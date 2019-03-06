@@ -1,5 +1,5 @@
-const create = require('./create');
-const vec2 = require('@jsxcad/math-vec2');
+import { create } from './create';
+import { fromPoint } from '@jsxcad/math-vec2';
 
 const reversed = array => array.reverse();
 const unreversed = array => array;
@@ -12,17 +12,12 @@ const unreversed = array => array;
  * @param {boolean} options.flipped - polygons are wound backward if true
  * @returns {surface} the constructed surface
  */
-const fromPolygons = ({ flipped = false }, polygonArray) => {
+export const fromPolygons = ({ flipped = false }, polygonArray) => {
   const wind = flipped ? reversed : unreversed;
   const surface = create();
   // Assemble the base geometry.
-  surface.basePolygons =
-      polygonArray.map(polygon =>
-        wind(polygon.map(point =>
-          vec2.canonicalize(point))));
+  surface.basePolygons = polygonArray.map(polygon => wind(polygon.map(point => fromPoint(point))));
   surface.isCanonicalized = false;
   surface.isFlipped = flipped;
   return surface;
 };
-
-module.exports = fromPolygons;

@@ -1,7 +1,7 @@
-const canonicalize = require('./canonicalize');
-const clippingToPolygons = require('./clippingToPolygons');
-const fromPolygons = require('./fromPolygons');
-const polygonClippingUnion = require('polygon-clipping').union;
+import { canonicalize } from './canonicalize';
+import { clippingToPolygons } from './clippingToPolygons';
+import { fromPolygons } from './fromPolygons';
+import { union as polygonClippingUnion } from 'polygon-clipping';
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -10,7 +10,7 @@ const polygonClippingUnion = require('polygon-clipping').union;
  * @param {Array<surface>} surfaces - the surfaces to union.
  * @returns {surface} the union of the surfaces.
  */
-const union = (...surfaces) => {
+export const union = (...surfaces) => {
   switch (surfaces.length) {
     case 0:
       return fromPolygons({}, []);
@@ -24,5 +24,3 @@ const union = (...surfaces) => {
     }
   }
 };
-
-module.exports = union;

@@ -1,7 +1,7 @@
-const canonicalize = require('./canonicalize');
-const clippingToPolygons = require('./clippingToPolygons');
-const fromPolygons = require('./fromPolygons');
-const polygonClippingIntersection = require('polygon-clipping').intersection;
+import { canonicalize } from './canonicalize';
+import { clippingToPolygons } from './clippingToPolygons';
+import { fromPolygons } from './fromPolygons';
+import { intersection as polygonClippingIntersection } from 'polygon-clipping';
 
 /**
  * Produce a surface that is the intersection of all provided surfaces.
@@ -21,7 +21,7 @@ const polygonClippingIntersection = require('polygon-clipping').intersection;
  *      |       |
  *      +-------+
  */
-const intersection = (...surfaces) => {
+export const intersection = (...surfaces) => {
   switch (surfaces.length) {
     case 0:
       return fromPolygons({}, []);
@@ -36,5 +36,3 @@ const intersection = (...surfaces) => {
     }
   }
 };
-
-module.exports = intersection;

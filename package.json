@@ -5,8 +5,9 @@
   "repository": "https://github.com/pentacular/JSxCAD",
   "main": "index.js",
   "scripts": {
-    "test": "lerna bootstrap && lerna run test",
-    "lint": "lerna bootstrap && lerna run lint"
+    "install": "lerna bootstrap --hoist",
+    "lint": "lerna bootstrap --hoist && lerna run lint",
+    "test": "lerna bootstrap --hoist && lerna run test"
   },
   "contributors": [
     {
@@ -52,7 +53,7 @@
   "devDependencies": {
     "ava": "^0.23.0",
     "conventional-changelog-cli": "^1.3.4",
-    "eslint": "^5.13.0",
+    "eslint": "^5.15.0",
     "eslint-config-google": "^0.12.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",
@@ -61,11 +62,12 @@
     "eslint-plugin-standard": "^4.0.0",
     "jsdoc": "^3.4.3",
     "jsdoc-to-markdown": "^3.0.0",
+    "lerna": "^3.13.1",
     "nyc": "^10.3.2"
   },
   "ava": {
     "require": [
-      "babel-register"
+      "esm"
     ]
   },
   "publishConfig": {

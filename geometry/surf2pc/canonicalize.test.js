@@ -1,6 +1,6 @@
-const canonicalize = require('./canonicalize');
-const fromPolygons = require('./fromPolygons');
-const test = require('ava');
+import { canonicalize } from './canonicalize';
+import { fromPolygons } from './fromPolygons';
+import { test } from 'ava';
 
 const rectangle = fromPolygons({}, [[[0, 1], [0, 0], [2, 0], [2, 1]]]);
 

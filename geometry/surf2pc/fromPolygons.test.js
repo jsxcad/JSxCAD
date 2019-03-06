@@ -1,6 +1,6 @@
-const fromPolygons = require('./fromPolygons');
-const test = require('ava');
-const toPolygons = require('./toPolygons');
+import { fromPolygons } from './fromPolygons';
+import { test } from 'ava';
+import { toPolygons } from './toPolygons';
 
 const polygon = [[0, 1, 0], [0, 0, 0], [2, 0, 0], [2, 1, 0]];
 const polygons = [polygon];

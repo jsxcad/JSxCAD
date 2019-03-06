@@ -1,4 +1,4 @@
-const { transform } = require('@jsxcad/algorithm-polygons');
+import { transform } from '@jsxcad/algorithm-polygons';
 
 /**
  * Only canonical geometries have meaningful content.
@@ -8,7 +8,7 @@ const { transform } = require('@jsxcad/algorithm-polygons');
  * @param {surface} surface - the surface to canonicalize.
  * @returns {surface} the same surface canonicalized.
  */
-const canonicalize = (surface) => {
+export const canonicalize = (surface) => {
   if (surface.isCanonicalized) {
     return surface;
   }
@@ -20,5 +20,3 @@ const canonicalize = (surface) => {
   surface.isCanonicalized = true;
   return surface;
 };
-
-module.exports = canonicalize;

@@ -3,6 +3,4 @@
  * @param {surface} surface - the surface to canonicalize.
  * @returns {surface} a distinct new surface, equal to the old surface.
  */
-const clone = surface => Object.assign({}, surface);
-
-module.exports = clone;
+export const clone = surface => Object.assign({}, surface);

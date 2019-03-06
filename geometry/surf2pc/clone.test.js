@@ -1,7 +1,7 @@
-const clone = require('./clone');
-const equals = require('./equals');
-const fromPolygons = require('./fromPolygons');
-const test = require('ava');
+import { clone } from './clone';
+import { equals } from './equals';
+import { fromPolygons } from './fromPolygons';
+import { test } from 'ava';
 
 const rectangle = fromPolygons({}, [[[0, 1], [0, 0], [2, 0], [2, 1]]]);
 

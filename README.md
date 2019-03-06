@@ -33,11 +33,17 @@ Note: npm packages will be published once the user api is up to spec.
 
 ## Usage
 
-- as Node module :
+- Running locally:
 
 ```
-const cad = require('@jsxcad/api-v1')
+git clone https://github.com/jsxcad/JSxCAD
+cd JSxCAD
+lerna bootstrap --hoist
+cd example/v1
+node -r esm example/v1/square.js
 ```
+
+should produce /tmp/square.pdf.
 
 ## API
 
@@ -46,6 +52,8 @@ For questions about the API, please contact the [User Group](https://groups.goog
 ## Contribute
 
 This library is maintained by a group of volunteers. We welcome and encourage anyone to pitch in but please take a moment to read the following guidelines.
+
+* Design discussion on [Design](https://docs.google.com/document/d/1SLwZldZ-3Xxda4b2HtJlQhFxdZDizvTz3ciKIZAyLoY/edit?usp=sharing).
 
 * Bug reports are accepted as [Issues](https://github.com/JSxCAD/jsxcad/issues/) via GitHub.
 

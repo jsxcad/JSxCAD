@@ -29,14 +29,7 @@ const footer =
     `trailer << /Root 1 0 R /Size 4 >>`,
     `%%EOF`];
 
-const pathsToPdf = (
-  {
-    orientation = 'portrait',
-    unit = 'mm',
-    lineWidth = 0.096,
-    size = [210, 297] // A4
-  },
-  paths) => {
+const pathsToPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, paths) => {
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;

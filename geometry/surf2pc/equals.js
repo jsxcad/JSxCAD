@@ -1,5 +1,5 @@
-const canonicalize = require('./canonicalize');
-const vec2 = require('@jsxcad/math-vec2');
+import { canonicalize } from './canonicalize';
+import { equals as equalsOfVec2 } from '@jsxcad/math-vec2';
 
 /**
  * Determine if two surfaces are not unequal.
@@ -9,7 +9,7 @@ const vec2 = require('@jsxcad/math-vec2');
  * @param  {surface} b - the surface to compare.
  * @returns {boolean} true if the surfaces are definitely equal.
  */
-const equals = (a, b) => {
+export const equals = (a, b) => {
   if (a.isFlipped !== b.isFlipped) {
     return false;
   }
@@ -31,7 +31,7 @@ const equals = (a, b) => {
     do {
       unequal = false;
       for (let nthPoint = 0; nthPoint < length; nthPoint++) {
-        if (!vec2.equals(polygonA[nthPoint], polygonB[(nthPoint + offset) % length])) {
+        if (!equalsOfVec2(polygonA[nthPoint], polygonB[(nthPoint + offset) % length])) {
           unequal = true;
           break;
         }
@@ -46,5 +46,3 @@ const equals = (a, b) => {
   }
   return true;
 };
-
-module.exports = equals;
