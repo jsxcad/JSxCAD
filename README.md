@@ -1,12 +1,7 @@
 ## JSxCAD
 
-## Computed Aided Design
-
-> Unstable - DO NOT USE
-
-DO NOT USE
-
-(unless you read the following carefully)
+## Unstable - DO NOT USE
+(... unless you read the following carefully ...)
 
 This fork of OpenJSCAD is in early development - many things are broken.
 
@@ -15,8 +10,6 @@ It is suitable for use for testing and development until the jscad user API is u
 At this time we are actively seeking representative jscad examples to drive user API development.
 
 If you have example code that you would like to work under JSxCAD please make a PR to add the code under example/v1.
-
-> CAD library
 
 ## Overview
 
