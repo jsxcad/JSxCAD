@@ -1,0 +1,10 @@
+const angle = require('./angle');
+const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+const test = require('ava');
+
+test('vec3: angle() should return correct values', (t) => {
+  t.is(q(angle([5, 5, 5], [0, 0, 0])), 1.57080);
+  t.is(q(angle([1, 0, 0], [1, 0, 0])), 0);
+  t.is(q(angle([1, 0, 0], [0, 1, 0])), 1.57080);
+  t.is(q(angle([1, 1, 1], [-1, -1, -1])), 3.14159);
+});
