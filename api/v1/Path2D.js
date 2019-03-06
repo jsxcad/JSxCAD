@@ -1,5 +1,5 @@
 import { provide } from '@jsxcad/provide';
-import { buildCircleArc, buildSvgArc } from '@jsxcad/algorithm-curve';
+import { buildCircleArc } from '@jsxcad/algorithm-curve';
 import { fromPoints } from '@jsxcad/geometry-path';
 import { fromXRotation, fromYRotation, fromZRotation, fromTranslation } from '@jsxcad/math-mat4';
 import { X, Y } from './constants';
