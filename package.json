@@ -62,6 +62,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "jsdoc": "^3.4.3",
     "jsdoc-to-markdown": "^3.0.0",
+    "lerna": "^3.13.1",
     "nyc": "^10.3.2"
   },
   "ava": {
