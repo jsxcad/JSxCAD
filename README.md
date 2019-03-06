@@ -38,9 +38,9 @@ Note: npm packages will be published once the user api is up to spec.
 ```
 git clone https://github.com/jsxcad/JSxCAD
 cd JSxCAD
-lerna bootstrap
+lerna bootstrap --hoist
 cd example/v1
-node -r esm ./square.js
+node -r esm example/v1/square.js
 ```
 
 should produce /tmp/square.pdf.
