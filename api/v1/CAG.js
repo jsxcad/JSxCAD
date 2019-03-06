@@ -1,21 +1,17 @@
-import { provide } from '@jsxcad/provide';
-
-// Set up default surface geometry.
-// provide('@jsxcad/geometry/surface', '', () => require('@jsxcad/geometry-surf2pc'));
+// FIX: Add interface to change default surface geometry.
 
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { fromPolygons } from '@jsxcad/geometry-surf2pc';
+import { Surf2Pc, fromPolygons } from '@jsxcad/geometry-surf2pc';
 import { toGeometry } from './toGeometry';
 import { writePdf } from './writePdf';
 
 export class CAG {
   constructor (geometry) {
-    this.geometry = geometry;
+    this.geometry = geometry || new Surf2Pc();
   }
 
   translate ([x, y]) {
-    return CAG.fromGeometry(provide(this.geometry)
-        .transform(fromTranslation([x, y, 0]), this.geometry));
+    return CAG.fromGeometry(this.geometry.transform(fromTranslation([x, y, 0])));
   }
 
   rotate (angles) {
@@ -24,30 +20,29 @@ export class CAG {
 
   rotateX (angle) {
     // FIX: magic numbers.
-    return CAG.fromGeometry(provide(this.geometry).transform(fromXRotation(angle * 0.017453292519943295),
-                                                             this.geometry));
+    return CAG.fromGeometry(this.geometry.transform(fromXRotation(angle * 0.017453292519943295)));
   }
 
   rotateY (angle) {
-    return CAG.fromGeometry(provide(this.geometry).transform(fromYRotation(angle * 0.017453292519943295),
-                                                             this.geometry));
+    return CAG.fromGeometry(this.geometry.transform(fromYRotation(angle * 0.017453292519943295)));
   }
 
   rotateZ (angle) {
-    return CAG.fromGeometry(provide(this.geometry).transform(fromZRotation(angle * 0.017453292519943295),
-                                                             this.geometry));
+    return CAG.fromGeometry(this.geometry.transform(fromZRotation(angle * 0.017453292519943295)));
   }
 
   scale (factor) {
     if (factor.length) {
       const [x = 1, y = 1, z = 1] = factor;
-      return CAG.fromGeometry(provide(this.geometry).transform(fromScaling([x, y, z]),
-                                                               this.geometry));
+      return CAG.fromGeometry(this.geometry.transform(fromScaling([x, y, z])));
     } else {
       // scale(4)
-      return CAG.fromGeometry(provide(this.geometry).transform(fromScaling([factor, factor, factor]),
-                                                               this.geometry));
+      return CAG.fromGeometry(this.geometry.transform(fromScaling([factor, factor, factor])));
     }
+  }
+
+  toPaths (options = {}) {
+    return this.toPolygons(options);
   }
 
   toGeometry () {
@@ -55,11 +50,11 @@ export class CAG {
   }
 
   toPolygons (options) {
-    return provide(this.geometry).toPolygons(options, this.geometry);
+    return this.geometry.toPolygons(options);
   }
 
   union (...shapes) {
-    return CAG.fromGeometry(provide(this.geometry).union(this.geometry, ...shapes.map(toGeometry)));
+    return CAG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
   }
 
   writePdf (options = {}) {
@@ -71,5 +66,5 @@ export class CAG {
 CAG.fromGeometry = (geometry) => new CAG(geometry);
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
-CAG.fromPoints = (points) => CAG.fromGeometry(fromPolygons({}, [points]));
-CAG.fromPolygons = (polygons) => CAG.fromGeometry(fromPolygons({}, polygons));
+CAG.fromPoints = (points) => CAG.fromGeometry(new Surf2Pc(fromPolygons({}, [points])));
+CAG.fromPolygons = (polygons) => CAG.fromGeometry(new Surf2Pc(fromPolygons({}, polygons)));

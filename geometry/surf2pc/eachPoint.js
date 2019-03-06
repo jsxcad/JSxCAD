@@ -1,4 +1,4 @@
-const canonicalize = require('./canonicalize');
+import { canonicalize } from './canonicalize';
 
 /**
  * Call a function with each significant point in the surface, in no particular
@@ -7,8 +7,6 @@ const canonicalize = require('./canonicalize');
  * @param {function} thunk - the function to call for each point.
  * @param {surface} surface - the surface to get the points of.
  */
-const eachPoint = (options, thunk, surface) => {
+export const eachPoint = (options, thunk, surface) => {
   canonicalize(surface).polygons.forEach(polygon => polygon.forEach(thunk));
 };
-
-module.exports = eachPoint;

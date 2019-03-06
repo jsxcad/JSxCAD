@@ -1,4 +1,4 @@
-const canonicalize = require('./canonicalize');
+import { canonicalize } from './canonicalize';
 
 const reversed = array => array.reverse();
 const unreversed = array => array;
@@ -9,9 +9,7 @@ const unreversed = array => array;
  * @param {object} options - options for creating the polygon array.
  * @returns {polygon array} the constructed polygon array.
  */
-const toPolygons = (options, surface) => {
+export const toPolygons = (options, surface) => {
   const wind = surface.isFlipped ? reversed : unreversed;
   return wind(canonicalize(surface).polygons.map(polygon => wind(polygon)));
 };
-
-module.exports = toPolygons;

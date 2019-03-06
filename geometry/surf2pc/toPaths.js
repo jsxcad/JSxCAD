@@ -1,5 +1,3 @@
-const toPolygons = require('./toPolygons');
+import { toPolygons } from './toPolygons';
 
-const toPaths = toPolygons;
-
-module.exports = toPaths;
+export const toPaths = toPolygons;

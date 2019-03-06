@@ -1,9 +1,9 @@
-const fromPolygons = require('./fromPolygons');
-const { fromTranslation } = require('@jsxcad/math-mat4');
-const intersection = require('./intersection');
-const test = require('ava');
-const toPolygons = require('./toPolygons');
-const transform = require('./transform');
+import { fromPolygons } from './fromPolygons';
+import { fromTranslation } from '@jsxcad/math-mat4';
+import { intersection } from './intersection';
+import { test } from 'ava';
+import { toPolygons } from './toPolygons';
+import { transform } from './transform';
 
 const rectangle = [[0, 1, 0], [0, 0, 0], [2, 0, 0], [2, 1, 0]];
 

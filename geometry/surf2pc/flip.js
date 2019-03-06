@@ -1,5 +1,5 @@
-const canonicalize = require('./canonicalize');
-const clone = require('./clone');
+import { canonicalize } from './canonicalize';
+import { clone } from './clone';
 
 /**
  * Flipping a surface affects how its interchange representations are wound.
@@ -8,10 +8,8 @@ const clone = require('./clone');
  * @param {surface} surface - the surface to flip.
  * @returns {surface} the flipped surface.
  */
-const flip = (surface) => {
+export const flip = (surface) => {
   const flipped = clone(canonicalize(surface));
   flipped.isFlipped = !surface.isFlipped;
   return flipped;
 };
-
-module.exports = flip;

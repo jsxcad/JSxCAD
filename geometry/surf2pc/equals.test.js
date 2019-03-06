@@ -1,7 +1,7 @@
-const equals = require('./equals');
-const flip = require('./flip');
-const fromPolygons = require('./fromPolygons');
-const test = require('ava');
+import { equals } from './equals';
+import { flip } from './flip';
+import { fromPolygons } from './fromPolygons';
+import { test } from 'ava';
 
 const X = fromPolygons({}, [[[0, 1], [0, 0], [2, 0], [2, 1]]]);
 const rotatedX = fromPolygons({}, [[[0, 0], [2, 0], [2, 1], [0, 1]]]);

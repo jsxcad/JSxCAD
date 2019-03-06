@@ -1,6 +1,6 @@
-const canonicalize = require('./canonicalize');
-const fromPolygons = require('./fromPolygons');
-const polygonClippingDifference = require('polygon-clipping').difference;
+import { canonicalize } from './canonicalize';
+import { fromPolygons } from './fromPolygons';
+import { difference as polygonClippingDifference } from 'polygon-clipping';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -21,7 +21,7 @@ const polygonClippingDifference = require('polygon-clipping').difference;
  *      |       |
  *      +-------+
  */
-const difference = (...surfaces) => {
+export const difference = (...surfaces) => {
   switch (surfaces.length) {
     case 0:
       return fromPolygons({}, []);
@@ -41,5 +41,3 @@ const difference = (...surfaces) => {
       return fromPolygons({}, [].concat(...differenced));
   }
 };
-
-module.exports = difference;

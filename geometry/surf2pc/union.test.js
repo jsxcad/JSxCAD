@@ -1,10 +1,10 @@
-const { degToRad } = require('@jsxcad/math-utils');
-const equals = require('./equals');
-const fromPolygons = require('./fromPolygons');
-const { fromZRotation } = require('@jsxcad/math-mat4');
-const test = require('ava');
-const transform = require('./transform');
-const union = require('./union');
+import { degToRad } from '@jsxcad/math-utils';
+import { equals } from './equals';
+import { fromPolygons } from './fromPolygons';
+import { fromZRotation } from '@jsxcad/math-mat4';
+import { test } from 'ava';
+import { transform } from './transform';
+import { union } from './union';
 
 const rectangle = fromPolygons({}, [[[0, 1], [0, 0], [2, 0], [2, 1]]]);
 
