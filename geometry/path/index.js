@@ -1,5 +1,7 @@
 const { publish } = require('@jsxcad/provide');
 
+// TODO: Turn this back into a class so that we can use normal dispatch.
+
 module.exports = publish({ base: '@jsxcad/geometry-path', require },
                          'appendPoint',
                          'concat',
@@ -9,5 +11,6 @@ module.exports = publish({ base: '@jsxcad/geometry-path', require },
                          'equals',
                          'fromPoints',
                          'reverse',
+                         'toPaths',
                          'toPoints',
                          'transform');
