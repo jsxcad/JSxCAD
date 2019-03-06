@@ -7,6 +7,7 @@ module.exports = publish({ base: '@jsxcad/geometry-surf2pc', require },
                          'flip',
                          'fromPolygons',
                          'intersection',
+                         'toPaths',
                          'toPolygons',
                          'transform',
                          'union');
