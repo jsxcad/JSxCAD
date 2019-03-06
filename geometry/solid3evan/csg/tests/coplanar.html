@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html><head>
+  <script src="lightgl.js"></script>
+  <script src="../csg.js"></script>
+  <script src="viewer.js"></script>
+  <style>
+
+body {
+  font: 14px/20px 'Helvetica Neue Light', HelveticaNeue-Light, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 50px 50px 200px 50px;
+}
+
+pre, code {
+  font: 12px/20px Monaco, monospace;
+  border: 1px solid #CCC;
+  border-radius: 3px;
+  background: #F9F9F9;
+  padding: 0 3px;
+  color: #555;
+}
+pre { padding: 10px; }
+
+h1, h2 { font: bold 50px/50px 'Helvetica Neue', Helvetica, Arial; }
+h2 { font-size: 30px; margin: 100px 0 0 0; }
+a { color: inherit; }
+.viewer { width: 250px; height: 250px; background: #EEE; }
+table { border-collapse: collapse; margin: 0 auto; }
+td { padding: 5px; text-align: center; }
+td code { background: none; border: none; color: inherit; }
+canvas { cursor: move; }
+
+  </style>
+</head><body>
+  <h1>csg.js</h1>
+  <p><b>Source code:</b> <a href="http://github.com/evanw/csg.js/">http://github.com/evanw/csg.js/</a><br>
+    <b>Documentation:</b> <a href="http://evanw.github.com/csg.js/docs/">http://evanw.github.com/csg.js/docs/</a></p>
+
+  <h2>Coplanar Test Cases</h2>
+  <p>These tests cover all the cases of a pair of overlapping coplanar polygons in both solids. To avoid duplicate polygons, the overlapping polygons are kept in the first solid and removed from the second solid.</p>
+  <table>
+    <tr>
+      <td><div id="0" class="viewer"></div><code>a</code></td>
+      <td><div id="1" class="viewer"></div><code>b</code></td>
+    </tr>
+    <tr>
+      <td><div id="2" class="viewer"></div><code>a.inverse()</code></td>
+      <td><div id="3" class="viewer"></div><code>b.inverse()</code></td>
+    </tr>
+    <tr>
+      <td><div id="4" class="viewer"></div><code>a.union(b)</code></td>
+      <td><div id="5" class="viewer"></div><code>b.union(a)</code></td>
+    </tr>
+    <tr>
+      <td><div id="6" class="viewer"></div><code>a.subtract(b)</code></td>
+      <td><div id="7" class="viewer"></div><code>b.subtract(a)</code></td>
+    </tr>
+    <tr>
+      <td><div id="8" class="viewer"></div><code>a.intersect(b)</code></td>
+      <td><div id="9" class="viewer"></div><code>b.intersect(a)</code></td>
+    </tr>
+  </table>
+  <table>
+    <tr>
+      <td><div id="10" class="viewer"></div><code>c</code></td>
+      <td><div id="11" class="viewer"></div><code>d</code></td>
+    </tr>
+    <tr>
+      <td><div id="12" class="viewer"></div><code>c.inverse()</code></td>
+      <td><div id="13" class="viewer"></div><code>d.inverse()</code></td>
+    </tr>
+    <tr>
+      <td><div id="14" class="viewer"></div><code>c.union(d)</code></td>
+      <td><div id="15" class="viewer"></div><code>d.union(c)</code></td>
+    </tr>
+    <tr>
+      <td><div id="16" class="viewer"></div><code>c.subtract(d)</code></td>
+      <td><div id="17" class="viewer"></div><code>d.subtract(c)</code></td>
+    </tr>
+    <tr>
+      <td><div id="18" class="viewer"></div><code>c.intersect(d)</code></td>
+      <td><div id="19" class="viewer"></div><code>d.intersect(c)</code></td>
+    </tr>
+  </table>
+
+  <script>
+
+// Test all coplanar cases
+var a = CSG.cube();
+var b = CSG.cylinder({ slices: 8, start: new CSG.Vector(-1, 0, 0), end: new CSG.Vector(1, 0, 0) });
+b = b.union(CSG.cylinder({ slices: 8, start: new CSG.Vector(0, -1, 0), end: new CSG.Vector(0, 1, 0) }));
+b = b.union(CSG.cylinder({ slices: 8, start: new CSG.Vector(0, 0, -1), end: new CSG.Vector(0, 0, 1) }));
+var c = CSG.cube({ radius: 0.5 });
+var d = CSG.cylinder({ radius: 0.5, slices: 8, start: new CSG.Vector(-1, 0, 0), end: new CSG.Vector(-0.5, 0, 0) });
+d = d.union(CSG.cylinder({ radius: 0.5, slices: 8, start: new CSG.Vector(0.5, 0, 0), end: new CSG.Vector(1, 0, 0) }));
+d = d.union(CSG.cylinder({ radius: 0.5, slices: 8, start: new CSG.Vector(0, -1, 0), end: new CSG.Vector(0, -0.5, 0) }));
+d = d.union(CSG.cylinder({ radius: 0.5, slices: 8, start: new CSG.Vector(0, 0.5, 0), end: new CSG.Vector(0, 1, 0) }));
+d = d.union(CSG.cylinder({ radius: 0.5, slices: 8, start: new CSG.Vector(0, 0, -1), end: new CSG.Vector(0, 0, -0.5) }));
+d = d.union(CSG.cylinder({ radius: 0.5, slices: 8, start: new CSG.Vector(0, 0, 0.5), end: new CSG.Vector(0, 0, 1) }));
+a.setColor(1, 0, 0);
+b.setColor(0, 0, 1);
+c.setColor(0, 1, 0);
+d.setColor(1, 1, 0);
+var operations = [
+  a,
+  b,
+  a.inverse(),
+  b.inverse(),
+  a.union(b),
+  b.union(a),
+  a.subtract(b),
+  b.subtract(a),
+  a.intersect(b),
+  b.intersect(a),
+  c,
+  d,
+  c.inverse(),
+  d.inverse(),
+  c.union(d),
+  d.union(c),
+  c.subtract(d),
+  d.subtract(c),
+  c.intersect(d),
+  d.intersect(c)
+];
+Viewer.lineOverlay = true;
+for (var i = 0; i < operations.length; i++) {
+  addViewer(new Viewer(operations[i], 250, 250, 5));
+}
+
+  </script>
+</body></html>

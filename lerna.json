@@ -1,0 +1,28 @@
+{
+  "version": "0.0.50",
+  "npmClient": "npm",
+  "command": {
+    "publish": {
+      "ignoreChanges": [
+        "ignored-file",
+        "*.md"
+      ],
+      "message": "chore(release): publish"
+    },
+    "bootstrap": {
+      "ignore": "component-*",
+      "npmClientArgs": [
+        "--no-package-lock"
+      ]
+    }
+  },
+  "packages": [
+    "algorithm/*",
+    "api/*",
+    "data/*",
+    "example/*",
+    "geometry/*",
+    "math/*",
+    "provide"
+  ]
+}
