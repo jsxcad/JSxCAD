@@ -1,11 +1,11 @@
-const { canonicalize, measureBoundingBox, subtract } = require('@jsxcad/algorithm-polygons');
+import { canonicalize, measureBoundingBox, subtract } from '@jsxcad/algorithm-polygons';
 
 /** Serialize the give objects to SVG format.
  * @param {Object} [options] - options for serialization
  * @param {Object|Array} objects - objects to serialize as SVG
  * @returns {Array} serialized contents, SVG format
  */
-const polygonsToSvg = (options = {}, rawPolygons) => {
+export const polygonsToSvg = (options = {}, rawPolygons) => {
   const polygons = canonicalize(rawPolygons);
   const min = measureBoundingBox(polygons)[0];
   // TODO: Add transform and translate support to polygons.
@@ -21,5 +21,3 @@ const polygonsToSvg = (options = {}, rawPolygons) => {
     `</svg>`
   ].join('\n');
 };
-
-module.exports = polygonsToSvg;

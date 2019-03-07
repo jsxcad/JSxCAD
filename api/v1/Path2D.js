@@ -1,28 +1,29 @@
-import { provide } from '@jsxcad/provide';
 import { buildCircleArc } from '@jsxcad/algorithm-curve';
-import { fromPoints } from '@jsxcad/geometry-path';
+import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
+import { butLast, last } from '@jsxcad/algorithm-paths';
+import { fromPaths } from '@jsxcad/geometry-paths';
 import { fromXRotation, fromYRotation, fromZRotation, fromTranslation } from '@jsxcad/math-mat4';
-import { X, Y } from './constants';
 
 export class Path2D {
-  constructor (points, closed, geometry) {
+  constructor (points = [], closed = false, geometry) {
     if (geometry !== undefined) {
       this.geometry = geometry;
-    } else if (points !== undefined) {
-      this.geometry = fromPoints({}, points);
     } else {
-      this.geometry = fromPoints({}, []);
-    }
-    if (closed === true) {
-      this.geometry = provide(this.geometry).close(this.geometry);
+      if (closed) {
+        this.geometry = fromPaths({}, [[points]]);
+      } else {
+        this.geometry = fromPaths({}, [[null, ...points]]);
+      }
     }
   }
 
   concat (otherpath) {
-    if (this.geometry.isClosed || otherpath.geometry.isClosed) {
+    if (this.isClosed() || otherpath.isClosed()) {
       throw new Error('Paths must not be closed');
     }
-    return Path2D.fromGeometry(provide(this.geometry).concat(this.geometry, otherpath.geometry));
+    // Rewrite the last of the paths.
+    return Path2D.fromPaths([...butLast(this.toPaths()),
+                             concatenate(this.toPath(), otherpath.toPath())]);
   }
 
   /**
@@ -31,8 +32,13 @@ export class Path2D {
    * @returns {Vector2[]} array of points the make up the path
    */
   getPoints () {
-    return provide(this.geometry).toPoints({}, this.geometry)
-        .map(point => [point[0], point[1]]);
+    const points = [];
+    this.toPath().forEach((point, index) => {
+      if (point !== null || index !== 0) {
+        points.push([point[0], point[1]]);
+      }
+    });
+    return points;
   }
 
   /**
@@ -41,10 +47,7 @@ export class Path2D {
    * @returns {Path2D} new Path2D object (not closed)
    */
   appendPoint (point) {
-    if (this.geometry.isClosed) {
-      throw new Error('Path must not be closed');
-    }
-    return Path2D.fromGeometry(provide(this.geometry).appendPoint({}, point, this.geometry));
+    return this.concat(new Path2D([point]));
   }
 
   /**
@@ -53,15 +56,11 @@ export class Path2D {
    * @returns {Path2D} new Path2D object (not closed)
    */
   appendPoints (points) {
-    if (this.geometry.isClosed) {
-      throw new Error('Path must not be closed');
-    }
-    return Path2D.fromGeometry(provide(this.geometry).concat(this.geometry,
-                                                             provide(this.geometry).fromPoints({}, points)));
+    return this.concat(new Path2D(points));
   }
 
   close () {
-    return Path2D.fromGeometry(provide(this.geometry).close(this.geometry));
+    return Path2D.fromPaths([...butLast(this.toPaths()), this.getPoints()]);
   }
 
   /**
@@ -69,7 +68,7 @@ export class Path2D {
    * @returns {Boolean} true when the path is closed, otherwise false
    */
   isClosed () {
-    return this.geometry.isClosed;
+    return isClosed(last(this.toPaths()));
   }
 
   /**
@@ -78,15 +77,10 @@ export class Path2D {
    * @returns {String} One of ['clockwise', 'counter-clockwise', 'straight'].
    */
   getTurn () {
-    const points = provide(this.geometry).toPoints({}, this.geometry);
-    let twiceArea = 0;
-    let last = points.length - 1;
-    for (let current = 0; current < points.length; last = current++) {
-      twiceArea += points[last][X] * points[current][Y] - points[last][Y] * points[current][X];
-    }
-    if (twiceArea > 0) {
+    const area = measureArea(this.toPath());
+    if (area > 0) {
       return 'clockwise';
-    } else if (twiceArea < 0) {
+    } else if (area < 0) {
       return 'counter-clockwise';
     } else {
       return 'straight';
@@ -124,8 +118,12 @@ export class Path2D {
     return this.transform(fromZRotation(angle * 0.017453292519943295));
   }
 
+  toPath () {
+    return last(this.toPaths());
+  }
+
   toPaths () {
-    return provide(this.geometry).toPaths({}, this.geometry);
+    return this.geometry.toPaths({});
   }
 
   translate ([x = 0, y = 0, z = 0]) {
@@ -133,9 +131,10 @@ export class Path2D {
   }
 
   transform (matrix4x4) {
-    return Path2D.fromGeometry(provide(this.geometry).transform(matrix4x4, this.geometry));
+    return Path2D.fromGeometry(this.geometry.transform(matrix4x4));
   }
 }
 
 Path2D.arc = (...params) => new Path2D(buildCircleArc(...params));
 Path2D.fromGeometry = (geometry) => new Path2D(undefined, undefined, geometry);
+Path2D.fromPaths = (paths) => new Path2D(undefined, undefined, fromPaths({}, paths));

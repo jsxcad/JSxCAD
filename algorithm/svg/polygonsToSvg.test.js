@@ -1,6 +1,6 @@
-const buildRegularPolygon = require('../shape/buildRegularPolygon');
-const polygonsToSvg = require('./polygonsToSvg');
-const test = require('ava');
+import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
+import { polygonsToSvg } from './polygonsToSvg';
+import { test } from 'ava';
 
 test('Triangle', t => {
   const svg = polygonsToSvg({}, [buildRegularPolygon({ edges: 3 })]);

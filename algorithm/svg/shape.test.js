@@ -1,9 +1,9 @@
-const canonicalize = require('./canonicalize');
-const { getPoints, toPath } = require('svg-shapes');
-const curvifySvgPath = require('curvify-svg-path');
-const absolutifySvgPath = require('abs-svg-path');
-const parseSvgPath = require('parse-svg-path');
-const test = require('ava');
+import { canonicalize } from './canonicalize';
+import { getPoints, toPath } from 'svg-shapes';
+import curvifySvgPath from 'curvify-svg-path';
+import absolutifySvgPath from 'abs-svg-path';
+import parseSvgPath from 'parse-svg-path';
+import { test } from 'ava';
 
 test('Circle as cubic bezier.', t => {
   const circlePath = toPath(getPoints('circle', { cx: 0, cy: 0, r: 1 }));

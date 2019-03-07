@@ -7,7 +7,7 @@ const Y = 1;
  * See: http://mathworld.wolfram.com/PolygonArea.html
  * @returns {Number} The area the path would have if it were a polygon.
  */
-const measureArea = (path) => {
+export const measureArea = (path) => {
   let last = path.length - 1;
   let current = (path[0] === null) ? 1 : 0;
   let twiceArea = 0;
@@ -16,5 +16,3 @@ const measureArea = (path) => {
   }
   return twiceArea / 2;
 };
-
-module.exports = measureArea;

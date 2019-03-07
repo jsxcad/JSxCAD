@@ -1,5 +1,5 @@
-const flip = require('./flip');
-const test = require('ava');
+import { flip } from './flip';
+import { test } from 'ava';
 
 test('Flipped paths area reversed.', t => {
   t.deepEqual(flip([[[1, 2], [3, 4]],

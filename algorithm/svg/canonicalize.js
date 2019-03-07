@@ -1,6 +1,5 @@
-const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 
 const canonicalizeSegment = ([directive, ...args]) => [directive, ...args.map(q)];
-const canonicalize = (svgPath) => svgPath.map(canonicalizeSegment);
 
-module.exports = canonicalize;
+export const canonicalize = (svgPath) => svgPath.map(canonicalizeSegment);
