@@ -1,6 +1,6 @@
-const { canonicalize } = require('@jsxcad/algorithm-paths');
-const svgPathToPaths = require('./svgPathToPaths');
-const test = require('ava');
+import { canonicalize } from '@jsxcad/algorithm-paths';
+import { svgPathToPaths } from './svgPathToPaths';
+import { test } from 'ava';
 
 // TODO: Add colinear point simplification.
 

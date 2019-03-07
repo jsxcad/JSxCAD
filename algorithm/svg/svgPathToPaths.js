@@ -1,10 +1,10 @@
-const absolutifySvgPath = require('abs-svg-path');
-const curvifySvgPath = require('curvify-svg-path');
-const { buildCubicBezierCurve } = require('@jsxcad/algorithm-shape');
-const mat4 = require('@jsxcad/math-mat4');
-const parseSvgPath = require('parse-svg-path');
-const transformPaths = require('../paths/transform');
-const vec2 = require('@jsxcad/math-vec2');
+import absolutifySvgPath from 'abs-svg-path';
+import curvifySvgPath from 'curvify-svg-path';
+import { buildCubicBezierCurve } from '@jsxcad/algorithm-shape';
+import { fromScaling } from '@jsxcad/math-mat4';
+import parseSvgPath from 'parse-svg-path';
+import { transform } from '@jsxcad/algorithm-paths';
+import { equals } from '@jsxcad/math-vec2';
 
 // FIX: Check scaling.
 
@@ -26,7 +26,7 @@ const toPaths = (svgPath) => {
 
   const maybeClosePath = () => {
     if (path.length > 3) {
-      if (vec2.equals(path[1], path[path.length - 1])) {
+      if (equals(path[1], path[path.length - 1])) {
         // The path is closed, remove the leading null.
         path = path.slice(1);
         newPath();
@@ -59,9 +59,7 @@ const toPaths = (svgPath) => {
 
   maybeClosePath();
   newPath();
-  return transformPaths(mat4.fromScaling([1, -1, 0]), paths);
+  return transform(fromScaling([1, -1, 0]), paths);
 };
 
-const svgPathToPaths = (options = {}, svgPath) => toPaths(curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));
-
-module.exports = svgPathToPaths;
+export const svgPathToPaths = (options = {}, svgPath) => toPaths(curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));

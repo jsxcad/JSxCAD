@@ -4,7 +4,6 @@ import { fromZRotation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
 
 test('Empty path has no points', t => {
-  const empty = new Path2D();
   t.deepEqual(new Path2D().getPoints(), []);
 });
 
@@ -22,12 +21,12 @@ test('Empty path with two appended has two point', t => {
 
 test('Path.arc() works', t => {
   t.deepEqual(canonicalize(
-                Path2D.arc({ center: [5, 5],
-                             radius: 10,
-                             startangle: 90,
-                             endangle: 180,
-                             resolution: 36,
-                             maketangent: true }).getPoints()),
+    Path2D.arc({ center: [5, 5],
+                 radius: 10,
+                 startangle: 90,
+                 endangle: 180,
+                 resolution: 36,
+                 maketangent: true }).getPoints()),
               [[5, 15, 0],
                [4.91273, 14.99962, 0],
                [3.36674, 14.86572, 0],
@@ -65,6 +64,7 @@ test('Left turn path has clockwise turn', t => {
 });
 
 test('Transform works', t => {
-  t.deepEqual(canonicalize(new Path2D([[0, 0], [0, 1]]).transform(fromZRotation(90 * 0.017453292519943295)).getPoints()),
+  t.deepEqual(canonicalize(new Path2D([[0, 0], [0, 1]])
+      .transform(fromZRotation(90 * 0.017453292519943295)).getPoints()),
               [[0, 0, 0], [-1, 0, 0]]);
 });

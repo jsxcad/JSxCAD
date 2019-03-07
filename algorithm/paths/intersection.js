@@ -1,1 +1,1 @@
-export const intersection = (...pathsets) => { throw Error('Not implemented'); }
+export const intersection = (...pathsets) => { throw Error('Not implemented'); };

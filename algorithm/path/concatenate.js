@@ -5,4 +5,4 @@ export const concatenate = (...paths) => {
     throw Error('Cannot concatenate closed paths.');
   }
   return [null, ...[].concat(...paths.map(path => path.slice(1)))];
-}
+};

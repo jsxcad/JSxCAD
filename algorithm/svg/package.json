@@ -61,8 +61,12 @@
     "@jsxcad/provide": "^0.0.50",
     "abs-svg-path": "^0.1.1",
     "curvify-svg-path": "^1.0.0",
+    "esm": "^3.2.10",
     "parse-svg-path": "^0.1.2",
     "svg-shapes": "^1.9.2"
+  },
+  "ava": {
+    "require": "esm"
   },
   "publishConfig": {
     "access": "restricted"

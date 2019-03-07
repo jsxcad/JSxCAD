@@ -3,7 +3,6 @@ import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
 import { butLast, last } from '@jsxcad/algorithm-paths';
 import { fromPaths } from '@jsxcad/geometry-paths';
 import { fromXRotation, fromYRotation, fromZRotation, fromTranslation } from '@jsxcad/math-mat4';
-import { X, Y } from './constants';
 
 export class Path2D {
   constructor (points = [], closed = false, geometry) {
@@ -35,10 +34,10 @@ export class Path2D {
   getPoints () {
     const points = [];
     this.toPath().forEach((point, index) => {
-                            if (point !== null || index != 0) {
-                              points.push([point[0], point[1]]);
-                            }
-                          });
+      if (point !== null || index !== 0) {
+        points.push([point[0], point[1]]);
+      }
+    });
     return points;
   }
 

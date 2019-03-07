@@ -20,4 +20,4 @@ export {
   measureBoundingBox,
   transform,
   union
-}
+};
