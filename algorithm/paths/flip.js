@@ -1,5 +1,3 @@
-const path = require('@jsxcad/algorithm-path');
+import { flip as flipOfPath } from '@jsxcad/algorithm-path';
 
-const flip = (paths) => paths.map(path.flip);
-
-module.exports = flip;
+export const flip = (paths) => paths.map(flipOfPath);

@@ -1,5 +1,3 @@
-const transformPath = require('@jsxcad/algorithm-path').transform;
+import { transform as transformOfPath } from '@jsxcad/algorithm-path';
 
-const transform = (matrix, paths) => paths.map(path => transformPath(matrix, path));
-
-module.exports = transform;
+export const transform = (matrix, paths) => paths.map(path => transformOfPath(matrix, path));

@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/geometry-path",
+  "name": "@jsxcad/geometry-paths",
   "version": "0.0.50",
   "description": "Path Geometry for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
@@ -52,13 +52,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
+    "@jsxcad/algorithm-paths": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/math-poly3": "^0.0.50",
-    "@jsxcad/math-utils": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50"
+    "esm": "^3.2.10"
+  },
+  "ava": {
+    "require": "esm"
   },
   "publishConfig": {
     "access": "restricted"

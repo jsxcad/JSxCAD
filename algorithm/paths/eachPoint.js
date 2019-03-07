@@ -1,4 +1,4 @@
-const eachPoint = (options = {}, thunk, paths) => {
+export const eachPoint = (options = {}, thunk, paths) => {
   for (const path of paths) {
     for (const point of path) {
       if (point !== null) {
@@ -7,5 +7,3 @@ const eachPoint = (options = {}, thunk, paths) => {
     }
   }
 };
-
-module.exports = eachPoint;

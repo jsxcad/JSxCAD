@@ -1,17 +1,15 @@
-const eachPoint = require('./eachPoint');
-const vec3 = require('@jsxcad/math-vec3');
+import { eachPoint } from './eachPoint';
+import { fromPoint, max, min } from '@jsxcad/math-vec3';
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-const measureBoundingBox = (paths) => {
-  let max;
-  let min;
+export const measureBoundingBox = (paths) => {
+  let minPoint;
+  let maxPoint;
   eachPoint({},
             point => {
-              max = (max === undefined) ? vec3.fromPoint(point) : vec3.max(max, vec3.fromPoint(point));
-              min = (min === undefined) ? vec3.fromPoint(point) : vec3.min(min, vec3.fromPoint(point));
+              minPoint = (minPoint === undefined) ? fromPoint(point) : min(minPoint, fromPoint(point));
+              maxPoint = (maxPoint === undefined) ? fromPoint(point) : max(maxPoint, fromPoint(point));
             },
             paths);
-  return [min, max];
+  return [minPoint, maxPoint];
 };
-
-module.exports = measureBoundingBox;
