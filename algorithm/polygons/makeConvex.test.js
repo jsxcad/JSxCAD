@@ -1,5 +1,5 @@
-const makeConvex = require('./makeConvex');
-const test = require('ava');
+import { makeConvex } from './makeConvex';
+import { test } from 'ava';
 
 test('Simple triangulation', t => {
   const convex = makeConvex({}, [[[0, -2], [2, -2], [2, 0], [1, -1], [0, -1]]]);

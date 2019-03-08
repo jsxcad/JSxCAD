@@ -53,11 +53,16 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-polygons": "^0.0.50",
+    "@jsxcad/math-mat4": "^0.0.50",
     "@jsxcad/math-plane": "^0.0.50",
     "@jsxcad/math-poly3": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
     "@jsxcad/math-vec4": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50"
+    "@jsxcad/provide": "^0.0.50",
+    "esm": "^3.2.10"
+  },
+  "ava": {
+    "require": "esm"
   },
   "publishConfig": {
     "access": "restricted"

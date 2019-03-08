@@ -1,7 +1,7 @@
-import { provide } from '@jsxcad/provide';
-import { fromPolygons } from '@jsxcad/geometry-solid3bsp';
+import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { toGeometry } from './toGeometry';
+import { toPoints } from '@jsxcad/algorithm-paths';
 import { writeStl } from './writeStl';
 
 export class CSG {
@@ -10,7 +10,7 @@ export class CSG {
   }
 
   difference (...shapes) {
-    return CSG.fromGeometry(provide(this.geometry).difference(this.geometry, ...shapes.map(toGeometry)));
+    return CSG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
   }
 
   dump (tag) {
@@ -23,7 +23,7 @@ export class CSG {
   }
 
   intersection (...shapes) {
-    return CSG.fromGeometry(provide(this.geometry).intersection(this.geometry, ...shapes.map(toGeometry)));
+    return CSG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
   }
 
   rotate (angles) {
@@ -32,29 +32,24 @@ export class CSG {
 
   rotateX (angle) {
     // FIX: Magic numbers.
-    return CSG.fromGeometry(provide(this.geometry).transform(fromXRotation(angle * 0.017453292519943295),
-                                                             this.geometry));
+    return CSG.fromGeometry(this.geometry.transform(fromXRotation(angle * 0.017453292519943295)));
   }
 
   rotateY (angle) {
-    return CSG.fromGeometry(provide(this.geometry).transform(fromYRotation(angle * 0.017453292519943295),
-                                                             this.geometry));
+    return CSG.fromGeometry(this.geometry.transform(fromYRotation(angle * 0.017453292519943295)));
   }
 
   rotateZ (angle) {
-    return CSG.fromGeometry(provide(this.geometry).transform(fromZRotation(angle * 0.017453292519943295),
-                                                             this.geometry));
+    return CSG.fromGeometry(this.geometry.transform(fromZRotation(angle * 0.017453292519943295)));
   }
 
   scale (factor) {
     if (factor.length) {
       // scale([1, 2, 3])
-      return CSG.fromGeometry(provide(this.geometry).transform(fromScaling(factor),
-                                                               this.geometry));
+      return CSG.fromGeometry(this.geometry.transform(fromScaling(factor)));
     } else {
       // scale(4)
-      return CSG.fromGeometry(provide(this.geometry).transform(fromScaling([factor, factor, factor]),
-                                                               this.geometry));
+      return CSG.fromGeometry(this.geometry.transform(fromScaling([factor, factor, factor])));
     }
   }
 
@@ -71,21 +66,24 @@ export class CSG {
     return this.geometry;
   }
 
+  toPaths (options) {
+    return this.geometry.toPaths(options);
+  }
+
   toPoints (options) {
-    return provide(this.geometry).toPoints(options, this.geometry);
+    return toPoints(options, this.toPaths(options));
   }
 
   toPolygons (options) {
-    return provide(this.geometry).toPolygons(options, this.geometry);
+    return this.toPaths(options);
   }
 
   translate ([x, y, z]) {
-    return CSG.fromGeometry(provide(this.geometry).transform(fromTranslation([x, y, z]),
-                                                             this.geometry));
+    return CSG.fromGeometry(this.geometry.transform(fromTranslation([x, y, z])));
   }
 
   union (...shapes) {
-    return CSG.fromGeometry(provide(this.geometry).union(this.geometry, ...shapes.map(toGeometry)));
+    return CSG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
   }
 
   writeStl (options = {}) {
@@ -95,4 +93,5 @@ export class CSG {
 }
 
 CSG.fromGeometry = (geometry) => new CSG(geometry);
-CSG.fromPolygons = (polygons) => CSG.fromGeometry(fromPolygons({}, polygons));
+CSG.fromPaths = (paths) => CSG.fromGeometry(fromPaths({}, paths));
+CSG.fromPolygons = CSG.fromPaths;

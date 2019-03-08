@@ -1,16 +1,16 @@
-const plane = require('@jsxcad/math-plane');
-const poly3 = require('@jsxcad/math-poly3');
+import { flip as flipOfPlane } from '@jsxcad/math-plane';
+import { flip as flipOfPoly3 } from '@jsxcad/math-poly3';
 
-const invert = (bsp) => {
+export const invert = (bsp) => {
   // Flip the polygons.
-  bsp.polygons = bsp.polygons.map(poly3.flip);
+  bsp.polygons = bsp.polygons.map(flipOfPoly3);
   // Recompute the plane.
   if (bsp.plane !== undefined) {
     // PROVE: General equivalence.
-    // const a = poly3.toPlane(bsp.polygons[0]);
+    // const a = toPlane(bsp.polygons[0]);
     // const b = plane.flip(bsp.plane);
     // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }
-    bsp.plane = plane.flip(bsp.plane);
+    bsp.plane = flipOfPlane(bsp.plane);
   }
   // Invert the children.
   if (bsp.front !== undefined) {
@@ -22,5 +22,3 @@ const invert = (bsp) => {
   // Swap the children.
   [bsp.front, bsp.back] = [bsp.back, bsp.front];
 };
-
-module.exports = invert;

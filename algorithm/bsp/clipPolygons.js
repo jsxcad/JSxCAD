@@ -1,6 +1,6 @@
-const splitPolygon = require('./splitPolygon');
+import { splitPolygon } from './splitPolygon';
 
-const clipPolygons = (bsp, polygons) => {
+export const clipPolygons = (bsp, polygons) => {
   if (bsp.plane === undefined) {
     // PROVE: Why this is correct, and why it is fraught upon bsp.plane.
     // We need this slice as the bsp trees perform destructive updates.
@@ -22,5 +22,3 @@ const clipPolygons = (bsp, polygons) => {
   }
   return front.concat(back);
 };
-
-module.exports = clipPolygons;

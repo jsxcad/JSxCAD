@@ -1,4 +1,4 @@
-const eachPoint = (options = {}, thunk, polygons) => {
+export const eachPoint = (options = {}, thunk, polygons) => {
   const points = [];
   for (const polygon of polygons) {
     for (const point of polygon) {
@@ -7,5 +7,3 @@ const eachPoint = (options = {}, thunk, polygons) => {
   }
   return points;
 };
-
-module.exports = eachPoint;

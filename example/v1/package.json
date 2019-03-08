@@ -52,6 +52,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-stl": "^0.0.50",
     "@jsxcad/api-v1": "^0.0.50",
     "@jsxcad/provide": "^0.0.50",
     "esm": "^3.2.10"

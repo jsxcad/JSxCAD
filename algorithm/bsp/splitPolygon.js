@@ -1,5 +1,5 @@
-const { toPlane } = require('@jsxcad/math-poly3');
-const vec3 = require('@jsxcad/math-vec3');
+import { toPlane } from '@jsxcad/math-poly3';
+import { dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 const EPSILON = 1e-5;
 
@@ -10,12 +10,12 @@ const SPANNING = 3; // Both front and back.
 
 const W = 3;
 
-const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
+export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
   // Classify each point as well as the entire polygon into one of the above
   // four classes.
   let polygonType = 0;
   let types = polygon.map(point => {
-    let t = vec3.dot(plane, point) - plane[W];
+    let t = dot(plane, point) - plane[W];
     let type = (t < -EPSILON) ? BACK
       : (t > EPSILON) ? FRONT
         : COPLANAR;
@@ -26,7 +26,7 @@ const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) 
   // Put the polygon in the correct list, splitting it when necessary.
   switch (polygonType) {
     case COPLANAR: {
-      if (vec3.dot(plane, toPlane(polygon)) > 0) {
+      if (dot(plane, toPlane(polygon)) > 0) {
         coplanarFront.push(polygon);
       } else {
         coplanarBack.push(polygon);
@@ -59,8 +59,8 @@ const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) 
         }
         if ((startType | endType) === SPANNING) {
         // Compute the point that touches the splitting plane.
-          let t = (plane[W] - vec3.dot(plane, startPoint)) / vec3.dot(plane, vec3.subtract(endPoint, startPoint));
-          let spanPoint = vec3.lerp(t, startPoint, endPoint);
+          let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+          let spanPoint = lerp(t, startPoint, endPoint);
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
@@ -77,5 +77,3 @@ const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) 
     }
   }
 };
-
-module.exports = splitPolygon;

@@ -1,6 +1,6 @@
-const { fromPoints } = require('@jsxcad/math-plane');
-const splitPolygon = require('./splitPolygon');
-const test = require('ava');
+import { fromPoints } from '@jsxcad/math-plane';
+import { splitPolygon } from './splitPolygon';
+import { test } from 'ava';
 
 const square = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]];
 

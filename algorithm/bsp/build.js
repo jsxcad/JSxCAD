@@ -1,18 +1,18 @@
-const create = require('./create');
-const poly3 = require('@jsxcad/math-poly3');
-const splitPolygon = require('./splitPolygon');
+import { create } from './create';
+import { toPlane } from '@jsxcad/math-poly3';
+import { splitPolygon } from './splitPolygon';
 
 // Build a BSP tree out of `polygons`. When called on an existing tree, the
 // new polygons are filtered down to the bottom of the tree and become new
 // nodes there. Each set of polygons is partitioned using the first polygon
 // (no heuristic is used to pick a good split).
-const build = (bsp, polygons) => {
+export const build = (bsp, polygons) => {
   if (polygons.length === 0) {
     return;
   }
   if (bsp.plane === undefined) {
     // Use the first polygon to partition the branches.
-    bsp.plane = poly3.toPlane(polygons[0]);
+    bsp.plane = toPlane(polygons[0]);
   }
   let front = [];
   let back = [];
@@ -32,5 +32,3 @@ const build = (bsp, polygons) => {
     build(bsp.back, back);
   }
 };
-
-module.exports = build;

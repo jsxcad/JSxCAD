@@ -1,3 +1,1 @@
-const create = () => ({ polygons: [] });
-
-module.exports = create;
+export const create = () => ({ polygons: [] });

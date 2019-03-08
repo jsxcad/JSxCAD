@@ -1,5 +1,3 @@
-const poly3 = require('@jsxcad/math-poly3');
+import { transform as transformOfPoly3 } from '@jsxcad/math-poly3';
 
-const transform = (matrix, polygons) => polygons.map(polygon => poly3.transform(matrix, polygon));
-
-module.exports = transform;
+export const transform = (matrix, polygons) => polygons.map(polygon => transformOfPoly3(matrix, polygon));

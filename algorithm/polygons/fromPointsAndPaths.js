@@ -1,11 +1,9 @@
-const poly3 = require('@jsxcad/math-poly3');
+import { fromPoints } from '@jsxcad/math-poly3';
 
-const fromPointsAndPaths = ({ points = [], paths = [] }) => {
+export const fromPointsAndPaths = ({ points = [], paths = [] }) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(poly3.fromPoints(path.map(nth => points[nth])));
+    polygons.push(fromPoints(path.map(nth => points[nth])));
   }
   return polygons;
 };
-
-module.exports = fromPointsAndPaths;

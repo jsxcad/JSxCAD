@@ -1,7 +1,7 @@
-const clipPolygons = require('./clipPolygons');
+import { clipPolygons } from './clipPolygons';
 
 // Destructively remove all polygons from a that are in b.
-const clipTo = (a, b) => {
+export const clipTo = (a, b) => {
   a.polygons = clipPolygons(b, a.polygons);
   if (a.front !== undefined) {
     clipTo(a.front, b);
@@ -10,5 +10,3 @@ const clipTo = (a, b) => {
     clipTo(a.back, b);
   }
 };
-
-module.exports = clipTo;
