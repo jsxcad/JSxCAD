@@ -1,29 +1,26 @@
-import { butLast } from './butLast';
 import { canonicalize } from './canonicalize';
-import { difference } from './difference';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
-import { intersection } from './intersection';
+import { fromPointsAndPaths } from './fromPointsAndPaths';
+import { fromTranslation } from '@jsxcad/math-mat4';
+import { makeConvex } from './makeConvex';
+import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
-import { last } from './last';
 import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
-import { toPolygons } from './toPolygons';
 import { transform } from './transform';
-import { union } from './union';
+
+export const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
 
 export {
-  butLast,
   canonicalize,
-  difference,
   eachPoint,
   flip,
-  intersection,
-  last,
+  fromPointsAndPaths,
+  makeConvex,
+  map,
   measureBoundingBox,
   toGeneric,
   toPoints,
-  toPolygons,
-  transform,
-  union
+  transform
 };

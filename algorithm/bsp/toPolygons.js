@@ -1,4 +1,4 @@
-const toPolygons = (options = {}, bsp) => {
+export const toPolygons = (options = {}, bsp) => {
   // PROVE: That we need this slice.
   var polygons = bsp.polygons.slice();
   if (bsp.front !== undefined) {
@@ -9,5 +9,3 @@ const toPolygons = (options = {}, bsp) => {
   }
   return polygons;
 };
-
-module.exports = toPolygons;

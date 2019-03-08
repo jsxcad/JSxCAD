@@ -1,9 +1,7 @@
-const fromPolygons = require('./fromPolygons');
-const mat4 = require('@jsxcad/math-mat4');
-const test = require('ava');
-const toPolygons = require('./toPolygons');
-const transform = require('./transform');
-const intersection = require('./intersection');
+import { fromTranslation } from '@jsxcad/math-mat4';
+import { intersection } from './intersection';
+import { test } from 'ava';
+import { transform } from '@jsxcad/algorithm-polygons';
 
 const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],
@@ -13,19 +11,13 @@ const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]]];
 
 test('Self intersection', t => {
-  const intersectionPolygons = toPolygons({}, intersection(fromPolygons({}, cubePolygons),
-                                                           fromPolygons({}, cubePolygons)));
-  t.deepEqual(intersectionPolygons, cubePolygons);
+  t.deepEqual(intersection(cubePolygons, cubePolygons),
+              cubePolygons);
 });
 
 test('Overlapping intersection', t => {
-  const intersectionPolygons =
-      toPolygons(
-        {},
-        intersection(transform(mat4.fromTranslation([0.5, 0.5, 0.5]),
-                               fromPolygons({}, cubePolygons)),
-                     fromPolygons({}, cubePolygons)));
-  t.deepEqual(intersectionPolygons,
+  t.deepEqual(intersection(transform(fromTranslation([0.5, 0.5, 0.5]), cubePolygons),
+                           cubePolygons),
               [[[-0.5, 1, 1], [-0.5, 1, -0.5], [-0.5, -0.5, -0.5], [-0.5, -0.5, 1]],
                [[-0.5, -0.5, 1], [-0.5, -0.5, -0.5], [1, -0.5, -0.5], [1, -0.5, 1]],
                [[1, 1, -0.5], [1, -0.5, -0.5], [-0.5, -0.5, -0.5], [-0.5, 1, -0.5]],

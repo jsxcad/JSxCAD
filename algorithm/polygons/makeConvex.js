@@ -1,5 +1,5 @@
-const Tess2 = require('tess2');
-const poly3 = require('@jsxcad/math-poly3');
+import Tess2 from 'tess2';
+import { isConvex } from '@jsxcad/math-poly3';
 
 const toContour = (polygon) => {
   const points = [];
@@ -27,11 +27,11 @@ const fromTessellation = (tessellation) => {
   return polygons;
 };
 
-const makeConvex = (options = {}, polygons) => {
+export const makeConvex = (options = {}, polygons) => {
   if (polygons.isConvex) {
     return polygons;
   }
-  if (polygons.every(poly3.isConvex)) {
+  if (polygons.every(isConvex)) {
     polygons.isConvex = true;
     return polygons;
   }
@@ -45,5 +45,3 @@ const makeConvex = (options = {}, polygons) => {
   convex.isConvex = true;
   return convex;
 };
-
-module.exports = makeConvex;

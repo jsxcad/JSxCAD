@@ -1,9 +1,7 @@
-const fromPolygons = require('./fromPolygons');
-const mat4 = require('@jsxcad/math-mat4');
-const test = require('ava');
-const toPolygons = require('./toPolygons');
-const transform = require('./transform');
-const union = require('./union');
+import { fromTranslation } from '@jsxcad/math-mat4';
+import { test } from 'ava';
+import { toGeneric, transform } from '@jsxcad/algorithm-polygons';
+import { union } from './union';
 
 const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],
@@ -13,25 +11,13 @@ const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]]];
 
 test('Self union', t => {
-  const unionPolygons = toPolygons({}, union(fromPolygons({}, cubePolygons),
-                                             fromPolygons({}, cubePolygons)));
-  t.deepEqual(unionPolygons,
-              [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
-               [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],
-               [[-1, -1, -1], [1, -1, -1], [1, -1, 1], [-1, -1, 1]],
-               [[-1, 1, -1], [-1, 1, 1], [1, 1, 1], [1, 1, -1]],
-               [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1]],
-               [[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]]]);
+  const unioned = union(cubePolygons, cubePolygons);
+  t.deepEqual(toGeneric(unioned), cubePolygons);
 });
 
 test('Overlapping union', t => {
-  const unionPolygons =
-      toPolygons(
-        {},
-        union(transform(mat4.fromTranslation([0.5, 0.5, 0.5]),
-                        fromPolygons({}, cubePolygons)),
-              fromPolygons({}, cubePolygons)));
-  t.deepEqual(unionPolygons,
+  t.deepEqual(toGeneric(union(transform(fromTranslation([0.5, 0.5, 0.5]), cubePolygons),
+                              cubePolygons)),
               [[[-0.5, 1, 1.5], [-0.5, 1.5, 1.5], [-0.5, 1.5, -0.5], [-0.5, 1, -0.5]],
                [[-0.5, -0.5, 1], [-0.5, -0.5, 1.5], [-0.5, 1, 1.5], [-0.5, 1, 1]],
                [[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],

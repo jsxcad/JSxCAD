@@ -1,9 +1,7 @@
-const eachPoint = require('./eachPoint');
+import { eachPoint } from './eachPoint';
 
-const toPoints = (options, polygons) => {
+export const toPoints = (options = {}, polygons) => {
   const points = [];
   eachPoint(options, point => points.push(point), polygons);
   return points;
 };
-
-module.exports = toPoints;
