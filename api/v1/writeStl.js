@@ -15,4 +15,4 @@ export const writeStl = ({ path }, shape) => {
 CSG.prototype.writeStl = function (options = {}) {
   writeStl(options, this);
   return this;
-}
+};
