@@ -1,6 +1,4 @@
-import { canonicalize } from './canonicalize';
-import { clippingToPolygons } from './clippingToPolygons';
-import { fromPolygons } from './fromPolygons';
+import { clippingToPolygons, z0SurfacesToClipping } from './clippingToPolygons';
 import { intersection as polygonClippingIntersection } from 'polygon-clipping';
 
 /**
@@ -21,18 +19,9 @@ import { intersection as polygonClippingIntersection } from 'polygon-clipping';
  *      |       |
  *      +-------+
  */
-export const intersection = (...surfaces) => {
-  switch (surfaces.length) {
-    case 0:
-      return fromPolygons({}, []);
-    case 1:
-      return surfaces[0];
-    default: {
-      const combined = surfaces.map(surface =>
-        canonicalize(surface).polygons.map(polygon => polygon.map(([a, b]) => [a, b])));
-      return fromPolygons(
-        {},
-        clippingToPolygons(polygonClippingIntersection(...combined)));
-    }
+export const intersection = (...z0Surfaces) => {
+  if (z0Surfaces.length === 0) {
+    return [];
   }
+  return clippingToPolygons(polygonClippingIntersection(...z0SurfacesToClipping(z0Surfaces)));
 };

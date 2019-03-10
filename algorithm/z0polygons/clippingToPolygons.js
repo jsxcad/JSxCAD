@@ -9,3 +9,7 @@ export const clippingToPolygons = (clipping) => {
   }
   return polygonArray;
 };
+
+export const z0SurfacesToClipping = (z0Surfaces) => {
+  return z0Surfaces.map(z0Surface => z0Surface.map(z0Polygon => z0Polygon.map(([x = 0, y = 0]) => [x, y])));
+};

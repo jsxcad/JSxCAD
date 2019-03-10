@@ -9,6 +9,7 @@ import { last } from './last';
 import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
+import { toZ0Polygons } from './toZ0Polygons';
 import { transform } from './transform';
 import { union } from './union';
 
@@ -24,6 +25,7 @@ export {
   toGeneric,
   toPoints,
   toPolygons,
+  toZ0Polygons,
   transform,
   union
 };
