@@ -27,6 +27,10 @@ const fromTessellation = (tessellation) => {
   return polygons;
 };
 
+// This limits the number of edges that a produced convex polygon may have.
+// PROVE: If Infinity is a reasonable value for this.
+const polySizeLimit = 1000;
+
 export const makeConvex = (options = {}, polygons) => {
   if (polygons.isConvex) {
     return polygons;
@@ -39,7 +43,7 @@ export const makeConvex = (options = {}, polygons) => {
     Tess2.tesselate({ contours: polygons.map(toContour),
                       windingRule: Tess2.WINDING_ODD,
                       elementType: Tess2.POLYGONS,
-                      polySize: 3,
+                      polySize: polySizeLimit,
                       vertexSize: 2
     }));
   convex.isConvex = true;

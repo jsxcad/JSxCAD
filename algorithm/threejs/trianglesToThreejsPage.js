@@ -1,6 +1,6 @@
 import { toPlane } from '@jsxcad/math-poly3';
 
-const page = ({ indices, positions, normals }) => `
+const page = ({ cameraPosition, indices, positions, normals }) => `
 <html lang="en">
   <head>
     <title>JSxCAD Viewer</title>
@@ -32,7 +32,7 @@ const page = ({ indices, positions, normals }) => `
       function init() {
         //
         camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
-        camera.position.z = 16;
+        [camera.position.x, camera.position.y, camera.position.z] = ${JSON.stringify(cameraPosition)};
         scene = new THREE.Scene();
         scene.background = new THREE.Color( 0x050505 );
         //
@@ -104,7 +104,7 @@ const intern = (map, point, next, update) => {
   return next;
 };
 
-export const trianglesToThreejsPage = (options = {}, triangles) => {
+export const trianglesToThreejsPage = ({ cameraPosition = [0, 0, 16] }, triangles) => {
   // Translate the paths to threejs geometry data.
   const indices = [];
   const vertexMap = {};
@@ -124,5 +124,5 @@ export const trianglesToThreejsPage = (options = {}, triangles) => {
                           }));
     }
   }
-  return page({ indices, positions, normals });
+  return page({ cameraPosition, indices, positions, normals });
 };

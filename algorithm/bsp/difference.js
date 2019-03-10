@@ -22,8 +22,6 @@ import { toPolygons } from './toPolygons';
    *      +-------+
    */
 export const difference = (base, ...subtractions) => {
-  console.log(`QQ/bsp/difference/base: ${JSON.stringify(base)}`);
-  console.log(`QQ/bsp/difference/subtractions: ${JSON.stringify(subtractions)}`);
   // TODO: Figure out why we do not subtract the union of the remainder of
   // the geometries. This approach chains subtractions rather than producing
   // a generational tree.
