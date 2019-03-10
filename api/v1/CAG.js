@@ -1,13 +1,13 @@
 // FIX: Add interface to change default surface geometry.
 
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { Surf2Pc, fromPolygons } from '@jsxcad/geometry-surf2pc';
+import { fromPaths } from '@jsxcad/geometry-surf2pc';
 import { toGeometry } from './toGeometry';
 import { writePdf } from './writePdf';
 
 export class CAG {
   constructor (geometry) {
-    this.geometry = geometry || new Surf2Pc();
+    this.geometry = geometry || fromPaths({}, []);
   }
 
   translate ([x, y]) {
@@ -50,7 +50,7 @@ export class CAG {
   }
 
   toPolygons (options) {
-    return this.geometry.toPolygons(options);
+    return this.geometry.toPaths(options);
   }
 
   union (...shapes) {
@@ -66,5 +66,5 @@ export class CAG {
 CAG.fromGeometry = (geometry) => new CAG(geometry);
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
-CAG.fromPoints = (points) => CAG.fromGeometry(new Surf2Pc(fromPolygons({}, [points])));
-CAG.fromPolygons = (polygons) => CAG.fromGeometry(new Surf2Pc(fromPolygons({}, polygons)));
+CAG.fromPoints = (points) => CAG.fromGeometry(fromPaths({}, [points]));
+CAG.fromPolygons = (polygons) => CAG.fromGeometry(fromPaths({}, polygons));

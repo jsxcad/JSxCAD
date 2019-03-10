@@ -1,8 +1,8 @@
 {
-  "name": "@jsxcad/geometry-surf2pc",
+  "name": "@jsxcad/algorithm-z0polygons",
   "version": "0.0.50",
-  "description": "Surface Geometry for JSxCAD.",
-  "repository": "https://github.com/pentacular/JSxCAD",
+  "description": "Operations on polygon arrays with z = 0 plane for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "index.js",
   "scripts": {
     "test": "ava *.test.js",
@@ -52,15 +52,17 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-z0polygons": "^0.0.50",
+    "@jsxcad/data-shape": "^0.0.50",
+    "@jsxcad/math-line2": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
-    "esm": "^3.2.10"
+    "@jsxcad/math-poly3": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50",
+    "esm": "^3.2.10",
+    "polygon-clipping": "^0.13.0"
   },
   "ava": {
     "require": "esm"
-   },
+  },
   "publishConfig": {
     "access": "restricted"
   }

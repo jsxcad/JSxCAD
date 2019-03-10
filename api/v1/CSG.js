@@ -5,7 +5,7 @@ import { toPoints } from '@jsxcad/algorithm-paths';
 
 export class CSG {
   constructor (geometry) {
-    this.geometry = geometry;
+    this.geometry = geometry || fromPaths({}, []);
   }
 
   difference (...shapes) {

@@ -6,6 +6,7 @@ import { isClosed } from './isClosed';
 import { measureArea } from './measureArea';
 import { toGeneric } from './toGeneric';
 import { toPolygon } from './toPolygon';
+import { toZ0Polygon } from './toZ0Polygon';
 import { transform } from './transform';
 
 export {
@@ -17,5 +18,6 @@ export {
   measureArea,
   toGeneric,
   toPolygon,
+  toZ0Polygon,
   transform
 };
