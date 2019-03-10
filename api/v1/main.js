@@ -32,6 +32,7 @@ import { translate } from './translate';
 import { union } from './union';
 import { writePdf } from './writePdf';
 import { writeStl } from './writeStl';
+import { writeThreejsPage } from './writeThreejs';
 
 export {
   CSG,
@@ -58,5 +59,6 @@ export {
   translate,
   union,
   writePdf,
-  writeStl
+  writeStl,
+  writeThreejsPage
 };

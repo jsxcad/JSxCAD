@@ -1,3 +1,4 @@
+import { blessAsConvex } from './blessAsConvex';
 import { makeConvex } from './makeConvex';
 import { test } from 'ava';
 
@@ -6,6 +7,5 @@ test('Simple triangulation', t => {
   const expected = [[[1, -1], [2, -2], [2, 0]],
                     [[0, -1], [2, -2], [1, -1]],
                     [[2, -2], [0, -1], [0, -2]]];
-  expected.isConvex = true;
-  t.deepEqual(convex, expected);
+  t.deepEqual(convex, blessAsConvex(expected));
 });

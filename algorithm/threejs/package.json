@@ -1,10 +1,9 @@
 {
-  "name": "@jsxcad/api-v1",
+  "name": "@jsxcad/algorithm-threejs",
   "version": "0.0.50",
-  "description": "Constructive Solid Geometry (CSG) Library",
+  "description": "ThreeJs integration algorithms for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "main.js",
-  "module": "main.js",
+  "main": "index.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -53,22 +52,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.50",
-    "@jsxcad/algorithm-curve": "^0.0.50",
-    "@jsxcad/algorithm-path": "^0.0.50",
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/algorithm-pdf": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-shape": "^0.0.50",
-    "@jsxcad/algorithm-stl": "^0.0.50",
-    "@jsxcad/algorithm-threejs": "^0.0.50",
-    "@jsxcad/algorithm-triangles": "^0.0.50",
-    "@jsxcad/geometry-paths": "^0.0.50",
-    "@jsxcad/geometry-solid3bsp": "^0.0.50",
-    "@jsxcad/geometry-surf2pc": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50",
+    "@jsxcad/math-poly3": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50",
     "esm": "^3.2.10"
+  },
+  "devDependencies": {
+    "@jsxcad/data-shape": "^0.0.50"
   },
   "ava": {
     "require": "esm"

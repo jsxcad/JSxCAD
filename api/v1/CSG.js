@@ -2,7 +2,6 @@ import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { toGeometry } from './toGeometry';
 import { toPoints } from '@jsxcad/algorithm-paths';
-import { writeStl } from './writeStl';
 
 export class CSG {
   constructor (geometry) {
@@ -84,11 +83,6 @@ export class CSG {
 
   union (...shapes) {
     return CSG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
-  }
-
-  writeStl (options = {}) {
-    writeStl(options, this);
-    return this;
   }
 }
 
