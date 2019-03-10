@@ -11,7 +11,7 @@ function radiusFromDiameter (d) {
 }
 
 function rotcy (rot, r, h) {
-  return rotate(rot, cylinder({r: r, h: h, center: true}));
+  return rotate(rot, cylinder({ r: r, h: h, center: true }));
 }
 
 function example001 () {
@@ -21,7 +21,7 @@ function example001 () {
   var height = radiusFromDiameter(size * 2.5);
 
   return difference(
-    sphere({r: radiusFromDiameter(size)}),
+    sphere({ r: radiusFromDiameter(size) }),
     rotcy([0, 0, 0], radius, height),
     rotcy([90, 0, 0], radius, height),
     rotcy([0, 90, 0], radius, height)
