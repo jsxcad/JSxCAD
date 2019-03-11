@@ -14,10 +14,12 @@ const buildCube = ({ center = false, centerPosition, length = 1, width = 1, heig
   if (center === false && centerPosition === undefined) {
     cube = cube.translate([0.5, 0.5, 0.5]);
   }
-  cube = cube.scale([length, width, height]);
   if (round) {
+    cube = cube.scale([length - roundingRadius * 2, width - roundingRadius * 2, height - roundingRadius * 2]);
     cube = CSG.fromPolygons(buildRoundedConvexHull({ roundingRadius: roundingRadius, roundingFaces: roundingFaces },
                                                    cube.toPoints({})));
+  } else {
+    cube = cube.scale([length, width, height]);
   }
   if (centerPosition) {
     cube = cube.translate(centerPosition);
@@ -48,7 +50,7 @@ const decode = (params) => {
 
   // cube({ radius: 1, roundradius: 0.9, resolution: 8 })
   try {
-    const { radius, roundRadius, resolution } = params[0];
+    const { radius = 1, roundRadius, resolution = 8 } = params[0];
     assertNumber(radius);
     assertNumber(roundRadius);
     assertNumber(resolution);

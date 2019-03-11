@@ -1,1 +1,6 @@
-export const intersection = (shape, ...shapes) => shape.intersection(...shapes);
+import { flatten } from './flatten';
+
+export const intersection = (...params) => {
+  const [shape, ...shapes] = flatten(params);
+  return shape.intersection(...shapes);
+};
