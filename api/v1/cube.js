@@ -50,7 +50,7 @@ const decode = (params) => {
 
   // cube({ radius: 1, roundradius: 0.9, resolution: 8 })
   try {
-    const { radius, roundRadius, resolution } = params[0];
+    const { radius = 1, roundRadius, resolution = 8 } = params[0];
     assertNumber(radius);
     assertNumber(roundRadius);
     assertNumber(resolution);

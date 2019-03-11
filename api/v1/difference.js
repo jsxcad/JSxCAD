@@ -1,1 +1,4 @@
-export const difference = (shape, ...shapes) => shape.difference(...shapes);
+export const difference = (...params) => {
+  const [shape, ...shapes] = flatten(params);
+  return shape.difference(...shapes);
+}
