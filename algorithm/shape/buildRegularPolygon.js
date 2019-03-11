@@ -1,4 +1,4 @@
-const vec2 = require('@jsxcad/math-vec2');
+import { fromAngleRadians } from '@jsxcad/math-vec2';
 
 /**
  * Construct a regular unit polygon of a given edge count.
@@ -15,15 +15,12 @@ const vec2 = require('@jsxcad/math-vec2');
  * const squarePoints = regularPolygon({ edges: 4 })
  * })
  */
-const buildRegularPolygon = ({ edges = 32 }) => {
+export const buildRegularPolygon = ({ edges = 32 }) => {
   let points = [];
   for (let i = 0; i < edges; i++) {
     let radians = 2 * Math.PI * i / edges;
-    // let point = vec2.canonicalize(vec2.fromAngleRadians(radians))
-    let point = vec2.fromAngleRadians(radians);
+    let point = fromAngleRadians(radians);
     points.push(point);
   }
   return points;
 };
-
-module.exports = buildRegularPolygon;

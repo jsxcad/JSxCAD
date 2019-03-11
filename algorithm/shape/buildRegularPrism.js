@@ -1,5 +1,5 @@
-const buildRegularPolygon = require('./buildRegularPolygon');
-const extrudeLinear = require('./extrudeLinear');
+import { buildRegularPolygon } from './buildRegularPolygon';
+import { extrudeLinear } from './extrudeLinear';
 
 /**
  * Construct a regular unit prism of a given edge count.
@@ -13,6 +13,5 @@ const extrudeLinear = require('./extrudeLinear');
  * const circlePoints = regularPolygon({ edges: 32 })
  */
 
-const buildRegularPrism = ({ edges = 32 }) => extrudeLinear({ height: 1 }, [buildRegularPolygon({ edges: edges })]);
-
-module.exports = buildRegularPrism;
+export const buildRegularPrism = ({ edges = 32 }) =>
+  extrudeLinear({ height: 1 }, [buildRegularPolygon({ edges: edges })]);

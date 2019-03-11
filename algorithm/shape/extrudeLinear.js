@@ -1,6 +1,6 @@
-const vec3 = require('@jsxcad/math-vec3');
+import { add } from '@jsxcad/math-vec3';
 
-const extrudeLinear = ({ height = 1 }, polygons) => {
+export const extrudeLinear = ({ height = 1 }, polygons) => {
   const extruded = [];
   const up = [0, 0, height];
   for (const polygon of polygons) {
@@ -12,12 +12,10 @@ const extrudeLinear = ({ height = 1 }, polygons) => {
       const start = floor[i];
       const end = floor[(i + 1) % floor.length];
       // Remember that we are walking CCW.
-      extruded.push([start, vec3.add(start, up), vec3.add(end, up), end]);
+      extruded.push([start, add(start, up), add(end, up), end]);
     }
     // Walk around the floor and reverse to build the roof.
-    extruded.push(floor.map(vertex => vec3.add(vertex, up)).reverse());
+    extruded.push(floor.map(vertex => add(vertex, up)).reverse());
   }
   return extruded;
 };
-
-module.exports = extrudeLinear;

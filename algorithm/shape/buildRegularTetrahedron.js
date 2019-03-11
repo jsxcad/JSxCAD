@@ -1,4 +1,4 @@
-const buildConvexHull = require('./buildConvexHull');
+import { buildConvexHull } from './buildConvexHull';
 
 // Unit tetrahedron vertices.
 const points = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],
@@ -6,6 +6,4 @@ const points = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],
                 [1, 1, 1], [1, -1, -1], [-1, -1, 1],
                 [1, 1, 1], [-1, -1, 1], [-1, 1, -1]];
 
-const buildRegularTetrahedron = (options = {}) => buildConvexHull({}, points);
-
-module.exports = buildRegularTetrahedron;
+export const buildRegularTetrahedron = (options = {}) => buildConvexHull({}, points);

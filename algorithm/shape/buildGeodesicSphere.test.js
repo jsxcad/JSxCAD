@@ -1,7 +1,7 @@
-const buildGeodesicSphere = require('./buildGeodesicSphere');
-const { canonicalize } = require('@jsxcad/algorithm-polygons');
-const { unitGeodesicSphere } = require('@jsxcad/data-shape');
-const test = require('ava');
+import { buildGeodesicSphere } from './buildGeodesicSphere';
+import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { test } from 'ava';
+import { unitGeodesicSphere } from '@jsxcad/data-shape';
 
 test('Build minimal sphere.', t => {
   t.deepEqual(canonicalize(buildGeodesicSphere({})), unitGeodesicSphere.unitGeodesicSphere20Polygons);

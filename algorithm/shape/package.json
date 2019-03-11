@@ -62,9 +62,12 @@
     "@jsxcad/math-vec2": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
     "@jsxcad/math-vec4": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50",
     "bezier": "^0.1.0",
+    "esm": "^3.2.10",
     "quickhull3d": "^2.0.4"
+  },
+  "ava": {
+    "require": "esm"
   },
   "publishConfig": {
     "access": "restricted"
