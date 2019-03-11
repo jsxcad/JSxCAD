@@ -4,4 +4,4 @@ export const flatten = (array) => {
   const flattened = [];
   walk(array, item => flattened.push(item));
   return flattened;
-}
+};

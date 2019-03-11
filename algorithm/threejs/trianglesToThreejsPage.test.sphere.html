@@ -20,10 +20,11 @@
     <div id="container"></div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
     <script>
-      var camera, scene, renderer, stats;
+      var camera, controls, scene, renderer, stats;
       var mesh;
       init();
       animate();
@@ -31,6 +32,18 @@
         //
         camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
         [camera.position.x, camera.position.y, camera.position.z] = [0,0,16];
+        //
+        controls = new THREE.TrackballControls(camera);
+        controls.rotateSpeed = 4.0;
+        controls.zoomSpeed = 4.0;
+        controls.panSpeed = 2.0;
+        controls.noZoom = false;
+        controls.noPan = false;
+        controls.staticMoving = true;
+        controls.dynamicDampingFactor = 0.1;
+        controls.keys = [65, 83, 68];
+        controls.addEventListener('change', render);
+        //
         scene = new THREE.Scene();
         scene.background = new THREE.Color( 0x050505 );
         //
@@ -71,21 +84,18 @@
       function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
+        controls.handleResize();
         renderer.setSize( window.innerWidth, window.innerHeight );
       }
-      //
       function animate() {
         requestAnimationFrame( animate );
         render();
+        controls.update();
         stats.update();
       }
       function render() {
-        var time = Date.now() * 0.001;
-        mesh.rotation.x = time * 0.25;
-        mesh.rotation.y = time * 0.5;
         renderer.render( scene, camera );
       }
     </script>
-
   </body>
 </html>
