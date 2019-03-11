@@ -1,8 +1,9 @@
-const interpolateCubicBezier = require('bezier').prepare(4);
+import bezier from 'bezier';
+const interpolateCubicBezier = bezier.prepare(4);
 
 // TODO: Change from segments to point-distance metric.
 
-const buildCubicBezierCurve = ({ segments = 8 }, points) => {
+export const buildCubicBezierCurve = ({ segments = 8 }, points) => {
   const xPoints = points.map(point => point[0]);
   const yPoints = points.map(point => point[1]);
   const path = [];
@@ -12,5 +13,3 @@ const buildCubicBezierCurve = ({ segments = 8 }, points) => {
   }
   return path;
 };
-
-module.exports = buildCubicBezierCurve;

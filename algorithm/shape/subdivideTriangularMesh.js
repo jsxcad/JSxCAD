@@ -1,6 +1,6 @@
-const subdivideTriangle = require('./subdivideTriangle');
+import { subdivideTriangle } from './subdivideTriangle';
 
-const subdivideTriangularMesh = (mesh) => {
+export const subdivideTriangularMesh = (mesh) => {
   const subdividedMesh = [];
   for (const triangle of mesh) {
     for (const subTriangle of subdivideTriangle(triangle)) {
@@ -9,5 +9,3 @@ const subdivideTriangularMesh = (mesh) => {
   }
   return subdividedMesh;
 };
-
-module.exports = subdivideTriangularMesh;

@@ -1,9 +1,7 @@
-const QuickHull = require('quickhull3d/dist/QuickHull');
+import QuickHull from 'quickhull3d/dist/QuickHull';
 
-const buildConvexHull = (options = {}, points) => {
+export const buildConvexHull = (options = {}, points) => {
   const hull = new QuickHull(points, { skipTriangulation: true });
   hull.build();
   return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));
 };
-
-module.exports = buildConvexHull;

@@ -1,8 +1,8 @@
-const buildConvexHull = require('./buildConvexHull');
-const { canonicalize, toPoints } = require('@jsxcad/algorithm-polygons');
-const { isWatertightPolygons } = require('@jsxcad/algorithm-watertight');
-const { unitCube } = require('@jsxcad/data-shape');
-const test = require('ava');
+import { buildConvexHull } from './buildConvexHull';
+import { canonicalize, toPoints } from '@jsxcad/algorithm-polygons';
+import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
+import { unitCube } from '@jsxcad/data-shape';
+import { test } from 'ava';
 
 test('Hulling a cube produces triangulated output .', t => {
   const polygons = canonicalize(buildConvexHull({}, toPoints({}, unitCube.unitCubePolygons)));

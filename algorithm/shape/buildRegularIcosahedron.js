@@ -1,4 +1,4 @@
-const { fromPointsAndPaths } = require('@jsxcad/algorithm-polygons');
+import { fromPointsAndPaths } from '@jsxcad/algorithm-polygons';
 
 // Unit icosahedron vertices.
 const points = [[0.850651, 0.000000, -0.525731],
@@ -21,8 +21,7 @@ const paths = [[1, 9, 0], [0, 10, 1], [0, 7, 6], [0, 6, 10],
                [5, 11, 2], [6, 7, 3], [3, 11, 6], [3, 7, 8],
                [4, 8, 9], [5, 10, 11], [6, 11, 10], [7, 9, 8]];
 
-const buildRegularIcosahedron = (options = {}) => {
+// FIX: Why aren't we computing the convex hull?
+export const buildRegularIcosahedron = (options = {}) => {
   return fromPointsAndPaths({ points: points, paths: paths });
 };
-
-module.exports = buildRegularIcosahedron;

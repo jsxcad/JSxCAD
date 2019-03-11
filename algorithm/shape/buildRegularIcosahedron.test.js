@@ -1,7 +1,7 @@
-const buildRegularIcosahedron = require('./buildRegularIcosahedron');
-const { canonicalize } = require('@jsxcad/algorithm-polygons');
-const test = require('ava');
-const { unitRegularIcosahedron } = require('@jsxcad/data-shape');
+import { buildRegularIcosahedron } from './buildRegularIcosahedron';
+import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { test } from 'ava';
+import { unitRegularIcosahedron } from '@jsxcad/data-shape';
 
 test('Build unit regular icosahedron.', t => {
   const icosahedron = canonicalize(buildRegularIcosahedron({}));
