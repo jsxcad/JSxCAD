@@ -11,7 +11,6 @@ export class CSG {
   }
 
   difference (...shapes) {
-console.log(`QQ/difference`);
     return CSG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
   }
 
@@ -69,7 +68,9 @@ console.log(`QQ/difference`);
   }
 
   toPaths (options) {
-    return this.geometry.toPaths(options);
+    const paths = this.geometry.toPaths(options);
+    // if (!isWatertightPolygons(paths)) throw Error('not watertight');
+    return paths;
   }
 
   toPoints (options) {
@@ -89,23 +90,10 @@ console.log(`QQ/difference`);
   }
 }
 
-CSG.fromGeometry = (geometry) => {
-  let paths = geometry.toPaths({});
-  if (!isWatertightPolygons(paths)) {
-    console.log(`QQ/CSG/fromGeometry/watertight: no`);
-    paths = canonicalize(paths);
-    if (!isWatertightPolygons(paths)) {
-      console.log(`QQ/CSG/fromGeometry/watertight/canonicalized: no`);
-      throw Error('canonicalized paths not watertight');
-    }
-  }
-  const result = new CSG(geometry);
-  return result;
-}
+CSG.fromGeometry = (geometry) => new CSG(geometry);
 CSG.fromPaths = (paths) => {
-  const triangles = toTriangles({}, paths);
+  const triangles = canonicalize(toTriangles({}, paths));
   if (!isWatertightPolygons(triangles)) throw Error('not watertight');
-  const result = CSG.fromGeometry(fromPaths({}, triangles));
-  return result;
+  return CSG.fromGeometry(fromPaths({}, triangles));
 }
 CSG.fromPolygons = CSG.fromPaths;

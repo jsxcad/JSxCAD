@@ -1,5 +1,5 @@
 import { toPlane } from '@jsxcad/math-poly3';
-import { dot, lerp, subtract } from '@jsxcad/math-vec3';
+import { canonicalize, dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 const EPSILON = 1e-5;
 
@@ -11,6 +11,7 @@ const SPANNING = 3; // Both front and back.
 const W = 3;
 
 export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
+console.log(`QQ/splitPolygon/plane: ${JSON.stringify(plane)}`)
   // Classify each point as well as the entire polygon into one of the above
   // four classes.
   let polygonType = 0;
@@ -22,6 +23,11 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
     polygonType |= type;
     return type;
   });
+console.log(`QQ/splitPolygon/polygon: ${JSON.stringify(polygon)}`)
+for (let i = 0; i < polygon.length; i++) {
+  console.log(`QQ/splitPolygon/edge: ${polygon[i]} -> ${polygon[(i + 1) % polygon.length]}`);
+}
+console.log(`QQ/splitPolygon/polygon/type: ${['COPLANAR', 'FRONT', 'BACK', 'SPANNING'][polygonType]}`)
 
   // Put the polygon in the correct list, splitting it when necessary.
   switch (polygonType) {
@@ -58,20 +64,33 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
           backPoints.push(startPoint);
         }
         if ((startType | endType) === SPANNING) {
-        // Compute the point that touches the splitting plane.
+          // Compute the point that touches the splitting plane.
           let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
-          let spanPoint = lerp(t, startPoint, endPoint);
+          let spanPoint = canonicalize(lerp(t, startPoint, endPoint));
+          console.log(`QQ/Spanning: ${JSON.stringify(startPoint)} -> ${JSON.stringify(spanPoint)} -> ${JSON.stringify(endPoint)}`)
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
       }
-      if (frontPoints.length >= 3) {
-      // Add the polygon that sticks out the front of the plane.
+      if (frontPoints.length == 3) {
         front.push(frontPoints);
+      } else if (frontPoints.length == 4) {
+        // Add the polygon that sticks out the front of the plane.
+        // front.push(frontPoints);
+        front.push([frontPoints[0], frontPoints[1], frontPoints[3]]);
+        front.push([frontPoints[3], frontPoints[1], frontPoints[2]]);
+      } else {
+        throw Error(`Was not triangle: ${JSON.stringify(frontPoints)}`);
       }
-      if (backPoints.length >= 3) {
-      // Add the polygon that sticks out the back of the plane.
+      if (backPoints.length == 3) {
         back.push(backPoints);
+      } else if (backPoints.length >= 3) {
+        // Add the polygon that sticks out the back of the plane.
+        // back.push(backPoints);
+        back.push([backPoints[0], backPoints[1], backPoints[3]]);
+        back.push([backPoints[3], backPoints[1], backPoints[2]]);
+      } else {
+        throw Error(`Was not triangle: ${JSON.stringify(backPoints)}`);
       }
       break;
     }

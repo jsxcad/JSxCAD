@@ -10,14 +10,12 @@ const poly3 = require('@jsxcad/math-poly3');
  * @returns {String} - the ascii STL output.
  */
 
-const polygonsToStla = (options, polygons) => {
+const polygonsToStla = (options = {}, polygons) => {
   if (!isWatertightPolygons(polygons)) {
     console.log(`QQ: polygon is not watertight`);
+    polygons = makeWatertight(polygons);
   }
-  // polygons = makeWatertight(polygons);
-  const result = `solid JSCAD\n${convertToFacets(options, polygons)}\nendsolid JSCAD\n`;
-  console.log(`QQ/polygonsToStla/done: ${result.length}`);
-  return result;
+  return `solid JSCAD\n${convertToFacets(options, polygons)}\nendsolid JSCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>
@@ -48,7 +46,6 @@ const convertToFacet = polygon => {
         ].join('\n'));
     }
   }
-console.log(`QQ/convertToFacet/done`);
   return result.join('\n');
 };
 

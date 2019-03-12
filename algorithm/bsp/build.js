@@ -16,9 +16,11 @@ export const build = (bsp, polygons) => {
   }
   let front = [];
   let back = [];
+console.log(`QQ/build/split/plane: ${JSON.stringify(bsp.plane)}`);
   for (let i = 0; i < polygons.length; i++) {
     splitPolygon(bsp.plane, bsp.polygons, bsp.polygons, front, back, polygons[i]);
   }
+console.log(`QQ/build/split/done`);
   if (front.length > 0) {
     if (bsp.front === undefined) {
       bsp.front = create();

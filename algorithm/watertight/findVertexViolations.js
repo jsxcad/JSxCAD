@@ -44,7 +44,7 @@ const findVertexViolations = (start, ...ends) => {
     for (let nth = 1; nth < ends.length; nth++) {
       if (!vec3.equals(ends[nth], ends[nth - 1])) {
         violations.push(['unequal', [start, ...ends]]);
-        violations.push(['unequal', [start, ...ends].reverse()]);
+        // violations.push(['unequal', [start, ...ends].reverse()]);
         // notWatertight = true
         // return
         break;
@@ -58,6 +58,10 @@ const findVertexViolations = (start, ...ends) => {
       // break
     }
   });
+
+  if (violations.length > 0) {
+    console.log(`QQ/watertight/violations: ${JSON.stringify(violations)}`);
+  }
 
   // If no violations, it is Watertight.
   return violations;

@@ -5,8 +5,7 @@ import { makeConvex } from '@jsxcad/algorithm-polygons';
 export const extrudeLinear = ({ height = 1 }, polygons) => {
   const extruded = [];
   const up = [0, 0, height];
-  // for (const triangle of makeConvex({}, polygons)) {
-  for (const triangle of polygons) {
+  for (const triangle of makeConvex({}, polygons)) {
   // for (const triangle of polygons) {
     // Build floor.
     const floor = triangle.map(point => [point[0], point[1], height / -2]).reverse();
