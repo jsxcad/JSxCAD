@@ -72,6 +72,7 @@ console.log(`QQ/splitPolygon/polygon/type: ${['COPLANAR', 'FRONT', 'BACK', 'SPAN
           backPoints.push(spanPoint);
         }
       }
+      // Add any polygon that sticks out the front of the plane.
       if (frontPoints.length == 3) {
         front.push(frontPoints);
       } else if (frontPoints.length == 4) {
@@ -82,10 +83,10 @@ console.log(`QQ/splitPolygon/polygon/type: ${['COPLANAR', 'FRONT', 'BACK', 'SPAN
       } else {
         throw Error(`Was not triangle: ${JSON.stringify(frontPoints)}`);
       }
+      // Add any polygon that sticks out the back of the plane.
       if (backPoints.length == 3) {
         back.push(backPoints);
-      } else if (backPoints.length >= 3) {
-        // Add the polygon that sticks out the back of the plane.
+      } else if (backPoints.length == 4) {
         // back.push(backPoints);
         back.push([backPoints[0], backPoints[1], backPoints[3]]);
         back.push([backPoints[3], backPoints[1], backPoints[2]]);

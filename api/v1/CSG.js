@@ -1,4 +1,7 @@
-import { fromPaths } from '@jsxcad/geometry-solid3bsp';
+// FIX: Get a better way to swap these.
+// import { fromPaths } from '@jsxcad/geometry-solid3bsp';
+import { fromPaths } from '@jsxcad/geometry-solid3evan';
+
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toGeometry } from './toGeometry';
