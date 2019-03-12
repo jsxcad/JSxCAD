@@ -3,7 +3,6 @@ import { isTriangle } from './isTriangle';
 import { makeConvex } from '@jsxcad/algorithm-polygons';
 
 export const toTriangles = (options = {}, paths) => {
-  return paths;
   if (paths.isTriangles) {
     return paths;
   }
