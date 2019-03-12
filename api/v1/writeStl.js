@@ -1,5 +1,7 @@
 import { CSG } from './CSG';
+import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { polygonsToStla } from '@jsxcad/algorithm-stl';
+import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 
 export const writeStl = ({ path }, shape) => {
   let polygons;
@@ -7,6 +9,12 @@ export const writeStl = ({ path }, shape) => {
     polygons = shape;
   } else {
     polygons = shape.toPolygons({});
+  }
+  if (!isWatertightPolygons(polygons)) {
+    polygons = canonicalize(polygons);
+    if (!isWatertightPolygons(polygons)) {
+      throw Error('Not watertight');
+    }
   }
   // TODO: Need to abstract filesystem access so that it can work in a browser.
   require('fs').writeFileSync(path, polygonsToStla({}, polygons));

@@ -1,7 +1,8 @@
 import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
+import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toGeometry } from './toGeometry';
-import { toPoints } from '@jsxcad/algorithm-paths';
+import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 import { toTriangles } from '@jsxcad/algorithm-triangles';
 
 export class CSG {
@@ -10,6 +11,7 @@ export class CSG {
   }
 
   difference (...shapes) {
+console.log(`QQ/difference`);
     return CSG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
   }
 
@@ -87,6 +89,23 @@ export class CSG {
   }
 }
 
-CSG.fromGeometry = (geometry) => new CSG(geometry);
-CSG.fromPaths = (paths) => CSG.fromGeometry(fromPaths({}, toTriangles({}, paths)));
+CSG.fromGeometry = (geometry) => {
+  let paths = geometry.toPaths({});
+  if (!isWatertightPolygons(paths)) {
+    console.log(`QQ/CSG/fromGeometry/watertight: no`);
+    paths = canonicalize(paths);
+    if (!isWatertightPolygons(paths)) {
+      console.log(`QQ/CSG/fromGeometry/watertight/canonicalized: no`);
+      throw Error('canonicalized paths not watertight');
+    }
+  }
+  const result = new CSG(geometry);
+  return result;
+}
+CSG.fromPaths = (paths) => {
+  const triangles = toTriangles({}, paths);
+  if (!isWatertightPolygons(triangles)) throw Error('not watertight');
+  const result = CSG.fromGeometry(fromPaths({}, triangles));
+  return result;
+}
 CSG.fromPolygons = CSG.fromPaths;
