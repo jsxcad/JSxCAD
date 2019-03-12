@@ -61,6 +61,7 @@
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-shape": "^0.0.50",
     "@jsxcad/algorithm-stl": "^0.0.50",
+    "@jsxcad/algorithm-text": "^0.0.50",
     "@jsxcad/algorithm-threejs": "^0.0.50",
     "@jsxcad/algorithm-triangles": "^0.0.50",
     "@jsxcad/geometry-paths": "^0.0.50",

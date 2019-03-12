@@ -8,7 +8,7 @@ import { equals } from '@jsxcad/math-vec2';
 
 // FIX: Check scaling.
 
-const toPaths = (svgPath) => {
+const toPaths = ({ curveSegments }, svgPath) => {
   const paths = [];
   let path = [null];
 
@@ -48,7 +48,7 @@ const toPaths = (svgPath) => {
         const [x1, y1, x2, y2, x, y] = args;
         const start = path[path.length - 1];
         const [xStart, yStart] = (start === null) ? [0, 0] : start;
-        path = path.concat(buildCubicBezierCurve({}, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
+        path = path.concat(buildCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
         break;
       }
       default: {
@@ -62,4 +62,5 @@ const toPaths = (svgPath) => {
   return transform(fromScaling([1, -1, 0]), paths);
 };
 
-export const svgPathToPaths = (options = {}, svgPath) => toPaths(curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));
+export const svgPathToPaths = (options = {}, svgPath) =>
+    toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));

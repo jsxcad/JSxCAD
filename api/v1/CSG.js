@@ -2,6 +2,7 @@ import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { toGeometry } from './toGeometry';
 import { toPoints } from '@jsxcad/algorithm-paths';
+import { toTriangles } from '@jsxcad/algorithm-triangles';
 
 export class CSG {
   constructor (geometry) {
@@ -87,5 +88,5 @@ export class CSG {
 }
 
 CSG.fromGeometry = (geometry) => new CSG(geometry);
-CSG.fromPaths = (paths) => CSG.fromGeometry(fromPaths({}, paths));
+CSG.fromPaths = (paths) => CSG.fromGeometry(fromPaths({}, toTriangles({}, paths)));
 CSG.fromPolygons = CSG.fromPaths;

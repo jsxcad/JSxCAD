@@ -1,4 +1,5 @@
-import { clippingToPolygons } from './clippingToPolygons';
+import { canonicalize } from '@jsxcad/algorithm-paths';
+import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
 import { difference as polygonClippingDifference } from 'polygon-clipping';
 
 /**
@@ -20,10 +21,13 @@ import { difference as polygonClippingDifference } from 'polygon-clipping';
  *      |       |
  *      +-------+
  */
-export const difference = (...z0Surfaces) => {
-  if (z0Surfaces.length === 0) {
-    return [];
+export const difference = (baseSurface, ...surfaces) => {
+  if (surfaces.length === 0) {
+    return baseSurface;
   }
-  const clipping = z0Surfaces.map(z0Surface => z0Surface.map(z0Polygon => z0Polygon.map(([x = 0, y = 0]) => [x, y])));
-  return clippingToPolygons(polygonClippingDifference(...clipping));
+  const surfaceClipping = z0SurfaceToClipping(canonicalize(baseSurface));
+  const subtractionClipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
+  const outputClipping = polygonClippingDifference(surfaceClipping, ...subtractionClipping);
+  const outputPaths = clippingToPolygons(outputClipping);
+  return outputPaths;
 };

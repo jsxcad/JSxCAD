@@ -1,5 +1,6 @@
 // FIX: Add interface to change default surface geometry.
 
+import { measureArea } from '@jsxcad/algorithm-path';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { fromPaths } from '@jsxcad/geometry-surf2pc';
 import { toGeometry } from './toGeometry';
@@ -8,6 +9,14 @@ import { writePdf } from './writePdf';
 export class CAG {
   constructor (geometry) {
     this.geometry = geometry || fromPaths({}, []);
+  }
+
+  difference (...shapes) {
+    return CAG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
+  }
+
+  intersection (...shapes) {
+    return CAG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
   }
 
   translate ([x, y]) {
@@ -64,7 +73,8 @@ export class CAG {
 }
 
 CAG.fromGeometry = (geometry) => new CAG(geometry);
+CAG.fromPaths = (paths) => CAG.fromGeometry(fromPaths({}, paths));
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
 CAG.fromPoints = (points) => CAG.fromGeometry(fromPaths({}, [points]));
-CAG.fromPolygons = (polygons) => CAG.fromGeometry(fromPaths({}, polygons));
+CAG.fromPolygons = (polygons) => CAG.fromPaths;
