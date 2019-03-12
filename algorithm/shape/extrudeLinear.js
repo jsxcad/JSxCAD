@@ -1,5 +1,4 @@
 import { add } from '@jsxcad/math-vec3';
-import { toTriangles } from '@jsxcad/algorithm-triangles';
 import { makeConvex } from '@jsxcad/algorithm-polygons';
 
 export const extrudeLinear = ({ height = 1 }, polygons) => {

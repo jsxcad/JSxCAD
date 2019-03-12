@@ -63,4 +63,4 @@ const toPaths = ({ curveSegments }, svgPath) => {
 };
 
 export const svgPathToPaths = (options = {}, svgPath) =>
-    toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));
+  toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));

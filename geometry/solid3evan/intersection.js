@@ -29,5 +29,5 @@ export const intersection = (...surfaces) => {
     const b = csgs.shift();
     a = a.intersect(b);
   }
-  return toPolygons().map(fromOldPoly);
+  return a.toPolygons().map(fromOldPoly);
 };

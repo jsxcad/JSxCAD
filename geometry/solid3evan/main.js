@@ -3,7 +3,7 @@ import { difference } from './difference';
 import { intersection } from './intersection';
 import { union } from './union';
 import { identity, multiply } from '@jsxcad/math-mat4';
-import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
+// import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toPolygons } from '@jsxcad/algorithm-paths';
 import { toTriangles } from '@jsxcad/algorithm-triangles';
 
@@ -46,4 +46,4 @@ export const fromPaths = (options = {}, paths) => {
   paths = canonicalize(toTriangles({}, paths));
   // if (!isWatertightPolygons(paths)) throw Error(`Not watertight: ${JSON.stringify(paths)}`);
   return new Solid3Bsp({ paths: paths });
-}
+};

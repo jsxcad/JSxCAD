@@ -1,13 +1,18 @@
-import { buildConvexHull } from './buildConvexHull';
 import { buildRegularPrism } from './buildRegularPrism';
-import { canonicalize, toPoints } from '@jsxcad/algorithm-polygons';
+import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { test } from 'ava';
-import { unitRegularTriangularPrism } from '@jsxcad/data-shape';
 
 test('A simple triangular prism', t => {
   const polygons = canonicalize(buildRegularPrism({ edges: 3 }));
-  t.deepEqual(buildConvexHull({}, toPoints({}, polygons)),
-              buildConvexHull({}, toPoints({}, unitRegularTriangularPrism.unitRegularTriangularPrismPolygons)));
+  t.deepEqual(polygons,
+              [[[-0.5, -0.86603, -0.5], [-0.5, -0.86603, 0.5], [-0.5, 0.86603, -0.5]],
+               [[-0.5, 0.86603, -0.5], [-0.5, -0.86603, 0.5], [-0.5, 0.86603, 0.5]],
+               [[-0.5, 0.86603, -0.5], [-0.5, 0.86603, 0.5], [1, 0, -0.5]],
+               [[1, 0, -0.5], [-0.5, 0.86603, 0.5], [1, 0, 0.5]],
+               [[1, 0, -0.5], [1, 0, 0.5], [-0.5, -0.86603, -0.5]],
+               [[-0.5, -0.86603, -0.5], [1, 0, 0.5], [-0.5, -0.86603, 0.5]],
+               [[1, 0, 0.5], [-0.5, 0.86603, 0.5], [-0.5, -0.86603, 0.5]],
+               [[-0.5, -0.86603, -0.5], [-0.5, 0.86603, -0.5], [1, 0, -0.5]]]);
   t.true(isWatertightPolygons(polygons));
 });

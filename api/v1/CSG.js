@@ -98,5 +98,5 @@ CSG.fromPaths = (paths) => {
   const triangles = canonicalize(toTriangles({}, paths));
   if (!isWatertightPolygons(triangles)) throw Error('not watertight');
   return CSG.fromGeometry(fromPaths({}, triangles));
-}
+};
 CSG.fromPolygons = CSG.fromPaths;
