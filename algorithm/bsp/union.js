@@ -1,16 +1,13 @@
 import { build } from './build';
 import { clipTo } from './clipTo';
 import { fromPolygons } from './fromPolygons';
-import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { invert } from './invert';
 import { toPolygons } from './toPolygons';
 
 export const union = (...solids) => {
   while (solids.length > 1) {
     const aSolid = solids.shift();
-    if (!isWatertightPolygons(aSolid)) { throw Error('Not watertight'); }
     const bSolid = solids.shift();
-    if (!isWatertightPolygons(bSolid)) { throw Error('Not watertight'); }
 
     const aBsp = fromPolygons({}, aSolid);
     const bBsp = fromPolygons({}, bSolid);
