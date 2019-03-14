@@ -13,7 +13,7 @@ const poly3 = require('@jsxcad/math-poly3');
 const polygonsToStla = (options = {}, polygons) => {
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);
-    // polygons = makeWatertight(polygons);
+    polygons = makeWatertight(polygons);
   }
   return `solid JSCAD\n${convertToFacets(options, polygons)}\nendsolid JSCAD\n`;
 };

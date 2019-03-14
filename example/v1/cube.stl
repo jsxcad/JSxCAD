@@ -1,80 +1,13 @@
 solid JSCAD
 facet normal 0 -1 0
 outer loop
-<<<<<<< HEAD
-vertex 30 -3.552713678800501e-15 0
-vertex -3.552713678800501e-15 0 0
-vertex 0 30.000000000000004 0
-=======
 vertex 30 0 0
 vertex 30 0 30
 vertex 0 0 0
->>>>>>> master
 endloop
 endfacet
 facet normal 0 -1 0
 outer loop
-<<<<<<< HEAD
-vertex 30 -3.552713678800501e-15 0
-vertex 0 30.000000000000004 0
-vertex 30.000000000000004 30 0
-endloop
-endfacet
-facet normal -1.1842378929335e-16 -1 0
-outer loop
-vertex 30 -3.552713678800501e-15 0
-vertex 30 -3.552713678800501e-15 30
-vertex -3.552713678800501e-15 0 30
-endloop
-endfacet
-facet normal -1.1842378929335e-16 -1 0
-outer loop
-vertex 30 -3.552713678800501e-15 0
-vertex -3.552713678800501e-15 0 30
-vertex -3.552713678800501e-15 0 0
-endloop
-endfacet
-facet normal -1 1.1842378929335e-16 0
-outer loop
-vertex -3.552713678800501e-15 0 0
-vertex -3.552713678800501e-15 0 30
-vertex 0 30.000000000000004 30
-endloop
-endfacet
-facet normal -1 1.1842378929335e-16 0
-outer loop
-vertex -3.552713678800501e-15 0 0
-vertex 0 30.000000000000004 30
-vertex 0 30.000000000000004 0
-endloop
-endfacet
-facet normal 1.1842378929335e-16 1 0
-outer loop
-vertex 0 30.000000000000004 0
-vertex 0 30.000000000000004 30
-vertex 30.000000000000004 30 30
-endloop
-endfacet
-facet normal 1.1842378929335e-16 1 0
-outer loop
-vertex 0 30.000000000000004 0
-vertex 30.000000000000004 30 30
-vertex 30.000000000000004 30 0
-endloop
-endfacet
-facet normal 1 -1.1842378929335e-16 0
-outer loop
-vertex 30.000000000000004 30 0
-vertex 30.000000000000004 30 30
-vertex 30 -3.552713678800501e-15 30
-endloop
-endfacet
-facet normal 1 -1.1842378929335e-16 0
-outer loop
-vertex 30.000000000000004 30 0
-vertex 30 -3.552713678800501e-15 30
-vertex 30 -3.552713678800501e-15 0
-=======
 vertex 0 0 0
 vertex 30 0 30
 vertex 0 0 30
@@ -134,33 +67,20 @@ outer loop
 vertex 30 30 0
 vertex 30 0 0
 vertex 0 30 0
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-<<<<<<< HEAD
-vertex 30.000000000000004 30 30
-vertex 0 30.000000000000004 30
-vertex -3.552713678800501e-15 0 30
-=======
 vertex 30 0 30
 vertex 0 30 30
 vertex 0 0 30
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-<<<<<<< HEAD
-vertex 30.000000000000004 30 30
-vertex -3.552713678800501e-15 0 30
-vertex 30 -3.552713678800501e-15 30
-=======
 vertex 0 0 0
 vertex 0 30 0
 vertex 30 0 0
->>>>>>> master
 endloop
 endfacet
 endsolid JSCAD

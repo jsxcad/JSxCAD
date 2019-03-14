@@ -1,78 +1,13 @@
 solid JSCAD
 facet normal 0 1 0
 outer loop
-<<<<<<< HEAD
-vertex 4.14214 5.85786 0
-vertex -8.881784197001252e-16 0 0
-vertex 0 10 0
-=======
 vertex 0 0 0
 vertex 4.14214 0 5.85787
 vertex 7.07107 0 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-<<<<<<< HEAD
-vertex 4.14214 5.85786 0
-vertex 0 10 0
-vertex 7.07107 10 0
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 10 5.85786 0
-vertex 10 5.85787 0
-vertex 7.07107 10 0
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 10 5.85786 0
-vertex 7.07107 10 0
-vertex 10 10 0
-endloop
-endfacet
-facet normal 0 -1 0
-outer loop
-vertex 4.14214 0 5.85786
-vertex 7.07107 0 10
-vertex -8.881784197001252e-16 0 10
-endloop
-endfacet
-facet normal 4.4408920985006264e-17 -1 4.4408920985006264e-17
-outer loop
-vertex 0 -4.440892098500626e-16 4.440892098500626e-16
-vertex 4.14214 0 5.85786
-vertex -8.881784197001252e-16 0 10
-endloop
-endfacet
-facet normal 4.4408920985006264e-17 -1 4.4408920985006264e-17
-outer loop
-vertex 0 -4.440892098500626e-16 4.440892098500626e-16
-vertex -8.881784197001252e-16 0 10
-vertex -8.881784197001252e-16 0 0
-endloop
-endfacet
-facet normal -3.0324330718048064e-16 -1 -2.1442552978784474e-16
-outer loop
-vertex 8.04738 0 8.61929
-vertex 10 -8.881784197001252e-16 10
-vertex 7.07107 0 10
-endloop
-endfacet
-facet normal -3.0324367322714645e-16 -1 -2.144250121193695e-16
-outer loop
-vertex 10 0 5.85786
-vertex 10 -8.881784197001252e-16 10
-vertex 8.04738 0 8.61929
-endloop
-endfacet
-facet normal -1 8.881784197001253e-17 0
-outer loop
-vertex -8.881784197001252e-16 0 0
-=======
 vertex 0 0 0
 vertex 7.07107 0 10
 vertex 0 0 10
@@ -110,43 +45,25 @@ facet normal -1 0 0
 outer loop
 vertex 0 7.07107 7.07107
 vertex 0 0 10
->>>>>>> master
 vertex 0 10 10
 endloop
 endfacet
-<<<<<<< HEAD
-facet normal -1 8.881784197001253e-17 0
-outer loop
-vertex -8.881784197001252e-16 0 0
-vertex -8.881784197001252e-16 0 10
-=======
 facet normal -1 0 0
 outer loop
 vertex 0 10 4.14214
 vertex 0 7.07107 7.07107
->>>>>>> master
 vertex 0 10 10
 endloop
 endfacet
 facet normal -1 0 0
 outer loop
-<<<<<<< HEAD
-vertex 4.14214 10 4.14214
-=======
 vertex 0 0 0
 vertex 0 5 5
->>>>>>> master
 vertex 0 10 0
-vertex 0 10 10
 endloop
 endfacet
 facet normal -1 0 0
 outer loop
-<<<<<<< HEAD
-vertex 7.07107 10 0
-vertex 0 10 0
-vertex 4.14214 10 4.14214
-=======
 vertex 0 10 4.14214
 vertex 0 10 0
 vertex 0 5 5
@@ -164,14 +81,10 @@ outer loop
 vertex 4.14213 10 4.14214
 vertex 0 10 4.14214
 vertex 0 10 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-<<<<<<< HEAD
-vertex 4.14214 10 4.14214
-=======
 vertex 4.14213 10 4.14214
 vertex 0 10 10
 vertex 5.85786 10 4.14214
@@ -188,47 +101,25 @@ facet normal 0 1 0
 outer loop
 vertex 10 10 4.14214
 vertex 5.85786 10 4.14214
->>>>>>> master
 vertex 0 10 10
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-<<<<<<< HEAD
-vertex 8.28427 10 4.14214
-vertex 10 10 10
-vertex 10 10 4.14214
-endloop
-endfacet
-facet normal 0 1 0
-outer loop
-vertex 4.14214 10 4.14214
-vertex 10 10 10
-vertex 8.28427 10 4.14214
-=======
 vertex 10 10 4.14214
 vertex 0 10 10
 vertex 10 10 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
 vertex 7.07107 10 0
 vertex 8.28427 10 1.71573
-<<<<<<< HEAD
-vertex 10 10 4.14214
-=======
 vertex 10 10 0
->>>>>>> master
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-<<<<<<< HEAD
-vertex 7.07107 10 0
-=======
->>>>>>> master
 vertex 10 10 4.14214
 vertex 10 10 0
 vertex 8.28427 10 1.71573
@@ -236,18 +127,6 @@ endloop
 endfacet
 facet normal 0 1 0
 outer loop
-<<<<<<< HEAD
-vertex 10 7.07107 7.07107
-vertex 10 8.28427 5.85787
-vertex 10 10 4.14214
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-vertex 10 7.07107 7.07107
-vertex 10 10 4.14214
-vertex 10 10 10
-=======
 vertex 7.07107 10 0
 vertex 0 10 0
 vertex 0 10 4.14214
@@ -258,12 +137,17 @@ outer loop
 vertex 7.07107 10 0
 vertex 0 10 4.14214
 vertex 4.14213 10 4.14214
->>>>>>> master
 endloop
 endfacet
 facet normal 1 0 0
 outer loop
-<<<<<<< HEAD
+vertex 10 10 4.14214
+vertex 10 10 10
+vertex 10 7.07107 7.07107
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
 vertex 10 7.07107 7.07107
 vertex 10 10 10
 vertex 10 4.14214 10
@@ -271,147 +155,55 @@ endloop
 endfacet
 facet normal 1 0 0
 outer loop
-vertex 10 7.92893 2.07107
-vertex 10 10 0
-vertex 10 8.4699 2.61204
-=======
-vertex 10 10 4.14214
-vertex 10 10 10
-vertex 10 7.07107 7.07107
->>>>>>> master
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-<<<<<<< HEAD
-vertex 10 10 4.14214
-vertex 10 9.14214 3.28427
-vertex 10 8.4699 2.61204
-=======
-vertex 10 7.07107 7.07107
-vertex 10 10 10
-vertex 10 4.14214 10
->>>>>>> master
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-<<<<<<< HEAD
-vertex 10 10 4.14214
-vertex 10 8.4699 2.61204
-=======
 vertex 10 5.85787 0
->>>>>>> master
 vertex 10 10 0
 vertex 10 10 4.14214
 endloop
 endfacet
 facet normal 1 0 0
 outer loop
-<<<<<<< HEAD
-vertex 10 7.07107 1.2132
-vertex 10 5.85787 0
-vertex 10 5.85786 0
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 7.07107 1.2132
-vertex 10 5.85786 0
-vertex 10 10 0
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 7.07107 1.2132
-vertex 10 10 0
-vertex 10 7.92893 2.07107
-=======
 vertex 10 0 5.85787
 vertex 10 1.21321 7.07107
 vertex 10 4.14214 10
->>>>>>> master
 endloop
 endfacet
 facet normal 1 0 0
 outer loop
-<<<<<<< HEAD
-vertex 10 2.07107 7.92893
-vertex 10 4.14214 10
-vertex 10 -8.881784197001252e-16 10
-=======
 vertex 10 0 5.85787
 vertex 10 4.14214 10
 vertex 10 0 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-<<<<<<< HEAD
-vertex 10 1.5301 7.38796
-vertex 10 -8.881784197001252e-16 10
-vertex 10 0 5.85786
-=======
 vertex 7.07107 0 10
 vertex 4.14213 4.14214 10
 vertex 0 10 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-<<<<<<< HEAD
-vertex 10 2.07107 7.92893
-vertex 10 -8.881784197001252e-16 10
-vertex 10 1.5301 7.38796
-=======
 vertex 7.07107 0 10
 vertex 0 10 10
 vertex 0 0 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-<<<<<<< HEAD
-vertex 4.14214 4.14214 10
-vertex 0 10 10
-vertex -8.881784197001252e-16 0 10
-=======
 vertex 0 10 10
 vertex 5.85786 4.14214 10
 vertex 7.07107 4.14214 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-<<<<<<< HEAD
-vertex 5.85786 1.71573 10
-vertex 4.14214 4.14214 10
-vertex -8.881784197001252e-16 0 10
-=======
 vertex 0 10 10
 vertex 7.07107 4.14214 10
 vertex 10 4.14214 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-<<<<<<< HEAD
-vertex 5.85786 1.71573 10
-vertex -8.881784197001252e-16 0 10
-vertex 7.07107 0 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 4.14214 4.14214 10
-vertex 10 10 10
-=======
->>>>>>> master
 vertex 0 10 10
 vertex 10 4.14214 10
 vertex 10 10 10
@@ -419,220 +211,13 @@ endloop
 endfacet
 facet normal 0 0 1
 outer loop
-<<<<<<< HEAD
-vertex 10 4.14214 10
-vertex 10 10 10
-vertex 8.28427 4.14214 10
-=======
 vertex 4.14213 4.14214 10
 vertex 5.85786 4.14214 10
 vertex 0 10 10
->>>>>>> master
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-<<<<<<< HEAD
-vertex 4.14214 4.14214 10
-vertex 8.28427 4.14214 10
-vertex 10 10 10
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
-vertex 10 4.14214 10
-vertex 8.04738 1.38071 10
-vertex 7.07107 0 10
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
-vertex 10 4.14214 10
-vertex 7.07107 0 10
-vertex 10 -8.881784197001252e-16 10
-endloop
-endfacet
-facet normal 0.7071061435172278 -0.5000004508998936 0.5000004508998936
-outer loop
-vertex -8.881784197001252e-16 0 0
-vertex 4.14214 5.85786 0
-vertex 0 7.071067811865476 7.0710678118654755
-endloop
-endfacet
-facet normal 0.7071061435172278 -0.5000004508998936 0.5000004508998936
-outer loop
-vertex -8.881784197001252e-16 0 0
-vertex 0 7.071067811865476 7.0710678118654755
-vertex 0 -4.440892098500626e-16 4.440892098500626e-16
-endloop
-endfacet
-facet normal 0.7071068905926903 -0.4999991755623054 0.5000006697129036
-outer loop
-vertex 7.07107 10 0
-vertex 0 7.071067811865476 7.0710678118654755
-vertex 4.14214 5.85786 0
-endloop
-endfacet
-facet normal 0.7071061435158803 -0.5000022544950069 0.4999986473001798
-outer loop
-vertex 4.14214 10 4.14214
-vertex 0 7.071067811865476 7.0710678118654755
-vertex 7.07107 10 0
-endloop
-endfacet
-facet normal 0.707106272045758 0.5000019818436666 -0.49999873818436397
-outer loop
-vertex 5.85786 1.71573 10
-vertex 7.07107 0 10
-vertex 4.14214 0 5.85786
-endloop
-endfacet
-facet normal 0.707106272045758 0.5000019818436666 -0.49999873818436397
-outer loop
-vertex 5.85786 1.71573 10
-vertex 4.14214 0 5.85786
-vertex 0 -4.440892098500626e-16 4.440892098500626e-16
-endloop
-endfacet
-facet normal 0.7071069920790463 0.4999998508764395 -0.49999985087643956
-outer loop
-vertex 0 7.071067811865476 7.0710678118654755
-vertex 5.85786 1.71573 10
-vertex 0 -4.440892098500626e-16 4.440892098500626e-16
-endloop
-endfacet
-facet normal 0.7071061435075219 0.4999963536824875 -0.5000045480974513
-outer loop
-vertex 4.14214 4.14214 10
-vertex 5.85786 1.71573 10
-vertex 0 7.071067811865476 7.0710678118654755
-endloop
-endfacet
-facet normal 3.094489519847339e-7 -0.7071070906353981 -0.7071064717374939
-outer loop
-vertex 10 7.07107 7.07107
-vertex 4.14214 4.14214 10
-vertex 0 7.071067811865476 7.0710678118654755
-endloop
-endfacet
-facet normal 0 -0.7071067811865477 -0.7071067811865475
-outer loop
-vertex 8.28427 4.14214 10
-vertex 4.14214 4.14214 10
-vertex 10 7.07107 7.07107
-endloop
-endfacet
-facet normal 0 -0.7071067811865477 -0.7071067811865475
-outer loop
-vertex 10 4.14214 10
-vertex 8.28427 4.14214 10
-vertex 10 7.07107 7.07107
-endloop
-endfacet
-facet normal 3.09448951956578e-7 -0.7071064717374939 -0.707107090635398
-outer loop
-vertex 4.14214 10 4.14214
-vertex 10 7.07107 7.07107
-vertex 0 7.071067811865476 7.0710678118654755
-endloop
-endfacet
-facet normal -8.837182610317888e-17 -0.7071067811865476 -0.7071067811865476
-outer loop
-vertex 10 8.28427 5.85787
-vertex 10 7.07107 7.07107
-vertex 4.14214 10 4.14214
-endloop
-endfacet
-facet normal 0 -0.7071067811865474 -0.7071067811865478
-outer loop
-vertex 8.28427 10 4.14214
-vertex 10 10 4.14214
-vertex 10 8.28427 5.85787
-endloop
-endfacet
-facet normal 0 -0.7071067811865474 -0.7071067811865478
-outer loop
-vertex 8.28427 10 4.14214
-vertex 10 8.28427 5.85787
-vertex 4.14214 10 4.14214
-endloop
-endfacet
-facet normal -0.7071049193543176 -0.5000042307213529 0.4999984022831193
-outer loop
-vertex 8.28427 10 1.71573
-vertex 10 9.14214 3.28427
-vertex 10 10 4.14214
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 7.07107 1.2132
-vertex 10 7.92893 2.07107
-vertex 10 8.4699 2.61204
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 7.07107 1.2132
-vertex 10 8.4699 2.61204
-vertex 10 9.14214 3.28427
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 7.07107 1.2132
-vertex 10 9.14214 3.28427
-vertex 8.28427 10 1.71573
-endloop
-endfacet
-facet normal -0.7071069970694649 -0.5000013214943688 0.499998373196642
-outer loop
-vertex 7.07107 10 0
-vertex 10 7.07107 1.2132
-vertex 8.28427 10 1.71573
-endloop
-endfacet
-facet normal -0.7071065653020276 -0.5000001526533614 0.5000001526533613
-outer loop
-vertex 10 5.85787 0
-vertex 10 7.07107 1.2132
-vertex 7.07107 10 0
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 2.07107 7.92893
-vertex 10 1.5301 7.38796
-vertex 10 0 5.85786
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 2.07107 7.92893
-vertex 10 0 5.85786
-vertex 8.04738 1.38071 10
-endloop
-endfacet
-facet normal -1 0 0
-outer loop
-vertex 10 2.07107 7.92893
-vertex 8.04738 1.38071 10
-vertex 10 4.14214 10
-endloop
-endfacet
-facet normal -0.7071065653020274 0.5000001526533615 -0.5000001526533614
-outer loop
-vertex 8.04738 0 8.61929
-vertex 7.07107 0 10
-vertex 8.04738 1.38071 10
-endloop
-endfacet
-facet normal -0.7071065653020274 0.5000001526533615 -0.5000001526533614
-outer loop
-vertex 8.04738 0 8.61929
-vertex 8.04738 1.38071 10
-vertex 10 0 5.85786
-=======
 vertex 8.28427 1.71573 10
 vertex 10 0 10
 vertex 10 4.14214 10
@@ -860,7 +445,6 @@ outer loop
 vertex 4.14214 5.85786 0
 vertex 0 7.07107 7.07107
 vertex 0 0 0
->>>>>>> master
 endloop
 endfacet
 endsolid JSCAD
