@@ -15,8 +15,10 @@ import { cos } from './cos';
 import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
+import { extrude } from './extrude';
 import { hsl2rgb } from './hsl2rgb';
 import { intersection } from './intersection';
+import { loadFont, text } from './text';
 import { max } from './max';
 import { polyhedron } from './polyhedron';
 import { rotate } from './rotate';
@@ -43,8 +45,10 @@ export {
   cube,
   cylinder,
   difference,
+  extrude,
   hsl2rgb,
   intersection,
+  loadFont,
   max,
   polyhedron,
   rotate,
@@ -56,6 +60,7 @@ export {
   sphere,
   sqrt,
   square,
+  text,
   translate,
   union,
   writePdf,

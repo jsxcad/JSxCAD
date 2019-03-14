@@ -10,6 +10,14 @@ export class CAG {
     this.geometry = geometry || fromPaths({}, []);
   }
 
+  difference (...shapes) {
+    return CAG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
+  }
+
+  intersection (...shapes) {
+    return CAG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
+  }
+
   translate ([x, y]) {
     return CAG.fromGeometry(this.geometry.transform(fromTranslation([x, y, 0])));
   }
@@ -64,7 +72,8 @@ export class CAG {
 }
 
 CAG.fromGeometry = (geometry) => new CAG(geometry);
+CAG.fromPaths = (paths) => CAG.fromGeometry(fromPaths({}, paths));
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
 CAG.fromPoints = (points) => CAG.fromGeometry(fromPaths({}, [points]));
-CAG.fromPolygons = (polygons) => CAG.fromGeometry(fromPaths({}, polygons));
+CAG.fromPolygons = (polygons) => CAG.fromPaths;

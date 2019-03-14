@@ -1,9 +1,7 @@
-const fromPolygons = require('./fromPolygons');
-const mat4 = require('@jsxcad/math-mat4');
-const test = require('ava');
-const toPolygons = require('./toPolygons');
-const transform = require('./transform');
-const union = require('./union');
+import { fromTranslation } from '@jsxcad/math-mat4';
+import { test } from 'ava';
+import { transform } from '@jsxcad/algorithm-polygons';
+import { union } from './union';
 
 const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],
@@ -13,8 +11,7 @@ const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]]];
 
 test('Self union', t => {
-  const unionPolygons = toPolygons({}, union(fromPolygons({}, cubePolygons),
-                                             fromPolygons({}, cubePolygons)));
+  const unionPolygons = union(cubePolygons, cubePolygons);
   t.deepEqual(unionPolygons,
               [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],
@@ -25,12 +22,7 @@ test('Self union', t => {
 });
 
 test('Overlapping union', t => {
-  const unionPolygons =
-      toPolygons(
-        {},
-        union(transform(mat4.fromTranslation([0.5, 0.5, 0.5]),
-                        fromPolygons({}, cubePolygons)),
-              fromPolygons({}, cubePolygons)));
+  const unionPolygons = union(transform(fromTranslation([0.5, 0.5, 0.5]), cubePolygons), cubePolygons);
   t.deepEqual(unionPolygons,
               [[[-0.5, 1, 1.5], [-0.5, 1.5, 1.5], [-0.5, 1.5, -0.5], [-0.5, 1, -0.5]],
                [[-0.5, -0.5, 1], [-0.5, -0.5, 1.5], [-0.5, 1, 1.5], [-0.5, 1, 1]],

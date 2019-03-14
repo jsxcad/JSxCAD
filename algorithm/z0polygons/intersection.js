@@ -1,4 +1,4 @@
-import { clippingToPolygons, z0SurfacesToClipping } from './clippingToPolygons';
+import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
 import { intersection as polygonClippingIntersection } from 'polygon-clipping';
 
 /**
@@ -23,5 +23,5 @@ export const intersection = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }
-  return clippingToPolygons(polygonClippingIntersection(...z0SurfacesToClipping(z0Surfaces)));
+  return clippingToPolygons(polygonClippingIntersection(...z0Surfaces.map(z0SurfaceToClipping)));
 };

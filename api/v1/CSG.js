@@ -1,7 +1,12 @@
+// FIX: Get a better way to swap these.
 import { fromPaths } from '@jsxcad/geometry-solid3bsp';
+// import { fromPaths } from '@jsxcad/geometry-solid3evan';
+
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
+import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toGeometry } from './toGeometry';
-import { toPoints } from '@jsxcad/algorithm-paths';
+import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
+import { toTriangles } from '@jsxcad/algorithm-triangles';
 
 export class CSG {
   constructor (geometry) {
@@ -66,7 +71,9 @@ export class CSG {
   }
 
   toPaths (options) {
-    return this.geometry.toPaths(options);
+    const paths = this.geometry.toPaths(options);
+    // if (!isWatertightPolygons(paths)) throw Error('not watertight');
+    return paths;
   }
 
   toPoints (options) {
@@ -87,5 +94,9 @@ export class CSG {
 }
 
 CSG.fromGeometry = (geometry) => new CSG(geometry);
-CSG.fromPaths = (paths) => CSG.fromGeometry(fromPaths({}, paths));
+CSG.fromPaths = (paths) => {
+  const triangles = canonicalize(toTriangles({}, paths));
+  if (!isWatertightPolygons(triangles)) throw Error('not watertight');
+  return CSG.fromGeometry(fromPaths({}, triangles));
+};
 CSG.fromPolygons = CSG.fromPaths;
