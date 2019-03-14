@@ -11,6 +11,7 @@ const SPANNING = 3; // Both front and back.
 const W = 3;
 
 export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
+  if (polygon.length !== 3) throw Error('impossible');
   // Classify each point as well as the entire polygon into one of the above
   // four classes.
   let polygonType = 0;
@@ -61,7 +62,7 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
         // Compute the point that touches the splitting plane.
           let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
           let spanPoint = canonicalize(lerp(t, startPoint, endPoint));
-          let spanPoint = lerp(t, startPoint, endPoint);
+          // let spanPoint = lerp(t, startPoint, endPoint);
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
