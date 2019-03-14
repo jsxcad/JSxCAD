@@ -1,6 +1,4 @@
-const { CSG, Polygon, Vertex, Vector3D } = require('./csg/csg');
-const toPolygons = require('./toPolygons');
-const fromPolygons = require('./fromPolygons');
+import { CSG, Polygon, Vertex, Vector3D } from './csg/csg';
 
 const toOldPoly = (polygon) => new Polygon(polygon.map(point => new Vertex(new Vector3D(point[0], point[1], point[2]),
                                                                            new Vector3D(0, 0, 0))));
@@ -23,20 +21,11 @@ const fromOldPoly = (polygon) => polygon.vertices.map(vertex => [vertex.pos.x, v
    *      |       |
    *      +-------+
    */
-const difference = (...geometries) => {
-  switch (geometries.length) {
-    case 0: return fromPolygons([]);
-    case 1: return geometries[0];
-    default: {
-      const csgs = geometries.map(geometry => CSG.fromPolygons(toPolygons({}, geometry).map(toOldPoly)));
-      let differences = csgs[0];
-      for (let i = 1; i < csgs.length; i++) {
-        differences = differences.subtract(csgs[i]);
-        geometries[0] = fromPolygons({}, differences.toPolygons().map(fromOldPoly));
-      }
-      return fromPolygons({}, differences.toPolygons().map(fromOldPoly));
-    }
+export const difference = (...surfaces) => {
+  const csgs = surfaces.map(surface => CSG.fromPolygons(surface.map(toOldPoly)));
+  let differences = csgs[0];
+  for (let i = 1; i < csgs.length; i++) {
+    differences = differences.subtract(csgs[i]);
   }
+  return differences.toPolygons().map(fromOldPoly);
 };
-
-module.exports = difference;

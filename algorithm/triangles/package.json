@@ -53,6 +53,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-path": "^0.0.50",
+    "@jsxcad/algorithm-polygons": "^0.0.50",
     "esm": "^3.2.10"
   },
   "devDependencies": {

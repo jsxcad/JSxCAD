@@ -1,19 +1,18 @@
 import { buildRegularPrism } from './buildRegularPrism';
-import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius';
-import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
-import { fromScaling, fromZRotation, multiply } from '@jsxcad/math-mat4';
+import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { test } from 'ava';
-import { unitCube, unitRegularTriangularPrism } from '@jsxcad/data-shape';
-
-test('A cube', t => {
-  const edgeLength = regularPolygonEdgeLengthToRadius(1, 4);
-  const polygons = canonicalize(transform(multiply(fromZRotation(45 * 0.017453292519943295),
-                                                   fromScaling([edgeLength, edgeLength, 1])),
-                                          buildRegularPrism({ edges: 4 })));
-  t.deepEqual(polygons, unitCube.unitCubePolygons);
-});
 
 test('A simple triangular prism', t => {
   const polygons = canonicalize(buildRegularPrism({ edges: 3 }));
-  t.deepEqual(polygons, unitRegularTriangularPrism.unitRegularTriangularPrismPolygons);
+  t.deepEqual(polygons,
+              [[[-0.5, -0.86603, -0.5], [-0.5, -0.86603, 0.5], [-0.5, 0.86603, -0.5]],
+               [[-0.5, 0.86603, -0.5], [-0.5, -0.86603, 0.5], [-0.5, 0.86603, 0.5]],
+               [[-0.5, 0.86603, -0.5], [-0.5, 0.86603, 0.5], [1, 0, -0.5]],
+               [[1, 0, -0.5], [-0.5, 0.86603, 0.5], [1, 0, 0.5]],
+               [[1, 0, -0.5], [1, 0, 0.5], [-0.5, -0.86603, -0.5]],
+               [[-0.5, -0.86603, -0.5], [1, 0, 0.5], [-0.5, -0.86603, 0.5]],
+               [[1, 0, 0.5], [-0.5, 0.86603, 0.5], [-0.5, -0.86603, 0.5]],
+               [[-0.5, -0.86603, -0.5], [-0.5, 0.86603, -0.5], [1, 0, -0.5]]]);
+  t.true(isWatertightPolygons(polygons));
 });

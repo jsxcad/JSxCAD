@@ -1,4 +1,5 @@
-import { clippingToPolygons } from './clippingToPolygons';
+import { canonicalize } from '@jsxcad/algorithm-paths';
+import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
 import { union as polygonClippingUnion } from 'polygon-clipping';
 
 /**
@@ -8,10 +9,11 @@ import { union as polygonClippingUnion } from 'polygon-clipping';
  * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
  * @returns {Z0Surface} the resulting z0 surface.
  */
-export const union = (...z0Surfaces) => {
-  if (z0Surfaces.length === 0) {
+export const union = (...surfaces) => {
+  if (surfaces.length === 0) {
     return [];
   }
-  const clipping = z0Surfaces.map(z0Surface => z0Surface.map(z0Polygon => z0Polygon.map(([x = 0, y = 0]) => [x, y])));
-  return clippingToPolygons(polygonClippingUnion(...clipping));
+  const clipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
+  const result = polygonClippingUnion(...clipping);
+  return clippingToPolygons(result);
 };

@@ -1,5 +1,7 @@
 import { canonicalize, flip, transform } from '@jsxcad/algorithm-polygons';
-import { difference, intersection, union } from '@jsxcad/algorithm-bsp';
+import { difference } from './difference';
+import { intersection } from './intersection';
+import { union } from './union';
 import { identity, multiply } from '@jsxcad/math-mat4';
 // import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toPolygons } from '@jsxcad/algorithm-paths';
