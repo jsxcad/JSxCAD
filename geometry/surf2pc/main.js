@@ -25,6 +25,7 @@ export class Surf2Pc {
     if (this.paths === undefined) {
       this.paths = transform(this.transforms, this.basePaths);
     }
+console.log(`QQ/surf2pc: ${JSON.stringify(this)}`);
     return this.paths;
   }
 

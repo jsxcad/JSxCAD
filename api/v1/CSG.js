@@ -12,19 +12,11 @@ export class CSG {
     return CSG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
   }
 
-  dump (tag) {
-    console.log(`CSG/dump/${tag}: ${JSON.stringify(this.geometry)}`);
-    return this;
-  }
-
-  intersect (...shapes) {
-    return this.intersection(...shapes);
-  }
-
   intersection (...shapes) {
     return CSG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
   }
 
+/*
   rotate (angles) {
     return this.rotateX(angles[0]).rotateY(angles[1]).rotateZ(angles[2]);
   }
@@ -60,6 +52,11 @@ export class CSG {
   subtract (...shapes) {
     return this.difference(...shapes);
   }
+*/
+
+  transform (matrix) {
+    return CSG.fromGeometry(this.geometry.transform(matrix));
+  }
 
   toGeometry () {
     return this.geometry;
@@ -77,9 +74,11 @@ export class CSG {
     return this.toPaths(options);
   }
 
+/*
   translate ([x, y, z]) {
     return CSG.fromGeometry(this.geometry.transform(fromTranslation([x, y, z])));
   }
+*/
 
   union (...shapes) {
     return CSG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));

@@ -10,6 +10,11 @@ export class CAG {
     this.geometry = geometry || fromPaths({}, []);
   }
 
+  transform (matrix) {
+    return CAG.fromGeometry(this.geometry.transform(matrix));
+  }
+
+/*
   translate ([x, y]) {
     return CAG.fromGeometry(this.geometry.transform(fromTranslation([x, y, 0])));
   }
@@ -40,6 +45,7 @@ export class CAG {
       return CAG.fromGeometry(this.geometry.transform(fromScaling([factor, factor, factor])));
     }
   }
+*/
 
   toPaths (options = {}) {
     return this.toPolygons(options);
@@ -51,10 +57,6 @@ export class CAG {
 
   toPolygons (options) {
     return this.geometry.toPaths(options);
-  }
-
-  union (...shapes) {
-    return CAG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
   }
 
   writePdf (options = {}) {
