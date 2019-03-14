@@ -61,6 +61,7 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
         // Compute the point that touches the splitting plane.
           let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
           let spanPoint = canonicalize(lerp(t, startPoint, endPoint));
+          let spanPoint = lerp(t, startPoint, endPoint);
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }

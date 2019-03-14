@@ -14,7 +14,7 @@ const polygonsToStla = (options, polygons) => {
   if (!isWatertightPolygons(polygons)) {
     console.log(`QQ: polygon is not watertight`);
   }
-  return `solid JSCAD\n${convertToFacets(options, makeWatertight(polygons))}\nendsolid JSCAD\n`;
+  return `solid JSCAD\n${convertToFacets(options, polygons)}\nendsolid JSCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>

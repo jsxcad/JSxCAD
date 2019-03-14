@@ -35,5 +35,5 @@ const zobrist = (pattern) => {
 
 writeStl({ path: '/tmp/zobrist.stl' },
          zobrist(' l ' +
-                'bl ' +
-                'u  ').scale([30, 30, 30]));
+                 'bl ' +
+                 'u  ').scale([30, 30, 30]));
