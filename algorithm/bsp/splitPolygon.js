@@ -1,5 +1,5 @@
 import { toPlane } from '@jsxcad/math-poly3';
-import { dot, lerp, subtract } from '@jsxcad/math-vec3';
+import { canonicalize, dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 const EPSILON = 1e-5;
 
@@ -60,18 +60,28 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
         if ((startType | endType) === SPANNING) {
         // Compute the point that touches the splitting plane.
           let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
-          let spanPoint = lerp(t, startPoint, endPoint);
+          let spanPoint = canonicalize(lerp(t, startPoint, endPoint));
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
       }
-      if (frontPoints.length >= 3) {
+      if (frontPoints.length == 3) {
       // Add the polygon that sticks out the front of the plane.
         front.push(frontPoints);
+      } else if (frontPoints.length == 4) {
+        front.push(frontPoints[0], frontPoints[1], frontPoints[3]);
+        front.push(frontPoints[3], frontPoints[1], frontPoints[2]);
+      } else {
+        throw Error('impossible');
       }
-      if (backPoints.length >= 3) {
+      if (backPoints.length == 3) {
       // Add the polygon that sticks out the back of the plane.
         back.push(backPoints);
+      } else if (backPoints.length == 4) {
+        back.push(backPoints[0], backPoints[1], backPoints[3]);
+        back.push(backPoints[3], backPoints[1], backPoints[2]);
+      } else {
+        throw Error('impossible');
       }
       break;
     }

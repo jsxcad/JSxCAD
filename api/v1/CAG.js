@@ -1,5 +1,6 @@
 // FIX: Add interface to change default surface geometry.
 
+import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { fromPaths } from '@jsxcad/geometry-surf2pc';
 import { toGeometry } from './toGeometry';
@@ -11,6 +12,7 @@ export class CAG {
   }
 
   transform (matrix) {
+console.log(`QQ/CAG/matrix: ${JSON.stringify(matrix)}`)
     return CAG.fromGeometry(this.geometry.transform(matrix));
   }
 
@@ -68,5 +70,5 @@ export class CAG {
 CAG.fromGeometry = (geometry) => new CAG(geometry);
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
-CAG.fromPoints = (points) => CAG.fromGeometry(fromPaths({}, [points]));
-CAG.fromPolygons = (polygons) => CAG.fromGeometry(fromPaths({}, polygons));
+CAG.fromPoints = (points) => CAG.fromGeometry(fromPaths({}, canonicalize([points])));
+CAG.fromPolygons = (polygons) => CAG.fromGeometry(fromPaths({}, canonicalize(polygons)));

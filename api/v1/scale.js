@@ -4,9 +4,10 @@ import { CSG } from './CSG';
 import { fromScaling } from '@jsxcad/math-mat4';
 
 export const scale = (factor, shape) => {
+console.log(`QQ/scale/factor: ${JSON.stringify(factor)}`);
   if (factor.length) {
-    // scale([1, 2, 3])
-    return shape.transform(fromScaling(factor));
+    const [x = 1, y = 1, z = 1] = factor;
+    return shape.transform(fromScaling([x, y, z]));
   } else {
     // scale(4)
     return shape.transform(fromScaling([factor, factor, factor]));
