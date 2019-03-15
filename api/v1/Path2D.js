@@ -4,6 +4,7 @@ import { canonicalize, butLast, last } from '@jsxcad/algorithm-paths';
 import { fromPaths } from '@jsxcad/geometry-paths';
 import { fromXRotation, fromYRotation, fromZRotation, fromTranslation } from '@jsxcad/math-mat4';
 
+// FIX: Incorrectly named.
 export class Path2D {
   constructor (points = [], closed = false, geometry) {
     if (geometry !== undefined) {
@@ -106,16 +107,12 @@ export class Path2D {
     return Error('Not yet implemented');
   }
 
-  rotateX (angle) {
-    return this.transform(fromXRotation(angle * 0.017453292519943295));
+  toSurface() {
+    return Error('Not yet implemented');
   }
 
-  rotateY (angle) {
-    return this.transform(fromYRotation(angle * 0.017453292519943295));
-  }
-
-  rotateZ (angle) {
-    return this.transform(fromZRotation(angle * 0.017453292519943295));
+  toGeometry() {
+    return this.geometry;
   }
 
   toPath () {
@@ -124,10 +121,6 @@ export class Path2D {
 
   toPaths () {
     return this.geometry.toPaths({});
-  }
-
-  translate ([x = 0, y = 0, z = 0]) {
-    return this.transform(fromTranslation([x, y, z]));
   }
 
   transform (matrix4x4) {

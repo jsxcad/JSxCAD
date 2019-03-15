@@ -11,6 +11,7 @@ export class Solid3Bsp {
   constructor ({ paths = [], transforms = identity() }) {
     this.basePaths = toPolygons(paths);
     this.transforms = transforms;
+    this.isSolid = true;
   }
 
   difference (...geometries) {

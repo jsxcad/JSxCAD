@@ -12,7 +12,6 @@ export class CAG {
   }
 
   transform (matrix) {
-console.log(`QQ/CAG/matrix: ${JSON.stringify(matrix)}`)
     return CAG.fromGeometry(this.geometry.transform(matrix));
   }
 
@@ -35,8 +34,8 @@ console.log(`QQ/CAG/matrix: ${JSON.stringify(matrix)}`)
 }
 
 CAG.fromGeometry = (geometry) => new CAG(geometry);
-CAG.fromPaths = (paths) => CAG.fromGeometry(fromPaths({}, paths));
+CAG.fromPaths = (paths) => CAG.fromGeometry(fromPaths({}, canonicalize(paths)));
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
-CAG.fromPoints = (points) => CAG.fromGeometry(fromPaths({}, [points]));
-CAG.fromPolygons = (polygons) => CAG.fromPaths;
+CAG.fromPoints = (points) => CAG.fromPaths([points]);
+CAG.fromPolygons = (polygons) => CAG.fromPaths(polygons);

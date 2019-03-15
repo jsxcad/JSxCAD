@@ -5,6 +5,7 @@ export class Paths {
   constructor ({ paths = [], transforms = identity() }) {
     this.basePaths = paths;
     this.transforms = transforms;
+    this.isPath = true;
     if (!(paths instanceof Array)) throw Error(`Die: ${JSON.stringify(paths)}`);
   }
 

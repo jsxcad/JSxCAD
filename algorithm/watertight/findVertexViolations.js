@@ -57,10 +57,6 @@ const findVertexViolations = (start, ...ends) => {
     }
   });
 
-  if (violations.length > 0) {
-    console.log(`QQ/watertight/violations: ${JSON.stringify(violations)}`);
-  }
-
   // If no violations, it is Watertight.
   return violations;
 };

@@ -2,6 +2,7 @@ export class Assembly {
   constructor ({ geometries = [], properties }) {
     this.geometries = geometries;
     this.properties = properties;
+    this.isAssembly = true;
   }
 
   label() {
@@ -33,6 +34,14 @@ export class Assembly {
                           this.geometries.map(geometry => geometry.intersection(...geometries)));
   }
 
+  merge (...geometries) {
+    return fromGeometries({ properties: this.properties }, [...this.toGeometries(), ...geometries]);
+  }
+
+  toGeometries(options = {}) {
+    return this.geometries;
+  }
+
   toPaths (options = {}) {
     // PROVE; Is concatenation sufficient, or do we need a pathwise union?
     return [].concat(...this.geometries.map(geometry => geometry.toPaths(options)));
@@ -45,10 +54,16 @@ export class Assembly {
   }
 
   union (...geometries) {
-    // FIX: This is wrong -- union can't be done eagerly like this -- we'd get N copies.
-    return fromGeometries({ properties: this.properties },
-                          this.geometries.map(geometry => geometry.union(...geometries)));
+    let unioned = this;
+    while (geometries.length > 0) {
+      const added = geometries.shift();
+      unioned = unioned.difference(added);
+      unioned = unioned.merge(added);
+    }
+    return unioned;
   }
 }
 
-export const fromGeometries = ({ properties }, geometries) => new Assembly({ geometries: geometries, properties: properties });
+export const fromGeometries = ({ properties }, geometries) => {
+  return new Assembly({ geometries: geometries, properties: properties });
+}

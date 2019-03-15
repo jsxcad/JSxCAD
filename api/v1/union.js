@@ -3,16 +3,9 @@ import { CAG } from './CAG';
 import { CSG } from './CSG';
 import { flatten } from './flatten';
 
-/*
-  union (...shapes) {
-    return CAG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
-  }
-*/
+export const union = (...params) => unionLazily(...flatten(params));
 
-export const union = (...params) => {
-  const [shape, ...shapes] = flatten(params);
-  return unionLazily(...shapes);
-};
+const method = function (...shapes) { return union(this, ...shapes); }
 
 Assembly.prototype.union = union;
 CAG.prototype.union = union;

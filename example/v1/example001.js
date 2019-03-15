@@ -23,8 +23,8 @@ function example001 () {
   return difference(
     sphere({ r: radiusFromDiameter(size) }),
     rotcy([0, 0, 0], radius, height),
-    rotcy([90, 0, 0], radius, height) //,
-    // rotcy([0, 90, 0], radius, height)
+    rotcy([90, 0, 0], radius, height),
+    rotcy([0, 90, 0], radius, height)
   );
 }
 

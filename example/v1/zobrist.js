@@ -1,3 +1,5 @@
+Error.stackTraceLimit = Infinity;
+
 import { cube, union, writeStl } from '@jsxcad/api-v1';
 
 /**

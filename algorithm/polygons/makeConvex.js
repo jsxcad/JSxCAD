@@ -1,12 +1,11 @@
-import { blessAsConvex } from './blessAsConvex';
 import Tess2 from 'tess2';
+import { blessAsConvex } from './blessAsConvex';
 import { isConvex } from '@jsxcad/math-poly3';
 
 const toContour = (polygon) => {
   const points = [];
-  for (const [x = 0, y = 0] of polygon) {
-    points.push(x);
-    points.push(y);
+  for (const [x = 0, y = 0, z = 0] of polygon) {
+    points.push(x, y, z);
   }
   return points;
 };
@@ -18,7 +17,7 @@ const fromTessellation = (tessellation) => {
 
   const toPoint = (offset) => {
     const vertex = tessPolygons[offset];
-    return [vertices[vertex * 2 + 0], vertices[vertex * 2 + 1]];
+    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];
   };
 
   for (let nth = 0; nth < tessPolygons.length; nth += 3) {
@@ -46,7 +45,7 @@ export const makeConvex = (options = {}, polygons) => {
                       windingRule: Tess2.WINDING_ODD,
                       elementType: Tess2.POLYGONS,
                       polySize: 3,
-                      vertexSize: 2
+                      vertexSize: 3
     }));
   return blessAsConvex(convex);
 };

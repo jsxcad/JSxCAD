@@ -4,11 +4,9 @@ import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/a
 
 const buildSquare = ({ scale = [1, 1, 1] }) => {
   const polygon = buildRegularPolygon({ edges: 4 });
-console.log(`QQ/square/polygon: ${JSON.stringify(polygon)}`);
   const cag = CAG.fromPoints(buildRegularPolygon({ edges: 4 }))
       .rotateZ(45)
       .scale(scale);
-console.log(`QQ/square/cag: ${JSON.stringify(cag)}`);
   return cag;
 }
 
