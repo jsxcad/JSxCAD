@@ -6,7 +6,7 @@ import { unitRegularTriangularPrism } from '@jsxcad/data-shape';
 
 test('Simple triangulation', t => {
   const convex = makeConvex({}, [[[0, -2], [2, -2], [2, 0], [1, -1], [0, -1]]]);
-  const expected = [[[1,-1,0],[2,-2,0],[2,0,0]],[[0,-1,0],[2,-2,0],[1,-1,0]],[[2,-2,0],[0,-1,0],[0,-2,0]]];
+  const expected = [[[1, -1, 0], [2, -2, 0], [2, 0, 0]], [[0, -1, 0], [2, -2, 0], [1, -1, 0]], [[2, -2, 0], [0, -1, 0], [0, -2, 0]]];
   t.deepEqual(convex, blessAsConvex(expected));
 });
 

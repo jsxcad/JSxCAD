@@ -8,7 +8,7 @@ const isDegenerate = (polygon) => {
     }
   }
   return false;
-}
+};
 
 export const canonicalize = (polygons) => {
   const canonicalized = [];
@@ -19,4 +19,4 @@ export const canonicalize = (polygons) => {
     }
   }
   return canonicalized;
-}
+};
