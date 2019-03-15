@@ -5,15 +5,15 @@ export class Assembly {
     this.isAssembly = true;
   }
 
-  label() {
+  label () {
     return this.properties['label'];
   }
 
-  withLabel(label) {
+  withLabel (label) {
     return this.withProperty('label', label);
   }
 
-  withProperty(key, value) {
+  withProperty (key, value) {
     const properties = Object.assign({}, this.properties);
     properties[key] = value;
     return fromGeometries({ geometries: this.geometries, properties: properties });
@@ -38,7 +38,7 @@ export class Assembly {
     return fromGeometries({ properties: this.properties }, [...this.toGeometries(), ...geometries]);
   }
 
-  toGeometries(options = {}) {
+  toGeometries (options = {}) {
     return this.geometries;
   }
 
@@ -66,4 +66,4 @@ export class Assembly {
 
 export const fromGeometries = ({ properties }, geometries) => {
   return new Assembly({ geometries: geometries, properties: properties });
-}
+};
