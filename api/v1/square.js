@@ -2,10 +2,12 @@ import { CAG } from './CAG';
 import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
-const buildSquare = ({ scale = [1, 1, 1] }) =>
-  CAG.fromPoints(buildRegularPolygon({ edges: 4 }))
+const buildSquare = ({ scale = [1, 1, 1] }) => {
+  const cag = CAG.fromPoints(buildRegularPolygon({ edges: 4 }))
       .rotateZ(45)
       .scale(scale);
+  return cag;
+};
 
 const decode = (params) => {
   const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);

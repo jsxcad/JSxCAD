@@ -1,4 +1,4 @@
-solid JSCAD
+solid JSxCAD
 facet normal 0.356822676799188 0 -0.9341721347384871
 outer loop
 vertex 7.7013 6 -1.05146
@@ -307,4 +307,4 @@ vertex 6 -1.05146 7.7013
 vertex 0 -1.05146 7.7013
 endloop
 endfacet
-endsolid JSCAD
+endsolid JSxCAD

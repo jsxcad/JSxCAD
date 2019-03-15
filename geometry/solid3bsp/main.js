@@ -9,6 +9,7 @@ export class Solid3Bsp {
   constructor ({ paths = [], transforms = identity() }) {
     this.basePaths = toPolygons(paths);
     this.transforms = transforms;
+    this.isSolid = true;
   }
 
   difference (...geometries) {
@@ -41,7 +42,6 @@ export class Solid3Bsp {
 }
 
 export const fromPaths = (options = {}, paths) => {
-  paths = canonicalize(toTriangles({}, paths));
-  // if (!isWatertightPolygons(paths)) throw Error(`Not watertight: ${JSON.stringify(paths)}`);
+  paths = toTriangles({}, paths);
   return new Solid3Bsp({ paths: paths });
 };

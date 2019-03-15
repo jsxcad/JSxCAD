@@ -1,5 +1,7 @@
 import { cylinder, difference, rotate, sphere, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
+Error.stackTraceLimit = Infinity;
+
 // title      : Example 001
 // author     : OpenSCAD.org, adapted by Rene K. Mueller
 // license    : MIT License

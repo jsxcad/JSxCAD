@@ -1,9 +1,9 @@
 import { buildCircleArc } from '@jsxcad/algorithm-curve';
 import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
-import { butLast, last } from '@jsxcad/algorithm-paths';
+import { canonicalize, butLast, last } from '@jsxcad/algorithm-paths';
 import { fromPaths } from '@jsxcad/geometry-paths';
-import { fromXRotation, fromYRotation, fromZRotation, fromTranslation } from '@jsxcad/math-mat4';
 
+// FIX: Incorrectly named.
 export class Path2D {
   constructor (points = [], closed = false, geometry) {
     if (geometry !== undefined) {
@@ -106,16 +106,12 @@ export class Path2D {
     return Error('Not yet implemented');
   }
 
-  rotateX (angle) {
-    return this.transform(fromXRotation(angle * 0.017453292519943295));
+  toSurface () {
+    return Error('Not yet implemented');
   }
 
-  rotateY (angle) {
-    return this.transform(fromYRotation(angle * 0.017453292519943295));
-  }
-
-  rotateZ (angle) {
-    return this.transform(fromZRotation(angle * 0.017453292519943295));
+  toGeometry () {
+    return this.geometry;
   }
 
   toPath () {
@@ -126,10 +122,6 @@ export class Path2D {
     return this.geometry.toPaths({});
   }
 
-  translate ([x = 0, y = 0, z = 0]) {
-    return this.transform(fromTranslation([x, y, z]));
-  }
-
   transform (matrix4x4) {
     return Path2D.fromGeometry(this.geometry.transform(matrix4x4));
   }
@@ -137,4 +129,4 @@ export class Path2D {
 
 Path2D.arc = (...params) => new Path2D(buildCircleArc(...params));
 Path2D.fromGeometry = (geometry) => new Path2D(undefined, undefined, geometry);
-Path2D.fromPaths = (paths) => new Path2D(undefined, undefined, fromPaths({}, paths));
+Path2D.fromPaths = (paths) => new Path2D(undefined, undefined, fromPaths({}, canonicalize(paths)));

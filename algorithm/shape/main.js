@@ -1,6 +1,7 @@
 import { buildConvexHull } from './buildConvexHull';
 import { buildCubicBezierCurve } from './buildCubicBezierCurve';
 import { buildGeodesicSphere } from './buildGeodesicSphere';
+import { buildRingSphere } from './buildRingSphere';
 import { buildRegularIcosahedron } from './buildRegularIcosahedron';
 import { buildRegularPolygon } from './buildRegularPolygon';
 import { buildRegularPrism } from './buildRegularPrism';
@@ -20,6 +21,7 @@ export {
   buildRegularPrism,
   buildRegularTetrahedron,
   buildRoundedConvexHull,
+  buildRingSphere,
   extrudeLinear,
   regularPolygonEdgeLengthToRadius,
   subdivideTriangle,

@@ -7,6 +7,8 @@ export class Surf2Pc {
   constructor ({ paths = [], transforms = identity() }) {
     this.basePaths = toZ0Polygons(paths);
     this.transforms = transforms;
+    this.isSurface = true;
+    this.isSurf2Pc = true;
   }
 
   difference (...geometries) {
