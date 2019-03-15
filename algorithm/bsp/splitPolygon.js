@@ -1,7 +1,5 @@
 import { toPlane } from '@jsxcad/math-poly3';
-import { canonicalize, dot, equals, lerp, subtract } from '@jsxcad/math-vec3';
-import { isDegenerate, isTriangle } from '@jsxcad/algorithm-triangles';
-import { measureArea, } from '@jsxcad/math-poly3';
+import { dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 const EPSILON = 1e-5;
 
@@ -69,15 +67,11 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
       }
       if (frontPoints.length >= 3) {
       // Add the polygon that sticks out the front of the plane.
-        if (!isDegenerate(frontPoints)) {
-          front.push(frontPoints);
-        }
+        front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
       // Add the polygon that sticks out the back of the plane.
-        if (!isDegenerate(backPoints)) {
-          back.push(backPoints);
-        }
+        back.push(backPoints);
       }
       break;
     }
