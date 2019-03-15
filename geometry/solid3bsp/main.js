@@ -42,7 +42,9 @@ export class Solid3Bsp {
 }
 
 export const fromPaths = (options = {}, paths) => {
-  paths = canonicalize(paths);
+  paths = toTriangles({}, paths);
+  // paths = canonicalize(paths);
+  // console.log(`QQ/solid3bsp/fromPaths: ${JSON.stringify(paths)}`)
   // paths = canonicalize(toTriangles({}, canonicalize(paths)));
   // if (!isWatertightPolygons(paths)) throw Error(`Not watertight: ${JSON.stringify(paths)}`);
   return new Solid3Bsp({ paths: paths });

@@ -39,6 +39,7 @@ export const makeConvex = (options = {}, polygons) => {
   if (polygons.every(isConvex)) {
     return blessAsConvex(polygons);
   }
+console.log(`QQ/makeConvex/polygons: ${JSON.stringify(polygons)}`)
   const contours = polygons.map(toContour);
   const convex = fromTessellation(
     Tess2.tesselate({ contours: contours,

@@ -7,7 +7,7 @@ import { identity, multiply } from '@jsxcad/math-mat4';
 import { toPolygons } from '@jsxcad/algorithm-paths';
 import { toTriangles } from '@jsxcad/algorithm-triangles';
 
-export class Solid3Bsp {
+export class Solid3Evan {
   constructor ({ paths = [], transforms = identity() }) {
     this.basePaths = toPolygons(paths);
     this.transforms = transforms;
@@ -35,7 +35,7 @@ export class Solid3Bsp {
   }
 
   transform (matrix) {
-    return new Solid3Bsp({ paths: this.basePaths, transforms: multiply(matrix, this.transforms) });
+    return new Solid3Evan({ paths: this.basePaths, transforms: multiply(matrix, this.transforms) });
   }
 
   union (...geometries) {
@@ -44,7 +44,7 @@ export class Solid3Bsp {
 }
 
 export const fromPaths = (options = {}, paths) => {
-  paths = canonicalize(toTriangles({}, paths));
+  // paths = canonicalize(toTriangles({}, paths));
   // if (!isWatertightPolygons(paths)) throw Error(`Not watertight: ${JSON.stringify(paths)}`);
-  return new Solid3Bsp({ paths: paths });
+  return new Solid3Evan({ paths: paths });
 };

@@ -21,3 +21,10 @@ export {
   toZ0Polygon,
   transform
 };
+
+import { fromScaling } from '@jsxcad/math-mat4';
+import { fromTranslation } from '@jsxcad/math-mat4';
+
+export const translate = (vector, path) => transform(fromTranslation(vector), path);
+export const scale = (vector, path) => transform(fromScaling(vector), path);
+

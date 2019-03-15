@@ -1,4 +1,6 @@
-import { cylinder, difference, rotate, sphere, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
+Error.stackTraceLimit = Infinity;
+
+import { cylinder, difference, rotate, sphere, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
 // title      : Example 001
 // author     : OpenSCAD.org, adapted by Rene K. Mueller
@@ -20,6 +22,7 @@ function example001 () {
   var radius = radiusFromDiameter(hole);
   var height = radiusFromDiameter(size * 2.5);
 
+  // return difference(
   return difference(
     sphere({ r: radiusFromDiameter(size) }),
     rotcy([0, 0, 0], radius, height),
