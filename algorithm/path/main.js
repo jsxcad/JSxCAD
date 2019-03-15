@@ -8,6 +8,7 @@ import { toGeneric } from './toGeneric';
 import { toPolygon } from './toPolygon';
 import { toZ0Polygon } from './toZ0Polygon';
 import { transform } from './transform';
+import { fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 
 export {
   canonicalize,
@@ -22,9 +23,5 @@ export {
   transform
 };
 
-import { fromScaling } from '@jsxcad/math-mat4';
-import { fromTranslation } from '@jsxcad/math-mat4';
-
 export const translate = (vector, path) => transform(fromTranslation(vector), path);
 export const scale = (vector, path) => transform(fromScaling(vector), path);
-
