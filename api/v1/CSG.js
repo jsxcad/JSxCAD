@@ -2,8 +2,6 @@
 import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 // import { fromPaths } from '@jsxcad/geometry-solid3evan';
 
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toGeometry } from './toGeometry';
 import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 import { toTriangles } from '@jsxcad/algorithm-triangles';
@@ -51,7 +49,6 @@ export class CSG {
 CSG.fromGeometry = (geometry) => new CSG(geometry);
 CSG.fromPaths = (paths) => {
   const triangles = canonicalize(toTriangles({}, paths));
-  // if (!isWatertightPolygons(triangles)) throw Error('not watertight');
   return CSG.fromGeometry(fromPaths({}, triangles));
 };
 CSG.fromPolygons = CSG.fromPaths;

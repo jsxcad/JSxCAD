@@ -1,5 +1,4 @@
 import { fromGeometries } from '@jsxcad/geometry-assembly';
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 
 export class Assembly {
@@ -42,7 +41,7 @@ export class Assembly {
 
 const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometries([shape]);
 
-export const unionLazily = (shape, ...shapes) => Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+export const unionLazily = (shape, ...shapes) =>
+  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
 
 Assembly.fromGeometry = (geometry) => new Assembly(geometry);
-Assembly.fromPaths = (paths) => Assembly.fromGeometry(fromPaths({}, paths));

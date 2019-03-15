@@ -2,7 +2,6 @@ import { buildCircleArc } from '@jsxcad/algorithm-curve';
 import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
 import { canonicalize, butLast, last } from '@jsxcad/algorithm-paths';
 import { fromPaths } from '@jsxcad/geometry-paths';
-import { fromXRotation, fromYRotation, fromZRotation, fromTranslation } from '@jsxcad/math-mat4';
 
 // FIX: Incorrectly named.
 export class Path2D {
@@ -107,11 +106,11 @@ export class Path2D {
     return Error('Not yet implemented');
   }
 
-  toSurface() {
+  toSurface () {
     return Error('Not yet implemented');
   }
 
-  toGeometry() {
+  toGeometry () {
     return this.geometry;
   }
 

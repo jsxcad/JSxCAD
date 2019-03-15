@@ -44,7 +44,5 @@ export class Solid3Evan {
 }
 
 export const fromPaths = (options = {}, paths) => {
-  // paths = canonicalize(toTriangles({}, paths));
-  // if (!isWatertightPolygons(paths)) throw Error(`Not watertight: ${JSON.stringify(paths)}`);
   return new Solid3Evan({ paths: paths });
 };

@@ -7,7 +7,6 @@ import { splitPolygon } from './splitPolygon';
 // nodes there. Each set of polygons is partitioned using the first polygon
 // (no heuristic is used to pick a good split).
 export const build = (bsp, polygons) => {
-// console.log(`QQ/build/polygons: ${JSON.stringify(polygons)}`)
   if (polygons.length === 0) {
     return;
   }

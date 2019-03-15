@@ -1,9 +1,7 @@
 // FIX: Add interface to change default surface geometry.
 
 import { canonicalize } from '@jsxcad/algorithm-polygons';
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { fromPaths } from '@jsxcad/geometry-surf2pc';
-import { toGeometry } from './toGeometry';
 import { writePdf } from './writePdf';
 
 export class CAG {

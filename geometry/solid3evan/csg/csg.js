@@ -587,7 +587,6 @@ CSG.Node.prototype = {
   // nodes there. Each set of polygons is partitioned using the first polygon
   // (no heuristic is used to pick a good split).
   build: function (polygons) {
-console.log(`QQ/build: ${JSON.stringify(polygons)}`);
     if (!polygons.length) return;
     if (!this.plane) {
       this.plane = polygons[0].plane.clone();
@@ -597,7 +596,6 @@ console.log(`QQ/build: ${JSON.stringify(polygons)}`);
       this.plane.splitPolygon(polygons[i], this.polygons, this.polygons, front, back);
     }
     if (front.length) {
-console.log(`QQ/front/length: ${front.length}`);
       if (!this.front) this.front = new CSG.Node();
       this.front.build(front);
     }

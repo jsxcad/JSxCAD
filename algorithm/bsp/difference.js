@@ -2,7 +2,6 @@ import { build } from './build';
 import { clipTo } from './clipTo';
 import { fromPolygons } from './fromPolygons';
 import { invert } from './invert';
-import { isDegenerate } from '@jsxcad/algorithm-triangles';
 import { toPolygons } from './toPolygons';
 
 /**
@@ -32,9 +31,7 @@ export const difference = (base, ...subtractions) => {
 
     invert(baseBsp);
     clipTo(baseBsp, subtractBsp);
-    if (toPolygons({}, baseBsp).some(isDegenerate)) throw Error('die');
-    if (toPolygons({}, subtractBsp).some(isDegenerate)) throw Error('die');
-    clipTo(subtractBsp, baseBsp); // Found degenerate triangle here.
+    clipTo(subtractBsp, baseBsp);
 
     invert(subtractBsp);
     clipTo(subtractBsp, baseBsp);

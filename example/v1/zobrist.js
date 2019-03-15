@@ -1,6 +1,6 @@
-Error.stackTraceLimit = Infinity;
-
 import { cube, union, writeStl } from '@jsxcad/api-v1';
+
+Error.stackTraceLimit = Infinity;
 
 /**
 * A zobrist is a pattern within a 3x3x3 grid, with letters on the medial faces, a dot on the lower face, and a smile

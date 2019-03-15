@@ -12,9 +12,9 @@ export const scale = (factor, shape) => {
     // scale(4)
     return shape.transform(fromScaling([factor, factor, factor]));
   }
-}
+};
 
-const method = function (factor) { return scale(factor, this); }
+const method = function (factor) { return scale(factor, this); };
 
 Assembly.prototype.scale = method;
 CAG.prototype.scale = method;
