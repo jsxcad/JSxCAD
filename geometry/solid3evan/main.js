@@ -3,9 +3,9 @@ import { difference } from './difference';
 import { intersection } from './intersection';
 import { union } from './union';
 import { identity, multiply } from '@jsxcad/math-mat4';
-// import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import { toPolygons } from '@jsxcad/algorithm-paths';
-import { toTriangles } from '@jsxcad/algorithm-triangles';
+// import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
+// import { toTriangles } from '@jsxcad/algorithm-triangles';
 
 export class Solid3Evan {
   constructor ({ paths = [], transforms = identity() }) {
