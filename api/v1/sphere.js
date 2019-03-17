@@ -1,8 +1,10 @@
 import { CSG } from './CSG';
 import { buildRingSphere } from '@jsxcad/algorithm-shape';
+// import { buildGeodesicSphere } from '@jsxcad/algorithm-shape';
 import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
 
 const buildSphere = ({ r = 1, fn = 32 }) => CSG.fromPolygons(buildRingSphere({ resolution: fn })).scale([r, r, r]);
+// const buildSphere = ({ r = 1, fn = 32 }) => CSG.fromPolygons(buildGeodesicSphere({ resolution: fn })).scale([r, r, r]);
 
 const decode = (params) => {
   // sphere();

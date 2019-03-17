@@ -3,6 +3,14 @@ import { clipTo } from './clipTo';
 import { fromPolygons } from './fromPolygons';
 import { invert } from './invert';
 import { toPolygons } from './toPolygons';
+import { measureBoundingSphere } from '@jsxcad/algorithm-polygons';
+import { distance } from '@jsxcad/math-vec3';
+
+const doesNotOverlap = (a, b) => {
+  const [centerA, radiusA] = measureBoundingSphere(a);
+  const [centerB, radiusB] = measureBoundingSphere(b);
+  return distance(centerA, centerB) > radiusA + radiusB;
+};
 
 /**
    * Given a solid and a set of solids to subtract produce the resulting solid.
@@ -26,6 +34,10 @@ export const difference = (base, ...subtractions) => {
   // the geometries. This approach chains subtractions rather than producing
   // a generational tree.
   for (let i = 0; i < subtractions.length; i++) {
+    if (doesNotOverlap(base, subtractions[i])) {
+      // Nothing to do.
+      continue;
+    }
     const baseBsp = fromPolygons({}, base);
     const subtractBsp = fromPolygons({}, subtractions[i]);
 

@@ -1,10 +1,18 @@
 import { splitPolygon } from './splitPolygon';
 
 export const clipPolygons = (bsp, polygons) => {
+  if (polygons.length === 0) {
+    // PROVE: Does this happen due to degeneracy?
+    return [];
+  }
   if (bsp.plane === undefined) {
-    // PROVE: Why this is correct, and why it is fraught upon bsp.plane.
+    // Why do we never reach this point?
+    throw Error('die');
+    // PROVE: Why this is correct, and why it is decided by bsp.plane?
+    //   I guess that this means that it is a new leaf in the tree, and so no clipping should happen.
+
     // We need this slice as the bsp trees perform destructive updates.
-    return polygons.slice();
+    // return polygons.slice();
   }
   let front = [];
   let back = [];
@@ -18,6 +26,7 @@ export const clipPolygons = (bsp, polygons) => {
     back = clipPolygons(bsp.back, back);
   } else {
     // PROVE: Explain this asymmetry.
+    // These polygons are behind a face, and inside the tree.
     back = [];
   }
   return front.concat(back);
