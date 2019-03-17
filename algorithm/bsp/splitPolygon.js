@@ -10,18 +10,28 @@ const SPANNING = 3; // Both front and back.
 
 const W = 3;
 
-export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
+const toType = (plane, point) => {
+  let t = dot(plane, point) - plane[W];
+  let type = (t < -EPSILON) ? BACK
+    : (t > EPSILON) ? FRONT
+      : COPLANAR;
+  return type;
+}
+
+export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon, expectCoplanar) => {
   // Classify each point as well as the entire polygon into one of the above
   // four classes.
   let polygonType = 0;
-  let types = polygon.map(point => {
-    let t = dot(plane, point) - plane[W];
-    let type = (t < -EPSILON) ? BACK
-      : (t > EPSILON) ? FRONT
-        : COPLANAR;
-    polygonType |= type;
-    return type;
-  });
+  for (const point of polygon) {
+    polygonType |= toType(plane, point);
+  }
+
+  if (expectCoplanar === true && polygonType !== COPLANAR) {
+    console.log(`QQ/splitPolygon/polygon: ${JSON.stringify(polygon)}`);
+    console.log(`QQ/splitPolygon/polygon/plane: ${JSON.stringify(toPlane(polygon))}`);
+    console.log(`QQ/splitPolygon/split/plane: ${JSON.stringify(plane)}`);
+    throw Error('die');
+  }
 
   // Put the polygon in the correct list, splitting it when necessary.
   switch (polygonType) {
@@ -44,13 +54,10 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
     case SPANNING: {
       let frontPoints = [];
       let backPoints = [];
-      for (let start = 0; start < polygon.length; start++) {
-        let end = (start + 1) % polygon.length;
-        // For each edge, i~j.
-        let startType = types[start];
-        let endType = types[end];
-        let startPoint = polygon[start];
-        let endPoint = polygon[end];
+      let startPoint = polygon[polygon.length - 1];
+      let startType = toType(plane, startPoint);
+      for (const endPoint of polygon) {
+        const endType = toType(plane, endPoint);
         if (startType !== BACK) {
           frontPoints.push(startPoint);
         }
@@ -64,15 +71,23 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
+        startPoint = endPoint;
+        startType = endType;
       }
       if (frontPoints.length >= 3) {
       // Add the polygon that sticks out the front of the plane.
         front.push(frontPoints);
-      }
+      } else if (frontPoints.length == 4) {
+        front.push([frontPoints[0], frontPoints[1], frontPoints[3]]);
+        front.push([frontPoints[3], frontPoints[1], frontPoints[2]]);
+      } else throw Error('die');
       if (backPoints.length >= 3) {
       // Add the polygon that sticks out the back of the plane.
         back.push(backPoints);
-      }
+      } else if (backPoints.length == 4) {
+        back.push([backPoints[0], backPoints[1], backPoints[3]]);
+        back.push([backPoints[3], backPoints[1], backPoints[2]]);
+      } else throw Error('die');
       break;
     }
   }

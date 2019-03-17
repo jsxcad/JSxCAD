@@ -42,6 +42,8 @@ export class Solid3Bsp {
 }
 
 export const fromPaths = (options = {}, paths) => {
-  paths = toTriangles({}, paths);
+  paths = canonicalize(toTriangles({}, paths));
+  // paths = toTriangles({}, paths);
+  // paths = canonicalize(paths);
   return new Solid3Bsp({ paths: paths });
 };

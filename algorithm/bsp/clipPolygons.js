@@ -1,8 +1,14 @@
 import { splitPolygon } from './splitPolygon';
 
+var depth = 0;
+
 export const clipPolygons = (bsp, polygons) => {
+  console.log(`QQ/clipPolygons/depth: ${depth += 1}`);
   if (bsp.plane === undefined) {
-    // PROVE: Why this is correct, and why it is fraught upon bsp.plane.
+    throw Error('die');
+    // PROVE: Why this is correct, and why it is decided by bsp.plane?
+    //   I guess that this means that it is a new leaf in the tree, and so no clipping should happen.
+
     // We need this slice as the bsp trees perform destructive updates.
     return polygons.slice();
   }
@@ -20,5 +26,6 @@ export const clipPolygons = (bsp, polygons) => {
     // PROVE: Explain this asymmetry.
     back = [];
   }
+  depth -= 1;
   return front.concat(back);
 };
