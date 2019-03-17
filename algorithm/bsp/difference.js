@@ -10,7 +10,7 @@ const doesNotOverlap = (a, b) => {
   const [centerA, radiusA] = measureBoundingSphere(a);
   const [centerB, radiusB] = measureBoundingSphere(b);
   return distance(centerA, centerB) > radiusA + radiusB;
-}
+};
 
 /**
    * Given a solid and a set of solids to subtract produce the resulting solid.

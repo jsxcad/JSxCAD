@@ -15,8 +15,8 @@ test('Split a square in half with a vertical plane.', t => {
   splitPolygon(plane, coplanarBack, coplanarFront, back, front, square);
   t.deepEqual(coplanarBack, []);
   t.deepEqual(coplanarFront, []);
-  t.deepEqual(back, [[[-1, 0, 0], [-1, -1, 0], [1, -1, 0], [1, 0, 0]]]);
-  t.deepEqual(front, [[[1, 1, 0], [-1, 1, 0], [-1, 0, 0], [1, 0, 0]]]);
+  t.deepEqual(back, [[[1, -1, 0], [1, 0, 0], [-1, 0, 0], [-1, -1, 0]]]);
+  t.deepEqual(front, [[[1, 0, 0], [1, 1, 0], [-1, 1, 0], [-1, 0, 0]]]);
 });
 
 test('A debugging case', t => {

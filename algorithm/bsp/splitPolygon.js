@@ -1,7 +1,5 @@
-import { canonicalize, squaredDistance } from '@jsxcad/math-vec3';
-import { isDegenerate } from '@jsxcad/algorithm-triangles';
+import { dot, lerp, squaredDistance, subtract } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
-import { dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 const EPSILON = 1e-5;
 const EPSILON_SQUARED = Math.pow(EPSILON, 2);
@@ -22,7 +20,7 @@ const toType = (plane, point) => {
   } else {
     return COPLANAR;
   }
-}
+};
 
 export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
   // Classify each point as well as the entire polygon into one of the above
@@ -83,7 +81,6 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
         startPoint = endPoint;
         startType = endType;
       }
-      const totalLength = frontPoints.length + backPoints.length;
       if (frontPoints.length >= 3) {
       // Add the polygon that sticks out the front of the plane.
         front.push(frontPoints);

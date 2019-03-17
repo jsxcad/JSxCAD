@@ -1,6 +1,6 @@
 import { blessAsTriangles } from './blessAsTriangles';
 import { isTriangle } from './isTriangle';
-import { makeConvex } from '@jsxcad/algorithm-polygons';
+// import { makeConvex } from '@jsxcad/algorithm-polygons';
 
 export const toTriangles = (options = {}, paths) => {
   if (paths.isTriangles) {

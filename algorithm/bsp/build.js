@@ -10,11 +10,9 @@ export const build = (bsp, polygons) => {
   if (polygons.length === 0) {
     return;
   }
-  let expectCoplanar = false;
   if (bsp.plane === undefined) {
     // Use the first polygon to partition the branches.
     bsp.plane = toPlane(polygons[0]);
-    expectCoplanar = true;
   }
   let front = [];
   let back = [];
