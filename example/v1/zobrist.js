@@ -1,4 +1,4 @@
-import { cube, union, writeStl } from '@jsxcad/api-v1';
+import { cube, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
 Error.stackTraceLimit = Infinity;
 
@@ -59,4 +59,7 @@ const zobristCubes = (specifications) => {
   return union(...cubes);
 }
 
-writeStl({ path: '/tmp/zobrist.stl' }, zobristCubes().scale([10, 10, 10]))
+const scaledCubes = zobristCubes().scale([10, 10, 10]);
+
+writeStl({ path: '/tmp/zobrist.stl' }, scaledCubes);
+writeThreejsPage({ cameraPosition: [0, 0, 120], path: '/tmp/zobrist.html' }, scaledCubes);

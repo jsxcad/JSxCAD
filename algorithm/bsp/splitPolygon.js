@@ -1,7 +1,10 @@
+import { canonicalize, squaredDistance } from '@jsxcad/math-vec3';
+import { isDegenerate } from '@jsxcad/algorithm-triangles';
 import { toPlane } from '@jsxcad/math-poly3';
 import { dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 const EPSILON = 1e-5;
+const EPSILON_SQUARED = Math.pow(EPSILON, 2);
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -12,25 +15,21 @@ const W = 3;
 
 const toType = (plane, point) => {
   let t = dot(plane, point) - plane[W];
-  let type = (t < -EPSILON) ? BACK
-    : (t > EPSILON) ? FRONT
-      : COPLANAR;
-  return type;
+  if (t < -EPSILON) {
+    return BACK;
+  } else if (t > EPSILON) {
+    return FRONT;
+  } else {
+    return COPLANAR;
+  }
 }
 
-export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon, expectCoplanar) => {
+export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, polygon) => {
   // Classify each point as well as the entire polygon into one of the above
   // four classes.
   let polygonType = 0;
   for (const point of polygon) {
     polygonType |= toType(plane, point);
-  }
-
-  if (expectCoplanar === true && polygonType !== COPLANAR) {
-    console.log(`QQ/splitPolygon/polygon: ${JSON.stringify(polygon)}`);
-    console.log(`QQ/splitPolygon/polygon/plane: ${JSON.stringify(toPlane(polygon))}`);
-    console.log(`QQ/splitPolygon/split/plane: ${JSON.stringify(plane)}`);
-    throw Error('die');
   }
 
   // Put the polygon in the correct list, splitting it when necessary.
@@ -59,35 +58,44 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
       for (const endPoint of polygon) {
         const endType = toType(plane, endPoint);
         if (startType !== BACK) {
+          // The inequality is important as it includes COPLANAR points.
           frontPoints.push(startPoint);
         }
         if (startType !== FRONT) {
+          // The inequality is important as it includes COPLANAR points.
           backPoints.push(startPoint);
         }
         if ((startType | endType) === SPANNING) {
-        // Compute the point that touches the splitting plane.
+          // This should exclude COPLANAR points.
+          // Compute the point that touches the splitting plane.
           let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
-          let spanPoint = lerp(t, startPoint, endPoint);
-          frontPoints.push(spanPoint);
-          backPoints.push(spanPoint);
+          // Canonicalization of the point would violate coplanarity in some cases.
+          // We could work around this by triangulation, but that doubles the load.
+          // So we defer canonicalization, and deal with degenerate triangles upon later canonicalization.
+          const spanPoint = lerp(t, startPoint, endPoint);
+          if (squaredDistance(spanPoint, startPoint) >= EPSILON_SQUARED &&
+              squaredDistance(spanPoint, endPoint) >= EPSILON_SQUARED) {
+            // Minimize the production of degenerate polygons.
+            frontPoints.push(spanPoint);
+            backPoints.push(spanPoint);
+          }
         }
         startPoint = endPoint;
         startType = endType;
       }
+      const totalLength = frontPoints.length + backPoints.length;
       if (frontPoints.length >= 3) {
       // Add the polygon that sticks out the front of the plane.
         front.push(frontPoints);
-      } else if (frontPoints.length == 4) {
-        front.push([frontPoints[0], frontPoints[1], frontPoints[3]]);
-        front.push([frontPoints[3], frontPoints[1], frontPoints[2]]);
-      } else throw Error('die');
+      } else {
+        throw Error('die');
+      }
       if (backPoints.length >= 3) {
       // Add the polygon that sticks out the back of the plane.
         back.push(backPoints);
-      } else if (backPoints.length == 4) {
-        back.push([backPoints[0], backPoints[1], backPoints[3]]);
-        back.push([backPoints[3], backPoints[1], backPoints[2]]);
-      } else throw Error('die');
+      } else {
+        throw Error('die');
+      }
       break;
     }
   }

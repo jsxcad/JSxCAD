@@ -1,10 +1,12 @@
 import { splitPolygon } from './splitPolygon';
 
-var depth = 0;
-
 export const clipPolygons = (bsp, polygons) => {
-  console.log(`QQ/clipPolygons/depth: ${depth += 1}`);
+  if (polygons.length === 0) {
+    // PROVE: Does this happen due to degeneracy?
+    return [];
+  }
   if (bsp.plane === undefined) {
+    // Why do we never reach this point?
     throw Error('die');
     // PROVE: Why this is correct, and why it is decided by bsp.plane?
     //   I guess that this means that it is a new leaf in the tree, and so no clipping should happen.
@@ -24,8 +26,8 @@ export const clipPolygons = (bsp, polygons) => {
     back = clipPolygons(bsp.back, back);
   } else {
     // PROVE: Explain this asymmetry.
+    // These polygons are behind a face, and inside the tree.
     back = [];
   }
-  depth -= 1;
   return front.concat(back);
 };
