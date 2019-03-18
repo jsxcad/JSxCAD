@@ -1,5 +1,5 @@
-const test = require('ava');
-const multiply = require('./multiply');
+import { multiply } from './multiply';
+import { test } from 'ava';
 
 test('mat4: multiply() should return a new mat4 with correct values', (t) => {
   const obs1 = multiply([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],

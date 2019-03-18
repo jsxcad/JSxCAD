@@ -1,6 +1,6 @@
-const c = require('./canonicalize');
-const test = require('ava');
-const transform = require('./transform');
+import { canonicalize as c } from './canonicalize';
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('Identity', (t) => {
   const identityMatrix = [

@@ -1,9 +1,8 @@
-const canonicalize = require('./canonicalize');
-const equals = require('./equals');
-const fromPoints = require('./fromPoints');
-const transform = require('./transform');
-const test = require('ava');
-// const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+import { canonicalize } from './canonicalize';
+import { equals } from './equals';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('poly3: identity transform should return a new poly3 with correct values', (t) => {
   const identityMatrix = [

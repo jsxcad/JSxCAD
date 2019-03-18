@@ -1,20 +1,16 @@
-const create = require('./create');
-const fromPoints = require('./fromPoints');
-const mat4 = require('@jsxcad/math-mat4');
-const measureBoundingBox = require('./measureBoundingBox');
-const test = require('ava');
-const transform = require('./transform');
+import { fromPoints } from './fromPoints';
+import { fromZRotation } from '@jsxcad/math-mat4';
+import { measureBoundingBox } from './measureBoundingBox';
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('poly3: measureBoundingBox() should return correct values', (t) => {
-  let ply1 = create();
-  let exp1 = [[0, 0, 0], [0, 0, 0]];
-  let ret1 = measureBoundingBox(ply1);
-  t.deepEqual(ret1[0], exp1[0]);
-  t.deepEqual(ret1[1], exp1[1]);
-
+  let ply1;
   // simple triangle
   let ply2 = fromPoints([[0, 0, 0], [0, 10, 0], [0, 10, 10]]);
+  let exp1;
   let exp2 = [[0, 0, 0], [0, 10, 10]];
+  let ret1;
   let ret2 = measureBoundingBox(ply2);
   t.deepEqual(ret2[0], exp2[0]);
   t.deepEqual(ret2[1], exp2[1]);
@@ -46,7 +42,7 @@ test('poly3: measureBoundingBox() should return correct values', (t) => {
   t.deepEqual(ret4[1], exp4[1]);
 
   // rotated to various angles
-  const rotation = mat4.fromZRotation((45 * 0.017453292519943295));
+  const rotation = fromZRotation((45 * 0.017453292519943295));
   ply1 = transform(rotation, ply1);
   ply2 = transform(rotation, ply2);
   ply3 = transform(rotation, ply3);

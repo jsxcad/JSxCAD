@@ -14,7 +14,7 @@
  * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
  * let observed = poly3.map(vertices)
  */
-const map = (original, transform) => {
+export const map = (original, transform) => {
   if (original === undefined) {
     original = [];
   }
@@ -23,5 +23,3 @@ const map = (original, transform) => {
   }
   return original.map(vertex => transform(vertex));
 };
-
-module.exports = map;

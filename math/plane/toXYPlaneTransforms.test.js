@@ -1,4 +1,4 @@
-const test = require('ava');
+import { test } from 'ava';
 // const toXYPlaneTransforms = require('./toXYPlaneTransforms');
 
 // FIX: Circular dependency.

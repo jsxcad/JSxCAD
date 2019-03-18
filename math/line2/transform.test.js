@@ -1,11 +1,11 @@
-const canonicalize = require('./canonicalize');
-const create = require('./create');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
-const transform = require('./transform');
+import { canonicalize } from './canonicalize';
+import { fromValues } from './fromValues';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('line2: transform() called with two paramerters should return a line2 with correct values', (t) => {
-  const line1 = create();
+  const line1 = fromValues();
   const line2 = fromPoints([0, 0], [0, 1]);
   const line3 = fromPoints([-3, -3], [3, 3]);
 

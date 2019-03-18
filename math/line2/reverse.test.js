@@ -1,11 +1,11 @@
-const canonicalize = require('./canonicalize');
-const create = require('./create');
-const fromPoints = require('./fromPoints');
-const reverse = require('./reverse');
-const test = require('ava');
+import { canonicalize } from './canonicalize';
+import { fromValues } from './fromValues';
+import { fromPoints } from './fromPoints';
+import { reverse } from './reverse';
+import { test } from 'ava';
 
 test('line2: reverse() should return proper lines', (t) => {
-  const line1 = create();
+  const line1 = fromValues();
   const rev1 = reverse(line1);
   t.deepEqual(canonicalize(rev1), [-0, -1, -0]);
 

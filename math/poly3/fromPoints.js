@@ -1,5 +1,3 @@
-const map = require('./map');
-
 /**
  * Create a poly3 from the given points.
  *
@@ -14,6 +12,4 @@ const map = require('./map');
  * ]
  * const polygon = createFromPoints(points)
  */
-const fromPoints = (points, planeof) => map(points);
-
-module.exports = fromPoints;
+export const fromPoints = (points, planeof) => [...points];

@@ -1,12 +1,6 @@
-const create = require('./create');
-const isConvex = require('./isConvex');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
-
-test('poly3: empty poly3 is convex', (t) => {
-  const ply1 = create();
-  t.true(isConvex(ply1));
-});
+import { isConvex } from './isConvex';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
 
 test('poly3: convex poly3 is convex', (t) => {
   const ply2 = fromPoints([[1, 1, 0], [1, 0, 0], [0, 0, 0]]);

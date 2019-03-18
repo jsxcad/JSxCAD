@@ -1,5 +1,5 @@
-const flip = require('./flip');
-const test = require('ava');
+import { flip } from './flip';
+import { test } from 'ava';
 
 test('plane: flip() called with one paramerters should return a plane with correct values', (t) => {
   t.deepEqual(flip([0, 0, 0, 0]), [-0, -0, -0, -0]);

@@ -4,6 +4,4 @@
  * @param {vec4} vec - plane to flip
  * @return {vec4} flipped plane
  */
-const flip = ([x, y, z, w]) => [-x, -y, -z, -w];
-
-module.exports = flip;
+export const flip = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];

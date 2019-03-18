@@ -1,5 +1,5 @@
-const fromPoints = require('./fromPoints');
-const test = require('ava');
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
 
 test('poly3: fromPoints() should return a new poly3 with correct values', (t) => {
   const exp1 = [[0, 0, 0], [1, 0, 0], [1, 1, 0]];
