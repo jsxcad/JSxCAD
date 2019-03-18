@@ -1,15 +1,16 @@
-import { unitCube } from './unitCube';
-import { unitGeodesicSphere } from './unitGeodesicSphere';
-import { unitRegularIcosahedron } from './unitRegularIcosahedron';
-import { unitRegularTriangularPrism } from './unitRegularTriangularPrism';
-import { unitRegularTriangle } from './unitRegularTriangle';
-import { unitSquare } from './unitSquare';
+import { unitCubePolygons } from './unitCube';
+import { unitGeodesicSphere20Polygons, unitGeodesicSphere80Polygons } from './unitGeodesicSphere';
+import { unitRegularIcosahedronPolygons } from './unitRegularIcosahedron';
+import { unitRegularTriangularPrismPolygons } from './unitRegularTriangularPrism';
+import { unitRegularTrianglePolygon } from './unitRegularTriangle';
+import { unitSquarePolygon } from './unitSquare';
 
 export {
-  unitCube,
-  unitGeodesicSphere,
-  unitRegularIcosahedron,
-  unitRegularTriangularPrism,
-  unitRegularTriangle,
-  unitSquare,
+  unitCubePolygons,
+  unitGeodesicSphere20Polygons,
+  unitGeodesicSphere80Polygons,
+  unitRegularIcosahedronPolygons,
+  unitRegularTriangularPrismPolygons,
+  unitRegularTrianglePolygon,
+  unitSquarePolygon
 };
