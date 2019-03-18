@@ -8,7 +8,7 @@ Unlike a drawing based approach to CAD JSXCAD uses a programing language to defi
 
 JSXCAD is a project derived from JSCAD which is itself inspired by Open SCAD.
 
-In general JSXCAD tries to support the same interface as JSCAD which can be found [here]()
+In general JSXCAD tries to support the same interface as JSCAD which can be found [here](https://openjscad.org/dokuwiki/doku.php).
 
 ## Using JSXCAD from the Command Line
 
@@ -54,7 +54,7 @@ const solid = example001();
 
 ```
 
-At the end of this code block `solid` will contain the JSXCAD geometry defined by the operatioins specified above.
+At the end of this code block `solid` will contain the JSXCAD geometry defined by the operations specified above.
 
 3) Exports
 
@@ -64,4 +64,15 @@ Once we have done some operations to our JSXCAD primitives we need to be able to
 
 Which will create a new file or overwrite an existing file in the location `/tmp/example001.stl`. JSXCAD can write to a number of file types this way.
 
-## Using JSXCAD imbeded in a website
+## Using JSXCAD embedded in a website or larger program
+
+One of the other major advantages of a programing based approach to CAD is that JSXCAD can be embedded in a website easily to provide CAD capabilities to a website. Because JSXCAD is already using java script it is easy to make a CAD model which can be modified by the website.
+
+1) Add way to view your JSXCAD file
+
+JSXCAD does natively include any file viewing capabilities. JSXCAD can only take a definition of geometry and write it to a file which we can then view in another program.
+
+Because a website needs to display the rendered model for visitors we will need use a library which can display the file produced by JSXCAD. 
+
+...in progress here
+

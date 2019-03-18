@@ -45,6 +45,8 @@ node -r esm example/v1/square.js
 
 should produce /tmp/square.pdf.
 
+You can find more detailed usage instructions in [the quick start guide](https://github.com/jsxcad/JSxCAD/blob/master/QUICKSTART.md)
+
 ## API
 
 For questions about the API, please contact the [User Group](https://groups.google.com/forum/#!forum/jsxcad).
