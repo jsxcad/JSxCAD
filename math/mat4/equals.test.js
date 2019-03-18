@@ -1,5 +1,5 @@
-const equals = require('./equals');
-const test = require('ava');
+import { equals } from './equals';
+import { test } from 'ava';
 
 test('vec3: equals() should return correct booleans', (t) => {
   const veca = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
