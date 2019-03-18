@@ -1,4 +1,4 @@
-const vec2 = require('@jsxcad/math-vec2');
+import { dot } from '@jsxcad/math-vec2';
 
 /**
  * Calculate the distance (positive) between the given point and line
@@ -7,10 +7,4 @@ const vec2 = require('@jsxcad/math-vec2');
  * @param {line2} line the 2D line of reference
  * @return {Number} distance between line and point
  */
-const distanceToPoint = (point, line) => {
-  let distance = vec2.dot(point, line);
-  distance = Math.abs(distance - line[2]);
-  return distance;
-};
-
-module.exports = distanceToPoint;
+export const distanceToPoint = (point, line) => Math.abs(dot(point, line) - line[2]);

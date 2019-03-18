@@ -6,6 +6,4 @@
  * @param {Number} w length (positive) of the normal segment
  * @returns {line2} a new unbounded 2D line
  */
-const fromValues = (x = 0, y = 0, w = 0) => [x, y, w];
-
-module.exports = fromValues;
+export const fromValues = (x = 0, y = 1, w = 0) => [x, y, w];

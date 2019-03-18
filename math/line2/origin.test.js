@@ -1,11 +1,11 @@
-const { canonicalize } = require('@jsxcad/math-vec2');
-const create = require('./create');
-const fromPoints = require('./fromPoints');
-const origin = require('./origin');
-const test = require('ava');
+import { canonicalize } from '@jsxcad/math-vec2';
+import { fromValues } from './fromValues';
+import { fromPoints } from './fromPoints';
+import { origin } from './origin';
+import { test } from 'ava';
 
 test('line2: origin() should return proper origins', (t) => {
-  const line1 = create();
+  const line1 = fromValues();
   const org1 = origin(line1);
   t.deepEqual(canonicalize(org1), [0, 0]);
 

@@ -1,6 +1,6 @@
-const equals = require('./equals');
-const fromValues = require('./fromValues');
-const test = require('ava');
+import { equals } from './equals';
+import { fromValues } from './fromValues';
+import { test } from 'ava';
 
 test('line2: equals() should return correct booleans', (t) => {
   const line0 = fromValues(0, 0, 0);

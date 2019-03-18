@@ -1,7 +1,7 @@
-const direction = require('./direction');
-const fromPoints = require('./fromPoints');
-const origin = require('./origin');
-const vec2 = require('@jsxcad/math-vec2');
+import { direction } from './direction';
+import { fromPoints } from './fromPoints';
+import { origin } from './origin';
+import { transform as transformVec2 } from '@jsxcad/math-vec2';
 
 /**
  * Transforms the given 2D line using the given matrix.
@@ -10,7 +10,5 @@ const vec2 = require('@jsxcad/math-vec2');
  * @param {line2} line the 2D line to transform
  * @returns {line2} a new unbounded 2D line
  */
-const transform = (matrix, line) => fromPoints(vec2.transform(matrix, origin(line)),
-                                               vec2.transform(matrix, direction(line)));
-
-module.exports = transform;
+export const transform = (matrix, line) => fromPoints(transformVec2(matrix, origin(line)),
+                                                      transformVec2(matrix, direction(line)));
