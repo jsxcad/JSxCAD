@@ -1,4 +1,4 @@
-import { dot, plus, scale, subtract } from '@jsxcad/math-vec3';
+import { add, dot, scale, subtract } from '@jsxcad/math-vec3';
 
 /**
  * Split the given line by the given plane.
@@ -11,5 +11,5 @@ export const splitLineSegmentByPlane = (plane, p1, p2) => {
   if (Number.isNaN(lambda)) lambda = 0;
   if (lambda > 1) lambda = 1;
   if (lambda < 0) lambda = 0;
-  return plus(p1, scale(lambda, direction));
+  return add(p1, scale(lambda, direction));
 };

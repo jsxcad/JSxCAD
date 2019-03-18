@@ -1,6 +1,4 @@
-const map = require('./map');
-const vec3 = require('@jsxcad/math-vec3');
+import { canonicalize as canonicalizeVec3 } from '@jsxcad/math-vec3';
+import { map } from './map';
 
-const canonicalize = polygon => map(polygon, vec3.canonicalize);
-
-module.exports = canonicalize;
+export const canonicalize = polygon => map(polygon, canonicalizeVec3);

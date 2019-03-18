@@ -1,13 +1,12 @@
-const create = require('./create');
-const mat4 = require('@jsxcad/math-mat4');
-const measureSignedVolume = require('./measureSignedVolume');
-const flip = require('./flip');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
-const transform = require('./transform');
+import { flip } from './flip';
+import { fromPoints } from './fromPoints';
+import { fromZRotation } from '@jsxcad/math-mat4';
+import { measureSignedVolume } from './measureSignedVolume';
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('poly3: measureSignedVolume() should return correct values', (t) => {
-  let ply1 = create();
+  let ply1 = [];
   let ret1 = measureSignedVolume(ply1);
   t.is(ret1, 0.0);
 
@@ -39,7 +38,7 @@ test('poly3: measureSignedVolume() should return correct values', (t) => {
   t.is(ret4, -325.00000);
 
   // rotated to various angles
-  const rotation = mat4.fromZRotation((45 * 0.017453292519943295));
+  const rotation = fromZRotation((45 * 0.017453292519943295));
   ply1 = transform(rotation, ply1);
   ply2 = transform(rotation, ply2);
   ply3 = transform(rotation, ply3);

@@ -1,14 +1,10 @@
-const toPlane = require('./toPlane');
-const vec3 = require('@jsxcad/math-vec3');
+import { toPlane } from './toPlane';
+import { cross, dot, subtract } from '@jsxcad/math-vec3';
 
 /**
  * Check whether the polygon is convex.
  * @returns {boolean}
  */
-const isConvex = (polygon) => {
-  return areVerticesConvex(polygon, toPlane(polygon));
-};
-
 const areVerticesConvex = (vertices, plane) => {
   const numvertices = vertices.length;
   if (numvertices > 2) {
@@ -30,12 +26,12 @@ const areVerticesConvex = (vertices, plane) => {
 //  prevpoint, point, nextpoint: the 3 coordinates (Vector3D instances)
 //  normal: the normal vector of the plane
 const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
-  const crossproduct = vec3.cross(
-    vec3.subtract(point, prevpoint),
-    vec3.subtract(nextpoint, point)
+  const crossproduct = cross(
+    subtract(point, prevpoint),
+    subtract(nextpoint, point)
   );
   // note: plane ~= normal point
-  const crossdotnormal = vec3.dot(crossproduct, plane);
+  const crossdotnormal = dot(crossproduct, plane);
   return crossdotnormal >= 0;
 };
 
@@ -46,4 +42,4 @@ const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
   return (crossdotnormal >= EPS)
 } */
 
-module.exports = isConvex;
+export const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
