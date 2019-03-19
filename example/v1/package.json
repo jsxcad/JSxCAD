@@ -55,6 +55,7 @@
     "@jsxcad/algorithm-stl": "^0.0.50",
     "@jsxcad/api-v1": "^0.0.50",
     "@jsxcad/provide": "^0.0.50",
+    "argv": "^0.0.2",
     "esm": "^3.2.10"
   },
   "ava": {
