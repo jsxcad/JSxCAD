@@ -1,6 +1,6 @@
-const dot = require('./dot');
-const normalize = require('./normalize');
-const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+import { dot } from './dot';
+import { normalize } from './normalize';
+import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 
 /**
  * Get the angle between two 3D vectors
@@ -8,9 +8,7 @@ const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
  * @param {vec3} b The second operand
  * @returns {Number} The angle in radians
  */
-const angle = (a, b) => {
+export const angle = (a, b) => {
   const cosine = q(dot(normalize(a), normalize(b)));
   return cosine > 1.0 ? 0 : Math.acos(cosine);
 };
-
-module.exports = angle;

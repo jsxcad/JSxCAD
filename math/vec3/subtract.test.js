@@ -1,5 +1,5 @@
-const subtract = require('./subtract');
-const test = require('ava');
+import { subtract } from './subtract';
+import { test } from 'ava';
 
 test('vec3: subtract() called with two paramerters should return a vec3 with correct values', (t) => {
   t.deepEqual(subtract([0, 0, 0], [0, 0, 0]), [0, 0, 0]);

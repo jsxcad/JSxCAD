@@ -1,5 +1,5 @@
-const cross = require('./cross');
-const test = require('ava');
+import { cross } from './cross';
+import { test } from 'ava';
 
 test('vec3: cross() called with two paramerters should return a vec3 with correct values', (t) => {
   t.deepEqual(cross([0, 0, 0], [0, 0, 0]), [0, 0, 0]);

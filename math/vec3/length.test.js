@@ -1,5 +1,5 @@
-const test = require('ava');
-const length = require('./length');
+import { length } from './length';
+import { test } from 'ava';
 
 test('vec3: length() should return correct values', (t) => {
   t.is(length([0, 0, 0]), 0);

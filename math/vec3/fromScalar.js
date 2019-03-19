@@ -4,6 +4,4 @@
  * @param  {Float} scalar
  * @returns {Vec3}
  */
-const fromScalar = (scalar) => [scalar, scalar, scalar];
-
-module.exports = fromScalar;
+export const fromScalar = (scalar) => [scalar, scalar, scalar];
