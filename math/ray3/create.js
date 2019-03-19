@@ -1,15 +1,13 @@
-const fromPointAndDirection = require('./fromPointAndDirection');
-const vec3 = require('@jsxcad/math-vec3');
+import { fromPointAndDirection } from './fromPointAndDirection';
+import { fromValues } from '@jsxcad/math-vec3';
 
 /**
  * Create an unbounded 3D line, positioned at 0,0,0 and lying on the X axis.
  *
  * @returns {line3} a new unbounded 3D line
  */
-const create = () => {
-  const point = vec3.fromValues(0, 0, 0);
-  const direction = vec3.fromValues(0, 0, 1);
+export const create = () => {
+  const point = fromValues(0, 0, 0);
+  const direction = fromValues(0, 0, 1);
   return fromPointAndDirection(point, direction);
 };
-
-module.exports = create;

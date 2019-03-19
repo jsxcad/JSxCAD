@@ -1,12 +1,12 @@
-const fromPoints = require('./fromPoints');
-const intersectPointOfLineAndPlane = require('./intersectPointOfLineAndPlane');
-const plane = require('@jsxcad/math-plane');
-const test = require('ava');
+import { fromPoints } from './fromPoints';
+import { intersectPointOfLineAndPlane } from './intersectPointOfLineAndPlane';
+import { fromPoints as fromPointsAPlane } from '@jsxcad/math-plane';
+import { test } from 'ava';
 
 test('line3: intersectPointOfLineAndPlane() should return a new line3 with correct values', (t) => {
-  const planeXY = plane.fromPoints([0, 0, 0], [1, 0, 0], [1, 1, 0]); // flat on XY
-  const planeXZ = plane.fromPoints([0, 0, 0], [1, 0, 0], [0, 0, 1]); // flat on XZ
-  const planeYZ = plane.fromPoints([0, 0, 0], [0, 1, 0], [0, 0, 1]); // flat on YZ
+  const planeXY = fromPointsAPlane([0, 0, 0], [1, 0, 0], [1, 1, 0]); // flat on XY
+  const planeXZ = fromPointsAPlane([0, 0, 0], [1, 0, 0], [0, 0, 1]); // flat on XZ
+  const planeYZ = fromPointsAPlane([0, 0, 0], [0, 1, 0], [0, 0, 1]); // flat on YZ
 
   const line1 = fromPoints([0, 0, 0], [1, 0, 0]);
   const line2 = fromPoints([1, 0, 0], [1, 1, 0]);

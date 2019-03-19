@@ -1,4 +1,4 @@
-const vec3 = require('@jsxcad/math-vec3');
+import { add, dot, scale, subtract } from '@jsxcad/math-vec3';
 
 /**
  * Determine the closest point on the given line to the given point.
@@ -7,11 +7,9 @@ const vec3 = require('@jsxcad/math-vec3');
  * @param {line3} line the 3D line for calculations
  * @returns {vec3} a new point
  */
-const closestPoint = (point, [lpoint, ldirection]) => {
-  const a = vec3.dot(vec3.subtract(point, lpoint), ldirection);
-  const b = vec3.dot(ldirection, ldirection);
+export const closestPoint = (point, [lpoint, ldirection]) => {
+  const a = dot(subtract(point, lpoint), ldirection);
+  const b = dot(ldirection, ldirection);
   const t = a / b;
-  return vec3.add(lpoint, vec3.scale(t, ldirection));
+  return add(lpoint, scale(t, ldirection));
 };
-
-module.exports = closestPoint;
