@@ -30,10 +30,8 @@ function example001 () {
   );
 }
 
-const solid = example001();
-
-writeStl({ path: '/tmp/example001.stl' }, solid);
-console.log(`Wrote STL`);
-
-writeThreejsPage({ cameraPosition: [0, 0, 120], path: '/tmp/example001.html' }, solid);
-console.log(`Wrote ThreeJS`);
+export const main = () => {
+  const solid = example001();
+  writeStl({ path: 'tmp/example001.stl' }, solid);
+  writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' }, solid);
+};

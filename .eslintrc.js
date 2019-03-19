@@ -1,5 +1,6 @@
 module.exports = {
     "extends": "standard",
+    "parser": "babel-eslint",
     "rules": {
         "max-len": [1, 120, 2],
         "semi": [2, "always"],

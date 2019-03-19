@@ -40,7 +40,7 @@ git clone https://github.com/jsxcad/JSxCAD
 cd JSxCAD
 npm install
 cd example/v1
-node -r esm example/v1/square.js
+node -r esm run square.js
 ```
 
 should produce /tmp/square.pdf.
