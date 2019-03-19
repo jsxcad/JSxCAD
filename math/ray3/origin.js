@@ -4,6 +4,4 @@
  * @param {line3} line the 3D line of reference
  * @return {vec3} the origin of the line
  */
-const origin = ([origin, unitDirection]) => origin;
-
-module.exports = origin;
+export const origin = ([origin, unitDirection]) => origin;

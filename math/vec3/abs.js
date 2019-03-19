@@ -5,6 +5,4 @@
  * @param {vec3} vec - given value
  * @returns {vec3} absolute value of the vector
  */
-const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
-
-module.exports = abs;
+export const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];

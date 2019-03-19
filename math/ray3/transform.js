@@ -1,5 +1,5 @@
-const fromPointAndDirection = require('./fromPointAndDirection');
-const vec3 = require('@jsxcad/math-vec3');
+import { fromPointAndDirection } from './fromPointAndDirection';
+import { add, subtract, transform as transformVec3 } from '@jsxcad/math-vec3';
 
 /**
  * Transforms the given 3D line using the given matrix.
@@ -8,12 +8,10 @@ const vec3 = require('@jsxcad/math-vec3');
  * @param {line3} line the 3D line to transform
  * @returns {line3} a new unbounded 3D line
  */
-const transform = (matrix, [point, direction]) => {
-  const pointPlusDirection = vec3.add(point, direction);
-  const newpoint = vec3.transform(matrix, point);
-  const newPointPlusDirection = vec3.transform(matrix, pointPlusDirection);
-  const newdirection = vec3.subtract(newPointPlusDirection, newpoint);
+export const transform = (matrix, [point, direction]) => {
+  const pointPlusDirection = add(point, direction);
+  const newpoint = transformVec3(matrix, point);
+  const newPointPlusDirection = transformVec3(matrix, pointPlusDirection);
+  const newdirection = subtract(newPointPlusDirection, newpoint);
   return fromPointAndDirection(newpoint, newdirection);
 };
-
-module.exports = transform;

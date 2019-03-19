@@ -1,5 +1,1 @@
-const fromValues = require('./fromValues');
-
-const fromAngleRadians = (radians) => fromValues(Math.cos(radians), Math.sin(radians));
-
-module.exports = fromAngleRadians;
+export const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];

@@ -1,8 +1,8 @@
-const canonicalize = require('./canonicalize');
-const create = require('./create');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
-const transform = require('./transform');
+import { canonicalize } from './canonicalize';
+import { create } from './create';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('line3: transform() called with two paramerters should return a line3 with correct values', (t) => {
   const line1 = create();

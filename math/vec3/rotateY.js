@@ -1,5 +1,5 @@
-const add = require('./add');
-const subtract = require('./subtract');
+import { add } from './add';
+import { subtract } from './subtract';
 
 /**
  * Rotate vector 3D vector around the y-axis
@@ -8,7 +8,7 @@ const subtract = require('./subtract');
  * @param {vec3} vector The vec3 point to rotate
  * @returns {vec3} out
  */
-const rotateY = (angle, origin, vector) => {
+export const rotateY = (angle, origin, vector) => {
   const p = subtract(vector, origin);
   // rotate
   const r = [p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
@@ -17,5 +17,3 @@ const rotateY = (angle, origin, vector) => {
   // translate
   return add(r, origin);
 };
-
-module.exports = rotateY;

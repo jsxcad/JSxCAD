@@ -1,6 +1,6 @@
-const fromPoints = require('./fromPoints');
-const test = require('ava');
-const { canonicalize } = require('@jsxcad/math-vec3');
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
+import { canonicalize } from '@jsxcad/math-vec3';
 
 test('line3: fromPoints() should return a new line3 with correct values', (t) => {
   let obs = fromPoints([0, 0, 0], [1, 0, 0]);

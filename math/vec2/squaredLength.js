@@ -4,6 +4,4 @@
  * @param {vec2} a vector to calculate squared length of
  * @returns {Number} squared length of a
  */
-const squaredLength = ([x, y]) => (x * x) + (y * y);
-
-module.exports = squaredLength;
+export const squaredLength = ([x, y]) => (x * x) + (y * y);

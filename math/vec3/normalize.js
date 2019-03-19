@@ -1,4 +1,4 @@
-const scale = require('./scale');
+import { scale } from './scale';
 
 /**
  * Normalize a vec3
@@ -6,10 +6,8 @@ const scale = require('./scale');
  * @param {vec3} a vector to normalize
  * @returns {vec3} out
  */
-const normalize = (a) => {
-  const x = a[0];
-  const y = a[1];
-  const z = a[2];
+export const normalize = (a) => {
+  const [x, y, z] = a;
   const len = (x * x) + (y * y) + (z * z);
   if (len > 0) {
     // TODO: evaluate use of glm_invsqrt here?
@@ -18,5 +16,3 @@ const normalize = (a) => {
     return a;
   }
 };
-
-module.exports = normalize;

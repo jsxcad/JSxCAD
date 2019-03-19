@@ -1,8 +1,8 @@
-const { canonicalize } = require('@jsxcad/math-vec3');
-const create = require('./create');
-const fromPoints = require('./fromPoints');
-const reverse = require('./reverse');
-const test = require('ava');
+import { canonicalize } from '@jsxcad/math-vec3';
+import { create } from './create';
+import { fromPoints } from './fromPoints';
+import { reverse } from './reverse';
+import { test } from 'ava';
 
 test('line3: reverse() should return proper lines', (t) => {
   const line1 = create();

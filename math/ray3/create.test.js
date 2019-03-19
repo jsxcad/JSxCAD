@@ -1,5 +1,5 @@
-const create = require('./create');
-const test = require('ava');
+import { create } from './create';
+import { test } from 'ava';
 
 test('line3: create() should return a line3 with initial values', (t) => {
   const obs = create();

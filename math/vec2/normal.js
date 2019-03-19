@@ -1,4 +1,4 @@
-const rotate = require('./rotate');
+import { rotate } from './rotate';
 
 /**
  * Calculates the normal value of the give vector
@@ -7,6 +7,4 @@ const rotate = require('./rotate');
  * @param {vec2} vec - given value
  * @returns {vec2} normal value of the vector
  */
-const normal = (vec) => rotate(Math.PI / 2, vec);
-
-module.exports = normal;
+export const normal = (vec) => rotate(Math.PI / 2, vec);

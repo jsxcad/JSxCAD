@@ -1,5 +1,5 @@
-const squaredDistance = require('./squaredDistance');
-const test = require('ava');
+import { squaredDistance } from './squaredDistance';
+import { test } from 'ava';
 
 test('vec2: squaredDistance() should return correct values', (t) => {
   t.is(squaredDistance([0, 0], [0, 0]), 0);

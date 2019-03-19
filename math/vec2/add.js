@@ -1,5 +1,3 @@
-const fromValues = require('./fromValues');
-
 /**
  * Adds two vec2's
  *
@@ -7,6 +5,4 @@ const fromValues = require('./fromValues');
  * @param {vec2} b the second operand
  * @returns {vec2} out
  */
-const add = (a, b) => fromValues(a[0] + b[0], a[1] + b[1]);
-
-module.exports = add;
+export const add = ([ax, ay], [bx, by]) => [ax + bx, ay + by];

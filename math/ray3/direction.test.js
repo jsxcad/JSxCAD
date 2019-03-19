@@ -1,8 +1,8 @@
-const create = require('./create');
-const direction = require('./direction');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
-const { canonicalize } = require('@jsxcad/math-vec3');
+import { create } from './create';
+import { direction } from './direction';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
+import { canonicalize } from '@jsxcad/math-vec3';
 
 test('line3: direction() should return proper direction', (t) => {
   const line1 = create();

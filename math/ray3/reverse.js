@@ -1,5 +1,5 @@
-const fromPointAndDirection = require('./fromPointAndDirection');
-const vec3 = require('@jsxcad/math-vec3');
+import { fromPointAndDirection } from './fromPointAndDirection';
+import { negate } from '@jsxcad/math-vec3';
 
 /**
  * Create a new line in the opposite direction as the given.
@@ -7,6 +7,4 @@ const vec3 = require('@jsxcad/math-vec3');
  * @param {line3} line the 3D line to reverse
  * @returns {line3} a new unbounded 3D line
  */
-const reverse = ([point, unitDirection]) => fromPointAndDirection(point, vec3.negate(unitDirection));
-
-module.exports = reverse;
+export const reverse = ([point, unitDirection]) => fromPointAndDirection(point, negate(unitDirection));

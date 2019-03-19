@@ -1,5 +1,5 @@
-const cross = require('./cross');
-const test = require('ava');
+import { cross } from './cross';
+import { test } from 'ava';
 
 test('vec2: cross() called with two paramerters should return a vec2 with correct values', (t) => {
   const obs1 = cross([0, 0], [0, 0]);

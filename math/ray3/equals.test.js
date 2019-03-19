@@ -1,6 +1,6 @@
-const equals = require('./equals');
-const fromPointAndDirection = require('./fromPointAndDirection');
-const test = require('ava');
+import { equals } from './equals';
+import { fromPointAndDirection } from './fromPointAndDirection';
+import { test } from 'ava';
 
 test('line3: equals() should return correct booleans', (t) => {
   const line0 = fromPointAndDirection([0, 0, 0], [1, 1, 1]);

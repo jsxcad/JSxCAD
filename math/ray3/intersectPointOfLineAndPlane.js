@@ -1,4 +1,4 @@
-const vec3 = require('@jsxcad/math-vec3');
+import { add, dot, scale } from '@jsxcad/math-vec3';
 
 /**
  * Determine the closest point on the given plane to the given line.
@@ -9,7 +9,7 @@ const vec3 = require('@jsxcad/math-vec3');
  * @param {line3} line the 3D line of reference
  * @returns {vec3} a new point
  */
-const intersectToPlane = (plane, line) => {
+export const intersectPointOfLineAndPlane = (plane, line) => {
   // plane: plane.normal * p = plane.w
   const pnormal = plane;
   const pw = plane[3];
@@ -18,10 +18,8 @@ const intersectToPlane = (plane, line) => {
   const ldirection = line[1];
 
   // point: p = line.point + labda * line.direction
-  const lambda = (pw - vec3.dot(pnormal, lpoint)) / vec3.dot(pnormal, ldirection);
+  const lambda = (pw - dot(pnormal, lpoint)) / dot(pnormal, ldirection);
 
-  const point = vec3.add(lpoint, vec3.scale(lambda, ldirection));
+  const point = add(lpoint, scale(lambda, ldirection));
   return point;
 };
-
-module.exports = intersectToPlane;

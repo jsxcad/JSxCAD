@@ -1,8 +1,8 @@
-const create = require('./create');
-const distanceToPoint = require('./distanceToPoint');
-const fromPoints = require('./fromPoints');
-const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
-const test = require('ava');
+import { create } from './create';
+import { distanceToPoint } from './distanceToPoint';
+import { fromPoints } from './fromPoints';
+import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
+import { test } from 'ava';
 
 test('line3: distanceToPoint() should return proper values', (t) => {
   const line1 = create();

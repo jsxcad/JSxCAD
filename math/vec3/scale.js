@@ -5,8 +5,6 @@
  * @param {vec3} vector the vector to scale
  * @returns {vec3} out
  */
-const scale = (amount, vector) => [vector[0] * amount,
-                                   vector[1] * amount,
-                                   vector[2] * amount];
-
-module.exports = scale;
+export const scale = (amount, [x, y, z]) => [x * amount,
+                                             y * amount,
+                                             z * amount];

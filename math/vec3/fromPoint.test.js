@@ -1,5 +1,5 @@
-const fromPoint = require('./fromPoint');
-const test = require('ava');
+import { fromPoint } from './fromPoint';
+import { test } from 'ava';
 
 test('With no ranks, produces the origin', (t) => {
   t.deepEqual(fromPoint([]), [0, 0, 0]);
