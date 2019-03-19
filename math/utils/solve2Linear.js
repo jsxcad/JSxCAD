@@ -3,7 +3,5 @@ export const solve2Linear = (a, b, c, d, u, v) => {
   const invdet = 1.0 / det;
   const x = u * d - b * v;
   const y = -u * c + a * v;
-  x *= invdet;
-  y *= invdet;
-  return [x, y];
+  return [x * invdet, y * invdet];
 };
