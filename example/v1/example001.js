@@ -34,4 +34,4 @@ export const main = () => {
   const solid = example001();
   writeStl({ path: 'tmp/example001.stl' }, solid);
   writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' }, solid);
-}
+};

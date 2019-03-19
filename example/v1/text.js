@@ -13,4 +13,4 @@ export const main = ({ text = 'JSxCAD' }) => {
 
   writeStl({ path: 'tmp/text.stl' }, solid);
   writeThreejsPage({ path: 'tmp/text.html', cameraPosition: [0, 0, 400] }, solid);
-}
+};

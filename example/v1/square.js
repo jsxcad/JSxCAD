@@ -7,4 +7,4 @@ export const getParameterDefinitions = () => [
 export const main = ({ length = 30 }) => {
   const shape = square(length);
   writePdf({ path: 'tmp/square.pdf' }, shape);
-}
+};

@@ -53,4 +53,4 @@ const buildGear = ({ mmPerTooth = 3, numberOfTeeth = 11, teethToHide = 0, pressu
 
 export const main = () => {
   writePdf({ path: 'tmp/gear.pdf' }, buildGear({}));
-}
+};

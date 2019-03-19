@@ -64,4 +64,4 @@ const scaledCubes = zobristCubes().scale([10, 10, 10]);
 export const main = () => {
   writeStl({ path: 'tmp/zobrist.stl' }, scaledCubes);
   writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/zobrist.html' }, scaledCubes);
-}
+};
