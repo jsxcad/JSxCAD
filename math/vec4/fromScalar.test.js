@@ -1,5 +1,5 @@
-const fromScalar = require('./fromScalar');
-const test = require('ava');
+import { fromScalar } from './fromScalar';
+import { test } from 'ava';
 
 test('vec4: fromScalar() should return a new vec4 with correct values', (t) => {
   const obs1 = fromScalar(0);

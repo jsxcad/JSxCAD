@@ -1,5 +1,5 @@
-const test = require('ava');
-const transform = require('./transform');
+import { test } from 'ava';
+import { transform } from './transform';
 
 test('vec4: transform() called with two paramerters should return a vec4 with correct values', (t) => {
   const identityMatrix = [
