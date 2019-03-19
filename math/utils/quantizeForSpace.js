@@ -1,4 +1,2 @@
 // TODO: Clean this up.
-const quantizeForSpace = (value) => value;
-
-module.exports = quantizeForSpace;
+export const quantizeForSpace = (value) => value;
