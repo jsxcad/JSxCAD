@@ -24,4 +24,4 @@ export {
   origin,
   reverse,
   transform
-}
+};
