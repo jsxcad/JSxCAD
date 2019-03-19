@@ -9,7 +9,7 @@ const run = async () => {
 
     if (getParameterDefinitions !== undefined) {
       const definitions = getParameterDefinitions();
-      const { targets, options } = argv.option(definitions).run();
+      const { options } = argv.option(definitions).run();
       for (const { name, initial } of definitions) {
         if (options[name] === undefined) {
           options[name] = initial;
@@ -17,11 +17,10 @@ const run = async () => {
       }
       mainOptions = options;
     }
-  
     if (main !== undefined) {
       main(mainOptions);
     }
   }
-}
+};
 
 run().catch(e => console.log(e.toString()));

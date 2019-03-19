@@ -6,8 +6,8 @@ export const getParameterDefinitions = () => [
   { name: 'text', initial: 30, caption: 'Length', type: 'text' }
 ];
 
-export const main = ({ text = 'JSxCAD' }) => {
-  const solid = union(text({ font: greatVibes, curveSegments: 32 }, 'JSxCAD'))
+export const main = ({ string = 'JSxCAD' }) => {
+  const solid = union(text({ font: greatVibes, curveSegments: 32 }, string))
       .extrude({ height: 10 })
       .translate([-170, -20, 0]);
 
