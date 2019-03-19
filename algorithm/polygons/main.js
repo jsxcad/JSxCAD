@@ -11,6 +11,10 @@ import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
 import { transform } from './transform';
 
+export const rotateX = (angle, polygons) => transform(fromXRotation(angle), polygons);
+export const rotateY = (angle, polygons) => transform(fromYRotation(angle), polygons);
+export const rotateZ = (angle, polygons) => transform(fromZRotation(angle), polygons);
+export const scale = (vector, polygons) => transform(fromScaling(vector), polygons);
 export const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
 
 export {
@@ -24,5 +28,9 @@ export {
   measureBoundingSphere,
   toGeneric,
   toPoints,
-  transform
+  rotateX,
+  rotateY,
+  rotateZ,
+  transform,
+  translate
 };
