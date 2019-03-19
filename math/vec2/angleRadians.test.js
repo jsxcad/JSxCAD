@@ -1,5 +1,5 @@
-const test = require('ava');
-const angleRadians = require('./angleRadians');
+import { angleRadians } from './angleRadians';
+import { test } from 'ava';
 
 test('vec2: angleRadians() should return correct values', (t) => {
   const distance1 = angleRadians([0, 0]);

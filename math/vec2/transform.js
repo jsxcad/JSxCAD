@@ -7,7 +7,5 @@
  * @param {vec2} vector the vector to transform
  * @returns {vec2} out
  */
-const transform = (matrix, [x, y]) => [matrix[0] * x + matrix[4] * y + matrix[12],
-                                       matrix[1] * x + matrix[5] * y + matrix[13]];
-
-module.exports = transform;
+export const transform = (matrix, [x, y]) => [matrix[0] * x + matrix[4] * y + matrix[12],
+                                              matrix[1] * x + matrix[5] * y + matrix[13]];

@@ -4,6 +4,4 @@
  * @param {vec2} a vector to negate
  * @returns {vec2} out
  */
-const negate = (a, b) => [-a[0], -a[1]];
-
-module.exports = negate;
+export const negate = ([x, y]) => [-x, -y];

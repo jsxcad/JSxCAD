@@ -6,7 +6,5 @@
  * @param {vec2} b the second operand
  * @returns {vec2} out
  */
-const lerp = (t, [ax, ay], [bx, by]) => [ax + t * (bx - ax),
-                                         ay + t * (by - ay)];
-
-module.exports = lerp;
+export const lerp = (t, [ax, ay], [bx, by]) => [ax + t * (bx - ax),
+                                                ay + t * (by - ay)];

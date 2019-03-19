@@ -5,10 +5,8 @@
  * @param {vec2} b the second operand
  * @returns {Number} distance between a and b
  */
-const distance = (a, b) => {
-  const x = b[0] - a[0];
-  const y = b[1] - a[1];
+export const distance = ([ax, ay], [bx, by]) => {
+  const x = bx - ax;
+  const y = by - ay;
   return Math.sqrt(x * x + y * y);
 };
-
-module.exports = distance;
