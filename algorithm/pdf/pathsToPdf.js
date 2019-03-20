@@ -1,5 +1,5 @@
-const mat4 = require('@jsxcad/math-mat4');
-const { measureBoundingBox, transform } = require('@jsxcad/algorithm-paths');
+import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
+import { measureBoundingBox, transform } from '@jsxcad/algorithm-paths';
 
 const X = 0;
 const Y = 1;
@@ -29,7 +29,7 @@ const footer =
     `trailer << /Root 1 0 R /Size 4 >>`,
     `%%EOF`];
 
-const pathsToPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, paths) => {
+export const pathsToPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, paths) => {
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;
@@ -41,8 +41,8 @@ const pathsToPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, 
   // it up to the top left. This positions the origin nicely for laser
   // cutting and printing.
   const offset = [-min[X] * scale, (height - max[Y]) * scale, 0];
-  const matrix = mat4.multiply(mat4.fromTranslation(offset),
-                               mat4.fromScaling([scale, scale, scale]));
+  const matrix = multiply(fromTranslation(offset),
+                          fromScaling([scale, scale, scale]));
   for (const path of transform(matrix, paths)) {
     let nth = (path[0] === null) ? 1 : 0;
     const [x1, y1] = path[nth];
@@ -62,5 +62,3 @@ const pathsToPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, 
                    lines,
                    footer).join('\n');
 };
-
-module.exports = pathsToPdf;

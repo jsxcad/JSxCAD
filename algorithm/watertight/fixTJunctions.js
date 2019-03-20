@@ -1,8 +1,8 @@
-const EPS = 1e-5;
-const plane = require('@jsxcad/math-plane');
-const poly3 = require('@jsxcad/math-poly3');
-const vec3 = require('@jsxcad/math-vec3');
+import { fromPoints as fromPointsAPlane } from '@jsxcad/math-plane';
+import { fromPoints as fromPointsAPoly3, toPlane } from '@jsxcad/math-poly3';
+import { add, dot, equals, fromScalar, multiply, squaredDistance, subtract } from '@jsxcad/math-vec3';
 
+const EPS = 1e-5;
 const W = 3;
 
 const tag = vertex => JSON.stringify([...vertex]);
@@ -54,8 +54,8 @@ function deleteSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, v
   let sideobjs = sidemap[sidetag];
   for (let i = 0; i < sideobjs.length; i++) {
     let sideobj = sideobjs[i];
-    if (!vec3.equals(sideobj.vertex0, vertex0)) continue;
-    if (!vec3.equals(sideobj.vertex1, vertex1)) continue;
+    if (!equals(sideobj.vertex0, vertex0)) continue;
+    if (!equals(sideobj.vertex1, vertex1)) continue;
     if (polygonindex !== null) {
       if (sideobj.polygonindex !== polygonindex) continue;
     }
@@ -102,7 +102,7 @@ function deleteSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, v
      Note that this can create polygons that are slightly non-convex (due to rounding errors). Therefore the result
      should not be used for further Geom3 operations!
 */
-const fixTJunctions = function (polygons) {
+export const fixTJunctions = function (polygons) {
   let sidemap = {};
 
   // STEP 1
@@ -230,13 +230,13 @@ const fixTJunctions = function (polygons) {
                 let endpos = endvertex;
                 let checkpos = matchingsidestartvertex;
                 // let direction = checkpos.minus(startpos)
-                let direction = vec3.subtract(checkpos, startpos);
+                let direction = subtract(checkpos, startpos);
                 // Now we need to check if endpos is on the line startpos-checkpos:
                 // let t = endpos.minus(startpos).dot(direction) / direction.dot(direction)
-                let t = vec3.dot(vec3.subtract(endpos, startpos), direction) / vec3.dot(direction, direction);
+                let t = dot(subtract(endpos, startpos), direction) / dot(direction, direction);
                 if ((t > 0) && (t < 1)) {
-                  let closestpoint = vec3.add(startpos, vec3.multiply(direction, vec3.fromScalar(t)));
-                  let distancesquared = vec3.squaredDistance(closestpoint, endpos);
+                  let closestpoint = add(startpos, multiply(direction, fromScalar(t)));
+                  let distancesquared = squaredDistance(closestpoint, endpos);
                   if (distancesquared < (EPS * EPS)) {
                     // Yes it's a t-junction! We need to split matchingside in two:
                     let polygonindex = matchingside.polygonindex;
@@ -254,10 +254,10 @@ const fixTJunctions = function (polygons) {
                     // split the side by inserting the vertex:
                     let newvertices = polygon.slice(0);
                     newvertices.splice(insertionvertextagindex, 0, endvertex);
-                    let newpolygon = poly3.fromPoints(newvertices);
+                    let newpolygon = fromPointsAPoly3(newvertices);
 
                     // calculate plane with differents point
-                    if (isNaN(poly3.toPlane(newpolygon)[W])) {
+                    if (isNaN(toPlane(newpolygon)[W])) {
                       let found = false;
                       let loop = function (callback) {
                         newpolygon.forEach(function (item) {
@@ -269,8 +269,8 @@ const fixTJunctions = function (polygons) {
                       loop(function (a) {
                         loop(function (b) {
                           loop(function (c) {
-                            newpolygon.plane = plane.fromPoints(a, b, c);
-                            if (!isNaN(poly3.toPlane(newpolygon)[W])) {
+                            newpolygon.plane = fromPointsAPlane(a, b, c);
+                            if (!isNaN(toPlane(newpolygon)[W])) {
                               found = true;
                             }
                           });
@@ -308,5 +308,3 @@ const fixTJunctions = function (polygons) {
 
   return polygons;
 };
-
-module.exports = fixTJunctions;

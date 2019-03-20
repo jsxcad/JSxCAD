@@ -57,7 +57,6 @@
     "@jsxcad/math-mat4": "^0.0.50",
     "@jsxcad/math-poly3": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50",
     "esm": "^3.2.10",
     "martinez-polygon-clipping": "^0.5.0",
     "tess2": "^1.0.0"

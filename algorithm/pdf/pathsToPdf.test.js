@@ -1,6 +1,6 @@
-const { buildRegularPolygon } = require('@jsxcad/algorithm-shape');
-const pathsToPdf = require('./pathsToPdf');
-const test = require('ava');
+import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
+import { pathsToPdf } from './pathsToPdf';
+import { test } from 'ava';
 
 test('Triangle', t => {
   // A polygon is a path.

@@ -1,8 +1,8 @@
 // Consider replacing the math library.
 
-const ensureMapElement = require('./ensureMapElement');
-const ray3 = require('@jsxcad/math-ray3');
-const vec3 = require('@jsxcad/math-vec3');
+import { ensureMapElement } from './ensureMapElement';
+import { fromPoints } from '@jsxcad/math-ray3';
+import { equals, length, subtract } from '@jsxcad/math-vec3';
 
 const toIdentity = JSON.stringify;
 
@@ -28,21 +28,21 @@ const toIdentity = JSON.stringify;
  *
  * So, we need to detect any distinct colinear edges.
  */
-const findVertexViolations = (start, ...ends) => {
+export const findVertexViolations = (start, ...ends) => {
   const lines = new Map();
   ends.forEach(end => {
     // These are not actually lines, but they all start at the same position, so we can pretend.
-    const ray = ray3.fromPoints(start, end);
+    const ray = fromPoints(start, end);
     ensureMapElement(lines, toIdentity(ray)).push(end);
   });
 
-  const distance = (end) => vec3.length(vec3.subtract(end, start));
+  const distance = (end) => length(subtract(end, start));
 
   let violations = [];
   lines.forEach(ends => {
     ends.sort((a, b) => distance(a) - distance(b));
     for (let nth = 1; nth < ends.length; nth++) {
-      if (!vec3.equals(ends[nth], ends[nth - 1])) {
+      if (!equals(ends[nth], ends[nth - 1])) {
         violations.push(['unequal', [start, ...ends]]);
         violations.push(['unequal', [start, ...ends].reverse()]);
         break;
@@ -60,5 +60,3 @@ const findVertexViolations = (start, ...ends) => {
   // If no violations, it is Watertight.
   return violations;
 };
-
-module.exports = findVertexViolations;

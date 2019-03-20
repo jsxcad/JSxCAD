@@ -1,6 +1,6 @@
-const polygonsToStla = require('./polygonsToStla');
-const test = require('ava');
-const { readFileSync } = require('fs');
+import { polygonsToStla } from './polygonsToStla';
+import { readFileSync } from 'fs';
+import { test } from 'ava';
 
 const box1Polygons =
   [

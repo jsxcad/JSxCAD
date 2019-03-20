@@ -1,5 +1,3 @@
-const findPolygonsViolations = require('./findPolygonsViolations');
+import { findPolygonsViolations } from './findPolygonsViolations';
 
-const isWatertightPolygons = polygons => findPolygonsViolations(polygons).length === 0;
-
-module.exports = isWatertightPolygons;
+export const isWatertightPolygons = polygons => findPolygonsViolations(polygons).length === 0;

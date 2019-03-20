@@ -54,7 +54,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-color": "^0.0.50",
-    "@jsxcad/algorithm-curve": "^0.0.50",
     "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
     "@jsxcad/algorithm-pdf": "^0.0.50",
@@ -71,7 +70,6 @@
     "@jsxcad/geometry-solid3evan": "^0.0.50",
     "@jsxcad/geometry-surf2pc": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50",
     "esm": "^3.2.10"
   },
   "ava": {

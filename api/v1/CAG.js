@@ -5,6 +5,10 @@ import { fromPaths } from '@jsxcad/geometry-surf2pc';
 import { writePdf } from './writePdf';
 
 export class CAG {
+  as (tag) {
+    return this.union().as(tag);
+  }
+
   constructor (geometry) {
     this.geometry = geometry || fromPaths({}, []);
   }

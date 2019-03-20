@@ -1,5 +1,5 @@
-const { isWatertightPolygons, makeWatertight } = require('@jsxcad/algorithm-watertight');
-const poly3 = require('@jsxcad/math-poly3');
+import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
+import { toPlane } from '@jsxcad/math-poly3';
 
 /**
  * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
@@ -10,7 +10,7 @@ const poly3 = require('@jsxcad/math-poly3');
  * @returns {String} - the ascii STL output.
  */
 
-const polygonsToStla = (options = {}, polygons) => {
+export const polygonsToStla = (options = {}, polygons) => {
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);
     if (options.doMakeWatertight) {
@@ -33,7 +33,7 @@ const convertToFacet = polygon => {
   let result = [];
   if (polygon.length >= 3) {
     // Build a poly3 for convenience in computing the normal.
-    let normal = toStlVector(poly3.toPlane(polygon));
+    let normal = toStlVector(toPlane(polygon));
     // STL requires triangular polygons. If our polygon has more vertices, create multiple triangles:
     for (let i = 0; i < polygon.length - 2; i++) {
       result.push(
@@ -50,5 +50,3 @@ const convertToFacet = polygon => {
   }
   return result.join('\n');
 };
-
-module.exports = polygonsToStla;

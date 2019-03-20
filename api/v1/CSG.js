@@ -2,11 +2,16 @@
 import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 // import { fromPaths } from '@jsxcad/geometry-solid3evan';
 
+import { Assembly } from './Assembly';
 import { toGeometry } from './toGeometry';
 import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 import { toTriangles } from '@jsxcad/algorithm-triangles';
 
 export class CSG {
+  as (tag) {
+    return Assembly.fromGeometries([this.geometry]).as(tag);
+  }
+
   constructor (geometry) {
     this.geometry = geometry || fromPaths({}, []);
   }

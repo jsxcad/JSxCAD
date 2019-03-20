@@ -1,10 +1,10 @@
-const { eachEdge } = require('@jsxcad/math-poly3');
-const ensureMapElement = require('./ensureMapElement');
-const findVertexViolations = require('./findVertexViolations');
+import { eachEdge } from '@jsxcad/math-poly3';
+import { ensureMapElement } from './ensureMapElement';
+import { findVertexViolations } from './findVertexViolations';
 
 const toIdentity = JSON.stringify;
 
-const findPolygonsViolations = polygons => {
+export const findPolygonsViolations = polygons => {
   // A map from vertex value to connected edges represented as an array in
   // the form [start, ...end].
   const edges = new Map();
@@ -20,5 +20,3 @@ const findPolygonsViolations = polygons => {
 
   return violations;
 };
-
-module.exports = findPolygonsViolations;

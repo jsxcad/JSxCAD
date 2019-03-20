@@ -1,6 +1,30 @@
 import { toPlane } from '@jsxcad/math-poly3';
 
-const page = ({ cameraPosition, indices, positions, normals }) => `
+const renderMaterial = (nth) => {
+  // Just cycle through materials for now.
+  const materials = [
+    'THREE.MeshNormalMaterial()',
+    'THREE.MeshLambertMaterial({ color: 0xffffff, ambient: 0xaaaaaa, shading: THREE.FlatShading })'
+  ];
+  return materials[nth % materials.length];
+};
+
+const renderDataset = ({ indices, positions, normals }, nth) => `
+        {
+          var geometry = new THREE.BufferGeometry();
+          var indices = ${JSON.stringify(indices)};
+          var positions = ${JSON.stringify(positions)};
+          var normals = ${JSON.stringify(normals)};
+          geometry.setIndex( indices );
+          geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+          geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+          var material = new ${renderMaterial(nth)};
+          mesh = new THREE.Mesh( geometry, material );
+          scene.add( mesh );
+        }
+`;
+
+const page = ({ cameraPosition, datasets }) => `
 <html lang="en">
   <head>
     <title>JSxCAD Viewer</title>
@@ -57,18 +81,7 @@ const page = ({ cameraPosition, indices, positions, normals }) => `
         var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
         light2.position.set( 0, - 1, 0 );
         scene.add( light2 );
-        //
-        var geometry = new THREE.BufferGeometry();
-        var indices = ${JSON.stringify(indices)};
-        var positions = ${JSON.stringify(positions)};
-        var normals = ${JSON.stringify(normals)};
-        //
-        geometry.setIndex( indices );
-        geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-        geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-        var material = new THREE.MeshNormalMaterial();
-        mesh = new THREE.Mesh( geometry, material );
-        scene.add( mesh );
+        ${datasets.map(renderDataset).join('')}
         //
         renderer = new THREE.WebGLRenderer( { antialias: true } );
         renderer.setPixelRatio( window.devicePixelRatio );
@@ -114,25 +127,29 @@ const intern = (map, point, next, update) => {
   return next;
 };
 
-export const trianglesToThreejsPage = ({ cameraPosition = [0, 0, 16] }, triangles) => {
+export const trianglesToThreejsPage = ({ cameraPosition = [0, 0, 16] }, ...triangularGeometries) => {
   // Translate the paths to threejs geometry data.
-  const indices = [];
-  const vertexMap = {};
-  const positions = [];
-  const normals = [];
+  const datasets = [];
+  for (const triangles of triangularGeometries) {
+    const indices = [];
+    const vertexMap = {};
+    const positions = [];
+    const normals = [];
 
-  for (const triangle of triangles) {
-    const [x, y, z] = toPlane(triangle);
-    const normal = [x, y, z];
-    for (const point of triangle) {
-      indices.push(intern(vertexMap,
-                          [point, normal],
-                          Math.floor(positions.length / 3),
-                          ([point, normal]) => {
-                            positions.push(...point);
-                            normals.push(...normal);
-                          }));
+    for (const triangle of triangles) {
+      const [x, y, z] = toPlane(triangle);
+      const normal = [x, y, z];
+      for (const point of triangle) {
+        indices.push(intern(vertexMap,
+                            [point, normal],
+                            Math.floor(positions.length / 3),
+                            ([point, normal]) => {
+                              positions.push(...point);
+                              normals.push(...normal);
+                            }));
+      }
     }
+    datasets.push({ indices, positions, normals });
   }
-  return page({ cameraPosition, indices, positions, normals });
+  return page({ cameraPosition, datasets });
 };

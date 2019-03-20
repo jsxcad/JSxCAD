@@ -1,5 +1,1 @@
-const { publish } = require('@jsxcad/provide');
-
-module.exports =
-    publish({ base: '@jsxcad/algorithm-pdf', require },
-            'pathsToPdf');
+module.exports = require('esm')(module)('./main.js');
