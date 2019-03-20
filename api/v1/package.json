@@ -71,7 +71,6 @@
     "@jsxcad/geometry-solid3evan": "^0.0.50",
     "@jsxcad/geometry-surf2pc": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/provide": "^0.0.50",
     "esm": "^3.2.10"
   },
   "ava": {

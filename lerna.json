@@ -22,7 +22,6 @@
     "data/*",
     "example/*",
     "geometry/*",
-    "math/*",
-    "provide"
+    "math/*"
   ]
 }
