@@ -17,4 +17,4 @@ export const main = () => {
   writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/assembly.html' },
                    assembly.toPaths({ tags: ['cube'] }),
                    assembly.toPaths({ tags: ['cylinder'] }));
-}
+};

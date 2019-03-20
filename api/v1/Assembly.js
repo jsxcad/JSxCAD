@@ -49,7 +49,7 @@ const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometri
 
 export const unionLazily = (shape, ...shapes) => {
   return Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
-}
+};
 
 // FIX: This needs clear documentation.
 Assembly.fromGeometry = (geometry) => new Assembly(geometry);

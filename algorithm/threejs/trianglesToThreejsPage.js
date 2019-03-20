@@ -144,7 +144,7 @@ export const trianglesToThreejsPage = ({ cameraPosition = [0, 0, 16] }, ...trian
                             [point, normal],
                             Math.floor(positions.length / 3),
                             ([point, normal]) => {
-                            positions.push(...point);
+                              positions.push(...point);
                               normals.push(...normal);
                             }));
       }
