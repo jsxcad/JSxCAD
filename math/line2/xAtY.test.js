@@ -1,10 +1,10 @@
-const test = require('ava');
-const xAtY = require('./xAtY');
-const create = require('./create');
-const fromPoints = require('./fromPoints');
+import { fromPoints } from './fromPoints';
+import { fromValues } from './fromValues';
+import { test } from 'ava';
+import { xAtY } from './xAtY';
 
 test('line2: xAtY() should return proper values', (t) => {
-  const line1 = create();
+  const line1 = fromValues();
 
   const x1 = xAtY(0, line1);
   t.is(x1, 0);

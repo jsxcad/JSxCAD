@@ -1,6 +1,6 @@
-const fromRotation = require('./fromRotation');
-const test = require('ava');
-const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+import { fromRotation } from './fromRotation';
+import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
+import { test } from 'ava';
 
 test('mat4: fromRotation() should return a new mat4 with correct values', (t) => {
   let rotation = 90 * 0.017453292519943295;

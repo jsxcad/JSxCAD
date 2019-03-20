@@ -1,7 +1,7 @@
-const equals = require('./equals');
-const flip = require('./flip');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
+import { equals } from './equals';
+import { flip } from './flip';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
 
 test('poly3: flip() should return a new poly3 with correct values', (t) => {
   const exp1 = [[1, 1, 0], [1, 0, 0], [0, 0, 0]]; exp1.plane = [0, 0, -1, 0];

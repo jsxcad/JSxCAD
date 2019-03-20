@@ -1,5 +1,5 @@
-const rotateX = require('./rotateX');
-const test = require('ava');
+import { rotateX } from './rotateX';
+import { test } from 'ava';
 
 const radians = 90 * Math.PI / 180;
 

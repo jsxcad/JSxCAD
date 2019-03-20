@@ -1,5 +1,5 @@
-const reallyQuantizeForSpace = require('./reallyQuantizeForSpace');
-const test = require('ava');
+import { reallyQuantizeForSpace } from './reallyQuantizeForSpace';
+import { test } from 'ava';
 
 test('Quantization happens.', t => {
   t.not(reallyQuantizeForSpace(Math.PI), Math.PI);

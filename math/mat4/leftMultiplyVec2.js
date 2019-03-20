@@ -1,4 +1,4 @@
-const { fromValues } = require('@jsxcad/math-vec2');
+import { fromValues } from '@jsxcad/math-vec2';
 
 /**
  * Multiply the input matrix by a Vector2 (interpreted as 2 column, 1 row)
@@ -8,8 +8,7 @@ const { fromValues } = require('@jsxcad/math-vec2');
  * @param {mat4} matrix the input matrix
  * @returns {vec2} output
  */
-const leftMultiplyVec2 = (vector, matrix) => {
-  const [v0, v1] = vector;
+export const leftMultiplyVec2 = ([v0, v1], matrix) => {
   const v2 = 0;
   const v3 = 1;
   let x = v0 * matrix[0] + v1 * matrix[4] + v2 * matrix[8] + v3 * matrix[12];
@@ -24,5 +23,3 @@ const leftMultiplyVec2 = (vector, matrix) => {
   }
   return fromValues(x, y);
 };
-
-module.exports = leftMultiplyVec2;

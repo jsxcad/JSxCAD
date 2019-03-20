@@ -1,4 +1,4 @@
-const vec3 = require('@jsxcad/math-vec3');
+import { cross, dot } from '@jsxcad/math-vec3';
 
 /*
  * Measure the signed volume of the given polygon, which must be convex.
@@ -6,16 +6,13 @@ const vec3 = require('@jsxcad/math-vec3');
  * and will be positive or negative based on the rotation of the vertices.
  * See http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf
  */
-const measureSignedVolume = (poly3) => {
+export const measureSignedVolume = (poly3) => {
   let signedVolume = 0;
   const vertices = poly3;
   // calculate based on triangluar polygons
   for (let i = 0; i < vertices.length - 2; i++) {
-    const cross = vec3.cross(vertices[i + 1], vertices[i + 2]);
-    signedVolume += vec3.dot(vertices[0], cross);
+    signedVolume += dot(vertices[0], cross(vertices[i + 1], vertices[i + 2]));
   }
   signedVolume /= 6;
   return signedVolume;
 };
-
-module.exports = measureSignedVolume;

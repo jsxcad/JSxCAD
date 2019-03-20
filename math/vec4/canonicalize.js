@@ -1,6 +1,3 @@
-const fromValues = require('./fromValues');
-const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 
-const canonicalize = vector => fromValues(...vector.map(q));
-
-module.exports = canonicalize;
+export const canonicalize = vector => vector.map(q);

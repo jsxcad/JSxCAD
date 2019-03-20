@@ -1,5 +1,5 @@
-const test = require('ava');
-const fromPoints = require('./fromPoints');
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
 
 test('plane: fromPoints() should return a new plane with correct values', (t) => {
   t.deepEqual(fromPoints([0, 0, 0], [1, 0, 0], [1, 1, 0]), [0, 0, 1, 0]);

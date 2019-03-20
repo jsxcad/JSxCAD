@@ -1,4 +1,4 @@
-const length = require('./length');
+import { length } from './length';
 
 /**
  * Calculates the unit vector of the given vector
@@ -6,11 +6,10 @@ const length = require('./length');
  * @param {vec3} vector - the base vector for calculations
  * @returns {vec3} unit vector of the given vector
  */
-const unit = (vector) => {
+export const unit = (vector) => {
+  const [x, y, z] = vector;
   const magnitude = length(vector);
-  return [vector[0] / magnitude,
-          vector[1] / magnitude,
-          vector[2] / magnitude];
+  return [x / magnitude,
+          y / magnitude,
+          z / magnitude];
 };
-
-module.exports = unit;

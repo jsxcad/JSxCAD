@@ -1,5 +1,5 @@
-const signedDistanceToPoint = require('./signedDistanceToPoint');
-const test = require('ava');
+import { signedDistanceToPoint } from './signedDistanceToPoint';
+import { test } from 'ava';
 
 test('plane: signedDistanceToPoint() should return correct values', (t) => {
   t.is(signedDistanceToPoint([0, 0, 0, 0], [0, 0, 0]), 0);

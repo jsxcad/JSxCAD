@@ -1,5 +1,5 @@
-const fromPointAndDirection = require('./fromPointAndDirection');
-const vec3 = require('@jsxcad/math-vec3');
+import { fromPointAndDirection } from './fromPointAndDirection';
+import { subtract } from '@jsxcad/math-vec3';
 
 /**
  * Creates a new 3D line that passes through the given points.
@@ -8,9 +8,7 @@ const vec3 = require('@jsxcad/math-vec3');
  * @param {vec3} p2 end point of the line segment
  * @returns {line3} a new unbounded 3D line
  */
-const fromPoints = (p1, p2) => {
-  const direction = vec3.subtract(p2, p1);
+export const fromPoints = (p1, p2) => {
+  const direction = subtract(p2, p1);
   return fromPointAndDirection(p1, direction);
 };
-
-module.exports = fromPoints;

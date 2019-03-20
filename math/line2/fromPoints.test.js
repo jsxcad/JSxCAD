@@ -1,6 +1,6 @@
-const c = require('./canonicalize');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
+import { canonicalize as c } from './canonicalize';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
 
 test('line2: fromPoints() should return a new line2 with correct values', (t) => {
   const obs1 = fromPoints([0, 0], [0, 0]);

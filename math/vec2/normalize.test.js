@@ -1,6 +1,6 @@
-const canonicalize = require('./canonicalize');
-const normalize = require('./normalize');
-const test = require('ava');
+import { canonicalize } from './canonicalize';
+import { normalize } from './normalize';
+import { test } from 'ava';
 
 test('vec2: normalize() called with one paramerters should return a vec2 with correct values', (t) => {
   t.deepEqual(canonicalize(normalize([0, 0])), [0, 0]);

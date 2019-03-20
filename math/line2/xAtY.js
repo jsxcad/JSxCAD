@@ -1,4 +1,4 @@
-const origin = require('./origin');
+import { origin } from './origin';
 
 /**
  * Determine the X coordinate of the given line at the Y coordinate.
@@ -9,7 +9,7 @@ const origin = require('./origin');
  * @param {line2} line the 2D line of reference
  * @return {Number} the X coordinate on the line
  */
-const xAtY = (y, line) => {
+export const xAtY = (y, line) => {
   // px = (distance - normal.y * y) / normal.x
   let x = (line[2] - (line[1] * y)) / line[0];
   if (Number.isNaN(x)) {
@@ -18,5 +18,3 @@ const xAtY = (y, line) => {
   }
   return x;
 };
-
-module.exports = xAtY;

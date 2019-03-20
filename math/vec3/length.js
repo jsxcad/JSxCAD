@@ -4,6 +4,4 @@
  * @param {vec3} a vector to calculate length of
  * @returns {Number} length of a
  */
-const length = ([x, y, z]) => Math.sqrt((x * x) + (y * y) + (z * z));
-
-module.exports = length;
+export const length = ([x = 0, y = 0, z = 0]) => Math.sqrt((x * x) + (y * y) + (z * z));

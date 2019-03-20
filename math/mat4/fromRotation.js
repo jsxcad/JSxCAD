@@ -1,6 +1,4 @@
-const create = require('./create');
-
-const { EPSILON } = require('./constants');
+const EPSILON = 1e-5;
 
 /**
  * Creates a matrix from a given angle around a given axis
@@ -14,9 +12,7 @@ const { EPSILON } = require('./constants');
  * @param {vec3} axis the axis to rotate around
  * @returns {mat4} out
  */
-const fromRotation = (rad, axis) => {
-  let out = create();
-  let [x, y, z] = axis;
+export const fromRotation = (rad, [x, y, z]) => {
   let len = Math.sqrt(x * x + y * y + z * z);
 
   if (Math.abs(len) < EPSILON) { return null; }
@@ -31,23 +27,20 @@ const fromRotation = (rad, axis) => {
   const t = 1 - c;
 
   // Perform rotation-specific matrix multiplication
-  out[0] = x * x * t + c;
-  out[1] = y * x * t + z * s;
-  out[2] = z * x * t - y * s;
-  out[3] = 0;
-  out[4] = x * y * t - z * s;
-  out[5] = y * y * t + c;
-  out[6] = z * y * t + x * s;
-  out[7] = 0;
-  out[8] = x * z * t + y * s;
-  out[9] = y * z * t - x * s;
-  out[10] = z * z * t + c;
-  out[11] = 0;
-  out[12] = 0;
-  out[13] = 0;
-  out[14] = 0;
-  out[15] = 1;
-  return out;
+  return [x * x * t + c,
+          y * x * t + z * s,
+          z * x * t - y * s,
+          0,
+          x * y * t - z * s,
+          y * y * t + c,
+          z * y * t + x * s,
+          0,
+          x * z * t + y * s,
+          y * z * t - x * s,
+          z * z * t + c,
+          0,
+          0,
+          0,
+          0,
+          1];
 };
-
-module.exports = fromRotation;

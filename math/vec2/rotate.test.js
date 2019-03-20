@@ -1,6 +1,6 @@
-const canonicalize = require('./canonicalize');
-const rotate = require('./rotate');
-const test = require('ava');
+import { canonicalize } from './canonicalize';
+import { rotate } from './rotate';
+import { test } from 'ava';
 
 const radians = 90 * Math.PI / 180;
 

@@ -1,5 +1,3 @@
-const create = require('./create');
-
 /**
  * Multiplies two mat4's
  *
@@ -7,8 +5,8 @@ const create = require('./create');
  * @param {mat4} b the second operand
  * @returns {mat4} out
  */
-const multiply = (a, b) => {
-  const out = create();
+export const multiply = (a, b) => {
+  const out = Array(16);
   const a00 = a[0];
   const a01 = a[1];
   const a02 = a[2];
@@ -64,5 +62,3 @@ const multiply = (a, b) => {
   out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
   return out;
 };
-
-module.exports = multiply;

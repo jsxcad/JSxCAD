@@ -1,5 +1,5 @@
-const lerp = require('./lerp');
-const test = require('ava');
+import { lerp } from './lerp';
+import { test } from 'ava';
 
 test('vec2: lerp() called with two paramerters should return a vec2 with correct values', (t) => {
   t.deepEqual(lerp(0, [0, 0], [0, 0]), [0, 0]);

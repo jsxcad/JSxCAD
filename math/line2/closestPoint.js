@@ -1,6 +1,6 @@
-const direction = require('./direction');
-const origin = require('./origin');
-const vec2 = require('@jsxcad/math-vec2');
+import { direction } from './direction';
+import { origin } from './origin';
+import { fromValues } from '@jsxcad/math-vec2';
 
 /**
  * Determine the closest point on the given line to the given point.
@@ -10,7 +10,7 @@ const vec2 = require('@jsxcad/math-vec2');
  * @param {line2} line the 2D line for calculations
  * @returns {vec2} a new point
  */
-const closestPoint = (point, line) => {
+export const closestPoint = (point, line) => {
   // linear function of AB
   const a = origin(line);
   const b = direction(line);
@@ -23,8 +23,5 @@ const closestPoint = (point, line) => {
   const x = (t2 - t1) / (m1 - m2);
   const y = m1 * x + t1;
 
-  const closest = vec2.fromValues(x, y);
-  return closest;
+  return fromValues(x, y);
 };
-
-module.exports = closestPoint;

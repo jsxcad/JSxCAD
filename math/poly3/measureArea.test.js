@@ -1,10 +1,10 @@
-const flip = require('./flip');
-const fromPoints = require('./fromPoints');
-const mat4 = require('@jsxcad/math-mat4');
-const measureArea = require('./measureArea');
-const test = require('ava');
-const transform = require('./transform');
-const q = require('@jsxcad/math-utils').reallyQuantizeForSpace;
+import { flip } from './flip';
+import { fromPoints } from './fromPoints';
+import { fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
+import { measureArea } from './measureArea';
+import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
+import { test } from 'ava';
+import { transform } from './transform';
 
 const empty = [];
 
@@ -34,22 +34,22 @@ test('poly3: test v-shape has area of 19.5.', (t) => {
 });
 
 test('poly3: rotated empty polygon still has zero area', (t) => {
-  const rotation = mat4.fromZRotation((45 * 0.017453292519943295));
+  const rotation = fromZRotation((45 * 0.017453292519943295));
   t.is(measureArea(transform(rotation, fromPoints(empty))), 0);
 });
 
 test('poly3: rotated triangle still has area of 50', (t) => {
-  const rotation = mat4.fromYRotation((45 * 0.017453292519943295));
+  const rotation = fromYRotation((45 * 0.017453292519943295));
   t.is(q(measureArea(transform(rotation, fromPoints(triangle)))), 50);
 });
 
 test('poly3: rotated square still has area of 100', (t) => {
-  const rotation = mat4.fromXRotation((45 * 0.017453292519943295));
+  const rotation = fromXRotation((45 * 0.017453292519943295));
   t.is(measureArea(transform(rotation, fromPoints(square))), 100);
 });
 
 test('poly3: rotated v-shape still has area of 19.5', (t) => {
-  const rotation = mat4.fromZRotation((45 * 0.017453292519943295));
+  const rotation = fromZRotation((45 * 0.017453292519943295));
   t.is(q(measureArea(transform(rotation, fromPoints(vShape)))), 19.5);
 });
 

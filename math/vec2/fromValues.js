@@ -6,6 +6,4 @@
  * @param {Number} y Y component
  * @returns {vec3} a new 2D vector
  */
-const fromValues = (x = 0, y = 0) => [x, y];
-
-module.exports = fromValues;
+export const fromValues = (x = 0, y = 0) => [x, y];

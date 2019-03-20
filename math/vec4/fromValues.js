@@ -7,6 +7,4 @@
  * @param {Number} w W component
  * @returns {vec4} a new vector
  */
-const fromValues = (x = 0, y = 0, z = 0, w = 0) => [x, y, z, w];
-
-module.exports = fromValues;
+export const fromValues = (x = 0, y = 0, z = 0, w = 0) => [x, y, z, w];

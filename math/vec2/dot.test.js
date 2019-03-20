@@ -1,5 +1,5 @@
-const dot = require('./dot');
-const test = require('ava');
+import { dot } from './dot';
+import { test } from 'ava';
 
 test('vec2: dot() should return correct values', (t) => {
   t.is(dot([0, 0], [0, 0]), 0);

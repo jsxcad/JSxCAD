@@ -1,6 +1,4 @@
-const angleRadians = require('./angleRadians');
-const { radToDeg } = require('@jsxcad/math-utils');
+import { angleRadians } from './angleRadians';
+import { radToDeg } from '@jsxcad/math-utils';
 
-const angleDegrees = (vector) => radToDeg(angleRadians(vector));
-
-module.exports = angleDegrees;
+export const angleDegrees = (vector) => radToDeg(angleRadians(vector));

@@ -5,11 +5,9 @@
  * @param {vec2} vector the vector to rotate
  * @returns {vec2} out
  */
-const rotate = (angle, [x, y]) => {
+export const rotate = (angle, [x, y]) => {
   const c = Math.cos(angle);
   const s = Math.sin(angle);
   return [x * c - y * s,
           x * s + y * c];
 };
-
-module.exports = rotate;

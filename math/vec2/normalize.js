@@ -4,7 +4,7 @@
  * @param {vec2} a vector to normalize
  * @returns {vec2} normalized (unit) vector
  */
-const normalize = ([x, y]) => {
+export const normalize = ([x, y]) => {
   let len = x * x + y * y;
   if (len > 0) {
     len = 1 / Math.sqrt(len);
@@ -13,5 +13,3 @@ const normalize = ([x, y]) => {
     return [x, y];
   }
 };
-
-module.exports = normalize;

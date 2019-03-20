@@ -1,4 +1,4 @@
-const eachEdge = require('./eachEdge');
+import { eachEdge } from './eachEdge';
 
 /**
  * Converts the polygon to an ordered list of edges.
@@ -7,10 +7,8 @@ const eachEdge = require('./eachEdge');
  * @returns {Edges}
  */
 
-const toEdges = (options = {}, polygon) => {
+export const toEdges = (options = {}, polygon) => {
   let edges = [];
   eachEdge({}, (a, b) => edges.push([a, b]), polygon);
   return edges;
 };
-
-module.exports = toEdges;

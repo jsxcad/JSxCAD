@@ -1,3 +1,1 @@
-const equals = (a, b) => (a[0] === b[0]) && (a[1] === b[1]) && (a[2] === b[2]);
-
-module.exports = equals;
+export const equals = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);

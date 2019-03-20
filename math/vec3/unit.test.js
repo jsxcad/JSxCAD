@@ -1,6 +1,6 @@
-const c = require('./canonicalize');
-const test = require('ava');
-const unit = require('./unit');
+import { canonicalize as c } from './canonicalize';
+import { test } from 'ava';
+import { unit } from './unit';
 
 test('vec3: unit() called with one paramerter should return a vec3 with correct values', (t) => {
   t.deepEqual(c(unit([0, 0, 0])), [0 / 0, 0 / 0, 0 / 0]);

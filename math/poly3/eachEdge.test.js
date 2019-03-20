@@ -1,5 +1,5 @@
-const eachEdge = require('./eachEdge');
-const test = require('ava');
+import { eachEdge } from './eachEdge';
+import { test } from 'ava';
 
 test('Empty polygon emits no edges.', t => {
   const collected = [];

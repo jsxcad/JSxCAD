@@ -1,5 +1,3 @@
-const create = require('./create');
-
 /**
  * Creates a matrix from the given angle around the Y axis
  * This is equivalent to (but much faster than):
@@ -10,29 +8,9 @@ const create = require('./create');
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
-const fromYRotation = (rad) => {
-  const out = create();
+export const fromYRotation = (rad) => {
   const s = Math.sin(rad);
   const c = Math.cos(rad);
-
   // Perform axis-specific matrix multiplication
-  out[0] = c;
-  out[1] = 0;
-  out[2] = -s;
-  out[3] = 0;
-  out[4] = 0;
-  out[5] = 1;
-  out[6] = 0;
-  out[7] = 0;
-  out[8] = s;
-  out[9] = 0;
-  out[10] = c;
-  out[11] = 0;
-  out[12] = 0;
-  out[13] = 0;
-  out[14] = 0;
-  out[15] = 1;
-  return out;
+  return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
 };
-
-module.exports = fromYRotation;

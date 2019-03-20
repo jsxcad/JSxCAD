@@ -1,9 +1,9 @@
-const vec3 = require('@jsxcad/math-vec3');
+import { cross, subtract } from '@jsxcad/math-vec3';
 
 // measure the area of the given poly3 (3D planar polygon)
 // translated from the orginal C++ code from Dan Sunday
 // 2000 softSurfer http://geomalgorithms.com
-const measureArea = (poly3) => {
+export const measureArea = (poly3) => {
   const n = poly3.length;
   if (n < 3) {
     return 0; // degenerate polygon
@@ -14,9 +14,9 @@ const measureArea = (poly3) => {
   const a = vertices[0];
   const b = vertices[1];
   const c = vertices[2];
-  const ba = vec3.subtract(b, a);
-  const ca = vec3.subtract(c, a);
-  const normal = vec3.cross(ba, ca);
+  const ba = subtract(b, a);
+  const ca = subtract(c, a);
+  const normal = cross(ba, ca);
   // let normal = b.minus(a).cross(c.minus(a))
   // let normal = poly3.plane.normal // unit based normal, CANNOT use
 
@@ -78,5 +78,3 @@ const measureArea = (poly3) => {
   }
   return area;
 };
-
-module.exports = measureArea;

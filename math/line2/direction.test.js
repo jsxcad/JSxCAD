@@ -1,11 +1,11 @@
-const { canonicalize } = require('@jsxcad/math-vec2');
-const create = require('./create');
-const direction = require('./direction');
-const fromPoints = require('./fromPoints');
-const test = require('ava');
+import { canonicalize } from '@jsxcad/math-vec2';
+import { fromValues } from './fromValues';
+import { direction } from './direction';
+import { fromPoints } from './fromPoints';
+import { test } from 'ava';
 
 test('line2: direction() should return proper direction', (t) => {
-  const line1 = create();
+  const line1 = fromValues();
   const dir1 = direction(line1);
   t.deepEqual(canonicalize(dir1), [1, -0]);
 
