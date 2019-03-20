@@ -1,7 +1,3 @@
-const fixTJunctions = require('./fixTJunctions');
+import { fixTJunctions } from './fixTJunctions';
 
-const makeWatertight = polygons => {
-  return fixTJunctions(polygons);
-};
-
-module.exports = makeWatertight;
+export const makeWatertight = polygons => fixTJunctions(polygons);

@@ -1,5 +1,5 @@
-const findVertexViolations = require('./findVertexViolations');
-const test = require('ava');
+import { findVertexViolations } from './findVertexViolations';
+import { test } from 'ava';
 
 test('Watertight vertex is has no violations', t => {
   t.deepEqual(findVertexViolations([0, 0, 0], [1, 1, 1], [1, 1, 1]), []);

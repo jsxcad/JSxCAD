@@ -1,6 +1,6 @@
-const findPolygonsViolations = require('./findPolygonsViolations');
-const isWatertightPolygons = require('./isWatertightPolygons');
-const test = require('ava');
+import { findPolygonsViolations } from './findPolygonsViolations';
+import { isWatertightPolygons } from './isWatertightPolygons';
+import { test } from 'ava';
 
 test('Leaky polygon array is not watertight', t => {
   const leaky = [[[-5, -5, -5], [-5, -5, 5], [-5, 5, 5], [-5, 5, -5]],
