@@ -9,7 +9,7 @@
  * @param   Number  l       The lightness
  * @return  Array           The RGB representation
  */
-const hslToRgb = ([hue, saturation, lightness]) => {
+export const hslToRgb = ([hue, saturation, lightness]) => {
   if (saturation === 0) {
     // Achromatic
     return [lightness, lightness, lightness];
@@ -32,5 +32,3 @@ function hue2rgb (p, q, t) {
   if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
   return p;
 }
-
-module.exports = hslToRgb;
