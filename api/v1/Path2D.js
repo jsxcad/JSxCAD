@@ -1,4 +1,4 @@
-import { buildCircleArc } from '@jsxcad/algorithm-curve';
+// import { buildCircleArc } from '@jsxcad/algorithm-curve';
 import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
 import { canonicalize, butLast, last } from '@jsxcad/algorithm-paths';
 import { fromPaths } from '@jsxcad/geometry-paths';
@@ -127,6 +127,6 @@ export class Path2D {
   }
 }
 
-Path2D.arc = (...params) => new Path2D(buildCircleArc(...params));
+// Path2D.arc = (...params) => new Path2D(buildCircleArc(...params));
 Path2D.fromGeometry = (geometry) => new Path2D(undefined, undefined, geometry);
 Path2D.fromPaths = (paths) => new Path2D(undefined, undefined, fromPaths({}, canonicalize(paths)));
