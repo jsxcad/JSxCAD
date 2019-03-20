@@ -2,6 +2,12 @@ import { fromGeometries } from '@jsxcad/geometry-assembly';
 import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 
 export class Assembly {
+  as (tag) {
+    const tags = this.geometry.getProperty('tags', []);
+    const result = Assembly.fromGeometry(this.geometry.withProperty('tags', [tag, ...tags]));
+    return result;
+  }
+
   constructor (geometry) {
     this.geometry = geometry || fromGeometries({}, []);
   }
@@ -39,9 +45,12 @@ export class Assembly {
   }
 }
 
-const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometries([shape]);
+const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometries({}, [shape]);
 
-export const unionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+export const unionLazily = (shape, ...shapes) => {
+  return Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+}
 
+// FIX: This needs clear documentation.
 Assembly.fromGeometry = (geometry) => new Assembly(geometry);
+Assembly.fromGeometries = (geometries) => Assembly.fromGeometry(fromGeometries({}, geometries));

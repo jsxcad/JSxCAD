@@ -5,6 +5,10 @@ import { fromPaths } from '@jsxcad/geometry-paths';
 
 // FIX: Incorrectly named.
 export class Path2D {
+  as (tag) {
+    return this.union().as(tag);
+  }
+
   constructor (points = [], closed = false, geometry) {
     if (geometry !== undefined) {
       this.geometry = geometry;

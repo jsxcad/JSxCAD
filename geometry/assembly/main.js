@@ -5,18 +5,20 @@ export class Assembly {
     this.isAssembly = true;
   }
 
-  label () {
-    return this.properties['label'];
-  }
-
-  withLabel (label) {
-    return this.withProperty('label', label);
+  getProperty (key, defaultValue) {
+    if (this.properties === undefined) {
+      return defaultValue;
+    }
+    if (this.properties[key] === undefined) {
+      return defaultValue;
+    }
+    return this.properties[key];
   }
 
   withProperty (key, value) {
     const properties = Object.assign({}, this.properties);
     properties[key] = value;
-    return fromGeometries({ geometries: this.geometries, properties: properties });
+    return fromGeometries({ properties: properties }, this.geometries);
   }
 
   difference (...geometries) {
@@ -42,8 +44,17 @@ export class Assembly {
     return this.geometries;
   }
 
-  toPaths (options = {}) {
-    // PROVE; Is concatenation sufficient, or do we need a pathwise union?
+  toPaths (options) {
+    const { tags } = options;
+    if (tags !== undefined) {
+      const ourTags = this.getProperty('tags');
+      if (ourTags !== undefined) {
+        if (ourTags.every(tag => !tags.includes(tag))) {
+          // This tagged assembly does not have the right tags -- produce no paths.
+          return [];
+        }
+      }
+    }
     return [].concat(...this.geometries.map(geometry => geometry.toPaths(options)));
   }
 

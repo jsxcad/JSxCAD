@@ -23,4 +23,7 @@ const run = async () => {
   }
 };
 
-run().catch(e => console.log(e.toString()));
+run().catch(e => {
+              console.log(e.toString());
+              console.log(e.stack);
+            })
