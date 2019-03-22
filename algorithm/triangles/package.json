@@ -3,7 +3,7 @@
   "version": "0.0.50",
   "description": "Operations on triangular meshes for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -54,11 +54,11 @@
   "dependencies": {
     "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
-    "esm": "^3.2.10"
+    "@jsxcad/math-vec3": "^0.0.50"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.50"
+    "@jsxcad/data-shape": "^0.0.50",
+    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"

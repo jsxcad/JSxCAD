@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Javascript CAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
   "scripts": {
     "install": "lerna bootstrap --hoist",
     "lint": "lerna bootstrap --hoist && lerna run lint",
@@ -47,9 +46,6 @@
     "jscad"
   ],
   "license": "MIT",
-  "dependencies": {
-    "esm": "^3.2.10"
-  },
   "devDependencies": {
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
@@ -61,10 +57,13 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
+    "esm": "^3.2.10",
     "jsdoc": "^3.4.3",
     "jsdoc-to-markdown": "^3.0.0",
     "lerna": "^3.13.1",
-    "nyc": "^10.3.2"
+    "nyc": "^10.3.2",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   },
   "ava": {
     "require": [

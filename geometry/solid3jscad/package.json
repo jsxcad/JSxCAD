@@ -3,7 +3,8 @@
   "version": "0.0.50",
   "description": "Solid Geometry based on JSCAD V1 original implementation.",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"

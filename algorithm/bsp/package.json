@@ -3,7 +3,7 @@
   "version": "0.0.50",
   "description": "BSP trees for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -34,7 +34,9 @@
     "@jsxcad/math-plane": "^0.0.50",
     "@jsxcad/math-poly3": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/math-vec4": "^0.0.50",
+    "@jsxcad/math-vec4": "^0.0.50"
+  },
+  "devDependencies": {
     "esm": "^3.2.10"
   },
   "ava": {

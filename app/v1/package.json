@@ -1,13 +1,14 @@
 {
-  "name": "@jsxcad/geometry-assembly",
+  "name": "@jsxcad/app-v1",
   "version": "0.0.50",
-  "description": "Assembly Geometry for JSxCAD.",
+  "description": "Basic Application for JSxCAD.",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "main.js",
-  "module": "main.js",
+  "main": "JSxCAD.js",
+  "module": "JSxCAD.js",
   "scripts": {
     "test": "ava *.test.js",
-    "lint": "eslint *.js"
+    "lint": "eslint *.js",
+    "webpack": "webpack --config webpack.config.js"
   },
   "contributors": [
     {
@@ -25,17 +26,18 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-z0polygons": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50"
+    "@jsxcad/api-v1": "^0.0.50",
+    "@jsxcad/algorithm-threejs": "^0.0.50",
+    "esm": "^3.2.10"
   },
   "devDependencies": {
-    "esm": "^3.2.10"
+    "@purtuga/esm-webpack-plugin": "^1.0.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   },
   "ava": {
     "require": "esm"
-   },
+  },
   "publishConfig": {
     "access": "restricted"
   }

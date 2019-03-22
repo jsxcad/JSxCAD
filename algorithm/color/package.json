@@ -3,7 +3,7 @@
   "version": "0.0.50",
   "description": "Color algorithms for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -51,7 +51,7 @@
     "jsxcad"
   ],
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "esm": "^3.2.10"
   },
   "ava": {

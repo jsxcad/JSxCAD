@@ -3,7 +3,7 @@
   "version": "0.0.50",
   "description": "3d polygons for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "module": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -55,7 +55,9 @@
     "@jsxcad/math-mat4": "^0.0.50",
     "@jsxcad/math-plane": "^0.0.50",
     "@jsxcad/math-utils": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50"
+  },
+  "devDependencies": {
     "esm": "^3.2.10"
   },
   "ava": {

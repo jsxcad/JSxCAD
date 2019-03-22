@@ -3,7 +3,8 @@
   "version": "0.0.50",
   "description": "3d vectors for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -52,7 +53,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.50",
+    "@jsxcad/math-utils": "^0.0.50"
+  },
+  "devDependencies": {
     "esm": "^3.2.10"
   },
   "ava": {

@@ -1,7 +1,7 @@
 import { pathsToPdf } from '@jsxcad/algorithm-pdf';
+import { writeFileSync } from '@jsxcad/sys';
 
 export const writePdf = ({ path }, shape) => {
   const paths = shape.toPaths({});
-  // TODO: Need to abstract filesystem access so that it can work in a browser.
-  require('fs').writeFileSync(path, pathsToPdf({}, paths));
+  writeFileSync(path, paths, { translator: () => pathsToPdf({}, paths) });
 };
