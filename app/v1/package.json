@@ -1,0 +1,44 @@
+{
+  "name": "@jsxcad/app-v1",
+  "version": "0.0.50",
+  "description": "Basic Application for JSxCAD.",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "JSxCAD.js",
+  "module": "JSxCAD.js",
+  "scripts": {
+    "test": "ava *.test.js",
+    "lint": "eslint *.js",
+    "webpack": "webpack --config webpack.config.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [
+    "csg",
+    "parametric",
+    "modeling",
+    "openjscad",
+    "jscad",
+    "jsxcad"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/api-v1": "^0.0.50",
+    "@jsxcad/algorithm-threejs": "^0.0.50",
+    "esm": "^3.2.10"
+  },
+  "devDependencies": {
+    "@purtuga/esm-webpack-plugin": "^1.0.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
