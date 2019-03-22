@@ -18,7 +18,7 @@ export const writeStl = ({ path, needIsWatertight = true }, shape) => {
       console.log('Warning: not watertight.');
     }
   }
-  writeFileSync(path, polygons, { translator: polygons => polygonsToStla({ needIsWatertight }, polygons) });
+  writeFileSync(path, polygons, { translator: () => polygonsToStla({ needIsWatertight }, polygons) });
 };
 
 CSG.prototype.writeStl = function (options = {}) {

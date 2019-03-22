@@ -3,7 +3,6 @@
   "version": "0.0.50",
   "description": "3d polygons for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "main.js",
   "module": "main.js",
   "scripts": {
     "test": "ava *.test.js",

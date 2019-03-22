@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Javascript CAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
   "scripts": {
     "install": "lerna bootstrap --hoist",
     "lint": "lerna bootstrap --hoist && lerna run lint",
