@@ -2,6 +2,7 @@ import { CSG } from './CSG';
 import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { polygonsToStla } from '@jsxcad/algorithm-stl';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
+import { writeFileSync } from '@jsxcad/sys';
 
 export const writeStl = ({ path, needIsWatertight = true }, shape) => {
   let polygons;
@@ -17,8 +18,7 @@ export const writeStl = ({ path, needIsWatertight = true }, shape) => {
       console.log('Warning: not watertight.');
     }
   }
-  // TODO: Need to abstract filesystem access so that it can work in a browser.
-  require('fs').writeFileSync(path, polygonsToStla({ needIsWatertight: needIsWatertight }, polygons));
+  writeFileSync(path, polygons, { translator: polygons => polygonsToStla({ needIsWatertight }, polygons) });
 };
 
 CSG.prototype.writeStl = function (options = {}) {

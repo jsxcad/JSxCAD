@@ -3,7 +3,7 @@
   "version": "0.0.50",
   "description": "ThreeJs integration algorithms for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -53,11 +53,11 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/math-poly3": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
-    "esm": "^3.2.10"
+    "@jsxcad/math-vec3": "^0.0.50"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.50"
+    "@jsxcad/data-shape": "^0.0.50",
+    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"

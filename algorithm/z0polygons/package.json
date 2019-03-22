@@ -3,7 +3,8 @@
   "version": "0.0.50",
   "description": "Operations on polygon arrays with z = 0 plane for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -54,13 +55,13 @@
   "dependencies": {
     "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
-    "esm": "^3.2.10",
     "polygon-clipping": "^0.13.0"
   },
   "devDependencies": {
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/math-utils": "^0.0.50"
+    "@jsxcad/math-utils": "^0.0.50",
+    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"

@@ -3,7 +3,7 @@
   "version": "0.0.50",
   "description": "Path data algorithms for JSxCAD",
   "repository": "https://github.com/pentacular/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "ava *.test.js",
     "lint": "eslint *.js"
@@ -53,7 +53,9 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50",
+    "@jsxcad/math-mat4": "^0.0.50"
+  },
+  "devDependencies": {
     "esm": "^3.2.10"
   },
   "ava": {

@@ -17,11 +17,13 @@
     }
   },
   "packages": [
+    "app/*",
     "algorithm/*",
     "api/*",
     "data/*",
     "example/*",
     "geometry/*",
-    "math/*"
+    "math/*",
+    "sys"
   ]
 }

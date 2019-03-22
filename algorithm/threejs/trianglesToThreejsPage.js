@@ -1,4 +1,5 @@
 import { toPlane } from '@jsxcad/math-poly3';
+import { trianglesToThreejsDatasets } from './trianglesToThreejsDatasets';
 
 const renderMaterial = (nth) => {
   // Just cycle through materials for now.
@@ -127,29 +128,8 @@ const intern = (map, point, next, update) => {
   return next;
 };
 
-export const trianglesToThreejsPage = ({ cameraPosition = [0, 0, 16] }, ...triangularGeometries) => {
-  // Translate the paths to threejs geometry data.
-  const datasets = [];
-  for (const triangles of triangularGeometries) {
-    const indices = [];
-    const vertexMap = {};
-    const positions = [];
-    const normals = [];
-
-    for (const triangle of triangles) {
-      const [x, y, z] = toPlane(triangle);
-      const normal = [x, y, z];
-      for (const point of triangle) {
-        indices.push(intern(vertexMap,
-                            [point, normal],
-                            Math.floor(positions.length / 3),
-                            ([point, normal]) => {
-                              positions.push(...point);
-                              normals.push(...normal);
-                            }));
-      }
-    }
-    datasets.push({ indices, positions, normals });
-  }
+export const trianglesToThreejsPage = (options, ...triangularGeometries) => {
+  const { cameraPosition = [0, 0, 16] } = options;
+  const datasets = trianglesToThreejsDatasets(options, ...triangularGeometries);
   return page({ cameraPosition, datasets });
 };
