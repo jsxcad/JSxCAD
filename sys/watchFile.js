@@ -6,6 +6,6 @@ const watchFile = (path, thunk) => {
   } else {
     // Do nothing.
   }
-}
+};
 
 module.exports.watchFile = watchFile;

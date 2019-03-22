@@ -11,7 +11,7 @@ const intern = (map, point, next, update) => {
   return next;
 };
 
-export const trianglesToThreejsDatasets = ({}, ...triangularGeometries) => {
+export const trianglesToThreejsDatasets = (options = {}, ...triangularGeometries) => {
   // Translate the paths to threejs geometry data.
   const datasets = [];
   for (const triangles of triangularGeometries) {

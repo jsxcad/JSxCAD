@@ -12,6 +12,6 @@ const writeFileSync = (path, data, options) => {
   } else {
     return writeFileSyncBrowser.writeFileSync(path, data, options);
   }
-}
+};
 
 module.exports.writeFileSync = writeFileSync;

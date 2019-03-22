@@ -9,6 +9,6 @@ const writeFileSync = (path, data, options) => {
   for (const watcher of file.watchers) {
     watcher(file);
   }
-}
+};
 
 module.exports.writeFileSync = writeFileSync;

@@ -1,4 +1,3 @@
-import { toPlane } from '@jsxcad/math-poly3';
 import { trianglesToThreejsDatasets } from './trianglesToThreejsDatasets';
 
 const renderMaterial = (nth) => {
@@ -116,17 +115,6 @@ const page = ({ cameraPosition, datasets }) => `
   </body>
 </html>
 `;
-
-const intern = (map, point, next, update) => {
-  const key = JSON.stringify(point);
-  let index = map[key];
-  if (index !== undefined) {
-    return index;
-  }
-  map[key] = next;
-  update(point);
-  return next;
-};
 
 export const trianglesToThreejsPage = (options, ...triangularGeometries) => {
   const { cameraPosition = [0, 0, 16] } = options;

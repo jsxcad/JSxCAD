@@ -7,6 +7,6 @@ const readFileSync = (path, options) => {
   } else {
     return readFileSyncBrowser.readFileSync(path, options);
   }
-}
+};
 
 module.exports.readFileSync = readFileSync;

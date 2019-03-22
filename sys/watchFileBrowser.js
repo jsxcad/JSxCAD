@@ -6,6 +6,6 @@ const watchFile = (path, thunk) => {
     files[path] = file;
   }
   file.watchers.push(thunk);
-}
+};
 
 module.exports.watchFile = watchFile;
