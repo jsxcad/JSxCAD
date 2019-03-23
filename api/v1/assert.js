@@ -29,3 +29,16 @@ export const assertNumber = (value) => {
     throw Error(`Not a number: ${value}`);
   }
 };
+
+export const assertNumberTriple = (value) => {
+  if (value.length === undefined) {
+    throw Error(`Has no length: ${value}`);
+  }
+
+  if (value.length !== 3) {
+    throw Error(`Is not a triple: ${value}`);
+  }
+  for (const v of value) {
+    assertNumber(v);
+  }
+};
