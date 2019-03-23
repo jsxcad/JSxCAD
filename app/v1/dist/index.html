@@ -6,29 +6,108 @@
     <style>
       body {
         color: #cccccc;
-        font-family:Monospace;
-        font-size:13px;
-        text-align:center;
+        font-family: Monospace;
+        font-size: 13px;
+        text-align: left;
         background-color: #050505;
         margin: 0px;
         overflow: hidden;
       }
+      .CodeMirror { 
+        border-top: 1px solid black;
+        border-bottom: 1px solid black;
+      }
     </style>
   </head>
   <body>
+    <textarea id="editor">
+let x = union(sphere().as('a'),
+              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'))
+
+writePaths({ path: 'window' },
+           x.toPaths({ tags: ['a'] }),
+           x.toPaths({ tags: ['b'] }))
+    </textarea>
+    <div id="viewer" height="200"></div>
     <div id="container"></div>
+
+    <!-- CodeMirror -->
+    <link rel="stylesheet" href="http://codemirror.net/lib/codemirror.css">
+    <script src="http://codemirror.net/lib/codemirror.js"></script>
+    <script src="http://codemirror.net/mode/javascript/javascript.js"></script>
+
+    <!-- ThreeJS -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
+
+    <!-- App -->
     <script type="module">
-      import { main } from './JSxCAD.js';
+      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, writeFileSync } from './JSxCAD.js';
 
-      const datasets = main();
+      console.log(api);
 
-      var camera, controls, scene, renderer, stats;
-      var mesh;
+      let editor;
+      let datasets = [];
+      let camera;
+      let controls;
+      let scene;
+      let renderer;
+      let stats;
+      let mesh;
+      let gui;
+
+      watchFile('window', ({ data }) => {
+                            for (const { controller, mesh } of datasets) {
+                              gui.remove(controller);
+                              scene.remove(mesh);
+                            }
+                            datasets = trianglesToThreejsDatasets({}, ...data);
+                            for (const dataset of datasets) {
+                              let geometry = new THREE.BufferGeometry();
+                              let { tags, material, indices, positions, normals } = dataset;
+                              geometry.setIndex( indices );
+                              geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
+                              geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
+                              let threeMaterial = new THREE.MeshNormalMaterial();
+                              dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
+                              scene.add(dataset.mesh);
+                              if (tags.length >= 1) {
+	                        dataset.controller = gui.add({ visible: true }, 'visible')
+                                                        .name(`Show ${tags[0]}?`)
+                                                        .listen()
+                                                        .onChange((value) => { dataset.mesh.visible = value; });
+                              }
+                            }
+                          });
+
+      const setupCodeMirror = () => {
+        editor = CodeMirror.fromTextArea(document.getElementById('editor'),
+                                         {
+                                           mode: "javascript",
+                                           theme: "default",
+                                           lineNumbers: true,
+                                           gutter: true,
+                                           lineWrapping: true,
+                                           extraKeys: {
+                                             'Shift-Enter': () => {
+                                               // Evaluate.
+                                               const code = new Function('$',
+                                                                         `const { ${Object.keys(api).join(', ')} } = $;\n\n` + 
+                                                                         editor.getDoc().getValue('\n'));
+                                               const result = code(api);
+                                               // Handle a return value as an implicit write.
+                                               if (result) {
+                                                 api.write({ path: 'window' }, result);
+                                               }
+                                             }
+                                           }
+                                         });
+      };
+      document.addEventListener("DOMContentLoaded", setupCodeMirror);
+
       init();
       animate();
       function init() {
@@ -58,29 +137,19 @@
         var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
         light2.position.set( 0, - 1, 0 );
         scene.add( light2 );
-        
-        for (const dataset of datasets) {
-          var geometry = new THREE.BufferGeometry();
-          var { name, material, indices, positions, normals } = dataset;
-          geometry.setIndex( indices );
-          geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-          geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-          var material = new THREE.MeshNormalMaterial();
-          mesh = new THREE.Mesh( geometry, material );
-          scene.add( mesh );
-        }
 
         //
         renderer = new THREE.WebGLRenderer( { antialias: true } );
         renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        document.body.appendChild( renderer.domElement );
+        renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
+        document.getElementById('viewer').appendChild(renderer.domElement);
         //
-        stats = new Stats();
-        document.body.appendChild( stats.dom );
+        // stats = new Stats();
+        // document.getElementById('viewer').appendChild(stats.dom);
         //
-        var gui = new dat.GUI();
-        gui.add( material, 'wireframe' );
+        gui = new dat.GUI({ autoPlace: false });
+        document.getElementById('viewer').appendChild(gui.domElement);
+        // gui.add( material, 'wireframe' );
         //
         window.addEventListener( 'resize', onWindowResize, false );
       }
@@ -88,13 +157,13 @@
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         controls.handleResize();
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        // renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
       }
       function animate() {
         requestAnimationFrame( animate );
         render();
         controls.update();
-        stats.update();
+        // stats.update();
       }
       function render() {
         renderer.render( scene, camera );

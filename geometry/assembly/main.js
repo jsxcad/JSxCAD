@@ -51,11 +51,15 @@ export class Assembly {
       if (ourTags !== undefined) {
         if (ourTags.every(tag => !tags.includes(tag))) {
           // This tagged assembly does not have the right tags -- produce no paths.
-          return [];
+          let paths = [];
+          paths.tags = tags;
+          return paths;
         }
       }
     }
-    return [].concat(...this.geometries.map(geometry => geometry.toPaths(options)));
+    let paths = [].concat(...this.geometries.map(geometry => geometry.toPaths(options)));
+    paths.tags = tags;
+    return paths;
   }
 
   transform (matrix) {

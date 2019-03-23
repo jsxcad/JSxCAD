@@ -4,8 +4,7 @@ import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 export class Assembly {
   as (tag) {
     const tags = this.geometry.getProperty('tags', []);
-    const result = Assembly.fromGeometry(this.geometry.withProperty('tags', [tag, ...tags]));
-    return result;
+    return Assembly.fromGeometry(this.geometry.withProperty('tags', [tag, ...tags]));
   }
 
   constructor (geometry) {

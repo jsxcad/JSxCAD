@@ -3,7 +3,6 @@
   "version": "0.0.50",
   "description": "Basic Application for JSxCAD.",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "JSxCAD.js",
   "module": "JSxCAD.js",
   "scripts": {
     "test": "ava *.test.js",
@@ -26,8 +25,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/api-v1": "^0.0.50",
     "@jsxcad/algorithm-threejs": "^0.0.50",
+    "@jsxcad/api-v1": "^0.0.50",
+    "@jsxcad/sys": "^0.0.50",
+    "codemirror": "^5.45.0",
     "esm": "^3.2.10"
   },
   "devDependencies": {

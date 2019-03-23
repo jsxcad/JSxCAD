@@ -1,10 +1,10 @@
-const IS_BROWSER = global['IS_BROWSER'];
+const fs = require('fs');
+const watchFileBrowser = require('./watchFileBrowser');
 
 const watchFile = (path, thunk) => {
-  if (IS_BROWSER) {
-    require('./watchFileBrowser').watchFile(path, thunk);
+  if (fs.writeFileSync) {
   } else {
-    // Do nothing.
+    watchFileBrowser.watchFile(path, thunk);
   }
 };
 
