@@ -33,7 +33,13 @@ export const trianglesToThreejsDatasets = (options = {}, ...triangularGeometries
                             }));
       }
     }
-    datasets.push({ name: triangles.name, material: triangles.material, indices, positions, normals });
+    datasets.push({
+      tags: triangles.tags,
+      material: triangles.material,
+      indices,
+      positions,
+      normals
+    });
   }
   return datasets;
 };

@@ -1,4 +1,11 @@
-import { cube } from '@jsxcad/api-v1';
+import * as api from '@jsxcad/api-v1';
 import { trianglesToThreejsDatasets } from '@jsxcad/algorithm-threejs';
+import { readFileSync, watchFile, writeFileSync } from '@jsxcad/sys';
 
-export const main = () => trianglesToThreejsDatasets({}, cube({ size: 4, center: true }).rotateX(45).rotateY(45).toPolygons());
+export {
+  api,
+  readFileSync,
+  trianglesToThreejsDatasets,
+  watchFile,
+  writeFileSync
+};
