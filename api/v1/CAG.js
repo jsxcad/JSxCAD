@@ -1,12 +1,13 @@
 // FIX: Add interface to change default surface geometry.
 
+import { Assembly } from './Assembly';
 import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { fromPaths } from '@jsxcad/geometry-surf2pc';
 import { writePdf } from './writePdf';
 
 export class CAG {
   as (tag) {
-    return this.union().as(tag);
+    return Assembly.fromGeometries([this.geometry]).as(tag);
   }
 
   constructor (geometry) {
