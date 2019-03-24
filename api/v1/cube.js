@@ -26,7 +26,7 @@ const buildCube = ({ center = false, centerPosition, length = 1, width = 1, heig
   }
   return cube;
 };
-    
+
 const decode = (params) => {
   // cube(10)
   try {
@@ -48,10 +48,10 @@ const decode = (params) => {
     Object.assign(roundParams, { round: true, roundingRadius: roundRadius, roundingFaces: resolution });
   }
 
-  const decoded = (() => {
+  const decodeVariants = () => {
     // cube({ center: [0, 0, 0], radius: 1 })
     try {
-      const { center } = params[0];
+      const { center, radius } = params[0];
       assertNumberTriple(center);
       assertNumber(radius);
       assertSingle(params);
@@ -82,7 +82,7 @@ const decode = (params) => {
         length: c2x - c1x,
         width: c2y - c1y,
         height: c2z - c1z,
-        centerPosition: [ (c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2 ],
+        centerPosition: [ (c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2 ]
       };
     } catch (e) {}
 
@@ -106,8 +106,9 @@ const decode = (params) => {
     } catch (e) {}
 
     return undefined;
-  })();
+  };
 
+  const decoded = decodeVariants();
   if (!decoded) {
     if (roundParams.round) {
       return roundParams;
