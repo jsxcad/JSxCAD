@@ -13,6 +13,10 @@ export class CAG {
     this.geometry = geometry || fromPaths({}, []);
   }
 
+  material (material) {
+    return Assembly.fromGeometries([this.geometry]).material(material);
+  }
+
   transform (matrix) {
     return CAG.fromGeometry(this.geometry.transform(matrix));
   }

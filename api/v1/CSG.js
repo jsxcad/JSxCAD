@@ -24,6 +24,10 @@ export class CSG {
     return CSG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
   }
 
+  material (material) {
+    return Assembly.fromGeometries([this.geometry]).material(material);
+  }
+
   transform (matrix) {
     return CSG.fromGeometry(this.geometry.transform(matrix));
   }

@@ -110,6 +110,10 @@ export class Path2D {
     return Error('Not yet implemented');
   }
 
+  material (material) {
+    return Assembly.fromGeometries([this.geometry]).material(material);
+  }
+
   toSurface () {
     return Error('Not yet implemented');
   }

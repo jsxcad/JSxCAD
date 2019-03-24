@@ -34,8 +34,7 @@ export const trianglesToThreejsDatasets = (options = {}, ...triangularGeometries
       }
     }
     datasets.push({
-      tags: triangles.tags,
-      material: triangles.material,
+      properties: triangles.properties,
       indices,
       positions,
       normals

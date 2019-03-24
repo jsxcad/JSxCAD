@@ -45,6 +45,9 @@ export class Assembly {
   }
 
   toPaths (options) {
+    // FIX: Probably instead of toPaths we want an interface like 'toComponentPaths' which preserves the
+    // paths and properties of each component (and sub-component, and so on).
+    // If they want a fused geometry, then they should ask for that.
     const { tags } = options;
     if (tags !== undefined) {
       const ourTags = this.getProperty('tags');
@@ -57,8 +60,10 @@ export class Assembly {
         }
       }
     }
-    let paths = [].concat(...this.geometries.map(geometry => geometry.toPaths(options)));
-    paths.tags = tags;
+    let subPaths = this.geometries.map(geometry => geometry.toPaths(options));
+    let paths = [].concat(...subPaths);
+    // FIX: This is probably the wrong thing to do, see above.
+    paths.properties = Object.assign({}, ...subPaths.map(subPath => subPath.properties || {}), this.properties || {});
     return paths;
   }
 
