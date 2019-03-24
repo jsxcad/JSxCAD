@@ -22,11 +22,13 @@
   <body>
     <textarea id="editor">
 let x = union(sphere().as('a'),
-              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'))
+              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b').material('metal'),
+              cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c'))
 
 writePaths({ path: 'window' },
            x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }))
+           x.toPaths({ tags: ['b'] }),
+           x.toPaths({ tags: ['c'] }))
     </textarea>
     <div id="viewer" height="200"></div>
     <div id="container"></div>
@@ -59,6 +61,20 @@ writePaths({ path: 'window' },
       let mesh;
       let gui;
 
+      const makeMaterial = (material) => {
+        switch (material) {
+          case 'metal':
+            return new THREE.MeshStandardMaterial({
+                     // FIX: There is something strange with the normals.
+                     color: 0x779aac,
+                     roughness: 0.75,
+                     metalness: 1
+                   });
+          default:
+            return new THREE.MeshNormalMaterial();
+        }
+      }
+
       watchFile('window', ({ data }) => {
                             for (const { controller, mesh } of datasets) {
                               gui.remove(controller);
@@ -67,11 +83,12 @@ writePaths({ path: 'window' },
                             datasets = trianglesToThreejsDatasets({}, ...data);
                             for (const dataset of datasets) {
                               let geometry = new THREE.BufferGeometry();
-                              let { tags, material, indices, positions, normals } = dataset;
+                              let { properties = {}, indices, positions, normals } = dataset;
+                              let { material, tags = [] } = properties;
                               geometry.setIndex( indices );
                               geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
                               geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
-                              let threeMaterial = new THREE.MeshNormalMaterial();
+                              let threeMaterial = makeMaterial(material);
                               dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
                               scene.add(dataset.mesh);
                               if (tags.length >= 1) {
@@ -132,10 +149,10 @@ writePaths({ path: 'window' },
         var ambientLight = new THREE.AmbientLight( 0x222222 );
         scene.add( ambientLight );
         var light1 = new THREE.DirectionalLight( 0xffffff, 0.5 );
-        light1.position.set( 1, 1, 1 );
+        light1.position.set( -1, -1, 16 );
         scene.add( light1 );
         var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
-        light2.position.set( 0, - 1, 0 );
+        light2.position.set( 1, 1, 16 );
         scene.add( light2 );
 
         //

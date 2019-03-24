@@ -19,6 +19,10 @@ export class Assembly {
     return Assembly.fromGeometry(this.geometry.intersection(...shapes.map(toAssembly)));
   }
 
+  material (material) {
+    return Assembly.fromGeometry(this.geometry.withProperty('material', material));
+  }
+
   toGeometry () {
     return this.geometry;
   }

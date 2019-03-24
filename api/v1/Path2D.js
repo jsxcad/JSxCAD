@@ -1,4 +1,5 @@
 // import { buildCircleArc } from '@jsxcad/algorithm-curve';
+import { Assembly } from './Assembly';
 import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
 import { canonicalize, butLast, last } from '@jsxcad/algorithm-paths';
 import { fromPaths } from '@jsxcad/geometry-paths';
@@ -6,7 +7,7 @@ import { fromPaths } from '@jsxcad/geometry-paths';
 // FIX: Incorrectly named.
 export class Path2D {
   as (tag) {
-    return this.union().as(tag);
+    return Assembly.fromGeometries([this.geometry]).as(tag);
   }
 
   constructor (points = [], closed = false, geometry) {
@@ -108,6 +109,10 @@ export class Path2D {
 
   innerToCAG () {
     return Error('Not yet implemented');
+  }
+
+  material (material) {
+    return Assembly.fromGeometries([this.geometry]).material(material);
   }
 
   toSurface () {
