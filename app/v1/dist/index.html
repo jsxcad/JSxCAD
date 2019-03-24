@@ -77,7 +77,9 @@ writePaths({ path: 'window' },
 
       watchFile('window', ({ data }) => {
                             for (const { controller, mesh } of datasets) {
-                              gui.remove(controller);
+                              if (controller) {
+                                gui.remove(controller);
+                              }
                               scene.remove(mesh);
                             }
                             datasets = trianglesToThreejsDatasets({}, ...data);
