@@ -55,6 +55,8 @@ This library is maintained by a group of volunteers. We welcome and encourage an
 
 * Design discussion on [Design](https://docs.google.com/document/d/1SLwZldZ-3Xxda4b2HtJlQhFxdZDizvTz3ciKIZAyLoY/edit?usp=sharing).
 
+* API discussion on [API](https://docs.google.com/document/d/197XMxmHM7dL0wbdeFG33BX3efA6_f5peiO5rUsdQkJc/edit?usp=sharing).
+
 * Bug reports are accepted as [Issues](https://github.com/JSxCAD/jsxcad/issues/) via GitHub.
 
 * New contributions are accepted as [Pull Requests](https://github.com/JSxCAD/jsxcad/pulls/) via GithHub.
