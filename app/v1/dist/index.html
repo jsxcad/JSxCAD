@@ -21,9 +21,9 @@
   </head>
   <body>
     <textarea id="editor">
-let x = union(sphere().as('a'),
-              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b').material('metal'),
-              cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c'))
+let x = union(sphere().as('a').material('metal'),
+              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
+              cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
 writePaths({ path: 'window' },
            x.toPaths({ tags: ['a'] }),
@@ -65,10 +65,10 @@ writePaths({ path: 'window' },
         switch (material) {
           case 'metal':
             return new THREE.MeshStandardMaterial({
-                     // FIX: There is something strange with the normals.
                      color: 0x779aac,
-                     roughness: 0.75,
-                     metalness: 1
+                     emissive: 0x7090a0,
+                     roughness: 0.65,
+                     metalness: 0.99,
                    });
           default:
             return new THREE.MeshNormalMaterial();
@@ -147,15 +147,16 @@ writePaths({ path: 'window' },
         //
         scene = new THREE.Scene();
         scene.background = new THREE.Color( 0x050505 );
+        scene.add(camera);
         //
         var ambientLight = new THREE.AmbientLight( 0x222222 );
         scene.add( ambientLight );
-        var light1 = new THREE.DirectionalLight( 0xffffff, 0.5 );
-        light1.position.set( -1, -1, 16 );
-        scene.add( light1 );
+        // var light1 = new THREE.PointLight(0xffffff, 0, 1);
+        // camera.add(light1);
         var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
-        light2.position.set( 1, 1, 16 );
-        scene.add( light2 );
+        light2.position.set( 1, 1, 1 );
+        camera.add(light2);
+        // scene.add( light2 );
 
         //
         renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -176,7 +177,7 @@ writePaths({ path: 'window' },
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         controls.handleResize();
-        // renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
+        renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
       }
       function animate() {
         requestAnimationFrame( animate );
