@@ -6,7 +6,8 @@
   "main": "main.js",
   "module": "main.js",
   "scripts": {
-    "test": "ava *.test.js",
+    "test": "ava",
+    "tests": "ava *.test.js",
     "lint": "eslint *.js"
   },
   "contributors": [
@@ -73,6 +74,7 @@
     "@jsxcad/sys": "^0.0.50"
   },
   "devDependencies": {
+    "ava": "^0.23.0",
     "esm": "^3.2.10"
   },
   "ava": {
