@@ -1,16 +1,16 @@
 const toKey = JSON.stringify;
 
-export const edgesToPolygons = ({}, edges) => {
+export const edgesToPolygons = (options = {}, edges) => {
   // Build an map of start to ends.
   let edgeMap = new Map();
   for (const [startPoint, endPoint] of edges) {
-    // There's probably a better way.
+    // There's probably a better way to intern the vertices.
     let startKey = toKey(startPoint);
     let vertex = edgeMap.get(startKey);
     if (vertex === undefined) {
       edgeMap.set(startKey, [startPoint, [toKey(endPoint)]]);
     } else {
-      const [startPoint, endPoints] = vertex;
+      const endPoints = vertex[1];
       endPoints.push(toKey(endPoint));
     }
   }
@@ -25,7 +25,7 @@ export const edgesToPolygons = ({}, edges) => {
     while (true) {
       const value = edgeMap.get(key);
       const [point, next] = value;
-      if (next.length == 0) {
+      if (next.length === 0) {
         if (polygon.length > 0) {
           // This would form an open path.
           polygons.push([null, ...polygon]);
@@ -48,4 +48,4 @@ export const edgesToPolygons = ({}, edges) => {
 
   // All done.
   return polygons;
-}
+};

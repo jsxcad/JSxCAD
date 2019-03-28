@@ -46,7 +46,6 @@ export const cutTrianglesByPlane = (plane, triangles) => {
         break;
       }
       case SPANNING: {
-        let edgePoints = [];
         let startPoint = triangle[triangle.length - 1];
         let startType = toType(plane, startPoint);
         let spanStart = null;
@@ -80,4 +79,4 @@ export const cutTrianglesByPlane = (plane, triangles) => {
     }
   }
   return edgesToPolygons({}, canonicalize(edges));
-}
+};
