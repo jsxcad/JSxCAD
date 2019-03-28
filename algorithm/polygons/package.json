@@ -5,8 +5,10 @@
   "repository": "https://github.com/pentacular/JSxCAD",
   "module": "main.js",
   "scripts": {
-    "test": "ava *.test.js",
-    "lint": "eslint *.js"
+    "tests": "ava *.test.js",
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava"
   },
   "contributors": [
     {
@@ -52,15 +54,18 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/data-shape": "^0.0.50",
     "@jsxcad/math-line2": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
+    "@jsxcad/math-plane": "^0.0.50",
     "@jsxcad/math-poly3": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
     "martinez-polygon-clipping": "^0.5.0",
     "tess2": "^1.0.0"
   },
   "devDependencies": {
+    "ava": "^0.23.0",
     "esm": "^3.2.10"
   },
   "ava": {

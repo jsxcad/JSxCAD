@@ -63,7 +63,6 @@
     "@jsxcad/algorithm-stl": "^0.0.50",
     "@jsxcad/algorithm-text": "^0.0.50",
     "@jsxcad/algorithm-threejs": "^0.0.50",
-    "@jsxcad/algorithm-triangles": "^0.0.50",
     "@jsxcad/algorithm-watertight": "^0.0.50",
     "@jsxcad/geometry-assembly": "^0.0.50",
     "@jsxcad/geometry-paths": "^0.0.50",
