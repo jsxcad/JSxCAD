@@ -2,14 +2,14 @@
   "name": "@jsxcad/example-v1",
   "version": "0.0.50",
   "description": "Constructive Solid Geometry (CSG) Library",
-  "repository": "https://github.com/pentacular/JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "index.js",
   "scripts": {
-    "tests": "ava *.test.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "example": "node -r esm run",
-    "test": "ava"
+    "test": "ava",
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
