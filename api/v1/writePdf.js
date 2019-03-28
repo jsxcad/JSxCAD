@@ -6,7 +6,7 @@ export const writePdf = ({ path }, ...shapes) => {
     if (shape instanceof Array) {
       return shape;
     } else {
-      return shape.toPolygons({});
+      return shape.toPaths({});
     }
   });
   writeFileSync(path, pathSets, { translator: () => pathsToPdf({}, [].concat(...pathSets)) });
