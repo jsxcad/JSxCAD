@@ -1,14 +1,17 @@
 import { canonicalize } from './canonicalize';
+import { cutTrianglesByPlane } from './cutTrianglesByPlane';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPointsAndPaths } from './fromPointsAndPaths';
 import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
+import { isTriangle } from './isTriangle';
 import { makeConvex } from './makeConvex';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
+import { toTriangles } from './toTriangles';
 import { transform } from './transform';
 
 const rotateX = (angle, polygons) => transform(fromXRotation(angle), polygons);
@@ -19,15 +22,18 @@ const translate = (vector, polygons) => transform(fromTranslation(vector), polyg
 
 export {
   canonicalize,
+  cutTrianglesByPlane,
   eachPoint,
   flip,
   fromPointsAndPaths,
+  isTriangle,
   makeConvex,
   map,
   measureBoundingBox,
   measureBoundingSphere,
   toGeneric,
   toPoints,
+  toTriangles,
   rotateX,
   rotateY,
   rotateZ,
