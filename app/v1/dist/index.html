@@ -47,7 +47,7 @@ writePaths({ path: 'window' },
 
     <!-- App -->
     <script type="module">
-      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, writeFileSync } from './JSxCAD.js';
+      import { api, readFileSync, trianglesToThreejsDatasets, threejsDisplay, watchFile, writeFileSync } from './JSxCAD.js';
 
       console.log(api);
 
@@ -130,6 +130,9 @@ writePaths({ path: 'window' },
       init();
       animate();
       function init() {
+        console.log("init ran");
+        var aTest = new threejsDisplay();
+        
         //
         camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
         [camera.position.x, camera.position.y, camera.position.z] = [0,0,16];
