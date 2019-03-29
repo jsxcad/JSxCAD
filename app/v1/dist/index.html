@@ -52,14 +52,7 @@ writePaths({ path: 'window' },
       console.log(api);
 
       let editor;
-      let datasets = [];
-      let camera;
-      let controls;
-      let scene;
-      let renderer;
-      let stats;
-      let mesh;
-      let gui;
+      let display = new threejsDisplay();
 
       const makeMaterial = (material) => {
         switch (material) {
@@ -75,32 +68,34 @@ writePaths({ path: 'window' },
         }
       }
 
-      watchFile('window', ({ data }) => {
-                            for (const { controller, mesh } of datasets) {
-                              if (controller) {
-                                gui.remove(controller);
-                              }
-                              scene.remove(mesh);
-                            }
-                            datasets = trianglesToThreejsDatasets({}, ...data);
-                            for (const dataset of datasets) {
-                              let geometry = new THREE.BufferGeometry();
-                              let { properties = {}, indices, positions, normals } = dataset;
-                              let { material, tags = [] } = properties;
-                              geometry.setIndex( indices );
-                              geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-                              geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
-                              let threeMaterial = makeMaterial(material);
-                              dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
-                              scene.add(dataset.mesh);
-                              if (tags.length >= 1) {
-	                        dataset.controller = gui.add({ visible: true }, 'visible')
-                                                        .name(`Show ${tags[0]}?`)
-                                                        .listen()
-                                                        .onChange((value) => { dataset.mesh.visible = value; });
-                              }
-                            }
-                          });
+        watchFile('window', ({ data }) => {
+            console.log("this refresh ran");
+            display.clearAll();
+        //for (const { controller, mesh } of datasets) {
+        //  if (controller) {
+        //    gui.remove(controller);
+        //  }
+        //  scene.remove(mesh);
+        //}
+        //datasets = trianglesToThreejsDatasets({}, ...data);
+        //for (const dataset of datasets) {
+        //  let geometry = new THREE.BufferGeometry();
+        //  let { properties = {}, indices, positions, normals } = dataset;
+         // let { material, tags = [] } = properties;
+        //  geometry.setIndex( indices );
+        //  geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
+        //  geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
+        //  let threeMaterial = makeMaterial(material);
+        //  dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
+        //  scene.add(dataset.mesh);
+        //  if (tags.length >= 1) {
+        //dataset.controller = gui.add({ visible: true }, 'visible')
+        //                            .name(`Show ${tags[0]}?`)
+        //                            .listen()
+        //                            .onChange((value) => { dataset.mesh.visible = value; });
+        //  }
+        //}
+        });
 
       const setupCodeMirror = () => {
         editor = CodeMirror.fromTextArea(document.getElementById('editor'),
@@ -126,71 +121,7 @@ writePaths({ path: 'window' },
                                          });
       };
       document.addEventListener("DOMContentLoaded", setupCodeMirror);
-
-      init();
-      animate();
-      function init() {
-        console.log("init ran");
-        var aTest = new threejsDisplay();
-        
-        //
-        camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
-        [camera.position.x, camera.position.y, camera.position.z] = [0,0,16];
-        //
-        controls = new THREE.TrackballControls(camera);
-        controls.rotateSpeed = 4.0;
-        controls.zoomSpeed = 4.0;
-        controls.panSpeed = 2.0;
-        controls.noZoom = false;
-        controls.noPan = false;
-        controls.staticMoving = true;
-        controls.dynamicDampingFactor = 0.1;
-        controls.keys = [65, 83, 68];
-        controls.addEventListener('change', render);
-        //
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color( 0x050505 );
-        scene.add(camera);
-        //
-        var ambientLight = new THREE.AmbientLight( 0x222222 );
-        scene.add( ambientLight );
-        // var light1 = new THREE.PointLight(0xffffff, 0, 1);
-        // camera.add(light1);
-        var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
-        light2.position.set( 1, 1, 1 );
-        camera.add(light2);
-        // scene.add( light2 );
-
-        //
-        renderer = new THREE.WebGLRenderer( { antialias: true } );
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-        document.getElementById('viewer').appendChild(renderer.domElement);
-        //
-        // stats = new Stats();
-        // document.getElementById('viewer').appendChild(stats.dom);
-        //
-        gui = new dat.GUI({ autoPlace: false });
-        document.getElementById('viewer').appendChild(gui.domElement);
-        // gui.add( material, 'wireframe' );
-        //
-        window.addEventListener( 'resize', onWindowResize, false );
-      }
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        controls.handleResize();
-        renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-      }
-      function animate() {
-        requestAnimationFrame( animate );
-        render();
-        controls.update();
-        // stats.update();
-      }
-      function render() {
-        renderer.render( scene, camera );
-      }
+      
     </script>
   </body>
 </html>
