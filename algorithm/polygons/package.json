@@ -2,13 +2,13 @@
   "name": "@jsxcad/algorithm-polygons",
   "version": "0.0.50",
   "description": "Operations on polygon arrays for JSxCAD",
-  "repository": "https://github.com/pentacular/JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
   "module": "main.js",
   "scripts": {
-    "tests": "ava *.test.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
-    "test": "ava"
+    "test": "ava",
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {

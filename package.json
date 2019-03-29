@@ -2,7 +2,7 @@
   "name": "@jsxcad/core",
   "version": "1.0.0",
   "description": "Javascript CAD",
-  "repository": "https://github.com/pentacular/JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
   "scripts": {
     "install": "lerna bootstrap --hoist",
     "lint": "lerna bootstrap --hoist && lerna run lint",
