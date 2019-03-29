@@ -20,7 +20,7 @@ export class threejsDisplay{
         this.controls.staticMoving = true;
         this.controls.dynamicDampingFactor = 0.1;
         this.controls.keys = [65, 83, 68];
-        this.controls.addEventListener('change', this.render);
+        this.controls.addEventListener('change', () => {this.render()});
         //
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color( 0x050505 );
@@ -34,7 +34,18 @@ export class threejsDisplay{
         light2.position.set( 1, 1, 1 );
         this.camera.add(light2);
         // scene.add( light2 );
-
+        
+        var geometry = new THREE.BufferGeometry();
+        var indices = [0,1,2,0,2,3];
+        var positions = [15.000000000000002,15,0,-15,15.000000000000002,0,-15.000000000000002,-15,0,15,-15.000000000000002,0];
+        var normals = [0,0,1,0,0,1,0,0,1,0,0,1];
+        geometry.setIndex( indices );
+        geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+        geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+        var material = new THREE.MeshNormalMaterial();
+        mesh = new THREE.Mesh( geometry, material );
+        this.scene.add( mesh );
+        
         //
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setPixelRatio( window.devicePixelRatio );
