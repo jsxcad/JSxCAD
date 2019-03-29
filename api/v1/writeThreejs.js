@@ -1,4 +1,4 @@
-import { toTriangles } from '@jsxcad/algorithm-triangles';
+import { toTriangles } from '@jsxcad/algorithm-polygons';
 import { trianglesToThreejsPage } from '@jsxcad/algorithm-threejs';
 import { writeFileSync } from '@jsxcad/sys';
 

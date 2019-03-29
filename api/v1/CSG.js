@@ -3,9 +3,9 @@ import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 // import { fromPaths } from '@jsxcad/geometry-solid3evan';
 
 import { Assembly } from './Assembly';
-import { toGeometry } from './toGeometry';
 import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
-import { toTriangles } from '@jsxcad/algorithm-triangles';
+import { toGeometry } from './toGeometry';
+import { toTriangles } from '@jsxcad/algorithm-polygons';
 
 export class CSG {
   as (tag) {

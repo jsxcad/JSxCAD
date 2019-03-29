@@ -2,11 +2,13 @@
   "name": "@jsxcad/algorithm-shape",
   "version": "0.0.50",
   "description": "Shape generating algorithms for JSxCAD",
-  "repository": "https://github.com/pentacular/JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "scripts": {
-    "test": "ava *.test.js",
-    "lint": "eslint *.js"
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
@@ -56,7 +58,6 @@
     "@jsxcad/algorithm-paths": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-stl": "^0.0.50",
-    "@jsxcad/algorithm-triangles": "^0.0.50",
     "@jsxcad/algorithm-watertight": "^0.0.50",
     "@jsxcad/data-shape": "^0.0.50",
     "@jsxcad/math-line2": "^0.0.50",

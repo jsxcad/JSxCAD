@@ -6,8 +6,10 @@
   "main": "main.js",
   "module": "main.js",
   "scripts": {
-    "test": "ava *.test.js",
-    "lint": "eslint *.js"
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
