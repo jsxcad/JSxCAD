@@ -13,6 +13,7 @@ import { acos } from './acos';
 import { circle } from './circle';
 import { cos } from './cos';
 import { cube } from './cube';
+import { crossSection } from './crossSection';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
@@ -43,6 +44,7 @@ export {
   Path2D,
   acos,
   circle,
+  crossSection,
   cos,
   cube,
   cylinder,
