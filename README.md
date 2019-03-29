@@ -40,10 +40,27 @@ git clone https://github.com/jsxcad/JSxCAD
 cd JSxCAD
 npm install
 cd example/v1
-node -r esm run square.js
+npm run example square
 ```
 
-should produce /tmp/square.pdf.
+should produce example/v1/tmp/square.pdf.
+
+- Script support:
+
+All sub-packages should support
+
+npm run test name
+npm run tests
+npm run lint
+npm run lintfix
+
+example/v1 supports additionally
+
+npm run example name
+
+app/v1 supports additionally
+
+npm run webpack
 
 ## API
 
