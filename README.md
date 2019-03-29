@@ -43,7 +43,7 @@ cd example/v1
 npm run example square
 ```
 
-should produce example/v1/tmp/square.pdf.
+This should produce example/v1/tmp/square.pdf.
 
 - To build and run a local copy of the website for testing:
 
