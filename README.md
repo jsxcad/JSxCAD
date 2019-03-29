@@ -62,6 +62,16 @@ app/v1 supports additionally
 
 npm run webpack
 
+- To build and run a local copy of the website for testing:
+
+```
+cd JSxCAD/app/v1
+npm run wepback
+http-server ./dist -o
+```
+
+should produce a new browser tab running a locally hosted version of the webpage for testing
+
 ## API
 
 For questions about the API, please contact the [User Group](https://groups.google.com/forum/#!forum/jsxcad).
