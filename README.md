@@ -45,23 +45,6 @@ npm run example square
 
 should produce example/v1/tmp/square.pdf.
 
-- Script support:
-
-All sub-packages should support
-
-npm run test name
-npm run tests
-npm run lint
-npm run lintfix
-
-example/v1 supports additionally
-
-npm run example name
-
-app/v1 supports additionally
-
-npm run webpack
-
 - To build and run a local copy of the website for testing:
 
 ```
@@ -70,7 +53,18 @@ npm run wepback
 http-server ./dist -o
 ```
 
-should produce a new browser tab running a locally hosted version of the webpage for testing
+This should produce a new browser running a locally hosted version of the webpage for testing.
+
+- Script support:
+
+All sub-packages should support:
+
+```
+npm run test name
+npm run tests
+npm run lint
+npm run lintfix
+```
 
 ## API
 
