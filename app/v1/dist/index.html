@@ -48,11 +48,12 @@ writePaths({ path: 'window' },
     <!-- App -->
     <script type="module">
       import { api, readFileSync, trianglesToThreejsDatasets, threejsDisplay, watchFile, writeFileSync } from './JSxCAD.js';
-
+      console.log("API: ");
       console.log(api);
 
       let editor;
       let display = new threejsDisplay();
+      display.writeScreen(api.cube(), "object1");
 
       const makeMaterial = (material) => {
         switch (material) {
@@ -69,8 +70,7 @@ writePaths({ path: 'window' },
       }
 
         watchFile('window', ({ data }) => {
-            console.log("this refresh ran");
-            display.clearAll();
+            
         //for (const { controller, mesh } of datasets) {
         //  if (controller) {
         //    gui.remove(controller);

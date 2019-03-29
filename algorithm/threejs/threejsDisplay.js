@@ -2,7 +2,6 @@
 export class threejsDisplay{
     constructor(){
         console.log("A new instance of threejs class has been created");
-        this.clearAll();
         //
         let datasets = [];
         let stats;
@@ -54,15 +53,21 @@ export class threejsDisplay{
         this.animate();
     }
     
-    write(object, id){
-        console.log("write shape not yet implimented");
+    writeScreen(object, id){
+        console.log("Writing shape to screen: ");
+        console.log(object);
+        console.log(id);
+        
+        //do the same thing that happens in the first part of write to three.js
+        
+        //Update the current three.js instance with the new values
     }
     
-    clearById(id){
+    clearScreenById(id){
         console.log("clear by ID not yet implimented");
     }
     
-    clearAll(){
+    clearScreenAll(){
         console.log("Clear all not yet implimented");
     }
     
