@@ -59,44 +59,25 @@ export class threejsDisplay{
         console.log("Writing shape to screen: ");
         console.log(id);
         
-        //do the same thing that happens in the first part of write to three.js
         //Function to convert to polygons if needed
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
         
         //Convert polygon to triangles
-        console.log("Polygons: ");
-        const solids = shapes.map(this.toPolygons).map(polygons => console.log(polygons));
-        
-        console.log("Solids: ");
-        console.log(solids);
+        const solids = shapes.map(toPolygons).map(polygons =>  toTriangles({}, polygons));
         
         //Convert triangles to threejs dataset
         const datasets = trianglesToThreejsDatasets({}, ...solids);
         
-        console.log("Computed dataset: ");
-        console.log(datasets);
-        
         var geometry = new THREE.BufferGeometry();
-        var indices = [0,1,2,0,2,3];
-        var positions = [15.000000000000002,15,0,-15,15.000000000000002,0,-15.000000000000002,-15,0,15,-15.000000000000002,0];
-        var normals = [0,0,1,0,0,1,0,0,1,0,0,1];
+        var indices = datasets[0].indices;
+        var positions = datasets[0].positions;
+        var normals = datasets[0].normals;
         geometry.setIndex( indices );
         geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
         geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
         var material = new THREE.MeshNormalMaterial();
         var mesh = new THREE.Mesh( geometry, material );
         this.scene.add( mesh );
-        
-        //Update the current three.js instance with the new values
-    }
-    
-    toPolygons(shape){
-        if(shape instanceof Array){
-            return shape.toPolygons({});
-        }
-        else{
-            return shape;
-        }
     }
     
     clearScreenById(id){
