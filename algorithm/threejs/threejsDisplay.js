@@ -1,3 +1,4 @@
+import { toTriangles } from '@jsxcad/algorithm-polygons';
 
 export class threejsDisplay{
     constructor(){
@@ -63,10 +64,14 @@ export class threejsDisplay{
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
         
         //Convert polygon to triangles
-        const solids = shapes.map(this.toPolygons).map(polygons => toTriangles({}, polygons));
+        console.log("Polygons: ");
+        const solids = shapes.map(this.toPolygons).map(polygons => console.log(polygons));
+        
+        console.log("Solids: ");
+        console.log(solids);
         
         //Convert triangles to threejs dataset
-        const datasets = trianglesToThreejsDatasets(options, ...solids);
+        const datasets = trianglesToThreejsDatasets({}, ...solids);
         
         console.log("Computed dataset: ");
         console.log(datasets);

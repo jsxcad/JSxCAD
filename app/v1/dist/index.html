@@ -53,7 +53,7 @@ writePaths({ path: 'window' },
 
       let editor;
       let display = new threejsDisplay();
-      display.writeScreen(api.cube(), "object1");
+      display.writeScreen("object1", api.cube());
 
       const makeMaterial = (material) => {
         switch (material) {
