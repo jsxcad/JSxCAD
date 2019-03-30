@@ -2,7 +2,6 @@ import { toTriangles } from '@jsxcad/algorithm-polygons';
 
 class threejsDisplay{
     constructor(targetID){
-        console.log("A new instance of threejs class has been created");
         //
         let datasets = [];
         let stats;
@@ -56,8 +55,6 @@ class threejsDisplay{
     }
     
     writeScreen(options = {}, ...shapes){
-        console.log("Writing shape to screen: ");
-        console.log(options.id);
         
         //Function to convert to polygons if needed
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
@@ -89,21 +86,19 @@ class threejsDisplay{
         geometry.setIndex( indices );
         geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
         geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-        var material = new THREE.MeshNormalMaterial();
+        var material = makeMaterial(datasets[0].properties.material);
         var mesh = new THREE.Mesh( geometry, material );
         mesh.name = options.id;
         this.scene.add( mesh );
     }
     
     clearScreenById(id){
-        console.log("Clearing by ID: " + id);
         var selectedObject = this.scene.getObjectByName(id);
         this.scene.remove( selectedObject );
         this.animate();
     }
     
     clearScreenAll(){
-        console.log("Clear all objects from the scene");
         while(this.scene.children.length > 0){ 
             this.scene.remove(this.scene.children[0]); 
         }

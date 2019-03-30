@@ -11,7 +11,6 @@
         text-align: left;
         background-color: #050505;
         margin: 0px;
-        overflow: hidden;
       }
       .CodeMirror { 
         border-top: 1px solid black;
@@ -25,10 +24,9 @@ let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
-writePaths({ path: 'window' },
-           x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }),
-           x.toPaths({ tags: ['c'] }))
+
+let display = writeDisplay("viewer");
+display.writeScreen({id: "x"}, x);
     </textarea>
     <div id="viewer" height="200"></div>
     <div id="container"></div>
@@ -48,21 +46,8 @@ writePaths({ path: 'window' },
     <!-- App -->
     <script type="module">
       import { api, readFileSync, trianglesToThreejsDatasets, watchFile, writeFileSync } from './JSxCAD.js';
-      console.log("API: ");
-      console.log(api);
 
       let editor;
-      console.log("Api: ");
-      console.log(api);
-      let display = api.writeDisplay("viewer");
-      display.writeScreen({id: "object1"}, api.cube());
-
-      watchFile('window', ({ data }) => {
-          console.log("Shift enter ran: ");
-          console.log(data);
-          display.writeScreen({id: "object2"}, api.cube());
-          display.clearScreenById("object1");
-      });
 
       const setupCodeMirror = () => {
         editor = CodeMirror.fromTextArea(document.getElementById('editor'),
@@ -79,13 +64,6 @@ writePaths({ path: 'window' },
                                                                          `const { ${Object.keys(api).join(', ')} } = $;\n\n` + 
                                                                          editor.getDoc().getValue('\n'));
                                                const result = code(api);
-                                               console.log("Result: ");
-                                               console.log(result);
-                                               console.log("" + code);
-                                               // Handle a return value as an implicit write.
-                                               if (result) {
-                                                 api.write({ path: 'window' }, result);
-                                               }
                                              }
                                            }
                                          });
