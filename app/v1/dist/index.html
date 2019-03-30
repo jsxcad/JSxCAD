@@ -70,7 +70,9 @@ writePaths({ path: 'window' },
       }
 
         watchFile('window', ({ data }) => {
-            
+            console.log("Shift enter ran");
+            display.writeScreen("object2", api.cube());
+            display.clearScreenById("object1");
         //for (const { controller, mesh } of datasets) {
         //  if (controller) {
         //    gui.remove(controller);

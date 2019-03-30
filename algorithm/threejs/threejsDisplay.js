@@ -50,7 +50,7 @@ export class threejsDisplay{
         document.getElementById('viewer').appendChild(gui.domElement);
         // gui.add( material, 'wireframe' );
         //
-        window.addEventListener( 'resize', this.onWindowResize, false );
+        window.addEventListener( 'resize', () => {this.onWindowResize()}, false );
         
         this.animate();
     }
@@ -77,11 +77,15 @@ export class threejsDisplay{
         geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
         var material = new THREE.MeshNormalMaterial();
         var mesh = new THREE.Mesh( geometry, material );
+        mesh.name = id;
         this.scene.add( mesh );
     }
     
     clearScreenById(id){
-        console.log("clear by ID not yet implimented");
+        console.log("Clearing by ID: " + id);
+        var selectedObject = this.scene.getObjectByName(id);
+        this.scene.remove( selectedObject );
+        this.animate();
     }
     
     clearScreenAll(){
