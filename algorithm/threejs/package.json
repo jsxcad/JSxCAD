@@ -54,7 +54,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/math-poly3": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50"
   },

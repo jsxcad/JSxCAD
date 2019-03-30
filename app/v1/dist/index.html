@@ -47,57 +47,22 @@ writePaths({ path: 'window' },
 
     <!-- App -->
     <script type="module">
-      import { api, readFileSync, trianglesToThreejsDatasets, threejsDisplay, watchFile, writeFileSync } from './JSxCAD.js';
+      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, writeFileSync } from './JSxCAD.js';
       console.log("API: ");
       console.log(api);
 
       let editor;
-      let display = new threejsDisplay("viewer");
-      display.writeScreen("object1", api.sphere());
+      console.log("Api: ");
+      console.log(api);
+      let display = api.writeDisplay("viewer");
+      display.writeScreen({id: "object1"}, api.cube());
 
-      const makeMaterial = (material) => {
-        switch (material) {
-          case 'metal':
-            return new THREE.MeshStandardMaterial({
-                     color: 0x779aac,
-                     emissive: 0x7090a0,
-                     roughness: 0.65,
-                     metalness: 0.99,
-                   });
-          default:
-            return new THREE.MeshNormalMaterial();
-        }
-      }
-
-        watchFile('window', ({ data }) => {
-            console.log("Shift enter ran");
-            display.writeScreen("object2", api.cube());
-            display.clearScreenAll();
-        //for (const { controller, mesh } of datasets) {
-        //  if (controller) {
-        //    gui.remove(controller);
-        //  }
-        //  scene.remove(mesh);
-        //}
-        //datasets = trianglesToThreejsDatasets({}, ...data);
-        //for (const dataset of datasets) {
-        //  let geometry = new THREE.BufferGeometry();
-        //  let { properties = {}, indices, positions, normals } = dataset;
-         // let { material, tags = [] } = properties;
-        //  geometry.setIndex( indices );
-        //  geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-        //  geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
-        //  let threeMaterial = makeMaterial(material);
-        //  dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
-        //  scene.add(dataset.mesh);
-        //  if (tags.length >= 1) {
-        //dataset.controller = gui.add({ visible: true }, 'visible')
-        //                            .name(`Show ${tags[0]}?`)
-        //                            .listen()
-        //                            .onChange((value) => { dataset.mesh.visible = value; });
-        //  }
-        //}
-        });
+      watchFile('window', ({ data }) => {
+          console.log("Shift enter ran: ");
+          console.log(data);
+          display.writeScreen({id: "object2"}, api.cube());
+          display.clearScreenById("object1");
+      });
 
       const setupCodeMirror = () => {
         editor = CodeMirror.fromTextArea(document.getElementById('editor'),
@@ -114,6 +79,9 @@ writePaths({ path: 'window' },
                                                                          `const { ${Object.keys(api).join(', ')} } = $;\n\n` + 
                                                                          editor.getDoc().getValue('\n'));
                                                const result = code(api);
+                                               console.log("Result: ");
+                                               console.log(result);
+                                               console.log("" + code);
                                                // Handle a return value as an implicit write.
                                                if (result) {
                                                  api.write({ path: 'window' }, result);

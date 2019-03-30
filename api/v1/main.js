@@ -32,6 +32,7 @@ import { sqrt } from './sqrt';
 import { square } from './square';
 import { translate } from './translate';
 import { union } from './union';
+import { writeDisplay } from './writeDisplay';
 import { writePaths } from './writePaths';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
@@ -65,6 +66,7 @@ export {
   text,
   translate,
   union,
+  writeDisplay,
   writePaths,
   writePdf,
   writeShape,

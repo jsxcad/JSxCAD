@@ -1,6 +1,6 @@
 import { toTriangles } from '@jsxcad/algorithm-polygons';
 
-export class threejsDisplay{
+class threejsDisplay{
     constructor(targetID){
         console.log("A new instance of threejs class has been created");
         //
@@ -55,9 +55,9 @@ export class threejsDisplay{
         this.animate();
     }
     
-    writeScreen(id, ...shapes){
+    writeScreen(options = {}, ...shapes){
         console.log("Writing shape to screen: ");
-        console.log(id);
+        console.log(options.id);
         
         //Function to convert to polygons if needed
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
@@ -68,6 +68,20 @@ export class threejsDisplay{
         //Convert triangles to threejs dataset
         const datasets = trianglesToThreejsDatasets({}, ...solids);
         
+        const makeMaterial = (material) => {
+            switch (material) {
+              case 'metal':
+                return new THREE.MeshStandardMaterial({
+                         color: 0x779aac,
+                         emissive: 0x7090a0,
+                         roughness: 0.65,
+                         metalness: 0.99,
+                       });
+              default:
+                return new THREE.MeshNormalMaterial();
+            }
+        }
+        
         var geometry = new THREE.BufferGeometry();
         var indices = datasets[0].indices;
         var positions = datasets[0].positions;
@@ -77,7 +91,7 @@ export class threejsDisplay{
         geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
         var material = new THREE.MeshNormalMaterial();
         var mesh = new THREE.Mesh( geometry, material );
-        mesh.name = id;
+        mesh.name = options.id;
         this.scene.add( mesh );
     }
     
@@ -96,6 +110,7 @@ export class threejsDisplay{
     }
     
     onWindowResize() {
+        //FIXME: This should be responsive to the size of the div it is placed in, not the window
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.controls.handleResize();
@@ -112,4 +127,8 @@ export class threejsDisplay{
     render() {
         this.renderer.render( this.scene, this.camera );
     }
+}
+
+export const writeDisplay = (...params) => {
+    return new threejsDisplay(...params);
 }
