@@ -52,7 +52,7 @@ writePaths({ path: 'window' },
       console.log(api);
 
       let editor;
-      let display = new threejsDisplay();
+      let display = new threejsDisplay("viewer");
       display.writeScreen("object1", api.sphere());
 
       const makeMaterial = (material) => {

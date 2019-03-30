@@ -1,7 +1,7 @@
 import { toTriangles } from '@jsxcad/algorithm-polygons';
 
 export class threejsDisplay{
-    constructor(){
+    constructor(targetID){
         console.log("A new instance of threejs class has been created");
         //
         let datasets = [];
@@ -41,13 +41,13 @@ export class threejsDisplay{
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-        document.getElementById('viewer').appendChild(this.renderer.domElement);
+        document.getElementById(targetID).appendChild(this.renderer.domElement);
         //
         // stats = new Stats();
         // document.getElementById('viewer').appendChild(stats.dom);
         //
         gui = new dat.GUI({ autoPlace: false });
-        document.getElementById('viewer').appendChild(gui.domElement);
+        document.getElementById(targetID).appendChild(gui.domElement);
         // gui.add( material, 'wireframe' );
         //
         window.addEventListener( 'resize', () => {this.onWindowResize()}, false );
