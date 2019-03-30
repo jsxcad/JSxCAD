@@ -89,7 +89,10 @@ export class threejsDisplay{
     }
     
     clearScreenAll(){
-        console.log("Clear all not yet implimented");
+        console.log("Clear all objects from the scene");
+        while(this.scene.children.length > 0){ 
+            this.scene.remove(this.scene.children[0]); 
+        }
     }
     
     onWindowResize() {
