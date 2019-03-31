@@ -2,7 +2,6 @@ import { toTriangles } from '@jsxcad/algorithm-polygons';
 
 class threejsDisplay{
     constructor(targetID){
-        console.log("A new instance of threejs class has been created");
         //
         let datasets = [];
         let stats;
@@ -79,34 +78,28 @@ class threejsDisplay{
         
         //Convert triangles to threejs dataset
         const datasets = trianglesToThreejsDatasets({}, ...solids);
-        console.log("datasets: ");
-        console.log(datasets);
         
         for (const dataset of datasets) {
-        
             var geometry = new THREE.BufferGeometry();
-            var indices = dataset.indices;
-            var positions = dataset.positions;
-            var normals = dataset.normals;
+            let { properties = {}, indices, positions, normals } = dataset;
+            let { material, tags = [] } = properties;
             geometry.setIndex( indices );
             geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
             geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-            var material = new THREE.MeshNormalMaterial();
-            var mesh = new THREE.Mesh( geometry, material );
+            var threeMaterial = makeMaterial(material);
+            var mesh = new THREE.Mesh( geometry, threeMaterial );
             mesh.name = options.id;
             this.scene.add( mesh );
         }
     }
     
     clearScreenById(id){
-        console.log("Clearing by ID: " + id);
         var selectedObject = this.scene.getObjectByName(id);
         this.scene.remove( selectedObject );
         this.animate();
     }
     
     clearScreenAll(){
-        console.log("Clear all objects from the scene");
         while(this.scene.children.length > 0){ 
             this.scene.remove(this.scene.children[0]); 
         }
@@ -133,7 +126,5 @@ class threejsDisplay{
 }
 
 export const buildThreejsScreen = (targetDiv) => {
-    console.log("Would be placing a new screen now");
-    console.log(targetDiv);
     new threejsDisplay(targetDiv);
 }

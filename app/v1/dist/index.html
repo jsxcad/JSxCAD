@@ -26,8 +26,8 @@ let x = union(sphere().as('a').material('metal'),
 
 clearScreen({path : 'window/viewer/*'});
 writeScreen({path : 'window/viewer/x'}, x);
-writeScreen({path : 'window/viewer/thing1'}, sphere(2));
-writeScreen({path : 'window/viewer/thing2'}, cube(2));
+writeScreen({path : 'window/viewer/thing1'}, sphere(2).translate([0, 0, -1.5]));
+writeScreen({path : 'window/viewer/thing2'}, cube(2).translate([-2, -2, -0.5]));
 clearScreen({path : 'window/viewer/thing1'});
 
     </textarea>
