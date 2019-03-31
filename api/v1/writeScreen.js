@@ -2,12 +2,10 @@ import { buildThreejsScreen } from './buildThreejsScreen';
 
 export const writeScreen = ({ path }, ...shapes) => {
     
-    const pathElements = path.split('/');
-    const target = pathElements[0];
-    const targetDiv = pathElements[1];
-    const shapeID = pathElements[2];
+    //Parse the path
+    var [target , targetDiv, shapeID ]  = path.split('/');
     
-    //Add a viewer to the div if there isn't one already
+    //Add a viewer to the path if there isn't one already
     if(typeof document.getElementById(targetDiv).threeScreen == 'undefined'){
         buildThreejsScreen(targetDiv);
     }

@@ -11,6 +11,7 @@ import { CSG } from './CSG';
 import { Path2D } from './Path2D';
 import { acos } from './acos';
 import { circle } from './circle';
+import { clearScreen } from './clearScreen';
 import { cos } from './cos';
 import { cube } from './cube';
 import { cylinder } from './cylinder';
@@ -45,6 +46,7 @@ export {
   Path2D,
   acos,
   circle,
+  clearScreen,
   cos,
   cube,
   cylinder,

@@ -24,11 +24,15 @@ let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
-
+clearScreen({path : 'window/viewer/*'});
 writeScreen({path : 'window/viewer/x'}, x);
+writeScreen({path : 'window/viewer/thing1'}, sphere(2));
+writeScreen({path : 'window/viewer/thing2'}, cube(2));
+clearScreen({path : 'window/viewer/thing1'});
 
     </textarea>
     <div id="viewer" height="200"></div>
+    <div id="viewer2" height="200"></div>
     <div id="container"></div>
 
     <!-- CodeMirror -->

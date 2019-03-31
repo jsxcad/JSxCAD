@@ -56,24 +56,15 @@ class threejsDisplay{
     }
     
     writeScreen(options = {}, ...shapes){
-        console.log("Writing shape to screen: ");
-        console.log(options.id);
-        console.log("Shapes:");
-        console.log(shapes);
         
         //Function to convert to polygons if needed
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
         
         //Convert polygon to triangles
         const solids = shapes.map(toPolygons).map(polygons =>  toTriangles({}, polygons));
-        console.log("Solids: ");
-        console.log(solids);
         
         //Convert triangles to threejs dataset
         const datasets = trianglesToThreejsDatasets({}, ...solids);
-        
-        console.log("Datasets: ");
-        console.log(datasets);
         
         const makeMaterial = (material) => {
             switch (material) {
