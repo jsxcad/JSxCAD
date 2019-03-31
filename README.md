@@ -33,19 +33,21 @@ Note: npm packages will be published once the user api is up to spec.
 
 ## Usage
 
-- Running locally:
+- Running locally
+
+This should produce example/v1/tmp/square.pdf.
 
 ```
 git clone https://github.com/jsxcad/JSxCAD
 cd JSxCAD
 npm install
 cd example/v1
-node -r esm run square.js
+npm run example square
 ```
 
-should produce /tmp/square.pdf.
+- To build and run a local copy of the website for testing
 
-- To build and run a local copy of the website for testing:
+This should produce a new browser running a locally hosted version of the webpage for testing.
 
 ```
 cd JSxCAD/app/v1
@@ -53,7 +55,25 @@ npm run wepback
 http-server ./dist -o
 ```
 
-should produce a new browser tab running a locally hosted version of the webpage for testing
+- Script support
+
+These should work at the top level.
+Travis will enforce 'npm run test' and 'npm run lint' passing.
+
+```
+npm install
+npm run test
+npm run lint
+```
+
+These should work in all sub-packages.
+
+```
+npm run test name
+npm run tests
+npm run lint
+npm run lintfix
+```
 
 ## API
 

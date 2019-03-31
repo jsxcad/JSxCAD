@@ -27,15 +27,15 @@ export class Assembly {
     return this.geometry;
   }
 
-  toPaths (options) {
+  toPaths (options = {}) {
     return canonicalize(this.geometry.toPaths(options));
   }
 
-  toPoints (options) {
+  toPoints (options = {}) {
     return toPoints(options, this.toPaths(options));
   }
 
-  toPolygons (options) {
+  toPolygons (options = {}) {
     return this.toPaths(options);
   }
 

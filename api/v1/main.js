@@ -14,6 +14,7 @@ import { circle } from './circle';
 import { clearScreen } from './clearScreen';
 import { cos } from './cos';
 import { cube } from './cube';
+import { crossSection } from './crossSection';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
@@ -46,6 +47,7 @@ export {
   acos,
   circle,
   clearScreen,
+  crossSection,
   cos,
   cube,
   cylinder,
