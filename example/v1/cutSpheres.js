@@ -1,7 +1,6 @@
-import { difference, sphere, tetrahedron, union, writePdf } from '@jsxcad/api-v1';
+import { difference, sphere, writePdf } from '@jsxcad/api-v1';
 import { cutTrianglesByPlane, toTriangles } from '@jsxcad/algorithm-polygons';
 import { fromPoints } from '@jsxcad/math-plane';
-import { union as unionOfZ0Polygons } from '@jsxcad/algorithm-z0polygons';
 
 export const main = () => {
   const z = 0;
