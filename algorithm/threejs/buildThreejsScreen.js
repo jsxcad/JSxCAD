@@ -35,15 +35,17 @@ class threejsDisplay {
     //
     this.renderer = new THREE.WebGLRenderer( { antialias: true } );
     this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-    document.getElementById(targetID).appendChild(this.renderer.domElement);
+    this.targetDiv = document.getElementById(targetID);
+    this.renderer.setSize( this.targetDiv.clientWidth, this.targetDiv.clientHeight);
+    this.targetDiv.appendChild(this.renderer.domElement);
     //
     // stats = new Stats();
     // document.getElementById('viewer').appendChild(stats.dom);
     //
     gui = new dat.GUI({ autoPlace: false });
-    document.getElementById(targetID).appendChild(gui.domElement);
-    document.getElementById(targetID).threeScreen = this;
+    this.targetDiv.appendChild(gui.domElement);
+    this.targetDiv.threeScreen = this;
+    this.onWindowResize();
     // gui.add( material, 'wireframe' );
     //
     window.addEventListener( 'resize', () => {this.onWindowResize()}, false );
@@ -103,11 +105,10 @@ class threejsDisplay {
   }
   
   onWindowResize() {
-    //FIXME: This should be responsive to the size of the div it is placed in, not the window
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.aspect = this.targetDiv.clientWidth / this.targetDiv.clientHeight;
     this.camera.updateProjectionMatrix();
     this.controls.handleResize();
-    this.renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
+    this.renderer.setSize( this.targetDiv.clientWidth, this.targetDiv.clientHeight);
   }
   
   animate() {
