@@ -1,4 +1,4 @@
-import { buildThreejsScreen } from './buildThreejsScreen';
+import { buildThreejsScreen } from '@jsxcad/algorithm-threejs';
 
 export const writeScreen = ({ path }, ...shapes) => {
     
