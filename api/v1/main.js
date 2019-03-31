@@ -35,6 +35,7 @@ import { union } from './union';
 import { writeDisplay } from './writeDisplay';
 import { writePaths } from './writePaths';
 import { writePdf } from './writePdf';
+import { writeScreen} from './writeScreen';
 import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
 import { writeThreejsPage } from './writeThreejs';
@@ -69,6 +70,7 @@ export {
   writeDisplay,
   writePaths,
   writePdf,
+  writeScreen,
   writeShape,
   writeStl,
   writeThreejsPage

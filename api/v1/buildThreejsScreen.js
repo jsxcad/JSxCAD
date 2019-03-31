@@ -1,7 +1,8 @@
 import { toTriangles } from '@jsxcad/algorithm-polygons';
 
 class threejsDisplay{
-    buldThreejsScreen(path){
+    constructor(targetID){
+        console.log("A new instance of threejs class has been created");
         //
         let datasets = [];
         let stats;
@@ -35,21 +36,18 @@ class threejsDisplay{
         this.camera.add(light2);
         // scene.add( light2 );
         
-        
         //
         this.renderer = new THREE.WebGLRenderer( { antialias: true } );
         this.renderer.setPixelRatio( window.devicePixelRatio );
         this.renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-        console.log("DomElement: ");
-        console.log(this.renderer.domElement);
         document.getElementById(targetID).appendChild(this.renderer.domElement);
-        document.getElementById(targetID).renderer = this;
         //
         // stats = new Stats();
         // document.getElementById('viewer').appendChild(stats.dom);
         //
         gui = new dat.GUI({ autoPlace: false });
         document.getElementById(targetID).appendChild(gui.domElement);
+        document.getElementById(targetID).threeScreen = this;
         // gui.add( material, 'wireframe' );
         //
         window.addEventListener( 'resize', () => {this.onWindowResize()}, false );
@@ -57,22 +55,25 @@ class threejsDisplay{
         this.animate();
     }
     
-    testLogOfDomElement(targetID){
-        console.log("Read back DOM: ");
-        console.log(document.getElementById(targetID));
-        console.log(document.getElementById(targetID).renderer);
-    }
-    
     writeScreen(options = {}, ...shapes){
+        console.log("Writing shape to screen: ");
+        console.log(options.id);
+        console.log("Shapes:");
+        console.log(shapes);
         
         //Function to convert to polygons if needed
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
         
         //Convert polygon to triangles
         const solids = shapes.map(toPolygons).map(polygons =>  toTriangles({}, polygons));
+        console.log("Solids: ");
+        console.log(solids);
         
         //Convert triangles to threejs dataset
         const datasets = trianglesToThreejsDatasets({}, ...solids);
+        
+        console.log("Datasets: ");
+        console.log(datasets);
         
         const makeMaterial = (material) => {
             switch (material) {
@@ -95,19 +96,21 @@ class threejsDisplay{
         geometry.setIndex( indices );
         geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
         geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-        var material = makeMaterial(datasets[0].properties.material);
+        var material = new THREE.MeshNormalMaterial();
         var mesh = new THREE.Mesh( geometry, material );
         mesh.name = options.id;
         this.scene.add( mesh );
     }
     
     clearScreenById(id){
+        console.log("Clearing by ID: " + id);
         var selectedObject = this.scene.getObjectByName(id);
         this.scene.remove( selectedObject );
         this.animate();
     }
     
     clearScreenAll(){
+        console.log("Clear all objects from the scene");
         while(this.scene.children.length > 0){ 
             this.scene.remove(this.scene.children[0]); 
         }
@@ -133,6 +136,8 @@ class threejsDisplay{
     }
 }
 
-export const writeDisplay = (...params) => {
-    return new threejsDisplay(...params);
+export const buildThreejsScreen = (targetDiv) => {
+    console.log("Would be placing a new screen now");
+    console.log(targetDiv);
+    new threejsDisplay(targetDiv);
 }

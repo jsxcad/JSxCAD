@@ -25,8 +25,8 @@ let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
 
-let display = writeDisplay("viewer");
-display.writeScreen({id: "x"}, x);
+writeScreen({path : 'window/viewer/x'}, x);
+
     </textarea>
     <div id="viewer" height="200"></div>
     <div id="container"></div>
