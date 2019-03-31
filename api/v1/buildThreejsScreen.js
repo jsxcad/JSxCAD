@@ -60,12 +60,6 @@ class threejsDisplay{
         //Function to convert to polygons if needed
         const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
         
-        //Convert polygon to triangles
-        const solids = shapes.map(toPolygons).map(polygons =>  toTriangles({}, polygons));
-        
-        //Convert triangles to threejs dataset
-        const datasets = trianglesToThreejsDatasets({}, ...solids);
-        
         const makeMaterial = (material) => {
             switch (material) {
               case 'metal':
@@ -80,17 +74,28 @@ class threejsDisplay{
             }
         }
         
-        var geometry = new THREE.BufferGeometry();
-        var indices = datasets[0].indices;
-        var positions = datasets[0].positions;
-        var normals = datasets[0].normals;
-        geometry.setIndex( indices );
-        geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-        geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-        var material = new THREE.MeshNormalMaterial();
-        var mesh = new THREE.Mesh( geometry, material );
-        mesh.name = options.id;
-        this.scene.add( mesh );
+        //Convert polygon to triangles
+        const solids = shapes.map(toPolygons).map(polygons =>  toTriangles({}, polygons));
+        
+        //Convert triangles to threejs dataset
+        const datasets = trianglesToThreejsDatasets({}, ...solids);
+        console.log("datasets: ");
+        console.log(datasets);
+        
+        for (const dataset of datasets) {
+        
+            var geometry = new THREE.BufferGeometry();
+            var indices = dataset.indices;
+            var positions = dataset.positions;
+            var normals = dataset.normals;
+            geometry.setIndex( indices );
+            geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+            geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+            var material = new THREE.MeshNormalMaterial();
+            var mesh = new THREE.Mesh( geometry, material );
+            mesh.name = options.id;
+            this.scene.add( mesh );
+        }
     }
     
     clearScreenById(id){
