@@ -1,19 +1,17 @@
 import { canonicalize, dot, equals, lerp, subtract } from '@jsxcad/math-vec3';
-import { measureArea } from '@jsxcad/algorithm-path';
 
 const EPSILON = 1e-5;
 
-// Points
-const COPLANAR = 0; // Neither front nor back.
+// Point Classification.
+const COPLANAR = 0;
 const FRONT = 1;
 const BACK = 2;
-const SPANNING = 3; // Both front and back.
 
-// Edges
+// Edge Properties.
 const START = 0;
 const END = 1;
 
-// Dimensions
+// Plane Properties.
 const W = 3;
 
 const toType = (plane, point) => {
@@ -32,7 +30,15 @@ const spanPoint = (plane, startPoint, endPoint) => {
   return canonicalize(lerp(t, startPoint, endPoint));
 };
 
-const equalsEdge = ([aStart, aEnd], [bStart, bEnd]) => equals(aStart, bStart) && equals(aEnd, bEnd);
+const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
+  if (aX < bX) { return -1; }
+  if (aX > bX) { return 1; }
+  if (aY < bY) { return -1; }
+  if (aY > bY) { return 1; }
+  if (aZ < bZ) { return -1; }
+  if (aZ > bZ) { return 1; }
+  return 0;
+};
 
 /**
  * Takes a cross-section of a triangulated solid at a plane, yielding surface defining loops
@@ -43,7 +49,9 @@ const equalsEdge = ([aStart, aEnd], [bStart, bEnd]) => equals(aStart, bStart) &&
  */
 export const cutTrianglesByPlane = (plane, triangles) => {
   let edges = [];
-  const addEdge = (start, end) => edges.push([start, end].sort());
+  const addEdge = (start, end) => {
+    edges.push([start, end]);
+  };
 
   // Find the edges along the plane and fold them into paths to produce a set of closed loops.
   for (let nth = 0; nth < triangles.length; nth++) {
@@ -51,63 +59,169 @@ export const cutTrianglesByPlane = (plane, triangles) => {
     const [a, b, c] = triangle;
     const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];
 
-    if (aType === COPLANAR && bType === COPLANAR && cType === COPLANAR) {
-      // addEdge(a, b);
-      // addEdge(b, c);
-      // addEdge(c, a);
-    } else if ((aType | bType) === SPANNING && (bType | cType) === SPANNING) { // a-b, b-c
-      addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));
-    } else if ((aType | bType) === SPANNING && (cType | aType) === SPANNING) { // a-b, c-a
-      addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));
-    } else if ((bType | cType) === SPANNING && (cType | aType) === SPANNING) { // b-c, c-a
-      addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));
-    } else if ((aType === COPLANAR) && (bType | cType) === SPANNING) {
-      addEdge(a, spanPoint(plane, b, c));
-    } else if ((bType === COPLANAR) && (cType | aType) === SPANNING) {
-      addEdge(b, spanPoint(plane, c, a));
-    } else if ((cType === COPLANAR) && (aType | bType) === SPANNING) {
-      addEdge(c, spanPoint(plane, a, b));
-    } else if ((aType === COPLANAR) && (bType === COPLANAR)) {
-      addEdge(a, b);
-    } else if ((aType === COPLANAR) && (cType === COPLANAR)) {
-      addEdge(a, c);
-    } else if ((bType === COPLANAR) && (cType === COPLANAR)) {
-      addEdge(b, c);
-    } else {
-      // The remaining cases are where corners touch.
-      // No edge added.
+    switch (aType) {
+      case FRONT:
+        switch (bType) {
+          case FRONT:
+            switch (cType) {
+              case FRONT:
+                // No intersection.
+                break;
+              case COPLANAR:
+                // Corner touches.
+                break;
+              case BACK:
+                // b-c down c-a up
+                addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));
+                break;
+            }
+            break;
+          case COPLANAR:
+            switch (cType) {
+              case FRONT:
+                // Corner touches.
+                break;
+              case COPLANAR:
+                // b-c along plane.
+                addEdge(b, c);
+                break;
+              case BACK:
+                // down at b, up c-a.
+                addEdge(b, spanPoint(plane, c, a));
+                break;
+            }
+            break;
+          case BACK:
+            switch (cType) {
+              case FRONT:
+                // a-b down, b-c up.
+                addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));
+                break;
+              case COPLANAR:
+                // a-b down, c up.
+                addEdge(spanPoint(plane, a, b), c);
+                break;
+              case BACK:
+                // a-b down, c-a up.
+                addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));
+                break;
+            }
+            break;
+        }
+        break;
+      case COPLANAR:
+        switch (bType) {
+          case FRONT:
+            switch (cType) {
+              case FRONT:
+                // Corner touches.
+                break;
+              case COPLANAR:
+                // c-a along plane.
+                addEdge(c, a);
+                break;
+              case BACK:
+                // down at b-c, up at a
+                addEdge(spanPoint(plane, b, c), a);
+                break;
+            }
+            break;
+          case COPLANAR:
+            switch (cType) {
+              case FRONT:
+                // a-b along plane.
+                addEdge(a, b);
+                break;
+              case COPLANAR:
+                // Entirely coplanar -- doesn't cut.
+                break;
+              case BACK:
+                // Wrong half-space.
+                break;
+            }
+            break;
+          case BACK:
+            switch (cType) {
+              case FRONT:
+                // down at a, up at b-c.
+                addEdge(a, spanPoint(plane, b, c));
+                break;
+              case COPLANAR:
+                // Wrong half-space.
+                break;
+              case BACK:
+                // Wrong half-space.
+                break;
+            }
+            break;
+        }
+        break;
+      case BACK:
+        switch (bType) {
+          case FRONT:
+            switch (cType) {
+              case FRONT:
+                // down at c-a, up at a-b
+                addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));
+                break;
+              case COPLANAR:
+                // down at c, up at a-b
+                addEdge(c, spanPoint(plane, a, b));
+                break;
+              case BACK:
+                // down at b-c, up at a-b.
+                addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));
+                break;
+            }
+            break;
+          case COPLANAR:
+            switch (cType) {
+              case FRONT:
+                // down at c-a, up at b.
+                addEdge(spanPoint(plane, c, a), b);
+                break;
+              case COPLANAR:
+                // Wrong half-space.
+                break;
+              case BACK:
+                // Wrong half-space.
+                break;
+            }
+            break;
+          case BACK:
+            switch (cType) {
+              case FRONT:
+                // down at c-a, up at b-c.
+                addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));
+                break;
+              case COPLANAR:
+                // Wrong half-space.
+                break;
+              case BACK:
+                // Wrong half-space.
+                break;
+            }
+            break;
+        }
+        break;
     }
   }
 
-  const extractSuccessor = (edges, edge) => {
+  const extractSuccessor = (edges, start) => {
     // FIX: Use a binary search to take advantage of the sorting of the edges.
     for (let nth = 0; nth < edges.length; nth++) {
       const candidate = edges[nth];
-      if (equals(candidate[START], edge[END])) {
+      if (equals(candidate[START], start)) {
         edges.splice(nth, 1);
         return candidate;
-      } else if (equals(candidate[END], edge[END])) {
-        edges.splice(nth, 1);
-        return candidate.reverse();
       }
     }
-    throw Error('die');
+    // Given manifold geometry, there must always be a successor.
+    throw Error('Non-manifold');
   };
 
   // Sort the edges so that deduplication is efficient.
-  edges.sort();
-
-  // Deduplicate.
-  {
-    // FIX: Figure out where the duplicates are coming from.
-    const deduped = [];
-    for (const edge of edges) {
-      if (deduped.length === 0 || !equalsEdge(edge, deduped[deduped.length - 1])) {
-        deduped.push(edge);
-      }
-    }
-    edges = deduped;
-  }
+  edges.sort(lexicographcalPointOrder);
 
   // Assemble the edges into loops which are closed paths.
   const loops = [];
@@ -115,14 +229,8 @@ export const cutTrianglesByPlane = (plane, triangles) => {
     let edge = edges.shift();
     const loop = [edge[START]];
     while (!equals(edge[END], loop[0])) {
-      edge = extractSuccessor(edges, edge);
+      edge = extractSuccessor(edges, edge[END]);
       loop.push(edge[START]);
-    }
-    // Ensure loop is correctly turned.
-    if (measureArea(loop) < 0) {
-      // Assume it is an exterior loop for now.
-      // FIX: Do it properly.
-      loop.reverse();
     }
     loops.push(loop);
   }
