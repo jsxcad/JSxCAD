@@ -1,9 +1,11 @@
 import { readFileSync } from './readFileSync';
-import { writeFileSync } from './writeFileSync';
 import { watchFile } from './watchFile';
+import { watchFileCreation } from './watchFileCreation';
+import { writeFileSync } from './writeFileSync';
 
 export {
   readFileSync,
   watchFile,
+  watchFileCreation,
   writeFileSync
 };
