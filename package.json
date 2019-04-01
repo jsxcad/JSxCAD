@@ -4,7 +4,7 @@
   "description": "Javascript CAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "scripts": {
-    "install": "lerna bootstrap --hoist",
+    "postinstall": "lerna bootstrap --hoist",
     "lint": "lerna bootstrap --hoist && lerna run lint",
     "test": "lerna bootstrap --hoist && lerna run test"
   },
