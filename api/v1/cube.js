@@ -1,6 +1,7 @@
 import { CSG } from './CSG';
 import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
 import { buildRegularPrism,
+         buildRoundedConvexHull,
          regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 // Dispatch mechanism.
@@ -31,8 +32,6 @@ const unitCube = () => CSG.fromPolygons(buildRegularPrism({ edges: 4 }))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
-// Cube Interfaces.
-
 const centerMaybe = ({ size, center }, shape) => {
   if (center) {
     return shape;
@@ -44,6 +43,8 @@ const centerMaybe = ({ size, center }, shape) => {
     }
   }
 };
+
+// Cube Interfaces.
 
 // cube()
 const cubeDefault = (...rest) => {
@@ -57,6 +58,16 @@ const cubeSide = (size, ...rest) => {
   assertNumber(size);
   return () => unitCube().scale(size).translate([size / 2, size / 2, size / 2]);
 };
+
+// cube({ radius, roundRadius, resolution })
+const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, ...rest) => {
+  assertEmpty(rest);
+  assertNumber(roundRadius);
+  assertNumber(resolution);
+  return () => CSG.fromPolygons(
+                 buildRoundedConvexHull({ roundingRadius: roundRadius, roundingFaces: resolution },
+                                        unitCube().scale(radius - roundRadius * 2).toPoints()));
+}
 
 // cube({ center: [0, 0, 0], radius: 1 })
 const cubeCenterRadius = ({ center, radius }, ...rest) => {
@@ -111,6 +122,7 @@ const cubeSizeCenter = ({ size, center = false }, ...rest) => {
 export const cube = chain('cube',
                           cubeDefault,
                           cubeSide,
+                          cubeRoundRadiusResolution,
                           cubeCenterRadius,
                           cubeRadius,
                           cubeCorner,
