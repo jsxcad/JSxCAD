@@ -65,9 +65,9 @@ const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, 
   assertNumber(roundRadius);
   assertNumber(resolution);
   return () => CSG.fromPolygons(
-                 buildRoundedConvexHull({ roundingRadius: roundRadius, roundingFaces: resolution },
-                                        unitCube().scale(radius - roundRadius * 2).toPoints()));
-}
+    buildRoundedConvexHull({ roundingRadius: roundRadius, roundingFaces: resolution },
+                           unitCube().scale(radius - roundRadius * 2).toPoints()));
+};
 
 // cube({ center: [0, 0, 0], radius: 1 })
 const cubeCenterRadius = ({ center, radius }, ...rest) => {
