@@ -1,6 +1,7 @@
 import { readFileSync } from './readFileSyncBrowser';
 import { test } from 'ava';
 import { watchFile } from './watchFileBrowser';
+import { watchFileCreation } from './files';
 import { writeFileSync } from './writeFileSyncBrowser';
 
 test('Test writing a new file', t => {
@@ -27,4 +28,19 @@ test('Test watch on writing an existing file', t => {
   t.false(changed);
   writeFileSync('tmp/4', 'goodbye');
   t.true(changed);
+});
+
+test('Test watching file creation.', t => {
+  // We should not notice this file being created.
+  writeFileSync('tmp/5', '5');
+
+  const created = [];
+  watchFileCreation(file => created.push(file.path));
+
+  // We should not notice this file being updated.
+  writeFileSync('tmp/5', 'five');
+
+  // We should notice this new file being created.
+  writeFileSync('tmp/6', 'six');
+  t.deepEqual(created, ['tmp/6']);
 });
