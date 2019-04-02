@@ -58,6 +58,7 @@
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-z0polygons": "^0.0.50",
     "@jsxcad/algorithm-stl": "^0.0.50",
+    "@jsxcad/algorithm-text": "^0.0.50",
     "@jsxcad/algorithm-watertight": "^0.0.50",
     "@jsxcad/data-shape": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",

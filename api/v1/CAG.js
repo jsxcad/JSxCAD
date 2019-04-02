@@ -14,6 +14,14 @@ export class CAG {
     this.geometry = geometry || fromPaths({}, []);
   }
 
+  difference (...shapes) {
+    return CAG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
+  }
+
+  intersection (...shapes) {
+    return CAG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
+  }
+
   material (material) {
     return Assembly.fromGeometries([this.geometry]).material(material);
   }
@@ -34,6 +42,10 @@ export class CAG {
     return this.geometry.toPaths(options);
   }
 
+  union (...shapes) {
+    return CAG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
+  }
+
   writePdf (options = {}) {
     writePdf(options, this);
     return this;
@@ -41,7 +53,9 @@ export class CAG {
 }
 
 CAG.fromGeometry = (geometry) => new CAG(geometry);
-CAG.fromPaths = (paths) => CAG.fromGeometry(fromPaths({}, canonicalize(paths)));
+CAG.fromPaths = (paths) => {
+  return CAG.fromGeometry(fromPaths({}, canonicalize(paths)));
+}
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
 CAG.fromPoints = (points) => CAG.fromPaths([points]);

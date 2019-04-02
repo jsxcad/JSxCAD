@@ -28,6 +28,7 @@ const chain = (name, ...dispatches) => {
 
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
+// Note: We can't call this while bootstrapping, but we could memoize the result afterward.
 const unitCube = () => CSG.fromPolygons(buildRegularPrism({ edges: 4 }))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
@@ -107,7 +108,7 @@ const cubeSizesCenter = ({ size, center = false }, ...rest) => {
   assertNumber(length);
   assertNumber(width);
   assertNumber(height);
-  return () => centerMaybe({ size, center }, unitCube().scale([length, width, height]).translate(center));
+  return () => centerMaybe({ size, center }, unitCube().scale([length, width, height]));
 };
 
 // cube({ size: 1, center: false });
