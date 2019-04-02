@@ -18,7 +18,7 @@
       }
     </style>
   </head>
-  <body>
+  <body id="body">
     <textarea id="editor">
 let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
@@ -35,6 +35,8 @@ clearScreen({path : 'window/viewer/thing1'});
     <div id="viewer2" height="200"></div>
     <div id="container"></div>
 
+    </textarea>
+
     <!-- CodeMirror -->
     <link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
     <script src="https://codemirror.net/lib/codemirror.js"></script>
@@ -49,10 +51,10 @@ clearScreen({path : 'window/viewer/thing1'});
 
     <!-- App -->
     <script type="module">
+
       import { api, readFileSync, trianglesToThreejsDatasets, watchFile, writeFileSync } from './JSxCAD.js';
 
       let editor;
-
       const setupCodeMirror = () => {
         editor = CodeMirror.fromTextArea(document.getElementById('editor'),
                                          {

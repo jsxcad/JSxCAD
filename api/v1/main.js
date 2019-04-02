@@ -32,6 +32,7 @@ import { sin } from './sin';
 import { sphere } from './sphere';
 import { sqrt } from './sqrt';
 import { square } from './square';
+import { tetrahedron } from './tetrahedron';
 import { translate } from './translate';
 import { union } from './union';
 import { writePaths } from './writePaths';
@@ -67,6 +68,7 @@ export {
   sphere,
   sqrt,
   square,
+  tetrahedron,
   text,
   translate,
   union,

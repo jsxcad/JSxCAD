@@ -58,6 +58,7 @@
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-z0polygons": "^0.0.50",
     "@jsxcad/algorithm-stl": "^0.0.50",
+    "@jsxcad/algorithm-watertight": "^0.0.50",
     "@jsxcad/data-shape": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
     "@jsxcad/math-plane": "^0.0.50",
@@ -68,7 +69,15 @@
     "argv": "^0.0.2"
   },
   "devDependencies": {
+    "argv": "^0.0.2",
     "ava": "^0.23.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.15.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
     "esm": "^3.2.10"
   },
   "ava": {
