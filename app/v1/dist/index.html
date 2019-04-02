@@ -19,19 +19,20 @@
       }
     </style>
   </head>
-  <body>
+  <body id="body">
     <textarea id="editor">
 let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
-writePaths({ path: 'window' },
+writePaths({ path: 'assembly' },
            x.toPaths({ tags: ['a'] }),
            x.toPaths({ tags: ['b'] }),
            x.toPaths({ tags: ['c'] }))
+    
+writePaths({ path: 'sphere' },
+           x.toPaths({ tags: ['a'] }));
     </textarea>
-    <div id="viewer" height="200"></div>
-    <div id="container"></div>
 
     <!-- CodeMirror -->
     <link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
@@ -47,19 +48,7 @@ writePaths({ path: 'window' },
 
     <!-- App -->
     <script type="module">
-      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, writeFileSync } from './JSxCAD.js';
-
-      console.log(api);
-
-      let editor;
-      let datasets = [];
-      let camera;
-      let controls;
-      let scene;
-      let renderer;
-      let stats;
-      let mesh;
-      let gui;
+      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
 
       const makeMaterial = (material) => {
         switch (material) {
@@ -75,32 +64,19 @@ writePaths({ path: 'window' },
         }
       }
 
-      watchFile('window', ({ data }) => {
-                            for (const { controller, mesh } of datasets) {
-                              if (controller) {
-                                gui.remove(controller);
-                              }
-                              scene.remove(mesh);
-                            }
-                            datasets = trianglesToThreejsDatasets({}, ...data);
-                            for (const dataset of datasets) {
-                              let geometry = new THREE.BufferGeometry();
-                              let { properties = {}, indices, positions, normals } = dataset;
-                              let { material, tags = [] } = properties;
-                              geometry.setIndex( indices );
-                              geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-                              geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
-                              let threeMaterial = makeMaterial(material);
-                              dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
-                              scene.add(dataset.mesh);
-                              if (tags.length >= 1) {
-	                        dataset.controller = gui.add({ visible: true }, 'visible')
-                                                        .name(`Show ${tags[0]}?`)
-                                                        .listen()
-                                                        .onChange((value) => { dataset.mesh.visible = value; });
-                              }
-                            }
-                          });
+      let editor;
+
+      const runScript = () => {
+        // Evaluate.
+        const code = new Function('$',
+                                  `const { ${Object.keys(api).join(', ')} } = $;\n\n` + 
+                                  editor.getDoc().getValue('\n'));
+        const result = code(api);
+        // Handle a return value as an implicit write.
+        if (result) {
+          api.write({ path: 'window' }, result);
+        }
+      }
 
       const setupCodeMirror = () => {
         editor = CodeMirror.fromTextArea(document.getElementById('editor'),
@@ -111,83 +87,109 @@ writePaths({ path: 'window' },
                                            gutter: true,
                                            lineWrapping: true,
                                            extraKeys: {
-                                             'Shift-Enter': () => {
-                                               // Evaluate.
-                                               const code = new Function('$',
-                                                                         `const { ${Object.keys(api).join(', ')} } = $;\n\n` + 
-                                                                         editor.getDoc().getValue('\n'));
-                                               const result = code(api);
-                                               // Handle a return value as an implicit write.
-                                               if (result) {
-                                                 api.write({ path: 'window' }, result);
-                                               }
-                                             }
+                                             'Shift-Enter': runScript
                                            }
                                          });
+        runScript();
       };
       document.addEventListener("DOMContentLoaded", setupCodeMirror);
 
-      init();
-      animate();
-      function init() {
-        //
-        camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
-        [camera.position.x, camera.position.y, camera.position.z] = [0,0,16];
-        //
-        controls = new THREE.TrackballControls(camera);
-        controls.rotateSpeed = 4.0;
-        controls.zoomSpeed = 4.0;
-        controls.panSpeed = 2.0;
-        controls.noZoom = false;
-        controls.noPan = false;
-        controls.staticMoving = true;
-        controls.dynamicDampingFactor = 0.1;
-        controls.keys = [65, 83, 68];
-        controls.addEventListener('change', render);
-        //
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color( 0x050505 );
-        scene.add(camera);
-        //
-        var ambientLight = new THREE.AmbientLight( 0x222222 );
-        scene.add( ambientLight );
-        // var light1 = new THREE.PointLight(0xffffff, 0, 1);
-        // camera.add(light1);
-        var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
-        light2.position.set( 1, 1, 1 );
-        camera.add(light2);
-        // scene.add( light2 );
+      watchFileCreation(({ path }) => {
+        // Add a new window when we see a new file written.
+        let datasets = [];
+        let camera;
+        let controls;
+        let scene;
+        let renderer;
+        let stats;
+        let mesh;
+        let gui;
 
-        //
-        renderer = new THREE.WebGLRenderer( { antialias: true } );
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-        document.getElementById('viewer').appendChild(renderer.domElement);
-        //
-        // stats = new Stats();
-        // document.getElementById('viewer').appendChild(stats.dom);
-        //
-        gui = new dat.GUI({ autoPlace: false });
-        document.getElementById('viewer').appendChild(gui.domElement);
-        // gui.add( material, 'wireframe' );
-        //
-        window.addEventListener( 'resize', onWindowResize, false );
-      }
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        controls.handleResize();
-        renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-      }
-      function animate() {
-        requestAnimationFrame( animate );
-        render();
-        controls.update();
-        // stats.update();
-      }
-      function render() {
-        renderer.render( scene, camera );
-      }
+        watchFile(path, ({ data }) => {
+                          // Delete any previous dataset in the window.
+                          for (const { controller, mesh } of datasets) {
+                            if (controller) {
+                              gui.remove(controller);
+                            }
+                            scene.remove(mesh);
+                          }
+                          // Build new datasets from the written data, and display them.
+                          datasets = trianglesToThreejsDatasets({}, ...data);
+                          for (const dataset of datasets) {
+                            let geometry = new THREE.BufferGeometry();
+                            let { properties = {}, indices, positions, normals } = dataset;
+                            let { material, tags = [] } = properties;
+                            geometry.setIndex( indices );
+                            geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
+                            geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
+                            let threeMaterial = makeMaterial(material);
+                            dataset.mesh = new THREE.Mesh(geometry, threeMaterial);
+                            scene.add(dataset.mesh);
+                            if (tags.length >= 1) {
+	                      dataset.controller = gui.add({ visible: true }, 'visible')
+                                                      .name(`Show ${tags[0]}?`)
+                                                      .listen()
+                                                      .onChange((value) => { dataset.mesh.visible = value; });
+                            }
+                          }
+                        });
+        init();
+        animate();
+        function init() {
+          //
+          camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
+          [camera.position.x, camera.position.y, camera.position.z] = [0,0,16];
+          //
+          controls = new THREE.TrackballControls(camera);
+          controls.rotateSpeed = 4.0;
+          controls.zoomSpeed = 4.0;
+          controls.panSpeed = 2.0;
+          controls.noZoom = false;
+          controls.noPan = false;
+          controls.staticMoving = true;
+          controls.dynamicDampingFactor = 0.1;
+          controls.keys = [65, 83, 68];
+          controls.addEventListener('change', render);
+          //
+          scene = new THREE.Scene();
+          scene.background = new THREE.Color( 0x050505 );
+          scene.add(camera);
+          //
+          var ambientLight = new THREE.AmbientLight( 0x222222 );
+          scene.add( ambientLight );
+          var light = new THREE.DirectionalLight( 0xffffff, 1 );
+          light.position.set( 1, 1, 1 );
+          camera.add(light);
+          renderer = new THREE.WebGLRenderer( { antialias: true } );
+          renderer.setPixelRatio( window.devicePixelRatio );
+          // renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
+          renderer.setSize(200, 200);
+          // TODO: Something more clever than this.
+          const viewerElement = document.createElement("div");
+          viewerElement.id = `viewer:${path}`;
+          viewerElement.height = 200;
+          document.getElementById("body").appendChild(viewerElement);
+          viewerElement.appendChild(renderer.domElement);
+          gui = new dat.GUI({ autoPlace: false });
+          viewerElement.appendChild(gui.domElement);
+          window.addEventListener( 'resize', onWindowResize, false );
+        }
+        function onWindowResize() {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          controls.handleResize();
+          // renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
+        }
+        function animate() {
+          requestAnimationFrame( animate );
+          render();
+          controls.update();
+          // stats.update();
+        }
+        function render() {
+          renderer.render( scene, camera );
+        }
+      })
     </script>
   </body>
 </html>

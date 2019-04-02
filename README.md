@@ -41,6 +41,7 @@ This should produce example/v1/tmp/square.pdf.
 git clone https://github.com/jsxcad/JSxCAD
 cd JSxCAD
 npm install
+npm run bootstrap
 cd example/v1
 npm run example square
 ```
@@ -62,6 +63,7 @@ Travis will enforce 'npm run test' and 'npm run lint' passing.
 
 ```
 npm install
+npm run bootstrap
 npm run test
 npm run lint
 ```
