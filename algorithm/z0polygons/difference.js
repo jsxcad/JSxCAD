@@ -27,8 +27,6 @@ export const difference = (baseSurface, ...surfaces) => {
   }
   const surfaceClipping = z0SurfaceToClipping(canonicalize(baseSurface));
   const subtractionClipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
-console.log(`difference/surface: ${JSON.stringify(surfaceClipping)}`);
-console.log(`difference/subtractions: ${JSON.stringify(subtractionClipping)}`);
   const outputClipping = polygonClippingDifference(surfaceClipping, ...subtractionClipping);
   const outputPaths = clippingToPolygons(outputClipping);
   return outputPaths;

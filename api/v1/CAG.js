@@ -53,9 +53,7 @@ export class CAG {
 }
 
 CAG.fromGeometry = (geometry) => new CAG(geometry);
-CAG.fromPaths = (paths) => {
-  return CAG.fromGeometry(fromPaths({}, canonicalize(paths)));
-}
+CAG.fromPaths = (paths) => CAG.fromGeometry(fromPaths({}, canonicalize(paths)));
 
 // BREAKING: Direction was not significant for CAG.fromPoints, but now is.
 CAG.fromPoints = (points) => CAG.fromPaths([points]);

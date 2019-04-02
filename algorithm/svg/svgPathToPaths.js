@@ -10,17 +10,17 @@ import { equals } from '@jsxcad/math-vec2';
 // FIX: Check scaling.
 
 const removeRepeatedPoints = (path) => {
-  const deduplicated = [];
+  const unrepeated = [];
   for (let nth = 1; nth < path.length; nth++) {
     const last = path[nth - 1];
     const current = path[nth];
     if (last === null) {
-      deduplicated.push(null, current);
+      unrepeated.push(null, current);
     } else if (!equals(last, current)) {
-      deduplicated.push(current);
+      unrepeated.push(current);
     }
   }
-  return deduplicated;
+  return unrepeated;
 }
 
 const toPaths = ({ curveSegments }, svgPath) => {
