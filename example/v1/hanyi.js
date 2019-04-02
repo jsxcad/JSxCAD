@@ -1,4 +1,4 @@
-import { CAG, cube, difference, loadFont, text, union, writePdf, writeStl } from '@jsxcad/api-v1';
+import { loadFont, text, writePdf, writeStl } from '@jsxcad/api-v1';
 
 const hanyi = loadFont({ path: './hanyi/HanyiSentyTang.ttf' });
 
