@@ -1,13 +1,15 @@
+import * as THREE from 'three';
 import { toTriangles } from '@jsxcad/algorithm-polygons';
+import { trianglesToThreejsDatasets } from '@jsxcad/algorithm-threejs';
 
-class threejsDisplay {
+class ThreejsDisplay {
   constructor (targetID) {
     //
     let gui;
     this.targetDiv = document.getElementById(targetID);
-    
-    this.camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
-    [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0,0,16];
+
+    this.camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
+    [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0, 0, 16];
     //
     this.controls = new THREE.TrackballControls(this.camera, this.targetDiv);
     this.controls.rotateSpeed = 4.0;
@@ -18,24 +20,24 @@ class threejsDisplay {
     this.controls.staticMoving = true;
     this.controls.dynamicDampingFactor = 0.1;
     this.controls.keys = [65, 83, 68];
-    this.controls.addEventListener('change', () => {this.render()});
+    this.controls.addEventListener('change', () => { this.render(); });
     //
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color( 0xB0AEB0 );
+    this.scene.background = new THREE.Color(0xB0AEB0);
     this.scene.add(this.camera);
     //
-    var ambientLight = new THREE.AmbientLight( 0x222222 );
-    this.scene.add( ambientLight );
+    var ambientLight = new THREE.AmbientLight(0x222222);
+    this.scene.add(ambientLight);
     // var light1 = new THREE.PointLight(0xffffff, 0, 1);
     // camera.add(light1);
-    var light2 = new THREE.DirectionalLight( 0xffffff, 1 );
-    light2.position.set( 1, 1, 1 );
+    var light2 = new THREE.DirectionalLight(0xffffff, 1);
+    light2.position.set(1, 1, 1);
     this.camera.add(light2);
     // scene.add( light2 );
-    
+
     //
-    this.renderer = new THREE.WebGLRenderer( { antialias: true } );
-    this.renderer.setPixelRatio( window.devicePixelRatio );
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
     this.targetDiv.appendChild(this.renderer.domElement);
     //
     // stats = new Stats();
@@ -47,82 +49,81 @@ class threejsDisplay {
     this.onWindowResize();
     // gui.add( material, 'wireframe' );
     //
-    window.addEventListener( 'resize', () => {this.onWindowResize()}, false );
-    
+    window.addEventListener('resize', () => { this.onWindowResize(); }, false);
+
     this.onWindowResize();
     this.animate();
   }
-  
-  writeScreen(options = {}, ...shapes){
-    
-    //Function to convert to polygons if needed
+
+  writeScreen (options = {}, ...shapes) {
+    // Function to convert to polygons if needed
     const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
-    
+
     const makeMaterial = (material) => {
       switch (material) {
         case 'metal':
-        return new THREE.MeshStandardMaterial({
-          color: 0x779aac,
-          emissive: 0x7090a0,
-          roughness: 0.65,
-          metalness: 0.99,
-        });
+          return new THREE.MeshStandardMaterial({
+            color: 0x779aac,
+            emissive: 0x7090a0,
+            roughness: 0.65,
+            metalness: 0.99
+          });
         default:
-        return new THREE.MeshNormalMaterial();
+          return new THREE.MeshNormalMaterial();
       }
-    }
-    
-    //Convert polygon to triangles
-    const solids = shapes.map(toPolygons).map(polygons =>  toTriangles({}, polygons));
-    
-    //Convert triangles to threejs dataset
+    };
+
+    // Convert polygon to triangles
+    const solids = shapes.map(toPolygons).map(polygons => toTriangles({}, polygons));
+
+    // Convert triangles to threejs dataset
     const datasets = trianglesToThreejsDatasets({}, ...solids);
-    
+
     for (const dataset of datasets) {
       var geometry = new THREE.BufferGeometry();
       let { properties = {}, indices, positions, normals } = dataset;
       let { material, tags = [] } = properties;
-      geometry.setIndex( indices );
-      geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-      geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+      geometry.setIndex(indices);
+      geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
       var threeMaterial = makeMaterial(material);
-      var mesh = new THREE.Mesh( geometry, threeMaterial );
+      var mesh = new THREE.Mesh(geometry, threeMaterial);
       mesh.name = options.id;
-      this.scene.add( mesh );
+      this.scene.add(mesh);
     }
   }
-  
-  clearScreenById(id){
+
+  clearScreenById (id) {
     var selectedObject = this.scene.getObjectByName(id);
-    this.scene.remove( selectedObject );
+    this.scene.remove(selectedObject);
     this.animate();
   }
-  
-  clearScreenAll(){
-    while(this.scene.children.length > 0){ 
-      this.scene.remove(this.scene.children[0]); 
+
+  clearScreenAll () {
+    while (this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0]);
     }
   }
-  
-  onWindowResize() {
+
+  onWindowResize () {
     this.camera.aspect = this.targetDiv.clientWidth / this.targetDiv.clientHeight;
     this.camera.updateProjectionMatrix();
     this.controls.handleResize();
-    this.renderer.setSize( this.targetDiv.clientWidth, this.targetDiv.clientHeight);
+    this.renderer.setSize(this.targetDiv.clientWidth, this.targetDiv.clientHeight);
   }
-  
-  animate() {
-    requestAnimationFrame( () => {this.animate()} );
+
+  animate () {
+    requestAnimationFrame(() => { this.animate(); });
     this.render();
     this.controls.update();
     // stats.update();
   }
-    
-  render() {
-    this.renderer.render( this.scene, this.camera );
+
+  render () {
+    this.renderer.render(this.scene, this.camera);
   }
 }
 
 export const buildThreejsScreen = (targetDiv) => {
-  new threejsDisplay(targetDiv);
-}
+  new ThreejsDisplay(targetDiv);
+};
