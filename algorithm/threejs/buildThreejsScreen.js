@@ -4,11 +4,12 @@ class threejsDisplay {
   constructor (targetID) {
     //
     let gui;
+    this.targetDiv = document.getElementById(targetID);
     
     this.camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
     [this.camera.position.x, this.camera.position.y, this.camera.position.z] = [0,0,16];
     //
-    this.controls = new THREE.TrackballControls(this.camera);
+    this.controls = new THREE.TrackballControls(this.camera, this.targetDiv);
     this.controls.rotateSpeed = 4.0;
     this.controls.zoomSpeed = 4.0;
     this.controls.panSpeed = 2.0;
@@ -35,7 +36,6 @@ class threejsDisplay {
     //
     this.renderer = new THREE.WebGLRenderer( { antialias: true } );
     this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.targetDiv = document.getElementById(targetID);
     this.targetDiv.appendChild(this.renderer.domElement);
     //
     // stats = new Stats();
