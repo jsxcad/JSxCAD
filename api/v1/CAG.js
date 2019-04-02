@@ -3,6 +3,7 @@
 import { Assembly } from './Assembly';
 import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { fromPaths } from '@jsxcad/geometry-surf2pc';
+import { toGeometry } from './toGeometry';
 import { writePdf } from './writePdf';
 
 export class CAG {
@@ -12,6 +13,14 @@ export class CAG {
 
   constructor (geometry) {
     this.geometry = geometry || fromPaths({}, []);
+  }
+
+  difference (...shapes) {
+    return CAG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
+  }
+
+  intersection (...shapes) {
+    return CAG.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
   }
 
   material (material) {
@@ -32,6 +41,10 @@ export class CAG {
 
   toPolygons (options) {
     return this.geometry.toPaths(options);
+  }
+
+  union (...shapes) {
+    return CAG.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
   }
 
   writePdf (options = {}) {
