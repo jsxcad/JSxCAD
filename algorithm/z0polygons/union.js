@@ -13,7 +13,7 @@ export const union = (...surfaces) => {
   if (surfaces.length === 0) {
     return [];
   }
-  if (surfaces.length == 1) {
+  if (surfaces.length === 1) {
     return surfaces[0];
   }
   const clipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));

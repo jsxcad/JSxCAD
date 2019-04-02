@@ -3,6 +3,7 @@
 import { Assembly } from './Assembly';
 import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { fromPaths } from '@jsxcad/geometry-surf2pc';
+import { toGeometry } from './toGeometry';
 import { writePdf } from './writePdf';
 
 export class CAG {
