@@ -13,6 +13,7 @@
         margin: 0px;
         overflow: hidden;
       }
+      .dg { position: absolute; top: 2px; left: 2px }
       .CodeMirror { 
         border-top: 1px solid black;
         border-bottom: 1px solid black;
@@ -20,23 +21,11 @@
     </style>
   </head>
   <body id="body">
-    <textarea id="editor">
-let x = union(sphere().as('a').material('metal'),
-              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
-              cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
-
-writePaths({ path: 'assembly' },
-           x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }),
-           x.toPaths({ tags: ['c'] }))
-    
-writePaths({ path: 'sphere' },
-           x.toPaths({ tags: ['a'] }));
-    </textarea>
-
     <!-- CodeMirror -->
     <link rel="stylesheet" href="https://codemirror.net/lib/codemirror.css">
     <script src="https://codemirror.net/lib/codemirror.js"></script>
+    <script src="https://codemirror.net/addon/display/autorefresh.js"></script>
+    <script src="https://codemirror.net/addon/display/fullscreen.js"></script>
     <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
 
     <!-- ThreeJS -->
@@ -65,6 +54,7 @@ writePaths({ path: 'sphere' },
       }
 
       let editor;
+      let pages = [];
 
       const runScript = () => {
         // Evaluate.
@@ -74,25 +64,90 @@ writePaths({ path: 'sphere' },
         const result = code(api);
         // Handle a return value as an implicit write.
         if (result) {
-          api.write({ path: 'window' }, result);
+          api.writePaths({ path: 'default' }, result);
         }
+        nextPage();
       }
 
-      const setupCodeMirror = () => {
-        editor = CodeMirror.fromTextArea(document.getElementById('editor'),
-                                         {
-                                           mode: "javascript",
-                                           theme: "default",
-                                           lineNumbers: true,
-                                           gutter: true,
-                                           lineWrapping: true,
-                                           extraKeys: {
-                                             'Shift-Enter': runScript
-                                           }
-                                         });
-        runScript();
+      const addPage = (element) => {
+        element.style.display = 'none';
+        document.getElementById("body").appendChild(element);
+        pages.push(element);
+      }
+
+      const nextPage = () => {
+console.log(`QQ/nextPage: ${pages.map(page => page.id)}`);
+        pages[0].style.display = 'none';
+        pages.push(pages.shift());
+        pages[0].style.display = 'block';
+      }
+
+      const lastPage = () => {
+console.log(`QQ/lastPage: ${pages.map(page => page.id)}`);
+        pages[0].style.display = 'none';
+        pages.unshift(pages.pop());
+        pages[0].style.display = 'block';
+      }
+
+      let setupDocumentDone = false;
+      const setupDocument = () => {
+        if (setupDocumentDone) throw Error('die');
+        setupDocumentDone = true;
+        editor = CodeMirror((domElement) => {
+                              domElement.id = 'editor';
+                              addPage(domElement);
+                            },
+                            {
+                              autoRefresh: true,
+                              mode: "javascript",
+                              theme: "default",
+                              fullScreen: true,
+                              lineNumbers: true,
+                              gutter: true,
+                              lineWrapping: true,
+                              extraKeys: {
+                                'Shift-Enter': runScript,
+                              },
+                              value:
+`
+// HOWTO
+//
+// Shift-Enter to render.
+// PageUp and PageDown to cycle windows.
+
+let x = union(sphere().as('a').material('metal'),
+              cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
+              cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
+
+writePaths({ path: 'assembly' },
+           x.toPaths({ tags: ['a'] }),
+           x.toPaths({ tags: ['b'] }),
+           x.toPaths({ tags: ['c'] }))
+    
+writePaths({ path: 'sphere' },
+           x.toPaths({ tags: ['a'] }));
+`
+                            });
+        document.addEventListener("keydown",
+                                  e => {
+                                    switch (e.keyCode) {
+                                      case 34:
+                                        // Page Down.
+                                        nextPage();
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        break;
+                                      case 33: 
+                                        // Page Up.
+                                        lastPage();
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        break;
+                                    }
+                                  });
+        nextPage();
       };
-      document.addEventListener("DOMContentLoaded", setupCodeMirror);
+      document.addEventListener("DOMContentLoaded", setupDocument);
 
       watchFileCreation(({ path }) => {
         // Add a new window when we see a new file written.
@@ -162,16 +217,15 @@ writePaths({ path: 'sphere' },
           camera.add(light);
           renderer = new THREE.WebGLRenderer( { antialias: true } );
           renderer.setPixelRatio( window.devicePixelRatio );
-          // renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
-          renderer.setSize(200, 200);
+          renderer.setSize( window.innerWidth, window.innerHeight);
           // TODO: Something more clever than this.
           const viewerElement = document.createElement("div");
           viewerElement.id = `viewer:${path}`;
-          viewerElement.height = 200;
-          document.getElementById("body").appendChild(viewerElement);
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
+console.log(`QQ/gui/domElement: ${gui.domElement}`);
           viewerElement.appendChild(gui.domElement);
+          addPage(viewerElement);
           window.addEventListener( 'resize', onWindowResize, false );
         }
         function onWindowResize() {
