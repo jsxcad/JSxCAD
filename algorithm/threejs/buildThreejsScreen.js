@@ -20,7 +20,7 @@ class threejsDisplay {
     this.controls.addEventListener('change', () => {this.render()});
     //
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color( 0x050505 );
+    this.scene.background = new THREE.Color( 0xB0AEB0 );
     this.scene.add(this.camera);
     //
     var ambientLight = new THREE.AmbientLight( 0x222222 );
@@ -36,7 +36,6 @@ class threejsDisplay {
     this.renderer = new THREE.WebGLRenderer( { antialias: true } );
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.targetDiv = document.getElementById(targetID);
-    this.renderer.setSize( this.targetDiv.clientWidth, this.targetDiv.clientHeight);
     this.targetDiv.appendChild(this.renderer.domElement);
     //
     // stats = new Stats();
@@ -50,6 +49,7 @@ class threejsDisplay {
     //
     window.addEventListener( 'resize', () => {this.onWindowResize()}, false );
     
+    this.onWindowResize();
     this.animate();
   }
   
