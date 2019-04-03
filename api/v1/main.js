@@ -7,6 +7,7 @@
  * the api uses.
  */
 
+import { CAG } from './CAG';
 import { CSG } from './CSG';
 import { Path2D } from './Path2D';
 import { acos } from './acos';
@@ -41,6 +42,7 @@ import { writeStl } from './writeStl';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
+  CAG,
   CSG,
   Path2D,
   acos,
