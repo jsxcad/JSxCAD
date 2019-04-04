@@ -1,8 +1,14 @@
 import { buildConvexHull } from '@jsxcad/algorithm-shape';
+import { CSG } from './CSG';
 import { toPoints } from '@jsxcad/algorithm-paths';
 
-const hull = (...geometries) => {
-    console.log("hull code ran");
-}
 
-module.exports = hull;
+export const hull = (...geometries) => {
+    
+    var allPoints = [];
+    for (const geometry of geometries) {
+        allPoints = allPoints.concat(geometry.toPoints());
+    }
+    
+    return CSG.fromPolygons(buildConvexHull({}, allPoints))
+}

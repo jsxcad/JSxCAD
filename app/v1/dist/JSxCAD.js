@@ -1423,11 +1423,11 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /*!***********************************************************!*\
   !*** C:/Users/Bar/Documents/GitHub/JSxCAD/api/v1/hull.js ***!
   \***********************************************************/
-/*! no exports provided */
+/*! exports provided: hull */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(module) {/* harmony import */ var _jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-shape */ \"../../algorithm/shape/main.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n\r\n\r\n\r\nconst hull = (...geometries) => {\r\n    console.log(\"hull code ran\");\r\n}\r\n\r\nmodule.exports = hull;\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../node_modules/webpack/buildin/harmony-module.js */ \"../../node_modules/webpack/buildin/harmony-module.js\")(module)))\n\n//# sourceURL=webpack://LIB/C:/Users/Bar/Documents/GitHub/JSxCAD/api/v1/hull.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return hull; });\n/* harmony import */ var _jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-shape */ \"../../algorithm/shape/main.js\");\n/* harmony import */ var _CSG__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CSG */ \"../../api/v1/CSG.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n\r\n\r\n\r\n\r\n\r\nconst hull = (...geometries) => {\r\n    \r\n    var allPoints = [];\r\n    for (const geometry of geometries) {\r\n        allPoints = allPoints.concat(geometry.toPoints());\r\n    }\r\n    \r\n    return _CSG__WEBPACK_IMPORTED_MODULE_1__[\"CSG\"].fromPolygons(Object(_jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexHull\"])({}, allPoints))\r\n}\r\n\n\n//# sourceURL=webpack://LIB/C:/Users/Bar/Documents/GitHub/JSxCAD/api/v1/hull.js?");
 
 /***/ }),
 
@@ -4195,17 +4195,6 @@ eval("var TINF_OK = 0;\nvar TINF_DATA_ERROR = -3;\n\nfunction Tree() {\n  this.t
 /***/ (function(module, exports) {
 
 eval("var g;\n\n// This works in non-strict mode\ng = (function() {\n\treturn this;\n})();\n\ntry {\n\t// This works if eval is allowed (see CSP)\n\tg = g || new Function(\"return this\")();\n} catch (e) {\n\t// This works if the window reference is available\n\tif (typeof window === \"object\") g = window;\n}\n\n// g can still be undefined, but nothing to do about it...\n// We return undefined, instead of nothing here, so it's\n// easier to handle this case. if(!global) { ...}\n\nmodule.exports = g;\n\n\n//# sourceURL=webpack://LIB/(webpack)/buildin/global.js?");
-
-/***/ }),
-
-/***/ "../../node_modules/webpack/buildin/harmony-module.js":
-/*!*******************************************!*\
-  !*** (webpack)/buildin/harmony-module.js ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("module.exports = function(originalModule) {\n\tif (!originalModule.webpackPolyfill) {\n\t\tvar module = Object.create(originalModule);\n\t\t// module.parent = undefined by default\n\t\tif (!module.children) module.children = [];\n\t\tObject.defineProperty(module, \"loaded\", {\n\t\t\tenumerable: true,\n\t\t\tget: function() {\n\t\t\t\treturn module.l;\n\t\t\t}\n\t\t});\n\t\tObject.defineProperty(module, \"id\", {\n\t\t\tenumerable: true,\n\t\t\tget: function() {\n\t\t\t\treturn module.i;\n\t\t\t}\n\t\t});\n\t\tObject.defineProperty(module, \"exports\", {\n\t\t\tenumerable: true\n\t\t});\n\t\tmodule.webpackPolyfill = 1;\n\t}\n\treturn module;\n};\n\n\n//# sourceURL=webpack://LIB/(webpack)/buildin/harmony-module.js?");
 
 /***/ }),
 
