@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './sphereCubes';
+import { main } from './sphereCubeHull';
 
 main();
 
