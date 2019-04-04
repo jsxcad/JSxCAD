@@ -1,5 +1,5 @@
 import { CSG } from './CSG';
-import { polygonsToStla } from '@jsxcad/algorithm-stl';
+ 
 import { writeFileSync } from '@jsxcad/sys';
 
 export const writeStl = ({ path, needIsWatertight = true }, ...shapes) => {

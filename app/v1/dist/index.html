@@ -224,11 +224,21 @@ writePaths({ path: 'sphere' },
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
 console.log(`QQ/gui/domElement: ${gui.domElement}`);
-          viewerElement.appendChild(gui.domElement);
           var button = document.createElement("button");
           button.setAttribute("type", "button");
           button.appendChild(document.createTextNode("Download"));
+          button.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
+          button.addEventListener("click", (e) => {
+            //Get the file...do we know the path or anything unique at this point?
+            console.log("button pressed");
+            console.log(path);
+            console.log(readFileSync(path));
+            //Make the download happen
+          });
+          console.log(path);
           viewerElement.appendChild(button);
+          viewerElement.appendChild(gui.domElement);
+          
           addPage(viewerElement);
           window.addEventListener( 'resize', onWindowResize, false );
         }
