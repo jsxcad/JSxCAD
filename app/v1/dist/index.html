@@ -122,7 +122,14 @@ let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
     
-writeStl({ path: 'sphere' }, sphere());
+writePaths({ path: 'assembly' },
+           x.toPaths({ tags: ['a'] }),
+           x.toPaths({ tags: ['b'] }),
+           x.toPaths({ tags: ['c'] }))
+    
+writeStl({ path: 'sphere' },
+           x.toPaths({ tags: ['a'] }));
+//writeStl({ path: 'sphere' }, sphere());
 `
                             });
         document.addEventListener("keydown",
@@ -184,6 +191,10 @@ writeStl({ path: 'sphere' }, sphere());
                                                       .onChange((value) => { dataset.mesh.visible = value; });
                             }
                           }
+                          
+                          console.log("The data we have to work with: ");
+                          console.log(data);
+                          
                         });
         init();
         animate();
@@ -220,17 +231,22 @@ writeStl({ path: 'sphere' }, sphere());
           viewerElement.id = `viewer:${path}`;
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
-console.log(`QQ/gui/domElement: ${gui.domElement}`);
-          var button = document.createElement("button");
+          console.log(`QQ/gui/domElement: ${gui.domElement}`);
+          viewerElement.appendChild(gui.domElement);
+          
+          //If the file supports downloading, add a button to download it TODO: this process will need to updated for downloading other file types like .pdf
+          const file = readFileSync(path);
+          
+          const button = document.createElement("button");
           button.setAttribute("type", "button");
           button.appendChild(document.createTextNode("Download"));
           button.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
+          button.setAttribute("disabled", "true");
           button.addEventListener("click", (e) => {
             const blob = new Blob([readFileSync(path).translator()], {type: "text/plain;charset=utf-8"});
             saveAs(blob, path+'.stl');
           });
           viewerElement.appendChild(button);
-          viewerElement.appendChild(gui.domElement);
           
           addPage(viewerElement);
           window.addEventListener( 'resize', onWindowResize, false );
