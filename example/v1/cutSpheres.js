@@ -4,8 +4,8 @@ import { fromPoints } from '@jsxcad/math-plane';
 
 export const main = () => {
   const z = 0;
-  const solid = difference(sphere(30), sphere(15));
-  const triangles = toTriangles({}, solid.toPaths());
+  const shape = difference(sphere(30), sphere(15));
+  const triangles = toTriangles({}, shape.toSolid());
   const paths = cutTrianglesByPlane(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
   writePdf({ path: 'tmp/cutSpheres.pdf' }, paths);
 };

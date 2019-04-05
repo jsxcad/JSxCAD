@@ -30,6 +30,28 @@ export class Surf2Pc {
     return this.paths;
   }
 
+  toSolids (options = {}) {
+    return [];
+  }
+
+  toZ0Drawing (options = {}) {
+    // RENAME: toPaths ?
+    // FIX: Consider more carefully the distinction between surfaces and paths.
+    return [];
+  }
+
+  toZ0Drawings (options = {}) {
+    return [];
+  }
+
+  toZ0Surface (options = {}) {
+    return this.toPaths(options);
+  }
+
+  toZ0Surfaces (options = {}) {
+    return [this.toZ0Surface(options)];
+  }
+
   transform (matrix) {
     return new Surf2Pc({ paths: this.basePaths, transforms: multiply(matrix, this.transforms) });
   }

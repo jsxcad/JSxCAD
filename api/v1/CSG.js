@@ -36,10 +36,22 @@ export class CSG {
     return this.geometry;
   }
 
-  toPaths (options) {
+  toPaths (options = {}) {
     const paths = this.geometry.toPaths(options);
     // if (!isWatertightPolygons(paths)) throw Error('not watertight');
     return paths;
+  }
+
+  toSolid (options = {}) {
+    return this.toPaths(options);
+  }
+
+  toSolids (options = {}) {
+    return [this.toPaths(options)];
+  }
+
+  toZ0Surfaces (options = {}) {
+    return [];
   }
 
   toPoints (options) {
