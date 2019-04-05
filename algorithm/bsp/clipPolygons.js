@@ -6,13 +6,7 @@ export const clipPolygons = (bsp, polygons) => {
     return [];
   }
   if (bsp.plane === undefined) {
-    // Why do we never reach this point?
-    throw Error('die');
-    // PROVE: Why this is correct, and why it is decided by bsp.plane?
-    //   I guess that this means that it is a new leaf in the tree, and so no clipping should happen.
-
-    // We need this slice as the bsp trees perform destructive updates.
-    // return polygons.slice();
+    return polygons.slice();
   }
   let front = [];
   let back = [];

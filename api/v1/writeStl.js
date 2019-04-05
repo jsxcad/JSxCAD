@@ -1,19 +1,20 @@
+import { Assembly } from './Assembly';
 import { CSG } from './CSG';
 import { polygonsToStla } from '@jsxcad/algorithm-stl';
 import { writeFileSync } from '@jsxcad/sys';
 
 export const writeStl = ({ path, needIsWatertight = true }, ...shapes) => {
-  const pathSets = shapes.map(shape => {
+  const solids = shapes.map(shape => {
     if (shape instanceof Array) {
       return shape;
     } else {
-      return shape.toPolygons({});
+      return shape.toSolid({});
     }
   });
-  writeFileSync(path, pathSets, { translator: () => polygonsToStla({ needIsWatertight }, [].concat(...pathSets)) });
+  writeFileSync(path, solids, { translator: () => polygonsToStla({ needIsWatertight }, [].concat(...solids)) });
 };
 
-CSG.prototype.writeStl = function (options = {}) {
-  writeStl(options, this);
-  return this;
-};
+const method = function (options = {}) { writeStl(options, this); return this; };
+
+Assembly.prototype.writeStl = method;
+CSG.prototype.writeStl = method;

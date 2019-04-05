@@ -4,7 +4,7 @@ import { main } from './assembly';
 
 main();
 
-test('Expected stl', t => {
+test('Expected html', t => {
   t.is(readFileSync('tmp/assembly.html', { encoding: 'utf8' }),
        readFileSync('assembly.html', { encoding: 'utf8' }));
 });

@@ -6,7 +6,7 @@ export function main () {
                 cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c'));
 
   writeStl({ path: 'tmp/sphereCubes.stl' },
-           x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }),
-           x.toPaths({ tags: ['c'] }));
+           x.toSolid({ tags: ['a'] }),
+           x.toSolid({ tags: ['b'] }),
+           x.toSolid({ tags: ['c'] }));
 }

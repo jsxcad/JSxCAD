@@ -131,6 +131,26 @@ export class Path2D {
     return this.geometry.toPaths({});
   }
 
+  toZ0Paths () {
+    return this.toPaths();
+  }
+
+  toZ0Drawing () {
+    return this.toPaths();
+  }
+
+  toZ0Drawings () {
+    return [this.toPaths()];
+  }
+
+  toZ0Surface () {
+    return [];
+  }
+
+  toZ0Surfaces () {
+    return [];
+  }
+
   transform (matrix4x4) {
     return Path2D.fromGeometry(this.geometry.transform(matrix4x4));
   }
