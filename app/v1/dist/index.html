@@ -34,6 +34,9 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
+    
+    <!-- File Saving -->
+    <script src="FileSaver.js"></script>
 
     <!-- App -->
     <script type="module">
@@ -118,14 +121,8 @@ console.log(`QQ/lastPage: ${pages.map(page => page.id)}`);
 let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
-
-writePaths({ path: 'assembly' },
-           x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }),
-           x.toPaths({ tags: ['c'] }))
     
-writePaths({ path: 'sphere' },
-           x.toPaths({ tags: ['a'] }));
+writeStl({ path: 'sphere' }, sphere());
 `
                             });
         document.addEventListener("keydown",
@@ -229,13 +226,9 @@ console.log(`QQ/gui/domElement: ${gui.domElement}`);
           button.appendChild(document.createTextNode("Download"));
           button.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
           button.addEventListener("click", (e) => {
-            //Get the file...do we know the path or anything unique at this point?
-            console.log("button pressed");
-            console.log(path);
-            console.log(readFileSync(path));
-            //Make the download happen
+            const blob = new Blob([readFileSync(path).translator()], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, path+'.stl');
           });
-          console.log(path);
           viewerElement.appendChild(button);
           viewerElement.appendChild(gui.domElement);
           

@@ -1,5 +1,5 @@
 const { getFile } = require('./files');
 
-const readFileSync = (path, options) => getFile(path).data;
+const readFileSync = (path, options) => getFile(path);
 
 module.exports.readFileSync = readFileSync;
