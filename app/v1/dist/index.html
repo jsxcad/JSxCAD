@@ -121,7 +121,7 @@ console.log(`QQ/lastPage: ${pages.map(page => page.id)}`);
 let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
-    
+
 writePaths({ path: 'assembly' },
            x.toPaths({ tags: ['a'] }),
            x.toPaths({ tags: ['b'] }),
@@ -237,10 +237,10 @@ writeStl({ path: 'sphere' },
           viewerElement.id = `viewer:${path}`;
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
-          console.log(`QQ/gui/domElement: ${gui.domElement}`);
+console.log(`QQ/gui/domElement: ${gui.domElement}`);
           viewerElement.appendChild(gui.domElement);
           
-          //If the file supports downloading, add a button to download it TODO: this process will need to updated for downloading other file types like .pdf
+          //Add a download button to the page it TODO: this process will need to updated for downloading other file types like .pdf
           
           downloadButton = document.createElement("button");
           downloadButton.setAttribute("type", "button");
