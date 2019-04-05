@@ -163,9 +163,11 @@ writeStl({ path: 'sphere' },
         let stats;
         let mesh;
         let gui;
+        let downloadButton;
 
-        watchFile(path, ({ data }) => {
+        watchFile(path, (file) => {
                           // Delete any previous dataset in the window.
+                          const { data } = file;
                           for (const { controller, mesh } of datasets) {
                             if (controller) {
                               gui.remove(controller);
@@ -192,8 +194,12 @@ writeStl({ path: 'sphere' },
                             }
                           }
                           
-                          console.log("The data we have to work with: ");
-                          console.log(data);
+                          if(file.translator){
+                            downloadButton.removeAttribute("disabled");
+                          }
+                          else{
+                            button.setAttribute("disabled", "true");
+                          }
                           
                         });
         init();
@@ -235,18 +241,17 @@ writeStl({ path: 'sphere' },
           viewerElement.appendChild(gui.domElement);
           
           //If the file supports downloading, add a button to download it TODO: this process will need to updated for downloading other file types like .pdf
-          const file = readFileSync(path);
           
-          const button = document.createElement("button");
-          button.setAttribute("type", "button");
-          button.appendChild(document.createTextNode("Download"));
-          button.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
-          button.setAttribute("disabled", "true");
-          button.addEventListener("click", (e) => {
+          downloadButton = document.createElement("button");
+          downloadButton.setAttribute("type", "button");
+          downloadButton.appendChild(document.createTextNode("Download"));
+          downloadButton.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
+          downloadButton.setAttribute("disabled", "true");
+          downloadButton.addEventListener("click", (e) => {
             const blob = new Blob([readFileSync(path).translator()], {type: "text/plain;charset=utf-8"});
             saveAs(blob, path+'.stl');
           });
-          viewerElement.appendChild(button);
+          viewerElement.appendChild(downloadButton);
           
           addPage(viewerElement);
           window.addEventListener( 'resize', onWindowResize, false );

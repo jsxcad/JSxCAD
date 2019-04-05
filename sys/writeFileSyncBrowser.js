@@ -5,13 +5,15 @@ const writeFileSync = (path, data, options) => {
   const { translator } = options;
   
   file.data = data;
-  for (const watcher of file.watchers) {
-    watcher(file);
-  }
   
   if(translator){
     file.translator = translator;
   }
+  
+  for (const watcher of file.watchers) {
+    watcher(file);
+  }
+  
 };
 
 module.exports.writeFileSync = writeFileSync;
