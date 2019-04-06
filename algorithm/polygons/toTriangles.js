@@ -2,7 +2,7 @@ import { blessAsTriangles } from './blessAsTriangles';
 import { isTriangle } from './isTriangle';
 
 export const toTriangles = (options = {}, paths) => {
-console.log(paths);
+  console.log(paths);
   if (paths.isTriangles) {
     return paths;
   }
