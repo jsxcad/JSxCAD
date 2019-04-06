@@ -79,14 +79,12 @@
       }
 
       const nextPage = () => {
-console.log(`QQ/nextPage: ${pages.map(page => page.id)}`);
         pages[0].style.display = 'none';
         pages.push(pages.shift());
         pages[0].style.display = 'block';
       }
 
       const lastPage = () => {
-console.log(`QQ/lastPage: ${pages.map(page => page.id)}`);
         pages[0].style.display = 'none';
         pages.unshift(pages.pop());
         pages[0].style.display = 'block';
@@ -165,9 +163,8 @@ writeStl({ path: 'sphere' },
         let gui;
         let downloadButton;
 
-        watchFile(path, (file) => {
+        watchFile(path, ({ data, translator }) => {
                           // Delete any previous dataset in the window.
-                          const { data } = file;
                           for (const { controller, mesh } of datasets) {
                             if (controller) {
                               gui.remove(controller);
@@ -194,10 +191,9 @@ writeStl({ path: 'sphere' },
                             }
                           }
                           
-                          if(file.translator){
+                          if(translator){
                             downloadButton.removeAttribute("disabled");
-                          }
-                          else{
+                          } else{
                             downloadButton.setAttribute("disabled", "true");
                           }
                           
@@ -237,7 +233,6 @@ writeStl({ path: 'sphere' },
           viewerElement.id = `viewer:${path}`;
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
-console.log(`QQ/gui/domElement: ${gui.domElement}`);
           viewerElement.appendChild(gui.domElement);
           
           //Add a download button to the page it TODO: this process will need to updated for downloading other file types like .pdf
@@ -247,7 +242,7 @@ console.log(`QQ/gui/domElement: ${gui.domElement}`);
           downloadButton.appendChild(document.createTextNode("Download"));
           downloadButton.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
           downloadButton.setAttribute("disabled", "true");
-          downloadButton.addEventListener("click", (e) => {
+          downloadButton.addEventListener("click", () => {
             const blob = new Blob([readFileSync(path).translator()], {type: "text/plain;charset=utf-8"});
             saveAs(blob, path+'.stl');
           });
