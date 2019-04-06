@@ -19,6 +19,7 @@ import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
 import { hsl2rgb } from './hsl2rgb';
+import { hull } from './hull';
 import { intersection } from './intersection';
 import { loadFont, text } from './text';
 import { max } from './max';
@@ -54,6 +55,7 @@ export {
   difference,
   extrude,
   hsl2rgb,
+  hull,
   intersection,
   loadFont,
   max,
