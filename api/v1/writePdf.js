@@ -20,6 +20,7 @@ export const writePdf = ({ path }, ...shapes) => {
 
   // FIX: How is this going to work with visualization?
   // Do we need to partition the geometries in the files by kind?
-  writeFileSync(path, [].concat(surfaces, drawings),
-                { translator: () => pathsToPdf({}, [].concat(...surfaces, ...drawings)) });
+  writeFileSync(path,
+                () => pathsToPdf({}, [].concat(...surfaces, ...drawings)),
+                { drawings: [].concat(surfaces, drawings) });
 };

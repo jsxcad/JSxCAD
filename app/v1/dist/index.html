@@ -37,7 +37,7 @@
 
     <!-- App -->
     <script type="module">
-      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
+      import { api, readFileSync, solidToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
 
       const makeMaterial = (material) => {
         switch (material) {
@@ -76,14 +76,12 @@
       }
 
       const nextPage = () => {
-console.log(`QQ/nextPage: ${pages.map(page => page.id)}`);
         pages[0].style.display = 'none';
         pages.push(pages.shift());
         pages[0].style.display = 'block';
       }
 
       const lastPage = () => {
-console.log(`QQ/lastPage: ${pages.map(page => page.id)}`);
         pages[0].style.display = 'none';
         pages.unshift(pages.pop());
         pages[0].style.display = 'block';
@@ -119,13 +117,13 @@ let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
-writePaths({ path: 'assembly' },
-           x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }),
-           x.toPaths({ tags: ['c'] }))
+writeStl({ path: 'assembly' },
+         x.toSolid({ tags: ['a'] }),
+         x.toSolid({ tags: ['b'] }),
+         x.toSolid({ tags: ['c'] }))
     
-writePaths({ path: 'sphere' },
-           x.toPaths({ tags: ['a'] }));
+writeStl({ path: 'sphere' },
+         x.toSolid({ tags: ['a'] }));
 `
                             });
         document.addEventListener("keydown",
@@ -160,7 +158,7 @@ writePaths({ path: 'sphere' },
         let mesh;
         let gui;
 
-        watchFile(path, ({ data }) => {
+        watchFile(path, (file, { solids }) => {
                           // Delete any previous dataset in the window.
                           for (const { controller, mesh } of datasets) {
                             if (controller) {
@@ -169,7 +167,7 @@ writePaths({ path: 'sphere' },
                             scene.remove(mesh);
                           }
                           // Build new datasets from the written data, and display them.
-                          datasets = trianglesToThreejsDatasets({}, ...data);
+                          datasets = solidToThreejsDatasets({}, ...solids);
                           for (const dataset of datasets) {
                             let geometry = new THREE.BufferGeometry();
                             let { properties = {}, indices, positions, normals } = dataset;
@@ -223,7 +221,6 @@ writePaths({ path: 'sphere' },
           viewerElement.id = `viewer:${path}`;
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
-console.log(`QQ/gui/domElement: ${gui.domElement}`);
           viewerElement.appendChild(gui.domElement);
           addPage(viewerElement);
           window.addEventListener( 'resize', onWindowResize, false );

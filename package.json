@@ -7,7 +7,8 @@
     "bootstrap": "lerna bootstrap --hoist",
     "lint": "lerna bootstrap --hoist && lerna run lint",
     "lintfix": "lerna bootstrap --hoist && lerna run lintfix",
-    "test": "lerna bootstrap --hoist && lerna run test"
+    "test": "lerna bootstrap --hoist && lerna run tests",
+    "tests": "lerna bootstrap --hoist && lerna run tests"
   },
   "contributors": [
     {

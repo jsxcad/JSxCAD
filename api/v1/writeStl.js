@@ -11,7 +11,9 @@ export const writeStl = ({ path, needIsWatertight = true }, ...shapes) => {
       return shape.toSolid({});
     }
   });
-  writeFileSync(path, solids, { translator: () => polygonsToStla({ needIsWatertight }, [].concat(...solids)) });
+  writeFileSync(path,
+                () => polygonsToStla({ needIsWatertight }, [].concat(...solids)),
+                { solids });
 };
 
 const method = function (options = {}) { writeStl(options, this); return this; };
