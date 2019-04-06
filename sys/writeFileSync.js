@@ -2,13 +2,11 @@ const fs = require('fs');
 const writeFileSyncBrowser = require('./writeFileSyncBrowser');
 
 const writeFileSync = (path, data, options = {}) => {
-  const { translator } = options;
   if (fs.writeFileSync) {
-    if (translator) {
-      return fs.writeFileSync(path, translator(), options);
-    } else {
-      return fs.writeFileSync(path, data, options);
+    if (typeof data === 'function') {
+      data = data();
     }
+    return fs.writeFileSync(path, data, options);
   } else {
     return writeFileSyncBrowser.writeFileSync(path, data, options);
   }

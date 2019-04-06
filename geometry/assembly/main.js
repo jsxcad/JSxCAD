@@ -1,3 +1,4 @@
+import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { difference as bspDifference, intersection as bspIntersection, union as bspUnion } from '@jsxcad/algorithm-bsp';
 import { difference as z0Difference, intersection as z0Intersection, union as z0Union } from '@jsxcad/algorithm-z0polygons';
 
@@ -66,7 +67,7 @@ export class Assembly {
     };
 
     const solids = this.toSolids(options);
-    return bspUnion(...solids.filter(solid => isSelectedTags(solid.tags)));
+    return canonicalize(bspUnion(...solids.filter(solid => isSelectedTags(solid.tags))));
   }
 
   toSolids (options) {
