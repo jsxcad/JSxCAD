@@ -1,9 +1,8 @@
 const { getFile } = require('./files');
 
-const writeFileSync = (path, data, { translator } = {}) => {
+const writeFileSync = (path, data, options = {}) => {
   const file = getFile(path);
   file.data = data;
-  file.translator = translator;
 
   for (const watcher of file.watchers) {
     watcher(file, options);

@@ -162,7 +162,7 @@ writeStl({ path: 'sphere' },
         let gui;
         let downloadButton;
 
-        watchFile(path, ({ data, translator }) => {
+        watchFile(path, (file, { solids }) => {
                           // Delete any previous dataset in the window.
                           for (const { controller, mesh } of datasets) {
                             if (controller) {
@@ -190,11 +190,6 @@ writeStl({ path: 'sphere' },
                             }
                           }
                           
-                          if(translator){
-                            downloadButton.removeAttribute("disabled");
-                          } else{
-                            downloadButton.setAttribute("disabled", "true");
-                          }
                           
                         });
         init();
@@ -246,9 +241,8 @@ writeStl({ path: 'sphere' },
           downloadButton.setAttribute("type", "button");
           downloadButton.appendChild(document.createTextNode("Download"));
           downloadButton.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
-          downloadButton.setAttribute("disabled", "true");
           downloadButton.addEventListener("click", () => {
-            const blob = new Blob([readFileSync(path).translator()], {type: "text/plain;charset=utf-8"});
+            const blob = new Blob([readFileSync(path).data()], {type: "text/plain;charset=utf-8"});
             saveAs(blob, path+'.stl');
           });
           return downloadButton;
