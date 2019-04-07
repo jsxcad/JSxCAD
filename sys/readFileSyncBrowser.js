@@ -7,6 +7,6 @@ const readFileSync = (path, options) => {
     file.data = file.data();
   }
   return file.data;
-}
+};
 
 module.exports.readFileSync = readFileSync;
