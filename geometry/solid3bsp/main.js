@@ -31,6 +31,30 @@ export class Solid3Bsp {
     return this.paths;
   }
 
+  toSolid (options = {}) {
+    return this.toPaths(options);
+  }
+
+  toSolids (options = {}) {
+    return [this.toSolid(options)];
+  }
+
+  toZ0Drawing (options = {}) {
+    return [];
+  }
+
+  toZ0Drawings (options = {}) {
+    return [];
+  }
+
+  toZ0Surface (options = {}) {
+    return [];
+  }
+
+  toZ0Surfaces (options = {}) {
+    return [];
+  }
+
   transform (matrix) {
     return new Solid3Bsp({ paths: this.basePaths, transforms: multiply(matrix, this.transforms) });
   }

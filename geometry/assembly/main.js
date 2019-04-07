@@ -1,8 +1,13 @@
+import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { difference as bspDifference, intersection as bspIntersection, union as bspUnion } from '@jsxcad/algorithm-bsp';
+import { difference as z0Difference, intersection as z0Intersection, union as z0Union } from '@jsxcad/algorithm-z0polygons';
+
 export class Assembly {
-  constructor ({ geometries = [], properties }) {
+  constructor ({ geometries = [], properties, operator = 'group' }) {
     this.geometries = geometries;
     this.properties = properties;
     this.isAssembly = true;
+    this.operator = operator;
   }
 
   getProperty (key, defaultValue) {
@@ -22,17 +27,17 @@ export class Assembly {
   }
 
   difference (...geometries) {
-    return fromGeometries({ properties: this.properties },
+    return fromGeometries({ properties: this.properties, operator: 'difference' },
                           this.geometries.map(geometry => geometry.difference(...geometries)));
   }
 
   flip () {
-    return fromGeometries({ properties: this.properties },
+    return fromGeometries({ properties: this.properties, operator: this.operator },
                           this.geometries.map(geometry => geometry.flip()));
   }
 
   intersection (...geometries) {
-    return fromGeometries({ properties: this.properties },
+    return fromGeometries({ properties: this.properties, operator: 'intersection' },
                           this.geometries.map(geometry => geometry.intersection(...geometries)));
   }
 
@@ -44,46 +49,157 @@ export class Assembly {
     return this.geometries;
   }
 
-  toPaths (options) {
-    // FIX: Probably instead of toPaths we want an interface like 'toComponentPaths' which preserves the
-    // paths and properties of each component (and sub-component, and so on).
-    // If they want a fused geometry, then they should ask for that.
+  toSolid (options) {
+    // FIX: Handle non-solids.
     const { tags } = options;
-    if (tags !== undefined) {
-      const ourTags = this.getProperty('tags');
-      if (ourTags !== undefined) {
-        if (ourTags.every(tag => !tags.includes(tag))) {
-          // This tagged assembly does not have the right tags -- produce no paths.
-          let paths = [];
-          paths.tags = tags;
-          return paths;
+
+    const isSelectedTags = (solidTags) => {
+      if (solidTags === undefined) {
+        return true;
+      }
+      if (tags === undefined) {
+        return true;
+      }
+      if (solidTags.every(solidTag => !tags.includes(solidTag))) {
+        return false;
+      }
+      return true;
+    };
+
+    const solids = this.toSolids(options);
+    return canonicalize(bspUnion(...solids.filter(solid => isSelectedTags(solid.tags))));
+  }
+
+  toSolids (options) {
+    const solids = [].concat(...this.geometries.map(geometry => geometry.toSolids(options)));
+
+    switch (this.operator) {
+      case 'difference': {
+        const differenced = bspDifference(...solids);
+        // FIX: Keep all properties.
+        differenced.tags = solids[0].tags;
+        return [differenced];
+      }
+      case 'intersection': {
+        const intersected = bspIntersection(...solids);
+        // FIX: Keep all properties.
+        intersected.tags = solids[0].tags;
+        return [intersected];
+      }
+      case 'union': {
+        // FIX: This is really 'group'.
+        // const unioned = bspUnion(...solids);
+        const holed = [];
+        for (let nth = 0; nth < solids.length; nth++) {
+          const cut = bspDifference(solids[nth], ...solids.slice(nth + 1));
+          cut.tags = solids[nth].tags;
+          holed.push(cut);
         }
+        return holed;
+      }
+      case 'group': {
+        solids.forEach(solid => { solid.tags = this.getProperty('tags'); });
+        return solids;
+      }
+      default: {
+        throw Error('die');
       }
     }
-    let subPaths = this.geometries.map(geometry => geometry.toPaths(options));
-    let paths = [].concat(...subPaths);
-    // FIX: This is probably the wrong thing to do, see above.
-    paths.properties = Object.assign({}, ...subPaths.map(subPath => subPath.properties || {}), this.properties || {});
-    return paths;
+  }
+
+  toZ0Drawing (options) {
+    const { tags } = options;
+
+    const isSelectedTags = (z0DrawingTags) => {
+      if (z0DrawingTags === undefined) {
+        return true;
+      }
+      if (tags === undefined) {
+        return true;
+      }
+      if (z0DrawingTags.every(z0DrawingTag => !tags.includes(z0DrawingTag))) {
+        return false;
+      }
+      return true;
+    };
+
+    const z0Drawings = this.toZ0Drawings(options);
+    return [].concat(...z0Drawings.filter(z0Drawing => isSelectedTags(z0Drawing.tags)));
+  }
+
+  toZ0Drawings (options) {
+    // FIX: Booleans on closed paths?
+    return [].concat(...this.geometries.map(geometry => geometry.toZ0Drawings(options)));
+  }
+
+  toZ0Surface (options) {
+    const { tags } = options;
+
+    const isSelectedTags = (z0SurfaceTags) => {
+      if (z0SurfaceTags === undefined) {
+        return true;
+      }
+      if (tags === undefined) {
+        return true;
+      }
+      if (z0SurfaceTags.every(z0SurfaceTag => !tags.includes(z0SurfaceTag))) {
+        return false;
+      }
+      return true;
+    };
+
+    const z0Surfaces = this.toZ0Surfaces(options);
+    return z0Union(...z0Surfaces.filter(z0Surface => isSelectedTags(z0Surface.tags)));
+  }
+
+  toZ0Surfaces (options) {
+    const surfaces = [].concat(...this.geometries.map(geometry => geometry.toZ0Surfaces(options)));
+
+    switch (this.operator) {
+      case 'difference': {
+        const differenced = z0Difference(...surfaces);
+        // FIX: Keep all properties.
+        differenced.tags = surfaces[0].tags;
+        return [differenced];
+      }
+      case 'intersection': {
+        const intersected = z0Intersection(...surfaces);
+        // FIX: Keep all properties.
+        intersected.tags = surfaces[0].tags;
+        return [intersected];
+      }
+      case 'union': {
+        // FIX: This is really 'group'.
+        // const unioned = union(...surfaces);
+        const holed = [];
+        for (let nth = 0; nth < surfaces.length; nth++) {
+          const cut = z0Difference(surfaces[nth], ...surfaces.slice(nth + 1));
+          cut.tags = surfaces[nth].tags;
+          holed.push(cut);
+        }
+        return holed;
+      }
+      case 'group': {
+        surfaces.forEach(surfaces => { surfaces.tags = this.getProperty('tags'); });
+        return surfaces;
+      }
+      default: {
+        throw Error('die');
+      }
+    }
   }
 
   transform (matrix) {
     // Assembly transforms are eager, but the component transforms may be lazy.
-    return fromGeometries({ properties: this.properties },
+    return fromGeometries({ properties: this.properties, operator: this.operator },
                           this.geometries.map(geometry => geometry.transform(matrix)));
   }
 
   union (...geometries) {
-    let unioned = this;
-    while (geometries.length > 0) {
-      const added = geometries.shift();
-      unioned = unioned.difference(added);
-      unioned = unioned.merge(added);
-    }
-    return unioned;
+    return fromGeometries({ properties: this.properties, operator: 'union' }, [...this.toGeometries(), ...geometries]);
   }
 }
 
-export const fromGeometries = ({ properties }, geometries) => {
-  return new Assembly({ geometries: geometries, properties: properties });
+export const fromGeometries = ({ properties, operator }, geometries) => {
+  return new Assembly({ geometries, properties, operator });
 };

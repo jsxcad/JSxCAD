@@ -30,10 +30,20 @@ const doesNotOverlap = (a, b) => {
    *      +-------+
    */
 export const difference = (base, ...subtractions) => {
+  if (base.length === 0) {
+    return base;
+  }
+  if (subtractions.length === 0) {
+    return base;
+  }
   // TODO: Figure out why we do not subtract the union of the remainder of
   // the geometries. This approach chains subtractions rather than producing
   // a generational tree.
   for (let i = 0; i < subtractions.length; i++) {
+    if (subtractions[i].length === 0) {
+      // Nothing to do.
+      continue;
+    }
     if (doesNotOverlap(base, subtractions[i])) {
       // Nothing to do.
       continue;

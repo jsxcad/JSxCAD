@@ -35,6 +35,30 @@ export class CAG {
     return this.toPolygons(options);
   }
 
+  toZ0Surface (options = {}) {
+    return this.toPaths(options);
+  }
+
+  toZ0Paths (options = {}) {
+    return this.toZ0Surface(options);
+  }
+
+  toZ0Drawing (options = {}) {
+    return [];
+  }
+
+  toZ0Drawings (options = {}) {
+    return [];
+  }
+
+  toZ0Surfaces (options = {}) {
+    return [this.toPaths(options)];
+  }
+
+  toSolids (options = {}) {
+    return [];
+  }
+
   toGeometry () {
     return this.geometry;
   }
