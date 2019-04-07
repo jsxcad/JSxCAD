@@ -6,11 +6,11 @@ import { writeFileSync } from './writeFileSyncBrowser';
 
 test('Test writing a new file', t => {
   writeFileSync('tmp/1', 'hello');
-  t.is(readFileSync('tmp/1').data, 'hello');
+  t.is(readFileSync('tmp/1'), 'hello');
 });
 
 test('Test reading a new file', t => {
-  t.is(readFileSync('tmp/2', 'hello').data, undefined);
+  t.is(readFileSync('tmp/2', 'hello'), undefined);
 });
 
 test('Test watch before writing a new file', t => {
