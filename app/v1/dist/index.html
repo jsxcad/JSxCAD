@@ -55,7 +55,7 @@
             return new THREE.MeshNormalMaterial();
         }
       }
-      
+
       let editor;
       let pages = [];
 
@@ -189,8 +189,6 @@ writeStl({ path: 'sphere' },
                                                       .onChange((value) => { dataset.mesh.visible = value; });
                             }
                           }
-                          
-                          
                         });
         init();
         animate();
@@ -228,8 +226,6 @@ writeStl({ path: 'sphere' },
           viewerElement.appendChild(renderer.domElement);
           gui = new dat.GUI({ autoPlace: false });
           viewerElement.appendChild(gui.domElement);
-          
-          //Add a download button to the page it TODO: this process will need to updated for downloading other file types like .pdf
           
           viewerElement.appendChild(makeDownloadButton());
           
