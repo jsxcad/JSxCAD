@@ -69,6 +69,8 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
           let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
           // Canonicalization of the point would violate coplanarity in some cases.
           // We could work around this by triangulation, but that doubles the load.
+          // Actually, even with triangulation, this can twist planes sufficiently that the splitting
+          // invariant is violated, leading to infinite recursion.
           // So we defer canonicalization, and deal with degenerate triangles upon later canonicalization.
           const spanPoint = lerp(t, startPoint, endPoint);
           if (squaredDistance(spanPoint, startPoint) >= EPSILON_SQUARED &&

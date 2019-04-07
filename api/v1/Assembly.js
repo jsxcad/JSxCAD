@@ -1,5 +1,5 @@
 import { fromGeometries } from '@jsxcad/geometry-assembly';
-import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
+import { toPoints } from '@jsxcad/algorithm-paths';
 
 export class Assembly {
   as (tag) {
@@ -27,8 +27,28 @@ export class Assembly {
     return this.geometry;
   }
 
-  toPaths (options = {}) {
-    return canonicalize(this.geometry.toPaths(options));
+  toSolid (options = {}) {
+    return this.geometry.toSolid(options);
+  }
+
+  toSolids (options = {}) {
+    return this.geometry.toSolids(options);
+  }
+
+  toZ0Drawing (options = {}) {
+    return this.geometry.toZ0Drawing(options);
+  }
+
+  toZ0Drawings (options = {}) {
+    return this.geometry.toZ0Drawings(options);
+  }
+
+  toZ0Surface (options = {}) {
+    return this.geometry.toZ0Surface(options);
+  }
+
+  toZ0Surfaces (options = {}) {
+    return this.geometry.toZ0Surfaces(options);
   }
 
   toPoints (options = {}) {
@@ -36,7 +56,7 @@ export class Assembly {
   }
 
   toPolygons (options = {}) {
-    return this.toPaths(options);
+    return this.toSolid(options);
   }
 
   transform (matrix) {
@@ -50,9 +70,14 @@ export class Assembly {
 
 const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometries({}, [shape]);
 
-export const unionLazily = (shape, ...shapes) => {
-  return Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
-};
+export const unionLazily = (shape, ...shapes) =>
+  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+
+export const differenceLazily = (shape, ...shapes) =>
+  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).difference(...shapes.map(shape => shape.toGeometry())));
+
+export const intersectionLazily = (shape, ...shapes) =>
+  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).intersection(...shapes.map(shape => shape.toGeometry())));
 
 // FIX: This needs clear documentation.
 Assembly.fromGeometry = (geometry) => new Assembly(geometry);

@@ -6,7 +6,7 @@ const writeFileSync = (path, data, { translator } = {}) => {
   file.translator = translator;
 
   for (const watcher of file.watchers) {
-    watcher(file);
+    watcher(file, options);
   }
 };
 

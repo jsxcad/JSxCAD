@@ -40,7 +40,7 @@
 
     <!-- App -->
     <script type="module">
-      import { api, readFileSync, trianglesToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
+      import { api, readFileSync, solidToThreejsDatasets, watchFile, watchFileCreation, writeFileSync } from './JSxCAD.js';
 
       const makeMaterial = (material) => {
         switch (material) {
@@ -120,14 +120,13 @@ let x = union(sphere().as('a').material('metal'),
               cube({ size: 1, center: true }).translate([0.5, 0.5, 0.5]).as('b'),
               cube({ size: 1, center: true }).translate([0.5, 0, 0]).as('c').material('metal'))
 
-writePaths({ path: 'assembly' },
-           x.toPaths({ tags: ['a'] }),
-           x.toPaths({ tags: ['b'] }),
-           x.toPaths({ tags: ['c'] }))
+writeStl({ path: 'assembly' },
+         x.toSolid({ tags: ['a'] }),
+         x.toSolid({ tags: ['b'] }),
+         x.toSolid({ tags: ['c'] }))
     
 writeStl({ path: 'sphere' },
-           x.toPaths({ tags: ['a'] }));
-//writeStl({ path: 'sphere' }, sphere());
+         x.toSolid({ tags: ['a'] }));
 `
                             });
         document.addEventListener("keydown",
@@ -172,7 +171,7 @@ writeStl({ path: 'sphere' },
                             scene.remove(mesh);
                           }
                           // Build new datasets from the written data, and display them.
-                          datasets = trianglesToThreejsDatasets({}, ...data);
+                          datasets = solidToThreejsDatasets({}, ...solids);
                           for (const dataset of datasets) {
                             let geometry = new THREE.BufferGeometry();
                             let { properties = {}, indices, positions, normals } = dataset;

@@ -1,4 +1,5 @@
 import { difference, flip, intersection, transform, union } from '@jsxcad/algorithm-paths';
+import { isClosed } from '@jsxcad/algorithm-path';
 import { identity, multiply } from '@jsxcad/math-mat4';
 
 export class Paths {
@@ -26,6 +27,30 @@ export class Paths {
       this.paths = transform(this.transforms, this.basePaths);
     }
     return this.paths;
+  }
+
+  toZ0Drawing (options = {}) {
+    return this.toPaths(options);
+  }
+
+  toZ0Drawings (options = {}) {
+    return [this.toPaths(options)];
+  }
+
+  toZ0Surface (options = {}) {
+    return this.toPaths(options).filter(isClosed);
+  }
+
+  toZ0Surfaces (options = {}) {
+    return [this.toSurface(options)];
+  }
+
+  toSolid (options = {}) {
+    return [];
+  }
+
+  toSolids (options = {}) {
+    return [this.toSolid(options)];
   }
 
   transform (matrix) {
