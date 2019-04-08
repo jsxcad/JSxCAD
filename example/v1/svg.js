@@ -1,3 +1,3 @@
-import { cube, writeSvg } from '@jsxcad/api-v1';
+import { sphere, writeSvg } from '@jsxcad/api-v1';
 
-export const main = () => writeSvg({ path: 'tmp/cube.svg' }, cube(30));
+export const main = () => writeSvg({ path: 'tmp/cube.svg' }, sphere(10));
