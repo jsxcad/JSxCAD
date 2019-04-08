@@ -238,7 +238,7 @@ writeStl({ path: 'sphere' },
           downloadButton.appendChild(document.createTextNode("Download"));
           downloadButton.setAttribute("style", "position: absolute; top: 2px; right: 2px;");
           downloadButton.addEventListener("click", () => {
-            const blob = new Blob([readFileSync(path).data()], {type: "text/plain;charset=utf-8"});
+            const blob = new Blob([readFileSync(path)], {type: "text/plain;charset=utf-8"});
             saveAs(blob, path+'.stl');
           });
           return downloadButton;
