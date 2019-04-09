@@ -6,8 +6,7 @@ import { negate } from '@jsxcad/math-vec3';
  * @param {Object|Array} objects - objects to serialize as SVG
  * @returns {Array} serialized contents, SVG format
  */
-export const polygonsToSvg = (options = { padding: 0 }, rawPolygons) => {
-  const padding = options.padding || 0;
+export const polygonsToSvg = ({ padding = 0 }, rawPolygons) => {
   const polygons = canonicalize(rawPolygons);
   const min = measureBoundingBox(polygons)[0];
   // TODO: Add transform and translate support to polygons.
