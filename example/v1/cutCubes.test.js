@@ -4,7 +4,7 @@ import { main } from './cutCubes';
 
 main();
 
-test('Expected stl', t => {
+test('Expected pdf', t => {
   t.is(readFileSync('tmp/cutCubes.pdf', { encoding: 'utf8' }),
        readFileSync('cutCubes.pdf', { encoding: 'utf8' }));
 });
