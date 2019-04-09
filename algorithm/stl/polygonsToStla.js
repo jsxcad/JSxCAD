@@ -13,7 +13,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 export const polygonsToStla = (options = {}, polygons) => {
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);
-    if (options.doMakeWatertight) {
+    if (false && options.doMakeWatertight) {
       polygons = makeWatertight(polygons);
     }
   }

@@ -83,15 +83,21 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
         startPoint = endPoint;
         startType = endType;
       }
-      if (frontPoints.length >= 3) {
+      if (frontPoints.length === 3) {
       // Add the polygon that sticks out the front of the plane.
         front.push(frontPoints);
+      } else if (frontPoints.length == 4) {
+        front.push([frontPoints[0], frontPoints[1], frontPoints[3]]);
+        front.push([frontPoints[2], frontPoints[3], frontPoints[1]]);
       } else {
         throw Error('die');
       }
-      if (backPoints.length >= 3) {
+      if (backPoints.length === 3) {
       // Add the polygon that sticks out the back of the plane.
         back.push(backPoints);
+      } else if (backPoints.length === 4) {
+        back.push([backPoints[0], backPoints[1], backPoints[3]]);
+        back.push([backPoints[2], backPoints[3], backPoints[1]]);
       } else {
         throw Error('die');
       }
