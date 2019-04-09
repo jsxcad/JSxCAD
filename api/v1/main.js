@@ -40,6 +40,7 @@ import { writePaths } from './writePaths';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
+import { writeSvg } from './writeSvg';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
@@ -77,5 +78,6 @@ export {
   writePdf,
   writeShape,
   writeStl,
+  writeSvg,
   writeThreejsPage
 };
