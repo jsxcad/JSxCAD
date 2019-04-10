@@ -9,7 +9,7 @@ export const main = () => {
   // This should produce the cube with a hole in it for the cylinder that we decided not to display.
   // writeStl({ path: 'tmp/assembly-cube.stl' }, assembly.toSolid({ tags: ['cube'] }));
   const surfaces = [];
-  writeStl({ path: 'tmp/assembly-cube-retessellated.stl' }, canonicalize(retessellate({ emitSurface: (surface) => surfaces.push(surface) }, assembly.toSolid({ tags: ['cube'] }))));
+  writeStl({ path: 'tmp/assembly-cube-retessellated.stl' }, retessellate({ emitSurface: (surface) => surfaces.push(surface) }, assembly.toSolid({ tags: ['cube'] })));
   for (let nth = 0; nth < surfaces.length; nth++) {
     writeSvg({ path: `tmp/assembly-cube-surface-${nth}.svg` }, surfaces[nth]);
   }
