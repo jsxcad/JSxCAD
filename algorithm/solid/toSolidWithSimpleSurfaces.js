@@ -1,9 +1,9 @@
-import { makeConvex, transform } from '@jsxcad/algorithm-polygons';
+import { transform } from '@jsxcad/algorithm-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { union } from '@jsxcad/algorithm-z0polygons';
 
-export const retessellate = ({ emitSurface }, solid) => {
+export const toSolidWithSimpleSurfaces = ({ emitSurface }, solid) => {
   const coplanarGroups = new Map();
 
   for (const polygon of solid) {
@@ -17,16 +17,16 @@ export const retessellate = ({ emitSurface }, solid) => {
     }
   }
 
-  const retessellated = [];
+  const simplified = [];
 
   for (const group of coplanarGroups.values()) {
     const [to, from] = toXYPlaneTransforms(toPlane(group[0]));
-    let surface = makeConvex({}, union(...transform(to, group).map(polygon => [polygon])));
+    let surface = union(...transform(to, group).map(polygon => [polygon]));
     if (emitSurface) {
       emitSurface(surface);
     }
-    retessellated.push(...transform(from, surface));
+    simplified.push(...transform(from, surface));
   }
 
-  return retessellated;
+  return simplified;
 };
