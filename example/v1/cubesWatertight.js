@@ -8,4 +8,4 @@ export const main = () => {
            retessellate({},
                         difference(cube({ size: [10, 10, 10], center: true }),
                                    cube({ size: [9, 9, 10], center: true })).toSolid()));
-}
+};

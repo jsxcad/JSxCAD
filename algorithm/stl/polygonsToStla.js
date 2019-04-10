@@ -1,4 +1,5 @@
 import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
+import { toTriangles } from '@jsxcad/algorithm-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 
 /**
@@ -13,11 +14,11 @@ import { toPlane } from '@jsxcad/math-poly3';
 export const polygonsToStla = (options = {}, polygons) => {
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);
-    if (false && options.doMakeWatertight) {
+    if (options.doMakeWatertight) {
       polygons = makeWatertight(polygons);
     }
   }
-  return `solid JSxCAD\n${convertToFacets(options, polygons)}\nendsolid JSxCAD\n`;
+  return `solid JSxCAD\n${convertToFacets(options, toTriangles({}, polygons))}\nendsolid JSxCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>
@@ -29,26 +30,11 @@ const toStlVector = vector =>
 const toStlVertex = vertex =>
   `vertex ${toStlVector(vertex)}`;
 
-const convertToFacet = polygon => {
-  let result = [];
-  if (polygon.length >= 3) {
-    // Build a poly3 for convenience in computing the normal.
-    const plane = toPlane(polygon);
-    const normal = toStlVector(toPlane(polygon));
-    if (polygon.length !== 3) throw Error('die');
-    // STL requires triangular polygons. If our polygon has more vertices, create multiple triangles:
-    for (let i = 0; i < polygon.length - 2; i++) {
-      result.push(
-        [
-          `facet normal ${normal}`,
-          `outer loop`,
-          `${toStlVertex(polygon[0])}`,
-          `${toStlVertex(polygon[i + 1])}`,
-          `${toStlVertex(polygon[i + 2])}`,
-          `endloop`,
-          `endfacet`
-        ].join('\n'));
-    }
-  }
-  return result.join('\n');
-};
+const convertToFacet = polygon =>
+  `facet normal ${toStlVector(toPlane(polygon))}\n` +
+  `outer loop\n` +
+  `${toStlVertex(polygon[0])}\n` +
+  `${toStlVertex(polygon[1])}\n` +
+  `${toStlVertex(polygon[2])}\n` +
+  `endloop\n` +
+  `endfacet`;

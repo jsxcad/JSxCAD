@@ -103,8 +103,6 @@ function deleteSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, v
      should not be used for further Geom3 operations!
 */
 export const fixTJunctions = function (polygons) {
-  return polygons; // DISABLED
-
   let sidemap = {};
 
   // STEP 1
