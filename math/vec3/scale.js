@@ -5,6 +5,4 @@
  * @param {vec3} vector the vector to scale
  * @returns {vec3} out
  */
-export const scale = (amount, [x, y, z]) => [x * amount,
-                                             y * amount,
-                                             z * amount];
+export const scale = (amount, [x, y, z]) => [(x * amount), (y * amount), (z * amount)];

@@ -40,6 +40,7 @@ export const makeConvex = (options = {}, polygons) => {
     return blessAsConvex(polygons);
   }
   const contours = polygons.map(toContour);
+  // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
   const convex = fromTessellation(
     Tess2.tesselate({ contours: contours,
                       windingRule: Tess2.WINDING_ODD,
