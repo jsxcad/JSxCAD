@@ -18,7 +18,6 @@ export const retessellate = ({ emitSurface }, solid) => {
   }
 
   const retessellated = [];
-  const surfaces = [];
 
   for (const group of coplanarGroups.values()) {
     const [to, from] = toXYPlaneTransforms(toPlane(group[0]));
