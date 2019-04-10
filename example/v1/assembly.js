@@ -6,14 +6,7 @@ export const main = () => {
   const assembly = union(cube({ size: 30, center: true }).as('cube'),
                          cylinder({ r: 5, h: 30, center: true, fn: 32 }).as('cylinder'));
 
-  // This should produce the cube with a hole in it for the cylinder that we decided not to display.
-  // writeStl({ path: 'tmp/assembly-cube.stl' }, assembly.toSolid({ tags: ['cube'] }));
-  const surfaces = [];
-  writeStl({ path: 'tmp/assembly-cube-retessellated.stl' }, retessellate({ emitSurface: (surface) => surfaces.push(surface) }, assembly.toSolid({ tags: ['cube'] })));
-  for (let nth = 0; nth < surfaces.length; nth++) {
-    writeSvg({ path: `tmp/assembly-cube-surface-${nth}.svg` }, surfaces[nth]);
-  }
-  return;
+  writeStl({ path: 'tmp/assembly-cube.stl' }, assembly.toSolid({ tags: ['cube'] }));
 
   // This should produce the cube with a hole in it filled by the cylinder.
   writeStl({ path: 'tmp/assembly-cube-cylinder.stl' }, assembly.toSolid({ tags: ['cube', 'cylinder'] }));
