@@ -1,8 +1,7 @@
-import { add, canonicalize, dot, lerp, scale, squaredDistance, subtract } from '@jsxcad/math-vec3';
-import { measureArea, toPlane } from '@jsxcad/math-poly3';
+import { dot, lerp, squaredDistance, subtract } from '@jsxcad/math-vec3';
+import { toPlane } from '@jsxcad/math-poly3';
 
-// const EPSILON = 1e-5;
-const EPSILON = 1e-6;
+const EPSILON = 1e-5;
 const EPSILON_SQUARED = Math.pow(EPSILON, 2);
 
 const COPLANAR = 0; // Neither front nor back.
@@ -73,7 +72,7 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
           // Actually, even with triangulation, this can twist planes sufficiently that the splitting
           // invariant is violated, leading to infinite recursion.
           // So we defer canonicalization, and deal with degenerate triangles upon later canonicalization.
-          const spanPoint = canonicalize(lerp(t, startPoint, endPoint));
+          const spanPoint = lerp(t, startPoint, endPoint);
           if (squaredDistance(spanPoint, startPoint) >= EPSILON_SQUARED &&
               squaredDistance(spanPoint, endPoint) >= EPSILON_SQUARED) {
             // Minimize the production of degenerate polygons.
@@ -88,13 +87,13 @@ export const splitPolygon = (plane, coplanarFront, coplanarBack, front, back, po
       // Add the polygon that sticks out the front of the plane.
         front.push(frontPoints);
       } else {
-        // throw Error('die');
+        throw Error('die');
       }
       if (backPoints.length >= 3) {
       // Add the polygon that sticks out the back of the plane.
         back.push(backPoints);
       } else {
-        // throw Error('die');
+        throw Error('die');
       }
       break;
     }
