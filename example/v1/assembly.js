@@ -2,9 +2,8 @@ import { cube, cylinder, union, writeStl, writeThreejsPage } from '@jsxcad/api-v
 
 export const main = () => {
   const assembly = union(cube({ size: 30, center: true }).as('cube'),
-                         cylinder({ r: 5, h: 30, center: true }).as('cylinder'));
+                         cylinder({ r: 5, h: 30, center: true, fn: 32 }).as('cylinder'));
 
-  // This should produce the cube with a hole in it for the cylinder that we decided not to display.
   writeStl({ path: 'tmp/assembly-cube.stl' }, assembly.toSolid({ tags: ['cube'] }));
 
   // This should produce the cube with a hole in it filled by the cylinder.
