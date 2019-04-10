@@ -1,6 +1,4 @@
-import { cube, cylinder, union, writeStl, writeSvg, writeThreejsPage } from '@jsxcad/api-v1';
-import { retessellate } from '@jsxcad/algorithm-solid';
-import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { cube, cylinder, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
 export const main = () => {
   const assembly = union(cube({ size: 30, center: true }).as('cube'),
