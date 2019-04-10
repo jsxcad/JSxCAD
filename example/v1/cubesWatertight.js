@@ -1,4 +1,4 @@
-import { cube, difference, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
+import { cube, difference, writeStl } from '@jsxcad/api-v1';
 import { retessellate } from '@jsxcad/algorithm-solid';
 
 // FIX: This produces a defective geometry with duplicate planes.
