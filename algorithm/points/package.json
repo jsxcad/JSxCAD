@@ -26,7 +26,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-poly3": "^0.0.50"
+    "@jsxcad/math-vec3": "^0.0.50"
   },
   "devDependencies": {
     "@jsxcad/data-shape": "^0.0.50",

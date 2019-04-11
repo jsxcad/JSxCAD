@@ -10,6 +10,6 @@ export const measureBoundingBox = (points) => {
               max = maxOfVec3(max, point);
               min = minOfVec3(min, point);
             },
-            solid);
+            points);
   return [min, max];
 };
