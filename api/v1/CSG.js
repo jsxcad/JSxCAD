@@ -36,8 +36,7 @@ export class CSG {
   }
 
   toSolid (options = {}) {
-    const solid = this.geometry.toSolid(options);
-    return solid;
+    return this.geometry.toSolid(options);
   }
 
   toSolids (options = {}) {

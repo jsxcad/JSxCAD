@@ -14,7 +14,7 @@ export const writeStl = ({ path, needIsWatertight = true }, ...shapes) => {
     }
   });
   writeFileSync(path,
-                () => polygonsToStla({ needIsWatertight }, ...solids.map(solid => toPolygons({}, makeSurfacesConvex({}, solid)))),
+                () => polygonsToStla({ needIsWatertight }, [].concat(...solids.map(solid => toPolygons({}, makeSurfacesConvex({}, solid))))),
                 { solids });
 };
 
