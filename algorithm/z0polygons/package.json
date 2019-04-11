@@ -57,6 +57,7 @@
   "dependencies": {
     "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
+    "@jsxcad/math-poly3": "^0.0.50",
     "polygon-clipping": "^0.13.0"
   },
   "devDependencies": {

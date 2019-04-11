@@ -1,5 +1,5 @@
-import { canonicalize } from '@jsxcad/algorithm-polygons';
-import { difference as bspDifference, intersection as bspIntersection, union as bspUnion } from '@jsxcad/algorithm-bsp';
+import { canonicalize } from '@jsxcad/algorithm-solid';
+import { difference as solidDifference, intersection as solidIntersection, union as solidUnion } from '@jsxcad/algorithm-bsp-surfaces';
 import { difference as z0Difference, intersection as z0Intersection, union as z0Union } from '@jsxcad/algorithm-z0polygons';
 
 export class Assembly {
@@ -67,7 +67,8 @@ export class Assembly {
     };
 
     const solids = this.toSolids(options);
-    return canonicalize(bspUnion(...solids.filter(solid => isSelectedTags(solid.tags))));
+    const solid = canonicalize(solidUnion(...solids.filter(solid => isSelectedTags(solid.tags))));
+    return solid;
   }
 
   toSolids (options) {
@@ -75,23 +76,23 @@ export class Assembly {
 
     switch (this.operator) {
       case 'difference': {
-        const differenced = bspDifference(...solids);
+        const differenced = solidDifference(...solids);
         // FIX: Keep all properties.
         differenced.tags = solids[0].tags;
         return [differenced];
       }
       case 'intersection': {
-        const intersected = bspIntersection(...solids);
+        const intersected = solidIntersection(...solids);
         // FIX: Keep all properties.
         intersected.tags = solids[0].tags;
         return [intersected];
       }
       case 'union': {
         // FIX: This is really 'group'.
-        // const unioned = bspUnion(...solids);
+        // const unioned = solidUnion(...solids);
         const holed = [];
         for (let nth = 0; nth < solids.length; nth++) {
-          const cut = bspDifference(solids[nth], ...solids.slice(nth + 1));
+          const cut = solidDifference(solids[nth], ...solids.slice(nth + 1));
           cut.tags = solids[nth].tags;
           holed.push(cut);
         }

@@ -1,11 +1,10 @@
 // FIX: Get a better way to swap these.
-import { fromPaths } from '@jsxcad/geometry-solid3bsp';
+import { fromSolid } from '@jsxcad/geometry-solid3bsp';
 // import { fromPaths } from '@jsxcad/geometry-solid3evan';
 
 import { Assembly } from './Assembly';
-import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
 import { toGeometry } from './toGeometry';
-import { toTriangles } from '@jsxcad/algorithm-polygons';
+import { fromPolygons, toPoints, toPolygons } from '@jsxcad/algorithm-solid';
 
 export class CSG {
   as (tag) {
@@ -13,7 +12,7 @@ export class CSG {
   }
 
   constructor (geometry) {
-    this.geometry = geometry || fromPaths({}, []);
+    this.geometry = geometry || fromSolid({}, []);
   }
 
   difference (...shapes) {
@@ -36,18 +35,13 @@ export class CSG {
     return this.geometry;
   }
 
-  toPaths (options = {}) {
-    const paths = this.geometry.toPaths(options);
-    // if (!isWatertightPolygons(paths)) throw Error('not watertight');
-    return paths;
-  }
-
   toSolid (options = {}) {
-    return this.toPaths(options);
+    const solid = this.geometry.toSolid(options);
+    return solid;
   }
 
   toSolids (options = {}) {
-    return [this.toPaths(options)];
+    return [this.toSolid(options)];
   }
 
   toZ0Surfaces (options = {}) {
@@ -55,11 +49,11 @@ export class CSG {
   }
 
   toPoints (options) {
-    return toPoints(options, this.toPaths(options));
+    return toPoints(options, this.toSolid(options));
   }
 
   toPolygons (options) {
-    return this.toPaths(options);
+    return toPolygons({}, this.toSolid(options));
   }
 
   union (...shapes) {
@@ -68,8 +62,4 @@ export class CSG {
 }
 
 CSG.fromGeometry = (geometry) => new CSG(geometry);
-CSG.fromPaths = (paths) => {
-  const triangles = canonicalize(toTriangles({}, paths));
-  return CSG.fromGeometry(fromPaths({}, triangles));
-};
-CSG.fromPolygons = CSG.fromPaths;
+CSG.fromPolygons = (polygons) => CSG.fromGeometry(fromSolid({}, fromPolygons({}, polygons)));

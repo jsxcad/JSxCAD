@@ -10,6 +10,7 @@ import { union as polygonClippingUnion } from 'polygon-clipping';
  * @returns {Z0Surface} the resulting z0 surface.
  */
 export const union = (...surfaces) => {
+console.log(`QQ/surface: ${JSON.stringify(surfaces)}`);
   if (surfaces.length === 0) {
     return [];
   }
@@ -17,6 +18,7 @@ export const union = (...surfaces) => {
     return surfaces[0];
   }
   const clipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
+console.log(`QQ/clipping: ${JSON.stringify(clipping)}`);
   const result = polygonClippingUnion(...clipping);
   return clippingToPolygons(result);
 };
