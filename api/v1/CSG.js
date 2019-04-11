@@ -4,6 +4,7 @@ import { fromPaths } from '@jsxcad/geometry-solid3bsp';
 
 import { Assembly } from './Assembly';
 import { canonicalize, toPoints } from '@jsxcad/algorithm-paths';
+import { measureBoundingBox } from '@jsxcad/algorithm-points';
 import { toGeometry } from './toGeometry';
 import { toTriangles } from '@jsxcad/algorithm-polygons';
 
@@ -18,6 +19,10 @@ export class CSG {
 
   difference (...shapes) {
     return CSG.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
+  }
+
+  getBounds () {
+    return measureBoundingBox(this.toPoints());
   }
 
   intersection (...shapes) {
