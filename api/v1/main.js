@@ -33,6 +33,7 @@ import { sin } from './sin';
 import { sphere } from './sphere';
 import { sqrt } from './sqrt';
 import { square } from './square';
+import { svgPath } from './svgPath';
 import { tetrahedron } from './tetrahedron';
 import { translate } from './translate';
 import { union } from './union';
@@ -70,6 +71,7 @@ export {
   sphere,
   sqrt,
   square,
+  svgPath,
   tetrahedron,
   text,
   translate,
