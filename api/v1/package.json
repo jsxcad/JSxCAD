@@ -56,6 +56,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-color": "^0.0.50",
+    "@jsxcad/algorithm-dst": "^0.0.50",
     "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
     "@jsxcad/algorithm-pdf": "^0.0.50",

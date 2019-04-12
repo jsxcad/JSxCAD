@@ -24,6 +24,7 @@ import { intersection } from './intersection';
 import { loadFont, text } from './text';
 import { max } from './max';
 import { polyhedron } from './polyhedron';
+import { readDst } from './readDst';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
@@ -62,6 +63,7 @@ export {
   loadFont,
   max,
   polyhedron,
+  readDst,
   rotate,
   rotateX,
   rotateY,
