@@ -1,6 +1,6 @@
 import { pathnameToFont, textToSurfaces } from '@jsxcad/algorithm-text';
 import { CAG } from './CAG';
-import { union } from '@jsxcad/algorithm-z0polygons';
+import { union } from '@jsxcad/algorithm-z0surface';
 
 export const loadFont = ({ path }) => pathnameToFont(path);
 

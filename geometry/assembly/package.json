@@ -31,7 +31,7 @@
     "@jsxcad/algorithm-paths": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-solid": "^0.0.50",
-    "@jsxcad/algorithm-z0polygons": "^0.0.50",
+    "@jsxcad/algorithm-z0surface": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50"
   },
   "devDependencies": {
