@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/algorithm-z0polygons",
+  "name": "@jsxcad/algorithm-z0surface",
   "version": "0.0.50",
-  "description": "Operations on polygon arrays with z = 0 plane for JSxCAD",
+  "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "main.js",
@@ -12,34 +12,6 @@
     "tests": "ava *.test.js"
   },
   "contributors": [
-    {
-      "name": "Alexandre Girard",
-      "url": "https://github.com/alx"
-    },
-    {
-      "name": "Evan Wallace",
-      "url": "http://evanw.github.com/csg.js/"
-    },
-    {
-      "name": "Joost Nieuwenhuijse",
-      "email": "joost@newhouse.nl"
-    },
-    {
-      "name": "Eduard Bespalov",
-      "url": "http://evanw.github.com/csg.js/"
-    },
-    {
-      "name": "bebbi",
-      "email": "elghatta@gmail.com"
-    },
-    {
-      "name": "Spiritdude Rene K Mueller",
-      "url": "http://renekmueller.com"
-    },
-    {
-      "name": "Jeff Gay",
-      "url": "http://www.z3d.jp"
-    },
     {
       "name": "Brian Spilsbury",
       "url": "http://github.com/pentacular/"

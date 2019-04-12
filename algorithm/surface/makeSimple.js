@@ -1,6 +1,6 @@
 import { toPlane, transform } from './main';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { union } from '@jsxcad/algorithm-z0polygons';
+import { union } from '@jsxcad/algorithm-z0surface';
 
 export const makeSimple = (options = {}, surface) => {
   const [to, from] = toXYPlaneTransforms(toPlane(surface));
