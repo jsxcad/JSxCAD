@@ -1,6 +1,6 @@
 import absolutifySvgPath from 'abs-svg-path';
 import curvifySvgPath from 'curvify-svg-path';
-import { buildCubicBezierCurve } from '@jsxcad/algorithm-shape';
+import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
 import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';
 import { canonicalize } from '@jsxcad/algorithm-path';
@@ -62,7 +62,7 @@ const toPaths = ({ curveSegments }, svgPath) => {
         const [x1, y1, x2, y2, x, y] = args;
         const start = path[path.length - 1];
         const [xStart, yStart] = (start === null) ? [0, 0] : start;
-        path = path.concat(buildCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
+        path = path.concat(buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
         break;
       }
       default: {
