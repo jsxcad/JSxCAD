@@ -67,6 +67,7 @@
     "@jsxcad/math-vec2": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
     "@jsxcad/math-vec4": "^0.0.50",
+    "adaptive-bezier-curve": "^1.0.3",
     "bezier": "^0.1.0",
     "quickhull3d": "^2.0.4"
   },
