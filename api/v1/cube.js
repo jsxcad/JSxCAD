@@ -67,11 +67,11 @@ const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, 
   assertNumber(resolution);
   return () => CSG.fromPolygons(
     buildConvexHull({},
-      buildConvexMinkowskiSum({},
-                              unitCube().scale(radius - roundRadius * 2).toPoints(),
-                              CSG.fromPolygons(buildRingSphere({ resolution }))
-                                 .scale(roundRadius)
-                                 .toPoints())));
+                    buildConvexMinkowskiSum({},
+                                            unitCube().scale(radius - roundRadius * 2).toPoints(),
+                                            CSG.fromPolygons(buildRingSphere({ resolution }))
+                                                .scale(roundRadius)
+                                                .toPoints())));
 };
 
 // cube({ center: [0, 0, 0], radius: 1 })
