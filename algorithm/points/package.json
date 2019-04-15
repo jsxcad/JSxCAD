@@ -28,7 +28,6 @@
   "dependencies": {
     "@jsxcad/math-mat4": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50",
-    "convex-minkowski-sum": "^1.0.0",
     "quickhull3d": "^2.0.4"
   },
   "devDependencies": {
