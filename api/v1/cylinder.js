@@ -49,7 +49,7 @@ export const cylinder = (...params) => {
     assertNumber(diameter);
     assertNumber(faces);
     assertNumber(height);
-    return buildCylinder({ r1: diameter / 2, r1: diameter / 2, h: height, center: true, edges: faces });
+    return buildCylinder({ r1: diameter / 2, r2: diameter / 2, h: height, center: true, edges: faces });
   } catch (e) {}
 
   throw Error(`Unsupported interface for cylinder: ${JSON.stringify(params)}`);

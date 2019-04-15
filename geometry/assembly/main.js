@@ -51,6 +51,7 @@ export class Assembly {
 
   toSolid (options) {
     // FIX: Handle non-solids.
+    // FIX: include -> requires ?
     const { include, exclude } = options;
 
     const isSelectedTags = (solidTags) => {
@@ -63,7 +64,7 @@ export class Assembly {
       if (include === undefined) {
         return true;
       }
-      if (solidTags.some(solidTag => !tags.includes(solidTag))) {
+      if (solidTags.some(solidTag => !include.includes(solidTag))) {
         return false;
       }
       return true;

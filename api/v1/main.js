@@ -23,6 +23,7 @@ import { hull } from './hull';
 import { intersection } from './intersection';
 import { loadFont, text } from './text';
 import { max } from './max';
+import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
 import { rotate } from './rotate';
@@ -62,6 +63,7 @@ export {
   intersection,
   loadFont,
   max,
+  minkowski,
   polyhedron,
   readDst,
   rotate,

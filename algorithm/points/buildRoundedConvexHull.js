@@ -1,14 +1,13 @@
 import { eachPoint, transform } from '@jsxcad/algorithm-polygons';
 import { fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 import { buildConvexHull } from './buildConvexHull';
-import { buildRingSphere } from './buildRingSphere';
 
 const scale = (vec, polygons) => transform(fromScaling(vec), polygons);
 const translate = (vec, polygons) => transform(fromTranslation(vec), polygons);
 
-export const buildRoundedConvexHull = ({ roundingRadius = 0.1, roundingFaces = 8 }, points) => {
-  const sphere = scale([roundingRadius, roundingRadius, roundingRadius], buildRingSphere({ resolution: roundingFaces }));
+export const buildRoundedConvexHull = ({ roundingRadius = 0.1, roundingFaces = 8 }, points, unitRounder) => {
+  const rounder = scale([roundingRadius, roundingRadius, roundingRadius], unitRounder);
   const hullPoints = [];
-  points.forEach(point => eachPoint({}, point => hullPoints.push(point), translate(point, sphere)));
+  points.forEach(point => eachPoint({}, point => hullPoints.push(point), translate(point, rounder)));
   return buildConvexHull({}, hullPoints);
 };

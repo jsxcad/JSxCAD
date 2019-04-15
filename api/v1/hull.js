@@ -1,4 +1,4 @@
-import { buildConvexHull } from '@jsxcad/algorithm-shape';
+import { buildConvexHull } from '@jsxcad/algorithm-points';
 import { CSG } from './CSG';
 
 export const hull = (...geometries) => {
