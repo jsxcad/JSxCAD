@@ -68,7 +68,7 @@ const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, 
   return () => CSG.fromPolygons(
     buildRoundedConvexHull({ roundingRadius: roundRadius, roundingFaces: resolution },
                            unitCube().scale(radius - roundRadius * 2).toPoints(),
-                           buildRingSphere({ resolution }).toPoints()));
+                           buildRingSphere({ resolution })));
 };
 
 // cube({ center: [0, 0, 0], radius: 1 })
