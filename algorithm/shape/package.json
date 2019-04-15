@@ -56,6 +56,7 @@
   "dependencies": {
     "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
+    "@jsxcad/algorithm-points": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-stl": "^0.0.50",
     "@jsxcad/algorithm-watertight": "^0.0.50",
@@ -68,8 +69,7 @@
     "@jsxcad/math-vec3": "^0.0.50",
     "@jsxcad/math-vec4": "^0.0.50",
     "adaptive-bezier-curve": "^1.0.3",
-    "bezier": "^0.1.0",
-    "quickhull3d": "^2.0.4"
+    "bezier": "^0.1.0"
   },
   "devDependencies": {
     "ava": "^0.23.0",

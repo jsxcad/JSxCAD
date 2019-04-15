@@ -26,9 +26,14 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-vec3": "^0.0.50"
+    "@jsxcad/math-mat4": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50",
+    "convex-minkowski-sum": "^1.0.0",
+    "quickhull3d": "^2.0.4"
   },
   "devDependencies": {
+    "@jsxcad/algorithm-polygons": "^0.0.50",
+    "@jsxcad/algorithm-watertight": "^0.0.50",
     "@jsxcad/data-shape": "^0.0.50",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",

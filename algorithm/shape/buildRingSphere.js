@@ -1,5 +1,5 @@
 import { buildRegularPolygon } from './buildRegularPolygon';
-import { buildConvexHull } from './buildConvexHull';
+import { buildConvexHull } from '@jsxcad/algorithm-points';
 import { scale, translate } from '@jsxcad/algorithm-path';
 import { toPoints } from '@jsxcad/algorithm-paths';
 
