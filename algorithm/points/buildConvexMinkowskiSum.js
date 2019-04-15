@@ -1,5 +1,3 @@
-import { eachPoint } from '@jsxcad/algorithm-polygons';
-import { buildConvexHull } from './buildConvexHull';
 import { translate } from './ops';
 
 export const buildConvexMinkowskiSum = (options = {}, aPoints, bPoints) => {
