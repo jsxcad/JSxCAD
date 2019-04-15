@@ -18,10 +18,7 @@ const run = async () => {
       mainOptions = options;
     }
     if (main !== undefined) {
-      const result = main(mainOptions);
-      if (typeof result === 'object' && result.then) {
-        await result;
-      }
+      await Promise.resolve(main(mainOptions));
     }
   }
 };
