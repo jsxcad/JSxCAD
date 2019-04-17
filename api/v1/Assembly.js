@@ -70,8 +70,11 @@ export class Assembly {
 
 const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometries({}, [shape]);
 
-export const unionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+export const unionLazily = (shape, ...shapes) => {
+  if (shape === undefined) throw Error('die');
+  if (shapes[0] === undefined) throw Error('die');
+  return Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+}
 
 export const differenceLazily = (shape, ...shapes) =>
   Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).difference(...shapes.map(shape => shape.toGeometry())));

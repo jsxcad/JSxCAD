@@ -1,26 +1,17 @@
 import { trianglesToThreejsDatasets } from './trianglesToThreejsDatasets';
 
-const renderMaterial = (nth) => {
-  // Just cycle through materials for now.
-  const materials = [
-    'THREE.MeshNormalMaterial()',
-    'THREE.MeshLambertMaterial({ color: 0xffffff, ambient: 0xaaaaaa, shading: THREE.FlatShading })'
-  ];
-  return materials[nth % materials.length];
-};
-
 const renderDataset = ({ indices, positions, normals }, nth) => `
         {
-          var geometry = new THREE.BufferGeometry();
-          var indices = ${JSON.stringify(indices)};
-          var positions = ${JSON.stringify(positions)};
-          var normals = ${JSON.stringify(normals)};
-          geometry.setIndex( indices );
-          geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-          geometry.addAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
-          var material = new ${renderMaterial(nth)};
-          mesh = new THREE.Mesh( geometry, material );
-          scene.add( mesh );
+          let geometry = new THREE.BufferGeometry();
+          let indices = ${JSON.stringify(indices)};
+          let positions = ${JSON.stringify(positions)};
+          let normals = ${JSON.stringify(normals)};
+          geometry.setIndex(indices);
+          geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+          geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+          let material = THREE.MeshNormalMaterial();
+          let mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
         }
 `;
 

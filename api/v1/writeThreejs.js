@@ -1,13 +1,10 @@
-import { toTriangles } from '@jsxcad/algorithm-polygons';
-import { trianglesToThreejsPage } from '@jsxcad/algorithm-threejs';
+import { assemblyToThreejsPage } from '@jsxcad/algorithm-threejs';
 import { writeFileSync } from '@jsxcad/sys';
 
 const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
 
-export const writeThreejsPage = (options, ...shapes) => {
-  const solids = shapes.map(toPolygons).map(polygons => toTriangles({}, polygons));
-  // FIX: Should we generalize on sets of paths, like solids, rather than paths?
+export const writeThreejsPage = (options, assembly) => {
   writeFileSync(options.path,
-                () => trianglesToThreejsPage(options, ...solids),
-                { solids });
+                () => assemblyToThreejsPage(options, assembly),
+                { assembly });
 };

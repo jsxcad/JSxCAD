@@ -1,6 +1,7 @@
 import { canonicalize } from '@jsxcad/algorithm-solid';
 import { difference as solidDifference, intersection as solidIntersection, union as solidUnion } from '@jsxcad/algorithm-bsp-surfaces';
 import { difference as z0Difference, intersection as z0Intersection, union as z0Union } from '@jsxcad/algorithm-z0surface';
+import { assertCoplanar} from '@jsxcad/algorithm-surface';
 
 export class Assembly {
   constructor ({ geometries = [], properties, operator = 'group' }) {
@@ -67,8 +68,12 @@ export class Assembly {
       return true;
     };
 
-    const solids = this.toSolids(options);
-    const solid = canonicalize(solidUnion(...solids.filter(solid => isSelectedTags(solid.tags))));
+    const solids = this.toSolids(options).filter(solid => isSelectedTags(solid.tags));
+    for (const solid of solids) {
+      for (const surface of solid) assertCoplanar(surface);
+    }
+    const solid = solidUnion(...solids);
+    for (const surface of solid) assertCoplanar(surface);
     return solid;
   }
 

@@ -1,5 +1,6 @@
-import { canonicalize, flip, fromPolygons as fromPolygonsASolid, transform } from '@jsxcad/algorithm-solid';
+import { canonicalize, flip, fromPolygons as solidFromPolygons, transform } from '@jsxcad/algorithm-solid';
 import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 import { identity, multiply } from '@jsxcad/math-mat4';
 
 export class Solid3Bsp {
@@ -22,9 +23,11 @@ export class Solid3Bsp {
   }
 
   toSolid (options = {}) {
+    for (const surface of this.baseSolid) assertCoplanar(surface);
     if (this.solid === undefined) {
-      this.solid = canonicalize(transform(this.transforms, this.baseSolid));
+      this.solid = transform(this.transforms, this.baseSolid);
     }
+    for (const surface of this.solid) assertCoplanar(surface);
     return this.solid;
   }
 
@@ -58,4 +61,4 @@ export class Solid3Bsp {
 }
 
 export const fromSolid = (options = {}, solid) => new Solid3Bsp({ solid: solid });
-export const fromPolygons = (options = {}, polygons) => new Solid3Bsp({ solid: fromPolygonsASolid({}, polygons) });
+export const fromPolygons = (options = {}, polygons) => new Solid3Bsp({ solid: solidFromPolygons({}, polygons) });
