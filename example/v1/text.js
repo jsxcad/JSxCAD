@@ -1,4 +1,4 @@
-import { loadFont, text, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
+import { loadFont, text, writeStl } from '@jsxcad/api-v1';
 
 Error.stackTraceLimit = Infinity;
 
