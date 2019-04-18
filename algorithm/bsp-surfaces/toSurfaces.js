@@ -1,4 +1,4 @@
-import { canonicalize, assertCoplanar } from '@jsxcad/algorithm-surface';
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 
 const gatherSurfaces = (bsp) => {
   // PROVE: That we need this slice.

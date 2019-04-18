@@ -8,37 +8,10 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
-    "tests": "ava *.test.js"
+    "tests": "ava *.test.js",
+    "webpack": "webpack --config webpack.config.js"
   },
   "contributors": [
-    {
-      "name": "Alexandre Girard",
-      "url": "https://github.com/alx"
-    },
-    {
-      "name": "Evan Wallace",
-      "url": "http://evanw.github.com/csg.js/"
-    },
-    {
-      "name": "Joost Nieuwenhuijse",
-      "email": "joost@newhouse.nl"
-    },
-    {
-      "name": "Eduard Bespalov",
-      "url": "http://evanw.github.com/csg.js/"
-    },
-    {
-      "name": "bebbi",
-      "email": "elghatta@gmail.com"
-    },
-    {
-      "name": "Spiritdude Rene K Mueller",
-      "url": "http://renekmueller.com"
-    },
-    {
-      "name": "Jeff Gay",
-      "url": "http://www.z3d.jp"
-    },
     {
       "name": "Brian Spilsbury",
       "url": "http://github.com/pentacular/"
@@ -59,7 +32,9 @@
     "@jsxcad/algorithm-solid": "^0.0.50",
     "@jsxcad/algorithm-surface": "^0.0.50",
     "@jsxcad/math-poly3": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50"
+    "@jsxcad/math-vec3": "^0.0.50",
+    "@jsxcad/sys": "^0.0.50",
+    "web-resource-inliner": "^4.3.1"
   },
   "devDependencies": {
     "@jsxcad/algorithm-paths": "^0.0.50",
@@ -72,7 +47,9 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "esm": "^3.2.10"
+    "esm": "^3.2.10",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   },
   "ava": {
     "require": "esm"

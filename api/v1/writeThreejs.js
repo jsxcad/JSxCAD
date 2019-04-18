@@ -1,10 +1,8 @@
 import { assemblyToThreejsPage } from '@jsxcad/algorithm-threejs';
 import { writeFileSync } from '@jsxcad/sys';
 
-const toPolygons = (shape) => (shape instanceof Array) ? shape : shape.toPolygons({});
-
-export const writeThreejsPage = (options, assembly) => {
+export const writeThreejsPage = (options, { paths, surfaces, solids }) => {
   writeFileSync(options.path,
-                () => assemblyToThreejsPage(options, assembly),
-                { assembly });
+                () => assemblyToThreejsPage(options, { paths, surfaces, solids }),
+                { paths, surfaces, solids });
 };

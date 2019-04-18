@@ -5,6 +5,7 @@ import { makeConvex } from './makeConvex';
 import { makeSimple } from './makeSimple';
 import { measureArea } from './measureArea';
 import { canonicalize, scale, toPlane, transform } from './ops';
+import { toGeneric } from './toGeneric';
 
 export {
   assertCoplanar,
@@ -14,6 +15,7 @@ export {
   makeConvex,
   makeSimple,
   measureArea,
+  toGeneric,
   toPlane,
   transform,
   scale

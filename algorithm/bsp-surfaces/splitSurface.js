@@ -1,18 +1,14 @@
-import { add, dot, lerp, scale, squaredDistance, subtract } from '@jsxcad/math-vec3';
+import { dot, scale, subtract } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 import { equals as planeEquals, signedDistanceToPoint as planeDistance, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 import { assertCoplanar } from '@jsxcad/algorithm-surface';
-import { intersectPointOfLineAndPlane, fromPoints, fromPlanes as intersectionOfPlanes, closestPoint as closestPointOnLine } from '@jsxcad/math-ray3';
 
 const EPSILON = 1e-5;
-const EPSILON_SQUARED = Math.pow(EPSILON, 2);
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
 const BACK = 2;
 const SPANNING = 3; // Both front and back.
-
-const W = 3;
 
 const toType = (plane, point) => {
   let t = planeDistance(plane, point);
@@ -77,13 +73,8 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
             // Compute the point that touches the splitting plane.
             const rawSpanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
             const spanPoint = subtract(rawSpanPoint, scale(planeDistance(toPlane(polygon), rawSpanPoint), plane));
-            if (true || squaredDistance(spanPoint, startPoint) >= EPSILON_SQUARED) {
-              frontPoints.push(spanPoint);
-            }
-            if (true || squaredDistance(spanPoint, endPoint) >= EPSILON_SQUARED) {
-              // Minimize the production of degenerate polygons.
-              backPoints.push(spanPoint);
-            }
+            frontPoints.push(spanPoint);
+            backPoints.push(spanPoint);
             if (Math.abs(planeDistance(plane, spanPoint)) > EPSILON) throw Error('die');
             if (frontPoints.length >= 3) {
               assertCoplanar([frontPoints]);

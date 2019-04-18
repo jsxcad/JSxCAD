@@ -1,4 +1,4 @@
-import { canonicalize, flip, fromPolygons as solidFromPolygons, transform } from '@jsxcad/algorithm-solid';
+import { flip, fromPolygons as solidFromPolygons, transform } from '@jsxcad/algorithm-solid';
 import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
 import { assertCoplanar } from '@jsxcad/algorithm-surface';
 import { identity, multiply } from '@jsxcad/math-mat4';

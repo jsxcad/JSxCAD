@@ -1,7 +1,6 @@
-import { canonicalize } from '@jsxcad/algorithm-solid';
 import { difference as solidDifference, intersection as solidIntersection, union as solidUnion } from '@jsxcad/algorithm-bsp-surfaces';
 import { difference as z0Difference, intersection as z0Intersection, union as z0Union } from '@jsxcad/algorithm-z0surface';
-import { assertCoplanar} from '@jsxcad/algorithm-surface';
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 
 export class Assembly {
   constructor ({ geometries = [], properties, operator = 'group' }) {

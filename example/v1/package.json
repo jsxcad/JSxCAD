@@ -56,6 +56,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-z0surface": "^0.0.50",
     "@jsxcad/algorithm-solid": "^0.0.50",

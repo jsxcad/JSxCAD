@@ -1,4 +1,4 @@
-import { equals, signedDistanceToPoint as planeDistance } from '@jsxcad/math-plane';
+import { signedDistanceToPoint as planeDistance } from '@jsxcad/math-plane';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const assertCoplanarPolygon = (polygon) => {
@@ -8,10 +8,10 @@ const assertCoplanarPolygon = (polygon) => {
       throw Error(`die: ${JSON.stringify(polygon)} ${planeDistance(plane, point)}`);
     }
   }
-}
+};
 
 export const assertCoplanar = (surface) => {
   for (const polygon of surface) {
     assertCoplanarPolygon(polygon);
   }
-}
+};

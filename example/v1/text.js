@@ -13,5 +13,4 @@ export const main = ({ string = 'JSxCAD' }) => {
   const solid = letters.extrude({ height: 10 }).translate([-170, -20, 0]);
 
   writeStl({ path: 'tmp/text.stl' }, solid);
-  writeThreejsPage({ path: 'tmp/text.html', cameraPosition: [0, 0, 400] }, solid);
 };

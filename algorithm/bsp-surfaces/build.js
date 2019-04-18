@@ -1,6 +1,5 @@
 import { create } from './create';
 import { measureArea, toPlane } from '@jsxcad/algorithm-surface';
-import { toPlane as polygonToPlane, equals as planeEquals } from '@jsxcad/math-poly3';
 import { splitSurface } from './splitSurface';
 
 // Build a BSP tree out of surfaces. When called on an existing tree, the
