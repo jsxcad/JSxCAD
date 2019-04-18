@@ -1,4 +1,5 @@
 import { eachPoint } from './eachPoint';
+import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
 import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { makeSurfacesSimple } from './makeSurfacesSimple';
@@ -12,6 +13,7 @@ import { canonicalize as canonicalizeSurface, transform as transformSurface } fr
 
 export {
   eachPoint,
+  flip,
   fromPolygons,
   makeSurfacesConvex,
   makeSurfacesSimple,

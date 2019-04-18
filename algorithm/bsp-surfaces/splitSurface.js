@@ -1,18 +1,17 @@
-import { dot, lerp, squaredDistance, subtract } from '@jsxcad/math-vec3';
+import { dot, scale, subtract } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
+import { equals as planeEquals, signedDistanceToPoint as planeDistance, splitLineSegmentByPlane } from '@jsxcad/math-plane';
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 
 const EPSILON = 1e-5;
-const EPSILON_SQUARED = Math.pow(EPSILON, 2);
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
 const BACK = 2;
 const SPANNING = 3; // Both front and back.
 
-const W = 3;
-
 const toType = (plane, point) => {
-  let t = dot(plane, point) - plane[W];
+  let t = planeDistance(plane, point);
   if (t < -EPSILON) {
     return BACK;
   } else if (t > EPSILON) {
@@ -23,16 +22,17 @@ const toType = (plane, point) => {
 };
 
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
+  assertCoplanar(surface);
   const coplanarFrontPolygons = [];
   const coplanarBackPolygons = [];
   const frontPolygons = [];
   const backPolygons = [];
+  let polygonType = COPLANAR;
   for (const polygon of surface) {
-    // Classify each point as well as the entire polygon into one of the above
-    // four classes.
-    let polygonType = 0;
-    for (const point of polygon) {
-      polygonType |= toType(plane, point);
+    if (!planeEquals(toPlane(polygon), plane)) {
+      for (const point of polygon) {
+        polygonType |= toType(plane, point);
+      }
     }
 
     // Put the polygon in the correct list, splitting it when necessary.
@@ -71,18 +71,16 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
           if ((startType | endType) === SPANNING) {
             // This should exclude COPLANAR points.
             // Compute the point that touches the splitting plane.
-            let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
-            // Canonicalization of the point would violate coplanarity in some cases.
-            // We could work around this by triangulation, but that doubles the load.
-            // Actually, even with triangulation, this can twist planes sufficiently that the splitting
-            // invariant is violated, leading to infinite recursion.
-            // So we defer canonicalization, and deal with degenerate triangles upon later canonicalization.
-            const spanPoint = lerp(t, startPoint, endPoint);
-            if (squaredDistance(spanPoint, startPoint) >= EPSILON_SQUARED &&
-                squaredDistance(spanPoint, endPoint) >= EPSILON_SQUARED) {
-              // Minimize the production of degenerate polygons.
-              frontPoints.push(spanPoint);
-              backPoints.push(spanPoint);
+            const rawSpanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
+            const spanPoint = subtract(rawSpanPoint, scale(planeDistance(toPlane(polygon), rawSpanPoint), plane));
+            frontPoints.push(spanPoint);
+            backPoints.push(spanPoint);
+            if (Math.abs(planeDistance(plane, spanPoint)) > EPSILON) throw Error('die');
+            if (frontPoints.length >= 3) {
+              assertCoplanar([frontPoints]);
+            }
+            if (backPoints.length >= 3) {
+              assertCoplanar([backPoints]);
             }
           }
           startPoint = endPoint;
@@ -92,28 +90,32 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
         // Add the polygon that sticks out the front of the plane.
           frontPolygons.push(frontPoints);
         } else {
-          throw Error('die');
+          // throw Error('die');
         }
         if (backPoints.length >= 3) {
         // Add the polygon that sticks out the back of the plane.
           backPolygons.push(backPoints);
         } else {
-          throw Error('die');
+          // throw Error('die');
         }
         break;
       }
     }
   }
   if (coplanarFrontPolygons.length > 0) {
+    assertCoplanar(coplanarFrontPolygons);
     coplanarFrontSurfaces.push(coplanarFrontPolygons);
   }
   if (coplanarBackPolygons.length > 0) {
+    assertCoplanar(coplanarBackPolygons);
     coplanarBackSurfaces.push(coplanarBackPolygons);
   }
   if (frontPolygons.length > 0) {
+    assertCoplanar(frontPolygons);
     frontSurfaces.push(frontPolygons);
   }
   if (backPolygons.length > 0) {
+    assertCoplanar(backPolygons);
     backSurfaces.push(backPolygons);
   }
 };

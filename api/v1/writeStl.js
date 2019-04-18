@@ -4,7 +4,7 @@ import { polygonsToStla } from '@jsxcad/algorithm-stl';
 import { writeFileSync } from '@jsxcad/sys';
 import { makeSurfacesConvex, toPolygons } from '@jsxcad/algorithm-solid';
 
-export const writeStl = ({ path, needIsWatertight = true }, ...shapes) => {
+export const writeStl = async ({ path, needIsWatertight = true }, ...shapes) => {
   const solids = shapes.map(shape => {
     if (shape instanceof Array) {
       return shape;
@@ -13,9 +13,9 @@ export const writeStl = ({ path, needIsWatertight = true }, ...shapes) => {
       return solid;
     }
   });
-  writeFileSync(path,
-                () => polygonsToStla({ needIsWatertight }, [].concat(...solids.map(solid => toPolygons({}, makeSurfacesConvex({}, solid))))),
-                { solids });
+  await writeFileSync(path,
+                      () => polygonsToStla({ needIsWatertight }, [].concat(...solids.map(solid => toPolygons({}, makeSurfacesConvex({}, solid))))),
+                      { solids });
 };
 
 const method = function (options = {}) { writeStl(options, this); return this; };

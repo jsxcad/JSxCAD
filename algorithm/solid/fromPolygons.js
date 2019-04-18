@@ -1,4 +1,5 @@
 import { toPlane } from '@jsxcad/math-poly3';
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 
 export const fromPolygons = (options = {}, polygons) => {
   const coplanarGroups = new Map();
@@ -16,5 +17,10 @@ export const fromPolygons = (options = {}, polygons) => {
 
   // The solid is a list of surfaces, which are lists of coplanar polygons.
   const solid = [...coplanarGroups.values()];
+
+  for (const surface of solid) {
+    assertCoplanar(surface);
+  }
+
   return solid;
 };
