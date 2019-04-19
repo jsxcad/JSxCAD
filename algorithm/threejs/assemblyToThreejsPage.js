@@ -1,6 +1,8 @@
 import { readFileSync } from '@jsxcad/sys';
 
 export const assemblyToThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer' }, { paths = [], solids = [], surfaces = [] }) => {
+  const serialize = (geometries) => JSON.stringify(geometries.map(geometry => ({ geometry, tags: geometry.tags })));
+
   // FIX: Avoid injection issues.
   const head = [
     `<title>${title}</title>`,
@@ -39,7 +41,11 @@ export const assemblyToThreejsPage = async ({ cameraPosition = [0, 0, 16], title
     `<script>console.log('QQ/Hello');<\\/script>`.replace('\\/', '/'),
     `<script>const runApp = () => {`,
     `  console.log('QQ/runApp');`,
-    `  addDisplay('main', ${JSON.stringify({ paths, solids, surfaces })});`,
+    `  addDisplay('main', {`,
+    `                       paths: ${serialize(paths)},`,
+    `                       solids: ${serialize(solids)},`,
+    `                       surfaces: ${serialize(surfaces)}`,
+    `                     })`,
     `  nextPage();`,
     `}`,
     `document.addEventListener("DOMContentLoaded", runApp);`,

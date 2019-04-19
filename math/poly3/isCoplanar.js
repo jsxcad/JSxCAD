@@ -1,11 +1,10 @@
-import { equals } from '@jsxcad/math-plane';
+import { signedDistanceToPoint as planeDistance } from '@jsxcad/math-plane';
 import { toPlane } from './toPlane';
 
 export const isCoplanar = (polygon) => {
   const plane = toPlane(polygon);
-  for (let nth = 1; nth < polygon.length - 2; nth++) {
-    if (!equals(plane, toPlane(polygon.slice(nth)))) {
-      console.log(`QQ/math/poly3/isCoplanar: false ${JSON.stringify(polygon)}`);
+  for (const point of polygon) {
+    if (planeDistance(plane, point) > 1e-5) {
       return false;
     }
   }

@@ -5,6 +5,9 @@ import { flip } from './flip';
 import { toSurfaces } from './toSurfaces';
 
 export const union = (...solids) => {
+  if (solids.length === 0) {
+    return [];
+  }
   while (solids.length > 1) {
     const aSolid = solids.shift();
     const bSolid = solids.shift();

@@ -58,7 +58,10 @@ export class Assembly {
       if (requires !== undefined && solidTags === undefined) {
         return false;
       }
-      if (excludes !== undefined && solidTags.some(solidTag => !excludes.includes(solidTag))) {
+      if (excludes !== undefined && solidTags === undefined) {
+        return true;
+      }
+      if (excludes !== undefined && solidTags.some(solidTag => excludes.includes(solidTag))) {
         return false;
       }
       if (requires !== undefined && solidTags.some(solidTag => !requires.includes(solidTag))) {
@@ -72,6 +75,10 @@ export class Assembly {
       for (const surface of solid) assertCoplanar(surface);
     }
     const solid = solidUnion(...solids);
+    if (solids.length >= 1) {
+      // This is the wrong thing to do.
+      solid.tags = solids[0].tags;
+    }
     for (const surface of solid) assertCoplanar(surface);
     return solid;
   }

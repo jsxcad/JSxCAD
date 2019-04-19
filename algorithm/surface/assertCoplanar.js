@@ -1,12 +1,8 @@
-import { signedDistanceToPoint as planeDistance } from '@jsxcad/math-plane';
-import { toPlane } from '@jsxcad/math-poly3';
+import { isCoplanar } from '@jsxcad/math-poly3';
 
 const assertCoplanarPolygon = (polygon) => {
-  const plane = toPlane(polygon);
-  for (const point of polygon) {
-    if (planeDistance(plane, point) > 1e-5) {
-      throw Error(`die: ${JSON.stringify(polygon)} ${planeDistance(plane, point)}`);
-    }
+  if (!isCoplanar(polygon)) {
+    throw Error(`die`);
   }
 };
 

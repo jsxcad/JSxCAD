@@ -1,5 +1,10 @@
 let pages = [];
 
+const tag = (data, tags) => {
+  data.tags = tags;
+  return data;
+}
+
 const addPage = (element) => {
   element.style.display = 'none';
   document.getElementById("body").appendChild(element);
@@ -30,9 +35,9 @@ const addDisplay = (path, data) => {
   let gui;
   let downloadButton;
 
-  const pathsToThreejsSegments = (paths) => {
+  const pathsToThreejsSegments = (geometry) => {
     const segments = [];
-    for (const path of paths) {
+    for (const path of geometry) {
       for (const [start, end] of toSegments({}, path)) {
         segments.push([start, end]);
       }
@@ -40,10 +45,10 @@ const addDisplay = (path, data) => {
     return segments;
   };
 
-  const solidToThreejsSolid = (solid) => {
+  const solidToThreejsSolid = (geometry) => {
     const normals = [];
     const positions = [];
-    for (const triangle of polygonsToTriangles({}, solidToPolygons({}, solid))) {
+    for (const triangle of polygonsToTriangles({}, solidToPolygons({}, geometry))) {
       for (const point of triangle) {
         const [x, y, z] = toPlane(triangle);
         normals.push(x, y, z);
@@ -53,7 +58,7 @@ const addDisplay = (path, data) => {
     return { normals, positions };
   };
 
-  const surfaceToThreejsSurface = (surface) => {
+  const surfaceToThreejsSurface = (geometry) => {
     const normals = [];
     const positions = [];
     const outputTriangle = (triangle) => {
@@ -63,14 +68,14 @@ const addDisplay = (path, data) => {
         positions.push(...point);
       }
     };
-    for (const triangle of polygonsToTriangles({}, makeConvexSurface({}, surface))) {
+    for (const triangle of polygonsToTriangles({}, makeConvexSurface({}, geometry))) {
       outputTriangle(triangle);
       outputTriangle(flipPolygon(triangle));
     }
     return { normals, positions };
   };
 
-  const addController = ({ tags = [] }) => {
+  const addController = ({ dataset, tags = [] }) => {
     if (tags.length >= 1) {
       return gui.add({ visible: true }, 'visible')
                 .name(`Show ${tags[0]}?`)
@@ -89,41 +94,41 @@ const addDisplay = (path, data) => {
     }
     // Build new datasets from the written data, and display them.
     datasets = [];
-    {
-      const segments = pathsToThreejsSegments(paths);
+    for (const { geometry, tags } of paths) {
+      const segments = pathsToThreejsSegments(geometry);
       // FIX: Paths need to be separated into tag groups.
       const dataset = {};
-      const geometry = new THREE.Geometry();
+      const threejsGeometry = new THREE.Geometry();
       const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
       for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
-        geometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+        threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
       }
-      dataset.mesh = new THREE.LineSegments(geometry, material);
-      dataset.controller = addController({ tags: paths.tags });
+      dataset.mesh = new THREE.LineSegments(threejsGeometry, material);
+      dataset.controller = addController({ dataset, tags });
       scene.add(dataset.mesh);
       datasets.push(dataset);
     }
-    for (const solid of solids) {
-      const { positions, normals } = solidToThreejsSolid(solid);
+    for (const { geometry, tags } of solids) {
+      const { positions, normals } = solidToThreejsSolid(geometry);
       const dataset = {};
-      const geometry = new THREE.BufferGeometry();
-      geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-      geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
+      const threejsGeometry = new THREE.BufferGeometry();
+      threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
       const material = new THREE.MeshNormalMaterial();
-      dataset.mesh = new THREE.Mesh(geometry, material);
-      dataset.controller = addController({ tags: solid.tags });
+      dataset.mesh = new THREE.Mesh(threejsGeometry, material);
+      dataset.controller = addController({ dataset, tags });
       scene.add(dataset.mesh);
       datasets.push(dataset);
     }
-    for (const surface of surfaces) {
-      const { positions, normals } = surfaceToThreejsSurface(surface);
+    for (const { geometry, tags } of surfaces) {
+      const { positions, normals } = surfaceToThreejsSurface(geometry);
       const dataset = {};
-      const geometry = new THREE.BufferGeometry();
-      geometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-      geometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
+      const threejsGeometry = new THREE.BufferGeometry();
+      threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
+      threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
       const material = new THREE.MeshNormalMaterial();
-      dataset.mesh = new THREE.Mesh(geometry, material);
-      dataset.controller = addController({ tags: surface.tags });
+      dataset.mesh = new THREE.Mesh(threejsGeometry, material);
+      dataset.controller = addController({ dataset, tags });
       scene.add(dataset.mesh);
       datasets.push(dataset);
     }
