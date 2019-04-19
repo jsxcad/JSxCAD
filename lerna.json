@@ -23,6 +23,7 @@
     "data/*",
     "example/*",
     "geometry/*",
+    "io/*",
     "math/*",
     "sys"
   ]
