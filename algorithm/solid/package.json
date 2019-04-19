@@ -27,9 +27,11 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-z0polygons": "^0.0.50",
+    "@jsxcad/algorithm-surface": "^0.0.50",
+    "@jsxcad/algorithm-z0surface": "^0.0.50",
     "@jsxcad/math-plane": "^0.0.50",
-    "@jsxcad/math-poly3": "^0.0.50"
+    "@jsxcad/math-poly3": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50"
   },
   "devDependencies": {
     "@jsxcad/data-shape": "^0.0.50",

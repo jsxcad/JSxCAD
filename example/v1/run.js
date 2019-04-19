@@ -18,7 +18,7 @@ const run = async () => {
       mainOptions = options;
     }
     if (main !== undefined) {
-      main(mainOptions);
+      await Promise.resolve(main(mainOptions));
     }
   }
 };

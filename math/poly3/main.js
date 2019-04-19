@@ -3,6 +3,8 @@ import { eachEdge } from './eachEdge';
 import { flip } from './flip';
 import { fromPoints } from './fromPoints';
 import { isConvex } from './isConvex';
+import { isCoplanar } from './isCoplanar';
+import { isStrictlyCoplanar } from './isStrictlyCoplanar';
 import { map } from './map';
 import { measureArea } from './measureArea';
 import { measureBoundingBox } from './measureBoundingBox';
@@ -18,6 +20,8 @@ export {
   flip,
   fromPoints,
   isConvex,
+  isCoplanar,
+  isStrictlyCoplanar,
   map,
   measureArea,
   measureBoundingBox,

@@ -2,9 +2,20 @@ import { Assembly, unionLazily } from './Assembly';
 import { CAG } from './CAG';
 import { CSG } from './CSG';
 import { Path2D } from './Path2D';
-import { flatten } from './flatten';
 
-export const union = (...params) => unionLazily(...flatten(params));
+export const union = (...params) => {
+  switch (params.length) {
+    case 0: {
+      return CSG.fromPolygons([]);
+    }
+    case 1: {
+      return params[0];
+    }
+    default: {
+      return unionLazily(...params);
+    }
+  }
+};
 
 const method = function (...shapes) { return union(this, ...shapes); };
 

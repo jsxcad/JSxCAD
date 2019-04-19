@@ -23,7 +23,9 @@ import { hull } from './hull';
 import { intersection } from './intersection';
 import { loadFont, text } from './text';
 import { max } from './max';
+import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';
+import { readDst } from './readDst';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
@@ -33,6 +35,7 @@ import { sin } from './sin';
 import { sphere } from './sphere';
 import { sqrt } from './sqrt';
 import { square } from './square';
+import { svgPath } from './svgPath';
 import { tetrahedron } from './tetrahedron';
 import { translate } from './translate';
 import { union } from './union';
@@ -60,7 +63,9 @@ export {
   intersection,
   loadFont,
   max,
+  minkowski,
   polyhedron,
+  readDst,
   rotate,
   rotateX,
   rotateY,
@@ -70,6 +75,7 @@ export {
   sphere,
   sqrt,
   square,
+  svgPath,
   tetrahedron,
   text,
   translate,

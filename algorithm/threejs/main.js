@@ -1,9 +1,5 @@
-import { solidToThreejsDatasets } from './solidToThreejsDatasets';
-import { trianglesToThreejsDatasets } from './trianglesToThreejsDatasets';
-import { trianglesToThreejsPage } from './trianglesToThreejsPage';
+import { assemblyToThreejsPage } from './assemblyToThreejsPage';
 
 export {
-  solidToThreejsDatasets,
-  trianglesToThreejsDatasets,
-  trianglesToThreejsPage
+  assemblyToThreejsPage
 };

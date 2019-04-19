@@ -4,6 +4,12 @@ import { cross, subtract } from '@jsxcad/math-vec3';
 // translated from the orginal C++ code from Dan Sunday
 // 2000 softSurfer http://geomalgorithms.com
 export const measureArea = (poly3) => {
+  let area = poly3.area;
+  if (area !== undefined) {
+    return area;
+  }
+
+  area = 0;
   const n = poly3.length;
   if (n < 3) {
     return 0; // degenerate polygon
@@ -34,7 +40,6 @@ export const measureArea = (poly3) => {
     coord = 2; // ignore Y coordinates
   }
 
-  let area = 0;
   let h = 0;
   let i = 1;
   let j = 2;
@@ -76,5 +81,7 @@ export const measureArea = (poly3) => {
       area *= (an / (2 * normal[2]));
       break;
   }
+
+  poly3.area = area;
   return area;
 };

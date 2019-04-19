@@ -8,6 +8,7 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "example": "node -r esm run",
+    "profile": "node -r esm --prof --logfile=prof.log --no-logfile-per-isolate run",
     "test": "ava",
     "tests": "ava *.test.js"
   },
@@ -55,8 +56,9 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-path": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-z0polygons": "^0.0.50",
+    "@jsxcad/algorithm-z0surface": "^0.0.50",
     "@jsxcad/algorithm-solid": "^0.0.50",
     "@jsxcad/algorithm-stl": "^0.0.50",
     "@jsxcad/algorithm-text": "^0.0.50",

@@ -1,38 +1,34 @@
-import { canonicalize, flip, toTriangles, transform } from '@jsxcad/algorithm-polygons';
-import { difference, intersection, union } from '@jsxcad/algorithm-bsp';
+import { flip, fromPolygons as solidFromPolygons, transform } from '@jsxcad/algorithm-solid';
+import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 import { identity, multiply } from '@jsxcad/math-mat4';
-// import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
-import { toPolygons } from '@jsxcad/algorithm-paths';
 
 export class Solid3Bsp {
-  constructor ({ paths = [], transforms = identity() }) {
-    this.basePaths = toPolygons(paths);
+  constructor ({ solid = [], transforms = identity() }) {
+    this.baseSolid = solid;
     this.transforms = transforms;
     this.isSolid = true;
   }
 
   difference (...geometries) {
-    return fromPaths({}, difference(this.toPaths({}), ...geometries.map(geometry => geometry.toPaths({}))));
+    return fromSolid({}, difference(this.toSolid({}), ...geometries.map(geometry => geometry.toSolid({}))));
   }
 
   flip () {
-    return fromPaths({}, flip(this.toPaths({})));
+    return fromSolid({}, flip(this.toSolid({})));
   }
 
   intersection (...geometries) {
-    return fromPaths({}, intersection(this.toPaths({}), ...geometries.map(geometry => geometry.toPaths({}))));
-  }
-
-  toPaths (options = {}) {
-    if (this.paths === undefined) {
-      this.paths = canonicalize(transform(this.transforms, this.basePaths));
-      // if (!isWatertightPolygons(this.paths)) throw Error('Not watertight');
-    }
-    return this.paths;
+    return fromSolid({}, intersection(this.toSolid({}), ...geometries.map(geometry => geometry.toSolid({}))));
   }
 
   toSolid (options = {}) {
-    return this.toPaths(options);
+    for (const surface of this.baseSolid) assertCoplanar(surface);
+    if (this.solid === undefined) {
+      this.solid = transform(this.transforms, this.baseSolid);
+    }
+    for (const surface of this.solid) assertCoplanar(surface);
+    return this.solid;
   }
 
   toSolids (options = {}) {
@@ -56,17 +52,13 @@ export class Solid3Bsp {
   }
 
   transform (matrix) {
-    return new Solid3Bsp({ paths: this.basePaths, transforms: multiply(matrix, this.transforms) });
+    return new Solid3Bsp({ solid: this.baseSolid, transforms: multiply(matrix, this.transforms) });
   }
 
   union (...geometries) {
-    return fromPaths({}, union(this.toPaths({}), ...geometries.map(geometry => geometry.toPaths({}))));
+    return fromSolid({}, union(this.toPaths({}), ...geometries.map(geometry => geometry.toPaths({}))));
   }
 }
 
-export const fromPaths = (options = {}, paths) => {
-  paths = canonicalize(toTriangles({}, paths));
-  // paths = toTriangles({}, paths);
-  // paths = canonicalize(paths);
-  return new Solid3Bsp({ paths: paths });
-};
+export const fromSolid = (options = {}, solid) => new Solid3Bsp({ solid: solid });
+export const fromPolygons = (options = {}, polygons) => new Solid3Bsp({ solid: solidFromPolygons({}, polygons) });

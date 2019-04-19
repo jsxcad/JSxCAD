@@ -13,6 +13,8 @@ import { toZ0Polygons } from './toZ0Polygons';
 import { transform } from './transform';
 import { union } from './union';
 
+import { fromScaling } from '@jsxcad/math-mat4';
+
 export {
   butLast,
   canonicalize,
@@ -29,3 +31,4 @@ export {
   transform,
   union
 };
+export const scale = ([x = 1, y = 1, z = 1], paths) => transform(fromScaling([x, y, z]), paths);

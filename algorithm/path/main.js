@@ -6,6 +6,7 @@ import { isClosed } from './isClosed';
 import { measureArea } from './measureArea';
 import { toGeneric } from './toGeneric';
 import { toPolygon } from './toPolygon';
+import { toSegments } from './toSegments';
 import { toZ0Polygon } from './toZ0Polygon';
 import { transform } from './transform';
 import { fromScaling, fromTranslation } from '@jsxcad/math-mat4';
@@ -19,6 +20,7 @@ export {
   measureArea,
   toGeneric,
   toPolygon,
+  toSegments,
   toZ0Polygon,
   transform
 };

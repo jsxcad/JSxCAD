@@ -1,4 +1,4 @@
-const EsmWebpackPlugin = require('@purtuga/esm-webpack-plugin');
+// const EsmWebpackPlugin = require('@purtuga/esm-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
@@ -6,14 +6,14 @@ module.exports = {
   entry: './JSxCAD.js',
   output: {
     filename: 'JSxCAD.js',
-    library: 'LIB',
+    library: 'JSxCAD',
     libraryTarget: 'var'
   },
   plugins: [
     new webpack.DefinePlugin({
       IS_BROWSER: true
-    }),
-    new EsmWebpackPlugin()
+    })
+    // new EsmWebpackPlugin(),
   ],
   node: {
     esm: 'empty',

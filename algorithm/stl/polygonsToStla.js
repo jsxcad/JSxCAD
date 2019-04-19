@@ -1,5 +1,5 @@
 import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
-import { toTriangles } from '@jsxcad/algorithm-polygons';
+import { canonicalize, toTriangles } from '@jsxcad/algorithm-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 
 /**
@@ -18,7 +18,7 @@ export const polygonsToStla = (options = {}, polygons) => {
       polygons = makeWatertight(polygons);
     }
   }
-  return `solid JSxCAD\n${convertToFacets(options, toTriangles({}, polygons))}\nendsolid JSxCAD\n`;
+  return `solid JSxCAD\n${convertToFacets(options, canonicalize(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>

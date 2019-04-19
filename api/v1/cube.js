@@ -1,8 +1,8 @@
 import { CSG } from './CSG';
 import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
-import { buildRegularPrism,
-         buildRoundedConvexHull,
+import { buildRingSphere, buildRegularPrism,
          regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/algorithm-points';
 
 // Dispatch mechanism.
 // TODO: Move this somewhere else.
@@ -66,8 +66,12 @@ const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, 
   assertNumber(roundRadius);
   assertNumber(resolution);
   return () => CSG.fromPolygons(
-    buildRoundedConvexHull({ roundingRadius: roundRadius, roundingFaces: resolution },
-                           unitCube().scale(radius - roundRadius * 2).toPoints()));
+    buildConvexHull({},
+                    buildConvexMinkowskiSum({},
+                                            unitCube().scale(radius - roundRadius * 2).toPoints(),
+                                            CSG.fromPolygons(buildRingSphere({ resolution }))
+                                                .scale(roundRadius)
+                                                .toPoints())));
 };
 
 // cube({ center: [0, 0, 0], radius: 1 })
