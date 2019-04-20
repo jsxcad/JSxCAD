@@ -1,15 +1,14 @@
 {
-  "name": "@jsxcad/io-jscad",
+  "name": "@jsxcad/convert-stl",
   "version": "0.0.50",
-  "description": "JSCAD integration algorithms for JSxCAD",
+  "description": "STL algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
-    "tests": "ava *.test.js",
-    "webpack": "webpack --config webpack.config.js"
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
@@ -55,10 +54,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-solid": "^0.0.50",
-    "@jsxcad/sys": "^0.0.50",
-    "ast-types": "^0.12.3",
-    "recast": "^0.17.5"
+    "@jsxcad/algorithm-polygons": "^0.0.50",
+    "@jsxcad/algorithm-watertight": "^0.0.50",
+    "@jsxcad/math-plane": "^0.0.50",
+    "@jsxcad/math-poly3": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50",
+    "@jsxcad/math-vec4": "^0.0.50"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -69,9 +70,7 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "esm": "^3.2.10",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0"
+    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"

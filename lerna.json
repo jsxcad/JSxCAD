@@ -20,10 +20,10 @@
     "app/*",
     "algorithm/*",
     "api/*",
+    "convert/*",
     "data/*",
     "example/*",
     "geometry/*",
-    "io/*",
     "math/*",
     "sys"
   ]

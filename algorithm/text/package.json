@@ -26,7 +26,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-svg": "^0.0.50",
+    "@jsxcad/convert-svg": "^0.0.50",
     "opentype.js": "^0.11.0"
   },
   "devDependencies": {
