@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/algorithm-stl",
+  "name": "@jsxcad/convert-stl",
   "version": "0.0.50",
   "description": "STL algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",

@@ -1,4 +1,4 @@
-import { pathsToPdf } from '@jsxcad/algorithm-pdf';
+import { pathsToPdf } from '@jsxcad/convert-pdf';
 import { writeFileSync } from '@jsxcad/sys';
 
 export const writePdf = ({ path }, ...shapes) => {

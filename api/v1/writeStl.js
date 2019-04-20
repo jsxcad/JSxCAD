@@ -1,6 +1,6 @@
 import { Assembly } from './Assembly';
 import { CSG } from './CSG';
-import { polygonsToStla } from '@jsxcad/algorithm-stl';
+import { polygonsToStla } from '@jsxcad/convert-stl';
 import { writeFileSync } from '@jsxcad/sys';
 import { makeSurfacesConvex, toPolygons } from '@jsxcad/algorithm-solid';
 
