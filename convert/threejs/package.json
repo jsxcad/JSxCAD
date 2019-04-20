@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/algorithm-threejs",
+  "name": "@jsxcad/convert-threejs",
   "version": "0.0.50",
   "description": "ThreeJs integration algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",

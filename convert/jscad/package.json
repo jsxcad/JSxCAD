@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/io-jscad",
+  "name": "@jsxcad/convert-jscad",
   "version": "0.0.50",
   "description": "JSCAD integration algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
