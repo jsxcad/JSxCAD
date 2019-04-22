@@ -21,7 +21,7 @@ const removeRepeatedPoints = (path) => {
   return unrepeated;
 };
 
-const toPaths = ({ curveSegments }, svgPath) => {
+const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {
   const paths = [];
   let path = [null];
 
@@ -74,8 +74,12 @@ const toPaths = ({ curveSegments }, svgPath) => {
   maybeClosePath();
   newPath();
 
-  // Turn it upside down.
-  return transform(fromScaling([1, -1, 0]), paths);
+  if (normalizeCoordinateSystem) {
+    // Turn it upside down.
+    return transform(fromScaling([1, -1, 0]), paths);
+  } else {
+    return paths;
+  }
 };
 
 export const svgPathToPaths = (options = {}, svgPath) =>

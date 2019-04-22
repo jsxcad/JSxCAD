@@ -65,9 +65,12 @@
     "abs-svg-path": "^0.1.1",
     "curvify-svg-path": "^1.0.0",
     "parse-svg-path": "^0.1.2",
-    "svg-shapes": "^1.9.2"
+    "svg-points": "^6.0.1",
+    "svg-shapes": "^1.9.2",
+    "xmldom": "^0.1.27"
   },
   "devDependencies": {
+    "@jsxcad/convert-pdf": "^0.0.50",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
