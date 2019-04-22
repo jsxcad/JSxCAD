@@ -32,20 +32,20 @@ const createJscadFunction = (script, operators) => {
                     return { main, getParameterDefinitions };
                    `
       )(operators);
-  const op = (params) => {
+  const getAssembly = (params) => {
     const output = main(params);
-    const result = { solids: [], surfaces: [], paths: [] };
+    const result = [];
     if (output.polygons) {
-      result.solids.push(csgToSolid(output));
+      result.push({ solid: csgToSolid(output) });
     }
     return result;
   };
-  op.getParameterDefinitions = getParameterDefinitions;
-  return op;
+  return { getAssembly, getParameterDefinitions };
 };
 
 const replaceIncludes = async (ast) => {
   const includes = [];
+  // Look for include("foo") statements and replace them with the content of "foo".
   types.visit(ast, {
     visitCallExpression: function (path) {
       const { node } = path;

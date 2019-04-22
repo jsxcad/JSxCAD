@@ -3,8 +3,8 @@ import { toGeneric } from '@jsxcad/algorithm-solid';
 import { test } from 'ava';
 
 test('Trivial', async (t) => {
-  const { solids } = (await scriptToOperator({}, 'const main = () => cube();'))();
-  t.deepEqual(toGeneric(solids[0]),
+  const { getAssembly } = await scriptToOperator({}, 'const main = () => cube();');
+  t.deepEqual(toGeneric(getAssembly()[0].solid),
               [[[[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0]]],
                [[[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]]],
                [[[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]]],
@@ -14,8 +14,8 @@ test('Trivial', async (t) => {
 });
 
 test('Include', async (t) => {
-  const { solids } = (await scriptToOperator({}, 'include("cuboid.jscad"); const main = () => cuboid();'))();
-  t.deepEqual(toGeneric(solids[0]),
+  const { getAssembly } = await scriptToOperator({}, 'include("cuboid.jscad"); const main = () => cuboid();');
+  t.deepEqual(toGeneric(getAssembly()[0].solid),
               [[[[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0]]],
                [[[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]]],
                [[[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]]],
@@ -25,7 +25,7 @@ test('Include', async (t) => {
 });
 
 test('Parameters', async (t) => {
-  const cube =
+  const { getAssembly, getParameterDefinitions } =
       await scriptToOperator({},
                              `
                               function getParameterDefinitions() {
@@ -34,14 +34,14 @@ test('Parameters', async (t) => {
                               const main = ({ size }) => cube(size);
                              `
       );
-  const { solids } = cube({ size: 2 });
-  t.deepEqual(toGeneric(solids[0]),
+  const solid = getAssembly({ size: 2 })[0].solid;
+  t.deepEqual(toGeneric(solid),
               [[[[0, 0, 0], [0, 0, 2], [0, 2, 2], [0, 2, 0]]],
                [[[2, 0, 0], [2, 2, 0], [2, 2, 2], [2, 0, 2]]],
                [[[0, 0, 0], [2, 0, 0], [2, 0, 2], [0, 0, 2]]],
                [[[0, 2, 0], [0, 2, 2], [2, 2, 2], [2, 2, 0]]],
                [[[0, 0, 0], [0, 2, 0], [2, 2, 0], [2, 0, 0]]],
                [[[0, 0, 2], [2, 0, 2], [2, 2, 2], [0, 2, 2]]]]);
-  t.deepEqual(cube.getParameterDefinitions(),
+  t.deepEqual(getParameterDefinitions(),
               [{ name: 'size', type: 'float', initial: 10, caption: 'Size' }]);
 });
