@@ -51,12 +51,14 @@ const applyTransforms = ({ matrix }, transformText) => {
         break;
       }
       case 'skewX': {
+        // TODO: Move to math-mat4.
         const [degrees = 0] = operands;
         const [a, b, c, d, tx, ty] = [1, 0, Math.tan(degrees * Math.PI / 180), 1, 0, 0];
         matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
         break;
       }
       case 'skewY': {
+        // TODO: Move to math-mat4.
         const [degrees = 0] = operands;
         const [a, b, c, d, tx, ty] = [1, Math.tan(adegrees * Math.PI / 180), 0, 1, 0, 0];
         matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
@@ -117,6 +119,7 @@ export const svgToAssembly = (options = {}, svgString) => {
         const output = (svgPath) =>
           assembly.push({ paths: transform(scale(matrix), svgPathToPaths({}, svgPath)) });
         
+        // FIX: Should output a path given a stroke, should output a surface given a fill.
         switch (node.tagName) {
           case 'path':     output(node.getAttribute('d')); break;
           case 'circle':   output(toPath(buildShape('cx', 'cy', 'r'))); break;
