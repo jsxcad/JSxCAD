@@ -67,3 +67,4 @@ export class CSG {
 
 CSG.fromGeometry = (geometry) => new CSG(geometry);
 CSG.fromPolygons = (polygons) => CSG.fromGeometry(fromSolid({}, fromPolygons({}, polygons)));
+CSG.fromSolid = (solid) => CSG.fromGeometry(fromSolid({}, solid));
