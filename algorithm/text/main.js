@@ -1,5 +1,5 @@
 import { loadSync } from 'opentype.js';
-import { svgPathToPaths } from '@jsxcad/algorithm-svg';
+import { svgPathToPaths } from '@jsxcad/convert-svg';
 
 export const pathnameToFont = (pathname) => loadSync(pathname);
 

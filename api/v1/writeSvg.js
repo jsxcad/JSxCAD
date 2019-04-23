@@ -1,4 +1,4 @@
-import { polygonsToSvg } from '../../algorithm/svg/polygonsToSvg';
+import { polygonsToSvg } from '@jsxcad/convert-svg';
 import { writeFileSync } from '@jsxcad/sys';
 
 export const writeSvg = ({ path }, ...shapes) => {

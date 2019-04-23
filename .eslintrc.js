@@ -4,6 +4,7 @@ module.exports = {
     "rules": {
         "max-len": [1, 120, 2],
         "semi": [2, "always"],
+        "no-new-func": 0,
         "indent": ["error",
                    2,
                    {
