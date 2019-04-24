@@ -4,7 +4,7 @@ import { flip } from './flip';
 import { makeConvex } from './makeConvex';
 import { makeSimple } from './makeSimple';
 import { measureArea } from './measureArea';
-import { canonicalize, scale, toPlane, transform } from './ops';
+import { canonicalize, rotateZ, scale, toPlane, transform } from './ops';
 import { toGeneric } from './toGeneric';
 
 export {
@@ -15,6 +15,7 @@ export {
   makeConvex,
   makeSimple,
   measureArea,
+  rotateZ,
   toGeneric,
   toPlane,
   transform,
