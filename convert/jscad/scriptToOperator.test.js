@@ -1,6 +1,6 @@
 import { scriptToOperator } from './scriptToOperator';
-import { toGeneric } from '@jsxcad/algorithm-solid';
 import { test } from 'ava';
+import { toGeneric } from '@jsxcad/algorithm-solid';
 
 test('Trivial', async (t) => {
   const { getAssembly } = await scriptToOperator({}, 'const main = () => cube();');

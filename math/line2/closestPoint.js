@@ -1,6 +1,6 @@
 import { direction } from './direction';
-import { origin } from './origin';
 import { fromValues } from '@jsxcad/math-vec2';
+import { origin } from './origin';
 
 /**
  * Determine the closest point on the given line to the given point.

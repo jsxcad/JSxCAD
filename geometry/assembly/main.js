@@ -1,89 +1,48 @@
-import { assemble, difference, intersection, union } from '@jsxcad/algorithm-assembly';
-import { assertCoplanar } from '@jsxcad/algorithm-surface';
+import { addTag, assemble, difference, intersection, toPaths, toSolid, toZ0Surface, union } from '@jsxcad/algorithm-assembly';
 
 export class Assembly {
-  constructor ({ geometries = [], tags = [], operator = 'group' }) {
-    this.geometries = geometries;
-    this.tags = tags;
-    this.isAssembly = true;
-    this.operator = operator;
+  constructor ({ geometry = [] }) {
+    this.geometry = geometry;
   }
 
-  getProperty (key, defaultValue) {
-    if (this.properties === undefined) {
-      return defaultValue;
-    }
-    if (this.properties[key] === undefined) {
-      return defaultValue;
-    }
-    return this.properties[key];
-  }
-
-  withProperty (key, value) {
-    const properties = Object.assign({}, this.properties);
-    properties[key] = value;
-    return fromGeometries({ properties: properties }, this.geometries);
+  addTag (value) {
+    return fromGeometry(addTag(tag, this.geometry));
   }
 
   assemble (...geometries) {
-    return fromGeometries({ properties: this.properties, operator: 'assemble' },
-                          this.geometries.map(geometry => geometry.difference(...geometries)));
+    return fromGeometry(assemble(this.geometry, ...geometries));
   }
 
   difference (...geometries) {
-    return fromGeometries({ properties: this.properties, operator: 'difference' },
-                          this.geometries.map(geometry => geometry.difference(...geometries)));
+    return fromGeometry(difference(this.geometry, ...geometries));
   }
 
   flip () {
-    return fromGeometries({ properties: this.properties, operator: this.operator },
-                          this.geometries.map(geometry => geometry.flip()));
+    return fromGeometry(flip(this.geometry) });
   }
 
   intersection (...geometries) {
-    return fromGeometries({ properties: this.properties, operator: 'intersection' },
-                          this.geometries.map(geometry => geometry.intersection(...geometries)));
-  }
-
-  merge (...geometries) {
-    return fromGeometries({ properties: this.properties }, [...this.toGeometries(), ...geometries]);
+    return fromGeometry(difference(this.geometry, ...geometries));
   }
 
   toSolid (options) {
-    return toSolid(options, this.toTaggedGeometries(options));
+    return toSolid(options, this.geometry);
   }
 
-  applyOperator (taggedGeometries) {
-    switch (this.operator) {
-      case 'assemble': return assemble(...taggedGeometries);
-      case 'difference': return difference(...taggedGeometries);
-      case 'intersection': return intersection(...taggedGeometries);
-      case 'union': return union(...taggedGeometries);
-      default: throw Error('die');
-    }
-  }
-
-  toTaggedGeometries (options) {
-    if (this.taggedGeometries === undefined) {
-      this.taggedGeometries = {
-        assembly: this.applyOperator([].concat(...this.geometries.map(geometry => geometry.toTaggedGeometries(options))),
-        tags: this.tags
-      };
-    }
-    return this.taggedGeometries;
+  toGeometry (options) {
+    return this.geometry;
   }
 
   transform (matrix) {
     // Assembly transforms are eager, but the component transforms may be lazy.
-    return fromGeometries({ properties: this.properties, operator: this.operator },
-                          this.geometries.map(geometry => geometry.transform(matrix)));
+    return fromGeometry(transform(matrix, geometry));
   }
 
   union (...geometries) {
-    return fromGeometries({ properties: this.properties, operator: 'union' }, [...this.toGeometries(), ...geometries]);
+    return fromGeometry(union(this.geometry, ...geometries));
   }
 }
 
-export const fromGeometries = ({ properties, operator }, geometries) => {
-  return new Assembly({ geometries, properties, operator });
+export const fromGeometry = (geometry) => {
+  return new Assembly(geometry);
 };

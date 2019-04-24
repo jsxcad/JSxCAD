@@ -1,6 +1,6 @@
 import { canonicalize } from './canonicalize';
-import { fromValues } from './fromValues';
 import { fromPoints } from './fromPoints';
+import { fromValues } from './fromValues';
 import { reverse } from './reverse';
 import { test } from 'ava';
 

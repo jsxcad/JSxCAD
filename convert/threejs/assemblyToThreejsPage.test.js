@@ -1,10 +1,11 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { assemblyToThreejsPage } from './assemblyToThreejsPage';
-import { test } from 'ava';
 import { unitGeodesicSphere20Polygons, unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
-import { scale as scaleSurface } from '@jsxcad/algorithm-surface';
-import { scale as scalePaths } from '@jsxcad/algorithm-paths';
+
+import { assemblyToThreejsPage } from './assemblyToThreejsPage';
 import { fromPolygons } from '@jsxcad/algorithm-solid';
+import { scale as scalePaths } from '@jsxcad/algorithm-paths';
+import { scale as scaleSurface } from '@jsxcad/algorithm-surface';
+import { test } from 'ava';
 
 test('Geodesic sphere', async (t) => {
   const html = await assemblyToThreejsPage(

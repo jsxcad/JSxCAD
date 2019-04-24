@@ -1,7 +1,7 @@
 import { build } from './build';
 import { clipTo } from './clipTo';
-import { fromSurfaces } from './fromSurfaces';
 import { flip } from './flip';
+import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
 
 export const union = (...solids) => {

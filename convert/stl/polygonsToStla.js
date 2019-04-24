@@ -1,5 +1,6 @@
-import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
 import { canonicalize, toTriangles } from '@jsxcad/algorithm-polygons';
+import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
+
 import { toPlane } from '@jsxcad/math-poly3';
 
 /**

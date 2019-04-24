@@ -1,11 +1,10 @@
 import { canonicalize, flip, transform } from '@jsxcad/algorithm-polygons';
+import { identity, multiply } from '@jsxcad/math-mat4';
+
 import { difference } from './difference';
 import { intersection } from './intersection';
-import { union } from './union';
-import { identity, multiply } from '@jsxcad/math-mat4';
 import { toPolygons } from '@jsxcad/algorithm-paths';
-// import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
-// import { toTriangles } from '@jsxcad/algorithm-triangles';
+import { union } from './union';
 
 export class Solid3Evan {
   constructor ({ paths = [], transforms = identity() }) {

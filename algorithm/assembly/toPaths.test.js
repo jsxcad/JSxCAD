@@ -7,8 +7,8 @@ import { toPaths } from './toPaths';
 import { writeFileSync } from 'fs';
 
 test('Simple', t => {
-  const assembly = [{ paths: [unitSquarePolygon], tags: ['a'] },
-                    { paths: [unitRegularTrianglePolygon], tags: ['b'] }];
+  const assembly = { assembly: [{ paths: [unitSquarePolygon], tags: ['a'] },
+                                { paths: [unitRegularTrianglePolygon], tags: ['b'] }] };
 
   const paths = toPaths({}, assembly);
   writeFileSync('toPaths.test.simple.pdf', pathsToPdf({}, paths));

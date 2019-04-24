@@ -1,6 +1,7 @@
+import { fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
+
 import { flip } from './flip';
 import { fromPoints } from './fromPoints';
-import { fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 import { measureArea } from './measureArea';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import { test } from 'ava';

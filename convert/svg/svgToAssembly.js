@@ -1,8 +1,9 @@
-import { DOMParser } from 'xmldom';
-import { transform } from '@jsxcad/algorithm-paths';
 import { fromScaling, fromTranslation, fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
+
+import { DOMParser } from 'xmldom';
 import { svgPathToPaths as baseSvgPathToPaths } from './svgPathToPaths';
 import { toPath } from 'svg-points';
+import { transform } from '@jsxcad/algorithm-paths';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const svgPathToPaths = (options = {}, svgPath) =>

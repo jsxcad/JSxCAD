@@ -1,25 +1,20 @@
 import { difference } from './difference';
 
 // Traverse the assembly tree and disjoint it backward.
-export const toDisjointAssembly = (assembly) => {
+export const toDisjointAssembly = (geometry) => {
   const subtractions = [];
-
-  const walk = (assembly, nth, disjointed) => {
-    const item = assembly[nth];
-    if (nth < assembly.length - 1) {
-      walk(assembly, nth + 1, disjointed);
+  const walk = (geometry, disjointed) => {
+console.log(`QQ/walk/geometry: ${JSON.stringify(geometry)}`);
+    for (const item of geometry.assembly) {
+      if (item.assembly !== undefined) {
+        disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));
+      } else {
+        const differenced = difference(item, ...subtractions);
+        disjointed.assembly.push(differenced);
+        subtractions.push(differenced);
+      }
     }
-    if (item.assembly) {
-      const subAssembly = [];
-      walk(item.assembly, 0, subAssembly);
-      disjointed.push({ assembly: subAssembly, tags: item.tags });
-    } else {
-      const differenced = difference(item, ...subtractions);
-      disjointed.push(differenced);
-      subtractions.push(differenced);
-    }
+    return disjointed;
   };
-  const disjoint = [];
-  walk(assembly, 0, disjoint);
-  return disjoint;
+  return walk(geometry, { assembly: [], tags: geometry.tags });
 };

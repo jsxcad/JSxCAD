@@ -1,30 +1,30 @@
-import { scale } from '@jsxcad/algorithm-paths';
-
 import {
   END,
   JUMP_STITCH,
   PAUSE,
-  Y_ADD_1,
-  Y_ADD_3,
-  Y_ADD_9,
-  Y_ADD_27,
-  Y_ADD_81,
-  Y_SUB_1,
-  Y_SUB_3,
-  Y_SUB_9,
-  Y_SUB_27,
-  Y_SUB_81,
   X_ADD_1,
-  X_ADD_3,
-  X_ADD_9,
   X_ADD_27,
+  X_ADD_3,
   X_ADD_81,
+  X_ADD_9,
   X_SUB_1,
-  X_SUB_3,
-  X_SUB_9,
   X_SUB_27,
-  X_SUB_81
+  X_SUB_3,
+  X_SUB_81,
+  X_SUB_9,
+  Y_ADD_1,
+  Y_ADD_27,
+  Y_ADD_3,
+  Y_ADD_81,
+  Y_ADD_9,
+  Y_SUB_1,
+  Y_SUB_27,
+  Y_SUB_3,
+  Y_SUB_81,
+  Y_SUB_9
 } from './dst';
+
+import { scale } from '@jsxcad/algorithm-paths';
 
 export const createByteFetcher = (bytes) => {
   let bytesRead = 0;

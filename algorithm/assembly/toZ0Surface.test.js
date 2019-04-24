@@ -7,8 +7,8 @@ import { toZ0Surface } from './toZ0Surface';
 import { writeFileSync } from 'fs';
 
 test('Simple', t => {
-  const assembly = [{ z0Surface: [unitSquarePolygon], tags: ['a'] },
-                    { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] }];
+  const assembly = { assembly: [{ z0Surface: [unitSquarePolygon], tags: ['a'] },
+                                { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] }] };
   const z0Surface = toZ0Surface({}, assembly);
   writeFileSync('toZ0Surface.test.simple.pdf', pathsToPdf({}, z0Surface));
   t.deepEqual(canonicalize(z0Surface),

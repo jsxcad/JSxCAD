@@ -3,17 +3,16 @@ import { canonicalize } from './canonicalize';
 import { difference } from './difference';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { fromScaling } from '@jsxcad/math-mat4';
 import { intersection } from './intersection';
-import { measureBoundingBox } from './measureBoundingBox';
 import { last } from './last';
+import { measureBoundingBox } from './measureBoundingBox';
 import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
 import { toZ0Polygons } from './toZ0Polygons';
 import { transform } from './transform';
 import { union } from './union';
-
-import { fromScaling } from '@jsxcad/math-mat4';
 
 export {
   butLast,

@@ -1,7 +1,8 @@
-import { canonicalize } from '@jsxcad/algorithm-paths';
 import { createByteFetcher, dstToZ0Paths, fetchHeader } from './dstToZ0Paths';
-import { test } from 'ava';
+
+import { canonicalize } from '@jsxcad/algorithm-paths';
 import { readFileSync } from 'fs';
+import { test } from 'ava';
 
 test('Fetch header', t => {
   const fetcher = createByteFetcher(readFileSync('test.dst'));

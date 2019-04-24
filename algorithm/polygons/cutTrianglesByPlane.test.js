@@ -1,7 +1,8 @@
-import { fromPoints } from '@jsxcad/math-plane';
-import { cutTrianglesByPlane } from './cutTrianglesByPlane';
-import { test } from 'ava';
 import { unitCubePolygons, unitGeodesicSphere20Polygons, unitRegularTetrahedronPolygons } from '@jsxcad/data-shape';
+
+import { cutTrianglesByPlane } from './cutTrianglesByPlane';
+import { fromPoints } from '@jsxcad/math-plane';
+import { test } from 'ava';
 import { toTriangles } from './toTriangles';
 
 test('Slice a cube to form a square.', t => {

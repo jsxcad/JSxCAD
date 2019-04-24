@@ -1,4 +1,4 @@
-import { canonicalize as canonicalizePolygon, transform as transformPolygon, toPlane as toPlaneOfPolygon } from '@jsxcad/math-poly3';
+import { canonicalize as canonicalizePolygon, toPlane as toPlaneOfPolygon, transform as transformPolygon } from '@jsxcad/math-poly3';
 import { fromScaling, fromZRotation } from '@jsxcad/math-mat4';
 
 export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);

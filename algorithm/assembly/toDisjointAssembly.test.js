@@ -7,9 +7,9 @@ import { toDisjointAssembly } from './toDisjointAssembly';
 import { writeFileSync } from 'fs';
 
 test('Simple', t => {
-  const disjoint = toDisjointAssembly([{ z0Surface: [unitSquarePolygon] },
-                                       { z0Surface: [unitRegularTrianglePolygon] },
-                                       { z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]) }]);
+  const disjoint = toDisjointAssembly({ assembly: [{ z0Surface: [unitSquarePolygon] },
+                                                   { z0Surface: [unitRegularTrianglePolygon] },
+                                                   { z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]) }] });
 
   writeFileSync('toDisjointAssembly.test.simple.0.pdf', pathsToPdf({}, disjoint[0].z0Surface));
   t.deepEqual(canonicalize(disjoint[0].z0Surface),

@@ -1,6 +1,7 @@
 import { difference, flip, intersection, transform, union } from '@jsxcad/algorithm-paths';
-import { isClosed } from '@jsxcad/algorithm-path';
 import { identity, multiply } from '@jsxcad/math-mat4';
+
+import { isClosed } from '@jsxcad/algorithm-path';
 
 export class Paths {
   constructor ({ paths = [], transforms = identity() }) {

@@ -1,8 +1,8 @@
-import { svgToAssembly } from './svgToAssembly';
 import { canonicalize as canonicalizePaths } from '@jsxcad/algorithm-paths';
-import { writeFileSync } from 'fs';
 import { pathsToPdf } from '@jsxcad/convert-pdf';
+import { svgToAssembly } from './svgToAssembly';
 import { test } from 'ava';
+import { writeFileSync } from 'fs';
 
 const canonicalize = (assembly) =>
   assembly.map(entry => {

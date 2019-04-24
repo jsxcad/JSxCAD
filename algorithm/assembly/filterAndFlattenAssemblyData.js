@@ -1,23 +1,23 @@
 import { hasMatchingTag } from './hasMatchingTag';
 
 // This needs to recursively walk the assembly.
-export const filterAndFlattenAssemblyData = ({ requires, excludes, form }, assembly) => {
+export const filterAndFlattenAssemblyData = ({ requires, excludes, form }, geometry) => {
   const filtered = [];
-  const walk = (assembly) => {
-    for (const entry of assembly) {
-      if (entry.assembly !== undefined) {
-        walk(entry.assembly);
+  const walk = (geometry) => {
+    for (const item of geometry.assembly) {
+      if (item.assembly !== undefined) {
+        walk(item);
       } else {
-        const data = entry[form];
-        if (data === undefined || hasMatchingTag(excludes, entry.tags)) {
+        const data = item[form];
+        if (data === undefined || hasMatchingTag(excludes, item.tags)) {
           continue;
         }
-        if (hasMatchingTag(requires, entry.tags, true)) {
+        if (hasMatchingTag(requires, item.tags, true)) {
           filtered.push(data);
         }
       }
     };
   };
-  walk(assembly);
+  walk(geometry);
   return filtered;
 };
