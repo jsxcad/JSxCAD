@@ -10,6 +10,6 @@ export const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0
 const method = function (angle) { return rotateY(angle, this); };
 
 Assembly.prototype.rotateY = method;
-Path2D.prototype.rotateY = method;
+Paths.prototype.rotateY = method;
 Solid.prototype.rotateY = method;
 Surface.prototype.rotateY = method;

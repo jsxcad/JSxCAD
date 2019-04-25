@@ -10,6 +10,6 @@ export const rotateX = (angle, shape) => shape.transform(fromXRotation(angle * 0
 const method = function (angle) { return rotateX(angle, this); };
 
 Assembly.prototype.rotateX = method;
-Path2D.prototype.rotateX = method;
+Paths.prototype.rotateX = method;
 Solid.prototype.rotateX = method;
 Surface.prototype.rotateX = method;

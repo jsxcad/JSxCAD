@@ -1,5 +1,5 @@
 import { Assembly } from './Assembly';
-import { Paths } from './Path2D';
+import { Paths } from './Paths';
 import { Solid } from './Solid';
 import { Surface } from './Surface';
 
@@ -18,6 +18,6 @@ export const scale = (factor, shape) => {
 const method = function (factor) { return scale(factor, this); };
 
 Assembly.prototype.scale = method;
-Path2D.prototype.scale = method;
+Paths.prototype.scale = method;
 Solid.prototype.scale = method;
 Surface.prototype.scale = method;

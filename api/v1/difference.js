@@ -1,6 +1,6 @@
 import { Assembly, differenceLazily } from './Assembly';
 
-import { Paths } from './Path2D';
+import { Paths } from './Paths';
 import { Solid } from './Solid';
 import { Surface } from './Surface';
 
