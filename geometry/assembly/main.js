@@ -2,7 +2,7 @@ import { addTag, assemble, difference, flip, intersection, toPaths, toSolid, toZ
 
 // FIX: Make it clear this should be lazy.
 export class Assembly {
-  constructor ({ geometry = [] }) {
+  constructor (geometry = { assembly: [] }) {
     this.geometry = geometry;
   }
 
@@ -20,6 +20,15 @@ export class Assembly {
 
   flip () {
     return fromGeometry(flip(toGeometry(this)));
+  }
+
+  getTags () {
+    const tags = this.geometry.tags;
+    if (tags === undefined) {
+      return [];
+    } else {
+      return tags;
+    }
   }
 
   intersection (...geometries) {

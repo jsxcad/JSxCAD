@@ -11,6 +11,7 @@ import { toPaths } from './toPaths';
 import { toSolid } from './toSolid';
 import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
+import { union } from './union';
 
 export {
   addTag,
@@ -23,7 +24,8 @@ export {
   toPaths,
   toSolid,
   toZ0Surface,
-  transform
+  transform,
+  union,
 };
 
 export const rotateX = (angle, assembly) => transform(fromXRotation(angle), assembly);

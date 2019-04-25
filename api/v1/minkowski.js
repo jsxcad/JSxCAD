@@ -1,7 +1,7 @@
 import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/algorithm-points';
-import { CSG } from './CSG';
+import { Solid } from './Solid';
 
 // TODO: Generalize for more operands?
 export const minkowski = (a, b) => {
-  return CSG.fromPolygons(buildConvexHull({}, buildConvexMinkowskiSum({}, a.toPoints(), b.toPoints())));
+  return Solid.fromPolygons(buildConvexHull({}, buildConvexMinkowskiSum({}, a.toPoints(), b.toPoints())));
 };

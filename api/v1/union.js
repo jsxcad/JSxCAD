@@ -1,12 +1,12 @@
 import { Assembly, unionLazily } from './Assembly';
-import { CAG } from './CAG';
-import { CSG } from './CSG';
-import { Path2D } from './Path2D';
+import { Paths } from './Paths';
+import { Solid } from './Solid';
+import { Surface } from './Surface';
 
 export const union = (...params) => {
   switch (params.length) {
     case 0: {
-      return CSG.fromPolygons([]);
+      return Assembly.fromGeometry({ assembly: [] });
     }
     case 1: {
       return params[0];
@@ -20,6 +20,6 @@ export const union = (...params) => {
 const method = function (...shapes) { return union(this, ...shapes); };
 
 Assembly.prototype.union = method;
-CAG.prototype.union = method;
-CSG.prototype.union = method;
-Path2D.prototype.union = method;
+Paths.prototype.union = method;
+Solid.prototype.union = method;
+Surface.prototype.union = method;

@@ -1,7 +1,6 @@
 import { makeSurfacesConvex, toPolygons } from '@jsxcad/algorithm-solid';
 
-import { Assembly } from './Assembly';
-import { CSG } from './CSG';
+import { Solid } from './Solid';
 import { polygonsToStla } from '@jsxcad/convert-stl';
 import { writeFileSync } from '@jsxcad/sys';
 
@@ -21,5 +20,4 @@ export const writeStl = async ({ path, needIsWatertight = true }, ...shapes) => 
 
 const method = function (options = {}) { writeStl(options, this); return this; };
 
-Assembly.prototype.writeStl = method;
-CSG.prototype.writeStl = method;
+Solid.prototype.writeStl = method;

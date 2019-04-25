@@ -9,9 +9,10 @@
 
 import { loadFont, text } from './text';
 
-import { CAG } from './CAG';
-import { CSG } from './CSG';
-import { Path2D } from './Path2D';
+import { Paths } from './Paths';
+import { Points } from './Points';
+import { Solid } from './Solid';
+import { Surface } from './Surface';
 import { acos } from './acos';
 import { circle } from './circle';
 import { cos } from './cos';
@@ -49,9 +50,10 @@ import { writeSvg } from './writeSvg';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
-  CAG,
-  CSG,
-  Path2D,
+  Solid,
+  Surface,
+  Paths,
+  Points,
   acos,
   circle,
   crossSection,

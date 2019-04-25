@@ -1,9 +1,9 @@
-import { CAG } from './CAG';
-import { CSG } from './CSG';
+import { Surface } from './Surface';
+import { Solid } from './Solid';
 import { extrudeLinear } from '@jsxcad/algorithm-shape';
 
 export const extrude = ({ height }, surface) => extrudeLinear({ height: height }, surface);
 
-CAG.prototype.extrude = function (options = {}) {
-  return CSG.fromPolygons(extrude(options, this.toPaths()));
+Surface.prototype.extrude = function (options = {}) {
+  return Surface.fromPolygons(extrude(options, this.toPaths()));
 };

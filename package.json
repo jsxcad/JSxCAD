@@ -5,10 +5,10 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
-    "lint": "lerna bootstrap --hoist && lerna run lint",
+    "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
-    "test": "lerna bootstrap --hoist && lerna run tests",
-    "tests": "lerna bootstrap --hoist && lerna run tests"
+    "test": "lerna run tests",
+    "tests": "lerna run tests"
   },
   "contributors": [
     {

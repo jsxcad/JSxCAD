@@ -1,9 +1,9 @@
 import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
 
-import { CSG } from './CSG';
+import { Solid } from './Solid';
 import { buildRingSphere } from '@jsxcad/algorithm-shape';
 
-const buildSphere = ({ r = 1, fn = 32 }) => CSG.fromPolygons(buildRingSphere({ resolution: fn })).scale([r, r, r]);
+const buildSphere = ({ r = 1, fn = 32 }) => Solid.fromPolygons(buildRingSphere({ resolution: fn })).scale([r, r, r]);
 
 const decode = (params) => {
   // sphere();
