@@ -72,4 +72,4 @@ export const differenceLazily = (shape, ...shapes) =>
 export const intersectionLazily = (shape, ...shapes) =>
   Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).intersection(...shapes.map(shape => shape.toGeometry())));
 
-Assembly.fromGeometry = (geometry) => new Assembly(geometry);
+Assembly.fromGeometry = (geometry) => new Assembly(fromGeometry(geometry));

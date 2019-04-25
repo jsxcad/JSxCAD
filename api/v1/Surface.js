@@ -1,12 +1,12 @@
 import { Assembly } from './Assembly';
 
 export class Surface extends Assembly {
-  constructor (geometry = fromGeometry({ assembly: [] })) {
+  constructor (geometry) {
     super(geometry);
   }
 
   fromGeometry (geometry) {
-    return Surface.fromGeometry
+    return Surface.fromGeometry(geometry);
   }
 }
 

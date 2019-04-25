@@ -1,7 +1,7 @@
 import { Assembly } from './Assembly';
 import { Paths } from './Paths';
 import { Solid } from './Solid';
-import { Surface } from './Solid';
+import { Surface } from './Surface';
 
 import { fromZRotation } from '@jsxcad/math-mat4';
 

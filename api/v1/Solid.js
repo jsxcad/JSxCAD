@@ -1,7 +1,8 @@
 import { Assembly } from './Assembly';
+import { fromPolygons } from '@jsxcad/algorithm-solid';
 
 export class Solid extends Assembly {
-  constructor (geometry = fromGeometry({ assembly: [] })) {
+  constructor (geometry) {
     super(geometry);
   }
 
@@ -11,5 +12,5 @@ export class Solid extends Assembly {
 }
 
 Solid.fromGeometry = (geometry) => new Solid(geometry);
-Solid.fromPolygons = (polygons) => new Solid({ solid: fromPolygons(polygons) });
+Solid.fromPolygons = (polygons) => new Solid({ solid: fromPolygons({}, polygons) });
 Solid.fromSurfaces = (surfaces) => new Solid({ solid: surfaces });
