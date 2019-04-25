@@ -50,6 +50,7 @@ export class Assembly {
   }
 
   transform (matrix) {
+console.log(`QQ/Solid/transform/this: ${JSON.stringify(this)}`);
     return this.fromGeometry(this.geometry.transform(matrix));
   }
 
@@ -61,15 +62,15 @@ export class Assembly {
 const toGeometry = (shape) => shape.toGeometry();
 
 export const assembleLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).assemble(...shapes.map(shape => shape.toGeometry())));
+  Assembly.fromGeometry(toGeometry(shape).assemble(...shapes.map(toGeometry)));
 
 export const unionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
+  Assembly.fromGeometry(toGeometry(shape).union(...shapes.map(toGeometry)));
 
 export const differenceLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).difference(...shapes.map(shape => shape.toGeometry())));
+  Assembly.fromGeometry(toGeometry(shape).difference(...shapes.map(toGeometry)));
 
 export const intersectionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).intersection(...shapes.map(shape => shape.toGeometry())));
+  Assembly.fromGeometry(toGeometry(shape).intersection(...shapes.map(toGeometry())));
 
-Assembly.fromGeometry = (geometry) => new Assembly(fromGeometry(geometry));
+Assembly.fromGeometry = (geometry) => new Assembly(geometry);

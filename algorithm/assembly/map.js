@@ -1,13 +1,10 @@
 export const map = (geometry, operation) => {
-  const walk = (geometry, updated) => {
-    for (const item of geometry.assembly) {
-      if (item.assembly !== undefined) {
-        updated.assembly.push(walk(item, { assembly: [], tags: item.tags }));
-      } else {
-        updated.assembly.push(operation(item));
-      }
+  const walk = (geometry) => {
+    const updated = operation(geometry);
+    if (updated.assembly) {
+      updated.assembly = updated.assembly.map(walk);
     }
-    return updated;
-  };
-  return walk(geometry, { assembly: [], tags: geometry.tags });
+    return operation(geometry);
+  }
+  return walk(geometry);
 };

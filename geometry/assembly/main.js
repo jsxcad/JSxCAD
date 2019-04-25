@@ -4,6 +4,8 @@ import { addTag, assemble, difference, flip, intersection, toPaths, toSolid, toZ
 export class Assembly {
   constructor (geometry = { assembly: [] }) {
     this.geometry = geometry;
+    if (geometry instanceof Array) throw Error('die');
+    if (geometry.geometry) throw Error('die');
   }
 
   addTag (tag) {
@@ -52,6 +54,8 @@ export class Assembly {
   }
 
   transform (matrix) {
+console.log(`QQ/lazy/assembly/transform/this: ${JSON.stringify(this)}`);
+console.log(`QQ/lazy/assembly/transform/this/toGeometry: ${JSON.stringify(toGeometry(this))}`);
     // Assembly transforms are eager, but the component transforms may be lazy.
     return fromGeometry(transform(matrix, toGeometry(this)));
   }
@@ -62,6 +66,8 @@ export class Assembly {
 }
 
 export const fromGeometry = (geometry) => {
+console.log(`QQ/lazy/assembly/fromGeometry: ${JSON.stringify(geometry)}`);
+if (geometry instanceof Array) throw Error('die');
   return new Assembly(geometry);
 };
 

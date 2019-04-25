@@ -12,6 +12,7 @@ export const union = (...params) => {
       return params[0];
     }
     default: {
+console.log(`QQ/api/union: ${JSON.stringify(params)}`);
       return unionLazily(...params);
     }
   }
