@@ -1,7 +1,7 @@
-// import { buildCircleArc } from '@jsxcad/algorithm-curve';
-import { Assembly } from './Assembly';
+import { butLast, canonicalize, last } from '@jsxcad/algorithm-paths';
 import { concatenate, isClosed, measureArea } from '@jsxcad/algorithm-path';
-import { canonicalize, butLast, last } from '@jsxcad/algorithm-paths';
+
+import { Assembly } from './Assembly';
 import { fromPaths } from '@jsxcad/geometry-paths';
 
 // FIX: Incorrectly named.

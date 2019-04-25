@@ -7,21 +7,22 @@
  * the api uses.
  */
 
+import { loadFont, text } from './text';
+
 import { CAG } from './CAG';
 import { CSG } from './CSG';
 import { Path2D } from './Path2D';
 import { acos } from './acos';
 import { circle } from './circle';
 import { cos } from './cos';
-import { cube } from './cube';
 import { crossSection } from './crossSection';
+import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
 import { hsl2rgb } from './hsl2rgb';
 import { hull } from './hull';
 import { intersection } from './intersection';
-import { loadFont, text } from './text';
 import { max } from './max';
 import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';

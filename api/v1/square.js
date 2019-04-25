@@ -1,6 +1,7 @@
-import { CAG } from './CAG';
 import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+
+import { CAG } from './CAG';
 
 const buildSquare = ({ scale = [1, 1, 1] }) => {
   const cag = CAG.fromPoints(buildRegularPolygon({ edges: 4 }))

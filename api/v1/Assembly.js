@@ -1,5 +1,4 @@
 import { fromGeometries, fromTaggedGeometries } from '@jsxcad/geometry-assembly';
-import { toPoints } from '@jsxcad/algorithm-paths';
 
 export class Assembly {
   as (tag) {
@@ -77,4 +76,4 @@ export const intersectionLazily = (shape, ...shapes) =>
 // FIX: This needs clear documentation.
 Assembly.fromGeometry = (geometry) => new Assembly(geometry);
 Assembly.fromGeometries = (geometries) => Assembly.fromGeometry(fromGeometries({}, geometries));
-Assembly.fromTaggedGeometries = (taggedGeometries) => Assembly.fromGeometry(fromTaggedGeometries({}, geometries));
+Assembly.fromTaggedGeometries = (taggedGeometries) => Assembly.fromGeometry(fromTaggedGeometries({}, taggedGeometries));

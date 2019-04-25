@@ -1,4 +1,4 @@
-import { addTag, assemble, difference, intersection, toPaths, toSolid, toZ0Surface, union } from '@jsxcad/algorithm-assembly';
+import { addTag, assemble, difference, flip, intersection, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
 
 // FIX: Make it clear this should be lazy.
 export class Assembly {
@@ -6,7 +6,7 @@ export class Assembly {
     this.geometry = geometry;
   }
 
-  addTag (value) {
+  addTag (tag) {
     return fromGeometry(addTag(tag, toGeometry(this)));
   }
 
@@ -23,15 +23,23 @@ export class Assembly {
   }
 
   intersection (...geometries) {
-    return fromGeometry(difference(toGeometry(this), ...geometries.map(toGeometry)));
+    return fromGeometry(intersection(toGeometry(this), ...geometries.map(toGeometry)));
+  }
+
+  toGeometry (options = {}) {
+    return this.geometry;
+  }
+
+  toPaths (options = {}) {
+    return toPaths(options, toGeometry(this));
   }
 
   toSolid (options = {}) {
     return toSolid(options, toGeometry(this));
   }
 
-  toGeometry (options = {}) {
-    return this.geometry;
+  toZ0Surface (options = {}) {
+    return toZ0Surface(options, toGeometry(this));
   }
 
   transform (matrix) {

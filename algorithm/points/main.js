@@ -1,10 +1,11 @@
+import { transform, translate } from './ops';
+
 import { buildConvexHull } from './buildConvexHull';
 import { buildConvexMinkowskiSum } from './buildConvexMinkowskiSum';
 import { canonicalize } from './canonicalize';
 import { eachPoint } from './eachPoint';
 import { fromPolygons } from './fromPolygons';
 import { measureBoundingBox } from './measureBoundingBox';
-import { transform, translate } from './ops';
 
 export {
   canonicalize,
@@ -14,5 +15,5 @@ export {
   fromPolygons,
   measureBoundingBox,
   transform,
-  translate,
+  translate
 };

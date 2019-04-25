@@ -1,6 +1,6 @@
+import { main } from './svg';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './svg';
 
 main();
 

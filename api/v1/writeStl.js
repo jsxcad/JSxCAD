@@ -1,8 +1,9 @@
+import { makeSurfacesConvex, toPolygons } from '@jsxcad/algorithm-solid';
+
 import { Assembly } from './Assembly';
 import { CSG } from './CSG';
 import { polygonsToStla } from '@jsxcad/convert-stl';
 import { writeFileSync } from '@jsxcad/sys';
-import { makeSurfacesConvex, toPolygons } from '@jsxcad/algorithm-solid';
 
 export const writeStl = async ({ path, needIsWatertight = true }, ...shapes) => {
   const solids = shapes.map(shape => {

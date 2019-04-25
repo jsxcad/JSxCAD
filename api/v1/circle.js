@@ -1,6 +1,7 @@
+import { assertBoolean, assertEmpty, assertNumber } from './assert';
+
 import { CAG } from './CAG';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { assertBoolean, assertNumber, assertEmpty } from './assert';
 
 const buildCircle = ({ r = 1, fn = 32, center = false }) =>
   CAG.fromPoints(buildRegularPolygon({ edges: fn })).scale(r);

@@ -1,5 +1,6 @@
-import { CSG } from './CSG';
 import { assertEmpty, assertNumber } from './assert';
+
+import { CSG } from './CSG';
 import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 const buildCylinder = ({ r1 = 1, r2 = 1, h = 1, edges = 32 }) => {

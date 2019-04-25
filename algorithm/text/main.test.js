@@ -1,5 +1,6 @@
-import { canonicalize } from '@jsxcad/algorithm-paths';
 import { pathnameToFont, textToSurfaces } from './main';
+
+import { canonicalize } from '@jsxcad/algorithm-paths';
 import { test } from 'ava';
 
 test('Render a letter', t => {

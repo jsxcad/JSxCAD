@@ -1,6 +1,6 @@
+import { main } from './square';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './square';
 
 main({});
 

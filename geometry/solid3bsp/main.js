@@ -1,7 +1,8 @@
-import { flip, fromPolygons as solidFromPolygons, transform } from '@jsxcad/algorithm-solid';
 import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
-import { assertCoplanar } from '@jsxcad/algorithm-surface';
+import { flip, fromPolygons as solidFromPolygons, transform } from '@jsxcad/algorithm-solid';
 import { identity, multiply } from '@jsxcad/math-mat4';
+
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 
 export class Solid3Bsp {
   constructor ({ solid = [], transforms = identity() }) {

@@ -1,6 +1,6 @@
+import { main } from './zobrist';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './zobrist';
 
 main();
 

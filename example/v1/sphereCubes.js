@@ -1,4 +1,4 @@
-import { cube, sphere, writeStl, union } from '@jsxcad/api-v1';
+import { cube, sphere, union, writeStl } from '@jsxcad/api-v1';
 
 export function main () {
   let x = union(sphere().as('a'),

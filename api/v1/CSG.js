@@ -1,11 +1,9 @@
-// FIX: Get a better way to swap these.
-import { fromSolid } from '@jsxcad/geometry-solid3bsp';
-// import { fromPaths } from '@jsxcad/geometry-solid3evan';
+import { fromPolygons, toPoints, toPolygons } from '@jsxcad/algorithm-solid';
 
 import { Assembly } from './Assembly';
+import { fromSolid } from '@jsxcad/geometry-solid3bsp';
 import { measureBoundingBox } from '@jsxcad/algorithm-points';
 import { toGeometry } from './toGeometry';
-import { fromPolygons, toPoints, toPolygons } from '@jsxcad/algorithm-solid';
 
 export class CSG {
   as (tag) {

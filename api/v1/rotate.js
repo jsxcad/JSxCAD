@@ -1,8 +1,9 @@
+import { fromXRotation, fromYRotation, fromZRotation, multiply } from '@jsxcad/math-mat4';
+
 import { Assembly } from './Assembly';
 import { CAG } from './CAG';
 import { CSG } from './CSG';
 import { Path2D } from './Path2D';
-import { fromXRotation, fromYRotation, fromZRotation, multiply } from '@jsxcad/math-mat4';
 
 const a2r = (angle) => angle * 0.017453292519943295;
 

@@ -1,8 +1,9 @@
-import { CSG } from './CSG';
 import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
-import { buildRingSphere, buildRegularPrism,
-         regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/algorithm-points';
+import { buildRegularPrism, buildRingSphere,
+         regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+
+import { CSG } from './CSG';
 
 // Dispatch mechanism.
 // TODO: Move this somewhere else.

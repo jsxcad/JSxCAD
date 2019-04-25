@@ -1,7 +1,8 @@
-import { difference, sphere, writeSvg } from '@jsxcad/api-v1';
 import { cutTrianglesByPlane, toTriangles } from '@jsxcad/algorithm-polygons';
-import { toPolygons } from '@jsxcad/algorithm-solid';
+import { difference, sphere, writeSvg } from '@jsxcad/api-v1';
+
 import { fromPoints } from '@jsxcad/math-plane';
+import { toPolygons } from '@jsxcad/algorithm-solid';
 
 export const main = () => {
   const z = 0;
