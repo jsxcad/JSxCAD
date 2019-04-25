@@ -23,7 +23,6 @@ test("FIX", t => {
 });
 */
 
-if (false)
 test('Both', t => {
   const assembly = { assembly: [{ solid: fromPolygons({}, unitCubePolygons), tags: ['a'] },
                                 { solid: fromPolygons({}, unitRegularTriangularPrismPolygons), tags: ['b'] }] };
@@ -60,7 +59,6 @@ test('Requires A', t => {
                [[[1, 0, 0.5], [-0.5, 0.86603, 0.5], [-0.5, -0.86603, 0.5]]]]);
 });
 
-if (false)
 test('Excludes A', t => {
   const assembly = { assembly: [{ solid: fromPolygons({}, unitCubePolygons), tags: ['a'] },
                                 { solid: fromPolygons({}, unitRegularTriangularPrismPolygons), tags: ['b'] }] };
@@ -74,7 +72,6 @@ test('Excludes A', t => {
                [[[1, 0, 0.5], [-0.5, 0.86603, 0.5], [-0.5, -0.86603, 0.5]]]]);
 });
 
-if (false)
 test('Subassembly', t => {
   const assembly = { assembly: [{ assembly: [{ solid: fromPolygons({}, unitCubePolygons), tags: ['a'] }] },
                                 { solid: fromPolygons({}, unitRegularTriangularPrismPolygons), tags: ['b'] }] };

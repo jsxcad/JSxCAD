@@ -3,25 +3,25 @@ import { canonicalize as canonicalizePoints } from '@jsxcad/algorithm-points';
 import { canonicalize as canonicalizeSolid } from '@jsxcad/algorithm-solid';
 import { canonicalize as canonicalizeSurface } from '@jsxcad/algorithm-surface';
 
-export const canonicalizeEntry = (entry) => {
+export const canonicalize = (geometry) => {
   const canonicalized = {};
-  if (entry.points) {
-    canonicalized.points = canonicalizePoints(entry.points);
+  if (geometry.points) {
+    canonicalized.points = canonicalizePoints(geometry.points);
   }
-  if (entry.paths) {
-    canonicalized.paths = canonicalizePaths(entry.paths);
+  if (geometry.paths) {
+    canonicalized.paths = canonicalizePaths(geometry.paths);
   }
-  if (entry.surface) {
-    canonicalized.surface = canonicalizeSurface(entry.surface);
+  if (geometry.z0Surface) {
+    canonicalized.z0Surface = canonicalizeSurface(geometry.z0Surface);
   }
-  if (entry.solid) {
-    canonicalized.solid = canonicalizeSolid(entry.solid);
+  if (geometry.solid) {
+    canonicalized.solid = canonicalizeSolid(geometry.solid);
   }
-  if (entry.assembly) {
-    canonicalized.assembly = canonicalize(entry.assembly);
+  if (geometry.assembly) {
+    canonicalized.assembly = geometry.assembly.map(canonicalize);
   }
-  canonicalized.tags = entry.tags;
+  if (geometry.tags !== undefined) {
+    canonicalized.tags = geometry.tags;
+  }
   return canonicalized;
 };
-
-export const canonicalize = (assembly) => assembly.map(canonicalizeEntry);

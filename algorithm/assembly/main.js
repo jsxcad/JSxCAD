@@ -1,7 +1,11 @@
 import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 
+import { addTag } from './addTag';
+import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
+import { difference } from './difference';
 import { flip } from './flip';
+import { intersection } from './intersection';
 import { toComponents } from './toComponents';
 import { toPaths } from './toPaths';
 import { toSolid } from './toSolid';
@@ -9,8 +13,12 @@ import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
 
 export {
+  addTag,
+  assemble,
   canonicalize,
+  difference,
   flip,
+  intersection,
   toComponents,
   toPaths,
   toSolid,

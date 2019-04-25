@@ -28,6 +28,7 @@
   "dependencies": {
     "@jsxcad/algorithm-bsp-surfaces": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
+    "@jsxcad/algorithm-points": "^0.0.50",
     "@jsxcad/algorithm-solid": "^0.0.50",
     "@jsxcad/algorithm-surface": "^0.0.50",
     "@jsxcad/algorithm-z0surface": "^0.0.50",
