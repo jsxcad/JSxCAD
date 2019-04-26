@@ -5078,7 +5078,7 @@ const lastPage = () => {
   pages[0].style.display = 'block';
 }
 
-const addDisplay = (path, data) => {
+const addDisplay = (path, geometry) => {
   // Add a new display when we see a new file written.
   let datasets = [];
   let camera;
@@ -5130,16 +5130,13 @@ const addDisplay = (path, data) => {
     return { normals, positions };
   };
 
-  const addController = ({ dataset, tags = [] }) => {
-    if (tags.length >= 1) {
-      return gui.add({ visible: true }, 'visible')
-                .name(`Show ${tags[0]}?`)
-                .listen()
-                .onChange((value) => { dataset.mesh.visible = value; });
+  const toName = (geometry) => {
+    if (geometry.tags !== undefined && geometry.tags.length >= 1) {
+      return geometry.tags[0];
     }
   }
 
-  const updateDatasets = ({ paths, solids, surfaces }) => {
+  const updateDatasets = (geometry) => {
     // Delete any previous dataset in the window.
     for (const { controller, mesh } of datasets) {
       if (controller) {
@@ -5149,43 +5146,58 @@ const addDisplay = (path, data) => {
     }
     // Build new datasets from the written data, and display them.
     datasets = [];
-    for (const { geometry, tags } of paths) {
-      const segments = pathsToThreejsSegments(geometry);
-      // FIX: Paths need to be separated into tag groups.
-      const dataset = {};
-      const threejsGeometry = new THREE.Geometry();
-      const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-      for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
-        threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        geometry.assembly.forEach(walk);
+      } else if (geometry.paths) {
+        const segments = pathsToThreejsSegments(geometry.paths);
+        const dataset = {};
+        const threejsGeometry = new THREE.Geometry();
+        const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+        for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+          threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+        }
+        dataset.mesh = new THREE.LineSegments(threejsGeometry, material);
+        dataset.name = toName(geometry);
+        scene.add(dataset.mesh);
+        datasets.push(dataset);
+      } else if (geometry.solid) {
+        const { positions, normals } = solidToThreejsSolid(geometry.solid);
+        const dataset = {};
+        const threejsGeometry = new THREE.BufferGeometry();
+        threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+        const material = new THREE.MeshNormalMaterial();
+        dataset.mesh = new THREE.Mesh(threejsGeometry, material);
+        dataset.name = toName(geometry);
+        scene.add(dataset.mesh);
+        datasets.push(dataset);
+      } else if (geometry.surface) {
+        const { positions, normals } = surfaceToThreejsSurface(geometry.surface);
+        const dataset = {};
+        const threejsGeometry = new THREE.BufferGeometry();
+        threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
+        threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
+        const material = new THREE.MeshNormalMaterial();
+        dataset.mesh = new THREE.Mesh(threejsGeometry, material);
+        dataset.name = toName(geometry);
+        scene.add(dataset.mesh);
+        datasets.push(dataset);
       }
-      dataset.mesh = new THREE.LineSegments(threejsGeometry, material);
-      dataset.controller = addController({ dataset, tags });
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-    }
-    for (const { geometry, tags } of solids) {
-      const { positions, normals } = solidToThreejsSolid(geometry);
-      const dataset = {};
-      const threejsGeometry = new THREE.BufferGeometry();
-      threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-      const material = new THREE.MeshNormalMaterial();
-      dataset.mesh = new THREE.Mesh(threejsGeometry, material);
-      dataset.controller = addController({ dataset, tags });
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
-    }
-    for (const { geometry, tags } of surfaces) {
-      const { positions, normals } = surfaceToThreejsSurface(geometry);
-      const dataset = {};
-      const threejsGeometry = new THREE.BufferGeometry();
-      threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
-      threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute( normals, 3));
-      const material = new THREE.MeshNormalMaterial();
-      dataset.mesh = new THREE.Mesh(threejsGeometry, material);
-      dataset.controller = addController({ dataset, tags });
-      scene.add(dataset.mesh);
-      datasets.push(dataset);
+    };
+
+    walk(geometry);
+
+    const controllers = {};
+    for (const dataset of datasets) {
+      if (dataset.name === undefined) { continue; }
+      let controller = controllers[dataset.name]
+      if (controller === undefined) {
+        controller = gui.add({ visible: true }, 'visible').name(`Show ${dataset.name}?`);
+        controllers[dataset.name] = controller;
+      }
+      controller.listen().onChange((value) => { dataset.mesh.visible = value; });
     }
   };
 
@@ -5260,8 +5272,8 @@ const addDisplay = (path, data) => {
     renderer.render( scene, camera );
   }
 
-  if (data) {
-    updateDatasets(data);
+  if (geometry) {
+    updateDatasets(geometry);
   }
 };
 
@@ -5270,11 +5282,7 @@ watchFileCreation(({ path }) => addDisplay(path));
 </script><script>console.log('QQ/Hello');</script>
 <script>const runApp = () => {
   console.log('QQ/runApp');
-  addDisplay('main', {
-                       paths: [{"geometry":[[3,0,0],[-1.5,2.59809,0],[-1.5,-2.59809,0]]}],
-                       solids: [{"geometry":[[[[0.85065,0,0.52573],[0.52573,-0.85065,0],[0.85065,0,-0.52573]]],[[[0.85065,0,-0.52573],[0.52573,0.85065,0],[0.85065,0,0.52573]]],[[[0.85065,0,-0.52573],[0,-0.52573,-0.85065],[0,0.52573,-0.85065]]],[[[0.85065,0,-0.52573],[0,0.52573,-0.85065],[0.52573,0.85065,0]]],[[[0.85065,0,-0.52573],[0.52573,-0.85065,0],[0,-0.52573,-0.85065]]],[[[0,-0.52573,0.85065],[0.85065,0,0.52573],[0,0.52573,0.85065]]],[[[0.52573,-0.85065,0],[0.85065,0,0.52573],[0,-0.52573,0.85065]]],[[[0.85065,0,0.52573],[0.52573,0.85065,0],[0,0.52573,0.85065]]],[[[-0.85065,0,-0.52573],[-0.52573,-0.85065,0],[-0.85065,0,0.52573]]],[[[-0.85065,0,0.52573],[-0.52573,0.85065,0],[-0.85065,0,-0.52573]]],[[[0,-0.52573,0.85065],[0,0.52573,0.85065],[-0.85065,0,0.52573]]],[[[-0.85065,0,0.52573],[-0.52573,-0.85065,0],[0,-0.52573,0.85065]]],[[[0,0.52573,0.85065],[-0.52573,0.85065,0],[-0.85065,0,0.52573]]],[[[0,0.52573,-0.85065],[0,-0.52573,-0.85065],[-0.85065,0,-0.52573]]],[[[-0.85065,0,-0.52573],[-0.52573,0.85065,0],[0,0.52573,-0.85065]]],[[[-0.85065,0,-0.52573],[0,-0.52573,-0.85065],[-0.52573,-0.85065,0]]],[[[0,-0.52573,0.85065],[-0.52573,-0.85065,0],[0.52573,-0.85065,0]]],[[[0,0.52573,0.85065],[0.52573,0.85065,0],[-0.52573,0.85065,0]]],[[[0,0.52573,-0.85065],[-0.52573,0.85065,0],[0.52573,0.85065,0]]],[[[0,-0.52573,-0.85065],[0.52573,-0.85065,0],[-0.52573,-0.85065,0]]]]}],
-                       surfaces: [{"geometry":[[[1,1,0],[-1,1,0],[-1,-1,0],[1,-1,0]]]}]
-                     })
+  addDisplay('main', {"assembly":[{"paths":[[[3,0,0],[-1.5,2.59809,0],[-1.5,-2.59809,0]]],"tags":["paths"]},{"solid":[[[[0.85065,0,0.52573],[0.52573,-0.85065,0],[0.85065,0,-0.52573]]],[[[0.85065,0,-0.52573],[0.52573,0.85065,0],[0.85065,0,0.52573]]],[[[0.85065,0,-0.52573],[0,-0.52573,-0.85065],[0,0.52573,-0.85065]]],[[[0.85065,0,-0.52573],[0,0.52573,-0.85065],[0.52573,0.85065,0]]],[[[0.85065,0,-0.52573],[0.52573,-0.85065,0],[0,-0.52573,-0.85065]]],[[[0,-0.52573,0.85065],[0.85065,0,0.52573],[0,0.52573,0.85065]]],[[[0.52573,-0.85065,0],[0.85065,0,0.52573],[0,-0.52573,0.85065]]],[[[0.85065,0,0.52573],[0.52573,0.85065,0],[0,0.52573,0.85065]]],[[[-0.85065,0,-0.52573],[-0.52573,-0.85065,0],[-0.85065,0,0.52573]]],[[[-0.85065,0,0.52573],[-0.52573,0.85065,0],[-0.85065,0,-0.52573]]],[[[0,-0.52573,0.85065],[0,0.52573,0.85065],[-0.85065,0,0.52573]]],[[[-0.85065,0,0.52573],[-0.52573,-0.85065,0],[0,-0.52573,0.85065]]],[[[0,0.52573,0.85065],[-0.52573,0.85065,0],[-0.85065,0,0.52573]]],[[[0,0.52573,-0.85065],[0,-0.52573,-0.85065],[-0.85065,0,-0.52573]]],[[[-0.85065,0,-0.52573],[-0.52573,0.85065,0],[0,0.52573,-0.85065]]],[[[-0.85065,0,-0.52573],[0,-0.52573,-0.85065],[-0.52573,-0.85065,0]]],[[[0,-0.52573,0.85065],[-0.52573,-0.85065,0],[0.52573,-0.85065,0]]],[[[0,0.52573,0.85065],[0.52573,0.85065,0],[-0.52573,0.85065,0]]],[[[0,0.52573,-0.85065],[-0.52573,0.85065,0],[0.52573,0.85065,0]]],[[[0,-0.52573,-0.85065],[0.52573,-0.85065,0],[-0.52573,-0.85065,0]]]],"tags":["solid"]},{"surface":[[[1,1,0],[-1,1,0],[-1,-1,0],[1,-1,0]]],"tags":["surface"]}]});
   nextPage();
 }
 document.addEventListener("DOMContentLoaded", runApp);

@@ -42,6 +42,7 @@ export class Assembly {
   }
 
   toSolid (options = {}) {
+console.log(`QQ/Assembly/toSolid/this: ${JSON.stringify(this)}`);
     return this.geometry.toSolid(options);
   }
 

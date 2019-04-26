@@ -1,10 +1,10 @@
-import { cube, cylinder, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
+import { assemble, cube, cylinder, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
 export const main = async () => {
   console.log(`QQ/cube: ${JSON.stringify(cube({ size: 30, center: true }))}`);
   console.log(`QQ/cube/as: ${JSON.stringify(cube({ size: 30, center: true }).as('cube'))}`);
-  const assembly = union(cube({ size: 30, center: true }).as('cube'),
-                         cylinder({ r: 5, h: 30, center: true, fn: 32 }).as('cylinder'));
+  const assembly = assemble(cube({ size: 30, center: true }).as('cube'),
+                            cylinder({ r: 5, h: 30, center: true, fn: 32 }).as('cylinder'));
 
   await writeStl({ path: 'tmp/assembly-cube.stl' }, assembly.toSolid({ requires: ['cube'], excludes: ['cylinder'] }));
 
@@ -15,9 +15,5 @@ export const main = async () => {
   await writeStl({ path: 'tmp/assembly-cylinder.stl' }, assembly.toSolid({ requires: ['cylinder'] }));
 
   // This should produce a threejs page with the two distinct geometries together.
-  await writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/assembly.html' },
-                         {
-                           solids: [assembly.toSolid({ requires: ['cube'] }),
-                                    assembly.toSolid({ requires: ['cylinder'] })]
-                         });
+  await writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/assembly.html' }, assembly);
 };

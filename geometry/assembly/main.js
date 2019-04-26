@@ -13,7 +13,9 @@ export class Assembly {
   }
 
   assemble (...geometries) {
-    return fromGeometry(assemble(toGeometry(this), ...geometries.map(toGeometry)));
+    const assembled = assemble(toGeometry(this), ...geometries.map(toGeometry));
+console.log(`QQ/lazy/assembly/assemble/assembled: ${JSON.stringify(assembled)}`);
+    return fromGeometry(assembled);
   }
 
   difference (...geometries) {

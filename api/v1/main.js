@@ -14,6 +14,7 @@ import { Points } from './Points';
 import { Solid } from './Solid';
 import { Surface } from './Surface';
 import { acos } from './acos';
+import { assemble } from './assemble';
 import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
@@ -55,6 +56,7 @@ export {
   Paths,
   Points,
   acos,
+  assemble,
   circle,
   crossSection,
   cos,

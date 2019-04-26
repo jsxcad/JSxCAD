@@ -1,1 +1,1 @@
-export const assemble = (...taggedGeometries) => taggedGeometries;
+export const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
