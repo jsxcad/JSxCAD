@@ -23,7 +23,7 @@ const lastPage = () => {
   pages[0].style.display = 'block';
 }
 
-const addDisplay = (path, geometry) => {
+const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) => {
   // Add a new display when we see a new file written.
   let datasets = [];
   let camera;
@@ -118,8 +118,8 @@ const addDisplay = (path, geometry) => {
         dataset.name = toName(geometry);
         scene.add(dataset.mesh);
         datasets.push(dataset);
-      } else if (geometry.surface) {
-        const { positions, normals } = surfaceToThreejsSurface(geometry.surface);
+      } else if (geometry.z0Surface) {
+        const { positions, normals } = surfaceToThreejsSurface(geometry.z0Surface);
         const dataset = {};
         const threejsGeometry = new THREE.BufferGeometry();
         threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
@@ -153,7 +153,7 @@ const addDisplay = (path, geometry) => {
   function init() {
     //
     camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 3500 );
-    [camera.position.x, camera.position.y, camera.position.z] = [0,0,16];
+    [camera.position.x, camera.position.y, camera.position.z] = cameraPosition;
     //
     controls = new THREE.TrackballControls(camera);
     controls.rotateSpeed = 4.0;

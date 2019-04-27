@@ -12,7 +12,7 @@ import { loadFont, text } from './text';
 import { Paths } from './Paths';
 import { Points } from './Points';
 import { Solid } from './Solid';
-import { Surface } from './Surface';
+import { Z0Surface } from './Z0Surface';
 import { acos } from './acos';
 import { assemble } from './assemble';
 import { circle } from './circle';
@@ -52,9 +52,9 @@ import { writeThreejsPage } from './writeThreejs';
 
 export {
   Solid,
-  Surface,
   Paths,
   Points,
+  Z0Surface,
   acos,
   assemble,
   circle,

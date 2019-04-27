@@ -1,4 +1,4 @@
-import { addTag, assemble, difference, flip, intersection, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
+import { addTag, assemble, difference, flip, intersection, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
 
 // FIX: Make it clear this should be lazy.
 export class Assembly {
@@ -53,6 +53,12 @@ console.log(`QQ/lazy/assembly/assemble/assembled: ${JSON.stringify(assembled)}`)
 
   toZ0Surface (options = {}) {
     return toZ0Surface(options, toGeometry(this));
+  }
+
+  toDisjointGeometry () {
+console.log(`QQ/lazyAssembly/toDisjointGeometry/this: ${JSON.stringify(this)}`);
+console.log(`QQ/lazyAssembly/toDisjointGeometry/geometry: ${JSON.stringify(toGeometry(this))}`);
+    return toDisjointGeometry(toGeometry(this));
   }
 
   transform (matrix) {

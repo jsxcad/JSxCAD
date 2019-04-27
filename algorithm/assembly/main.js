@@ -4,9 +4,11 @@ import { addTag } from './addTag';
 import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
+import { eachItem } from './eachItem';
 import { flip } from './flip';
 import { intersection } from './intersection';
 import { toComponents } from './toComponents';
+import { toDisjointGeometry } from './toDisjointGeometry';
 import { toPaths } from './toPaths';
 import { toSolid } from './toSolid';
 import { toZ0Surface } from './toZ0Surface';
@@ -18,9 +20,11 @@ export {
   assemble,
   canonicalize,
   difference,
+  eachItem,
   flip,
   intersection,
   toComponents,
+  toDisjointGeometry,
   toPaths,
   toSolid,
   toZ0Surface,

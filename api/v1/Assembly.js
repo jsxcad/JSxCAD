@@ -2,76 +2,87 @@ import { fromGeometry } from '@jsxcad/geometry-assembly';
 
 export class Assembly {
   as (tag) {
-    return this.fromGeometry(this.geometry.addTag(tag));
+    return this.fromLazyGeometry(toLazyGeometry(this).addTag(tag));
   }
 
   assemble (...shapes) {
-    return this.fromGeometry(this.geometry.assemble(...shapes.map(toGeometry)));
+    return this.fromLazyGeometry(toLazyGeometry(this).assemble(...shapes.map(toLazyGeometry)));
   }
 
-  constructor (geometry = fromGeometry({ assembly: [] })) {
-    this.geometry = geometry;
+  constructor (lazyGeometry = fromGeometry({ assembly: [] })) {
+    this.lazyGeometry = lazyGeometry;
   }
 
   difference (...shapes) {
-    return this.fromGeometry(this.geometry.difference(...shapes.map(toGeometry)));
+    return this.fromLazyGeometry(toLazyGeometry(this).difference(...shapes.map(toLazyGeometry)));
   }
 
-  fromGeometry (geometry) {
-    return Assembly.fromGeometry(geometry);
+  fromLazyGeometry (geometry) {
+    return Assembly.fromLazyGeometry(geometry);
   }
 
   intersection (...shapes) {
-    return this.fromGeometry(this.geometry.intersection(...shapes.map(toGeometry)));
+    return this.fromLazyGeometry(toLazyGeometry(this).intersection(...shapes.map(toLazyGeometry)));
   }
 
-  toGeometry () {
-    return this.geometry;
+  toLazyGeometry () {
+    return this.lazyGeometry;
   }
 
   toComponents (options = {}) {
-    return this.geometry.toComponents(options);
+    return toLazyGeometry(this).toComponents(options);
+  }
+
+  toDisjointGeometry(options = {}) {
+    const geometry = toLazyGeometry(this).toDisjointGeometry(options);
+console.log(`QQ/Assembly/toDisjointGeometry/this: ${JSON.stringify(this)}`);
+console.log(`QQ/Assembly/toDisjointGeometry/lazyGeometry: ${JSON.stringify(toLazyGeometry(this))}`);
+console.log(`QQ/Assembly/toDisjointGeometry/disjointGeometry: ${JSON.stringify(geometry)}`);
+    return geometry;
   }
 
   toPaths (options = {}) {
-    return this.geometry.toPaths(options);
+    return toLazyGeometry(this).toPaths(options);
   }
 
   toPoints (options = {}) {
-    return this.geometry.toPoints(options);
+    return toLazyGeometry(this).toPoints(options);
   }
 
   toSolid (options = {}) {
 console.log(`QQ/Assembly/toSolid/this: ${JSON.stringify(this)}`);
-    return this.geometry.toSolid(options);
+    return toLazyGeometry(this).toSolid(options);
   }
 
   toZ0Surface (options = {}) {
-    return this.geometry.toZ0Surface(options);
+console.log(`QQ/Assembly/toZ0Surface/this; ${JSON.stringify(this)}`);
+console.log(`QQ/Assembly/toZ0Surface/lazy; ${JSON.stringify(toLazyGeometry(this))}`);
+    return toLazyGeometry(this).toZ0Surface(options);
   }
 
   transform (matrix) {
 console.log(`QQ/Solid/transform/this: ${JSON.stringify(this)}`);
-    return this.fromGeometry(this.geometry.transform(matrix));
+console.log(`QQ/Solid/transform/toLazyGeometry: ${JSON.stringify(toLazyGeometry(this))}`);
+    return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));
   }
 
   union (...shapes) {
-    return this.fromGeometry(this.geometry.union(...shapes.map(toGeometry)));
+    return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
   }
 }
 
-const toGeometry = (shape) => shape.toGeometry();
+const toLazyGeometry = (shape) => shape.toLazyGeometry();
 
 export const assembleLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(toGeometry(shape).assemble(...shapes.map(toGeometry)));
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).assemble(...shapes.map(toLazyGeometry)));
 
 export const unionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(toGeometry(shape).union(...shapes.map(toGeometry)));
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).union(...shapes.map(toLazyGeometry)));
 
 export const differenceLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(toGeometry(shape).difference(...shapes.map(toGeometry)));
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
 
 export const intersectionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(toGeometry(shape).intersection(...shapes.map(toGeometry())));
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));
 
-Assembly.fromGeometry = (geometry) => new Assembly(geometry);
+Assembly.fromLazyGeometry = (geometry) => new Assembly(geometry);

@@ -39,7 +39,7 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<script>console.log('QQ/Hello');<\\/script>`.replace('\\/', '/'),
     `<script>const runApp = () => {`,
     `  console.log('QQ/runApp');`,
-    `  addDisplay('main', ${JSON.stringify(geometry)});`,
+    `  addDisplay('main', { cameraPosition: ${JSON.stringify(cameraPosition)}, geometry: ${JSON.stringify(geometry)} });`,
     `  nextPage();`,
     `}`,
     `document.addEventListener("DOMContentLoaded", runApp);`,

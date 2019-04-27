@@ -1,7 +1,7 @@
 import { Assembly } from './Assembly';
 import { Paths } from './Paths';
 import { Solid } from './Solid';
-import { Surface } from './Surface';
+import { Z0Surface } from './Z0Surface';
 
 import { fromScaling } from '@jsxcad/math-mat4';
 
@@ -20,4 +20,4 @@ const method = function (factor) { return scale(factor, this); };
 Assembly.prototype.scale = method;
 Paths.prototype.scale = method;
 Solid.prototype.scale = method;
-Surface.prototype.scale = method;
+Z0Surface.prototype.scale = method;

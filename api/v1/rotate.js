@@ -1,7 +1,7 @@
 import { fromXRotation, fromYRotation, fromZRotation, multiply } from '@jsxcad/math-mat4';
 
 import { Assembly } from './Assembly';
-import { Surface } from './Surface';
+import { Z0Surface } from './Z0Surface';
 import { Solid } from './Solid';
 import { Paths } from './Paths';
 
@@ -15,4 +15,4 @@ const method = function (angles) { return rotate(angles, this); };
 Assembly.prototype.rotate = method;
 Paths.prototype.rotate = method;
 Solid.prototype.rotate = method;
-Surface.prototype.rotate = method;
+Z0Surface.prototype.rotate = method;

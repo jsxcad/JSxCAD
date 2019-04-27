@@ -26,6 +26,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-assembly": "^0.0.50",
     "@jsxcad/algorithm-polygons": "^0.0.50",
     "@jsxcad/algorithm-solid": "^0.0.50",
     "@jsxcad/algorithm-watertight": "^0.0.50",

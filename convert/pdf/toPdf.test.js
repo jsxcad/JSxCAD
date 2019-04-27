@@ -1,10 +1,10 @@
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { pathsToPdf } from './pathsToPdf';
+import { toPdf } from './toPdf';
 import { test } from 'ava';
 
 test('Triangle', t => {
   // A polygon is a path.
-  const pdf = pathsToPdf({}, [buildRegularPolygon({ edges: 3 })]);
+  const pdf = toPdf({}, { paths: [buildRegularPolygon({ edges: 3 })] });
   t.is(pdf,
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',

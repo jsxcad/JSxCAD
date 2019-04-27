@@ -1,7 +1,7 @@
 import { Assembly, assembleLazily } from './Assembly';
 import { Paths } from './Paths';
 import { Solid } from './Solid';
-import { Surface } from './Surface';
+import { Z0Surface } from './Z0Surface';
 
 export const assemble = (...params) => {
   switch (params.length) {
@@ -23,4 +23,4 @@ const method = function (...shapes) { return assemble(this, ...shapes); };
 Assembly.prototype.assemble = method;
 Paths.prototype.assemble = method;
 Solid.prototype.assemble = method;
-Surface.prototype.assemble = method;
+Z0Surface.prototype.assemble = method;

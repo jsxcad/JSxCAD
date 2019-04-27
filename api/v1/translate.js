@@ -1,7 +1,7 @@
 import { Assembly } from './Assembly';
 import { Paths } from './Paths';
 import { Solid } from './Solid';
-import { Surface } from './Surface';
+import { Z0Surface } from './Z0Surface';
 
 import { fromTranslation } from '@jsxcad/math-mat4';
 
@@ -16,4 +16,4 @@ const method = function (vector) {
 Assembly.prototype.translate = method;
 Paths.prototype.translate = method;
 Solid.prototype.translate = method;
-Surface.prototype.translate = method;
+Z0Surface.prototype.translate = method;

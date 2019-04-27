@@ -1,10 +1,10 @@
 export const map = (geometry, operation) => {
   const walk = (geometry) => {
-    const updated = operation(geometry);
-    if (updated.assembly) {
-      updated.assembly = updated.assembly.map(walk);
+    if (geometry.assembly) {
+      return operation({ assembly: geometry.assembly.map(walk), tags: geometry.tags });
+    } else {
+      return operation(geometry);
     }
-    return operation(geometry);
   }
   return walk(geometry);
 };

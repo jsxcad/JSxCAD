@@ -1,5 +1,5 @@
 import { Assembly } from './Assembly';
-import { Surface } from './Surface';
+import { Z0Surface } from './Z0Surface';
 import { Solid } from './Solid';
 import { Paths } from './Paths';
 
@@ -12,4 +12,4 @@ const method = function (angle) { return rotateY(angle, this); };
 Assembly.prototype.rotateY = method;
 Paths.prototype.rotateY = method;
 Solid.prototype.rotateY = method;
-Surface.prototype.rotateY = method;
+Z0Surface.prototype.rotateY = method;

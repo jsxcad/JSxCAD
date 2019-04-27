@@ -1,4 +1,5 @@
 import { Assembly } from './Assembly';
+import { fromGeometry } from '@jsxcad/geometry-assembly';
 
 export class Paths extends Assembly {
   constructor (geometry = fromGeometry({ assembly: [] })) {
@@ -11,4 +12,4 @@ export class Paths extends Assembly {
 }
 
 Paths.fromGeometry = (geometry) => new Paths(geometry);
-Paths.fromPaths = (paths) => new Solid({ paths: paths });
+Paths.fromPaths = (paths) => new Paths(fromGeometry({ paths: paths }));

@@ -1,9 +1,8 @@
-import { canonicalize as canonicalizeSurface, transform as transformSurface } from '@jsxcad/algorithm-surface';
+import { canonicalize, scale, transform, translate } from './ops';
 
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
-import { fromScaling } from '@jsxcad/math-mat4';
 import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { makeSurfacesSimple } from './makeSurfacesSimple';
 import { measureBoundingBox } from './measureBoundingBox';
@@ -13,6 +12,7 @@ import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
 
 export {
+  canonicalize,
   eachPoint,
   flip,
   fromPolygons,
@@ -20,11 +20,10 @@ export {
   makeSurfacesSimple,
   measureBoundingBox,
   measureBoundingSphere,
+  scale,
   toGeneric,
   toPoints,
-  toPolygons
+  toPolygons,
+  transform,
+  translate,
 };
-
-export const transform = (matrix, solid) => solid.map(surface => transformSurface(matrix, surface));
-export const scale = (vector, solid) => transform(fromScaling(vector), solid);
-export const canonicalize = (solid) => solid.map(canonicalizeSurface);

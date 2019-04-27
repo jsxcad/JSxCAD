@@ -1,6 +1,9 @@
 import { canonicalize, toTriangles } from '@jsxcad/algorithm-polygons';
 import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
 
+import { eachItem } from '@jsxcad/algorithm-assembly';
+import { toPolygons } from '@jsxcad/algorithm-solid';
+
 import { toPlane } from '@jsxcad/math-poly3';
 
 /**
@@ -12,7 +15,19 @@ import { toPlane } from '@jsxcad/math-poly3';
  * @returns {String} - the ascii STL output.
  */
 
-export const polygonsToStla = (options = {}, polygons) => {
+const geometryToTriangles = (geometry) => {
+  const triangleSets = [];
+  eachItem(geometry,
+           item => {
+             if (item.solid) {
+               triangleSets.push(toTriangles({}, toPolygons({}, item.solid)));
+             }
+           });
+  return [].concat(...triangleSets);
+}
+
+export const toStla = (options = {}, geometry) => {
+  const polygons = geometryToTriangles(geometry);
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);
     if (options.doMakeWatertight) {
