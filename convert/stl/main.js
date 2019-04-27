@@ -1,7 +1,5 @@
-import { polygonsToStla } from './polygonsToStla';
-import { solidToStla } from './solidToStla';
+import { toStla } from './toStla';
 
 export {
-  polygonsToStla,
-  solidToStla
+  toStla
 };

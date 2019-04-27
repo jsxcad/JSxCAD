@@ -26,6 +26,7 @@ import { hsl2rgb } from './hsl2rgb';
 import { hull } from './hull';
 import { intersection } from './intersection';
 import { max } from './max';
+import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
@@ -69,6 +70,7 @@ export {
   intersection,
   loadFont,
   max,
+  measureBoundingBox,
   minkowski,
   polyhedron,
   readDst,

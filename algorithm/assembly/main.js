@@ -29,7 +29,7 @@ export {
   toSolid,
   toZ0Surface,
   transform,
-  union,
+  union
 };
 
 export const rotateX = (angle, assembly) => transform(fromXRotation(angle), assembly);

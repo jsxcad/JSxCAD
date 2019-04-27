@@ -4,6 +4,6 @@ export const eachItem = (geometry, operation) => {
       geometry.assembly.forEach(walk);
     }
     operation(geometry);
-  }
+  };
   walk(geometry);
 };

@@ -10,12 +10,9 @@ import { writeStl } from './writeStl';
 
 export const crossSection = ({ z = 0 } = {}, shape) => {
   const triangles = toTriangles({}, toPolygons({}, shape.toSolid()));
-console.log(`QQ/crossSection/solid: ${JSON.stringify(shape.toSolid())}`);
-writeStl({ path: 'crossSection.stl' }, shape.toSolid());
+writeStl({ path: 'crossSection.stl' }, shape);
   const paths = cutTrianglesByPlane(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
-console.log(`QQ/crossSection/paths: ${JSON.stringify(paths)}`);
-  const polygons = unionZ0Surfaces(...paths.map(path => [path]));
-  return Z0Surface.fromPolygons(polygons);
+  return Z0Surface.fromPaths(paths);
 };
 
 const method = function (options) { return crossSection(options, this); };

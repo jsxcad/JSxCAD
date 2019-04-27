@@ -5,6 +5,6 @@ export const map = (geometry, operation) => {
     } else {
       return operation(geometry);
     }
-  }
+  };
   return walk(geometry);
 };

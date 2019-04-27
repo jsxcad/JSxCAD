@@ -2,10 +2,8 @@ import { differenceItems } from './differenceItems';
 
 // Traverse the assembly tree and disjoint it backward.
 export const toDisjointGeometry = (geometry) => {
-console.log(`QQ/toDisjointGeometry/geometry: ${JSON.stringify(geometry)}`);
   if (geometry.assembly === undefined) {
     // A singleton is disjoint.
-console.log(`QQ/toDisjointGeometry/singleton`);
     return geometry;
   } else {
     const subtractions = [];
@@ -23,7 +21,6 @@ console.log(`QQ/toDisjointGeometry/singleton`);
       return disjointed;
     };
     const result = walk(geometry, { assembly: [], tags: geometry.tags });
-console.log(`QQ/toDisjointGeometry/result: ${JSON.stringify(result)}`);
     return result;
   }
 };
