@@ -10,7 +10,7 @@ export const readJscad = async ({ path, script }) => {
   }
   const { getAssembly, getParameterDefinitions } = await scriptToOperator({}, script);
   const jscadOp = (parameters) => {
-    return Assembly.fromAssembly(getAssembly(parameters));
+    return Assembly.fromGeometry(getAssembly(parameters));
   };
   jscadOp.getParameterDefinitions = getParameterDefinitions;
   return jscadOp;

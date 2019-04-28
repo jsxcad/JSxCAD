@@ -8,9 +8,10 @@ export const getParameterDefinitions = () => [
   { name: 'text', initial: 30, caption: 'Length', type: 'text' }
 ];
 
-export const main = ({ string = 'JSxCAD' }) => {
+export const main = async ({ string = 'JSxCAD' }) => {
   const letters = text({ font: greatVibes, curveSegments: 32 }, string);
   const solid = letters.extrude({ height: 10 }).translate([-170, -20, 0]);
+console.log(`QQ/text/solid: ${JSON.stringify(solid)}`);
 
-  writeStl({ path: 'tmp/text.stl' }, solid);
+  await writeStl({ path: 'tmp/text.stl' }, solid);
 };

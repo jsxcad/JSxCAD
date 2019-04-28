@@ -12,7 +12,7 @@ export class Paths extends Assembly {
   concat (...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toPaths();
+      const geometry = shape.toPaths().toDisjointGeometry();
       if (!isSingleOpenPath(geometry)) {
         throw Error('Concatenation requires single open paths.');
       }
@@ -23,11 +23,11 @@ export class Paths extends Assembly {
 
   close () {
 console.log(`QQ/Paths/close/this: ${JSON.stringify(this)}`);
-    const paths = this.toPaths();
-    if (!isSingleOpenPath(paths)) {
+    const geometry = this.toPaths().toDisjointGeometry();
+    if (!isSingleOpenPath(geometry)) {
       throw Error('Close requires a single open path.');
     }
-    return Paths.fromClosedPath(close(paths[0]));
+    return Paths.fromClosedPath(close(geometry.paths[0]));
   }
 
   fromGeometry (geometry) {

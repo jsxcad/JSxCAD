@@ -1,4 +1,4 @@
-import { addTag, assemble, difference, flip, intersection, toDisjointGeometry, toPaths, toPoints, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
+import { addTag, assemble, difference, flip, intersection, eachPoint, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
 
 // FIX: Make it clear this should be lazy.
 export class Assembly {
@@ -39,24 +39,24 @@ console.log(`QQ/lazy/assembly/assemble/assembled: ${JSON.stringify(assembled)}`)
     return fromGeometry(intersection(toGeometry(this), ...geometries.map(toGeometry)));
   }
 
+  eachPoint (options = {}, operation) {
+    return eachPoint(options, operation, toGeometry(this));
+  }
+
   toGeometry (options = {}) {
     return this.geometry;
   }
 
-  toPoints (options = {}) {
-    return toPoints(options, toGeometry(this));
-  }
-
   toPaths (options = {}) {
-    return toPaths(options, toGeometry(this));
+    return fromGeometry(toPaths(options, toGeometry(this)));
   }
 
   toSolid (options = {}) {
-    return toSolid(options, toGeometry(this));
+    return fromGeometry(toSolid(options, toGeometry(this)));
   }
 
   toZ0Surface (options = {}) {
-    return toZ0Surface(options, toGeometry(this));
+    return fromGeometry(toZ0Surface(options, toGeometry(this)));
   }
 
   toDisjointGeometry () {
@@ -68,7 +68,6 @@ console.log(`QQ/lazyAssembly/toDisjointGeometry/geometry: ${JSON.stringify(toGeo
   transform (matrix) {
 console.log(`QQ/lazy/assembly/transform/this: ${JSON.stringify(this)}`);
 console.log(`QQ/lazy/assembly/transform/this/toGeometry: ${JSON.stringify(toGeometry(this))}`);
-    // Assembly transforms are eager, but the component transforms may be lazy.
     return fromGeometry(transform(matrix, toGeometry(this)));
   }
 

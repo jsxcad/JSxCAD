@@ -1,9 +1,9 @@
 import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
-import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/algorithm-points';
 import { buildRegularPrism, buildRingSphere,
          regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Solid } from './Solid';
+import { minkowski } from './minkowski';
 
 // Dispatch mechanism.
 // TODO: Move this somewhere else.
@@ -66,13 +66,8 @@ const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, 
   assertEmpty(rest);
   assertNumber(roundRadius);
   assertNumber(resolution);
-  return () => Solid.fromPolygons(
-    buildConvexHull({},
-                    buildConvexMinkowskiSum({},
-                                            unitCube().scale(radius - roundRadius * 2).toPoints(),
-                                            Solid.fromPolygons(buildRingSphere({ resolution }))
-                                                .scale(roundRadius)
-                                                .toPoints())));
+  return () => minkowski(unitCube().scale(radius - roundRadius * 2),
+                         Solid.fromPolygons(buildRingSphere({ resolution })).scale(roundRadius));
 };
 
 // cube({ center: [0, 0, 0], radius: 1 })

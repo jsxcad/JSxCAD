@@ -36,9 +36,9 @@ const createJscadFunction = (script, operators) => {
       )(operators);
   const getAssembly = (params) => {
     const output = main(params);
-    const result = [];
+    const result = { assembly: [] };
     if (output.polygons) {
-      result.push({ solid: csgToSolid(output) });
+      result.assembly.push({ solid: csgToSolid(output) });
     }
     return result;
   };

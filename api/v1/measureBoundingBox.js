@@ -1,9 +1,17 @@
-import { cutTrianglesByPlane, toTriangles } from '@jsxcad/algorithm-polygons';
+import { max, min } from '@jsxcad/math-vec3';
 
 import { Assembly } from './Assembly';
-import { measureBoundingBox as measureBoundingBoxOfPoints } from '@jsxcad/algorithm-points';
 
-export const measureBoundingBox = (shape) => measureBoundingBoxOfPoints(shape.toPoints());
+export const measureBoundingBox = (shape) => {
+  let minPoint = [Infinity, Infinity, Infinity];
+  let maxPoint = [-Infinity, -Infinity, -Infinity];
+  shape.eachPoint({},
+                  (point) => {
+                    minPoint = min(minPoint, point);
+                    maxPoint = max(maxPoint, point);
+                  });
+  return [minPoint, maxPoint];
+}
 
 const method = function () { return measureBoundingBox(this); };
 

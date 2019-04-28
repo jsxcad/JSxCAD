@@ -1,5 +1,5 @@
 import { Assembly } from './Assembly';
 import { readFile } from '@jsxcad/sys';
-import { svgToAssembly } from '@jsxcad/convert-svg';
+import { toSvg } from '@jsxcad/convert-svg';
 
-export const readJscad = async ({ path }) => Assembly.fromAssembly(svgToAssembly({}, await readFile(path)));
+export const readSvg = async ({ path }) => Assembly.fromGeometry(toSvg({}, await readFile(path)));

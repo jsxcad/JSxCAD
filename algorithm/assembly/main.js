@@ -5,6 +5,7 @@ import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
 import { eachItem } from './eachItem';
+import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { intersection } from './intersection';
 import { toComponents } from './toComponents';
@@ -21,6 +22,7 @@ export {
   canonicalize,
   difference,
   eachItem,
+  eachPoint,
   flip,
   intersection,
   toComponents,

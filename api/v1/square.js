@@ -4,10 +4,11 @@ import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/a
 import { Z0Surface } from './Z0Surface';
 
 const buildSquare = ({ scale = [1, 1, 1] }) => {
-  const cag = Z0Surface.fromPoints(buildRegularPolygon({ edges: 4 }))
-      .rotateZ(45)
-      .scale(scale);
-  return cag;
+  const shape = Z0Surface.fromPath(buildRegularPolygon({ edges: 4 }));
+  console.log(`QQ/buildSquare/shape: ${JSON.stringify(shape)}`);
+  const transformedShape = shape.rotateZ(45).scale(scale);
+  console.log(`QQ/buildSquare/transformedShape: ${JSON.stringify(transformedShape)}`);
+  return transformedShape;
 };
 
 const decode = (params) => {

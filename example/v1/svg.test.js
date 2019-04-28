@@ -2,9 +2,8 @@ import { main } from './svg';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
 
-main();
-
-test('Expected svg', t => {
+test('Expected svg', async (t) => {
+  await main();
   t.is(readFileSync('tmp/cutSpheres.svg', { encoding: 'utf8' }),
        readFileSync('cutSpheres.svg', { encoding: 'utf8' }));
 });

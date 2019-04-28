@@ -1,4 +1,4 @@
-import { createByteFetcher, dstToZ0Paths, fetchHeader } from './dstToZ0Paths';
+import { createByteFetcher, fetchHeader, fromDst } from './fromDst';
 
 import { canonicalize } from '@jsxcad/algorithm-paths';
 import { readFileSync } from 'fs';
@@ -25,7 +25,7 @@ test('Fetch header', t => {
 });
 
 test('Read dst to z0paths', t => {
-  const paths = canonicalize(dstToZ0Paths({}, readFileSync('test.dst')));
+  const paths = canonicalize(fromDst({}, readFileSync('test.dst')));
   t.deepEqual(paths,
               [[null, [100, -200, 0], [100, -188.9, 0], [100, -177.8, 0], [100, -166.7, 0], [100, -155.6, 0], [100, -144.4, 0], [100, -133.3, 0], [100, -122.2, 0], [100, -111.1, 0], [100, -100, 0]],
                [null, [250, -100, 0], [250, -111.1, 0], [250, -122.2, 0], [250, -133.3, 0], [250, -144.4, 0], [250, -155.6, 0], [250, -166.7, 0], [250, -177.8, 0], [250, -188.9, 0], [250, -200, 0]],
