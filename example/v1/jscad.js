@@ -39,7 +39,6 @@ export const main = async () => {
     });
 
   const output = example001();
-  console.log(`QQ/example001: ${JSON.stringify(output)}`);
 
-  writeStl({ path: 'tmp/jscad.stl' }, output);
+  await writeStl({ path: 'tmp/jscad.stl' }, output);
 };
