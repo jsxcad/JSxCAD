@@ -50,6 +50,6 @@ const buildGear = ({ mmPerTooth = 3, numberOfTeeth = 11, teethToHide = 0, pressu
   return profile.close();
 };
 
-export const main = () => {
-  writePdf({ path: 'tmp/gear.pdf' }, buildGear({}));
+export const main = async () => {
+  await writePdf({ path: 'tmp/gear.pdf' }, buildGear({}));
 };
