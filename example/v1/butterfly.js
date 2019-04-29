@@ -1,6 +1,6 @@
 import { svgPath, writePdf } from '@jsxcad/api-v1';
 
-export const main = () => {
+export const main = async () => {
   // Path data from butterfly.svg.
   await writePdf({ path: 'tmp/butterfly.pdf' },
                  svgPath({},
