@@ -12,7 +12,6 @@ export const assemble = (...params) => {
       return params[0];
     }
     default: {
-console.log(`QQ/api/assemble: ${JSON.stringify(params)}`);
       return assembleLazily(...params);
     }
   }

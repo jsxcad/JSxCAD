@@ -1,6 +1,6 @@
+import { main } from './jscad';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './jscad';
 
 test('Expected stl', async (t) => {
   await main();

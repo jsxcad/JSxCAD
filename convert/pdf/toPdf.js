@@ -1,6 +1,7 @@
-import { eachItem } from '@jsxcad/algorithm-assembly';
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
 import { measureBoundingBox, transform } from '@jsxcad/algorithm-paths';
+
+import { eachItem } from '@jsxcad/algorithm-assembly';
 
 const X = 0;
 const Y = 1;
@@ -32,10 +33,8 @@ const footer =
 
 const geometryToPaths = (geometry) => {
   const pathsets = [];
-console.log(`QQ/geometryToPaths/geometry: ${JSON.stringify(geometry)}`);
   eachItem(geometry,
            item => {
-console.log(`QQ/geometryToPaths/item: ${JSON.stringify(item)}`);
              if (item.paths) {
                pathsets.push(item.paths);
              }
@@ -43,9 +42,8 @@ console.log(`QQ/geometryToPaths/item: ${JSON.stringify(item)}`);
                pathsets.push(item.z0Surface);
              }
            });
-console.log(`QQ/geometryToPaths/pathsets: ${JSON.stringify(pathsets)}`);
   return [].concat(...pathsets);
-}
+};
 
 export const toPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, geometry) => {
   const paths = geometryToPaths(geometry);

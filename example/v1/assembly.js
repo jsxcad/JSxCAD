@@ -1,8 +1,6 @@
-import { assemble, cube, cylinder, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
+import { assemble, cube, cylinder, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
 export const main = async () => {
-  console.log(`QQ/cube: ${JSON.stringify(cube({ size: 30, center: true }))}`);
-  console.log(`QQ/cube/as: ${JSON.stringify(cube({ size: 30, center: true }).as('cube'))}`);
   const assembly = assemble(cube({ size: 30, center: true }).as('cube'),
                             cylinder({ r: 5, h: 30, center: true, fn: 32 }).as('cylinder'));
 

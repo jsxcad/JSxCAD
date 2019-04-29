@@ -1,6 +1,6 @@
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { toPdf } from './toPdf';
 import { test } from 'ava';
+import { toPdf } from './toPdf';
 
 test('Triangle', t => {
   // A polygon is a path.

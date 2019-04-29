@@ -1,5 +1,6 @@
+import { fromSvgPath } from '@jsxcad/convert-svg';
 import { loadSync } from 'opentype.js';
-import { svgPathToPaths } from '@jsxcad/convert-svg';
+import { union } from '@jsxcad/algorithm-z0surface';
 
 export const pathnameToFont = (pathname) => loadSync(pathname);
 
@@ -11,5 +12,9 @@ export const textToSurfaces = ({ curveSegments, font, size, kerning = true, feat
                     (glyph, x, y, fontSize) => {
                       svgPaths.push(glyph.getPath(x, y, fontSize, options, this).toPathData());
                     });
-  return svgPaths.map(svgPath => svgPathToPaths({ curveSegments: curveSegments }, svgPath));
+  const pathsets = [];
+  for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
+    pathsets.push(paths);
+  }
+  return { z0Surface: union(...pathsets) };
 };

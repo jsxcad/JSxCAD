@@ -1,4 +1,4 @@
-import { loadFont, text, writeStl } from '@jsxcad/api-v1';
+import { loadFont, text, writePdf, writeStl } from '@jsxcad/api-v1';
 
 Error.stackTraceLimit = Infinity;
 
@@ -10,8 +10,8 @@ export const getParameterDefinitions = () => [
 
 export const main = async ({ string = 'JSxCAD' }) => {
   const letters = text({ font: greatVibes, curveSegments: 32 }, string);
-  const solid = letters.extrude({ height: 10 }).translate([-170, -20, 0]);
-console.log(`QQ/text/solid: ${JSON.stringify(solid)}`);
+  await writePdf({ path: 'tmp/text.pdf' }, letters.toZ0Surface());
 
+  const solid = letters.extrude({ height: 10 }).translate([-170, -20, 0]);
   await writeStl({ path: 'tmp/text.stl' }, solid);
 };

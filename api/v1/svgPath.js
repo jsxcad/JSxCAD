@@ -1,4 +1,5 @@
-import { Paths } from './Paths';
-import { svgPathToPaths } from '@jsxcad/convert-svg';
+import { Assembly } from './Assembly';
+import { fromSvgPath } from '@jsxcad/convert-svg';
 
-export const svgPath = (options = {}, svgPath) => Paths.fromPaths(svgPathToPaths(options, svgPath));
+export const svgPath = (options = {}, svgPath) =>
+  Assembly.fromGeometry(fromSvgPath(options, svgPath));

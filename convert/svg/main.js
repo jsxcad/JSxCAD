@@ -1,9 +1,11 @@
 import { canonicalize } from './canonicalize';
+import { fromSvg } from './fromSvg';
+import { fromSvgPath } from './fromSvgPath';
 import { toSvg } from './toSvg';
-import { svgPathToPaths } from './svgPathToPaths';
 
 export {
   canonicalize,
-  toSvg,
-  svgPathToPaths
+  fromSvg,
+  fromSvgPath,
+  toSvg
 };

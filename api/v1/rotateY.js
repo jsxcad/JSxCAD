@@ -1,8 +1,7 @@
 import { Assembly } from './Assembly';
-import { Z0Surface } from './Z0Surface';
-import { Solid } from './Solid';
 import { Paths } from './Paths';
-
+import { Solid } from './Solid';
+import { Z0Surface } from './Z0Surface';
 import { fromYRotation } from '@jsxcad/math-mat4';
 
 export const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));

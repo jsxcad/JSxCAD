@@ -37,12 +37,8 @@ export class Assembly {
     return toLazyGeometry(this).toComponents(options);
   }
 
-  toDisjointGeometry(options = {}) {
-console.log(`QQ/Assembly/toDisjointGeometry/this: ${JSON.stringify(this)}`);
-console.log(`QQ/Assembly/toDisjointGeometry/lazyGeometry: ${JSON.stringify(toLazyGeometry(this))}`);
-    const geometry = toLazyGeometry(this).toDisjointGeometry(options);
-console.log(`QQ/Assembly/toDisjointGeometry/disjointGeometry: ${JSON.stringify(geometry)}`);
-    return geometry;
+  toDisjointGeometry (options = {}) {
+    return toLazyGeometry(this).toDisjointGeometry(options);
   }
 
   toPaths (options = {}) {
@@ -62,8 +58,6 @@ console.log(`QQ/Assembly/toDisjointGeometry/disjointGeometry: ${JSON.stringify(g
   }
 
   transform (matrix) {
-console.log(`QQ/Solid/transform/this: ${JSON.stringify(this)}`);
-console.log(`QQ/Solid/transform/toLazyGeometry: ${JSON.stringify(toLazyGeometry(this))}`);
     return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));
   }
 

@@ -11,7 +11,7 @@ export const measureBoundingBox = (shape) => {
                     maxPoint = max(maxPoint, point);
                   });
   return [minPoint, maxPoint];
-}
+};
 
 const method = function () { return measureBoundingBox(this); };
 

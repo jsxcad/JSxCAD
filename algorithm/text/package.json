@@ -30,7 +30,9 @@
     "opentype.js": "^0.11.0"
   },
   "devDependencies": {
+    "@jsxcad/algorithm-assembly": "^0.0.50",
     "@jsxcad/algorithm-paths": "^0.0.50",
+    "@jsxcad/algorithm-z0surface": "^0.0.50",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",

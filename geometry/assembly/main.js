@@ -1,4 +1,4 @@
-import { addTag, assemble, difference, flip, intersection, eachPoint, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
+import { addTag, assemble, difference, eachPoint, flip, intersection, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/algorithm-assembly';
 
 // FIX: Make it clear this should be lazy.
 export class Assembly {
@@ -14,7 +14,6 @@ export class Assembly {
 
   assemble (...geometries) {
     const assembled = assemble(toGeometry(this), ...geometries.map(toGeometry));
-console.log(`QQ/lazy/assembly/assemble/assembled: ${JSON.stringify(assembled)}`);
     return fromGeometry(assembled);
   }
 
@@ -60,14 +59,10 @@ console.log(`QQ/lazy/assembly/assemble/assembled: ${JSON.stringify(assembled)}`)
   }
 
   toDisjointGeometry () {
-console.log(`QQ/lazyAssembly/toDisjointGeometry/this: ${JSON.stringify(this)}`);
-console.log(`QQ/lazyAssembly/toDisjointGeometry/geometry: ${JSON.stringify(toGeometry(this))}`);
     return toDisjointGeometry(toGeometry(this));
   }
 
   transform (matrix) {
-console.log(`QQ/lazy/assembly/transform/this: ${JSON.stringify(this)}`);
-console.log(`QQ/lazy/assembly/transform/this/toGeometry: ${JSON.stringify(toGeometry(this))}`);
     return fromGeometry(transform(matrix, toGeometry(this)));
   }
 
@@ -77,8 +72,7 @@ console.log(`QQ/lazy/assembly/transform/this/toGeometry: ${JSON.stringify(toGeom
 }
 
 export const fromGeometry = (geometry) => {
-console.log(`QQ/lazy/assembly/fromGeometry: ${JSON.stringify(geometry)}`);
-if (geometry instanceof Array) throw Error('die');
+  if (geometry instanceof Array) throw Error('die');
   return new Assembly(geometry);
 };
 

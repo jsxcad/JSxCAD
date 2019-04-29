@@ -1,13 +1,10 @@
 import { Assembly } from './Assembly';
+import { fromGeometry } from '@jsxcad/geometry-assembly';
 
 export class Points extends Assembly {
   constructor (geometry = fromGeometry({ assembly: [] })) {
     super(geometry);
   }
-
-  fromGeometry (geometry) {
-    return Points.fromGeometry(geometry);
-  }
 }
 
-Points.fromGeometry = (geometry) => new Solid(geometry);
+Points.fromGeometry = (geometry) => new Points(fromGeometry(geometry));

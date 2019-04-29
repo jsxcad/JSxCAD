@@ -1,8 +1,9 @@
-import { Assembly } from './Assembly';
 import { close, concatenate } from '@jsxcad/algorithm-path';
+
+import { Assembly } from './Assembly';
 import { fromGeometry } from '@jsxcad/geometry-assembly';
 
-const isSingleOpenPath = ({ paths }) => (paths.length == 1) && (paths[0][0] === null);
+const isSingleOpenPath = ({ paths }) => (paths.length === 1) && (paths[0][0] === null);
 
 export class Paths extends Assembly {
   constructor (geometry = fromGeometry({ assembly: [] })) {
@@ -22,7 +23,6 @@ export class Paths extends Assembly {
   }
 
   close () {
-console.log(`QQ/Paths/close/this: ${JSON.stringify(this)}`);
     const geometry = this.toPaths().toDisjointGeometry();
     if (!isSingleOpenPath(geometry)) {
       throw Error('Close requires a single open path.');
@@ -43,5 +43,5 @@ Paths.fromOpenPath = (openPath) => {
   } else {
     return new Paths(fromGeometry({ paths: [[null, ...openPath]] }));
   }
-}
+};
 Paths.fromPaths = (paths) => new Paths(fromGeometry({ paths: paths }));

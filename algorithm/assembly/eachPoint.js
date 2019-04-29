@@ -1,7 +1,7 @@
-import { map } from './map';
 import { eachPoint as eachPointOfPaths } from '@jsxcad/algorithm-paths';
 import { eachPoint as eachPointOfSolid } from '@jsxcad/algorithm-solid';
 import { eachPoint as eachPointOfSurface } from '@jsxcad/algorithm-surface';
+import { map } from './map';
 
 export const eachPoint = (options, operation, geometry) => {
   map(geometry,
@@ -16,4 +16,4 @@ export const eachPoint = (options, operation, geometry) => {
           eachPointOfSurface(options, operation, geometry.z0Surface);
         }
       });
-}
+};

@@ -7,9 +7,7 @@ import { writeFileSync } from '@jsxcad/sys';
 
 export const writeSvg = async ({ path }, ...shapes) => {
   const assembly = assemble(...shapes);
-console.log(`QQ/writeSvg/assembly: ${JSON.stringify(assembly)}`);
   const disjoint = assembly.toDisjointGeometry();
-console.log(`QQ/writeSvg/disjoint: ${JSON.stringify(disjoint)}`);
   await writeFileSync(path, () => toSvg({}, disjoint), disjoint);
 };
 

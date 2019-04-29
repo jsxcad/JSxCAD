@@ -1,6 +1,6 @@
-import { toStla } from './toStla';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
+import { toStla } from './toStla';
 
 const box1Solid =
   [

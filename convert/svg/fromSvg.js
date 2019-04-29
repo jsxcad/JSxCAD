@@ -1,13 +1,13 @@
 import { fromScaling, fromTranslation, fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
 
 import { DOMParser } from 'xmldom';
-import { svgPathToPaths as baseSvgPathToPaths } from './svgPathToPaths';
+import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
 import { toPath } from 'svg-points';
-import { transform } from '@jsxcad/algorithm-paths';
+import { transform } from '@jsxcad/algorithm-assembly';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
-const svgPathToPaths = (options = {}, svgPath) =>
-  baseSvgPathToPaths(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);
+const fromSvgPath = (options = {}, svgPath) =>
+  baseFromSvgPath(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);
 
 const ELEMENT_NODE = 1;
 const ATTRIBUTE_NODE = 2;
@@ -76,8 +76,8 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const svgToAssembly = (options = {}, svgString) => {
-  const assembly = [];
+export const fromSvg = (options = {}, svgString) => {
+  const geometry = { assembly: [] };
   const svg = new DOMParser().parseFromString(svgString, 'image/svg+xml');
 
   const measureScale = (node) => {
@@ -118,7 +118,7 @@ export const svgToAssembly = (options = {}, svgString) => {
         ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
 
         const output = (svgPath) =>
-          assembly.push({ paths: transform(scale(matrix), svgPathToPaths({}, svgPath)) });
+          geometry.assembly.push(transform(scale(matrix), fromSvgPath({}, svgPath)));
 
         // FIX: Should output a path given a stroke, should output a surface given a fill.
         switch (node.tagName) {
@@ -155,5 +155,5 @@ export const svgToAssembly = (options = {}, svgString) => {
   };
 
   walk({ matrix: identity() }, svg);
-  return assembly;
+  return geometry;
 };

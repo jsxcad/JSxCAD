@@ -82,5 +82,5 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) =
   }
 };
 
-export const svgPathToPaths = (options = {}, svgPath) =>
-  toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));
+export const fromSvgPath = (options = {}, svgPath) =>
+  ({ paths: toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath)))) });

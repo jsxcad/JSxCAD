@@ -1,5 +1,3 @@
-import { makeSurfacesConvex, toPolygons } from '@jsxcad/algorithm-solid';
-
 import { Solid } from './Solid';
 import { assemble } from './assemble';
 import { toStla } from '@jsxcad/convert-stl';

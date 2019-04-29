@@ -1,5 +1,6 @@
-import { canonicalize, scale, transform, translate } from './ops';
+import { scale, transform, translate } from './ops';
 
+import { canonicalize } from './canonicalize';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
@@ -25,5 +26,5 @@ export {
   toPoints,
   toPolygons,
   transform,
-  translate,
+  translate
 };
