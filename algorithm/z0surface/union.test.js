@@ -1,7 +1,8 @@
+import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
+
 import { degToRad } from '@jsxcad/math-utils';
 import { fromZRotation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
-import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
 import { union } from './union';
 
 const rectangle = [[[0, 0], [2, 0], [2, 1], [0, 1]]];

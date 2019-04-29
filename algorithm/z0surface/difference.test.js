@@ -1,8 +1,9 @@
+import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
+
 import { degToRad } from '@jsxcad/math-utils';
 import { difference } from './difference';
 import { fromZRotation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
-import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
 
 // FIX: Check multipolygon construction against example/v1/squares*.js
 

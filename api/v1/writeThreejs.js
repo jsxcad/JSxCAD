@@ -1,8 +1,8 @@
-import { assemblyToThreejsPage } from '@jsxcad/convert-threejs';
+import { toThreejsPage } from '@jsxcad/convert-threejs';
 import { writeFileSync } from '@jsxcad/sys';
 
-export const writeThreejsPage = (options, { paths, surfaces, solids }) => {
+export const writeThreejsPage = (options, shape) => {
   writeFileSync(options.path,
-                () => assemblyToThreejsPage(options, { paths, surfaces, solids }),
-                { paths, surfaces, solids });
+                () => toThreejsPage(options, shape.toDisjointGeometry()),
+                shape.toDisjointGeometry());
 };

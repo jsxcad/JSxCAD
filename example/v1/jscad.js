@@ -38,5 +38,7 @@ export const main = async () => {
                `
     });
 
-  writeStl({ path: 'tmp/jscad.stl' }, example001());
+  const output = example001();
+
+  await writeStl({ path: 'tmp/jscad.stl' }, output);
 };

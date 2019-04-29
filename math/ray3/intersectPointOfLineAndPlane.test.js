@@ -1,6 +1,6 @@
 import { fromPoints } from './fromPoints';
-import { intersectPointOfLineAndPlane } from './intersectPointOfLineAndPlane';
 import { fromPoints as fromPointsAPlane } from '@jsxcad/math-plane';
+import { intersectPointOfLineAndPlane } from './intersectPointOfLineAndPlane';
 import { test } from 'ava';
 
 test('line3: intersectPointOfLineAndPlane() should return a new line3 with correct values', (t) => {

@@ -1,10 +1,11 @@
+import { unitCubePolygons, unitGeodesicSphere20Polygons } from '@jsxcad/data-shape';
+
 import { buildConvexHull } from './buildConvexHull';
 import { buildConvexMinkowskiSum } from './buildConvexMinkowskiSum';
 import { canonicalize } from './canonicalize';
-import { toPoints } from '@jsxcad/algorithm-polygons';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
-import { unitCubePolygons, unitGeodesicSphere20Polygons } from '@jsxcad/data-shape';
 import { test } from 'ava';
+import { toPoints } from '@jsxcad/algorithm-polygons';
 
 test('Minkowski sum of a cube and a sphere.', t => {
   const points = canonicalize(buildConvexMinkowskiSum({},

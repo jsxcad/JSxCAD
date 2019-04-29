@@ -1,9 +1,10 @@
 import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
-import { buildRegularPolygon } from './buildRegularPolygon';
 import { fromScaling, fromZRotation, multiply } from '@jsxcad/math-mat4';
+import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
+
+import { buildRegularPolygon } from './buildRegularPolygon';
 import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius';
 import { test } from 'ava';
-import { unitSquarePolygon, unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
 test('A square', t => {
   const edgeLength = regularPolygonEdgeLengthToRadius(1, 4);

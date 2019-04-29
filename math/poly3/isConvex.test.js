@@ -1,5 +1,5 @@
-import { isConvex } from './isConvex';
 import { fromPoints } from './fromPoints';
+import { isConvex } from './isConvex';
 import { test } from 'ava';
 
 test('poly3: convex poly3 is convex', (t) => {

@@ -17,6 +17,12 @@ module.exports = {
                      "ObjectExpression": "first",
                      "SwitchCase": 1, 
                      "VariableDeclarator": "first"
-                   }]
+                   }],
+        "sort-imports": ["error", {
+            "ignoreCase": false,
+            "ignoreDeclarationSort": false,
+            "ignoreMemberSort": false,
+            "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+        }]
     }
 };

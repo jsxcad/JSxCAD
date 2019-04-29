@@ -1,88 +1,84 @@
-import { fromGeometries } from '@jsxcad/geometry-assembly';
-import { toPoints } from '@jsxcad/algorithm-paths';
+import { fromGeometry } from '@jsxcad/geometry-assembly';
 
 export class Assembly {
   as (tag) {
-    const tags = this.geometry.getProperty('tags', []);
-    return Assembly.fromGeometry(this.geometry.withProperty('tags', [tag, ...tags]));
+    return this.fromLazyGeometry(toLazyGeometry(this).addTag(tag));
   }
 
-  constructor (geometry) {
-    this.geometry = geometry || fromGeometries({}, []);
+  assemble (...shapes) {
+    return this.fromLazyGeometry(toLazyGeometry(this).assemble(...shapes.map(toLazyGeometry)));
+  }
+
+  constructor (lazyGeometry = fromGeometry({ assembly: [] })) {
+    this.lazyGeometry = lazyGeometry;
   }
 
   difference (...shapes) {
-    return Assembly.fromGeometry(this.geometry.difference(...shapes.map(toAssembly)));
+    return this.fromLazyGeometry(toLazyGeometry(this).difference(...shapes.map(toLazyGeometry)));
+  }
+
+  eachPoint (options = {}, operation) {
+    toLazyGeometry(this).eachPoint(options, operation);
+  }
+
+  fromLazyGeometry (geometry) {
+    return Assembly.fromLazyGeometry(geometry);
   }
 
   intersection (...shapes) {
-    return Assembly.fromGeometry(this.geometry.intersection(...shapes.map(toAssembly)));
+    return this.fromLazyGeometry(toLazyGeometry(this).intersection(...shapes.map(toLazyGeometry)));
   }
 
-  material (material) {
-    return Assembly.fromGeometry(this.geometry.withProperty('material', material));
+  toLazyGeometry () {
+    return this.lazyGeometry;
   }
 
-  toGeometry () {
-    return this.geometry;
+  toComponents (options = {}) {
+    return toLazyGeometry(this).toComponents(options);
   }
 
-  toSolid (options = {}) {
-    return this.geometry.toSolid(options);
+  toDisjointGeometry (options = {}) {
+    return toLazyGeometry(this).toDisjointGeometry(options);
   }
 
-  toSolids (options = {}) {
-    return this.geometry.toSolids(options);
-  }
-
-  toZ0Drawing (options = {}) {
-    return this.geometry.toZ0Drawing(options);
-  }
-
-  toZ0Drawings (options = {}) {
-    return this.geometry.toZ0Drawings(options);
-  }
-
-  toZ0Surface (options = {}) {
-    return this.geometry.toZ0Surface(options);
-  }
-
-  toZ0Surfaces (options = {}) {
-    return this.geometry.toZ0Surfaces(options);
+  toPaths (options = {}) {
+    return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));
   }
 
   toPoints (options = {}) {
-    return toPoints(options, this.toPaths(options));
+    return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));
   }
 
-  toPolygons (options = {}) {
-    return this.toSolid(options);
+  toSolid (options = {}) {
+    return this.fromLazyGeometry(toLazyGeometry(this).toSolid(options));
+  }
+
+  toZ0Surface (options = {}) {
+    return this.fromLazyGeometry(toLazyGeometry(this).toZ0Surface(options));
   }
 
   transform (matrix) {
-    return Assembly.fromGeometry(this.geometry.transform(matrix));
+    return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));
   }
 
   union (...shapes) {
-    return Assembly.fromGeometry(this.geometry.union(...shapes.map(toAssembly)));
+    return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
   }
 }
 
-const toAssembly = (shape) => (shape instanceof Assembly) ? shape : fromGeometries({}, [shape]);
+const toLazyGeometry = (shape) => shape.toLazyGeometry();
 
-export const unionLazily = (shape, ...shapes) => {
-  if (shapes.some(arg => arg === undefined)) throw Error('die');
-  if (shape === undefined) throw Error('die');
-  if (shapes[0] === undefined) throw Error(`die: ${shapes.length}`);
-  return Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).union(...shapes.map(shape => shape.toGeometry())));
-};
+export const assembleLazily = (shape, ...shapes) =>
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).assemble(...shapes.map(toLazyGeometry)));
+
+export const unionLazily = (shape, ...shapes) =>
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).union(...shapes.map(toLazyGeometry)));
 
 export const differenceLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).difference(...shapes.map(shape => shape.toGeometry())));
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
 
 export const intersectionLazily = (shape, ...shapes) =>
-  Assembly.fromGeometry(fromGeometries({}, [shape.toGeometry()]).intersection(...shapes.map(shape => shape.toGeometry())));
+  Assembly.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));
 
-// FIX: This needs clear documentation.
-Assembly.fromGeometry = (geometry) => new Assembly(geometry);
-Assembly.fromGeometries = (geometries) => Assembly.fromGeometry(fromGeometries({}, geometries));
+Assembly.fromLazyGeometry = (lazyGeometry) => new Assembly(lazyGeometry);
+Assembly.fromGeometry = (geometry) => new Assembly(fromGeometry(geometry));

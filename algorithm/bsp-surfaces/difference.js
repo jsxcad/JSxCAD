@@ -1,10 +1,10 @@
 import { build } from './build';
 import { clipTo } from './clipTo';
-import { fromSurfaces } from './fromSurfaces';
-import { flip } from './flip';
-import { toSurfaces } from './toSurfaces';
-import { measureBoundingSphere } from '@jsxcad/algorithm-solid';
 import { distance } from '@jsxcad/math-vec3';
+import { flip } from './flip';
+import { fromSurfaces } from './fromSurfaces';
+import { measureBoundingSphere } from '@jsxcad/algorithm-solid';
+import { toSurfaces } from './toSurfaces';
 
 const doesNotOverlap = (a, b) => {
   const [centerA, radiusA] = measureBoundingSphere(a);

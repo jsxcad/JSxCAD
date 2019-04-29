@@ -1,10 +1,10 @@
 import { build } from './build';
 import { clipTo } from './clipTo';
+import { distance } from '@jsxcad/math-vec3';
 import { fromPolygons } from './fromPolygons';
 import { invert } from './invert';
-import { toPolygons } from './toPolygons';
 import { measureBoundingSphere } from '@jsxcad/algorithm-polygons';
-import { distance } from '@jsxcad/math-vec3';
+import { toPolygons } from './toPolygons';
 
 const doesNotOverlap = (a, b) => {
   const [centerA, radiusA] = measureBoundingSphere(a);

@@ -1,6 +1,7 @@
-import { buildRegularPolygon } from './buildRegularPolygon';
-import { buildConvexHull } from '@jsxcad/algorithm-points';
 import { scale, translate } from '@jsxcad/algorithm-path';
+
+import { buildConvexHull } from '@jsxcad/algorithm-points';
+import { buildRegularPolygon } from './buildRegularPolygon';
 import { toPoints } from '@jsxcad/algorithm-paths';
 
 export const buildRingSphere = ({ resolution = 20 }) => {

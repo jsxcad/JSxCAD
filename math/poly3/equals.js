@@ -1,6 +1,6 @@
 import { equals as equalsPlane } from '@jsxcad/math-plane';
-import { toPlane } from './toPlane';
 import { equals as equalsVec3 } from '@jsxcad/math-vec3';
+import { toPlane } from './toPlane';
 
 /**
  * Compare two polygons for equality

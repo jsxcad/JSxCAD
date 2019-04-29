@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/math-vec2';
-import { fromValues } from './fromValues';
 import { fromPoints } from './fromPoints';
+import { fromValues } from './fromValues';
 import { origin } from './origin';
 import { test } from 'ava';
 

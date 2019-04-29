@@ -1,4 +1,4 @@
-import { CSG } from './CSG';
+import { Solid } from './Solid';
 
 /**
  * polyhedron({      // openscad-like (e.g. pyramid)
@@ -17,5 +17,5 @@ export const polyhedron = ({ points = [], triangles = [] }) => {
     polygons.push(triangle.map(point => points[point]));
   }
 
-  return CSG.fromPolygons(polygons);
+  return Solid.fromPolygons(polygons);
 };

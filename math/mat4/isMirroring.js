@@ -1,4 +1,4 @@
-import { dot, cross } from '@jsxcad/math-vec3';
+import { cross, dot } from '@jsxcad/math-vec3';
 
 /**
  * determine whether the input matrix is a mirroring transformation

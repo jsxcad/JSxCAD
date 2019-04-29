@@ -1,10 +1,9 @@
+import { main } from './butterfly';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './butterfly';
 
-main();
-
-test('Expected stl', t => {
+test('Expected stl', async (t) => {
+  await main();
   t.is(readFileSync('tmp/butterfly.pdf', { encoding: 'utf8' }),
        readFileSync('butterfly.pdf', { encoding: 'utf8' }));
 });

@@ -1,7 +1,8 @@
-import { fromPoints } from '@jsxcad/math-plane';
-import { cutTrianglesByPlane } from './cutTrianglesByPlane';
-import { test } from 'ava';
 import { unitCubePolygons, unitGeodesicSphere20Polygons, unitRegularTetrahedronPolygons } from '@jsxcad/data-shape';
+
+import { cutTrianglesByPlane } from './cutTrianglesByPlane';
+import { fromPoints } from '@jsxcad/math-plane';
+import { test } from 'ava';
 import { toTriangles } from './toTriangles';
 
 test('Slice a cube to form a square.', t => {
@@ -14,8 +15,7 @@ test('Slice a cube to form a square.', t => {
 test('Slice a tetrahedron to form a triangle.', t => {
   const input = toTriangles({}, unitRegularTetrahedronPolygons);
   const polygons = cutTrianglesByPlane(fromPoints([0, 0, 0], [1, 0, 0], [0, 1, 0]), input);
-  // FIX: Check that the tetrahedron is a tetrahedron -- this looks like a pyramid.
-  t.deepEqual(polygons, [[[-30, 0, 0], [0, -30, 0], [30, 0, 0], [0, 30, 0]]]);
+  t.deepEqual(polygons, [[[-1, 0, 0], [0, -1, 0], [1, 0, 0], [0, 1, 0]]]);
 });
 
 test('Slice a sphere to form a circle.', t => {

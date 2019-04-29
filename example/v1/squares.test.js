@@ -1,10 +1,9 @@
+import { main } from './squares';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './squares';
 
-main({});
-
-test('Expected pdf', t => {
+test('Expected pdf', async (t) => {
+  await main({});
   t.is(readFileSync('tmp/squares.pdf', { encoding: 'utf8' }),
        readFileSync('squares.pdf', { encoding: 'utf8' }));
 });

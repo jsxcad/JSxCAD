@@ -1,9 +1,10 @@
-import { CSG } from './CSG';
 import { assertEmpty, assertNumber } from './assert';
+
+import { Solid } from './Solid';
 import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 const buildCylinder = ({ r1 = 1, r2 = 1, h = 1, edges = 32 }) => {
-  return CSG.fromPolygons(buildRegularPrism({ edges: edges })).scale([r1, r1, h]);
+  return Solid.fromPolygons(buildRegularPrism({ edges: edges })).scale([r1, r1, h]);
 };
 
 /**

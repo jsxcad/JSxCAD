@@ -1,5 +1,5 @@
-import { polygonsToStla } from './polygonsToStla';
+import { toStla } from './toStla';
 
 export {
-  polygonsToStla
+  toStla
 };

@@ -1,8 +1,8 @@
 import { buildRegularPolygon } from './buildRegularPolygon';
 import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { fromPoint } from '@jsxcad/math-vec3';
 import { subdivideTriangle } from './subdivideTriangle';
 import { test } from 'ava';
-import { fromPoint } from '@jsxcad/math-vec3';
 
 test('Build unit triangle and subdivide.', t => {
   const triangle = canonicalize([buildRegularPolygon({ edges: 3 })])[0];

@@ -1,8 +1,9 @@
+import { Solid } from './Solid';
 import { buildConvexHull } from '@jsxcad/algorithm-points';
-import { CSG } from './CSG';
 
 export const hull = (...geometries) => {
-  const allPoints = [].concat(...geometries.map(geometry => geometry.toPoints()));
-
-  return CSG.fromPolygons(buildConvexHull({}, allPoints));
+  // FIX: Support z0Surface hulling.
+  const points = [];
+  geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));
+  return Solid.fromPolygons(buildConvexHull({}, points));
 };

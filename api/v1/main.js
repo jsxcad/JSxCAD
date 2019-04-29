@@ -7,22 +7,26 @@
  * the api uses.
  */
 
-import { CAG } from './CAG';
-import { CSG } from './CSG';
-import { Path2D } from './Path2D';
+import { loadFont, text } from './text';
+
+import { Paths } from './Paths';
+import { Points } from './Points';
+import { Solid } from './Solid';
+import { Z0Surface } from './Z0Surface';
 import { acos } from './acos';
+import { assemble } from './assemble';
 import { circle } from './circle';
 import { cos } from './cos';
-import { cube } from './cube';
 import { crossSection } from './crossSection';
+import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
 import { hsl2rgb } from './hsl2rgb';
 import { hull } from './hull';
 import { intersection } from './intersection';
-import { loadFont, text } from './text';
 import { max } from './max';
+import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
@@ -42,16 +46,17 @@ import { translate } from './translate';
 import { union } from './union';
 import { writePaths } from './writePaths';
 import { writePdf } from './writePdf';
-import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
-  CAG,
-  CSG,
-  Path2D,
+  Solid,
+  Paths,
+  Points,
+  Z0Surface,
   acos,
+  assemble,
   circle,
   crossSection,
   cos,
@@ -64,6 +69,7 @@ export {
   intersection,
   loadFont,
   max,
+  measureBoundingBox,
   minkowski,
   polyhedron,
   readDst,
@@ -84,7 +90,6 @@ export {
   union,
   writePaths,
   writePdf,
-  writeShape,
   writeStl,
   writeSvg,
   writeThreejsPage

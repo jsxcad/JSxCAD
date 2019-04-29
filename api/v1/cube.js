@@ -1,8 +1,9 @@
-import { CSG } from './CSG';
 import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
-import { buildRingSphere, buildRegularPrism,
+import { buildRegularPrism, buildRingSphere,
          regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
-import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/algorithm-points';
+
+import { Solid } from './Solid';
+import { minkowski } from './minkowski';
 
 // Dispatch mechanism.
 // TODO: Move this somewhere else.
@@ -29,7 +30,7 @@ const chain = (name, ...dispatches) => {
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 // Note: We can't call this while bootstrapping, but we could memoize the result afterward.
-const unitCube = () => CSG.fromPolygons(buildRegularPrism({ edges: 4 }))
+const unitCube = () => Solid.fromPolygons(buildRegularPrism({ edges: 4 }))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
@@ -65,13 +66,8 @@ const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, 
   assertEmpty(rest);
   assertNumber(roundRadius);
   assertNumber(resolution);
-  return () => CSG.fromPolygons(
-    buildConvexHull({},
-                    buildConvexMinkowskiSum({},
-                                            unitCube().scale(radius - roundRadius * 2).toPoints(),
-                                            CSG.fromPolygons(buildRingSphere({ resolution }))
-                                                .scale(roundRadius)
-                                                .toPoints())));
+  return () => minkowski(unitCube().scale(radius - roundRadius * 2),
+                         Solid.fromPolygons(buildRingSphere({ resolution })).scale(roundRadius));
 };
 
 // cube({ center: [0, 0, 0], radius: 1 })
@@ -134,5 +130,5 @@ export const cube = chain('cube',
                           cubeSizesCenter,
                           cubeSizeCenter);
 
-// Install support for CSG.cube and CSG.roundedCube.
-CSG.cube = cube;
+// Install support for Solid.cube and Solid.roundedCube.
+Solid.cube = cube;

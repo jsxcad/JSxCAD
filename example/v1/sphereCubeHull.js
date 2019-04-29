@@ -1,4 +1,4 @@
-import { cube, sphere, writeStl, hull } from '@jsxcad/api-v1';
+import { cube, hull, sphere, writeStl } from '@jsxcad/api-v1';
 
 export function main () {
   let x = hull(sphere(),

@@ -1,5 +1,5 @@
-import { pathsToPdf } from './pathsToPdf';
+import { toPdf } from './toPdf';
 
 export {
-  pathsToPdf
+  toPdf
 };
