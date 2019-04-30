@@ -1,5 +1,5 @@
-import { dstToZ0Paths } from './dstToZ0Paths';
+import { fromDst } from './fromDst';
 
 export {
-  dstToZ0Paths
+  fromDst
 };

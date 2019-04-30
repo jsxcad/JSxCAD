@@ -1,4 +1,4 @@
-import { CSG, Polygon, Vertex, Vector3D } from './csg/csg';
+import { CSG, Polygon, Vector3D, Vertex } from './csg/csg';
 
 const toOldPoly = (polygon) => new Polygon(polygon.map(point => new Vertex(new Vector3D(point[0], point[1], point[2]),
                                                                            new Vector3D(0, 0, 0))));

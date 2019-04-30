@@ -1,5 +1,6 @@
-import { fromValues } from '@jsxcad/math-mat4';
 import { cross, fromScalar, multiply, random, unit } from '@jsxcad/math-vec3';
+
+import { fromValues } from '@jsxcad/math-mat4';
 
 const X = 0;
 const Y = 1;

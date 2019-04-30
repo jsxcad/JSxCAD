@@ -1,5 +1,5 @@
-import { assemblyToThreejsPage } from './assemblyToThreejsPage';
+import { toThreejsPage } from './toThreejsPage';
 
 export {
-  assemblyToThreejsPage
+  toThreejsPage
 };

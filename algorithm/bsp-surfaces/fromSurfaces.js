@@ -1,6 +1,6 @@
+import { assertCoplanar } from '@jsxcad/algorithm-surface';
 import { build } from './build';
 import { create } from './create';
-import { assertCoplanar } from '@jsxcad/algorithm-surface';
 
 export const fromSurfaces = (options = {}, surfaces) => {
   for (const surface of surfaces) {

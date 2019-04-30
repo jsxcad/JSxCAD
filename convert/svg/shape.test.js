@@ -1,7 +1,8 @@
-import { canonicalize } from './canonicalize';
 import { getPoints, toPath } from 'svg-shapes';
-import curvifySvgPath from 'curvify-svg-path';
+
 import absolutifySvgPath from 'abs-svg-path';
+import { canonicalize } from './canonicalize';
+import curvifySvgPath from 'curvify-svg-path';
 import parseSvgPath from 'parse-svg-path';
 import { test } from 'ava';
 

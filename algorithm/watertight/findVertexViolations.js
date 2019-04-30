@@ -1,8 +1,7 @@
-// Consider replacing the math library.
+import { equals, length, subtract } from '@jsxcad/math-vec3';
 
 import { ensureMapElement } from './ensureMapElement';
 import { fromPoints } from '@jsxcad/math-ray3';
-import { equals, length, subtract } from '@jsxcad/math-vec3';
 
 const toIdentity = JSON.stringify;
 

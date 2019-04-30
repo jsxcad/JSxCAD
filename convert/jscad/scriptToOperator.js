@@ -1,8 +1,10 @@
-import { fromPolygons } from '@jsxcad/algorithm-solid';
-import { parse, print } from 'recast';
-import types from 'ast-types';
 import * as api from './api';
+
+import { parse, print } from 'recast';
+
+import { fromPolygons } from '@jsxcad/algorithm-solid';
 import { readFile } from '@jsxcad/sys';
+import types from 'ast-types';
 
 const unpackApi = (api) => {
   const operators = {};
@@ -34,9 +36,9 @@ const createJscadFunction = (script, operators) => {
       )(operators);
   const getAssembly = (params) => {
     const output = main(params);
-    const result = [];
+    const result = { assembly: [] };
     if (output.polygons) {
-      result.push({ solid: csgToSolid(output) });
+      result.assembly.push({ solid: csgToSolid(output) });
     }
     return result;
   };

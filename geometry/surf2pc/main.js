@@ -1,7 +1,8 @@
 import { difference, intersection, union } from '@jsxcad/algorithm-z0surface';
-import { toZ0Polygons } from '@jsxcad/algorithm-paths';
 import { flip, transform } from '@jsxcad/algorithm-polygons';
 import { identity, multiply } from '@jsxcad/math-mat4';
+
+import { toZ0Polygons } from '@jsxcad/algorithm-paths';
 
 export class Surf2Pc {
   constructor ({ paths = [], transforms = identity() }) {

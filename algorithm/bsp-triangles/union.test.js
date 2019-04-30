@@ -1,6 +1,7 @@
+import { toGeneric, transform } from '@jsxcad/algorithm-polygons';
+
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
-import { toGeneric, transform } from '@jsxcad/algorithm-polygons';
 import { union } from './union';
 
 const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],

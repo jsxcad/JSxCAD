@@ -1,6 +1,7 @@
+import { cross, fromValues, length as lengthOfVec3, scale } from '@jsxcad/math-vec3';
+
 import { fromPointAndDirection } from './fromPointAndDirection';
 import { solve2Linear } from '@jsxcad/math-utils';
-import { cross, fromValues, length as lengthOfVec3, scale } from '@jsxcad/math-vec3';
 
 const EPS = 1e-5;
 

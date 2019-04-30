@@ -1,6 +1,6 @@
+import { main } from './interlock-proof-of-concept';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { main } from './interlock-proof-of-concept';
 
 test('Expected stl', async (t) => {
   await main();

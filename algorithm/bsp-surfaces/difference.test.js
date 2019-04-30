@@ -1,7 +1,8 @@
+import { fromPolygons, toGeneric, transform } from '@jsxcad/algorithm-solid';
+
 import { difference } from './difference';
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
-import { fromPolygons, toGeneric, transform } from '@jsxcad/algorithm-solid';
 
 const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],

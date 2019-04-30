@@ -1,5 +1,5 @@
-import { toPlane } from '@jsxcad/math-poly3';
 import { assertCoplanar } from '@jsxcad/algorithm-surface';
+import { toPlane } from '@jsxcad/math-poly3';
 
 export const fromPolygons = (options = {}, polygons) => {
   const coplanarGroups = new Map();

@@ -1,8 +1,9 @@
-import { Assembly } from './Assembly';
-import { CAG } from './CAG';
-import { CSG } from './CSG';
-import { Path2D } from './Path2D';
 import { fromXRotation, fromYRotation, fromZRotation, multiply } from '@jsxcad/math-mat4';
+
+import { Assembly } from './Assembly';
+import { Paths } from './Paths';
+import { Solid } from './Solid';
+import { Z0Surface } from './Z0Surface';
 
 const a2r = (angle) => angle * 0.017453292519943295;
 
@@ -12,6 +13,6 @@ export const rotate = ([x = 0, y = 0, z = 0], shape) =>
 const method = function (angles) { return rotate(angles, this); };
 
 Assembly.prototype.rotate = method;
-CAG.prototype.rotate = method;
-CSG.prototype.rotate = method;
-Path2D.prototype.rotate = method;
+Paths.prototype.rotate = method;
+Solid.prototype.rotate = method;
+Z0Surface.prototype.rotate = method;

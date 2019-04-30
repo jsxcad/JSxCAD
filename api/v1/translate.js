@@ -1,7 +1,8 @@
 import { Assembly } from './Assembly';
-import { CAG } from './CAG';
-import { CSG } from './CSG';
-import { Path2D } from './Path2D';
+import { Paths } from './Paths';
+import { Solid } from './Solid';
+import { Z0Surface } from './Z0Surface';
+
 import { fromTranslation } from '@jsxcad/math-mat4';
 
 export const translate = ([x = 0, y = 0, z = 0], shape) => {
@@ -13,6 +14,6 @@ const method = function (vector) {
 };
 
 Assembly.prototype.translate = method;
-CAG.prototype.translate = method;
-CSG.prototype.translate = method;
-Path2D.prototype.translate = method;
+Paths.prototype.translate = method;
+Solid.prototype.translate = method;
+Z0Surface.prototype.translate = method;

@@ -1,6 +1,7 @@
-import { fromPoints as fromPointsAPlane } from '@jsxcad/math-plane';
-import { fromPoints as fromPointsAPoly3, toPlane } from '@jsxcad/math-poly3';
 import { add, dot, equals, fromScalar, multiply, squaredDistance, subtract } from '@jsxcad/math-vec3';
+import { fromPoints as fromPointsAPoly3, toPlane } from '@jsxcad/math-poly3';
+
+import { fromPoints as fromPointsAPlane } from '@jsxcad/math-plane';
 
 const EPS = 1e-5;
 const W = 3;

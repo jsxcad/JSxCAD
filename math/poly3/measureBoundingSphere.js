@@ -1,5 +1,6 @@
-import { measureBoundingBox } from './measureBoundingBox';
 import { add, distance, scale } from '@jsxcad/math-vec3';
+
+import { measureBoundingBox } from './measureBoundingBox';
 
 /** Measure the bounding sphere of the given poly3
  * @param {poly3} the poly3 to measure

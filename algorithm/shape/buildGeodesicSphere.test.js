@@ -1,7 +1,8 @@
+import { unitGeodesicSphere20Polygons, unitGeodesicSphere80Polygons } from '@jsxcad/data-shape';
+
 import { buildGeodesicSphere } from './buildGeodesicSphere';
 import { canonicalize } from '@jsxcad/algorithm-polygons';
 import { test } from 'ava';
-import { unitGeodesicSphere20Polygons, unitGeodesicSphere80Polygons } from '@jsxcad/data-shape';
 
 test('Build minimal sphere.', t => {
   t.deepEqual(canonicalize(buildGeodesicSphere({})), unitGeodesicSphere20Polygons);

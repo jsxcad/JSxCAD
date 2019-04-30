@@ -1,8 +1,8 @@
+import { fromPolygons } from './fromPolygons';
 import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { test } from 'ava';
-import { unitCubePolygons } from '@jsxcad/data-shape';
 import { toGeneric } from './toGeneric';
-import { fromPolygons } from './fromPolygons';
+import { unitCubePolygons } from '@jsxcad/data-shape';
 
 test('Retessellate a cube to a defragmented triangulation.', t => {
   const retessellated = makeSurfacesConvex({}, fromPolygons({}, unitCubePolygons));

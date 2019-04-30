@@ -1,5 +1,6 @@
-import { canonicalize } from '@jsxcad/algorithm-paths';
 import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
+
+import { canonicalize } from '@jsxcad/algorithm-paths';
 import { difference as polygonClippingDifference } from 'polygon-clipping';
 
 /**

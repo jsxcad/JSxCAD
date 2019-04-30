@@ -1,6 +1,6 @@
 import { create } from './create';
-import { toPlane } from '@jsxcad/math-poly3';
 import { splitPolygon } from './splitPolygon';
+import { toPlane } from '@jsxcad/math-poly3';
 
 // Build a BSP tree out of `polygons`. When called on an existing tree, the
 // new polygons are filtered down to the bottom of the tree and become new

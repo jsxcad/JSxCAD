@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/math-vec2';
-import { fromValues } from './fromValues';
 import { direction } from './direction';
 import { fromPoints } from './fromPoints';
+import { fromValues } from './fromValues';
 import { test } from 'ava';
 
 test('line2: direction() should return proper direction', (t) => {

@@ -1,7 +1,7 @@
 import { blessAsTriangles } from './blessAsTriangles';
-import { unitSquarePolygon } from '@jsxcad/data-shape';
-import { toTriangles } from './toTriangles';
 import { test } from 'ava';
+import { toTriangles } from './toTriangles';
+import { unitSquarePolygon } from '@jsxcad/data-shape';
 
 test('Triangulate a square.', t => {
   t.deepEqual(toTriangles({}, [unitSquarePolygon]),

@@ -1,5 +1,7 @@
-import { solve2Linear } from '@jsxcad/math-utils';
 import { add, cross, equals, length, normalize, subtract } from '@jsxcad/math-vec2';
+
+import { solve2Linear } from '@jsxcad/math-utils';
+
 const EPS = 1e-5;
 
 // see if the line between p0start and p0end intersects with the line between p1start and p1end

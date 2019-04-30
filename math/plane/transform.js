@@ -1,7 +1,8 @@
+import { add, cross, multiply, random, transform as transformVec3 } from '@jsxcad/math-vec3';
+
 import { flip } from './flip';
 import { fromPoints } from './fromPoints';
 import { isMirroring } from '@jsxcad/math-mat4';
-import { add, cross, multiply, random, transform as transformVec3 } from '@jsxcad/math-vec3';
 
 /**
  * Transform the given plane using the given matrix

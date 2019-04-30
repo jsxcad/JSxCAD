@@ -1,7 +1,8 @@
 import { Assembly } from './Assembly';
-import { CAG } from './CAG';
-import { CSG } from './CSG';
-import { Path2D } from './Path2D';
+import { Paths } from './Paths';
+import { Solid } from './Solid';
+import { Z0Surface } from './Z0Surface';
+
 import { fromScaling } from '@jsxcad/math-mat4';
 
 export const scale = (factor, shape) => {
@@ -17,6 +18,6 @@ export const scale = (factor, shape) => {
 const method = function (factor) { return scale(factor, this); };
 
 Assembly.prototype.scale = method;
-CAG.prototype.scale = method;
-CSG.prototype.scale = method;
-Path2D.prototype.scale = method;
+Paths.prototype.scale = method;
+Solid.prototype.scale = method;
+Z0Surface.prototype.scale = method;
