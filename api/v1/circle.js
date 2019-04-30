@@ -1,10 +1,10 @@
 import { assertBoolean, assertEmpty, assertNumber } from './assert';
 
-import { Z0Surface } from './Z0Surface';
+import { Shape } from './Shape';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 
 const buildCircle = ({ r = 1, fn = 32, center = false }) =>
-  Z0Surface.fromPoints(buildRegularPolygon({ edges: fn })).scale(r);
+  Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: fn })).scale(r);
 
 /**
  *

@@ -1,6 +1,6 @@
 import { max, min } from '@jsxcad/math-vec3';
 
-import { Assembly } from './Assembly';
+import { Shape } from './Shape';
 
 export const measureBoundingBox = (shape) => {
   let minPoint = [Infinity, Infinity, Infinity];
@@ -15,4 +15,4 @@ export const measureBoundingBox = (shape) => {
 
 const method = function () { return measureBoundingBox(this); };
 
-Assembly.prototype.measureBoundingBox = method;
+Shape.prototype.measureBoundingBox = method;

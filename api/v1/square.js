@@ -1,10 +1,10 @@
 import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
-import { Z0Surface } from './Z0Surface';
+import { Shape } from './Shape';
 
 const buildSquare = ({ scale = [1, 1, 1] }) => {
-  const shape = Z0Surface.fromPath(buildRegularPolygon({ edges: 4 }));
+  const shape = Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 }));
   const transformedShape = shape.rotateZ(45).scale(scale);
   return transformedShape;
 };

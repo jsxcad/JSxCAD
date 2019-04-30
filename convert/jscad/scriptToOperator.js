@@ -34,7 +34,7 @@ const createJscadFunction = (script, operators) => {
                     return { main, getParameterDefinitions };
                    `
       )(operators);
-  const getAssembly = (params) => {
+  const getGeometry = (params) => {
     const output = main(params);
     const result = { assembly: [] };
     if (output.polygons) {
@@ -42,7 +42,7 @@ const createJscadFunction = (script, operators) => {
     }
     return result;
   };
-  return { getAssembly, getParameterDefinitions };
+  return { getGeometry, getParameterDefinitions };
 };
 
 const replaceIncludes = async (ast) => {
