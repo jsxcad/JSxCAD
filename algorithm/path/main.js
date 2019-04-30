@@ -6,6 +6,7 @@ import { concatenate } from './concatenate';
 import { flip } from './flip';
 import { isClosed } from './isClosed';
 import { measureArea } from './measureArea';
+import { open } from './open';
 import { toGeneric } from './toGeneric';
 import { toPolygon } from './toPolygon';
 import { toSegments } from './toSegments';
@@ -19,6 +20,7 @@ export {
   flip,
   isClosed,
   measureArea,
+  open,
   toGeneric,
   toPolygon,
   toSegments,

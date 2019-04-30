@@ -1,9 +1,9 @@
 import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
 
-import { Solid } from './Solid';
+import { Shape } from './Shape';
 import { buildRegularTetrahedron } from '@jsxcad/algorithm-shape';
 
-const buildTetrahedron = ({ r = 1 }) => Solid.fromPolygons(buildRegularTetrahedron({})).scale([r, r, r]);
+const buildTetrahedron = ({ r = 1 }) => Shape.fromPolygons(buildRegularTetrahedron({})).scale([r, r, r]);
 
 const decode = (params) => {
   // sphere();

@@ -1,12 +1,13 @@
-import { Solid } from './Solid';
-import { Z0Surface } from './Z0Surface';
+import { Shape } from './Shape';
 import { extrudeLinear } from '@jsxcad/algorithm-shape';
 
 export const extrude = ({ height } = {}, shape) => {
   const geometry = shape.toZ0Surface();
-  return Solid.fromPolygons(extrudeLinear({ height: height }, geometry.lazyGeometry.geometry.z0Surface));
+  const extrusion = extrudeLinear({ height: height }, geometry.lazyGeometry.geometry.z0Surface);
+  const extrudedShape = Shape.fromPolygonsToSolid(extrusion);
+  return extrudedShape;
 };
 
 const method = function (options) { return extrude(options, this); };
 
-Z0Surface.prototype.extrude = method;
+Shape.prototype.extrude = method;

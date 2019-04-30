@@ -9,10 +9,7 @@
 
 import { loadFont, text } from './text';
 
-import { Paths } from './Paths';
-import { Points } from './Points';
-import { Solid } from './Solid';
-import { Z0Surface } from './Z0Surface';
+import { Shape } from './Shape';
 import { acos } from './acos';
 import { assemble } from './assemble';
 import { circle } from './circle';
@@ -51,10 +48,7 @@ import { writeSvg } from './writeSvg';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
-  Solid,
-  Paths,
-  Points,
-  Z0Surface,
+  Shape,
   acos,
   assemble,
   circle,

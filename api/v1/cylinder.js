@@ -1,10 +1,10 @@
 import { assertEmpty, assertNumber } from './assert';
 
-import { Solid } from './Solid';
+import { Shape } from './Shape';
 import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 const buildCylinder = ({ r1 = 1, r2 = 1, h = 1, edges = 32 }) => {
-  return Solid.fromPolygons(buildRegularPrism({ edges: edges })).scale([r1, r1, h]);
+  return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: edges })).scale([r1, r1, h]);
 };
 
 /**
