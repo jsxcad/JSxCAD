@@ -549,8 +549,6 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry} = {}) => {
 
   if (typeof watchFile !== 'undefined') {
     watchFile(path, (file, data) => {
-console.log(`QQ/watchFile/file: ${JSON.stringify(file)}`);
-console.log(`QQ/watchFile/data: ${JSON.stringify(data)}`);
                       if (data !== undefined) {
                         updateDatasets(api.toThreejsGeometry(data));
                       }
@@ -632,7 +630,6 @@ console.log(`QQ/watchFile/data: ${JSON.stringify(data)}`);
 };
 
 if (typeof watchFileCreation !== 'undefined') {
-console.log(`QQ/watchFileCreation`);
   watchFileCreation(({ path }) => addDisplay(path));
 }
 
