@@ -2,8 +2,6 @@ const fs = require('fs');
 const writeFileSyncBrowser = require('./writeFileSyncBrowser');
 
 const writeFileSync = async (path, data, options = {}) => {
-console.log(`QQ/writeFileSync/path: ${path}`);
-console.log(`QQ/writeFileSync/options: ${JSON.stringify(options)}`);
   if (fs.writeFileSync) {
     if (typeof data === 'function') {
       data = data();
