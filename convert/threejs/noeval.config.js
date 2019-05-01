@@ -1,19 +1,17 @@
-// const EsmWebpackPlugin = require('@purtuga/esm-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
-  entry: './JSxCAD.js',
+  entry: './noeval.js',
   output: {
-    filename: 'JSxCAD.js',
-    library: 'JSxCAD',
+    filename: 'noeval.js',
+    library: 'api',
     libraryTarget: 'var'
   },
   plugins: [
     new webpack.DefinePlugin({
       IS_BROWSER: true
     })
-    // new EsmWebpackPlugin(),
   ],
   node: {
     esm: 'empty',
