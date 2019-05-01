@@ -1,4 +1,4 @@
-import { Solid } from './Solid';
+import { Shape } from './Shape';
 
 /**
  * polyhedron({      // openscad-like (e.g. pyramid)
@@ -17,5 +17,5 @@ export const polyhedron = ({ points = [], triangles = [] }) => {
     polygons.push(triangle.map(point => points[point]));
   }
 
-  return Solid.fromPolygons(polygons);
+  return Shape.fromPolygons(polygons);
 };

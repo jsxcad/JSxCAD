@@ -1,4 +1,4 @@
-import { Solid } from './Solid';
+import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { toStla } from '@jsxcad/convert-stl';
 import { writeFileSync } from '@jsxcad/sys';
@@ -10,4 +10,4 @@ export const writeStl = async ({ path, needIsWatertight = true }, ...shapes) => 
 
 const method = function (options = {}) { writeStl(options, this); return this; };
 
-Solid.prototype.writeStl = method;
+Shape.prototype.writeStl = method;
