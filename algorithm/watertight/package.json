@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-watertight",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "description": "Watertightness algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -47,11 +47,11 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.53",
-    "@jsxcad/math-plane": "^0.0.53",
-    "@jsxcad/math-poly3": "^0.0.53",
-    "@jsxcad/math-ray3": "^0.0.53",
-    "@jsxcad/math-vec3": "^0.0.53"
+    "@jsxcad/geometry-polygons": "^0.0.54",
+    "@jsxcad/math-plane": "^0.0.54",
+    "@jsxcad/math-poly3": "^0.0.54",
+    "@jsxcad/math-ray3": "^0.0.54",
+    "@jsxcad/math-vec3": "^0.0.54"
   },
   "devDependencies": {
     "ava": "^0.23.0",
