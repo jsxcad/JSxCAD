@@ -1,4 +1,4 @@
-import { canonicalize, transform } from '@jsxcad/algorithm-polygons';
+import { canonicalize, transform } from '@jsxcad/geometry-polygons';
 import { fromScaling, fromZRotation, multiply } from '@jsxcad/math-mat4';
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 

@@ -1,6 +1,6 @@
 import { pathnameToFont, textToSurfaces } from './main';
 
-import { canonicalize } from '@jsxcad/algorithm-assembly';
+import { canonicalize } from '@jsxcad/geometry-eager';
 import { test } from 'ava';
 
 test('Render a letter', t => {

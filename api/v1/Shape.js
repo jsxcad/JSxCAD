@@ -1,7 +1,7 @@
-import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/algorithm-path';
+import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 
-import { fromGeometry } from '@jsxcad/geometry-assembly';
-import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/algorithm-solid';
+import { fromGeometry } from '@jsxcad/geometry-lazy';
+import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
   as (tag) {

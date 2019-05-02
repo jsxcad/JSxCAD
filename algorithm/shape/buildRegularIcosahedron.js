@@ -1,4 +1,4 @@
-import { fromPointsAndPaths } from '@jsxcad/algorithm-polygons';
+import { fromPointsAndPaths } from '@jsxcad/geometry-polygons';
 
 // Unit icosahedron vertices.
 const points = [[0.850651, 0.000000, -0.525731],

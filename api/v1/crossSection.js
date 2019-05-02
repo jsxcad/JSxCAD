@@ -1,8 +1,8 @@
-import { cutTrianglesByPlane, toTriangles } from '@jsxcad/algorithm-polygons';
+import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
 
 import { Shape } from './Shape';
 import { fromPoints } from '@jsxcad/math-plane';
-import { toPolygons } from '@jsxcad/algorithm-solid';
+import { toPolygons } from '@jsxcad/geometry-solid';
 
 export const crossSection = ({ z = 0 } = {}, shape) => {
   const geometry = shape.toSolid().toDisjointGeometry();

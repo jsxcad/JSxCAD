@@ -1,10 +1,9 @@
 {
   "name": "@jsxcad/geometry-paths",
   "version": "0.0.50",
-  "description": "Path Geometry for JSxCAD",
+  "description": "Path array data algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
-  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -12,34 +11,6 @@
     "tests": "ava *.test.js"
   },
   "contributors": [
-    {
-      "name": "Alexandre Girard",
-      "url": "https://github.com/alx"
-    },
-    {
-      "name": "Evan Wallace",
-      "url": "http://evanw.github.com/csg.js/"
-    },
-    {
-      "name": "Joost Nieuwenhuijse",
-      "email": "joost@newhouse.nl"
-    },
-    {
-      "name": "Eduard Bespalov",
-      "url": "http://evanw.github.com/csg.js/"
-    },
-    {
-      "name": "bebbi",
-      "email": "elghatta@gmail.com"
-    },
-    {
-      "name": "Spiritdude Rene K Mueller",
-      "url": "http://renekmueller.com"
-    },
-    {
-      "name": "Jeff Gay",
-      "url": "http://www.z3d.jp"
-    },
     {
       "name": "Brian Spilsbury",
       "url": "http://github.com/pentacular/"
@@ -55,9 +26,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-path": "^0.0.50",
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50"
+    "@jsxcad/geometry-path": "^0.0.50",
+    "@jsxcad/math-mat4": "^0.0.50",
+    "@jsxcad/math-vec3": "^0.0.50"
   },
   "devDependencies": {
     "ava": "^0.23.0",

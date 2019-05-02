@@ -1,5 +1,5 @@
 import { Shape } from './Shape';
-import { buildConvexHull } from '@jsxcad/algorithm-points';
+import { buildConvexHull } from '@jsxcad/geometry-points';
 
 export const hull = (...geometries) => {
   // FIX: Support z0Surface hulling.

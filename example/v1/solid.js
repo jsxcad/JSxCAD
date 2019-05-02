@@ -1,4 +1,4 @@
-import { toPolygons } from '@jsxcad/algorithm-solid';
+import { toPolygons } from '@jsxcad/geometry-solid';
 import { writeStl } from '@jsxcad/api-v1';
 
 export const main = () => {

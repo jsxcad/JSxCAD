@@ -1,7 +1,7 @@
 import { dot, scale, subtract } from '@jsxcad/math-vec3';
 import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
-import { assertCoplanar } from '@jsxcad/algorithm-surface';
+import { assertCoplanar } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const EPSILON = 1e-5;

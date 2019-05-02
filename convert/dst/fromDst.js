@@ -24,7 +24,7 @@ import {
   Y_SUB_9
 } from './dst';
 
-import { scale } from '@jsxcad/algorithm-paths';
+import { scale } from '@jsxcad/geometry-paths';
 
 export const createByteFetcher = (bytes) => {
   let bytesRead = 0;

@@ -1,6 +1,6 @@
 import { fromSvgPath } from '@jsxcad/convert-svg';
 import { loadSync } from 'opentype.js';
-import { union } from '@jsxcad/algorithm-z0surface';
+import { union } from '@jsxcad/geometry-z0surface';
 
 export const pathnameToFont = (pathname) => loadSync(pathname);
 

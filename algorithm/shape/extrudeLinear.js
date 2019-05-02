@@ -1,5 +1,5 @@
 import { add } from '@jsxcad/math-vec3';
-import { makeConvex } from '@jsxcad/algorithm-polygons';
+import { makeConvex } from '@jsxcad/geometry-polygons';
 
 export const extrudeLinear = ({ height = 1 }, polygons) => {
   const extruded = [];

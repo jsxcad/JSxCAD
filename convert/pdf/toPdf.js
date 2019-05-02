@@ -1,7 +1,7 @@
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
-import { measureBoundingBox, transform } from '@jsxcad/algorithm-paths';
+import { measureBoundingBox, transform } from '@jsxcad/geometry-paths';
 
-import { eachItem } from '@jsxcad/algorithm-assembly';
+import { eachItem } from '@jsxcad/geometry-eager';
 
 const X = 0;
 const Y = 1;

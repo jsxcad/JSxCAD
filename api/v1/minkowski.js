@@ -1,4 +1,4 @@
-import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/algorithm-points';
+import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/geometry-points';
 
 import { Shape } from './Shape';
 

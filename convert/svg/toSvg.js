@@ -1,5 +1,5 @@
-import { canonicalize, measureBoundingBox, translate } from '@jsxcad/algorithm-polygons';
-import { eachItem } from '@jsxcad/algorithm-assembly';
+import { canonicalize, measureBoundingBox, translate } from '@jsxcad/geometry-polygons';
+import { eachItem } from '@jsxcad/geometry-eager';
 import { negate } from '@jsxcad/math-vec3';
 
 const toPolygons = (geometry) => {

@@ -1,7 +1,7 @@
 import { difference } from './difference';
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
-import { transform } from '@jsxcad/algorithm-polygons';
+import { transform } from '@jsxcad/geometry-polygons';
 
 const cubePolygons = [[[-1, -1, -1], [-1, -1, 1], [-1, 1, 1], [-1, 1, -1]],
                       [[1, -1, -1], [1, 1, -1], [1, 1, 1], [1, -1, 1]],

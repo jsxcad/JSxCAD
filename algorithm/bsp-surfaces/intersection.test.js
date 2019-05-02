@@ -1,4 +1,4 @@
-import { fromPolygons, toGeneric, transform } from '@jsxcad/algorithm-solid';
+import { fromPolygons, toGeneric, transform } from '@jsxcad/geometry-solid';
 
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { intersection } from './intersection';
