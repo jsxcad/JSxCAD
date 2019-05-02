@@ -63,7 +63,7 @@ export const toThreejsGeometry = (geometry) => {
   }
 };
 
-export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer', includeEditor = false, includeEvaluator = false, initialScript = '', initialPage = 'editor' }, geometry) => {
+export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer', includeEditor = false, includeEvaluator = false, initialScript = '', initialPage = 'editor', previewPage = 'default' }, geometry) => {
   const threejsGeometry = toThreejsGeometry(geometry);
   // FIX: Avoid injection issues.
   const head = [
@@ -80,10 +80,10 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
 
   const body = [
     `<!-- CodeMirror -->`,
-    `<script src="https://codemirror.net/lib/codemirror.js"><\\/script>`.replace('\\/', '/'),
-    `<script src="https://codemirror.net/addon/display/autorefresh.js"><\\/script>`.replace('\\/', '/'),
-    `<script src="https://codemirror.net/addon/display/fullscreen.js"><\\/script>`.replace('\\/', '/'),
-    `<script src="https://codemirror.net/mode/javascript/javascript.js"><\\/script>`.replace('\\/', '/'),
+    includeEditor ? `<script src="https://codemirror.net/lib/codemirror.js"><\\/script>`.replace('\\/', '/') : '',
+    includeEditor ? `<script src="https://codemirror.net/addon/display/autorefresh.js"><\\/script>`.replace('\\/', '/') : '',
+    includeEditor ? `<script src="https://codemirror.net/addon/display/fullscreen.js"><\\/script>`.replace('\\/', '/') : '',
+    includeEditor ? `<script src="https://codemirror.net/mode/javascript/javascript.js"><\\/script>`.replace('\\/', '/') : '',
     `<!-- ThreeJS -->`,
     `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"><\\/script>`.replace('\\/', '/'),
     `<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"><\\/script>`.replace('\\/', '/'),
@@ -104,7 +104,7 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
 
   const app = [
     `<script>const runApp = () => {`,
-    threejsGeometry ? `  writeFileSync('main', () => {}, ${JSON.stringify(threejsGeometry)});` : '',
+    threejsGeometry ? `  writeFileSync(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)});` : '',
     `  nextPage();`,
     `}`,
     `document.addEventListener("DOMContentLoaded", runApp);`,
