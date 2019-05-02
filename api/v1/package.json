@@ -55,7 +55,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.50",
     "@jsxcad/algorithm-shape": "^0.0.50",
     "@jsxcad/algorithm-text": "^0.0.50",
     "@jsxcad/algorithm-watertight": "^0.0.50",
