@@ -19,7 +19,6 @@ import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
-import { hsl2rgb } from './hsl2rgb';
 import { hull } from './hull';
 import { intersection } from './intersection';
 import { max } from './max';
@@ -57,7 +56,6 @@ export {
   cylinder,
   difference,
   extrude,
-  hsl2rgb,
   hull,
   intersection,
   loadFont,
