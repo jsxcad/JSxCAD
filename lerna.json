@@ -17,7 +17,6 @@
     }
   },
   "packages": [
-    "app/*",
     "algorithm/*",
     "api/*",
     "convert/*",
