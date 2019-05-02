@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-ray3",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "description": "3d rays for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,9 +48,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-plane": "^0.0.51",
-    "@jsxcad/math-utils": "^0.0.51",
-    "@jsxcad/math-vec3": "^0.0.51"
+    "@jsxcad/math-plane": "^0.0.52",
+    "@jsxcad/math-utils": "^0.0.52",
+    "@jsxcad/math-vec3": "^0.0.52"
   },
   "devDependencies": {
     "ava": "^0.23.0",
