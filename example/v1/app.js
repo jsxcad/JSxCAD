@@ -1,5 +1,4 @@
 import { assemble, cube, sphere, writeThreejsPage } from '@jsxcad/api-v1';
-import { writeFileSync } from 'fs';
 
 const script = `
 // HOWTO
