@@ -23,7 +23,7 @@ const lastPage = () => {
   pages[0].style.display = 'block';
 }
 
-const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) => {
+const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry} = {}) => {
   // Add a new display when we see a new file written.
   let datasets = [];
   let camera;
@@ -34,46 +34,6 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) =
   let mesh;
   let gui;
   let downloadButton;
-
-  const pathsToThreejsSegments = (geometry) => {
-    const segments = [];
-    for (const path of geometry) {
-      for (const [start, end] of toSegments({}, path)) {
-        segments.push([start, end]);
-      }
-    }
-    return segments;
-  };
-
-  const solidToThreejsSolid = (geometry) => {
-    const normals = [];
-    const positions = [];
-    for (const triangle of polygonsToTriangles({}, solidToPolygons({}, geometry))) {
-      for (const point of triangle) {
-        const [x, y, z] = toPlane(triangle);
-        normals.push(x, y, z);
-        positions.push(...point);
-      }
-    }
-    return { normals, positions };
-  };
-
-  const surfaceToThreejsSurface = (geometry) => {
-    const normals = [];
-    const positions = [];
-    const outputTriangle = (triangle) => {
-      for (const point of triangle) {
-        const [x, y, z] = toPlane(triangle);
-        normals.push(x, y, z);
-        positions.push(...point);
-      }
-    };
-    for (const triangle of polygonsToTriangles({}, makeConvexSurface({}, geometry))) {
-      outputTriangle(triangle);
-      outputTriangle(flipPolygon(triangle));
-    }
-    return { normals, positions };
-  };
 
   const toName = (geometry) => {
     if (geometry.tags !== undefined && geometry.tags.length >= 1) {
@@ -95,8 +55,8 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) =
     const walk = (geometry) => {
       if (geometry.assembly) {
         geometry.assembly.forEach(walk);
-      } else if (geometry.paths) {
-        const segments = pathsToThreejsSegments(geometry.paths);
+      } else if (geometry.threejsSegments) {
+        const segments = geometry.threejsSegments; // pathsToThreejsSegments(geometry.paths);
         const dataset = {};
         const threejsGeometry = new THREE.Geometry();
         const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
@@ -107,8 +67,8 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) =
         dataset.name = toName(geometry);
         scene.add(dataset.mesh);
         datasets.push(dataset);
-      } else if (geometry.solid) {
-        const { positions, normals } = solidToThreejsSolid(geometry.solid);
+      } else if (geometry.threejsSolid) {
+        const { positions, normals } = geometry.threejsSolid; // solidToThreejsSolid(geometry.solid);
         const dataset = {};
         const threejsGeometry = new THREE.BufferGeometry();
         threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -118,8 +78,8 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) =
         dataset.name = toName(geometry);
         scene.add(dataset.mesh);
         datasets.push(dataset);
-      } else if (geometry.z0Surface) {
-        const { positions, normals } = surfaceToThreejsSurface(geometry.z0Surface);
+      } else if (geometry.threejsSurface) {
+        const { positions, normals } = geometry.threejsSurface; // surfaceToThreejsSurface(geometry.z0Surface);
         const dataset = {};
         const threejsGeometry = new THREE.BufferGeometry();
         threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute( positions, 3));
@@ -146,7 +106,13 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) =
     }
   };
 
-  watchFile(path, (file, data) => updateDatasets(paths, data));
+  if (typeof watchFile !== 'undefined') {
+    watchFile(path, (file, data) => {
+                      if (data !== undefined) {
+                        updateDatasets(api.toThreejsGeometry(data));
+                      }
+                     });
+  }
 
   init();
   animate();
@@ -222,4 +188,6 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry = {} } = {}) =
   }
 };
 
-watchFileCreation(({ path }) => addDisplay(path));
+if (typeof watchFileCreation !== 'undefined') {
+  watchFileCreation(({ path }) => addDisplay(path));
+}

@@ -1,5 +1,6 @@
-import { toThreejsPage } from './toThreejsPage';
+import { toThreejsGeometry, toThreejsPage } from './toThreejsPage';
 
 export {
+  toThreejsGeometry,
   toThreejsPage
 };
