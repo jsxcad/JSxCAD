@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-z0surface",
-  "version": "0.0.52",
+  "version": "0.0.53",
   "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,15 +20,15 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-path": "^0.0.52",
-    "@jsxcad/geometry-paths": "^0.0.52",
-    "@jsxcad/math-poly3": "^0.0.52",
+    "@jsxcad/geometry-path": "^0.0.53",
+    "@jsxcad/geometry-paths": "^0.0.53",
+    "@jsxcad/math-poly3": "^0.0.53",
     "polygon-clipping": "^0.13.0"
   },
   "devDependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.52",
-    "@jsxcad/math-mat4": "^0.0.52",
-    "@jsxcad/math-utils": "^0.0.52",
+    "@jsxcad/geometry-polygons": "^0.0.53",
+    "@jsxcad/math-mat4": "^0.0.53",
+    "@jsxcad/math-utils": "^0.0.53",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
