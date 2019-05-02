@@ -106,7 +106,7 @@ const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry} = {}) => {
     }
   };
 
-  if (typeof watchFile !== 'undefined') {
+  if (typeof api.toThreejsGeometry !== 'undefined') {
     watchFile(path, (file, data) => {
                       if (data !== undefined) {
                         updateDatasets(api.toThreejsGeometry(data));
