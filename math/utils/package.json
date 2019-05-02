@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-utils",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "math utils for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -45,8 +45,7 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-  ],
+  "keywords": [],
   "license": "MIT",
   "devDependencies": {
     "ava": "^0.23.0",

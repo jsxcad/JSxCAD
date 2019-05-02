@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/convert-dst",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "DST (Data Stitch Tajima) algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -16,14 +16,13 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-eager": "^0.0.50",
-    "@jsxcad/geometry-path": "^0.0.50",
-    "@jsxcad/geometry-paths": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50"
+    "@jsxcad/geometry-eager": "^0.0.51",
+    "@jsxcad/geometry-path": "^0.0.51",
+    "@jsxcad/geometry-paths": "^0.0.51",
+    "@jsxcad/math-vec3": "^0.0.51"
   },
   "devDependencies": {
     "ava": "^0.23.0",

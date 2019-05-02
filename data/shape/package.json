@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/data-shape",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "Reference shape data for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "index.js",
@@ -16,8 +16,7 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
     "esm": "^3.2.10"

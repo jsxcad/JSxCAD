@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-lazy",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "Assembly Geometry for JSxCAD.",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -17,19 +17,18 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp-surfaces": "^0.0.50",
-    "@jsxcad/geometry-eager": "^0.0.50",
-    "@jsxcad/geometry-paths": "^0.0.50",
-    "@jsxcad/geometry-points": "^0.0.50",
-    "@jsxcad/geometry-polygons": "^0.0.50",
-    "@jsxcad/geometry-solid": "^0.0.50",
-    "@jsxcad/geometry-surface": "^0.0.50",
-    "@jsxcad/geometry-z0surface": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50"
+    "@jsxcad/algorithm-bsp-surfaces": "^0.0.51",
+    "@jsxcad/geometry-eager": "^0.0.51",
+    "@jsxcad/geometry-paths": "^0.0.51",
+    "@jsxcad/geometry-points": "^0.0.51",
+    "@jsxcad/geometry-polygons": "^0.0.51",
+    "@jsxcad/geometry-solid": "^0.0.51",
+    "@jsxcad/geometry-surface": "^0.0.51",
+    "@jsxcad/geometry-z0surface": "^0.0.51",
+    "@jsxcad/math-mat4": "^0.0.51"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -44,7 +43,7 @@
   },
   "ava": {
     "require": "esm"
-   },
+  },
   "publishConfig": {
     "access": "restricted"
   }

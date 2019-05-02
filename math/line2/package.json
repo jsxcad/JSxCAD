@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-line2",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "2d lines for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -45,12 +45,11 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.50",
-    "@jsxcad/math-vec2": "^0.0.50",
+    "@jsxcad/math-utils": "^0.0.51",
+    "@jsxcad/math-vec2": "^0.0.51",
     "esm": "^3.2.10"
   },
   "devDependencies": {

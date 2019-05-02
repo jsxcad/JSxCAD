@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-path",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "description": "Path data algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -16,12 +16,11 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50"
+    "@jsxcad/math-mat4": "^0.0.51",
+    "@jsxcad/math-vec3": "^0.0.51"
   },
   "devDependencies": {
     "ava": "^0.23.0",
