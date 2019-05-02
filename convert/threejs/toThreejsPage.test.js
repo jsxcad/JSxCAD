@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { unitGeodesicSphere20Polygons, unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
-import { fromPolygons } from '@jsxcad/algorithm-solid';
-import { scale as scalePaths } from '@jsxcad/algorithm-paths';
-import { scale as scaleSurface } from '@jsxcad/algorithm-surface';
+import { fromPolygons } from '@jsxcad/geometry-solid';
+import { scale as scalePaths } from '@jsxcad/geometry-paths';
+import { scale as scaleSurface } from '@jsxcad/geometry-surface';
 import { test } from 'ava';
 import { toThreejsPage } from './toThreejsPage';
 

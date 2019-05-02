@@ -1,4 +1,4 @@
-import { canonicalize } from '@jsxcad/algorithm-path';
+import { canonicalize } from '@jsxcad/geometry-path';
 import { cube } from '@jsxcad/api-v1';
 import { test } from 'ava';
 

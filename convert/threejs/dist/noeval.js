@@ -196,7 +196,7 @@ eval("const { getFile } = __webpack_require__(/*! ./files */ \"../../sys/files.j
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("const fs = __webpack_require__(/*! fs */ \"../../node_modules/node-libs-browser/mock/empty.js\");\nconst writeFileSyncBrowser = __webpack_require__(/*! ./writeFileSyncBrowser */ \"../../sys/writeFileSyncBrowser.js\");\n\nconst writeFileSync = async (path, data, options = {}) => {\nconsole.log(`QQ/writeFileSync/path: ${path}`);\nconsole.log(`QQ/writeFileSync/options: ${JSON.stringify(options)}`);\n  if (fs.writeFileSync) {\n    if (typeof data === 'function') {\n      data = data();\n    }\n    return fs.writeFileSync(path, await Promise.resolve(data), options);\n  } else {\n    return writeFileSyncBrowser.writeFileSync(path, data, options);\n  }\n};\n\nmodule.exports.writeFileSync = writeFileSync;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/sys/writeFileSync.js?");
+eval("const fs = __webpack_require__(/*! fs */ \"../../node_modules/node-libs-browser/mock/empty.js\");\nconst writeFileSyncBrowser = __webpack_require__(/*! ./writeFileSyncBrowser */ \"../../sys/writeFileSyncBrowser.js\");\n\nconst writeFileSync = async (path, data, options = {}) => {\n  if (fs.writeFileSync) {\n    if (typeof data === 'function') {\n      data = data();\n    }\n    return fs.writeFileSync(path, await Promise.resolve(data), options);\n  } else {\n    return writeFileSyncBrowser.writeFileSync(path, data, options);\n  }\n};\n\nmodule.exports.writeFileSync = writeFileSync;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/sys/writeFileSync.js?");
 
 /***/ }),
 

@@ -1,5 +1,5 @@
 import { buildRingSphere } from './buildRingSphere';
-import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { canonicalize } from '@jsxcad/geometry-polygons';
 import { test } from 'ava';
 
 test('Build a ring sphere', t => {

@@ -1,11 +1,11 @@
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
-import { canonicalize } from '@jsxcad/algorithm-path';
+import { canonicalize } from '@jsxcad/geometry-path';
 import curvifySvgPath from 'curvify-svg-path';
 import { equals } from '@jsxcad/math-vec2';
 import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';
-import { transform } from '@jsxcad/algorithm-paths';
+import { transform } from '@jsxcad/geometry-paths';
 
 // FIX: Check scaling.
 

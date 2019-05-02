@@ -1,4 +1,4 @@
-import { measureArea, toPlane } from '@jsxcad/algorithm-surface';
+import { measureArea, toPlane } from '@jsxcad/geometry-surface';
 
 import { create } from './create';
 import { splitSurface } from './splitSurface';

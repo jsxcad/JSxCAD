@@ -1,4 +1,4 @@
-import { canonicalize } from '@jsxcad/algorithm-assembly';
+import { canonicalize } from '@jsxcad/geometry-eager';
 import { fromSvg } from './fromSvg';
 import { test } from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';

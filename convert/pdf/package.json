@@ -54,9 +54,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-assembly": "^0.0.50",
-    "@jsxcad/algorithm-paths": "^0.0.50",
     "@jsxcad/algorithm-shape": "^0.0.50",
+    "@jsxcad/geometry-eager": "^0.0.50",
+    "@jsxcad/geometry-paths": "^0.0.50",
     "@jsxcad/math-mat4": "^0.0.50",
     "@jsxcad/math-vec3": "^0.0.50"
   },

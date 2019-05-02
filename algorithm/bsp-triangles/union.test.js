@@ -1,4 +1,4 @@
-import { toGeneric, transform } from '@jsxcad/algorithm-polygons';
+import { toGeneric, transform } from '@jsxcad/geometry-polygons';
 
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { test } from 'ava';

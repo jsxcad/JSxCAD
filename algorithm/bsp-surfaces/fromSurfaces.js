@@ -1,4 +1,4 @@
-import { assertCoplanar } from '@jsxcad/algorithm-surface';
+import { assertCoplanar } from '@jsxcad/geometry-surface';
 import { build } from './build';
 import { create } from './create';
 

@@ -1,10 +1,10 @@
 import { flip, toPlane } from '@jsxcad/math-poly3';
 
-import { makeConvex } from '@jsxcad/algorithm-surface';
+import { makeConvex } from '@jsxcad/geometry-surface';
 import { readFileSync } from '@jsxcad/sys';
-import { toPolygons } from '@jsxcad/algorithm-solid';
-import { toSegments } from '@jsxcad/algorithm-path';
-import { toTriangles } from '@jsxcad/algorithm-polygons';
+import { toPolygons } from '@jsxcad/geometry-solid';
+import { toSegments } from '@jsxcad/geometry-path';
+import { toTriangles } from '@jsxcad/geometry-polygons';
 
 const loadResource = (pathname, condition = true) =>
   condition ? readFileSync(`${__dirname}/dist/${pathname}`, { encoding: 'utf8' }) : '';

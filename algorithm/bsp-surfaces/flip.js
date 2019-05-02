@@ -1,5 +1,5 @@
 import { flip as flipPlane } from '@jsxcad/math-plane';
-import { flip as flipSurface } from '@jsxcad/algorithm-surface';
+import { flip as flipSurface } from '@jsxcad/geometry-surface';
 
 export const flip = (bsp) => {
   // Flip the polygons.

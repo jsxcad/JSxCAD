@@ -1,5 +1,5 @@
 import { cube, difference, writeStl } from '@jsxcad/api-v1';
-import { toSolidWithConvexSurfaces } from '@jsxcad/algorithm-solid';
+import { toSolidWithConvexSurfaces } from '@jsxcad/geometry-solid';
 
 // FIX: This produces a defective geometry with duplicate planes.
 
