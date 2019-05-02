@@ -18,12 +18,6 @@
     }
   ],
   "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
   ],
   "license": "MIT",
   "dependencies": {
