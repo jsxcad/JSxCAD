@@ -25,7 +25,7 @@ const geometryToTriangles = (geometry) => {
   return [].concat(...triangleSets);
 };
 
-export const toStla = (options = {}, geometry) => {
+export const toStla = async (options = {}, geometry) => {
   let polygons = geometryToTriangles(geometry);
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);

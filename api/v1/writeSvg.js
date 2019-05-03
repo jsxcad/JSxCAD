@@ -1,10 +1,11 @@
 import { Shape } from './Shape';
 import { toSvg } from '@jsxcad/convert-svg';
-import { writeFileSync } from '@jsxcad/sys';
+import { writeFile } from '@jsxcad/sys';
 
-export const writeSvg = async ({ path }, shape) => {
+export const writeSvg = async (options, shape) => {
+  const { path } = options;
   const disjoint = shape.toDisjointGeometry();
-  await writeFileSync(path, () => toSvg({}, disjoint), disjoint);
+  await writeFile(path, toSvg({}, disjoint), disjoint);
 };
 
 const method = function (options = {}) { writeSvg(options, this); return this; };

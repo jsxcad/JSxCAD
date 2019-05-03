@@ -2,9 +2,9 @@ import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import { test } from 'ava';
 import { toPdf } from './toPdf';
 
-test('Triangle', t => {
+test('Triangle', async t => {
   // A polygon is a path.
-  const pdf = toPdf({}, { paths: [buildRegularPolygon({ edges: 3 })] });
+  const pdf = await toPdf({}, { paths: [buildRegularPolygon({ edges: 3 })] });
   t.is(pdf,
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
@@ -30,9 +30,9 @@ test('Triangle', t => {
         '%%EOF'].join('\n'));
 });
 
-test('Triangle with a custom page size', t => {
+test('Triangle with a custom page size', async t => {
   // A polygon is a path.
-  const pdf = toPdf({ size: [100, 200] }, { paths: [buildRegularPolygon({ edges: 3 })] });
+  const pdf = await toPdf({ size: [100, 200] }, { paths: [buildRegularPolygon({ edges: 3 })] });
   t.is(pdf,
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
