@@ -49,6 +49,7 @@ npm run example square
 - Script support
 
 These should work at the top level.
+
 Travis will enforce 'npm run test' and 'npm run lint' passing.
 
 ```
