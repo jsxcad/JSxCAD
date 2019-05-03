@@ -93,7 +93,7 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<!-- FileSaver -->`,
     `<script type="module">`,
     // await loadResource('FileSaver.js'),
-    includeEvaluator ?  `import * as api from 'https://unpkg.com/@jsxcad/api-v1@0.0.54?module';` : '',
+    includeEvaluator ? `import * as api from 'https://unpkg.com/@jsxcad/api-v1@0.0.54?module';` : '',
     `import { readFile, watchFile, watchFileCreation, writeFile } from 'https://unpkg.com/@jsxcad/sys@0.0.54?module';`,
     `import { toThreejsGeometry } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.54?module';`,
     initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',
