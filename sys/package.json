@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/sys",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "System support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",

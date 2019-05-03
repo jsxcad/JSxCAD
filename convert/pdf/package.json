@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/convert-pdf",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "Pdf algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,11 +48,11 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-shape": "^0.0.56",
-    "@jsxcad/geometry-eager": "^0.0.56",
-    "@jsxcad/geometry-paths": "^0.0.56",
-    "@jsxcad/math-mat4": "^0.0.56",
-    "@jsxcad/math-vec3": "^0.0.56"
+    "@jsxcad/algorithm-shape": "^0.0.57",
+    "@jsxcad/geometry-eager": "^0.0.57",
+    "@jsxcad/geometry-paths": "^0.0.57",
+    "@jsxcad/math-mat4": "^0.0.57",
+    "@jsxcad/math-vec3": "^0.0.57"
   },
   "devDependencies": {
     "ava": "^0.23.0",
