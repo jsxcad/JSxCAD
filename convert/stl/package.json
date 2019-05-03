@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/convert-stl",
-  "version": "0.0.54",
+  "version": "0.0.55",
   "description": "STL algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,14 +20,14 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-watertight": "^0.0.54",
-    "@jsxcad/geometry-eager": "^0.0.54",
-    "@jsxcad/geometry-polygons": "^0.0.54",
-    "@jsxcad/geometry-solid": "^0.0.54",
-    "@jsxcad/math-plane": "^0.0.54",
-    "@jsxcad/math-poly3": "^0.0.54",
-    "@jsxcad/math-vec3": "^0.0.54",
-    "@jsxcad/math-vec4": "^0.0.54"
+    "@jsxcad/algorithm-watertight": "^0.0.55",
+    "@jsxcad/geometry-eager": "^0.0.55",
+    "@jsxcad/geometry-polygons": "^0.0.55",
+    "@jsxcad/geometry-solid": "^0.0.55",
+    "@jsxcad/math-plane": "^0.0.55",
+    "@jsxcad/math-poly3": "^0.0.55",
+    "@jsxcad/math-vec3": "^0.0.55",
+    "@jsxcad/math-vec4": "^0.0.55"
   },
   "devDependencies": {
     "ava": "^0.23.0",
