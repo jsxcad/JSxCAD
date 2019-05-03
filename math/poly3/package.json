@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-poly3",
-  "version": "0.0.57",
+  "version": "0.0.58",
   "description": "3d polygons for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,10 +48,10 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-mat4": "^0.0.57",
-    "@jsxcad/math-plane": "^0.0.57",
-    "@jsxcad/math-utils": "^0.0.57",
-    "@jsxcad/math-vec3": "^0.0.57"
+    "@jsxcad/math-mat4": "^0.0.58",
+    "@jsxcad/math-plane": "^0.0.58",
+    "@jsxcad/math-utils": "^0.0.58",
+    "@jsxcad/math-vec3": "^0.0.58"
   },
   "devDependencies": {
     "ava": "^0.23.0",
