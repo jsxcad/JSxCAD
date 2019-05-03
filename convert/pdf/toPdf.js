@@ -1,5 +1,5 @@
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
-import { measureBoundingBox, transform } from '@jsxcad/geometry-paths';
+import { canonicalize, measureBoundingBox, transform } from '@jsxcad/geometry-paths';
 
 import { eachItem } from '@jsxcad/geometry-eager';
 
