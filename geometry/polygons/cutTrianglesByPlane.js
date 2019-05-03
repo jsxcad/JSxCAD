@@ -47,7 +47,7 @@ const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
  * FIX: Make sure this works properly for solids with holes in them, etc.
  * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.
  */
-export const cutTrianglesByPlane = (plane, triangles) => {
+export const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
   let edges = [];
   const addEdge = (start, end) => {
     edges.push([start, end]);
@@ -228,9 +228,18 @@ export const cutTrianglesByPlane = (plane, triangles) => {
   while (edges.length > 0) {
     let edge = edges.shift();
     const loop = [edge[START]];
-    while (!equals(edge[END], loop[0])) {
-      edge = extractSuccessor(edges, edge[END]);
-      loop.push(edge[START]);
+    try {
+      while (!equals(edge[END], loop[0])) {
+        edge = extractSuccessor(edges, edge[END]);
+        loop.push(edge[START]);
+      }
+    } catch (e) {
+      if (allowOpenPaths) {
+        // FIX: Check the error.
+        loop.unshift(null);
+      } else {
+        throw e;
+      }
     }
     loops.push(loop);
   }
