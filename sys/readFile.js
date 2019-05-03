@@ -1,18 +1,20 @@
-const fs = require('fs');
-const readFileSyncBrowser = require('./readFileSyncBrowser');
-const fetch = require('node-fetch');
+import { isBrowser, isNode } from 'browser-or-node';
 
-export const readFile = (path, options) => {
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    if (fetch) {
-      return fetch(path).then(result => result.text());
-    } else {
-      return window.fetch(path).then(result => result.text());
-    }
-  }
-  if (fs.promises.readFile) {
+const { getFile } = require('./files');
+
+export const readFile = async (path, options = {}) => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    const fs = await import('fs');
     return fs.promises.readFile(path, options);
+  } else if (isBrowser) {
+    const file = getFile(path);
+    if (typeof file.data === 'function') {
+      // Force lazy evaluation.
+      file.data = file.data();
+    }
+    return file.data;
   } else {
-    return Promise.resolve(readFileSyncBrowser(path, options));
+    throw Error('die');
   }
 };

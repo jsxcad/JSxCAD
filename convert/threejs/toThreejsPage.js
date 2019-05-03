@@ -1,13 +1,13 @@
 import { flip, toPlane } from '@jsxcad/math-poly3';
 
 import { makeConvex } from '@jsxcad/geometry-surface';
-import { readFileSync } from '@jsxcad/sys';
+import { readFile } from '@jsxcad/sys';
 import { toPolygons } from '@jsxcad/geometry-solid';
 import { toSegments } from '@jsxcad/geometry-path';
 import { toTriangles } from '@jsxcad/geometry-polygons';
 
-const loadResource = (pathname, condition = true) =>
-  condition ? readFileSync(`${__dirname}/dist/${pathname}`, { encoding: 'utf8' }) : '';
+const loadResource = async (pathname, condition = true) =>
+  condition ? readFile(`${__dirname}/dist/${pathname}`, { encoding: 'utf8' }) : '';
 
 const pathsToThreejsSegments = (geometry) => {
   const segments = [];
@@ -71,9 +71,9 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">`,
     `<style>`,
-    loadResource('page.css'),
-    loadResource('three.css'),
-    loadResource('codemirror.css', includeEditor),
+    await loadResource('page.css'),
+    await loadResource('three.css'),
+    await loadResource('codemirror.css', includeEditor),
     `</style>`,
     `<link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet">`
   ].join('\n');
@@ -93,18 +93,18 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<!-- FileSaver -->`,
     `<script>`,
     initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',
-    loadResource('FileSaver.js'),
-    loadResource('eval.js', includeEvaluator),
-    loadResource('noeval.js', !includeEvaluator),
-    `const { readFileSync, watchFile, watchFileCreation, writeFileSync } = api;`,
-    loadResource('display.js'),
-    loadResource('editor.js', includeEditor),
+    await loadResource('FileSaver.js'),
+    await loadResource('eval.js', includeEvaluator),
+    await loadResource('noeval.js', !includeEvaluator),
+    `const { readFile, watchFile, watchFileCreation, writeFile } = api;`,
+    await loadResource('display.js'),
+    await loadResource('editor.js', includeEditor),
     `<\\/script>`.replace('\\/', '/')
   ].join('\n');
 
   const app = [
     `<script>const runApp = () => {`,
-    threejsGeometry ? `  writeFileSync(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)});` : '',
+    threejsGeometry ? `  await writeFile(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)});` : '',
     `  nextPage();`,
     `}`,
     `document.addEventListener("DOMContentLoaded", runApp);`,

@@ -4,7 +4,7 @@ export const getParameterDefinitions = () => [
   { name: 'length', initial: 30, caption: 'Length', type: 'int' }
 ];
 
-export const main = ({ length = 30 }) => {
+export const main = async ({ length = 30 }) => {
   const shape = square(length);
-  writePdf({ path: 'tmp/square.pdf' }, shape);
+  await writePdf({ path: 'tmp/square.pdf' }, shape);
 };

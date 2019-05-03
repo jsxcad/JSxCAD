@@ -1,11 +1,3 @@
-const fs = require('fs');
-const watchFileBrowser = require('./watchFileBrowser');
+const { getFile } = require('./files');
 
-const watchFile = (path, thunk) => {
-  if (fs.writeFileSync) {
-  } else {
-    watchFileBrowser.watchFile(path, thunk);
-  }
-};
-
-module.exports.watchFile = watchFile;
+export const watchFile = (path, thunk) => getFile(path).watchers.push(thunk);

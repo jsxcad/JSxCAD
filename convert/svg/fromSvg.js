@@ -76,9 +76,9 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const fromSvg = (options = {}, svgString) => {
+export const fromSvg = async (options = {}, svgString) => {
   const geometry = { assembly: [] };
-  const svg = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+  const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
 
   const measureScale = (node) => {
     // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.
