@@ -1,7 +1,7 @@
 const files = {};
 const fileCreationWatchers = [];
 
-const getFile = (path) => {
+export const getFile = (path) => {
   let file = files[path];
   if (file === undefined) {
     file = { path: path, watchers: [] };
@@ -13,7 +13,4 @@ const getFile = (path) => {
   return file;
 };
 
-const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);
-
-module.exports.getFile = getFile;
-module.exports.watchFileCreation = watchFileCreation;
+export const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);

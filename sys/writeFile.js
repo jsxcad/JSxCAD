@@ -1,6 +1,6 @@
 import { isBrowser, isNode } from './browserOrNode';
 
-const { getFile } = require('./files');
+import { getFile } from './files';
 
 export const writeFile = async (path, data, options = {}) => {
   data = await data;

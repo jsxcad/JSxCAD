@@ -1,6 +1,6 @@
 import { fromScaling, fromTranslation, fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
 
-import { DOMParser } from 'xmldom';
+import { DOMParser } from 'xmldom/dom-parser';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
 import { toPath } from 'svg-points';
 import { transform } from '@jsxcad/geometry-eager';
