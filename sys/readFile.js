@@ -1,4 +1,4 @@
-import { isBrowser, isNode } from 'browser-or-node';
+import { isBrowser, isNode } from './browserOrNode';
 
 const { getFile } = require('./files');
 
