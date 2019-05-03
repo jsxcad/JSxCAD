@@ -4,6 +4,7 @@
   "description": "DST (Data Stitch Tajima) algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",

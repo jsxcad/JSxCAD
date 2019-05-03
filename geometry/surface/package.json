@@ -3,6 +3,7 @@
   "version": "0.0.54",
   "description": "Operations on surfaces for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
   "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",

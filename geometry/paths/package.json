@@ -4,6 +4,7 @@
   "description": "Path array data algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
