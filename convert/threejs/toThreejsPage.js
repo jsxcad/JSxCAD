@@ -91,25 +91,20 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"><\\/script>`.replace('\\/', '/'),
     `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"><\\/script>`.replace('\\/', '/'),
     `<!-- FileSaver -->`,
-    `<script>`,
+    `<script type="module">`,
+    // await loadResource('FileSaver.js'),
+    includeEvaluator ? `import * as api from 'https://unpkg.com/@jsxcad/api-v1@0.0.54?module';` : '',
+    `import { readFile, watchFile, watchFileCreation, writeFile } from 'https://unpkg.com/@jsxcad/sys@0.0.54?module';`,
+    `import { toThreejsGeometry } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.54?module';`,
     initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',
-    await loadResource('FileSaver.js'),
-    await loadResource('eval.js', includeEvaluator),
-    await loadResource('noeval.js', !includeEvaluator),
-    `const { readFile, watchFile, watchFileCreation, writeFile } = api;`,
     await loadResource('display.js'),
     await loadResource('editor.js', includeEditor),
-    `<\\/script>`.replace('\\/', '/')
-  ].join('\n');
-
-  const app = [
-    `<script>const runApp = () => {`,
-    threejsGeometry ? `  await writeFile(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)});` : '',
-    `  nextPage();`,
+    `const runApp = () => {`,
+    threejsGeometry ? `  writeFile(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)}).then(_ => nextPage());` : '',
     `}`,
     `document.addEventListener("DOMContentLoaded", runApp);`,
     `<\\/script>`.replace('\\/', '/')
   ].join('\n');
 
-  return `<html><head>${head}</head><body id="body">${body}${app}</body></html>`;
+  return `<html><head>${head}</head><body id="body">${body}</body></html>`;
 };

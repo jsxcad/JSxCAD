@@ -4,6 +4,7 @@
   "description": "Constructive Solid Geometry (CSG) Library",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "index.js",
+  "module": "index.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -80,6 +81,7 @@
   "ava": {
     "require": "esm"
   },
+  "private": true,
   "publishConfig": {
     "access": "public"
   }
