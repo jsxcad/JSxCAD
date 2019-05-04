@@ -1,7 +1,7 @@
 import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
 
 import { canonicalize } from '@jsxcad/geometry-paths';
-import { union as polygonClippingUnion } from 'polygon-clipping';
+import polygonClipping from 'polygon-clipping';
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -18,6 +18,6 @@ export const union = (...surfaces) => {
     return surfaces[0];
   }
   const clipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
-  const result = polygonClippingUnion(...clipping);
+  const result = polygonClipping.union(...clipping);
   return clippingToPolygons(result);
 };
