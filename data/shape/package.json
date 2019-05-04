@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/data-shape",
-  "version": "0.0.58",
+  "version": "0.0.62",
   "description": "Reference shape data for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -37,5 +37,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
 }

@@ -10,7 +10,7 @@ export const textToSurfaces = ({ curveSegments, font, size, kerning = true, feat
   const svgPaths = [];
   font.forEachGlyph(text, 0, 0, size, options,
                     (glyph, x, y, fontSize) => {
-                      svgPaths.push(glyph.getPath(x, y, fontSize, options, this).toPathData());
+                      svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
                     });
   const pathsets = [];
   for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {

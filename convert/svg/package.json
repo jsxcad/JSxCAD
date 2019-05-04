@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/convert-svg",
-  "version": "0.0.58",
+  "version": "0.0.62",
   "description": "SVG algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,15 +20,15 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-shape": "^0.0.58",
-    "@jsxcad/geometry-eager": "^0.0.58",
-    "@jsxcad/geometry-path": "^0.0.58",
-    "@jsxcad/geometry-paths": "^0.0.58",
-    "@jsxcad/geometry-polygons": "^0.0.58",
-    "@jsxcad/math-mat4": "^0.0.58",
-    "@jsxcad/math-utils": "^0.0.58",
-    "@jsxcad/math-vec2": "^0.0.58",
-    "@jsxcad/math-vec3": "^0.0.58",
+    "@jsxcad/algorithm-shape": "^0.0.62",
+    "@jsxcad/geometry-eager": "^0.0.62",
+    "@jsxcad/geometry-path": "^0.0.62",
+    "@jsxcad/geometry-paths": "^0.0.62",
+    "@jsxcad/geometry-polygons": "^0.0.62",
+    "@jsxcad/math-mat4": "^0.0.62",
+    "@jsxcad/math-utils": "^0.0.62",
+    "@jsxcad/math-vec2": "^0.0.62",
+    "@jsxcad/math-vec3": "^0.0.62",
     "abs-svg-path": "^0.1.1",
     "curvify-svg-path": "^1.0.0",
     "parse-svg-path": "^0.1.2",
@@ -37,7 +37,7 @@
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
-    "@jsxcad/convert-pdf": "^0.0.58",
+    "@jsxcad/convert-pdf": "^0.0.62",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
@@ -53,5 +53,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
 }

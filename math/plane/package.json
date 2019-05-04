@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-plane",
-  "version": "0.0.58",
+  "version": "0.0.62",
   "description": "3d planes for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,9 +48,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-mat4": "^0.0.58",
-    "@jsxcad/math-utils": "^0.0.58",
-    "@jsxcad/math-vec3": "^0.0.58"
+    "@jsxcad/math-mat4": "^0.0.62",
+    "@jsxcad/math-utils": "^0.0.62",
+    "@jsxcad/math-vec3": "^0.0.62"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -68,5 +68,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
 }

@@ -29,11 +29,10 @@ body {
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
 <!-- FileSaver -->
 <script type="module">
-const api = {};
-import { readFile, watchFile, watchFileCreation, writeFile } from 'https://unpkg.com/@jsxcad/sys@0.0.58?module';
-const toThreejsGeometry = g => g;
+import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.62/dist/main?module';
+const { readFile, watchFile, watchFileCreation, writeFile } = sys;
 
-import { display } from './display.js';
+import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.60/display.js?module';
 const { addPage, nextPage, lastPage } = display({ toThreejsGeometry, watchFile, watchFileCreation });
 
 const runApp = () => {
