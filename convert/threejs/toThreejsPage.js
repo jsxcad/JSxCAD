@@ -1,13 +1,9 @@
 import { flip, toPlane } from '@jsxcad/math-poly3';
 
 import { makeConvex } from '@jsxcad/geometry-surface';
-import { readFile } from '@jsxcad/sys';
 import { toPolygons } from '@jsxcad/geometry-solid';
 import { toSegments } from '@jsxcad/geometry-path';
 import { toTriangles } from '@jsxcad/geometry-polygons';
-
-const loadResource = async (pathname, condition = true) =>
-  condition ? readFile(`${__dirname}/dist/${pathname}`, { encoding: 'utf8' }) : '';
 
 const pathsToThreejsSegments = (geometry) => {
   const segments = [];
@@ -71,9 +67,9 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">`,
     `<style>`,
-    await loadResource('page.css'),
-    await loadResource('three.css'),
-    await loadResource('codemirror.css', includeEditor),
+    `body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #050505; margin: 0px; overflow: hidden; }`,
+    `.dg { position: absolute; top: 2px; left: 2px }`,
+    `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; }`,
     `</style>`,
     `<link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet">`
   ].join('\n');
@@ -92,14 +88,16 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"><\\/script>`.replace('\\/', '/'),
     `<!-- FileSaver -->`,
     `<script type="module">`,
-    // await loadResource('FileSaver.js'),
-    `import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.62/dist/main?module';`,
+    `import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.63/dist/main?module';`,
+    // `import { api, sys, toThreejsGeometry } from './bundle.js'`,
     `const { readFile, watchFile, watchFileCreation, writeFile } = sys;`,
     initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',
-    // await loadResource('display.js'),
-    `import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.60/display.js?module';`,
-    `const { addPage, nextPage, lastPage } = display({ toThreejsGeometry, watchFile, watchFileCreation });`,
-    await loadResource('editor.js', includeEditor),
+    `import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.63/display.js?module';`,
+    // `import { display } from './display.js';`,
+    `const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });`,
+    includeEditor ? `import { editor } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.63/editor.js?module'` : '',
+    // includeEditor ? `import { editor } from './editor.js';` : '',
+    includeEditor ? `editor({ CodeMirror, addPage, api, initialScript, nextPage, lastPage });` : '',
     `const runApp = () => {`,
     threejsGeometry ? `  writeFile(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)}).then(_ => nextPage());` : '',
     `}`,

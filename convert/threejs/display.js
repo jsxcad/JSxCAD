@@ -1,4 +1,4 @@
-export const display = ({ Blob, THREE, dat, readFileSync, requestAnimationFrame, saveAs, toThreejsGeometry, watchFile, watchFileCreation }) => {
+export const display = ({ Blob, THREE, dat, readFile, requestAnimationFrame, saveAs, toThreejsGeometry, watchFile, watchFileCreation }) => {
   let pages = [];
 
   const addPage = (element) => {
@@ -27,7 +27,7 @@ export const display = ({ Blob, THREE, dat, readFileSync, requestAnimationFrame,
     let scene;
     let renderer;
     let gui;
-    let downloadButton;
+    // let downloadButton;
 
     const toName = (geometry) => {
       if (geometry.tags !== undefined && geometry.tags.length >= 1) {
@@ -144,12 +144,11 @@ export const display = ({ Blob, THREE, dat, readFileSync, requestAnimationFrame,
       viewerElement.appendChild(renderer.domElement);
       gui = new dat.GUI({ autoPlace: false });
       viewerElement.appendChild(gui.domElement);
-
-      viewerElement.appendChild(makeDownloadButton());
-
+      // viewerElement.appendChild(makeDownloadButton());
       addPage(viewerElement);
       window.addEventListener('resize', onWindowResize, false);
     }
+    /*
     function makeDownloadButton () {
       downloadButton = document.createElement('button');
       downloadButton.setAttribute('type', 'button');
@@ -161,6 +160,7 @@ export const display = ({ Blob, THREE, dat, readFileSync, requestAnimationFrame,
       });
       return downloadButton;
     }
+    */
     function onWindowResize () {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();

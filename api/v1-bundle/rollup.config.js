@@ -16,7 +16,7 @@ export default {
   plugins: [
     nodeResolve({ preferBuiltins: false }),
     commonjs(),
-    // globals(),
+    globals(),
     builtins()
   ],
 };
