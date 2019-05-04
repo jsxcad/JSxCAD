@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-surface",
-  "version": "0.0.59",
+  "version": "0.0.60",
   "description": "Operations on surfaces for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,14 +20,14 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.59",
-    "@jsxcad/geometry-z0surface": "^0.0.59",
-    "@jsxcad/math-mat4": "^0.0.59",
-    "@jsxcad/math-plane": "^0.0.59",
-    "@jsxcad/math-poly3": "^0.0.59"
+    "@jsxcad/geometry-polygons": "^0.0.60",
+    "@jsxcad/geometry-z0surface": "^0.0.60",
+    "@jsxcad/math-mat4": "^0.0.60",
+    "@jsxcad/math-plane": "^0.0.60",
+    "@jsxcad/math-poly3": "^0.0.60"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.59",
+    "@jsxcad/data-shape": "^0.0.60",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
