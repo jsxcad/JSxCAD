@@ -1,7 +1,8 @@
 import { toPdf } from '@jsxcad/convert-pdf';
-import { writeFileSync } from '@jsxcad/sys';
+import { writeFile } from '@jsxcad/sys';
 
-export const writePdf = ({ path }, shape) => {
+export const writePdf = async (options, shape) => {
+  const { path } = options;
   const geometry = shape.toDisjointGeometry();
-  writeFileSync(path, () => toPdf({}, geometry), geometry);
+  return writeFile(path, toPdf(options, geometry), geometry);
 };

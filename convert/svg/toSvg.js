@@ -1,5 +1,5 @@
-import { canonicalize, measureBoundingBox, translate } from '@jsxcad/algorithm-polygons';
-import { eachItem } from '@jsxcad/algorithm-assembly';
+import { canonicalize, measureBoundingBox, translate } from '@jsxcad/geometry-polygons';
+import { eachItem } from '@jsxcad/geometry-eager';
 import { negate } from '@jsxcad/math-vec3';
 
 const toPolygons = (geometry) => {
@@ -18,7 +18,7 @@ const toPolygons = (geometry) => {
  * @param {Object|Array} objects - objects to serialize as SVG
  * @returns {Array} serialized contents, SVG format
  */
-export const toSvg = ({ padding = 0 }, geometry) => {
+export const toSvg = async ({ padding = 0 }, geometry) => {
   // FIX: SVG should handle both surfaces and paths.
   const polygons = canonicalize(toPolygons(geometry));
   const min = measureBoundingBox(polygons)[0];

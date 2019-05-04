@@ -1,9 +1,10 @@
 {
   "name": "@jsxcad/convert-stl",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "STL algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -16,24 +17,17 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-assembly": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-solid": "^0.0.50",
-    "@jsxcad/algorithm-watertight": "^0.0.50",
-    "@jsxcad/math-plane": "^0.0.50",
-    "@jsxcad/math-poly3": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/math-vec4": "^0.0.50"
+    "@jsxcad/algorithm-watertight": "^0.0.58",
+    "@jsxcad/geometry-eager": "^0.0.58",
+    "@jsxcad/geometry-polygons": "^0.0.58",
+    "@jsxcad/geometry-solid": "^0.0.58",
+    "@jsxcad/math-plane": "^0.0.58",
+    "@jsxcad/math-poly3": "^0.0.58",
+    "@jsxcad/math-vec3": "^0.0.58",
+    "@jsxcad/math-vec4": "^0.0.58"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -50,6 +44,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

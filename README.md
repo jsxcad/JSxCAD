@@ -3,7 +3,7 @@
 ## Unstable - DO NOT USE
 (... unless you read the following carefully ...)
 
-This fork of OpenJSCAD is in early development - many things are broken.
+This code is in early development - many things are broken.
 
 It is suitable for use for testing and development until the jscad user API is up to spec.
 
@@ -46,19 +46,10 @@ cd example/v1
 npm run example square
 ```
 
-- To build and run a local copy of the website for testing
-
-This should produce a new browser running a locally hosted version of the webpage for testing.
-
-```
-cd JSxCAD/app/v1
-npm run wepback
-http-server ./dist -o
-```
-
 - Script support
 
 These should work at the top level.
+
 Travis will enforce 'npm run test' and 'npm run lint' passing.
 
 ```

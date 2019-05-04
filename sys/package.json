@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/sys",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "System support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -17,14 +17,7 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
     "esm": "^3.2.10",
@@ -45,6 +38,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

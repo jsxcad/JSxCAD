@@ -1,9 +1,10 @@
 {
   "name": "@jsxcad/data-shape",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "Reference shape data for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "index.js",
+  "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -16,14 +17,7 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
     "esm": "^3.2.10"
@@ -42,6 +36,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

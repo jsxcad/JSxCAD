@@ -1,9 +1,10 @@
 {
   "name": "@jsxcad/convert-threejs",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "ThreeJs integration algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -18,29 +19,21 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-path": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-solid": "^0.0.50",
-    "@jsxcad/algorithm-surface": "^0.0.50",
-    "@jsxcad/math-poly3": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/sys": "^0.0.50",
+    "@jsxcad/geometry-path": "^0.0.58",
+    "@jsxcad/geometry-polygons": "^0.0.58",
+    "@jsxcad/geometry-solid": "^0.0.58",
+    "@jsxcad/geometry-surface": "^0.0.58",
+    "@jsxcad/math-poly3": "^0.0.58",
+    "@jsxcad/math-vec3": "^0.0.58",
+    "@jsxcad/sys": "^0.0.58",
     "web-resource-inliner": "^4.3.1"
   },
   "devDependencies": {
-    "@jsxcad/api-v1": "^0.0.50",
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/data-shape": "^0.0.50",
+    "@jsxcad/data-shape": "^0.0.58",
+    "@jsxcad/geometry-paths": "^0.0.58",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
@@ -57,6 +50,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

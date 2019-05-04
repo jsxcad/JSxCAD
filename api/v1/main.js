@@ -19,7 +19,6 @@ import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
-import { hsl2rgb } from './hsl2rgb';
 import { hull } from './hull';
 import { intersection } from './intersection';
 import { max } from './max';
@@ -41,7 +40,6 @@ import { svgPath } from './svgPath';
 import { tetrahedron } from './tetrahedron';
 import { translate } from './translate';
 import { union } from './union';
-import { writePaths } from './writePaths';
 import { writePdf } from './writePdf';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
@@ -58,7 +56,6 @@ export {
   cylinder,
   difference,
   extrude,
-  hsl2rgb,
   hull,
   intersection,
   loadFont,
@@ -82,7 +79,6 @@ export {
   text,
   translate,
   union,
-  writePaths,
   writePdf,
   writeStl,
   writeSvg,

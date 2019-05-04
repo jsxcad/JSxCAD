@@ -1,9 +1,10 @@
 {
   "name": "@jsxcad/example-v1",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "Constructive Solid Geometry (CSG) Library",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "index.js",
+  "module": "index.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -46,30 +47,23 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-path": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-z0surface": "^0.0.50",
-    "@jsxcad/algorithm-solid": "^0.0.50",
-    "@jsxcad/algorithm-text": "^0.0.50",
-    "@jsxcad/algorithm-watertight": "^0.0.50",
-    "@jsxcad/convert-stl": "^0.0.50",
-    "@jsxcad/data-shape": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/math-plane": "^0.0.50",
-    "@jsxcad/math-poly3": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
-    "@jsxcad/math-utils": "^0.0.50",
-    "@jsxcad/api-v1": "^0.0.50",
+    "@jsxcad/algorithm-text": "^0.0.58",
+    "@jsxcad/algorithm-watertight": "^0.0.58",
+    "@jsxcad/api-v1": "^0.0.58",
+    "@jsxcad/convert-stl": "^0.0.58",
+    "@jsxcad/data-shape": "^0.0.58",
+    "@jsxcad/geometry-path": "^0.0.58",
+    "@jsxcad/geometry-polygons": "^0.0.58",
+    "@jsxcad/geometry-solid": "^0.0.58",
+    "@jsxcad/geometry-z0surface": "^0.0.58",
+    "@jsxcad/math-mat4": "^0.0.58",
+    "@jsxcad/math-plane": "^0.0.58",
+    "@jsxcad/math-poly3": "^0.0.58",
+    "@jsxcad/math-utils": "^0.0.58",
+    "@jsxcad/math-vec3": "^0.0.58",
     "argv": "^0.0.2"
   },
   "devDependencies": {
@@ -87,7 +81,8 @@
   "ava": {
     "require": "esm"
   },
+  "private": true,
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

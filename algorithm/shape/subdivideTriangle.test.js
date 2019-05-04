@@ -1,5 +1,5 @@
 import { buildRegularPolygon } from './buildRegularPolygon';
-import { canonicalize } from '@jsxcad/algorithm-polygons';
+import { canonicalize } from '@jsxcad/geometry-polygons';
 import { fromPoint } from '@jsxcad/math-vec3';
 import { subdivideTriangle } from './subdivideTriangle';
 import { test } from 'ava';

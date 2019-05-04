@@ -1,9 +1,9 @@
 import { fromScaling, fromTranslation, fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
 
-import { DOMParser } from 'xmldom';
+import { DOMParser } from 'xmldom/dom-parser';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
 import { toPath } from 'svg-points';
-import { transform } from '@jsxcad/algorithm-assembly';
+import { transform } from '@jsxcad/geometry-eager';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath = (options = {}, svgPath) =>
@@ -76,9 +76,9 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const fromSvg = (options = {}, svgString) => {
+export const fromSvg = async (options = {}, svgString) => {
   const geometry = { assembly: [] };
-  const svg = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+  const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
 
   const measureScale = (node) => {
     // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.

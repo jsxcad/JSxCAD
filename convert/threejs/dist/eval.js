@@ -87,246 +87,6 @@ var api =
 /************************************************************************/
 /******/ ({
 
-/***/ "../../algorithm/assembly/addTag.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/addTag.js ***!
-  \****************************************************************/
-/*! exports provided: addTag */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"addTag\", function() { return addTag; });\nconst addTag = (tag, geometry) => {\n  const copy = Object.assign({}, geometry);\n  if (copy.tags) {\n    copy.tags = [tag, ...copy.tags];\n  } else {\n    copy.tags = [tag];\n  }\n  return copy;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/addTag.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/assemble.js":
-/*!******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/assemble.js ***!
-  \******************************************************************/
-/*! exports provided: assemble */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return assemble; });\nconst assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/assemble.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/canonicalize.js":
-/*!**********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/canonicalize.js ***!
-  \**********************************************************************/
-/*! exports provided: canonicalize */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\n\n\n\nconst canonicalize = (geometry) => {\n  const canonicalized = {};\n  if (geometry.points) {\n    canonicalized.points = Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(geometry.points);\n  }\n  if (geometry.paths) {\n    canonicalized.paths = Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(geometry.paths);\n  }\n  if (geometry.z0Surface) {\n    canonicalized.z0Surface = Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_3__[\"canonicalize\"])(geometry.z0Surface);\n  }\n  if (geometry.solid) {\n    canonicalized.solid = Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__[\"canonicalize\"])(geometry.solid);\n  }\n  if (geometry.assembly) {\n    canonicalized.assembly = geometry.assembly.map(canonicalize);\n  }\n  if (geometry.tags !== undefined) {\n    canonicalized.tags = geometry.tags;\n  }\n  return canonicalized;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/canonicalize.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/difference.js":
-/*!********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/difference.js ***!
-  \********************************************************************/
-/*! exports provided: difference */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../algorithm/assembly/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\n\n\nconst difference = (...geometries) => {\n  const assembly = { assembly: geometries };\n  const pathsData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'paths' }, assembly);\n  const solidData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'solid' }, assembly);\n  const z0SurfaceData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'z0Surface' }, assembly);\n  const differenced = { assembly: [] };\n  if (pathsData.length > 0) {\n    differenced.assembly.push({ paths: Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"difference\"])(...pathsData) });\n  }\n  if (solidData.length > 0) {\n    differenced.assembly.push({ solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"difference\"])(...solidData) });\n  }\n  if (z0SurfaceData.length > 0) {\n    differenced.assembly.push({ z0Surface: Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_3__[\"difference\"])(...z0SurfaceData) });\n  }\n  return differenced;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/difference.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/differenceItems.js":
-/*!*************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/differenceItems.js ***!
-  \*************************************************************************/
-/*! exports provided: differenceItems */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"differenceItems\", function() { return differenceItems; });\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\nconst differenceItems = (base, ...subtractions) => {\n  const differenced = { tags: base.tags };\n  if (base.solid) {\n    differenced.solid = base.solid;\n    for (const subtraction of subtractions) {\n      if (subtraction.solid) {\n        differenced.solid = Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_0__[\"difference\"])(differenced.solid, subtraction.solid);\n      }\n    }\n  } else if (base.z0Surface) {\n    differenced.z0Surface = base.z0Surface;\n    for (const subtraction of subtractions) {\n      if (subtraction.z0Surface) {\n        differenced.z0Surface = Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_1__[\"difference\"])(differenced.z0Surface, subtraction.z0Surface);\n      }\n    }\n    return differenced;\n  } else if (base.paths) {\n    differenced.paths = base.paths;\n    // FIX: Figure out how paths differencing should work.\n  }\n  return differenced;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/differenceItems.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/eachItem.js":
-/*!******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/eachItem.js ***!
-  \******************************************************************/
-/*! exports provided: eachItem */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachItem\", function() { return eachItem; });\nconst eachItem = (geometry, operation) => {\n  const walk = (geometry) => {\n    if (geometry.assembly) {\n      geometry.assembly.forEach(walk);\n    }\n    operation(geometry);\n  };\n  walk(geometry);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/eachItem.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/eachPoint.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/eachPoint.js ***!
-  \*******************************************************************/
-/*! exports provided: eachPoint */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ \"../../algorithm/assembly/map.js\");\n\n\n\n\n\nconst eachPoint = (options, operation, geometry) => {\n  Object(_map__WEBPACK_IMPORTED_MODULE_3__[\"map\"])(geometry,\n      (geometry) => {\n        if (geometry.paths) {\n          Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, operation, geometry.paths);\n        }\n        if (geometry.solid) {\n          Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])(options, operation, geometry.solid);\n        }\n        if (geometry.z0Surface) {\n          Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"eachPoint\"])(options, operation, geometry.z0Surface);\n        }\n      });\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/eachPoint.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/filterAndFlattenAssemblyData.js":
-/*!**************************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/filterAndFlattenAssemblyData.js ***!
-  \**************************************************************************************/
-/*! exports provided: filterAndFlattenAssemblyData */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"filterAndFlattenAssemblyData\", function() { return filterAndFlattenAssemblyData; });\n/* harmony import */ var _hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./hasMatchingTag */ \"../../algorithm/assembly/hasMatchingTag.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ \"../../algorithm/assembly/map.js\");\n\n\n\n// This needs to recursively walk the assembly.\nconst filterAndFlattenAssemblyData = ({ requires, excludes, form }, geometry) => {\n  const filtered = [];\n  const filter = (item) => {\n    const data = item[form];\n    if (data === undefined || Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(excludes, item.tags)) {\n      return item;\n    }\n    if (Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(requires, item.tags, true)) {\n      filtered.push(data);\n    }\n    return item;\n  };\n  Object(_map__WEBPACK_IMPORTED_MODULE_1__[\"map\"])(geometry, filter);\n  return filtered;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/filterAndFlattenAssemblyData.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/flip.js":
-/*!**************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/flip.js ***!
-  \**************************************************************/
-/*! exports provided: flip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\n\n\n\nconst flipEntry = (entry) => {\n  const flipped = {};\n  if (entry.points) {\n    flipped.points = Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__[\"flip\"])(entry.points);\n  }\n  if (entry.paths) {\n    flipped.paths = Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(entry.paths);\n  }\n  if (entry.surface) {\n    flipped.surface = Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(entry.surface);\n  }\n  if (entry.solid) {\n    flipped.solid = Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__[\"flip\"])(entry.solid);\n  }\n  if (entry.assembly) {\n    flipped.assembly = flip(entry.assembly);\n  }\n  flipped.tags = entry.tags;\n  return flipped;\n};\n\nconst flip = (assembly) => assembly.map(flipEntry);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/flip.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/hasMatchingTag.js":
-/*!************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/hasMatchingTag.js ***!
-  \************************************************************************/
-/*! exports provided: hasMatchingTag */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hasMatchingTag\", function() { return hasMatchingTag; });\nconst hasMatchingTag = (set, tags, whenSetUndefined = false) => {\n  if (set === undefined) {\n    return whenSetUndefined;\n  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {\n    return true;\n  } else {\n    return false;\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/hasMatchingTag.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/intersection.js":
-/*!**********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/intersection.js ***!
-  \**********************************************************************/
-/*! exports provided: intersection */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return intersection; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../algorithm/assembly/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\n\n\nconst intersection = (...geometries) => {\n  const assembly = { assembly: geometries };\n  const pathsData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'paths' }, assembly);\n  const solidData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'solid' }, assembly);\n  const z0SurfaceData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'z0Surface' }, assembly);\n  const intersectioned = { assembly: [] };\n  if (pathsData.length > 0) {\n    intersectioned.assembly.push({ paths: Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"intersection\"])(...pathsData) });\n  }\n  if (solidData.length > 0) {\n    intersectioned.assembly.push({ solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"intersection\"])(...solidData) });\n  }\n  if (z0SurfaceData.length > 0) {\n    intersectioned.assembly.push({ z0Surface: Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_3__[\"intersection\"])(...z0SurfaceData) });\n  }\n  return intersectioned;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/intersection.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/main.js":
-/*!**************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/main.js ***!
-  \**************************************************************/
-/*! exports provided: addTag, assemble, canonicalize, difference, eachItem, eachPoint, flip, intersection, toComponents, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union, rotateX, rotateY, rotateZ, translate, scale */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return rotateX; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return rotateY; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return rotateZ; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _addTag__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./addTag */ \"../../algorithm/assembly/addTag.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"addTag\", function() { return _addTag__WEBPACK_IMPORTED_MODULE_1__[\"addTag\"]; });\n\n/* harmony import */ var _assemble__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./assemble */ \"../../algorithm/assembly/assemble.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return _assemble__WEBPACK_IMPORTED_MODULE_2__[\"assemble\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./canonicalize */ \"../../algorithm/assembly/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_3__[\"canonicalize\"]; });\n\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./difference */ \"../../algorithm/assembly/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_4__[\"difference\"]; });\n\n/* harmony import */ var _eachItem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./eachItem */ \"../../algorithm/assembly/eachItem.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachItem\", function() { return _eachItem__WEBPACK_IMPORTED_MODULE_5__[\"eachItem\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/assembly/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_6__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./flip */ \"../../algorithm/assembly/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_7__[\"flip\"]; });\n\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./intersection */ \"../../algorithm/assembly/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_8__[\"intersection\"]; });\n\n/* harmony import */ var _toComponents__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toComponents */ \"../../algorithm/assembly/toComponents.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toComponents\", function() { return _toComponents__WEBPACK_IMPORTED_MODULE_9__[\"toComponents\"]; });\n\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../algorithm/assembly/toDisjointGeometry.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toDisjointGeometry\", function() { return _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_10__[\"toDisjointGeometry\"]; });\n\n/* harmony import */ var _toPaths__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toPaths */ \"../../algorithm/assembly/toPaths.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPaths\", function() { return _toPaths__WEBPACK_IMPORTED_MODULE_11__[\"toPaths\"]; });\n\n/* harmony import */ var _toSolid__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./toSolid */ \"../../algorithm/assembly/toSolid.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toSolid\", function() { return _toSolid__WEBPACK_IMPORTED_MODULE_12__[\"toSolid\"]; });\n\n/* harmony import */ var _toZ0Surface__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./toZ0Surface */ \"../../algorithm/assembly/toZ0Surface.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toZ0Surface\", function() { return _toZ0Surface__WEBPACK_IMPORTED_MODULE_13__[\"toZ0Surface\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./transform */ \"../../algorithm/assembly/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./union */ \"../../algorithm/assembly/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_15__[\"union\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst rotateX = (angle, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromXRotation\"])(angle), assembly);\nconst rotateY = (angle, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromYRotation\"])(angle), assembly);\nconst rotateZ = (angle, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromZRotation\"])(angle), assembly);\nconst translate = (vector, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), assembly);\nconst scale = (vector, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), assembly);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/map.js":
-/*!*************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/map.js ***!
-  \*************************************************************/
-/*! exports provided: map */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\nconst map = (geometry, operation) => {\n  const walk = (geometry) => {\n    if (geometry.assembly) {\n      return operation({ assembly: geometry.assembly.map(walk), tags: geometry.tags });\n    } else {\n      return operation(geometry);\n    }\n  };\n  return walk(geometry);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/map.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/toComponents.js":
-/*!**********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/toComponents.js ***!
-  \**********************************************************************/
-/*! exports provided: toComponents */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toComponents\", function() { return toComponents; });\n/* harmony import */ var _hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./hasMatchingTag */ \"../../algorithm/assembly/hasMatchingTag.js\");\n\n\nconst toComponents = ({ requires, excludes }, geometry) => {\n  const components = [];\n\n  const walk = (geometry) => {\n    for (const item of geometry.assembly) {\n      if (Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(excludes, item.tags)) {\n        continue;\n      } else if (Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(requires, item.tags, true)) {\n        components.push(item);\n      } else if (item.assembly !== undefined) {\n        walk(item);\n      }\n    }\n  };\n  walk(geometry);\n  return components;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/toComponents.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/toDisjointGeometry.js":
-/*!****************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/toDisjointGeometry.js ***!
-  \****************************************************************************/
-/*! exports provided: toDisjointGeometry */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toDisjointGeometry\", function() { return toDisjointGeometry; });\n/* harmony import */ var _differenceItems__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./differenceItems */ \"../../algorithm/assembly/differenceItems.js\");\n\n\n// Traverse the assembly tree and disjoint it backward.\nconst toDisjointGeometry = (geometry) => {\n  if (geometry.assembly === undefined) {\n    // A singleton is disjoint.\n    return geometry;\n  } else {\n    const subtractions = [];\n    const walk = (geometry, disjointed) => {\n      for (let nth = geometry.assembly.length - 1; nth >= 0; nth--) {\n        const item = geometry.assembly[nth];\n        if (item.assembly !== undefined) {\n          disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));\n        } else {\n          const differenced = Object(_differenceItems__WEBPACK_IMPORTED_MODULE_0__[\"differenceItems\"])(item, ...subtractions);\n          disjointed.assembly.push(differenced);\n          subtractions.push(differenced);\n        }\n      }\n      return disjointed;\n    };\n    const result = walk(geometry, { assembly: [], tags: geometry.tags });\n    return result;\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/toDisjointGeometry.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/toPaths.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/toPaths.js ***!
-  \*****************************************************************/
-/*! exports provided: toPaths */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPaths\", function() { return toPaths; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../algorithm/assembly/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../algorithm/assembly/toDisjointGeometry.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n\n\n\n\nconst toPaths = ({ requires, excludes }, assembly) =>\n  ({\n    paths: Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ requires, excludes, form: 'paths' }, Object(_toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__[\"toDisjointGeometry\"])(assembly)))\n  });\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/toPaths.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/toSolid.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/toSolid.js ***!
-  \*****************************************************************/
-/*! exports provided: toSolid */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSolid\", function() { return toSolid; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../algorithm/assembly/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../algorithm/assembly/toDisjointGeometry.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n\n\n\n\nconst toSolid = ({ requires, excludes }, assembly) =>\n  ({\n    solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ requires, excludes, form: 'solid' }, Object(_toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__[\"toDisjointGeometry\"])(assembly)))\n  });\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/toSolid.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/toZ0Surface.js":
-/*!*********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/toZ0Surface.js ***!
-  \*********************************************************************/
-/*! exports provided: toZ0Surface */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toZ0Surface\", function() { return toZ0Surface; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../algorithm/assembly/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../algorithm/assembly/toDisjointGeometry.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\n\nconst toZ0Surface = ({ requires, excludes }, assembly) => {\n  const filtered = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ requires, excludes, form: 'z0Surface' }, Object(_toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__[\"toDisjointGeometry\"])(assembly));\n  const unioned = Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...filtered);\n  return { z0Surface: unioned };\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/toZ0Surface.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/transform.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/transform.js ***!
-  \*******************************************************************/
-/*! exports provided: transform */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../algorithm/assembly/map.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\n\n\n\n\nconst transformItem = (matrix, item) => {\n  const transformed = {};\n  if (item.assembly) {\n    transformed.assembly = item.assembly;\n  }\n  if (item.paths) {\n    transformed.paths = Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, item.paths);\n  }\n  if (item.points) {\n    transformed.points = Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_2__[\"transform\"])(matrix, item.points);\n  }\n  if (item.solid) {\n    transformed.solid = Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_3__[\"transform\"])(matrix, item.solid);\n  }\n  if (item.z0Surface) {\n    // FIX: Handle transformations that take the surface out of z0.\n    transformed.z0Surface = Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_4__[\"transform\"])(matrix, item.z0Surface);\n  }\n  transformed.tags = item.tags;\n  return transformed;\n};\n\nconst transform = (matrix, assembly) => Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(assembly, item => transformItem(matrix, item));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/transform.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/assembly/union.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/assembly/union.js ***!
-  \***************************************************************/
-/*! exports provided: union */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return union; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../algorithm/assembly/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\n\n\nconst union = (...geometries) => {\n  const assembly = { assembly: geometries };\n  const pathsData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'paths' }, assembly);\n  const solidData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'solid' }, assembly);\n  const z0SurfaceData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'z0Surface' }, assembly);\n  const unioned = { assembly: [] };\n  if (pathsData.length > 0) {\n    unioned.assembly.push({ paths: Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"union\"])(...pathsData) });\n  }\n  if (solidData.length > 0) {\n    unioned.assembly.push({ solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...solidData) });\n  }\n  if (z0SurfaceData.length > 0) {\n    unioned.assembly.push({ z0Surface: Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_3__[\"union\"])(...z0SurfaceData) });\n  }\n  return unioned;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/assembly/union.js?");
-
-/***/ }),
-
 /***/ "../../algorithm/bsp-surfaces/build.js":
 /*!*******************************************************************!*\
   !*** /home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/build.js ***!
@@ -335,7 +95,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"build\", function() { return build; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _create__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./create */ \"../../algorithm/bsp-surfaces/create.js\");\n/* harmony import */ var _splitSurface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./splitSurface */ \"../../algorithm/bsp-surfaces/splitSurface.js\");\n\n\n\n\n\n// Build a BSP tree out of surfaces. When called on an existing tree, the\n// new surfaces are filtered down to the bottom of the tree and become new\n// nodes there. Each set of surfaces is partitioned using the surface with the largest area.\nconst build = (bsp, surfaces) => {\n  if (surfaces.length === 0) {\n    return;\n  }\n  if (bsp.plane === undefined) {\n    let largestSurface = surfaces[0];\n    for (let nth = 1; nth < surfaces.length; nth++) {\n      if (Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"measureArea\"])(surfaces[nth]) > Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"measureArea\"])(largestSurface)) {\n        largestSurface = surfaces[nth];\n      }\n    }\n    // Use the plane of the surface to partition the branches.\n    bsp.plane = Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(largestSurface);\n  }\n  let front = [];\n  let back = [];\n  for (let i = 0; i < surfaces.length; i++) {\n    Object(_splitSurface__WEBPACK_IMPORTED_MODULE_2__[\"splitSurface\"])(bsp.plane, bsp.surfaces, bsp.surfaces, front, back, surfaces[i]);\n  }\n  if (front.length > 0) {\n    if (bsp.front === undefined) {\n      bsp.front = Object(_create__WEBPACK_IMPORTED_MODULE_1__[\"create\"])();\n    }\n    build(bsp.front, front);\n  }\n  if (back.length > 0) {\n    if (bsp.back === undefined) {\n      bsp.back = Object(_create__WEBPACK_IMPORTED_MODULE_1__[\"create\"])();\n    }\n    build(bsp.back, back);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/build.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"build\", function() { return build; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _create__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./create */ \"../../algorithm/bsp-surfaces/create.js\");\n/* harmony import */ var _splitSurface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./splitSurface */ \"../../algorithm/bsp-surfaces/splitSurface.js\");\n\n\n\n\n\n// Build a BSP tree out of surfaces. When called on an existing tree, the\n// new surfaces are filtered down to the bottom of the tree and become new\n// nodes there. Each set of surfaces is partitioned using the surface with the largest area.\nconst build = (bsp, surfaces) => {\n  if (surfaces.length === 0) {\n    return;\n  }\n  if (bsp.plane === undefined) {\n    let largestSurface = surfaces[0];\n    for (let nth = 1; nth < surfaces.length; nth++) {\n      if (Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"measureArea\"])(surfaces[nth]) > Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"measureArea\"])(largestSurface)) {\n        largestSurface = surfaces[nth];\n      }\n    }\n    // Use the plane of the surface to partition the branches.\n    bsp.plane = Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(largestSurface);\n  }\n  let front = [];\n  let back = [];\n  for (let i = 0; i < surfaces.length; i++) {\n    Object(_splitSurface__WEBPACK_IMPORTED_MODULE_2__[\"splitSurface\"])(bsp.plane, bsp.surfaces, bsp.surfaces, front, back, surfaces[i]);\n  }\n  if (front.length > 0) {\n    if (bsp.front === undefined) {\n      bsp.front = Object(_create__WEBPACK_IMPORTED_MODULE_1__[\"create\"])();\n    }\n    build(bsp.front, front);\n  }\n  if (back.length > 0) {\n    if (bsp.back === undefined) {\n      bsp.back = Object(_create__WEBPACK_IMPORTED_MODULE_1__[\"create\"])();\n    }\n    build(bsp.back, back);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/build.js?");
 
 /***/ }),
 
@@ -383,7 +143,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\n/* harmony import */ var _build__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./build */ \"../../algorithm/bsp-surfaces/build.js\");\n/* harmony import */ var _clipTo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./clipTo */ \"../../algorithm/bsp-surfaces/clipTo.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./flip */ \"../../algorithm/bsp-surfaces/flip.js\");\n/* harmony import */ var _fromSurfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fromSurfaces */ \"../../algorithm/bsp-surfaces/fromSurfaces.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _toSurfaces__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./toSurfaces */ \"../../algorithm/bsp-surfaces/toSurfaces.js\");\n\n\n\n\n\n\n\n\nconst doesNotOverlap = (a, b) => {\n  const [centerA, radiusA] = Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_5__[\"measureBoundingSphere\"])(a);\n  const [centerB, radiusB] = Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_5__[\"measureBoundingSphere\"])(b);\n  return Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__[\"distance\"])(centerA, centerB) > radiusA + radiusB;\n};\n\n/**\n   * Given a solid and a set of solids to subtract produce the resulting solid.\n   * @param {Polygons} base - Polygons for the base to subtract from.\n   * @param {Array<Polygons>} subtractions - a list of Polygons to subtract.\n   * @returns {Polygons} the resulting Polygons.\n   * @example\n   * let C = difference(A, B);\n   * @example\n   * +-------+            +-------+\n   * |       |            |       |\n   * |   A   |            |       |\n   * |    +--+----+   =   |    +--+\n   * +----+--+    |       +----+\n   *      |   B   |\n   *      |       |\n   *      +-------+\n   */\nconst difference = (base, ...subtractions) => {\n  if (base.length === 0) {\n    return base;\n  }\n  if (subtractions.length === 0) {\n    return base;\n  }\n  // TODO: Figure out why we do not subtract the union of the remainder of\n  // the geometries. This approach chains subtractions rather than producing\n  // a generational tree.\n  for (let i = 0; i < subtractions.length; i++) {\n    if (subtractions[i].length === 0) {\n      // Nothing to do.\n      continue;\n    }\n    if (doesNotOverlap(base, subtractions[i])) {\n      // Nothing to do.\n      continue;\n    }\n    const baseBsp = Object(_fromSurfaces__WEBPACK_IMPORTED_MODULE_4__[\"fromSurfaces\"])({}, base);\n    const subtractBsp = Object(_fromSurfaces__WEBPACK_IMPORTED_MODULE_4__[\"fromSurfaces\"])({}, subtractions[i]);\n\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(baseBsp);\n    Object(_clipTo__WEBPACK_IMPORTED_MODULE_1__[\"clipTo\"])(baseBsp, subtractBsp);\n    Object(_clipTo__WEBPACK_IMPORTED_MODULE_1__[\"clipTo\"])(subtractBsp, baseBsp);\n\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(subtractBsp);\n    Object(_clipTo__WEBPACK_IMPORTED_MODULE_1__[\"clipTo\"])(subtractBsp, baseBsp);\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(subtractBsp);\n\n    Object(_build__WEBPACK_IMPORTED_MODULE_0__[\"build\"])(baseBsp, Object(_toSurfaces__WEBPACK_IMPORTED_MODULE_6__[\"toSurfaces\"])({}, subtractBsp));\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(baseBsp);\n\n    // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.\n    base = Object(_toSurfaces__WEBPACK_IMPORTED_MODULE_6__[\"toSurfaces\"])({}, baseBsp);\n  }\n  return base;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/difference.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\n/* harmony import */ var _build__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./build */ \"../../algorithm/bsp-surfaces/build.js\");\n/* harmony import */ var _clipTo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./clipTo */ \"../../algorithm/bsp-surfaces/clipTo.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./flip */ \"../../algorithm/bsp-surfaces/flip.js\");\n/* harmony import */ var _fromSurfaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fromSurfaces */ \"../../algorithm/bsp-surfaces/fromSurfaces.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _toSurfaces__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./toSurfaces */ \"../../algorithm/bsp-surfaces/toSurfaces.js\");\n\n\n\n\n\n\n\n\nconst doesNotOverlap = (a, b) => {\n  const [centerA, radiusA] = Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_5__[\"measureBoundingSphere\"])(a);\n  const [centerB, radiusB] = Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_5__[\"measureBoundingSphere\"])(b);\n  return Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__[\"distance\"])(centerA, centerB) > radiusA + radiusB;\n};\n\n/**\n   * Given a solid and a set of solids to subtract produce the resulting solid.\n   * @param {Polygons} base - Polygons for the base to subtract from.\n   * @param {Array<Polygons>} subtractions - a list of Polygons to subtract.\n   * @returns {Polygons} the resulting Polygons.\n   * @example\n   * let C = difference(A, B);\n   * @example\n   * +-------+            +-------+\n   * |       |            |       |\n   * |   A   |            |       |\n   * |    +--+----+   =   |    +--+\n   * +----+--+    |       +----+\n   *      |   B   |\n   *      |       |\n   *      +-------+\n   */\nconst difference = (base, ...subtractions) => {\n  if (base.length === 0) {\n    return base;\n  }\n  if (subtractions.length === 0) {\n    return base;\n  }\n  // TODO: Figure out why we do not subtract the union of the remainder of\n  // the geometries. This approach chains subtractions rather than producing\n  // a generational tree.\n  for (let i = 0; i < subtractions.length; i++) {\n    if (subtractions[i].length === 0) {\n      // Nothing to do.\n      continue;\n    }\n    if (doesNotOverlap(base, subtractions[i])) {\n      // Nothing to do.\n      continue;\n    }\n    const baseBsp = Object(_fromSurfaces__WEBPACK_IMPORTED_MODULE_4__[\"fromSurfaces\"])({}, base);\n    const subtractBsp = Object(_fromSurfaces__WEBPACK_IMPORTED_MODULE_4__[\"fromSurfaces\"])({}, subtractions[i]);\n\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(baseBsp);\n    Object(_clipTo__WEBPACK_IMPORTED_MODULE_1__[\"clipTo\"])(baseBsp, subtractBsp);\n    Object(_clipTo__WEBPACK_IMPORTED_MODULE_1__[\"clipTo\"])(subtractBsp, baseBsp);\n\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(subtractBsp);\n    Object(_clipTo__WEBPACK_IMPORTED_MODULE_1__[\"clipTo\"])(subtractBsp, baseBsp);\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(subtractBsp);\n\n    Object(_build__WEBPACK_IMPORTED_MODULE_0__[\"build\"])(baseBsp, Object(_toSurfaces__WEBPACK_IMPORTED_MODULE_6__[\"toSurfaces\"])({}, subtractBsp));\n    Object(_flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(baseBsp);\n\n    // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.\n    base = Object(_toSurfaces__WEBPACK_IMPORTED_MODULE_6__[\"toSurfaces\"])({}, baseBsp);\n  }\n  return base;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/difference.js?");
 
 /***/ }),
 
@@ -395,7 +155,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\n\nconst flip = (bsp) => {\n  // Flip the polygons.\n  bsp.surfaces = bsp.surfaces.map(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_1__[\"flip\"]);\n  // Recompute the plane.\n  if (bsp.plane !== undefined) {\n    // PROVE: General equivalence.\n    // const a = toPlane(bsp.polygons[0]);\n    // const b = plane.flip(bsp.plane);\n    // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }\n    bsp.plane = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(bsp.plane);\n  }\n  // Invert the children.\n  if (bsp.front !== undefined) {\n    flip(bsp.front);\n  }\n  if (bsp.back !== undefined) {\n    flip(bsp.back);\n  }\n  // Swap the children.\n  [bsp.front, bsp.back] = [bsp.back, bsp.front];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/flip.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\n\nconst flip = (bsp) => {\n  // Flip the polygons.\n  bsp.surfaces = bsp.surfaces.map(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_1__[\"flip\"]);\n  // Recompute the plane.\n  if (bsp.plane !== undefined) {\n    // PROVE: General equivalence.\n    // const a = toPlane(bsp.polygons[0]);\n    // const b = plane.flip(bsp.plane);\n    // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }\n    bsp.plane = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(bsp.plane);\n  }\n  // Invert the children.\n  if (bsp.front !== undefined) {\n    flip(bsp.front);\n  }\n  if (bsp.back !== undefined) {\n    flip(bsp.back);\n  }\n  // Swap the children.\n  [bsp.front, bsp.back] = [bsp.back, bsp.front];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/flip.js?");
 
 /***/ }),
 
@@ -407,7 +167,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromSurfaces\", function() { return fromSurfaces; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _build__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./build */ \"../../algorithm/bsp-surfaces/build.js\");\n/* harmony import */ var _create__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./create */ \"../../algorithm/bsp-surfaces/create.js\");\n\n\n\n\nconst fromSurfaces = (options = {}, surfaces) => {\n  for (const surface of surfaces) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"assertCoplanar\"])(surface);\n  }\n  const bsp = Object(_create__WEBPACK_IMPORTED_MODULE_2__[\"create\"])();\n  // Build is destructive.\n  Object(_build__WEBPACK_IMPORTED_MODULE_1__[\"build\"])(bsp, surfaces.map(surface => surface.slice()));\n  return bsp;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/fromSurfaces.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromSurfaces\", function() { return fromSurfaces; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _build__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./build */ \"../../algorithm/bsp-surfaces/build.js\");\n/* harmony import */ var _create__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./create */ \"../../algorithm/bsp-surfaces/create.js\");\n\n\n\n\nconst fromSurfaces = (options = {}, surfaces) => {\n  for (const surface of surfaces) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"assertCoplanar\"])(surface);\n  }\n  const bsp = Object(_create__WEBPACK_IMPORTED_MODULE_2__[\"create\"])();\n  // Build is destructive.\n  Object(_build__WEBPACK_IMPORTED_MODULE_1__[\"build\"])(bsp, surfaces.map(surface => surface.slice()));\n  return bsp;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/fromSurfaces.js?");
 
 /***/ }),
 
@@ -443,7 +203,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _bui
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"splitSurface\", function() { return splitSurface; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\n\n\n\nconst EPSILON = 1e-5;\n\nconst COPLANAR = 0; // Neither front nor back.\nconst FRONT = 1;\nconst BACK = 2;\nconst SPANNING = 3; // Both front and back.\n\nconst toType = (plane, point) => {\n  let t = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"signedDistanceToPoint\"])(plane, point);\n  if (t < -EPSILON) {\n    return BACK;\n  } else if (t > EPSILON) {\n    return FRONT;\n  } else {\n    return COPLANAR;\n  }\n};\n\nconst splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {\n  Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(surface);\n  const coplanarFrontPolygons = [];\n  const coplanarBackPolygons = [];\n  const frontPolygons = [];\n  const backPolygons = [];\n  let polygonType = COPLANAR;\n  for (const polygon of surface) {\n    if (!Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"equals\"])(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon), plane)) {\n      for (const point of polygon) {\n        polygonType |= toType(plane, point);\n      }\n    }\n\n    // Put the polygon in the correct list, splitting it when necessary.\n    switch (polygonType) {\n      case COPLANAR: {\n        if (Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon)) > 0) {\n          coplanarFrontPolygons.push(polygon);\n        } else {\n          coplanarBackPolygons.push(polygon);\n        }\n        break;\n      }\n      case FRONT: {\n        frontPolygons.push(polygon);\n        break;\n      }\n      case BACK: {\n        backPolygons.push(polygon);\n        break;\n      }\n      case SPANNING: {\n        let frontPoints = [];\n        let backPoints = [];\n        let startPoint = polygon[polygon.length - 1];\n        let startType = toType(plane, startPoint);\n        for (const endPoint of polygon) {\n          const endType = toType(plane, endPoint);\n          if (startType !== BACK) {\n            // The inequality is important as it includes COPLANAR points.\n            frontPoints.push(startPoint);\n          }\n          if (startType !== FRONT) {\n            // The inequality is important as it includes COPLANAR points.\n            backPoints.push(startPoint);\n          }\n          if ((startType | endType) === SPANNING) {\n            // This should exclude COPLANAR points.\n            // Compute the point that touches the splitting plane.\n            const rawSpanPoint = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"splitLineSegmentByPlane\"])(plane, startPoint, endPoint);\n            const spanPoint = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"subtract\"])(rawSpanPoint, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])(Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"signedDistanceToPoint\"])(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon), rawSpanPoint), plane));\n            frontPoints.push(spanPoint);\n            backPoints.push(spanPoint);\n            if (Math.abs(Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"signedDistanceToPoint\"])(plane, spanPoint)) > EPSILON) throw Error('die');\n            if (frontPoints.length >= 3) {\n              Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])([frontPoints]);\n            }\n            if (backPoints.length >= 3) {\n              Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])([backPoints]);\n            }\n          }\n          startPoint = endPoint;\n          startType = endType;\n        }\n        if (frontPoints.length >= 3) {\n        // Add the polygon that sticks out the front of the plane.\n          frontPolygons.push(frontPoints);\n        } else {\n          // throw Error('die');\n        }\n        if (backPoints.length >= 3) {\n        // Add the polygon that sticks out the back of the plane.\n          backPolygons.push(backPoints);\n        } else {\n          // throw Error('die');\n        }\n        break;\n      }\n    }\n  }\n  if (coplanarFrontPolygons.length > 0) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(coplanarFrontPolygons);\n    coplanarFrontSurfaces.push(coplanarFrontPolygons);\n  }\n  if (coplanarBackPolygons.length > 0) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(coplanarBackPolygons);\n    coplanarBackSurfaces.push(coplanarBackPolygons);\n  }\n  if (frontPolygons.length > 0) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(frontPolygons);\n    frontSurfaces.push(frontPolygons);\n  }\n  if (backPolygons.length > 0) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(backPolygons);\n    backSurfaces.push(backPolygons);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/splitSurface.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"splitSurface\", function() { return splitSurface; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\n\n\n\nconst EPSILON = 1e-5;\n\nconst COPLANAR = 0; // Neither front nor back.\nconst FRONT = 1;\nconst BACK = 2;\nconst SPANNING = 3; // Both front and back.\n\nconst toType = (plane, point) => {\n  let t = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"signedDistanceToPoint\"])(plane, point);\n  if (t < -EPSILON) {\n    return BACK;\n  } else if (t > EPSILON) {\n    return FRONT;\n  } else {\n    return COPLANAR;\n  }\n};\n\nconst splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {\n  Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(surface);\n  const coplanarFrontPolygons = [];\n  const coplanarBackPolygons = [];\n  const frontPolygons = [];\n  const backPolygons = [];\n  let polygonType = COPLANAR;\n  for (const polygon of surface) {\n    if (!Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"equals\"])(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon), plane)) {\n      for (const point of polygon) {\n        polygonType |= toType(plane, point);\n      }\n    }\n\n    // Put the polygon in the correct list, splitting it when necessary.\n    switch (polygonType) {\n      case COPLANAR: {\n        if (Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon)) > 0) {\n          coplanarFrontPolygons.push(polygon);\n        } else {\n          coplanarBackPolygons.push(polygon);\n        }\n        break;\n      }\n      case FRONT: {\n        frontPolygons.push(polygon);\n        break;\n      }\n      case BACK: {\n        backPolygons.push(polygon);\n        break;\n      }\n      case SPANNING: {\n        let frontPoints = [];\n        let backPoints = [];\n        let startPoint = polygon[polygon.length - 1];\n        let startType = toType(plane, startPoint);\n        for (const endPoint of polygon) {\n          const endType = toType(plane, endPoint);\n          if (startType !== BACK) {\n            // The inequality is important as it includes COPLANAR points.\n            frontPoints.push(startPoint);\n          }\n          if (startType !== FRONT) {\n            // The inequality is important as it includes COPLANAR points.\n            backPoints.push(startPoint);\n          }\n          if ((startType | endType) === SPANNING) {\n            // This should exclude COPLANAR points.\n            // Compute the point that touches the splitting plane.\n            const rawSpanPoint = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"splitLineSegmentByPlane\"])(plane, startPoint, endPoint);\n            const spanPoint = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"subtract\"])(rawSpanPoint, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])(Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"signedDistanceToPoint\"])(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon), rawSpanPoint), plane));\n            frontPoints.push(spanPoint);\n            backPoints.push(spanPoint);\n            if (Math.abs(Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"signedDistanceToPoint\"])(plane, spanPoint)) > EPSILON) throw Error('die');\n            if (frontPoints.length >= 3) {\n              Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])([frontPoints]);\n            }\n            if (backPoints.length >= 3) {\n              Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])([backPoints]);\n            }\n          }\n          startPoint = endPoint;\n          startType = endType;\n        }\n        if (frontPoints.length >= 3) {\n        // Add the polygon that sticks out the front of the plane.\n          frontPolygons.push(frontPoints);\n        } else {\n          // throw Error('die');\n        }\n        if (backPoints.length >= 3) {\n        // Add the polygon that sticks out the back of the plane.\n          backPolygons.push(backPoints);\n        } else {\n          // throw Error('die');\n        }\n        break;\n      }\n    }\n  }\n  if (coplanarFrontPolygons.length > 0) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(coplanarFrontPolygons);\n    coplanarFrontSurfaces.push(coplanarFrontPolygons);\n  }\n  if (coplanarBackPolygons.length > 0) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(coplanarBackPolygons);\n    coplanarBackSurfaces.push(coplanarBackPolygons);\n  }\n  if (frontPolygons.length > 0) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(frontPolygons);\n    frontSurfaces.push(frontPolygons);\n  }\n  if (backPolygons.length > 0) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(backPolygons);\n    backSurfaces.push(backPolygons);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/splitSurface.js?");
 
 /***/ }),
 
@@ -455,7 +215,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSurfaces\", function() { return toSurfaces; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\nconst gatherSurfaces = (bsp) => {\n  // PROVE: That we need this slice.\n  let surfaces = bsp.surfaces.slice();\n  if (bsp.front !== undefined) {\n    surfaces = surfaces.concat(gatherSurfaces(bsp.front));\n  }\n  if (bsp.back !== undefined) {\n    surfaces = surfaces.concat(gatherSurfaces(bsp.back));\n  }\n  return surfaces;\n};\n\nconst toSurfaces = (options = {}, bsp) => {\n  const surfaces = gatherSurfaces(bsp);\n  for (const surface of surfaces) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"assertCoplanar\"])(surface);\n  }\n  // Some of these surfaces may have cracked.\n  return surfaces;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/toSurfaces.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSurfaces\", function() { return toSurfaces; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\nconst gatherSurfaces = (bsp) => {\n  // PROVE: That we need this slice.\n  let surfaces = bsp.surfaces.slice();\n  if (bsp.front !== undefined) {\n    surfaces = surfaces.concat(gatherSurfaces(bsp.front));\n  }\n  if (bsp.back !== undefined) {\n    surfaces = surfaces.concat(gatherSurfaces(bsp.back));\n  }\n  return surfaces;\n};\n\nconst toSurfaces = (options = {}, bsp) => {\n  const surfaces = gatherSurfaces(bsp);\n  for (const surface of surfaces) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"assertCoplanar\"])(surface);\n  }\n  // Some of these surfaces may have cracked.\n  return surfaces;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/bsp-surfaces/toSurfaces.js?");
 
 /***/ }),
 
@@ -495,654 +255,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _hsl
 
 /***/ }),
 
-/***/ "../../algorithm/path/canonicalize.js":
-/*!******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/canonicalize.js ***!
-  \******************************************************************/
-/*! exports provided: canonicalize */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst canonicalizePoint = (point, index) => {\n  if (point === null) {\n    if (index !== 0) throw Error('Path has null not at head');\n    return point;\n  } else {\n    return Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(point);\n  }\n};\n\nconst canonicalize = (path) => path.map(canonicalizePoint);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/canonicalize.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/close.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/close.js ***!
-  \***********************************************************/
-/*! exports provided: close */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"close\", function() { return close; });\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isClosed */ \"../../algorithm/path/isClosed.js\");\n\n\nconst close = (path) => Object(_isClosed__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path) ? path : path.slice(1);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/close.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/concatenate.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/concatenate.js ***!
-  \*****************************************************************/
-/*! exports provided: concatenate */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"concatenate\", function() { return concatenate; });\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isClosed */ \"../../algorithm/path/isClosed.js\");\n\n\nconst concatenate = (...paths) => {\n  if (!paths.every(path => !Object(_isClosed__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path))) {\n    throw Error('Cannot concatenate closed paths.');\n  }\n  const result = [null, ...[].concat(...paths.map(path => path.slice(1)))];\n  return result;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/concatenate.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/flip.js":
-/*!**********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/flip.js ***!
-  \**********************************************************/
-/*! exports provided: flip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\nconst flip = (path) => {\n  if (path[0] === null) {\n    return [null, ...path.slice(1).reverse()];\n  } else {\n    return path.slice().reverse();\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/flip.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/isClosed.js":
-/*!**************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/isClosed.js ***!
-  \**************************************************************/
-/*! exports provided: isClosed */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isClosed\", function() { return isClosed; });\nconst isClosed = (path) => (path.length === 0) || (path[0] !== null);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/isClosed.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/main.js":
-/*!**********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/main.js ***!
-  \**********************************************************/
-/*! exports provided: canonicalize, close, concatenate, flip, isClosed, measureArea, open, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate, scale */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../algorithm/path/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _close__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./close */ \"../../algorithm/path/close.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"close\", function() { return _close__WEBPACK_IMPORTED_MODULE_2__[\"close\"]; });\n\n/* harmony import */ var _concatenate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./concatenate */ \"../../algorithm/path/concatenate.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"concatenate\", function() { return _concatenate__WEBPACK_IMPORTED_MODULE_3__[\"concatenate\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./flip */ \"../../algorithm/path/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_4__[\"flip\"]; });\n\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./isClosed */ \"../../algorithm/path/isClosed.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"isClosed\", function() { return _isClosed__WEBPACK_IMPORTED_MODULE_5__[\"isClosed\"]; });\n\n/* harmony import */ var _measureArea__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./measureArea */ \"../../algorithm/path/measureArea.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return _measureArea__WEBPACK_IMPORTED_MODULE_6__[\"measureArea\"]; });\n\n/* harmony import */ var _open__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./open */ \"../../algorithm/path/open.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"open\", function() { return _open__WEBPACK_IMPORTED_MODULE_7__[\"open\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./toGeneric */ \"../../algorithm/path/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_8__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPolygon__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toPolygon */ \"../../algorithm/path/toPolygon.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPolygon\", function() { return _toPolygon__WEBPACK_IMPORTED_MODULE_9__[\"toPolygon\"]; });\n\n/* harmony import */ var _toSegments__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toSegments */ \"../../algorithm/path/toSegments.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toSegments\", function() { return _toSegments__WEBPACK_IMPORTED_MODULE_10__[\"toSegments\"]; });\n\n/* harmony import */ var _toZ0Polygon__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toZ0Polygon */ \"../../algorithm/path/toZ0Polygon.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygon\", function() { return _toZ0Polygon__WEBPACK_IMPORTED_MODULE_11__[\"toZ0Polygon\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./transform */ \"../../algorithm/path/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_12__[\"transform\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst translate = (vector, path) => Object(_transform__WEBPACK_IMPORTED_MODULE_12__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), path);\nconst scale = (vector, path) => Object(_transform__WEBPACK_IMPORTED_MODULE_12__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), path);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/measureArea.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/measureArea.js ***!
-  \*****************************************************************/
-/*! exports provided: measureArea */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return measureArea; });\nconst X = 0;\nconst Y = 1;\n\n/**\n * Measure the area of a path as though it were a polygon.\n * A negative area indicates a clockwise path, and a positive area indicates a counter-clock-wise path.\n * See: http://mathworld.wolfram.com/PolygonArea.html\n * @returns {Number} The area the path would have if it were a polygon.\n */\nconst measureArea = (path) => {\n  let last = path.length - 1;\n  let current = (path[0] === null) ? 1 : 0;\n  let twiceArea = 0;\n  for (; current < path.length; last = current++) {\n    twiceArea += path[last][X] * path[current][Y] - path[last][Y] * path[current][X];\n  }\n  return twiceArea / 2;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/measureArea.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/open.js":
-/*!**********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/open.js ***!
-  \**********************************************************/
-/*! exports provided: open */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"open\", function() { return open; });\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isClosed */ \"../../algorithm/path/isClosed.js\");\n\n\nconst open = (path) => Object(_isClosed__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path) ? [null, ...path] : path;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/open.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/toGeneric.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/toGeneric.js ***!
-  \***************************************************************/
-/*! exports provided: toGeneric */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\nconst toGeneric = (path) => [...path];\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/toGeneric.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/toPolygon.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/toPolygon.js ***!
-  \***************************************************************/
-/*! exports provided: toPolygon */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPolygon\", function() { return toPolygon; });\nconst toPolygon = (path) => {\n  if (path.isPolygon !== true) {\n    if (path.length < 3) throw Error('Path would form degenerate polygon.');\n    if (path[0] === null) throw Error('Only closed paths can be polygons.');\n    // FIX: Check for coplanarity.\n    path.isPolygon = true;\n  }\n  return path;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/toPolygon.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/toSegments.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/toSegments.js ***!
-  \****************************************************************/
-/*! exports provided: toSegments */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSegments\", function() { return toSegments; });\nconst toSegments = (options = {}, path) => {\n  const segments = [];\n  if (path[0] !== null) {\n    segments.push([path[path.length - 1], path[0]]);\n    segments.push([path[0], path[1]]);\n  }\n  for (let nth = 2; nth < path.length; nth++) {\n    segments.push([path[nth - 1], path[nth]]);\n  }\n  return segments;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/toSegments.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/toZ0Polygon.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/toZ0Polygon.js ***!
-  \*****************************************************************/
-/*! exports provided: toZ0Polygon */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygon\", function() { return toZ0Polygon; });\nconst isZ0Point = ([x = 0, y = 0, z = 0]) => (z === 0);\n\nconst toZ0Polygon = (path) => {\n  if (path.isZ0Polygon !== true) {\n    if (path.length < 3) throw Error('Path would form degenerate polygon.');\n    if (path[0] === null) throw Error('Only closed paths can be polygons.');\n    if (!path.every(isZ0Point)) throw Error(`z != 0: ${JSON.stringify(path.filter(path => !isZ0Point(path)))}`);\n    path.isZ0Polygon = true;\n  }\n  return path;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/toZ0Polygon.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/path/transform.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/path/transform.js ***!
-  \***************************************************************/
-/*! exports provided: transform */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst transform = (matrix, path) =>\n  path.map((point, index) => (point === null) ? null : Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, point));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/path/transform.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/butLast.js":
-/*!**************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/butLast.js ***!
-  \**************************************************************/
-/*! exports provided: butLast */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"butLast\", function() { return butLast; });\nconst butLast = (paths) => paths.slice(0, paths.length - 1);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/butLast.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/canonicalize.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/canonicalize.js ***!
-  \*******************************************************************/
-/*! exports provided: canonicalize */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\nconst canonicalize = (paths) => {\n  let canonicalized = paths.map(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n  if (paths.properties !== undefined) {\n    // Transfer properties.\n    canonicalized.properties = paths.properties;\n  }\n  return canonicalized;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/canonicalize.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/difference.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/difference.js ***!
-  \*****************************************************************/
-/*! exports provided: difference */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\nconst difference = (pathset, ...pathsets) => { throw Error('Not implemented'); };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/difference.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/eachPoint.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/eachPoint.js ***!
-  \****************************************************************/
-/*! exports provided: eachPoint */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, paths) => {\n  for (const path of paths) {\n    for (const point of path) {\n      if (point !== null) {\n        thunk(point);\n      }\n    }\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/eachPoint.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/flip.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/flip.js ***!
-  \***********************************************************/
-/*! exports provided: flip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\nconst flip = (paths) => paths.map(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"flip\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/flip.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/intersection.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/intersection.js ***!
-  \*******************************************************************/
-/*! exports provided: intersection */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return intersection; });\nconst intersection = (...pathsets) => { throw Error('Not implemented'); };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/intersection.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/last.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/last.js ***!
-  \***********************************************************/
-/*! exports provided: last */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"last\", function() { return last; });\nconst last = (paths) => paths.length >= 1 ? paths[paths.length - 1] : [null];\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/last.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/main.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/main.js ***!
-  \***********************************************************/
-/*! exports provided: butLast, canonicalize, difference, eachPoint, flip, intersection, last, measureBoundingBox, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, union, scale */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _butLast__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./butLast */ \"../../algorithm/paths/butLast.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"butLast\", function() { return _butLast__WEBPACK_IMPORTED_MODULE_0__[\"butLast\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../algorithm/paths/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./difference */ \"../../algorithm/paths/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_2__[\"difference\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/paths/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_3__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./flip */ \"../../algorithm/paths/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_4__[\"flip\"]; });\n\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./intersection */ \"../../algorithm/paths/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_6__[\"intersection\"]; });\n\n/* harmony import */ var _last__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./last */ \"../../algorithm/paths/last.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"last\", function() { return _last__WEBPACK_IMPORTED_MODULE_7__[\"last\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../algorithm/paths/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_8__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toGeneric */ \"../../algorithm/paths/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_9__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPoints__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toPoints */ \"../../algorithm/paths/toPoints.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return _toPoints__WEBPACK_IMPORTED_MODULE_10__[\"toPoints\"]; });\n\n/* harmony import */ var _toPolygons__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toPolygons */ \"../../algorithm/paths/toPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return _toPolygons__WEBPACK_IMPORTED_MODULE_11__[\"toPolygons\"]; });\n\n/* harmony import */ var _toZ0Polygons__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./toZ0Polygons */ \"../../algorithm/paths/toZ0Polygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygons\", function() { return _toZ0Polygons__WEBPACK_IMPORTED_MODULE_12__[\"toZ0Polygons\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./transform */ \"../../algorithm/paths/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_13__[\"transform\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./union */ \"../../algorithm/paths/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_14__[\"union\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst scale = ([x = 1, y = 1, z = 1], paths) => Object(_transform__WEBPACK_IMPORTED_MODULE_13__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__[\"fromScaling\"])([x, y, z]), paths);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/map.js":
-/*!**********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/map.js ***!
-  \**********************************************************/
-/*! exports provided: map */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\n/**\n * Transforms each path of Paths.\n *\n * @param {Paths} original - the Paths to transform.\n * @param {Function} [transform=identity] - function used to transform the paths.\n * @returns {Paths} the transformed paths.\n */\nconst map = (original, transform) => {\n  if (original === undefined) {\n    original = [];\n  }\n  if (transform === undefined) {\n    transform = _ => _;\n  }\n  // FIX: Consider optimizing this to return the original if all transforms are identity transforms.\n  return original.map(path => transform(path));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/map.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/measureBoundingBox.js":
-/*!*************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/measureBoundingBox.js ***!
-  \*************************************************************************/
-/*! exports provided: measureBoundingBox */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/paths/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (paths) => {\n  let minPoint;\n  let maxPoint;\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              minPoint = (minPoint === undefined) ? Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point) : Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(minPoint, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point));\n              maxPoint = (maxPoint === undefined) ? Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point) : Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(maxPoint, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point));\n            },\n            paths);\n  return [minPoint, maxPoint];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/measureBoundingBox.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/toGeneric.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/toGeneric.js ***!
-  \****************************************************************/
-/*! exports provided: toGeneric */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../algorithm/paths/map.js\");\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\n\nconst toGeneric = (paths) => Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(paths, _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_1__[\"toGeneric\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/toGeneric.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/toPoints.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/toPoints.js ***!
-  \***************************************************************/
-/*! exports provided: toPoints */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return toPoints; });\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/paths/eachPoint.js\");\n\n\nconst toPoints = (options = {}, paths) => {\n  const points = [];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, point => points.push(point), paths);\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/toPoints.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/toPolygons.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/toPolygons.js ***!
-  \*****************************************************************/
-/*! exports provided: toPolygons */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return toPolygons; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../algorithm/paths/map.js\");\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\n\nconst toPolygons = (paths) => {\n  if (paths.isPolygons !== true) {\n    paths = Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(paths, _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_1__[\"toPolygon\"]);\n    paths.isPolygons = true;\n  }\n  return paths;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/toPolygons.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/toZ0Polygons.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/toZ0Polygons.js ***!
-  \*******************************************************************/
-/*! exports provided: toZ0Polygons */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygons\", function() { return toZ0Polygons; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../algorithm/paths/map.js\");\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\n\nconst toZ0Polygons = (paths) => {\n  if (paths.isZ0Polygons !== true) {\n    paths = Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(paths, _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_1__[\"toZ0Polygon\"]);\n    paths.isZ0Polygons = true;\n  }\n  return paths;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/toZ0Polygons.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/transform.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/transform.js ***!
-  \****************************************************************/
-/*! exports provided: transform */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\nconst transform = (matrix, paths) => paths.map(path => Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, path));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/transform.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/paths/union.js":
-/*!************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/paths/union.js ***!
-  \************************************************************/
-/*! exports provided: union */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return union; });\n// FIX: Deduplication.\n\nconst union = (...pathsets) => [].concat(...pathsets);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/paths/union.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/buildConvexHull.js":
-/*!***********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/buildConvexHull.js ***!
-  \***********************************************************************/
-/*! exports provided: buildConvexHull */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildConvexHull\", function() { return buildConvexHull; });\n/* harmony import */ var quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! quickhull3d/dist/QuickHull */ \"../../node_modules/quickhull3d/dist/QuickHull.js\");\n/* harmony import */ var quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0__);\n\n\nconst buildConvexHull = (options = {}, points) => {\n  const hull = new quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0___default.a(points, { skipTriangulation: true });\n  hull.build();\n  return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/buildConvexHull.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/buildConvexMinkowskiSum.js":
-/*!*******************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/buildConvexMinkowskiSum.js ***!
-  \*******************************************************************************/
-/*! exports provided: buildConvexMinkowskiSum */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildConvexMinkowskiSum\", function() { return buildConvexMinkowskiSum; });\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../algorithm/points/ops.js\");\n\n\nconst buildConvexMinkowskiSum = (options = {}, aPoints, bPoints) => {\n  const summedPoints = [];\n  for (const aPoint of aPoints) {\n    for (const summedPoint of Object(_ops__WEBPACK_IMPORTED_MODULE_0__[\"translate\"])(aPoint, bPoints)) {\n      summedPoints.push(summedPoint);\n    }\n  }\n  return summedPoints;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/buildConvexMinkowskiSum.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/canonicalize.js":
-/*!********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/canonicalize.js ***!
-  \********************************************************************/
-/*! exports provided: canonicalize */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst canonicalize = (points) => points.map(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/canonicalize.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/eachPoint.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/eachPoint.js ***!
-  \*****************************************************************/
-/*! exports provided: eachPoint */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, points) => {\n  for (const point of points) {\n    thunk(point);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/eachPoint.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/fromPolygons.js":
-/*!********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/fromPolygons.js ***!
-  \********************************************************************/
-/*! exports provided: fromPolygons */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return fromPolygons; });\nconst fromPolygons = (options = {}, polygons) => {\n  const points = [];\n  for (const polygon of polygons) {\n    for (const point of polygon) {\n      points.push(point);\n    }\n  }\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/fromPolygons.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/main.js":
-/*!************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/main.js ***!
-  \************************************************************/
-/*! exports provided: canonicalize, buildConvexHull, buildConvexMinkowskiSum, eachPoint, flip, fromPolygons, measureBoundingBox, transform, translate */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../algorithm/points/ops.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"transform\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"translate\"]; });\n\n/* harmony import */ var _buildConvexHull__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./buildConvexHull */ \"../../algorithm/points/buildConvexHull.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"buildConvexHull\", function() { return _buildConvexHull__WEBPACK_IMPORTED_MODULE_1__[\"buildConvexHull\"]; });\n\n/* harmony import */ var _buildConvexMinkowskiSum__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./buildConvexMinkowskiSum */ \"../../algorithm/points/buildConvexMinkowskiSum.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"buildConvexMinkowskiSum\", function() { return _buildConvexMinkowskiSum__WEBPACK_IMPORTED_MODULE_2__[\"buildConvexMinkowskiSum\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./canonicalize */ \"../../algorithm/points/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_3__[\"canonicalize\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/points/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_4__[\"eachPoint\"]; });\n\n/* harmony import */ var _fromPolygons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./fromPolygons */ \"../../algorithm/points/fromPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return _fromPolygons__WEBPACK_IMPORTED_MODULE_5__[\"fromPolygons\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../algorithm/points/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_6__[\"measureBoundingBox\"]; });\n\n\n\n\n\n\n\n\n\n\nconst flip = (points) => points;\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/measureBoundingBox.js":
-/*!**************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/measureBoundingBox.js ***!
-  \**************************************************************************/
-/*! exports provided: measureBoundingBox */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/points/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (points) => {\n  let max = points[0];\n  let min = points[0];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              max = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(max, point);\n              min = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(min, point);\n            },\n            points);\n  return [min, max];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/measureBoundingBox.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/points/ops.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/points/ops.js ***!
-  \***********************************************************/
-/*! exports provided: transform, translate */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\n\nconst transform = (matrix, points) => points.map(point => Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, point));\nconst translate = ([x = 0, y = 0, z = 0], points) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([x, y, z]), points);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/points/ops.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/blessAsConvex.js":
-/*!***********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/blessAsConvex.js ***!
-  \***********************************************************************/
-/*! exports provided: blessAsConvex */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"blessAsConvex\", function() { return blessAsConvex; });\nconst blessAsConvex = (paths) => { paths.isConvex = true; return paths; };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/blessAsConvex.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/blessAsTriangles.js":
-/*!**************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/blessAsTriangles.js ***!
-  \**************************************************************************/
-/*! exports provided: blessAsTriangles */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"blessAsTriangles\", function() { return blessAsTriangles; });\nconst blessAsTriangles = (paths) => { paths.isTriangles = true; return paths; };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/blessAsTriangles.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/canonicalize.js":
-/*!**********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/canonicalize.js ***!
-  \**********************************************************************/
-/*! exports provided: canonicalize */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\n\nconst isDegenerate = (polygon) => {\n  for (let nth = 0; nth < polygon.length; nth++) {\n    if (Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__[\"equals\"])(polygon[nth], polygon[(nth + 1) % polygon.length])) {\n      return true;\n    }\n  }\n  return false;\n};\n\nconst canonicalize = (polygons) => {\n  const canonicalized = [];\n  for (let polygon of polygons) {\n    polygon = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(polygon);\n    if (!isDegenerate(polygon)) {\n      canonicalized.push(polygon);\n    }\n  }\n  return canonicalized;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/canonicalize.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/cutTrianglesByPlane.js":
-/*!*****************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/cutTrianglesByPlane.js ***!
-  \*****************************************************************************/
-/*! exports provided: cutTrianglesByPlane */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"cutTrianglesByPlane\", function() { return cutTrianglesByPlane; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst EPSILON = 1e-5;\n\n// Point Classification.\nconst COPLANAR = 0;\nconst FRONT = 1;\nconst BACK = 2;\n\n// Edge Properties.\nconst START = 0;\nconst END = 1;\n\n// Plane Properties.\nconst W = 3;\n\nconst toType = (plane, point) => {\n  let t = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, point) - plane[W];\n  if (t < -EPSILON) {\n    return BACK;\n  } else if (t > EPSILON) {\n    return FRONT;\n  } else {\n    return COPLANAR;\n  }\n};\n\nconst spanPoint = (plane, startPoint, endPoint) => {\n  let t = (plane[W] - Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, startPoint)) / Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"subtract\"])(endPoint, startPoint));\n  return Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"lerp\"])(t, startPoint, endPoint));\n};\n\nconst lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {\n  if (aX < bX) { return -1; }\n  if (aX > bX) { return 1; }\n  if (aY < bY) { return -1; }\n  if (aY > bY) { return 1; }\n  if (aZ < bZ) { return -1; }\n  if (aZ > bZ) { return 1; }\n  return 0;\n};\n\n/**\n * Takes a cross-section of a triangulated solid at a plane, yielding surface defining loops\n * in that plane.\n *\n * FIX: Make sure this works properly for solids with holes in them, etc.\n * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.\n */\nconst cutTrianglesByPlane = (plane, triangles) => {\n  let edges = [];\n  const addEdge = (start, end) => {\n    edges.push([start, end]);\n  };\n\n  // Find the edges along the plane and fold them into paths to produce a set of closed loops.\n  for (let nth = 0; nth < triangles.length; nth++) {\n    const triangle = triangles[nth];\n    const [a, b, c] = triangle;\n    const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];\n\n    switch (aType) {\n      case FRONT:\n        switch (bType) {\n          case FRONT:\n            switch (cType) {\n              case FRONT:\n                // No intersection.\n                break;\n              case COPLANAR:\n                // Corner touches.\n                break;\n              case BACK:\n                // b-c down c-a up\n                addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));\n                break;\n            }\n            break;\n          case COPLANAR:\n            switch (cType) {\n              case FRONT:\n                // Corner touches.\n                break;\n              case COPLANAR:\n                // b-c along plane.\n                addEdge(b, c);\n                break;\n              case BACK:\n                // down at b, up c-a.\n                addEdge(b, spanPoint(plane, c, a));\n                break;\n            }\n            break;\n          case BACK:\n            switch (cType) {\n              case FRONT:\n                // a-b down, b-c up.\n                addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));\n                break;\n              case COPLANAR:\n                // a-b down, c up.\n                addEdge(spanPoint(plane, a, b), c);\n                break;\n              case BACK:\n                // a-b down, c-a up.\n                addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));\n                break;\n            }\n            break;\n        }\n        break;\n      case COPLANAR:\n        switch (bType) {\n          case FRONT:\n            switch (cType) {\n              case FRONT:\n                // Corner touches.\n                break;\n              case COPLANAR:\n                // c-a along plane.\n                addEdge(c, a);\n                break;\n              case BACK:\n                // down at b-c, up at a\n                addEdge(spanPoint(plane, b, c), a);\n                break;\n            }\n            break;\n          case COPLANAR:\n            switch (cType) {\n              case FRONT:\n                // a-b along plane.\n                addEdge(a, b);\n                break;\n              case COPLANAR:\n                // Entirely coplanar -- doesn't cut.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n          case BACK:\n            switch (cType) {\n              case FRONT:\n                // down at a, up at b-c.\n                addEdge(a, spanPoint(plane, b, c));\n                break;\n              case COPLANAR:\n                // Wrong half-space.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n        }\n        break;\n      case BACK:\n        switch (bType) {\n          case FRONT:\n            switch (cType) {\n              case FRONT:\n                // down at c-a, up at a-b\n                addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));\n                break;\n              case COPLANAR:\n                // down at c, up at a-b\n                addEdge(c, spanPoint(plane, a, b));\n                break;\n              case BACK:\n                // down at b-c, up at a-b.\n                addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));\n                break;\n            }\n            break;\n          case COPLANAR:\n            switch (cType) {\n              case FRONT:\n                // down at c-a, up at b.\n                addEdge(spanPoint(plane, c, a), b);\n                break;\n              case COPLANAR:\n                // Wrong half-space.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n          case BACK:\n            switch (cType) {\n              case FRONT:\n                // down at c-a, up at b-c.\n                addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));\n                break;\n              case COPLANAR:\n                // Wrong half-space.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n        }\n        break;\n    }\n  }\n\n  const extractSuccessor = (edges, start) => {\n    // FIX: Use a binary search to take advantage of the sorting of the edges.\n    for (let nth = 0; nth < edges.length; nth++) {\n      const candidate = edges[nth];\n      if (Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"equals\"])(candidate[START], start)) {\n        edges.splice(nth, 1);\n        return candidate;\n      }\n    }\n    // Given manifold geometry, there must always be a successor.\n    throw Error('Non-manifold');\n  };\n\n  // Sort the edges so that deduplication is efficient.\n  edges.sort(lexicographcalPointOrder);\n\n  // Assemble the edges into loops which are closed paths.\n  const loops = [];\n  while (edges.length > 0) {\n    let edge = edges.shift();\n    const loop = [edge[START]];\n    while (!Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"equals\"])(edge[END], loop[0])) {\n      edge = extractSuccessor(edges, edge[END]);\n      loop.push(edge[START]);\n    }\n    loops.push(loop);\n  }\n\n  return loops;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/cutTrianglesByPlane.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/eachPoint.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/eachPoint.js ***!
-  \*******************************************************************/
-/*! exports provided: eachPoint */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, polygons) => {\n  for (const polygon of polygons) {\n    for (const point of polygon) {\n      thunk(point);\n    }\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/eachPoint.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/flip.js":
-/*!**************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/flip.js ***!
-  \**************************************************************/
-/*! exports provided: flip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ \"../../algorithm/polygons/map.js\");\n\n\n\nconst flip = (polygons) => Object(_map__WEBPACK_IMPORTED_MODULE_1__[\"map\"])(polygons, _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"flip\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/flip.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/fromPointsAndPaths.js":
-/*!****************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/fromPointsAndPaths.js ***!
-  \****************************************************************************/
-/*! exports provided: fromPointsAndPaths */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromPointsAndPaths\", function() { return fromPointsAndPaths; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst fromPointsAndPaths = ({ points = [], paths = [] }) => {\n  const polygons = [];\n  for (const path of paths) {\n    polygons.push(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoints\"])(path.map(nth => points[nth])));\n  }\n  return polygons;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/fromPointsAndPaths.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/isTriangle.js":
-/*!********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/isTriangle.js ***!
-  \********************************************************************/
-/*! exports provided: isTriangle */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isTriangle\", function() { return isTriangle; });\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n\n\nconst isTriangle = (path) => Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path) && path.length === 3;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/isTriangle.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/main.js":
-/*!**************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/main.js ***!
-  \**************************************************************/
-/*! exports provided: canonicalize, cutTrianglesByPlane, eachPoint, flip, fromPointsAndPaths, isTriangle, makeConvex, map, measureBoundingBox, measureBoundingSphere, toGeneric, toPoints, toTriangles, rotateX, rotateY, rotateZ, scale, transform, translate */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return rotateX; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return rotateY; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return rotateZ; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../algorithm/polygons/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _cutTrianglesByPlane__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./cutTrianglesByPlane */ \"../../algorithm/polygons/cutTrianglesByPlane.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cutTrianglesByPlane\", function() { return _cutTrianglesByPlane__WEBPACK_IMPORTED_MODULE_2__[\"cutTrianglesByPlane\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/polygons/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_3__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./flip */ \"../../algorithm/polygons/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_4__[\"flip\"]; });\n\n/* harmony import */ var _fromPointsAndPaths__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./fromPointsAndPaths */ \"../../algorithm/polygons/fromPointsAndPaths.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"fromPointsAndPaths\", function() { return _fromPointsAndPaths__WEBPACK_IMPORTED_MODULE_5__[\"fromPointsAndPaths\"]; });\n\n/* harmony import */ var _isTriangle__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./isTriangle */ \"../../algorithm/polygons/isTriangle.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"isTriangle\", function() { return _isTriangle__WEBPACK_IMPORTED_MODULE_6__[\"isTriangle\"]; });\n\n/* harmony import */ var _makeConvex__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./makeConvex */ \"../../algorithm/polygons/makeConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return _makeConvex__WEBPACK_IMPORTED_MODULE_7__[\"makeConvex\"]; });\n\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./map */ \"../../algorithm/polygons/map.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return _map__WEBPACK_IMPORTED_MODULE_8__[\"map\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../algorithm/polygons/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_9__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./measureBoundingSphere */ \"../../algorithm/polygons/measureBoundingSphere.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_10__[\"measureBoundingSphere\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toGeneric */ \"../../algorithm/polygons/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_11__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPoints__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./toPoints */ \"../../algorithm/polygons/toPoints.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return _toPoints__WEBPACK_IMPORTED_MODULE_12__[\"toPoints\"]; });\n\n/* harmony import */ var _toTriangles__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./toTriangles */ \"../../algorithm/polygons/toTriangles.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toTriangles\", function() { return _toTriangles__WEBPACK_IMPORTED_MODULE_13__[\"toTriangles\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./transform */ \"../../algorithm/polygons/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst rotateX = (angle, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromXRotation\"])(angle), polygons);\nconst rotateY = (angle, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromYRotation\"])(angle), polygons);\nconst rotateZ = (angle, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromZRotation\"])(angle), polygons);\nconst scale = (vector, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), polygons);\nconst translate = (vector, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), polygons);\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/makeConvex.js":
-/*!********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/makeConvex.js ***!
-  \********************************************************************/
-/*! exports provided: makeConvex */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return makeConvex; });\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tess2 */ \"../../algorithm/tess2.js/index.js\");\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tess2__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _blessAsConvex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./blessAsConvex */ \"../../algorithm/polygons/blessAsConvex.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\n\nconst toContour = (polygon) => {\n  const points = [];\n  for (const [x = 0, y = 0, z = 0] of polygon) {\n    points.push(x, y, z);\n  }\n  return points;\n};\n\nconst fromTessellation = (tessellation) => {\n  const tessPolygons = tessellation.elements;\n  const vertices = tessellation.vertices;\n  const polygons = [];\n\n  const toPoint = (offset) => {\n    const vertex = tessPolygons[offset];\n    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];\n  };\n\n  for (let nth = 0; nth < tessPolygons.length; nth += 3) {\n    polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);\n  }\n\n  return polygons;\n};\n\n// This currently does triangulation.\n// Higher arities are possible, but end up being null padded.\n// Let's see if they're useful.\n\n// TODO: Call this toConvexPolygons\nconst makeConvex = (options = {}, polygons) => {\n  if (polygons.isConvex) {\n    return polygons;\n  }\n  if (polygons.every(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__[\"isConvex\"])) {\n    return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(polygons);\n  }\n  const contours = polygons.map(toContour);\n  // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.\n  const convex = fromTessellation(\n    tess2__WEBPACK_IMPORTED_MODULE_0___default.a.tesselate({ contours: contours,\n                      windingRule: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.WINDING_ODD,\n                      elementType: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.POLYGONS,\n                      polySize: 3,\n                      vertexSize: 3\n    }));\n  return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(convex);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/makeConvex.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/map.js":
-/*!*************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/map.js ***!
-  \*************************************************************/
-/*! exports provided: map */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\n/**\n * Transforms each polygon of Polygons.\n *\n * @param {Polygons} original - the Polygons to transform.\n * @param {Function} [transform=identity] - function used to transform the polygons.\n * @returns {Polygons} a copy with transformed polygons.\n */\nconst map = (original, transform) => {\n  if (original === undefined) {\n    original = [];\n  }\n  if (transform === undefined) {\n    transform = _ => _;\n  }\n  return original.map(polygon => transform(polygon));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/map.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/measureBoundingBox.js":
-/*!****************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/measureBoundingBox.js ***!
-  \****************************************************************************/
-/*! exports provided: measureBoundingBox */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/polygons/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (polygons) => {\n  let max = polygons[0][0];\n  let min = polygons[0][0];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              max = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(max, point);\n              min = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(min, point);\n            },\n            polygons);\n  return [min, max];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/measureBoundingBox.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/measureBoundingSphere.js":
-/*!*******************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/measureBoundingSphere.js ***!
-  \*******************************************************************************/
-/*! exports provided: measureBoundingSphere */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return measureBoundingSphere; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../algorithm/polygons/measureBoundingBox.js\");\n\n\n\n\n/** Measure the bounding sphere of the given poly3\n * @param {poly3} the poly3 to measure\n * @returns computed bounding sphere; center (vec3) and radius\n */\nconst measureBoundingSphere = (polygons) => {\n  if (polygons.boundingSphere === undefined) {\n    const [min, max] = Object(_measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__[\"measureBoundingBox\"])(polygons);\n    const center = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])(0.5, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(min, max));\n    const radius = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"distance\"])(center, max);\n    polygons.boundingSphere = [center, radius];\n  }\n  return polygons.boundingSphere;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/measureBoundingSphere.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/toGeneric.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/toGeneric.js ***!
-  \*******************************************************************/
-/*! exports provided: toGeneric */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../algorithm/polygons/map.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\nconst toGeneric = (polygons) => Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(polygons, _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__[\"map\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/toGeneric.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/toPoints.js":
-/*!******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/toPoints.js ***!
-  \******************************************************************/
-/*! exports provided: toPoints */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return toPoints; });\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/polygons/eachPoint.js\");\n\n\nconst toPoints = (options = {}, polygons) => {\n  const points = [];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, point => points.push(point), polygons);\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/toPoints.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/toTriangles.js":
-/*!*********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/toTriangles.js ***!
-  \*********************************************************************/
-/*! exports provided: toTriangles */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toTriangles\", function() { return toTriangles; });\n/* harmony import */ var _blessAsTriangles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./blessAsTriangles */ \"../../algorithm/polygons/blessAsTriangles.js\");\n/* harmony import */ var _isTriangle__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./isTriangle */ \"../../algorithm/polygons/isTriangle.js\");\n\n\n\nconst toTriangles = (options = {}, paths) => {\n  if (paths.isTriangles) {\n    return paths;\n  }\n  if (paths.every(_isTriangle__WEBPACK_IMPORTED_MODULE_1__[\"isTriangle\"])) {\n    return Object(_blessAsTriangles__WEBPACK_IMPORTED_MODULE_0__[\"blessAsTriangles\"])(paths);\n  }\n  const triangles = [];\n  for (const path of paths) {\n    for (let nth = 2; nth < path.length; nth++) {\n      triangles.push([path[0], path[nth - 1], path[nth]]);\n    }\n  }\n  return Object(_blessAsTriangles__WEBPACK_IMPORTED_MODULE_0__[\"blessAsTriangles\"])(triangles);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/toTriangles.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/polygons/transform.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/polygons/transform.js ***!
-  \*******************************************************************/
-/*! exports provided: transform */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst transform = (matrix, polygons) => polygons.map(polygon => Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, polygon));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/polygons/transform.js?");
-
-/***/ }),
-
 /***/ "../../algorithm/shape/buildAdaptiveCubicBezierCurve.js":
 /*!************************************************************************************!*\
   !*** /home/sbrian/github6/JSxCAD/algorithm/shape/buildAdaptiveCubicBezierCurve.js ***!
@@ -1175,7 +287,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildRegularIcosahedron\", function() { return buildRegularIcosahedron; });\n/* harmony import */ var _jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-polygons */ \"../../algorithm/polygons/main.js\");\n\n\n// Unit icosahedron vertices.\nconst points = [[0.850651, 0.000000, -0.525731],\n                [0.850651, -0.000000, 0.525731],\n                [-0.850651, -0.000000, 0.525731],\n                [-0.850651, 0.000000, -0.525731],\n                [0.000000, -0.525731, 0.850651],\n                [0.000000, 0.525731, 0.850651],\n                [0.000000, 0.525731, -0.850651],\n                [0.000000, -0.525731, -0.850651],\n                [-0.525731, -0.850651, -0.000000],\n                [0.525731, -0.850651, -0.000000],\n                [0.525731, 0.850651, 0.000000],\n                [-0.525731, 0.850651, 0.000000]];\n\n// Triangular decomposition structure.\nconst paths = [[1, 9, 0], [0, 10, 1], [0, 7, 6], [0, 6, 10],\n               [0, 9, 7], [4, 1, 5], [9, 1, 4], [1, 10, 5],\n               [3, 8, 2], [2, 11, 3], [4, 5, 2], [2, 8, 4],\n               [5, 11, 2], [6, 7, 3], [3, 11, 6], [3, 7, 8],\n               [4, 8, 9], [5, 10, 11], [6, 11, 10], [7, 9, 8]];\n\n// FIX: Why aren't we computing the convex hull?\nconst buildRegularIcosahedron = (options = {}) => {\n  return Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"fromPointsAndPaths\"])({ points: points, paths: paths });\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/buildRegularIcosahedron.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildRegularIcosahedron\", function() { return buildRegularIcosahedron; });\n/* harmony import */ var _jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-polygons */ \"../../geometry/polygons/main.js\");\n\n\n// Unit icosahedron vertices.\nconst points = [[0.850651, 0.000000, -0.525731],\n                [0.850651, -0.000000, 0.525731],\n                [-0.850651, -0.000000, 0.525731],\n                [-0.850651, 0.000000, -0.525731],\n                [0.000000, -0.525731, 0.850651],\n                [0.000000, 0.525731, 0.850651],\n                [0.000000, 0.525731, -0.850651],\n                [0.000000, -0.525731, -0.850651],\n                [-0.525731, -0.850651, -0.000000],\n                [0.525731, -0.850651, -0.000000],\n                [0.525731, 0.850651, 0.000000],\n                [-0.525731, 0.850651, 0.000000]];\n\n// Triangular decomposition structure.\nconst paths = [[1, 9, 0], [0, 10, 1], [0, 7, 6], [0, 6, 10],\n               [0, 9, 7], [4, 1, 5], [9, 1, 4], [1, 10, 5],\n               [3, 8, 2], [2, 11, 3], [4, 5, 2], [2, 8, 4],\n               [5, 11, 2], [6, 7, 3], [3, 11, 6], [3, 7, 8],\n               [4, 8, 9], [5, 10, 11], [6, 11, 10], [7, 9, 8]];\n\n// FIX: Why aren't we computing the convex hull?\nconst buildRegularIcosahedron = (options = {}) => {\n  return Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"fromPointsAndPaths\"])({ points: points, paths: paths });\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/buildRegularIcosahedron.js?");
 
 /***/ }),
 
@@ -1211,7 +323,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildRegularTetrahedron\", function() { return buildRegularTetrahedron; });\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n\n\n// Unit tetrahedron vertices.\nconst points = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],\n                [-1, 1, -1], [-1, -1, 1], [1, -1, -1],\n                [1, 1, 1], [1, -1, -1], [-1, -1, 1],\n                [1, 1, 1], [-1, -1, 1], [-1, 1, -1]];\n\nconst buildRegularTetrahedron = (options = {}) => Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexHull\"])({}, points);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/buildRegularTetrahedron.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildRegularTetrahedron\", function() { return buildRegularTetrahedron; });\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n\n\n// Unit tetrahedron vertices.\nconst points = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],\n                [-1, 1, -1], [-1, -1, 1], [1, -1, -1],\n                [1, 1, 1], [1, -1, -1], [-1, -1, 1],\n                [1, 1, 1], [-1, -1, 1], [-1, 1, -1]];\n\nconst buildRegularTetrahedron = (options = {}) => Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexHull\"])({}, points);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/buildRegularTetrahedron.js?");
 
 /***/ }),
 
@@ -1223,7 +335,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildRingSphere\", function() { return buildRingSphere; });\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n/* harmony import */ var _buildRegularPolygon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./buildRegularPolygon */ \"../../algorithm/shape/buildRegularPolygon.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n\n\n\n\n\n\nconst buildRingSphere = ({ resolution = 20 }) => {\n  const paths = [];\n  // Trace out latitudinal rings.\n  for (let slice = 0; slice <= resolution; slice++) {\n    let angle = Math.PI * 2.0 * slice / resolution;\n    let height = Math.sin(angle);\n    let radius = Math.cos(angle);\n    paths.push(Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"translate\"])([0, 0, height], Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])([radius, radius, radius], Object(_buildRegularPolygon__WEBPACK_IMPORTED_MODULE_2__[\"buildRegularPolygon\"])({ edges: resolution }))));\n  }\n  // Hull the rings to form a sphere.\n  return Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__[\"buildConvexHull\"])({}, Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_3__[\"toPoints\"])({}, paths));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/buildRingSphere.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildRingSphere\", function() { return buildRingSphere; });\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n/* harmony import */ var _buildRegularPolygon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./buildRegularPolygon */ \"../../algorithm/shape/buildRegularPolygon.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n\n\n\n\n\n\nconst buildRingSphere = ({ resolution = 20 }) => {\n  const paths = [];\n  // Trace out latitudinal rings.\n  for (let slice = 0; slice <= resolution; slice++) {\n    let angle = Math.PI * 2.0 * slice / resolution;\n    let height = Math.sin(angle);\n    let radius = Math.cos(angle);\n    paths.push(Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"translate\"])([0, 0, height], Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])([radius, radius, radius], Object(_buildRegularPolygon__WEBPACK_IMPORTED_MODULE_2__[\"buildRegularPolygon\"])({ edges: resolution }))));\n  }\n  // Hull the rings to form a sphere.\n  return Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__[\"buildConvexHull\"])({}, Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_3__[\"toPoints\"])({}, paths));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/buildRingSphere.js?");
 
 /***/ }),
 
@@ -1247,7 +359,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"extrudeLinear\", function() { return extrudeLinear; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-polygons */ \"../../algorithm/polygons/main.js\");\n\n\n\nconst extrudeLinear = ({ height = 1 }, polygons) => {\n  const extruded = [];\n  const up = [0, 0, height];\n\n  // Build the walls.\n  for (const polygon of polygons) {\n    // Build floor outline. This need not be a convex polygon.\n    const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();\n    // Walk around the floor to build the walls.\n    for (let i = 0; i < floor.length; i++) {\n      const start = floor[i];\n      const end = floor[(i + 1) % floor.length];\n      // Remember that we are walking CCW.\n      extruded.push([start, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(start, up), end]);\n      extruded.push([end, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(start, up), Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(end, up)]);\n    }\n  }\n\n  // Build the roof and floor from convex polygons.\n  for (const polygon of Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_1__[\"makeConvex\"])({}, polygons)) {\n    const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();\n    const roof = floor.map(vertex => Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(vertex, up)).reverse();\n    extruded.push(roof, floor);\n  }\n\n  return extruded;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/extrudeLinear.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"extrudeLinear\", function() { return extrudeLinear; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-polygons */ \"../../geometry/polygons/main.js\");\n\n\n\nconst extrudeLinear = ({ height = 1 }, polygons) => {\n  const extruded = [];\n  const up = [0, 0, height];\n\n  // Build the walls.\n  for (const polygon of polygons) {\n    // Build floor outline. This need not be a convex polygon.\n    const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();\n    // Walk around the floor to build the walls.\n    for (let i = 0; i < floor.length; i++) {\n      const start = floor[i];\n      const end = floor[(i + 1) % floor.length];\n      // Remember that we are walking CCW.\n      extruded.push([start, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(start, up), end]);\n      extruded.push([end, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(start, up), Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(end, up)]);\n    }\n  }\n\n  // Build the roof and floor from convex polygons.\n  for (const polygon of Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_1__[\"makeConvex\"])({}, polygons)) {\n    const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();\n    const roof = floor.map(vertex => Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(vertex, up)).reverse();\n    extruded.push(roof, floor);\n  }\n\n  return extruded;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/shape/extrudeLinear.js?");
 
 /***/ }),
 
@@ -1299,282 +411,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "../../algorithm/solid/canonicalize.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/canonicalize.js ***!
-  \*******************************************************************/
-/*! exports provided: canonicalize */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\nconst canonicalize = (solid) => solid.map(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/canonicalize.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/eachPoint.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/eachPoint.js ***!
-  \****************************************************************/
-/*! exports provided: eachPoint */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\nconst eachPoint = (options = {}, thunk, solid) => {\n  for (const surface of solid) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, thunk, surface);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/eachPoint.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/flip.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/flip.js ***!
-  \***********************************************************/
-/*! exports provided: flip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\nconst flip = (solid) => solid.map(surface => Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(surface));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/flip.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/fromPolygons.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/fromPolygons.js ***!
-  \*******************************************************************/
-/*! exports provided: fromPolygons */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return fromPolygons; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\nconst fromPolygons = (options = {}, polygons) => {\n  const coplanarGroups = new Map();\n\n  for (const polygon of polygons) {\n    const plane = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__[\"toPlane\"])(polygon);\n    const key = JSON.stringify(plane);\n    const groups = coplanarGroups.get(key);\n    if (groups === undefined) {\n      coplanarGroups.set(key, [polygon]);\n    } else {\n      groups.push(polygon);\n    }\n  }\n\n  // The solid is a list of surfaces, which are lists of coplanar polygons.\n  const solid = [...coplanarGroups.values()];\n\n  for (const surface of solid) {\n    Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"assertCoplanar\"])(surface);\n  }\n\n  return solid;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/fromPolygons.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/main.js":
-/*!***********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/main.js ***!
-  \***********************************************************/
-/*! exports provided: canonicalize, eachPoint, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, scale, toGeneric, toPoints, toPolygons, transform, translate */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../algorithm/solid/ops.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"scale\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"transform\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"translate\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../algorithm/solid/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/solid/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_2__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./flip */ \"../../algorithm/solid/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"]; });\n\n/* harmony import */ var _fromPolygons__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fromPolygons */ \"../../algorithm/solid/fromPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return _fromPolygons__WEBPACK_IMPORTED_MODULE_4__[\"fromPolygons\"]; });\n\n/* harmony import */ var _makeSurfacesConvex__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./makeSurfacesConvex */ \"../../algorithm/solid/makeSurfacesConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesConvex\", function() { return _makeSurfacesConvex__WEBPACK_IMPORTED_MODULE_5__[\"makeSurfacesConvex\"]; });\n\n/* harmony import */ var _makeSurfacesSimple__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./makeSurfacesSimple */ \"../../algorithm/solid/makeSurfacesSimple.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesSimple\", function() { return _makeSurfacesSimple__WEBPACK_IMPORTED_MODULE_6__[\"makeSurfacesSimple\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../algorithm/solid/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_7__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./measureBoundingSphere */ \"../../algorithm/solid/measureBoundingSphere.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_8__[\"measureBoundingSphere\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toGeneric */ \"../../algorithm/solid/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_9__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPoints__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toPoints */ \"../../algorithm/solid/toPoints.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return _toPoints__WEBPACK_IMPORTED_MODULE_10__[\"toPoints\"]; });\n\n/* harmony import */ var _toPolygons__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toPolygons */ \"../../algorithm/solid/toPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return _toPolygons__WEBPACK_IMPORTED_MODULE_11__[\"toPolygons\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/makeSurfacesConvex.js":
-/*!*************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/makeSurfacesConvex.js ***!
-  \*************************************************************************/
-/*! exports provided: makeSurfacesConvex */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesConvex\", function() { return makeSurfacesConvex; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\nconst makeSurfacesConvex = (options = {}, solid) => solid.map(surface => Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"makeConvex\"])(options, surface));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/makeSurfacesConvex.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/makeSurfacesSimple.js":
-/*!*************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/makeSurfacesSimple.js ***!
-  \*************************************************************************/
-/*! exports provided: makeSurfacesSimple */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesSimple\", function() { return makeSurfacesSimple; });\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\nconst makeSurfacesSimple = (options = {}, solid) => solid.map(surface => Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_0__[\"makeSimple\"])({}, surface));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/makeSurfacesSimple.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/measureBoundingBox.js":
-/*!*************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/measureBoundingBox.js ***!
-  \*************************************************************************/
-/*! exports provided: measureBoundingBox */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/solid/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (solid) => {\n  let max = solid[0][0][0];\n  let min = solid[0][0][0];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              max = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(max, point);\n              min = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(min, point);\n            },\n            solid);\n  return [min, max];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/measureBoundingBox.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/measureBoundingSphere.js":
-/*!****************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/measureBoundingSphere.js ***!
-  \****************************************************************************/
-/*! exports provided: measureBoundingSphere */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return measureBoundingSphere; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../algorithm/solid/measureBoundingBox.js\");\n\n\n\n\n/** Measure the bounding sphere of the given poly3\n * @param {poly3} the poly3 to measure\n * @returns computed bounding sphere; center (vec3) and radius\n */\nconst measureBoundingSphere = (solid) => {\n  if (solid.boundingSphere === undefined) {\n    const [min, max] = Object(_measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__[\"measureBoundingBox\"])(solid);\n    const center = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])(0.5, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(min, max));\n    const radius = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"distance\"])(center, max);\n    solid.boundingSphere = [center, radius];\n  }\n  return solid.boundingSphere;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/measureBoundingSphere.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/ops.js":
-/*!**********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/ops.js ***!
-  \**********************************************************/
-/*! exports provided: transform, translate, scale */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n\n\n\n\nconst transform = (matrix, solid) => solid.map(surface => Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, surface));\nconst translate = (vector, solid) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), solid);\nconst scale = (vector, solid) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), solid);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/ops.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/toGeneric.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/toGeneric.js ***!
-  \****************************************************************/
-/*! exports provided: toGeneric */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\nconst toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/toGeneric.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/toPoints.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/toPoints.js ***!
-  \***************************************************************/
-/*! exports provided: toPoints */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return toPoints; });\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/solid/eachPoint.js\");\n\n\nconst toPoints = (options = {}, solid) => {\n  const points = [];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])({}, point => points.push(point), solid);\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/toPoints.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/solid/toPolygons.js":
-/*!*****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/solid/toPolygons.js ***!
-  \*****************************************************************/
-/*! exports provided: toPolygons */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return toPolygons; });\n// Relax the coplanar arrangement into polygon soup.\nconst toPolygons = (options = {}, solid) => [].concat(...solid);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/solid/toPolygons.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/assertCoplanar.js":
-/*!***********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/assertCoplanar.js ***!
-  \***********************************************************************/
-/*! exports provided: assertCoplanar */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"assertCoplanar\", function() { return assertCoplanar; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst assertCoplanarPolygon = (polygon) => {\n  if (!Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"isCoplanar\"])(polygon)) {\n    throw Error(`die`);\n  }\n};\n\nconst assertCoplanar = (surface) => {\n  for (const polygon of surface) {\n    assertCoplanarPolygon(polygon);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/assertCoplanar.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/eachPoint.js":
-/*!******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/eachPoint.js ***!
-  \******************************************************************/
-/*! exports provided: eachPoint */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, surface) => {\n  for (const polygon of surface) {\n    for (const point of polygon) {\n      thunk(point);\n    }\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/eachPoint.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/flip.js":
-/*!*************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/flip.js ***!
-  \*************************************************************/
-/*! exports provided: flip */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ \"../../algorithm/surface/map.js\");\n\n\n\nconst flip = (surface) => Object(_map__WEBPACK_IMPORTED_MODULE_1__[\"map\"])(surface, _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"flip\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/flip.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/main.js":
-/*!*************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/main.js ***!
-  \*************************************************************/
-/*! exports provided: assertCoplanar, canonicalize, eachPoint, flip, makeConvex, makeSimple, measureArea, rotateZ, toGeneric, toPlane, transform, scale */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../algorithm/surface/ops.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"rotateZ\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPlane\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"transform\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"scale\"]; });\n\n/* harmony import */ var _assertCoplanar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./assertCoplanar */ \"../../algorithm/surface/assertCoplanar.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assertCoplanar\", function() { return _assertCoplanar__WEBPACK_IMPORTED_MODULE_1__[\"assertCoplanar\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./eachPoint */ \"../../algorithm/surface/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_2__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./flip */ \"../../algorithm/surface/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"]; });\n\n/* harmony import */ var _makeConvex__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./makeConvex */ \"../../algorithm/surface/makeConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return _makeConvex__WEBPACK_IMPORTED_MODULE_4__[\"makeConvex\"]; });\n\n/* harmony import */ var _makeSimple__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./makeSimple */ \"../../algorithm/surface/makeSimple.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeSimple\", function() { return _makeSimple__WEBPACK_IMPORTED_MODULE_5__[\"makeSimple\"]; });\n\n/* harmony import */ var _measureArea__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./measureArea */ \"../../algorithm/surface/measureArea.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return _measureArea__WEBPACK_IMPORTED_MODULE_6__[\"measureArea\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./toGeneric */ \"../../algorithm/surface/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_7__[\"toGeneric\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/makeConvex.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/makeConvex.js ***!
-  \*******************************************************************/
-/*! exports provided: makeConvex */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return makeConvex; });\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./main */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _assertCoplanar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./assertCoplanar */ \"../../algorithm/surface/assertCoplanar.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n\n\n\n\n\n\nconst makeConvex = (options = {}, surface) => {\n  Object(_assertCoplanar__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(surface);\n  const [to, from] = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_3__[\"toXYPlaneTransforms\"])(Object(_main__WEBPACK_IMPORTED_MODULE_1__[\"toPlane\"])(surface));\n  let retessellatedSurface = Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_0__[\"makeConvex\"])({}, Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_0__[\"union\"])(...Object(_main__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(to, surface).map(polygon => [polygon])));\n  return Object(_main__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(from, retessellatedSurface);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/makeConvex.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/makeSimple.js":
-/*!*******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/makeSimple.js ***!
-  \*******************************************************************/
-/*! exports provided: makeSimple */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeSimple\", function() { return makeSimple; });\n/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\n\nconst makeSimple = (options = {}, surface) => {\n  const [to, from] = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"toXYPlaneTransforms\"])(Object(_main__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(surface));\n  let simpleSurface = Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...Object(_main__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(to, surface).map(polygon => [polygon]));\n  return Object(_main__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(from, simpleSurface);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/makeSimple.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/map.js":
-/*!************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/map.js ***!
-  \************************************************************/
-/*! exports provided: map */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\n/**\n * Transforms each polygon of the surface.\n *\n * @param {Polygons} original - the Polygons to transform.\n * @param {Function} [transform=identity] - function used to transform the polygons.\n * @returns {Polygons} a copy with transformed polygons.\n */\nconst map = (original, transform) => {\n  if (original === undefined) {\n    original = [];\n  }\n  if (transform === undefined) {\n    transform = _ => _;\n  }\n  return original.map(polygon => transform(polygon));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/map.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/measureArea.js":
-/*!********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/measureArea.js ***!
-  \********************************************************************/
-/*! exports provided: measureArea */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return measureArea; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst measureArea = (surface) => {\n  // CHECK: That this handles negative area properly.\n  let total = 0;\n  for (const polygon of surface) {\n    total += Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"measureArea\"])(polygon);\n  }\n  return total;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/measureArea.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/ops.js":
-/*!************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/ops.js ***!
-  \************************************************************/
-/*! exports provided: toPlane, canonicalize, transform, rotateZ, scale */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPlane\", function() { return toPlane; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return rotateZ; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n\n\n\nconst toPlane = (surface) => Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(surface[0]);\nconst canonicalize = (surface) => surface.map(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n\n// Transforms\nconst transform = (matrix, surface) => surface.map(polygon => Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, polygon));\nconst rotateZ = (angle, surface) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_1__[\"fromZRotation\"])(angle), surface);\nconst scale = (vector, surface) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_1__[\"fromScaling\"])(vector), surface);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/ops.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/surface/toGeneric.js":
-/*!******************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/surface/toGeneric.js ***!
-  \******************************************************************/
-/*! exports provided: toGeneric */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\nconst toGeneric = (surface) => surface.map(path => path.map(point => [...point]));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/surface/toGeneric.js?");
-
-/***/ }),
-
 /***/ "../../algorithm/tess2.js/index.js":
 /*!***************************************************************!*\
   !*** /home/sbrian/github6/JSxCAD/algorithm/tess2.js/index.js ***!
@@ -1606,7 +442,7 @@ eval("/*\n** SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008) \n** Copy
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"pathnameToFont\", function() { return pathnameToFont; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"textToSurfaces\", function() { return textToSurfaces; });\n/* harmony import */ var _jsxcad_convert_svg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/convert-svg */ \"../svg/main.js\");\n/* harmony import */ var opentype_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! opentype.js */ \"../../node_modules/opentype.js/src/opentype.js\");\n/* harmony import */ var _jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-z0surface */ \"../../algorithm/z0surface/main.js\");\n\n\n\n\nconst pathnameToFont = (pathname) => Object(opentype_js__WEBPACK_IMPORTED_MODULE_1__[\"loadSync\"])(pathname);\n\nconst textToSurfaces = ({ curveSegments, font, size, kerning = true, features = undefined, hinting = false },\n                               text) => {\n  const options = { kerning: kerning, features: features, hinting: hinting };\n  const svgPaths = [];\n  font.forEachGlyph(text, 0, 0, size, options,\n                    (glyph, x, y, fontSize) => {\n                      svgPaths.push(glyph.getPath(x, y, fontSize, options, undefined).toPathData());\n                    });\n  const pathsets = [];\n  for (let { paths } of svgPaths.map(svgPath => Object(_jsxcad_convert_svg__WEBPACK_IMPORTED_MODULE_0__[\"fromSvgPath\"])({ curveSegments: curveSegments }, svgPath))) {\n    pathsets.push(paths);\n  }\n  return { z0Surface: Object(_jsxcad_algorithm_z0surface__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...pathsets) };\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/text/main.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"pathnameToFont\", function() { return pathnameToFont; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"textToSurfaces\", function() { return textToSurfaces; });\n/* harmony import */ var _jsxcad_convert_svg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/convert-svg */ \"../svg/main.js\");\n/* harmony import */ var opentype_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! opentype.js */ \"../../node_modules/opentype.js/src/opentype.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\n\nconst pathnameToFont = (pathname) => Object(opentype_js__WEBPACK_IMPORTED_MODULE_1__[\"loadSync\"])(pathname);\n\nconst textToSurfaces = ({ curveSegments, font, size, kerning = true, features = undefined, hinting = false },\n                               text) => {\n  const options = { kerning: kerning, features: features, hinting: hinting };\n  const svgPaths = [];\n  font.forEachGlyph(text, 0, 0, size, options,\n                    (glyph, x, y, fontSize) => {\n                      svgPaths.push(glyph.getPath(x, y, fontSize, options, undefined).toPathData());\n                    });\n  const pathsets = [];\n  for (let { paths } of svgPaths.map(svgPath => Object(_jsxcad_convert_svg__WEBPACK_IMPORTED_MODULE_0__[\"fromSvgPath\"])({ curveSegments: curveSegments }, svgPath))) {\n    pathsets.push(paths);\n  }\n  return { z0Surface: Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...pathsets) };\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/text/main.js?");
 
 /***/ }),
 
@@ -1694,90 +530,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "../../algorithm/z0surface/blessAsConvex.js":
-/*!************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/blessAsConvex.js ***!
-  \************************************************************************/
-/*! exports provided: blessAsConvex */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"blessAsConvex\", function() { return blessAsConvex; });\nconst blessAsConvex = (paths) => { paths.isConvex = true; return paths; };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/blessAsConvex.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/z0surface/clippingToPolygons.js":
-/*!*****************************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/clippingToPolygons.js ***!
-  \*****************************************************************************/
-/*! exports provided: clippingToPolygons, z0SurfaceToClipping */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"clippingToPolygons\", function() { return clippingToPolygons; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"z0SurfaceToClipping\", function() { return z0SurfaceToClipping; });\n// Internal function to massage data for passing to polygon-clipping.\nconst clippingToPolygons = (clipping) => {\n  const polygonArray = [];\n  for (const polygons of clipping) {\n    for (const polygon of polygons) {\n      polygon.pop();\n      polygonArray.push(polygon);\n    }\n  }\n  return polygonArray;\n};\n\nconst z0SurfaceToClipping = (z0Surface) => {\n  return [z0Surface.map(z0Polygon => z0Polygon.map(([x = 0, y = 0]) => [x, y]))];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/clippingToPolygons.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/z0surface/difference.js":
-/*!*********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/difference.js ***!
-  \*********************************************************************/
-/*! exports provided: difference */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\n/* harmony import */ var _clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clippingToPolygons */ \"../../algorithm/z0surface/clippingToPolygons.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! polygon-clipping */ \"../../node_modules/polygon-clipping/dist/polygon-clipping.umd.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n\n\n/**\n * Return a surface representing the difference between the first surface\n *   and the rest of the surfaces.\n * The difference of no surfaces is the empty surface.\n * The difference of one surface is that surface.\n * @param {Array<surface>} surfaces - the surfaces.\n * @returns {surface} - the resulting surface\n * @example\n * let C = difference(A, B)\n * @example\n * +-------+            +-------+\n * |       |            |   C   |\n * |   A   |            |       |\n * |    +--+----+   =   |    +--+\n * +----+--+    |       +----+\n *      |   B   |\n *      |       |\n *      +-------+\n */\nconst difference = (baseSurface, ...surfaces) => {\n  if (surfaces.length === 0) {\n    return baseSurface;\n  }\n  const surfaceClipping = Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])(Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(baseSurface));\n  const subtractionClipping = surfaces.map(surface => Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])(Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(surface)));\n  const outputClipping = Object(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__[\"difference\"])(surfaceClipping, ...subtractionClipping);\n  const outputPaths = Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"clippingToPolygons\"])(outputClipping);\n  return outputPaths;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/difference.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/z0surface/intersection.js":
-/*!***********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/intersection.js ***!
-  \***********************************************************************/
-/*! exports provided: intersection */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return intersection; });\n/* harmony import */ var _clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clippingToPolygons */ \"../../algorithm/z0surface/clippingToPolygons.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! polygon-clipping */ \"../../node_modules/polygon-clipping/dist/polygon-clipping.umd.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(polygon_clipping__WEBPACK_IMPORTED_MODULE_1__);\n\n\n\n/**\n * Produce a surface that is the intersection of all provided surfaces.\n * The intersection of no surfaces is the empty surface.\n * The intersection of one surface is that surface.\n * @param {Array<surface>} surfaces - the surfaces to intersect.\n * @returns {surface} the intersection of surfaces.\n * @example\n * let C = difference(A, B)\n * @example\n * +-------+            +-------+\n * |       |            |   C   |\n * |   A   |            |       |\n * |    +--+----+   =   |    +--+\n * +----+--+    |       +----+\n *      |   B   |\n *      |       |\n *      +-------+\n */\nconst intersection = (...z0Surfaces) => {\n  if (z0Surfaces.length === 0) {\n    return [];\n  }\n  return Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"clippingToPolygons\"])(Object(polygon_clipping__WEBPACK_IMPORTED_MODULE_1__[\"intersection\"])(...z0Surfaces.map(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/intersection.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/z0surface/main.js":
-/*!***************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/main.js ***!
-  \***************************************************************/
-/*! exports provided: difference, makeConvex, intersection, union */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./difference */ \"../../algorithm/z0surface/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_0__[\"difference\"]; });\n\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./intersection */ \"../../algorithm/z0surface/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_1__[\"intersection\"]; });\n\n/* harmony import */ var _makeConvex__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./makeConvex */ \"../../algorithm/z0surface/makeConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return _makeConvex__WEBPACK_IMPORTED_MODULE_2__[\"makeConvex\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./union */ \"../../algorithm/z0surface/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_3__[\"union\"]; });\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/main.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/z0surface/makeConvex.js":
-/*!*********************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/makeConvex.js ***!
-  \*********************************************************************/
-/*! exports provided: makeConvex */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return makeConvex; });\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tess2 */ \"../../node_modules/tess2/index.js\");\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tess2__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _blessAsConvex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./blessAsConvex */ \"../../algorithm/z0surface/blessAsConvex.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\n\nconst toContour = (polygon) => {\n  const points = [];\n  for (const [x = 0, y = 0, z = 0] of polygon) {\n    points.push(x, y, z);\n  }\n  return points;\n};\n\nconst fromTessellation = (tessellation) => {\n  const tessPolygons = tessellation.elements;\n  const vertices = tessellation.vertices;\n  const polygons = [];\n\n  const toPoint = (offset) => {\n    const vertex = tessPolygons[offset];\n    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];\n  };\n\n  for (let nth = 0; nth < tessPolygons.length; nth += 3) {\n    polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);\n  }\n\n  return polygons;\n};\n\n// This currently does triangulation.\n// Higher arities are possible, but end up being null padded.\n// Let's see if they're useful.\n\n// TODO: Call this toConvexPolygons\nconst makeConvex = (options = {}, polygons) => {\n  if (polygons.isConvex) {\n    return polygons;\n  }\n  if (polygons.every(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__[\"isConvex\"])) {\n    return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(polygons);\n  }\n  const contours = polygons.map(toContour);\n  // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.\n  const convex = fromTessellation(\n    tess2__WEBPACK_IMPORTED_MODULE_0___default.a.tesselate({ contours: contours,\n                      windingRule: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.WINDING_ODD,\n                      elementType: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.POLYGONS,\n                      polySize: 3,\n                      vertexSize: 3\n    }));\n  return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(convex);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/makeConvex.js?");
-
-/***/ }),
-
-/***/ "../../algorithm/z0surface/union.js":
-/*!****************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/algorithm/z0surface/union.js ***!
-  \****************************************************************/
-/*! exports provided: union */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return union; });\n/* harmony import */ var _clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clippingToPolygons */ \"../../algorithm/z0surface/clippingToPolygons.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! polygon-clipping */ \"../../node_modules/polygon-clipping/dist/polygon-clipping.umd.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n\n\n/**\n * Produces a surface that is the union of all provided surfaces.\n * The union of no surfaces is the empty surface.\n * The union of one surface is that surface.\n * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.\n * @returns {Z0Surface} the resulting z0 surface.\n */\nconst union = (...surfaces) => {\n  if (surfaces.length === 0) {\n    return [];\n  }\n  if (surfaces.length === 1) {\n    return surfaces[0];\n  }\n  const clipping = surfaces.map(surface => Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])(Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(surface)));\n  const result = Object(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...clipping);\n  return Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"clippingToPolygons\"])(result);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/algorithm/z0surface/union.js?");
-
-/***/ }),
-
 /***/ "../../api/v1/Shape.js":
 /*!***************************************************!*\
   !*** /home/sbrian/github6/JSxCAD/api/v1/Shape.js ***!
@@ -1786,7 +538,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Shape\", function() { return Shape; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"assembleLazily\", function() { return assembleLazily; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"unionLazily\", function() { return unionLazily; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"differenceLazily\", function() { return differenceLazily; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersectionLazily\", function() { return intersectionLazily; });\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n/* harmony import */ var _jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-assembly */ \"../../geometry/assembly/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n\n\n\n\n\nclass Shape {\n  as (tag) {\n    return this.fromLazyGeometry(toLazyGeometry(this).addTag(tag));\n  }\n\n  assemble (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).assemble(...shapes.map(toLazyGeometry)));\n  }\n\n  close () {\n    const geometry = this.toPaths().toDisjointGeometry();\n    if (!isSingleOpenPath(geometry)) {\n      throw Error('Close requires a single open path.');\n    }\n    return Shape.fromClosedPath(Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"close\"])(geometry.paths[0]));\n  }\n\n  concat (...shapes) {\n    const paths = [];\n    for (const shape of [this, ...shapes]) {\n      const geometry = shape.toPaths().toDisjointGeometry();\n      if (!isSingleOpenPath(geometry)) {\n        throw Error('Concatenation requires single open paths.');\n      }\n      paths.push(geometry.paths[0]);\n    }\n    return Shape.fromOpenPath(Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"concatenate\"])(...paths));\n  }\n\n  constructor (lazyGeometry = Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ assembly: [] })) {\n    this.lazyGeometry = lazyGeometry;\n  }\n\n  difference (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).difference(...shapes.map(toLazyGeometry)));\n  }\n\n  eachPoint (options = {}, operation) {\n    toLazyGeometry(this).eachPoint(options, operation);\n  }\n\n  fromLazyGeometry (geometry) {\n    return Shape.fromLazyGeometry(geometry);\n  }\n\n  intersection (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).intersection(...shapes.map(toLazyGeometry)));\n  }\n\n  toLazyGeometry () {\n    return this.lazyGeometry;\n  }\n\n  toComponents (options = {}) {\n    return toLazyGeometry(this).toComponents(options);\n  }\n\n  toDisjointGeometry (options = {}) {\n    return toLazyGeometry(this).toDisjointGeometry(options);\n  }\n\n  toPaths (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));\n  }\n\n  toPoints (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));\n  }\n\n  toSolid (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toSolid(options));\n  }\n\n  toZ0Surface (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toZ0Surface(options));\n  }\n\n  transform (matrix) {\n    return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));\n  }\n\n  union (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));\n  }\n}\nconst isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);\n\nconst toLazyGeometry = (shape) => shape.toLazyGeometry();\n\nconst assembleLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).assemble(...shapes.map(toLazyGeometry)));\n\nconst unionLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).union(...shapes.map(toLazyGeometry)));\n\nconst differenceLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));\n\nconst intersectionLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));\n\nShape.fromClosedPath = (path) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ paths: [Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"close\"])(path)] }));\nShape.fromGeometry = (geometry) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])(geometry));\nShape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);\nShape.fromOpenPath = (path) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ paths: [Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_0__[\"open\"])(path)] }));\nShape.fromPaths = (paths) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ paths: paths }));\nShape.fromPathToZ0Surface = (path) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ z0Surface: [path] }));\nShape.fromPathsToZ0Surface = (paths) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ z0Surface: paths }));\nShape.fromPolygonsToSolid = (polygons) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ solid: Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__[\"fromPolygons\"])({}, polygons) }));\nShape.fromPolygonsToZ0Surface = (polygons) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ z0Surface: polygons }));\nShape.fromSurfaces = (surfaces) => new Shape(Object(_jsxcad_geometry_assembly__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ solid: surfaces }));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/Shape.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Shape\", function() { return Shape; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"assembleLazily\", function() { return assembleLazily; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"unionLazily\", function() { return unionLazily; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"differenceLazily\", function() { return differenceLazily; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersectionLazily\", function() { return intersectionLazily; });\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n/* harmony import */ var _jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-lazy */ \"../../geometry/lazy/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n\n\n\n\n\nclass Shape {\n  as (tag) {\n    return this.fromLazyGeometry(toLazyGeometry(this).addTag(tag));\n  }\n\n  assemble (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).assemble(...shapes.map(toLazyGeometry)));\n  }\n\n  close () {\n    const geometry = this.toPaths().toDisjointGeometry();\n    if (!isSingleOpenPath(geometry)) {\n      throw Error('Close requires a single open path.');\n    }\n    return Shape.fromClosedPath(Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"close\"])(geometry.paths[0]));\n  }\n\n  concat (...shapes) {\n    const paths = [];\n    for (const shape of [this, ...shapes]) {\n      const geometry = shape.toPaths().toDisjointGeometry();\n      if (!isSingleOpenPath(geometry)) {\n        throw Error('Concatenation requires single open paths.');\n      }\n      paths.push(geometry.paths[0]);\n    }\n    return Shape.fromOpenPath(Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"concatenate\"])(...paths));\n  }\n\n  constructor (lazyGeometry = Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ assembly: [] })) {\n    this.lazyGeometry = lazyGeometry;\n  }\n\n  difference (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).difference(...shapes.map(toLazyGeometry)));\n  }\n\n  eachPoint (options = {}, operation) {\n    toLazyGeometry(this).eachPoint(options, operation);\n  }\n\n  fromLazyGeometry (geometry) {\n    return Shape.fromLazyGeometry(geometry);\n  }\n\n  intersection (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).intersection(...shapes.map(toLazyGeometry)));\n  }\n\n  toLazyGeometry () {\n    return this.lazyGeometry;\n  }\n\n  toComponents (options = {}) {\n    return toLazyGeometry(this).toComponents(options);\n  }\n\n  toDisjointGeometry (options = {}) {\n    return toLazyGeometry(this).toDisjointGeometry(options);\n  }\n\n  toPaths (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));\n  }\n\n  toPoints (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));\n  }\n\n  toSolid (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toSolid(options));\n  }\n\n  toZ0Surface (options = {}) {\n    return this.fromLazyGeometry(toLazyGeometry(this).toZ0Surface(options));\n  }\n\n  transform (matrix) {\n    return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));\n  }\n\n  union (...shapes) {\n    return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));\n  }\n}\nconst isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);\n\nconst toLazyGeometry = (shape) => shape.toLazyGeometry();\n\nconst assembleLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).assemble(...shapes.map(toLazyGeometry)));\n\nconst unionLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).union(...shapes.map(toLazyGeometry)));\n\nconst differenceLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));\n\nconst intersectionLazily = (shape, ...shapes) =>\n  Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));\n\nShape.fromClosedPath = (path) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ paths: [Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"close\"])(path)] }));\nShape.fromGeometry = (geometry) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])(geometry));\nShape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);\nShape.fromOpenPath = (path) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ paths: [Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"open\"])(path)] }));\nShape.fromPaths = (paths) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ paths: paths }));\nShape.fromPathToZ0Surface = (path) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ z0Surface: [path] }));\nShape.fromPathsToZ0Surface = (paths) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ z0Surface: paths }));\nShape.fromPolygonsToSolid = (polygons) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ solid: Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__[\"fromPolygons\"])({}, polygons) }));\nShape.fromPolygonsToZ0Surface = (polygons) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ z0Surface: polygons }));\nShape.fromSurfaces = (surfaces) => new Shape(Object(_jsxcad_geometry_lazy__WEBPACK_IMPORTED_MODULE_1__[\"fromGeometry\"])({ solid: surfaces }));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/Shape.js?");
 
 /***/ }),
 
@@ -1858,7 +610,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"crossSection\", function() { return crossSection; });\n/* harmony import */ var _jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-polygons */ \"../../algorithm/polygons/main.js\");\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n\n\n\n\n\n\nconst crossSection = ({ z = 0 } = {}, shape) => {\n  const geometry = shape.toSolid().toDisjointGeometry();\n  const polygons = Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_3__[\"toPolygons\"])({}, geometry.solid);\n  const triangles = Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"toTriangles\"])({}, polygons);\n  const paths = Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"cutTrianglesByPlane\"])(Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_2__[\"fromPoints\"])([0, 0, z], [1, 0, z], [0, 1, z]), triangles);\n  return _Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"].fromPathsToZ0Surface(paths);\n};\n\nconst method = function (options) { return crossSection(options, this); };\n\n_Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"].prototype.crossSection = method;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/crossSection.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"crossSection\", function() { return crossSection; });\n/* harmony import */ var _jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-polygons */ \"../../geometry/polygons/main.js\");\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n\n\n\n\n\n\nconst crossSection = ({ z = 0 } = {}, shape) => {\n  const geometry = shape.toSolid().toDisjointGeometry();\n  const polygons = Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_3__[\"toPolygons\"])({}, geometry.solid);\n  const triangles = Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"toTriangles\"])({}, polygons);\n  const paths = Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"cutTrianglesByPlane\"])(Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_2__[\"fromPoints\"])([0, 0, z], [1, 0, z], [0, 1, z]), triangles);\n  return _Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"].fromPathsToZ0Surface(paths);\n};\n\nconst method = function (options) { return crossSection(options, this); };\n\n_Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"].prototype.crossSection = method;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/crossSection.js?");
 
 /***/ }),
 
@@ -1930,7 +682,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return hull; });\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n\n\n\nconst hull = (...geometries) => {\n  // FIX: Support z0Surface hulling.\n  const points = [];\n  geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));\n  return _Shape__WEBPACK_IMPORTED_MODULE_0__[\"Shape\"].fromPolygonsToSolid(Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_1__[\"buildConvexHull\"])({}, points));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/hull.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return hull; });\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n\n\n\nconst hull = (...geometries) => {\n  // FIX: Support z0Surface hulling.\n  const points = [];\n  geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));\n  return _Shape__WEBPACK_IMPORTED_MODULE_0__[\"Shape\"].fromPolygonsToSolid(Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__[\"buildConvexHull\"])({}, points));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/hull.js?");
 
 /***/ }),
 
@@ -1950,11 +702,11 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /*!**************************************************!*\
   !*** /home/sbrian/github6/JSxCAD/api/v1/main.js ***!
   \**************************************************/
-/*! exports provided: Shape, acos, assemble, circle, crossSection, cos, cube, cylinder, difference, extrude, hsl2rgb, hull, intersection, loadFont, max, measureBoundingBox, minkowski, polyhedron, readDst, readJscad, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePaths, writePdf, writeStl, writeSvg, writeThreejsPage */
+/*! exports provided: Shape, acos, assemble, circle, crossSection, cos, cube, cylinder, difference, extrude, hsl2rgb, hull, intersection, loadFont, max, measureBoundingBox, minkowski, polyhedron, readDst, readJscad, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePdf, writeStl, writeSvg, writeThreejsPage */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./text */ \"../../api/v1/text.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"loadFont\", function() { return _text__WEBPACK_IMPORTED_MODULE_0__[\"loadFont\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"text\", function() { return _text__WEBPACK_IMPORTED_MODULE_0__[\"text\"]; });\n\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"Shape\", function() { return _Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"]; });\n\n/* harmony import */ var _acos__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./acos */ \"../../api/v1/acos.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"acos\", function() { return _acos__WEBPACK_IMPORTED_MODULE_2__[\"acos\"]; });\n\n/* harmony import */ var _assemble__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./assemble */ \"../../api/v1/assemble.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return _assemble__WEBPACK_IMPORTED_MODULE_3__[\"assemble\"]; });\n\n/* harmony import */ var _circle__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./circle */ \"../../api/v1/circle.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"circle\", function() { return _circle__WEBPACK_IMPORTED_MODULE_4__[\"circle\"]; });\n\n/* harmony import */ var _cos__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cos */ \"../../api/v1/cos.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cos\", function() { return _cos__WEBPACK_IMPORTED_MODULE_5__[\"cos\"]; });\n\n/* harmony import */ var _crossSection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./crossSection */ \"../../api/v1/crossSection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"crossSection\", function() { return _crossSection__WEBPACK_IMPORTED_MODULE_6__[\"crossSection\"]; });\n\n/* harmony import */ var _cube__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./cube */ \"../../api/v1/cube.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cube\", function() { return _cube__WEBPACK_IMPORTED_MODULE_7__[\"cube\"]; });\n\n/* harmony import */ var _cylinder__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./cylinder */ \"../../api/v1/cylinder.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cylinder\", function() { return _cylinder__WEBPACK_IMPORTED_MODULE_8__[\"cylinder\"]; });\n\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./difference */ \"../../api/v1/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_9__[\"difference\"]; });\n\n/* harmony import */ var _extrude__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./extrude */ \"../../api/v1/extrude.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"extrude\", function() { return _extrude__WEBPACK_IMPORTED_MODULE_10__[\"extrude\"]; });\n\n/* harmony import */ var _hsl2rgb__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./hsl2rgb */ \"../../api/v1/hsl2rgb.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hsl2rgb\", function() { return _hsl2rgb__WEBPACK_IMPORTED_MODULE_11__[\"hsl2rgb\"]; });\n\n/* harmony import */ var _hull__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./hull */ \"../../api/v1/hull.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return _hull__WEBPACK_IMPORTED_MODULE_12__[\"hull\"]; });\n\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./intersection */ \"../../api/v1/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_13__[\"intersection\"]; });\n\n/* harmony import */ var _max__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./max */ \"../../api/v1/max.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"max\", function() { return _max__WEBPACK_IMPORTED_MODULE_14__[\"max\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../api/v1/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_15__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _minkowski__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./minkowski */ \"../../api/v1/minkowski.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"minkowski\", function() { return _minkowski__WEBPACK_IMPORTED_MODULE_16__[\"minkowski\"]; });\n\n/* harmony import */ var _polyhedron__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./polyhedron */ \"../../api/v1/polyhedron.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"polyhedron\", function() { return _polyhedron__WEBPACK_IMPORTED_MODULE_17__[\"polyhedron\"]; });\n\n/* harmony import */ var _readDst__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./readDst */ \"../../api/v1/readDst.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readDst\", function() { return _readDst__WEBPACK_IMPORTED_MODULE_18__[\"readDst\"]; });\n\n/* harmony import */ var _readJscad__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./readJscad */ \"../../api/v1/readJscad.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readJscad\", function() { return _readJscad__WEBPACK_IMPORTED_MODULE_19__[\"readJscad\"]; });\n\n/* harmony import */ var _rotate__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./rotate */ \"../../api/v1/rotate.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotate\", function() { return _rotate__WEBPACK_IMPORTED_MODULE_20__[\"rotate\"]; });\n\n/* harmony import */ var _rotateX__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./rotateX */ \"../../api/v1/rotateX.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return _rotateX__WEBPACK_IMPORTED_MODULE_21__[\"rotateX\"]; });\n\n/* harmony import */ var _rotateY__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./rotateY */ \"../../api/v1/rotateY.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return _rotateY__WEBPACK_IMPORTED_MODULE_22__[\"rotateY\"]; });\n\n/* harmony import */ var _rotateZ__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./rotateZ */ \"../../api/v1/rotateZ.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return _rotateZ__WEBPACK_IMPORTED_MODULE_23__[\"rotateZ\"]; });\n\n/* harmony import */ var _scale__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./scale */ \"../../api/v1/scale.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _scale__WEBPACK_IMPORTED_MODULE_24__[\"scale\"]; });\n\n/* harmony import */ var _sin__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./sin */ \"../../api/v1/sin.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sin\", function() { return _sin__WEBPACK_IMPORTED_MODULE_25__[\"sin\"]; });\n\n/* harmony import */ var _sphere__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./sphere */ \"../../api/v1/sphere.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sphere\", function() { return _sphere__WEBPACK_IMPORTED_MODULE_26__[\"sphere\"]; });\n\n/* harmony import */ var _sqrt__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./sqrt */ \"../../api/v1/sqrt.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sqrt\", function() { return _sqrt__WEBPACK_IMPORTED_MODULE_27__[\"sqrt\"]; });\n\n/* harmony import */ var _square__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./square */ \"../../api/v1/square.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"square\", function() { return _square__WEBPACK_IMPORTED_MODULE_28__[\"square\"]; });\n\n/* harmony import */ var _svgPath__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./svgPath */ \"../../api/v1/svgPath.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"svgPath\", function() { return _svgPath__WEBPACK_IMPORTED_MODULE_29__[\"svgPath\"]; });\n\n/* harmony import */ var _tetrahedron__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./tetrahedron */ \"../../api/v1/tetrahedron.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"tetrahedron\", function() { return _tetrahedron__WEBPACK_IMPORTED_MODULE_30__[\"tetrahedron\"]; });\n\n/* harmony import */ var _translate__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./translate */ \"../../api/v1/translate.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _translate__WEBPACK_IMPORTED_MODULE_31__[\"translate\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./union */ \"../../api/v1/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_32__[\"union\"]; });\n\n/* harmony import */ var _writePaths__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./writePaths */ \"../../api/v1/writePaths.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writePaths\", function() { return _writePaths__WEBPACK_IMPORTED_MODULE_33__[\"writePaths\"]; });\n\n/* harmony import */ var _writePdf__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./writePdf */ \"../../api/v1/writePdf.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writePdf\", function() { return _writePdf__WEBPACK_IMPORTED_MODULE_34__[\"writePdf\"]; });\n\n/* harmony import */ var _writeStl__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./writeStl */ \"../../api/v1/writeStl.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeStl\", function() { return _writeStl__WEBPACK_IMPORTED_MODULE_35__[\"writeStl\"]; });\n\n/* harmony import */ var _writeSvg__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./writeSvg */ \"../../api/v1/writeSvg.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeSvg\", function() { return _writeSvg__WEBPACK_IMPORTED_MODULE_36__[\"writeSvg\"]; });\n\n/* harmony import */ var _writeThreejs__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./writeThreejs */ \"../../api/v1/writeThreejs.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeThreejsPage\", function() { return _writeThreejs__WEBPACK_IMPORTED_MODULE_37__[\"writeThreejsPage\"]; });\n\n/**\n *\n * Defines the interface used by the api to access the rest of the system on\n * behalf of a user. e.g., algorithms and geometries.\n *\n * A user can destructively update this mapping in their code to change what\n * the api uses.\n */\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/main.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _text__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./text */ \"../../api/v1/text.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"loadFont\", function() { return _text__WEBPACK_IMPORTED_MODULE_0__[\"loadFont\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"text\", function() { return _text__WEBPACK_IMPORTED_MODULE_0__[\"text\"]; });\n\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"Shape\", function() { return _Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"]; });\n\n/* harmony import */ var _acos__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./acos */ \"../../api/v1/acos.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"acos\", function() { return _acos__WEBPACK_IMPORTED_MODULE_2__[\"acos\"]; });\n\n/* harmony import */ var _assemble__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./assemble */ \"../../api/v1/assemble.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return _assemble__WEBPACK_IMPORTED_MODULE_3__[\"assemble\"]; });\n\n/* harmony import */ var _circle__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./circle */ \"../../api/v1/circle.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"circle\", function() { return _circle__WEBPACK_IMPORTED_MODULE_4__[\"circle\"]; });\n\n/* harmony import */ var _cos__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cos */ \"../../api/v1/cos.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cos\", function() { return _cos__WEBPACK_IMPORTED_MODULE_5__[\"cos\"]; });\n\n/* harmony import */ var _crossSection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./crossSection */ \"../../api/v1/crossSection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"crossSection\", function() { return _crossSection__WEBPACK_IMPORTED_MODULE_6__[\"crossSection\"]; });\n\n/* harmony import */ var _cube__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./cube */ \"../../api/v1/cube.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cube\", function() { return _cube__WEBPACK_IMPORTED_MODULE_7__[\"cube\"]; });\n\n/* harmony import */ var _cylinder__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./cylinder */ \"../../api/v1/cylinder.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cylinder\", function() { return _cylinder__WEBPACK_IMPORTED_MODULE_8__[\"cylinder\"]; });\n\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./difference */ \"../../api/v1/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_9__[\"difference\"]; });\n\n/* harmony import */ var _extrude__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./extrude */ \"../../api/v1/extrude.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"extrude\", function() { return _extrude__WEBPACK_IMPORTED_MODULE_10__[\"extrude\"]; });\n\n/* harmony import */ var _hsl2rgb__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./hsl2rgb */ \"../../api/v1/hsl2rgb.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hsl2rgb\", function() { return _hsl2rgb__WEBPACK_IMPORTED_MODULE_11__[\"hsl2rgb\"]; });\n\n/* harmony import */ var _hull__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./hull */ \"../../api/v1/hull.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return _hull__WEBPACK_IMPORTED_MODULE_12__[\"hull\"]; });\n\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./intersection */ \"../../api/v1/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_13__[\"intersection\"]; });\n\n/* harmony import */ var _max__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./max */ \"../../api/v1/max.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"max\", function() { return _max__WEBPACK_IMPORTED_MODULE_14__[\"max\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../api/v1/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_15__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _minkowski__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./minkowski */ \"../../api/v1/minkowski.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"minkowski\", function() { return _minkowski__WEBPACK_IMPORTED_MODULE_16__[\"minkowski\"]; });\n\n/* harmony import */ var _polyhedron__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./polyhedron */ \"../../api/v1/polyhedron.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"polyhedron\", function() { return _polyhedron__WEBPACK_IMPORTED_MODULE_17__[\"polyhedron\"]; });\n\n/* harmony import */ var _readDst__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./readDst */ \"../../api/v1/readDst.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readDst\", function() { return _readDst__WEBPACK_IMPORTED_MODULE_18__[\"readDst\"]; });\n\n/* harmony import */ var _readJscad__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./readJscad */ \"../../api/v1/readJscad.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readJscad\", function() { return _readJscad__WEBPACK_IMPORTED_MODULE_19__[\"readJscad\"]; });\n\n/* harmony import */ var _rotate__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./rotate */ \"../../api/v1/rotate.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotate\", function() { return _rotate__WEBPACK_IMPORTED_MODULE_20__[\"rotate\"]; });\n\n/* harmony import */ var _rotateX__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./rotateX */ \"../../api/v1/rotateX.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return _rotateX__WEBPACK_IMPORTED_MODULE_21__[\"rotateX\"]; });\n\n/* harmony import */ var _rotateY__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./rotateY */ \"../../api/v1/rotateY.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return _rotateY__WEBPACK_IMPORTED_MODULE_22__[\"rotateY\"]; });\n\n/* harmony import */ var _rotateZ__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./rotateZ */ \"../../api/v1/rotateZ.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return _rotateZ__WEBPACK_IMPORTED_MODULE_23__[\"rotateZ\"]; });\n\n/* harmony import */ var _scale__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./scale */ \"../../api/v1/scale.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _scale__WEBPACK_IMPORTED_MODULE_24__[\"scale\"]; });\n\n/* harmony import */ var _sin__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./sin */ \"../../api/v1/sin.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sin\", function() { return _sin__WEBPACK_IMPORTED_MODULE_25__[\"sin\"]; });\n\n/* harmony import */ var _sphere__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./sphere */ \"../../api/v1/sphere.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sphere\", function() { return _sphere__WEBPACK_IMPORTED_MODULE_26__[\"sphere\"]; });\n\n/* harmony import */ var _sqrt__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./sqrt */ \"../../api/v1/sqrt.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sqrt\", function() { return _sqrt__WEBPACK_IMPORTED_MODULE_27__[\"sqrt\"]; });\n\n/* harmony import */ var _square__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ./square */ \"../../api/v1/square.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"square\", function() { return _square__WEBPACK_IMPORTED_MODULE_28__[\"square\"]; });\n\n/* harmony import */ var _svgPath__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./svgPath */ \"../../api/v1/svgPath.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"svgPath\", function() { return _svgPath__WEBPACK_IMPORTED_MODULE_29__[\"svgPath\"]; });\n\n/* harmony import */ var _tetrahedron__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./tetrahedron */ \"../../api/v1/tetrahedron.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"tetrahedron\", function() { return _tetrahedron__WEBPACK_IMPORTED_MODULE_30__[\"tetrahedron\"]; });\n\n/* harmony import */ var _translate__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./translate */ \"../../api/v1/translate.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _translate__WEBPACK_IMPORTED_MODULE_31__[\"translate\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./union */ \"../../api/v1/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_32__[\"union\"]; });\n\n/* harmony import */ var _writePdf__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./writePdf */ \"../../api/v1/writePdf.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writePdf\", function() { return _writePdf__WEBPACK_IMPORTED_MODULE_33__[\"writePdf\"]; });\n\n/* harmony import */ var _writeStl__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./writeStl */ \"../../api/v1/writeStl.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeStl\", function() { return _writeStl__WEBPACK_IMPORTED_MODULE_34__[\"writeStl\"]; });\n\n/* harmony import */ var _writeSvg__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./writeSvg */ \"../../api/v1/writeSvg.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeSvg\", function() { return _writeSvg__WEBPACK_IMPORTED_MODULE_35__[\"writeSvg\"]; });\n\n/* harmony import */ var _writeThreejs__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./writeThreejs */ \"../../api/v1/writeThreejs.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeThreejsPage\", function() { return _writeThreejs__WEBPACK_IMPORTED_MODULE_36__[\"writeThreejsPage\"]; });\n\n/**\n *\n * Defines the interface used by the api to access the rest of the system on\n * behalf of a user. e.g., algorithms and geometries.\n *\n * A user can destructively update this mapping in their code to change what\n * the api uses.\n */\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/main.js?");
 
 /***/ }),
 
@@ -1990,7 +742,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"minkowski\", function() { return minkowski; });\n/* harmony import */ var _jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-points */ \"../../algorithm/points/main.js\");\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n\n\n\n\n// TODO: Generalize for more operands?\nconst minkowski = (a, b) => {\n  const aPoints = [];\n  const bPoints = [];\n  a.eachPoint({}, point => aPoints.push(point));\n  b.eachPoint({}, point => bPoints.push(point));\n  return _Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"].fromPolygonsToSolid(Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexHull\"])({}, Object(_jsxcad_algorithm_points__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexMinkowskiSum\"])({}, aPoints, bPoints)));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/minkowski.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"minkowski\", function() { return minkowski; });\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n/* harmony import */ var _Shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Shape */ \"../../api/v1/Shape.js\");\n\n\n\n\n// TODO: Generalize for more operands?\nconst minkowski = (a, b) => {\n  const aPoints = [];\n  const bPoints = [];\n  a.eachPoint({}, point => aPoints.push(point));\n  b.eachPoint({}, point => bPoints.push(point));\n  return _Shape__WEBPACK_IMPORTED_MODULE_1__[\"Shape\"].fromPolygonsToSolid(Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexHull\"])({}, Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_0__[\"buildConvexMinkowskiSum\"])({}, aPoints, bPoints)));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/minkowski.js?");
 
 /***/ }),
 
@@ -2198,18 +950,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "../../api/v1/writePaths.js":
-/*!********************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/api/v1/writePaths.js ***!
-  \********************************************************/
-/*! exports provided: writePaths */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"writePaths\", function() { return writePaths; });\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n\n\nconst writePaths = ({ path }, ...paths) => {\n  Object(_jsxcad_sys__WEBPACK_IMPORTED_MODULE_0__[\"writeFileSync\"])(path, '', { paths: paths });\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/api/v1/writePaths.js?");
-
-/***/ }),
-
 /***/ "../../api/v1/writePdf.js":
 /*!******************************************************!*\
   !*** /home/sbrian/github6/JSxCAD/api/v1/writePdf.js ***!
@@ -2258,15 +998,1263 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 
 /***/ }),
 
-/***/ "../../geometry/assembly/main.js":
+/***/ "../../geometry/eager/addTag.js":
+/*!************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/addTag.js ***!
+  \************************************************************/
+/*! exports provided: addTag */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"addTag\", function() { return addTag; });\nconst addTag = (tag, geometry) => {\n  const copy = Object.assign({}, geometry);\n  if (copy.tags) {\n    copy.tags = [tag, ...copy.tags];\n  } else {\n    copy.tags = [tag];\n  }\n  return copy;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/addTag.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/assemble.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/assemble.js ***!
+  \**************************************************************/
+/*! exports provided: assemble */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return assemble; });\nconst assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/assemble.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/canonicalize.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/canonicalize.js ***!
+  \******************************************************************/
+/*! exports provided: canonicalize */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\n\n\n\nconst canonicalize = (geometry) => {\n  const canonicalized = {};\n  if (geometry.points) {\n    canonicalized.points = Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(geometry.points);\n  }\n  if (geometry.paths) {\n    canonicalized.paths = Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(geometry.paths);\n  }\n  if (geometry.z0Surface) {\n    canonicalized.z0Surface = Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_3__[\"canonicalize\"])(geometry.z0Surface);\n  }\n  if (geometry.solid) {\n    canonicalized.solid = Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__[\"canonicalize\"])(geometry.solid);\n  }\n  if (geometry.assembly) {\n    canonicalized.assembly = geometry.assembly.map(canonicalize);\n  }\n  if (geometry.tags !== undefined) {\n    canonicalized.tags = geometry.tags;\n  }\n  return canonicalized;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/canonicalize.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/difference.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/difference.js ***!
+  \****************************************************************/
+/*! exports provided: difference */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../geometry/eager/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\n\n\nconst difference = (...geometries) => {\n  const assembly = { assembly: geometries };\n  const pathsData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'paths' }, assembly);\n  const solidData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'solid' }, assembly);\n  const z0SurfaceData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'z0Surface' }, assembly);\n  const differenced = { assembly: [] };\n  if (pathsData.length > 0) {\n    differenced.assembly.push({ paths: Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"difference\"])(...pathsData) });\n  }\n  if (solidData.length > 0) {\n    differenced.assembly.push({ solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"difference\"])(...solidData) });\n  }\n  if (z0SurfaceData.length > 0) {\n    differenced.assembly.push({ z0Surface: Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_3__[\"difference\"])(...z0SurfaceData) });\n  }\n  return differenced;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/difference.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/differenceItems.js":
+/*!*********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/differenceItems.js ***!
+  \*********************************************************************/
+/*! exports provided: differenceItems */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"differenceItems\", function() { return differenceItems; });\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\nconst differenceItems = (base, ...subtractions) => {\n  const differenced = { tags: base.tags };\n  if (base.solid) {\n    differenced.solid = base.solid;\n    for (const subtraction of subtractions) {\n      if (subtraction.solid) {\n        differenced.solid = Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_0__[\"difference\"])(differenced.solid, subtraction.solid);\n      }\n    }\n  } else if (base.z0Surface) {\n    differenced.z0Surface = base.z0Surface;\n    for (const subtraction of subtractions) {\n      if (subtraction.z0Surface) {\n        differenced.z0Surface = Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_1__[\"difference\"])(differenced.z0Surface, subtraction.z0Surface);\n      }\n    }\n    return differenced;\n  } else if (base.paths) {\n    differenced.paths = base.paths;\n    // FIX: Figure out how paths differencing should work.\n  }\n  return differenced;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/differenceItems.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/eachItem.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/eachItem.js ***!
+  \**************************************************************/
+/*! exports provided: eachItem */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachItem\", function() { return eachItem; });\nconst eachItem = (geometry, operation) => {\n  const walk = (geometry) => {\n    if (geometry.assembly) {\n      geometry.assembly.forEach(walk);\n    }\n    operation(geometry);\n  };\n  walk(geometry);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/eachItem.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/eachPoint.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/eachPoint.js ***!
+  \***************************************************************/
+/*! exports provided: eachPoint */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map */ \"../../geometry/eager/map.js\");\n\n\n\n\n\nconst eachPoint = (options, operation, geometry) => {\n  Object(_map__WEBPACK_IMPORTED_MODULE_3__[\"map\"])(geometry,\n      (geometry) => {\n        if (geometry.paths) {\n          Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, operation, geometry.paths);\n        }\n        if (geometry.solid) {\n          Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])(options, operation, geometry.solid);\n        }\n        if (geometry.z0Surface) {\n          Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_2__[\"eachPoint\"])(options, operation, geometry.z0Surface);\n        }\n      });\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/eachPoint.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/filterAndFlattenAssemblyData.js":
+/*!**********************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/filterAndFlattenAssemblyData.js ***!
+  \**********************************************************************************/
+/*! exports provided: filterAndFlattenAssemblyData */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"filterAndFlattenAssemblyData\", function() { return filterAndFlattenAssemblyData; });\n/* harmony import */ var _hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./hasMatchingTag */ \"../../geometry/eager/hasMatchingTag.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ \"../../geometry/eager/map.js\");\n\n\n\n// This needs to recursively walk the assembly.\nconst filterAndFlattenAssemblyData = ({ requires, excludes, form }, geometry) => {\n  const filtered = [];\n  const filter = (item) => {\n    const data = item[form];\n    if (data === undefined || Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(excludes, item.tags)) {\n      return item;\n    }\n    if (Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(requires, item.tags, true)) {\n      filtered.push(data);\n    }\n    return item;\n  };\n  Object(_map__WEBPACK_IMPORTED_MODULE_1__[\"map\"])(geometry, filter);\n  return filtered;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/filterAndFlattenAssemblyData.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/flip.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/flip.js ***!
+  \**********************************************************/
+/*! exports provided: flip */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\n\n\n\nconst flipEntry = (entry) => {\n  const flipped = {};\n  if (entry.points) {\n    flipped.points = Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_1__[\"flip\"])(entry.points);\n  }\n  if (entry.paths) {\n    flipped.paths = Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(entry.paths);\n  }\n  if (entry.surface) {\n    flipped.surface = Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_3__[\"flip\"])(entry.surface);\n  }\n  if (entry.solid) {\n    flipped.solid = Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__[\"flip\"])(entry.solid);\n  }\n  if (entry.assembly) {\n    flipped.assembly = flip(entry.assembly);\n  }\n  flipped.tags = entry.tags;\n  return flipped;\n};\n\nconst flip = (assembly) => assembly.map(flipEntry);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/flip.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/hasMatchingTag.js":
+/*!********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/hasMatchingTag.js ***!
+  \********************************************************************/
+/*! exports provided: hasMatchingTag */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"hasMatchingTag\", function() { return hasMatchingTag; });\nconst hasMatchingTag = (set, tags, whenSetUndefined = false) => {\n  if (set === undefined) {\n    return whenSetUndefined;\n  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {\n    return true;\n  } else {\n    return false;\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/hasMatchingTag.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/intersection.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/intersection.js ***!
+  \******************************************************************/
+/*! exports provided: intersection */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return intersection; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../geometry/eager/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\n\n\nconst intersection = (...geometries) => {\n  const assembly = { assembly: geometries };\n  const pathsData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'paths' }, assembly);\n  const solidData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'solid' }, assembly);\n  const z0SurfaceData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'z0Surface' }, assembly);\n  const intersectioned = { assembly: [] };\n  if (pathsData.length > 0) {\n    intersectioned.assembly.push({ paths: Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"intersection\"])(...pathsData) });\n  }\n  if (solidData.length > 0) {\n    intersectioned.assembly.push({ solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"intersection\"])(...solidData) });\n  }\n  if (z0SurfaceData.length > 0) {\n    intersectioned.assembly.push({ z0Surface: Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_3__[\"intersection\"])(...z0SurfaceData) });\n  }\n  return intersectioned;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/intersection.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/main.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/main.js ***!
+  \**********************************************************/
+/*! exports provided: addTag, assemble, canonicalize, difference, eachItem, eachPoint, flip, intersection, toComponents, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union, rotateX, rotateY, rotateZ, translate, scale */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return rotateX; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return rotateY; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return rotateZ; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _addTag__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./addTag */ \"../../geometry/eager/addTag.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"addTag\", function() { return _addTag__WEBPACK_IMPORTED_MODULE_1__[\"addTag\"]; });\n\n/* harmony import */ var _assemble__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./assemble */ \"../../geometry/eager/assemble.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return _assemble__WEBPACK_IMPORTED_MODULE_2__[\"assemble\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./canonicalize */ \"../../geometry/eager/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_3__[\"canonicalize\"]; });\n\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./difference */ \"../../geometry/eager/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_4__[\"difference\"]; });\n\n/* harmony import */ var _eachItem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./eachItem */ \"../../geometry/eager/eachItem.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachItem\", function() { return _eachItem__WEBPACK_IMPORTED_MODULE_5__[\"eachItem\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/eager/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_6__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./flip */ \"../../geometry/eager/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_7__[\"flip\"]; });\n\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./intersection */ \"../../geometry/eager/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_8__[\"intersection\"]; });\n\n/* harmony import */ var _toComponents__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toComponents */ \"../../geometry/eager/toComponents.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toComponents\", function() { return _toComponents__WEBPACK_IMPORTED_MODULE_9__[\"toComponents\"]; });\n\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../geometry/eager/toDisjointGeometry.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toDisjointGeometry\", function() { return _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_10__[\"toDisjointGeometry\"]; });\n\n/* harmony import */ var _toPaths__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toPaths */ \"../../geometry/eager/toPaths.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPaths\", function() { return _toPaths__WEBPACK_IMPORTED_MODULE_11__[\"toPaths\"]; });\n\n/* harmony import */ var _toSolid__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./toSolid */ \"../../geometry/eager/toSolid.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toSolid\", function() { return _toSolid__WEBPACK_IMPORTED_MODULE_12__[\"toSolid\"]; });\n\n/* harmony import */ var _toZ0Surface__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./toZ0Surface */ \"../../geometry/eager/toZ0Surface.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toZ0Surface\", function() { return _toZ0Surface__WEBPACK_IMPORTED_MODULE_13__[\"toZ0Surface\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./transform */ \"../../geometry/eager/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./union */ \"../../geometry/eager/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_15__[\"union\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst rotateX = (angle, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromXRotation\"])(angle), assembly);\nconst rotateY = (angle, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromYRotation\"])(angle), assembly);\nconst rotateZ = (angle, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromZRotation\"])(angle), assembly);\nconst translate = (vector, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), assembly);\nconst scale = (vector, assembly) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), assembly);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/map.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/map.js ***!
+  \*********************************************************/
+/*! exports provided: map */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\nconst map = (geometry, operation) => {\n  const walk = (geometry) => {\n    if (geometry.assembly) {\n      return operation({ assembly: geometry.assembly.map(walk), tags: geometry.tags });\n    } else {\n      return operation(geometry);\n    }\n  };\n  return walk(geometry);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/map.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/toComponents.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/toComponents.js ***!
+  \******************************************************************/
+/*! exports provided: toComponents */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toComponents\", function() { return toComponents; });\n/* harmony import */ var _hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./hasMatchingTag */ \"../../geometry/eager/hasMatchingTag.js\");\n\n\nconst toComponents = ({ requires, excludes }, geometry) => {\n  const components = [];\n\n  const walk = (geometry) => {\n    for (const item of geometry.assembly) {\n      if (Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(excludes, item.tags)) {\n        continue;\n      } else if (Object(_hasMatchingTag__WEBPACK_IMPORTED_MODULE_0__[\"hasMatchingTag\"])(requires, item.tags, true)) {\n        components.push(item);\n      } else if (item.assembly !== undefined) {\n        walk(item);\n      }\n    }\n  };\n  walk(geometry);\n  return components;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/toComponents.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/toDisjointGeometry.js":
+/*!************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/toDisjointGeometry.js ***!
+  \************************************************************************/
+/*! exports provided: toDisjointGeometry */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toDisjointGeometry\", function() { return toDisjointGeometry; });\n/* harmony import */ var _differenceItems__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./differenceItems */ \"../../geometry/eager/differenceItems.js\");\n\n\n// Traverse the assembly tree and disjoint it backward.\nconst toDisjointGeometry = (geometry) => {\n  if (geometry.assembly === undefined) {\n    // A singleton is disjoint.\n    return geometry;\n  } else {\n    const subtractions = [];\n    const walk = (geometry, disjointed) => {\n      for (let nth = geometry.assembly.length - 1; nth >= 0; nth--) {\n        const item = geometry.assembly[nth];\n        if (item.assembly !== undefined) {\n          disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));\n        } else {\n          const differenced = Object(_differenceItems__WEBPACK_IMPORTED_MODULE_0__[\"differenceItems\"])(item, ...subtractions);\n          disjointed.assembly.push(differenced);\n          subtractions.push(differenced);\n        }\n      }\n      return disjointed;\n    };\n    const result = walk(geometry, { assembly: [], tags: geometry.tags });\n    return result;\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/toDisjointGeometry.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/toPaths.js":
 /*!*************************************************************!*\
-  !*** /home/sbrian/github6/JSxCAD/geometry/assembly/main.js ***!
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/toPaths.js ***!
   \*************************************************************/
+/*! exports provided: toPaths */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPaths\", function() { return toPaths; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../geometry/eager/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../geometry/eager/toDisjointGeometry.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n\n\n\n\nconst toPaths = ({ requires, excludes }, assembly) =>\n  ({\n    paths: Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ requires, excludes, form: 'paths' }, Object(_toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__[\"toDisjointGeometry\"])(assembly)))\n  });\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/toPaths.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/toSolid.js":
+/*!*************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/toSolid.js ***!
+  \*************************************************************/
+/*! exports provided: toSolid */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSolid\", function() { return toSolid; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../geometry/eager/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../geometry/eager/toDisjointGeometry.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n\n\n\n\nconst toSolid = ({ requires, excludes }, assembly) =>\n  ({\n    solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ requires, excludes, form: 'solid' }, Object(_toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__[\"toDisjointGeometry\"])(assembly)))\n  });\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/toSolid.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/toZ0Surface.js":
+/*!*****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/toZ0Surface.js ***!
+  \*****************************************************************/
+/*! exports provided: toZ0Surface */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toZ0Surface\", function() { return toZ0Surface; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../geometry/eager/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toDisjointGeometry */ \"../../geometry/eager/toDisjointGeometry.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\n\nconst toZ0Surface = ({ requires, excludes }, assembly) => {\n  const filtered = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ requires, excludes, form: 'z0Surface' }, Object(_toDisjointGeometry__WEBPACK_IMPORTED_MODULE_1__[\"toDisjointGeometry\"])(assembly));\n  const unioned = Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...filtered);\n  return { z0Surface: unioned };\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/toZ0Surface.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/transform.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/transform.js ***!
+  \***************************************************************/
+/*! exports provided: transform */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../geometry/eager/map.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-points */ \"../../geometry/points/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\n\n\n\n\nconst transformItem = (matrix, item) => {\n  const transformed = {};\n  if (item.assembly) {\n    transformed.assembly = item.assembly;\n  }\n  if (item.paths) {\n    transformed.paths = Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, item.paths);\n  }\n  if (item.points) {\n    transformed.points = Object(_jsxcad_geometry_points__WEBPACK_IMPORTED_MODULE_2__[\"transform\"])(matrix, item.points);\n  }\n  if (item.solid) {\n    transformed.solid = Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_3__[\"transform\"])(matrix, item.solid);\n  }\n  if (item.z0Surface) {\n    // FIX: Handle transformations that take the surface out of z0.\n    transformed.z0Surface = Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_4__[\"transform\"])(matrix, item.z0Surface);\n  }\n  transformed.tags = item.tags;\n  return transformed;\n};\n\nconst transform = (matrix, assembly) => Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(assembly, item => transformItem(matrix, item));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/transform.js?");
+
+/***/ }),
+
+/***/ "../../geometry/eager/union.js":
+/*!***********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/eager/union.js ***!
+  \***********************************************************/
+/*! exports provided: union */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return union; });\n/* harmony import */ var _filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./filterAndFlattenAssemblyData */ \"../../geometry/eager/filterAndFlattenAssemblyData.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-bsp-surfaces */ \"../../algorithm/bsp-surfaces/main.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\n\n\nconst union = (...geometries) => {\n  const assembly = { assembly: geometries };\n  const pathsData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'paths' }, assembly);\n  const solidData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'solid' }, assembly);\n  const z0SurfaceData = Object(_filterAndFlattenAssemblyData__WEBPACK_IMPORTED_MODULE_0__[\"filterAndFlattenAssemblyData\"])({ form: 'z0Surface' }, assembly);\n  const unioned = { assembly: [] };\n  if (pathsData.length > 0) {\n    unioned.assembly.push({ paths: Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"union\"])(...pathsData) });\n  }\n  if (solidData.length > 0) {\n    unioned.assembly.push({ solid: Object(_jsxcad_algorithm_bsp_surfaces__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...solidData) });\n  }\n  if (z0SurfaceData.length > 0) {\n    unioned.assembly.push({ z0Surface: Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_3__[\"union\"])(...z0SurfaceData) });\n  }\n  return unioned;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/eager/union.js?");
+
+/***/ }),
+
+/***/ "../../geometry/lazy/main.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/lazy/main.js ***!
+  \*********************************************************/
 /*! exports provided: Assembly, fromGeometry */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Assembly\", function() { return Assembly; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromGeometry\", function() { return fromGeometry; });\n/* harmony import */ var _jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-assembly */ \"../../algorithm/assembly/main.js\");\n\n\n// FIX: Make it clear this should be lazy.\nclass Assembly {\n  constructor (geometry = { assembly: [] }) {\n    this.geometry = geometry;\n    if (geometry instanceof Array) throw Error('die');\n    if (geometry.geometry) throw Error('die');\n  }\n\n  addTag (tag) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"addTag\"])(tag, toGeometry(this)));\n  }\n\n  assemble (...geometries) {\n    const assembled = Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"assemble\"])(toGeometry(this), ...geometries.map(toGeometry));\n    return fromGeometry(assembled);\n  }\n\n  difference (...geometries) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"difference\"])(toGeometry(this), ...geometries.map(toGeometry)));\n  }\n\n  flip () {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(toGeometry(this)));\n  }\n\n  getTags () {\n    const tags = this.geometry.tags;\n    if (tags === undefined) {\n      return [];\n    } else {\n      return tags;\n    }\n  }\n\n  intersection (...geometries) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"intersection\"])(toGeometry(this), ...geometries.map(toGeometry)));\n  }\n\n  eachPoint (options = {}, operation) {\n    return Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, operation, toGeometry(this));\n  }\n\n  toGeometry (options = {}) {\n    return this.geometry;\n  }\n\n  toPaths (options = {}) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"toPaths\"])(options, toGeometry(this)));\n  }\n\n  toSolid (options = {}) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"toSolid\"])(options, toGeometry(this)));\n  }\n\n  toZ0Surface (options = {}) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"toZ0Surface\"])(options, toGeometry(this)));\n  }\n\n  toDisjointGeometry () {\n    return Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"toDisjointGeometry\"])(toGeometry(this));\n  }\n\n  transform (matrix) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, toGeometry(this)));\n  }\n\n  union (...geometries) {\n    return fromGeometry(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_0__[\"union\"])(toGeometry(this), ...geometries.map(toGeometry)));\n  }\n}\n\nconst fromGeometry = (geometry) => {\n  if (geometry instanceof Array) throw Error('die');\n  return new Assembly(geometry);\n};\n\nconst toGeometry = (assembly) => assembly.toGeometry();\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/assembly/main.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"Assembly\", function() { return Assembly; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromGeometry\", function() { return fromGeometry; });\n/* harmony import */ var _jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-eager */ \"../../geometry/eager/main.js\");\n\n\n// FIX: Make it clear this should be lazy.\nclass Assembly {\n  constructor (geometry = { assembly: [] }) {\n    this.geometry = geometry;\n    if (geometry instanceof Array) throw Error('die');\n    if (geometry.geometry) throw Error('die');\n  }\n\n  addTag (tag) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"addTag\"])(tag, toGeometry(this)));\n  }\n\n  assemble (...geometries) {\n    const assembled = Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"assemble\"])(toGeometry(this), ...geometries.map(toGeometry));\n    return fromGeometry(assembled);\n  }\n\n  difference (...geometries) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"difference\"])(toGeometry(this), ...geometries.map(toGeometry)));\n  }\n\n  flip () {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(toGeometry(this)));\n  }\n\n  getTags () {\n    const tags = this.geometry.tags;\n    if (tags === undefined) {\n      return [];\n    } else {\n      return tags;\n    }\n  }\n\n  intersection (...geometries) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"intersection\"])(toGeometry(this), ...geometries.map(toGeometry)));\n  }\n\n  eachPoint (options = {}, operation) {\n    return Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, operation, toGeometry(this));\n  }\n\n  toGeometry (options = {}) {\n    return this.geometry;\n  }\n\n  toPaths (options = {}) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"toPaths\"])(options, toGeometry(this)));\n  }\n\n  toSolid (options = {}) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"toSolid\"])(options, toGeometry(this)));\n  }\n\n  toZ0Surface (options = {}) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"toZ0Surface\"])(options, toGeometry(this)));\n  }\n\n  toDisjointGeometry () {\n    return Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"toDisjointGeometry\"])(toGeometry(this));\n  }\n\n  transform (matrix) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, toGeometry(this)));\n  }\n\n  union (...geometries) {\n    return fromGeometry(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_0__[\"union\"])(toGeometry(this), ...geometries.map(toGeometry)));\n  }\n}\n\nconst fromGeometry = (geometry) => {\n  if (geometry instanceof Array) throw Error('die');\n  return new Assembly(geometry);\n};\n\nconst toGeometry = (assembly) => assembly.toGeometry();\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/lazy/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/canonicalize.js":
+/*!*****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/canonicalize.js ***!
+  \*****************************************************************/
+/*! exports provided: canonicalize */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst canonicalizePoint = (point, index) => {\n  if (point === null) {\n    if (index !== 0) throw Error('Path has null not at head');\n    return point;\n  } else {\n    return Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(point);\n  }\n};\n\nconst canonicalize = (path) => path.map(canonicalizePoint);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/canonicalize.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/close.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/close.js ***!
+  \**********************************************************/
+/*! exports provided: close */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"close\", function() { return close; });\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isClosed */ \"../../geometry/path/isClosed.js\");\n\n\nconst close = (path) => Object(_isClosed__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path) ? path : path.slice(1);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/close.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/concatenate.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/concatenate.js ***!
+  \****************************************************************/
+/*! exports provided: concatenate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"concatenate\", function() { return concatenate; });\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isClosed */ \"../../geometry/path/isClosed.js\");\n\n\nconst concatenate = (...paths) => {\n  if (!paths.every(path => !Object(_isClosed__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path))) {\n    throw Error('Cannot concatenate closed paths.');\n  }\n  const result = [null, ...[].concat(...paths.map(path => path.slice(1)))];\n  return result;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/concatenate.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/flip.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/flip.js ***!
+  \*********************************************************/
+/*! exports provided: flip */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\nconst flip = (path) => {\n  if (path[0] === null) {\n    return [null, ...path.slice(1).reverse()];\n  } else {\n    return path.slice().reverse();\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/flip.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/isClosed.js":
+/*!*************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/isClosed.js ***!
+  \*************************************************************/
+/*! exports provided: isClosed */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isClosed\", function() { return isClosed; });\nconst isClosed = (path) => (path.length === 0) || (path[0] !== null);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/isClosed.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/main.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/main.js ***!
+  \*********************************************************/
+/*! exports provided: canonicalize, close, concatenate, flip, isClosed, measureArea, open, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate, scale */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../geometry/path/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _close__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./close */ \"../../geometry/path/close.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"close\", function() { return _close__WEBPACK_IMPORTED_MODULE_2__[\"close\"]; });\n\n/* harmony import */ var _concatenate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./concatenate */ \"../../geometry/path/concatenate.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"concatenate\", function() { return _concatenate__WEBPACK_IMPORTED_MODULE_3__[\"concatenate\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./flip */ \"../../geometry/path/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_4__[\"flip\"]; });\n\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./isClosed */ \"../../geometry/path/isClosed.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"isClosed\", function() { return _isClosed__WEBPACK_IMPORTED_MODULE_5__[\"isClosed\"]; });\n\n/* harmony import */ var _measureArea__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./measureArea */ \"../../geometry/path/measureArea.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return _measureArea__WEBPACK_IMPORTED_MODULE_6__[\"measureArea\"]; });\n\n/* harmony import */ var _open__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./open */ \"../../geometry/path/open.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"open\", function() { return _open__WEBPACK_IMPORTED_MODULE_7__[\"open\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./toGeneric */ \"../../geometry/path/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_8__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPolygon__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toPolygon */ \"../../geometry/path/toPolygon.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPolygon\", function() { return _toPolygon__WEBPACK_IMPORTED_MODULE_9__[\"toPolygon\"]; });\n\n/* harmony import */ var _toSegments__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toSegments */ \"../../geometry/path/toSegments.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toSegments\", function() { return _toSegments__WEBPACK_IMPORTED_MODULE_10__[\"toSegments\"]; });\n\n/* harmony import */ var _toZ0Polygon__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toZ0Polygon */ \"../../geometry/path/toZ0Polygon.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygon\", function() { return _toZ0Polygon__WEBPACK_IMPORTED_MODULE_11__[\"toZ0Polygon\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./transform */ \"../../geometry/path/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_12__[\"transform\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst translate = (vector, path) => Object(_transform__WEBPACK_IMPORTED_MODULE_12__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), path);\nconst scale = (vector, path) => Object(_transform__WEBPACK_IMPORTED_MODULE_12__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), path);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/measureArea.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/measureArea.js ***!
+  \****************************************************************/
+/*! exports provided: measureArea */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return measureArea; });\nconst X = 0;\nconst Y = 1;\n\n/**\n * Measure the area of a path as though it were a polygon.\n * A negative area indicates a clockwise path, and a positive area indicates a counter-clock-wise path.\n * See: http://mathworld.wolfram.com/PolygonArea.html\n * @returns {Number} The area the path would have if it were a polygon.\n */\nconst measureArea = (path) => {\n  let last = path.length - 1;\n  let current = (path[0] === null) ? 1 : 0;\n  let twiceArea = 0;\n  for (; current < path.length; last = current++) {\n    twiceArea += path[last][X] * path[current][Y] - path[last][Y] * path[current][X];\n  }\n  return twiceArea / 2;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/measureArea.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/open.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/open.js ***!
+  \*********************************************************/
+/*! exports provided: open */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"open\", function() { return open; });\n/* harmony import */ var _isClosed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isClosed */ \"../../geometry/path/isClosed.js\");\n\n\nconst open = (path) => Object(_isClosed__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path) ? [null, ...path] : path;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/open.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/toGeneric.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/toGeneric.js ***!
+  \**************************************************************/
+/*! exports provided: toGeneric */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\nconst toGeneric = (path) => [...path];\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/toGeneric.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/toPolygon.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/toPolygon.js ***!
+  \**************************************************************/
+/*! exports provided: toPolygon */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPolygon\", function() { return toPolygon; });\nconst toPolygon = (path) => {\n  if (path.isPolygon !== true) {\n    if (path.length < 3) throw Error('Path would form degenerate polygon.');\n    if (path[0] === null) throw Error('Only closed paths can be polygons.');\n    // FIX: Check for coplanarity.\n    path.isPolygon = true;\n  }\n  return path;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/toPolygon.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/toSegments.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/toSegments.js ***!
+  \***************************************************************/
+/*! exports provided: toSegments */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSegments\", function() { return toSegments; });\nconst toSegments = (options = {}, path) => {\n  const segments = [];\n  if (path[0] !== null) {\n    segments.push([path[path.length - 1], path[0]]);\n    segments.push([path[0], path[1]]);\n  }\n  for (let nth = 2; nth < path.length; nth++) {\n    segments.push([path[nth - 1], path[nth]]);\n  }\n  return segments;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/toSegments.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/toZ0Polygon.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/toZ0Polygon.js ***!
+  \****************************************************************/
+/*! exports provided: toZ0Polygon */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygon\", function() { return toZ0Polygon; });\nconst isZ0Point = ([x = 0, y = 0, z = 0]) => (z === 0);\n\nconst toZ0Polygon = (path) => {\n  if (path.isZ0Polygon !== true) {\n    if (path.length < 3) throw Error('Path would form degenerate polygon.');\n    if (path[0] === null) throw Error('Only closed paths can be polygons.');\n    if (!path.every(isZ0Point)) throw Error(`z != 0: ${JSON.stringify(path.filter(path => !isZ0Point(path)))}`);\n    path.isZ0Polygon = true;\n  }\n  return path;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/toZ0Polygon.js?");
+
+/***/ }),
+
+/***/ "../../geometry/path/transform.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/path/transform.js ***!
+  \**************************************************************/
+/*! exports provided: transform */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst transform = (matrix, path) =>\n  path.map((point, index) => (point === null) ? null : Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, point));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/path/transform.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/butLast.js":
+/*!*************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/butLast.js ***!
+  \*************************************************************/
+/*! exports provided: butLast */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"butLast\", function() { return butLast; });\nconst butLast = (paths) => paths.slice(0, paths.length - 1);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/butLast.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/canonicalize.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/canonicalize.js ***!
+  \******************************************************************/
+/*! exports provided: canonicalize */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\nconst canonicalize = (paths) => {\n  let canonicalized = paths.map(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n  if (paths.properties !== undefined) {\n    // Transfer properties.\n    canonicalized.properties = paths.properties;\n  }\n  return canonicalized;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/canonicalize.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/difference.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/difference.js ***!
+  \****************************************************************/
+/*! exports provided: difference */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\nconst difference = (pathset, ...pathsets) => { throw Error('Not implemented'); };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/difference.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/eachPoint.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/eachPoint.js ***!
+  \***************************************************************/
+/*! exports provided: eachPoint */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, paths) => {\n  for (const path of paths) {\n    for (const point of path) {\n      if (point !== null) {\n        thunk(point);\n      }\n    }\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/eachPoint.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/flip.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/flip.js ***!
+  \**********************************************************/
+/*! exports provided: flip */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\nconst flip = (paths) => paths.map(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"flip\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/flip.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/intersection.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/intersection.js ***!
+  \******************************************************************/
+/*! exports provided: intersection */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return intersection; });\nconst intersection = (...pathsets) => { throw Error('Not implemented'); };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/intersection.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/last.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/last.js ***!
+  \**********************************************************/
+/*! exports provided: last */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"last\", function() { return last; });\nconst last = (paths) => paths.length >= 1 ? paths[paths.length - 1] : [null];\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/last.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/main.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/main.js ***!
+  \**********************************************************/
+/*! exports provided: butLast, canonicalize, difference, eachPoint, flip, intersection, last, measureBoundingBox, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, union, scale */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _butLast__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./butLast */ \"../../geometry/paths/butLast.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"butLast\", function() { return _butLast__WEBPACK_IMPORTED_MODULE_0__[\"butLast\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../geometry/paths/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./difference */ \"../../geometry/paths/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_2__[\"difference\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/paths/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_3__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./flip */ \"../../geometry/paths/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_4__[\"flip\"]; });\n\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./intersection */ \"../../geometry/paths/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_6__[\"intersection\"]; });\n\n/* harmony import */ var _last__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./last */ \"../../geometry/paths/last.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"last\", function() { return _last__WEBPACK_IMPORTED_MODULE_7__[\"last\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../geometry/paths/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_8__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toGeneric */ \"../../geometry/paths/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_9__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPoints__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toPoints */ \"../../geometry/paths/toPoints.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return _toPoints__WEBPACK_IMPORTED_MODULE_10__[\"toPoints\"]; });\n\n/* harmony import */ var _toPolygons__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toPolygons */ \"../../geometry/paths/toPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return _toPolygons__WEBPACK_IMPORTED_MODULE_11__[\"toPolygons\"]; });\n\n/* harmony import */ var _toZ0Polygons__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./toZ0Polygons */ \"../../geometry/paths/toZ0Polygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygons\", function() { return _toZ0Polygons__WEBPACK_IMPORTED_MODULE_12__[\"toZ0Polygons\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./transform */ \"../../geometry/paths/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_13__[\"transform\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./union */ \"../../geometry/paths/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_14__[\"union\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst scale = ([x = 1, y = 1, z = 1], paths) => Object(_transform__WEBPACK_IMPORTED_MODULE_13__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__[\"fromScaling\"])([x, y, z]), paths);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/map.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/map.js ***!
+  \*********************************************************/
+/*! exports provided: map */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\n/**\n * Transforms each path of Paths.\n *\n * @param {Paths} original - the Paths to transform.\n * @param {Function} [transform=identity] - function used to transform the paths.\n * @returns {Paths} the transformed paths.\n */\nconst map = (original, transform) => {\n  if (original === undefined) {\n    original = [];\n  }\n  if (transform === undefined) {\n    transform = _ => _;\n  }\n  // FIX: Consider optimizing this to return the original if all transforms are identity transforms.\n  return original.map(path => transform(path));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/map.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/measureBoundingBox.js":
+/*!************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/measureBoundingBox.js ***!
+  \************************************************************************/
+/*! exports provided: measureBoundingBox */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/paths/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (paths) => {\n  let minPoint;\n  let maxPoint;\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              minPoint = (minPoint === undefined) ? Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point) : Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(minPoint, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point));\n              maxPoint = (maxPoint === undefined) ? Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point) : Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(maxPoint, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoint\"])(point));\n            },\n            paths);\n  return [minPoint, maxPoint];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/measureBoundingBox.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/toGeneric.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/toGeneric.js ***!
+  \***************************************************************/
+/*! exports provided: toGeneric */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../geometry/paths/map.js\");\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\n\nconst toGeneric = (paths) => Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(paths, _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_1__[\"toGeneric\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/toGeneric.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/toPoints.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/toPoints.js ***!
+  \**************************************************************/
+/*! exports provided: toPoints */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return toPoints; });\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/paths/eachPoint.js\");\n\n\nconst toPoints = (options = {}, paths) => {\n  const points = [];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, point => points.push(point), paths);\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/toPoints.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/toPolygons.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/toPolygons.js ***!
+  \****************************************************************/
+/*! exports provided: toPolygons */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return toPolygons; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../geometry/paths/map.js\");\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\n\nconst toPolygons = (paths) => {\n  if (paths.isPolygons !== true) {\n    paths = Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(paths, _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_1__[\"toPolygon\"]);\n    paths.isPolygons = true;\n  }\n  return paths;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/toPolygons.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/toZ0Polygons.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/toZ0Polygons.js ***!
+  \******************************************************************/
+/*! exports provided: toZ0Polygons */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toZ0Polygons\", function() { return toZ0Polygons; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../geometry/paths/map.js\");\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\n\nconst toZ0Polygons = (paths) => {\n  if (paths.isZ0Polygons !== true) {\n    paths = Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(paths, _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_1__[\"toZ0Polygon\"]);\n    paths.isZ0Polygons = true;\n  }\n  return paths;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/toZ0Polygons.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/transform.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/transform.js ***!
+  \***************************************************************/
+/*! exports provided: transform */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\nconst transform = (matrix, paths) => paths.map(path => Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, path));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/transform.js?");
+
+/***/ }),
+
+/***/ "../../geometry/paths/union.js":
+/*!***********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/paths/union.js ***!
+  \***********************************************************/
+/*! exports provided: union */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return union; });\n// FIX: Deduplication.\n\nconst union = (...pathsets) => [].concat(...pathsets);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/paths/union.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/buildConvexHull.js":
+/*!**********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/buildConvexHull.js ***!
+  \**********************************************************************/
+/*! exports provided: buildConvexHull */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildConvexHull\", function() { return buildConvexHull; });\n/* harmony import */ var quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! quickhull3d/dist/QuickHull */ \"../../node_modules/quickhull3d/dist/QuickHull.js\");\n/* harmony import */ var quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0__);\n\n\nconst buildConvexHull = (options = {}, points) => {\n  const hull = new quickhull3d_dist_QuickHull__WEBPACK_IMPORTED_MODULE_0___default.a(points, { skipTriangulation: true });\n  hull.build();\n  return hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/buildConvexHull.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/buildConvexMinkowskiSum.js":
+/*!******************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/buildConvexMinkowskiSum.js ***!
+  \******************************************************************************/
+/*! exports provided: buildConvexMinkowskiSum */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"buildConvexMinkowskiSum\", function() { return buildConvexMinkowskiSum; });\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../geometry/points/ops.js\");\n\n\nconst buildConvexMinkowskiSum = (options = {}, aPoints, bPoints) => {\n  const summedPoints = [];\n  for (const aPoint of aPoints) {\n    for (const summedPoint of Object(_ops__WEBPACK_IMPORTED_MODULE_0__[\"translate\"])(aPoint, bPoints)) {\n      summedPoints.push(summedPoint);\n    }\n  }\n  return summedPoints;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/buildConvexMinkowskiSum.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/canonicalize.js":
+/*!*******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/canonicalize.js ***!
+  \*******************************************************************/
+/*! exports provided: canonicalize */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst canonicalize = (points) => points.map(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/canonicalize.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/eachPoint.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/eachPoint.js ***!
+  \****************************************************************/
+/*! exports provided: eachPoint */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, points) => {\n  for (const point of points) {\n    thunk(point);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/eachPoint.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/fromPolygons.js":
+/*!*******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/fromPolygons.js ***!
+  \*******************************************************************/
+/*! exports provided: fromPolygons */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return fromPolygons; });\nconst fromPolygons = (options = {}, polygons) => {\n  const points = [];\n  for (const polygon of polygons) {\n    for (const point of polygon) {\n      points.push(point);\n    }\n  }\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/fromPolygons.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/main.js":
+/*!***********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/main.js ***!
+  \***********************************************************/
+/*! exports provided: canonicalize, buildConvexHull, buildConvexMinkowskiSum, eachPoint, flip, fromPolygons, measureBoundingBox, transform, translate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../geometry/points/ops.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"transform\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"translate\"]; });\n\n/* harmony import */ var _buildConvexHull__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./buildConvexHull */ \"../../geometry/points/buildConvexHull.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"buildConvexHull\", function() { return _buildConvexHull__WEBPACK_IMPORTED_MODULE_1__[\"buildConvexHull\"]; });\n\n/* harmony import */ var _buildConvexMinkowskiSum__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./buildConvexMinkowskiSum */ \"../../geometry/points/buildConvexMinkowskiSum.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"buildConvexMinkowskiSum\", function() { return _buildConvexMinkowskiSum__WEBPACK_IMPORTED_MODULE_2__[\"buildConvexMinkowskiSum\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./canonicalize */ \"../../geometry/points/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_3__[\"canonicalize\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/points/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_4__[\"eachPoint\"]; });\n\n/* harmony import */ var _fromPolygons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./fromPolygons */ \"../../geometry/points/fromPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return _fromPolygons__WEBPACK_IMPORTED_MODULE_5__[\"fromPolygons\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../geometry/points/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_6__[\"measureBoundingBox\"]; });\n\n\n\n\n\n\n\n\n\n\nconst flip = (points) => points;\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/measureBoundingBox.js":
+/*!*************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/measureBoundingBox.js ***!
+  \*************************************************************************/
+/*! exports provided: measureBoundingBox */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/points/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (points) => {\n  let max = points[0];\n  let min = points[0];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              max = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(max, point);\n              min = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(min, point);\n            },\n            points);\n  return [min, max];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/measureBoundingBox.js?");
+
+/***/ }),
+
+/***/ "../../geometry/points/ops.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/points/ops.js ***!
+  \**********************************************************/
+/*! exports provided: transform, translate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\n\nconst transform = (matrix, points) => points.map(point => Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, point));\nconst translate = ([x = 0, y = 0, z = 0], points) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([x, y, z]), points);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/points/ops.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/blessAsConvex.js":
+/*!**********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/blessAsConvex.js ***!
+  \**********************************************************************/
+/*! exports provided: blessAsConvex */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"blessAsConvex\", function() { return blessAsConvex; });\nconst blessAsConvex = (paths) => { paths.isConvex = true; return paths; };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/blessAsConvex.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/blessAsTriangles.js":
+/*!*************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/blessAsTriangles.js ***!
+  \*************************************************************************/
+/*! exports provided: blessAsTriangles */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"blessAsTriangles\", function() { return blessAsTriangles; });\nconst blessAsTriangles = (paths) => { paths.isTriangles = true; return paths; };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/blessAsTriangles.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/canonicalize.js":
+/*!*********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/canonicalize.js ***!
+  \*********************************************************************/
+/*! exports provided: canonicalize */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\n\nconst isDegenerate = (polygon) => {\n  for (let nth = 0; nth < polygon.length; nth++) {\n    if (Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_1__[\"equals\"])(polygon[nth], polygon[(nth + 1) % polygon.length])) {\n      return true;\n    }\n  }\n  return false;\n};\n\nconst canonicalize = (polygons) => {\n  const canonicalized = [];\n  for (let polygon of polygons) {\n    polygon = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(polygon);\n    if (!isDegenerate(polygon)) {\n      canonicalized.push(polygon);\n    }\n  }\n  return canonicalized;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/canonicalize.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/cutTrianglesByPlane.js":
+/*!****************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/cutTrianglesByPlane.js ***!
+  \****************************************************************************/
+/*! exports provided: cutTrianglesByPlane */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"cutTrianglesByPlane\", function() { return cutTrianglesByPlane; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\nconst EPSILON = 1e-5;\n\n// Point Classification.\nconst COPLANAR = 0;\nconst FRONT = 1;\nconst BACK = 2;\n\n// Edge Properties.\nconst START = 0;\nconst END = 1;\n\n// Plane Properties.\nconst W = 3;\n\nconst toType = (plane, point) => {\n  let t = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, point) - plane[W];\n  if (t < -EPSILON) {\n    return BACK;\n  } else if (t > EPSILON) {\n    return FRONT;\n  } else {\n    return COPLANAR;\n  }\n};\n\nconst spanPoint = (plane, startPoint, endPoint) => {\n  let t = (plane[W] - Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, startPoint)) / Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"dot\"])(plane, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"subtract\"])(endPoint, startPoint));\n  return Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"lerp\"])(t, startPoint, endPoint));\n};\n\nconst lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {\n  if (aX < bX) { return -1; }\n  if (aX > bX) { return 1; }\n  if (aY < bY) { return -1; }\n  if (aY > bY) { return 1; }\n  if (aZ < bZ) { return -1; }\n  if (aZ > bZ) { return 1; }\n  return 0;\n};\n\n/**\n * Takes a cross-section of a triangulated solid at a plane, yielding surface defining loops\n * in that plane.\n *\n * FIX: Make sure this works properly for solids with holes in them, etc.\n * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.\n */\nconst cutTrianglesByPlane = (plane, triangles) => {\n  let edges = [];\n  const addEdge = (start, end) => {\n    edges.push([start, end]);\n  };\n\n  // Find the edges along the plane and fold them into paths to produce a set of closed loops.\n  for (let nth = 0; nth < triangles.length; nth++) {\n    const triangle = triangles[nth];\n    const [a, b, c] = triangle;\n    const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];\n\n    switch (aType) {\n      case FRONT:\n        switch (bType) {\n          case FRONT:\n            switch (cType) {\n              case FRONT:\n                // No intersection.\n                break;\n              case COPLANAR:\n                // Corner touches.\n                break;\n              case BACK:\n                // b-c down c-a up\n                addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));\n                break;\n            }\n            break;\n          case COPLANAR:\n            switch (cType) {\n              case FRONT:\n                // Corner touches.\n                break;\n              case COPLANAR:\n                // b-c along plane.\n                addEdge(b, c);\n                break;\n              case BACK:\n                // down at b, up c-a.\n                addEdge(b, spanPoint(plane, c, a));\n                break;\n            }\n            break;\n          case BACK:\n            switch (cType) {\n              case FRONT:\n                // a-b down, b-c up.\n                addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));\n                break;\n              case COPLANAR:\n                // a-b down, c up.\n                addEdge(spanPoint(plane, a, b), c);\n                break;\n              case BACK:\n                // a-b down, c-a up.\n                addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));\n                break;\n            }\n            break;\n        }\n        break;\n      case COPLANAR:\n        switch (bType) {\n          case FRONT:\n            switch (cType) {\n              case FRONT:\n                // Corner touches.\n                break;\n              case COPLANAR:\n                // c-a along plane.\n                addEdge(c, a);\n                break;\n              case BACK:\n                // down at b-c, up at a\n                addEdge(spanPoint(plane, b, c), a);\n                break;\n            }\n            break;\n          case COPLANAR:\n            switch (cType) {\n              case FRONT:\n                // a-b along plane.\n                addEdge(a, b);\n                break;\n              case COPLANAR:\n                // Entirely coplanar -- doesn't cut.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n          case BACK:\n            switch (cType) {\n              case FRONT:\n                // down at a, up at b-c.\n                addEdge(a, spanPoint(plane, b, c));\n                break;\n              case COPLANAR:\n                // Wrong half-space.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n        }\n        break;\n      case BACK:\n        switch (bType) {\n          case FRONT:\n            switch (cType) {\n              case FRONT:\n                // down at c-a, up at a-b\n                addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));\n                break;\n              case COPLANAR:\n                // down at c, up at a-b\n                addEdge(c, spanPoint(plane, a, b));\n                break;\n              case BACK:\n                // down at b-c, up at a-b.\n                addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));\n                break;\n            }\n            break;\n          case COPLANAR:\n            switch (cType) {\n              case FRONT:\n                // down at c-a, up at b.\n                addEdge(spanPoint(plane, c, a), b);\n                break;\n              case COPLANAR:\n                // Wrong half-space.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n          case BACK:\n            switch (cType) {\n              case FRONT:\n                // down at c-a, up at b-c.\n                addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));\n                break;\n              case COPLANAR:\n                // Wrong half-space.\n                break;\n              case BACK:\n                // Wrong half-space.\n                break;\n            }\n            break;\n        }\n        break;\n    }\n  }\n\n  const extractSuccessor = (edges, start) => {\n    // FIX: Use a binary search to take advantage of the sorting of the edges.\n    for (let nth = 0; nth < edges.length; nth++) {\n      const candidate = edges[nth];\n      if (Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"equals\"])(candidate[START], start)) {\n        edges.splice(nth, 1);\n        return candidate;\n      }\n    }\n    // Given manifold geometry, there must always be a successor.\n    throw Error('Non-manifold');\n  };\n\n  // Sort the edges so that deduplication is efficient.\n  edges.sort(lexicographcalPointOrder);\n\n  // Assemble the edges into loops which are closed paths.\n  const loops = [];\n  while (edges.length > 0) {\n    let edge = edges.shift();\n    const loop = [edge[START]];\n    while (!Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"equals\"])(edge[END], loop[0])) {\n      edge = extractSuccessor(edges, edge[END]);\n      loop.push(edge[START]);\n    }\n    loops.push(loop);\n  }\n\n  return loops;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/cutTrianglesByPlane.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/eachPoint.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/eachPoint.js ***!
+  \******************************************************************/
+/*! exports provided: eachPoint */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, polygons) => {\n  for (const polygon of polygons) {\n    for (const point of polygon) {\n      thunk(point);\n    }\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/eachPoint.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/flip.js":
+/*!*************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/flip.js ***!
+  \*************************************************************/
+/*! exports provided: flip */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ \"../../geometry/polygons/map.js\");\n\n\n\nconst flip = (polygons) => Object(_map__WEBPACK_IMPORTED_MODULE_1__[\"map\"])(polygons, _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"flip\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/flip.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/fromPointsAndPaths.js":
+/*!***************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/fromPointsAndPaths.js ***!
+  \***************************************************************************/
+/*! exports provided: fromPointsAndPaths */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromPointsAndPaths\", function() { return fromPointsAndPaths; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst fromPointsAndPaths = ({ points = [], paths = [] }) => {\n  const polygons = [];\n  for (const path of paths) {\n    polygons.push(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"fromPoints\"])(path.map(nth => points[nth])));\n  }\n  return polygons;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/fromPointsAndPaths.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/isTriangle.js":
+/*!*******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/isTriangle.js ***!
+  \*******************************************************************/
+/*! exports provided: isTriangle */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isTriangle\", function() { return isTriangle; });\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n\n\nconst isTriangle = (path) => Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_0__[\"isClosed\"])(path) && path.length === 3;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/isTriangle.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/main.js":
+/*!*************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/main.js ***!
+  \*************************************************************/
+/*! exports provided: canonicalize, cutTrianglesByPlane, eachPoint, flip, fromPointsAndPaths, isTriangle, makeConvex, map, measureBoundingBox, measureBoundingSphere, toGeneric, toPoints, toTriangles, rotateX, rotateY, rotateZ, scale, transform, translate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return rotateX; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return rotateY; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return rotateZ; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../geometry/polygons/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _cutTrianglesByPlane__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./cutTrianglesByPlane */ \"../../geometry/polygons/cutTrianglesByPlane.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cutTrianglesByPlane\", function() { return _cutTrianglesByPlane__WEBPACK_IMPORTED_MODULE_2__[\"cutTrianglesByPlane\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/polygons/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_3__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./flip */ \"../../geometry/polygons/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_4__[\"flip\"]; });\n\n/* harmony import */ var _fromPointsAndPaths__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./fromPointsAndPaths */ \"../../geometry/polygons/fromPointsAndPaths.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"fromPointsAndPaths\", function() { return _fromPointsAndPaths__WEBPACK_IMPORTED_MODULE_5__[\"fromPointsAndPaths\"]; });\n\n/* harmony import */ var _isTriangle__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./isTriangle */ \"../../geometry/polygons/isTriangle.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"isTriangle\", function() { return _isTriangle__WEBPACK_IMPORTED_MODULE_6__[\"isTriangle\"]; });\n\n/* harmony import */ var _makeConvex__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./makeConvex */ \"../../geometry/polygons/makeConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return _makeConvex__WEBPACK_IMPORTED_MODULE_7__[\"makeConvex\"]; });\n\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./map */ \"../../geometry/polygons/map.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return _map__WEBPACK_IMPORTED_MODULE_8__[\"map\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../geometry/polygons/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_9__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./measureBoundingSphere */ \"../../geometry/polygons/measureBoundingSphere.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_10__[\"measureBoundingSphere\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toGeneric */ \"../../geometry/polygons/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_11__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPoints__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./toPoints */ \"../../geometry/polygons/toPoints.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return _toPoints__WEBPACK_IMPORTED_MODULE_12__[\"toPoints\"]; });\n\n/* harmony import */ var _toTriangles__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./toTriangles */ \"../../geometry/polygons/toTriangles.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toTriangles\", function() { return _toTriangles__WEBPACK_IMPORTED_MODULE_13__[\"toTriangles\"]; });\n\n/* harmony import */ var _transform__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./transform */ \"../../geometry/polygons/transform.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nconst rotateX = (angle, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromXRotation\"])(angle), polygons);\nconst rotateY = (angle, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromYRotation\"])(angle), polygons);\nconst rotateZ = (angle, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromZRotation\"])(angle), polygons);\nconst scale = (vector, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), polygons);\nconst translate = (vector, polygons) => Object(_transform__WEBPACK_IMPORTED_MODULE_14__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), polygons);\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/makeConvex.js":
+/*!*******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/makeConvex.js ***!
+  \*******************************************************************/
+/*! exports provided: makeConvex */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return makeConvex; });\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tess2 */ \"../../algorithm/tess2.js/index.js\");\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tess2__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _blessAsConvex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./blessAsConvex */ \"../../geometry/polygons/blessAsConvex.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\n\nconst toContour = (polygon) => {\n  const points = [];\n  for (const [x = 0, y = 0, z = 0] of polygon) {\n    points.push(x, y, z);\n  }\n  return points;\n};\n\nconst fromTessellation = (tessellation) => {\n  const tessPolygons = tessellation.elements;\n  const vertices = tessellation.vertices;\n  const polygons = [];\n\n  const toPoint = (offset) => {\n    const vertex = tessPolygons[offset];\n    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];\n  };\n\n  for (let nth = 0; nth < tessPolygons.length; nth += 3) {\n    polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);\n  }\n\n  return polygons;\n};\n\n// This currently does triangulation.\n// Higher arities are possible, but end up being null padded.\n// Let's see if they're useful.\n\n// TODO: Call this toConvexPolygons\nconst makeConvex = (options = {}, polygons) => {\n  if (polygons.isConvex) {\n    return polygons;\n  }\n  if (polygons.every(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__[\"isConvex\"])) {\n    return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(polygons);\n  }\n  const contours = polygons.map(toContour);\n  // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.\n  const convex = fromTessellation(\n    tess2__WEBPACK_IMPORTED_MODULE_0___default.a.tesselate({ contours: contours,\n                      windingRule: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.WINDING_ODD,\n                      elementType: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.POLYGONS,\n                      polySize: 3,\n                      vertexSize: 3\n    }));\n  return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(convex);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/makeConvex.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/map.js":
+/*!************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/map.js ***!
+  \************************************************************/
+/*! exports provided: map */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\n/**\n * Transforms each polygon of Polygons.\n *\n * @param {Polygons} original - the Polygons to transform.\n * @param {Function} [transform=identity] - function used to transform the polygons.\n * @returns {Polygons} a copy with transformed polygons.\n */\nconst map = (original, transform) => {\n  if (original === undefined) {\n    original = [];\n  }\n  if (transform === undefined) {\n    transform = _ => _;\n  }\n  return original.map(polygon => transform(polygon));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/map.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/measureBoundingBox.js":
+/*!***************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/measureBoundingBox.js ***!
+  \***************************************************************************/
+/*! exports provided: measureBoundingBox */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/polygons/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (polygons) => {\n  let max = polygons[0][0];\n  let min = polygons[0][0];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              max = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(max, point);\n              min = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(min, point);\n            },\n            polygons);\n  return [min, max];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/measureBoundingBox.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/measureBoundingSphere.js":
+/*!******************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/measureBoundingSphere.js ***!
+  \******************************************************************************/
+/*! exports provided: measureBoundingSphere */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return measureBoundingSphere; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../geometry/polygons/measureBoundingBox.js\");\n\n\n\n\n/** Measure the bounding sphere of the given poly3\n * @param {poly3} the poly3 to measure\n * @returns computed bounding sphere; center (vec3) and radius\n */\nconst measureBoundingSphere = (polygons) => {\n  if (polygons.boundingSphere === undefined) {\n    const [min, max] = Object(_measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__[\"measureBoundingBox\"])(polygons);\n    const center = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])(0.5, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(min, max));\n    const radius = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"distance\"])(center, max);\n    polygons.boundingSphere = [center, radius];\n  }\n  return polygons.boundingSphere;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/measureBoundingSphere.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/toGeneric.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/toGeneric.js ***!
+  \******************************************************************/
+/*! exports provided: toGeneric */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./map */ \"../../geometry/polygons/map.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\nconst toGeneric = (polygons) => Object(_map__WEBPACK_IMPORTED_MODULE_0__[\"map\"])(polygons, _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__[\"map\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/toGeneric.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/toPoints.js":
+/*!*****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/toPoints.js ***!
+  \*****************************************************************/
+/*! exports provided: toPoints */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return toPoints; });\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/polygons/eachPoint.js\");\n\n\nconst toPoints = (options = {}, polygons) => {\n  const points = [];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, point => points.push(point), polygons);\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/toPoints.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/toTriangles.js":
+/*!********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/toTriangles.js ***!
+  \********************************************************************/
+/*! exports provided: toTriangles */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toTriangles\", function() { return toTriangles; });\n/* harmony import */ var _blessAsTriangles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./blessAsTriangles */ \"../../geometry/polygons/blessAsTriangles.js\");\n/* harmony import */ var _isTriangle__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./isTriangle */ \"../../geometry/polygons/isTriangle.js\");\n\n\n\nconst toTriangles = (options = {}, paths) => {\n  if (paths.isTriangles) {\n    return paths;\n  }\n  if (paths.every(_isTriangle__WEBPACK_IMPORTED_MODULE_1__[\"isTriangle\"])) {\n    return Object(_blessAsTriangles__WEBPACK_IMPORTED_MODULE_0__[\"blessAsTriangles\"])(paths);\n  }\n  const triangles = [];\n  for (const path of paths) {\n    for (let nth = 2; nth < path.length; nth++) {\n      triangles.push([path[0], path[nth - 1], path[nth]]);\n    }\n  }\n  return Object(_blessAsTriangles__WEBPACK_IMPORTED_MODULE_0__[\"blessAsTriangles\"])(triangles);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/toTriangles.js?");
+
+/***/ }),
+
+/***/ "../../geometry/polygons/transform.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/polygons/transform.js ***!
+  \******************************************************************/
+/*! exports provided: transform */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst transform = (matrix, polygons) => polygons.map(polygon => Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, polygon));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/polygons/transform.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/canonicalize.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/canonicalize.js ***!
+  \******************************************************************/
+/*! exports provided: canonicalize */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\nconst canonicalize = (solid) => solid.map(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/canonicalize.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/eachPoint.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/eachPoint.js ***!
+  \***************************************************************/
+/*! exports provided: eachPoint */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\nconst eachPoint = (options = {}, thunk, solid) => {\n  for (const surface of solid) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])(options, thunk, surface);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/eachPoint.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/flip.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/flip.js ***!
+  \**********************************************************/
+/*! exports provided: flip */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\nconst flip = (solid) => solid.map(surface => Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(surface));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/flip.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/fromPolygons.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/fromPolygons.js ***!
+  \******************************************************************/
+/*! exports provided: fromPolygons */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return fromPolygons; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\nconst fromPolygons = (options = {}, polygons) => {\n  const coplanarGroups = new Map();\n\n  for (const polygon of polygons) {\n    const plane = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_1__[\"toPlane\"])(polygon);\n    const key = JSON.stringify(plane);\n    const groups = coplanarGroups.get(key);\n    if (groups === undefined) {\n      coplanarGroups.set(key, [polygon]);\n    } else {\n      groups.push(polygon);\n    }\n  }\n\n  // The solid is a list of surfaces, which are lists of coplanar polygons.\n  const solid = [...coplanarGroups.values()];\n\n  for (const surface of solid) {\n    Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"assertCoplanar\"])(surface);\n  }\n\n  return solid;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/fromPolygons.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/main.js":
+/*!**********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/main.js ***!
+  \**********************************************************/
+/*! exports provided: canonicalize, eachPoint, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, scale, toGeneric, toPoints, toPolygons, transform, translate */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../geometry/solid/ops.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"scale\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"transform\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"translate\"]; });\n\n/* harmony import */ var _canonicalize__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./canonicalize */ \"../../geometry/solid/canonicalize.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _canonicalize__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/solid/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_2__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./flip */ \"../../geometry/solid/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"]; });\n\n/* harmony import */ var _fromPolygons__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./fromPolygons */ \"../../geometry/solid/fromPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"fromPolygons\", function() { return _fromPolygons__WEBPACK_IMPORTED_MODULE_4__[\"fromPolygons\"]; });\n\n/* harmony import */ var _makeSurfacesConvex__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./makeSurfacesConvex */ \"../../geometry/solid/makeSurfacesConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesConvex\", function() { return _makeSurfacesConvex__WEBPACK_IMPORTED_MODULE_5__[\"makeSurfacesConvex\"]; });\n\n/* harmony import */ var _makeSurfacesSimple__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./makeSurfacesSimple */ \"../../geometry/solid/makeSurfacesSimple.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesSimple\", function() { return _makeSurfacesSimple__WEBPACK_IMPORTED_MODULE_6__[\"makeSurfacesSimple\"]; });\n\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../geometry/solid/measureBoundingBox.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _measureBoundingBox__WEBPACK_IMPORTED_MODULE_7__[\"measureBoundingBox\"]; });\n\n/* harmony import */ var _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./measureBoundingSphere */ \"../../geometry/solid/measureBoundingSphere.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return _measureBoundingSphere__WEBPACK_IMPORTED_MODULE_8__[\"measureBoundingSphere\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./toGeneric */ \"../../geometry/solid/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_9__[\"toGeneric\"]; });\n\n/* harmony import */ var _toPoints__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./toPoints */ \"../../geometry/solid/toPoints.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return _toPoints__WEBPACK_IMPORTED_MODULE_10__[\"toPoints\"]; });\n\n/* harmony import */ var _toPolygons__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./toPolygons */ \"../../geometry/solid/toPolygons.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return _toPolygons__WEBPACK_IMPORTED_MODULE_11__[\"toPolygons\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/makeSurfacesConvex.js":
+/*!************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/makeSurfacesConvex.js ***!
+  \************************************************************************/
+/*! exports provided: makeSurfacesConvex */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesConvex\", function() { return makeSurfacesConvex; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\nconst makeSurfacesConvex = (options = {}, solid) => solid.map(surface => Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"makeConvex\"])(options, surface));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/makeSurfacesConvex.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/makeSurfacesSimple.js":
+/*!************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/makeSurfacesSimple.js ***!
+  \************************************************************************/
+/*! exports provided: makeSurfacesSimple */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeSurfacesSimple\", function() { return makeSurfacesSimple; });\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\nconst makeSurfacesSimple = (options = {}, solid) => solid.map(surface => Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_0__[\"makeSimple\"])({}, surface));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/makeSurfacesSimple.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/measureBoundingBox.js":
+/*!************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/measureBoundingBox.js ***!
+  \************************************************************************/
+/*! exports provided: measureBoundingBox */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return measureBoundingBox; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/solid/eachPoint.js\");\n\n\n\n\n// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)\nconst measureBoundingBox = (solid) => {\n  let max = solid[0][0][0];\n  let min = solid[0][0][0];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_1__[\"eachPoint\"])({},\n            point => {\n              max = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"max\"])(max, point);\n              min = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"min\"])(min, point);\n            },\n            solid);\n  return [min, max];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/measureBoundingBox.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/measureBoundingSphere.js":
+/*!***************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/measureBoundingSphere.js ***!
+  \***************************************************************************/
+/*! exports provided: measureBoundingSphere */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingSphere\", function() { return measureBoundingSphere; });\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n/* harmony import */ var _measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./measureBoundingBox */ \"../../geometry/solid/measureBoundingBox.js\");\n\n\n\n\n/** Measure the bounding sphere of the given poly3\n * @param {poly3} the poly3 to measure\n * @returns computed bounding sphere; center (vec3) and radius\n */\nconst measureBoundingSphere = (solid) => {\n  if (solid.boundingSphere === undefined) {\n    const [min, max] = Object(_measureBoundingBox__WEBPACK_IMPORTED_MODULE_1__[\"measureBoundingBox\"])(solid);\n    const center = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"scale\"])(0.5, Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"add\"])(min, max));\n    const radius = Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_0__[\"distance\"])(center, max);\n    solid.boundingSphere = [center, radius];\n  }\n  return solid.boundingSphere;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/measureBoundingSphere.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/ops.js":
+/*!*********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/ops.js ***!
+  \*********************************************************/
+/*! exports provided: transform, translate, scale */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return translate; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n\n\n\n\nconst transform = (matrix, solid) => solid.map(surface => Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, surface));\nconst translate = (vector, solid) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(vector), solid);\nconst scale = (vector, solid) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(vector), solid);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/ops.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/toGeneric.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/toGeneric.js ***!
+  \***************************************************************/
+/*! exports provided: toGeneric */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\nconst toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/toGeneric.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/toPoints.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/toPoints.js ***!
+  \**************************************************************/
+/*! exports provided: toPoints */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPoints\", function() { return toPoints; });\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/solid/eachPoint.js\");\n\n\nconst toPoints = (options = {}, solid) => {\n  const points = [];\n  Object(_eachPoint__WEBPACK_IMPORTED_MODULE_0__[\"eachPoint\"])({}, point => points.push(point), solid);\n  return points;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/toPoints.js?");
+
+/***/ }),
+
+/***/ "../../geometry/solid/toPolygons.js":
+/*!****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/solid/toPolygons.js ***!
+  \****************************************************************/
+/*! exports provided: toPolygons */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPolygons\", function() { return toPolygons; });\n// Relax the coplanar arrangement into polygon soup.\nconst toPolygons = (options = {}, solid) => [].concat(...solid);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/solid/toPolygons.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/assertCoplanar.js":
+/*!**********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/assertCoplanar.js ***!
+  \**********************************************************************/
+/*! exports provided: assertCoplanar */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"assertCoplanar\", function() { return assertCoplanar; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst assertCoplanarPolygon = (polygon) => {\n  if (!Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"isCoplanar\"])(polygon)) {\n    throw Error(`die`);\n  }\n};\n\nconst assertCoplanar = (surface) => {\n  for (const polygon of surface) {\n    assertCoplanarPolygon(polygon);\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/assertCoplanar.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/eachPoint.js":
+/*!*****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/eachPoint.js ***!
+  \*****************************************************************/
+/*! exports provided: eachPoint */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return eachPoint; });\nconst eachPoint = (options = {}, thunk, surface) => {\n  for (const polygon of surface) {\n    for (const point of polygon) {\n      thunk(point);\n    }\n  }\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/eachPoint.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/flip.js":
+/*!************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/flip.js ***!
+  \************************************************************/
+/*! exports provided: flip */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return flip; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ \"../../geometry/surface/map.js\");\n\n\n\nconst flip = (surface) => Object(_map__WEBPACK_IMPORTED_MODULE_1__[\"map\"])(surface, _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"flip\"]);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/flip.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/main.js":
+/*!************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/main.js ***!
+  \************************************************************/
+/*! exports provided: assertCoplanar, canonicalize, eachPoint, flip, makeConvex, makeSimple, measureArea, rotateZ, toGeneric, toPlane, transform, scale */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ops__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ops */ \"../../geometry/surface/ops.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"rotateZ\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toPlane\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"transform\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _ops__WEBPACK_IMPORTED_MODULE_0__[\"scale\"]; });\n\n/* harmony import */ var _assertCoplanar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./assertCoplanar */ \"../../geometry/surface/assertCoplanar.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assertCoplanar\", function() { return _assertCoplanar__WEBPACK_IMPORTED_MODULE_1__[\"assertCoplanar\"]; });\n\n/* harmony import */ var _eachPoint__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./eachPoint */ \"../../geometry/surface/eachPoint.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"eachPoint\", function() { return _eachPoint__WEBPACK_IMPORTED_MODULE_2__[\"eachPoint\"]; });\n\n/* harmony import */ var _flip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./flip */ \"../../geometry/surface/flip.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"flip\", function() { return _flip__WEBPACK_IMPORTED_MODULE_3__[\"flip\"]; });\n\n/* harmony import */ var _makeConvex__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./makeConvex */ \"../../geometry/surface/makeConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return _makeConvex__WEBPACK_IMPORTED_MODULE_4__[\"makeConvex\"]; });\n\n/* harmony import */ var _makeSimple__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./makeSimple */ \"../../geometry/surface/makeSimple.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeSimple\", function() { return _makeSimple__WEBPACK_IMPORTED_MODULE_5__[\"makeSimple\"]; });\n\n/* harmony import */ var _measureArea__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./measureArea */ \"../../geometry/surface/measureArea.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return _measureArea__WEBPACK_IMPORTED_MODULE_6__[\"measureArea\"]; });\n\n/* harmony import */ var _toGeneric__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./toGeneric */ \"../../geometry/surface/toGeneric.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return _toGeneric__WEBPACK_IMPORTED_MODULE_7__[\"toGeneric\"]; });\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/makeConvex.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/makeConvex.js ***!
+  \******************************************************************/
+/*! exports provided: makeConvex */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return makeConvex; });\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./main */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _assertCoplanar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./assertCoplanar */ \"../../geometry/surface/assertCoplanar.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n\n\n\n\n\n\nconst makeConvex = (options = {}, surface) => {\n  Object(_assertCoplanar__WEBPACK_IMPORTED_MODULE_2__[\"assertCoplanar\"])(surface);\n  const [to, from] = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_3__[\"toXYPlaneTransforms\"])(Object(_main__WEBPACK_IMPORTED_MODULE_1__[\"toPlane\"])(surface));\n  let retessellatedSurface = Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_0__[\"makeConvex\"])({}, Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_0__[\"union\"])(...Object(_main__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(to, surface).map(polygon => [polygon])));\n  return Object(_main__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(from, retessellatedSurface);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/makeConvex.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/makeSimple.js":
+/*!******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/makeSimple.js ***!
+  \******************************************************************/
+/*! exports provided: makeSimple */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeSimple\", function() { return makeSimple; });\n/* harmony import */ var _main__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-plane */ \"../../math/plane/main.js\");\n/* harmony import */ var _jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-z0surface */ \"../../geometry/z0surface/main.js\");\n\n\n\n\nconst makeSimple = (options = {}, surface) => {\n  const [to, from] = Object(_jsxcad_math_plane__WEBPACK_IMPORTED_MODULE_1__[\"toXYPlaneTransforms\"])(Object(_main__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(surface));\n  let simpleSurface = Object(_jsxcad_geometry_z0surface__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...Object(_main__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(to, surface).map(polygon => [polygon]));\n  return Object(_main__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(from, simpleSurface);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/makeSimple.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/map.js":
+/*!***********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/map.js ***!
+  \***********************************************************/
+/*! exports provided: map */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"map\", function() { return map; });\n/**\n * Transforms each polygon of the surface.\n *\n * @param {Polygons} original - the Polygons to transform.\n * @param {Function} [transform=identity] - function used to transform the polygons.\n * @returns {Polygons} a copy with transformed polygons.\n */\nconst map = (original, transform) => {\n  if (original === undefined) {\n    original = [];\n  }\n  if (transform === undefined) {\n    transform = _ => _;\n  }\n  return original.map(polygon => transform(polygon));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/map.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/measureArea.js":
+/*!*******************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/measureArea.js ***!
+  \*******************************************************************/
+/*! exports provided: measureArea */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"measureArea\", function() { return measureArea; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\nconst measureArea = (surface) => {\n  // CHECK: That this handles negative area properly.\n  let total = 0;\n  for (const polygon of surface) {\n    total += Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"measureArea\"])(polygon);\n  }\n  return total;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/measureArea.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/ops.js":
+/*!***********************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/ops.js ***!
+  \***********************************************************/
+/*! exports provided: toPlane, canonicalize, transform, rotateZ, scale */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPlane\", function() { return toPlane; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"canonicalize\", function() { return canonicalize; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"transform\", function() { return transform; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return rotateZ; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return scale; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n\n\n\nconst toPlane = (surface) => Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(surface[0]);\nconst canonicalize = (surface) => surface.map(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"]);\n\n// Transforms\nconst transform = (matrix, surface) => surface.map(polygon => Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"transform\"])(matrix, polygon));\nconst rotateZ = (angle, surface) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_1__[\"fromZRotation\"])(angle), surface);\nconst scale = (vector, surface) => transform(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_1__[\"fromScaling\"])(vector), surface);\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/ops.js?");
+
+/***/ }),
+
+/***/ "../../geometry/surface/toGeneric.js":
+/*!*****************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/surface/toGeneric.js ***!
+  \*****************************************************************/
+/*! exports provided: toGeneric */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toGeneric\", function() { return toGeneric; });\nconst toGeneric = (surface) => surface.map(path => path.map(point => [...point]));\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/surface/toGeneric.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/blessAsConvex.js":
+/*!***********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/blessAsConvex.js ***!
+  \***********************************************************************/
+/*! exports provided: blessAsConvex */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"blessAsConvex\", function() { return blessAsConvex; });\nconst blessAsConvex = (paths) => { paths.isConvex = true; return paths; };\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/blessAsConvex.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/clippingToPolygons.js":
+/*!****************************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/clippingToPolygons.js ***!
+  \****************************************************************************/
+/*! exports provided: clippingToPolygons, z0SurfaceToClipping */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"clippingToPolygons\", function() { return clippingToPolygons; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"z0SurfaceToClipping\", function() { return z0SurfaceToClipping; });\n// Internal function to massage data for passing to polygon-clipping.\nconst clippingToPolygons = (clipping) => {\n  const polygonArray = [];\n  for (const polygons of clipping) {\n    for (const polygon of polygons) {\n      polygon.pop();\n      polygonArray.push(polygon);\n    }\n  }\n  return polygonArray;\n};\n\nconst z0SurfaceToClipping = (z0Surface) => {\n  return [z0Surface.map(z0Polygon => z0Polygon.map(([x = 0, y = 0]) => [x, y]))];\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/clippingToPolygons.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/difference.js":
+/*!********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/difference.js ***!
+  \********************************************************************/
+/*! exports provided: difference */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return difference; });\n/* harmony import */ var _clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clippingToPolygons */ \"../../geometry/z0surface/clippingToPolygons.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! polygon-clipping */ \"../../node_modules/polygon-clipping/dist/polygon-clipping.umd.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n\n\n/**\n * Return a surface representing the difference between the first surface\n *   and the rest of the surfaces.\n * The difference of no surfaces is the empty surface.\n * The difference of one surface is that surface.\n * @param {Array<surface>} surfaces - the surfaces.\n * @returns {surface} - the resulting surface\n * @example\n * let C = difference(A, B)\n * @example\n * +-------+            +-------+\n * |       |            |   C   |\n * |   A   |            |       |\n * |    +--+----+   =   |    +--+\n * +----+--+    |       +----+\n *      |   B   |\n *      |       |\n *      +-------+\n */\nconst difference = (baseSurface, ...surfaces) => {\n  if (surfaces.length === 0) {\n    return baseSurface;\n  }\n  const surfaceClipping = Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])(Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(baseSurface));\n  const subtractionClipping = surfaces.map(surface => Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])(Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(surface)));\n  const outputClipping = Object(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__[\"difference\"])(surfaceClipping, ...subtractionClipping);\n  const outputPaths = Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"clippingToPolygons\"])(outputClipping);\n  return outputPaths;\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/difference.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/intersection.js":
+/*!**********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/intersection.js ***!
+  \**********************************************************************/
+/*! exports provided: intersection */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return intersection; });\n/* harmony import */ var _clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clippingToPolygons */ \"../../geometry/z0surface/clippingToPolygons.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! polygon-clipping */ \"../../node_modules/polygon-clipping/dist/polygon-clipping.umd.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(polygon_clipping__WEBPACK_IMPORTED_MODULE_1__);\n\n\n\n/**\n * Produce a surface that is the intersection of all provided surfaces.\n * The intersection of no surfaces is the empty surface.\n * The intersection of one surface is that surface.\n * @param {Array<surface>} surfaces - the surfaces to intersect.\n * @returns {surface} the intersection of surfaces.\n * @example\n * let C = difference(A, B)\n * @example\n * +-------+            +-------+\n * |       |            |   C   |\n * |   A   |            |       |\n * |    +--+----+   =   |    +--+\n * +----+--+    |       +----+\n *      |   B   |\n *      |       |\n *      +-------+\n */\nconst intersection = (...z0Surfaces) => {\n  if (z0Surfaces.length === 0) {\n    return [];\n  }\n  return Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"clippingToPolygons\"])(Object(polygon_clipping__WEBPACK_IMPORTED_MODULE_1__[\"intersection\"])(...z0Surfaces.map(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])));\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/intersection.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/main.js":
+/*!**************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/main.js ***!
+  \**************************************************************/
+/*! exports provided: difference, makeConvex, intersection, union */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _difference__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./difference */ \"../../geometry/z0surface/difference.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _difference__WEBPACK_IMPORTED_MODULE_0__[\"difference\"]; });\n\n/* harmony import */ var _intersection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./intersection */ \"../../geometry/z0surface/intersection.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _intersection__WEBPACK_IMPORTED_MODULE_1__[\"intersection\"]; });\n\n/* harmony import */ var _makeConvex__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./makeConvex */ \"../../geometry/z0surface/makeConvex.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return _makeConvex__WEBPACK_IMPORTED_MODULE_2__[\"makeConvex\"]; });\n\n/* harmony import */ var _union__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./union */ \"../../geometry/z0surface/union.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _union__WEBPACK_IMPORTED_MODULE_3__[\"union\"]; });\n\n\n\n\n\n\n\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/main.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/makeConvex.js":
+/*!********************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/makeConvex.js ***!
+  \********************************************************************/
+/*! exports provided: makeConvex */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"makeConvex\", function() { return makeConvex; });\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tess2 */ \"../../node_modules/tess2/index.js\");\n/* harmony import */ var tess2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tess2__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _blessAsConvex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./blessAsConvex */ \"../../geometry/z0surface/blessAsConvex.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n\n\n\n\nconst toContour = (polygon) => {\n  const points = [];\n  for (const [x = 0, y = 0, z = 0] of polygon) {\n    points.push(x, y, z);\n  }\n  return points;\n};\n\nconst fromTessellation = (tessellation) => {\n  const tessPolygons = tessellation.elements;\n  const vertices = tessellation.vertices;\n  const polygons = [];\n\n  const toPoint = (offset) => {\n    const vertex = tessPolygons[offset];\n    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];\n  };\n\n  for (let nth = 0; nth < tessPolygons.length; nth += 3) {\n    polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);\n  }\n\n  return polygons;\n};\n\n// This currently does triangulation.\n// Higher arities are possible, but end up being null padded.\n// Let's see if they're useful.\n\n// TODO: Call this toConvexPolygons\nconst makeConvex = (options = {}, polygons) => {\n  if (polygons.isConvex) {\n    return polygons;\n  }\n  if (polygons.every(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_2__[\"isConvex\"])) {\n    return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(polygons);\n  }\n  const contours = polygons.map(toContour);\n  // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.\n  const convex = fromTessellation(\n    tess2__WEBPACK_IMPORTED_MODULE_0___default.a.tesselate({ contours: contours,\n                      windingRule: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.WINDING_ODD,\n                      elementType: tess2__WEBPACK_IMPORTED_MODULE_0___default.a.POLYGONS,\n                      polySize: 3,\n                      vertexSize: 3\n    }));\n  return Object(_blessAsConvex__WEBPACK_IMPORTED_MODULE_1__[\"blessAsConvex\"])(convex);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/makeConvex.js?");
+
+/***/ }),
+
+/***/ "../../geometry/z0surface/union.js":
+/*!***************************************************************!*\
+  !*** /home/sbrian/github6/JSxCAD/geometry/z0surface/union.js ***!
+  \***************************************************************/
+/*! exports provided: union */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return union; });\n/* harmony import */ var _clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clippingToPolygons */ \"../../geometry/z0surface/clippingToPolygons.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! polygon-clipping */ \"../../node_modules/polygon-clipping/dist/polygon-clipping.umd.js\");\n/* harmony import */ var polygon_clipping__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__);\n\n\n\n\n\n/**\n * Produces a surface that is the union of all provided surfaces.\n * The union of no surfaces is the empty surface.\n * The union of one surface is that surface.\n * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.\n * @returns {Z0Surface} the resulting z0 surface.\n */\nconst union = (...surfaces) => {\n  if (surfaces.length === 0) {\n    return [];\n  }\n  if (surfaces.length === 1) {\n    return surfaces[0];\n  }\n  const clipping = surfaces.map(surface => Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"z0SurfaceToClipping\"])(Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"canonicalize\"])(surface)));\n  const result = Object(polygon_clipping__WEBPACK_IMPORTED_MODULE_2__[\"union\"])(...clipping);\n  return Object(_clippingToPolygons__WEBPACK_IMPORTED_MODULE_0__[\"clippingToPolygons\"])(result);\n};\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/geometry/z0surface/union.js?");
 
 /***/ }),
 
@@ -5522,7 +5510,7 @@ eval("const { getFile } = __webpack_require__(/*! ./files */ \"../../sys/files.j
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("const fs = __webpack_require__(/*! fs */ \"../../node_modules/node-libs-browser/mock/empty.js\");\nconst writeFileSyncBrowser = __webpack_require__(/*! ./writeFileSyncBrowser */ \"../../sys/writeFileSyncBrowser.js\");\n\nconst writeFileSync = async (path, data, options = {}) => {\nconsole.log(`QQ/writeFileSync/path: ${path}`);\nconsole.log(`QQ/writeFileSync/options: ${JSON.stringify(options)}`);\n  if (fs.writeFileSync) {\n    if (typeof data === 'function') {\n      data = data();\n    }\n    return fs.writeFileSync(path, await Promise.resolve(data), options);\n  } else {\n    return writeFileSyncBrowser.writeFileSync(path, data, options);\n  }\n};\n\nmodule.exports.writeFileSync = writeFileSync;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/sys/writeFileSync.js?");
+eval("const fs = __webpack_require__(/*! fs */ \"../../node_modules/node-libs-browser/mock/empty.js\");\nconst writeFileSyncBrowser = __webpack_require__(/*! ./writeFileSyncBrowser */ \"../../sys/writeFileSyncBrowser.js\");\n\nconst writeFileSync = async (path, data, options = {}) => {\n  if (fs.writeFileSync) {\n    if (typeof data === 'function') {\n      data = data();\n    }\n    return fs.writeFileSync(path, await Promise.resolve(data), options);\n  } else {\n    return writeFileSyncBrowser.writeFileSync(path, data, options);\n  }\n};\n\nmodule.exports.writeFileSync = writeFileSync;\n\n\n//# sourceURL=webpack://api//home/sbrian/github6/JSxCAD/sys/writeFileSync.js?");
 
 /***/ }),
 
@@ -5557,7 +5545,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(Buffer) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"createByteFetcher\", function() { return createByteFetcher; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fetchHeader\", function() { return fetchHeader; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fetchStitches\", function() { return fetchStitches; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromDst\", function() { return fromDst; });\n/* harmony import */ var _dst__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dst */ \"../dst/dst.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n\n\n\n\nconst createByteFetcher = (bytes) => {\n  let bytesRead = 0;\n  const byteFetcher = (length) => {\n    const fetched = bytes.slice(bytesRead, bytesRead += length);\n    return fetched;\n  };\n  return byteFetcher;\n};\n\nconst fetchHeader = (options = {}, fetchBytes) => {\n  function readBytes (prefix, field, converter, start, length, flag) {\n    let bytes = fetchBytes(length);\n    if (field !== '') {\n      options[field] = converter(prefix, bytes);\n    }\n  }\n\n  function asString (prefix, bytes) {\n    return Buffer.from(bytes).toString().slice(prefix.length).trim();\n  }\n\n  const asNumber = (prefix, bytes) => {\n    const number = parseInt(asString(prefix, bytes));\n    if (isNaN(number)) {\n      return undefined;\n    } else {\n      return number;\n    }\n  };\n\n  readBytes('LA:', 'label', asString, 0, 20); // Label\n  readBytes('ST:', 'stitchCount', asNumber, 20, 11);\n  readBytes('CO:', 'colorCount', asNumber, 31, 7);\n  readBytes('+X:', 'positiveX', asNumber, 38, 9);\n  readBytes('-X:', 'negativeX', asNumber, 47, 9);\n  readBytes('+Y:', 'positiveY', asNumber, 56, 9);\n  readBytes('-Y:', 'negativeY', asNumber, 65, 9);\n  readBytes('AX:', 'deltaX', asNumber, 74, 10, 'sign');\n  readBytes('AY:', 'deltaY', asNumber, 84, 10, 'sign');\n  readBytes('MX:', 'previousX', asNumber, 94, 10, 'sign');\n  readBytes('MY:', 'previousY', asNumber, 104, 10, 'sign');\n  readBytes('PD:', 'previousFile', asNumber, 114, 10);\n  readBytes('\\x1a   ', '', '', 124, 4); // end of header\n  readBytes('', '', '', 128, 384); // block padding\n\n  return options;\n};\n\nconst fetchStitch = (fetchBytes) => {\n  let bytes = fetchBytes(3);\n  let r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);\n\n  let x = 0;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_81\"]) x += 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_81\"]) x -= 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_27\"]) x += 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_27\"]) x -= 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_9\"]) x += 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_9\"]) x -= 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_3\"]) x += 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_3\"]) x -= 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_1\"]) x += 1;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_1\"]) x -= 1;\n\n  let y = 0;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_81\"]) y += 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_81\"]) y -= 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_27\"]) y += 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_27\"]) y -= 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_9\"]) y += 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_9\"]) y -= 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_3\"]) y += 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_3\"]) y -= 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_1\"]) y += 1;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_1\"]) y -= 1;\n\n  let flag;\n  if ((r & (_dst__WEBPACK_IMPORTED_MODULE_0__[\"END\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) === (_dst__WEBPACK_IMPORTED_MODULE_0__[\"END\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) {\n    flag = 'end';\n  } else if ((r & (_dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) === (_dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) {\n    flag = 'color_change';\n  } else if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"]) {\n    flag = 'jump';\n  } else {\n    flag = 'stitch';\n  }\n  return [x, y, flag];\n};\n\nconst fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {\n  let x = previousX;\n  let y = previousY;\n\n  const paths = [];\n  let path = [null, [previousX, previousY]];\n\n  const finishPath = () => {\n    if (path.length > 2) {\n      paths.push(path);\n    }\n    path = [null];\n  };\n\n  for (;;) {\n    const [dx, dy, flag] = fetchStitch(fetchBytes);\n\n    x += dx;\n    y += dy;\n\n    switch (flag) {\n      default:\n      case 'end': {\n        finishPath();\n        return paths;\n      }\n      case 'color_change': {\n        finishPath();\n        path.push([x, y]);\n        break;\n      }\n      case 'jump': {\n        finishPath();\n        break;\n      }\n      case 'stitch': {\n        path.push([x, y]);\n      }\n    }\n  }\n};\n\nconst fromDst = (options = {}, data) => {\n  const fetcher = createByteFetcher(data);\n  const header = fetchHeader({}, fetcher);\n  return { paths: Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"scale\"])([0.1, 0.1, 0.1], fetchStitches(header, fetcher)) };\n};\n\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../node_modules/buffer/index.js */ \"../../node_modules/buffer/index.js\").Buffer))\n\n//# sourceURL=webpack://api/../dst/fromDst.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(Buffer) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"createByteFetcher\", function() { return createByteFetcher; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fetchHeader\", function() { return fetchHeader; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fetchStitches\", function() { return fetchStitches; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromDst\", function() { return fromDst; });\n/* harmony import */ var _dst__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dst */ \"../dst/dst.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n\n\n\n\nconst createByteFetcher = (bytes) => {\n  let bytesRead = 0;\n  const byteFetcher = (length) => {\n    const fetched = bytes.slice(bytesRead, bytesRead += length);\n    return fetched;\n  };\n  return byteFetcher;\n};\n\nconst fetchHeader = (options = {}, fetchBytes) => {\n  function readBytes (prefix, field, converter, start, length, flag) {\n    let bytes = fetchBytes(length);\n    if (field !== '') {\n      options[field] = converter(prefix, bytes);\n    }\n  }\n\n  function asString (prefix, bytes) {\n    return Buffer.from(bytes).toString().slice(prefix.length).trim();\n  }\n\n  const asNumber = (prefix, bytes) => {\n    const number = parseInt(asString(prefix, bytes));\n    if (isNaN(number)) {\n      return undefined;\n    } else {\n      return number;\n    }\n  };\n\n  readBytes('LA:', 'label', asString, 0, 20); // Label\n  readBytes('ST:', 'stitchCount', asNumber, 20, 11);\n  readBytes('CO:', 'colorCount', asNumber, 31, 7);\n  readBytes('+X:', 'positiveX', asNumber, 38, 9);\n  readBytes('-X:', 'negativeX', asNumber, 47, 9);\n  readBytes('+Y:', 'positiveY', asNumber, 56, 9);\n  readBytes('-Y:', 'negativeY', asNumber, 65, 9);\n  readBytes('AX:', 'deltaX', asNumber, 74, 10, 'sign');\n  readBytes('AY:', 'deltaY', asNumber, 84, 10, 'sign');\n  readBytes('MX:', 'previousX', asNumber, 94, 10, 'sign');\n  readBytes('MY:', 'previousY', asNumber, 104, 10, 'sign');\n  readBytes('PD:', 'previousFile', asNumber, 114, 10);\n  readBytes('\\x1a   ', '', '', 124, 4); // end of header\n  readBytes('', '', '', 128, 384); // block padding\n\n  return options;\n};\n\nconst fetchStitch = (fetchBytes) => {\n  let bytes = fetchBytes(3);\n  let r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);\n\n  let x = 0;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_81\"]) x += 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_81\"]) x -= 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_27\"]) x += 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_27\"]) x -= 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_9\"]) x += 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_9\"]) x -= 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_3\"]) x += 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_3\"]) x -= 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_ADD_1\"]) x += 1;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"X_SUB_1\"]) x -= 1;\n\n  let y = 0;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_81\"]) y += 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_81\"]) y -= 81;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_27\"]) y += 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_27\"]) y -= 27;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_9\"]) y += 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_9\"]) y -= 9;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_3\"]) y += 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_3\"]) y -= 3;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_ADD_1\"]) y += 1;\n  if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"Y_SUB_1\"]) y -= 1;\n\n  let flag;\n  if ((r & (_dst__WEBPACK_IMPORTED_MODULE_0__[\"END\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) === (_dst__WEBPACK_IMPORTED_MODULE_0__[\"END\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) {\n    flag = 'end';\n  } else if ((r & (_dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) === (_dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"] | _dst__WEBPACK_IMPORTED_MODULE_0__[\"PAUSE\"])) {\n    flag = 'color_change';\n  } else if (r & _dst__WEBPACK_IMPORTED_MODULE_0__[\"JUMP_STITCH\"]) {\n    flag = 'jump';\n  } else {\n    flag = 'stitch';\n  }\n  return [x, y, flag];\n};\n\nconst fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {\n  let x = previousX;\n  let y = previousY;\n\n  const paths = [];\n  let path = [null, [previousX, previousY]];\n\n  const finishPath = () => {\n    if (path.length > 2) {\n      paths.push(path);\n    }\n    path = [null];\n  };\n\n  for (;;) {\n    const [dx, dy, flag] = fetchStitch(fetchBytes);\n\n    x += dx;\n    y += dy;\n\n    switch (flag) {\n      default:\n      case 'end': {\n        finishPath();\n        return paths;\n      }\n      case 'color_change': {\n        finishPath();\n        path.push([x, y]);\n        break;\n      }\n      case 'jump': {\n        finishPath();\n        break;\n      }\n      case 'stitch': {\n        path.push([x, y]);\n      }\n    }\n  }\n};\n\nconst fromDst = (options = {}, data) => {\n  const fetcher = createByteFetcher(data);\n  const header = fetchHeader({}, fetcher);\n  return { paths: Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"scale\"])([0.1, 0.1, 0.1], fetchStitches(header, fetcher)) };\n};\n\n/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../node_modules/buffer/index.js */ \"../../node_modules/buffer/index.js\").Buffer))\n\n//# sourceURL=webpack://api/../dst/fromDst.js?");
 
 /***/ }),
 
@@ -5615,7 +5603,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _scr
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scriptToOperator\", function() { return scriptToOperator; });\n/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ \"../jscad/api.js\");\n/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_api__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var recast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! recast */ \"../../node_modules/recast/main.js\");\n/* harmony import */ var recast__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(recast__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n/* harmony import */ var ast_types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ast-types */ \"../../node_modules/ast-types/main.js\");\n/* harmony import */ var ast_types__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(ast_types__WEBPACK_IMPORTED_MODULE_4__);\n\n\n\n\n\n\n\n\nconst unpackApi = (api) => {\n  const operators = {};\n  for (const domain of Object.keys(api)) {\n    for (const library of Object.keys(api[domain])) {\n      for (const operator of Object.keys(api[domain][library])) {\n        operators[operator] = api[domain][library][operator];\n      }\n    }\n  }\n  return operators;\n};\n\nconst operators = unpackApi(_api__WEBPACK_IMPORTED_MODULE_0__);\n\nconst csgToSolid = (csg) =>\n  Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_2__[\"fromPolygons\"])({}, csg.polygons.map(polygon =>\n    polygon.vertices.map(vertex =>\n      [vertex.pos.x, vertex.pos.y, vertex.pos.z])));\n\nconst createJscadFunction = (script, operators) => {\n  const { main, getParameterDefinitions } =\n      new Function(`{ ${Object.keys(operators).join(', ')} }`,\n                   `\n                    function getParameterDefinitions () { return []; }\n                    ${script};\n                    return { main, getParameterDefinitions };\n                   `\n      )(operators);\n  const getGeometry = (params) => {\n    const output = main(params);\n    const result = { assembly: [] };\n    if (output.polygons) {\n      result.assembly.push({ solid: csgToSolid(output) });\n    }\n    return result;\n  };\n  return { getGeometry, getParameterDefinitions };\n};\n\nconst replaceIncludes = async (ast) => {\n  const includes = [];\n  // Look for include(\"foo\") statements and replace them with the content of \"foo\".\n  ast_types__WEBPACK_IMPORTED_MODULE_4___default.a.visit(ast, {\n    visitCallExpression: function (path) {\n      const { node } = path;\n      const { callee } = node;\n      const { name } = callee;\n      if (name === 'include' && node.arguments.length >= 1) {\n        const { type } = node.arguments[0];\n        if (type === 'Literal') {\n          includes.push(path);\n        }\n      }\n      this.traverse(path);\n    }\n  });\n  for (const include of includes) {\n    include.replace(await replaceIncludes(Object(recast__WEBPACK_IMPORTED_MODULE_1__[\"parse\"])(await Object(_jsxcad_sys__WEBPACK_IMPORTED_MODULE_3__[\"readFile\"])(include.node.arguments[0].value))));\n  }\n  return ast;\n};\n\nconst scriptToOperator = async (options = {}, script) =>\n  replaceIncludes(Object(recast__WEBPACK_IMPORTED_MODULE_1__[\"parse\"])(script))\n      .then(ast => createJscadFunction(Object(recast__WEBPACK_IMPORTED_MODULE_1__[\"print\"])(ast).code, operators))\n      .catch(error => console.log(error));\n\n\n//# sourceURL=webpack://api/../jscad/scriptToOperator.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"scriptToOperator\", function() { return scriptToOperator; });\n/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ \"../jscad/api.js\");\n/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_api__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var recast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! recast */ \"../../node_modules/recast/main.js\");\n/* harmony import */ var recast__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(recast__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n/* harmony import */ var ast_types__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ast-types */ \"../../node_modules/ast-types/main.js\");\n/* harmony import */ var ast_types__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(ast_types__WEBPACK_IMPORTED_MODULE_4__);\n\n\n\n\n\n\n\n\nconst unpackApi = (api) => {\n  const operators = {};\n  for (const domain of Object.keys(api)) {\n    for (const library of Object.keys(api[domain])) {\n      for (const operator of Object.keys(api[domain][library])) {\n        operators[operator] = api[domain][library][operator];\n      }\n    }\n  }\n  return operators;\n};\n\nconst operators = unpackApi(_api__WEBPACK_IMPORTED_MODULE_0__);\n\nconst csgToSolid = (csg) =>\n  Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_2__[\"fromPolygons\"])({}, csg.polygons.map(polygon =>\n    polygon.vertices.map(vertex =>\n      [vertex.pos.x, vertex.pos.y, vertex.pos.z])));\n\nconst createJscadFunction = (script, operators) => {\n  const { main, getParameterDefinitions } =\n      new Function(`{ ${Object.keys(operators).join(', ')} }`,\n                   `\n                    function getParameterDefinitions () { return []; }\n                    ${script};\n                    return { main, getParameterDefinitions };\n                   `\n      )(operators);\n  const getGeometry = (params) => {\n    const output = main(params);\n    const result = { assembly: [] };\n    if (output.polygons) {\n      result.assembly.push({ solid: csgToSolid(output) });\n    }\n    return result;\n  };\n  return { getGeometry, getParameterDefinitions };\n};\n\nconst replaceIncludes = async (ast) => {\n  const includes = [];\n  // Look for include(\"foo\") statements and replace them with the content of \"foo\".\n  ast_types__WEBPACK_IMPORTED_MODULE_4___default.a.visit(ast, {\n    visitCallExpression: function (path) {\n      const { node } = path;\n      const { callee } = node;\n      const { name } = callee;\n      if (name === 'include' && node.arguments.length >= 1) {\n        const { type } = node.arguments[0];\n        if (type === 'Literal') {\n          includes.push(path);\n        }\n      }\n      this.traverse(path);\n    }\n  });\n  for (const include of includes) {\n    include.replace(await replaceIncludes(Object(recast__WEBPACK_IMPORTED_MODULE_1__[\"parse\"])(await Object(_jsxcad_sys__WEBPACK_IMPORTED_MODULE_3__[\"readFile\"])(include.node.arguments[0].value))));\n  }\n  return ast;\n};\n\nconst scriptToOperator = async (options = {}, script) =>\n  replaceIncludes(Object(recast__WEBPACK_IMPORTED_MODULE_1__[\"parse\"])(script))\n      .then(ast => createJscadFunction(Object(recast__WEBPACK_IMPORTED_MODULE_1__[\"print\"])(ast).code, operators))\n      .catch(error => console.log(error));\n\n\n//# sourceURL=webpack://api/../jscad/scriptToOperator.js?");
 
 /***/ }),
 
@@ -6288,7 +6276,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _toP
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPdf\", function() { return toPdf; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n/* harmony import */ var _jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-assembly */ \"../../algorithm/assembly/main.js\");\n\n\n\n\n\nconst X = 0;\nconst Y = 1;\n\n// Not entirely sure how conformant this is, but it seems to work for simple\n// cases.\n\n// Width are height are in post-script points.\nconst header = ({ width = 595, height = 841, lineWidth = 0.096 }) =>\n  [`%PDF-1.5`,\n   `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,\n   `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,\n   `3 0 obj <<`,\n   `  /Contents 4 0 R`,\n   `  /MediaBox [ 0 0 ${width.toFixed(9)} ${height.toFixed(9)} ]`,\n   `  /Parent 2 0 R`,\n   `  /Type /Page`,\n   `>>`,\n   `endobj`,\n   `4 0 obj << >>`,\n   `stream`,\n   `${lineWidth.toFixed(9)} w`];\n\nconst footer =\n   [`endstream`,\n    `endobj`,\n    `trailer << /Root 1 0 R /Size 4 >>`,\n    `%%EOF`];\n\nconst geometryToPaths = (geometry) => {\n  const pathsets = [];\n  Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_2__[\"eachItem\"])(geometry,\n           item => {\n             if (item.paths) {\n               pathsets.push(item.paths);\n             }\n             if (item.z0Surface) {\n               pathsets.push(item.z0Surface);\n             }\n           });\n  return [].concat(...pathsets);\n};\n\nconst toPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, geometry) => {\n  const paths = geometryToPaths(geometry);\n  // This is the size of a post-script point in mm.\n  const pointSize = 0.352777778;\n  const scale = 1 / pointSize;\n  const [width, height] = size;\n  const lines = [];\n  const [min, max] = Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"measureBoundingBox\"])(paths);\n  // Currently the origin is at the bottom left.\n  // Subtract the x min, and the y max, then add the page height to bring\n  // it up to the top left. This positions the origin nicely for laser\n  // cutting and printing.\n  const offset = [-min[X] * scale, (height - max[Y]) * scale, 0];\n  const matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(offset),\n                          Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])([scale, scale, scale]));\n  for (const path of Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, paths)) {\n    let nth = (path[0] === null) ? 1 : 0;\n    const [x1, y1] = path[nth];\n    lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.\n    for (nth++; nth < path.length; nth++) {\n      const [x2, y2] = path[nth];\n      lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.\n    }\n    if (path[0] !== null) {\n      // A leading null indicates an open path.\n      lines.push(`h`); // close path.\n    }\n    lines.push(`S`); // stroke.\n  }\n\n  return [].concat(header({ width: width * scale, height: height * scale, lineWidth: lineWidth }),\n                   lines,\n                   footer).join('\\n');\n};\n\n\n//# sourceURL=webpack://api/../pdf/toPdf.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toPdf\", function() { return toPdf; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n/* harmony import */ var _jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-eager */ \"../../geometry/eager/main.js\");\n\n\n\n\n\nconst X = 0;\nconst Y = 1;\n\n// Not entirely sure how conformant this is, but it seems to work for simple\n// cases.\n\n// Width are height are in post-script points.\nconst header = ({ width = 595, height = 841, lineWidth = 0.096 }) =>\n  [`%PDF-1.5`,\n   `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,\n   `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,\n   `3 0 obj <<`,\n   `  /Contents 4 0 R`,\n   `  /MediaBox [ 0 0 ${width.toFixed(9)} ${height.toFixed(9)} ]`,\n   `  /Parent 2 0 R`,\n   `  /Type /Page`,\n   `>>`,\n   `endobj`,\n   `4 0 obj << >>`,\n   `stream`,\n   `${lineWidth.toFixed(9)} w`];\n\nconst footer =\n   [`endstream`,\n    `endobj`,\n    `trailer << /Root 1 0 R /Size 4 >>`,\n    `%%EOF`];\n\nconst geometryToPaths = (geometry) => {\n  const pathsets = [];\n  Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_2__[\"eachItem\"])(geometry,\n           item => {\n             if (item.paths) {\n               pathsets.push(item.paths);\n             }\n             if (item.z0Surface) {\n               pathsets.push(item.z0Surface);\n             }\n           });\n  return [].concat(...pathsets);\n};\n\nconst toPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, geometry) => {\n  const paths = geometryToPaths(geometry);\n  // This is the size of a post-script point in mm.\n  const pointSize = 0.352777778;\n  const scale = 1 / pointSize;\n  const [width, height] = size;\n  const lines = [];\n  const [min, max] = Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"measureBoundingBox\"])(paths);\n  // Currently the origin is at the bottom left.\n  // Subtract the x min, and the y max, then add the page height to bring\n  // it up to the top left. This positions the origin nicely for laser\n  // cutting and printing.\n  const offset = [-min[X] * scale, (height - max[Y]) * scale, 0];\n  const matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])(offset),\n                          Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])([scale, scale, scale]));\n  for (const path of Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_1__[\"transform\"])(matrix, paths)) {\n    let nth = (path[0] === null) ? 1 : 0;\n    const [x1, y1] = path[nth];\n    lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.\n    for (nth++; nth < path.length; nth++) {\n      const [x2, y2] = path[nth];\n      lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.\n    }\n    if (path[0] !== null) {\n      // A leading null indicates an open path.\n      lines.push(`h`); // close path.\n    }\n    lines.push(`S`); // stroke.\n  }\n\n  return [].concat(header({ width: width * scale, height: height * scale, lineWidth: lineWidth }),\n                   lines,\n                   footer).join('\\n');\n};\n\n\n//# sourceURL=webpack://api/../pdf/toPdf.js?");
 
 /***/ }),
 
@@ -6312,7 +6300,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _toS
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toStla\", function() { return toStla; });\n/* harmony import */ var _jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-polygons */ \"../../algorithm/polygons/main.js\");\n/* harmony import */ var _jsxcad_algorithm_watertight__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-watertight */ \"../../algorithm/watertight/main.js\");\n/* harmony import */ var _jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-assembly */ \"../../algorithm/assembly/main.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n\n\n\n\n\n\n\n/**\n * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.\n * The exterior side of a polygon is determined by a CCW point ordering.\n *\n * @param {Object} options.\n * @param {Polygon Array} polygons - An array of arrays of points.\n * @returns {String} - the ascii STL output.\n */\n\nconst geometryToTriangles = (geometry) => {\n  const triangleSets = [];\n  Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_2__[\"eachItem\"])(geometry,\n           item => {\n             if (item.solid) {\n               triangleSets.push(Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"toTriangles\"])({}, Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_4__[\"toPolygons\"])({}, item.solid)));\n             }\n           });\n  return [].concat(...triangleSets);\n};\n\nconst toStla = (options = {}, geometry) => {\n  let polygons = geometryToTriangles(geometry);\n  if (!Object(_jsxcad_algorithm_watertight__WEBPACK_IMPORTED_MODULE_1__[\"isWatertightPolygons\"])(polygons)) {\n    console.log(`polygonsToStla: Polygon is not watertight`);\n    if (options.doMakeWatertight) {\n      polygons = Object(_jsxcad_algorithm_watertight__WEBPACK_IMPORTED_MODULE_1__[\"makeWatertight\"])(polygons);\n    }\n  }\n  return `solid JSxCAD\\n${convertToFacets(options, Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"toTriangles\"])({}, polygons)))}\\nendsolid JSxCAD\\n`;\n};\n\nconst convertToFacets = (options, polygons) =>\n  polygons.map(convertToFacet).join('\\n');\n\nconst toStlVector = vector =>\n  `${vector[0]} ${vector[1]} ${vector[2]}`;\n\nconst toStlVertex = vertex =>\n  `vertex ${toStlVector(vertex)}`;\n\nconst convertToFacet = polygon =>\n  `facet normal ${toStlVector(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon))}\\n` +\n  `outer loop\\n` +\n  `${toStlVertex(polygon[0])}\\n` +\n  `${toStlVertex(polygon[1])}\\n` +\n  `${toStlVertex(polygon[2])}\\n` +\n  `endloop\\n` +\n  `endfacet`;\n\n\n//# sourceURL=webpack://api/../stl/toStla.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toStla\", function() { return toStla; });\n/* harmony import */ var _jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-polygons */ \"../../geometry/polygons/main.js\");\n/* harmony import */ var _jsxcad_algorithm_watertight__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-watertight */ \"../../algorithm/watertight/main.js\");\n/* harmony import */ var _jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-eager */ \"../../geometry/eager/main.js\");\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n\n\n\n\n\n\n\n/**\n * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.\n * The exterior side of a polygon is determined by a CCW point ordering.\n *\n * @param {Object} options.\n * @param {Polygon Array} polygons - An array of arrays of points.\n * @returns {String} - the ascii STL output.\n */\n\nconst geometryToTriangles = (geometry) => {\n  const triangleSets = [];\n  Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_2__[\"eachItem\"])(geometry,\n           item => {\n             if (item.solid) {\n               triangleSets.push(Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"toTriangles\"])({}, Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_4__[\"toPolygons\"])({}, item.solid)));\n             }\n           });\n  return [].concat(...triangleSets);\n};\n\nconst toStla = (options = {}, geometry) => {\n  let polygons = geometryToTriangles(geometry);\n  if (!Object(_jsxcad_algorithm_watertight__WEBPACK_IMPORTED_MODULE_1__[\"isWatertightPolygons\"])(polygons)) {\n    console.log(`polygonsToStla: Polygon is not watertight`);\n    if (options.doMakeWatertight) {\n      polygons = Object(_jsxcad_algorithm_watertight__WEBPACK_IMPORTED_MODULE_1__[\"makeWatertight\"])(polygons);\n    }\n  }\n  return `solid JSxCAD\\n${convertToFacets(options, Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"toTriangles\"])({}, polygons)))}\\nendsolid JSxCAD\\n`;\n};\n\nconst convertToFacets = (options, polygons) =>\n  polygons.map(convertToFacet).join('\\n');\n\nconst toStlVector = vector =>\n  `${vector[0]} ${vector[1]} ${vector[2]}`;\n\nconst toStlVertex = vertex =>\n  `vertex ${toStlVector(vertex)}`;\n\nconst convertToFacet = polygon =>\n  `facet normal ${toStlVector(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_3__[\"toPlane\"])(polygon))}\\n` +\n  `outer loop\\n` +\n  `${toStlVertex(polygon[0])}\\n` +\n  `${toStlVertex(polygon[1])}\\n` +\n  `${toStlVertex(polygon[2])}\\n` +\n  `endloop\\n` +\n  `endfacet`;\n\n\n//# sourceURL=webpack://api/../stl/toStla.js?");
 
 /***/ }),
 
@@ -6336,7 +6324,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromSvg\", function() { return fromSvg; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var xmldom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! xmldom */ \"../../node_modules/xmldom/dom-parser.js\");\n/* harmony import */ var xmldom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(xmldom__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _fromSvgPath__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./fromSvgPath */ \"../svg/fromSvgPath.js\");\n/* harmony import */ var svg_points__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! svg-points */ \"../../node_modules/svg-points/modules/index.js\");\n/* harmony import */ var _jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/algorithm-assembly */ \"../../algorithm/assembly/main.js\");\n\n\n\n\n\n\n\n// Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.\nconst fromSvgPath = (options = {}, svgPath) =>\n  Object(_fromSvgPath__WEBPACK_IMPORTED_MODULE_2__[\"fromSvgPath\"])(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);\n\nconst ELEMENT_NODE = 1;\nconst ATTRIBUTE_NODE = 2;\nconst TEXT_NODE = 3;\nconst CDATA_SECTION_NODE = 4;\nconst ENTITY_REFERENCE_NODE = 5;\nconst ENTITY_NODE = 6;\nconst PROCESSING_INSTRUCTION_NODE = 7;\nconst COMMENT_NODE = 8;\nconst DOCUMENT_NODE = 9;\nconst DOCUMENT_TYPE_NODE = 10;\nconst DOCUMENT_FRAGMENT_NODE = 11;\nconst NOTATION_NODE = 12;\n\nconst applyTransforms = ({ matrix }, transformText) => {\n  const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);\n  if (match) {\n    const [operator, operandText, rest] = match.slice(1);\n    const operands = operandText.split(/ +/).map(operand => parseFloat(operand));\n    switch (operator) {\n      case 'matrix': {\n        // a b c\n        const [a, b, c, d, tx, ty] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);\n        break;\n      }\n      case 'translate': {\n        const [x = 0, y = 0, z = 0] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([x, y, z]));\n        break;\n      }\n      case 'scale': {\n        const [x = 1, y = x, z = 1] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])([x, y, z]));\n        break;\n      }\n      case 'rotate': {\n        const [degrees = 0, x = 0, y = 0, z = 0] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([x, y, z]));\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromZRotation\"])(degrees * Math.PI / 180));\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([-x, -y, -z]));\n        break;\n      }\n      case 'skewX': {\n        // TODO: Move to math-mat4.\n        const [degrees = 0] = operands;\n        const [a, b, c, d, tx, ty] = [1, 0, Math.tan(degrees * Math.PI / 180), 1, 0, 0];\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);\n        break;\n      }\n      case 'skewY': {\n        // TODO: Move to math-mat4.\n        const [degrees = 0] = operands;\n        const [a, b, c, d, tx, ty] = [1, Math.tan(degrees * Math.PI / 180), 0, 1, 0, 0];\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);\n        break;\n      }\n      default: {\n        throw Error(`die: Unknown operator '${operator}'.`);\n      }\n    }\n    if (rest) {\n      return applyTransforms({ matrix }, rest);\n    }\n  }\n  return { matrix };\n};\n\nconst fromSvg = (options = {}, svgString) => {\n  const geometry = { assembly: [] };\n  const svg = new xmldom__WEBPACK_IMPORTED_MODULE_1__[\"DOMParser\"]().parseFromString(svgString, 'image/svg+xml');\n\n  const measureScale = (node) => {\n    // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.\n    const width = parseFloat(node.getAttribute('width')) * 10;\n    const height = parseFloat(node.getAttribute('height')) * 10;\n    const [minX, minY, maxX, maxY] = node.getAttribute('viewBox').split(/ +/).map(text => parseFloat(text));\n    const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];\n    return scaling;\n  };\n\n  const scaling = measureScale(svg.documentElement);\n  const scale = (matrix) => Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(scaling), matrix);\n\n  const walk = ({ matrix }, node) => {\n    const buildShape = (...attrs) => {\n      const result = { type: node.tagName };\n      for (const attr of attrs) {\n        const value = node.getAttribute(attr);\n        // FIX: Update toPath to handle these naturally.\n        // toPath has some odd requirements about its inputs.\n        if (value === '') {\n          if (attr === 'cx' || attr === 'cy') {\n            result[attr] = 0;\n          }\n        } else {\n          if (attr === 'points' || attr === 'd') {\n            result[attr] = value;\n          } else {\n            result[attr] = parseFloat(value);\n          }\n        }\n      }\n      return result;\n    };\n    switch (node.nodeType) {\n      case ELEMENT_NODE: {\n        ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));\n\n        const output = (svgPath) =>\n          geometry.assembly.push(Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_4__[\"transform\"])(scale(matrix), fromSvgPath({}, svgPath)));\n\n        // FIX: Should output a path given a stroke, should output a surface given a fill.\n        switch (node.tagName) {\n          case 'path': output(node.getAttribute('d')); break;\n          case 'circle': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('cx', 'cy', 'r'))); break;\n          case 'ellipse': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('cx', 'cy', 'rx', 'ry'))); break;\n          case 'line': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('x1', 'x2', 'y1', 'y2'))); break;\n          case 'polygon': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('points'))); break;\n          case 'polyline': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('points'))); break;\n          case 'rect': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('height', 'width', 'x', 'y', 'rx', 'ry'))); break;\n          default: break;\n        }\n        break;\n      }\n      case ATTRIBUTE_NODE:\n      case TEXT_NODE:\n      case CDATA_SECTION_NODE:\n      case ENTITY_REFERENCE_NODE:\n      case ENTITY_NODE:\n      case PROCESSING_INSTRUCTION_NODE:\n      case COMMENT_NODE:\n      case DOCUMENT_NODE:\n      case DOCUMENT_TYPE_NODE:\n      case DOCUMENT_FRAGMENT_NODE:\n      case NOTATION_NODE:\n        break;\n    }\n    if (node.childNodes) {\n      for (let nth = 0; nth < node.childNodes.length; nth++) {\n        const childNode = node.childNodes[nth];\n        walk({ matrix }, childNode);\n      }\n    }\n  };\n\n  walk({ matrix: Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"identity\"])() }, svg);\n  return geometry;\n};\n\n\n//# sourceURL=webpack://api/../svg/fromSvg.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromSvg\", function() { return fromSvg; });\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var xmldom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! xmldom */ \"../../node_modules/xmldom/dom-parser.js\");\n/* harmony import */ var xmldom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(xmldom__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _fromSvgPath__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./fromSvgPath */ \"../svg/fromSvgPath.js\");\n/* harmony import */ var svg_points__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! svg-points */ \"../../node_modules/svg-points/modules/index.js\");\n/* harmony import */ var _jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/geometry-eager */ \"../../geometry/eager/main.js\");\n\n\n\n\n\n\n\n// Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.\nconst fromSvgPath = (options = {}, svgPath) =>\n  Object(_fromSvgPath__WEBPACK_IMPORTED_MODULE_2__[\"fromSvgPath\"])(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);\n\nconst ELEMENT_NODE = 1;\nconst ATTRIBUTE_NODE = 2;\nconst TEXT_NODE = 3;\nconst CDATA_SECTION_NODE = 4;\nconst ENTITY_REFERENCE_NODE = 5;\nconst ENTITY_NODE = 6;\nconst PROCESSING_INSTRUCTION_NODE = 7;\nconst COMMENT_NODE = 8;\nconst DOCUMENT_NODE = 9;\nconst DOCUMENT_TYPE_NODE = 10;\nconst DOCUMENT_FRAGMENT_NODE = 11;\nconst NOTATION_NODE = 12;\n\nconst applyTransforms = ({ matrix }, transformText) => {\n  const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);\n  if (match) {\n    const [operator, operandText, rest] = match.slice(1);\n    const operands = operandText.split(/ +/).map(operand => parseFloat(operand));\n    switch (operator) {\n      case 'matrix': {\n        // a b c\n        const [a, b, c, d, tx, ty] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);\n        break;\n      }\n      case 'translate': {\n        const [x = 0, y = 0, z = 0] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([x, y, z]));\n        break;\n      }\n      case 'scale': {\n        const [x = 1, y = x, z = 1] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])([x, y, z]));\n        break;\n      }\n      case 'rotate': {\n        const [degrees = 0, x = 0, y = 0, z = 0] = operands;\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([x, y, z]));\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromZRotation\"])(degrees * Math.PI / 180));\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromTranslation\"])([-x, -y, -z]));\n        break;\n      }\n      case 'skewX': {\n        // TODO: Move to math-mat4.\n        const [degrees = 0] = operands;\n        const [a, b, c, d, tx, ty] = [1, 0, Math.tan(degrees * Math.PI / 180), 1, 0, 0];\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);\n        break;\n      }\n      case 'skewY': {\n        // TODO: Move to math-mat4.\n        const [degrees = 0] = operands;\n        const [a, b, c, d, tx, ty] = [1, Math.tan(degrees * Math.PI / 180), 0, 1, 0, 0];\n        matrix = Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);\n        break;\n      }\n      default: {\n        throw Error(`die: Unknown operator '${operator}'.`);\n      }\n    }\n    if (rest) {\n      return applyTransforms({ matrix }, rest);\n    }\n  }\n  return { matrix };\n};\n\nconst fromSvg = (options = {}, svgString) => {\n  const geometry = { assembly: [] };\n  const svg = new xmldom__WEBPACK_IMPORTED_MODULE_1__[\"DOMParser\"]().parseFromString(svgString, 'image/svg+xml');\n\n  const measureScale = (node) => {\n    // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.\n    const width = parseFloat(node.getAttribute('width')) * 10;\n    const height = parseFloat(node.getAttribute('height')) * 10;\n    const [minX, minY, maxX, maxY] = node.getAttribute('viewBox').split(/ +/).map(text => parseFloat(text));\n    const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];\n    return scaling;\n  };\n\n  const scaling = measureScale(svg.documentElement);\n  const scale = (matrix) => Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"multiply\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"fromScaling\"])(scaling), matrix);\n\n  const walk = ({ matrix }, node) => {\n    const buildShape = (...attrs) => {\n      const result = { type: node.tagName };\n      for (const attr of attrs) {\n        const value = node.getAttribute(attr);\n        // FIX: Update toPath to handle these naturally.\n        // toPath has some odd requirements about its inputs.\n        if (value === '') {\n          if (attr === 'cx' || attr === 'cy') {\n            result[attr] = 0;\n          }\n        } else {\n          if (attr === 'points' || attr === 'd') {\n            result[attr] = value;\n          } else {\n            result[attr] = parseFloat(value);\n          }\n        }\n      }\n      return result;\n    };\n    switch (node.nodeType) {\n      case ELEMENT_NODE: {\n        ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));\n\n        const output = (svgPath) =>\n          geometry.assembly.push(Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_4__[\"transform\"])(scale(matrix), fromSvgPath({}, svgPath)));\n\n        // FIX: Should output a path given a stroke, should output a surface given a fill.\n        switch (node.tagName) {\n          case 'path': output(node.getAttribute('d')); break;\n          case 'circle': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('cx', 'cy', 'r'))); break;\n          case 'ellipse': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('cx', 'cy', 'rx', 'ry'))); break;\n          case 'line': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('x1', 'x2', 'y1', 'y2'))); break;\n          case 'polygon': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('points'))); break;\n          case 'polyline': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('points'))); break;\n          case 'rect': output(Object(svg_points__WEBPACK_IMPORTED_MODULE_3__[\"toPath\"])(buildShape('height', 'width', 'x', 'y', 'rx', 'ry'))); break;\n          default: break;\n        }\n        break;\n      }\n      case ATTRIBUTE_NODE:\n      case TEXT_NODE:\n      case CDATA_SECTION_NODE:\n      case ENTITY_REFERENCE_NODE:\n      case ENTITY_NODE:\n      case PROCESSING_INSTRUCTION_NODE:\n      case COMMENT_NODE:\n      case DOCUMENT_NODE:\n      case DOCUMENT_TYPE_NODE:\n      case DOCUMENT_FRAGMENT_NODE:\n      case NOTATION_NODE:\n        break;\n    }\n    if (node.childNodes) {\n      for (let nth = 0; nth < node.childNodes.length; nth++) {\n        const childNode = node.childNodes[nth];\n        walk({ matrix }, childNode);\n      }\n    }\n  };\n\n  walk({ matrix: Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_0__[\"identity\"])() }, svg);\n  return geometry;\n};\n\n\n//# sourceURL=webpack://api/../svg/fromSvg.js?");
 
 /***/ }),
 
@@ -6348,7 +6336,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromSvgPath\", function() { return fromSvgPath; });\n/* harmony import */ var abs_svg_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! abs-svg-path */ \"../../node_modules/abs-svg-path/index.js\");\n/* harmony import */ var abs_svg_path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(abs_svg_path__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-shape */ \"../../algorithm/shape/main.js\");\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n/* harmony import */ var curvify_svg_path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! curvify-svg-path */ \"../../node_modules/curvify-svg-path/index.js\");\n/* harmony import */ var curvify_svg_path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(curvify_svg_path__WEBPACK_IMPORTED_MODULE_3__);\n/* harmony import */ var _jsxcad_math_vec2__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/math-vec2 */ \"../../math/vec2/main.js\");\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var parse_svg_path__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! parse-svg-path */ \"../../node_modules/parse-svg-path/index.js\");\n/* harmony import */ var parse_svg_path__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(parse_svg_path__WEBPACK_IMPORTED_MODULE_6__);\n/* harmony import */ var _jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @jsxcad/algorithm-paths */ \"../../algorithm/paths/main.js\");\n\n\n\n\n\n\n\n\n\n// FIX: Check scaling.\n\nconst removeRepeatedPoints = (path) => {\n  const unrepeated = [path[0]];\n  for (let nth = 1; nth < path.length; nth++) {\n    const last = path[nth - 1];\n    const current = path[nth];\n    if (last === null || !Object(_jsxcad_math_vec2__WEBPACK_IMPORTED_MODULE_4__[\"equals\"])(last, current)) {\n      unrepeated.push(current);\n    }\n  }\n  return unrepeated;\n};\n\nconst toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {\n  const paths = [];\n  let path = [null];\n\n  const newPath = () => {\n    if (path[0] === null) {\n      maybeClosePath();\n    }\n    if (path.length < 2) {\n      // An empty path.\n      return;\n    }\n    paths.push(path);\n    path = [null];\n  };\n\n  const maybeClosePath = () => {\n    path = removeRepeatedPoints(Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_2__[\"canonicalize\"])(path));\n    if (path.length > 3) {\n      if (path[0] === null && Object(_jsxcad_math_vec2__WEBPACK_IMPORTED_MODULE_4__[\"equals\"])(path[1], path[path.length - 1])) {\n        // The path is closed, remove the leading null, and the duplicate point at the end.\n        path = path.slice(1, path.length - 1);\n        newPath();\n      }\n    }\n  };\n\n  for (const segment of svgPath) {\n    const [directive, ...args] = segment;\n    switch (directive) {\n      case 'M': {\n        maybeClosePath();\n        newPath();\n        const [x, y] = args;\n        path.push([x, y]);\n        break;\n      }\n      case 'C': {\n        const [x1, y1, x2, y2, x, y] = args;\n        const start = path[path.length - 1];\n        const [xStart, yStart] = (start === null) ? [0, 0] : start;\n        path = path.concat(Object(_jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_1__[\"buildAdaptiveCubicBezierCurve\"])({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));\n        break;\n      }\n      default: {\n        throw Error(`Unexpected segment: ${JSON.stringify(segment)}`);\n      }\n    }\n  }\n\n  maybeClosePath();\n  newPath();\n\n  if (normalizeCoordinateSystem) {\n    // Turn it upside down.\n    return Object(_jsxcad_algorithm_paths__WEBPACK_IMPORTED_MODULE_7__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__[\"fromScaling\"])([1, -1, 0]), paths);\n  } else {\n    return paths;\n  }\n};\n\nconst fromSvgPath = (options = {}, svgPath) =>\n  ({ paths: toPaths(options, curvify_svg_path__WEBPACK_IMPORTED_MODULE_3___default()(abs_svg_path__WEBPACK_IMPORTED_MODULE_0___default()(parse_svg_path__WEBPACK_IMPORTED_MODULE_6___default()(svgPath)))) });\n\n\n//# sourceURL=webpack://api/../svg/fromSvgPath.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fromSvgPath\", function() { return fromSvgPath; });\n/* harmony import */ var abs_svg_path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! abs-svg-path */ \"../../node_modules/abs-svg-path/index.js\");\n/* harmony import */ var abs_svg_path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(abs_svg_path__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-shape */ \"../../algorithm/shape/main.js\");\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n/* harmony import */ var curvify_svg_path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! curvify-svg-path */ \"../../node_modules/curvify-svg-path/index.js\");\n/* harmony import */ var curvify_svg_path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(curvify_svg_path__WEBPACK_IMPORTED_MODULE_3__);\n/* harmony import */ var _jsxcad_math_vec2__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/math-vec2 */ \"../../math/vec2/main.js\");\n/* harmony import */ var _jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/math-mat4 */ \"../../math/mat4/main.js\");\n/* harmony import */ var parse_svg_path__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! parse-svg-path */ \"../../node_modules/parse-svg-path/index.js\");\n/* harmony import */ var parse_svg_path__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(parse_svg_path__WEBPACK_IMPORTED_MODULE_6__);\n/* harmony import */ var _jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @jsxcad/geometry-paths */ \"../../geometry/paths/main.js\");\n\n\n\n\n\n\n\n\n\n// FIX: Check scaling.\n\nconst removeRepeatedPoints = (path) => {\n  const unrepeated = [path[0]];\n  for (let nth = 1; nth < path.length; nth++) {\n    const last = path[nth - 1];\n    const current = path[nth];\n    if (last === null || !Object(_jsxcad_math_vec2__WEBPACK_IMPORTED_MODULE_4__[\"equals\"])(last, current)) {\n      unrepeated.push(current);\n    }\n  }\n  return unrepeated;\n};\n\nconst toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {\n  const paths = [];\n  let path = [null];\n\n  const newPath = () => {\n    if (path[0] === null) {\n      maybeClosePath();\n    }\n    if (path.length < 2) {\n      // An empty path.\n      return;\n    }\n    paths.push(path);\n    path = [null];\n  };\n\n  const maybeClosePath = () => {\n    path = removeRepeatedPoints(Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_2__[\"canonicalize\"])(path));\n    if (path.length > 3) {\n      if (path[0] === null && Object(_jsxcad_math_vec2__WEBPACK_IMPORTED_MODULE_4__[\"equals\"])(path[1], path[path.length - 1])) {\n        // The path is closed, remove the leading null, and the duplicate point at the end.\n        path = path.slice(1, path.length - 1);\n        newPath();\n      }\n    }\n  };\n\n  for (const segment of svgPath) {\n    const [directive, ...args] = segment;\n    switch (directive) {\n      case 'M': {\n        maybeClosePath();\n        newPath();\n        const [x, y] = args;\n        path.push([x, y]);\n        break;\n      }\n      case 'C': {\n        const [x1, y1, x2, y2, x, y] = args;\n        const start = path[path.length - 1];\n        const [xStart, yStart] = (start === null) ? [0, 0] : start;\n        path = path.concat(Object(_jsxcad_algorithm_shape__WEBPACK_IMPORTED_MODULE_1__[\"buildAdaptiveCubicBezierCurve\"])({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));\n        break;\n      }\n      default: {\n        throw Error(`Unexpected segment: ${JSON.stringify(segment)}`);\n      }\n    }\n  }\n\n  maybeClosePath();\n  newPath();\n\n  if (normalizeCoordinateSystem) {\n    // Turn it upside down.\n    return Object(_jsxcad_geometry_paths__WEBPACK_IMPORTED_MODULE_7__[\"transform\"])(Object(_jsxcad_math_mat4__WEBPACK_IMPORTED_MODULE_5__[\"fromScaling\"])([1, -1, 0]), paths);\n  } else {\n    return paths;\n  }\n};\n\nconst fromSvgPath = (options = {}, svgPath) =>\n  ({ paths: toPaths(options, curvify_svg_path__WEBPACK_IMPORTED_MODULE_3___default()(abs_svg_path__WEBPACK_IMPORTED_MODULE_0___default()(parse_svg_path__WEBPACK_IMPORTED_MODULE_6___default()(svgPath)))) });\n\n\n//# sourceURL=webpack://api/../svg/fromSvgPath.js?");
 
 /***/ }),
 
@@ -6372,7 +6360,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _can
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSvg\", function() { return toSvg; });\n/* harmony import */ var _jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/algorithm-polygons */ \"../../algorithm/polygons/main.js\");\n/* harmony import */ var _jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-assembly */ \"../../algorithm/assembly/main.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\n\n\nconst toPolygons = (geometry) => {\n  const polygonSets = [];\n  Object(_jsxcad_algorithm_assembly__WEBPACK_IMPORTED_MODULE_1__[\"eachItem\"])(geometry,\n           item => {\n             if (item.z0Surface) {\n               polygonSets.push(item.z0Surface);\n             }\n           });\n  return [].concat(...polygonSets);\n};\n\n/** Serialize the give objects to SVG format.\n * @param {Object} [options] - options for serialization\n * @param {Object|Array} objects - objects to serialize as SVG\n * @returns {Array} serialized contents, SVG format\n */\nconst toSvg = ({ padding = 0 }, geometry) => {\n  // FIX: SVG should handle both surfaces and paths.\n  const polygons = Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(toPolygons(geometry));\n  const min = Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"measureBoundingBox\"])(polygons)[0];\n  // TODO: Add transform and translate support to polygons.\n  const shiftedPolygons = Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"translate\"])(Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__[\"negate\"])(min), polygons));\n  const [width, height] = Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_0__[\"measureBoundingBox\"])(shiftedPolygons)[1];\n\n  return [\n    `<?xml version=\"1.0\" encoding=\"UTF-8\"?>`,\n    `<!-- Generated by jsxcad -->`,\n    `<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1 Tiny//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd\">`,\n    `<svg baseProfile=\"tiny\" height=\"${height} mm\" width=\"${width} mm\" viewBox=\"${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}\" version=\"1.1\" stroke=\"black\" stroke-width=\".1\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">`,\n    ...shiftedPolygons.map(polygon => `<path d=\"${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z\"/>`),\n    `</svg>`\n  ].join('\\n');\n};\n\n\n//# sourceURL=webpack://api/../svg/toSvg.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toSvg\", function() { return toSvg; });\n/* harmony import */ var _jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/geometry-polygons */ \"../../geometry/polygons/main.js\");\n/* harmony import */ var _jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-eager */ \"../../geometry/eager/main.js\");\n/* harmony import */ var _jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/math-vec3 */ \"../../math/vec3/main.js\");\n\n\n\n\nconst toPolygons = (geometry) => {\n  const polygonSets = [];\n  Object(_jsxcad_geometry_eager__WEBPACK_IMPORTED_MODULE_1__[\"eachItem\"])(geometry,\n           item => {\n             if (item.z0Surface) {\n               polygonSets.push(item.z0Surface);\n             }\n           });\n  return [].concat(...polygonSets);\n};\n\n/** Serialize the give objects to SVG format.\n * @param {Object} [options] - options for serialization\n * @param {Object|Array} objects - objects to serialize as SVG\n * @returns {Array} serialized contents, SVG format\n */\nconst toSvg = ({ padding = 0 }, geometry) => {\n  // FIX: SVG should handle both surfaces and paths.\n  const polygons = Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(toPolygons(geometry));\n  const min = Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"measureBoundingBox\"])(polygons)[0];\n  // TODO: Add transform and translate support to polygons.\n  const shiftedPolygons = Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"canonicalize\"])(Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"translate\"])(Object(_jsxcad_math_vec3__WEBPACK_IMPORTED_MODULE_2__[\"negate\"])(min), polygons));\n  const [width, height] = Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_0__[\"measureBoundingBox\"])(shiftedPolygons)[1];\n\n  return [\n    `<?xml version=\"1.0\" encoding=\"UTF-8\"?>`,\n    `<!-- Generated by jsxcad -->`,\n    `<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1 Tiny//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd\">`,\n    `<svg baseProfile=\"tiny\" height=\"${height} mm\" width=\"${width} mm\" viewBox=\"${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}\" version=\"1.1\" stroke=\"black\" stroke-width=\".1\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">`,\n    ...shiftedPolygons.map(polygon => `<path d=\"${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z\"/>`),\n    `</svg>`\n  ].join('\\n');\n};\n\n\n//# sourceURL=webpack://api/../svg/toSvg.js?");
 
 /***/ }),
 
@@ -6380,11 +6368,11 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) *
 /*!*****************!*\
   !*** ./eval.js ***!
   \*****************/
-/*! exports provided: toThreejsGeometry, Shape, acos, assemble, circle, crossSection, cos, cube, cylinder, difference, extrude, hsl2rgb, hull, intersection, loadFont, max, measureBoundingBox, minkowski, polyhedron, readDst, readJscad, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePaths, writePdf, writeStl, writeSvg, writeThreejsPage, readFile, readFileSync, watchFile, watchFileCreation, writeFileSync */
+/*! exports provided: toThreejsGeometry, Shape, acos, assemble, circle, crossSection, cos, cube, cylinder, difference, extrude, hsl2rgb, hull, intersection, loadFont, max, measureBoundingBox, minkowski, polyhedron, readDst, readJscad, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePdf, writeStl, writeSvg, writeThreejsPage, readFile, readFileSync, watchFile, watchFileCreation, writeFileSync */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/api-v1 */ \"../../api/v1/main.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"Shape\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"Shape\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"acos\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"acos\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"assemble\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"circle\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"circle\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"crossSection\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"crossSection\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cos\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"cos\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cube\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"cube\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cylinder\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"cylinder\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"difference\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"extrude\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"extrude\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hsl2rgb\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"hsl2rgb\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"hull\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"intersection\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"loadFont\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"loadFont\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"max\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"max\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"measureBoundingBox\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"minkowski\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"minkowski\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"polyhedron\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"polyhedron\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readDst\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"readDst\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readJscad\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"readJscad\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotate\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotate\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotateX\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotateY\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotateZ\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"scale\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sin\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"sin\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sphere\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"sphere\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sqrt\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"sqrt\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"square\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"square\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"svgPath\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"svgPath\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"tetrahedron\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"tetrahedron\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"text\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"text\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"translate\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"union\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writePaths\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writePaths\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writePdf\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writePdf\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeStl\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writeStl\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeSvg\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writeSvg\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeThreejsPage\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writeThreejsPage\"]; });\n\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readFile\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"readFile\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readFileSync\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"readFileSync\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"watchFile\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"watchFile\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"watchFileCreation\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"watchFileCreation\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeFileSync\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"writeFileSync\"]; });\n\n/* harmony import */ var _toThreejsPage__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./toThreejsPage */ \"./toThreejsPage.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toThreejsGeometry\", function() { return _toThreejsPage__WEBPACK_IMPORTED_MODULE_2__[\"toThreejsGeometry\"]; });\n\n\n\n\n\n\n//# sourceURL=webpack://api/./eval.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/api-v1 */ \"../../api/v1/main.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"Shape\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"Shape\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"acos\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"acos\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"assemble\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"assemble\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"circle\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"circle\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"crossSection\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"crossSection\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cos\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"cos\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cube\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"cube\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"cylinder\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"cylinder\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"difference\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"difference\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"extrude\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"extrude\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hsl2rgb\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"hsl2rgb\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"hull\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"hull\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"intersection\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"intersection\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"loadFont\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"loadFont\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"max\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"max\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"measureBoundingBox\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"measureBoundingBox\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"minkowski\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"minkowski\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"polyhedron\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"polyhedron\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readDst\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"readDst\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readJscad\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"readJscad\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotate\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotate\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateX\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotateX\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateY\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotateY\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"rotateZ\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"rotateZ\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"scale\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"scale\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sin\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"sin\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sphere\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"sphere\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"sqrt\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"sqrt\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"square\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"square\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"svgPath\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"svgPath\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"tetrahedron\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"tetrahedron\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"text\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"text\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"translate\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"translate\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"union\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"union\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writePdf\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writePdf\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeStl\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writeStl\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeSvg\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writeSvg\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeThreejsPage\", function() { return _jsxcad_api_v1__WEBPACK_IMPORTED_MODULE_0__[\"writeThreejsPage\"]; });\n\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readFile\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"readFile\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"readFileSync\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"readFileSync\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"watchFile\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"watchFile\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"watchFileCreation\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"watchFileCreation\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"writeFileSync\", function() { return _jsxcad_sys__WEBPACK_IMPORTED_MODULE_1__[\"writeFileSync\"]; });\n\n/* harmony import */ var _toThreejsPage__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./toThreejsPage */ \"./toThreejsPage.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"toThreejsGeometry\", function() { return _toThreejsPage__WEBPACK_IMPORTED_MODULE_2__[\"toThreejsGeometry\"]; });\n\n\n\n\n\n\n//# sourceURL=webpack://api/./eval.js?");
 
 /***/ }),
 
@@ -6408,7 +6396,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _toT
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(__dirname) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toThreejsGeometry\", function() { return toThreejsGeometry; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toThreejsPage\", function() { return toThreejsPage; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/algorithm-surface */ \"../../algorithm/surface/main.js\");\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n/* harmony import */ var _jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/algorithm-solid */ \"../../algorithm/solid/main.js\");\n/* harmony import */ var _jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/algorithm-path */ \"../../algorithm/path/main.js\");\n/* harmony import */ var _jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/algorithm-polygons */ \"../../algorithm/polygons/main.js\");\n\n\n\n\n\n\n\n\nconst loadResource = (pathname, condition = true) =>\n  condition ? Object(_jsxcad_sys__WEBPACK_IMPORTED_MODULE_2__[\"readFileSync\"])(`${__dirname}/dist/${pathname}`, { encoding: 'utf8' }) : '';\n\nconst pathsToThreejsSegments = (geometry) => {\n  const segments = [];\n  for (const path of geometry) {\n    for (const [start, end] of Object(_jsxcad_algorithm_path__WEBPACK_IMPORTED_MODULE_4__[\"toSegments\"])({}, path)) {\n      segments.push([start, end]);\n    }\n  }\n  return segments;\n};\n\nconst solidToThreejsSolid = (geometry) => {\n  const normals = [];\n  const positions = [];\n  for (const triangle of Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_5__[\"toTriangles\"])({}, Object(_jsxcad_algorithm_solid__WEBPACK_IMPORTED_MODULE_3__[\"toPolygons\"])({}, geometry))) {\n    for (const point of triangle) {\n      const [x, y, z] = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(triangle);\n      normals.push(x, y, z);\n      positions.push(...point);\n    }\n  }\n  return { normals, positions };\n};\n\nconst z0SurfaceToThreejsSurface = (geometry) => {\n  const normals = [];\n  const positions = [];\n  const outputTriangle = (triangle) => {\n    for (const point of triangle) {\n      const [x, y, z] = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(triangle);\n      normals.push(x, y, z);\n      positions.push(...point);\n    }\n  };\n  for (const triangle of Object(_jsxcad_algorithm_polygons__WEBPACK_IMPORTED_MODULE_5__[\"toTriangles\"])({}, Object(_jsxcad_algorithm_surface__WEBPACK_IMPORTED_MODULE_1__[\"makeConvex\"])({}, geometry))) {\n    outputTriangle(triangle);\n    outputTriangle(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(triangle));\n  }\n  return { normals, positions };\n};\n\nconst toThreejsGeometry = (geometry) => {\n  if (geometry.isThreejsGeometry) {\n    return geometry;\n  } else if (geometry.assembly) {\n    return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };\n  } else if (geometry.paths) {\n    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };\n  } else if (geometry.solid) {\n    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };\n  } else if (geometry.z0Surface) {\n    return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: geometry.tags, isThreejsGeometry: true };\n  }\n};\n\nconst toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer', includeEditor = false, includeEvaluator = false, initialScript = '', initialPage = 'editor' }, geometry) => {\n  const threejsGeometry = toThreejsGeometry(geometry);\n  // FIX: Avoid injection issues.\n  const head = [\n    `<title>${title}</title>`,\n    `<meta charset=\"utf-8\">`,\n    `<meta name=\"viewport\" content=\"width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0\">`,\n    `<style>`,\n    loadResource('page.css'),\n    loadResource('three.css'),\n    loadResource('codemirror.css', includeEditor),\n    `</style>`,\n    `<link href=\"https://codemirror.net/lib/codemirror.css\" rel=\"stylesheet\">`\n  ].join('\\n');\n\n  const body = [\n    `<!-- CodeMirror -->`,\n    `<script src=\"https://codemirror.net/lib/codemirror.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script src=\"https://codemirror.net/addon/display/autorefresh.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script src=\"https://codemirror.net/addon/display/fullscreen.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script src=\"https://codemirror.net/mode/javascript/javascript.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<!-- ThreeJS -->`,\n    `<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<!-- FileSaver -->`,\n    `<script>`,\n    initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',\n    loadResource('FileSaver.js'),\n    loadResource('eval.js', includeEvaluator),\n    loadResource('noeval.js', !includeEvaluator),\n    `const { readFileSync, watchFile, watchFileCreation, writeFileSync } = api;`,\n    loadResource('display.js'),\n    loadResource('editor.js', includeEditor),\n    `<\\\\/script>`.replace('\\\\/', '/')\n  ].join('\\n');\n\n  const app = [\n    `<script>const runApp = () => {`,\n    threejsGeometry ? `  writeFileSync('main', () => {}, ${JSON.stringify(threejsGeometry)});` : '',\n    `  nextPage();`,\n    `}`,\n    `document.addEventListener(\"DOMContentLoaded\", runApp);`,\n    `<\\\\/script>`.replace('\\\\/', '/')\n  ].join('\\n');\n\n  return `<html><head>${head}</head><body id=\"body\">${body}${app}</body></html>`;\n};\n\n/* WEBPACK VAR INJECTION */}.call(this, \"/\"))\n\n//# sourceURL=webpack://api/./toThreejsPage.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* WEBPACK VAR INJECTION */(function(__dirname) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toThreejsGeometry\", function() { return toThreejsGeometry; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"toThreejsPage\", function() { return toThreejsPage; });\n/* harmony import */ var _jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jsxcad/math-poly3 */ \"../../math/poly3/main.js\");\n/* harmony import */ var _jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jsxcad/geometry-surface */ \"../../geometry/surface/main.js\");\n/* harmony import */ var _jsxcad_sys__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsxcad/sys */ \"../../sys/main.js\");\n/* harmony import */ var _jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jsxcad/geometry-solid */ \"../../geometry/solid/main.js\");\n/* harmony import */ var _jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsxcad/geometry-path */ \"../../geometry/path/main.js\");\n/* harmony import */ var _jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @jsxcad/geometry-polygons */ \"../../geometry/polygons/main.js\");\n\n\n\n\n\n\n\n\nconst loadResource = (pathname, condition = true) =>\n  condition ? Object(_jsxcad_sys__WEBPACK_IMPORTED_MODULE_2__[\"readFileSync\"])(`${__dirname}/dist/${pathname}`, { encoding: 'utf8' }) : '';\n\nconst pathsToThreejsSegments = (geometry) => {\n  const segments = [];\n  for (const path of geometry) {\n    for (const [start, end] of Object(_jsxcad_geometry_path__WEBPACK_IMPORTED_MODULE_4__[\"toSegments\"])({}, path)) {\n      segments.push([start, end]);\n    }\n  }\n  return segments;\n};\n\nconst solidToThreejsSolid = (geometry) => {\n  const normals = [];\n  const positions = [];\n  for (const triangle of Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_5__[\"toTriangles\"])({}, Object(_jsxcad_geometry_solid__WEBPACK_IMPORTED_MODULE_3__[\"toPolygons\"])({}, geometry))) {\n    for (const point of triangle) {\n      const [x, y, z] = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(triangle);\n      normals.push(x, y, z);\n      positions.push(...point);\n    }\n  }\n  return { normals, positions };\n};\n\nconst z0SurfaceToThreejsSurface = (geometry) => {\n  const normals = [];\n  const positions = [];\n  const outputTriangle = (triangle) => {\n    for (const point of triangle) {\n      const [x, y, z] = Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"toPlane\"])(triangle);\n      normals.push(x, y, z);\n      positions.push(...point);\n    }\n  };\n  for (const triangle of Object(_jsxcad_geometry_polygons__WEBPACK_IMPORTED_MODULE_5__[\"toTriangles\"])({}, Object(_jsxcad_geometry_surface__WEBPACK_IMPORTED_MODULE_1__[\"makeConvex\"])({}, geometry))) {\n    outputTriangle(triangle);\n    outputTriangle(Object(_jsxcad_math_poly3__WEBPACK_IMPORTED_MODULE_0__[\"flip\"])(triangle));\n  }\n  return { normals, positions };\n};\n\nconst toThreejsGeometry = (geometry) => {\n  if (geometry.isThreejsGeometry) {\n    return geometry;\n  } else if (geometry.assembly) {\n    return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };\n  } else if (geometry.paths) {\n    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };\n  } else if (geometry.solid) {\n    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };\n  } else if (geometry.z0Surface) {\n    return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: geometry.tags, isThreejsGeometry: true };\n  }\n};\n\nconst toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer', includeEditor = false, includeEvaluator = false, initialScript = '', initialPage = 'editor', previewPage = 'default' }, geometry) => {\n  const threejsGeometry = toThreejsGeometry(geometry);\n  // FIX: Avoid injection issues.\n  const head = [\n    `<title>${title}</title>`,\n    `<meta charset=\"utf-8\">`,\n    `<meta name=\"viewport\" content=\"width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0\">`,\n    `<style>`,\n    loadResource('page.css'),\n    loadResource('three.css'),\n    loadResource('codemirror.css', includeEditor),\n    `</style>`,\n    `<link href=\"https://codemirror.net/lib/codemirror.css\" rel=\"stylesheet\">`\n  ].join('\\n');\n\n  const body = [\n    `<!-- CodeMirror -->`,\n    includeEditor ? `<script src=\"https://codemirror.net/lib/codemirror.js\"><\\\\/script>`.replace('\\\\/', '/') : '',\n    includeEditor ? `<script src=\"https://codemirror.net/addon/display/autorefresh.js\"><\\\\/script>`.replace('\\\\/', '/') : '',\n    includeEditor ? `<script src=\"https://codemirror.net/addon/display/fullscreen.js\"><\\\\/script>`.replace('\\\\/', '/') : '',\n    includeEditor ? `<script src=\"https://codemirror.net/mode/javascript/javascript.js\"><\\\\/script>`.replace('\\\\/', '/') : '',\n    `<!-- ThreeJS -->`,\n    `<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js\"><\\\\/script>`.replace('\\\\/', '/'),\n    `<!-- FileSaver -->`,\n    `<script>`,\n    initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',\n    loadResource('FileSaver.js'),\n    loadResource('eval.js', includeEvaluator),\n    loadResource('noeval.js', !includeEvaluator),\n    `const { readFileSync, watchFile, watchFileCreation, writeFileSync } = api;`,\n    loadResource('display.js'),\n    loadResource('editor.js', includeEditor),\n    `<\\\\/script>`.replace('\\\\/', '/')\n  ].join('\\n');\n\n  const app = [\n    `<script>const runApp = () => {`,\n    threejsGeometry ? `  writeFileSync(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)});` : '',\n    `  nextPage();`,\n    `}`,\n    `document.addEventListener(\"DOMContentLoaded\", runApp);`,\n    `<\\\\/script>`.replace('\\\\/', '/')\n  ].join('\\n');\n\n  return `<html><head>${head}</head><body id=\"body\">${body}${app}</body></html>`;\n};\n\n/* WEBPACK VAR INJECTION */}.call(this, \"/\"))\n\n//# sourceURL=webpack://api/./toThreejsPage.js?");
 
 /***/ }),
 

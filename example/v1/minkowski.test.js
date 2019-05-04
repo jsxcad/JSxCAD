@@ -2,9 +2,8 @@ import { main } from './minkowski';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
 
-main();
-
-test('Expected stl', t => {
+test('Expected stl', async t => {
+  await main();
   t.is(readFileSync('tmp/minkowski.stl', { encoding: 'utf8' }),
        readFileSync('minkowski.stl', { encoding: 'utf8' }));
 });

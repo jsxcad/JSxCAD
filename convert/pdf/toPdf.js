@@ -1,7 +1,7 @@
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
-import { measureBoundingBox, transform } from '@jsxcad/algorithm-paths';
+import { measureBoundingBox, transform } from '@jsxcad/geometry-paths';
 
-import { eachItem } from '@jsxcad/algorithm-assembly';
+import { eachItem } from '@jsxcad/geometry-eager';
 
 const X = 0;
 const Y = 1;
@@ -45,8 +45,8 @@ const geometryToPaths = (geometry) => {
   return [].concat(...pathsets);
 };
 
-export const toPdf = ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, geometry) => {
-  const paths = geometryToPaths(geometry);
+export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, geometry) => {
+  const paths = geometryToPaths(await geometry);
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;

@@ -1,9 +1,10 @@
 {
   "name": "@jsxcad/convert-svg",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "SVG algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -16,25 +17,18 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-assembly": "^0.0.50",
-    "@jsxcad/algorithm-path": "^0.0.50",
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/algorithm-polygons": "^0.0.50",
-    "@jsxcad/algorithm-shape": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/math-utils": "^0.0.50",
-    "@jsxcad/math-vec2": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50",
+    "@jsxcad/algorithm-shape": "^0.0.58",
+    "@jsxcad/geometry-eager": "^0.0.58",
+    "@jsxcad/geometry-path": "^0.0.58",
+    "@jsxcad/geometry-paths": "^0.0.58",
+    "@jsxcad/geometry-polygons": "^0.0.58",
+    "@jsxcad/math-mat4": "^0.0.58",
+    "@jsxcad/math-utils": "^0.0.58",
+    "@jsxcad/math-vec2": "^0.0.58",
+    "@jsxcad/math-vec3": "^0.0.58",
     "abs-svg-path": "^0.1.1",
     "curvify-svg-path": "^1.0.0",
     "parse-svg-path": "^0.1.2",
@@ -43,7 +37,7 @@
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
-    "@jsxcad/convert-pdf": "^0.0.50",
+    "@jsxcad/convert-pdf": "^0.0.58",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
@@ -58,6 +52,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

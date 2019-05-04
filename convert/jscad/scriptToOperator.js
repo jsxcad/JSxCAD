@@ -2,7 +2,7 @@ import * as api from './api';
 
 import { parse, print } from 'recast';
 
-import { fromPolygons } from '@jsxcad/algorithm-solid';
+import { fromPolygons } from '@jsxcad/geometry-solid';
 import { readFile } from '@jsxcad/sys';
 import types from 'ast-types';
 

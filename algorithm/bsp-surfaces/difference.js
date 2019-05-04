@@ -3,7 +3,7 @@ import { clipTo } from './clipTo';
 import { distance } from '@jsxcad/math-vec3';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
-import { measureBoundingSphere } from '@jsxcad/algorithm-solid';
+import { measureBoundingSphere } from '@jsxcad/geometry-solid';
 import { toSurfaces } from './toSurfaces';
 
 const doesNotOverlap = (a, b) => {

@@ -1,9 +1,10 @@
 {
   "name": "@jsxcad/convert-pdf",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "Pdf algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
+  "module": "main.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -44,21 +45,14 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-assembly": "^0.0.50",
-    "@jsxcad/algorithm-paths": "^0.0.50",
-    "@jsxcad/algorithm-shape": "^0.0.50",
-    "@jsxcad/math-mat4": "^0.0.50",
-    "@jsxcad/math-vec3": "^0.0.50"
+    "@jsxcad/algorithm-shape": "^0.0.58",
+    "@jsxcad/geometry-eager": "^0.0.58",
+    "@jsxcad/geometry-paths": "^0.0.58",
+    "@jsxcad/math-mat4": "^0.0.58",
+    "@jsxcad/math-vec3": "^0.0.58"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -75,6 +69,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

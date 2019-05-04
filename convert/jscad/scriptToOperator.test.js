@@ -1,4 +1,4 @@
-import { canonicalize } from '@jsxcad/algorithm-assembly';
+import { canonicalize } from '@jsxcad/geometry-eager';
 import { scriptToOperator } from './scriptToOperator';
 import { test } from 'ava';
 

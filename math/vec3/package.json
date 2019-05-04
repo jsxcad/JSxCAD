@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-vec3",
-  "version": "0.0.50",
+  "version": "0.0.58",
   "description": "3d vectors for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -45,17 +45,10 @@
       "url": "http://github.com/pentacular/"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad",
-    "jsxcad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.50"
+    "@jsxcad/math-utils": "^0.0.58"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -72,6 +65,6 @@
     "require": "esm"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

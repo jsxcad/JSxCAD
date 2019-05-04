@@ -1,5 +1,5 @@
 {
-  "version": "0.0.50",
+  "version": "0.0.58",
   "npmClient": "npm",
   "command": {
     "publish": {
@@ -17,7 +17,6 @@
     }
   },
   "packages": [
-    "app/*",
     "algorithm/*",
     "api/*",
     "convert/*",

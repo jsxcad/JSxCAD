@@ -7,6 +7,7 @@
     "bootstrap": "lerna bootstrap --hoist",
     "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
+    "publish": "lerna publish",
     "test": "lerna run tests",
     "tests": "lerna run tests"
   },
@@ -40,18 +41,11 @@
       "url": "http://www.z3d.jp"
     }
   ],
-  "keywords": [
-    "csg",
-    "parametric",
-    "modeling",
-    "openjscad",
-    "jscad"
-  ],
+  "keywords": [],
   "license": "MIT",
   "devDependencies": {
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
-    "conventional-changelog-cli": "^1.3.4",
     "eslint": "^5.15.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.16.0",
@@ -59,10 +53,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "esm": "^3.2.10",
-    "jsdoc": "^3.4.3",
-    "jsdoc-to-markdown": "^3.0.0",
     "lerna": "^3.13.1",
-    "nyc": "^10.3.2",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
