@@ -7,18 +7,16 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 export default {
   input: 'main.js',
   output: {
-    file: 'bundle.js',
+    dir: 'dist',
     format: 'esm'
   },
   external: [
     '@jsxcad/convert-jscad',
-    '@jsxcad/convert-threejs',
-    '@jsxcad/sys',
   ],
   plugins: [
     nodeResolve({ preferBuiltins: false }),
     commonjs(),
-    globals(),
+    // globals(),
     builtins()
   ],
 };
