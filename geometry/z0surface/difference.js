@@ -1,7 +1,7 @@
 import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
 
 import { canonicalize } from '@jsxcad/geometry-paths';
-import { difference as polygonClippingDifference } from 'polygon-clipping';
+import polygonClipping from 'polygon-clipping';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -28,7 +28,7 @@ export const difference = (baseSurface, ...surfaces) => {
   }
   const surfaceClipping = z0SurfaceToClipping(canonicalize(baseSurface));
   const subtractionClipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
-  const outputClipping = polygonClippingDifference(surfaceClipping, ...subtractionClipping);
+  const outputClipping = polygonClipping.difference(surfaceClipping, ...subtractionClipping);
   const outputPaths = clippingToPolygons(outputClipping);
   return outputPaths;
 };

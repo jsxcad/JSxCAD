@@ -26,7 +26,7 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
-import { readJscad } from './readJscad';
+// import { readJscad } from './readJscad';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
@@ -64,7 +64,7 @@ export {
   minkowski,
   polyhedron,
   readDst,
-  readJscad,
+  //  readJscad,
   rotate,
   rotateX,
   rotateY,

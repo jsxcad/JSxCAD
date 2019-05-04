@@ -1,9 +1,8 @@
 import * as api from './api';
 
-import { parse, print } from 'recast';
-
 import { fromPolygons } from '@jsxcad/geometry-solid';
 import { readFile } from '@jsxcad/sys';
+import recast from 'recast';
 import types from 'ast-types';
 
 const unpackApi = (api) => {
@@ -63,12 +62,12 @@ const replaceIncludes = async (ast) => {
     }
   });
   for (const include of includes) {
-    include.replace(await replaceIncludes(parse(await readFile(include.node.arguments[0].value))));
+    include.replace(await replaceIncludes(recast.parse(await readFile(include.node.arguments[0].value))));
   }
   return ast;
 };
 
 export const scriptToOperator = async (options = {}, script) =>
-  replaceIncludes(parse(script))
-      .then(ast => createJscadFunction(print(ast).code, operators))
+  replaceIncludes(recast.parse(script))
+      .then(ast => createJscadFunction(recast.print(ast).code, operators))
       .catch(error => console.log(error));
