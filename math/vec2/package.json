@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-vec2",
-  "version": "0.0.60",
+  "version": "0.0.61",
   "description": "2d vectors for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,7 +48,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.60"
+    "@jsxcad/math-utils": "^0.0.61"
   },
   "devDependencies": {
     "ava": "^0.23.0",

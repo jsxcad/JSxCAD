@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-utils",
-  "version": "0.0.60",
+  "version": "0.0.61",
   "description": "math utils for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
