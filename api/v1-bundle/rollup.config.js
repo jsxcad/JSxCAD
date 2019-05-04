@@ -11,12 +11,12 @@ export default {
     format: 'esm'
   },
   external: [
-    '@jsxcad/convert-jscad',
+    '@jsxcad/convert-jscad'
   ],
   plugins: [
     nodeResolve({ preferBuiltins: false }),
     commonjs(),
     globals(),
     builtins()
-  ],
+  ]
 };
