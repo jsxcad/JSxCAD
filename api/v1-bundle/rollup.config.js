@@ -1,6 +1,8 @@
 // rollup.config.js
+import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
-import resolve from 'rollup-plugin-node-resolve';
+import globals from 'rollup-plugin-node-globals';
+import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
   input: 'main.js',
@@ -8,8 +10,15 @@ export default {
     file: 'bundle.js',
     format: 'esm'
   },
+  external: [
+    '@jsxcad/convert-jscad',
+    '@jsxcad/convert-threejs',
+    '@jsxcad/sys',
+  ],
   plugins: [
-    resolve(),
-    commonjs()
-  ]
+    nodeResolve({ preferBuiltins: false }),
+    commonjs(),
+    globals(),
+    builtins()
+  ],
 };

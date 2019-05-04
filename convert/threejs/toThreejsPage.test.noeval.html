@@ -30,10 +30,10 @@ body {
 <!-- FileSaver -->
 <script type="module">
 const api = {};
-import { readFile, watchFile, watchFileCreation, writeFile } from 'https://unpkg.com/@jsxcad/sys@0.0.58?module';
+import { readFile, watchFile, watchFileCreation, writeFile } from 'https://unpkg.com/@jsxcad/sys@0.0.60?module';
 const toThreejsGeometry = g => g;
 
-import { display } from './display.js';
+import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.60/display.js?module';
 const { addPage, nextPage, lastPage } = display({ toThreejsGeometry, watchFile, watchFileCreation });
 
 const runApp = () => {
