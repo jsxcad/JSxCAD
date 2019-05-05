@@ -3,7 +3,6 @@ import { writeFile } from '@jsxcad/sys';
 
 export const writeThreejsPage = async (options, shape) => {
   const { path } = options;
-  return writeFile(path,
-                   await toThreejsPage(options, shape.toDisjointGeometry()),
-                   shape.toDisjointGeometry());
+  const geometry = shape.toDisjointGeometry();
+  return writeFile({ geometry }, path, toThreejsPage(options, shape.toDisjointGeometry()));
 };

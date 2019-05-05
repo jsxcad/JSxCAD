@@ -5,7 +5,7 @@ import { writeFile } from '@jsxcad/sys';
 export const writeStl = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toDisjointGeometry();
-  return writeFile(path, toStl(options, geometry), geometry);
+  return writeFile({ geometry }, path, toStl(options, geometry));
 };
 
 const method = function (options = {}) { writeStl(options, this); return this; };
