@@ -1,5 +1,4 @@
 import { Shape } from './Shape';
-import { assemble } from './assemble';
 import { toStl } from '@jsxcad/convert-stl';
 import { writeFile } from '@jsxcad/sys';
 
