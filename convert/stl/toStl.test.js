@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { test } from 'ava';
-import { toStla } from './toStla';
+import { toStl } from './toStl';
 
 const box1Solid =
   [
@@ -13,5 +13,5 @@ const box1Solid =
   ];
 
 test('Correctly render a box', async t => {
-  t.is(await toStla({}, { solid: box1Solid }), readFileSync('toStla.test.box.stl', { encoding: 'utf8' }));
+  t.is(await toStl({}, { solid: box1Solid }), readFileSync('toStl.test.box.stl', { encoding: 'utf8' }));
 });

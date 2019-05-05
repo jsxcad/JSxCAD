@@ -27,7 +27,9 @@
     "@jsxcad/math-plane": "^0.0.63",
     "@jsxcad/math-poly3": "^0.0.63",
     "@jsxcad/math-vec3": "^0.0.63",
-    "@jsxcad/math-vec4": "^0.0.63"
+    "@jsxcad/math-vec4": "^0.0.63",
+    "parse-stl-ascii": "^1.0.2",
+    "parse-stl-binary": "^1.0.1"
   },
   "devDependencies": {
     "ava": "^0.23.0",

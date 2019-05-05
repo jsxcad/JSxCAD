@@ -19,7 +19,8 @@ body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
 <!-- FileSaver -->
 <script type="module">
-import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.63/dist/main?module';
+// import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.63/dist/main?module';
+import { api, sys, toThreejsGeometry } from './bundle.js';
 const { readFile, watchFile, watchFileCreation, writeFile } = sys;
 const initialScript = "hello";
 import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.63/display.js?module';
