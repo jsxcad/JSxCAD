@@ -2,7 +2,7 @@ import { isBrowser, isNode } from './browserOrNode';
 
 import { getFile } from './files';
 
-export const writeFile = async (path, data, options = {}) => {
+export const writeFile = async (options, path, data) => {
   data = await data;
   if (isNode) {
     const fs = await import('fs');
