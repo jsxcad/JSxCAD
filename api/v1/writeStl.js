@@ -3,9 +3,9 @@ import { assemble } from './assemble';
 import { toStl } from '@jsxcad/convert-stl';
 import { writeFile } from '@jsxcad/sys';
 
-export const writeStl = async (options, ...shapes) => {
+export const writeStl = async (options, shape) => {
   const { path } = options;
-  const geometry = assemble(...shapes).toDisjointGeometry();
+  const geometry = shape.toDisjointGeometry();
   return writeFile(path, toStl(options, geometry), geometry);
 };
 

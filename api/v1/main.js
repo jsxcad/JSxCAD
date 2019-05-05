@@ -66,6 +66,7 @@ export {
   polyhedron,
   readDst,
   readJscad,
+  readStl,
   rotate,
   rotateX,
   rotateY,
