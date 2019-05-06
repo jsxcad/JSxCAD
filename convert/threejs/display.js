@@ -2,14 +2,16 @@
 
 export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, saveAs, toThreejsGeometry, watchFile, watchFileCreation }) => {
   let pages = [];
+  let left = 20;
+  let top = 20;
 
   const addPage = (title = 'Window') => {
     const frame = jsFrame.create({
       title: title,
-      left: 20,
-      top: 20,
-      width: 320,
-      height: 220,
+      left: left,
+      top: top,
+      width: 1000,
+      height: 600,
       movable: true,
       resizable: true,
       appearanceName: 'yosemite',
@@ -19,6 +21,8 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
         overflow: 'visible'
       }
     });
+    left += 10;
+    top += 10;
     frame.setControl({
       styleDisplay: 'inline',
       maximizeButton: 'zoomButton',

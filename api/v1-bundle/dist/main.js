@@ -28641,10 +28641,10 @@ const readFile = async (options, path) => {
   const { sources = [] } = options;
   const file = getFile(path);
   if (file.data === undefined) {
-    file.data = fetchPersistent(path);
+    file.data = await fetchPersistent(path);
   }
   if (file.data === undefined) {
-    file.data = fetchSources(sources);
+    file.data = await fetchSources(sources);
   }
   if (file.data !== undefined) {
     if (file.data.then) {

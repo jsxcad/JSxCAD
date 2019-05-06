@@ -21,7 +21,7 @@ test('No-eval geodesic sphere', async (t) => {
 
 test('Eval geodesic sphere', async (t) => {
   const html = await toThreejsPage(
-    { includeEvaluator: true, includeEditor: true, initialScript: 'hello' },
+    { includeEvaluator: true, includeEditor: true, initialScript: `writeStl({ path: 'sphere' }, sphere());` },
     { assembly: [{ paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]), tags: ['paths'] },
                  { solid: fromPolygons({}, unitGeodesicSphere20Polygons), tags: ['solid'] },
                  { z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]), tags: ['surface'] }] });
