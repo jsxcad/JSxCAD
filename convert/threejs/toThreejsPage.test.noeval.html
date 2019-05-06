@@ -20,10 +20,10 @@ body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
 <!-- FileSaver -->
 <script type="module">
-import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.63/dist/main?module';
+import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@^0.0.64/dist/main?module';
 const { readFile, watchFile, watchFileCreation, writeFile } = sys;
 
-import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.63/display.js?module';
+import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@^0.0.64/display.js?module';
 const jsFrame = new JSFrame();
 const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });
 
