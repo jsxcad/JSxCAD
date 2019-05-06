@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/api-v1-bundle",
-  "version": "0.0.66",
+  "version": "0.0.67",
   "description": "Constructive Solid Geometry (CSG) Library",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "bundle.js",
@@ -49,7 +49,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/api-v1": "^0.0.66"
+    "@jsxcad/api-v1": "^0.0.67"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.4.4",
