@@ -1,22 +1,25 @@
-export const display = ({ Blob, THREE, dat, readFile, requestAnimationFrame, saveAs, toThreejsGeometry, watchFile, watchFileCreation }) => {
+export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, saveAs, toThreejsGeometry, watchFile, watchFileCreation }) => {
   let pages = [];
 
   const addPage = (element) => {
-    element.style.display = 'none';
-    document.getElementById('body').appendChild(element);
     pages.push(element);
+    const frame = jsFrame.create({
+      title: 'Window',
+      left: 20, top: 20, width: 320, height: 220,
+      movable: true,
+      resizable: true,
+      html: '<div style="padding:10px;font-size:12px;color:darkgray;">Contents of window</div>'
+    });
+    frame.$('div').appendChild(element);
+    frame.show();
   };
 
   const nextPage = () => {
-    pages[0].style.display = 'none';
     pages.push(pages.shift());
-    pages[0].style.display = 'block';
   };
 
   const lastPage = () => {
-    pages[0].style.display = 'none';
     pages.unshift(pages.pop());
-    pages[0].style.display = 'block';
   };
 
   const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry } = {}) => {
@@ -101,9 +104,9 @@ export const display = ({ Blob, THREE, dat, readFile, requestAnimationFrame, sav
     };
 
     if (typeof toThreejsGeometry !== 'undefined') {
-      watchFile(path, (file, data) => {
+      watchFile(path, ({ geometry }, file) => {
         if (data !== undefined) {
-          updateDatasets(toThreejsGeometry(data));
+          updateDatasets(toThreejsGeometry(geometry));
         }
       });
     }
