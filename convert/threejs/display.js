@@ -1,28 +1,50 @@
+/* global ResizeObserver */
+
 export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, saveAs, toThreejsGeometry, watchFile, watchFileCreation }) => {
   let pages = [];
 
-  const addPage = (element) => {
-    pages.push(element);
+  const addPage = (title = 'Window') => {
     const frame = jsFrame.create({
-      title: 'Window',
-      left: 20, top: 20, width: 320, height: 220,
+      title: title,
+      left: 20,
+      top: 20,
+      width: 320,
+      height: 220,
       movable: true,
       resizable: true,
-      html: '<div style="padding:10px;font-size:12px;color:darkgray;">Contents of window</div>'
+      appearanceName: 'yosemite',
+      html: '<div></div>',
+      style: {
+        backgroundColor: 'rgba(220,220,220,0.8)',
+        overflow: 'visible'
+      }
     });
-    frame.$('div').appendChild(element);
+    frame.setControl({
+      styleDisplay: 'inline',
+      maximizeButton: 'zoomButton',
+      demaximizeButton: 'dezoomButton',
+      minimizeButton: 'minimizeButton',
+      deminimizeButton: 'deminimizeButton',
+      hideButton: 'closeButton',
+      animation: true,
+      animationDuration: 150
+    });
     frame.show();
+    pages.push(frame);
+    return frame;
   };
 
   const nextPage = () => {
     pages.push(pages.shift());
+    pages[0].requestFocus();
   };
 
   const lastPage = () => {
     pages.unshift(pages.pop());
+    pages[0].requestFocus();
   };
 
-  const addDisplay = (path, { cameraPosition = [0, 0, 16], geometry } = {}) => {
+  const addDisplay = ({ cameraPosition = [0, 0, 16], geometry } = {}, path) => {
     // Add a new display when we see a new file written.
     let datasets = [];
     let camera;
@@ -30,6 +52,8 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
     let scene;
     let renderer;
     let gui;
+    const page = addPage(path);
+    let viewerElement;
     // let downloadButton;
 
     const toName = (geometry) => {
@@ -105,7 +129,7 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
 
     if (typeof toThreejsGeometry !== 'undefined') {
       watchFile(path, ({ geometry }, file) => {
-        if (data !== undefined) {
+        if (geometry !== undefined) {
           updateDatasets(toThreejsGeometry(geometry));
         }
       });
@@ -115,19 +139,8 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
     animate();
     function init () {
       //
-      camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
+      camera = new THREE.PerspectiveCamera(27, page.offsetWidth / page.offsetHeight, 1, 3500);
       [camera.position.x, camera.position.y, camera.position.z] = cameraPosition;
-      //
-      controls = new THREE.TrackballControls(camera);
-      controls.rotateSpeed = 4.0;
-      controls.zoomSpeed = 4.0;
-      controls.panSpeed = 2.0;
-      controls.noZoom = false;
-      controls.noPan = false;
-      controls.staticMoving = true;
-      controls.dynamicDampingFactor = 0.1;
-      controls.keys = [65, 83, 68];
-      controls.addEventListener('change', render);
       //
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x050505);
@@ -140,16 +153,31 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
       camera.add(light);
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      // TODO: Something more clever than this.
-      const viewerElement = document.createElement('div');
+      renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px';
+      viewerElement = document.createElement('div');
       viewerElement.id = `viewer:${path}`;
+      viewerElement.style.height = '100%';
       viewerElement.appendChild(renderer.domElement);
       gui = new dat.GUI({ autoPlace: false });
+      gui.domElement.style = 'padding: 5px';
       viewerElement.appendChild(gui.domElement);
       // viewerElement.appendChild(makeDownloadButton());
-      addPage(viewerElement);
-      window.addEventListener('resize', onWindowResize, false);
+      // page.$('div').appendChild(viewerElement);
+      page.$('div').appendChild(viewerElement);
+      //
+      controls = new THREE.TrackballControls(camera, viewerElement);
+      controls.rotateSpeed = 4.0;
+      controls.zoomSpeed = 4.0;
+      controls.panSpeed = 2.0;
+      controls.noZoom = false;
+      controls.noPan = false;
+      controls.staticMoving = true;
+      controls.dynamicDampingFactor = 0.1;
+      controls.keys = [65, 83, 68];
+      controls.addEventListener('change', render);
+      //
+      onResize();
+      new ResizeObserver(onResize).observe(page.iframe);
     }
     /*
     function makeDownloadButton () {
@@ -164,17 +192,18 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
       return downloadButton;
     }
     */
-    function onWindowResize () {
-      camera.aspect = window.innerWidth / window.innerHeight;
+    function onResize () {
+      const width = viewerElement.clientWidth - 10;
+      const height = viewerElement.clientHeight - 5;
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
       controls.handleResize();
-      // renderer.setSize( window.innerWidth * 0.5, window.innerHeight * 0.5);
+      renderer.setSize(width, height);
     }
     function animate () {
       requestAnimationFrame(animate);
       render();
       controls.update();
-      // stats.update();
     }
     function render () {
       renderer.render(scene, camera);
@@ -186,7 +215,7 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
   };
 
   if (typeof watchFileCreation !== 'undefined') {
-    watchFileCreation(({ path }) => addDisplay(path));
+    watchFileCreation(({ path }) => addDisplay({}, path));
   }
 
   return { addPage, nextPage, lastPage };
