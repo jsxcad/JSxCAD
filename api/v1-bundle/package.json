@@ -49,7 +49,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/api-v1": "^0.0.67"
+    "@jsxcad/api-v1": "^0.0.67",
+    "@jsxcad/convert-threejs": "^0.0.67",
+    "@jsxcad/sys": "^0.0.67"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.4.4",

@@ -11,9 +11,6 @@ export default {
     format: 'esm'
   },
   external: [
-    '@jsxcad/api-v1-bundle',
-    '@jsxcad/convert-jscad',
-    '@jsxcad/convert-threejs',
     'buffer',
     'events',
     'process',
