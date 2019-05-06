@@ -11,7 +11,11 @@ export default {
     format: 'esm'
   },
   external: [
-    '@jsxcad/convert-jscad'
+    '@jsxcad/api-v1-bundle',
+    '@jsxcad/convert-jscad',
+    'buffer',
+    'events',
+    'process',
   ],
   plugins: [
     nodeResolve({ preferBuiltins: false }),
