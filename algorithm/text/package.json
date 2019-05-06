@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-text",
-  "version": "0.0.64",
+  "version": "0.0.65",
   "description": "Operations on text for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,13 +20,13 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/convert-svg": "^0.0.64",
+    "@jsxcad/convert-svg": "^0.0.65",
     "opentype.js": "^0.11.0"
   },
   "devDependencies": {
-    "@jsxcad/geometry-eager": "^0.0.64",
-    "@jsxcad/geometry-paths": "^0.0.64",
-    "@jsxcad/geometry-z0surface": "^0.0.64",
+    "@jsxcad/geometry-eager": "^0.0.65",
+    "@jsxcad/geometry-paths": "^0.0.65",
+    "@jsxcad/geometry-z0surface": "^0.0.65",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
