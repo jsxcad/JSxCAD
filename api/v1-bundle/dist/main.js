@@ -28667,7 +28667,7 @@ const writeFile = async (options, path, data) => {
     const file = getFile(path);
     file.data = data;
     for (const watcher of file.watchers) {
-      watcher(file, options);
+      watcher(options, file);
     }
   } else {
     throw Error('die');
