@@ -69,7 +69,7 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     `<style>`,
     `body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #050505; margin: 0px; overflow: hidden; }`,
     `.dg { position: absolute; top: 2px; left: 2px }`,
-    `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; }`,
+    `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; }`,
     `</style>`,
     `<link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet">`
   ].join('\n');
@@ -80,6 +80,7 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     includeEditor ? `<script src="https://codemirror.net/addon/display/autorefresh.js"><\\/script>`.replace('\\/', '/') : '',
     includeEditor ? `<script src="https://codemirror.net/addon/display/fullscreen.js"><\\/script>`.replace('\\/', '/') : '',
     includeEditor ? `<script src="https://codemirror.net/mode/javascript/javascript.js"><\\/script>`.replace('\\/', '/') : '',
+    includeEditor ? `<script src="https://riversun.github.io/jsframe/jsframe.js"><\\/script>`.replace('\\/', '/') : '',
     `<!-- ThreeJS -->`,
     `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"><\\/script>`.replace('\\/', '/'),
     `<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"><\\/script>`.replace('\\/', '/'),
@@ -94,12 +95,13 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
     initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',
     `import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.63/display.js?module';`,
     // `import { display } from './display.js';`,
-    `const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });`,
+    `const jsFrame = new JSFrame();`,
+    `const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });`,
     includeEditor ? `import { editor } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.63/editor.js?module'` : '',
     // includeEditor ? `import { editor } from './editor.js';` : '',
     includeEditor ? `editor({ CodeMirror, addPage, api, initialScript, nextPage, lastPage });` : '',
     `const runApp = () => {`,
-    threejsGeometry ? `  writeFile(${JSON.stringify(previewPage)}, () => {}, ${JSON.stringify(threejsGeometry)}).then(_ => nextPage());` : '',
+    threejsGeometry ? `  writeFile({ geometry: ${JSON.stringify(threejsGeometry)} }, ${JSON.stringify(previewPage)}, '').then(_ => nextPage());` : '',
     `}`,
     `document.addEventListener("DOMContentLoaded", runApp);`,
     `<\\/script>`.replace('\\/', '/')
