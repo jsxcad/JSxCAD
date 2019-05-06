@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-lazy",
-  "version": "0.0.63",
+  "version": "0.0.64",
   "description": "Assembly Geometry for JSxCAD.",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,15 +20,15 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp-surfaces": "^0.0.63",
-    "@jsxcad/geometry-eager": "^0.0.63",
-    "@jsxcad/geometry-paths": "^0.0.63",
-    "@jsxcad/geometry-points": "^0.0.63",
-    "@jsxcad/geometry-polygons": "^0.0.63",
-    "@jsxcad/geometry-solid": "^0.0.63",
-    "@jsxcad/geometry-surface": "^0.0.63",
-    "@jsxcad/geometry-z0surface": "^0.0.63",
-    "@jsxcad/math-mat4": "^0.0.63"
+    "@jsxcad/algorithm-bsp-surfaces": "^0.0.64",
+    "@jsxcad/geometry-eager": "^0.0.64",
+    "@jsxcad/geometry-paths": "^0.0.64",
+    "@jsxcad/geometry-points": "^0.0.64",
+    "@jsxcad/geometry-polygons": "^0.0.64",
+    "@jsxcad/geometry-solid": "^0.0.64",
+    "@jsxcad/geometry-surface": "^0.0.64",
+    "@jsxcad/geometry-z0surface": "^0.0.64",
+    "@jsxcad/math-mat4": "^0.0.64"
   },
   "devDependencies": {
     "ava": "^0.23.0",

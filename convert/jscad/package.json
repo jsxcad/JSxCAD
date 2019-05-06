@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/convert-jscad",
-  "version": "0.0.63",
+  "version": "0.0.64",
   "description": "JSCAD integration algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -49,9 +49,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-eager": "^0.0.63",
-    "@jsxcad/geometry-solid": "^0.0.63",
-    "@jsxcad/sys": "^0.0.63",
+    "@jsxcad/geometry-eager": "^0.0.64",
+    "@jsxcad/geometry-solid": "^0.0.64",
+    "@jsxcad/sys": "^0.0.64",
     "ast-types": "^0.12.3",
     "recast": "^0.17.5"
   },
