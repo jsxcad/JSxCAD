@@ -1,10 +1,12 @@
 export const editor = ({ CodeMirror, addPage, api, initialScript, nextPage, lastPage }) => {
   let editor;
 
-  const runScript = () => {
+  const runScript = async () => {
     // Evaluate.
-    const code = new Function(`{ ${Object.keys(api).join(', ')} }`, editor.getDoc().getValue('\n'));
-    const result = code(api);
+    const code = new Function(`{ ${Object.keys(api).join(', ')} }`,
+                              `${editor.getDoc().getValue('\n')}; return main;`);
+    const main = code(api);
+    const result = await main();
     // Handle a return value as an implicit write.
     if (result) {
       api.writePaths({ path: 'default' }, result);

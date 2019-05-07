@@ -219,7 +219,11 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
   };
 
   if (typeof watchFileCreation !== 'undefined') {
-    watchFileCreation(({ path }) => addDisplay({}, path));
+    watchFileCreation(({ path }) => {
+                        if (path.startsWith("window/")) {
+                          addDisplay({}, path);
+                        }
+                      })
   }
 
   return { addPage, nextPage, lastPage };
