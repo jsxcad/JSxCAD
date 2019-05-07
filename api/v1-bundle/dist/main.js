@@ -141,7 +141,6 @@ const fromZRotation = (rad) => {
  * @param {vec3} vec - given value
  * @returns {vec3} absolute value of the vector
  */
-const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
 
 /**
  * Adds two vec3's
@@ -295,18 +294,6 @@ const multiply = ([ax, ay, az], [bx, by, bz]) => [(ax * bx), (ay * by), (az * bz
  * @returns {vec3} out
  */
 const negate = ([x, y, z]) => [-x, -y, -z];
-
-// find a vector that is somewhat perpendicular to this one
-const random = (vec) => {
-  const temp = abs(vec);
-  if ((temp[0] <= temp[1]) && (temp[0] <= temp[2])) {
-    return [1, 0, 0];
-  } else if ((temp[1] <= temp[0]) && (temp[1] <= temp[2])) {
-    return [0, 1, 0];
-  } else {
-    return [0, 0, 1];
-  }
-};
 
 /**
  * Subtracts vector b from vector a
@@ -3174,36 +3161,6 @@ const splitLineSegmentByPlane = (plane, p1, p2) => {
   return add(p1, scale(lambda, direction));
 };
 
-const X = 0;
-const Y = 1;
-const Z = 2;
-const W$1 = 3;
-
-const toXYPlaneTransforms = (plane, rightVector) => {
-  if (rightVector === undefined) {
-    rightVector = random(plane);
-  }
-
-  const v = unit(cross(plane, rightVector));
-  const u = cross(v, plane);
-  const p = multiply(plane, fromScalar(plane[W$1]));
-
-  return [
-    // to
-    fromValues(
-      u[X], v[X], plane[X], 0,
-      u[Y], v[Y], plane[Y], 0,
-      u[Z], v[Z], plane[Z], 0,
-      0, 0, -plane[W$1], 1),
-    // from
-    fromValues(
-      u[X], u[Y], u[Z], 0,
-      v[X], v[Y], v[Z], 0,
-      plane[X], plane[Y], plane[Z], 0,
-      p[X], p[Y], p[Z], 1)
-  ];
-};
-
 const toPlane = (polygon) => {
   if (polygon.plane === undefined) {
     if (polygon.length >= 3) {
@@ -3262,6 +3219,16 @@ const isCoplanar = (polygon) => {
   const plane = toPlane(polygon);
   for (const point of polygon) {
     if (signedDistanceToPoint(plane, point) > 1e-5) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const isStrictlyCoplanar = (polygon) => {
+  const plane = toPlane(polygon);
+  for (let nth = 1; nth < polygon.length - 2; nth++) {
+    if (!equals$2(plane, toPlane(polygon.slice(nth)))) {
       return false;
     }
   }
@@ -3402,10 +3369,10 @@ const START = 0;
 const END = 1;
 
 // Plane Properties.
-const W$2 = 3;
+const W$1 = 3;
 
 const toType = (plane, point) => {
-  let t = dot(plane, point) - plane[W$2];
+  let t = dot(plane, point) - plane[W$1];
   if (t < -EPSILON) {
     return BACK;
   } else if (t > EPSILON) {
@@ -3416,7 +3383,7 @@ const toType = (plane, point) => {
 };
 
 const spanPoint = (plane, startPoint, endPoint) => {
-  let t = (plane[W$2] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+  let t = (plane[W$1] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
   return canonicalize(lerp(t, startPoint, endPoint));
 };
 
@@ -3685,18 +3652,6 @@ const flip$2 = (path) => {
 };
 
 const open = (path) => isClosed(path) ? [null, ...path] : path;
-
-const toSegments = (options = {}, path) => {
-  const segments = [];
-  if (path[0] !== null) {
-    segments.push([path[path.length - 1], path[0]]);
-    segments.push([path[0], path[1]]);
-  }
-  for (let nth = 2; nth < path.length; nth++) {
-    segments.push([path[nth - 1], path[nth]]);
-  }
-  return segments;
-};
 
 const transform$2 = (matrix, path) =>
   path.map((point, index) => (point === null) ? null : transform(matrix, point));
@@ -10153,7 +10108,7 @@ const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
 const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
 
 var max$1 = Math.max;
-var abs$1 = Math.abs;
+var abs = Math.abs;
 var pow = Math.pow;
 var sin$1 = Math.sin;
 var cos = Math.cos;
@@ -10179,8 +10134,8 @@ function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
   var pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2;
   if (pxp === 0 && pyp === 0) return []
 
-  rx = abs$1(rx);
-  ry = abs$1(ry);
+  rx = abs(rx);
+  ry = abs(ry);
 
   var lambda = (
     pow(pxp, 2) / pow(rx, 2) +
@@ -10198,7 +10153,7 @@ function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
   var ang1 = centre[2];
   var ang2 = centre[3];
 
-  var segments = max$1(ceil(abs$1(ang2) / (τ / 4)), 1);
+  var segments = max$1(ceil(abs(ang2) / (τ / 4)), 1);
   if (!segments) return []
 
   var curves = [];
@@ -13329,57 +13284,6 @@ const intersection$2 = (...z0Surfaces) => {
   return clippingToPolygons(index.intersection(...z0Surfaces.map(z0SurfaceToClipping)));
 };
 
-const blessAsConvex$1 = (paths) => { paths.isConvex = true; return paths; };
-
-const toContour$1 = (polygon) => {
-  const points = [];
-  for (const [x = 0, y = 0, z = 0] of polygon) {
-    points.push(x, y, z);
-  }
-  return points;
-};
-
-const fromTessellation$1 = (tessellation) => {
-  const tessPolygons = tessellation.elements;
-  const vertices = tessellation.vertices;
-  const polygons = [];
-
-  const toPoint = (offset) => {
-    const vertex = tessPolygons[offset];
-    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];
-  };
-
-  for (let nth = 0; nth < tessPolygons.length; nth += 3) {
-    polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);
-  }
-
-  return polygons;
-};
-
-// This currently does triangulation.
-// Higher arities are possible, but end up being null padded.
-// Let's see if they're useful.
-
-// TODO: Call this toConvexPolygons
-const makeConvex$1 = (options = {}, polygons) => {
-  if (polygons.isConvex) {
-    return polygons;
-  }
-  if (polygons.every(isConvex)) {
-    return blessAsConvex$1(polygons);
-  }
-  const contours = polygons.map(toContour$1);
-  // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
-  const convex = fromTessellation$1(
-    tess2$1.tesselate({ contours: contours,
-                      windingRule: tess2$1.WINDING_ODD,
-                      elementType: tess2$1.POLYGONS,
-                      polySize: 3,
-                      vertexSize: 3
-    }));
-  return blessAsConvex$1(convex);
-};
-
 /**
  * Produces a surface that is the union of all provided surfaces.
  * The union of no surfaces is the empty surface.
@@ -13399,13 +13303,6 @@ const union$2 = (...surfaces) => {
   return clippingToPolygons(result);
 };
 
-const makeConvex$2 = (options = {}, surface) => {
-  assertCoplanar(surface);
-  const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
-  let retessellatedSurface = makeConvex$1({}, union$2(...transform$6(to, surface).map(polygon => [polygon])));
-  return transform$6(from, retessellatedSurface);
-};
-
 const measureArea$1 = (surface) => {
   // CHECK: That this handles negative area properly.
   let total = 0;
@@ -13415,7 +13312,10 @@ const measureArea$1 = (surface) => {
   return total;
 };
 
-const transform$7 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
+const multiply$2 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
+
+const rotateX = (radians, solid) => multiply$2(fromXRotation(radians), solid);
+const scale$4 = (vector, solid) => multiply$2(fromScaling(vector), solid);
 
 const eachPoint$3 = (options = {}, thunk, solid) => {
   for (const surface of solid) {
@@ -14055,7 +13955,7 @@ const transformItem = (matrix, item) => {
     transformed.points = transform$4(matrix, item.points);
   }
   if (item.solid) {
-    transformed.solid = transform$7(matrix, item.solid);
+    transformed.solid = multiply$2(matrix, item.solid);
   }
   if (item.z0Surface) {
     // FIX: Handle transformations that take the surface out of z0.
@@ -14065,7 +13965,7 @@ const transformItem = (matrix, item) => {
   return transformed;
 };
 
-const transform$8 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
+const transform$7 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
 
 const union$4 = (...geometries) => {
   const assembly = { assembly: geometries };
@@ -27895,7 +27795,7 @@ class Assembly {
   }
 
   transform (matrix) {
-    return fromGeometry(transform$8(matrix, toGeometry(this)));
+    return fromGeometry(transform$7(matrix, toGeometry(this)));
   }
 
   union (...geometries) {
@@ -28614,8 +28514,12 @@ const getFileFetcher = async () => {
 // Fetch from internal store.
 // FIX: Support browser local storage.
 const fetchPersistent = async (path) => {
-  const fetchFile = await getFileFetcher();
-  return fetchFile(path);
+  try {
+    const fetchFile = await getFileFetcher();
+    const data = await fetchFile(path);
+    return data;
+  } catch (e) {
+  }
 };
 
 // Fetch from external sources.
@@ -28627,7 +28531,8 @@ const fetchSources = async (sources) => {
     if (source.url !== undefined) {
       const response = await fetchUrl(source.url);
       if (response.ok) {
-        return response.text();
+        const data = await response.text();
+        return data;
       }
     } else if (source.file !== undefined) {
       return fetchFile(source.file);
@@ -28658,19 +28563,22 @@ const readFile = async (options, path) => {
 const watchFile = (path, thunk) => getFile(path).watchers.push(thunk);
 
 const writeFile = async (options, path, data) => {
+  const { ephemeral } = options;
+
   data = await data;
-  if (isNode) {
-    const fs = await import('./empty-40f8bc7b.js');
-    let result = await fs.promises.writeFile(path, data);
-    return result;
-  } else if (isBrowser$1) {
-    const file = getFile(path);
-    file.data = data;
-    for (const watcher of file.watchers) {
-      watcher(options, file);
+  const file = getFile(path);
+  file.data = data;
+
+  for (const watcher of file.watchers) {
+    watcher(options, file);
+  }
+
+  if (!ephemeral) {
+    if (isNode) {
+      const fs = await import('./empty-40f8bc7b.js');
+      let result = await fs.promises.writeFile(path, data);
+      return result;
     }
-  } else {
-    throw Error('die');
   }
 };
 
@@ -28686,6 +28594,163 @@ var main = /*#__PURE__*/Object.freeze({
 const readDst = async (options) => {
   const { path } = options;
   return Shape.fromGeometry(await fromDst(options, await readFile(options, path)));
+};
+
+const scriptToOperator = () => {};
+
+const readJscad = async ({ path, script }) => {
+  if (script === undefined) {
+    if (path !== undefined) {
+      script = await readFile({}, path);
+    }
+  }
+  const { getGeometry, getParameterDefinitions } = await scriptToOperator({}, script);
+  const jscadOp = (parameters) => {
+    return Shape.fromGeometry(getGeometry(parameters));
+  };
+  jscadOp.getParameterDefinitions = getParameterDefinitions;
+  return jscadOp;
+};
+
+const RESOLUTION = 10000;
+
+const readPart = async (part) => {
+  part = part.toLowerCase().replace(/\\/, '/');
+  return readFile({ sources: [{ url: `http://www.ldraw.org/library/official/parts/${part}` },
+                              { url: `http://www.ldraw.org/library/official/p/48/${part}` },
+                              { url: `http://www.ldraw.org/library/official/p/${part}` }] },
+                  `tmp/ldraw-part-${part}`);
+};
+
+const loadPart = async (part) => {
+  let code = [];
+  let source = await readPart(part);
+  for (let line of source.split('\r\n')) {
+    let args = line.replace(/^\s+/, '').split(/\s+/);
+    code.push(args);
+  }
+  return { type: source.type, code: code, name: source.name };
+};
+
+const flt = (text) => parseFloat(text);
+const ldu = (text) => Math.round(flt(text) * RESOLUTION) / RESOLUTION;
+
+const fromPartToPolygons = async ({ part, invert = false, stack = [] }) => {
+  let code = await loadPart(part);
+  let polygons = [];
+  let direction = 'CCW';
+  let invertNext = 0;
+
+  function Direction () {
+    if (invert) {
+      return { CCW: 'CW', CW: 'CCW' }[direction];
+    } else {
+      return direction;
+    }
+  }
+
+  for (let args of code.code) {
+    switch (parseInt(args[0])) {
+      case 0: { // meta
+        switch (args[1]) {
+          case 'BFC':
+            switch (args[2]) {
+              case 'CERTIFY': {
+                switch (args[3]) {
+                  case 'CW': {
+                    direction = 'CW';
+                    break;
+                  }
+                  case 'CCW': {
+                    direction = 'CCW';
+                    break;
+                  }
+                }
+                break;
+              }
+              case 'INVERTNEXT': {
+                invertNext = 2;
+                break;
+              }
+            }
+            break;
+        }
+        break;
+      }
+      case 1: { // sub-part
+        let [, , x, y, z, a, b, c, d, e, f, g, h, i, subPart] = args;
+        let subInvert = invert;
+        if (invertNext > 0) {
+          subInvert = !subInvert;
+        }
+        stack.push(subPart);
+        let matrix = fromValues(flt(a), flt(d), flt(g), 0.0,
+                                        flt(b), flt(e), flt(h), 0.0,
+                                        flt(c), flt(f), flt(i), 0.0,
+                                        ldu(x), ldu(y), ldu(z), 1.0);
+        polygons.push(...transform$3(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
+        stack.pop();
+        break;
+      }
+      case 2: { // display line
+        break;
+      }
+      case 3: { // triangle
+        let [, , x1, y1, z1, x2, y2, z2, x3, y3, z3] = args;
+        let polygon = [[ldu(x1), ldu(y1), ldu(z1)],
+                       [ldu(x2), ldu(y2), ldu(z2)],
+                       [ldu(x3), ldu(y3), ldu(z3)]];
+        if (!isStrictlyCoplanar(polygon)) throw Error('die');
+        if (Direction() === 'CW') {
+          polygons.push(flip(polygon));
+        } else {
+          polygons.push(polygon);
+        }
+        break;
+      }
+      case 4: { // quad
+        let [, , x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4] = args;
+        let p = [[ldu(x1), ldu(y1), ldu(z1)],
+                 [ldu(x2), ldu(y2), ldu(z2)],
+                 [ldu(x3), ldu(y3), ldu(z3)],
+                 [ldu(x4), ldu(y4), ldu(z4)]];
+        if (Direction() === 'CW') {
+          if (isStrictlyCoplanar(p)) {
+            polygons.push(flip(p));
+          } else {
+            polygons.push(flip([p[0], p[1], p[3]]));
+            polygons.push(flip([p[2], p[3], p[1]]));
+          }
+        } else {
+          if (isStrictlyCoplanar(p)) {
+            polygons.push(p);
+          } else {
+            polygons.push([p[0], p[1], p[3]]);
+            polygons.push([p[2], p[3], p[1]]);
+          }
+        }
+        break;
+      }
+      case 5: { // optional line
+        break;
+      }
+    }
+    if (invertNext > 0) {
+      invertNext -= 1;
+    }
+  }
+  return polygons;
+};
+
+const fromLDraw = async ({ part }) =>
+  ({
+    solid: rotateX(-90 * Math.PI / 180,
+                   scale$4([0.4, 0.4, 0.4],
+                         fromPolygons({}, await fromPartToPolygons({ part }))))
+  });
+
+const readLDraw = async (options) => {
+  return Shape.fromGeometry(await fromLDraw(options));
 };
 
 function parse$4(str) {
@@ -28922,7 +28987,7 @@ const findPolygonsViolations = polygons => {
 const isWatertightPolygons = polygons => findPolygonsViolations(polygons).length === 0;
 
 const EPS = 1e-5;
-const W$3 = 3;
+const W$2 = 3;
 
 const tag = vertex => JSON.stringify([...vertex]);
 
@@ -29176,7 +29241,7 @@ const fixTJunctions = function (polygons) {
                     let newpolygon = fromPoints(newvertices);
 
                     // calculate plane with differents point
-                    if (isNaN(toPlane(newpolygon)[W$3])) {
+                    if (isNaN(toPlane(newpolygon)[W$2])) {
                       let found = false;
                       let loop = function (callback) {
                         newpolygon.forEach(function (item) {
@@ -29189,7 +29254,7 @@ const fixTJunctions = function (polygons) {
                         loop(function (b) {
                           loop(function (c) {
                             newpolygon.plane = fromPoints$1(a, b, c);
-                            if (!isNaN(toPlane(newpolygon)[W$3])) {
+                            if (!isNaN(toPlane(newpolygon)[W$2])) {
                               found = true;
                             }
                           });
@@ -29293,9 +29358,9 @@ const method$6 = function (angles) { return rotate(angles, this); };
 
 Shape.prototype.rotate = method$6;
 
-const rotateX = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
+const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-const method$7 = function (angle) { return rotateX(angle, this); };
+const method$7 = function (angle) { return rotateX$1(angle, this); };
 
 Shape.prototype.rotateX = method$7;
 
@@ -29311,7 +29376,7 @@ const method$9 = function (angle) { return rotateZ(angle, this); };
 
 Shape.prototype.rotateZ = method$9;
 
-const scale$4 = (factor, shape) => {
+const scale$5 = (factor, shape) => {
   if (factor.length) {
     const [x = 1, y = 1, z = 1] = factor;
     return shape.transform(fromScaling([x, y, z]));
@@ -29321,7 +29386,7 @@ const scale$4 = (factor, shape) => {
   }
 };
 
-const method$a = function (factor) { return scale$4(factor, this); };
+const method$a = function (factor) { return scale$5(factor, this); };
 
 Shape.prototype.scale = method$a;
 
@@ -29495,8 +29560,8 @@ const method$c = function (...shapes) { return union$5(this, ...shapes); };
 
 Shape.prototype.union = method$c;
 
-const X$1 = 0;
-const Y$1 = 1;
+const X = 0;
+const Y = 1;
 
 // Not entirely sure how conformant this is, but it seems to work for simple
 // cases.
@@ -29549,7 +29614,7 @@ const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096,
   // Subtract the x min, and the y max, then add the page height to bring
   // it up to the top left. This positions the origin nicely for laser
   // cutting and printing.
-  const offset = [-min[X$1] * scale, (height - max[Y$1]) * scale, 0];
+  const offset = [-min[X] * scale, (height - max[Y]) * scale, 0];
   const matrix = multiply$1(fromTranslation(offset),
                           fromScaling([scale, scale, scale]));
   for (const path of transform$5(matrix, paths)) {
@@ -29598,6 +29663,15 @@ const method$e = function (options = {}) { writeSvg(options, this); return this;
 
 Shape.prototype.writeSvg = method$e;
 
+const toThreejsGeometry = () => {};
+                                             const toThreejsPage = () => {};
+
+const writeThreejsPage = async (options, shape) => {
+  const { path } = options;
+  const geometry = shape.toDisjointGeometry();
+  return writeFile({ geometry }, path, toThreejsPage(options, shape.toDisjointGeometry()));
+};
+
 /**
  *
  * Defines the interface used by the api to access the rest of the system on
@@ -29626,12 +29700,14 @@ var main$1 = /*#__PURE__*/Object.freeze({
   minkowski: minkowski,
   polyhedron: polyhedron,
   readDst: readDst,
+  readJscad: readJscad,
+  readLDraw: readLDraw,
   readStl: readStl,
   rotate: rotate,
-  rotateX: rotateX,
+  rotateX: rotateX$1,
   rotateY: rotateY,
   rotateZ: rotateZ,
-  scale: scale$4,
+  scale: scale$5,
   sin: sin$2,
   sphere: sphere,
   sqrt: sqrt$1,
@@ -29643,61 +29719,8 @@ var main$1 = /*#__PURE__*/Object.freeze({
   union: union$5,
   writePdf: writePdf,
   writeStl: writeStl,
-  writeSvg: writeSvg
+  writeSvg: writeSvg,
+  writeThreejsPage: writeThreejsPage
 });
-
-const pathsToThreejsSegments = (geometry) => {
-  const segments = [];
-  for (const path of geometry) {
-    for (const [start, end] of toSegments({}, path)) {
-      segments.push([start, end]);
-    }
-  }
-  return segments;
-};
-
-const solidToThreejsSolid = (geometry) => {
-  const normals = [];
-  const positions = [];
-  for (const triangle of toTriangles({}, toPolygons({}, geometry))) {
-    for (const point of triangle) {
-      const [x, y, z] = toPlane(triangle);
-      normals.push(x, y, z);
-      positions.push(...point);
-    }
-  }
-  return { normals, positions };
-};
-
-const z0SurfaceToThreejsSurface = (geometry) => {
-  const normals = [];
-  const positions = [];
-  const outputTriangle = (triangle) => {
-    for (const point of triangle) {
-      const [x, y, z] = toPlane(triangle);
-      normals.push(x, y, z);
-      positions.push(...point);
-    }
-  };
-  for (const triangle of toTriangles({}, makeConvex$2({}, geometry))) {
-    outputTriangle(triangle);
-    outputTriangle(flip(triangle));
-  }
-  return { normals, positions };
-};
-
-const toThreejsGeometry = (geometry) => {
-  if (geometry.isThreejsGeometry) {
-    return geometry;
-  } else if (geometry.assembly) {
-    return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };
-  } else if (geometry.paths) {
-    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };
-  } else if (geometry.solid) {
-    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };
-  } else if (geometry.z0Surface) {
-    return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: geometry.tags, isThreejsGeometry: true };
-  }
-};
 
 export { main$1 as api, main as sys, toThreejsGeometry };

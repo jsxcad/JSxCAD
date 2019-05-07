@@ -64,6 +64,7 @@
     "@jsxcad/math-poly3": "^0.0.71",
     "@jsxcad/math-utils": "^0.0.71",
     "@jsxcad/math-vec3": "^0.0.71",
+    "@jsxcad/sys": "^0.0.71",
     "argv": "^0.0.2"
   },
   "devDependencies": {

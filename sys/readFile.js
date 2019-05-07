@@ -26,8 +26,12 @@ const getFileFetcher = async () => {
 // Fetch from internal store.
 // FIX: Support browser local storage.
 const fetchPersistent = async (path) => {
-  const fetchFile = await getFileFetcher();
-  return fetchFile(path);
+  try {
+    const fetchFile = await getFileFetcher();
+    const data = await fetchFile(path);
+    return data;
+  } catch (e) {
+  }
 };
 
 // Fetch from external sources.
@@ -39,7 +43,8 @@ const fetchSources = async (sources) => {
     if (source.url !== undefined) {
       const response = await fetchUrl(source.url);
       if (response.ok) {
-        return response.text();
+        const data = await response.text();
+        return data;
       }
     } else if (source.file !== undefined) {
       return fetchFile(source.file);

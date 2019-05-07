@@ -1,4 +1,4 @@
-import { scale, transform, translate } from './ops';
+import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } from './ops';
 
 import { canonicalize } from './canonicalize';
 import { eachPoint } from './eachPoint';
@@ -21,6 +21,9 @@ export {
   makeSurfacesSimple,
   measureBoundingBox,
   measureBoundingSphere,
+  rotateX,
+  rotateY,
+  rotateZ,
   scale,
   toGeneric,
   toPoints,
