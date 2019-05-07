@@ -2,6 +2,7 @@
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
+import hypothetical from 'rollup-plugin-hypothetical';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
@@ -13,9 +14,19 @@ export default {
   external: [
     'buffer',
     'events',
-    'process',
+    'process'
   ],
   plugins: [
+    hypothetical(
+      {
+        allowFallthrough: true,
+        files: {
+          '@jsxcad/convert-jscad': `export const scriptToOperator = () => {};`,
+          '@jsxcad/convert-threejs': `export const toThreejsGeometry = () => {};
+                                             export const toThreejsPage = () => {};
+                                            `
+        }
+      }),
     nodeResolve({ preferBuiltins: false }),
     commonjs(),
     globals(),
