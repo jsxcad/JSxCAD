@@ -7,11 +7,14 @@ import { transform } from '@jsxcad/geometry-polygons';
 
 const RESOLUTION = 10000;
 
+// const URL_PREFIX = 'https://github.com/ctiller/ldraw/blob/master/';
+const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
+
 const readPart = async (part) => {
   part = part.toLowerCase().replace(/\\/, '/');
-  return readFile({ sources: [{ url: `http://www.ldraw.org/library/official/parts/${part}` },
-                              { url: `http://www.ldraw.org/library/official/p/48/${part}` },
-                              { url: `http://www.ldraw.org/library/official/p/${part}` }] },
+  return readFile({ sources: [{ url: `${URL_PREFIX}/parts/${part}` },
+                              { url: `${URL_PREFIX}/p/48/${part}` },
+                              { url: `${URL_PREFIX}/p/${part}` }] },
                   `tmp/ldraw-part-${part}`);
 };
 

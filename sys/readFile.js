@@ -41,7 +41,8 @@ const fetchSources = async (sources) => {
   // Try to load the data from a source.
   for (const source of sources) {
     if (source.url !== undefined) {
-      const response = await fetchUrl(source.url);
+      const response = await fetchUrl(new Request(source.url,
+                                                  { method: 'GET', headers: new Headers(), mode: 'cors' }));
       if (response.ok) {
         const data = await response.text();
         return data;
