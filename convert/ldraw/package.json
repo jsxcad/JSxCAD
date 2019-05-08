@@ -1,0 +1,49 @@
+{
+  "name": "@jsxcad/convert-ldraw",
+  "version": "0.0.74",
+  "description": "Ldraw (lego draw) algorithms for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "module": "main.js",
+  "scripts": {
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/geometry-eager": "^0.0.74",
+    "@jsxcad/geometry-polygons": "^0.0.74",
+    "@jsxcad/geometry-solid": "^0.0.74",
+    "@jsxcad/math-mat4": "^0.0.74",
+    "@jsxcad/math-poly3": "^0.0.74",
+    "@jsxcad/math-vec3": "^0.0.74",
+    "@jsxcad/sys": "^0.0.74"
+  },
+  "devDependencies": {
+    "ava": "^0.23.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.15.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "esm": "^3.2.10"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+}

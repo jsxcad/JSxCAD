@@ -1,20 +1,22 @@
-import { isBrowser, isNode } from './browserOrNode';
-
 import { getFile } from './files';
+import { isNode } from './browserOrNode';
 
-export const writeFile = async (path, data, options = {}) => {
+export const writeFile = async (options, path, data) => {
+  const { ephemeral } = options;
+
   data = await data;
-  if (isNode) {
-    const fs = await import('fs');
-    let result = await fs.promises.writeFile(path, data);
-    return result;
-  } else if (isBrowser) {
-    const file = getFile(path);
-    file.data = data;
-    for (const watcher of file.watchers) {
-      watcher(file, options);
+  const file = getFile(path);
+  file.data = data;
+
+  for (const watcher of file.watchers) {
+    watcher(options, file);
+  }
+
+  if (!ephemeral) {
+    if (isNode) {
+      const fs = await import('fs');
+      let result = await fs.promises.writeFile(path, data);
+      return result;
     }
-  } else {
-    throw Error('die');
   }
 };

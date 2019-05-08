@@ -26,7 +26,9 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
-// import { readJscad } from './readJscad';
+import { readJscad } from './readJscad';
+import { readLDraw } from './readLDraw';
+import { readStl } from './readStl';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
@@ -43,7 +45,7 @@ import { union } from './union';
 import { writePdf } from './writePdf';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
-// import { writeThreejsPage } from './writeThreejs';
+import { writeThreejsPage } from './writeThreejs';
 
 export {
   Shape,
@@ -64,7 +66,9 @@ export {
   minkowski,
   polyhedron,
   readDst,
-  //  readJscad,
+  readJscad,
+  readLDraw,
+  readStl,
   rotate,
   rotateX,
   rotateY,
@@ -82,5 +86,5 @@ export {
   writePdf,
   writeStl,
   writeSvg,
-  // writeThreejsPage
+  writeThreejsPage
 };

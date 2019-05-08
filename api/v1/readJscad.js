@@ -5,7 +5,7 @@ import { scriptToOperator } from '@jsxcad/convert-jscad';
 export const readJscad = async ({ path, script }) => {
   if (script === undefined) {
     if (path !== undefined) {
-      script = await readFile(path);
+      script = await readFile({}, path);
     }
   }
   const { getGeometry, getParameterDefinitions } = await scriptToOperator({}, script);

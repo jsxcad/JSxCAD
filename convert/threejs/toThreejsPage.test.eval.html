@@ -2,29 +2,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <style>
-body {
-  color: #cccccc;
-  font-family: Monospace;
-  font-size: 13px;
-  text-align: left;
-  background-color: #050505;
-  margin: 0px;
-  overflow: hidden;
-}
-
+body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #0.73505; margin: 0px; overflow: hidden; }
 .dg { position: absolute; top: 2px; left: 2px }
-
-.CodeMirror { 
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
-}
-
+.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; }
 </style>
 <link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet"></head><body id="body"><!-- CodeMirror -->
 <script src="https://codemirror.net/lib/codemirror.js"></script>
 <script src="https://codemirror.net/addon/display/autorefresh.js"></script>
 <script src="https://codemirror.net/addon/display/fullscreen.js"></script>
 <script src="https://codemirror.net/mode/javascript/javascript.js"></script>
+<script src="https://riversun.github.io/jsframe/jsframe.js"></script>
 <!-- ThreeJS -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
 <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
@@ -33,66 +20,16 @@ body {
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
 <!-- FileSaver -->
 <script type="module">
-import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@0.0.62/dist/main?module';
+import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@^0.0.74/dist/main?module';
 const { readFile, watchFile, watchFileCreation, writeFile } = sys;
-const initialScript = "hello";
-import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@0.0.60/display.js?module';
-const { addPage, nextPage, lastPage } = display({ toThreejsGeometry, watchFile, watchFileCreation });
-let editor;
-
-const runScript = () => {
-  // Evaluate.
-  const code = new Function(`{ ${Object.keys(api).join(', ')} }`, editor.getDoc().getValue('\n'));
-  const result = code(api);
-  // Handle a return value as an implicit write.
-  if (result) {
-    api.writePaths({ path: 'default' }, result);
-  }
-  nextPage();
-}
-
-const setupDocument = () => {
-  editor = CodeMirror((domElement) => {
-                        domElement.id = 'editor';
-                        addPage(domElement);
-                      },
-                      {
-                        autoRefresh: true,
-                        mode: "javascript",
-                        theme: "default",
-                        fullScreen: true,
-                        lineNumbers: true,
-                        gutter: true,
-                        lineWrapping: true,
-                        extraKeys: {
-                          'Shift-Enter': runScript,
-                        },
-                        value: (typeof initialScript === 'undefined') ? '' : initialScript
-                      });
-  document.addEventListener("keydown",
-                            e => {
-                              switch (e.keyCode) {
-                                case 34:
-                                  // Page Down.
-                                  nextPage();
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  break;
-                                case 33: 
-                                  // Page Up.
-                                  lastPage();
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  break;
-                              }
-                            });
-  lastPage();
-};
-document.addEventListener("DOMContentLoaded", setupDocument);
-
-
+const initialScript = "\nconst main = async () => {\n   const teapot = await readStl({ path: 'teapot',\n                                  format: 'ascii',\n                                  sources: [{ url: 'https://jsxcad.js.org/stl/teapot.stl' }] });\n   await writeStl({ path: 'window/teapot' }, difference(teapot.scale([0.1, 0.1, 0.1]), cube(5)));\n }\n";
+import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@^0.0.74/display.js?module';
+const jsFrame = new JSFrame();
+const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });
+import { editor } from 'https://unpkg.com/@jsxcad/convert-threejs@^0.0.74/editor.js?module'
+editor({ CodeMirror, addPage, api, initialScript, nextPage, lastPage });
 const runApp = () => {
-  writeFile("default", () => {}, {"assembly":[{"threejsSegments":[[[-1.5,-2.59809,0],[3,0,0]],[[3,0,0],[-1.5,2.59809,0]],[[-1.5,2.59809,0],[-1.5,-2.59809,0]]],"tags":["paths"],"isThreejsGeometry":true},{"threejsSolid":{"normals":[0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,-0.9341721347384871,0.5773502691896258,0.5773502691896257,-0.5773502691896258,0.5773502691896258,0.5773502691896257,-0.5773502691896258,0.5773502691896258,0.5773502691896257,-0.5773502691896258,0.5773502691896258,-0.5773502691896257,-0.5773502691896258,0.5773502691896258,-0.5773502691896257,-0.5773502691896258,0.5773502691896258,-0.5773502691896257,-0.5773502691896258,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.5773502691896258,-0.5773502691896258,0.5773502691896257,0.5773502691896258,-0.5773502691896258,0.5773502691896257,0.5773502691896258,-0.5773502691896258,0.5773502691896257,0.5773502691896258,0.5773502691896257,0.5773502691896258,0.5773502691896258,0.5773502691896257,0.5773502691896258,0.5773502691896258,0.5773502691896257,0.5773502691896258,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,-0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,-0.5773502691896258,-0.5773502691896257,0.5773502691896258,-0.5773502691896258,-0.5773502691896257,0.5773502691896258,-0.5773502691896258,-0.5773502691896257,0.5773502691896258,-0.5773502691896257,0.5773502691896258,0.5773502691896258,-0.5773502691896257,0.5773502691896258,0.5773502691896258,-0.5773502691896257,0.5773502691896258,0.5773502691896258,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.5773502691896258,0.5773502691896257,-0.5773502691896258,-0.5773502691896258,0.5773502691896257,-0.5773502691896258,-0.5773502691896258,0.5773502691896257,-0.5773502691896258,-0.5773502691896258,-0.5773502691896257,-0.5773502691896258,-0.5773502691896258,-0.5773502691896257,-0.5773502691896258,-0.5773502691896258,-0.5773502691896257,-0.5773502691896258,0,-0.9341721347384871,0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,-0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794,0,-0.9341721347384871,-0.35682267679918794],"positions":[0.85065,0,0.52573,0.52573,-0.85065,0,0.85065,0,-0.52573,0.85065,0,-0.52573,0.52573,0.85065,0,0.85065,0,0.52573,0.85065,0,-0.52573,0,-0.52573,-0.85065,0,0.52573,-0.85065,0.85065,0,-0.52573,0,0.52573,-0.85065,0.52573,0.85065,0,0.85065,0,-0.52573,0.52573,-0.85065,0,0,-0.52573,-0.85065,0,-0.52573,0.85065,0.85065,0,0.52573,0,0.52573,0.85065,0.52573,-0.85065,0,0.85065,0,0.52573,0,-0.52573,0.85065,0.85065,0,0.52573,0.52573,0.85065,0,0,0.52573,0.85065,-0.85065,0,-0.52573,-0.52573,-0.85065,0,-0.85065,0,0.52573,-0.85065,0,0.52573,-0.52573,0.85065,0,-0.85065,0,-0.52573,0,-0.52573,0.85065,0,0.52573,0.85065,-0.85065,0,0.52573,-0.85065,0,0.52573,-0.52573,-0.85065,0,0,-0.52573,0.85065,0,0.52573,0.85065,-0.52573,0.85065,0,-0.85065,0,0.52573,0,0.52573,-0.85065,0,-0.52573,-0.85065,-0.85065,0,-0.52573,-0.85065,0,-0.52573,-0.52573,0.85065,0,0,0.52573,-0.85065,-0.85065,0,-0.52573,0,-0.52573,-0.85065,-0.52573,-0.85065,0,0,-0.52573,0.85065,-0.52573,-0.85065,0,0.52573,-0.85065,0,0,0.52573,0.85065,0.52573,0.85065,0,-0.52573,0.85065,0,0,0.52573,-0.85065,-0.52573,0.85065,0,0.52573,0.85065,0,0,-0.52573,-0.85065,0.52573,-0.85065,0,-0.52573,-0.85065,0]},"tags":["solid"],"isThreejsGeometry":true},{"threejsSurface":{"normals":[0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1],"positions":[1,1,0,-1,1,0,-1,-1,0,-1,-1,0,-1,1,0,1,1,0,1,1,0,-1,-1,0,1,-1,0,1,-1,0,-1,-1,0,1,1,0]},"tags":["surface"],"isThreejsGeometry":true}],"isThreejsGeometry":true}).then(_ => nextPage());
+
 }
 document.addEventListener("DOMContentLoaded", runApp);
 </script></body></html>

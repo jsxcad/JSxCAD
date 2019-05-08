@@ -1,5 +1,7 @@
-import { toStla } from './toStla';
+import { fromStl } from './fromStl';
+import { toStl } from './toStl';
 
 export {
-  toStla
+  fromStl,
+  toStl
 };
