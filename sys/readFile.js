@@ -43,14 +43,16 @@ const fetchSources = async (sources) => {
   for (const source of sources) {
     if (source.url !== undefined) {
       log(`# Fetching ${source.url}`);
-      // const response = await fetchUrl(new Request(source.url, { method: 'GET', headers: new Headers(), mode: 'cors' }));
       const response = await fetchUrl(source.url);
       if (response.ok) {
         const data = await response.text();
         return data;
       }
     } else if (source.file !== undefined) {
-      return fetchFile(source.file);
+      try {
+        const data = await fetchFile(source.file);
+        return data;
+      } catch (e) {}
     } else {
       throw Error('die');
     }
