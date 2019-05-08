@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-points",
-  "version": "0.0.73",
+  "version": "0.0.74",
   "description": "Operations on point clouds for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,14 +20,14 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-mat4": "^0.0.73",
-    "@jsxcad/math-vec3": "^0.0.73",
+    "@jsxcad/math-mat4": "^0.0.74",
+    "@jsxcad/math-vec3": "^0.0.74",
     "quickhull3d": "^2.0.4"
   },
   "devDependencies": {
-    "@jsxcad/algorithm-watertight": "^0.0.73",
-    "@jsxcad/data-shape": "^0.0.73",
-    "@jsxcad/geometry-polygons": "^0.0.73",
+    "@jsxcad/algorithm-watertight": "^0.0.74",
+    "@jsxcad/data-shape": "^0.0.74",
+    "@jsxcad/geometry-polygons": "^0.0.74",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
