@@ -28467,8 +28467,8 @@ const fetchSources = async (sources) => {
   for (const source of sources) {
     if (source.url !== undefined) {
       log(`# Fetching ${source.url}`);
-      const response = await fetchUrl(new Request(source.url,
-                                                  { method: 'GET', headers: new Headers(), mode: 'cors' }));
+      // const response = await fetchUrl(new Request(source.url, { method: 'GET', headers: new Headers(), mode: 'cors' }));
+      const response = await fetchUrl(source.url);
       if (response.ok) {
         const data = await response.text();
         return data;
@@ -29851,6 +29851,7 @@ const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD View
     `body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #0.73505; margin: 0px; overflow: hidden; }`,
     `.dg { position: absolute; top: 2px; left: 2px }`,
     `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; }`,
+    `.Console { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; color: black; }`,
     `</style>`,
     `<link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet">`
   ].join('\n');
@@ -29882,7 +29883,7 @@ const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD View
     includeEditor ? `import { editor } from './editor.js';` : '',
     includeEditor ? `editor({ CodeMirror, addPage, api, initialScript, nextPage, lastPage });` : '',
     includeEditor ? `import { console } from './console.js';` : '',
-    includeEditor ? `console({ jsFrame, watchFile });` : '',
+    includeEditor ? `console({ addPage, watchFile });` : '',
     `const runApp = () => {`,
     threejsGeometry ? `  writeFile({ geometry: ${JSON.stringify(threejsGeometry)} }, ${JSON.stringify(previewPage)}, '').then(_ => nextPage());` : '',
     `}`,
