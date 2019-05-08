@@ -22,9 +22,8 @@ export default {
         allowFallthrough: true,
         files: {
           '@jsxcad/convert-jscad': `export const scriptToOperator = () => {};`,
-          '@jsxcad/convert-threejs': `export const toThreejsGeometry = () => {};
-                                             export const toThreejsPage = () => {};
-                                            `
+//          '@jsxcad/convert-threejs': `export const toThreejsGeometry = () => {};
+//                                             export const toThreejsPage = () => {};`
         }
       }),
     nodeResolve({ preferBuiltins: false }),
