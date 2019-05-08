@@ -5,6 +5,7 @@
 body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #0.73505; margin: 0px; overflow: hidden; }
 .dg { position: absolute; top: 2px; left: 2px }
 .CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; }
+.Console { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; color: black; }
 </style>
 <link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet"></head><body id="body"><!-- CodeMirror -->
 
@@ -20,12 +21,14 @@ body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
 <!-- FileSaver -->
 <script type="module">
-import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@^0.0.74/dist/main?module';
+import { api, sys, toThreejsGeometry } from './bundle.js'
 const { readFile, watchFile, watchFileCreation, writeFile } = sys;
 
-import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@^0.0.74/display.js?module';
+import { display } from './display.js';
 const jsFrame = new JSFrame();
 const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });
+
+
 
 
 const runApp = () => {

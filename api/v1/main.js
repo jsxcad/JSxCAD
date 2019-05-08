@@ -21,6 +21,7 @@ import { difference } from './difference';
 import { extrude } from './extrude';
 import { hull } from './hull';
 import { intersection } from './intersection';
+import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
@@ -61,6 +62,7 @@ export {
   hull,
   intersection,
   loadFont,
+  log,
   max,
   measureBoundingBox,
   minkowski,

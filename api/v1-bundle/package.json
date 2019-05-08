@@ -3,8 +3,8 @@
   "version": "0.0.74",
   "description": "Constructive Solid Geometry (CSG) Library",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "bundle.js",
-  "module": "bundle.js",
+  "main": "dist/bundle.js",
+  "module": "dist/bundle.js",
   "scripts": {
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",

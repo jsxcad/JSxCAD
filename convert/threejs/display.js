@@ -21,8 +21,8 @@ export const display = ({ Blob, THREE, dat, jsFrame, readFile, requestAnimationF
         overflow: 'visible'
       }
     });
-    left += 10;
-    top += 10;
+    left += 50;
+    top += 50;
     frame.setControl({
       styleDisplay: 'inline',
       maximizeButton: 'zoomButton',
