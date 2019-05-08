@@ -21,7 +21,7 @@ export default {
       {
         allowFallthrough: true,
         files: {
-          '@jsxcad/convert-jscad': `export const scriptToOperator = () => {};`,
+          '@jsxcad/convert-jscad': `export const scriptToOperator = () => {};`
         }
       }),
     nodeResolve({ preferBuiltins: false }),
