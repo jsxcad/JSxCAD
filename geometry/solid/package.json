@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-solid",
-  "version": "0.0.72",
+  "version": "0.0.73",
   "description": "Operations on polygon arrays for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,16 +20,16 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.72",
-    "@jsxcad/geometry-surface": "^0.0.72",
-    "@jsxcad/geometry-z0surface": "^0.0.72",
-    "@jsxcad/math-mat4": "^0.0.72",
-    "@jsxcad/math-plane": "^0.0.72",
-    "@jsxcad/math-poly3": "^0.0.72",
-    "@jsxcad/math-vec3": "^0.0.72"
+    "@jsxcad/geometry-polygons": "^0.0.73",
+    "@jsxcad/geometry-surface": "^0.0.73",
+    "@jsxcad/geometry-z0surface": "^0.0.73",
+    "@jsxcad/math-mat4": "^0.0.73",
+    "@jsxcad/math-plane": "^0.0.73",
+    "@jsxcad/math-poly3": "^0.0.73",
+    "@jsxcad/math-vec3": "^0.0.73"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.72",
+    "@jsxcad/data-shape": "^0.0.73",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
