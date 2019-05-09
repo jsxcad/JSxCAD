@@ -13991,6 +13991,24 @@ const intersection$4 = (...geometries) => {
   return intersectioned;
 };
 
+const toComponents = ({ requires, excludes }, geometry) => {
+  const components = [];
+
+  const walk = (geometry) => {
+    for (const item of geometry.assembly) {
+      if (hasMatchingTag(excludes, item.tags)) {
+        continue;
+      } else if (hasMatchingTag(requires, item.tags, true)) {
+        components.push(item);
+      } else if (item.assembly !== undefined) {
+        walk(item);
+      }
+    }
+  };
+  walk(geometry);
+  return components;
+};
+
 const differenceItems = (base, ...subtractions) => {
   const differenced = { tags: base.tags };
   if (base.solid) {
@@ -27907,6 +27925,10 @@ class Assembly {
     return toDisjointGeometry(toGeometry(this));
   }
 
+  toComponents (options) {
+    return toComponents(toGeometry(this));
+  }
+
   transform (matrix) {
     return fromGeometry(transform$7(matrix, toGeometry(this)));
   }
@@ -28424,7 +28446,7 @@ const writeFile = async (options, path, data) => {
   }
 };
 
-const log = (text) => writeFile({}, "console/out", text);
+const log = (text) => writeFile({ ephemeral: true }, 'console/out', text);
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
@@ -28467,14 +28489,16 @@ const fetchSources = async (sources) => {
   for (const source of sources) {
     if (source.url !== undefined) {
       log(`# Fetching ${source.url}`);
-      // const response = await fetchUrl(new Request(source.url, { method: 'GET', headers: new Headers(), mode: 'cors' }));
       const response = await fetchUrl(source.url);
       if (response.ok) {
         const data = await response.text();
         return data;
       }
     } else if (source.file !== undefined) {
-      return fetchFile(source.file);
+      try {
+        const data = await fetchFile(source.file);
+        return data;
+      } catch (e) {}
     } else {
       throw Error('die');
     }
