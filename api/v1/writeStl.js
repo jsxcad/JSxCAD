@@ -8,10 +8,10 @@ const toGeometry = ({ disjoint = true }, shape) => {
   } else {
     return shape.toGeometry();
   }
-}
+};
 
 export const writeStl = async (options, shape) => {
-  const { path, disjoint = true } = options;
+  const { path } = options;
   const geometry = toGeometry(options, shape);
   return writeFile({ geometry }, path, toStl(options, geometry));
 };

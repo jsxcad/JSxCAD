@@ -1,8 +1,8 @@
 import { add, negate, scale } from '@jsxcad/math-vec3';
-import { measureBoundingBox } from './measureBoundingBox';
-import { translate } from './translate';
 
 import { Shape } from './Shape';
+import { measureBoundingBox } from './measureBoundingBox';
+import { translate } from './translate';
 
 export const center = (shape) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
