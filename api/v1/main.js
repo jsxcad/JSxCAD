@@ -12,6 +12,7 @@ import { loadFont, text } from './text';
 import { Shape } from './Shape';
 import { acos } from './acos';
 import { assemble } from './assemble';
+import { center } from './center';
 import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
@@ -52,6 +53,7 @@ export {
   Shape,
   acos,
   assemble,
+  center,
   circle,
   crossSection,
   cos,

@@ -64,6 +64,10 @@ export class Shape {
     return toLazyGeometry(this).toDisjointGeometry(options);
   }
 
+  toGeometry (options = {}) {
+    return toLazyGeometry(this).toGeometry(options);
+  }
+
   toPaths (options = {}) {
     return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));
   }
