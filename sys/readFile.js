@@ -1,5 +1,6 @@
 import { isBrowser, isNode } from './browserOrNode';
 import { getFile } from './files';
+import { log } from './log';
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
@@ -41,14 +42,17 @@ const fetchSources = async (sources) => {
   // Try to load the data from a source.
   for (const source of sources) {
     if (source.url !== undefined) {
-      const response = await fetchUrl(new Request(source.url,
-                                                  { method: 'GET', headers: new Headers(), mode: 'cors' }));
+      log(`# Fetching ${source.url}`);
+      const response = await fetchUrl(source.url);
       if (response.ok) {
         const data = await response.text();
         return data;
       }
     } else if (source.file !== undefined) {
-      return fetchFile(source.file);
+      try {
+        const data = await fetchFile(source.file);
+        return data;
+      } catch (e) {}
     } else {
       throw Error('die');
     }

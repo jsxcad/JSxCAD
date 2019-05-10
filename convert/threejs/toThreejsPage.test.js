@@ -25,10 +25,8 @@ test('Eval geodesic sphere', async (t) => {
       includeEditor: true,
       initialScript: `
 const main = async () => {
-   const teapot = await readStl({ path: 'teapot',
-                                  format: 'ascii',
-                                  sources: [{ url: 'https://jsxcad.js.org/stl/teapot.stl' }] });
-   await writeStl({ path: 'window/teapot' }, difference(teapot.scale([0.1, 0.1, 0.1]), cube(5)));
+   const skeleton = await readLDraw({ part: '6260c01.dat' });
+   await writeStl({ path: 'window/skeleton' }, difference(skeleton.scale([0.1, 0.1, 0.1]), cube(5)));
  }
 `
     },
