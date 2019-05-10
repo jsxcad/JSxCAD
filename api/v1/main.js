@@ -47,6 +47,7 @@ import { union } from './union';
 import { writePdf } from './writePdf';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
+import { writeSvgPhoto } from './writeSvgPhoto';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
@@ -90,5 +91,6 @@ export {
   writePdf,
   writeStl,
   writeSvg,
+  writeSvgPhoto,
   writeThreejsPage
 };
