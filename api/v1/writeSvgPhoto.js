@@ -1,8 +1,8 @@
 import { Shape } from './Shape';
-import { toSvg } from '@jsxcad/convert-svg';
+import { toSvg } from '@jsxcad/convert-threejs';
 import { writeFile } from '@jsxcad/sys';
 
-export const writeSvg = async (options, shape) => {
+export const writeSvgPhoto = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toDisjointGeometry();
   return writeFile({ geometry }, path, toSvg(options, geometry));
@@ -10,4 +10,4 @@ export const writeSvg = async (options, shape) => {
 
 const method = function (options = {}) { writeSvg(options, this); return this; };
 
-Shape.prototype.writeSvg = method;
+Shape.prototype.writeSvgPhoto = method;
