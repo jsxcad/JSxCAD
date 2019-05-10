@@ -1,0 +1,36 @@
+digraph Geometry {
+  outputorder="edgesfirst"
+  fontcolor = "blue";
+  fontsize = 18;
+
+  subgraph cluster_api {
+    label = "User API";
+    "Shape";
+  }
+  subgraph cluster_lazy {
+    label = "Lazy Geometry";
+    "Lazy Geometry";
+  }
+  subgraph cluster_tagged {
+    label = "Tagged Geometry";
+    "Tagged Geometry";
+    "Assembly" [style=filled, fillcolor=white];
+  }
+  subgraph cluster_geometry {
+    label = "Geometry";
+    "Paths";
+    "Points";
+    "Surface";
+    "Solid";
+    "Z0Surface";
+  }
+
+  "Shape" -> "Lazy Geometry";
+  "Lazy Geometry" -> "Tagged Geometry";
+  "Tagged Geometry" -> "Assembly";
+  "Tagged Geometry" -> "Paths";
+  "Tagged Geometry" -> "Z0Surface";
+  "Tagged Geometry" -> "Surface";
+  "Tagged Geometry" -> "Solid";
+  "Tagged Geometry" -> "Points";
+}
