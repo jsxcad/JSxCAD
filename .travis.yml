@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - 10
+  - 12.2
 script:
   - npm run bootstrap
   - npm run test
