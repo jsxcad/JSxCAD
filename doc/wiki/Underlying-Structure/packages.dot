@@ -1,0 +1,23 @@
+digraph Pages {
+  outputorder="edgesfirst"
+  fontcolor = "blue";
+  fontsize = 18;
+
+  "User APIs";
+  "Lazy Geometry";
+  "Conversion";
+  "Geometry";
+  "Algorithm";
+  "Math";
+
+  "User APIs" -> "Lazy Geometry";
+  "User APIs" -> "Geometry";
+  "User APIs" -> "Conversion";
+  "User APIs" -> "Algorithm";
+  "User APIs" -> "Math";
+  "Lazy Geometry" -> "Geometry";
+  "Conversion" -> "Geometry";
+  "Geometry" -> "Math";
+  "Geometry" -> "Algorithm";
+  "Algorithm" -> "Math";
+}

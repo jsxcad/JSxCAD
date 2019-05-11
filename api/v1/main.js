@@ -12,6 +12,7 @@ import { loadFont, text } from './text';
 import { Shape } from './Shape';
 import { acos } from './acos';
 import { assemble } from './assemble';
+import { center } from './center';
 import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
@@ -46,12 +47,14 @@ import { union } from './union';
 import { writePdf } from './writePdf';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
+import { writeSvgPhoto } from './writeSvgPhoto';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
   Shape,
   acos,
   assemble,
+  center,
   circle,
   crossSection,
   cos,
@@ -88,5 +91,6 @@ export {
   writePdf,
   writeStl,
   writeSvg,
+  writeSvgPhoto,
   writeThreejsPage
 };
