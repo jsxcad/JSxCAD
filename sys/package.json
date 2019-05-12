@@ -9,7 +9,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
-    "tests": "ava *.test.js"
+    "tests": "ava *.test.js",
+    "rollup": "rollup -c rollup.config.js"
   },
   "contributors": [
     {
@@ -32,7 +33,13 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "esm": "^3.2.10"
+    "esm": "^3.2.10",
+    "rollup": "^1.11.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-hypothetical": "^2.1.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"
