@@ -1,4 +1,8 @@
 const { parentPort } = require('worker_threads');
+const { conversation } = require('./conversationRequireable');
 
-// FIX: Have it ask the asker a question and include the answer in the answer.
-parentPort.on('message', ({ id, question }) => parentPort.postMessage({ id, answer: question }));
+const say = (message) => parentPort.postMessage(message);
+const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
+const { hear } = conversation({ agent, say });
+
+parentPort.on('message', hear);
