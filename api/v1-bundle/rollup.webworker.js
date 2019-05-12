@@ -1,9 +1,8 @@
 // rollup.config.js
-import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
-import loadz0r from "rollup-plugin-loadz0r";
 import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical';
+import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
@@ -27,7 +26,7 @@ export default {
           'fs': '',
           'node-fetch': '',
           'os': '',
-          'tty': '',
+          'tty': ''
         }
       }),
     nodeResolve({ preferBuiltins: false }),
