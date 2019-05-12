@@ -1,4 +1,6 @@
-export const conversation = ({ agent, say }) => {
+'use strict';
+
+const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = {};
   const ask = (question) => {
@@ -26,3 +28,11 @@ export const conversation = ({ agent, say }) => {
   };
   return { ask, hear };
 };
+
+/* global postMessage, onmessage:writable */
+
+const say = (message) => postMessage(message);
+const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
+const { hear } = conversation({ agent, say });
+onmessage = ({ data }) => hear(data);
+if (onmessage === undefined) throw Error('die');
