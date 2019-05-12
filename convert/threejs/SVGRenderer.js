@@ -2,22 +2,22 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-export const installSVGRenderer = ({ THREE, document }) => {
-  THREE.SVGObject = function (node) {
+export const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine, RenderableFace, document }) => {
+  const SVGObject = function (node) {
   	THREE.Object3D.call(this);
 
   	this.node = node;
   };
 
-  THREE.SVGObject.prototype = Object.create(THREE.Object3D.prototype);
-  THREE.SVGObject.prototype.constructor = THREE.SVGObject;
+  SVGObject.prototype = Object.create(THREE.Object3D.prototype);
+  SVGObject.prototype.constructor = SVGObject;
 
-  THREE.SVGRenderer = function () {
+  const SVGRenderer = function () {
   	console.log('THREE.SVGRenderer', THREE.REVISION);
 
   	var _this = this;
   		var _renderData; var _elements; var _lights;
-  		var _projector = new THREE.Projector();
+  		var _projector = new Projector();
   		var _svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   		var _svgWidth; var _svgHeight; var _svgWidthHalf; var _svgHeightHalf;
 
@@ -168,12 +168,12 @@ export const installSVGRenderer = ({ THREE, document }) => {
 
   			_elemBox.makeEmpty();
 
-  			if (element instanceof THREE.RenderableSprite) {
+  			if (element instanceof RenderableSprite) {
   				_v1 = element;
   				_v1.x *= _svgWidthHalf; _v1.y *= -_svgHeightHalf;
 
   				renderSprite(_v1, element, material);
-  			} else if (element instanceof THREE.RenderableLine) {
+  			} else if (element instanceof RenderableLine) {
   				_v1 = element.v1; _v2 = element.v2;
 
   				_v1.positionScreen.x *= _svgWidthHalf; _v1.positionScreen.y *= -_svgHeightHalf;
@@ -184,7 +184,7 @@ export const installSVGRenderer = ({ THREE, document }) => {
   				if (_clipBox.intersectsBox(_elemBox) === true) {
   					renderLine(_v1, _v2, element, material);
   				}
-  			} else if (element instanceof THREE.RenderableFace) {
+  			} else if (element instanceof RenderableFace) {
   				_v1 = element.v1; _v2 = element.v2; _v3 = element.v3;
 
   				if (_v1.positionScreen.z < -1 || _v1.positionScreen.z > 1) continue;
@@ -210,7 +210,7 @@ export const installSVGRenderer = ({ THREE, document }) => {
   		flushPath(); // just to flush last svg:path
 
   		scene.traverseVisible(function (object) {
-  			 if (object instanceof THREE.SVGObject) {
+  			 if (object instanceof SVGObject) {
   				_vector3.setFromMatrixPosition(object.matrixWorld);
   				_vector3.applyMatrix4(_viewProjectionMatrix);
 
@@ -401,4 +401,6 @@ export const installSVGRenderer = ({ THREE, document }) => {
   		return _svgPathPool[ id ];
   	}
   };
+
+  return { SVGRenderer };
 };
