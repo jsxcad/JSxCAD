@@ -39,10 +39,12 @@ This should produce example/v1/tmp/square.pdf.
 
 ```
 git clone https://github.com/jsxcad/JSxCAD
+
 cd JSxCAD
 npm install
 npm run bootstrap
 cd example/v1
+
 npm run example square
 ```
 

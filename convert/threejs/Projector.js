@@ -5,7 +5,7 @@
  */
 
 export const installProjector = ({ THREE }) => {
-  THREE.RenderableObject = function () {
+  const RenderableObject = function () {
   	this.id = 0;
 
   	this.object = null;
@@ -15,12 +15,12 @@ export const installProjector = ({ THREE }) => {
 
   //
 
-  THREE.RenderableFace = function () {
+  const RenderableFace = function () {
   	this.id = 0;
 
-  	this.v1 = new THREE.RenderableVertex();
-  	this.v2 = new THREE.RenderableVertex();
-  	this.v3 = new THREE.RenderableVertex();
+  	this.v1 = new RenderableVertex();
+  	this.v2 = new RenderableVertex();
+  	this.v3 = new RenderableVertex();
 
   	this.normalModel = new THREE.Vector3();
 
@@ -37,7 +37,7 @@ export const installProjector = ({ THREE }) => {
 
   //
 
-  THREE.RenderableVertex = function () {
+  const RenderableVertex = function () {
   	this.position = new THREE.Vector3();
   	this.positionWorld = new THREE.Vector3();
   	this.positionScreen = new THREE.Vector4();
@@ -45,18 +45,18 @@ export const installProjector = ({ THREE }) => {
   	this.visible = true;
   };
 
-  THREE.RenderableVertex.prototype.copy = function (vertex) {
+  RenderableVertex.prototype.copy = function (vertex) {
   	this.positionWorld.copy(vertex.positionWorld);
   	this.positionScreen.copy(vertex.positionScreen);
   };
 
   //
 
-  THREE.RenderableLine = function () {
+  const RenderableLine = function () {
   	this.id = 0;
 
-  	this.v1 = new THREE.RenderableVertex();
-  	this.v2 = new THREE.RenderableVertex();
+  	this.v1 = new RenderableVertex();
+  	this.v2 = new RenderableVertex();
 
   	this.vertexColors = [ new THREE.Color(), new THREE.Color() ];
   	this.material = null;
@@ -67,7 +67,7 @@ export const installProjector = ({ THREE }) => {
 
   //
 
-  THREE.RenderableSprite = function () {
+  const RenderableSprite = function () {
   	this.id = 0;
 
   	this.object = null;
@@ -85,7 +85,7 @@ export const installProjector = ({ THREE }) => {
 
   //
 
-  THREE.Projector = function () {
+  const Projector = function () {
   	var _object; var _objectCount; var _objectPool = []; var _objectPoolLength = 0;
   		var _vertex; var _vertexCount; var _vertexPool = []; var _vertexPoolLength = 0;
   		var _face; var _faceCount; var _facePool = []; var _facePoolLength = 0;
@@ -747,7 +747,7 @@ export const installProjector = ({ THREE }) => {
 
   	function getNextObjectInPool () {
   		if (_objectCount === _objectPoolLength) {
-  			var object = new THREE.RenderableObject();
+  			var object = new RenderableObject();
   			_objectPool.push(object);
   			_objectPoolLength++;
   			_objectCount++;
@@ -759,7 +759,7 @@ export const installProjector = ({ THREE }) => {
 
   	function getNextVertexInPool () {
   		if (_vertexCount === _vertexPoolLength) {
-  			var vertex = new THREE.RenderableVertex();
+  			var vertex = new RenderableVertex();
   			_vertexPool.push(vertex);
   			_vertexPoolLength++;
   			_vertexCount++;
@@ -771,7 +771,7 @@ export const installProjector = ({ THREE }) => {
 
   	function getNextFaceInPool () {
   		if (_faceCount === _facePoolLength) {
-  			var face = new THREE.RenderableFace();
+  			var face = new RenderableFace();
   			_facePool.push(face);
   			_facePoolLength++;
   			_faceCount++;
@@ -783,7 +783,7 @@ export const installProjector = ({ THREE }) => {
 
   	function getNextLineInPool () {
   		if (_lineCount === _linePoolLength) {
-  			var line = new THREE.RenderableLine();
+  			var line = new RenderableLine();
   			_linePool.push(line);
   			_linePoolLength++;
   			_lineCount++;
@@ -795,7 +795,7 @@ export const installProjector = ({ THREE }) => {
 
   	function getNextSpriteInPool () {
   		if (_spriteCount === _spritePoolLength) {
-  			var sprite = new THREE.RenderableSprite();
+  			var sprite = new RenderableSprite();
   			_spritePool.push(sprite);
   			_spritePoolLength++;
   			_spriteCount++;
@@ -870,4 +870,6 @@ export const installProjector = ({ THREE }) => {
   		}
   	}
   };
+
+  return { Projector, RenderableObject, RenderableFace, RenderableVertex, RenderableLine, RenderableSprite };
 };

@@ -5,13 +5,9 @@ import { installSVGRenderer } from './SVGRenderer';
 import { toThreejsGeometry } from './toThreejsGeometry';
 
 // Bootstrap start.
-installProjector({ THREE });
+const { Projector, RenderableFace, RenderableLine, RenderableSprite } = installProjector({ THREE });
 
-{
-  // FIX: Is there a better way to get an empty document?
-  const document = new DOMParser().parseFromString('<xml></xml>', 'text/xml');
-  installSVGRenderer({ THREE, document });
-}
+const { SVGRenderer } = installSVGRenderer({ THREE, Projector, RenderableFace, RenderableLine, RenderableSprite, document: new DOMParser().parseFromString('<xml></xml>', 'text/xml') });
 // Bootstrap done.
 
 const build = ({ cameraPosition = [0, 0, 16], pageSize = [100, 100] }, geometry) => {
@@ -65,7 +61,7 @@ export const toSvg = async (options = {}, geometry) => {
   const { pageSize = [500, 500] } = options;
   const [pageWidth, pageHeight] = pageSize;
 
-  const renderer = new THREE.SVGRenderer({});
+  const renderer = new SVGRenderer({});
   renderer.setSize(pageWidth, pageHeight);
   renderer.render(scene, camera);
 
