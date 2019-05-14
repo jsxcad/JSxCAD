@@ -1,6 +1,6 @@
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 
-import { fromGeometry } from '@jsxcad/geometry-lazy';
+import { fromGeometry as fromGeometryToLazyGeometry } from '@jsxcad/geometry-lazy';
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
@@ -32,7 +32,7 @@ export class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor (lazyGeometry = fromGeometry({ assembly: [] })) {
+  constructor (lazyGeometry = fromGeometryToLazyGeometry({ assembly: [] })) {
     this.lazyGeometry = lazyGeometry;
   }
 
@@ -108,13 +108,13 @@ export const differenceLazily = (shape, ...shapes) =>
 export const intersectionLazily = (shape, ...shapes) =>
   Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry)));
 
-Shape.fromClosedPath = (path) => new Shape(fromGeometry({ paths: [closePath(path)] }));
-Shape.fromGeometry = (geometry) => new Shape(fromGeometry(geometry));
+Shape.fromClosedPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [closePath(path)] }));
+Shape.fromGeometry = (geometry) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry(geometry));
 Shape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);
-Shape.fromOpenPath = (path) => new Shape(fromGeometry({ paths: [openPath(path)] }));
-Shape.fromPaths = (paths) => new Shape(fromGeometry({ paths: paths }));
-Shape.fromPathToZ0Surface = (path) => new Shape(fromGeometry({ z0Surface: [path] }));
-Shape.fromPathsToZ0Surface = (paths) => new Shape(fromGeometry({ z0Surface: paths }));
-Shape.fromPolygonsToSolid = (polygons) => new Shape(fromGeometry({ solid: fromPolygonsToSolid({}, polygons) }));
-Shape.fromPolygonsToZ0Surface = (polygons) => new Shape(fromGeometry({ z0Surface: polygons }));
-Shape.fromSurfaces = (surfaces) => new Shape(fromGeometry({ solid: surfaces }));
+Shape.fromOpenPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [openPath(path)] }));
+Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: paths }));
+Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: [path] }));
+Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: paths }));
+Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: fromPolygonsToSolid({}, polygons) }));
+Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: polygons }));
+Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: surfaces }));
