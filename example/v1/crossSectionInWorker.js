@@ -3,7 +3,7 @@ import { assemble, circle, difference, extrude, Shape, sphere, square, writeSvg 
 export const main = async () => {
   
   //Here is a simple example which works
-  const cube = square(10).extrude({height: 10});
+  const cube = square(10).extrude({height: 10}).translate([0,0,-5]);;
   const passable = cube.toLazyGeometry().toGeometry();
   //Simulate passing to ww here ----------------------------
   const inThread = Shape.fromGeometry(passable).crossSection().toDisjointGeometry();
