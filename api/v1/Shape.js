@@ -106,7 +106,7 @@ export const differenceLazily = (shape, ...shapes) =>
   Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
 
 export const intersectionLazily = (shape, ...shapes) =>
-  Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));
+  Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry)));
 
 Shape.fromClosedPath = (path) => new Shape(fromGeometry({ paths: [closePath(path)] }));
 Shape.fromGeometry = (geometry) => new Shape(fromGeometry(geometry));
