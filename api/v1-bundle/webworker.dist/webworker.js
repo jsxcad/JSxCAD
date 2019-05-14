@@ -74021,7 +74021,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const say = (message) => postMessage(message);
   // const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;
-  const agent = async ({ ask, question }) => cube().toGeometry();
+  const agent = async ({ ask, question }) => cube(30).toGeometry();
   const { hear } = conversation({ agent, say });
   onmessage = ({ data }) => hear(data);
   if (onmessage === undefined) throw Error('die');
