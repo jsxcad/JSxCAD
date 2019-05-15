@@ -6,9 +6,8 @@ import { conversation } from './conversation.js';
 // Sets up a worker with conversational interface.
 export const createService = async ({ nodeWorker, webWorker, agent }) => {
   if (isNode) {
-    console.log(`QQ/worker_threads/import`);
-    const { Worker } = await import('worker_threads');
-    console.log(`QQ/worker_threads/worker`);
+    // const { Worker } = await import('worker_threads');
+    const { Worker } = require('worker_threads');
     const worker = new Worker(nodeWorker);
     const say = (message) => worker.postMessage(message);
     const { ask, hear } = conversation({ agent, say });
@@ -23,7 +22,6 @@ export const createService = async ({ nodeWorker, webWorker, agent }) => {
         });
       });
     };
-    console.log(`QQ/worker_threads/hear`);
     worker.on('message', hear);
     return { ask, stop };
   } else if (isBrowser) {

@@ -1,7 +1,13 @@
+/* global self */
+
+import { isNode, isWebWorker } from './browserOrNode';
+
 import { getFile } from './files';
-import { isNode } from './browserOrNode';
 
 export const writeFile = async (options, path, data) => {
+  if (isWebWorker) {
+    return self.ask({ writeFile: { options, path, data: await data } });
+  }
   const { ephemeral } = options;
 
   data = await data;
