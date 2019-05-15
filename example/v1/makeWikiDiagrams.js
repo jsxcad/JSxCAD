@@ -1,4 +1,4 @@
-import { Shape, assemble, circle, cube, cylinder, writeSvgPhoto } from '@jsxcad/api-v1';
+import { Shape, assemble, circle, cube, cylinder, difference, writeSvgPhoto } from '@jsxcad/api-v1';
 
 // cube, cylinder, difference, extrude, hull, intersection, loadFont, log, max, measureBoundingBox, minkowski, polyhedron, readDst, readLDraw, readStl, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePdf, writeStl, writeSvg, writeSvgPhoto, writeThreejsPage
 
@@ -30,6 +30,77 @@ const main = async () => {
   // Cross Section
   const crossSection = assembled.crossSection();
   await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/crossSection.svg', cameraPosition: [0, 0, dist] }, crossSection.rotate([xAng, yAng, 0]));
+
+  // Cube
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/cube.svg', cameraPosition: [0, 0, dist] }, aCube.rotate([xAng, yAng, 0]));
+
+  // Cylinder
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/cylinder.svg', cameraPosition: [0, 0, dist] }, cylinder({ r: 5, h: 10, center: true }).rotate([xAng, yAng, 0]));
+
+  // Difference
+  const theDifference = difference(aCube, aCylinder);
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/difference.svg', cameraPosition: [0, 0, dist] }, theDifference.rotate([xAng, yAng, 0]));
+  //  extrude
+
+  //  hull
+
+  //  intersection
+
+  //  loadFont
+
+  //  log
+
+  //  max
+
+  //  measureBoundingBox
+
+  //  minkowski
+
+  //  polyhedron
+
+  //  readDst
+
+  //  readLDraw
+
+  //  readStl
+
+  //  rotate
+
+  //  rotateX
+
+  //  rotateY
+
+  //  rotateZ
+
+  //  scale
+
+  //  sin
+
+  //  sphere
+
+  //  sqrt
+
+  //  square
+
+  //  svgPath
+
+  //  tetrahedron
+
+  //  text
+
+  //  translate
+
+  //  union
+
+  //  writePdf
+
+  //  writeStl
+
+  //  writeSvg
+
+  //  writeSvgPhoto
+
+  //  writeThreejsPage
 };
 
 main().then(() => { console.log('Diagrams Generated'); });
