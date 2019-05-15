@@ -15,7 +15,7 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
   const setupDocument = () => {
     editor = CodeMirror((domElement) => {
       domElement.id = 'editor';
-      addPage({ title: 'Source', content: '<div id="editor"></div>', contentOverflow: 'hidden' });
+      addPage({ title: 'Source', content: '<div id="editor"></div>', contentOverflow: 'hidden', position: 'top-left' });
       document.getElementById('editor').appendChild(domElement);
     },
                         {

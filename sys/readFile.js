@@ -1,4 +1,6 @@
-import { isBrowser, isNode } from './browserOrNode';
+/* global self */
+
+import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 import { getFile } from './files';
 import { log } from './log';
 
@@ -60,6 +62,9 @@ const fetchSources = async (sources) => {
 };
 
 export const readFile = async (options, path) => {
+  if (isWebWorker) {
+    return self.ask({ readFile: { options, path } });
+  }
   const { sources = [] } = options;
   const file = getFile(path);
   if (file.data === undefined) {

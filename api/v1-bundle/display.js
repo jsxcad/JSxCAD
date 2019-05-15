@@ -3,23 +3,27 @@
 import * as THREE from 'three';
 import * as dat from 'dat.gui';
 
+import { installCSS, installCSSLink } from './css';
+
 import TrackballControls from 'three-trackballcontrols';
-import { installCSSLink } from './css';
 import { jsPanel } from 'jspanel4';
+import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 export const installDisplayCSS = (document) => {
   installCSSLink(document, 'https://unpkg.com/jspanel4@4.6.0/es6module/jspanel.css');
+  installCSS(document, `.dg { position: absolute; top: 2px; left: 2px }`);
 };
 
-export const installDisplay = async ({ document, readFile, watchFile, watchFileCreation }) => {
+export const installDisplay = async ({ document, readFile, watchFile, watchFileCreation, window }) => {
   let pages = [];
 
-  const addPage = ({ title = 'Window', content = '', contentOverflow = 'scroll' }) => {
+  const addPage = ({ title = 'Window', content = '', contentOverflow = 'scroll', position = 'top-left', size = '600 600' }) => {
     const panel = jsPanel.create({
       headerTitle: title,
-      contentSize: '600 600',
+      contentSize: size,
       content,
-      contentOverflow
+      contentOverflow,
+      position: { my: position, at: position }
     });
     pages.push(panel);
     return panel;
@@ -43,7 +47,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     let scene;
     let renderer;
     let gui;
-    const page = addPage(path);
+    // FIX: Injection.
+    const page = addPage({ title: path, content: `<div id="${path}"></div>`, contentOverflow: 'hidden', position: 'top-right' });
     let viewerElement;
     // let downloadButton;
 
@@ -115,17 +120,19 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           controllers[dataset.name] = controller;
         }
         controller.listen().onChange((value) => { dataset.mesh.visible = value; });
+        dataset.controller = controller;
       }
     };
 
     watchFile(path, ({ geometry }, file) => {
       if (geometry !== undefined) {
         // We expect the geometry already includes threejs versions.
-        updateDatasets(geometry);
+        updateDatasets(toThreejsGeometry(geometry));
       }
     });
 
     init();
+    animate();
     function init () {
       //
       camera = new THREE.PerspectiveCamera(27, page.offsetWidth / page.offsetHeight, 1, 3500);
@@ -150,9 +157,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       gui = new dat.GUI({ autoPlace: false });
       gui.domElement.style = 'padding: 5px';
       viewerElement.appendChild(gui.domElement);
-      // viewerElement.appendChild(makeDownloadButton());
-      // page.$('div').appendChild(viewerElement);
-      page.$('div').appendChild(viewerElement);
+      const container = document.getElementById(path);
+      container.appendChild(viewerElement);
       //
       controls = new TrackballControls(camera, viewerElement);
       controls.rotateSpeed = 4.0;
@@ -166,7 +172,12 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       controls.addEventListener('change', render);
       //
       onResize();
-      new ResizeObserver(onResize).observe(page.iframe);
+      new ResizeObserver(onResize).observe(container);
+    }
+    function animate () {
+      window.requestAnimationFrame(animate);
+      render();
+      controls.update();
     }
     function onResize () {
       const width = viewerElement.clientWidth - 10;
