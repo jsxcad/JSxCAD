@@ -1,4 +1,4 @@
-import { Shape, assemble, circle, cube, cylinder, difference, writeSvgPhoto } from '@jsxcad/api-v1';
+import { Shape, assemble, circle, cube, cylinder, difference, hull, intersection, writeSvgPhoto } from '@jsxcad/api-v1';
 
 // cube, cylinder, difference, extrude, hull, intersection, loadFont, log, max, measureBoundingBox, minkowski, polyhedron, readDst, readLDraw, readStl, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePdf, writeStl, writeSvg, writeSvgPhoto, writeThreejsPage
 
@@ -40,11 +40,18 @@ const main = async () => {
   // Difference
   const theDifference = difference(aCube, aCylinder);
   await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/difference.svg', cameraPosition: [0, 0, dist] }, theDifference.rotate([xAng, yAng, 0]));
+
   //  extrude
+  const anExtrusion = circle({ r: 2 }).extrude({ height: 10 });
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/extrude.svg', cameraPosition: [0, 0, dist] }, anExtrusion.rotate([xAng, yAng, 0]));
 
   //  hull
+  const aHull = hull(aCube.translate([-5, -5, 0]), aCylinder);
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/hull.svg', cameraPosition: [0, 0, dist] }, aHull.rotate([xAng, yAng, 0]));
 
   //  intersection
+  const anIntersection = intersection(aCube, aCylinder);
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/intersection.svg', cameraPosition: [0, 0, dist] }, anIntersection.rotate([xAng, yAng, 0]));
 
   //  loadFont
 
