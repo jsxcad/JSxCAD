@@ -25,9 +25,11 @@ export const assertSingle = (value) => {
   return true;
 };
 
-export const assertNumber = (value) => {
-  if (typeof value !== 'number') {
-    throw Error(`Not a number: ${value}`);
+export const assertNumber = (...values) => {
+  for (const value of values) {
+    if (typeof value !== 'number') {
+      throw Error(`Not a number: ${value}`);
+    }
   }
   return true;
 };
