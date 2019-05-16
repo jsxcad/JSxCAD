@@ -26,6 +26,7 @@ import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
+import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
 // import { readJscad } from './readJscad';
@@ -69,6 +70,7 @@ export {
   max,
   measureBoundingBox,
   minkowski,
+  polygon,
   polyhedron,
   readDst,
   // readJscad,
