@@ -1,4 +1,4 @@
-import { Shape, assemble, circle, cube, cylinder, difference, hull, intersection, writeSvgPhoto } from '@jsxcad/api-v1';
+import { Shape, assemble, circle, cube, cylinder, difference, hull, intersection, square, writeSvgPhoto } from '@jsxcad/api-v1';
 
 // cube, cylinder, difference, extrude, hull, intersection, loadFont, log, max, measureBoundingBox, minkowski, polyhedron, readDst, readLDraw, readStl, rotate, rotateX, rotateY, rotateZ, scale, sin, sphere, sqrt, square, svgPath, tetrahedron, text, translate, union, writePdf, writeStl, writeSvg, writeSvgPhoto, writeThreejsPage
 
@@ -88,7 +88,9 @@ const main = async () => {
   //  sqrt
 
   //  square
-
+    const aSquare = square({size: [15,20]});
+    await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/square.svg', cameraPosition: [0, 0, dist] }, aSquare.rotate([xAng, yAng, 0]));
+    
   //  svgPath
 
   //  tetrahedron
