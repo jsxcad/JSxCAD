@@ -3,9 +3,8 @@
 import * as THREE from 'three';
 import * as dat from 'dat.gui';
 
-import { installCSS, installCSSLink } from './css';
-
 import TrackballControls from 'three-trackballcontrols';
+import { installCSS } from './css';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
