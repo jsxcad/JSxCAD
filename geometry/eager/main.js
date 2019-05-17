@@ -11,6 +11,7 @@ import { intersection } from './intersection';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toPaths } from './toPaths';
+import { toPoints } from './toPoints';
 import { toSolid } from './toSolid';
 import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
@@ -28,6 +29,7 @@ export {
   toComponents,
   toDisjointGeometry,
   toPaths,
+  toPoints,
   toSolid,
   toZ0Surface,
   transform,

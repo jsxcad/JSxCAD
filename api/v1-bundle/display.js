@@ -11,7 +11,7 @@ import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 export const installDisplayCSS = (document) => {
-  installCSSLink(document, 'https://unpkg.com/jspanel4@4.6.0/es6module/jspanel.css');
+  // installCSSLink(document, 'https://unpkg.com/jspanel4@4.6.0/es6module/jspanel.css');
   installCSS(document, `
                .dg { position: absolute; top: 2px; left: 2px; background: #ffffff; color: #000000 }
                .dg.main.taller-than-window .close-button { border-top: 1px solid #ddd; }

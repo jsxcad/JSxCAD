@@ -14,6 +14,7 @@ import { Shape } from './Shape';
 import { acos } from './acos';
 import { assemble } from './assemble';
 import { center } from './center';
+import { chainHull } from './chainHull';
 import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
@@ -58,6 +59,7 @@ export {
   acos,
   assemble,
   center,
+  chainHull,
   circle,
   crossSection,
   cos,
