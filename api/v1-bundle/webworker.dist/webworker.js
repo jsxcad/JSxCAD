@@ -17112,6 +17112,12 @@ define("./webworker.js",[],function () { 'use strict';
       paths: union(...filterAndFlattenAssemblyData({ requires, excludes, form: 'paths' }, toDisjointGeometry(assembly)))
     });
 
+  const toPoints$1 = (options = {}, geometry) => {
+    const points = [];
+    eachPoint$4(options, point => points.push(point), geometry);
+    return { points };
+  };
+
   const toSolid = ({ requires, excludes }, assembly) =>
     ({
       solid: union$3(...filterAndFlattenAssemblyData({ requires, excludes, form: 'solid' }, toDisjointGeometry(assembly)))
@@ -30958,6 +30964,10 @@ define("./webworker.js",[],function () { 'use strict';
       return this.geometry;
     }
 
+    toPoints (options = {}) {
+      return fromGeometry(toPoints$1(options, toGeometry(this)));
+    }
+
     toPaths (options = {}) {
       return fromGeometry(toPaths$1(options, toGeometry(this)));
     }
@@ -31210,6 +31220,15 @@ define("./webworker.js",[],function () { 'use strict';
   const method$3 = function () { return center(this); };
 
   Shape.prototype.center = method$3;
+
+  const chainHull = (...geometries) => {
+    const points = geometries.map(geometry => geometry.toPoints().toGeometry().points);
+    const chain = [];
+    for (let nth = 1; nth < geometries.length; nth++) {
+      chain.push(Shape.fromPolygonsToSolid(buildConvexHull({}, [...points[nth - 1], ...points[nth]])));
+    }
+    return assemble$1(...chain);
+  };
 
   const assert$1 = (value, message, pass) => {
     if (pass !== true) {
@@ -83566,6 +83585,7 @@ define("./webworker.js",[],function () { 'use strict';
     acos: acos$1,
     assemble: assemble$1,
     center: center,
+    chainHull: chainHull,
     circle: circle,
     crossSection: crossSection,
     cos: cos$1,
