@@ -3548,7 +3548,7 @@ define("./webworker.js",[],function () { 'use strict';
   const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
     let edges = [];
     const addEdge = (start, end) => {
-      edges.push([start, end]);
+      edges.push([canonicalize(start), canonicalize(end)]);
     };
 
     // Find the edges along the plane and fold them into paths to produce a set of closed loops.
@@ -16459,6 +16459,10 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const makeConvex$2 = (options = {}, surface) => {
+    if (surface.length === 0) {
+     // An empty surface is not non-convex.
+     return surface;
+    }
     assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
     let retessellatedSurface = makeConvex$1({}, union$2(...transform$7(to, surface).map(polygon => [polygon])));
@@ -33021,7 +33025,7 @@ define("./webworker.js",[],function () { 'use strict';
   const writePdf = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toPdf({ preview: true, ...options }, geometry));
+    return writeFile({ geometry, preview: true }, path, toPdf({ preview: true, ...options }, geometry));
   };
 
   const toGeometry$1 = ({ disjoint = true }, shape) => {

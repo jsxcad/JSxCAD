@@ -1,13 +1,15 @@
 import { Shape } from './Shape';
+import { assemble } from './assemble';
 import { assertNumber } from './assert';
 import { dispatch } from './dispatch';
 import { extrudeLinear } from '@jsxcad/algorithm-shape';
+import { getZ0Surfaces } from '@jsxcad/geometry-eager';
 
 export const fromHeight = ({ height }, shape) => {
-  const geometry = shape.toZ0Surface();
-  const extrusion = extrudeLinear({ height: height }, geometry.lazyGeometry.geometry.z0Surface);
-  const extrudedShape = Shape.fromPolygonsToSolid(extrusion).translate([0, 0, height / 2]);
-  return extrudedShape;
+  const z0Surfaces = getZ0Surfaces(shape.toGeometry());
+  const extrusions = z0Surfaces.map(z0Surface => extrudeLinear({ height: height }, z0Surface));
+  const extrudedShapes = extrusions.map(extrusion => Shape.fromPolygonsToSolid(extrusion).translate([0, 0, height / 2]));
+  return assemble(...extrudedShapes);
 };
 
 export const extrude = dispatch(

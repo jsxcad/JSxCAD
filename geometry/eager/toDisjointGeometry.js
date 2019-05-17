@@ -5,6 +5,8 @@ export const toDisjointGeometry = (geometry) => {
   if (geometry.assembly === undefined) {
     // A singleton is disjoint.
     return geometry;
+  } else if (geometry.disjointGeometry) {
+    return geometry.disjointGeometry;
   } else {
     const subtractions = [];
     const walk = (geometry, disjointed) => {
@@ -21,6 +23,7 @@ export const toDisjointGeometry = (geometry) => {
       return disjointed;
     };
     const result = walk(geometry, { assembly: [], tags: geometry.tags });
+    geometry.disjointGeometry = result;
     return result;
   }
 };
