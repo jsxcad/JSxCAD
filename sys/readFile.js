@@ -4,7 +4,7 @@ import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 import * as fs from 'fs';
 import { getFile } from './files';
 import { log } from './log';
-import * as nodeFetch from 'node-fetch';
+import nodeFetch from 'node-fetch';
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {

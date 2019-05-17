@@ -10,5 +10,5 @@ test('Simple', t => {
       .rotateZ(90)
       .toPath();
   t.deepEqual(canonicalize(path),
-              [null, [0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [-1, 1, 0]]);
+              [null,[0,0,0],[1,0, 0],[1,1, 0]]);
 });
