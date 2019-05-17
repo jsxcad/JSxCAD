@@ -215,6 +215,7 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * @returns {mat4} out
    */
+  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
   /**
    * Calculates the absolute value of the give vector
@@ -563,6 +564,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec2} b the second operand
    * @returns {vec2} out
    */
+  const add$1 = ([ax, ay], [bx, by]) => [ax + bx, ay + by];
 
   // y=sin, x=cos
 
@@ -727,6 +729,8 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec2} vector the vector to transform
    * @returns {vec2} out
    */
+  const transform$1 = (matrix, [x, y]) => [matrix[0] * x + matrix[4] * y + matrix[12],
+                                                matrix[1] * x + matrix[5] * y + matrix[13]];
 
   /**
    * Subtracts matrix b from matrix a
@@ -3465,7 +3469,7 @@ define("./webworker.js",[],function () { 'use strict';
    */
 
   // Affine transformation of polygon. Returns a new polygon.
-  const transform$1 = (matrix, polygon) => {
+  const transform$2 = (matrix, polygon) => {
     const transformed = map(polygon, vertex => transform(matrix, vertex));
     if (isMirroring(matrix)) {
       // Reverse the order to preserve the orientation.
@@ -3802,11 +3806,11 @@ define("./webworker.js",[],function () { 'use strict';
     return segments;
   };
 
-  const transform$2 = (matrix, path) =>
+  const transform$3 = (matrix, path) =>
     path.map((point, index) => (point === null) ? null : transform(matrix, point));
 
-  const translate = (vector, path) => transform$2(fromTranslation(vector), path);
-  const scale$1 = (vector, path) => transform$2(fromScaling(vector), path);
+  const translate = (vector, path) => transform$3(fromTranslation(vector), path);
+  const scale$1 = (vector, path) => transform$3(fromScaling(vector), path);
 
   const isTriangle = (path) => isClosed(path) && path.length === 3;
 
@@ -7301,9 +7305,9 @@ define("./webworker.js",[],function () { 'use strict';
     return blessAsTriangles(triangles);
   };
 
-  const transform$3 = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
+  const transform$4 = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
 
-  const translate$1 = (vector, polygons) => transform$3(fromTranslation(vector), polygons);
+  const translate$1 = (vector, polygons) => transform$4(fromTranslation(vector), polygons);
 
   /**
    * Construct a regular unit polygon of a given edge count.
@@ -7373,8 +7377,8 @@ define("./webworker.js",[],function () { 'use strict';
   const buildRegularPrism = ({ edges = 32 }) =>
     extrudeLinear({ height: 1 }, [buildRegularPolygon({ edges: edges })]);
 
-  const transform$4 = (matrix, points) => points.map(point => transform(matrix, point));
-  const translate$2 = ([x = 0, y = 0, z = 0], points) => transform$4(fromTranslation([x, y, z]), points);
+  const transform$5 = (matrix, points) => points.map(point => transform(matrix, point));
+  const translate$2 = ([x = 0, y = 0, z = 0], points) => transform$5(fromTranslation([x, y, z]), points);
 
   var subtract_1 = subtract$1;
 
@@ -7730,7 +7734,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   unwrapExports(Vertex_1);
 
-  var add_1 = add$1;
+  var add_1 = add$2;
 
   /**
    * Adds two vec3's
@@ -7740,7 +7744,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
-  function add$1(out, a, b) {
+  function add$2(out, a, b) {
       out[0] = a[0] + b[0];
       out[1] = a[1] + b[1];
       out[2] = a[2] + b[2];
@@ -13107,13 +13111,13 @@ define("./webworker.js",[],function () { 'use strict';
     return points;
   };
 
-  const transform$5 = (matrix, paths) => paths.map(path => transform$2(matrix, path));
+  const transform$6 = (matrix, paths) => paths.map(path => transform$3(matrix, path));
 
   // FIX: Deduplication.
 
   const union = (...pathsets) => [].concat(...pathsets);
 
-  const scale$3 = ([x = 1, y = 1, z = 1], paths) => transform$5(fromScaling([x, y, z]), paths);
+  const scale$3 = ([x = 1, y = 1, z = 1], paths) => transform$6(fromScaling([x, y, z]), paths);
 
   const buildRingSphere = ({ resolution = 20 }) => {
     const paths = [];
@@ -13558,7 +13562,7 @@ define("./webworker.js",[],function () { 'use strict';
 
     if (normalizeCoordinateSystem) {
       // Turn it upside down.
-      return transform$5(fromScaling([1, -1, 0]), paths);
+      return transform$6(fromScaling([1, -1, 0]), paths);
     } else {
       return paths;
     }
@@ -13582,7 +13586,7 @@ define("./webworker.js",[],function () { 'use strict';
   const toPlane$1 = (surface) => toPlane(surface[0]);
 
   // Transforms
-  const transform$6 = (matrix, surface) => surface.map(polygon => transform$1(matrix, polygon));
+  const transform$7 = (matrix, surface) => surface.map(polygon => transform$2(matrix, polygon));
 
   const assertCoplanarPolygon = (polygon) => {
     if (!isCoplanar(polygon)) {
@@ -13784,7 +13788,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param  {Tree}       tree
    * @return {Node}       root
    */
-  function add$2 (i, data, t, comparator, tree) {
+  function add$3 (i, data, t, comparator, tree) {
     const node = new Node$1(i, data);
 
     if (t === null) {
@@ -13919,7 +13923,7 @@ define("./webworker.js",[],function () { 'use strict';
      * @return {Node|null}
      */
     add (key, data) {
-      return this._root = add$2(key, data, this._root, this._comparator, this);
+      return this._root = add$3(key, data, this._root, this._comparator, this);
     }
 
 
@@ -16457,8 +16461,8 @@ define("./webworker.js",[],function () { 'use strict';
   const makeConvex$2 = (options = {}, surface) => {
     assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
-    let retessellatedSurface = makeConvex$1({}, union$2(...transform$6(to, surface).map(polygon => [polygon])));
-    return transform$6(from, retessellatedSurface);
+    let retessellatedSurface = makeConvex$1({}, union$2(...transform$7(to, surface).map(polygon => [polygon])));
+    return transform$7(from, retessellatedSurface);
   };
 
   const measureArea$1 = (surface) => {
@@ -16470,7 +16474,7 @@ define("./webworker.js",[],function () { 'use strict';
     return total;
   };
 
-  const multiply$2 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
+  const multiply$2 = (matrix, solid) => solid.map(surface => transform$7(matrix, surface));
 
   const rotateX = (radians, solid) => multiply$2(fromXRotation(radians), solid);
   const scale$4 = (vector, solid) => multiply$2(fromScaling(vector), solid);
@@ -17125,23 +17129,23 @@ define("./webworker.js",[],function () { 'use strict';
       transformed.assembly = item.assembly;
     }
     if (item.paths) {
-      transformed.paths = transform$5(matrix, item.paths);
+      transformed.paths = transform$6(matrix, item.paths);
     }
     if (item.points) {
-      transformed.points = transform$4(matrix, item.points);
+      transformed.points = transform$5(matrix, item.points);
     }
     if (item.solid) {
       transformed.solid = multiply$2(matrix, item.solid);
     }
     if (item.z0Surface) {
       // FIX: Handle transformations that take the surface out of z0.
-      transformed.z0Surface = transform$6(matrix, item.z0Surface);
+      transformed.z0Surface = transform$7(matrix, item.z0Surface);
     }
     transformed.tags = item.tags;
     return transformed;
   };
 
-  const transform$7 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
+  const transform$8 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
 
   const union$4 = (...geometries) => {
     const assembly = { assembly: geometries };
@@ -30975,7 +30979,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     transform (matrix) {
-      return fromGeometry(transform$7(matrix, toGeometry(this)));
+      return fromGeometry(transform$8(matrix, toGeometry(this)));
     }
 
     union (...geometries) {
@@ -31093,18 +31097,19 @@ define("./webworker.js",[],function () { 'use strict';
     Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
 
   const intersectionLazily = (shape, ...shapes) =>
-    Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry())));
+    Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry)));
 
-  Shape.fromClosedPath = (path) => new Shape(fromGeometry({ paths: [close(path)] }));
-  Shape.fromGeometry = (geometry) => new Shape(fromGeometry(geometry));
+  Shape.fromClosedPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [close(path)] }));
+  Shape.fromGeometry = (geometry) => Shape.fromLazyGeometry(fromGeometry(geometry));
   Shape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);
-  Shape.fromOpenPath = (path) => new Shape(fromGeometry({ paths: [open(path)] }));
-  Shape.fromPaths = (paths) => new Shape(fromGeometry({ paths: paths }));
-  Shape.fromPathToZ0Surface = (path) => new Shape(fromGeometry({ z0Surface: [path] }));
-  Shape.fromPathsToZ0Surface = (paths) => new Shape(fromGeometry({ z0Surface: paths }));
-  Shape.fromPolygonsToSolid = (polygons) => new Shape(fromGeometry({ solid: fromPolygons({}, polygons) }));
-  Shape.fromPolygonsToZ0Surface = (polygons) => new Shape(fromGeometry({ z0Surface: polygons }));
-  Shape.fromSurfaces = (surfaces) => new Shape(fromGeometry({ solid: surfaces }));
+  Shape.fromOpenPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [open(path)] }));
+  Shape.fromPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [path] }));
+  Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometry({ paths: paths }));
+  Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: [path] }));
+  Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: paths }));
+  Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometry({ solid: fromPolygons({}, polygons) }));
+  Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: polygons }));
+  Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometry({ solid: surfaces }));
 
   const loadFont = ({ path }) => pathnameToFont(path);
 
@@ -31112,6 +31117,44 @@ define("./webworker.js",[],function () { 'use strict';
 
   const text = ({ font, curveSegments }, text) =>
     Shape.fromGeometry(textToSurfaces({ font: font, curveSegments }, text));
+
+  class Cursor {
+    constructor ({ matrix = identity(), path = [null, [0, 0, 0]] } = {}) {
+      this.matrix = matrix;
+      this.path = path.slice();
+    }
+
+    rotateZ (angle) {
+      return this.transform(fromZRotation(angle * Math.PI * 2 / 360));
+    }
+
+    toPoint () {
+      const last = this.path[this.path.length - 1];
+      if (last === null) {
+        return [0, 0, 0];
+      } else {
+        return last;
+      }
+    }
+
+    toPath () {
+      return this.path;
+    }
+
+    toShape () {
+      return Shape.fromPath(this.toPath());
+    }
+
+    transform (matrix) {
+      return new Cursor({ matrix: multiply$1(matrix, this.matrix), path: this.path });
+    }
+
+    translate ([x = 0, y = 0, z = 0]) {
+      const path = this.path.slice();
+      path.push(add$1(this.toPoint(), transform$1(this.matrix, [x, y, z])));
+      return new Cursor({ matrix: this.matrix, path });
+    }
+  }
 
   const acos$1 = (a) => Math.acos(a) / (Math.PI * 2) * 360;
 
@@ -31657,11 +31700,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const log = (text) => writeFile({ ephemeral: true }, 'console/out', text);
 
-
-
-  var nodeFetch = /*#__PURE__*/Object.freeze({
-
-  });
+  var nodeFetch = {};
 
   /* global self */
 
@@ -32041,7 +32080,7 @@ define("./webworker.js",[],function () { 'use strict';
                                           flt(b), flt(e), flt(h), 0.0,
                                           flt(c), flt(f), flt(i), 0.0,
                                           ldu(x), ldu(y), ldu(z), 1.0);
-          polygons.push(...transform$3(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
+          polygons.push(...transform$4(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
           stack.pop();
           break;
         }
@@ -32940,7 +32979,7 @@ define("./webworker.js",[],function () { 'use strict';
     const offset = [-min[X$1] * scale, (height - max[Y$1]) * scale, 0];
     const matrix = multiply$1(fromTranslation(offset),
                             fromScaling([scale, scale, scale]));
-    for (const path of transform$5(matrix, paths)) {
+    for (const path of transform$6(matrix, paths)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
@@ -83522,6 +83561,7 @@ define("./webworker.js",[],function () { 'use strict';
    */
 
   var api = /*#__PURE__*/Object.freeze({
+    Cursor: Cursor,
     Shape: Shape,
     acos: acos$1,
     assemble: assemble$1,

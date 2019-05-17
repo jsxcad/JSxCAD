@@ -24,7 +24,7 @@ export default {
         allowFallthrough: true,
         files: {
           'fs': 'export const promises = {}',
-          'node-fetch': '',
+          'node-fetch': 'export default {}',
           'os': '',
           'tty': ''
         }
