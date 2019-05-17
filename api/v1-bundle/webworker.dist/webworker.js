@@ -16460,8 +16460,8 @@ define("./webworker.js",[],function () { 'use strict';
 
   const makeConvex$2 = (options = {}, surface) => {
     if (surface.length === 0) {
-     // An empty surface is not non-convex.
-     return surface;
+      // An empty surface is not non-convex.
+      return surface;
     }
     assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
@@ -17026,6 +17026,28 @@ define("./webworker.js",[],function () { 'use strict';
 
   const flip$8 = (assembly) => assembly.map(flipEntry);
 
+  const getSolids = (geometry) => {
+    const solids = [];
+    eachItem(geometry,
+             item => {
+               if (item.solid) {
+                 solids.push(item.solid);
+               }
+             });
+    return solids;
+  };
+
+  const getZ0Surfaces = (geometry) => {
+    const z0Surfaces = [];
+    eachItem(geometry,
+             item => {
+               if (item.z0Surface) {
+                 z0Surfaces.push(item.z0Surface);
+               }
+             });
+    return z0Surfaces;
+  };
+
   const intersection$4 = (...geometries) => {
     const assembly = { assembly: geometries };
     const pathsData = filterAndFlattenAssemblyData({ form: 'paths' }, assembly);
@@ -17042,24 +17064,6 @@ define("./webworker.js",[],function () { 'use strict';
       intersectioned.assembly.push({ z0Surface: intersection$2(...z0SurfaceData) });
     }
     return intersectioned;
-  };
-
-  const toComponents = ({ requires, excludes }, geometry) => {
-    const components = [];
-
-    const walk = (geometry) => {
-      for (const item of geometry.assembly) {
-        if (hasMatchingTag(excludes, item.tags)) {
-          continue;
-        } else if (hasMatchingTag(requires, item.tags, true)) {
-          components.push(item);
-        } else if (item.assembly !== undefined) {
-          walk(item);
-        }
-      }
-    };
-    walk(geometry);
-    return components;
   };
 
   const differenceItems = (base, ...subtractions) => {
@@ -17091,6 +17095,8 @@ define("./webworker.js",[],function () { 'use strict';
     if (geometry.assembly === undefined) {
       // A singleton is disjoint.
       return geometry;
+    } else if (geometry.disjointGeometry) {
+      return geometry.disjointGeometry;
     } else {
       const subtractions = [];
       const walk = (geometry, disjointed) => {
@@ -17107,8 +17113,26 @@ define("./webworker.js",[],function () { 'use strict';
         return disjointed;
       };
       const result = walk(geometry, { assembly: [], tags: geometry.tags });
+      geometry.disjointGeometry = result;
       return result;
     }
+  };
+
+  const toComponents = ({ requires, excludes }, geometry) => {
+    const components = [];
+    const walk = (geometry) => {
+      for (const item of geometry.assembly) {
+        if (hasMatchingTag(excludes, item.tags)) {
+          continue;
+        } else if (hasMatchingTag(requires, item.tags, true)) {
+          components.push(item);
+        } else if (item.assembly !== undefined) {
+          walk(item);
+        }
+      }
+    };
+    walk(toDisjointGeometry(geometry));
+    return components;
   };
 
   const toPaths$1 = ({ requires, excludes }, assembly) =>
@@ -30989,7 +31013,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     toComponents (options) {
-      return toComponents(toGeometry(this));
+      return toComponents(options, toGeometry(this)).map(fromGeometry);
     }
 
     transform (matrix) {
@@ -31018,7 +31042,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     close () {
-      const geometry = this.toPaths().toDisjointGeometry();
+      const geometry = this.toGeometry();
       if (!isSingleOpenPath(geometry)) {
         throw Error('Close requires a single open path.');
       }
@@ -31028,7 +31052,7 @@ define("./webworker.js",[],function () { 'use strict';
     concat (...shapes) {
       const paths = [];
       for (const shape of [this, ...shapes]) {
-        const geometry = shape.toPaths().toDisjointGeometry();
+        const geometry = shape.toGeometry();
         if (!isSingleOpenPath(geometry)) {
           throw Error('Concatenation requires single open paths.');
         }
@@ -31062,7 +31086,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     toComponents (options = {}) {
-      return toLazyGeometry(this).toComponents(options);
+      return toLazyGeometry(this).toComponents(options).map(Shape.fromLazyGeometry);
     }
 
     toDisjointGeometry (options = {}) {
@@ -31073,20 +31097,8 @@ define("./webworker.js",[],function () { 'use strict';
       return toLazyGeometry(this).toGeometry(options);
     }
 
-    toPaths (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));
-    }
-
     toPoints (options = {}) {
       return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));
-    }
-
-    toSolid (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toSolid(options));
-    }
-
-    toZ0Surface (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toZ0Surface(options));
     }
 
     transform (matrix) {
@@ -31095,6 +31107,11 @@ define("./webworker.js",[],function () { 'use strict';
 
     union (...shapes) {
       return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
+    }
+
+    withComponents (options = {}) {
+      const components = this.toComponents(options);
+      return assembleLazily(...components);
     }
   }
   const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
@@ -31225,11 +31242,11 @@ define("./webworker.js",[],function () { 'use strict';
 
   Shape.prototype.center = method$3;
 
-  const chainHull = (...geometries) => {
-    const points = geometries.map(geometry => geometry.toPoints().toGeometry().points);
+  const chainHull = (...shapes) => {
+    const pointsets = shapes.map(shape => toPoints$1({}, shape.toGeometry()).points);
     const chain = [];
-    for (let nth = 1; nth < geometries.length; nth++) {
-      chain.push(Shape.fromPolygonsToSolid(buildConvexHull({}, [...points[nth - 1], ...points[nth]])));
+    for (let nth = 1; nth < pointsets.length; nth++) {
+      chain.push(Shape.fromPolygonsToSolid(buildConvexHull({}, [...pointsets[nth - 1], ...pointsets[nth]])));
     }
     return assemble$1(...chain);
   };
@@ -31365,11 +31382,15 @@ define("./webworker.js",[],function () { 'use strict';
   const cos$1 = (a) => Math.cos(a / 360 * Math.PI * 2);
 
   const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-    const geometry = shape.toSolid().toDisjointGeometry();
-    const polygons = toPolygons({}, geometry.solid);
-    const triangles = toTriangles({}, polygons);
-    const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
-    return Shape.fromPathsToZ0Surface(paths);
+    const solids = getSolids(shape.toGeometry());
+    const shapes = [];
+    for (const solid of solids) {
+      const polygons = toPolygons({}, solid);
+      const triangles = toTriangles({}, polygons);
+      const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
+      shapes.push(Shape.fromPathsToZ0Surface(paths));
+    }
+    return assemble$1(...shapes);
   };
 
   const method$4 = function (options) { return crossSection(options, this); };
@@ -31570,10 +31591,10 @@ define("./webworker.js",[],function () { 'use strict';
   Shape.prototype.difference = method$5;
 
   const fromHeight = ({ height }, shape) => {
-    const geometry = shape.toZ0Surface();
-    const extrusion = extrudeLinear({ height: height }, geometry.lazyGeometry.geometry.z0Surface);
-    const extrudedShape = Shape.fromPolygonsToSolid(extrusion).translate([0, 0, height / 2]);
-    return extrudedShape;
+    const z0Surfaces = getZ0Surfaces(shape.toGeometry());
+    const extrusions = z0Surfaces.map(z0Surface => extrudeLinear({ height: height }, z0Surface));
+    const extrudedShapes = extrusions.map(extrusion => Shape.fromPolygonsToSolid(extrusion).translate([0, 0, height / 2]));
+    return assemble$1(...extrudedShapes);
   };
 
   const extrude = dispatch(

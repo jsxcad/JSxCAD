@@ -8,6 +8,7 @@ import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { getSolids } from './getSolids';
+import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { toComponents } from './toComponents';
@@ -28,6 +29,7 @@ export {
   eachPoint,
   flip,
   getSolids,
+  getSurfaces,
   getZ0Surfaces,
   intersection,
   toComponents,
