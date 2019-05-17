@@ -1,22 +1,23 @@
 /* global self */
 
+import * as fs from 'fs';
+
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 import { getFile } from './files';
 import { log } from './log';
+import nodeFetch from 'node-fetch';
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
     return window.fetch;
   } else {
-    const module = await import('node-fetch');
-    return module.default;
+    return nodeFetch;
   }
 };
 
 const getFileFetcher = async () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    const fs = await import('fs');
     return fs.promises.readFile;
   } else if (isBrowser) {
     // This will always fail, but maybe it should use local storage.
@@ -66,7 +67,7 @@ export const readFile = async (options, path) => {
     return self.ask({ readFile: { options, path } });
   }
   const { sources = [] } = options;
-  const file = getFile(path);
+  const file = getFile(options, path);
   if (file.data === undefined) {
     file.data = await fetchPersistent(path);
   }

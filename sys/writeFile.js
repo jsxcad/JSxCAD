@@ -1,5 +1,7 @@
 /* global self */
 
+import * as fs from 'fs';
+
 import { isNode, isWebWorker } from './browserOrNode';
 
 import { getFile } from './files';
@@ -11,7 +13,7 @@ export const writeFile = async (options, path, data) => {
   const { ephemeral } = options;
 
   data = await data;
-  const file = getFile(path);
+  const file = getFile(options, path);
   file.data = data;
 
   for (const watcher of file.watchers) {
@@ -20,9 +22,7 @@ export const writeFile = async (options, path, data) => {
 
   if (!ephemeral) {
     if (isNode) {
-      const fs = await import('fs');
-      let result = await fs.promises.writeFile(path, data);
-      return result;
+      return fs.promises.writeFile(path, data);
     }
   }
 };

@@ -9,6 +9,7 @@
 
 import { loadFont, text } from './text';
 
+import { Cursor } from './Cursor';
 import { Shape } from './Shape';
 import { acos } from './acos';
 import { assemble } from './assemble';
@@ -52,6 +53,7 @@ import { writeSvgPhoto } from './writeSvgPhoto';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
+  Cursor,
   Shape,
   acos,
   assemble,

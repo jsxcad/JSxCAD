@@ -112,6 +112,7 @@ Shape.fromClosedPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeomet
 Shape.fromGeometry = (geometry) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry(geometry));
 Shape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);
 Shape.fromOpenPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [openPath(path)] }));
+Shape.fromPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [path] }));
 Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: paths }));
 Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: [path] }));
 Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: paths }));

@@ -8,8 +8,8 @@ export const installReference = ({ addPage, document, watchFile }) => {
   const viewerElement = document.getElementById('reference');
   viewerElement.id = `viewer:reference`;
   const frame = document.createElement('iframe');
-  frame.src = `https://en.wikibooks.org/wiki/JSxCAD_User_Guide`;
-  // frame.src = `https://jsxcad.js.org/reference/user_guide.html?a=a`;
+  // frame.src = `https://en.wikibooks.org/wiki/JSxCAD_User_Guide`;
+  frame.src = `https://jsxcad.js.org/reference/user_guide.html?a=a`;
   frame.classList.add('Reference');
   viewerElement.appendChild(frame);
   return {};
