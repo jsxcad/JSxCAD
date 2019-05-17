@@ -4,5 +4,5 @@ export const main = async () => {
   const scene = assemble(sphere(10).as('sphere'),
                          cube(10).as('cube'),
                          cylinder({ r: 3, h: 27 }).as('cylinder'));
-  writePdf({ path: 'tmp/crossSection.pdf' }, scene.crossSection());
+  await writePdf({ path: 'tmp/crossSection.pdf' }, scene.crossSection());
 };
