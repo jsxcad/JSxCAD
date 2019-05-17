@@ -4,5 +4,5 @@ import { writeFile } from '@jsxcad/sys';
 export const writePdf = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toDisjointGeometry();
-  return writeFile({ geometry }, path, toPdf(options, geometry));
+  return writeFile({ geometry }, path, toPdf({ preview: true, ...options }, geometry));
 };

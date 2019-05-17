@@ -80,7 +80,7 @@ if (!self.define) {
     });
   };
 }
-define("./webworker.js",['require'], function (require) { 'use strict';
+define("./webworker.js",[],function () { 'use strict';
 
   // radians = degrees * PI / 180
 
@@ -31168,6 +31168,13 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.center = method$3;
 
+  const assert$1 = (value, message, pass) => {
+    if (pass !== true) {
+      throw Error(`${message}: ${value}`);
+    }
+    return true;
+  };
+
   const assertBoolean = (value) => {
     if (typeof value !== 'boolean') {
       throw Error(`Not a boolean: ${value}`);
@@ -31195,9 +31202,30 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return true;
   };
 
-  const assertNumber = (value) => {
-    if (typeof value !== 'number') {
-      throw Error(`Not a number: ${value}`);
+  const assertPoint = (value) => {
+    if (value.length === undefined) {
+      throw Error(`Has no length: ${value}`);
+    }
+    const [x, y, z = 0] = value;
+    assertNumber(x);
+    assertNumber(y);
+    assertNumber(z);
+    return true;
+  };
+
+  const assertPoints = (value) => {
+    if (value.length === undefined) {
+      throw Error(`Has no length: ${value}`);
+    }
+    value.forEach(assertPoint);
+    return true;
+  };
+
+  const assertNumber = (...values) => {
+    for (const value of values) {
+      if (typeof value !== 'number') {
+        throw Error(`Not a number: ${value}`);
+      }
     }
     return true;
   };
@@ -31215,40 +31243,58 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return true;
   };
 
-  const buildCircle = ({ r = 1, fn = 32, center = false }) =>
-    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: fn })).scale(r);
-
-  /**
-   *
-   * circle();                        // openscad like
-   * circle(1);
-   * circle({r: 2, fn:5});            // fn = number of segments to approximate the circle
-   * circle({r: 3, center: true});    // center: false (default)
-   *
-   */
-  const circle = (...params) => {
-    // circle({ r: 3, center: true, fn: 5 });
-    try {
-      const { r, center = false, fn = 32 } = params[0];
-      assertNumber(r);
-      assertNumber(fn);
-      assertBoolean(center);
-      return buildCircle({ r: r, fn: fn, center: center });
-    } catch (e) {}
-
-    // circle(1);
-    try {
-      const [r] = params[0];
-      assertNumber(r);
-      return buildCircle({ r: r });
-    } catch (e) {}
-
-    // circle(1);
-    try {
-      assertEmpty(params);
-      return buildCircle({});
-    } catch (e) {}
+  const dispatch = (name, ...dispatches) => {
+    return (...params) => {
+      for (const dispatch of dispatches) {
+        // For each signature
+        let operation;
+        try {
+          // Try to decode it into an operation.
+          operation = dispatch(...params);
+        } catch (e) {
+          continue;
+        }
+        return operation();
+      }
+      throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
+    };
   };
+
+  // FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified circle.
+  // Is this the most useful measure?
+  const unitCircle = ({ resolution = 32 }) =>
+    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: resolution }));
+
+  const fromRadius = ({ radius, resolution }) => unitCircle({ resolution }).scale(radius);
+  const fromDiameter = ({ diameter, resolution }) => unitCircle({ resolution }).scale(diameter / 2);
+
+  const circle = dispatch(
+    'circle',
+    // circle()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => unitCircle();
+    },
+    // circle(2)
+    (radius) => {
+      assertNumber(radius);
+      return () => fromRadius({ radius });
+    },
+    // circle({ r: 2, fn: 32 })
+    ({ r, fn }) => {
+      assertNumber(r);
+      return () => fromRadius({ radius: r, resolution: fn });
+    },
+    // circle({ radius: 2, resolution: 32 })
+    ({ radius, resolution }) => {
+      assertNumber(radius);
+      return () => fromRadius({ radius, resolution });
+    },
+    // circle({ diameter: 2, resolution: 32 })
+    ({ diameter, resolution }) => {
+      assertNumber(diameter);
+      return () => fromDiameter({ diameter, resolution });
+    });
 
   const cos$1 = (a) => Math.cos(a / 360 * Math.PI * 2);
 
@@ -31457,23 +31503,6 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   Shape.prototype.difference = method$5;
 
-  const dispatch = (name, ...dispatches) => {
-    return (...params) => {
-      for (const dispatch of dispatches) {
-        // For each signature
-        let operation;
-        try {
-          // Try to decode it into an operation.
-          operation = dispatch(...params);
-        } catch (e) {
-          continue;
-        }
-        return operation();
-      }
-      throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
-    };
-  };
-
   const fromHeight = ({ height }, shape) => {
     const geometry = shape.toZ0Surface();
     const extrusion = extrudeLinear({ height: height }, geometry.lazyGeometry.geometry.z0Surface);
@@ -31584,16 +31613,18 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     }
   };
 
+  const promises = {};
+
   const files = {};
   const fileCreationWatchers = [];
 
-  const getFile = (path) => {
+  const getFile = (options, path) => {
     let file = files[path];
     if (file === undefined) {
       file = { path: path, watchers: [] };
       files[path] = file;
       for (const watcher of fileCreationWatchers) {
-        watcher(file);
+        watcher(options, file);
       }
     }
     return file;
@@ -31601,14 +31632,16 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);
 
+  /* global self */
+
   const writeFile = async (options, path, data) => {
     if (isWebWorker) {
-      return await self.ask({ writeFile: { options, path, data: await data }});
+      return self.ask({ writeFile: { options, path, data: await data } });
     }
     const { ephemeral } = options;
 
     data = await data;
-    const file = getFile(path);
+    const file = getFile(options, path);
     file.data = data;
 
     for (const watcher of file.watchers) {
@@ -31617,29 +31650,33 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
     if (!ephemeral) {
       if (isNode) {
-        const fs = await new Promise(function (resolve, reject) { require(['./fs-b077e889'], resolve, reject) });
-        let result = await fs.promises.writeFile(path, data);
-        return result;
+        return promises.writeFile(path, data);
       }
     }
   };
 
   const log = (text) => writeFile({ ephemeral: true }, 'console/out', text);
 
+
+
+  var nodeFetch = /*#__PURE__*/Object.freeze({
+
+  });
+
+  /* global self */
+
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
       return window.fetch;
     } else {
-      const module = await new Promise(function (resolve, reject) { require(['./node-fetch-b077e889'], resolve, reject) });
-      return module.default;
+      return nodeFetch;
     }
   };
 
   const getFileFetcher = async () => {
     if (isNode) {
       // FIX: Put this through getFile, also.
-      const fs = await new Promise(function (resolve, reject) { require(['./fs-b077e889'], resolve, reject) });
-      return fs.promises.readFile;
+      return promises.readFile;
     } else if (isBrowser$1) {
       // This will always fail, but maybe it should use local storage.
       return () => {};
@@ -31685,10 +31722,10 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const readFile = async (options, path) => {
     if (isWebWorker) {
-      return await self.ask({ readFile: { options, path }});
+      return self.ask({ readFile: { options, path } });
     }
     const { sources = [] } = options;
-    const file = getFile(path);
+    const file = getFile(options, path);
     if (file.data === undefined) {
       file.data = await fetchPersistent(path);
     }
@@ -31704,7 +31741,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     return file.data;
   };
 
-  const watchFile = (path, thunk) => getFile(path).watchers.push(thunk);
+  const watchFile = (path, thunk) => getFile({}, path).watchers.push(thunk);
 
 
 
@@ -31721,6 +31758,23 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const log$1 = (text) => log(text);
 
   const max$2 = Math.max;
+
+  const fromPath = ({ points }) => Shape.fromPathToZ0Surface(points);
+
+  const polygon = dispatch(
+    'polygon',
+    // polygon([[0,0],[3,0],[3,3]])
+    (points) => {
+      assertPoints(points);
+      assert$1(points, 'Not at least three points', points.length >= 3);
+      return () => fromPath({ path: points });
+    },
+    // polygon({ points: [[0, 0], [3, 0], [3, 3]] })
+    ({ points }) => {
+      assertPoints(points);
+      assert$1(points, 'Not at least three points', points.length >= 3);
+      return () => fromPath({ path: points });
+    });
 
   /**
    * polyhedron({      // openscad-like (e.g. pyramid)
@@ -32735,63 +32789,43 @@ define("./webworker.js",['require'], function (require) { 'use strict';
 
   const sqrt$1 = Math.sqrt;
 
-  const buildSquare = ({ scale = [1, 1, 1] }) => {
-    const shape = Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 }));
-    const transformedShape = shape.rotateZ(45).scale(scale);
-    return transformedShape;
-  };
+  const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
+  const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale$1);
 
-  const decode$2 = (params) => {
-    const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
+  const fromSize = ({ size }) => unitSquare().scale(size);
+  const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
 
-    // square({ size: [2,4], center: true }); // 2x4, center: false (default)
-    try {
-      const { size, center = false } = params[0];
-      const [length, width] = size;
-      assertNumber(length);
-      assertNumber(width);
-      assertBoolean(center);
-      return { scale: [edgeScale * length, edgeScale * width] };
-    } catch (e) {}
-
-    // square([2,4]}); // 2x4, center: false (default)
-    try {
-      const [length, width] = params[0];
-      assertNumber(length);
-      assertNumber(width);
-      return { scale: [edgeScale * length, edgeScale * width] };
-    } catch (e) {}
-    // square(1); // 2x4, center: false (default)
-    try {
-      const [length] = params;
-      assertNumber(length);
-      assertSingle(params);
-      return { scale: [edgeScale * length, edgeScale * length] };
-    } catch (e) {}
+  const square = dispatch(
+    'square',
     // square()
-    try {
-      assertEmpty(params);
-      return {};
-    } catch (e) {}
-    throw Error(`Unsupported interface for square: ${JSON.stringify(params)}`);
-  };
-
-  /**
-   *
-   * square();                                   // openscad like
-   * square(1);                                  // 1x1
-   * square([2,3]);                              // 2x3
-   * square({size: [2,4], center: true});        // 2x4, center: false (default)
-   *
-   */
-  const square = (...params) => buildSquare(decode$2(params));
+    (...args) => {
+      assertEmpty(args);
+      return () => fromSize({ size: 1 });
+    },
+    // square(4)
+    (size) => {
+      assertNumber(size);
+      return () => fromSize({ size });
+    },
+    // square({ size: 4 })
+    ({ size }) => {
+      assertNumber(size);
+      return () => fromSize({ size });
+    },
+    // square({ size: [4, 5] })
+    ({ size }) => {
+      const [width, length, ...rest] = size;
+      assertNumber(width, length);
+      assertEmpty(rest);
+      return () => fromDimensions({ width, length });
+    });
 
   const svgPath = (options = {}, svgPath) =>
     Shape.fromGeometry(fromSvgPath(options, svgPath));
 
   const buildTetrahedron = ({ r = 1 }) => Shape.fromPolygons(buildRegularTetrahedron({})).scale([r, r, r]);
 
-  const decode$3 = (params) => {
+  const decode$2 = (params) => {
     // sphere();
     try {
       assertEmpty(params);
@@ -32829,7 +32863,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
    * sphere({r: 10, fn: 100 });
    * sphere({r: 10, fn: 100, type: 'geodesic'});  // geodesic approach (icosahedron further triangulated)
    */
-  const tetrahedron = (...params) => buildTetrahedron(decode$3(params));
+  const tetrahedron = (...params) => buildTetrahedron(decode$2(params));
 
   const union$5 = (...params) => {
     switch (params.length) {
@@ -32929,7 +32963,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writePdf = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toPdf(options, geometry));
+    return writeFile({ geometry }, path, toPdf({ preview: true, ...options }, geometry));
   };
 
   const toGeometry$1 = ({ disjoint = true }, shape) => {
@@ -32943,7 +32977,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writeStl = async (options, shape) => {
     const { path } = options;
     const geometry = toGeometry$1(options, shape);
-    return writeFile({ geometry }, path, toStl(options, geometry));
+    return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
   const method$e = function (options = {}) { writeStl(options, this); return this; };
@@ -32953,7 +32987,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writeSvg = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toSvg(options, geometry));
+    return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
   const method$f = function (options = {}) { writeSvg(options, this); return this; };
@@ -83465,7 +83499,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writeSvgPhoto = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toSvg$1(options, geometry));
+    return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
   const method$g = function (options = {}) { writeSvgPhoto(options, this); return this; };
@@ -83475,7 +83509,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
   const writeThreejsPage = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry }, path, toThreejsPage(options, shape.toDisjointGeometry()));
+    return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
   /**
@@ -83506,6 +83540,7 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     max: max$2,
     measureBoundingBox: measureBoundingBox$3,
     minkowski: minkowski,
+    polygon: polygon,
     polyhedron: polyhedron,
     readDst: readDst,
     readLDraw: readLDraw,
@@ -83531,20 +83566,20 @@ define("./webworker.js",['require'], function (require) { 'use strict';
     writeThreejsPage: writeThreejsPage
   });
 
-  /* global postMessage, onmessage:writable */
+  /* global postMessage, onmessage:writable, self */
 
   const say = (message) => postMessage(message);
   const agent = async ({ ask, question }) => {
-                  try {
-                    if (question.evaluate) {
-                      const code = new Function(`{ ${Object.keys(api).join(', ')} }`,
-                                                `${question.evaluate}; return main;`);
-                      return code(api)();
-                    }
-                  } catch (error) {
-                    await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: error.toString() }});
-                  }
-                };
+    try {
+      if (question.evaluate) {
+        const code = new Function(`{ ${Object.keys(api).join(', ')} }`,
+                                  `${question.evaluate}; return main;`);
+        return code(api)();
+      }
+    } catch (error) {
+      await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: error.toString() } });
+    }
+  };
   const { ask, hear } = conversation({ agent, say });
   self.ask = ask;
   onmessage = ({ data }) => hear(data);
