@@ -76,7 +76,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       content: `<div id="${path}"></div>`,
       contentOverflow: 'hidden',
       position: 'right-top',
-      footerToolbar: `<span class="jsPanel-ftr-btn" id="download/${path}">Download ${path}</span>`,
+      footerToolbar: `<button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
       callback: (panel) => {
         document.getElementById(`download/${path}`)
             .addEventListener('click',

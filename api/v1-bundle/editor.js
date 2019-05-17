@@ -4,7 +4,7 @@ import CodeMirror from 'codemirror/src/codemirror.js';
 
 export const installEditorCSS = (display) => {
   installCSSLink(document, 'https://codemirror.net/lib/codemirror.css');
-  installCSS(document, `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; height: 100% }`);
+  installCSS(document, `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 20px; height: 100% }`);
 };
 
 export const installEditor = ({ addPage, document, evaluator, initialScript, nextPage, lastPage }) => {
@@ -20,8 +20,9 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
         title: 'Source',
         content: '<div id="editor"></div>',
         contentOverflow: 'hidden',
+        size: '1000 600',
         position: 'top-left',
-        footerToolbar: `<span class="jsPanel-ftr-btn" id="runScript">Run Script</span>`,
+        footerToolbar: `<button class="jsPanel-ftr-btn" id="runScript" style="padding: 5px; margin: 3 px;">Run Script</button>`,
         callback: (panel) => document.getElementById(`runScript`).addEventListener('click', runScript)
       });
       document.getElementById('editor').appendChild(domElement);

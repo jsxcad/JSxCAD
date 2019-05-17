@@ -19,9 +19,9 @@ window.bootstrap = async () => {
 const main = async () => {
   const scene = assemble(sphere(10).as('sphere'),
                          cube(10).as('cube'),
-                         cylinder({ r: 3, h: 30 }).as('cylinder'));
-  await writeStl({ path: 'example.stl' }, scene);
-  await writeStl({ path: 'sphere.stl' }, scene.toSolid({ requires: ['sphere'] }));
+                         cylinder({ r: 3, h: 27 }).as('cylinder'));
+  await writeStl({ path: 'example.stl', disjoint: false }, Shape.fromGeometry(scene.toDisjointGeometry()));
+  await writeStl({ path: 'sphere.stl', disjoint: false }, scene.toSolid({ requires: ['sphere'] }));
 }
 `;
   const { addPage, nextPage, lastPage } = await installDisplay({ document, readFile, watchFile, watchFileCreation, window });
