@@ -58,6 +58,7 @@
     "@jsxcad/convert-stl": "^0.0.75",
     "@jsxcad/convert-svg": "^0.0.75",
     "@jsxcad/convert-threejs": "^0.0.75",
+    "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-lazy": "^0.0.75",
     "@jsxcad/geometry-path": "^0.0.75",
     "@jsxcad/geometry-paths": "^0.0.75",

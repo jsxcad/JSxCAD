@@ -7,6 +7,8 @@ import { difference } from './difference';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { getSolids } from './getSolids';
+import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
@@ -25,6 +27,8 @@ export {
   eachItem,
   eachPoint,
   flip,
+  getSolids,
+  getZ0Surfaces,
   intersection,
   toComponents,
   toDisjointGeometry,

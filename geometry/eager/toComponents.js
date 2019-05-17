@@ -1,8 +1,8 @@
 import { hasMatchingTag } from './hasMatchingTag';
+import { toDisjointGeometry } from './toDisjointGeometry';
 
 export const toComponents = ({ requires, excludes }, geometry) => {
   const components = [];
-
   const walk = (geometry) => {
     for (const item of geometry.assembly) {
       if (hasMatchingTag(excludes, item.tags)) {
@@ -14,6 +14,6 @@ export const toComponents = ({ requires, excludes }, geometry) => {
       }
     }
   };
-  walk(geometry);
+  walk(toDisjointGeometry(geometry));
   return components;
 };

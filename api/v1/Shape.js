@@ -13,7 +13,7 @@ export class Shape {
   }
 
   close () {
-    const geometry = this.toPaths().toDisjointGeometry();
+    const geometry = this.toGeometry();
     if (!isSingleOpenPath(geometry)) {
       throw Error('Close requires a single open path.');
     }
@@ -23,7 +23,7 @@ export class Shape {
   concat (...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toPaths().toDisjointGeometry();
+      const geometry = shape.toGeometry();
       if (!isSingleOpenPath(geometry)) {
         throw Error('Concatenation requires single open paths.');
       }
@@ -57,7 +57,7 @@ export class Shape {
   }
 
   toComponents (options = {}) {
-    return toLazyGeometry(this).toComponents(options);
+    return toLazyGeometry(this).toComponents(options).map(Shape.fromLazyGeometry);
   }
 
   toDisjointGeometry (options = {}) {
@@ -68,20 +68,8 @@ export class Shape {
     return toLazyGeometry(this).toGeometry(options);
   }
 
-  toPaths (options = {}) {
-    return this.fromLazyGeometry(toLazyGeometry(this).toPaths(options));
-  }
-
   toPoints (options = {}) {
     return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));
-  }
-
-  toSolid (options = {}) {
-    return this.fromLazyGeometry(toLazyGeometry(this).toSolid(options));
-  }
-
-  toZ0Surface (options = {}) {
-    return this.fromLazyGeometry(toLazyGeometry(this).toZ0Surface(options));
   }
 
   transform (matrix) {
@@ -90,6 +78,11 @@ export class Shape {
 
   union (...shapes) {
     return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
+  }
+
+  withComponents (options = {}) {
+    const components = this.toComponents(options);
+    return assembleLazily(...components);
   }
 }
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);

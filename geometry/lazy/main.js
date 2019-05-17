@@ -69,7 +69,7 @@ export class Assembly {
   }
 
   toComponents (options) {
-    return toComponents(toGeometry(this));
+    return toComponents(options, toGeometry(this)).map(fromGeometry);
   }
 
   transform (matrix) {
