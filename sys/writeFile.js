@@ -1,8 +1,9 @@
 /* global self */
 
+import * as fs from 'fs';
+
 import { isNode, isWebWorker } from './browserOrNode';
 
-import * as fs from 'fs';
 import { getFile } from './files';
 
 export const writeFile = async (options, path, data) => {

@@ -22,7 +22,7 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
         contentOverflow: 'hidden',
         position: 'top-left',
         footerToolbar: `<span class="jsPanel-ftr-btn" id="runScript">Run Script</span>`,
-        callback: (panel) => document.getElementById(`runScript`).addEventListener('click', runScript),
+        callback: (panel) => document.getElementById(`runScript`).addEventListener('click', runScript)
       });
       document.getElementById('editor').appendChild(domElement);
     },

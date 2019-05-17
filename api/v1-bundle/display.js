@@ -1,4 +1,4 @@
-/* global ResizeObserver */
+/* global Blob, ResizeObserver */
 
 import * as THREE from 'three';
 import * as dat from 'dat.gui';
@@ -79,14 +79,14 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       position: 'right-top',
       footerToolbar: `<span class="jsPanel-ftr-btn" id="download/${path}">Download ${path}</span>`,
       callback: (panel) => {
-                  document.getElementById(`download/${path}`)
-                          .addEventListener('click',
-                                            async () => {
-                                              const blob = new Blob([await readFile({}, path)],
-                                                                    {type: "text/plain;charset=utf-8"});
-                                              saveAs(blob, path);
-                                            });
-                },
+        document.getElementById(`download/${path}`)
+            .addEventListener('click',
+                              async () => {
+                                const blob = new Blob([await readFile({}, path)],
+                                                      { type: 'text/plain;charset=utf-8' });
+                                saveAs(blob, path);
+                              });
+      }
     });
     let viewerElement;
     const toName = (geometry) => {
@@ -183,7 +183,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       {
         const grid = new THREE.GridHelper(1000, 100, 0x000080, 0xc0c0c0);
         grid.material.opacity = 0.5;
-        grid.rotation.x = - Math.PI / 2;
+        grid.rotation.x = -Math.PI / 2;
         grid.material.transparent = true;
         scene.add(grid);
       }

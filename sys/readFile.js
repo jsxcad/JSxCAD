@@ -1,7 +1,8 @@
 /* global self */
 
-import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 import * as fs from 'fs';
+
+import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 import { getFile } from './files';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
