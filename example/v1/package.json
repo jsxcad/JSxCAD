@@ -55,6 +55,7 @@
     "@jsxcad/api-v1": "^0.0.75",
     "@jsxcad/convert-stl": "^0.0.75",
     "@jsxcad/data-shape": "^0.0.75",
+    "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-path": "^0.0.75",
     "@jsxcad/geometry-polygons": "^0.0.75",
     "@jsxcad/geometry-solid": "^0.0.75",
