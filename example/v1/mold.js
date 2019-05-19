@@ -1,8 +1,8 @@
 import { circle, difference, writeStl } from '@jsxcad/api-v1';
 
 export const main = async () => {
-  const outside = circle({ r: 64 / 2, fn: 3, center: true });
-  const inside = circle({ r: 60 / 2, fn: 3, center: true });
+  const outside = circle({ radius: 64 / 2, resolution: 3 });
+  const inside = circle({ radius: 60 / 2, resolution: 3 });
   const perimeter = difference(outside, inside);
 
   await writeStl({ path: 'tmp/mold_inside.stl' }, inside.extrude({ height: 1 }));

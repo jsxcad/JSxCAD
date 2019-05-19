@@ -11,6 +11,7 @@ import { loadFont, text } from './text';
 
 import { Cursor } from './Cursor';
 import { Shape } from './Shape';
+import { above } from './above';
 import { acos } from './acos';
 import { assemble } from './assemble';
 import { center } from './center';
@@ -22,6 +23,7 @@ import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
+import { front } from './front';
 import { hull } from './hull';
 import { intersection } from './intersection';
 import { log } from './log';
@@ -35,6 +37,7 @@ import { readDst } from './readDst';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readStl } from './readStl';
+import { right } from './right';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
@@ -57,6 +60,7 @@ import { writeThreejsPage } from './writeThreejs';
 export {
   Cursor,
   Shape,
+  above,
   acos,
   assemble,
   center,
@@ -68,6 +72,7 @@ export {
   cylinder,
   difference,
   extrude,
+  front,
   hull,
   intersection,
   loadFont,
@@ -82,6 +87,7 @@ export {
   // readJscad,
   readLDraw,
   readStl,
+  right,
   rotate,
   rotateX,
   rotateY,

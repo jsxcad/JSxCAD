@@ -21,6 +21,7 @@
     "api/*",
     "convert/*",
     "data/*",
+    "doc",
     "example/*",
     "geometry/*",
     "math/*",
