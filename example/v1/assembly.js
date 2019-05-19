@@ -1,7 +1,7 @@
 import { assemble, cube, cylinder, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
 
 export const main = async () => {
-  const assembly = assemble(cube({ size: 30, center: true }).as('cube'),
+  const assembly = assemble(cube(30).as('cube'),
                             cylinder({ r: 5, h: 30, center: true, fn: 32 }).as('cylinder'));
 
   await writeStl({ path: 'tmp/assembly-cube.stl' }, assembly.withComponents({ requires: ['cube'], excludes: ['cylinder'] }));
