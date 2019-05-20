@@ -4,7 +4,7 @@ export const clippingToPolygons = (clipping) => {
   for (const polygons of clipping) {
     for (const polygon of polygons) {
       polygon.pop();
-      polygonArray.push(polygon);
+      polygonArray.push(polygon.map(([x, y]) => [x, y, 0]));
     }
   }
   return polygonArray;

@@ -7,8 +7,7 @@ import { toUserGuide } from '@jsxcad/doc';
 
 const { writeFile } = fs.promises;
 
-// toUserGuide({ api, paths: ['circle.js', 'cube.js', 'cylinder.js', 'extrude.js'], root: __dirname })
-toUserGuide({ api, paths: ['extrude.js'], root: __dirname })
+toUserGuide({ api, paths: ['circle.js', 'crossSection.js', 'cube.js', 'cylinder.js', 'extrude.js'], root: __dirname })
     .then(html => writeFile('UserGuide.html', html))
     .catch(error => {
              console.log(`buildUserGuide: error`);

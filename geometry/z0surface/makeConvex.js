@@ -36,9 +36,6 @@ export const makeConvex = (options = {}, polygons) => {
   if (polygons.isConvex) {
     return polygons;
   }
-  if (polygons.every(isConvex)) {
-    return blessAsConvex(polygons);
-  }
   const contours = polygons.map(toContour);
   // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
   const convex = fromTessellation(

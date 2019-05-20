@@ -43,67 +43,10 @@ import { dispatch } from './dispatch';
 const unitCircle = ({ resolution = 32 }) =>
   Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: resolution }));
 
-/**
- *
- * ## circle.fromValue(value)
- *
- * Generate a circle from the radius in mm with a resolution of 32 segments.
- *
- * ::: illustration
- * ```
- * circle.fromValue(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * circle.fromValue(10).outline()
- * ```
- * :::
- *
- **/
-
 export const fromValue = (radius) => unitCircle({ resolution: 32 }).scale(radius);
-
-/**
- *
- * ## circle.fromRadius({ radius, resolution=32 })
- *
- * Generate a circle given a radius and resolution.
- * ::: illustration { "view": { "position": [0, 0, 50] } }
- * ```
- * circle.fromRadius({ radius: 5 })
- * ```
- * :::
- * ::: illustration
- * ```
- * circle.fromRadius({ radius: 10,
- *                     resolution: 16 })
- * ```
- * :::
- *
- **/
 
 export const fromRadius = ({ radius, resolution = 32 }) => unitCircle({ resolution }).scale(radius);
 
-/**
- *
- * ## circle.fromDiameter({ diameter, resolution=32 })
- *
- * Generate a circle given a diameter and resolution.
- *
- * ::: illustration
- * ```
- * circle.fromDiameter({ diameter: 5 })
- * ```
- * :::
- * ::: illustration
- * ```
- * circle.fromDiameter({ diameter: 10,
- *                       resolution: 8 })
- * ```
- * :::
- *
- **/
 export const fromDiameter = ({ diameter, resolution = 32 }) => unitCircle({ resolution }).scale(diameter / 2);
 
 export const circle = dispatch(

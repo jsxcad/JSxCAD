@@ -6,6 +6,24 @@ import { fromPoints } from '@jsxcad/math-plane';
 import { getSolids } from '@jsxcad/geometry-eager';
 import { toPolygons } from '@jsxcad/geometry-solid';
 
+/**
+ *
+ * # CrossSection
+ *
+ * Produces a cross-section of a solid as a surface.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * difference(cylinder(10, 10), cylinder(8, 10))
+ * :::
+ * ::: illustration
+ * difference(sphere(10), sphere(8)).crossSection()
+ * :::
+ * ::: illustration
+ * difference(sphere(10), sphere(8)).crossSection().outline()
+ * :::
+ *
+ **/
+
 export const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
   const solids = getSolids(shape.toGeometry());
   const shapes = [];

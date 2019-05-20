@@ -6,7 +6,6 @@ import { translate } from './translate';
 const Z = 2;
 
 export const above = (shape) => {
-console.log(`QQ/above: ${JSON.stringify(shape)}`);
   const [minPoint] = measureBoundingBox(shape);
   return translate(negate([0, 0, minPoint[Z]]), shape);
 };
