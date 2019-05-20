@@ -3,6 +3,7 @@ import { max, min } from '@jsxcad/math-vec3';
 import { Shape } from './Shape';
 
 export const measureBoundingBox = (shape) => {
+console.log(`QQ/measureBoundingBox: ${JSON.stringify(shape)}`);
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
   shape.eachPoint({},

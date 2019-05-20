@@ -112,3 +112,4 @@ Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometryToLaz
 Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: fromPolygonsToSolid({}, polygons) }));
 Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: polygons }));
 Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: surfaces }));
+Shape.fromSolid = (solid) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: solid }));

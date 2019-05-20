@@ -6,6 +6,7 @@ import { buildRegularPrism } from './buildRegularPrism';
 import { buildRegularTetrahedron } from './buildRegularTetrahedron';
 import { buildRingSphere } from './buildRingSphere';
 import { buildUniformCubicBezierCurve } from './buildUniformCubicBezierCurve';
+import { extrude } from './extrude';
 import { extrudeLinear } from './extrudeLinear';
 import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius';
 import { subdivideTriangle } from './subdivideTriangle';
@@ -20,6 +21,7 @@ export {
   buildRegularTetrahedron,
   buildRingSphere,
   buildUniformCubicBezierCurve,
+  extrude,
   extrudeLinear,
   regularPolygonEdgeLengthToRadius,
   subdivideTriangle,
