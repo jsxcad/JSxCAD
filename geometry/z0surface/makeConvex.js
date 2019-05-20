@@ -1,6 +1,5 @@
 import Tess2 from 'tess2';
 import { blessAsConvex } from './blessAsConvex';
-import { isConvex } from '@jsxcad/math-poly3';
 
 const toContour = (polygon) => {
   const points = [];

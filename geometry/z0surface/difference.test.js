@@ -7,10 +7,10 @@ import { test } from 'ava';
 
 // FIX: Check multipolygon construction against example/v1/squares*.js
 
-const squares = [[[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]],
-                 [[1.5, -0.5], [2, -0.5], [2, 0.5], [1.5, 0.5]]];
+const squares = [[[-0.5, -0.5, 0], [0.5, -0.5, 0], [0.5, 0.5, 0], [-0.5, 0.5, 0]],
+                 [[1.5, -0.5, 0], [2, -0.5, 0], [2, 0.5, 0], [1.5, 0.5, 0]]];
 
-const rectangle = [[[0, 0], [2, 0], [2, 1], [0, 1]]];
+const rectangle = [[[0, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]]];
 
 test('difference: Difference of one geometry produces that geometry', t => {
   t.deepEqual(difference(rectangle), rectangle);

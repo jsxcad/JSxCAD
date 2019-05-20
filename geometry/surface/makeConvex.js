@@ -1,7 +1,7 @@
-import { makeConvex as makeConvexZ0Surface, union } from '@jsxcad/geometry-z0surface';
 import { toPlane, transform } from './main';
 
 import { assertCoplanar } from './assertCoplanar';
+import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 export const makeConvex = (options = {}, surface) => {
@@ -11,7 +11,6 @@ export const makeConvex = (options = {}, surface) => {
   }
   assertCoplanar(surface);
   const [to, from] = toXYPlaneTransforms(toPlane(surface));
-  // let retessellatedSurface = makeConvexZ0Surface({}, union(...transform(to, surface).map(polygon => [polygon])));
   let retessellatedSurface = makeConvexZ0Surface({}, transform(to, surface));
   return transform(from, retessellatedSurface);
 };
