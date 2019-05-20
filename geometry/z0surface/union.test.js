@@ -5,7 +5,7 @@ import { fromZRotation } from '@jsxcad/math-mat4';
 import { test } from 'ava';
 import { union } from './union';
 
-const rectangle = [[[0, 0], [2, 0], [2, 1], [0, 1]]];
+const rectangle = [[[0, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]]];
 
 test('union: Union of no geometries produces an empty geometry', t => {
   t.deepEqual(union(), []);

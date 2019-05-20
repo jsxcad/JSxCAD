@@ -50,67 +50,12 @@ const unitCube = () => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })
 
 // Cube Interfaces.
 
-/**
- *
- * ## cube.fromValue(value)
- *
- * Generate a cube with the provided side length.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * cube.fromValue(10)
- * ```
- * :::
- *
- **/
 export const fromValue = (value) => unitCube().scale(value);
 
-/**
- *
- * ## cube.fromRadius({ radius })
- *
- * Generate a cube which fits into a sphere of the given radius.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * assemble(cube.fromRadius({ radius: 10 }).above(),
- *          circle.fromRadius({ radius: 10 }).outline())
- * ```
- * :::
- *
- **/
 export const fromRadius = ({ radius }) => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
-/**
- *
- * ## cube.fromDiameter({ radius })
- *
- * Generate a cube which fits into a sphere of the given diameter.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * assemble(cube.fromDiameter({ diameter: 20 }).above(),
- *          circle({ diameter: 20 }).outline())
- * ```
- * :::
- *
- **/
 export const fromDiameter = ({ diameter }) => fromRadius({ radius: diameter / 2 });
 
-/**
- *
- * ## cube.fromCorners({ corner1, corner2 })
- *
- * Generate a cube from two opposite corners.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * cube.fromCorners({ corner1: [10, 10, 10],
- *                    corner2: [0, 0, 0] })
- * ```
- * :::
- *
- **/
 export const fromCorners = ({ corner1, corner2 }) => {
   const [c1x, c1y, c1z] = corner1;
   const [c2x, c2y, c2z] = corner2;

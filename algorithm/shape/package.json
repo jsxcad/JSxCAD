@@ -54,6 +54,8 @@
     "@jsxcad/geometry-paths": "^0.0.75",
     "@jsxcad/geometry-points": "^0.0.75",
     "@jsxcad/geometry-polygons": "^0.0.75",
+    "@jsxcad/geometry-solid": "^0.0.75",
+    "@jsxcad/geometry-z0surface": "^0.0.75",
     "@jsxcad/math-line2": "^0.0.75",
     "@jsxcad/math-mat4": "^0.0.75",
     "@jsxcad/math-plane": "^0.0.75",

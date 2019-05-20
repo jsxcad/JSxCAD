@@ -1,6 +1,5 @@
 import Tess2 from 'tess2';
 import { blessAsConvex } from './blessAsConvex';
-import { isConvex } from '@jsxcad/math-poly3';
 
 const toContour = (polygon) => {
   const points = [];
@@ -35,9 +34,6 @@ const fromTessellation = (tessellation) => {
 export const makeConvex = (options = {}, polygons) => {
   if (polygons.isConvex) {
     return polygons;
-  }
-  if (polygons.every(isConvex)) {
-    return blessAsConvex(polygons);
   }
   const contours = polygons.map(toContour);
   // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.

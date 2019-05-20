@@ -41,51 +41,10 @@ const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
  *
  **/
 
-/**
- *
- * ## cylinder.fromValue(radius, height=1, resolution=32)
- *
- * Generate a cylinder of the given radius and height.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * cylinder.fromValue(10, 8)
- * ```
- * :::
- *
- **/
 export const fromValue = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
 
-/**
- *
- * ## cylinder.fromRadius({ radius, height=1, resolution=32 })
- *
- * Generate a cylinder of the given radius and height.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * cylinder.fromRadius({ radius: 8,
- *                       height: 10 })
- * ```
- * :::
- *
- **/
 export const fromRadius = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
 
-/**
- *
- * ## cylinder.fromDiameter({ diameter, height=1, resolution=32 })
- *
- * Generate a cylinder of the given diameter and height.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * cylinder.fromDiameter({ diameter: 12,
- *                         height: 12 })
- * ```
- * :::
- *
- **/
 export const fromDiameter = ({ diameter, height = 1, resolution = 32 }) => buildCylinder({ radius: diameter / 2, height, resolution });
 
 export const cylinder = dispatch(
