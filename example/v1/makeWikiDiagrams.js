@@ -9,7 +9,7 @@ const main = async () => {
   const dist = 70;
 
   const aCube = cube({ size: 10, center: true });
-  const aCylinder = cylinder({ r: 5, h: 10, center: true }).translate([8, 0, 0]);
+  const aCylinder = cylinder(5, 10).translate([8, 0, 0]);
 
   // Assembly and intro picture
   const assembled = assemble(aCube, aCylinder);
@@ -35,7 +35,7 @@ const main = async () => {
   await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/cube.svg', cameraPosition: [0, 0, dist] }, aCube.rotate([xAng, yAng, 0]));
 
   // Cylinder
-  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/cylinder.svg', cameraPosition: [0, 0, dist] }, cylinder({ r: 5, h: 10, center: true }).rotate([xAng, yAng, 0]));
+  await writeSvgPhoto({ path: '../../doc/wiki/User-Guide/cylinder.svg', cameraPosition: [0, 0, dist] }, cylinder(5, 10).rotate([xAng, yAng, 0]));
 
   // Difference
   const theDifference = difference(aCube, aCylinder);

@@ -6,6 +6,7 @@
   "main": "main.js",
   "module": "main.js",
   "scripts": {
+    "build:UserGuide": "node -r esm buildUserGuide",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
@@ -58,6 +59,7 @@
     "@jsxcad/convert-stl": "^0.0.75",
     "@jsxcad/convert-svg": "^0.0.75",
     "@jsxcad/convert-threejs": "^0.0.75",
+    "@jsxcad/doc": "^0.0.75",
     "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-lazy": "^0.0.75",
     "@jsxcad/geometry-path": "^0.0.75",
