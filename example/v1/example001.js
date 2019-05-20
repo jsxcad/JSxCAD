@@ -13,7 +13,7 @@ function radiusFromDiameter (d) {
 }
 
 function rotcy (rot, r, h) {
-  return rotate(rot, cylinder({ r: r, h: h, center: true }));
+  return rotate(rot, cylinder(r, h));
 }
 
 function example001 () {

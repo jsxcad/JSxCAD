@@ -21,12 +21,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/api-v1": "^0.0.75",
     "@jsxcad/convert-threejs": "^0.0.75",
-    "doctrine": "^3.0.0",
     "esm": "^3.2.10",
     "jsdoc-extractor": "^3.0.0",
-    "klaw-sync": "^6.0.0",
     "markdown-it": "^8.4.2",
     "markdown-it-container": "^2.0.0"
   },

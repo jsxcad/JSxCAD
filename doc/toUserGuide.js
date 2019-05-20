@@ -1,15 +1,10 @@
-// FIX: The api should be injected from the invoking package.
-import * as api from '@jsxcad/api-v1';
-
 import MarkdownIt from 'markdown-it';
 import MarkdownItContainer from 'markdown-it-container';
-import { basename } from 'path';
 import fs from 'fs';
 import jsdocExtractor from 'jsdoc-extractor';
 import { toSvgSync } from '@jsxcad/convert-threejs';
-import walkDirectory from 'klaw-sync';
 
-const { readFile, writeFile } = fs.promises;
+const { readFile } = fs.promises;
 
 // The illustration operator.
 // This is a kind of immediate, single-expression version of the language.
@@ -48,21 +43,14 @@ const toMarkdown = (comment) => {
   return markdown.join('\n');
 };
 
-export const extract = async (root) => {
+export const toUserGuide = async ({ api, paths, root }) => {
   const markdowns = [];
-  const filter = ({ path }) => !['node_modules'].includes(basename(path));
-  for (const { path } of walkDirectory(root, { filter })) {
-    if (path.endsWith('.js')) {
-      try {
-        for (const [buffer] of jsdocExtractor(await readFile(path))) {
-          const entry = buffer.toString('utf8');
-          const extraction = toMarkdown(entry);
-          if (extraction !== undefined) {
-            markdowns.push(extraction);
-          }
-        }
-      } catch (error) {
-        console.log(error);
+  for (const path of paths) {
+    for (const [buffer] of jsdocExtractor(await readFile(path))) {
+      const entry = buffer.toString('utf8');
+      const extraction = toMarkdown(entry);
+      if (extraction !== undefined) {
+        markdowns.push(extraction);
       }
     }
   }
@@ -129,8 +117,5 @@ export const extract = async (root) => {
  </body>
 </html>
 `;
-  return writeFile('/tmp/doc.html', html);
+  return html;
 };
-
-extract(`${__dirname}/../api/v1`)
-    .catch(e => console.log(e));

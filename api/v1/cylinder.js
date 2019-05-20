@@ -2,56 +2,120 @@ import { assertEmpty, assertNumber } from './assert';
 
 import { Shape } from './Shape';
 import { buildRegularPrism } from '@jsxcad/algorithm-shape';
+import { dispatch } from './dispatch';
 
-const buildCylinder = ({ r1 = 1, r2 = 1, h = 1, edges = 32 }) => {
-  return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: edges })).scale([r1, r1, h]);
+const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
+  return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
 };
 
 /**
  *
- * cylinder();              // unit cylinder
- * cylinder({r: 1, h: 10});                 // openscad like
- * cylinder({d: 1, h: 10});
- * cylinder({r: 1, h: 10, center: true});   // default: center:false
- * cylinder({r: 1, h: 10, center: [true, true, false]});  // individual x,y,z center flags
- * cylinder({r: 1, h: 10, round: true});
- * cylinder({r1: 3, r2: 0, h: 10});
- * cylinder({d1: 1, d2: 0.5, h: 10});
- * cylinder({start: [0,0,0], end: [0,0,10], r1: 1, r2: 2, fn: 50});
+ * # Cylinder
  *
- */
-export const cylinder = (...params) => {
+ * Generates cylinders.
+ *
+ * ::: illustration { "view": { "position": [10, 10, 10] } }
+ * ```
+ * cylinder()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cylinder(10, 2)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cylinder({ radius: 2,
+ *            height: 10,
+ *            resolution: 8 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cylinder({ diameter: 6,
+ *            height: 8,
+ *            resolution: 16 })
+ * ```
+ * :::
+ *
+ **/
+
+/**
+ *
+ * ## cylinder.fromValue(radius, height=1, resolution=32)
+ *
+ * Generate a cylinder of the given radius and height.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cylinder.fromValue(10, 8)
+ * ```
+ * :::
+ *
+ **/
+export const fromValue = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
+
+/**
+ *
+ * ## cylinder.fromRadius({ radius, height=1, resolution=32 })
+ *
+ * Generate a cylinder of the given radius and height.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cylinder.fromRadius({ radius: 8,
+ *                       height: 10 })
+ * ```
+ * :::
+ *
+ **/
+export const fromRadius = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
+
+/**
+ *
+ * ## cylinder.fromDiameter({ diameter, height=1, resolution=32 })
+ *
+ * Generate a cylinder of the given diameter and height.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cylinder.fromDiameter({ diameter: 12,
+ *                         height: 12 })
+ * ```
+ * :::
+ *
+ **/
+export const fromDiameter = ({ diameter, height = 1, resolution = 32 }) => buildCylinder({ radius: diameter / 2, height, resolution });
+
+export const cylinder = dispatch(
+  'cylinder',
   // cylinder()
-  try {
-    assertEmpty(params);
-    return buildCylinder({});
-  } catch (e) {}
-
-  // cylinder({r: 1, h: 10, center: true});
-  try {
-    const { h, r, fn = 32 } = params[0];
-    assertNumber(h);
-    assertNumber(r);
-    return buildCylinder({ r1: r, r2: r, h: h, edges: fn });
-  } catch (e) {}
-
-  // cylinder({ r1: 1, r2: 2, h: 10, center: true});
-  try {
-    const { h, r1, r2, fn = 32 } = params[0];
-    assertNumber(h);
-    assertNumber(r1);
-    assertNumber(r2);
-    return buildCylinder({ r1: r1, r2: r2, h: h, edges: fn });
-  } catch (e) {}
-
-  // cylinder({ faces: 32, diameter: 1, height: 10 });
-  try {
-    const { diameter, height, faces } = params[0];
-    assertNumber(diameter);
-    assertNumber(faces);
+  (...rest) => {
+    assertEmpty(rest);
+    return () => fromValue(1);
+  },
+  (radius, height = 1, resolution = 32) => {
+    assertNumber(radius);
     assertNumber(height);
-    return buildCylinder({ r1: diameter / 2, r2: diameter / 2, h: height, center: true, edges: faces });
-  } catch (e) {}
+    assertNumber(resolution);
+    return () => fromValue(radius, height, resolution);
+  },
+  ({ radius, height = 1, resolution = 32 }) => {
+    assertNumber(radius);
+    assertNumber(height);
+    assertNumber(resolution);
+    return () => fromRadius({ radius, height, resolution });
+  },
+  ({ diameter, height = 1, resolution = 32 }) => {
+    assertNumber(diameter);
+    assertNumber(height);
+    assertNumber(resolution);
+    return () => fromDiameter({ diameter, height, resolution });
+  });
 
-  throw Error(`Unsupported interface for cylinder: ${JSON.stringify(params)}`);
-};
+cylinder.fromValue = fromValue;
+cylinder.fromRadius = fromRadius;
+cylinder.fromDiameter = fromDiameter;
+
+export default cylinder;

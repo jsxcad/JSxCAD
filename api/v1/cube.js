@@ -58,7 +58,7 @@ const unitCube = () => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * cube.fromValue(10).above()
+ * cube.fromValue(10)
  * ```
  * :::
  *
@@ -154,3 +154,5 @@ cube.fromValue = fromValue;
 cube.fromRadius = fromRadius;
 cube.fromDiameter = fromDiameter;
 cube.fromCorners = fromCorners;
+
+export default cube;
