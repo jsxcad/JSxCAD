@@ -14,6 +14,8 @@ import { Shape } from './Shape';
 import { above } from './above';
 import { acos } from './acos';
 import { assemble } from './assemble';
+import { back } from './back';
+import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { circle } from './circle';
@@ -31,6 +33,8 @@ import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
 import { outline } from './outline';
+import { point } from './point';
+import { points } from './points';
 import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
@@ -63,6 +67,8 @@ export {
   above,
   acos,
   assemble,
+  back,
+  below,
   center,
   chainHull,
   circle,
@@ -81,6 +87,8 @@ export {
   measureBoundingBox,
   minkowski,
   outline,
+  point,
+  points,
   polygon,
   polyhedron,
   readDst,

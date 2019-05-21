@@ -37,6 +37,14 @@ const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => 
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
+    } else if (geometry.threejsPoints) {
+      const points = geometry.threejsPoints;
+      const threejsGeometry = new THREE.Geometry();
+      const material = new THREE.PointsMaterial({ color: 0x0000ff });
+      for (const [x, y, z] of points) {
+        threejsGeometry.vertices.push(new THREE.Vector3(x, y, z));
+      }
+      scene.add(new THREE.Points(threejsGeometry, material));
     } else if (geometry.threejsSegments) {
       const segments = geometry.threejsSegments;
       const threejsGeometry = new THREE.Geometry();

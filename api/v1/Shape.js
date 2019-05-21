@@ -109,6 +109,8 @@ Shape.fromPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ p
 Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: paths }));
 Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: [path] }));
 Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: paths }));
+Shape.fromPoint = (point) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ points: [point] }));
+Shape.fromPoints = (points) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ points: points }));
 Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: fromPolygonsToSolid({}, polygons) }));
 Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: polygons }));
 Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: surfaces }));
