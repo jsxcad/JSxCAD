@@ -12,10 +12,17 @@ import { getZ0Surfaces } from '@jsxcad/geometry-eager';
  * Generates a solid from a surface.
  *
  * ::: illustration
- * difference(circle(10), circle(8))
+ * ```
+ * difference(circle(10),
+ *            circle(8))
+ * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
- * difference(circle(10), circle(8)).extrude({ height: 10 })
+ * ```
+ * difference(circle(10),
+ *            circle(8))
+ *   .extrude({ height: 10 })
+ * ```
  * :::
  *
  **/

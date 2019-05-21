@@ -13,13 +13,25 @@ import { toPolygons } from '@jsxcad/geometry-solid';
  * Produces a cross-section of a solid as a surface.
  *
  * ::: illustration { "view": { "position": [40, 40, 60] } }
- * difference(cylinder(10, 10), cylinder(8, 10))
+ * ```
+ * difference(cylinder(10, 10),
+ *            cylinder(8, 10))
+ * ```
  * :::
  * ::: illustration
- * difference(sphere(10), sphere(8)).crossSection()
+ * ```
+ * difference(sphere(10),
+ *            sphere(8))
+ *   .crossSection()
+ * ```
  * :::
  * ::: illustration
- * difference(sphere(10), sphere(8)).crossSection().outline()
+ * ```
+ * difference(sphere(10),
+ *            sphere(8))
+ *   .crossSection()
+ *   .outline()
+ * ```
  * :::
  *
  **/

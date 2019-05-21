@@ -5,14 +5,14 @@ import { translate } from './translate';
 
 /**
  *
- * # Front
+ * # Back
  *
- * Moves the shape so that it is just before the origin.
+ * Moves the shape so that it is just behind the origin.
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
  * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
- *          cube(10).front())
+ *          cube(10).back())
  * ```
  * :::
  **/
@@ -20,11 +20,11 @@ import { translate } from './translate';
 
 const Y = 1;
 
-export const front = (shape) => {
-  const [minPoint] = measureBoundingBox(shape);
-  return translate(negate([0, minPoint[Y], 0]), shape);
+export const back = (shape) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  return translate(negate([0, maxPoint[Y], 0]), shape);
 };
 
-const method = function () { return front(this); };
+const method = function () { return back(this); };
 
-Shape.prototype.front = method;
+Shape.prototype.back = method;
