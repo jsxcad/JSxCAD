@@ -1,6 +1,5 @@
-import { assertEmpty, assertNumberTriple } from './assert';
-
 import { Shape } from './Shape';
+import { assertNumberTriple } from './assert';
 import { dispatch } from './dispatch';
 
 export const fromPoints = (points) => Shape.fromPoints(points);

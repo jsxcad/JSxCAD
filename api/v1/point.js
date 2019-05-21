@@ -7,7 +7,7 @@ export const fromValue = (point) => Shape.fromPoint(point);
 
 /**
  *
- * # Point 
+ * # Point
  *
  * Generates a point, by default at the origin.
  *
