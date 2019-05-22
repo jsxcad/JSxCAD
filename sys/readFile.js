@@ -10,6 +10,8 @@ import { log } from './log';
 import nodeFetch from 'node-fetch';
 import { writeFile } from './writeFile';
 
+const { promises } = fs;
+
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
     return window.fetch;
@@ -21,7 +23,7 @@ const getUrlFetcher = async () => {
 const getFileFetcher = async () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    return fs.promises.readFile;
+    return promises.readFile;
   } else if (isBrowser) {
     // This will always fail, but maybe it should use local storage.
     return () => {};
@@ -57,7 +59,9 @@ const fetchSources = async (sources) => {
     } else if (source.file !== undefined) {
       try {
         const data = await fetchFile(source.file);
-        return data;
+        if (data !== undefined) {
+          return data;
+        }
       } catch (e) {}
     } else {
       throw Error('die');

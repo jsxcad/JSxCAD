@@ -749,10 +749,6 @@ define("./webworker.js",[],function () { 'use strict';
   	return module = { exports: {} }, fn(module, module.exports), module.exports;
   }
 
-  function getCjsExportFromNamespace (n) {
-  	return n && n['default'] || n;
-  }
-
   //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
   //[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
   //[5]   	Name	   ::=   	NameStartChar (NameChar)*
@@ -8675,11 +8671,26 @@ define("./webworker.js",[],function () { 'use strict';
   var browser_6 = browser$2.storage;
   var browser_7 = browser$2.colors;
 
+  // MIT lisence
+  // from https://github.com/substack/tty-browserify/blob/1ba769a6429d242f36226538835b4034bf6b7886/index.js
 
+  function isatty() {
+    return false;
+  }
 
-  var tty = /*#__PURE__*/Object.freeze({
+  function ReadStream() {
+    throw new Error('tty.ReadStream is not implemented');
+  }
 
-  });
+  function WriteStream() {
+    throw new Error('tty.ReadStream is not implemented');
+  }
+
+  var tty = {
+    isatty: isatty,
+    ReadStream: ReadStream,
+    WriteStream: WriteStream
+  };
 
   var lookup = [];
   var revLookup = [];
@@ -10647,14 +10658,10 @@ define("./webworker.js",[],function () { 'use strict';
     return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isFastBuffer(obj.slice(0, 0))
   }
 
-  var isBuffer$1 = function isBuffer(arg) {
-    return arg instanceof Buffer;
-  };
-
-  var inherits_browser = createCommonjsModule(function (module) {
-  if (typeof Object.create === 'function') {
-    // implementation from standard node.js 'util' module
-    module.exports = function inherits(ctor, superCtor) {
+  var inherits;
+  if (typeof Object.create === 'function'){
+    inherits = function inherits(ctor, superCtor) {
+      // implementation from standard node.js 'util' module
       ctor.super_ = superCtor;
       ctor.prototype = Object.create(superCtor.prototype, {
         constructor: {
@@ -10666,8 +10673,7 @@ define("./webworker.js",[],function () { 'use strict';
       });
     };
   } else {
-    // old school shim for old browsers
-    module.exports = function inherits(ctor, superCtor) {
+    inherits = function inherits(ctor, superCtor) {
       ctor.super_ = superCtor;
       var TempCtor = function () {};
       TempCtor.prototype = superCtor.prototype;
@@ -10675,52 +10681,10 @@ define("./webworker.js",[],function () { 'use strict';
       ctor.prototype.constructor = ctor;
     };
   }
-  });
-
-  var inherits = createCommonjsModule(function (module) {
-  try {
-    var util$1 = util;
-    if (typeof util$1.inherits !== 'function') throw '';
-    module.exports = util$1.inherits;
-  } catch (e) {
-    module.exports = inherits_browser;
-  }
-  });
-
-  var util = createCommonjsModule(function (module, exports) {
-  // Copyright Joyent, Inc. and other Node contributors.
-  //
-  // Permission is hereby granted, free of charge, to any person obtaining a
-  // copy of this software and associated documentation files (the
-  // "Software"), to deal in the Software without restriction, including
-  // without limitation the rights to use, copy, modify, merge, publish,
-  // distribute, sublicense, and/or sell copies of the Software, and to permit
-  // persons to whom the Software is furnished to do so, subject to the
-  // following conditions:
-  //
-  // The above copyright notice and this permission notice shall be included
-  // in all copies or substantial portions of the Software.
-  //
-  // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-  // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-  // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-  // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-  // USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-  var getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors ||
-    function getOwnPropertyDescriptors(obj) {
-      var keys = Object.keys(obj);
-      var descriptors = {};
-      for (var i = 0; i < keys.length; i++) {
-        descriptors[keys[i]] = Object.getOwnPropertyDescriptor(obj, keys[i]);
-      }
-      return descriptors;
-    };
+  var inherits$1 = inherits;
 
   var formatRegExp = /%[sdj%]/g;
-  exports.format = function(f) {
+  function format(f) {
     if (!isString(f)) {
       var objects = [];
       for (var i = 0; i < arguments.length; i++) {
@@ -10756,21 +10720,16 @@ define("./webworker.js",[],function () { 'use strict';
       }
     }
     return str;
-  };
-
+  }
 
   // Mark that a method should not be used.
   // Returns a modified function which warns once by default.
   // If --no-deprecation is set, then it is a no-op.
-  exports.deprecate = function(fn, msg) {
-    if (typeof process !== 'undefined' && process.noDeprecation === true) {
-      return fn;
-    }
-
+  function deprecate(fn, msg) {
     // Allow for deprecating things in the process of starting up.
-    if (typeof process === 'undefined') {
+    if (isUndefined(global$1.process)) {
       return function() {
-        return exports.deprecate(fn, msg).apply(this, arguments);
+        return deprecate(fn, msg).apply(this, arguments);
       };
     }
 
@@ -10786,20 +10745,19 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     return deprecated;
-  };
-
+  }
 
   var debugs = {};
   var debugEnviron;
-  exports.debuglog = function(set) {
+  function debuglog(set) {
     if (isUndefined(debugEnviron))
       debugEnviron = process.env.NODE_DEBUG || '';
     set = set.toUpperCase();
     if (!debugs[set]) {
       if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-        var pid = process.pid;
+        var pid = 0;
         debugs[set] = function() {
-          var msg = exports.format.apply(exports, arguments);
+          var msg = format.apply(null, arguments);
           console.error('%s %d: %s', set, pid, msg);
         };
       } else {
@@ -10807,8 +10765,7 @@ define("./webworker.js",[],function () { 'use strict';
       }
     }
     return debugs[set];
-  };
-
+  }
 
   /**
    * Echos the value of a value. Trys to print the value out
@@ -10832,7 +10789,7 @@ define("./webworker.js",[],function () { 'use strict';
       ctx.showHidden = opts;
     } else if (opts) {
       // got an "options" object
-      exports._extend(ctx, opts);
+      _extend(ctx, opts);
     }
     // set default options
     if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
@@ -10842,8 +10799,6 @@ define("./webworker.js",[],function () { 'use strict';
     if (ctx.colors) ctx.stylize = stylizeWithColor;
     return formatValue(ctx, obj, ctx.depth);
   }
-  exports.inspect = inspect;
-
 
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   inspect.colors = {
@@ -10911,7 +10866,7 @@ define("./webworker.js",[],function () { 'use strict';
         value &&
         isFunction(value.inspect) &&
         // Filter out the util module, it's inspect function is special
-        value.inspect !== exports.inspect &&
+        value.inspect !== inspect &&
         // Also filter out any prototype objects using the circular check.
         !(value.constructor && value.constructor.prototype === value)) {
       var ret = value.inspect(recurseTimes, ctx);
@@ -10962,7 +10917,7 @@ define("./webworker.js",[],function () { 'use strict';
     var base = '', array = false, braces = ['{', '}'];
 
     // Make Array say that they are Array
-    if (isArray(value)) {
+    if (isArray$1(value)) {
       array = true;
       braces = ['[', ']'];
     }
@@ -11141,71 +11096,58 @@ define("./webworker.js",[],function () { 'use strict';
 
   // NOTE: These type checking functions intentionally don't use `instanceof`
   // because it is fragile and can be easily faked with `Object.create()`.
-  function isArray(ar) {
+  function isArray$1(ar) {
     return Array.isArray(ar);
   }
-  exports.isArray = isArray;
 
   function isBoolean(arg) {
     return typeof arg === 'boolean';
   }
-  exports.isBoolean = isBoolean;
 
   function isNull(arg) {
     return arg === null;
   }
-  exports.isNull = isNull;
 
   function isNullOrUndefined(arg) {
     return arg == null;
   }
-  exports.isNullOrUndefined = isNullOrUndefined;
 
   function isNumber(arg) {
     return typeof arg === 'number';
   }
-  exports.isNumber = isNumber;
 
   function isString(arg) {
     return typeof arg === 'string';
   }
-  exports.isString = isString;
 
   function isSymbol(arg) {
     return typeof arg === 'symbol';
   }
-  exports.isSymbol = isSymbol;
 
   function isUndefined(arg) {
     return arg === void 0;
   }
-  exports.isUndefined = isUndefined;
 
   function isRegExp(re) {
     return isObject(re) && objectToString(re) === '[object RegExp]';
   }
-  exports.isRegExp = isRegExp;
 
   function isObject(arg) {
     return typeof arg === 'object' && arg !== null;
   }
-  exports.isObject = isObject;
 
   function isDate(d) {
     return isObject(d) && objectToString(d) === '[object Date]';
   }
-  exports.isDate = isDate;
 
   function isError(e) {
     return isObject(e) &&
         (objectToString(e) === '[object Error]' || e instanceof Error);
   }
-  exports.isError = isError;
 
   function isFunction(arg) {
     return typeof arg === 'function';
   }
-  exports.isFunction = isFunction;
 
   function isPrimitive(arg) {
     return arg === null ||
@@ -11215,9 +11157,10 @@ define("./webworker.js",[],function () { 'use strict';
            typeof arg === 'symbol' ||  // ES6 symbol
            typeof arg === 'undefined';
   }
-  exports.isPrimitive = isPrimitive;
 
-  exports.isBuffer = isBuffer$1;
+  function isBuffer$1(maybeBuf) {
+    return isBuffer(maybeBuf);
+  }
 
   function objectToString(o) {
     return Object.prototype.toString.call(o);
@@ -11243,27 +11186,11 @@ define("./webworker.js",[],function () { 'use strict';
 
 
   // log is just a thin wrapper to console.log that prepends a timestamp
-  exports.log = function() {
-    console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-  };
+  function log() {
+    console.log('%s - %s', timestamp(), format.apply(null, arguments));
+  }
 
-
-  /**
-   * Inherit the prototype methods from one constructor into another.
-   *
-   * The Function.prototype.inherits from lang.js rewritten as a standalone
-   * function (not on Function.prototype). NOTE: If this file is to be loaded
-   * during bootstrapping this function needs to be rewritten using some native
-   * functions as prototype setup using normal JavaScript does not work as
-   * expected during bootstrapping (see mirror.js in r114903).
-   *
-   * @param {function} ctor Constructor function which needs to inherit the
-   *     prototype.
-   * @param {function} superCtor Constructor function to inherit prototype from.
-   */
-  exports.inherits = inherits;
-
-  exports._extend = function(origin, add) {
+  function _extend(origin, add) {
     // Don't do anything if add isn't an object
     if (!add || !isObject(add)) return origin;
 
@@ -11273,149 +11200,35 @@ define("./webworker.js",[],function () { 'use strict';
       origin[keys[i]] = add[keys[i]];
     }
     return origin;
-  };
-
+  }
   function hasOwnProperty(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
-  var kCustomPromisifiedSymbol = typeof Symbol !== 'undefined' ? Symbol('util.promisify.custom') : undefined;
-
-  exports.promisify = function promisify(original) {
-    if (typeof original !== 'function')
-      throw new TypeError('The "original" argument must be of type Function');
-
-    if (kCustomPromisifiedSymbol && original[kCustomPromisifiedSymbol]) {
-      var fn = original[kCustomPromisifiedSymbol];
-      if (typeof fn !== 'function') {
-        throw new TypeError('The "util.promisify.custom" argument must be of type Function');
-      }
-      Object.defineProperty(fn, kCustomPromisifiedSymbol, {
-        value: fn, enumerable: false, writable: false, configurable: true
-      });
-      return fn;
-    }
-
-    function fn() {
-      var promiseResolve, promiseReject;
-      var promise = new Promise(function (resolve, reject) {
-        promiseResolve = resolve;
-        promiseReject = reject;
-      });
-
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      args.push(function (err, value) {
-        if (err) {
-          promiseReject(err);
-        } else {
-          promiseResolve(value);
-        }
-      });
-
-      try {
-        original.apply(this, args);
-      } catch (err) {
-        promiseReject(err);
-      }
-
-      return promise;
-    }
-
-    Object.setPrototypeOf(fn, Object.getPrototypeOf(original));
-
-    if (kCustomPromisifiedSymbol) Object.defineProperty(fn, kCustomPromisifiedSymbol, {
-      value: fn, enumerable: false, writable: false, configurable: true
-    });
-    return Object.defineProperties(
-      fn,
-      getOwnPropertyDescriptors(original)
-    );
+  var util = {
+    inherits: inherits$1,
+    _extend: _extend,
+    log: log,
+    isBuffer: isBuffer$1,
+    isPrimitive: isPrimitive,
+    isFunction: isFunction,
+    isError: isError,
+    isDate: isDate,
+    isObject: isObject,
+    isRegExp: isRegExp,
+    isUndefined: isUndefined,
+    isSymbol: isSymbol,
+    isString: isString,
+    isNumber: isNumber,
+    isNullOrUndefined: isNullOrUndefined,
+    isNull: isNull,
+    isBoolean: isBoolean,
+    isArray: isArray$1,
+    inspect: inspect,
+    deprecate: deprecate,
+    format: format,
+    debuglog: debuglog
   };
-
-  exports.promisify.custom = kCustomPromisifiedSymbol;
-
-  function callbackifyOnRejected(reason, cb) {
-    // `!reason` guard inspired by bluebird (Ref: https://goo.gl/t5IS6M).
-    // Because `null` is a special error value in callbacks which means "no error
-    // occurred", we error-wrap so the callback consumer can distinguish between
-    // "the promise rejected with null" or "the promise fulfilled with undefined".
-    if (!reason) {
-      var newReason = new Error('Promise was rejected with a falsy value');
-      newReason.reason = reason;
-      reason = newReason;
-    }
-    return cb(reason);
-  }
-
-  function callbackify(original) {
-    if (typeof original !== 'function') {
-      throw new TypeError('The "original" argument must be of type Function');
-    }
-
-    // We DO NOT return the promise as it gives the user a false sense that
-    // the promise is actually somehow related to the callback's execution
-    // and that the callback throwing will reject the promise.
-    function callbackified() {
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-
-      var maybeCb = args.pop();
-      if (typeof maybeCb !== 'function') {
-        throw new TypeError('The last argument must be of type Function');
-      }
-      var self = this;
-      var cb = function() {
-        return maybeCb.apply(self, arguments);
-      };
-      // In true node style we process the callback on `nextTick` with all the
-      // implications (stack, `uncaughtException`, `async_hooks`)
-      original.apply(this, args)
-        .then(function(ret) { nextTick(cb, null, ret); },
-              function(rej) { nextTick(callbackifyOnRejected, rej, cb); });
-    }
-
-    Object.setPrototypeOf(callbackified, Object.getPrototypeOf(original));
-    Object.defineProperties(callbackified,
-                            getOwnPropertyDescriptors(original));
-    return callbackified;
-  }
-  exports.callbackify = callbackify;
-  });
-  var util_1 = util.format;
-  var util_2 = util.deprecate;
-  var util_3 = util.debuglog;
-  var util_4 = util.inspect;
-  var util_5 = util.isArray;
-  var util_6 = util.isBoolean;
-  var util_7 = util.isNull;
-  var util_8 = util.isNullOrUndefined;
-  var util_9 = util.isNumber;
-  var util_10 = util.isString;
-  var util_11 = util.isSymbol;
-  var util_12 = util.isUndefined;
-  var util_13 = util.isRegExp;
-  var util_14 = util.isObject;
-  var util_15 = util.isDate;
-  var util_16 = util.isError;
-  var util_17 = util.isFunction;
-  var util_18 = util.isPrimitive;
-  var util_19 = util.isBuffer;
-  var util_20 = util.log;
-  var util_21 = util.inherits;
-  var util_22 = util._extend;
-  var util_23 = util.promisify;
-  var util_24 = util.callbackify;
-
-
-
-  var os = /*#__PURE__*/Object.freeze({
-
-  });
 
   var hasFlag = function (flag, argv) {
   	argv = argv || process.argv;
@@ -11426,8 +11239,6 @@ define("./webworker.js",[],function () { 'use strict';
 
   	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
   };
-
-  getCjsExportFromNamespace(os);
 
   const env$1 = process.env;
 
@@ -11519,8 +11330,6 @@ define("./webworker.js",[],function () { 'use strict';
 
   var supportsColor = process && support(supportLevel);
 
-  var tty$1 = getCjsExportFromNamespace(tty);
-
   var node = createCommonjsModule(function (module, exports) {
 
   /**
@@ -11591,7 +11400,7 @@ define("./webworker.js",[],function () { 'use strict';
    */
 
   function useColors() {
-    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty$1.isatty(process.stderr.fd);
+    return 'colors' in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
   }
   /**
    * Adds ANSI color escape codes if enabled.
@@ -13049,6 +12858,12 @@ define("./webworker.js",[],function () { 'use strict';
     return summedPoints;
   };
 
+  const eachPoint$1 = (options = {}, thunk, points) => {
+    for (const point of points) {
+      thunk(point);
+    }
+  };
+
   const flip$3 = (points) => points;
 
   // Unit tetrahedron vertices.
@@ -13070,7 +12885,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const difference = (pathset, ...pathsets) => { throw Error('Not implemented'); };
 
-  const eachPoint$1 = (options = {}, thunk, paths) => {
+  const eachPoint$2 = (options = {}, thunk, paths) => {
     for (const path of paths) {
       for (const point of path) {
         if (point !== null) {
@@ -13088,7 +12903,7 @@ define("./webworker.js",[],function () { 'use strict';
   const measureBoundingBox$1 = (paths) => {
     let minPoint;
     let maxPoint;
-    eachPoint$1({},
+    eachPoint$2({},
               point => {
                 minPoint = (minPoint === undefined) ? fromPoint(point) : min(minPoint, fromPoint(point));
                 maxPoint = (maxPoint === undefined) ? fromPoint(point) : max(maxPoint, fromPoint(point));
@@ -13107,7 +12922,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const toPoints = (options = {}, paths) => {
     const points = [];
-    eachPoint$1(options, point => points.push(point), paths);
+    eachPoint$2(options, point => points.push(point), paths);
     return points;
   };
 
@@ -13207,382 +13022,6 @@ define("./webworker.js",[],function () { 'use strict';
 
   const interpolateCubicBezier = bezier.prepare(4);
 
-  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
-
-  const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
-
-  var max$1 = Math.max;
-  var abs$1 = Math.abs;
-  var pow = Math.pow;
-  var sin$1 = Math.sin;
-  var cos = Math.cos;
-  var tan = Math.tan;
-  var acos = Math.acos;
-  var sqrt = Math.sqrt;
-  var ceil = Math.ceil;
-  var τ = Math.PI * 2;
-
-  var arcToCurves = curves;
-
-  function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
-    if (rx === 0 || ry === 0) return []
-
-    xrot = xrot || 0;
-    large = large || 0;
-    sweep = sweep || 0;
-
-    var sinphi = sin$1(xrot * τ / 360);
-    var cosphi = cos(xrot * τ / 360);
-
-    var pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2;
-    var pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2;
-    if (pxp === 0 && pyp === 0) return []
-
-    rx = abs$1(rx);
-    ry = abs$1(ry);
-
-    var lambda = (
-      pow(pxp, 2) / pow(rx, 2) +
-      pow(pyp, 2) / pow(ry, 2)
-    );
-
-    if (lambda > 1) {
-      rx *= sqrt(lambda);
-      ry *= sqrt(lambda);
-    }
-
-    var centre = getArcCentre(px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp);
-    var centrex = centre[0];
-    var centrey = centre[1];
-    var ang1 = centre[2];
-    var ang2 = centre[3];
-
-    var segments = max$1(ceil(abs$1(ang2) / (τ / 4)), 1);
-    if (!segments) return []
-
-    var curves = [];
-    ang2 /= segments;
-    while (segments--) {
-      curves.push(approxUnitArc(ang1, ang2));
-      ang1 += ang2;
-    }
-
-    var result = [];
-    var curve, a, b, c;
-    var i = 0, l = curves.length;
-
-    while (i < l) {
-      curve = curves[i++];
-      a = mapToEllipse(curve[0], rx, ry, cosphi, sinphi, centrex, centrey);
-      b = mapToEllipse(curve[1], rx, ry, cosphi, sinphi, centrex, centrey);
-      c = mapToEllipse(curve[2], rx, ry, cosphi, sinphi, centrex, centrey);
-      result[result.length] = [a[0], a[1], b[0], b[1], c[0], c[1]];
-    }
-
-    return result
-  }
-
-  function mapToEllipse (curve, rx, ry, cosphi, sinphi, centrex, centrey) {
-    var x = curve[0] * rx;
-    var y = curve[1] * ry;
-
-    var xp = cosphi * x - sinphi * y;
-    var yp = sinphi * x + cosphi * y;
-
-    return [xp + centrex, yp + centrey]
-  }
-
-  function approxUnitArc (ang1, ang2) {
-    var a = 4 / 3 * tan(ang2 / 4);
-
-    var x1 = cos(ang1);
-    var y1 = sin$1(ang1);
-    var x2 = cos(ang1 + ang2);
-    var y2 = sin$1(ang1 + ang2);
-
-    return [
-      [x1 - y1 * a, y1 + x1 * a ],
-      [x2 + y2 * a, y2 - x2 * a],
-      [x2, y2]
-    ]
-  }
-
-  function getArcCentre (px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp) {
-    var rxsq = pow(rx, 2);
-    var rysq = pow(ry, 2);
-    var pxpsq = pow(pxp, 2);
-    var pypsq = pow(pyp, 2);
-
-    var radicant = (rxsq * rysq) - (rxsq * pypsq) - (rysq * pxpsq);
-
-    if (radicant < 0) radicant = 0;
-    radicant /= (rxsq * pypsq) + (rysq * pxpsq);
-    radicant = sqrt(radicant) * (large === sweep ? -1 : 1);
-
-    var centrexp = radicant * rx / ry * pyp;
-    var centreyp = radicant * -ry / rx * pxp;
-    var centrex = cosphi * centrexp - sinphi * centreyp + (px + cx) / 2;
-    var centrey = sinphi * centrexp + cosphi * centreyp + (py + cy) / 2;
-
-    var vx1 = (pxp - centrexp) / rx;
-    var vy1 = (pyp - centreyp) / ry;
-    var vx2 = (-pxp - centrexp) / rx;
-    var vy2 = (-pyp - centreyp) / ry;
-
-    var ang1 = vectorAngle(1, 0, vx1, vy1);
-    var ang2 = vectorAngle(vx1, vy1, vx2, vy2);
-
-    if (sweep === 0 && ang2 > 0) ang2 -= τ;
-    if (sweep === 1 && ang2 < 0) ang2 += τ;
-
-    return [centrex, centrey, ang1, ang2]
-  }
-
-  function vectorAngle (ux, uy, vx, vy) {
-    var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
-    var umag = sqrt(ux * ux + uy * uy);
-    var vmag = sqrt(ux * ux + uy * uy);
-    var dot = ux * vx + uy * vy;
-
-    var div = dot / (umag * vmag);
-    if (div > 1) div = 1;
-    if (div < -1) div = -1;
-
-    return sign * acos(div)
-  }
-
-  var curvifySvgPath = curvify;
-
-  function curvify (path) {
-    var result = [];
-    var cmd, prev, curves;
-    var x = 0, y = 0;
-    var bx = 0, by = 0;
-    var sx = 0, sy = 0;
-    var qx, qy, cx, cy;
-    var i = 0, j, m, sl;
-    var l = path.length;
-
-    while (i < l) {
-      seg = path[i++], cmd = seg[0];
-
-      if (cmd == 'M') sx = seg[1], sy = seg[2];
-      else if (cmd == 'L') seg = line(x, y, seg[1], seg[2]);
-      else if (cmd == 'H') seg = line(x, y, seg[1], y);
-      else if (cmd == 'V') seg = line(x, y, x, seg[1]);
-      else if (cmd == 'Z') seg = line(x, y, sx, sy);
-
-      else if (cmd == 'A') {
-        curves = arcToCurves(
-          x, y, seg[6], seg[7],
-          seg[1], seg[2], seg[3],
-          seg[4], seg[5]
-        );
-
-        m = curves.length;
-        if (!m) continue
-        j = 0;
-
-        while (j < m) {
-          c = curves[j++];
-          seg = ['C', c[0], c[1], c[2], c[3], c[4], c[5]];
-          if (j < m) result[result.length] = seg;
-        }
-      }
-
-      else if (cmd == 'S') {
-        cx = x, cy = y;
-        if (prev == 'C' || prev == 'S') {
-          cx += cx - bx,
-          cy += cy - by;
-        }
-        seg = ['C', cx, cy, seg[1], seg[2], seg[3], seg[4]];
-      }
-
-      else if (cmd == 'T') {
-        if (prev == 'Q' || prev == 'T') {
-          qx = x * 2 - qx, qy = y * 2 - qy;
-        }
-        else qx = x, qy = y;
-        seg = quadratic(x, y, qx, qy, seg[1], seg[2]);
-      }
-
-      else if (cmd == 'Q') {
-        qx = seg[1], qy = seg[2];
-        seg = quadratic(x, y, seg[1], seg[2], seg[3], seg[4]);
-      }
-
-      sl = seg.length;
-      x = seg[sl - 2], y = seg[sl - 1];
-      if (sl > 4) bx = seg[sl - 4], by = seg[sl - 3];
-      else bx = x, by = y;
-      prev = cmd;
-
-      result[result.length] = seg;
-    }
-
-    return result
-  }
-
-  function line (x1, y1, x2, y2) {
-    return ['C', x1, y1, x2, y2, x2, y2]
-  }
-
-  function quadratic (x1, y1, cx, cy, x2, y2) {
-    return ['C',
-      x1 / 3 + (2 / 3) * cx, y1 / 3 + (2 / 3) * cy,
-      x2 / 3 + (2 / 3) * cx, y2 / 3 + (2 / 3) * cy,
-      x2, y2
-    ]
-  }
-
-  var parseSvgPath = parse$2;
-
-  /**
-   * expected argument lengths
-   * @type {Object}
-   */
-
-  var length$2 = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
-
-  /**
-   * segment pattern
-   * @type {RegExp}
-   */
-
-  var segment = /([astvzqmhlc])([^astvzqmhlc]*)/ig;
-
-  /**
-   * parse an svg path data string. Generates an Array
-   * of commands where each command is an Array of the
-   * form `[command, arg1, arg2, ...]`
-   *
-   * @param {String} path
-   * @return {Array}
-   */
-
-  function parse$2(path) {
-  	var data = [];
-  	path.replace(segment, function(_, command, args){
-  		var type = command.toLowerCase();
-  		args = parseValues(args);
-
-  		// overloaded moveTo
-  		if (type == 'm' && args.length > 2) {
-  			data.push([command].concat(args.splice(0, 2)));
-  			type = 'l';
-  			command = command == 'm' ? 'l' : 'L';
-  		}
-
-  		while (true) {
-  			if (args.length == length$2[type]) {
-  				args.unshift(command);
-  				return data.push(args)
-  			}
-  			if (args.length < length$2[type]) throw new Error('malformed path data')
-  			data.push([command].concat(args.splice(0, length$2[type])));
-  		}
-  	});
-  	return data
-  }
-
-  var number = /-?[0-9]*\.?[0-9]+(?:e[-+]?\d+)?/ig;
-
-  function parseValues(args) {
-  	var numbers = args.match(number);
-  	return numbers ? numbers.map(Number) : []
-  }
-
-  // FIX: Check scaling.
-
-  const removeRepeatedPoints = (path) => {
-    const unrepeated = [path[0]];
-    for (let nth = 1; nth < path.length; nth++) {
-      const last = path[nth - 1];
-      const current = path[nth];
-      if (last === null || !equals$1(last, current)) {
-        unrepeated.push(current);
-      }
-    }
-    return unrepeated;
-  };
-
-  const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {
-    const paths = [];
-    let path = [null];
-
-    const newPath = () => {
-      if (path[0] === null) {
-        maybeClosePath();
-      }
-      if (path.length < 2) {
-        // An empty path.
-        return;
-      }
-      paths.push(path);
-      path = [null];
-    };
-
-    const maybeClosePath = () => {
-      path = removeRepeatedPoints(canonicalize$3(path));
-      if (path.length > 3) {
-        if (path[0] === null && equals$1(path[1], path[path.length - 1])) {
-          // The path is closed, remove the leading null, and the duplicate point at the end.
-          path = path.slice(1, path.length - 1);
-          newPath();
-        }
-      }
-    };
-
-    for (const segment of svgPath) {
-      const [directive, ...args] = segment;
-      switch (directive) {
-        case 'M': {
-          maybeClosePath();
-          newPath();
-          const [x, y] = args;
-          path.push([x, y]);
-          break;
-        }
-        case 'C': {
-          const [x1, y1, x2, y2, x, y] = args;
-          const start = path[path.length - 1];
-          const [xStart, yStart] = (start === null) ? [0, 0] : start;
-          path = path.concat(buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
-          break;
-        }
-        default: {
-          throw Error(`Unexpected segment: ${JSON.stringify(segment)}`);
-        }
-      }
-    }
-
-    maybeClosePath();
-    newPath();
-
-    if (normalizeCoordinateSystem) {
-      // Turn it upside down.
-      return transform$6(fromScaling([1, -1, 0]), paths);
-    } else {
-      return paths;
-    }
-  };
-
-  const fromSvgPath = (options = {}, svgPath) =>
-    ({ paths: toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath)))) });
-
-  const addTag = (tag, geometry) => {
-    const copy = Object.assign({}, geometry);
-    if (copy.tags) {
-      copy.tags = [tag, ...copy.tags];
-    } else {
-      copy.tags = [tag];
-    }
-    return copy;
-  };
-
-  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
-
   const toPlane$1 = (surface) => toPlane(surface[0]);
 
   // Transforms
@@ -13600,7 +13039,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const eachPoint$2 = (options = {}, thunk, surface) => {
+  const eachPoint$3 = (options = {}, thunk, surface) => {
     for (const polygon of surface) {
       for (const point of polygon) {
         thunk(point);
@@ -13633,7 +13072,7 @@ define("./webworker.js",[],function () { 'use strict';
     for (const polygons of clipping) {
       for (const polygon of polygons) {
         polygon.pop();
-        polygonArray.push(polygon);
+        polygonArray.push(polygon.map(([x, y]) => [x, y, 0]));
       }
     }
     return polygonArray;
@@ -14497,7 +13936,7 @@ define("./webworker.js",[],function () { 'use strict';
     var kross = crossProduct(v1, v2);
     return cmp(kross, 0);
   };
-  var length$3 = function length(v) {
+  var length$2 = function length(v) {
     return Math.sqrt(dotProduct(v, v));
   };
   /* Get the sine of the angle from pShared -> pAngle to pShaed -> pBase */
@@ -14511,7 +13950,7 @@ define("./webworker.js",[],function () { 'use strict';
       x: pAngle.x - pShared.x,
       y: pAngle.y - pShared.y
     };
-    return crossProduct(vAngle, vBase) / length$3(vAngle) / length$3(vBase);
+    return crossProduct(vAngle, vBase) / length$2(vAngle) / length$2(vBase);
   };
   /* Get the cosine of the angle from pShared -> pAngle to pShaed -> pBase */
 
@@ -14524,7 +13963,7 @@ define("./webworker.js",[],function () { 'use strict';
       x: pAngle.x - pShared.x,
       y: pAngle.y - pShared.y
     };
-    return dotProduct(vAngle, vBase) / length$3(vAngle) / length$3(vBase);
+    return dotProduct(vAngle, vBase) / length$2(vAngle) / length$2(vBase);
   };
   /* Get the closest point on an line (defined by two points)
    * to another point. */
@@ -16424,9 +15863,6 @@ define("./webworker.js",[],function () { 'use strict';
     if (polygons.isConvex) {
       return polygons;
     }
-    if (polygons.every(isConvex)) {
-      return blessAsConvex$1(polygons);
-    }
     const contours = polygons.map(toContour$1);
     // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
     const convex = fromTessellation$1(
@@ -16465,7 +15901,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
     assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
-    let retessellatedSurface = makeConvex$1({}, union$2(...transform$7(to, surface).map(polygon => [polygon])));
+    let retessellatedSurface = makeConvex$1({}, transform$7(to, surface));
     return transform$7(from, retessellatedSurface);
   };
 
@@ -16483,9 +15919,9 @@ define("./webworker.js",[],function () { 'use strict';
   const rotateX = (radians, solid) => multiply$2(fromXRotation(radians), solid);
   const scale$4 = (vector, solid) => multiply$2(fromScaling(vector), solid);
 
-  const eachPoint$3 = (options = {}, thunk, solid) => {
+  const eachPoint$4 = (options = {}, thunk, solid) => {
     for (const surface of solid) {
-      eachPoint$2(options, thunk, surface);
+      eachPoint$3(options, thunk, surface);
     }
   };
 
@@ -16519,7 +15955,7 @@ define("./webworker.js",[],function () { 'use strict';
   const measureBoundingBox$2 = (solid) => {
     let max$1 = solid[0][0][0];
     let min$1 = solid[0][0][0];
-    eachPoint$3({},
+    eachPoint$4({},
               point => {
                 max$1 = max(max$1, point);
                 min$1 = min(min$1, point);
@@ -16544,6 +15980,909 @@ define("./webworker.js",[],function () { 'use strict';
 
   // Relax the coplanar arrangement into polygon soup.
   const toPolygons = (options = {}, solid) => [].concat(...solid);
+
+  const extrude = ({ height = 1 }, surface) => {
+    const polygons = [];
+    const up = [0, 0, height];
+
+    // Build the walls.
+    for (const polygon of surface) {
+      // Build floor outline. This need not be a convex polygon.
+      const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
+      // Walk around the floor to build the walls.
+      for (let i = 0; i < floor.length; i++) {
+        const start = floor[i];
+        const end = floor[(i + 1) % floor.length];
+        // Remember that we are walking CCW.
+        polygons.push([start, add(start, up), end]);
+        polygons.push([end, add(start, up), add(end, up)]);
+      }
+    }
+
+    // Build the roof and floor from convex polygons.
+    for (const polygon of makeConvex$1({}, surface)) {
+      const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
+      const roof = floor.map(vertex => add(vertex, up)).reverse();
+      polygons.push(roof, floor);
+    }
+
+    return fromPolygons({}, polygons);
+  };
+
+  const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+
+  const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
+
+  var max$1 = Math.max;
+  var abs$1 = Math.abs;
+  var pow = Math.pow;
+  var sin$1 = Math.sin;
+  var cos = Math.cos;
+  var tan = Math.tan;
+  var acos = Math.acos;
+  var sqrt = Math.sqrt;
+  var ceil = Math.ceil;
+  var τ = Math.PI * 2;
+
+  var arcToCurves = curves;
+
+  function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
+    if (rx === 0 || ry === 0) return []
+
+    xrot = xrot || 0;
+    large = large || 0;
+    sweep = sweep || 0;
+
+    var sinphi = sin$1(xrot * τ / 360);
+    var cosphi = cos(xrot * τ / 360);
+
+    var pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2;
+    var pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2;
+    if (pxp === 0 && pyp === 0) return []
+
+    rx = abs$1(rx);
+    ry = abs$1(ry);
+
+    var lambda = (
+      pow(pxp, 2) / pow(rx, 2) +
+      pow(pyp, 2) / pow(ry, 2)
+    );
+
+    if (lambda > 1) {
+      rx *= sqrt(lambda);
+      ry *= sqrt(lambda);
+    }
+
+    var centre = getArcCentre(px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp);
+    var centrex = centre[0];
+    var centrey = centre[1];
+    var ang1 = centre[2];
+    var ang2 = centre[3];
+
+    var segments = max$1(ceil(abs$1(ang2) / (τ / 4)), 1);
+    if (!segments) return []
+
+    var curves = [];
+    ang2 /= segments;
+    while (segments--) {
+      curves.push(approxUnitArc(ang1, ang2));
+      ang1 += ang2;
+    }
+
+    var result = [];
+    var curve, a, b, c;
+    var i = 0, l = curves.length;
+
+    while (i < l) {
+      curve = curves[i++];
+      a = mapToEllipse(curve[0], rx, ry, cosphi, sinphi, centrex, centrey);
+      b = mapToEllipse(curve[1], rx, ry, cosphi, sinphi, centrex, centrey);
+      c = mapToEllipse(curve[2], rx, ry, cosphi, sinphi, centrex, centrey);
+      result[result.length] = [a[0], a[1], b[0], b[1], c[0], c[1]];
+    }
+
+    return result
+  }
+
+  function mapToEllipse (curve, rx, ry, cosphi, sinphi, centrex, centrey) {
+    var x = curve[0] * rx;
+    var y = curve[1] * ry;
+
+    var xp = cosphi * x - sinphi * y;
+    var yp = sinphi * x + cosphi * y;
+
+    return [xp + centrex, yp + centrey]
+  }
+
+  function approxUnitArc (ang1, ang2) {
+    var a = 4 / 3 * tan(ang2 / 4);
+
+    var x1 = cos(ang1);
+    var y1 = sin$1(ang1);
+    var x2 = cos(ang1 + ang2);
+    var y2 = sin$1(ang1 + ang2);
+
+    return [
+      [x1 - y1 * a, y1 + x1 * a ],
+      [x2 + y2 * a, y2 - x2 * a],
+      [x2, y2]
+    ]
+  }
+
+  function getArcCentre (px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp) {
+    var rxsq = pow(rx, 2);
+    var rysq = pow(ry, 2);
+    var pxpsq = pow(pxp, 2);
+    var pypsq = pow(pyp, 2);
+
+    var radicant = (rxsq * rysq) - (rxsq * pypsq) - (rysq * pxpsq);
+
+    if (radicant < 0) radicant = 0;
+    radicant /= (rxsq * pypsq) + (rysq * pxpsq);
+    radicant = sqrt(radicant) * (large === sweep ? -1 : 1);
+
+    var centrexp = radicant * rx / ry * pyp;
+    var centreyp = radicant * -ry / rx * pxp;
+    var centrex = cosphi * centrexp - sinphi * centreyp + (px + cx) / 2;
+    var centrey = sinphi * centrexp + cosphi * centreyp + (py + cy) / 2;
+
+    var vx1 = (pxp - centrexp) / rx;
+    var vy1 = (pyp - centreyp) / ry;
+    var vx2 = (-pxp - centrexp) / rx;
+    var vy2 = (-pyp - centreyp) / ry;
+
+    var ang1 = vectorAngle(1, 0, vx1, vy1);
+    var ang2 = vectorAngle(vx1, vy1, vx2, vy2);
+
+    if (sweep === 0 && ang2 > 0) ang2 -= τ;
+    if (sweep === 1 && ang2 < 0) ang2 += τ;
+
+    return [centrex, centrey, ang1, ang2]
+  }
+
+  function vectorAngle (ux, uy, vx, vy) {
+    var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
+    var umag = sqrt(ux * ux + uy * uy);
+    var vmag = sqrt(ux * ux + uy * uy);
+    var dot = ux * vx + uy * vy;
+
+    var div = dot / (umag * vmag);
+    if (div > 1) div = 1;
+    if (div < -1) div = -1;
+
+    return sign * acos(div)
+  }
+
+  var curvifySvgPath = curvify;
+
+  function curvify (path) {
+    var result = [];
+    var cmd, prev, curves;
+    var x = 0, y = 0;
+    var bx = 0, by = 0;
+    var sx = 0, sy = 0;
+    var qx, qy, cx, cy;
+    var i = 0, j, m, sl;
+    var l = path.length;
+
+    while (i < l) {
+      seg = path[i++], cmd = seg[0];
+
+      if (cmd == 'M') sx = seg[1], sy = seg[2];
+      else if (cmd == 'L') seg = line(x, y, seg[1], seg[2]);
+      else if (cmd == 'H') seg = line(x, y, seg[1], y);
+      else if (cmd == 'V') seg = line(x, y, x, seg[1]);
+      else if (cmd == 'Z') seg = line(x, y, sx, sy);
+
+      else if (cmd == 'A') {
+        curves = arcToCurves(
+          x, y, seg[6], seg[7],
+          seg[1], seg[2], seg[3],
+          seg[4], seg[5]
+        );
+
+        m = curves.length;
+        if (!m) continue
+        j = 0;
+
+        while (j < m) {
+          c = curves[j++];
+          seg = ['C', c[0], c[1], c[2], c[3], c[4], c[5]];
+          if (j < m) result[result.length] = seg;
+        }
+      }
+
+      else if (cmd == 'S') {
+        cx = x, cy = y;
+        if (prev == 'C' || prev == 'S') {
+          cx += cx - bx,
+          cy += cy - by;
+        }
+        seg = ['C', cx, cy, seg[1], seg[2], seg[3], seg[4]];
+      }
+
+      else if (cmd == 'T') {
+        if (prev == 'Q' || prev == 'T') {
+          qx = x * 2 - qx, qy = y * 2 - qy;
+        }
+        else qx = x, qy = y;
+        seg = quadratic(x, y, qx, qy, seg[1], seg[2]);
+      }
+
+      else if (cmd == 'Q') {
+        qx = seg[1], qy = seg[2];
+        seg = quadratic(x, y, seg[1], seg[2], seg[3], seg[4]);
+      }
+
+      sl = seg.length;
+      x = seg[sl - 2], y = seg[sl - 1];
+      if (sl > 4) bx = seg[sl - 4], by = seg[sl - 3];
+      else bx = x, by = y;
+      prev = cmd;
+
+      result[result.length] = seg;
+    }
+
+    return result
+  }
+
+  function line (x1, y1, x2, y2) {
+    return ['C', x1, y1, x2, y2, x2, y2]
+  }
+
+  function quadratic (x1, y1, cx, cy, x2, y2) {
+    return ['C',
+      x1 / 3 + (2 / 3) * cx, y1 / 3 + (2 / 3) * cy,
+      x2 / 3 + (2 / 3) * cx, y2 / 3 + (2 / 3) * cy,
+      x2, y2
+    ]
+  }
+
+  var parseSvgPath = parse$2;
+
+  /**
+   * expected argument lengths
+   * @type {Object}
+   */
+
+  var length$3 = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
+
+  /**
+   * segment pattern
+   * @type {RegExp}
+   */
+
+  var segment = /([astvzqmhlc])([^astvzqmhlc]*)/ig;
+
+  /**
+   * parse an svg path data string. Generates an Array
+   * of commands where each command is an Array of the
+   * form `[command, arg1, arg2, ...]`
+   *
+   * @param {String} path
+   * @return {Array}
+   */
+
+  function parse$2(path) {
+  	var data = [];
+  	path.replace(segment, function(_, command, args){
+  		var type = command.toLowerCase();
+  		args = parseValues(args);
+
+  		// overloaded moveTo
+  		if (type == 'm' && args.length > 2) {
+  			data.push([command].concat(args.splice(0, 2)));
+  			type = 'l';
+  			command = command == 'm' ? 'l' : 'L';
+  		}
+
+  		while (true) {
+  			if (args.length == length$3[type]) {
+  				args.unshift(command);
+  				return data.push(args)
+  			}
+  			if (args.length < length$3[type]) throw new Error('malformed path data')
+  			data.push([command].concat(args.splice(0, length$3[type])));
+  		}
+  	});
+  	return data
+  }
+
+  var number = /-?[0-9]*\.?[0-9]+(?:e[-+]?\d+)?/ig;
+
+  function parseValues(args) {
+  	var numbers = args.match(number);
+  	return numbers ? numbers.map(Number) : []
+  }
+
+  // FIX: Check scaling.
+
+  const removeRepeatedPoints = (path) => {
+    const unrepeated = [path[0]];
+    for (let nth = 1; nth < path.length; nth++) {
+      const last = path[nth - 1];
+      const current = path[nth];
+      if (last === null || !equals$1(last, current)) {
+        unrepeated.push(current);
+      }
+    }
+    return unrepeated;
+  };
+
+  const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {
+    const paths = [];
+    let path = [null];
+
+    const newPath = () => {
+      if (path[0] === null) {
+        maybeClosePath();
+      }
+      if (path.length < 2) {
+        // An empty path.
+        return;
+      }
+      paths.push(path);
+      path = [null];
+    };
+
+    const maybeClosePath = () => {
+      path = removeRepeatedPoints(canonicalize$3(path));
+      if (path.length > 3) {
+        if (path[0] === null && equals$1(path[1], path[path.length - 1])) {
+          // The path is closed, remove the leading null, and the duplicate point at the end.
+          path = path.slice(1, path.length - 1);
+          newPath();
+        }
+      }
+    };
+
+    for (const segment of svgPath) {
+      const [directive, ...args] = segment;
+      switch (directive) {
+        case 'M': {
+          maybeClosePath();
+          newPath();
+          const [x, y] = args;
+          path.push([x, y]);
+          break;
+        }
+        case 'C': {
+          const [x1, y1, x2, y2, x, y] = args;
+          const start = path[path.length - 1];
+          const [xStart, yStart] = (start === null) ? [0, 0] : start;
+          path = path.concat(buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
+          break;
+        }
+        default: {
+          throw Error(`Unexpected segment: ${JSON.stringify(segment)}`);
+        }
+      }
+    }
+
+    maybeClosePath();
+    newPath();
+
+    if (normalizeCoordinateSystem) {
+      // Turn it upside down.
+      return transform$6(fromScaling([1, -1, 0]), paths);
+    } else {
+      return paths;
+    }
+  };
+
+  const fromSvgPath = (options = {}, svgPath) =>
+    ({ paths: toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath)))) });
+
+  var _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  var toPoints$1 = function toPoints(_ref) {
+    var type = _ref.type,
+        props = _objectWithoutProperties(_ref, ['type']);
+
+    switch (type) {
+      case 'circle':
+        return getPointsFromCircle(props);
+      case 'ellipse':
+        return getPointsFromEllipse(props);
+      case 'line':
+        return getPointsFromLine(props);
+      case 'path':
+        return getPointsFromPath(props);
+      case 'polygon':
+        return getPointsFromPolygon(props);
+      case 'polyline':
+        return getPointsFromPolyline(props);
+      case 'rect':
+        return getPointsFromRect(props);
+      case 'g':
+        return getPointsFromG(props);
+      default:
+        throw new Error('Not a valid shape type');
+    }
+  };
+
+  var getPointsFromCircle = function getPointsFromCircle(_ref2) {
+    var cx = _ref2.cx,
+        cy = _ref2.cy,
+        r = _ref2.r;
+
+    return [{ x: cx, y: cy - r, moveTo: true }, { x: cx, y: cy + r, curve: { type: 'arc', rx: r, ry: r, sweepFlag: 1 } }, { x: cx, y: cy - r, curve: { type: 'arc', rx: r, ry: r, sweepFlag: 1 } }];
+  };
+
+  var getPointsFromEllipse = function getPointsFromEllipse(_ref3) {
+    var cx = _ref3.cx,
+        cy = _ref3.cy,
+        rx = _ref3.rx,
+        ry = _ref3.ry;
+
+    return [{ x: cx, y: cy - ry, moveTo: true }, { x: cx, y: cy + ry, curve: { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 } }, { x: cx, y: cy - ry, curve: { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 } }];
+  };
+
+  var getPointsFromLine = function getPointsFromLine(_ref4) {
+    var x1 = _ref4.x1,
+        x2 = _ref4.x2,
+        y1 = _ref4.y1,
+        y2 = _ref4.y2;
+
+    return [{ x: x1, y: y1, moveTo: true }, { x: x2, y: y2 }];
+  };
+
+  var validCommands = /[MmLlHhVvCcSsQqTtAaZz]/g;
+
+  var commandLengths = {
+    A: 7,
+    C: 6,
+    H: 1,
+    L: 2,
+    M: 2,
+    Q: 4,
+    S: 4,
+    T: 2,
+    V: 1,
+    Z: 0
+  };
+
+  var relativeCommands = ['a', 'c', 'h', 'l', 'm', 'q', 's', 't', 'v'];
+
+  var isRelative = function isRelative(command) {
+    return relativeCommands.indexOf(command) !== -1;
+  };
+
+  var optionalArcKeys = ['xAxisRotation', 'largeArcFlag', 'sweepFlag'];
+
+  var getCommands = function getCommands(d) {
+    return d.match(validCommands);
+  };
+
+  var getParams = function getParams(d) {
+    return d.split(validCommands).map(function (v) {
+      return v.replace(/[0-9]+-/g, function (m) {
+        return m.slice(0, -1) + ' -';
+      });
+    }).map(function (v) {
+      return v.replace(/\.[0-9]+/g, function (m) {
+        return m + ' ';
+      });
+    }).map(function (v) {
+      return v.trim();
+    }).filter(function (v) {
+      return v.length > 0;
+    }).map(function (v) {
+      return v.split(/[ ,]+/).map(parseFloat).filter(function (n) {
+        return !isNaN(n);
+      });
+    });
+  };
+
+  var getPointsFromPath = function getPointsFromPath(_ref5) {
+    var d = _ref5.d;
+
+    var commands = getCommands(d);
+    var params = getParams(d);
+
+    var points = [];
+
+    var moveTo = void 0;
+
+    for (var i = 0, l = commands.length; i < l; i++) {
+      var command = commands[i];
+      var upperCaseCommand = command.toUpperCase();
+      var commandLength = commandLengths[upperCaseCommand];
+      var relative = isRelative(command);
+
+      if (commandLength > 0) {
+        var commandParams = params.shift();
+        var iterations = commandParams.length / commandLength;
+
+        for (var j = 0; j < iterations; j++) {
+          var prevPoint = points[points.length - 1] || { x: 0, y: 0 };
+
+          switch (upperCaseCommand) {
+            case 'M':
+              var x = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var y = (relative ? prevPoint.y : 0) + commandParams.shift();
+
+              if (j === 0) {
+                moveTo = { x: x, y: y };
+                points.push({ x: x, y: y, moveTo: true });
+              } else {
+                points.push({ x: x, y: y });
+              }
+
+              break;
+
+            case 'L':
+              points.push({
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break;
+
+            case 'H':
+              points.push({
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: prevPoint.y
+              });
+
+              break;
+
+            case 'V':
+              points.push({
+                x: prevPoint.x,
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break;
+
+            case 'A':
+              points.push({
+                curve: {
+                  type: 'arc',
+                  rx: commandParams.shift(),
+                  ry: commandParams.shift(),
+                  xAxisRotation: commandParams.shift(),
+                  largeArcFlag: commandParams.shift(),
+                  sweepFlag: commandParams.shift()
+                },
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              var _iteratorNormalCompletion = true;
+              var _didIteratorError = false;
+              var _iteratorError = undefined;
+
+              try {
+                for (var _iterator = optionalArcKeys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                  var k = _step.value;
+
+                  if (points[points.length - 1]['curve'][k] === 0) {
+                    delete points[points.length - 1]['curve'][k];
+                  }
+                }
+              } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                  }
+                } finally {
+                  if (_didIteratorError) {
+                    throw _iteratorError;
+                  }
+                }
+              }
+
+              break;
+
+            case 'C':
+              points.push({
+                curve: {
+                  type: 'cubic',
+                  x1: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                  y1: (relative ? prevPoint.y : 0) + commandParams.shift(),
+                  x2: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                  y2: (relative ? prevPoint.y : 0) + commandParams.shift()
+                },
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break;
+
+            case 'S':
+              var sx2 = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var sy2 = (relative ? prevPoint.y : 0) + commandParams.shift();
+              var sx = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var sy = (relative ? prevPoint.y : 0) + commandParams.shift();
+
+              var diff = {};
+
+              var sx1 = void 0;
+              var sy1 = void 0;
+
+              if (prevPoint.curve && prevPoint.curve.type === 'cubic') {
+                diff.x = Math.abs(prevPoint.x - prevPoint.curve.x2);
+                diff.y = Math.abs(prevPoint.y - prevPoint.curve.y2);
+                sx1 = prevPoint.x < prevPoint.curve.x2 ? prevPoint.x - diff.x : prevPoint.x + diff.x;
+                sy1 = prevPoint.y < prevPoint.curve.y2 ? prevPoint.y - diff.y : prevPoint.y + diff.y;
+              } else {
+                diff.x = Math.abs(sx - sx2);
+                diff.y = Math.abs(sy - sy2);
+                sx1 = prevPoint.x;
+                sy1 = prevPoint.y;
+              }
+
+              points.push({ curve: { type: 'cubic', x1: sx1, y1: sy1, x2: sx2, y2: sy2 }, x: sx, y: sy });
+
+              break;
+
+            case 'Q':
+              points.push({
+                curve: {
+                  type: 'quadratic',
+                  x1: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                  y1: (relative ? prevPoint.y : 0) + commandParams.shift()
+                },
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break;
+
+            case 'T':
+              var tx = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var ty = (relative ? prevPoint.y : 0) + commandParams.shift();
+
+              var tx1 = void 0;
+              var ty1 = void 0;
+
+              if (prevPoint.curve && prevPoint.curve.type === 'quadratic') {
+                var _diff = {
+                  x: Math.abs(prevPoint.x - prevPoint.curve.x1),
+                  y: Math.abs(prevPoint.y - prevPoint.curve.y1)
+                };
+
+                tx1 = prevPoint.x < prevPoint.curve.x1 ? prevPoint.x - _diff.x : prevPoint.x + _diff.x;
+                ty1 = prevPoint.y < prevPoint.curve.y1 ? prevPoint.y - _diff.y : prevPoint.y + _diff.y;
+              } else {
+                tx1 = prevPoint.x;
+                ty1 = prevPoint.y;
+              }
+
+              points.push({ curve: { type: 'quadratic', x1: tx1, y1: ty1 }, x: tx, y: ty });
+
+              break;
+          }
+        }
+      } else {
+        var _prevPoint = points[points.length - 1] || { x: 0, y: 0 };
+
+        if (_prevPoint.x !== moveTo.x || _prevPoint.y !== moveTo.y) {
+          points.push({ x: moveTo.x, y: moveTo.y });
+        }
+      }
+    }
+
+    return points;
+  };
+
+  var getPointsFromPolygon = function getPointsFromPolygon(_ref6) {
+    var points = _ref6.points;
+
+    return getPointsFromPoints({ closed: true, points: points });
+  };
+
+  var getPointsFromPolyline = function getPointsFromPolyline(_ref7) {
+    var points = _ref7.points;
+
+    return getPointsFromPoints({ closed: false, points: points });
+  };
+
+  var getPointsFromPoints = function getPointsFromPoints(_ref8) {
+    var closed = _ref8.closed,
+        points = _ref8.points;
+
+    var numbers = points.split(/[\s,]+/).map(function (n) {
+      return parseFloat(n);
+    });
+
+    var p = numbers.reduce(function (arr, point, i) {
+      if (i % 2 === 0) {
+        arr.push({ x: point });
+      } else {
+        arr[(i - 1) / 2].y = point;
+      }
+
+      return arr;
+    }, []);
+
+    if (closed) {
+      p.push(_extends$1({}, p[0]));
+    }
+
+    p[0].moveTo = true;
+
+    return p;
+  };
+
+  var getPointsFromRect = function getPointsFromRect(_ref9) {
+    var height = _ref9.height,
+        rx = _ref9.rx,
+        ry = _ref9.ry,
+        width = _ref9.width,
+        x = _ref9.x,
+        y = _ref9.y;
+
+    if (rx || ry) {
+      return getPointsFromRectWithCornerRadius({
+        height: height,
+        rx: rx || ry,
+        ry: ry || rx,
+        width: width,
+        x: x,
+        y: y
+      });
+    }
+
+    return getPointsFromBasicRect({ height: height, width: width, x: x, y: y });
+  };
+
+  var getPointsFromBasicRect = function getPointsFromBasicRect(_ref10) {
+    var height = _ref10.height,
+        width = _ref10.width,
+        x = _ref10.x,
+        y = _ref10.y;
+
+    return [{ x: x, y: y, moveTo: true }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }];
+  };
+
+  var getPointsFromRectWithCornerRadius = function getPointsFromRectWithCornerRadius(_ref11) {
+    var height = _ref11.height,
+        rx = _ref11.rx,
+        ry = _ref11.ry,
+        width = _ref11.width,
+        x = _ref11.x,
+        y = _ref11.y;
+
+    var curve = { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 };
+
+    return [{ x: x + rx, y: y, moveTo: true }, { x: x + width - rx, y: y }, { x: x + width, y: y + ry, curve: curve }, { x: x + width, y: y + height - ry }, { x: x + width - rx, y: y + height, curve: curve }, { x: x + rx, y: y + height }, { x: x, y: y + height - ry, curve: curve }, { x: x, y: y + ry }, { x: x + rx, y: y, curve: curve }];
+  };
+
+  var getPointsFromG = function getPointsFromG(_ref12) {
+    var shapes = _ref12.shapes;
+    return shapes.map(function (s) {
+      return toPoints$1(s);
+    });
+  };
+
+  var pointsToD = function pointsToD(p) {
+    var d = '';
+    var i = 0;
+    var firstPoint = void 0;
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = p[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var point = _step.value;
+        var _point$curve = point.curve,
+            curve = _point$curve === undefined ? false : _point$curve,
+            moveTo = point.moveTo,
+            x = point.x,
+            y = point.y;
+
+        var isFirstPoint = i === 0 || moveTo;
+        var isLastPoint = i === p.length - 1 || p[i + 1].moveTo;
+        var prevPoint = i === 0 ? null : p[i - 1];
+
+        if (isFirstPoint) {
+          firstPoint = point;
+
+          if (!isLastPoint) {
+            d += 'M' + x + ',' + y;
+          }
+        } else if (curve) {
+          switch (curve.type) {
+            case 'arc':
+              var _point$curve2 = point.curve,
+                  _point$curve2$largeAr = _point$curve2.largeArcFlag,
+                  largeArcFlag = _point$curve2$largeAr === undefined ? 0 : _point$curve2$largeAr,
+                  rx = _point$curve2.rx,
+                  ry = _point$curve2.ry,
+                  _point$curve2$sweepFl = _point$curve2.sweepFlag,
+                  sweepFlag = _point$curve2$sweepFl === undefined ? 0 : _point$curve2$sweepFl,
+                  _point$curve2$xAxisRo = _point$curve2.xAxisRotation,
+                  xAxisRotation = _point$curve2$xAxisRo === undefined ? 0 : _point$curve2$xAxisRo;
+
+              d += 'A' + rx + ',' + ry + ',' + xAxisRotation + ',' + largeArcFlag + ',' + sweepFlag + ',' + x + ',' + y;
+              break;
+            case 'cubic':
+              var _point$curve3 = point.curve,
+                  cx1 = _point$curve3.x1,
+                  cy1 = _point$curve3.y1,
+                  cx2 = _point$curve3.x2,
+                  cy2 = _point$curve3.y2;
+
+              d += 'C' + cx1 + ',' + cy1 + ',' + cx2 + ',' + cy2 + ',' + x + ',' + y;
+              break;
+            case 'quadratic':
+              var _point$curve4 = point.curve,
+                  qx1 = _point$curve4.x1,
+                  qy1 = _point$curve4.y1;
+
+              d += 'Q' + qx1 + ',' + qy1 + ',' + x + ',' + y;
+              break;
+          }
+
+          if (isLastPoint && x === firstPoint.x && y === firstPoint.y) {
+            d += 'Z';
+          }
+        } else if (isLastPoint && x === firstPoint.x && y === firstPoint.y) {
+          d += 'Z';
+        } else if (x !== prevPoint.x && y !== prevPoint.y) {
+          d += 'L' + x + ',' + y;
+        } else if (x !== prevPoint.x) {
+          d += 'H' + x;
+        } else if (y !== prevPoint.y) {
+          d += 'V' + y;
+        }
+
+        i++;
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return d;
+  };
+
+  var toPath = function toPath(s) {
+    var isPoints = Array.isArray(s);
+    var isGroup = isPoints ? Array.isArray(s[0]) : s.type === 'g';
+    var points = isPoints ? s : isGroup ? s.shapes.map(function (shp) {
+      return toPoints$1(shp);
+    }) : toPoints$1(s);
+
+    if (isGroup) {
+      return points.map(function (p) {
+        return pointsToD(p);
+      });
+    }
+
+    return pointsToD(points);
+  };
+
+  const addTag = (tag, geometry) => {
+    const copy = Object.assign({}, geometry);
+    if (copy.tags) {
+      copy.tags = [tag, ...copy.tags];
+    } else {
+      copy.tags = [tag];
+    }
+    return copy;
+  };
+
+  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
 
   const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
     if (set === undefined) {
@@ -16988,17 +17327,17 @@ define("./webworker.js",[],function () { 'use strict';
     walk(geometry);
   };
 
-  const eachPoint$4 = (options, operation, geometry) => {
+  const eachPoint$5 = (options, operation, geometry) => {
     map$2(geometry,
         (geometry) => {
-          if (geometry.paths) {
-            eachPoint$1(options, operation, geometry.paths);
-          }
-          if (geometry.solid) {
-            eachPoint$3(options, operation, geometry.solid);
-          }
-          if (geometry.z0Surface) {
-            eachPoint$2(options, operation, geometry.z0Surface);
+          if (geometry.points) {
+            eachPoint$1(options, operation, geometry.points);
+          } else if (geometry.paths) {
+            eachPoint$2(options, operation, geometry.paths);
+          } else if (geometry.solid) {
+            eachPoint$4(options, operation, geometry.solid);
+          } else if (geometry.z0Surface) {
+            eachPoint$3(options, operation, geometry.z0Surface);
           }
         });
   };
@@ -17140,9 +17479,9 @@ define("./webworker.js",[],function () { 'use strict';
       paths: union(...filterAndFlattenAssemblyData({ requires, excludes, form: 'paths' }, toDisjointGeometry(assembly)))
     });
 
-  const toPoints$1 = (options = {}, geometry) => {
+  const toPoints$2 = (options = {}, geometry) => {
     const points = [];
-    eachPoint$4(options, point => points.push(point), geometry);
+    eachPoint$5(options, point => points.push(point), geometry);
     return { points };
   };
 
@@ -17197,6 +17536,159 @@ define("./webworker.js",[],function () { 'use strict';
       unioned.assembly.push({ z0Surface: union$2(...z0SurfaceData) });
     }
     return unioned;
+  };
+
+  // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
+  const fromSvgPath$1 = (options = {}, svgPath) =>
+    fromSvgPath(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);
+
+  const ELEMENT_NODE$1 = 1;
+  const ATTRIBUTE_NODE$1 = 2;
+  const TEXT_NODE$1 = 3;
+  const CDATA_SECTION_NODE$1 = 4;
+  const ENTITY_REFERENCE_NODE$1 = 5;
+  const ENTITY_NODE$1 = 6;
+  const PROCESSING_INSTRUCTION_NODE$1 = 7;
+  const COMMENT_NODE$1 = 8;
+  const DOCUMENT_NODE$1 = 9;
+  const DOCUMENT_TYPE_NODE$1 = 10;
+  const DOCUMENT_FRAGMENT_NODE$1 = 11;
+  const NOTATION_NODE$1 = 12;
+
+  const applyTransforms = ({ matrix }, transformText) => {
+    const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
+    if (match) {
+      const [operator, operandText, rest] = match.slice(1);
+      const operands = operandText.split(/ +/).map(operand => parseFloat(operand));
+      switch (operator) {
+        case 'matrix': {
+          // a b c
+          const [a, b, c, d, tx, ty] = operands;
+          matrix = multiply$1(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+          break;
+        }
+        case 'translate': {
+          const [x = 0, y = 0, z = 0] = operands;
+          matrix = multiply$1(matrix, fromTranslation([x, y, z]));
+          break;
+        }
+        case 'scale': {
+          const [x = 1, y = x, z = 1] = operands;
+          matrix = multiply$1(matrix, fromScaling([x, y, z]));
+          break;
+        }
+        case 'rotate': {
+          const [degrees = 0, x = 0, y = 0, z = 0] = operands;
+          matrix = multiply$1(matrix, fromTranslation([x, y, z]));
+          matrix = multiply$1(matrix, fromZRotation(degrees * Math.PI / 180));
+          matrix = multiply$1(matrix, fromTranslation([-x, -y, -z]));
+          break;
+        }
+        case 'skewX': {
+          // TODO: Move to math-mat4.
+          const [degrees = 0] = operands;
+          const [a, b, c, d, tx, ty] = [1, 0, Math.tan(degrees * Math.PI / 180), 1, 0, 0];
+          matrix = multiply$1(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+          break;
+        }
+        case 'skewY': {
+          // TODO: Move to math-mat4.
+          const [degrees = 0] = operands;
+          const [a, b, c, d, tx, ty] = [1, Math.tan(degrees * Math.PI / 180), 0, 1, 0, 0];
+          matrix = multiply$1(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+          break;
+        }
+        default: {
+          throw Error(`die: Unknown operator '${operator}'.`);
+        }
+      }
+      if (rest) {
+        return applyTransforms({ matrix }, rest);
+      }
+    }
+    return { matrix };
+  };
+
+  const fromSvg = async (options = {}, svgString) => {
+    const geometry = { assembly: [] };
+    const svg = new domParser_3().parseFromString(await svgString, 'image/svg+xml');
+
+    const measureScale = (node) => {
+      // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.
+      const width = parseFloat(node.getAttribute('width')) * 10;
+      const height = parseFloat(node.getAttribute('height')) * 10;
+      const [minX, minY, maxX, maxY] = node.getAttribute('viewBox').split(/ +/).map(text => parseFloat(text));
+      const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];
+      return scaling;
+    };
+
+    const scaling = measureScale(svg.documentElement);
+    const scale = (matrix) => multiply$1(fromScaling(scaling), matrix);
+
+    const walk = ({ matrix }, node) => {
+      const buildShape = (...attrs) => {
+        const result = { type: node.tagName };
+        for (const attr of attrs) {
+          const value = node.getAttribute(attr);
+          // FIX: Update toPath to handle these naturally.
+          // toPath has some odd requirements about its inputs.
+          if (value === '') {
+            if (attr === 'cx' || attr === 'cy') {
+              result[attr] = 0;
+            }
+          } else {
+            if (attr === 'points' || attr === 'd') {
+              result[attr] = value;
+            } else {
+              result[attr] = parseFloat(value);
+            }
+          }
+        }
+        return result;
+      };
+      switch (node.nodeType) {
+        case ELEMENT_NODE$1: {
+          ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
+
+          const output = (svgPath) =>
+            geometry.assembly.push(transform$8(scale(matrix), fromSvgPath$1({}, svgPath)));
+
+          // FIX: Should output a path given a stroke, should output a surface given a fill.
+          switch (node.tagName) {
+            case 'path': output(node.getAttribute('d')); break;
+            case 'circle': output(toPath(buildShape('cx', 'cy', 'r'))); break;
+            case 'ellipse': output(toPath(buildShape('cx', 'cy', 'rx', 'ry'))); break;
+            case 'line': output(toPath(buildShape('x1', 'x2', 'y1', 'y2'))); break;
+            case 'polygon': output(toPath(buildShape('points'))); break;
+            case 'polyline': output(toPath(buildShape('points'))); break;
+            case 'rect': output(toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry'))); break;
+            default: break;
+          }
+          break;
+        }
+        case ATTRIBUTE_NODE$1:
+        case TEXT_NODE$1:
+        case CDATA_SECTION_NODE$1:
+        case ENTITY_REFERENCE_NODE$1:
+        case ENTITY_NODE$1:
+        case PROCESSING_INSTRUCTION_NODE$1:
+        case COMMENT_NODE$1:
+        case DOCUMENT_NODE$1:
+        case DOCUMENT_TYPE_NODE$1:
+        case DOCUMENT_FRAGMENT_NODE$1:
+        case NOTATION_NODE$1:
+          break;
+      }
+      if (node.childNodes) {
+        for (let nth = 0; nth < node.childNodes.length; nth++) {
+          const childNode = node.childNodes[nth];
+          walk({ matrix }, childNode);
+        }
+      }
+    };
+
+    walk({ matrix: identity() }, svg);
+    return geometry;
   };
 
   const toPolygons$1 = (geometry) => {
@@ -30985,7 +31477,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     eachPoint (options = {}, operation) {
-      return eachPoint$4(options, operation, toGeometry(this));
+      return eachPoint$5(options, operation, toGeometry(this));
     }
 
     toGeometry (options = {}) {
@@ -30993,7 +31485,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     toPoints (options = {}) {
-      return fromGeometry(toPoints$1(options, toGeometry(this)));
+      return fromGeometry(toPoints$2(options, toGeometry(this)));
     }
 
     toPaths (options = {}) {
@@ -31138,9 +31630,12 @@ define("./webworker.js",[],function () { 'use strict';
   Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometry({ paths: paths }));
   Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: [path] }));
   Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: paths }));
+  Shape.fromPoint = (point) => Shape.fromLazyGeometry(fromGeometry({ points: [point] }));
+  Shape.fromPoints = (points) => Shape.fromLazyGeometry(fromGeometry({ points: points }));
   Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometry({ solid: fromPolygons({}, polygons) }));
   Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: polygons }));
   Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometry({ solid: surfaces }));
+  Shape.fromSolid = (solid) => Shape.fromLazyGeometry(fromGeometry({ solid: solid }));
 
   const loadFont = ({ path }) => pathnameToFont(path);
 
@@ -31187,7 +31682,126 @@ define("./webworker.js",[],function () { 'use strict';
     }
   }
 
+  /**
+   *
+   * # Measure Bounding Box
+   *
+   * Provides the corners of the smallest orthogonal box containing the shape.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere(7)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * (
+   *  ([corner1, corner2]) => cube({ corner1, corner2})
+   * )(sphere(7).measureBoundingBox())
+   * ```
+   * :::
+   **/
+
+  const measureBoundingBox$3 = (shape) => {
+    let minPoint = [Infinity, Infinity, Infinity];
+    let maxPoint = [-Infinity, -Infinity, -Infinity];
+    shape.eachPoint({},
+                    (point) => {
+                      minPoint = min(minPoint, point);
+                      maxPoint = max(maxPoint, point);
+                    });
+    return [minPoint, maxPoint];
+  };
+
+  const method = function () { return measureBoundingBox$3(this); };
+
+  Shape.prototype.measureBoundingBox = method;
+
+  const translate$3 = ([x = 0, y = 0, z = 0], shape) => {
+    return shape.transform(fromTranslation([x, y, z]));
+  };
+
+  const method$1 = function (vector) {
+    return translate$3(vector, this);
+  };
+
+  Shape.prototype.translate = method$1;
+
+  /**
+   *
+   * # Above
+   *
+   * Moves the shape so that it is just above the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cube(10).above(),
+   *          cylinder(2, 15).rotateY(90))
+   * ```
+   * :::
+   **/
+
+  const Z$1 = 2;
+
+  const above = (shape) => {
+    const [minPoint] = measureBoundingBox$3(shape);
+    return translate$3(negate([0, 0, minPoint[Z$1]]), shape);
+  };
+
+  const method$2 = function () { return above(this); };
+
+  Shape.prototype.above = method$2;
+
+  /**
+   *
+   * # Arc Cosine
+   *
+   * Gives the arc cosine converted to degrees.
+   * ```
+   * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
+   *
+   * acos(0) = 90
+   * acos(0.5) = 60
+   * acos(1) = 0
+   * ```
+   *
+   **/
+
   const acos$1 = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+
+  /**
+   *
+   * # Assemble
+   *
+   * Produces an assembly of shapes that can be manipulated as a single shape.
+   *
+   * ::: illustration { "view": { "position": [80, 80, 80] } }
+   * ```
+   * assemble(circle(20).translate([0, 0, -12]),
+   *          square(40).translate([0, 0, 16]).outline(),
+   *          cylinder(10, 20));
+   * ```
+   * :::
+   *
+   * Components of the assembly can be extracted by tag filtering.
+   *
+   * Components later in the assembly project holes into components earlier in the assembly so that the geometries are disjoint.
+   *
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          cylinder(10, 40).above().as('cylinder'))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          cylinder(10, 40).above().as('cylinder'))
+   *   .toComponents({ requires: ['cube'] })[0]
+   * ```
+   * :::
+   *
+   **/
 
   const assemble$1 = (...params) => {
     switch (params.length) {
@@ -31203,34 +31817,80 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method = function (...shapes) { return assemble$1(this, ...shapes); };
+  const method$3 = function (...shapes) { return assemble$1(this, ...shapes); };
 
-  Shape.prototype.assemble = method;
+  Shape.prototype.assemble = method$3;
 
-  const measureBoundingBox$3 = (shape) => {
-    let minPoint = [Infinity, Infinity, Infinity];
-    let maxPoint = [-Infinity, -Infinity, -Infinity];
-    shape.eachPoint({},
-                    (point) => {
-                      minPoint = min(minPoint, point);
-                      maxPoint = max(maxPoint, point);
-                    });
-    return [minPoint, maxPoint];
+  /**
+   *
+   * # Back
+   *
+   * Moves the shape so that it is just behind the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
+   *          cube(10).back())
+   * ```
+   * :::
+   **/
+
+  const Y$1 = 1;
+
+  const back = (shape) => {
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    return translate$3(negate([0, maxPoint[Y$1], 0]), shape);
   };
 
-  const method$1 = function () { return measureBoundingBox$3(this); };
+  const method$4 = function () { return back(this); };
 
-  Shape.prototype.measureBoundingBox = method$1;
+  Shape.prototype.back = method$4;
 
-  const translate$3 = ([x = 0, y = 0, z = 0], shape) => {
-    return shape.transform(fromTranslation([x, y, z]));
+  /**
+   *
+   * # Below
+   *
+   * Moves the shape so that it is just below the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 10] } }
+   * ```
+   * assemble(cylinder(2, 15).rotateY(90),
+   *          cube(10).below())
+   * ```
+   * :::
+   **/
+
+  const Z$2 = 2;
+
+  const below = (shape) => {
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    return translate$3(negate([0, 0, maxPoint[Z$2]]), shape);
   };
 
-  const method$2 = function (vector) {
-    return translate$3(vector, this);
-  };
+  const method$5 = function () { return below(this); };
 
-  Shape.prototype.translate = method$2;
+  Shape.prototype.below = method$5;
+
+  /**
+   *
+   * # Center
+   *
+   * Moves the shape so that it is centered on the origin.
+   *
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * cube({ corner1: [30, -30, 10],
+   *        corner2: [10, -10, 0] })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * cube({ corner1: [30, -30, 10],
+   *        corner2: [10, -10, 0] })
+   *   .center()
+   * ```
+   * :::
+   **/
 
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$3(shape);
@@ -31238,12 +31898,36 @@ define("./webworker.js",[],function () { 'use strict';
     return translate$3(negate(center), shape);
   };
 
-  const method$3 = function () { return center(this); };
+  const method$6 = function () { return center(this); };
 
-  Shape.prototype.center = method$3;
+  Shape.prototype.center = method$6;
+
+  /**
+   *
+   * # Chain Hull
+   *
+   * Builds a convex hull between adjacent pairs in a sequence of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * chainHull(cube(3).translate([-5, 5]),
+   *           sphere(3).translate([5, -5]),
+   *           cylinder(3, 10).translate([-10, -10]))
+   *   .translate([10, 10])
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [80, 80, 0] } }
+   * ```
+   * chainHull(circle(20).translate([0, 0, -10]),
+   *           circle(10),
+   *           circle(20).translate([0, 0, 10]))
+   * ```
+   * :::
+   *
+   **/
 
   const chainHull = (...shapes) => {
-    const pointsets = shapes.map(shape => toPoints$1({}, shape.toGeometry()).points);
+    const pointsets = shapes.map(shape => toPoints$2({}, shape.toGeometry()).points);
     const chain = [];
     for (let nth = 1; nth < pointsets.length; nth++) {
       chain.push(Shape.fromPolygonsToSolid(buildConvexHull({}, [...pointsets[nth - 1], ...pointsets[nth]])));
@@ -31343,30 +32027,62 @@ define("./webworker.js",[],function () { 'use strict';
     };
   };
 
+  /**
+   *
+   * # Circle (disc)
+   *
+   * Circles are approximated as surfaces delimeted by regular polygons.
+   *
+   * Properly speaking what is produced here are discs.
+   * The circle perimeter can be extracted via outline().
+   *
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * circle()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle({ radius: 10,
+   *          resolution: 8 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle({ diameter: 20,
+   *          resolution: 16 })
+   * ```
+   * :::
+   **/
+
   // FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified circle.
   // Is this the most useful measure?
+
   const unitCircle = ({ resolution = 32 }) =>
     Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: resolution }));
 
-  const fromRadius = ({ radius, resolution }) => unitCircle({ resolution }).scale(radius);
-  const fromDiameter = ({ diameter, resolution }) => unitCircle({ resolution }).scale(diameter / 2);
+  const fromValue = (radius) => unitCircle({ resolution: 32 }).scale(radius);
+
+  const fromRadius = ({ radius, resolution = 32 }) => unitCircle({ resolution }).scale(radius);
+
+  const fromDiameter = ({ diameter, resolution = 32 }) => unitCircle({ resolution }).scale(diameter / 2);
 
   const circle = dispatch(
     'circle',
     // circle()
     (...rest) => {
       assertEmpty(rest);
-      return () => unitCircle();
+      return () => fromValue(1);
     },
     // circle(2)
-    (radius) => {
-      assertNumber(radius);
-      return () => fromRadius({ radius });
-    },
-    // circle({ r: 2, fn: 32 })
-    ({ r, fn }) => {
-      assertNumber(r);
-      return () => fromRadius({ radius: r, resolution: fn });
+    (value) => {
+      assertNumber(value);
+      return () => fromValue(value);
     },
     // circle({ radius: 2, resolution: 32 })
     ({ radius, resolution }) => {
@@ -31379,7 +32095,56 @@ define("./webworker.js",[],function () { 'use strict';
       return () => fromDiameter({ diameter, resolution });
     });
 
+  circle.fromValue = fromValue;
+  circle.fromRadius = fromRadius;
+  circle.fromDiameter = fromDiameter;
+
+  /**
+   *
+   * # Cosine
+   *
+   * Gives the cosine in degrees.
+   * ```
+   * cos(a) => Math.cos(a / 360 * Math.PI * 2);
+   *
+   * cos(0) = 1
+   * cos(45) = 0.707
+   * cos(90) = 0
+   * ```
+   *
+   **/
+
   const cos$1 = (a) => Math.cos(a / 360 * Math.PI * 2);
+
+  /**
+   *
+   * # CrossSection
+   *
+   * Produces a cross-section of a solid as a surface.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * difference(cylinder(10, 10),
+   *            cylinder(8, 10))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(sphere(10),
+   *            sphere(8))
+   *   .crossSection()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(sphere(10),
+   *            sphere(8))
+   *   .crossSection()
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
 
   const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
     const solids = getSolids(shape.toGeometry());
@@ -31393,38 +32158,44 @@ define("./webworker.js",[],function () { 'use strict';
     return assemble$1(...shapes);
   };
 
-  const method$4 = function (options) { return crossSection(options, this); };
+  const method$7 = function (options) { return crossSection(options, this); };
 
-  Shape.prototype.crossSection = method$4;
+  Shape.prototype.crossSection = method$7;
 
-  // TODO: Generalize for more operands?
-  const minkowski = (a, b) => {
-    const aPoints = [];
-    const bPoints = [];
-    a.eachPoint({}, point => aPoints.push(point));
-    b.eachPoint({}, point => bPoints.push(point));
-    return Shape.fromPolygonsToSolid(buildConvexHull({}, buildConvexMinkowskiSum({}, aPoints, bPoints)));
-  };
-
-  // Dispatch mechanism.
-  // TODO: Move this somewhere else.
-
-  const chain = (name, ...dispatches) => {
-    return (...params) => {
-      for (const dispatch of dispatches) {
-        // For each signature
-        let operation;
-        try {
-          // Try to decode it into an operation.
-          operation = dispatch(...params);
-        } catch (e) {
-          continue;
-        }
-        return operation();
-      }
-      throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
-    };
-  };
+  /**
+   *
+   * # Cube (cuboid)
+   *
+   * Generates cuboids.
+   *
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube({ radius: 8 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube({ diameter: 16 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube({ corner1: [0, 0, 0],
+   *        corner2: [10, 10, 10] })
+   * ```
+   * :::
+   *
+   **/
 
   // Geometry construction.
 
@@ -31435,169 +32206,189 @@ define("./webworker.js",[],function () { 'use strict';
       .rotateZ(45)
       .scale([edgeScale, edgeScale, 1]);
 
-  const centerMaybe = ({ size, center }, shape) => {
-    if (center) {
-      return shape;
-    } else {
-      if (typeof size === 'number') {
-        return shape.translate([size / 2, size / 2, size / 2]);
-      } else {
-        return shape.translate([size[0] / 2, size[1] / 2, size[2] / 2]);
-      }
-    }
-  };
-
   // Cube Interfaces.
 
-  // cube()
-  const cubeDefault = (...rest) => {
-    assertEmpty(rest);
-    return () => unitCube().translate([0.5, 0.5, 0.5]);
-  };
+  const fromValue$1 = (value) => unitCube().scale(value);
 
-  // cube(10)
-  const cubeSide = (size, ...rest) => {
-    assertEmpty(rest);
-    assertNumber(size);
-    return () => unitCube().scale(size).translate([size / 2, size / 2, size / 2]);
-  };
+  const fromRadius$1 = ({ radius }) => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
-  // cube({ radius, roundRadius, resolution })
-  const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, ...rest) => {
-    assertEmpty(rest);
-    assertNumber(roundRadius);
-    assertNumber(resolution);
-    return () => minkowski(unitCube().scale(radius - roundRadius * 2),
-                           Shape.fromPolygonsToSolid(buildRingSphere({ resolution })).scale(roundRadius));
-  };
+  const fromDiameter$1 = ({ diameter }) => fromRadius$1({ radius: diameter / 2 });
 
-  // cube({ center: [0, 0, 0], radius: 1 })
-  const cubeCenterRadius = ({ center, radius }, ...rest) => {
-    assertEmpty(rest);
-    assertNumberTriple(center);
-    // PROVE: That radius makes sense when used like this.
-    assertNumber(radius);
-    return () => unitCube().scale(radius).translate(center);
-  };
-
-  // cube({ radius: 1 })
-  const cubeRadius = ({ radius }, ...rest) => {
-    assertEmpty(rest);
-    // PROVE: That radius makes sense when used like this.
-    assertNumber(radius);
-    return () => unitCube().scale(radius).translate([radius / 2, radius / 2, radius / 2]);
-  };
-
-  // cube({ corner1: [4, 4, 4], corner2: [5, 4, 2] });
-  const cubeCorner = ({ corner1, corner2 }, ...rest) => {
-    assertEmpty(rest);
-    assertNumberTriple(corner1);
-    assertNumberTriple(corner2);
+  const fromCorners = ({ corner1, corner2 }) => {
     const [c1x, c1y, c1z] = corner1;
     const [c2x, c2y, c2z] = corner2;
     const length = c2x - c1x;
     const width = c2y - c1y;
     const height = c2z - c1z;
     const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
-    return () => unitCube().scale([length, width, height]).translate(center);
+    return unitCube().scale([length, width, height]).translate(center);
   };
 
-  // cube({size: [1,2,3], center: false });
-  const cubeSizesCenter = ({ size, center = false }, ...rest) => {
-    assertEmpty(rest);
-    const [length, width, height] = size;
-    assertNumber(length);
-    assertNumber(width);
-    assertNumber(height);
-    return () => centerMaybe({ size, center }, unitCube().scale([length, width, height]));
-  };
+  const cube = dispatch(
+    'cube',
+    // cube()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue$1(1);
+    },
+    // cube(2)
+    (value) => {
+      assertNumber(value);
+      return () => fromValue$1(value);
+    },
+    // cube({ radius: 2 })
+    ({ radius }) => {
+      assertNumber(radius);
+      return () => fromRadius$1({ radius });
+    },
+    // cube({ diameter: 2 })
+    ({ diameter }) => {
+      assertNumber(diameter);
+      return () => fromDiameter$1({ diameter });
+    },
+    // cube({ corner1: [2, 2, 2], corner2: [1, 1, 1] })
+    ({ corner1, corner2 }) => {
+      assertNumberTriple(corner1);
+      assertNumberTriple(corner2);
+      return () => fromCorners({ corner1, corner2 });
+    });
 
-  // cube({ size: 1, center: false });
-  const cubeSizeCenter = ({ size, center = false }, ...rest) => {
-    assertEmpty(rest);
-    assertNumber(size);
-    return () => centerMaybe({ size, center }, unitCube().scale(size));
-  };
+  cube.fromValue = fromValue$1;
+  cube.fromRadius = fromRadius$1;
+  cube.fromDiameter = fromDiameter$1;
+  cube.fromCorners = fromCorners;
 
-  // Cube Operation
-
-  const cube = chain('cube',
-                            cubeDefault,
-                            cubeSide,
-                            cubeRoundRadiusResolution,
-                            cubeCenterRadius,
-                            cubeRadius,
-                            cubeCorner,
-                            cubeSizesCenter,
-                            cubeSizeCenter);
-
-  const buildCylinder = ({ r1 = 1, r2 = 1, h = 1, edges = 32 }) => {
-    return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: edges })).scale([r1, r1, h]);
+  const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
+    return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
   };
 
   /**
    *
-   * cylinder();              // unit cylinder
-   * cylinder({r: 1, h: 10});                 // openscad like
-   * cylinder({d: 1, h: 10});
-   * cylinder({r: 1, h: 10, center: true});   // default: center:false
-   * cylinder({r: 1, h: 10, center: [true, true, false]});  // individual x,y,z center flags
-   * cylinder({r: 1, h: 10, round: true});
-   * cylinder({r1: 3, r2: 0, h: 10});
-   * cylinder({d1: 1, d2: 0.5, h: 10});
-   * cylinder({start: [0,0,0], end: [0,0,10], r1: 1, r2: 2, fn: 50});
+   * # Cylinder
    *
-   */
-  const cylinder = (...params) => {
+   * Generates cylinders.
+   *
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cylinder()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cylinder(10, 2)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cylinder({ radius: 2,
+   *            height: 10,
+   *            resolution: 8 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cylinder({ diameter: 6,
+   *            height: 8,
+   *            resolution: 16 })
+   * ```
+   * :::
+   *
+   **/
+
+  const fromValue$2 = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
+
+  const fromRadius$2 = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
+
+  const fromDiameter$2 = ({ diameter, height = 1, resolution = 32 }) => buildCylinder({ radius: diameter / 2, height, resolution });
+
+  const cylinder = dispatch(
+    'cylinder',
     // cylinder()
-    try {
-      assertEmpty(params);
-      return buildCylinder({});
-    } catch (e) {}
-
-    // cylinder({r: 1, h: 10, center: true});
-    try {
-      const { h, r, fn = 32 } = params[0];
-      assertNumber(h);
-      assertNumber(r);
-      return buildCylinder({ r1: r, r2: r, h: h, edges: fn });
-    } catch (e) {}
-
-    // cylinder({ r1: 1, r2: 2, h: 10, center: true});
-    try {
-      const { h, r1, r2, fn = 32 } = params[0];
-      assertNumber(h);
-      assertNumber(r1);
-      assertNumber(r2);
-      return buildCylinder({ r1: r1, r2: r2, h: h, edges: fn });
-    } catch (e) {}
-
-    // cylinder({ faces: 32, diameter: 1, height: 10 });
-    try {
-      const { diameter, height, faces } = params[0];
-      assertNumber(diameter);
-      assertNumber(faces);
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue$2(1);
+    },
+    (radius, height = 1, resolution = 32) => {
+      assertNumber(radius);
       assertNumber(height);
-      return buildCylinder({ r1: diameter / 2, r2: diameter / 2, h: height, center: true, edges: faces });
-    } catch (e) {}
+      assertNumber(resolution);
+      return () => fromValue$2(radius, height, resolution);
+    },
+    ({ radius, height = 1, resolution = 32 }) => {
+      assertNumber(radius);
+      assertNumber(height);
+      assertNumber(resolution);
+      return () => fromRadius$2({ radius, height, resolution });
+    },
+    ({ diameter, height = 1, resolution = 32 }) => {
+      assertNumber(diameter);
+      assertNumber(height);
+      assertNumber(resolution);
+      return () => fromDiameter$2({ diameter, height, resolution });
+    });
 
-    throw Error(`Unsupported interface for cylinder: ${JSON.stringify(params)}`);
-  };
+  cylinder.fromValue = fromValue$2;
+  cylinder.fromRadius = fromRadius$2;
+  cylinder.fromDiameter = fromDiameter$2;
+
+  /**
+   *
+   * # Difference
+   *
+   * Difference produces a version of the first shape with the remaining shapes removed, where applicable.
+   * Different kinds of shapes do not interact. e.g., you cannot subtract a surface from a solid.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * difference(cube(10, 10).below(),
+   *            cube(5, 10).below())
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(2.5))
+   * ```
+   * :::
+   *
+   **/
 
   const difference$5 = (...params) => differenceLazily(...params);
 
-  const method$5 = function (...shapes) { return difference$5(this, ...shapes); };
+  const method$8 = function (...shapes) { return difference$5(this, ...shapes); };
 
-  Shape.prototype.difference = method$5;
+  Shape.prototype.difference = method$8;
+
+  /**
+   *
+   * # Extrude
+   *
+   * Generates a solid from a surface.
+   *
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(8))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * difference(circle(10),
+   *            circle(8))
+   *   .extrude({ height: 10 })
+   * ```
+   * :::
+   *
+   **/
 
   const fromHeight = ({ height }, shape) => {
     const z0Surfaces = getZ0Surfaces(shape.toGeometry());
-    const extrusions = z0Surfaces.map(z0Surface => extrudeLinear({ height: height }, z0Surface));
-    const extrudedShapes = extrusions.map(extrusion => Shape.fromPolygonsToSolid(extrusion).translate([0, 0, height / 2]));
-    return assemble$1(...extrudedShapes);
+    const solids = z0Surfaces.map(z0Surface => extrude({ height: height }, z0Surface));
+    const assembly = assemble$1(...solids.map(Shape.fromSolid));
+    return assembly;
   };
 
-  const extrude = dispatch(
+  const extrude$1 = dispatch(
     'extrude',
     ({ height }, shape) => {
       assertNumber(height);
@@ -31605,9 +32396,49 @@ define("./webworker.js",[],function () { 'use strict';
     }
   );
 
-  const method$6 = function (options) { return extrude(options, this); };
+  const method$9 = function (options) { return extrude$1(options, this); };
 
-  Shape.prototype.extrude = method$6;
+  Shape.prototype.extrude = method$9;
+
+  /**
+   *
+   * # Front
+   *
+   * Moves the shape so that it is just before the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
+   *          cube(10).front())
+   * ```
+   * :::
+   **/
+
+  const Y$2 = 1;
+
+  const front = (shape) => {
+    const [minPoint] = measureBoundingBox$3(shape);
+    return translate$3(negate([0, minPoint[Y$2], 0]), shape);
+  };
+
+  const method$a = function () { return front(this); };
+
+  Shape.prototype.front = method$a;
+
+  /**
+   *
+   * # Hull
+   *
+   * Builds the convex hull of a set of shapes.
+   *
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(point([0, 0, 10]),
+   *      circle(10))
+   * ```
+   * :::
+   *
+   **/
 
   const hull = (...geometries) => {
     // FIX: Support z0Surface hulling.
@@ -31616,11 +32447,34 @@ define("./webworker.js",[],function () { 'use strict';
     return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
   };
 
+  /**
+   *
+   * # Intersection
+   *
+   * Intersection produces a version of the first shape retaining only the parts included in the remaining shapes.
+   *
+   * Different kinds of shapes do not interact. e.g., you cannot intersect a surface and a solid.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * intersection(cube(12),
+   *              sphere(8))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * intersection(circle(10).translate([-5]),
+   *              circle(10).translate([5]))
+   * ```
+   * :::
+   *
+   **/
+
   const intersection$5 = (...params) => intersectionLazily(...params);
 
-  const method$7 = function (...shapes) { return intersection$5(this, ...shapes); };
+  const method$b = function (...shapes) { return intersection$5(this, ...shapes); };
 
-  Shape.prototype.intersection = method$7;
+  Shape.prototype.intersection = method$b;
 
   const conversation = ({ agent, say }) => {
     let id = 0;
@@ -31700,7 +32554,39 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const promises = {};
+  var empty = {};
+
+  var fs = /*#__PURE__*/Object.freeze({
+    'default': empty
+  });
+
+  // Copyright Joyent, Inc. and other Node contributors.
+
+  // Split a filename into [root, dir, basename, ext], unix version
+  // 'root' is just a slash, or nothing.
+  var splitPathRe =
+      /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+  var splitPath = function(filename) {
+    return splitPathRe.exec(filename).slice(1);
+  };
+
+  function dirname(path) {
+    var result = splitPath(path),
+        root = result[0],
+        dir = result[1];
+
+    if (!root && !dir) {
+      // No dirname whatsoever
+      return '.';
+    }
+
+    if (dir) {
+      // It has a dirname, strip trailing slash
+      dir = dir.substr(0, dir.length - 1);
+    }
+
+    return root + dir;
+  }
 
   const files = {};
   const fileCreationWatchers = [];
@@ -31721,6 +32607,8 @@ define("./webworker.js",[],function () { 'use strict';
 
   /* global self */
 
+  const { promises } = fs;
+
   const writeFile = async (options, path, data) => {
     if (isWebWorker) {
       return self.ask({ writeFile: { options, path, data: await data } });
@@ -31737,16 +32625,23 @@ define("./webworker.js",[],function () { 'use strict';
 
     if (!ephemeral) {
       if (isNode) {
+        try {
+          await promises.mkdir(dirname(path), { recursive: true });
+        } catch (error) {
+          console.log(`QQ/mkdir: ${error.toString()}`);
+        }
         return promises.writeFile(path, data);
       }
     }
   };
 
-  const log = (text) => writeFile({ ephemeral: true }, 'console/out', text);
+  const log$1 = (text) => writeFile({ ephemeral: true }, 'console/out', text);
 
   var nodeFetch = {};
 
   /* global self */
+
+  const { promises: promises$1 } = fs;
 
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
@@ -31759,7 +32654,7 @@ define("./webworker.js",[],function () { 'use strict';
   const getFileFetcher = async () => {
     if (isNode) {
       // FIX: Put this through getFile, also.
-      return promises.readFile;
+      return promises$1.readFile;
     } else if (isBrowser$1) {
       // This will always fail, but maybe it should use local storage.
       return () => {};
@@ -31786,7 +32681,7 @@ define("./webworker.js",[],function () { 'use strict';
     // Try to load the data from a source.
     for (const source of sources) {
       if (source.url !== undefined) {
-        log(`# Fetching ${source.url}`);
+        log$1(`# Fetching ${source.url}`);
         const response = await fetchUrl(source.url);
         if (response.ok) {
           const data = await response.text();
@@ -31795,7 +32690,9 @@ define("./webworker.js",[],function () { 'use strict';
       } else if (source.file !== undefined) {
         try {
           const data = await fetchFile(source.file);
-          return data;
+          if (data !== undefined) {
+            return data;
+          }
         } catch (e) {}
       } else {
         throw Error('die');
@@ -31804,6 +32701,7 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const readFile = async (options, path) => {
+    const { ephemeral, decode } = options;
     if (isWebWorker) {
       return self.ask({ readFile: { options, path } });
     }
@@ -31811,9 +32709,18 @@ define("./webworker.js",[],function () { 'use strict';
     const file = getFile(options, path);
     if (file.data === undefined) {
       file.data = await fetchPersistent(path);
+      if (file.data !== undefined) {
+        if (decode !== undefined && Buffer.isBuffer(file.data)) {
+          file.data = file.data.toString(decode);
+        }
+      }
     }
     if (file.data === undefined) {
       file.data = await fetchSources(sources);
+      if (!ephemeral) {
+        // Update persistent storage.
+        await writeFile(options, path, file.data);
+      }
     }
     if (file.data !== undefined) {
       if (file.data.then) {
@@ -31831,52 +32738,240 @@ define("./webworker.js",[],function () { 'use strict';
   var sys = /*#__PURE__*/Object.freeze({
     createService: createService,
     conversation: conversation,
-    log: log,
+    log: log$1,
     readFile: readFile,
     watchFile: watchFile,
     watchFileCreation: watchFileCreation,
     writeFile: writeFile
   });
 
-  const log$1 = (text) => log(text);
+  /**
+   *
+   * # Log
+   *
+   * Writes a string to the console.
+   *
+   * ```
+   * log("Hello, World")
+   * ```
+   *
+   **/
+
+  const log$2 = (text) => log$1(text);
+
+  /**
+   *
+   * # Max
+   *
+   * Produces the maximum of a series of numbers.
+   *
+   * ```
+   * max(1, 2, 3, 4) == 4
+   * ```
+   *
+   **/
 
   const max$2 = Math.max;
 
-  const fromPath = ({ points }) => Shape.fromPathToZ0Surface(points);
+  /**
+   *
+   * # Minkowski (convex)
+   *
+   * Generates the minkowski sum of a two convex shapes.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * minkowski(cube(10),
+   *           sphere(3));
+   * ```
+   * :::
+   *
+   **/
+
+  // TODO: Generalize for more operands?
+  const minkowski = (a, b) => {
+    const aPoints = [];
+    const bPoints = [];
+    a.eachPoint({}, point => aPoints.push(point));
+    b.eachPoint({}, point => bPoints.push(point));
+    return Shape.fromPolygonsToSolid(buildConvexHull({}, buildConvexMinkowskiSum({}, aPoints, bPoints)));
+  };
+
+  /**
+   *
+   * # Outline
+   *
+   * Generates the outline of a surface.
+   *
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(2).translate([-4]),
+   *            circle(2).translate([4]))
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * difference(circle(10),
+   *            circle(2).translate([-4]),
+   *            circle(2).translate([4]))
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const outline = (options = {}, shape) => {
+    // FIX: Handle non-z0surfaces.
+    return Shape.fromPaths(union$2(...getZ0Surfaces(shape.toGeometry())));
+  };
+
+  const method$c = function (options) { return outline(options, this); };
+
+  Shape.prototype.outline = method$c;
+
+  const fromValue$3 = (point) => Shape.fromPoint(point);
+
+  /**
+   *
+   * # Point
+   *
+   * Generates a point, by default at the origin.
+   *
+   * Note: The points are not visible in the illustrations below.
+   *
+   * ::: illustration
+   * ```
+   * point()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * point([1, 1, 0])
+   * ```
+   * :::
+   *
+   **/
+
+  const point = dispatch(
+    'point',
+    // point()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue$3([0, 0, 0]);
+    },
+    // point([1, 2, 3])
+    (value) => {
+      assertNumberTriple(value);
+      return () => fromValue$3(value);
+    });
+
+  point.fromValue = fromValue$3;
+
+  const fromPoints$2 = (points) => Shape.fromPoints(points);
+
+  /**
+   *
+   * # Points
+   *
+   * Generates point cloud.
+   *
+   * Note: The points are not visible in the illustrations below.
+   *
+   * ::: illustration
+   * ```
+   * points([ -0.5, -0.5, -0.5 ],
+   *        [ -0.5, -0.5, 0.5 ],
+   *        [ -0.5, 0.5, -0.5 ],
+   *        [ -0.5, 0.5, 0.5 ],
+   *        [ 0.5, -0.5, -0.5 ],
+   *        [ 0.5, -0.5, 0.5 ],
+   *        [ 0.5, 0.5, -0.5 ],
+   *        [ 0.5, 0.5, 0.5 ])
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * hull(points([ -0.5, -0.5, -0.5 ],
+   *             [ -0.5, -0.5, 0.5 ],
+   *             [ -0.5, 0.5, -0.5 ],
+   *             [ -0.5, 0.5, 0.5 ],
+   *             [ 0.5, -0.5, -0.5 ],
+   *             [ 0.5, -0.5, 0.5 ],
+   *             [ 0.5, 0.5, -0.5 ],
+   *             [ 0.5, 0.5, 0.5 ]))
+   * ```
+   * :::
+   *
+   **/
+
+  const points$1 = dispatch(
+    'points',
+    // points([1, 2, 3], [2, 3, 4])
+    (...points) => {
+      for (const [x = 0, y = 0, z = 0] of points) {
+        assertNumberTriple([x, y, z]);
+      }
+      return () => fromPoints$2(points);
+    });
+
+  points$1.fromPoints = fromPoints$2;
+
+  const fromValue$4 = (points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+
+  /**
+   *
+   * # Polygon
+   *
+   * ::: illustration { "view": { "position": [0, 0, 5] } }
+   * ```
+   * polygon([0, 1],
+   *         [1, 1],
+   *         [1, 0],
+   *         [0.2, 0.2])
+   * ```
+   * :::
+   *
+   **/
 
   const polygon = dispatch(
     'polygon',
-    // polygon([[0,0],[3,0],[3,3]])
-    (points) => {
+    // polygon([0, 0], [3, 0], [3, 3])
+    (...points) => {
       assertPoints(points);
       assert$1(points, 'Not at least three points', points.length >= 3);
-      return () => fromPath({ path: points });
+      return () => fromValue$4(points);
     },
     // polygon({ points: [[0, 0], [3, 0], [3, 3]] })
     ({ points }) => {
       assertPoints(points);
       assert$1(points, 'Not at least three points', points.length >= 3);
-      return () => fromPath({ path: points });
+      return () => fromValue$4(points);
     });
 
+  polygon.fromValue = fromValue$4;
+
   /**
-   * polyhedron({      // openscad-like (e.g. pyramid)
-   *   points: [ [10,10,0],[10,-10,0],[-10,-10,0],[-10,10,0], // the four points at base
-   *             [0,0,10] ],                                  // the apex point
-   *   triangles: [ [0,1,4],[1,2,4],[2,3,4],[3,0,4],          // each triangle side
-   *                [1,0,3],[2,1,3] ]                         // two triangles for square base
-   * });
    *
-   */
+   * # Polyhedron
+   *
+   * FIX: Invalid winding.
+   *
+   * ::: illustration { "view": { "position": [80, 20, 20] } }
+   * ```
+   * polyhedron({ points: [[10, 10, 0], [10, -10, 0], [-10, -10, 0], [-10, 10, 0], [0, 0, 10]],
+   *              triangles: [[0, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4], [1, 0, 3], [2, 1, 3]] })
+   * ```
+   * :::
+   *
+   **/
 
   const polyhedron = ({ points = [], triangles = [] }) => {
     const polygons = [];
-
     for (const triangle of triangles) {
       polygons.push(triangle.map(point => points[point]));
     }
-
-    return Shape.fromPolygons(polygons);
+    return Shape.fromPolygonsToSolid(polygons);
   };
 
   const Y_ADD_1 = 1 << 23;
@@ -32040,6 +33135,20 @@ define("./webworker.js",[],function () { 'use strict';
     return { paths: scale$3([0.1, 0.1, 0.1], fetchStitches(header, fetcher)) };
   };
 
+  /**
+   *
+   * # Read Data Stitch Tajima
+   *
+   * ::: illustration { "view": { "position": [0, 0, 200] } }
+   * ```
+   * await readDst({ path: 'dst/atg-sft003.dst',
+   *                 sources: [{ file: 'dst/atg-sft003.dst' },
+   *                           { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
+   * ```
+   * :::
+   *
+   **/
+
   const readDst = async (options) => {
     const { path } = options;
     return Shape.fromGeometry(await fromDst(options, await readFile(options, path)));
@@ -32052,10 +33161,13 @@ define("./webworker.js",[],function () { 'use strict';
 
   const readPart = async (part) => {
     part = part.toLowerCase().replace(/\\/, '/');
-    return readFile({ sources: [{ url: `${URL_PREFIX}/parts/${part}` },
-                                { url: `${URL_PREFIX}/p/48/${part}` },
-                                { url: `${URL_PREFIX}/p/${part}` }] },
-                    `tmp/ldraw-part-${part}`);
+    return readFile({
+      sources: [{ url: `${URL_PREFIX}/parts/${part}` },
+                { url: `${URL_PREFIX}/p/48/${part}` },
+                { url: `${URL_PREFIX}/p/${part}` }],
+      decode: 'utf8'
+    },
+                    `ldraw/${part}`);
   };
 
   const loadPart = async (part) => {
@@ -32184,6 +33296,18 @@ define("./webworker.js",[],function () { 'use strict';
                      scale$4([0.4, 0.4, 0.4],
                            fromPolygons({}, await fromPartToPolygons({ part }))))
     });
+
+  /**
+   *
+   * # Read LDraw Parts
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * await readLDraw({ part: '3004.dat' })
+   * ```
+   * :::
+   *
+   **/
 
   const readLDraw = async (options) => {
     return Shape.fromGeometry(await fromLDraw(options));
@@ -32338,7 +33462,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} p2 end point of the line segment
    * @returns {line3} a new unbounded 3D line
    */
-  const fromPoints$2 = (p1, p2) => {
+  const fromPoints$3 = (p1, p2) => {
     const direction = subtract(p2, p1);
     return fromPointAndDirection(p1, direction);
   };
@@ -32378,7 +33502,7 @@ define("./webworker.js",[],function () { 'use strict';
     const lines = new Map();
     ends.forEach(end => {
       // These are not actually lines, but they all start at the same position, so we can pretend.
-      const ray = fromPoints$2(start, end);
+      const ray = fromPoints$3(start, end);
       ensureMapElement(lines, toIdentity(ray)).push(end);
     });
 
@@ -32780,37 +33904,84 @@ define("./webworker.js",[],function () { 'use strict';
     `endloop\n` +
     `endfacet`;
 
+  /**
+   *
+   * # Read STL
+   *
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * await readStl({ path: 'stl/teapot.stl',
+   *                 format: 'ascii',
+   *                 sources: [{ file: 'stl/teapot.stl' },
+   *                           { url: 'https://jsxcad.js.org/stl/teapot.stl' }] })
+   * ```
+   * :::
+   *
+   **/
+
   const readStl = async (options) => {
     const { path } = options;
     return Shape.fromGeometry(await fromStl(options, await readFile(options, path)));
   };
+
+  /**
+   *
+   * # Read Scalable Vector Format
+   *
+   * ::: illustration { "view": { "position": [0, 0, 100] } }
+   * ```
+   * (
+   *  await readSvg({ path: 'svg/butterfly.svg',
+   *                 sources: [{ file: 'svg/butterfly.svg' },
+   *                           { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] })
+   * ).center().scale(0.02)
+   * ```
+   * :::
+   *
+   **/
+
+  const readSvg = async (options) => {
+    const { path } = options;
+    return Shape.fromGeometry(await fromSvg(options, await readFile({ decode: 'utf8', ...options }, path)));
+  };
+
+  const X$1 = 0;
+
+  const right = (shape) => {
+    const [minPoint] = measureBoundingBox$3(shape);
+    return translate$3(negate([minPoint[X$1], 0, 0]), shape);
+  };
+
+  const method$d = function () { return right(this); };
+
+  Shape.prototype.right = method$d;
 
   const a2r = (angle) => angle * 0.017453292519943295;
 
   const rotate = ([x = 0, y = 0, z = 0], shape) =>
     shape.transform(multiply$1(fromZRotation(a2r(z)), multiply$1(fromYRotation(a2r(y)), fromXRotation(a2r(x)))));
 
-  const method$8 = function (angles) { return rotate(angles, this); };
+  const method$e = function (angles) { return rotate(angles, this); };
 
-  Shape.prototype.rotate = method$8;
+  Shape.prototype.rotate = method$e;
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$9 = function (angle) { return rotateX$1(angle, this); };
+  const method$f = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$9;
+  Shape.prototype.rotateX = method$f;
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$a = function (angle) { return rotateY(angle, this); };
+  const method$g = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$a;
+  Shape.prototype.rotateY = method$g;
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$b = function (angle) { return rotateZ(angle, this); };
+  const method$h = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$b;
+  Shape.prototype.rotateZ = method$h;
 
   const scale$5 = (factor, shape) => {
     if (factor.length) {
@@ -32822,9 +33993,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$c = function (factor) { return scale$5(factor, this); };
+  const method$i = function (factor) { return scale$5(factor, this); };
 
-  Shape.prototype.scale = method$c;
+  Shape.prototype.scale = method$i;
 
   const sin$2 = (a) => Math.sin(a / 360 * Math.PI * 2);
 
@@ -32962,12 +34133,12 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$d = function (...shapes) { return union$5(this, ...shapes); };
+  const method$j = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$d;
+  Shape.prototype.union = method$j;
 
-  const X$1 = 0;
-  const Y$1 = 1;
+  const X$2 = 0;
+  const Y$3 = 1;
 
   // Not entirely sure how conformant this is, but it seems to work for simple
   // cases.
@@ -33020,7 +34191,7 @@ define("./webworker.js",[],function () { 'use strict';
     // Subtract the x min, and the y max, then add the page height to bring
     // it up to the top left. This positions the origin nicely for laser
     // cutting and printing.
-    const offset = [-min[X$1] * scale, (height - max[Y$1]) * scale, 0];
+    const offset = [-min[X$2] * scale, (height - max[Y$3]) * scale, 0];
     const matrix = multiply$1(fromTranslation(offset),
                             fromScaling([scale, scale, scale]));
     for (const path of transform$6(matrix, paths)) {
@@ -33063,9 +34234,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$e = function (options = {}) { writeStl(options, this); return this; };
+  const method$k = function (options = {}) { writeStl(options, this); return this; };
 
-  Shape.prototype.writeStl = method$e;
+  Shape.prototype.writeStl = method$k;
 
   const writeSvg = async (options, shape) => {
     const { path } = options;
@@ -33073,9 +34244,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$f = function (options = {}) { writeSvg(options, this); return this; };
+  const method$l = function (options = {}) { writeSvg(options, this); return this; };
 
-  Shape.prototype.writeSvg = method$f;
+  Shape.prototype.writeSvg = method$l;
 
   // Polyfills
 
@@ -83014,8 +84185,6 @@ define("./webworker.js",[],function () { 'use strict';
     SVGObject.prototype.constructor = SVGObject;
 
     const SVGRenderer = function () {
-    	console.log('THREE.SVGRenderer', THREE.REVISION);
-
     	var _this = this;
     		var _renderData; var _elements; var _lights;
     		var _projector = new Projector();
@@ -83406,6 +84575,10 @@ define("./webworker.js",[],function () { 'use strict';
     return { SVGRenderer };
   };
 
+  const pointsToThreejsPoints = (geometry) => {
+    return geometry.points;
+  };
+
   const pathsToThreejsSegments = (geometry) => {
     const segments = [];
     for (const path of geometry) {
@@ -83453,6 +84626,8 @@ define("./webworker.js",[],function () { 'use strict';
       return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };
     } else if (geometry.paths) {
       return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };
+    } else if (geometry.points) {
+      return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: geometry.tags, isThreejsGeometry: true };
     } else if (geometry.solid) {
       return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };
     } else if (geometry.z0Surface) {
@@ -83466,13 +84641,23 @@ define("./webworker.js",[],function () { 'use strict';
   const { SVGRenderer } = installSVGRenderer({ THREE: THREE$1, Projector: Projector$1, RenderableFace, RenderableLine, RenderableSprite, document: new domParser_3().parseFromString('<xml></xml>', 'text/xml') });
   // Bootstrap done.
 
-  const build$1 = ({ cameraPosition = [0, 0, 16], pageSize = [100, 100] }, geometry) => {
+  const build$1 = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
+    const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
     const [pageWidth, pageHeight] = pageSize;
     const camera = new PerspectiveCamera(27, pageWidth / pageHeight, 1, 3500);
-    [camera.position.x, camera.position.y, camera.position.z] = cameraPosition;
+    [camera.position.x, camera.position.y, camera.position.z] = position;
+    camera.up = new Vector3(...up);
+    camera.lookAt(...target);
     const scene = new Scene();
-    scene.background = new Color(0x050505);
+    scene.background = new Color(0xffffff);
     scene.add(camera);
+    if (grid) {
+      const grid = new GridHelper(100, 10, 'green', 'blue');
+      grid.material = new LineBasicMaterial({ color: 0x000000 });
+      grid.rotation.x = -Math.PI / 2;
+      // grid.material.transparent = true;
+      scene.add(grid);
+    }
     //
     var ambientLight = new AmbientLight(0x222222);
     scene.add(ambientLight);
@@ -83483,6 +84668,14 @@ define("./webworker.js",[],function () { 'use strict';
     const walk = (geometry) => {
       if (geometry.assembly) {
         geometry.assembly.forEach(walk);
+      } else if (geometry.threejsPoints) {
+        const points = geometry.threejsPoints;
+        const threejsGeometry = new Geometry();
+        const material = new PointsMaterial({ color: 0x0000ff });
+        for (const [x, y, z] of points) {
+          threejsGeometry.vertices.push(new Vector3(x, y, z));
+        }
+        scene.add(new Points(threejsGeometry, material));
       } else if (geometry.threejsSegments) {
         const segments = geometry.threejsSegments;
         const threejsGeometry = new Geometry();
@@ -83512,7 +84705,9 @@ define("./webworker.js",[],function () { 'use strict';
     return [scene, camera];
   };
 
-  const toSvg$1 = async (options = {}, geometry) => {
+  const toSvg$1 = async (options = {}, geometry) => toSvgSync(options, geometry);
+
+  const toSvgSync = (options = {}, geometry) => {
     const [scene, camera] = build$1(options, geometry);
     const { pageSize = [500, 500] } = options;
     const [pageWidth, pageHeight] = pageSize;
@@ -83585,9 +84780,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$g = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$m = function (options = {}) { writeSvgPhoto(options, this); return this; };
 
-  Shape.prototype.writeSvgPhoto = method$g;
+  Shape.prototype.writeSvgPhoto = method$m;
 
   const writeThreejsPage = async (options, shape) => {
     const { path } = options;
@@ -83607,8 +84802,11 @@ define("./webworker.js",[],function () { 'use strict';
   var api = /*#__PURE__*/Object.freeze({
     Cursor: Cursor,
     Shape: Shape,
+    above: above,
     acos: acos$1,
     assemble: assemble$1,
+    back: back,
+    below: below,
     center: center,
     chainHull: chainHull,
     circle: circle,
@@ -83617,19 +84815,25 @@ define("./webworker.js",[],function () { 'use strict';
     cube: cube,
     cylinder: cylinder,
     difference: difference$5,
-    extrude: extrude,
+    extrude: extrude$1,
+    front: front,
     hull: hull,
     intersection: intersection$5,
     loadFont: loadFont,
-    log: log$1,
+    log: log$2,
     max: max$2,
     measureBoundingBox: measureBoundingBox$3,
     minkowski: minkowski,
+    outline: outline,
+    point: point,
+    points: points$1,
     polygon: polygon,
     polyhedron: polyhedron,
     readDst: readDst,
     readLDraw: readLDraw,
     readStl: readStl,
+    readSvg: readSvg,
+    right: right,
     rotate: rotate,
     rotateX: rotateX$1,
     rotateY: rotateY,
@@ -83659,7 +84863,10 @@ define("./webworker.js",[],function () { 'use strict';
       if (question.evaluate) {
         const code = new Function(`{ ${Object.keys(api).join(', ')} }`,
                                   `${question.evaluate}; return main;`);
-        return code(api)();
+        const shape = await code(api)();
+        if (shape !== undefined) {
+          await writeFile({ preview: true, geometry: shape.toDisjointGeometry() }, 'preview', 'preview');
+        }
       }
     } catch (error) {
       await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: error.toString() } });

@@ -9,7 +9,10 @@ const agent = async ({ ask, question }) => {
     if (question.evaluate) {
       const code = new Function(`{ ${Object.keys(api).join(', ')} }`,
                                 `${question.evaluate}; return main;`);
-      return code(api)();
+      const shape = await code(api)();
+      if (shape !== undefined) {
+        await sys.writeFile({ preview: true, geometry: shape.toDisjointGeometry() }, 'preview', 'preview');
+      }
     }
   } catch (error) {
     await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: error.toString() } });
