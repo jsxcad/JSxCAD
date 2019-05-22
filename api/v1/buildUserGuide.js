@@ -22,7 +22,7 @@ const paths = [
   'minkowski.js',
   'outline.js',
   'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
-  'readDst.js', 'readLDraw.js', 'readStl.js', 'readSvg.js',
+  'readDst.js', 'readLDraw.js', 'readStl.js', 'readSvg.js'
 ];
 
 toUserGuide({ api, paths, root: __dirname })

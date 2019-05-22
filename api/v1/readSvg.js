@@ -18,8 +18,7 @@ import { readFile } from '@jsxcad/sys';
  *
  **/
 
-
 export const readSvg = async (options) => {
   const { path } = options;
   return Shape.fromGeometry(await fromSvg(options, await readFile({ decode: 'utf8', ...options }, path)));
-}
+};

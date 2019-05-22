@@ -4,8 +4,8 @@ import * as fs from 'fs';
 
 import { isNode, isWebWorker } from './browserOrNode';
 
-import { getFile } from './files';
 import { dirname } from 'path';
+import { getFile } from './files';
 
 export const writeFile = async (options, path, data) => {
   if (isWebWorker) {

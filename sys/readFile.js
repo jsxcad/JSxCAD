@@ -3,11 +3,12 @@
 import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+
 import { Buffer } from 'buffer';
 import { getFile } from './files';
 import { log } from './log';
-import { writeFile } from './writeFile';
 import nodeFetch from 'node-fetch';
+import { writeFile } from './writeFile';
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
