@@ -7,6 +7,8 @@ import { isNode, isWebWorker } from './browserOrNode';
 import { dirname } from 'path';
 import { getFile } from './files';
 
+const { promises } = fs;
+
 export const writeFile = async (options, path, data) => {
   if (isWebWorker) {
     return self.ask({ writeFile: { options, path, data: await data } });
@@ -24,11 +26,11 @@ export const writeFile = async (options, path, data) => {
   if (!ephemeral) {
     if (isNode) {
       try {
-        await fs.promises.mkdir(dirname(path), { recursive: true });
+        await promises.mkdir(dirname(path), { recursive: true });
       } catch (error) {
         console.log(`QQ/mkdir: ${error.toString()}`);
       }
-      return fs.promises.writeFile(path, data);
+      return promises.writeFile(path, data);
     }
   }
 };

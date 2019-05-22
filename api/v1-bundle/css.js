@@ -4,12 +4,13 @@ export const installCSS = (document, text) => {
   document.head.appendChild(style);
 };
 
-export const installCSSLink = (document, href) => {
-  var style = document.createElement('link');
-  style.rel = 'stylesheet';
-  style.type = 'text/css';
-  style.media = 'screen';
-  style.href = href;
-  style.async = false;
-  document.head.appendChild(style);
-};
+export const installCSSLink = async (document, href) =>
+  new Promise((resolve, reject) => {
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.media = 'screen';
+    link.href = href;
+    link.onload = resolve;
+    document.head.appendChild(link);
+  });

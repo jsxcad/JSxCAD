@@ -1,4 +1,5 @@
 // rollup.config.js
+import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical';
@@ -12,24 +13,25 @@ export default {
     format: 'amd'
   },
   external: [
-    'buffer',
-    'events',
-    'process'
+    //    'buffer',
+    //    'events',
+    //    'process'
   ],
   plugins: [
     loadz0r(),
+    builtins(),
     commonjs(),
+    globals(),
     hypothetical(
       {
         allowFallthrough: true,
         files: {
-          'fs': 'export const promises = {}',
-          'node-fetch': 'export default {}',
+          'fs': 'export const promises = {};',
+          'node-fetch': 'export default {};',
           'os': '',
           'tty': ''
         }
       }),
-    nodeResolve({ preferBuiltins: false }),
-    globals()
+    nodeResolve({ preferBuiltins: true })
   ]
 };
