@@ -41,6 +41,7 @@ import { readDst } from './readDst';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readStl } from './readStl';
+import { readSvg } from './readSvg';
 import { right } from './right';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
@@ -95,6 +96,7 @@ export {
   // readJscad,
   readLDraw,
   readStl,
+  readSvg,
   right,
   rotate,
   rotateX,

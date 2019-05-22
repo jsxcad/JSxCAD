@@ -3,9 +3,12 @@
 import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+
+import { Buffer } from 'buffer';
 import { getFile } from './files';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
+import { writeFile } from './writeFile';
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
@@ -63,6 +66,7 @@ const fetchSources = async (sources) => {
 };
 
 export const readFile = async (options, path) => {
+  const { ephemeral, decode } = options;
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
@@ -70,9 +74,18 @@ export const readFile = async (options, path) => {
   const file = getFile(options, path);
   if (file.data === undefined) {
     file.data = await fetchPersistent(path);
+    if (file.data !== undefined) {
+      if (decode !== undefined && Buffer.isBuffer(file.data)) {
+        file.data = file.data.toString(decode);
+      }
+    }
   }
   if (file.data === undefined) {
     file.data = await fetchSources(sources);
+    if (!ephemeral) {
+      // Update persistent storage.
+      await writeFile(options, path, file.data);
+    }
   }
   if (file.data !== undefined) {
     if (file.data.then) {

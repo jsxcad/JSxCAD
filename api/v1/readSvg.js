@@ -1,5 +1,24 @@
 import { Shape } from './Shape';
+import { fromSvg } from '@jsxcad/convert-svg';
 import { readFile } from '@jsxcad/sys';
-import { toSvg } from '@jsxcad/convert-svg';
 
-export const readSvg = async ({ path }) => Shape.fromGeometry(toSvg({}, await readFile({}, path)));
+/**
+ *
+ * # Read Scalable Vector Format
+ *
+ * ::: illustration { "view": { "position": [0, 0, 100] } }
+ * ```
+ * (
+ *  await readSvg({ path: 'svg/butterfly.svg',
+ *                 sources: [{ file: 'svg/butterfly.svg' },
+ *                           { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] })
+ * ).center().scale(0.02)
+ * ```
+ * :::
+ *
+ **/
+
+export const readSvg = async (options) => {
+  const { path } = options;
+  return Shape.fromGeometry(await fromSvg(options, await readFile({ decode: 'utf8', ...options }, path)));
+};
