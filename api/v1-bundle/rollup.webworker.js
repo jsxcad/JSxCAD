@@ -13,9 +13,9 @@ export default {
     format: 'amd'
   },
   external: [
-//    'buffer',
-//    'events',
-//    'process'
+    //    'buffer',
+    //    'events',
+    //    'process'
   ],
   plugins: [
     loadz0r(),
@@ -32,6 +32,6 @@ export default {
           'tty': ''
         }
       }),
-    nodeResolve({ preferBuiltins: true }),
+    nodeResolve({ preferBuiltins: true })
   ]
 };
