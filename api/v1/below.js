@@ -11,7 +11,7 @@ import { translate } from './translate';
  *
  * ::: illustration { "view": { "position": [40, 40, 10] } }
  * ```
- * assemble(cylinder(30, 2),
+ * assemble(cylinder(2, 15).rotateY(90),
  *          cube(10).below())
  * ```
  * :::

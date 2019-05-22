@@ -9,10 +9,10 @@ import { translate } from './translate';
  *
  * Moves the shape so that it is just above the origin.
  *
- * ::: illustration { "view": { "position": [40, 40, 0] } }
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * assemble(circle(30),
- *          cube(10).above())
+ * assemble(cube(10).above(),
+ *          cylinder(2, 15).rotateY(90))
  * ```
  * :::
  **/

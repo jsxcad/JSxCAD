@@ -2,7 +2,7 @@ import MarkdownIt from 'markdown-it';
 import MarkdownItContainer from 'markdown-it-container';
 import fs from 'fs';
 import jsdocExtractor from 'jsdoc-extractor';
-import { toSvgSync } from '@jsxcad/convert-threejs';
+import { toSvg } from '@jsxcad/convert-threejs';
 
 const { readFile } = fs.promises;
 
@@ -11,8 +11,7 @@ const { readFile } = fs.promises;
 // FIX: Figure out the language generally.
 const toOperator = ({ api }, script) => {
   try {
-    return new Function(`{ ${Object.keys(api).join(', ')} }`,
-                        `return ${script};`);
+    return new Function(`return async ({ ${Object.keys(api).join(', ')} }) => ${script};`)();
   } catch (error) {
     console.log(`toOperator: ${script}`);
     console.log(error.toString());
@@ -56,6 +55,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
   }
   const markdown = markdowns.join('\n');
   const md = new MarkdownIt();
+  const patches = [];
   const render = (tokens, idx) => {
     switch (tokens[idx].type) {
       case 'container_illustration_close':
@@ -90,15 +90,20 @@ export const toUserGuide = async ({ api, paths, root }) => {
           }
         }
         const text = chunks.join('\n');
-        const operator = toOperator({ api }, text);
-        const geometry = operator(api);
         // Place the geometry very slightly above the grid.
-        const svg = toSvgSync(options, geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
-        return `<table><tr><td>${svg}</td><td>`;
+        const patch = `<<<${patches.length}>>>`;
+        patches.push({ patch, options, text });
+        return `<table><tr><td>${patch}</td><td>`;
       }
     }
   };
   md.use(MarkdownItContainer, 'illustration', { render });
+  let markdownHtml = md.render(markdown);
+  for (const { patch, options, text } of patches) {
+    const geometry = await toOperator({ api }, text)(api);
+    const svg = await toSvg(options, geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
+    markdownHtml = markdownHtml.replace(patch, svg);
+  }
   const html = `
 <html>
  <head>
@@ -113,7 +118,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
   </style>
  </head>
  <body>
-  ${md.render(markdown)}
+  ${markdownHtml}
  </body>
 </html>
 `;
