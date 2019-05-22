@@ -1,0 +1,49 @@
+{
+  "name": "@jsxcad/compiler",
+  "version": "0.0.75",
+  "description": "Compiler support for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "module": "main.js",
+  "scripts": {
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "extract": "node -r esm extract.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/convert-threejs": "^0.0.75",
+    "ast-types": "^0.12.3",
+    "recast": "^0.17.5",
+    "esm": "^3.2.10",
+    "escodegen": "^1.11.1",
+    "esprima": "^4.0.1"
+  },
+  "devDependencies": {
+    "ava": "^0.23.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.15.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "esm": "^3.2.10"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  }
+}
