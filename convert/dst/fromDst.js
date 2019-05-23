@@ -27,9 +27,12 @@ import {
 import { scale } from '@jsxcad/geometry-paths';
 
 export const createByteFetcher = (bytes) => {
+  const bytesLength = bytes.length;
   let bytesRead = 0;
   const byteFetcher = (length) => {
-    const fetched = bytes.slice(bytesRead, bytesRead += length);
+    const end = Math.min(bytesRead + length, bytesLength + 1);
+    const fetched = bytes.slice(bytesRead, end);
+    bytesRead = end;
     return fetched;
   };
   return byteFetcher;
@@ -76,7 +79,12 @@ export const fetchHeader = (options = {}, fetchBytes) => {
 
 const fetchStitch = (fetchBytes) => {
   let bytes = fetchBytes(3);
-  let r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
+  let r;
+  if (bytes.length === 3) {
+    r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
+  } else {
+    r = (END | JUMP_STITCH | PAUSE);
+  }
 
   let x = 0;
   if (r & X_ADD_81) x += 81;
