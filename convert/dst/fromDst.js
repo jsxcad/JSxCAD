@@ -27,9 +27,10 @@ import {
 import { scale } from '@jsxcad/geometry-paths';
 
 export const createByteFetcher = (bytes) => {
+  const bytesLength = bytes.length;
   let bytesRead = 0;
   const byteFetcher = (length) => {
-    const end = Math.min(bytesRead + length, bytes.length + 1);
+    const end = Math.min(bytesRead + length, bytesLength + 1);
     const fetched = bytes.slice(bytesRead, end);
     bytesRead = end;
     return fetched;

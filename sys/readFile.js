@@ -29,7 +29,7 @@ const dataAs = (as, data) => {
         if (Buffer.isBuffer(data)) {
           return data;
         } else if (data instanceof ArrayBuffer) {
-          return data;
+          return new Uint8Array(data);
         }
         break;
     }
@@ -79,15 +79,17 @@ const fetchSources = async ({ as = 'utf8' }, sources) => {
       if (response.ok) {
         switch (as) {
           case 'utf8':
-            return dataAs(as, response.text());
+            return dataAs(as, await response.text());
           case 'bytes':
-            return dataAs(response.arrayBuffer());
+            return dataAs(as, await response.arrayBuffer());
         }
       }
     } else if (source.file !== undefined) {
       try {
         const data = await fetchFile(source.file);
-        return dataAs(as, data);
+        if (data !== undefined) {
+          return dataAs(as, data);
+        }
       } catch (e) {}
     } else {
       throw Error('die');

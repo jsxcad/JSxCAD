@@ -16272,6 +16272,7 @@ define("./webworker.js",[],function () { 'use strict';
     var qx, qy, cx, cy;
     var i = 0, j, m, sl;
     var l = path.length;
+    var c, seg;
 
     while (i < l) {
       seg = path[i++], cmd = seg[0];
@@ -32751,6 +32752,28 @@ define("./webworker.js",[],function () { 'use strict';
 
   const { promises: promises$1 } = fs;
 
+  const dataAs = (as, data) => {
+    if (data !== undefined) {
+      switch (as) {
+        case 'utf8':
+          if (typeof data === 'string') {
+            return data;
+          } else if (Buffer.isBuffer(data)) {
+            const utf8 = data.toString('utf8');
+            return utf8;
+          }
+          break;
+        case 'bytes':
+          if (Buffer.isBuffer(data)) {
+            return data;
+          } else if (data instanceof ArrayBuffer) {
+            return new Uint8Array(data);
+          }
+          break;
+      }
+    }
+  };
+
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
       return window.fetch;
@@ -32773,17 +32796,17 @@ define("./webworker.js",[],function () { 'use strict';
 
   // Fetch from internal store.
   // FIX: Support browser local storage.
-  const fetchPersistent = async (path) => {
+  const fetchPersistent = async ({ as }, path) => {
     try {
       const fetchFile = await getFileFetcher();
       const data = await fetchFile(path);
-      return data;
+      return dataAs(as, data);
     } catch (e) {
     }
   };
 
   // Fetch from external sources.
-  const fetchSources = async (sources) => {
+  const fetchSources = async ({ as = 'utf8' }, sources) => {
     const fetchUrl = await getUrlFetcher();
     const fetchFile = await getFileFetcher();
     // Try to load the data from a source.
@@ -32792,14 +32815,18 @@ define("./webworker.js",[],function () { 'use strict';
         log$1(`# Fetching ${source.url}`);
         const response = await fetchUrl(source.url);
         if (response.ok) {
-          const data = await response.text();
-          return data;
+          switch (as) {
+            case 'utf8':
+              return dataAs(as, await response.text());
+            case 'bytes':
+              return dataAs(as, await response.arrayBuffer());
+          }
         }
       } else if (source.file !== undefined) {
         try {
           const data = await fetchFile(source.file);
           if (data !== undefined) {
-            return data;
+            return dataAs(as, data);
           }
         } catch (e) {}
       } else {
@@ -32809,22 +32836,19 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const readFile = async (options, path) => {
-    const { ephemeral, decode } = options;
+    const { ephemeral, as = 'utf8' } = options;
     if (isWebWorker) {
       return self.ask({ readFile: { options, path } });
     }
     const { sources = [] } = options;
     const file = getFile(options, path);
-    if (file.data === undefined) {
-      file.data = await fetchPersistent(path);
-      if (file.data !== undefined) {
-        if (decode !== undefined && Buffer.isBuffer(file.data)) {
-          file.data = file.data.toString(decode);
-        }
-      }
+    if (file.data === undefined || file.as !== as) {
+      file.data = await fetchPersistent({ as }, path);
+      file.as = as;
     }
-    if (file.data === undefined) {
-      file.data = await fetchSources(sources);
+    if (file.data === undefined || file.as !== as) {
+      file.data = await fetchSources({ as }, sources);
+      file.as = as;
       if (!ephemeral) {
         // Update persistent storage.
         await writeFile(options, path, file.data);
@@ -33105,9 +33129,10 @@ define("./webworker.js",[],function () { 'use strict';
   const END$1 = (Y_ADD_81 | Y_SUB_81);
 
   const createByteFetcher = (bytes) => {
+    const bytesLength = bytes.length;
     let bytesRead = 0;
     const byteFetcher = (length) => {
-      const end = Math.min(bytesRead + length, bytes.length + 1);
+      const end = Math.min(bytesRead + length, bytesLength + 1);
       const fetched = bytes.slice(bytesRead, end);
       bytesRead = end;
       return fetched;
@@ -33264,7 +33289,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const readDst = async (options) => {
     const { path } = options;
-    return Shape.fromGeometry(await fromDst(options, await readFile(options, path)));
+    return Shape.fromGeometry(await fromDst(options, await readFile({ as: 'bytes', ...options }, path)));
   };
 
   const RESOLUTION = 10000;
@@ -34032,9 +34057,18 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
+  const formatToAs = (format) => {
+    switch (format) {
+      case 'binary': return 'bytes';
+      case 'ascii':
+      default: return 'utf8';
+    }
+  };
+
   const readStl = async (options) => {
-    const { path } = options;
-    return Shape.fromGeometry(await fromStl(options, await readFile(options, path)));
+    const { path, format = 'ascii' } = options;
+    const as = formatToAs(format);
+    return Shape.fromGeometry(await fromStl(options, await readFile({ as, ...options }, path)));
   };
 
   /**
