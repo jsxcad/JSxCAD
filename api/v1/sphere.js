@@ -1,46 +1,73 @@
-import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
+import { assertEmpty, assertNumber } from './assert';
 
 import { Shape } from './Shape';
 import { buildRingSphere } from '@jsxcad/algorithm-shape';
-
-const buildSphere = ({ r = 1, fn = 32 }) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution: fn })).scale([r, r, r]);
-
-const decode = (params) => {
-  // sphere();
-  try {
-    assertEmpty(params);
-    return {};
-  } catch (e) {}
-
-  // sphere(2);
-  try {
-    assertSingle(params);
-    const [radius] = params;
-    assertNumber(radius);
-    return { r: radius };
-  } catch (e) {}
-
-  // sphere({ r: 10, fn: 100 });  // geodesic approach (icosahedron further triangulated)
-  try {
-    assertSingle(params);
-    const { r = 1, fn = 32, center = false } = params[0];
-    assertNumber(r);
-    assertNumber(fn);
-    assertBoolean(center);
-    return { fn: fn, r: r };
-  } catch (e) {}
-
-  throw Error(`Unsupported interface for sphere: ${JSON.stringify(params)}`);
-};
+import { dispatch } from './dispatch';
 
 /**
  *
- * sphere();                          // openscad like
- * sphere(1);
- * sphere({r: 2});                    // Note: center:true is default (unlike other primitives, as OpenSCAD)
- * sphere({r: 2, center: true});     // Note: OpenSCAD doesn't support center for sphere but we do
- * sphere({r: 2, center: [false, false, true]}); // individual axis center
- * sphere({r: 10, fn: 100 });
- * sphere({r: 10, fn: 100, type: 'geodesic'});  // geodesic approach (icosahedron further triangulated)
- */
-export const sphere = (...params) => buildSphere(decode(params));
+ * # Sphere
+ *
+ * Generates spheres.
+ *
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * sphere()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [60, 60, 60] } }
+ * ```
+ * sphere(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * sphere({ radius: 8, resolution: 5 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * sphere({ diameter: 16, resolution: 64 })
+ * ```
+ * :::
+ *
+ **/
+
+const unitSphere = ({ resolution = 32 } = {}) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+
+export const fromValue = (value) => unitSphere().scale(value);
+
+export const fromRadius = ({ radius, resolution = 32 }) => unitSphere({ resolution }).scale(radius);
+
+export const fromDiameter = ({ diameter, resolution = 32 }) => unitSphere({ resolution }).scale(diameter / 2);
+
+export const sphere = dispatch(
+  'sphere',
+  // sphere()
+  (...rest) => {
+    assertEmpty(rest);
+    return () => fromValue(1);
+  },
+  // sphere(2)
+  (value) => {
+    assertNumber(value);
+    return () => fromValue(value);
+  },
+  // sphere({ radius: 2, resolution: 5 })
+  ({ radius, resolution = 32 }) => {
+    assertNumber(radius);
+    assertNumber(resolution);
+    return () => fromRadius({ radius, resolution });
+  },
+  // sphere({ diameter: 2, resolution: 25 })
+  ({ diameter, resolution = 32 }) => {
+    assertNumber(diameter);
+    assertNumber(resolution);
+    return () => fromDiameter({ diameter, resolution });
+  });
+
+sphere.fromValue = fromValue;
+sphere.fromRadius = fromRadius;
+sphere.fromDiameter = fromDiameter;
+
+export default sphere;
