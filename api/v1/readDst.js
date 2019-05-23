@@ -18,5 +18,5 @@ import { readFile } from '@jsxcad/sys';
 
 export const readDst = async (options) => {
   const { path } = options;
-  return Shape.fromGeometry(await fromDst(options, await readFile(options, path)));
+  return Shape.fromGeometry(await fromDst(options, await readFile({ as: 'bytes', ...options }, path)));
 };

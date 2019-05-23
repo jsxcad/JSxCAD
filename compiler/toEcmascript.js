@@ -38,10 +38,10 @@ export const toEcmascript = (options, script) => {
   } else {
     // They don't export a main function, so build one for them.
     if (expressions.length >= 1) {
-      // Turn the last expression into a return statement.
+      // Turn any final expression into a return statement.
       const last = expressions.length - 1;
       const tail = expressions[last];
-      if (tail.type !== 'ReturnStatement') {
+      if (tail.type === 'ExpressionStatement') {
         expressions[last] = {
           type: 'ReturnStatement',
           argument: expressions[last]

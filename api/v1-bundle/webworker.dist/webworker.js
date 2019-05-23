@@ -33107,7 +33107,9 @@ define("./webworker.js",[],function () { 'use strict';
   const createByteFetcher = (bytes) => {
     let bytesRead = 0;
     const byteFetcher = (length) => {
-      const fetched = bytes.slice(bytesRead, bytesRead += length);
+      const end = Math.min(bytesRead + length, bytes.length + 1);
+      const fetched = bytes.slice(bytesRead, end);
+      bytesRead = end;
       return fetched;
     };
     return byteFetcher;
@@ -33154,7 +33156,12 @@ define("./webworker.js",[],function () { 'use strict';
 
   const fetchStitch = (fetchBytes) => {
     let bytes = fetchBytes(3);
-    let r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
+    let r;
+    if (bytes.length === 3) {
+      r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
+    } else {
+      r = (END$1 | JUMP_STITCH | PAUSE);
+    }
 
     let x = 0;
     if (r & X_ADD_81) x += 81;
@@ -34036,7 +34043,7 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [0, 0, 100] } }
    * ```
-   * 
+   *
    * const svg = readSvg({ path: 'svg/butterfly.svg',
    *                       sources: [{ file: 'svg/butterfly.svg' },
    *                                 { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] });
@@ -104839,10 +104846,10 @@ define("./webworker.js",[],function () { 'use strict';
     } else {
       // They don't export a main function, so build one for them.
       if (expressions.length >= 1) {
-        // Turn the last expression into a return statement.
+        // Turn any final expression into a return statement.
         const last = expressions.length - 1;
         const tail = expressions[last];
-        if (tail.type !== 'ReturnStatement') {
+        if (tail.type === 'ExpressionStatement') {
           expressions[last] = {
             type: 'ReturnStatement',
             argument: expressions[last]
