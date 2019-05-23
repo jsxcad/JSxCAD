@@ -15,9 +15,8 @@ import { Shape } from './Shape';
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * (
- *  ([corner1, corner2]) => cube({ corner1, corner2})
- * )(sphere(7).measureBoundingBox())
+ * const [corner1, corner2] = sphere(7).measureBoundingBox();
+ * cube({ corner1, corner2 })
  * ```
  * :::
  **/

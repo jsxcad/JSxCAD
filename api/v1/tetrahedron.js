@@ -1,46 +1,71 @@
-import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
+import { assertEmpty, assertNumber } from './assert';
 
 import { Shape } from './Shape';
 import { buildRegularTetrahedron } from '@jsxcad/algorithm-shape';
-
-const buildTetrahedron = ({ r = 1 }) => Shape.fromPolygons(buildRegularTetrahedron({})).scale([r, r, r]);
-
-const decode = (params) => {
-  // sphere();
-  try {
-    assertEmpty(params);
-    return {};
-  } catch (e) {}
-
-  // sphere(2);
-  try {
-    assertSingle(params);
-    const [radius] = params;
-    assertNumber(radius);
-    return { r: radius };
-  } catch (e) {}
-
-  // sphere({ r: 10, fn: 100 });  // geodesic approach (icosahedron further triangulated)
-  try {
-    assertSingle(params);
-    const { r = 1, fn = 32, center = false } = params[0];
-    assertNumber(r);
-    assertNumber(fn);
-    assertBoolean(center);
-    return { fn: fn, r: r };
-  } catch (e) {}
-
-  throw Error(`Unsupported interface for sphere: ${JSON.stringify(params)}`);
-};
+import { dispatch } from './dispatch';
 
 /**
  *
- * sphere();                          // openscad like
- * sphere(1);
- * sphere({r: 2});                    // Note: center:true is default (unlike other primitives, as OpenSCAD)
- * sphere({r: 2, center: true});     // Note: OpenSCAD doesn't support center for sphere but we do
- * sphere({r: 2, center: [false, false, true]}); // individual axis center
- * sphere({r: 10, fn: 100 });
- * sphere({r: 10, fn: 100, type: 'geodesic'});  // geodesic approach (icosahedron further triangulated)
- */
-export const tetrahedron = (...params) => buildTetrahedron(decode(params));
+ * # Tetrahedron
+ *
+ * Generates tetrahedrons.
+ *
+ * ::: illustration { "view": { "position": [8, 8, 8] } }
+ * ```
+ * tetrahedron()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * tetrahedron(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [60, 60, 60] } }
+ * ```
+ * tetrahedron({ radius: 8 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [60, 60, 60] } }
+ * ```
+ * tetrahedron({ diameter: 16 })
+ * ```
+ * :::
+ *
+ **/
+
+const unitTetrahedron = () => Shape.fromPolygonsToSolid(buildRegularTetrahedron({}));
+
+export const fromValue = (value) => unitTetrahedron().scale(value);
+
+export const fromRadius = ({ radius }) => unitTetrahedron().scale(radius);
+
+export const fromDiameter = ({ diameter }) => unitTetrahedron().scale(diameter / 2);
+
+export const tetrahedron = dispatch(
+  'tetrahedron',
+  // tetrahedron()
+  (...rest) => {
+    assertEmpty(rest);
+    return () => fromValue(1);
+  },
+  // tetrahedron(2)
+  (value) => {
+    assertNumber(value);
+    return () => fromValue(value);
+  },
+  // tetrahedron({ radius: 2 })
+  ({ radius }) => {
+    assertNumber(radius);
+    return () => fromRadius({ radius });
+  },
+  // tetrahedron({ diameter: 2 })
+  ({ diameter }) => {
+    assertNumber(diameter);
+    return () => fromDiameter({ diameter });
+  });
+
+tetrahedron.fromValue = fromValue;
+tetrahedron.fromRadius = fromRadius;
+tetrahedron.fromDiameter = fromDiameter;
+
+export default tetrahedron;

@@ -43,7 +43,6 @@ import { readLDraw } from './readLDraw';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
-import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
 import { rotateZ } from './rotateZ';
@@ -55,6 +54,7 @@ import { square } from './square';
 import { svgPath } from './svgPath';
 import { tetrahedron } from './tetrahedron';
 import { translate } from './translate';
+import { triangle } from './triangle';
 import { union } from './union';
 import { writePdf } from './writePdf';
 import { writeStl } from './writeStl';
@@ -98,7 +98,6 @@ export {
   readStl,
   readSvg,
   right,
-  rotate,
   rotateX,
   rotateY,
   rotateZ,
@@ -111,6 +110,7 @@ export {
   tetrahedron,
   text,
   translate,
+  triangle,
   union,
   writePdf,
   writeStl,
