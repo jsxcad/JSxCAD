@@ -8,9 +8,9 @@ import { readFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [0, 0, 200] } }
  * ```
- * await readDst({ path: 'dst/atg-sft003.dst',
- *                 sources: [{ file: 'dst/atg-sft003.dst' },
- *                           { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
+ * readDst({ path: 'dst/atg-sft003.dst',
+ *         sources: [{ file: 'dst/atg-sft003.dst' },
+ *                   { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
  * ```
  * :::
  *

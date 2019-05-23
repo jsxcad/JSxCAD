@@ -9,12 +9,12 @@ const agent = async ({ ask, question }) => {
   try {
     if (question.evaluate) {
       const ecmascript = toEcmascript({}, question.evaluate);
-      console.log(`Evaluate/in: ${question.evaluate}`);
-      console.log(`Evaluate/out: ${ecmascript}`);
+      console.log(`QQ/script: ${question.evaluate}`);
+      console.log(`QQ/ecmascript: ${ecmascript}`);
       const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
       const shape = await code(api).main();
       if (shape !== undefined) {
-        await sys.writeFile({ preview: true, geometry: shape.toDisjointGeometry() }, 'preview', 'preview');
+        return shape.toDisjointGeometry();
       }
     }
   } catch (error) {

@@ -2,6 +2,7 @@ import MarkdownIt from 'markdown-it';
 import MarkdownItContainer from 'markdown-it-container';
 import fs from 'fs';
 import jsdocExtractor from 'jsdoc-extractor';
+import { toEcmascript } from '@jsxcad/compiler';
 import { toSvg } from '@jsxcad/convert-threejs';
 
 const { readFile } = fs.promises;
@@ -10,10 +11,14 @@ const { readFile } = fs.promises;
 // This is a kind of immediate, single-expression version of the language.
 // FIX: Figure out the language generally.
 const toOperator = ({ api }, script) => {
+  let ecmascript;
   try {
-    return new Function(`return async ({ ${Object.keys(api).join(', ')} }) => ${script};`)();
+    ecmascript = toEcmascript({}, script);
+    const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+    return code(api).main;
   } catch (error) {
-    console.log(`toOperator: ${script}`);
+    console.log(`toOperator/script: ${script}`);
+    console.log(`toOperator/ecmascript: ${ecmascript}`);
     console.log(error.toString());
     throw error;
   }
@@ -100,7 +105,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
   md.use(MarkdownItContainer, 'illustration', { render });
   let markdownHtml = md.render(markdown);
   for (const { patch, options, text } of patches) {
-    const geometry = await toOperator({ api }, text)(api);
+    const geometry = await toOperator({ api }, text)();
     const svg = await toSvg(options, geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
     markdownHtml = markdownHtml.replace(patch, svg);
   }

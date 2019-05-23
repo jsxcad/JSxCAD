@@ -14,6 +14,11 @@ export const installEvaluatorCSS = () => {};
 
 export const installEvaluator = async () => {
   const { ask } = await createService({ webWorker: './webworker.js', agent });
-  const evaluator = async (script) => ask({ evaluate: script });
+  const evaluator = async (script) => {
+    const geometry = await ask({ evaluate: script });
+    if (geometry) {
+      await writeFile({ preview: true, geometry }, 'preview', 'preview');
+    }
+  };
   return { evaluator };
 };

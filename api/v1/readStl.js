@@ -8,10 +8,10 @@ import { readFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * await readStl({ path: 'stl/teapot.stl',
- *                 format: 'ascii',
- *                 sources: [{ file: 'stl/teapot.stl' },
- *                           { url: 'https://jsxcad.js.org/stl/teapot.stl' }] })
+ * readStl({ path: 'stl/teapot.stl',
+ *           format: 'ascii',
+ *           sources: [{ file: 'stl/teapot.stl' },
+ *                     { url: 'https://jsxcad.js.org/stl/teapot.stl' }] })
  * ```
  * :::
  *
