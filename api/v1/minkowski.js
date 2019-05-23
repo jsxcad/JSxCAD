@@ -2,6 +2,21 @@ import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/geometry-point
 
 import { Shape } from './Shape';
 
+/**
+ *
+ * # Minkowski (convex)
+ *
+ * Generates the minkowski sum of a two convex shapes.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * minkowski(cube(10),
+ *           sphere(3));
+ * ```
+ * :::
+ *
+ **/
+
 // TODO: Generalize for more operands?
 export const minkowski = (a, b) => {
   const aPoints = [];

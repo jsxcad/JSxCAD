@@ -12,7 +12,7 @@ const { readFile } = fs.promises;
 
 test('Example', async (t) => {
   const svg = await toSvg(
-    { cameraPosition: [0, 0, 16] },
+    { view: { position: [0, 0, 16] } },
     { assembly: [{ paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]), tags: ['paths'] },
                  { solid: fromPolygons({}, unitGeodesicSphere20Polygons), tags: ['solid'] },
                  { z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]), tags: ['surface'] }] });

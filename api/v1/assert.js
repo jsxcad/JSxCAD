@@ -1,3 +1,10 @@
+export const assert = (value, message, pass) => {
+  if (pass !== true) {
+    throw Error(`${message}: ${value}`);
+  }
+  return true;
+};
+
 export const assertBoolean = (value) => {
   if (typeof value !== 'boolean') {
     throw Error(`Not a boolean: ${value}`);
@@ -25,9 +32,30 @@ export const assertSingle = (value) => {
   return true;
 };
 
-export const assertNumber = (value) => {
-  if (typeof value !== 'number') {
-    throw Error(`Not a number: ${value}`);
+export const assertPoint = (value) => {
+  if (value.length === undefined) {
+    throw Error(`Has no length: ${value}`);
+  }
+  const [x, y, z = 0] = value;
+  assertNumber(x);
+  assertNumber(y);
+  assertNumber(z);
+  return true;
+};
+
+export const assertPoints = (value) => {
+  if (value.length === undefined) {
+    throw Error(`Has no length: ${value}`);
+  }
+  value.forEach(assertPoint);
+  return true;
+};
+
+export const assertNumber = (...values) => {
+  for (const value of values) {
+    if (typeof value !== 'number') {
+      throw Error(`Not a number: ${value}`);
+    }
   }
   return true;
 };

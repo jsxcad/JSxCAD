@@ -13,8 +13,6 @@ export const installSVGRenderer = ({ THREE, Projector, RenderableSprite, Rendera
   SVGObject.prototype.constructor = SVGObject;
 
   const SVGRenderer = function () {
-  	console.log('THREE.SVGRenderer', THREE.REVISION);
-
   	var _this = this;
   		var _renderData; var _elements; var _lights;
   		var _projector = new Projector();

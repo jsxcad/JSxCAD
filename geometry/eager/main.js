@@ -7,10 +7,14 @@ import { difference } from './difference';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { getSolids } from './getSolids';
+import { getSurfaces } from './getSurfaces';
+import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toPaths } from './toPaths';
+import { toPoints } from './toPoints';
 import { toSolid } from './toSolid';
 import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
@@ -24,10 +28,14 @@ export {
   eachItem,
   eachPoint,
   flip,
+  getSolids,
+  getSurfaces,
+  getZ0Surfaces,
   intersection,
   toComponents,
   toDisjointGeometry,
   toPaths,
+  toPoints,
   toSolid,
   toZ0Surface,
   transform,

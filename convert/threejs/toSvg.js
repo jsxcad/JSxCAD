@@ -10,13 +10,23 @@ const { Projector, RenderableFace, RenderableLine, RenderableSprite } = installP
 const { SVGRenderer } = installSVGRenderer({ THREE, Projector, RenderableFace, RenderableLine, RenderableSprite, document: new DOMParser().parseFromString('<xml></xml>', 'text/xml') });
 // Bootstrap done.
 
-const build = ({ cameraPosition = [0, 0, 16], pageSize = [100, 100] }, geometry) => {
+const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
   const [pageWidth, pageHeight] = pageSize;
   const camera = new THREE.PerspectiveCamera(27, pageWidth / pageHeight, 1, 3500);
-  [camera.position.x, camera.position.y, camera.position.z] = cameraPosition;
+  [camera.position.x, camera.position.y, camera.position.z] = position;
+  camera.up = new THREE.Vector3(...up);
+  camera.lookAt(...target);
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050505);
+  scene.background = new THREE.Color(0xffffff);
   scene.add(camera);
+  if (grid) {
+    const grid = new THREE.GridHelper(100, 10, 'green', 'blue');
+    grid.material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    grid.rotation.x = -Math.PI / 2;
+    // grid.material.transparent = true;
+    scene.add(grid);
+  }
   //
   var ambientLight = new THREE.AmbientLight(0x222222);
   scene.add(ambientLight);
@@ -27,6 +37,14 @@ const build = ({ cameraPosition = [0, 0, 16], pageSize = [100, 100] }, geometry)
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
+    } else if (geometry.threejsPoints) {
+      const points = geometry.threejsPoints;
+      const threejsGeometry = new THREE.Geometry();
+      const material = new THREE.PointsMaterial({ color: 0x0000ff });
+      for (const [x, y, z] of points) {
+        threejsGeometry.vertices.push(new THREE.Vector3(x, y, z));
+      }
+      scene.add(new THREE.Points(threejsGeometry, material));
     } else if (geometry.threejsSegments) {
       const segments = geometry.threejsSegments;
       const threejsGeometry = new THREE.Geometry();
@@ -56,7 +74,9 @@ const build = ({ cameraPosition = [0, 0, 16], pageSize = [100, 100] }, geometry)
   return [scene, camera];
 };
 
-export const toSvg = async (options = {}, geometry) => {
+export const toSvg = async (options = {}, geometry) => toSvgSync(options, geometry);
+
+export const toSvgSync = (options = {}, geometry) => {
   const [scene, camera] = build(options, geometry);
   const { pageSize = [500, 500] } = options;
   const [pageWidth, pageHeight] = pageSize;

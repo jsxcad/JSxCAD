@@ -6,8 +6,8 @@ test('Requires A', t => {
                                 { solid: [], tags: ['b'] },
                                 { solid: [], tags: ['a', 'b'] }] };
   const components = toComponents({ requires: ['a'] }, assembly);
-  t.deepEqual(components, [{ 'solid': [], 'tags': ['a'] },
-                           { 'solid': [], 'tags': ['a', 'b'] }]);
+  t.deepEqual(components, [{ 'solid': [], 'tags': ['a', 'b'] },
+                           { 'solid': [], 'tags': ['a'] }]);
 });
 
 test('Requires Deep A', t => {
@@ -15,7 +15,8 @@ test('Requires Deep A', t => {
                                 { solid: [], tags: ['b'] },
                                 { solid: [], tags: ['a', 'b'] }] };
   const components = toComponents({ requires: ['a'] }, assembly);
-  t.deepEqual(components, [{ 'solid': [], 'tags': ['a'] }, { 'solid': [], 'tags': ['a', 'b'] }]);
+  t.deepEqual(components, [{ 'solid': [], 'tags': ['a', 'b'] },
+                           { 'solid': [], 'tags': ['a'] }]);
 });
 
 test('Excludes B', t => {

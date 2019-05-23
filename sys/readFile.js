@@ -1,21 +1,29 @@
-import { isBrowser, isNode } from './browserOrNode';
+/* global self */
+
+import * as fs from 'fs';
+
+import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+
+import { Buffer } from 'buffer';
 import { getFile } from './files';
 import { log } from './log';
+import nodeFetch from 'node-fetch';
+import { writeFile } from './writeFile';
+
+const { promises } = fs;
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
     return window.fetch;
   } else {
-    const module = await import('node-fetch');
-    return module.default;
+    return nodeFetch;
   }
 };
 
 const getFileFetcher = async () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
-    const fs = await import('fs');
-    return fs.promises.readFile;
+    return promises.readFile;
   } else if (isBrowser) {
     // This will always fail, but maybe it should use local storage.
     return () => {};
@@ -51,7 +59,9 @@ const fetchSources = async (sources) => {
     } else if (source.file !== undefined) {
       try {
         const data = await fetchFile(source.file);
-        return data;
+        if (data !== undefined) {
+          return data;
+        }
       } catch (e) {}
     } else {
       throw Error('die');
@@ -60,13 +70,26 @@ const fetchSources = async (sources) => {
 };
 
 export const readFile = async (options, path) => {
+  const { ephemeral, decode } = options;
+  if (isWebWorker) {
+    return self.ask({ readFile: { options, path } });
+  }
   const { sources = [] } = options;
-  const file = getFile(path);
+  const file = getFile(options, path);
   if (file.data === undefined) {
     file.data = await fetchPersistent(path);
+    if (file.data !== undefined) {
+      if (decode !== undefined && Buffer.isBuffer(file.data)) {
+        file.data = file.data.toString(decode);
+      }
+    }
   }
   if (file.data === undefined) {
     file.data = await fetchSources(sources);
+    if (!ephemeral) {
+      // Update persistent storage.
+      await writeFile(options, path, file.data);
+    }
   }
   if (file.data !== undefined) {
     if (file.data.then) {

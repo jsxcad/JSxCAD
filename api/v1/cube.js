@@ -1,29 +1,43 @@
 import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
-import { buildRegularPrism, buildRingSphere,
-         regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+import { buildRegularPrism, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
-import { minkowski } from './minkowski';
+import { dispatch } from './dispatch';
 
-// Dispatch mechanism.
-// TODO: Move this somewhere else.
-
-const chain = (name, ...dispatches) => {
-  return (...params) => {
-    for (const dispatch of dispatches) {
-      // For each signature
-      let operation;
-      try {
-        // Try to decode it into an operation.
-        operation = dispatch(...params);
-      } catch (e) {
-        continue;
-      }
-      return operation();
-    }
-    throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
-  };
-};
+/**
+ *
+ * # Cube (cuboid)
+ *
+ * Generates cuboids.
+ *
+ * ::: illustration { "view": { "position": [10, 10, 10] } }
+ * ```
+ * cube()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cube(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cube({ radius: 8 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cube({ diameter: 16 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cube({ corner1: [0, 0, 0],
+ *        corner2: [10, 10, 10] })
+ * ```
+ * :::
+ *
+ **/
 
 // Geometry construction.
 
@@ -34,98 +48,56 @@ const unitCube = () => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
-const centerMaybe = ({ size, center }, shape) => {
-  if (center) {
-    return shape;
-  } else {
-    if (typeof size === 'number') {
-      return shape.translate([size / 2, size / 2, size / 2]);
-    } else {
-      return shape.translate([size[0] / 2, size[1] / 2, size[2] / 2]);
-    }
-  }
-};
-
 // Cube Interfaces.
 
-// cube()
-const cubeDefault = (...rest) => {
-  assertEmpty(rest);
-  return () => unitCube().translate([0.5, 0.5, 0.5]);
-};
+export const fromValue = (value) => unitCube().scale(value);
 
-// cube(10)
-const cubeSide = (size, ...rest) => {
-  assertEmpty(rest);
-  assertNumber(size);
-  return () => unitCube().scale(size).translate([size / 2, size / 2, size / 2]);
-};
+export const fromRadius = ({ radius }) => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
-// cube({ radius, roundRadius, resolution })
-const cubeRoundRadiusResolution = ({ radius = 1, roundRadius, resolution = 5 }, ...rest) => {
-  assertEmpty(rest);
-  assertNumber(roundRadius);
-  assertNumber(resolution);
-  return () => minkowski(unitCube().scale(radius - roundRadius * 2),
-                         Shape.fromPolygonsToSolid(buildRingSphere({ resolution })).scale(roundRadius));
-};
+export const fromDiameter = ({ diameter }) => fromRadius({ radius: diameter / 2 });
 
-// cube({ center: [0, 0, 0], radius: 1 })
-const cubeCenterRadius = ({ center, radius }, ...rest) => {
-  assertEmpty(rest);
-  assertNumberTriple(center);
-  // PROVE: That radius makes sense when used like this.
-  assertNumber(radius);
-  return () => unitCube().scale(radius).translate(center);
-};
-
-// cube({ radius: 1 })
-const cubeRadius = ({ radius }, ...rest) => {
-  assertEmpty(rest);
-  // PROVE: That radius makes sense when used like this.
-  assertNumber(radius);
-  return () => unitCube().scale(radius).translate([radius / 2, radius / 2, radius / 2]);
-};
-
-// cube({ corner1: [4, 4, 4], corner2: [5, 4, 2] });
-const cubeCorner = ({ corner1, corner2 }, ...rest) => {
-  assertEmpty(rest);
-  assertNumberTriple(corner1);
-  assertNumberTriple(corner2);
+export const fromCorners = ({ corner1, corner2 }) => {
   const [c1x, c1y, c1z] = corner1;
   const [c2x, c2y, c2z] = corner2;
   const length = c2x - c1x;
   const width = c2y - c1y;
   const height = c2z - c1z;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
-  return () => unitCube().scale([length, width, height]).translate(center);
+  return unitCube().scale([length, width, height]).translate(center);
 };
 
-// cube({size: [1,2,3], center: false });
-const cubeSizesCenter = ({ size, center = false }, ...rest) => {
-  assertEmpty(rest);
-  const [length, width, height] = size;
-  assertNumber(length);
-  assertNumber(width);
-  assertNumber(height);
-  return () => centerMaybe({ size, center }, unitCube().scale([length, width, height]));
-};
+export const cube = dispatch(
+  'cube',
+  // cube()
+  (...rest) => {
+    assertEmpty(rest);
+    return () => fromValue(1);
+  },
+  // cube(2)
+  (value) => {
+    assertNumber(value);
+    return () => fromValue(value);
+  },
+  // cube({ radius: 2 })
+  ({ radius }) => {
+    assertNumber(radius);
+    return () => fromRadius({ radius });
+  },
+  // cube({ diameter: 2 })
+  ({ diameter }) => {
+    assertNumber(diameter);
+    return () => fromDiameter({ diameter });
+  },
+  // cube({ corner1: [2, 2, 2], corner2: [1, 1, 1] })
+  ({ corner1, corner2 }) => {
+    assertNumberTriple(corner1);
+    assertNumberTriple(corner2);
+    return () => fromCorners({ corner1, corner2 });
+  });
 
-// cube({ size: 1, center: false });
-const cubeSizeCenter = ({ size, center = false }, ...rest) => {
-  assertEmpty(rest);
-  assertNumber(size);
-  return () => centerMaybe({ size, center }, unitCube().scale(size));
-};
+cube.fromValue = fromValue;
+cube.fromRadius = fromRadius;
+cube.fromDiameter = fromDiameter;
+cube.fromCorners = fromCorners;
 
-// Cube Operation
-
-export const cube = chain('cube',
-                          cubeDefault,
-                          cubeSide,
-                          cubeRoundRadiusResolution,
-                          cubeCenterRadius,
-                          cubeRadius,
-                          cubeCorner,
-                          cubeSizesCenter,
-                          cubeSizeCenter);
+export default cube;

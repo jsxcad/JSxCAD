@@ -19,8 +19,10 @@
   "packages": [
     "algorithm/*",
     "api/*",
+    "compiler",
     "convert/*",
     "data/*",
+    "doc",
     "example/*",
     "geometry/*",
     "math/*",

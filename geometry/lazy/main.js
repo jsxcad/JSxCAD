@@ -1,4 +1,6 @@
-import { addTag, assemble, difference, eachPoint, flip, intersection, toComponents, toDisjointGeometry, toPaths, toSolid, toZ0Surface, transform, union } from '@jsxcad/geometry-eager';
+import { addTag, assemble, difference, eachPoint, flip, intersection,
+         toComponents, toDisjointGeometry, toPaths, toPoints, toSolid, toZ0Surface,
+         transform, union } from '@jsxcad/geometry-eager';
 
 // FIX: Make it clear this should be lazy.
 export class Assembly {
@@ -46,6 +48,10 @@ export class Assembly {
     return this.geometry;
   }
 
+  toPoints (options = {}) {
+    return fromGeometry(toPoints(options, toGeometry(this)));
+  }
+
   toPaths (options = {}) {
     return fromGeometry(toPaths(options, toGeometry(this)));
   }
@@ -63,7 +69,7 @@ export class Assembly {
   }
 
   toComponents (options) {
-    return toComponents(toGeometry(this));
+    return toComponents(options, toGeometry(this)).map(fromGeometry);
   }
 
   transform (matrix) {

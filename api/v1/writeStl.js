@@ -13,7 +13,7 @@ const toGeometry = ({ disjoint = true }, shape) => {
 export const writeStl = async (options, shape) => {
   const { path } = options;
   const geometry = toGeometry(options, shape);
-  return writeFile({ geometry }, path, toStl(options, geometry));
+  return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
 };
 
 const method = function (options = {}) { writeStl(options, this); return this; };

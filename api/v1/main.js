@@ -9,10 +9,15 @@
 
 import { loadFont, text } from './text';
 
+import { Cursor } from './Cursor';
 import { Shape } from './Shape';
+import { above } from './above';
 import { acos } from './acos';
 import { assemble } from './assemble';
+import { back } from './back';
+import { below } from './below';
 import { center } from './center';
+import { chainHull } from './chainHull';
 import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
@@ -20,17 +25,24 @@ import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { extrude } from './extrude';
+import { front } from './front';
 import { hull } from './hull';
 import { intersection } from './intersection';
 import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { minkowski } from './minkowski';
+import { outline } from './outline';
+import { point } from './point';
+import { points } from './points';
+import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readStl } from './readStl';
+import { readSvg } from './readSvg';
+import { right } from './right';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
@@ -51,10 +63,15 @@ import { writeSvgPhoto } from './writeSvgPhoto';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
+  Cursor,
   Shape,
+  above,
   acos,
   assemble,
+  back,
+  below,
   center,
+  chainHull,
   circle,
   crossSection,
   cos,
@@ -62,6 +79,7 @@ export {
   cylinder,
   difference,
   extrude,
+  front,
   hull,
   intersection,
   loadFont,
@@ -69,11 +87,17 @@ export {
   max,
   measureBoundingBox,
   minkowski,
+  outline,
+  point,
+  points,
+  polygon,
   polyhedron,
   readDst,
   // readJscad,
   readLDraw,
   readStl,
+  readSvg,
+  right,
   rotate,
   rotateX,
   rotateY,

@@ -50,7 +50,7 @@ const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
 export const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
   let edges = [];
   const addEdge = (start, end) => {
-    edges.push([start, end]);
+    edges.push([canonicalize(start), canonicalize(end)]);
   };
 
   // Find the edges along the plane and fold them into paths to produce a set of closed loops.

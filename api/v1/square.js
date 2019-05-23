@@ -1,58 +1,38 @@
-import { assertBoolean, assertEmpty, assertNumber, assertSingle } from './assert';
+import { assertEmpty, assertNumber } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
+import { dispatch } from './dispatch';
 
-const buildSquare = ({ scale = [1, 1, 1] }) => {
-  const shape = Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 }));
-  const transformedShape = shape.rotateZ(45).scale(scale);
-  return transformedShape;
-};
+const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
+const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale);
 
-const decode = (params) => {
-  const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
+export const fromSize = ({ size }) => unitSquare().scale(size);
+export const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
 
-  // square({ size: [2,4], center: true }); // 2x4, center: false (default)
-  try {
-    const { size, center = false } = params[0];
-    const [length, width] = size;
-    assertNumber(length);
-    assertNumber(width);
-    assertBoolean(center);
-    return { scale: [edgeScale * length, edgeScale * width] };
-  } catch (e) {}
-
-  // square([2,4]}); // 2x4, center: false (default)
-  try {
-    const [length, width] = params[0];
-    assertNumber(length);
-    assertNumber(width);
-    return { scale: [edgeScale * length, edgeScale * width] };
-  } catch (e) {};
-
-  // square(1); // 2x4, center: false (default)
-  try {
-    const [length] = params;
-    assertNumber(length);
-    assertSingle(params);
-    return { scale: [edgeScale * length, edgeScale * length] };
-  } catch (e) {};
-
+export const square = dispatch(
+  'square',
   // square()
-  try {
-    assertEmpty(params);
-    return {};
-  } catch (e) {};
+  (...args) => {
+    assertEmpty(args);
+    return () => fromSize({ size: 1 });
+  },
+  // square(4)
+  (size) => {
+    assertNumber(size);
+    return () => fromSize({ size });
+  },
+  // square({ size: 4 })
+  ({ size }) => {
+    assertNumber(size);
+    return () => fromSize({ size });
+  },
+  // square({ size: [4, 5] })
+  ({ size }) => {
+    const [width, length, ...rest] = size;
+    assertNumber(width, length);
+    assertEmpty(rest);
+    return () => fromDimensions({ width, length });
+  });
 
-  throw Error(`Unsupported interface for square: ${JSON.stringify(params)}`);
-};
-
-/**
- *
- * square();                                   // openscad like
- * square(1);                                  // 1x1
- * square([2,3]);                              // 2x3
- * square({size: [2,4], center: true});        // 2x4, center: false (default)
- *
- */
-export const square = (...params) => buildSquare(decode(params));
+export default square;

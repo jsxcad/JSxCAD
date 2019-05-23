@@ -5,6 +5,10 @@ import { makeConvex } from '@jsxcad/geometry-surface';
 import { toPolygons } from '@jsxcad/geometry-solid';
 import { toSegments } from '@jsxcad/geometry-path';
 
+const pointsToThreejsPoints = (geometry) => {
+  return geometry.points;
+};
+
 const pathsToThreejsSegments = (geometry) => {
   const segments = [];
   for (const path of geometry) {
@@ -52,6 +56,8 @@ export const toThreejsGeometry = (geometry) => {
     return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };
   } else if (geometry.paths) {
     return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };
+  } else if (geometry.points) {
+    return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: geometry.tags, isThreejsGeometry: true };
   } else if (geometry.solid) {
     return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };
   } else if (geometry.z0Surface) {

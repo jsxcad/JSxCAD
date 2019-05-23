@@ -12,10 +12,13 @@ const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
 const readPart = async (part) => {
   part = part.toLowerCase().replace(/\\/, '/');
-  return readFile({ sources: [{ url: `${URL_PREFIX}/parts/${part}` },
-                              { url: `${URL_PREFIX}/p/48/${part}` },
-                              { url: `${URL_PREFIX}/p/${part}` }] },
-                  `tmp/ldraw-part-${part}`);
+  return readFile({
+    sources: [{ url: `${URL_PREFIX}/parts/${part}` },
+              { url: `${URL_PREFIX}/p/48/${part}` },
+              { url: `${URL_PREFIX}/p/${part}` }],
+    decode: 'utf8'
+  },
+                  `ldraw/${part}`);
 };
 
 const loadPart = async (part) => {
