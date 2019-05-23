@@ -33247,9 +33247,9 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [0, 0, 200] } }
    * ```
-   * await readDst({ path: 'dst/atg-sft003.dst',
-   *                 sources: [{ file: 'dst/atg-sft003.dst' },
-   *                           { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
+   * readDst({ path: 'dst/atg-sft003.dst',
+   *         sources: [{ file: 'dst/atg-sft003.dst' },
+   *                   { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
    * ```
    * :::
    *
@@ -33409,7 +33409,7 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [40, 40, 40] } }
    * ```
-   * await readLDraw({ part: '3004.dat' })
+   * readLDraw({ part: '3004.dat' })
    * ```
    * :::
    *
@@ -34016,10 +34016,10 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [100, 100, 100] } }
    * ```
-   * await readStl({ path: 'stl/teapot.stl',
-   *                 format: 'ascii',
-   *                 sources: [{ file: 'stl/teapot.stl' },
-   *                           { url: 'https://jsxcad.js.org/stl/teapot.stl' }] })
+   * readStl({ path: 'stl/teapot.stl',
+   *           format: 'ascii',
+   *           sources: [{ file: 'stl/teapot.stl' },
+   *                     { url: 'https://jsxcad.js.org/stl/teapot.stl' }] })
    * ```
    * :::
    *
@@ -34036,11 +34036,11 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [0, 0, 100] } }
    * ```
-   * (
-   *  await readSvg({ path: 'svg/butterfly.svg',
-   *                 sources: [{ file: 'svg/butterfly.svg' },
-   *                           { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] })
-   * ).center().scale(0.02)
+   * 
+   * const svg = readSvg({ path: 'svg/butterfly.svg',
+   *                       sources: [{ file: 'svg/butterfly.svg' },
+   *                                 { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] });
+   * svg.center().scale(0.02)
    * ```
    * :::
    *
@@ -104804,14 +104804,11 @@ define("./webworker.js",[],function () { 'use strict';
 
   const toEcmascript = (options, script) => {
     let ast = recast.parse(script);
-    const b = recast.types.builders;
 
     const exportNames = [];
     const expressions = [];
 
     const body = ast.program.body;
-  console.log(`QQ/body: ${JSON.stringify(body)}`);
-
     const out = [];
 
     // Separate top level exports and expressions.
@@ -104847,56 +104844,54 @@ define("./webworker.js",[],function () { 'use strict';
         const tail = expressions[last];
         if (tail.type !== 'ReturnStatement') {
           expressions[last] = {
-            type: "ReturnStatement",
+            type: 'ReturnStatement',
             argument: expressions[last]
           };
         }
       }
       const main = {
-        type: "VariableDeclaration",
+        type: 'VariableDeclaration',
         declarations: [{
-          type: "VariableDeclarator",
+          type: 'VariableDeclarator',
           id: {
-            type: "Identifier",
-            name: "main"
+            type: 'Identifier',
+            name: 'main'
           },
           init: {
-            type: "ArrowFunctionExpression",
-            id:null,
-            params:[],
+            type: 'ArrowFunctionExpression',
+            id: null,
+            params: [],
             body: {
-              type: "BlockStatement",
-              body: expressions,
+              type: 'BlockStatement',
+              body: expressions
             },
             generator: false,
-            expression: true,
+            expression: true
           }
         }],
-        kind: "const"
+        kind: 'const'
       };
       out.push(main);
       exportNames.push('main');
     }
 
-    console.log(`QQ/out: ${JSON.stringify(out)}`);
-
     // Return the exports as an object.
     out.push({
-          type: "ReturnStatement",
-          argument: {
-            type: "ObjectExpression",
-            properties:
+      type: 'ReturnStatement',
+      argument: {
+        type: 'ObjectExpression',
+        properties:
               exportNames.map(name => ({
-                                type: "Property",
-                                key: { type: "Identifier", name },
-                                value: { type: "Identifier", name },
-                              }))
-          }
-        });
+                type: 'Property',
+                key: { type: 'Identifier', name },
+                value: { type: 'Identifier', name }
+              }))
+      }
+    });
 
     ast = {
-      type: "Program",
-      body: out,
+      type: 'Program',
+      body: out
     };
 
     // Make arrow functions async.
@@ -104909,9 +104904,9 @@ define("./webworker.js",[],function () { 'use strict';
       visitCallExpression: function (path) {
         this.traverse(path);
         path.replace({
-                       type: "AwaitExpression",
-                       argument: path.node,
-                     });
+          type: 'AwaitExpression',
+          argument: path.node
+        });
       }
     });
     return recast.print(ast).code;
@@ -104924,12 +104919,12 @@ define("./webworker.js",[],function () { 'use strict';
     try {
       if (question.evaluate) {
         const ecmascript = toEcmascript({}, question.evaluate);
-        console.log(`Evaluate/in: ${question.evaluate}`);
-        console.log(`Evaluate/out: ${ecmascript}`);
+        console.log(`QQ/script: ${question.evaluate}`);
+        console.log(`QQ/ecmascript: ${ecmascript}`);
         const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
         const shape = await code(api).main();
         if (shape !== undefined) {
-          await writeFile({ preview: true, geometry: shape.toDisjointGeometry() }, 'preview', 'preview');
+          return shape.toDisjointGeometry();
         }
       }
     } catch (error) {

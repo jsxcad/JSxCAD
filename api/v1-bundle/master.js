@@ -31,7 +31,10 @@ const main = async () => {
   await installReference({ addPage, document });
 };
 
-window.onload = () => {
-  window.bootstrapCSS();
-  setTimeout(() => window.bootstrap(), 0);
-};
+window.bootstrapCSS();
+
+document.onreadystatechange = () => {
+                                if (document.readyState === 'complete') {
+                                  window.bootstrap();
+                                }
+                              };

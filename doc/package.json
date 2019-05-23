@@ -21,6 +21,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/compiler": "^0.0.75",
     "@jsxcad/convert-threejs": "^0.0.75",
     "esm": "^3.2.10",
     "jsdoc-extractor": "^3.0.0",

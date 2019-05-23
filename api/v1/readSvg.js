@@ -8,11 +8,11 @@ import { readFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [0, 0, 100] } }
  * ```
- * (
- *  await readSvg({ path: 'svg/butterfly.svg',
- *                 sources: [{ file: 'svg/butterfly.svg' },
- *                           { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] })
- * ).center().scale(0.02)
+ * 
+ * const svg = readSvg({ path: 'svg/butterfly.svg',
+ *                       sources: [{ file: 'svg/butterfly.svg' },
+ *                                 { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] });
+ * svg.center().scale(0.02)
  * ```
  * :::
  *
