@@ -19,6 +19,6 @@ export const installEvaluator = async () => {
     if (geometry) {
       await writeFile({ preview: true, geometry }, 'preview', 'preview');
     }
-  }
+  };
   return { evaluator };
 };

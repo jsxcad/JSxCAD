@@ -34,7 +34,7 @@ const main = async () => {
 window.bootstrapCSS();
 
 document.onreadystatechange = () => {
-                                if (document.readyState === 'complete') {
-                                  window.bootstrap();
-                                }
-                              };
+  if (document.readyState === 'complete') {
+    window.bootstrap();
+  }
+};
