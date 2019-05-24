@@ -9,8 +9,8 @@ import { Shape, differenceLazily } from './Shape';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * difference(cube(10, 10).below(),
- *            cube(5, 10).below())
+ * difference(cube(10).below(),
+ *            cube(5).below())
  * ```
  * :::
  * ::: illustration

@@ -21,12 +21,14 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/convert-svg": "^0.0.75",
+    "fontkit": "^1.8.0",
     "opentype.js": "^0.11.0"
   },
   "devDependencies": {
     "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-paths": "^0.0.75",
     "@jsxcad/geometry-z0surface": "^0.0.75",
+    "@jsxcad/sys": "^0.0.75",
     "ava": "^0.23.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
