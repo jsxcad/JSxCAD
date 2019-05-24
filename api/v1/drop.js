@@ -1,10 +1,8 @@
-import { assertShape, assertString, assertStrings } from './assert';
+import { assertShape, assertStrings } from './assert';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { dispatch } from './dispatch';
-import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { getZ0Surfaces } from '@jsxcad/geometry-eager';
 
 /**
  *
