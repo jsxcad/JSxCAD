@@ -31804,9 +31804,8 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    * ::: illustration { "view": { "position": [40, 40, 40] } }
    * ```
-   * (
-   *  ([corner1, corner2]) => cube({ corner1, corner2})
-   * )(sphere(7).measureBoundingBox())
+   * const [corner1, corner2] = sphere(7).measureBoundingBox();
+   * cube({ corner1, corner2 })
    * ```
    * :::
    **/
@@ -32051,29 +32050,12 @@ define("./webworker.js",[],function () { 'use strict';
     return true;
   };
 
-  const assertBoolean = (value) => {
-    if (typeof value !== 'boolean') {
-      throw Error(`Not a boolean: ${value}`);
-    }
-    return true;
-  };
-
   const assertEmpty = (value) => {
     if (value.length === undefined) {
       throw Error(`Has no length: ${value}`);
     }
     if (value.length !== 0) {
       throw Error(`Is not empty: ${value}`);
-    }
-    return true;
-  };
-
-  const assertSingle = (value) => {
-    if (value.length === undefined) {
-      throw Error(`Has no length: ${value}`);
-    }
-    if (value.length !== 1) {
-      throw Error(`Is not single: ${value}`);
     }
     return true;
   };
@@ -32718,14 +32700,17 @@ define("./webworker.js",[],function () { 'use strict';
 
   const { promises } = fs;
 
+  // FIX Convert data by representation.
+
   const writeFile = async (options, path, data) => {
+    const { as = 'utf8', ephemeral } = options;
     if (isWebWorker) {
-      return self.ask({ writeFile: { options, path, data: await data } });
+      return self.ask({ writeFile: { options: { as, ...options }, path, data: await data } });
     }
-    const { ephemeral } = options;
 
     data = await data;
     const file = getFile(options, path);
+    file.as = as;
     file.data = data;
 
     for (const watcher of file.watchers) {
@@ -34092,6 +34077,20 @@ define("./webworker.js",[],function () { 'use strict';
     return Shape.fromGeometry(await fromSvg(options, await readFile({ decode: 'utf8', ...options }, path)));
   };
 
+  /**
+   *
+   * # Right
+   *
+   * Moves the shape so that it is just to the right of the origin.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(cube(10).right(),
+   *          cylinder(2, 15))
+   * ```
+   * :::
+   **/
+
   const X$1 = 0;
 
   const right = (shape) => {
@@ -34103,32 +34102,100 @@ define("./webworker.js",[],function () { 'use strict';
 
   Shape.prototype.right = method$d;
 
-  const a2r = (angle) => angle * 0.017453292519943295;
-
-  const rotate = ([x = 0, y = 0, z = 0], shape) =>
-    shape.transform(multiply$1(fromZRotation(a2r(z)), multiply$1(fromYRotation(a2r(y)), fromXRotation(a2r(x)))));
-
-  const method$e = function (angles) { return rotate(angles, this); };
-
-  Shape.prototype.rotate = method$e;
+  /**
+   *
+   * # Rotate X
+   *
+   * Rotates the shape around the X axis.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10).rotateX(90)
+   * ```
+   * :::
+   **/
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$f = function (angle) { return rotateX$1(angle, this); };
+  const method$e = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$f;
+  Shape.prototype.rotateX = method$e;
+
+  /**
+   *
+   * # Rotate Y
+   *
+   * Rotates the shape around the Y axis.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10).rotateY(90)
+   * ```
+   * :::
+   **/
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$g = function (angle) { return rotateY(angle, this); };
+  const method$f = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$g;
+  Shape.prototype.rotateY = method$f;
+
+  /**
+   *
+   * # Rotate Z
+   *
+   * Rotates the shape around the Z axis.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * square(10).rotateZ(45)
+   * ```
+   * :::
+   **/
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$h = function (angle) { return rotateZ(angle, this); };
+  const method$g = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$h;
+  Shape.prototype.rotateZ = method$g;
+
+  /**
+   *
+   * # Scale
+   *
+   * Scales an object uniformly or per axis.
+   *
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube().scale(2)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * cube().scale([1, 2, 3])
+   * ```
+   * :::
+   **/
 
   const scale$5 = (factor, shape) => {
     if (factor.length) {
@@ -34140,61 +34207,150 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$i = function (factor) { return scale$5(factor, this); };
+  const method$h = function (factor) { return scale$5(factor, this); };
 
-  Shape.prototype.scale = method$i;
-
-  const sin$2 = (a) => Math.sin(a / 360 * Math.PI * 2);
-
-  const buildSphere = ({ r = 1, fn = 32 }) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution: fn })).scale([r, r, r]);
-
-  const decode$1 = (params) => {
-    // sphere();
-    try {
-      assertEmpty(params);
-      return {};
-    } catch (e) {}
-
-    // sphere(2);
-    try {
-      assertSingle(params);
-      const [radius] = params;
-      assertNumber(radius);
-      return { r: radius };
-    } catch (e) {}
-
-    // sphere({ r: 10, fn: 100 });  // geodesic approach (icosahedron further triangulated)
-    try {
-      assertSingle(params);
-      const { r = 1, fn = 32, center = false } = params[0];
-      assertNumber(r);
-      assertNumber(fn);
-      assertBoolean(center);
-      return { fn: fn, r: r };
-    } catch (e) {}
-
-    throw Error(`Unsupported interface for sphere: ${JSON.stringify(params)}`);
-  };
+  Shape.prototype.scale = method$h;
 
   /**
    *
-   * sphere();                          // openscad like
-   * sphere(1);
-   * sphere({r: 2});                    // Note: center:true is default (unlike other primitives, as OpenSCAD)
-   * sphere({r: 2, center: true});     // Note: OpenSCAD doesn't support center for sphere but we do
-   * sphere({r: 2, center: [false, false, true]}); // individual axis center
-   * sphere({r: 10, fn: 100 });
-   * sphere({r: 10, fn: 100, type: 'geodesic'});  // geodesic approach (icosahedron further triangulated)
-   */
-  const sphere = (...params) => buildSphere(decode$1(params));
+   * # Sine
+   *
+   * Gives the sine in degrees.
+   * ```
+   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
+   *
+   * sin(0) = 0
+   * sin(45) = 0.707
+   * sin(90) = 1
+   * ```
+   *
+   **/
+
+  const sin$2 = (a) => Math.sin(a / 360 * Math.PI * 2);
+
+  /**
+   *
+   * # Sphere
+   *
+   * Generates spheres.
+   *
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * sphere()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, 60, 60] } }
+   * ```
+   * sphere(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere({ radius: 8, resolution: 5 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere({ diameter: 16, resolution: 64 })
+   * ```
+   * :::
+   *
+   **/
+
+  const unitSphere = ({ resolution = 32 } = {}) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+
+  const fromValue$5 = (value) => unitSphere().scale(value);
+
+  const fromRadius$3 = ({ radius, resolution = 32 }) => unitSphere({ resolution }).scale(radius);
+
+  const fromDiameter$3 = ({ diameter, resolution = 32 }) => unitSphere({ resolution }).scale(diameter / 2);
+
+  const sphere = dispatch(
+    'sphere',
+    // sphere()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue$5(1);
+    },
+    // sphere(2)
+    (value) => {
+      assertNumber(value);
+      return () => fromValue$5(value);
+    },
+    // sphere({ radius: 2, resolution: 5 })
+    ({ radius, resolution = 32 }) => {
+      assertNumber(radius);
+      assertNumber(resolution);
+      return () => fromRadius$3({ radius, resolution });
+    },
+    // sphere({ diameter: 2, resolution: 25 })
+    ({ diameter, resolution = 32 }) => {
+      assertNumber(diameter);
+      assertNumber(resolution);
+      return () => fromDiameter$3({ diameter, resolution });
+    });
+
+  sphere.fromValue = fromValue$5;
+  sphere.fromRadius = fromRadius$3;
+  sphere.fromDiameter = fromDiameter$3;
+
+  /**
+   *
+   * # Square Root
+   *
+   * Gives the the square root of a number.
+   * ```
+   * sqrt(a) => Math.sqrt(a);
+   *
+   * sqrt(0) = 0
+   * sqrt(4) = 2
+   * sqrt(16) = 4
+   * ```
+   *
+   **/
 
   const sqrt$1 = Math.sqrt;
+
+  /**
+   *
+   * # Square (rectangle)
+   *
+   * Properly speaking what is produced here are rectangles.
+   *
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * square()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square(6, 12)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square({ radius: 10 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * square({ diameter: 20 })
+   * ```
+   * :::
+   **/
 
   const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
   const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale$1);
 
   const fromSize = ({ size }) => unitSquare().scale(size);
   const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
+  const fromRadius$4 = ({ radius }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(radius);
+  const fromDiameter$4 = ({ diameter }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(diameter / 2);
 
   const square = dispatch(
     'square',
@@ -34204,67 +34360,177 @@ define("./webworker.js",[],function () { 'use strict';
       return () => fromSize({ size: 1 });
     },
     // square(4)
-    (size) => {
+    (size, ...rest) => {
       assertNumber(size);
+      assertEmpty(rest);
       return () => fromSize({ size });
     },
-    // square({ size: 4 })
-    ({ size }) => {
-      assertNumber(size);
-      return () => fromSize({ size });
-    },
-    // square({ size: [4, 5] })
-    ({ size }) => {
-      const [width, length, ...rest] = size;
-      assertNumber(width, length);
+    // square(4, 6)
+    (width, length, ...rest) => {
+      assertNumber(width);
+      assertNumber(length);
       assertEmpty(rest);
       return () => fromDimensions({ width, length });
+    },
+    // square({ radius: 5 })
+    ({ radius }) => {
+      assertNumber(radius);
+      return () => fromRadius$4({ radius });
+    },
+    // square({ diameter: 5 })
+    ({ diameter }) => {
+      assertNumber(diameter);
+      return () => fromDiameter$4({ diameter });
     });
+
+  /**
+   *
+   * # Svg Path
+   *
+   * Generates a path from svg path data.
+   *
+   * ::: illustration
+   * ```
+   * svgPath({},
+   *         'M 120.25163,89.678938 C 105.26945,76.865343 86.290871,70.978848 64.320641,70.277872 z')
+   *   .center()
+   *   .scale(0.2)
+   * ```
+   * :::
+   *
+   **/
 
   const svgPath = (options = {}, svgPath) =>
     Shape.fromGeometry(fromSvgPath(options, svgPath));
 
-  const buildTetrahedron = ({ r = 1 }) => Shape.fromPolygons(buildRegularTetrahedron({})).scale([r, r, r]);
+  /**
+   *
+   * # Tetrahedron
+   *
+   * Generates tetrahedrons.
+   *
+   * ::: illustration { "view": { "position": [8, 8, 8] } }
+   * ```
+   * tetrahedron()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [80, 80, 80] } }
+   * ```
+   * tetrahedron(10)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, 60, 60] } }
+   * ```
+   * tetrahedron({ radius: 8 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [60, 60, 60] } }
+   * ```
+   * tetrahedron({ diameter: 16 })
+   * ```
+   * :::
+   *
+   **/
 
-  const decode$2 = (params) => {
-    // sphere();
-    try {
-      assertEmpty(params);
-      return {};
-    } catch (e) {}
+  const unitTetrahedron = () => Shape.fromPolygonsToSolid(buildRegularTetrahedron({}));
 
-    // sphere(2);
-    try {
-      assertSingle(params);
-      const [radius] = params;
+  const fromValue$6 = (value) => unitTetrahedron().scale(value);
+
+  const fromRadius$5 = ({ radius }) => unitTetrahedron().scale(radius);
+
+  const fromDiameter$5 = ({ diameter }) => unitTetrahedron().scale(diameter / 2);
+
+  const tetrahedron = dispatch(
+    'tetrahedron',
+    // tetrahedron()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue$6(1);
+    },
+    // tetrahedron(2)
+    (value) => {
+      assertNumber(value);
+      return () => fromValue$6(value);
+    },
+    // tetrahedron({ radius: 2 })
+    ({ radius }) => {
       assertNumber(radius);
-      return { r: radius };
-    } catch (e) {}
+      return () => fromRadius$5({ radius });
+    },
+    // tetrahedron({ diameter: 2 })
+    ({ diameter }) => {
+      assertNumber(diameter);
+      return () => fromDiameter$5({ diameter });
+    });
 
-    // sphere({ r: 10, fn: 100 });  // geodesic approach (icosahedron further triangulated)
-    try {
-      assertSingle(params);
-      const { r = 1, fn = 32, center = false } = params[0];
-      assertNumber(r);
-      assertNumber(fn);
-      assertBoolean(center);
-      return { fn: fn, r: r };
-    } catch (e) {}
-
-    throw Error(`Unsupported interface for sphere: ${JSON.stringify(params)}`);
-  };
+  tetrahedron.fromValue = fromValue$6;
+  tetrahedron.fromRadius = fromRadius$5;
+  tetrahedron.fromDiameter = fromDiameter$5;
 
   /**
    *
-   * sphere();                          // openscad like
-   * sphere(1);
-   * sphere({r: 2});                    // Note: center:true is default (unlike other primitives, as OpenSCAD)
-   * sphere({r: 2, center: true});     // Note: OpenSCAD doesn't support center for sphere but we do
-   * sphere({r: 2, center: [false, false, true]}); // individual axis center
-   * sphere({r: 10, fn: 100 });
-   * sphere({r: 10, fn: 100, type: 'geodesic'});  // geodesic approach (icosahedron further triangulated)
-   */
-  const tetrahedron = (...params) => buildTetrahedron(decode$2(params));
+   * # Triangle
+   *
+   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ```
+   * triangle()
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * triangle(10)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * triangle({ radius: 10 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * triangle({ diameter: 20 })
+   * ```
+   * :::
+   **/
+
+  // FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified radius.
+  // Is this the most useful measure?
+
+  const unitTriangle = () =>
+    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 3 }));
+
+  const fromValue$7 = (radius) => unitTriangle({ resolution: 32 }).scale(radius);
+
+  const fromRadius$6 = ({ radius, resolution = 32 }) => unitTriangle({ resolution }).scale(radius);
+
+  const fromDiameter$6 = ({ diameter, resolution = 32 }) => unitTriangle({ resolution }).scale(diameter / 2);
+
+  const triangle = dispatch(
+    'triangle',
+    // triangle()
+    (...rest) => {
+      assertEmpty(rest);
+      return () => fromValue$7(1);
+    },
+    // triangle(2)
+    (value) => {
+      assertNumber(value);
+      return () => fromValue$7(value);
+    },
+    // triangle({ radius: 2, resolution: 32 })
+    ({ radius, resolution }) => {
+      assertNumber(radius);
+      return () => fromRadius$6({ radius });
+    },
+    // triangle({ diameter: 2, resolution: 32 })
+    ({ diameter, resolution }) => {
+      assertNumber(diameter);
+      return () => fromDiameter$6({ diameter });
+    });
+
+  triangle.fromValue = fromValue$7;
+  triangle.fromRadius = fromRadius$6;
+  triangle.fromDiameter = fromDiameter$6;
 
   const union$5 = (...params) => {
     switch (params.length) {
@@ -34280,9 +34546,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$j = function (...shapes) { return union$5(this, ...shapes); };
+  const method$i = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$j;
+  Shape.prototype.union = method$i;
 
   const X$2 = 0;
   const Y$3 = 1;
@@ -34381,9 +34647,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$k = function (options = {}) { writeStl(options, this); return this; };
+  const method$j = function (options = {}) { writeStl(options, this); return this; };
 
-  Shape.prototype.writeStl = method$k;
+  Shape.prototype.writeStl = method$j;
 
   const writeSvg = async (options, shape) => {
     const { path } = options;
@@ -34391,9 +34657,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$l = function (options = {}) { writeSvg(options, this); return this; };
+  const method$k = function (options = {}) { writeSvg(options, this); return this; };
 
-  Shape.prototype.writeSvg = method$l;
+  Shape.prototype.writeSvg = method$k;
 
   // Polyfills
 
@@ -84927,9 +85193,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$m = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$l = function (options = {}) { writeSvgPhoto(options, this); return this; };
 
-  Shape.prototype.writeSvgPhoto = method$m;
+  Shape.prototype.writeSvgPhoto = method$l;
 
   const writeThreejsPage = async (options, shape) => {
     const { path } = options;
@@ -84981,7 +85247,6 @@ define("./webworker.js",[],function () { 'use strict';
     readStl: readStl,
     readSvg: readSvg,
     right: right,
-    rotate: rotate,
     rotateX: rotateX$1,
     rotateY: rotateY,
     rotateZ: rotateZ,
@@ -84994,6 +85259,7 @@ define("./webworker.js",[],function () { 'use strict';
     tetrahedron: tetrahedron,
     text: text,
     translate: translate$3,
+    triangle: triangle,
     union: union$5,
     writePdf: writePdf,
     writeStl: writeStl,
@@ -89731,7 +89997,7 @@ define("./webworker.js",[],function () { 'use strict';
    * Decode a single base 64 character code digit to an integer. Returns -1 on
    * failure.
    */
-  var decode$3 = function (charCode) {
+  var decode$1 = function (charCode) {
     var bigA = 65;     // 'A'
     var bigZ = 90;     // 'Z'
 
@@ -89778,7 +90044,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   var base64$1 = {
   	encode: encode$1,
-  	decode: decode$3
+  	decode: decode$1
   };
 
   /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -89896,7 +90162,7 @@ define("./webworker.js",[],function () { 'use strict';
    * Decodes the next base 64 VLQ value from the given string and returns the
    * value and the rest of the string via the out parameter.
    */
-  var decode$4 = function base64VLQ_decode(aStr, aIndex, aOutParam) {
+  var decode$2 = function base64VLQ_decode(aStr, aIndex, aOutParam) {
     var strLen = aStr.length;
     var result = 0;
     var shift = 0;
@@ -89924,7 +90190,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   var base64Vlq = {
   	encode: encode$2,
-  	decode: decode$4
+  	decode: decode$2
   };
 
   var util$1 = createCommonjsModule(function (module, exports) {

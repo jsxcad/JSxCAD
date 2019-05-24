@@ -1,5 +1,4 @@
-import recast from 'recast';
-import types from 'ast-types';
+import recast from 'recast'; import types from 'ast-types';
 
 export const toEcmascript = (options, script) => {
   let ast = recast.parse(script);
@@ -103,8 +102,11 @@ export const toEcmascript = (options, script) => {
     visitCallExpression: function (path) {
       this.traverse(path);
       path.replace({
-        type: 'AwaitExpression',
-        argument: path.node
+        type: 'ParenthesizedExpression',
+        expression: {
+          type: 'AwaitExpression',
+          argument: path.node
+        }
       });
     }
   });
