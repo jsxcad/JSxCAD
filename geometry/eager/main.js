@@ -7,6 +7,7 @@ import { difference } from './difference';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { getPaths } from './getPaths';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
@@ -28,6 +29,7 @@ export {
   eachItem,
   eachPoint,
   flip,
+  getPaths,
   getSolids,
   getSurfaces,
   getZ0Surfaces,

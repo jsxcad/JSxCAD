@@ -1,3 +1,5 @@
+import { Shape } from './Shape';
+
 export const assert = (value, message, pass) => {
   if (pass !== true) {
     throw Error(`${message}: ${value}`);
@@ -20,6 +22,27 @@ export const assertEmpty = (value) => {
     throw Error(`Is not empty: ${value}`);
   }
   return true;
+};
+
+export const assertShape = (value) => {
+  if (value instanceof Shape) {
+    return true;
+  }
+  throw Error(`Is not Shape: ${value}`);
+};
+
+export const assertString = (value) => {
+  if (typeof value === 'string') {
+    return true;
+  }
+  throw Error(`Is not string: ${value}`);
+};
+
+export const assertStrings = (value) => {
+  if (value instanceof Array && value.every(item => typeof item === 'string')) {
+    return true;
+  }
+  throw Error(`Is not a list of strings: ${value}`);
 };
 
 export const assertSingle = (value) => {

@@ -1,6 +1,7 @@
+import { assertNumber, assertShape } from './assert';
+
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { assertNumber } from './assert';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { getZ0Surfaces } from '@jsxcad/geometry-eager';
@@ -34,13 +35,24 @@ export const fromHeight = ({ height }, shape) => {
   return assembly;
 };
 
+export const fromValue = (height, shape) => fromHeight({ height }, shape);
+
 export const extrude = dispatch(
   'extrude',
+  (height, shape) => {
+    assertNumber(height);
+    assertShape(shape);
+    return () => fromValue(height, shape);
+  },
   ({ height }, shape) => {
     assertNumber(height);
+    assertShape(shape);
     return () => fromHeight({ height }, shape);
   }
 );
+
+extrude.fromValue = fromValue;
+extrude.fromHeight = fromHeight;
 
 const method = function (options) { return extrude(options, this); };
 

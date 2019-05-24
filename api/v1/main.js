@@ -7,8 +7,6 @@
  * the api uses.
  */
 
-import { loadFont, text } from './text';
-
 import { Cursor } from './Cursor';
 import { Shape } from './Shape';
 import { above } from './above';
@@ -24,10 +22,13 @@ import { crossSection } from './crossSection';
 import { cube } from './cube';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
+import { drop } from './drop';
 import { extrude } from './extrude';
 import { front } from './front';
 import { hull } from './hull';
+import { interior } from './interior';
 import { intersection } from './intersection';
+import { keep } from './keep';
 import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
@@ -38,6 +39,7 @@ import { points } from './points';
 import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
+import { readFont } from './readFont';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readStl } from './readStl';
@@ -78,11 +80,12 @@ export {
   cube,
   cylinder,
   difference,
+  drop,
   extrude,
   front,
   hull,
+  interior,
   intersection,
-  loadFont,
   log,
   max,
   measureBoundingBox,
@@ -93,6 +96,7 @@ export {
   polygon,
   polyhedron,
   readDst,
+  readFont,
   // readJscad,
   readLDraw,
   readStl,
@@ -108,10 +112,10 @@ export {
   square,
   svgPath,
   tetrahedron,
-  text,
   translate,
   triangle,
   union,
+  keep,
   writePdf,
   writeStl,
   writeSvg,
