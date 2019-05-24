@@ -6,7 +6,6 @@ test('Wrap and return.', t => {
                                   `export const foo = (x) => x + 1;
                                    let a = 10;
                                    circle(foo(a));`);
-  console.log(ecmascript);
   t.is(ecmascript,
        `const foo = async x => x + 1;
 
@@ -17,6 +16,20 @@ const main = async () => {
 
 return {
     foo: foo,
+    main: main
+};`);
+});
+
+test("Don't return declarations.", t => {
+  const ecmascript = toEcmascript({},
+                                  `let a = 10;`);
+  console.log(ecmascript);
+  t.is(ecmascript,
+       `const main = async () => {
+    let a = 10;
+};
+
+return {
     main: main
 };`);
 });

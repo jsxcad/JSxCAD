@@ -11,9 +11,9 @@ const { SVGRenderer } = installSVGRenderer({ THREE, Projector, RenderableFace, R
 // Bootstrap done.
 
 const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
-  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1], near = 1, far = 3500 } = view;
   const [pageWidth, pageHeight] = pageSize;
-  const camera = new THREE.PerspectiveCamera(27, pageWidth / pageHeight, 1, 3500);
+  const camera = new THREE.PerspectiveCamera(27, pageWidth / pageHeight, near, far);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.up = new THREE.Vector3(...up);
   camera.lookAt(...target);

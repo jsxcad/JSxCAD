@@ -17,7 +17,16 @@ import { readFile } from '@jsxcad/sys';
  *
  **/
 
+const formatToAs = (format) => {
+  switch (format) {
+    case 'binary': return 'bytes';
+    case 'ascii':
+    default: return 'utf8';
+  }
+};
+
 export const readStl = async (options) => {
-  const { path } = options;
-  return Shape.fromGeometry(await fromStl(options, await readFile(options, path)));
+  const { path, format = 'ascii' } = options;
+  const as = formatToAs(format);
+  return Shape.fromGeometry(await fromStl(options, await readFile({ as, ...options }, path)));
 };
