@@ -11,7 +11,7 @@ test('Wrap and return.', t => {
 
 const main = async () => {
     let a = 10;
-    return await circle(await foo(a));;
+    return (await circle((await foo(a))));;
 };
 
 return {
@@ -27,6 +27,18 @@ test("Don't return declarations.", t => {
   t.is(ecmascript,
        `const main = async () => {
     let a = 10;
+};
+
+return {
+    main: main
+};`);
+});
+
+test('Bind await to calls properly.', t => {
+  const ecmascript = toEcmascript({}, `foo().bar()`);
+  t.is(ecmascript,
+       `const main = async () => {
+    return (await (await foo()).bar());
 };
 
 return {

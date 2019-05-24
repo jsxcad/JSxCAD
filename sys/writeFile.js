@@ -9,14 +9,17 @@ import { getFile } from './files';
 
 const { promises } = fs;
 
+// FIX Convert data by representation.
+
 export const writeFile = async (options, path, data) => {
+  const { as = 'utf8', ephemeral } = options;
   if (isWebWorker) {
-    return self.ask({ writeFile: { options, path, data: await data } });
+    return self.ask({ writeFile: { options: { as, ...options }, path, data: await data } });
   }
-  const { ephemeral } = options;
 
   data = await data;
   const file = getFile(options, path);
+  file.as = as;
   file.data = data;
 
   for (const watcher of file.watchers) {

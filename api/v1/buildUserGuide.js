@@ -24,7 +24,7 @@ const paths = [
   'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
   'readDst.js', 'readLDraw.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
   'scale.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
-  'tetrahedron.js'
+  'tetrahedron.js', 'triangle.js'
 ];
 
 toUserGuide({ api, paths, root: __dirname })
