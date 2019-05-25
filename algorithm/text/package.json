@@ -21,7 +21,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/convert-svg": "^0.0.75",
-    "fontkit": "^1.8.0",
     "opentype.js": "^0.11.0"
   },
   "devDependencies": {
