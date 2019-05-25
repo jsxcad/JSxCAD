@@ -1,22 +1,29 @@
-import { filterAndFlattenAssemblyData } from './filterAndFlattenAssemblyData';
+import { eachItem } from './eachItem';
+import { map } from './map';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
 import { intersection as solidIntersection } from '@jsxcad/algorithm-bsp-surfaces';
 import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface';
 
-export const intersection = (...geometries) => {
-  const assembly = { assembly: geometries };
-  const pathsData = filterAndFlattenAssemblyData({ form: 'paths' }, assembly);
-  const solidData = filterAndFlattenAssemblyData({ form: 'solid' }, assembly);
-  const z0SurfaceData = filterAndFlattenAssemblyData({ form: 'z0Surface' }, assembly);
-  const intersectioned = { assembly: [] };
-  if (pathsData.length > 0) {
-    intersectioned.assembly.push({ paths: pathsIntersection(...pathsData) });
+export const intersection = (geometry, ...geometries) => {
+  if (geometries.length === 0) {
+    // Nothing to do.
+    return geometry;
+  } else {
+    return map(geometry,
+               (item) => {
+                 for (const intersectGeometry of geometries) {
+                   eachItem(intersectGeometry,
+                            (intersectItem) => {
+                              if (item.solid && intersectItem.solid) {
+                                item = { solid: solidIntersection(item.solid, intersectItem.solid) };
+                              } else if (item.z0Surface && intersectItem.z0Surface) {
+                                item = { z0Surface: z0SurfaceIntersection(item.z0Surface, intersectItem.z0Surface) };
+                              } else if (item.paths && intersectItem.paths) {
+                                item = { paths: pathsIntersection(item.paths, intersectItem.paths) };
+                              }
+                            });
+                 }
+                 return item;
+               });
   }
-  if (solidData.length > 0) {
-    intersectioned.assembly.push({ solid: solidIntersection(...solidData) });
-  }
-  if (z0SurfaceData.length > 0) {
-    intersectioned.assembly.push({ z0Surface: z0SurfaceIntersection(...z0SurfaceData) });
-  }
-  return intersectioned;
 };

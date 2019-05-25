@@ -19,6 +19,13 @@ import { Shape, differenceLazily } from './Shape';
  *            circle(2.5))
  * ```
  * :::
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * difference(assemble(cube().below(),
+ *                     cube().above()),
+ *            cube().right())
+ * ```
+ * :::
  *
  **/
 

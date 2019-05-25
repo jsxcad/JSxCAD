@@ -18,15 +18,17 @@ const paths = [
   'hull.js',
   'interior.js', 'intersection.js',
   'keep.js',
+  'left.js', 'lego.js',
   'log.js',
-  'max.js',
-  'measureBoundingBox.js',
+  'max.js', 'measureBoundingBox.js', 'microGearMotor.js',
   'minkowski.js',
   'outline.js',
   'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
-  'readDst.js', 'readFont.js', 'readLDraw.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
+  'readDst.js', 'readFont.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
   'scale.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
-  'tetrahedron.js', 'triangle.js'
+  'tetrahedron.js', 'translate.js', 'triangle.js',
+  'union.js',
+  'writeShape.js'
 ];
 
 toUserGuide({ api, paths, root: __dirname })

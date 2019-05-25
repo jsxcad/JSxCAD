@@ -55,5 +55,4 @@ extrude.fromValue = fromValue;
 extrude.fromHeight = fromHeight;
 
 const method = function (options) { return extrude(options, this); };
-
 Shape.prototype.extrude = method;

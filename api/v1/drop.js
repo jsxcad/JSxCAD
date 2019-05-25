@@ -6,7 +6,7 @@ import { dispatch } from './dispatch';
 
 /**
  *
- * # Drop Components
+ * # Drop from assembly
  *
  * Generates an assembly from components in an assembly without a tag.
  *

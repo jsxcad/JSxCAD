@@ -1,22 +1,30 @@
-import { filterAndFlattenAssemblyData } from './filterAndFlattenAssemblyData';
+import { eachItem } from './eachItem';
+import { map } from './map';
 import { union as pathsUnion } from '@jsxcad/geometry-paths';
 import { union as solidUnion } from '@jsxcad/algorithm-bsp-surfaces';
 import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface';
 
-export const union = (...geometries) => {
-  const assembly = { assembly: geometries };
-  const pathsData = filterAndFlattenAssemblyData({ form: 'paths' }, assembly);
-  const solidData = filterAndFlattenAssemblyData({ form: 'solid' }, assembly);
-  const z0SurfaceData = filterAndFlattenAssemblyData({ form: 'z0Surface' }, assembly);
-  const unioned = { assembly: [] };
-  if (pathsData.length > 0) {
-    unioned.assembly.push({ paths: pathsUnion(...pathsData) });
+// FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
+export const union = (geometry, ...geometries) => {
+  if (geometries.length === 0) {
+    // Nothing to do.
+    return geometry;
+  } else {
+    return map(geometry,
+               (item) => {
+                 for (const unionGeometry of geometries) {
+                   eachItem(unionGeometry,
+                            (unionItem) => {
+                              if (item.solid && unionItem.solid) {
+                                item = { solid: solidUnion(item.solid, unionItem.solid) };
+                              } else if (item.z0Surface && unionItem.z0Surface) {
+                                item = { z0Surface: z0SurfaceUnion(item.z0Surface, unionItem.z0Surface) };
+                              } else if (item.paths && unionItem.paths) {
+                                item = { paths: pathsUnion(item.paths, unionItem.paths) };
+                              }
+                            });
+                 }
+                 return item;
+               });
   }
-  if (solidData.length > 0) {
-    unioned.assembly.push({ solid: solidUnion(...solidData) });
-  }
-  if (z0SurfaceData.length > 0) {
-    unioned.assembly.push({ z0Surface: z0SurfaceUnion(...z0SurfaceData) });
-  }
-  return unioned;
 };

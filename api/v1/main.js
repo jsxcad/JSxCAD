@@ -29,9 +29,12 @@ import { hull } from './hull';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { left } from './left';
+import { lego } from './lego';
 import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
+import { microGearMotor } from './microGearMotor';
 import { minkowski } from './minkowski';
 import { outline } from './outline';
 import { point } from './point';
@@ -42,6 +45,7 @@ import { readDst } from './readDst';
 import { readFont } from './readFont';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
+import { readShape } from './readShape';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
@@ -59,6 +63,7 @@ import { translate } from './translate';
 import { triangle } from './triangle';
 import { union } from './union';
 import { writePdf } from './writePdf';
+import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
 import { writeSvgPhoto } from './writeSvgPhoto';
@@ -86,9 +91,12 @@ export {
   hull,
   interior,
   intersection,
+  left,
+  lego,
   log,
   max,
   measureBoundingBox,
+  microGearMotor,
   minkowski,
   outline,
   point,
@@ -99,6 +107,7 @@ export {
   readFont,
   // readJscad,
   readLDraw,
+  readShape,
   readStl,
   readSvg,
   right,
@@ -117,6 +126,7 @@ export {
   union,
   keep,
   writePdf,
+  writeShape,
   writeStl,
   writeSvg,
   writeSvgPhoto,

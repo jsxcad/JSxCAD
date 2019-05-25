@@ -6,7 +6,7 @@ import { dispatch } from './dispatch';
 
 /**
  *
- * # Keep Components
+ * # Keep in assembly
  *
  * Generates an assembly from components in an assembly with a tag.
  *

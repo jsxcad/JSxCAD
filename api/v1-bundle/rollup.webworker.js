@@ -3,6 +3,7 @@ import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
 import hypothetical from 'rollup-plugin-hypothetical';
+import json from 'rollup-plugin-json';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
@@ -22,6 +23,7 @@ export default {
     builtins(),
     commonjs(),
     globals(),
+    json(),
     hypothetical(
       {
         allowFallthrough: true,
@@ -32,6 +34,6 @@ export default {
           'tty': ''
         }
       }),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ jsnext: true, preferBuiltins: true })
   ]
 };
