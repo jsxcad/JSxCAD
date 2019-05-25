@@ -32,6 +32,6 @@ export default {
           'tty': ''
         }
       }),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ jsnext: true, preferBuiltins: true })
   ]
 };

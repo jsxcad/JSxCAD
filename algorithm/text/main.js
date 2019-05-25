@@ -1,11 +1,11 @@
 import { scale, translate } from '@jsxcad/geometry-eager';
 
-import { create } from 'fontkit';
+import fontkit from 'fontkit';
 import { fromSvgPath } from '@jsxcad/convert-svg';
 import { union } from '@jsxcad/geometry-z0surface';
 
 export const toFont = ({ name }, bytes) => {
-  const fontData = create(Buffer.from(bytes), name);
+  const fontData = fontkit.create(Buffer.from(bytes), name);
 
   const font = ({ emSize = 1 }, text) => {
     const { glyphs, positions } = fontData.layout(text);

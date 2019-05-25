@@ -29,9 +29,12 @@ import { hull } from './hull';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { left } from './left';
+import { lego } from './lego';
 import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
+import { microGearMotor } from './microGearMotor';
 import { minkowski } from './minkowski';
 import { outline } from './outline';
 import { point } from './point';
@@ -88,9 +91,12 @@ export {
   hull,
   interior,
   intersection,
+  left,
+  lego,
   log,
   max,
   measureBoundingBox,
+  microGearMotor,
   minkowski,
   outline,
   point,

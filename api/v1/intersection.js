@@ -16,11 +16,37 @@ import { Shape, intersectionLazily } from './Shape';
  * :::
  * ::: illustration
  * ```
- * intersection(circle(10).translate([-5]),
- *              circle(10).translate([5]))
+ * intersection(circle(10).translate(-5),
+ *              circle(10).translate(5))
  * ```
  * :::
- *
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * intersection(assemble(cube().below(),
+ *                       cube().above()),
+ *              sphere(1))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(difference(square(10),
+ *                     square(7))
+ *            .translate(-2, -2),
+ *          difference(square(10),
+ *                     square(7))
+ *            .translate(2, 2));
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * intersection(difference(square(10),
+ *                         square(7))
+ *                .translate(-2, -2),
+ *              difference(square(10),
+ *                         square(7))
+ *                .translate(2, 2));
+ * ```
+ * :::
  **/
 
 export const intersection = (...params) => intersectionLazily(...params);

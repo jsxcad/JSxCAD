@@ -18,7 +18,7 @@ const agent = async ({ ask, question }) => {
       }
     }
   } catch (error) {
-    await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: error.toString() } });
+    await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: `${error.toString()}\n${error.stack}` } });
   }
 };
 const { ask, hear } = sys.conversation({ agent, say });

@@ -1,22 +1,29 @@
-import { filterAndFlattenAssemblyData } from './filterAndFlattenAssemblyData';
+import { eachItem } from './eachItem';
+import { map } from './map';
 import { difference as pathsDifference } from '@jsxcad/geometry-paths';
 import { difference as solidDifference } from '@jsxcad/algorithm-bsp-surfaces';
 import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface';
 
-export const difference = (...geometries) => {
-  const assembly = { assembly: geometries };
-  const pathsData = filterAndFlattenAssemblyData({ form: 'paths' }, assembly);
-  const solidData = filterAndFlattenAssemblyData({ form: 'solid' }, assembly);
-  const z0SurfaceData = filterAndFlattenAssemblyData({ form: 'z0Surface' }, assembly);
-  const differenced = { assembly: [] };
-  if (pathsData.length > 0) {
-    differenced.assembly.push({ paths: pathsDifference(...pathsData) });
+export const difference = (geometry, ...geometries) => {
+  if (geometries.length === 0) {
+    // Nothing to do.
+    return geometry;
+  } else {
+    return map(geometry,
+               (item) => {
+                 for (const subtractGeometry of geometries) {
+                   eachItem(subtractGeometry,
+                            (subtractItem) => {
+                              if (item.solid && subtractItem.solid) {
+                                item = { solid: solidDifference(item.solid, subtractItem.solid) };
+                              } else if (item.z0Surface && subtractItem.z0Surface) {
+                                item = { z0Surface: z0SurfaceDifference(item.z0Surface, subtractItem.z0Surface) };
+                              } else if (item.paths && subtractItem.paths) {
+                                item = { paths: pathsDifference(item.paths, subtractItem.paths) };
+                              }
+                            });
+                 }
+                 return item;
+               });
   }
-  if (solidData.length > 0) {
-    differenced.assembly.push({ solid: solidDifference(...solidData) });
-  }
-  if (z0SurfaceData.length > 0) {
-    differenced.assembly.push({ z0Surface: z0SurfaceDifference(...z0SurfaceData) });
-  }
-  return differenced;
 };
