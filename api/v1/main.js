@@ -42,6 +42,7 @@ import { readDst } from './readDst';
 import { readFont } from './readFont';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
+import { readShape } from './readShape';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
@@ -59,6 +60,7 @@ import { translate } from './translate';
 import { triangle } from './triangle';
 import { union } from './union';
 import { writePdf } from './writePdf';
+import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
 import { writeSvgPhoto } from './writeSvgPhoto';
@@ -99,6 +101,7 @@ export {
   readFont,
   // readJscad,
   readLDraw,
+  readShape,
   readStl,
   readSvg,
   right,
@@ -117,6 +120,7 @@ export {
   union,
   keep,
   writePdf,
+  writeShape,
   writeStl,
   writeSvg,
   writeSvgPhoto,

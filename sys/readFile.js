@@ -111,9 +111,7 @@ export const readFile = async (options, path) => {
   if (file.data === undefined || file.as !== as) {
     file.data = await fetchSources({ as }, sources);
     file.as = as;
-    console.log(`QQ/readFile/file: ${JSON.stringify(file)}`);
-    console.log(`QQ/readFile/path: ${path}`);
-    if (!ephemeral) {
+    if (!ephemeral && file.data !== undefined) {
       // Update persistent storage.
       await writeFile(options, path, file.data);
     }
