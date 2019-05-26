@@ -8,6 +8,7 @@ import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { Buffer } from 'buffer';
 import { getFile } from './files';
+import localForage from 'localforage';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
 import { writeFile } from './writeFile';
@@ -49,15 +50,18 @@ const getFileFetcher = async () => {
     // FIX: Put this through getFile, also.
     return promises.readFile;
   } else if (isBrowser) {
-    // This will always fail, but maybe it should use local storage.
-    return () => {};
+    return async (path) => {
+      const data = await localForage.getItem(`file/${path}`);
+      if (data !== null) {
+        return data;
+      }
+    };
   } else {
     throw Error('die');
   }
 };
 
 // Fetch from internal store.
-// FIX: Support browser local storage.
 const fetchPersistent = async ({ as }, path) => {
   try {
     const fetchFile = await getFileFetcher();
