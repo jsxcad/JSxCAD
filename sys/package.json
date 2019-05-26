@@ -22,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "esm": "^3.2.10",
+    "localforage": "^1.7.3",
     "node-fetch": "^2.3.0"
   },
   "devDependencies": {

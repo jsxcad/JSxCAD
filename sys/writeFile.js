@@ -2,10 +2,11 @@
 
 import * as fs from 'fs';
 
-import { isNode, isWebWorker } from './browserOrNode';
+import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { dirname } from 'path';
 import { getFile } from './files';
+import localForage from 'localforage';
 
 const { promises } = fs;
 
@@ -34,6 +35,8 @@ export const writeFile = async (options, path, data) => {
         console.log(`QQ/mkdir: ${error.toString()}`);
       }
       return promises.writeFile(path, data);
+    } else if (isBrowser) {
+      return localForage.setItem(`file/${path}`, data);
     }
   }
 };

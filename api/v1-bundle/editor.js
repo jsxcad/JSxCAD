@@ -1,6 +1,7 @@
 import { installCSS, installCSSLink } from './css';
 
 import CodeMirror from 'codemirror/src/codemirror.js';
+import { writeFile } from '@jsxcad/sys';
 
 export const installEditorCSS = (display) => {
   installCSSLink(document, 'https://codemirror.net/lib/codemirror.css');
@@ -11,7 +12,11 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
   let editor;
 
   // FIX: Need some visual indicator that the script is running.
-  const runScript = async () => evaluator(editor.getDoc().getValue('\n'));
+  const runScript = async () => {
+    const script = editor.getDoc().getValue('\n');
+    await writeFile({}, 'script', script);
+    return evaluator(script);
+  }
 
   const setupDocument = () => {
     editor = CodeMirror((domElement) => {
