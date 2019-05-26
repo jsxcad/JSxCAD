@@ -16,7 +16,7 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
     const script = editor.getDoc().getValue('\n');
     await writeFile({}, 'script', script);
     return evaluator(script);
-  }
+  };
 
   const setupDocument = () => {
     editor = CodeMirror((domElement) => {

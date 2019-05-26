@@ -55,7 +55,7 @@ const getFileFetcher = async () => {
       if (data !== null) {
         return data;
       }
-    }
+    };
   } else {
     throw Error('die');
   }
