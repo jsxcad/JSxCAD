@@ -106,7 +106,8 @@ export const toUserGuide = async ({ api, paths, root }) => {
   let markdownHtml = md.render(markdown);
   for (const { patch, options, text } of patches) {
     const geometry = await toOperator({ api }, text)();
-    const svg = await toSvg(options, geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
+    const svg = await toSvg({ includeXmlHeader: false, ...options },
+                            geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
     markdownHtml = markdownHtml.replace(patch, svg);
   }
   const html = `

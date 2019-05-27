@@ -28,7 +28,7 @@ const paths = [
   'scale.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
   'tetrahedron.js', 'translate.js', 'triangle.js',
   'union.js',
-  'writeShape.js'
+  'writePdf.js', 'writeShape.js', 'writeStl.js', 'writeSvg.js', 'writeSvgPhoto.js'
 ];
 
 toUserGuide({ api, paths, root: __dirname })
