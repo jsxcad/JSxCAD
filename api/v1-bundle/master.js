@@ -16,7 +16,7 @@ model.keep('cube').writeStl({ path: 'cube.stl' });
 model.keep('cube').crossSection().writePfd({ path: 'cut.pdf' });
 
 model;
-`
+`;
 
 window.bootstrapCSS = () => {
   installConsoleCSS(document);
