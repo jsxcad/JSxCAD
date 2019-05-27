@@ -15998,7 +15998,17 @@ define("./webworker.js",[],function () { 'use strict';
     );
   };
 
-  const socket = ({ diameter = 5.05, height = 1.8, gripRingHeight = 0.7, faces = 32, play = 0.1 } = {}) => {
+  const studSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
+    const studs = [];
+    for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
+      for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
+        studs.push(stud().translate([x - width / 2, y - length / 2, height / 2]));
+      }
+    }
+    return assemble$1(cube(width, length, height), ...studs);
+  };
+
+  const socket = ({ diameter = 5.05, height = 1.8, gripRingHeight = 0.7, faces = 32, play = 0.0 } = {}) => {
     // A stud is theoretically 1.7 mm tall.
     // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
     const bottom = 0.5;
@@ -16013,24 +16023,15 @@ define("./webworker.js",[],function () { 'use strict';
       cylinder({ diameter: (diameter + play) + expansion, height: bottom }).translate([0, 0, bottom / 2]));
   };
 
-  const studSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
-    const studs = [];
-    for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
-      for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-        studs.push(stud().translate([x - width / 2, y - length / 2, height / 2]));
-      }
-    }
-    return assemble$1(cube(width, length, height), ...studs);
-  };
-
-  const socketSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
+  const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1, studDiameter = 5, studHeight = 1.8, studMarginX = 0, studMarginY = 0, studPlay = 0 } = {}) => {
     const sockets = [];
     for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
       for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-        sockets.push(socket().translate([x - width / 2, y - length / 2, height / -2]));
+        sockets.push(socket({ diameter: studDiameter, height: studHeight, play: studPlay })
+                       .translate([x - width / 2, y - length / 2, height / -2]));
       }
     }
-    return assemble$1(cube(width, length, height),
+    return assemble$1(cube(width - play * 2, length - play * 2, height),
                     assemble$1(...sockets).as('void'));
   };
 
@@ -16153,6 +16154,14 @@ define("./webworker.js",[],function () { 'use strict';
     return root + dir;
   }
 
+  let base = '';
+
+  const setupFilesystem = ({ fileBase }) => {
+    if (fileBase !== undefined) {
+      base = fileBase;
+    }
+  };
+
   const files = {};
   const fileCreationWatchers = [];
 
@@ -16168,7 +16177,9 @@ define("./webworker.js",[],function () { 'use strict';
     return file;
   };
 
-  const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);
+  const watchFileCreation = (thunk) => {
+    return fileCreationWatchers.push(thunk);
+  };
 
   var localforage = createCommonjsModule(function (module, exports) {
   /*!
@@ -18988,15 +18999,16 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     if (!ephemeral) {
+      const persistentPath = `${base}/${path}`;
       if (isNode) {
         try {
-          await promises.mkdir(dirname(path), { recursive: true });
+          await promises.mkdir(dirname(persistentPath), { recursive: true });
         } catch (error) {
           console.log(`QQ/mkdir: ${error.toString()}`);
         }
-        return promises.writeFile(path, data);
+        return promises.writeFile(persistentPath, data);
       } else if (isBrowser) {
-        return localforage.setItem(`file/${path}`, data);
+        return localforage.setItem(`file/${persistentPath}`, data);
       }
     }
   };
@@ -19049,7 +19061,7 @@ define("./webworker.js",[],function () { 'use strict';
         if (data !== null) {
           return data;
         }
-      }
+      };
     } else {
       throw Error('die');
     }
@@ -19059,7 +19071,7 @@ define("./webworker.js",[],function () { 'use strict';
   const fetchPersistent = async ({ as }, path) => {
     try {
       const fetchFile = await getFileFetcher();
-      const data = await fetchFile(path);
+      const data = await fetchFile(`${base}/${path}`);
       return dataAs(as, data);
     } catch (e) {
     }
@@ -19132,6 +19144,7 @@ define("./webworker.js",[],function () { 'use strict';
     conversation: conversation,
     log: log$1,
     readFile: readFile,
+    setupFilesystem: setupFilesystem,
     watchFile: watchFile,
     watchFileCreation: watchFileCreation,
     writeFile: writeFile

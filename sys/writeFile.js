@@ -4,6 +4,7 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
+import { base } from './filesystem';
 import { dirname } from 'path';
 import { getFile } from './files';
 import localForage from 'localforage';
@@ -28,15 +29,16 @@ export const writeFile = async (options, path, data) => {
   }
 
   if (!ephemeral) {
+    const persistentPath = `${base}${path}`;
     if (isNode) {
       try {
-        await promises.mkdir(dirname(path), { recursive: true });
+        await promises.mkdir(dirname(persistentPath), { recursive: true });
       } catch (error) {
         console.log(`QQ/mkdir: ${error.toString()}`);
       }
-      return promises.writeFile(path, data);
+      return promises.writeFile(persistentPath, data);
     } else if (isBrowser) {
-      return localForage.setItem(`file/${path}`, data);
+      return localForage.setItem(`file/${persistentPath}`, data);
     }
   }
 };

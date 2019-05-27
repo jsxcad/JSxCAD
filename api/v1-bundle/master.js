@@ -1,11 +1,22 @@
+/* global location */
+
 import { installConsole, installConsoleCSS } from './console';
 import { installDisplay, installDisplayCSS } from './display';
 import { installEditor, installEditorCSS } from './editor';
 import { installEvaluator, installEvaluatorCSS } from './evaluator';
 import { installReference, installReferenceCSS } from './reference';
-import { readFile, watchFile, watchFileCreation } from '@jsxcad/sys';
+import { readFile, setupFilesystem, watchFile, watchFileCreation } from '@jsxcad/sys';
 
-const defaultScript = `assemble(circle(10), cube(10), triangle(15).outline())`;
+const defaultScript =
+`
+const model = assemble(cube(10).as('cube'),
+                       cylinder(4, 10).as('cylinder'));
+
+model.keep('cube').writeStl({ path: 'cube.stl' });
+model.keep('cube').crossSection().writePfd({ path: 'cut.pdf' });
+
+model;
+`
 
 window.bootstrapCSS = () => {
   installConsoleCSS(document);
@@ -16,6 +27,8 @@ window.bootstrapCSS = () => {
 };
 
 window.bootstrap = async () => {
+  // The file prefix partitions projects.
+  setupFilesystem({ fileBase: location.hash.substring(1) });
   let initialScript = await readFile({}, 'script');
   if (initialScript === undefined) {
     initialScript = defaultScript;

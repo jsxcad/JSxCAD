@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { Buffer } from 'buffer';
+import { base } from './filesystem';
 import { getFile } from './files';
 import localForage from 'localforage';
 import { log } from './log';
@@ -65,7 +66,7 @@ const getFileFetcher = async () => {
 const fetchPersistent = async ({ as }, path) => {
   try {
     const fetchFile = await getFileFetcher();
-    const data = await fetchFile(path);
+    const data = await fetchFile(`${base}${path}`);
     return dataAs(as, data);
   } catch (e) {
   }
