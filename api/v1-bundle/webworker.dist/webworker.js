@@ -16028,7 +16028,7 @@ define("./webworker.js",[],function () { 'use strict';
     for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
       for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
         sockets.push(socket({ diameter: studDiameter, height: studHeight, play: studPlay })
-                       .translate([x - width / 2, y - length / 2, height / -2]));
+            .translate([x - width / 2, y - length / 2, height / -2]));
       }
     }
     return assemble$1(cube(width - play * 2, length - play * 2, height),
@@ -16126,6 +16126,19 @@ define("./webworker.js",[],function () { 'use strict';
     'default': require$$0
   });
 
+  let base = '';
+
+  const setupFilesystem = ({ fileBase }) => {
+    // A prefix used to partition the filesystem for multiple projects.
+    if (fileBase !== undefined) {
+      if (base.endsWith('/')) {
+        base = fileBase;
+      } else {
+        base = `${fileBase}/`;
+      }
+    }
+  };
+
   // Copyright Joyent, Inc. and other Node contributors.
 
   // Split a filename into [root, dir, basename, ext], unix version
@@ -16153,14 +16166,6 @@ define("./webworker.js",[],function () { 'use strict';
 
     return root + dir;
   }
-
-  let base = '';
-
-  const setupFilesystem = ({ fileBase }) => {
-    if (fileBase !== undefined) {
-      base = fileBase;
-    }
-  };
 
   const files = {};
   const fileCreationWatchers = [];
@@ -18999,7 +19004,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     if (!ephemeral) {
-      const persistentPath = `${base}/${path}`;
+      const persistentPath = `${base}${path}`;
       if (isNode) {
         try {
           await promises.mkdir(dirname(persistentPath), { recursive: true });
@@ -19071,7 +19076,7 @@ define("./webworker.js",[],function () { 'use strict';
   const fetchPersistent = async ({ as }, path) => {
     try {
       const fetchFile = await getFileFetcher();
-      const data = await fetchFile(`${base}/${path}`);
+      const data = await fetchFile(`${base}${path}`);
       return dataAs(as, data);
     } catch (e) {
     }
@@ -38089,6 +38094,10 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toPdf({ preview: true, ...options }, geometry));
   };
 
+  const method$o = function (options = {}) { writePdf(options, this); return this; };
+
+  Shape.prototype.writePdf = method$o;
+
   const toGeometry$2 = ({ disjoint = true }, shape) => {
     if (disjoint) {
       return shape.toDisjointGeometry();
@@ -38103,9 +38112,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$o = function (options = {}) { writeStl(options, this); return this; };
+  const method$p = function (options = {}) { writeStl(options, this); return this; };
 
-  Shape.prototype.writeStl = method$o;
+  Shape.prototype.writeStl = method$p;
 
   const writeSvg = async (options, shape) => {
     const { path } = options;
@@ -38113,9 +38122,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$p = function (options = {}) { writeSvg(options, this); return this; };
+  const method$q = function (options = {}) { writeSvg(options, this); return this; };
 
-  Shape.prototype.writeSvg = method$p;
+  Shape.prototype.writeSvg = method$q;
 
   // Polyfills
 
@@ -88649,15 +88658,19 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$q = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$r = function (options = {}) { writeSvgPhoto(options, this); return this; };
 
-  Shape.prototype.writeSvgPhoto = method$q;
+  Shape.prototype.writeSvgPhoto = method$r;
 
   const writeThreejsPage = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
     return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
+
+  const method$s = function (options = {}) { writeThreejsPage(options, this); return this; };
+
+  Shape.prototype.writeThreejsPage = method$s;
 
   /**
    *
