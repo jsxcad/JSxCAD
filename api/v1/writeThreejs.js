@@ -1,4 +1,4 @@
-import { Shape } from './shape';
+import { Shape } from './Shape';
 import { toThreejsPage } from '@jsxcad/convert-threejs';
 import { writeFile } from '@jsxcad/sys';
 
