@@ -37,7 +37,17 @@ export const stud = ({ diameter = 5, height = 1.8, play = 0.1, faces = 32 } = {}
   );
 };
 
-export const socket = ({ diameter = 5.05, height = 1.8, gripRingHeight = 0.7, faces = 32, play = 0.1 } = {}) => {
+export const studSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
+  const studs = [];
+  for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
+    for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
+      studs.push(stud().translate([x - width / 2, y - length / 2, height / 2]));
+    }
+  }
+  return assemble(cube(width, length, height), ...studs);
+};
+
+export const socket = ({ diameter = 5.05, height = 1.8, gripRingHeight = 0.7, faces = 32, play = 0.0 } = {}) => {
   // A stud is theoretically 1.7 mm tall.
   // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
   const bottom = 0.5;
@@ -52,24 +62,15 @@ export const socket = ({ diameter = 5.05, height = 1.8, gripRingHeight = 0.7, fa
     cylinder({ diameter: (diameter + play) + expansion, height: bottom }).translate([0, 0, bottom / 2]));
 };
 
-export const studSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
-  const studs = [];
-  for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
-    for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-      studs.push(stud().translate([x - width / 2, y - length / 2, height / 2]));
-    }
-  }
-  return assemble(cube(width, length, height), ...studs);
-};
-
-export const socketSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
+export const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1, studDiameter = 5, studHeight = 1.8, studMarginX = 0, studMarginY = 0, studPlay = 0 } = {}) => {
   const sockets = [];
   for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
     for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-      sockets.push(socket().translate([x - width / 2, y - length / 2, height / -2]));
+      sockets.push(socket({ diameter: studDiameter, height: studHeight, play: studPlay })
+          .translate([x - width / 2, y - length / 2, height / -2]));
     }
   }
-  return assemble(cube(width, length, height),
+  return assemble(cube(width - play * 2, length - play * 2, height),
                   assemble(...sockets).as('void'));
 };
 
