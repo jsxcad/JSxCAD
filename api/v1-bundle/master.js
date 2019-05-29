@@ -13,9 +13,9 @@ const model = assemble(cube(10).as('cube'),
                        cylinder(4, 10).as('cylinder'));
 
 model.keep('cube').writeStl({ path: 'cube.stl' });
-model.keep('cube').crossSection().writePfd({ path: 'cut.pdf' });
+model.keep('cube').crossSection().outline().writePdf({ path: 'cut.pdf' });
 
-model;
+return model;
 `;
 
 window.bootstrapCSS = () => {

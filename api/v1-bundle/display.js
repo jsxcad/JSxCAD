@@ -96,11 +96,15 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     };
     const updateDatasets = (geometry) => {
       // Delete any previous dataset in the window.
+      controllers = new Set();
       for (const { controller, mesh } of datasets) {
         if (controller) {
-          gui.remove(controller);
+          controllers.add(controller);
         }
         scene.remove(mesh);
+      }
+      for (controller of controlers) {
+        gui.remove(controller);
       }
       // Build new datasets from the written data, and display them.
       datasets = [];
