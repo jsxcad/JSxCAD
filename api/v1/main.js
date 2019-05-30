@@ -43,7 +43,7 @@ import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
 import { readFont } from './readFont';
-// import { readJscad } from './readJscad';
+import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readShape } from './readShape';
 import { readStl } from './readStl';
@@ -105,7 +105,7 @@ export {
   polyhedron,
   readDst,
   readFont,
-  // readJscad,
+  readJscad,
   readLDraw,
   readShape,
   readStl,

@@ -8,6 +8,7 @@ Error.stackTraceLimit = Infinity;
 const { writeFile } = fs.promises;
 
 const paths = [
+  'Intro.js',
   'above.js', 'acos.js', 'assemble.js',
   'back.js', 'below.js',
   'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cursor.js', 'cylinder.js',

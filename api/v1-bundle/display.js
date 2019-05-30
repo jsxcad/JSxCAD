@@ -77,7 +77,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       content: `<div id="${path}"></div>`,
       contentOverflow: 'hidden',
       position: 'right-top',
-      footerToolbar: `<button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
+      footerToolbar: `</span><button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
       callback: (panel) => {
         document.getElementById(`download/${path}`)
             .addEventListener('click',
@@ -95,16 +95,18 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       }
     };
     const updateDatasets = (geometry) => {
-      // Delete any previous dataset in the window.
-      controllers = new Set();
-      for (const { controller, mesh } of datasets) {
-        if (controller) {
-          controllers.add(controller);
+      {
+        // Delete any previous dataset in the window.
+        const controllers = new Set();
+        for (const { controller, mesh } of datasets) {
+          if (controller) {
+            controllers.add(controller);
+          }
+          scene.remove(mesh);
         }
-        scene.remove(mesh);
-      }
-      for (controller of controlers) {
-        gui.remove(controller);
+        for (const controller of controllers) {
+          gui.remove(controller);
+        }
       }
       // Build new datasets from the written data, and display them.
       datasets = [];
@@ -151,16 +153,18 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
 
       walk(geometry);
 
-      const controllers = {};
-      for (const dataset of datasets) {
-        if (dataset.name === undefined) { continue; }
-        let controller = controllers[dataset.name];
-        if (controller === undefined) {
-          controller = gui.add({ visible: true }, 'visible').name(`Show ${dataset.name}?`);
-          controllers[dataset.name] = controller;
+      {
+        const controllers = {};
+        for (const dataset of datasets) {
+          if (dataset.name === undefined) { continue; }
+          let controller = controllers[dataset.name];
+          if (controller === undefined) {
+            controller = gui.add({ visible: true }, 'visible').name(`Show ${dataset.name}?`);
+            controllers[dataset.name] = controller;
+          }
+          controller.listen().onChange((value) => { dataset.mesh.visible = value; });
+          dataset.controller = controller;
         }
-        controller.listen().onChange((value) => { dataset.mesh.visible = value; });
-        dataset.controller = controller;
       }
     };
 

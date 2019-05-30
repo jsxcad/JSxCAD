@@ -13,7 +13,7 @@ const normalizeVector = (...params) => {
     const [x = 0, y = 0, z = 0] = params;
     return [x, y, z];
   }
-}
+};
 
 /**
  *
