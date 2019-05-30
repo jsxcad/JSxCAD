@@ -28,7 +28,23 @@ import { Shape, assembleLazily } from './Shape';
  * ```
  * assemble(cube(30).above().as('cube'),
  *          cylinder(10, 40).above().as('cylinder'))
- *   .toComponents({ requires: ['cube'] })[0]
+ *   .keep('cube')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(cube(30).above().as('cube'),
+ *          assemble(circle(40),
+ *                   circle(50).outline()).as('circles'))
+ *   .keep('circles')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(cube(30).above().as('cube'),
+ *          assemble(circle(40).as('circle'),
+ *                   circle(50).outline().as('outline')))
+ *   .drop('outline')
  * ```
  * :::
  *

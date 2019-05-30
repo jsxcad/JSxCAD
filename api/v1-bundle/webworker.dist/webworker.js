@@ -83,199 +83,6 @@ if (!self.define) {
 define("./webworker.js",[],function () { 'use strict';
 
   /**
-   * Calculates the absolute value of the give vector
-   *
-   * @param {vec2} vec - given value
-   * @returns {vec2} absolute value of the vector
-   */
-
-  /**
-   * Adds two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-  const add = ([ax, ay], [bx, by]) => [ax + bx, ay + by];
-
-  // y=sin, x=cos
-
-  // radians = degrees * PI / 180
-
-  // TODO: Clean this up.
-
-  // degrees = radians * 180 / PI
-
-  const spatialResolution = 1e5;
-
-  // Quantize values for use in spatial coordinates, and so on, even if the usual quantizeForSpace is disabled.
-  const reallyQuantizeForSpace = (value) => (Math.round(value * spatialResolution) / spatialResolution);
-
-  /**
-   * Computes the cross product (3D) of two vectors
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec3} cross product
-   */
-
-  /**
-   * Calculates the euclidian distance between two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {Number} distance between a and b
-   */
-
-  /**
-   * Divides two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Calculates the dot product of two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {Number} dot product of a and b
-   */
-
-  const equals = ([ax, ay], [bx, by]) => (ax === bx) && (ay === by);
-
-  const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
-
-  /**
-   * Creates a new vec2 from the point given.
-   * Missing ranks are implicitly zero.
-   *
-   * @param {Number} x X component
-   * @param {Number} y Y component
-   * @returns {vec2} a new 2D vector
-   */
-
-  /** Create a vec2 from a single scalar value
-   * @param  {Float} scalar
-   * @returns {Vec2} a new vec2
-   */
-
-  /**
-   * Creates a new vec3 initialized with the given values
-   * Any missing ranks are implicitly zero.
-   *
-   * @param {Number} x X component
-   * @param {Number} y Y component
-   * @returns {vec3} a new 2D vector
-   */
-
-  /**
-   * Calculates the length of a vec2
-   *
-   * @param {vec2} a vector to calculate length of
-   * @returns {Number} length of a
-   */
-
-  /**
-   * Performs a linear interpolation between two vec2's
-   *
-   * @param {Number} t interpolation amount between the two inputs
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Returns the maximum of two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Returns the minimum of two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Multiplies two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Negates the components of a vec2
-   *
-   * @param {vec2} a vector to negate
-   * @returns {vec2} out
-   */
-
-  /**
-   * Rotates a vec2 by an angle
-   *
-   * @param {Number} angle the angle of rotation (in radians)
-   * @param {vec2} vector the vector to rotate
-   * @returns {vec2} out
-   */
-
-  /**
-   * Normalize the given vector.
-   *
-   * @param {vec2} a vector to normalize
-   * @returns {vec2} normalized (unit) vector
-   */
-
-  /**
-   * Scales a vec2 by a scalar number
-   *
-   * @param {Number} amount amount to scale the vector by
-   * @param {vec2} vector the vector to scale
-   * @returns {vec2} out
-   */
-
-  /**
-   * Calculates the squared euclidian distance between two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {Number} squared distance between a and b
-   */
-
-  /**
-   * Calculates the squared length of a vec2
-   *
-   * @param {vec2} a vector to calculate squared length of
-   * @returns {Number} squared length of a
-   */
-
-  /**
-   * Subtracts vector b from vector a
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Transforms the vec2 with a mat4
-   * 3rd vector component is implicitly '0'
-   * 4th vector component is implicitly '1'
-   *
-   * @param {mat4} matrix matrix to transform with
-   * @param {vec2} vector the vector to transform
-   * @returns {vec2} out
-   */
-  const transform = (matrix, [x, y]) => [matrix[0] * x + matrix[4] * y + matrix[12],
-                                                matrix[1] * x + matrix[5] * y + matrix[13]];
-
-  /**
    * Adds two mat4's
    *
    * @param {mat4} a the first operand
@@ -415,7 +222,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second vector to add
    * @returns {vec3} the added vectors
    */
-  const add$1 = ([ax, ay, az], [bx, by, bz]) => [(ax + bx), (ay + by), (az + bz)];
+  const add = ([ax, ay, az], [bx, by, bz]) => [(ax + bx), (ay + by), (az + bz)];
 
   /**
    * Calculates the dot product of two vec3's
@@ -434,6 +241,17 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {vec3} out
    */
   const scale = (amount, [x, y, z]) => [(x * amount), (y * amount), (z * amount)];
+
+  // radians = degrees * PI / 180
+
+  // TODO: Clean this up.
+
+  // degrees = radians * 180 / PI
+
+  const spatialResolution = 1e5;
+
+  // Quantize values for use in spatial coordinates, and so on, even if the usual quantizeForSpace is disabled.
+  const reallyQuantizeForSpace = (value) => (Math.round(value * spatialResolution) / spatialResolution);
 
   const canonicalize = ([x = 0, y = 0, z = 0]) => [reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(z)];
 
@@ -470,7 +288,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {vec3} out
    */
 
-  const equals$1 = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);
+  const equals = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);
 
   /**
    * Creates a new vec3 from the point given.
@@ -611,7 +429,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} params[2] vector the vector to transform
    * @returns {vec3} out
    */
-  const transform$1 = (matrix, [x = 0, y = 0, z = 0]) => {
+  const transform = (matrix, [x = 0, y = 0, z = 0]) => {
     let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
     w = w || 1.0;
     return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
@@ -733,6 +551,185 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec2} vec - given value
+   * @returns {vec2} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  // y=sin, x=cos
+
+  /**
+   * Computes the cross product (3D) of two vectors
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec3} cross product
+   */
+
+  /**
+   * Calculates the euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the dot product of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+
+  const equals$1 = ([ax, ay], [bx, by]) => (ax === bx) && (ay === by);
+
+  const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
+
+  /**
+   * Creates a new vec2 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec2} a new 2D vector
+   */
+
+  /** Create a vec2 from a single scalar value
+   * @param  {Float} scalar
+   * @returns {Vec2} a new vec2
+   */
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   * Any missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec3} a new 2D vector
+   */
+
+  /**
+   * Calculates the length of a vec2
+   *
+   * @param {vec2} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+
+  /**
+   * Performs a linear interpolation between two vec2's
+   *
+   * @param {Number} t interpolation amount between the two inputs
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the maximum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the minimum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Multiplies two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Negates the components of a vec2
+   *
+   * @param {vec2} a vector to negate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Rotates a vec2 by an angle
+   *
+   * @param {Number} angle the angle of rotation (in radians)
+   * @param {vec2} vector the vector to rotate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Normalize the given vector.
+   *
+   * @param {vec2} a vector to normalize
+   * @returns {vec2} normalized (unit) vector
+   */
+
+  /**
+   * Scales a vec2 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec2} vector the vector to scale
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the squared euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+
+  /**
+   * Calculates the squared length of a vec2
+   *
+   * @param {vec2} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Transforms the vec2 with a mat4
+   * 3rd vector component is implicitly '0'
+   * 4th vector component is implicitly '1'
+   *
+   * @param {mat4} matrix matrix to transform with
+   * @param {vec2} vector the vector to transform
+   * @returns {vec2} out
+   */
+
+  /**
    * Subtracts matrix b from matrix a
    *
    * @param {mat4} out the receiving matrix
@@ -786,11 +783,11 @@ define("./webworker.js",[],function () { 'use strict';
     return segments;
   };
 
-  const transform$2 = (matrix, path) =>
-    path.map((point, index) => (point === null) ? null : transform$1(matrix, point));
+  const transform$1 = (matrix, path) =>
+    path.map((point, index) => (point === null) ? null : transform(matrix, point));
 
-  const translate = (vector, path) => transform$2(fromTranslation(vector), path);
-  const scale$1 = (vector, path) => transform$2(fromScaling(vector), path);
+  const translate = (vector, path) => transform$1(fromTranslation(vector), path);
+  const scale$1 = (vector, path) => transform$1(fromScaling(vector), path);
 
   const addTag = (tag, geometry) => {
     const copy = Object.assign({}, geometry);
@@ -856,16 +853,16 @@ define("./webworker.js",[],function () { 'use strict';
     return points;
   };
 
-  const transform$3 = (matrix, paths) => paths.map(path => transform$2(matrix, path));
+  const transform$2 = (matrix, paths) => paths.map(path => transform$1(matrix, path));
 
   // FIX: Deduplication.
 
   const union = (...pathsets) => [].concat(...pathsets);
 
-  const scale$2 = ([x = 1, y = 1, z = 1], paths) => transform$3(fromScaling([x, y, z]), paths);
+  const scale$2 = ([x = 1, y = 1, z = 1], paths) => transform$2(fromScaling([x, y, z]), paths);
 
-  const transform$4 = (matrix, points) => points.map(point => transform$1(matrix, point));
-  const translate$1 = ([x = 0, y = 0, z = 0], points) => transform$4(fromTranslation([x, y, z]), points);
+  const transform$3 = (matrix, points) => points.map(point => transform(matrix, point));
+  const translate$1 = ([x = 0, y = 0, z = 0], points) => transform$3(fromTranslation([x, y, z]), points);
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1247,7 +1244,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   unwrapExports(Vertex_1);
 
-  var add_1 = add$2;
+  var add_1 = add$1;
 
   /**
    * Adds two vec3's
@@ -1257,7 +1254,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {vec3} out
    */
-  function add$2(out, a, b) {
+  function add$1(out, a, b) {
       out[0] = a[0] + b[0];
       out[1] = a[1] + b[1];
       out[2] = a[2] + b[2];
@@ -6610,7 +6607,7 @@ define("./webworker.js",[],function () { 'use strict';
     if (Number.isNaN(lambda)) lambda = 0;
     if (lambda > 1) lambda = 1;
     if (lambda < 0) lambda = 0;
-    return add$1(p1, scale(lambda, direction));
+    return add(p1, scale(lambda, direction));
   };
 
   const X = 0;
@@ -6810,8 +6807,8 @@ define("./webworker.js",[],function () { 'use strict';
    */
 
   // Affine transformation of polygon. Returns a new polygon.
-  const transform$5 = (matrix, polygon) => {
-    const transformed = map(polygon, vertex => transform$1(matrix, vertex));
+  const transform$4 = (matrix, polygon) => {
+    const transformed = map(polygon, vertex => transform(matrix, vertex));
     if (isMirroring(matrix)) {
       // Reverse the order to preserve the orientation.
       transformed.reverse();
@@ -6822,7 +6819,7 @@ define("./webworker.js",[],function () { 'use strict';
   const toPlane$1 = (surface) => toPlane(surface[0]);
 
   // Transforms
-  const transform$6 = (matrix, surface) => surface.map(polygon => transform$5(matrix, polygon));
+  const transform$5 = (matrix, surface) => surface.map(polygon => transform$4(matrix, polygon));
 
   const assertCoplanarPolygon = (polygon) => {
     if (!isCoplanar(polygon)) {
@@ -7024,7 +7021,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param  {Tree}       tree
    * @return {Node}       root
    */
-  function add$3 (i, data, t, comparator, tree) {
+  function add$2 (i, data, t, comparator, tree) {
     const node = new Node(i, data);
 
     if (t === null) {
@@ -7159,7 +7156,7 @@ define("./webworker.js",[],function () { 'use strict';
      * @return {Node|null}
      */
     add (key, data) {
-      return this._root = add$3(key, data, this._root, this._comparator, this);
+      return this._root = add$2(key, data, this._root, this._comparator, this);
     }
 
 
@@ -13107,8 +13104,8 @@ define("./webworker.js",[],function () { 'use strict';
     }
     assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
-    let retessellatedSurface = makeConvex({}, transform$6(to, surface));
-    return transform$6(from, retessellatedSurface);
+    let retessellatedSurface = makeConvex({}, transform$5(to, surface));
+    return transform$5(from, retessellatedSurface);
   };
 
   const measureArea$1 = (surface) => {
@@ -13120,7 +13117,7 @@ define("./webworker.js",[],function () { 'use strict';
     return total;
   };
 
-  const multiply$2 = (matrix, solid) => solid.map(surface => transform$6(matrix, surface));
+  const multiply$2 = (matrix, solid) => solid.map(surface => transform$5(matrix, surface));
 
   const rotateX = (radians, solid) => multiply$2(fromXRotation(radians), solid);
   const scale$4 = (vector, solid) => multiply$2(fromScaling(vector), solid);
@@ -13177,7 +13174,7 @@ define("./webworker.js",[],function () { 'use strict';
   const measureBoundingSphere = (solid) => {
     if (solid.boundingSphere === undefined) {
       const [min, max] = measureBoundingBox$1(solid);
-      const center = scale(0.5, add$1(min, max));
+      const center = scale(0.5, add(min, max));
       const radius = distance(center, max);
       solid.boundingSphere = [center, radius];
     }
@@ -13828,23 +13825,23 @@ define("./webworker.js",[],function () { 'use strict';
       transformed.assembly = item.assembly;
     }
     if (item.paths) {
-      transformed.paths = transform$3(matrix, item.paths);
+      transformed.paths = transform$2(matrix, item.paths);
     }
     if (item.points) {
-      transformed.points = transform$4(matrix, item.points);
+      transformed.points = transform$3(matrix, item.points);
     }
     if (item.solid) {
       transformed.solid = multiply$2(matrix, item.solid);
     }
     if (item.z0Surface) {
       // FIX: Handle transformations that take the surface out of z0.
-      transformed.z0Surface = transform$6(matrix, item.z0Surface);
+      transformed.z0Surface = transform$5(matrix, item.z0Surface);
     }
     transformed.tags = item.tags;
     return transformed;
   };
 
-  const transform$7 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
+  const transform$6 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
 
   // FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
   const union$4 = (geometry, ...geometries) => {
@@ -13871,7 +13868,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const scale$5 = (vector, assembly) => transform$7(fromScaling(vector), assembly);
+  const scale$5 = (vector, assembly) => transform$6(fromScaling(vector), assembly);
 
   // FIX: Make it clear this should be lazy.
   class Assembly {
@@ -13944,7 +13941,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
 
     transform (matrix) {
-      return fromGeometry(transform$7(matrix, toGeometry(this)));
+      return fromGeometry(transform$6(matrix, toGeometry(this)));
     }
 
     union (...geometries) {
@@ -14071,44 +14068,6 @@ define("./webworker.js",[],function () { 'use strict';
   Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: polygons }));
   Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometry({ solid: surfaces }));
   Shape.fromSolid = (solid) => Shape.fromLazyGeometry(fromGeometry({ solid: solid }));
-
-  class Cursor {
-    constructor ({ matrix = identity(), path = [null, [0, 0, 0]] } = {}) {
-      this.matrix = matrix;
-      this.path = path.slice();
-    }
-
-    rotateZ (angle) {
-      return this.transform(fromZRotation(angle * Math.PI * 2 / 360));
-    }
-
-    toPoint () {
-      const last = this.path[this.path.length - 1];
-      if (last === null) {
-        return [0, 0, 0];
-      } else {
-        return last;
-      }
-    }
-
-    toPath () {
-      return this.path;
-    }
-
-    toShape () {
-      return Shape.fromPath(this.toPath());
-    }
-
-    transform (matrix) {
-      return new Cursor({ matrix: multiply$1(matrix, this.matrix), path: this.path });
-    }
-
-    translate ([x = 0, y = 0, z = 0]) {
-      const path = this.path.slice();
-      path.push(add(this.toPoint(), transform(this.matrix, [x, y, z])));
-      return new Cursor({ matrix: this.matrix, path });
-    }
-  }
 
   /**
    *
@@ -14380,7 +14339,23 @@ define("./webworker.js",[],function () { 'use strict';
    * ```
    * assemble(cube(30).above().as('cube'),
    *          cylinder(10, 40).above().as('cylinder'))
-   *   .toComponents({ requires: ['cube'] })[0]
+   *   .keep('cube')
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          assemble(circle(40),
+   *                   circle(50).outline()).as('circles'))
+   *   .keep('circles')
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          assemble(circle(40).as('circle'),
+   *                   circle(50).outline().as('outline')))
+   *   .drop('outline')
    * ```
    * :::
    *
@@ -14477,7 +14452,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const center = (shape) => {
     const [minPoint, maxPoint] = measureBoundingBox$2(shape);
-    let center = scale(0.5, add$1(minPoint, maxPoint));
+    let center = scale(0.5, add(minPoint, maxPoint));
     return translate$2(negate(center), shape);
   };
 
@@ -14722,7 +14697,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const isDegenerate = (polygon) => {
     for (let nth = 0; nth < polygon.length; nth++) {
-      if (equals$1(polygon[nth], polygon[(nth + 1) % polygon.length])) {
+      if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
         return true;
       }
     }
@@ -14951,7 +14926,7 @@ define("./webworker.js",[],function () { 'use strict';
       // FIX: Use a binary search to take advantage of the sorting of the edges.
       for (let nth = 0; nth < edges.length; nth++) {
         const candidate = edges[nth];
-        if (equals$1(candidate[START], start)) {
+        if (equals(candidate[START], start)) {
           edges.splice(nth, 1);
           return candidate;
         }
@@ -14969,7 +14944,7 @@ define("./webworker.js",[],function () { 'use strict';
       let edge = edges.shift();
       const loop = [edge[START]];
       try {
-        while (!equals$1(edge[END], loop[0])) {
+        while (!equals(edge[END], loop[0])) {
           edge = extractSuccessor(edges, edge[END]);
           loop.push(edge[START]);
         }
@@ -15087,9 +15062,9 @@ define("./webworker.js",[],function () { 'use strict';
     return blessAsTriangles(triangles);
   };
 
-  const transform$8 = (matrix, polygons) => polygons.map(polygon => transform$5(matrix, polygon));
+  const transform$7 = (matrix, polygons) => polygons.map(polygon => transform$4(matrix, polygon));
 
-  const translate$3 = (vector, polygons) => transform$8(fromTranslation(vector), polygons);
+  const translate$3 = (vector, polygons) => transform$7(fromTranslation(vector), polygons);
 
   /**
    * Construct a regular unit polygon of a given edge count.
@@ -15129,15 +15104,15 @@ define("./webworker.js",[],function () { 'use strict';
         const start = floor[i];
         const end = floor[(i + 1) % floor.length];
         // Remember that we are walking CCW.
-        extruded.push([start, add$1(start, up), end]);
-        extruded.push([end, add$1(start, up), add$1(end, up)]);
+        extruded.push([start, add(start, up), end]);
+        extruded.push([end, add(start, up), add(end, up)]);
       }
     }
 
     // Build the roof and floor from convex polygons.
     for (const polygon of makeConvex$2({}, polygons)) {
       const floor = polygon.map(point => [point[0], point[1], height / -2]).reverse();
-      const roof = floor.map(vertex => add$1(vertex, up)).reverse();
+      const roof = floor.map(vertex => add(vertex, up)).reverse();
       extruded.push(roof, floor);
     }
 
@@ -15268,15 +15243,15 @@ define("./webworker.js",[],function () { 'use strict';
         const start = floor[i];
         const end = floor[(i + 1) % floor.length];
         // Remember that we are walking CCW.
-        polygons.push([start, add$1(start, up), end]);
-        polygons.push([end, add$1(start, up), add$1(end, up)]);
+        polygons.push([start, add(start, up), end]);
+        polygons.push([end, add(start, up), add(end, up)]);
       }
     }
 
     // Build the roof and floor from convex polygons.
     for (const polygon of makeConvex({}, surface)) {
       const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
-      const roof = floor.map(vertex => add$1(vertex, up)).reverse();
+      const roof = floor.map(vertex => add(vertex, up)).reverse();
       polygons.push(roof, floor);
     }
 
@@ -15535,6 +15510,123 @@ define("./webworker.js",[],function () { 'use strict';
   cube.fromDiameter = fromDiameter$1;
   cube.fromCorners = fromCorners;
 
+  // Normalize (1, 2, 3) and ([1, 2, 3]).
+  const normalizeVector = (...params) => {
+    if (params[0] instanceof Array) {
+      const [x = 0, y = 0, z = 0] = params[0];
+      return [x, y, z];
+    } else {
+      const [x = 0, y = 0, z = 0] = params;
+      return [x, y, z];
+    }
+  };
+
+  /**
+   *
+   * # Cursor
+   *
+   * A cursor is moved by transformations rather than the universe around it.
+   *
+   * ::: illustration { "view": { "position": [0, -1, 40] } }
+   * ```
+   * cursor()
+   *   .translate(5)
+   *   .turn(45)
+   *   .translate(5)
+   *   .interior()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 40] } }
+   * ```
+   * cursor()
+   *   .translate(5)
+   *   .turn(-45)
+   *   .translate(5)
+   *   .interior()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 25] } }
+   * ```
+   * cursor()
+   *   .translate(5)
+   *   .corner(45)
+   *   .translate(5)
+   *   .interior()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 25] } }
+   * ```
+   * cursor()
+   *   .translate(5)
+   *   .corner(-45)
+   *   .translate(5)
+   *   .interior()
+   * ```
+   * :::
+   *
+   **/
+
+  class Cursor {
+    constructor ({ matrix = identity(), path = [null, [0, 0, 0]] } = {}) {
+      this.matrix = matrix;
+      this.path = path.slice();
+    }
+
+    close () {
+      return new Cursor({ matrix: this.matrix, path: close(this.path) });
+    }
+
+    corner (angle) {
+      return this.rotateZ(180 - angle);
+    }
+
+    interior () {
+      return this.close().toShape().interior();
+    }
+
+    outline () {
+      return this.close().toShape();
+    }
+
+    rotateZ (angle) {
+      return this.transform(fromZRotation(angle * Math.PI * 2 / 360));
+    }
+
+    toPoint () {
+      const last = this.path[this.path.length - 1];
+      if (last === null) {
+        return [0, 0, 0];
+      } else {
+        return last;
+      }
+    }
+
+    toPath () {
+      return this.path;
+    }
+
+    toShape () {
+      return Shape.fromPath(this.toPath());
+    }
+
+    transform (matrix) {
+      return new Cursor({ matrix: multiply$1(matrix, this.matrix), path: this.path });
+    }
+
+    translate (...params) {
+      const [x, y, z] = normalizeVector(params);
+      const path = this.path.slice();
+      path.push(add(this.toPoint(), transform(this.matrix, [x, y, z])));
+      return new Cursor({ matrix: this.matrix, path });
+    }
+
+    turn (angle) {
+      return this.rotateZ(angle);
+    }
+  }
+
+  const cursor = () => new Cursor();
+
   const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
     return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
   };
@@ -15784,6 +15876,18 @@ define("./webworker.js",[],function () { 'use strict';
    *      circle(10))
    * ```
    * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * assemble(point([0, 0, 10]),
+   *          circle(10))
+   *   .hull()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * point([0, 0, 10]).hull(circle(10))
+   * ```
+   * :::
    *
    **/
 
@@ -15793,6 +15897,10 @@ define("./webworker.js",[],function () { 'use strict';
     geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));
     return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
   };
+
+  const method$c = function (...shapes) { return hull(this, ...shapes); };
+
+  Shape.prototype.hull = method$c;
 
   /**
    *
@@ -15826,9 +15934,9 @@ define("./webworker.js",[],function () { 'use strict';
     return Shape.fromPathsToZ0Surface(union$2(...getPaths(shape.toGeometry())));
   };
 
-  const method$c = function (options) { return interior(options, this); };
+  const method$d = function (options) { return interior(options, this); };
 
-  Shape.prototype.interior = method$c;
+  Shape.prototype.interior = method$d;
 
   /**
    *
@@ -15881,9 +15989,9 @@ define("./webworker.js",[],function () { 'use strict';
 
   const intersection$5 = (...params) => intersectionLazily(...params);
 
-  const method$d = function (...shapes) { return intersection$5(this, ...shapes); };
+  const method$e = function (...shapes) { return intersection$5(this, ...shapes); };
 
-  Shape.prototype.intersection = method$d;
+  Shape.prototype.intersection = method$e;
 
   /**
    *
@@ -15934,9 +16042,9 @@ define("./webworker.js",[],function () { 'use strict';
 
   keep.fromValues = fromValue$6;
 
-  const method$e = function (...tags) { return keep(tags, this); };
+  const method$f = function (...tags) { return keep(tags, this); };
 
-  Shape.prototype.keep = method$e;
+  Shape.prototype.keep = method$f;
 
   /**
    *
@@ -15959,9 +16067,9 @@ define("./webworker.js",[],function () { 'use strict';
     return translate$2(negate([maxPoint[X$1], 0, 0]), shape);
   };
 
-  const method$f = function () { return left(this); };
+  const method$g = function () { return left(this); };
 
-  Shape.prototype.left = method$f;
+  Shape.prototype.left = method$g;
 
   /**
    *
@@ -15998,37 +16106,35 @@ define("./webworker.js",[],function () { 'use strict';
     );
   };
 
-  const studSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0 } = {}) => {
+  const studSheet = ({ width = 32, length = 32, height = 1.8, studDiameter = 5, studHeight = 1.8, studFaces = 32, studMarginX = 0, studMarginY = 0, play = 0.1 } = {}) => {
     const studs = [];
     for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
       for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
         studs.push(stud().translate([x - width / 2, y - length / 2, height / 2]));
       }
     }
-    return assemble$1(cube(width, length, height), ...studs);
+    return assemble$1(cube(width - play * 2, length - play * 2, height), ...studs);
   };
 
-  const socket = ({ diameter = 5.05, height = 1.8, gripRingHeight = 0.7, faces = 32, play = 0.0 } = {}) => {
+  const socket = ({ diameter = 5.1, height = 1.8, gripRingHeight = 0.4, gripRingContraction = 0.1, faces = 32, play = 0.0 } = {}) => {
     // A stud is theoretically 1.7 mm tall.
     // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
     const bottom = 0.5;
-    const expansion = 0.5;
     const topHeight = height - gripRingHeight - bottom;
     return assemble$1(
       // flaired top
-      cylinder({ diameter: (diameter + play) + expansion, height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
+      cylinder({ diameter: (diameter + play), height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
       // grip ring
-      cylinder({ diameter: (diameter + play), height: gripRingHeight }).translate([0, 0, gripRingHeight / 2 + bottom]),
+      cylinder({ diameter: (diameter + play) - gripRingContraction, height: gripRingHeight }).translate([0, 0, gripRingHeight / 2 + bottom]),
       // flaired base
-      cylinder({ diameter: (diameter + play) + expansion, height: bottom }).translate([0, 0, bottom / 2]));
+      cylinder({ diameter: (diameter + play), height: bottom }).translate([0, 0, bottom / 2]));
   };
 
-  const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1, studDiameter = 5, studHeight = 1.8, studMarginX = 0, studMarginY = 0, studPlay = 0 } = {}) => {
+  const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1, studMarginX = 0, studMarginY = 0, stud = {} } = {}) => {
     const sockets = [];
     for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
       for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-        sockets.push(socket({ diameter: studDiameter, height: studHeight, play: studPlay })
-            .translate([x - width / 2, y - length / 2, height / -2]));
+        sockets.push(socket(stud).translate(x - width / 2, y - length / 2, height / -2));
       }
     }
     return assemble$1(cube(width - play * 2, length - play * 2, height),
@@ -19245,9 +19351,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$g = function (...shapes) { return union$5(this, ...shapes); };
+  const method$h = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$g;
+  Shape.prototype.union = method$h;
 
   /**
    *
@@ -19335,9 +19441,9 @@ define("./webworker.js",[],function () { 'use strict';
     return Shape.fromPaths(union$2(...getZ0Surfaces(shape.toGeometry())));
   };
 
-  const method$h = function (options) { return outline(options, this); };
+  const method$i = function (options) { return outline(options, this); };
 
-  Shape.prototype.outline = method$h;
+  Shape.prototype.outline = method$i;
 
   const fromValue$7 = (point) => Shape.fromPoint(point);
 
@@ -19356,7 +19462,37 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    * ::: illustration
    * ```
+   * point(1)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * point(1, 2)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * point(1, 2, 3)
+   * ```
+   * :::
+   * ::: illustration
+   * ```
    * point([1, 1, 0])
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * point([1])
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * point([1, 2])
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * point([1, 2, 3])
    * ```
    * :::
    *
@@ -19365,14 +19501,19 @@ define("./webworker.js",[],function () { 'use strict';
   const point = dispatch(
     'point',
     // point()
-    (...rest) => {
+    (x = 0, y = 0, z = 0, ...rest) => {
+      assertNumber(x);
+      assertNumber(y);
+      assertNumber(z);
       assertEmpty(rest);
-      return () => fromValue$7([0, 0, 0]);
+      return () => fromValue$7([x, y, z]);
     },
     // point([1, 2, 3])
-    (value) => {
-      assertNumberTriple(value);
-      return () => fromValue$7(value);
+    ([x = 0, y = 0, z = 0]) => {
+      assertNumber(x);
+      assertNumber(y);
+      assertNumber(z);
+      return () => fromValue$7([x, y, z]);
     });
 
   point.fromValue = fromValue$7;
@@ -22159,7 +22300,7 @@ define("./webworker.js",[],function () { 'use strict';
     for (let nth = 1; nth < path.length; nth++) {
       const last = path[nth - 1];
       const current = path[nth];
-      if (last === null || !equals(last, current)) {
+      if (last === null || !equals$1(last, current)) {
         unrepeated.push(current);
       }
     }
@@ -22185,7 +22326,7 @@ define("./webworker.js",[],function () { 'use strict';
     const maybeClosePath = () => {
       path = removeRepeatedPoints(canonicalize$1(path));
       if (path.length > 3) {
-        if (path[0] === null && equals(path[1], path[path.length - 1])) {
+        if (path[0] === null && equals$1(path[1], path[path.length - 1])) {
           // The path is closed, remove the leading null, and the duplicate point at the end.
           path = path.slice(1, path.length - 1);
           newPath();
@@ -22221,7 +22362,7 @@ define("./webworker.js",[],function () { 'use strict';
 
     if (normalizeCoordinateSystem) {
       // Turn it upside down.
-      return transform$3(fromScaling([1, -1, 0]), paths);
+      return transform$2(fromScaling([1, -1, 0]), paths);
     } else {
       return paths;
     }
@@ -22842,7 +22983,7 @@ define("./webworker.js",[],function () { 'use strict';
           ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
 
           const output = (svgPath) =>
-            geometry.assembly.push(transform$7(scale(matrix), fromSvgPath$1({}, svgPath)));
+            geometry.assembly.push(transform$6(scale(matrix), fromSvgPath$1({}, svgPath)));
 
           // FIX: Should output a path given a stroke, should output a surface given a fill.
           switch (node.tagName) {
@@ -36763,7 +36904,7 @@ define("./webworker.js",[],function () { 'use strict';
                                           flt(b), flt(e), flt(h), 0.0,
                                           flt(c), flt(f), flt(i), 0.0,
                                           ldu(x), ldu(y), ldu(z), 1.0);
-          polygons.push(...transform$8(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
+          polygons.push(...transform$7(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
           stack.pop();
           break;
         }
@@ -36869,9 +37010,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$i = function (options = {}) { writeShape(options, this); return this; };
+  const method$j = function (options = {}) { writeShape(options, this); return this; };
 
-  Shape.prototype.writeShape = method$i;
+  Shape.prototype.writeShape = method$j;
 
   /**
    *
@@ -37114,7 +37255,7 @@ define("./webworker.js",[],function () { 'use strict';
     lines.forEach(ends => {
       ends.sort((a, b) => distance(a) - distance(b));
       for (let nth = 1; nth < ends.length; nth++) {
-        if (!equals$1(ends[nth], ends[nth - 1])) {
+        if (!equals(ends[nth], ends[nth - 1])) {
           violations.push(['unequal', [start, ...ends]]);
           violations.push(['unequal', [start, ...ends].reverse()]);
           break;
@@ -37200,8 +37341,8 @@ define("./webworker.js",[],function () { 'use strict';
     let sideobjs = sidemap[sidetag];
     for (let i = 0; i < sideobjs.length; i++) {
       let sideobj = sideobjs[i];
-      if (!equals$1(sideobj.vertex0, vertex0)) continue;
-      if (!equals$1(sideobj.vertex1, vertex1)) continue;
+      if (!equals(sideobj.vertex0, vertex0)) continue;
+      if (!equals(sideobj.vertex1, vertex1)) continue;
       if (polygonindex !== null) {
         if (sideobj.polygonindex !== polygonindex) continue;
       }
@@ -37381,7 +37522,7 @@ define("./webworker.js",[],function () { 'use strict';
                   // let t = endpos.minus(startpos).dot(direction) / direction.dot(direction)
                   let t = dot(subtract(endpos, startpos), direction) / dot(direction, direction);
                   if ((t > 0) && (t < 1)) {
-                    let closestpoint = add$1(startpos, multiply(direction, fromScalar(t)));
+                    let closestpoint = add(startpos, multiply(direction, fromScalar(t)));
                     let distancesquared = squaredDistance(closestpoint, endpos);
                     if (distancesquared < (EPS * EPS)) {
                       // Yes it's a t-junction! We need to split matchingside in two:
@@ -37577,9 +37718,9 @@ define("./webworker.js",[],function () { 'use strict';
     return translate$2(negate([minPoint[X$2], 0, 0]), shape);
   };
 
-  const method$j = function () { return right(this); };
+  const method$k = function () { return right(this); };
 
-  Shape.prototype.right = method$j;
+  Shape.prototype.right = method$k;
 
   /**
    *
@@ -37601,9 +37742,9 @@ define("./webworker.js",[],function () { 'use strict';
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$k = function (angle) { return rotateX$1(angle, this); };
+  const method$l = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$k;
+  Shape.prototype.rotateX = method$l;
 
   /**
    *
@@ -37625,9 +37766,9 @@ define("./webworker.js",[],function () { 'use strict';
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$l = function (angle) { return rotateY(angle, this); };
+  const method$m = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$l;
+  Shape.prototype.rotateY = method$m;
 
   /**
    *
@@ -37649,9 +37790,9 @@ define("./webworker.js",[],function () { 'use strict';
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$m = function (angle) { return rotateZ(angle, this); };
+  const method$n = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$m;
+  Shape.prototype.rotateZ = method$n;
 
   /**
    *
@@ -37686,9 +37827,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const method$n = function (factor) { return scale$6(factor, this); };
+  const method$o = function (factor) { return scale$6(factor, this); };
 
-  Shape.prototype.scale = method$n;
+  Shape.prototype.scale = method$o;
 
   /**
    *
@@ -38068,7 +38209,7 @@ define("./webworker.js",[],function () { 'use strict';
     const offset = [-min[X$3] * scale, (height - max[Y$3]) * scale, 0];
     const matrix = multiply$1(fromTranslation(offset),
                             fromScaling([scale, scale, scale]));
-    for (const path of transform$3(matrix, paths)) {
+    for (const path of transform$2(matrix, paths)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
@@ -38088,15 +38229,48 @@ define("./webworker.js",[],function () { 'use strict';
                      footer).join('\n');
   };
 
+  /**
+   *
+   * # Write PDF
+   *
+   * ```
+   * cube().crossSection().writePdf({ path: 'cube.pdf' });
+   * ```
+   *
+   * ```
+   * writePdf({ path: 'cube.pdf' }, cube().crossSection());
+   * ```
+   *
+   **/
+
   const writePdf = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
     return writeFile({ geometry, preview: true }, path, toPdf({ preview: true, ...options }, geometry));
   };
 
-  const method$o = function (options = {}) { writePdf(options, this); return this; };
+  const method$p = function (options = {}) { writePdf(options, this); return this; };
 
-  Shape.prototype.writePdf = method$o;
+  Shape.prototype.writePdf = method$p;
+
+  /**
+   *
+   * # Write STL
+   *
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * cube().writeStl({ path: 'cube.stl' });
+   * readStl({ path: 'cube.stl' });
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * writeStl({ path: 'cube.stl' }, cube());
+   * readStl({ path: 'cube.stl' });
+   * ```
+   * :::
+   *
+   **/
 
   const toGeometry$2 = ({ disjoint = true }, shape) => {
     if (disjoint) {
@@ -38112,9 +38286,28 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$p = function (options = {}) { writeStl(options, this); return this; };
+  const method$q = function (options = {}) { writeStl(options, this); return this; };
 
-  Shape.prototype.writeStl = method$p;
+  Shape.prototype.writeStl = method$q;
+
+  /**
+   *
+   * # Write SVG
+   *
+   * ::: illustration
+   * ```
+   * cube().crossSection().writeSvg({ path: 'svg/cube1.svg' });
+   * readSvg({ path: 'svg/cube1.svg' })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * writeSvg({ path: 'svg/cube2.svg' }, cube().crossSection());
+   * readSvg({ path: 'svg/cube2.svg' })
+   * ```
+   * :::
+   *
+   **/
 
   const writeSvg = async (options, shape) => {
     const { path } = options;
@@ -38122,9 +38315,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$q = function (options = {}) { writeSvg(options, this); return this; };
+  const method$r = function (options = {}) { writeSvg(options, this); return this; };
 
-  Shape.prototype.writeSvg = method$q;
+  Shape.prototype.writeSvg = method$r;
 
   // Polyfills
 
@@ -88585,9 +88778,15 @@ define("./webworker.js",[],function () { 'use strict';
 
   const toSvg$1 = async (options = {}, geometry) => toSvgSync(options, geometry);
 
+  const header$1 =
+`<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated by jsxcad -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+`  ;
+
   const toSvgSync = (options = {}, geometry) => {
     const [scene, camera] = build$1(options, geometry);
-    const { pageSize = [500, 500] } = options;
+    const { includeXmlHeader = true, pageSize = [500, 500] } = options;
     const [pageWidth, pageHeight] = pageSize;
 
     const renderer = new SVGRenderer({});
@@ -88595,7 +88794,11 @@ define("./webworker.js",[],function () { 'use strict';
     renderer.render(scene, camera);
 
     const serializer = new domParser_2();
-    return serializer.serializeToString(renderer.domElement);
+    let svg = serializer.serializeToString(renderer.domElement) + '\n';
+    if (includeXmlHeader) {
+      svg = header$1 + svg;
+    }
+    return svg;
   };
 
   const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer', includeEditor = false, includeEvaluator = false, initialScript = '', initialPage = 'editor', previewPage = 'default' }, geometry) => {
@@ -88652,15 +88855,37 @@ define("./webworker.js",[],function () { 'use strict';
     return `<html><head>${head}</head><body id="body">${body}</body></html>`;
   };
 
+  /**
+   *
+   * # Write SVG Photo
+   *
+   * This takes a scene and a camera position and generates a two-dimensional SVG representation
+   * as a svg tag.
+   *
+   * ::: illustration { "view": { "position": [0, -1, 2500] } }
+   * ```
+   * cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
+   * readSvg({ path: 'svg/cube3.svg' })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 2500] } }
+   * ```
+   * writeSvgPhoto({ path: 'svg/cube4.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } }, cube());
+   * readSvg({ path: 'svg/cube4.svg' })
+   * ```
+   * :::
+   *
+   **/
+
   const writeSvgPhoto = async (options, shape) => {
     const { path } = options;
     const geometry = shape.toDisjointGeometry();
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$r = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$s = function (options = {}) { writeSvgPhoto(options, this); return this; };
 
-  Shape.prototype.writeSvgPhoto = method$r;
+  Shape.prototype.writeSvgPhoto = method$s;
 
   const writeThreejsPage = async (options, shape) => {
     const { path } = options;
@@ -88668,9 +88893,9 @@ define("./webworker.js",[],function () { 'use strict';
     return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$s = function (options = {}) { writeThreejsPage(options, this); return this; };
+  const method$t = function (options = {}) { writeThreejsPage(options, this); return this; };
 
-  Shape.prototype.writeThreejsPage = method$s;
+  Shape.prototype.writeThreejsPage = method$t;
 
   /**
    *
@@ -88682,7 +88907,6 @@ define("./webworker.js",[],function () { 'use strict';
    */
 
   var api = /*#__PURE__*/Object.freeze({
-    Cursor: Cursor,
     Shape: Shape,
     above: above,
     acos: acos,
@@ -88695,6 +88919,7 @@ define("./webworker.js",[],function () { 'use strict';
     crossSection: crossSection,
     cos: cos,
     cube: cube,
+    cursor: cursor,
     cylinder: cylinder,
     difference: difference$5,
     drop: drop,

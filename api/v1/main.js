@@ -7,7 +7,6 @@
  * the api uses.
  */
 
-import { Cursor } from './Cursor';
 import { Shape } from './Shape';
 import { above } from './above';
 import { acos } from './acos';
@@ -20,6 +19,7 @@ import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
 import { cube } from './cube';
+import { cursor } from './cursor';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { drop } from './drop';
@@ -43,7 +43,7 @@ import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
 import { readFont } from './readFont';
-// import { readJscad } from './readJscad';
+import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readShape } from './readShape';
 import { readStl } from './readStl';
@@ -70,7 +70,6 @@ import { writeSvgPhoto } from './writeSvgPhoto';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
-  Cursor,
   Shape,
   above,
   acos,
@@ -83,6 +82,7 @@ export {
   crossSection,
   cos,
   cube,
+  cursor,
   cylinder,
   difference,
   drop,
@@ -105,7 +105,7 @@ export {
   polyhedron,
   readDst,
   readFont,
-  // readJscad,
+  readJscad,
   readLDraw,
   readShape,
   readStl,

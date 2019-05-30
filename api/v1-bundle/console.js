@@ -9,7 +9,7 @@ export const installConsole = ({ addPage, document, watchFile }) => {
             (options, file) => {
               viewerElement.appendChild(document.createTextNode(file.data));
               viewerElement.appendChild(document.createElement('br'));
-              viewerElement.scrollTop = viewerElement.scrollHeight;
+              viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
             });
   return {};
 };

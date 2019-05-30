@@ -83,6 +83,16 @@ export const assertNumber = (...values) => {
   return true;
 };
 
+export const assertNumbers = (...values) => {
+  for (const value of values) {
+    if (!value.length) {
+      throw Error(`Not an array: ${value}`);
+    }
+    value.every(assertNumber);
+  }
+  return true;
+};
+
 export const assertNumberTriple = (value) => {
   if (value.length === undefined) {
     throw Error(`Has no length: ${value}`);

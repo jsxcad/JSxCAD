@@ -12,11 +12,7 @@ export default {
     dir: 'webworker.dist',
     format: 'amd'
   },
-  external: [
-    //    'buffer',
-    //    'events',
-    //    'process'
-  ],
+  external: [],
   plugins: [
     loadz0r(),
     builtins(),
