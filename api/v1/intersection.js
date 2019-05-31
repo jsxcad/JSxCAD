@@ -1,4 +1,5 @@
-import { Shape, intersectionLazily } from './Shape';
+import { Shape, fromGeometry, toGeometry } from './Shape';
+import { intersection as intersectionGeometry } from '@jsxcad/geometry-eager';
 
 /**
  *
@@ -49,7 +50,19 @@ import { Shape, intersectionLazily } from './Shape';
  * :::
  **/
 
-export const intersection = (...params) => intersectionLazily(...params);
+export const intersection = (...shapes) => {
+  switch (shapes.length) {
+    case 0: {
+      return fromGeometry({ assembly: [] });
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(intersectionGeometry(...shapes.map(toGeometry)));
+    }
+  }
+};
 
 const method = function (...shapes) { return intersection(this, ...shapes); };
 

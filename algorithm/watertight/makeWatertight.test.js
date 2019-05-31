@@ -1,6 +1,6 @@
 import { isWatertightPolygons } from './isWatertightPolygons';
 import { makeWatertight } from './makeWatertight';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Makes box1-union-box4 test case watertight.', t => {
   const v1Output = [[[-5, -5, -5], [-5, -5, 5], [-5, 5, 5], [-5, 5, -5]], // -5,5,-5 (not this one)

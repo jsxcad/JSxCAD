@@ -4,7 +4,7 @@ import { flip } from './flip';
 import { fromPoints } from './fromPoints';
 import { measureArea } from './measureArea';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
-import { test } from 'ava';
+import test from 'ava';
 import { transform } from './transform';
 
 const empty = [];

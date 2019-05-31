@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { fromLDraw } from './fromLDraw';
-import { test } from 'ava';
+import test from 'ava';
 import { writeFile } from '@jsxcad/sys';
 
 test('Load a file', async t => {

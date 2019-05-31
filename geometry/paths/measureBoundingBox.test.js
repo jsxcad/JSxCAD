@@ -1,5 +1,5 @@
 import { measureBoundingBox } from './measureBoundingBox';
-import { test } from 'ava';
+import test from 'ava';
 
 test('matches in the trivial case.', t => {
   t.deepEqual(measureBoundingBox([[[1, 2], [3, 4]]]),

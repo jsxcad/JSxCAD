@@ -20,13 +20,13 @@
  * # Introduction
  *
  * The initial app can be opened via:
- * [http://jsxcad.js.org/preAlpha](http://jsxcad.js.org/preAlpha)
+ * <p><a href="https://jsxcad.js.org/preAlpha" target="_blank">https://jsxcad.js.org/preAlpha</a></p>
  *
  * Appending #project will select a project (stored within local storage):
- * [http://jsxcad.js.org/preAlpha#circle](http://jsxcad.js.org/preAlpha#circle)
+ * <p><a href="https://jsxcad.js.org/preAlpha#circle" target="_blank">https://jsxcad.js.org/preAlpha#circle</a></p>
  *
  * Appending @gistUrl will load the initial script from a file named 'script' in the provided gist url:
- * [http://jsxcad.js.org/preAlpha#circle@https://api.github.com/gists/3c39d513e91278681eed2eea27b0e589](http://jsxcad.js.org/preAlpha#circle@https://api.github.com/gists/3c39d513e91278681eed2eea27b0e589)
+ * <p><a href="https://jsxcad.js.org/preAlpha#circle@https://api.github.com/gists/3c39d513e91278681eed2eea27b0e589" target="_blank">https://jsxcad.js.org/preAlpha#circle@https://api.github.com/gists/3c39d513e91278681eed2eea27b0e589</a></p>
  *
  * Replace 3c39d513e91278681eed2eea27b0e589 in the example with your gist id.
  *

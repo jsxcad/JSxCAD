@@ -1,5 +1,5 @@
 import { concatenate } from './concatenate';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Concatenation of closed paths fails', t => {
   t.throws(() => concatenate([[1, 1], [2, 2]],

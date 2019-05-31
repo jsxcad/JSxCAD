@@ -1,6 +1,6 @@
 import { buildRingSphere } from './buildRingSphere';
 import { canonicalize } from '@jsxcad/geometry-polygons';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Build a ring sphere', t => {
   t.deepEqual(canonicalize(buildRingSphere({ resolution: 8 })),

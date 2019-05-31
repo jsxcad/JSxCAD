@@ -1,15 +1,13 @@
+import { addTags, eachPoint,
+         toComponents, toDisjointGeometry, toKeptGeometry, toPoints,
+         transform } from '@jsxcad/geometry-eager';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 
-import { fromGeometry as fromGeometryToLazyGeometry } from '@jsxcad/geometry-lazy';
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
-  as (tag) {
-    return this.fromLazyGeometry(toLazyGeometry(this).addTag(tag));
-  }
-
-  assemble (...shapes) {
-    return this.fromLazyGeometry(toLazyGeometry(this).assemble(...shapes.map(toLazyGeometry)));
+  as (...tags) {
+    return fromGeometry(addTags(tags, toGeometry(this)));
   }
 
   close () {
@@ -32,86 +30,53 @@ export class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor (lazyGeometry = fromGeometryToLazyGeometry({ assembly: [] })) {
-    this.lazyGeometry = lazyGeometry;
-  }
-
-  difference (...shapes) {
-    return this.fromLazyGeometry(toLazyGeometry(this).difference(...shapes.map(toLazyGeometry)));
+  constructor (geometry = fromGeometry({ assembly: [] })) {
+    this.geometry = geometry;
   }
 
   eachPoint (options = {}, operation) {
-    toLazyGeometry(this).eachPoint(options, operation);
-  }
-
-  fromLazyGeometry (geometry) {
-    return Shape.fromLazyGeometry(geometry);
-  }
-
-  intersection (...shapes) {
-    return this.fromLazyGeometry(toLazyGeometry(this).intersection(...shapes.map(toLazyGeometry)));
-  }
-
-  toLazyGeometry () {
-    return this.lazyGeometry;
+    eachPoint(options, operation, toGeometry(this));
   }
 
   toComponents (options = {}) {
-    return toLazyGeometry(this).toComponents(options).map(Shape.fromLazyGeometry);
+    return toComponents(options, toGeometry(this)).map(fromGeometry);
   }
 
   toDisjointGeometry (options = {}) {
-    return toLazyGeometry(this).toDisjointGeometry(options);
+    return toDisjointGeometry(toGeometry(this));
+  }
+
+  toKeptGeometry (options = {}) {
+    return toKeptGeometry(toGeometry(this));
   }
 
   toGeometry (options = {}) {
-    return toLazyGeometry(this).toGeometry(options);
+    return this.geometry;
   }
 
   toPoints (options = {}) {
-    return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));
+    return toPoints(options, this.toGeometry());
   }
 
   transform (matrix) {
-    return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));
-  }
-
-  union (...shapes) {
-    return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
-  }
-
-  withComponents (options = {}) {
-    const components = this.toComponents(options);
-    return assembleLazily(...components);
+    return fromGeometry(transform(matrix, this.toGeometry()));
   }
 }
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
-const toLazyGeometry = (shape) => shape.toLazyGeometry();
+Shape.fromClosedPath = (path) => fromGeometry({ paths: [closePath(path)] });
+Shape.fromGeometry = (geometry) => new Shape(geometry);
+Shape.fromOpenPath = (path) => fromGeometry({ paths: [openPath(path)] });
+Shape.fromPath = (path) => fromGeometry({ paths: [path] });
+Shape.fromPaths = (paths) => fromGeometry({ paths: paths });
+Shape.fromPathToZ0Surface = (path) => fromGeometry({ z0Surface: [path] });
+Shape.fromPathsToZ0Surface = (paths) => fromGeometry({ z0Surface: paths });
+Shape.fromPoint = (point) => fromGeometry({ points: [point] });
+Shape.fromPoints = (points) => fromGeometry({ points: points });
+Shape.fromPolygonsToSolid = (polygons) => fromGeometry({ solid: fromPolygonsToSolid({}, polygons) });
+Shape.fromPolygonsToZ0Surface = (polygons) => fromGeometry({ z0Surface: polygons });
+Shape.fromSurfaces = (surfaces) => fromGeometry({ solid: surfaces });
+Shape.fromSolid = (solid) => fromGeometry({ solid: solid });
 
-export const assembleLazily = (shape, ...shapes) =>
-  Shape.fromLazyGeometry(toLazyGeometry(shape).assemble(...shapes.map(toLazyGeometry)));
-
-export const unionLazily = (shape, ...shapes) =>
-  Shape.fromLazyGeometry(toLazyGeometry(shape).union(...shapes.map(toLazyGeometry)));
-
-export const differenceLazily = (shape, ...shapes) =>
-  Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
-
-export const intersectionLazily = (shape, ...shapes) =>
-  Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry)));
-
-Shape.fromClosedPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [closePath(path)] }));
-Shape.fromGeometry = (geometry) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry(geometry));
-Shape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);
-Shape.fromOpenPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [openPath(path)] }));
-Shape.fromPath = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: [path] }));
-Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ paths: paths }));
-Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: [path] }));
-Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: paths }));
-Shape.fromPoint = (point) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ points: [point] }));
-Shape.fromPoints = (points) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ points: points }));
-Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: fromPolygonsToSolid({}, polygons) }));
-Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ z0Surface: polygons }));
-Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: surfaces }));
-Shape.fromSolid = (solid) => Shape.fromLazyGeometry(fromGeometryToLazyGeometry({ solid: solid }));
+export const fromGeometry = Shape.fromGeometry;
+export const toGeometry = (shape) => shape.toGeometry();

@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { readFile } from '@jsxcad/sys';
-import { test } from 'ava';
+import test from 'ava';
 import { toFont } from './main';
 
 test('Render a letter', async (t) => {

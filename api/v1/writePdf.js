@@ -17,8 +17,12 @@ import { writeFile } from '@jsxcad/sys';
  **/
 
 export const writePdf = async (options, shape) => {
+  if (typeof options === 'string') {
+    // Support writePdf('foo', bar);
+    options = { path: options };
+  }
   const { path } = options;
-  const geometry = shape.toDisjointGeometry();
+  const geometry = shape.toKeptGeometry();
   return writeFile({ geometry, preview: true }, path, toPdf({ preview: true, ...options }, geometry));
 };
 

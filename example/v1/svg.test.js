@@ -1,6 +1,6 @@
 import { main } from './svg';
 import { readFileSync } from 'fs';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Expected svg', async (t) => {
   await main();

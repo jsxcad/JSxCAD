@@ -1,4 +1,5 @@
-import { Shape, unionLazily } from './Shape';
+import { Shape, fromGeometry, toGeometry } from './Shape';
+import { union as unionGeometry } from '@jsxcad/geometry-eager';
 
 /**
  *
@@ -48,16 +49,16 @@ import { Shape, unionLazily } from './Shape';
  *
  **/
 
-export const union = (...params) => {
-  switch (params.length) {
+export const union = (...shapes) => {
+  switch (shapes.length) {
     case 0: {
-      return Shape.fromGeometry({ assembly: [] });
+      return fromGeometry({ assembly: [] });
     }
     case 1: {
-      return params[0];
+      return shapes[0];
     }
     default: {
-      return unionLazily(...params);
+      return fromGeometry(unionGeometry(...shapes.map(toGeometry)));
     }
   }
 };

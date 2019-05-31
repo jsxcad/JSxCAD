@@ -2,7 +2,7 @@ import { unitCubePolygons, unitRegularTriangularPrismPolygons } from '@jsxcad/da
 
 import { canonicalize } from './canonicalize';
 import { fromPolygons } from '@jsxcad/geometry-solid';
-import { test } from 'ava';
+import test from 'ava';
 import { toSolid } from './toSolid';
 
 /*

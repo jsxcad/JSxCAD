@@ -5,7 +5,7 @@ import { fromPolygons } from '@jsxcad/geometry-solid';
 import fs from 'fs';
 import { scale as scalePaths } from '@jsxcad/geometry-paths';
 import { scale as scaleSurface } from '@jsxcad/geometry-surface';
-import { test } from 'ava';
+import test from 'ava';
 import { toSvg } from './toSvg';
 
 const { readFile } = fs.promises;

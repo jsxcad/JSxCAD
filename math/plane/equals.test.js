@@ -1,5 +1,5 @@
 import { equals } from './equals';
-import { test } from 'ava';
+import test from 'ava';
 
 test('plane: equals() should return correct booleans', (t) => {
   t.true(equals([0, 0, 0, 0], [0, 0, 0, 0]));

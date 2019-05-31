@@ -3,7 +3,7 @@ import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shap
 
 import { canonicalize } from './canonicalize';
 import { intersection } from './intersection';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Simple', t => {
   const intersected = intersection({ assembly: [{ z0Surface: [unitSquarePolygon] }] },

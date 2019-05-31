@@ -2,7 +2,7 @@ import { canonicalize } from './canonicalize';
 import { fromPoints } from './fromPoints';
 import { fromValues } from './fromValues';
 import { reverse } from './reverse';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line2: reverse() should return proper lines', (t) => {
   const line1 = fromValues();

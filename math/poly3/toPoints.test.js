@@ -1,4 +1,4 @@
-import { test } from 'ava';
+import test from 'ava';
 import { toPoints } from './toPoints';
 
 test('Exercise toPoints', t => {

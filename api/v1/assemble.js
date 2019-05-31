@@ -1,4 +1,5 @@
-import { Shape, assembleLazily } from './Shape';
+import { Shape, fromGeometry, toGeometry } from './Shape';
+import { assemble as assembleGeometry } from '@jsxcad/geometry-eager';
 
 /**
  *
@@ -50,16 +51,16 @@ import { Shape, assembleLazily } from './Shape';
  *
  **/
 
-export const assemble = (...params) => {
-  switch (params.length) {
+export const assemble = (...shapes) => {
+  switch (shapes.length) {
     case 0: {
       return Shape.fromGeometry({ assembly: [] });
     }
     case 1: {
-      return params[0];
+      return shapes[0];
     }
     default: {
-      return assembleLazily(...params);
+      return fromGeometry(assembleGeometry(...shapes.map(toGeometry)));
     }
   }
 };

@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { scriptToOperator } from './scriptToOperator';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Trivial', async (t) => {
   const { getGeometry } = await scriptToOperator({}, 'const main = () => cube();');

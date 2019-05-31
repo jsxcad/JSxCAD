@@ -1,6 +1,6 @@
 import { fromPoints } from '@jsxcad/math-plane';
 import { splitSurface } from './splitSurface';
-import { test } from 'ava';
+import test from 'ava';
 import { toGeneric } from '@jsxcad/geometry-surface';
 
 const square = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]];

@@ -1,7 +1,7 @@
 import { create } from './create';
 import { fromPoints } from './fromPoints';
 import { origin } from './origin';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line3: origin() should return proper origins', (t) => {
   const line1 = create();

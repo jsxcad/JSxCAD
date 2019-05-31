@@ -1,7 +1,7 @@
 import { buildRegularPrism } from './buildRegularPrism';
 import { canonicalize } from '@jsxcad/geometry-polygons';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
-import { test } from 'ava';
+import test from 'ava';
 
 test('A simple triangular prism', t => {
   const polygons = canonicalize(buildRegularPrism({ edges: 3 }));

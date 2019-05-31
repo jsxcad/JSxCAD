@@ -37,7 +37,7 @@ import { toPolygons } from '@jsxcad/geometry-solid';
  **/
 
 export const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-  const solids = getSolids(shape.toGeometry());
+  const solids = getSolids(shape.toKeptGeometry());
   const shapes = [];
   for (const solid of solids) {
     const polygons = toPolygons({}, solid);

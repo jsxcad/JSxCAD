@@ -1,5 +1,5 @@
 import { canonicalize as c } from './canonicalize';
-import { test } from 'ava';
+import test from 'ava';
 import { unit } from './unit';
 
 test('vec3: unit() called with one paramerter should return a vec3 with correct values', (t) => {

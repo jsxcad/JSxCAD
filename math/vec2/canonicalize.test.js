@@ -1,6 +1,6 @@
 import { canonicalize } from './canonicalize';
 import { equals } from './equals';
-import { test } from 'ava';
+import test from 'ava';
 
 const piVec = [Math.PI, Math.PI];
 

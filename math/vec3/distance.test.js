@@ -1,5 +1,5 @@
 import { distance } from './distance';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: distance() should return correct values', (t) => {
   t.is(distance([0, 0, 0], [0, 0, 0]), 0);

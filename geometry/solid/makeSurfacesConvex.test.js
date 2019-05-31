@@ -1,7 +1,7 @@
 import { canonicalize } from './canonicalize';
 import { fromPolygons } from './fromPolygons';
 import { makeSurfacesConvex } from './makeSurfacesConvex';
-import { test } from 'ava';
+import test from 'ava';
 import { unitCubePolygons } from '@jsxcad/data-shape';
 
 test('Retessellate a cube to a defragmented triangulation.', t => {

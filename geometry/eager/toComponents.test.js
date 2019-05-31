@@ -1,4 +1,4 @@
-import { test } from 'ava';
+import test from 'ava';
 import { toComponents } from './toComponents';
 
 test('Requires A', t => {

@@ -1,5 +1,5 @@
 import { readFile } from './readFile';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Utf8 read', async t => {
   const data = await readFile({ as: 'utf8', sources: [{ file: 'testdata/hello.txt' }] }, 'tmp/utf8');

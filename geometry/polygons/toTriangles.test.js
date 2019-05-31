@@ -1,5 +1,5 @@
 import { blessAsTriangles } from './blessAsTriangles';
-import { test } from 'ava';
+import test from 'ava';
 import { toTriangles } from './toTriangles';
 import { unitSquarePolygon } from '@jsxcad/data-shape';
 

@@ -1,5 +1,5 @@
 import { fromValues } from './fromValues';
-import { test } from 'ava';
+import test from 'ava';
 
 test('mat4: fromValues() should return a new mat4 with correct values', (t) => {
   const obs1 = fromValues(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);

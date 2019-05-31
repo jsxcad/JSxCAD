@@ -2,7 +2,7 @@ import { create } from './create';
 import { distanceToPoint } from './distanceToPoint';
 import { fromPoints } from './fromPoints';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line3: distanceToPoint() should return proper values', (t) => {
   const line1 = create();

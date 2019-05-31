@@ -1,5 +1,5 @@
 import { squaredDistance } from './squaredDistance';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: squaredDistance() should return correct values', (t) => {
   t.is(squaredDistance([0, 0, 0], [0, 0, 0]), 0);

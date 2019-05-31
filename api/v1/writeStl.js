@@ -21,17 +21,12 @@ import { writeFile } from '@jsxcad/sys';
  *
  **/
 
-const toGeometry = ({ disjoint = true }, shape) => {
-  if (disjoint) {
-    return shape.toDisjointGeometry();
-  } else {
-    return shape.toGeometry();
-  }
-};
-
 export const writeStl = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
   const { path } = options;
-  const geometry = toGeometry(options, shape);
+  const geometry = shape.toKeptGeometry(options);
   return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
 };
 

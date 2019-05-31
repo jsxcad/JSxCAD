@@ -1,6 +1,6 @@
 import { main } from './cutCubes';
 import { readFileSync } from 'fs';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Expected pdf', async (t) => {
   await main();

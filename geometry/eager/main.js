@@ -1,9 +1,10 @@
 import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 
-import { addTag } from './addTag';
+import { addTags } from './addTags';
 import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
+import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
@@ -12,8 +13,10 @@ import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
+import { keep } from './keep';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
+import { toKeptGeometry } from './toKeptGeometry';
 import { toPaths } from './toPaths';
 import { toPoints } from './toPoints';
 import { toSolid } from './toSolid';
@@ -22,10 +25,11 @@ import { transform } from './transform';
 import { union } from './union';
 
 export {
-  addTag,
+  addTags,
   assemble,
   canonicalize,
   difference,
+  drop,
   eachItem,
   eachPoint,
   flip,
@@ -34,8 +38,10 @@ export {
   getSurfaces,
   getZ0Surfaces,
   intersection,
+  keep,
   toComponents,
   toDisjointGeometry,
+  toKeptGeometry,
   toPaths,
   toPoints,
   toSolid,

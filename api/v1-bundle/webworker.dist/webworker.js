@@ -6694,16 +6694,6 @@ define("./webworker.js",[],function () { 'use strict';
 
   const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
 
-  const isCoplanar = (polygon) => {
-    const plane = toPlane(polygon);
-    for (const point of polygon) {
-      if (signedDistanceToPoint(plane, point) > 1e-5) {
-        return false;
-      }
-    }
-    return true;
-  };
-
   const isStrictlyCoplanar = (polygon) => {
     const plane = toPlane(polygon);
     for (let nth = 1; nth < polygon.length - 2; nth++) {
@@ -6821,17 +6811,7 @@ define("./webworker.js",[],function () { 'use strict';
   // Transforms
   const transform$5 = (matrix, surface) => surface.map(polygon => transform$4(matrix, polygon));
 
-  const assertCoplanarPolygon = (polygon) => {
-    if (!isCoplanar(polygon)) {
-      throw Error(`die`);
-    }
-  };
-
-  const assertCoplanar = (surface) => {
-    for (const polygon of surface) {
-      assertCoplanarPolygon(polygon);
-    }
-  };
+  // import { isCoplanar } from '@jsxcad/math-poly3';
 
   const eachPoint$2 = (options = {}, thunk, surface) => {
     for (const polygon of surface) {
@@ -13102,7 +13082,6 @@ define("./webworker.js",[],function () { 'use strict';
       // An empty surface is not non-convex.
       return surface;
     }
-    assertCoplanar(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
     let retessellatedSurface = makeConvex({}, transform$5(to, surface));
     return transform$5(from, retessellatedSurface);
@@ -13146,10 +13125,6 @@ define("./webworker.js",[],function () { 'use strict';
 
     // The solid is a list of surfaces, which are lists of coplanar polygons.
     const solid = [...coplanarGroups.values()];
-
-    for (const surface of solid) {
-      assertCoplanar(surface);
-    }
 
     return solid;
   };
@@ -13226,7 +13201,6 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
-    assertCoplanar(surface);
     const coplanarFrontPolygons = [];
     const coplanarBackPolygons = [];
     const frontPolygons = [];
@@ -13280,12 +13254,6 @@ define("./webworker.js",[],function () { 'use strict';
               frontPoints.push(spanPoint);
               backPoints.push(spanPoint);
               if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON) throw Error('die');
-              if (frontPoints.length >= 3) {
-                assertCoplanar([frontPoints]);
-              }
-              if (backPoints.length >= 3) {
-                assertCoplanar([backPoints]);
-              }
             }
             startPoint = endPoint;
             startType = endType;
@@ -13303,19 +13271,15 @@ define("./webworker.js",[],function () { 'use strict';
       }
     }
     if (coplanarFrontPolygons.length > 0) {
-      assertCoplanar(coplanarFrontPolygons);
       coplanarFrontSurfaces.push(coplanarFrontPolygons);
     }
     if (coplanarBackPolygons.length > 0) {
-      assertCoplanar(coplanarBackPolygons);
       coplanarBackSurfaces.push(coplanarBackPolygons);
     }
     if (frontPolygons.length > 0) {
-      assertCoplanar(frontPolygons);
       frontSurfaces.push(frontPolygons);
     }
     if (backPolygons.length > 0) {
-      assertCoplanar(backPolygons);
       backSurfaces.push(backPolygons);
     }
   };
@@ -13416,9 +13380,6 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const fromSurfaces = (options = {}, surfaces) => {
-    for (const surface of surfaces) {
-      assertCoplanar(surface);
-    }
     const bsp = create();
     // Build is destructive.
     build(bsp, surfaces.map(surface => surface.slice()));
@@ -13439,9 +13400,6 @@ define("./webworker.js",[],function () { 'use strict';
 
   const toSurfaces = (options = {}, bsp) => {
     const surfaces = gatherSurfaces(bsp);
-    for (const surface of surfaces) {
-      assertCoplanar(surface);
-    }
     // Some of these surfaces may have cracked.
     return surfaces;
   };
@@ -16073,6 +16031,72 @@ define("./webworker.js",[],function () { 'use strict';
 
   /**
    *
+   * # Union
+   *
+   * Union produces a version of the first shape extended to cover the remaining shapes, as applicable.
+   * Different kinds of shapes do not interact. e.g., you cannot union a surface and a solid.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * union(sphere(5).left(),
+   *       sphere(5),
+   *       sphere(5).right())
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * union(sphere(5).left(),
+   *       sphere(5),
+   *       sphere(5).right())
+   *   .crossSection()
+   *   .outline()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, 0, 5] } }
+   * ```
+   * union(triangle(),
+   *       triangle().rotateZ(180))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, 0, 5] } }
+   * ```
+   * union(triangle(),
+   *       triangle().rotateZ(180))
+   *   .outline()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
+   * union(assemble(cube().left(),
+   *                cube().right()),
+   *       cube().front())
+   *   .crossSection()
+   *   .outline()
+   * ```
+   * :::
+   *
+   **/
+
+  const union$5 = (...params) => {
+    switch (params.length) {
+      case 0: {
+        return Shape.fromGeometry({ assembly: [] });
+      }
+      case 1: {
+        return params[0];
+      }
+      default: {
+        return unionLazily(...params);
+      }
+    }
+  };
+
+  const method$h = function (...shapes) { return union$5(this, ...shapes); };
+
+  Shape.prototype.union = method$h;
+
+  /**
+   *
    * # Lego
    *
    * ::: illustration { "view": { "position": [10, 10, 10] } }
@@ -16093,6 +16117,14 @@ define("./webworker.js",[],function () { 'use strict';
    * ::: illustration { "view": { "position": [40, 40, -20] } }
    * ```
    * lego.socketSheet().drop('void')
+   * ```
+   * :::
+   * Fix: Does not drop deep 'void'.
+   * ::: illustration { "view": { "position": [40, 40, -20] } }
+   * ```
+   * assemble(cube(8, 8, 3.2).above().as('plate'),
+   *          lego.socket().above())
+   *   .drop('void')
    * ```
    * :::
    *
@@ -16121,7 +16153,7 @@ define("./webworker.js",[],function () { 'use strict';
     // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
     const bottom = 0.5;
     const topHeight = height - gripRingHeight - bottom;
-    return assemble$1(
+    return union$5(
       // flaired top
       cylinder({ diameter: (diameter + play), height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
       // grip ring
@@ -19288,72 +19320,6 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const max$1 = Math.max;
-
-  /**
-   *
-   * # Union
-   *
-   * Union produces a version of the first shape extended to cover the remaining shapes, as applicable.
-   * Different kinds of shapes do not interact. e.g., you cannot union a surface and a solid.
-   *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
-   * ```
-   * union(sphere(5).left(),
-   *       sphere(5),
-   *       sphere(5).right())
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
-   * ```
-   * union(sphere(5).left(),
-   *       sphere(5),
-   *       sphere(5).right())
-   *   .crossSection()
-   *   .outline()
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [0, 0, 5] } }
-   * ```
-   * union(triangle(),
-   *       triangle().rotateZ(180))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [0, 0, 5] } }
-   * ```
-   * union(triangle(),
-   *       triangle().rotateZ(180))
-   *   .outline()
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [5, 5, 5] } }
-   * ```
-   * union(assemble(cube().left(),
-   *                cube().right()),
-   *       cube().front())
-   *   .crossSection()
-   *   .outline()
-   * ```
-   * :::
-   *
-   **/
-
-  const union$5 = (...params) => {
-    switch (params.length) {
-      case 0: {
-        return Shape.fromGeometry({ assembly: [] });
-      }
-      case 1: {
-        return params[0];
-      }
-      default: {
-        return unionLazily(...params);
-      }
-    }
-  };
-
-  const method$h = function (...shapes) { return union$5(this, ...shapes); };
-
-  Shape.prototype.union = method$h;
 
   /**
    *

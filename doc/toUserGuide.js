@@ -59,7 +59,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
     }
   }
   const markdown = markdowns.join('\n');
-  const md = new MarkdownIt();
+  const md = new MarkdownIt({ html: true });
   const patches = [];
   const render = (tokens, idx) => {
     switch (tokens[idx].type) {
