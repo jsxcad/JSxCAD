@@ -33,6 +33,6 @@ export const writeShape = async (options, shape) => {
   return writeFile({ preview, geometry }, path, JSON.stringify(geometry));
 };
 
-const method = function (options = {}) { writeShape(options, this); return this; };
+const method = function (options = {}) { return writeShape(options, this); };
 
 Shape.prototype.writeShape = method;

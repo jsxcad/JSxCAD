@@ -30,6 +30,6 @@ export const writeStl = async (options, shape) => {
   return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
 };
 
-const method = function (options = {}) { writeStl(options, this); return this; };
+const method = function (options = {}) { return writeStl(options, this); };
 
 Shape.prototype.writeStl = method;

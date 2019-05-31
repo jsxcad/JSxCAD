@@ -11,6 +11,6 @@ export const writeThreejsPage = async (options, shape) => {
   return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
 };
 
-const method = function (options = {}) { writeThreejsPage(options, this); return this; };
+const method = function (options = {}) { return writeThreejsPage(options, this); };
 
 Shape.prototype.writeThreejsPage = method;

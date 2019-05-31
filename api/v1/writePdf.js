@@ -23,9 +23,10 @@ export const writePdf = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  return writeFile({ geometry, preview: true }, path, toPdf({ preview: true, ...options }, geometry));
+  const pdf = await toPdf({ preview: true, ...options }, geometry);
+  return writeFile({ geometry, preview: true }, path, pdf);
 };
 
-const method = function (options = {}) { writePdf(options, this); return this; };
+const method = function (options = {}) { return writePdf(options, this); };
 
 Shape.prototype.writePdf = method;

@@ -33,6 +33,6 @@ export const writeSvgPhoto = async (options, shape) => {
   return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
 };
 
-const method = function (options = {}) { writeSvgPhoto(options, this); return this; };
+const method = function (options = {}) { return writeSvgPhoto(options, this); };
 
 Shape.prototype.writeSvgPhoto = method;
