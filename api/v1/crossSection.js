@@ -37,6 +37,7 @@ import { getSolids } from '@jsxcad/geometry-tagged';
  **/
 
 export const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
+  const geometry = shape.toGeometry();
   const solids = getSolids(shape.toKeptGeometry());
   const shapes = [];
   for (const solid of solids) {

@@ -10,6 +10,9 @@ export const keep = (tags, geometry) => {
     } else if (geometry.assembly) {
       // Might be something to keep in here.
       return { ...geometry, assembly: geometry.assembly.map(walk) };
+    } else if (geometry.untransformed) {
+      // Might be something to keep in here.
+      return { ...geometry, untransformed: walk(geometry.untransformed) };
     } else {
       // Drop it.
       return addTags(['@drop'], geometry);

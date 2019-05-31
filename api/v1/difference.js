@@ -1,4 +1,4 @@
-import { Shape, fromGeometry, toGeometry } from './Shape';
+import { Shape, fromGeometry, toKeptGeometry } from './Shape';
 import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
 
 /**
@@ -39,7 +39,7 @@ export const difference = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(differenceGeometry(...shapes.map(toGeometry)));
+      return fromGeometry(differenceGeometry(...shapes.map(toKeptGeometry)));
     }
   }
 };

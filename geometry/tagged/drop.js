@@ -9,6 +9,8 @@ export const drop = (tags, geometry) => {
       return addTags(['@drop'], geometry);
     } else if (geometry.assembly) {
       return { ...geometry, assembly: geometry.assembly.map(walk) };
+    } else if (geometry.untransformed) {
+      return { ...geometry, untransformed: walk(geometry.untransformed) };
     } else {
       return geometry;
     }

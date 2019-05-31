@@ -1,7 +1,10 @@
 import { differenceItems } from './differenceItems';
+import { toTransformedGeometry } from './toTransformedGeometry';
 
 // Traverse the assembly tree and disjoint it backward.
-export const toDisjointGeometry = (geometry) => {
+export const toDisjointGeometry = (untransformedGeometry) => {
+  const geometry = toTransformedGeometry(untransformedGeometry);
+
   if (geometry.assembly === undefined) {
     // A singleton is disjoint.
     return geometry;

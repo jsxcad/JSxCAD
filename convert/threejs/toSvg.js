@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { DOMParser, XMLSerializer } from 'xmldom';
 import { installProjector } from './Projector';
 import { installSVGRenderer } from './SVGRenderer';
+import { toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { toThreejsGeometry } from './toThreejsGeometry';
 
 // Bootstrap start.
@@ -83,7 +84,7 @@ const header =
 `;
 
 export const toSvgSync = (options = {}, geometry) => {
-  const [scene, camera] = build(options, geometry);
+  const [scene, camera] = build(options, toKeptGeometry(geometry));
   const { includeXmlHeader = true, pageSize = [500, 500] } = options;
   const [pageWidth, pageHeight] = pageSize;
 

@@ -20,9 +20,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-polygons": "^0.0.75",
     "@jsxcad/geometry-solid": "^0.0.75",
+    "@jsxcad/geometry-tagged": "^0.0.75",
     "@jsxcad/math-mat4": "^0.0.75",
     "@jsxcad/math-poly3": "^0.0.75",
     "@jsxcad/math-vec3": "^0.0.75",

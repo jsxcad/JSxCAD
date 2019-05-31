@@ -1,10 +1,9 @@
-import { map } from './map';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
 import { transform as transformSurface } from '@jsxcad/geometry-surface';
 
-const transformItem = (matrix, item) => {
+export const transformItem = (matrix, item) => {
   const transformed = {};
   if (item.assembly) {
     transformed.assembly = item.assembly;
@@ -26,4 +25,4 @@ const transformItem = (matrix, item) => {
   return transformed;
 };
 
-export const transform = (matrix, assembly) => map(assembly, item => transformItem(matrix, item));
+export const transform = (matrix, untransformed) => ({ matrix, untransformed });
