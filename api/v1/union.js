@@ -1,5 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { union as unionGeometry } from '@jsxcad/geometry-eager';
+import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *

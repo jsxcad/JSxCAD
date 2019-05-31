@@ -1,5 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { difference as differenceGeometry } from '@jsxcad/geometry-eager';
+import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *

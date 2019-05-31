@@ -1,7 +1,7 @@
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { buildConvexHull } from '@jsxcad/geometry-points';
-import { toPoints } from '@jsxcad/geometry-eager';
+import { toPoints } from '@jsxcad/geometry-tagged';
 
 /**
  *

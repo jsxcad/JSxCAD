@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/geometry-eager",
+  "name": "@jsxcad/geometry-tagged",
   "version": "0.0.75",
   "description": "Assembly algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",

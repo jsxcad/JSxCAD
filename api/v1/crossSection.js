@@ -3,8 +3,8 @@ import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { fromPoints } from '@jsxcad/math-plane';
-import { getSolids } from '@jsxcad/geometry-eager';
 import { toPolygons } from '@jsxcad/geometry-solid';
+import { getSolids } from '@jsxcad/geometry-tagged';
 
 /**
  *

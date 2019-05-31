@@ -1,6 +1,6 @@
 import { addTags, eachPoint,
          toComponents, toDisjointGeometry, toKeptGeometry, toPoints,
-         transform } from '@jsxcad/geometry-eager';
+         transform } from '@jsxcad/geometry-tagged';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';

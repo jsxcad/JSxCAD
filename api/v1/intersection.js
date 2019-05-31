@@ -1,5 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { intersection as intersectionGeometry } from '@jsxcad/geometry-eager';
+import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *

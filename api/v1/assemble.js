@@ -1,5 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { assemble as assembleGeometry } from '@jsxcad/geometry-eager';
+import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
