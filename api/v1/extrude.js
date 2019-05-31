@@ -4,7 +4,7 @@ import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { getZ0Surfaces } from '@jsxcad/geometry-eager';
+import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -29,7 +29,7 @@ import { getZ0Surfaces } from '@jsxcad/geometry-eager';
  **/
 
 export const fromHeight = ({ height }, shape) => {
-  const z0Surfaces = getZ0Surfaces(shape.toGeometry());
+  const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
   const solids = z0Surfaces.map(z0Surface => extrudeAlgorithm({ height: height }, z0Surface));
   const assembly = assemble(...solids.map(Shape.fromSolid));
   return assembly;

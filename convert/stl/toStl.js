@@ -1,7 +1,7 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
+import { eachItem, toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
 
-import { eachItem } from '@jsxcad/geometry-eager';
 import { toPlane } from '@jsxcad/math-poly3';
 import { toPolygons } from '@jsxcad/geometry-solid';
 
@@ -26,7 +26,8 @@ const geometryToTriangles = (geometry) => {
 };
 
 export const toStl = async (options = {}, geometry) => {
-  let polygons = geometryToTriangles(geometry);
+  let keptGeometry = toKeptGeometry(geometry);
+  let polygons = geometryToTriangles(keptGeometry);
   if (!isWatertightPolygons(polygons)) {
     console.log(`polygonsToStla: Polygon is not watertight`);
     if (options.doMakeWatertight) {

@@ -738,6 +738,21 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {mat4} out
    */
 
+  const addTags = (tags, geometry) => {
+    if (tags === undefined) {
+      return geometry;
+    }
+    const copy = Object.assign({}, geometry);
+    if (copy.tags) {
+      copy.tags = [...tags, ...copy.tags];
+    } else {
+      copy.tags = [...tags];
+    }
+    return copy;
+  };
+
+  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
+
   const canonicalizePoint = (point, index) => {
     if (point === null) {
       if (index !== 0) throw Error('Path has null not at head');
@@ -761,14 +776,6 @@ define("./webworker.js",[],function () { 'use strict';
     return result;
   };
 
-  const flip = (path) => {
-    if (path[0] === null) {
-      return [null, ...path.slice(1).reverse()];
-    } else {
-      return path.slice().reverse();
-    }
-  };
-
   const open = (path) => isClosed(path) ? [null, ...path] : path;
 
   const toSegments = (options = {}, path) => {
@@ -788,18 +795,6 @@ define("./webworker.js",[],function () { 'use strict';
 
   const translate = (vector, path) => transform$1(fromTranslation(vector), path);
   const scale$1 = (vector, path) => transform$1(fromScaling(vector), path);
-
-  const addTag = (tag, geometry) => {
-    const copy = Object.assign({}, geometry);
-    if (copy.tags) {
-      copy.tags = [tag, ...copy.tags];
-    } else {
-      copy.tags = [tag];
-    }
-    return copy;
-  };
-
-  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
 
   const canonicalize$2 = (paths) => {
     let canonicalized = paths.map(canonicalize$1);
@@ -821,8 +816,6 @@ define("./webworker.js",[],function () { 'use strict';
       }
     }
   };
-
-  const flip$1 = (paths) => paths.map(flip);
 
   const intersection = (...pathsets) => { throw Error('Not implemented'); };
 
@@ -4850,19 +4843,39 @@ define("./webworker.js",[],function () { 'use strict';
     endianness: endianness,
   };
 
-  var hasFlag = function (flag, argv) {
+  var hasFlag = (flag, argv) => {
   	argv = argv || process.argv;
-
-  	var terminatorPos = argv.indexOf('--');
-  	var prefix = /^-{1,2}/.test(flag) ? '' : '--';
-  	var pos = argv.indexOf(prefix + flag);
-
+  	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+  	const pos = argv.indexOf(prefix + flag);
+  	const terminatorPos = argv.indexOf('--');
   	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
   };
 
-  const env$1 = process.env;
+  const {env: env$1} = process;
 
-  const support = level => {
+  let forceColor;
+  if (hasFlag('no-color') ||
+  	hasFlag('no-colors') ||
+  	hasFlag('color=false') ||
+  	hasFlag('color=never')) {
+  	forceColor = 0;
+  } else if (hasFlag('color') ||
+  	hasFlag('colors') ||
+  	hasFlag('color=true') ||
+  	hasFlag('color=always')) {
+  	forceColor = 1;
+  }
+  if ('FORCE_COLOR' in env$1) {
+  	if (env$1.FORCE_COLOR === true || env$1.FORCE_COLOR === 'true') {
+  		forceColor = 1;
+  	} else if (env$1.FORCE_COLOR === false || env$1.FORCE_COLOR === 'false') {
+  		forceColor = 0;
+  	} else {
+  		forceColor = env$1.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env$1.FORCE_COLOR, 10), 3);
+  	}
+  }
+
+  function translateLevel(level) {
   	if (level === 0) {
   		return false;
   	}
@@ -4873,12 +4886,10 @@ define("./webworker.js",[],function () { 'use strict';
   		has256: level >= 2,
   		has16m: level >= 3
   	};
-  };
+  }
 
-  let supportLevel = (() => {
-  	if (hasFlag('no-color') ||
-  		hasFlag('no-colors') ||
-  		hasFlag('color=false')) {
+  function supportsColor(stream) {
+  	if (forceColor === 0) {
   		return 0;
   	}
 
@@ -4892,11 +4903,14 @@ define("./webworker.js",[],function () { 'use strict';
   		return 2;
   	}
 
-  	if (hasFlag('color') ||
-  		hasFlag('colors') ||
-  		hasFlag('color=true') ||
-  		hasFlag('color=always')) {
-  		return 1;
+  	if (stream && !stream.isTTY && forceColor === undefined) {
+  		return 0;
+  	}
+
+  	const min = forceColor || 0;
+
+  	if (env$1.TERM === 'dumb') {
+  		return min;
   	}
 
   	if ('CI' in env$1) {
@@ -4904,11 +4918,15 @@ define("./webworker.js",[],function () { 'use strict';
   			return 1;
   		}
 
-  		return 0;
+  		return min;
   	}
 
   	if ('TEAMCITY_VERSION' in env$1) {
   		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env$1.TEAMCITY_VERSION) ? 1 : 0;
+  	}
+
+  	if (env$1.COLORTERM === 'truecolor') {
+  		return 3;
   	}
 
   	if ('TERM_PROGRAM' in env$1) {
@@ -4917,8 +4935,6 @@ define("./webworker.js",[],function () { 'use strict';
   		switch (env$1.TERM_PROGRAM) {
   			case 'iTerm.app':
   				return version >= 3 ? 3 : 2;
-  			case 'Hyper':
-  				return 3;
   			case 'Apple_Terminal':
   				return 2;
   			// No default
@@ -4929,7 +4945,7 @@ define("./webworker.js",[],function () { 'use strict';
   		return 2;
   	}
 
-  	if (/^screen|^xterm|^vt100|^rxvt|color|ansi|cygwin|linux/i.test(env$1.TERM)) {
+  	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env$1.TERM)) {
   		return 1;
   	}
 
@@ -4937,18 +4953,19 @@ define("./webworker.js",[],function () { 'use strict';
   		return 1;
   	}
 
-  	if (env$1.TERM === 'dumb') {
-  		return 0;
-  	}
-
-  	return 0;
-  })();
-
-  if ('FORCE_COLOR' in env$1) {
-  	supportLevel = parseInt(env$1.FORCE_COLOR, 10) === 0 ? 0 : (supportLevel || 1);
+  	return min;
   }
 
-  var supportsColor = process && support(supportLevel);
+  function getSupportLevel(stream) {
+  	const level = supportsColor(stream);
+  	return translateLevel(level);
+  }
+
+  var supportsColor_1 = {
+  	supportsColor: getSupportLevel,
+  	stdout: getSupportLevel(process.stdout),
+  	stderr: getSupportLevel(process.stderr)
+  };
 
   var node = createCommonjsModule(function (module, exports) {
 
@@ -4978,9 +4995,9 @@ define("./webworker.js",[],function () { 'use strict';
   try {
     // Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
     // eslint-disable-next-line import/no-extraneous-dependencies
-    var supportsColor$1 = supportsColor;
+    var supportsColor = supportsColor_1;
 
-    if (supportsColor$1 && (supportsColor$1.stderr || supportsColor$1).level >= 2) {
+    if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
       exports.colors = [20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68, 69, 74, 75, 76, 77, 78, 79, 80, 81, 92, 93, 98, 99, 112, 113, 128, 129, 134, 135, 148, 149, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 214, 215, 220, 221];
     }
   } catch (error) {} // Swallow - we only care if `supports-color` is available; it doesn't have to be.
@@ -6484,8 +6501,6 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const flip$2 = (points) => points;
-
   /**
    * Transforms the vertices of a polygon, producing a new poly3.
    *
@@ -6536,7 +6551,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {poly3} polygon - the polygon to flip
    * @returns {poly3} a new poly3
    */
-  const flip$3 = (polygon) => [...polygon].reverse();
+  const flip = (polygon) => [...polygon].reverse();
 
   /**
    * Create a poly3 from the given points.
@@ -6566,7 +6581,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec4} vec - plane to flip
    * @return {vec4} flipped plane
    */
-  const flip$4 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
+  const flip$1 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
 
   /**
    * Create a new plane from the given points
@@ -6838,7 +6853,7 @@ define("./webworker.js",[],function () { 'use strict';
     return original.map(polygon => transform(polygon));
   };
 
-  const flip$5 = (surface) => map$1(surface, flip$3);
+  const flip$2 = (surface) => map$1(surface, flip);
 
   // Internal function to massage data for passing to polygon-clipping.
   const clippingToPolygons = (clipping) => {
@@ -13107,8 +13122,6 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const flip$6 = (solid) => solid.map(surface => flip$5(surface));
-
   const fromPolygons = (options = {}, polygons) => {
     const coplanarGroups = new Map();
 
@@ -13357,23 +13370,23 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const flip$7 = (bsp) => {
+  const flip$3 = (bsp) => {
     // Flip the polygons.
-    bsp.surfaces = bsp.surfaces.map(flip$5);
+    bsp.surfaces = bsp.surfaces.map(flip$2);
     // Recompute the plane.
     if (bsp.plane !== undefined) {
       // PROVE: General equivalence.
       // const a = toPlane(bsp.polygons[0]);
       // const b = plane.flip(bsp.plane);
       // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }
-      bsp.plane = flip$4(bsp.plane);
+      bsp.plane = flip$1(bsp.plane);
     }
     // Invert the children.
     if (bsp.front !== undefined) {
-      flip$7(bsp.front);
+      flip$3(bsp.front);
     }
     if (bsp.back !== undefined) {
-      flip$7(bsp.back);
+      flip$3(bsp.back);
     }
     // Swap the children.
     [bsp.front, bsp.back] = [bsp.back, bsp.front];
@@ -13449,16 +13462,16 @@ define("./webworker.js",[],function () { 'use strict';
       const baseBsp = fromSurfaces({}, base);
       const subtractBsp = fromSurfaces({}, subtractions[i]);
 
-      flip$7(baseBsp);
+      flip$3(baseBsp);
       clipTo(baseBsp, subtractBsp);
       clipTo(subtractBsp, baseBsp);
 
-      flip$7(subtractBsp);
+      flip$3(subtractBsp);
       clipTo(subtractBsp, baseBsp);
-      flip$7(subtractBsp);
+      flip$3(subtractBsp);
 
       build(baseBsp, toSurfaces({}, subtractBsp));
-      flip$7(baseBsp);
+      flip$3(baseBsp);
 
       // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.
       base = toSurfaces({}, baseBsp);
@@ -13493,15 +13506,15 @@ define("./webworker.js",[],function () { 'use strict';
       const aBsp = fromSurfaces({}, aSolid);
       const bBsp = fromSurfaces({}, bSolid);
 
-      flip$7(aBsp);
+      flip$3(aBsp);
       clipTo(bBsp, aBsp);
 
-      flip$7(bBsp);
+      flip$3(bBsp);
       clipTo(aBsp, bBsp);
       clipTo(bBsp, aBsp);
       build(aBsp, toSurfaces({}, bBsp));
 
-      flip$7(aBsp);
+      flip$3(aBsp);
 
       // Push back for the next generation.
       solids.push(toSurfaces({}, aBsp));
@@ -13527,9 +13540,9 @@ define("./webworker.js",[],function () { 'use strict';
       clipTo(bBsp, aBsp);
 
       // Turn b inside out and remove the bits that are in a.
-      flip$7(bBsp);
+      flip$3(bBsp);
       clipTo(bBsp, aBsp);
-      flip$7(bBsp);
+      flip$3(bBsp);
 
       // Now merge the two together.
       build(aBsp, toSurfaces({}, bBsp));
@@ -13564,6 +13577,33 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
+  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+    if (set === undefined) {
+      return whenSetUndefined;
+    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  // Dropped elements displace as usual, but are not included in positive output.
+
+  const drop = (tags, geometry) => {
+    const walk = (geometry) => {
+      if (hasMatchingTag(tags, geometry.tags)) {
+        return addTags(['@drop'], geometry);
+      } else if (geometry.assembly) {
+        return { ...geometry, assembly: geometry.assembly.map(walk) };
+      } else if (geometry.untransformed) {
+        return { ...geometry, untransformed: walk(geometry.untransformed) };
+      } else {
+        return geometry;
+      }
+    };
+    return walk(geometry);
+  };
+
   const eachPoint$4 = (options, operation, geometry) => {
     map$2(geometry,
         (geometry) => {
@@ -13578,29 +13618,6 @@ define("./webworker.js",[],function () { 'use strict';
           }
         });
   };
-
-  const flipEntry = (entry) => {
-    const flipped = {};
-    if (entry.points) {
-      flipped.points = flip$2(entry.points);
-    }
-    if (entry.paths) {
-      flipped.paths = flip$1(entry.paths);
-    }
-    if (entry.surface) {
-      flipped.surface = flip$5(entry.surface);
-    }
-    if (entry.solid) {
-      flipped.solid = flip$6(entry.solid);
-    }
-    if (entry.assembly) {
-      flipped.assembly = flip$8(entry.assembly);
-    }
-    flipped.tags = entry.tags;
-    return flipped;
-  };
-
-  const flip$8 = (assembly) => assembly.map(flipEntry);
 
   const getPaths = (geometry) => {
     const paths = [];
@@ -13659,14 +13676,24 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-    if (set === undefined) {
-      return whenSetUndefined;
-    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
-      return true;
-    } else {
-      return false;
-    }
+  // Keep drops everything that doesn't match here or toward the root.
+
+  const keep = (tags, geometry) => {
+    const walk = (geometry) => {
+      if (hasMatchingTag(tags, geometry.tags)) {
+        return geometry;
+      } else if (geometry.assembly) {
+        // Might be something to keep in here.
+        return { ...geometry, assembly: geometry.assembly.map(walk) };
+      } else if (geometry.untransformed) {
+        // Might be something to keep in here.
+        return { ...geometry, untransformed: walk(geometry.untransformed) };
+      } else {
+        // Drop it.
+        return addTags(['@drop'], geometry);
+      }
+    };
+    return walk(geometry);
   };
 
   const differenceItems = (base, ...subtractions) => {
@@ -13693,8 +13720,61 @@ define("./webworker.js",[],function () { 'use strict';
     return differenced;
   };
 
+  const transformItem = (matrix, item) => {
+    const transformed = {};
+    if (item.assembly) {
+      transformed.assembly = item.assembly;
+    }
+    if (item.paths) {
+      transformed.paths = transform$2(matrix, item.paths);
+    }
+    if (item.points) {
+      transformed.points = transform$3(matrix, item.points);
+    }
+    if (item.solid) {
+      transformed.solid = multiply$2(matrix, item.solid);
+    }
+    if (item.z0Surface) {
+      // FIX: Handle transformations that take the surface out of z0.
+      transformed.z0Surface = transform$5(matrix, item.z0Surface);
+    }
+    transformed.tags = item.tags;
+    return transformed;
+  };
+
+  const transform$6 = (matrix, untransformed) => ({ matrix, untransformed });
+
+  // Apply the accumulated matrix transformations and produce a geometry without them.
+
+  const toTransformedGeometry = (geometry) => {
+    if (geometry.transformedGeometry === undefined) {
+      const walk = (matrix, geometry) => {
+        if (geometry.matrix) {
+          // Preserve any tags applied to the untransformed geometry.
+          return addTags(geometry.tags,
+                         walk(multiply$1(matrix, geometry.matrix),
+                              geometry.untransformed));
+        }
+
+        if (geometry.assembly) {
+          return {
+            ...geometry,
+            assembly: geometry.assembly.map(geometry => walk(matrix, geometry))
+          };
+        }
+
+        return transformItem(matrix, geometry);
+      };
+
+      geometry.transformed = walk(identity(), geometry);
+    }
+    return geometry.transformed;
+  };
+
   // Traverse the assembly tree and disjoint it backward.
-  const toDisjointGeometry = (geometry) => {
+  const toDisjointGeometry = (untransformedGeometry) => {
+    const geometry = toTransformedGeometry(untransformedGeometry);
+
     if (geometry.assembly === undefined) {
       // A singleton is disjoint.
       return geometry;
@@ -13738,68 +13818,30 @@ define("./webworker.js",[],function () { 'use strict';
     return components;
   };
 
-  // This needs to recursively walk the assembly.
-  const filterAndFlattenAssemblyData = ({ requires, excludes, form }, geometry) => {
-    const filtered = [];
-    const filter = (item) => {
-      const data = item[form];
-      if (data === undefined || hasMatchingTag(excludes, item.tags)) {
-        return item;
-      }
-      if (hasMatchingTag(requires, item.tags, true)) {
-        filtered.push(data);
-      }
-      return item;
-    };
-    map$2(geometry, filter);
-    return filtered;
-  };
+  // Produce a disjoint geometry suitable for display.
 
-  const toPaths = ({ requires, excludes }, assembly) =>
-    ({
-      paths: union(...filterAndFlattenAssemblyData({ requires, excludes, form: 'paths' }, toDisjointGeometry(assembly)))
-    });
+  const toKeptGeometry = (geometry) => {
+    const disjointGeometry = toDisjointGeometry(geometry);
+
+    const walk = (geometry) => {
+      if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {
+        if (geometry.assembly) {
+          return { ...geometry, assembly: geometry.assembly.map(walk).filter(item => item !== undefined) };
+        } else {
+          return geometry;
+        }
+      }
+    };
+
+    const keptGeometry = walk(disjointGeometry);
+    return keptGeometry || {};
+  };
 
   const toPoints$1 = (options = {}, geometry) => {
     const points = [];
     eachPoint$4(options, point => points.push(point), geometry);
     return { points };
   };
-
-  const toSolid = ({ requires, excludes }, assembly) =>
-    ({
-      solid: union$3(...filterAndFlattenAssemblyData({ requires, excludes, form: 'solid' }, toDisjointGeometry(assembly)))
-    });
-
-  const toZ0Surface = ({ requires, excludes }, assembly) => {
-    const filtered = filterAndFlattenAssemblyData({ requires, excludes, form: 'z0Surface' }, toDisjointGeometry(assembly));
-    const unioned = union$2(...filtered);
-    return { z0Surface: unioned };
-  };
-
-  const transformItem = (matrix, item) => {
-    const transformed = {};
-    if (item.assembly) {
-      transformed.assembly = item.assembly;
-    }
-    if (item.paths) {
-      transformed.paths = transform$2(matrix, item.paths);
-    }
-    if (item.points) {
-      transformed.points = transform$3(matrix, item.points);
-    }
-    if (item.solid) {
-      transformed.solid = multiply$2(matrix, item.solid);
-    }
-    if (item.z0Surface) {
-      // FIX: Handle transformations that take the surface out of z0.
-      transformed.z0Surface = transform$5(matrix, item.z0Surface);
-    }
-    transformed.tags = item.tags;
-    return transformed;
-  };
-
-  const transform$6 = (matrix, assembly) => map$2(assembly, item => transformItem(matrix, item));
 
   // FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
   const union$4 = (geometry, ...geometries) => {
@@ -13826,105 +13868,13 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const scale$5 = (vector, assembly) => transform$6(fromScaling(vector), assembly);
-
-  // FIX: Make it clear this should be lazy.
-  class Assembly {
-    constructor (geometry = { assembly: [] }) {
-      this.geometry = geometry;
-      if (geometry instanceof Array) throw Error('die');
-      if (geometry.geometry) throw Error('die');
-    }
-
-    addTag (tag) {
-      return fromGeometry(addTag(tag, toGeometry(this)));
-    }
-
-    assemble (...geometries) {
-      const assembled = assemble(toGeometry(this), ...geometries.map(toGeometry));
-      return fromGeometry(assembled);
-    }
-
-    difference (...geometries) {
-      return fromGeometry(difference$4(toGeometry(this), ...geometries.map(toGeometry)));
-    }
-
-    flip () {
-      return fromGeometry(flip$8(toGeometry(this)));
-    }
-
-    getTags () {
-      const tags = this.geometry.tags;
-      if (tags === undefined) {
-        return [];
-      } else {
-        return tags;
-      }
-    }
-
-    intersection (...geometries) {
-      return fromGeometry(intersection$4(toGeometry(this), ...geometries.map(toGeometry)));
-    }
-
-    eachPoint (options = {}, operation) {
-      return eachPoint$4(options, operation, toGeometry(this));
-    }
-
-    toGeometry (options = {}) {
-      return this.geometry;
-    }
-
-    toPoints (options = {}) {
-      return fromGeometry(toPoints$1(options, toGeometry(this)));
-    }
-
-    toPaths (options = {}) {
-      return fromGeometry(toPaths(options, toGeometry(this)));
-    }
-
-    toSolid (options = {}) {
-      return fromGeometry(toSolid(options, toGeometry(this)));
-    }
-
-    toZ0Surface (options = {}) {
-      return fromGeometry(toZ0Surface(options, toGeometry(this)));
-    }
-
-    toDisjointGeometry () {
-      return toDisjointGeometry(toGeometry(this));
-    }
-
-    toComponents (options) {
-      return toComponents(options, toGeometry(this)).map(fromGeometry);
-    }
-
-    transform (matrix) {
-      return fromGeometry(transform$6(matrix, toGeometry(this)));
-    }
-
-    union (...geometries) {
-      return fromGeometry(union$4(toGeometry(this), ...geometries.map(toGeometry)));
-    }
-  }
-
-  const fromGeometry = (geometry) => {
-    if (geometry instanceof Array) throw Error('die');
-    return new Assembly(geometry);
-  };
-
-  const toGeometry = (assembly) => assembly.toGeometry();
-
   class Shape {
-    as (tag) {
-      return this.fromLazyGeometry(toLazyGeometry(this).addTag(tag));
-    }
-
-    assemble (...shapes) {
-      return this.fromLazyGeometry(toLazyGeometry(this).assemble(...shapes.map(toLazyGeometry)));
+    as (...tags) {
+      return fromGeometry(addTags(tags, toGeometry(this)));
     }
 
     close () {
-      const geometry = this.toGeometry();
+      const geometry = this.toKeptGeometry();
       if (!isSingleOpenPath(geometry)) {
         throw Error('Close requires a single open path.');
       }
@@ -13934,7 +13884,7 @@ define("./webworker.js",[],function () { 'use strict';
     concat (...shapes) {
       const paths = [];
       for (const shape of [this, ...shapes]) {
-        const geometry = shape.toGeometry();
+        const geometry = shape.toKeptGeometry();
         if (!isSingleOpenPath(geometry)) {
           throw Error('Concatenation requires single open paths.');
         }
@@ -13943,89 +13893,58 @@ define("./webworker.js",[],function () { 'use strict';
       return Shape.fromOpenPath(concatenate(...paths));
     }
 
-    constructor (lazyGeometry = fromGeometry({ assembly: [] })) {
-      this.lazyGeometry = lazyGeometry;
-    }
-
-    difference (...shapes) {
-      return this.fromLazyGeometry(toLazyGeometry(this).difference(...shapes.map(toLazyGeometry)));
+    constructor (geometry = fromGeometry({ assembly: [] })) {
+      this.geometry = geometry;
     }
 
     eachPoint (options = {}, operation) {
-      toLazyGeometry(this).eachPoint(options, operation);
-    }
-
-    fromLazyGeometry (geometry) {
-      return Shape.fromLazyGeometry(geometry);
-    }
-
-    intersection (...shapes) {
-      return this.fromLazyGeometry(toLazyGeometry(this).intersection(...shapes.map(toLazyGeometry)));
-    }
-
-    toLazyGeometry () {
-      return this.lazyGeometry;
+      eachPoint$4(options, operation, this.toKeptGeometry());
     }
 
     toComponents (options = {}) {
-      return toLazyGeometry(this).toComponents(options).map(Shape.fromLazyGeometry);
+      return toComponents(options, toGeometry(this)).map(fromGeometry);
     }
 
     toDisjointGeometry (options = {}) {
-      return toLazyGeometry(this).toDisjointGeometry(options);
+      return toDisjointGeometry(toGeometry(this));
+    }
+
+    toKeptGeometry (options = {}) {
+      return toKeptGeometry(toGeometry(this));
     }
 
     toGeometry (options = {}) {
-      return toLazyGeometry(this).toGeometry(options);
+      return this.geometry;
     }
 
     toPoints (options = {}) {
-      return this.fromLazyGeometry(toLazyGeometry(this).toPoints(options));
+      return toPoints$1(options, this.toKeptGeometry());
     }
 
     transform (matrix) {
-      return this.fromLazyGeometry(toLazyGeometry(this).transform(matrix));
-    }
-
-    union (...shapes) {
-      return this.fromLazyGeometry(toLazyGeometry(this).union(...shapes.map(toLazyGeometry)));
-    }
-
-    withComponents (options = {}) {
-      const components = this.toComponents(options);
-      return assembleLazily(...components);
+      if (matrix.some(item => item === -Infinity)) throw Error('die');
+      return fromGeometry(transform$6(matrix, this.toGeometry()));
     }
   }
   const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
-  const toLazyGeometry = (shape) => shape.toLazyGeometry();
+  Shape.fromClosedPath = (path) => fromGeometry({ paths: [close(path)] });
+  Shape.fromGeometry = (geometry) => new Shape(geometry);
+  Shape.fromOpenPath = (path) => fromGeometry({ paths: [open(path)] });
+  Shape.fromPath = (path) => fromGeometry({ paths: [path] });
+  Shape.fromPaths = (paths) => fromGeometry({ paths: paths });
+  Shape.fromPathToZ0Surface = (path) => fromGeometry({ z0Surface: [path] });
+  Shape.fromPathsToZ0Surface = (paths) => fromGeometry({ z0Surface: paths });
+  Shape.fromPoint = (point) => fromGeometry({ points: [point] });
+  Shape.fromPoints = (points) => fromGeometry({ points: points });
+  Shape.fromPolygonsToSolid = (polygons) => fromGeometry({ solid: fromPolygons({}, polygons) });
+  Shape.fromPolygonsToZ0Surface = (polygons) => fromGeometry({ z0Surface: polygons });
+  Shape.fromSurfaces = (surfaces) => fromGeometry({ solid: surfaces });
+  Shape.fromSolid = (solid) => fromGeometry({ solid: solid });
 
-  const assembleLazily = (shape, ...shapes) =>
-    Shape.fromLazyGeometry(toLazyGeometry(shape).assemble(...shapes.map(toLazyGeometry)));
-
-  const unionLazily = (shape, ...shapes) =>
-    Shape.fromLazyGeometry(toLazyGeometry(shape).union(...shapes.map(toLazyGeometry)));
-
-  const differenceLazily = (shape, ...shapes) =>
-    Shape.fromLazyGeometry(toLazyGeometry(shape).difference(...shapes.map(toLazyGeometry)));
-
-  const intersectionLazily = (shape, ...shapes) =>
-    Shape.fromLazyGeometry(toLazyGeometry(shape).intersection(...shapes.map(toLazyGeometry)));
-
-  Shape.fromClosedPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [close(path)] }));
-  Shape.fromGeometry = (geometry) => Shape.fromLazyGeometry(fromGeometry(geometry));
-  Shape.fromLazyGeometry = (lazyGeometry) => new Shape(lazyGeometry);
-  Shape.fromOpenPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [open(path)] }));
-  Shape.fromPath = (path) => Shape.fromLazyGeometry(fromGeometry({ paths: [path] }));
-  Shape.fromPaths = (paths) => Shape.fromLazyGeometry(fromGeometry({ paths: paths }));
-  Shape.fromPathToZ0Surface = (path) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: [path] }));
-  Shape.fromPathsToZ0Surface = (paths) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: paths }));
-  Shape.fromPoint = (point) => Shape.fromLazyGeometry(fromGeometry({ points: [point] }));
-  Shape.fromPoints = (points) => Shape.fromLazyGeometry(fromGeometry({ points: points }));
-  Shape.fromPolygonsToSolid = (polygons) => Shape.fromLazyGeometry(fromGeometry({ solid: fromPolygons({}, polygons) }));
-  Shape.fromPolygonsToZ0Surface = (polygons) => Shape.fromLazyGeometry(fromGeometry({ z0Surface: polygons }));
-  Shape.fromSurfaces = (surfaces) => Shape.fromLazyGeometry(fromGeometry({ solid: surfaces }));
-  Shape.fromSolid = (solid) => Shape.fromLazyGeometry(fromGeometry({ solid: solid }));
+  const fromGeometry = Shape.fromGeometry;
+  const toGeometry = (shape) => shape.toGeometry();
+  const toKeptGeometry$1 = (shape) => shape.toKeptGeometry();
 
   /**
    *
@@ -14319,16 +14238,16 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const assemble$1 = (...params) => {
-    switch (params.length) {
+  const assemble$1 = (...shapes) => {
+    switch (shapes.length) {
       case 0: {
         return Shape.fromGeometry({ assembly: [] });
       }
       case 1: {
-        return params[0];
+        return shapes[0];
       }
       default: {
-        return assembleLazily(...params);
+        return fromGeometry(assemble(...shapes.map(toGeometry)));
       }
     }
   };
@@ -14443,7 +14362,7 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const chainHull = (...shapes) => {
-    const pointsets = shapes.map(shape => toPoints$1({}, shape.toGeometry()).points);
+    const pointsets = shapes.map(shape => shape.toPoints().points);
     const chain = [];
     for (let nth = 1; nth < pointsets.length; nth++) {
       chain.push(Shape.fromPolygonsToSolid(buildConvexHull({}, [...pointsets[nth - 1], ...pointsets[nth]])));
@@ -15340,7 +15259,8 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-    const solids = getSolids(shape.toGeometry());
+    const geometry = shape.toGeometry();
+    const solids = getSolids(shape.toKeptGeometry());
     const shapes = [];
     for (const solid of solids) {
       const polygons = toPolygons({}, solid);
@@ -15687,7 +15607,19 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const difference$5 = (...params) => differenceLazily(...params);
+  const difference$5 = (...shapes) => {
+    switch (shapes.length) {
+      case 0: {
+        return fromGeometry({ assembly: [] });
+      }
+      case 1: {
+        return shapes[0];
+      }
+      default: {
+        return fromGeometry(difference$4(...shapes.map(toKeptGeometry$1)));
+      }
+    }
+  };
 
   const method$8 = function (...shapes) { return difference$5(this, ...shapes); };
 
@@ -15729,9 +15661,9 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const fromValue$4 = (tags, shape) => assemble$1(...shape.toComponents({ excludes: tags }));
+  const fromValue$4 = (tags, shape) => fromGeometry(drop(tags, toGeometry(shape)));
 
-  const drop = dispatch(
+  const drop$1 = dispatch(
     'drop',
     (tags, shape) => {
       assertStrings(tags);
@@ -15740,9 +15672,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   );
 
-  drop.fromValues = fromValue$4;
+  drop$1.fromValues = fromValue$4;
 
-  const method$9 = function (...tags) { return drop(tags, this); };
+  const method$9 = function (...tags) { return drop$1(tags, this); };
 
   Shape.prototype.drop = method$9;
 
@@ -15769,7 +15701,7 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const fromHeight = ({ height }, shape) => {
-    const z0Surfaces = getZ0Surfaces(shape.toGeometry());
+    const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
     const solids = z0Surfaces.map(z0Surface => extrude({ height: height }, z0Surface));
     const assembly = assemble$1(...solids.map(Shape.fromSolid));
     return assembly;
@@ -15849,10 +15781,10 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const hull = (...geometries) => {
+  const hull = (...shapes) => {
     // FIX: Support z0Surface hulling.
     const points = [];
-    geometries.forEach(geometry => geometry.eachPoint({}, point => points.push(point)));
+    shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
     return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
   };
 
@@ -15945,7 +15877,19 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const intersection$5 = (...params) => intersectionLazily(...params);
+  const intersection$5 = (...shapes) => {
+    switch (shapes.length) {
+      case 0: {
+        return fromGeometry({ assembly: [] });
+      }
+      case 1: {
+        return shapes[0];
+      }
+      default: {
+        return fromGeometry(intersection$4(...shapes.map(toKeptGeometry$1)));
+      }
+    }
+  };
 
   const method$e = function (...shapes) { return intersection$5(this, ...shapes); };
 
@@ -15987,9 +15931,9 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const fromValue$6 = (tags, shape) => assemble$1(...shape.toComponents({ requires: tags }));
+  const fromValue$6 = (tags, shape) => fromGeometry(keep(tags, toGeometry(shape)));
 
-  const keep = dispatch(
+  const keep$1 = dispatch(
     'keep',
     (tags, shape) => {
       assertStrings(tags);
@@ -15998,9 +15942,9 @@ define("./webworker.js",[],function () { 'use strict';
     }
   );
 
-  keep.fromValues = fromValue$6;
+  keep$1.fromValues = fromValue$6;
 
-  const method$f = function (...tags) { return keep(tags, this); };
+  const method$f = function (...tags) { return keep$1(tags, this); };
 
   Shape.prototype.keep = method$f;
 
@@ -16077,16 +16021,16 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const union$5 = (...params) => {
-    switch (params.length) {
+  const union$5 = (...shapes) => {
+    switch (shapes.length) {
       case 0: {
-        return Shape.fromGeometry({ assembly: [] });
+        return fromGeometry({ assembly: [] });
       }
       case 1: {
-        return params[0];
+        return shapes[0];
       }
       default: {
-        return unionLazily(...params);
+        return fromGeometry(union$4(...shapes.map(toKeptGeometry$1)));
       }
     }
   };
@@ -16119,11 +16063,11 @@ define("./webworker.js",[],function () { 'use strict';
    * lego.socketSheet().drop('void')
    * ```
    * :::
-   * Fix: Does not drop deep 'void'.
-   * ::: illustration { "view": { "position": [40, 40, -20] } }
+   * FIX: Does not drop deep 'void'.
+   * ::: illustration { "view": { "position": [20, 20, -30] } }
    * ```
    * assemble(cube(8, 8, 3.2).above().as('plate'),
-   *          lego.socket().above())
+   *          lego.socket().above().as('socket'))
    *   .drop('void')
    * ```
    * :::
@@ -22273,7 +22217,7 @@ define("./webworker.js",[],function () { 'use strict';
     return unrepeated;
   };
 
-  const toPaths$1 = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {
+  const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {
     const paths = [];
     let path = [null];
 
@@ -22335,7 +22279,7 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const fromSvgPath = (options = {}, svgPath) =>
-    ({ paths: toPaths$1(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath)))) });
+    ({ paths: toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath)))) });
 
   var _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -22836,6 +22780,677 @@ define("./webworker.js",[],function () { 'use strict';
     return pointsToD(points);
   };
 
+  /**
+   * Adds two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
+   *
+   * @param {mat4} a The first matrix.
+   * @param {mat4} b The second matrix.
+   * @returns {Boolean} True if the matrices are equal, false otherwise.
+   */
+
+  /**
+   * Creates a matrix from a vector scaling
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.scale(dest, dest, vec);
+   *
+   * @param {vec3} v Scaling vector
+   * @returns {mat4} out
+   */
+  const fromScaling$1 = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
+
+  /**
+   * Creates a matrix from a vector translation
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.translate(dest, dest, vec);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {vec3} v Translation vector
+   * @returns {mat4} out
+   */
+
+  /**
+   * Create a new mat4 with the given values
+   *
+   * @param {Number} m00 Component in column 0, row 0 position (index 0)
+   * @param {Number} m01 Component in column 0, row 1 position (index 1)
+   * @param {Number} m02 Component in column 0, row 2 position (index 2)
+   * @param {Number} m03 Component in column 0, row 3 position (index 3)
+   * @param {Number} m10 Component in column 1, row 0 position (index 4)
+   * @param {Number} m11 Component in column 1, row 1 position (index 5)
+   * @param {Number} m12 Component in column 1, row 2 position (index 6)
+   * @param {Number} m13 Component in column 1, row 3 position (index 7)
+   * @param {Number} m20 Component in column 2, row 0 position (index 8)
+   * @param {Number} m21 Component in column 2, row 1 position (index 9)
+   * @param {Number} m22 Component in column 2, row 2 position (index 10)
+   * @param {Number} m23 Component in column 2, row 3 position (index 11)
+   * @param {Number} m30 Component in column 3, row 0 position (index 12)
+   * @param {Number} m31 Component in column 3, row 1 position (index 13)
+   * @param {Number} m32 Component in column 3, row 2 position (index 14)
+   * @param {Number} m33 Component in column 3, row 3 position (index 15)
+   * @returns {mat4} A new mat4
+   */
+
+  /**
+   * Creates a matrix from the given angle around the X axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateX(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from the given angle around the Y axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateY(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from the given angle around the Z axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateZ(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Set a mat4 to the identity matrix
+   *
+   * @returns {mat4} out
+   */
+
+  /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec3} [out] - receiving vector
+   * @param {vec3} vec - given value
+   * @returns {vec3} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec3's
+   *
+   * @param {vec3} a the first vector to add
+   * @param {vec3} b the second vector to add
+   * @returns {vec3} the added vectors
+   */
+
+  /**
+   * Calculates the dot product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+  const dot$2 = ([ax, ay, az], [bx, by, bz]) => (ax * bx) + (ay * by) + (az * bz);
+
+  /**
+   * Scales a vec3 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec3} vector the vector to scale
+   * @returns {vec3} out
+   */
+
+  // radians = degrees * PI / 180
+
+  // TODO: Clean this up.
+
+  // degrees = radians * 180 / PI
+
+  /**
+   * Computes the cross product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const cross$2 = ([ax, ay, az], [bx, by, bz]) => [ay * bz - az * by,
+                                                        az * bx - ax * bz,
+                                                        ax * by - ay * bx];
+
+  /**
+   * Calculates the euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Creates a new vec3 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @param {Number} z Z component
+   * @returns {vec3} a new 3D vector
+   */
+
+  /** create a vec3 from a single scalar value
+   * all components of the resulting vec3 have the value of the
+   * input scalar
+   * @param  {Float} scalar
+   * @returns {Vec3}
+   */
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @param {Number} z Z component
+   * @returns {vec3} a new 3D vector
+   */
+
+  // extend to a 3D vector by adding a z coordinate:
+
+  /**
+   * Calculates the length of a vec3
+   *
+   * @param {vec3} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+
+  /**
+   * Performs a linear interpolation between two vec3's
+   *
+   * @param {Number} t interpolant (0.0 to 1.0) applied between the two inputs
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Returns the maximum of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Returns the minimum of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Multiplies two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Negates the components of a vec3
+   *
+   * @param {vec3} a vector to negate
+   * @returns {vec3} out
+   */
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Calculates the squared euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+
+  /**
+   * Calculates the squared length of a vec3
+   *
+   * @param {vec3} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Transforms the vec3 with a mat4.
+   * 4th vector component is implicitly '1'
+   * @param {[[<vec3>], <mat4> , <vec3>]} params
+   * @param {mat4} params[1] matrix matrix to transform with
+   * @param {vec3} params[2] vector the vector to transform
+   * @returns {vec3} out
+   */
+  const transform$8 = (matrix, [x = 0, y = 0, z = 0]) => {
+    let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
+    w = w || 1.0;
+    return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
+            (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
+            (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w];
+  };
+
+  /**
+   * determine whether the input matrix is a mirroring transformation
+   *
+   * @param {mat4} mat the input matrix
+   * @returns {boolean} output
+   */
+  const isMirroring$1 = (mat) => {
+    const u = [mat[0], mat[4], mat[8]];
+    const v = [mat[1], mat[5], mat[9]];
+    const w = [mat[2], mat[6], mat[10]];
+
+    // for a true orthogonal, non-mirrored base, u.cross(v) == w
+    // If they have an opposite direction then we are mirroring
+    const mirrorvalue = dot$2(cross$2(u, v), w);
+    const ismirror = (mirrorvalue < 0);
+    return ismirror;
+  };
+
+  /**
+   * m the mat4 by the dimensions in the given vec3
+   * create an affine matrix for mirroring into an arbitrary plane:
+   *
+   * @param {vec3} v the vec3 to mirror the matrix by
+   * @param {mat4} a the matrix to mirror
+   * @returns {mat4} out
+   */
+
+  /**
+   * Create an affine matrix for mirroring onto an arbitrary plane
+   *
+   * @param {vec4} plane to mirror the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Multiplies two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec2} vec - given value
+   * @returns {vec2} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  // y=sin, x=cos
+
+  /**
+   * Computes the cross product (3D) of two vectors
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec3} cross product
+   */
+
+  /**
+   * Calculates the euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the dot product of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+
+  /**
+   * Creates a new vec2 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec2} a new 2D vector
+   */
+
+  /** Create a vec2 from a single scalar value
+   * @param  {Float} scalar
+   * @returns {Vec2} a new vec2
+   */
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   * Any missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec3} a new 2D vector
+   */
+
+  /**
+   * Calculates the length of a vec2
+   *
+   * @param {vec2} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+
+  /**
+   * Performs a linear interpolation between two vec2's
+   *
+   * @param {Number} t interpolation amount between the two inputs
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the maximum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the minimum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Multiplies two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Negates the components of a vec2
+   *
+   * @param {vec2} a vector to negate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Rotates a vec2 by an angle
+   *
+   * @param {Number} angle the angle of rotation (in radians)
+   * @param {vec2} vector the vector to rotate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Normalize the given vector.
+   *
+   * @param {vec2} a vector to normalize
+   * @returns {vec2} normalized (unit) vector
+   */
+
+  /**
+   * Scales a vec2 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec2} vector the vector to scale
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the squared euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+
+  /**
+   * Calculates the squared length of a vec2
+   *
+   * @param {vec2} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Transforms the vec2 with a mat4
+   * 3rd vector component is implicitly '0'
+   * 4th vector component is implicitly '1'
+   *
+   * @param {mat4} matrix matrix to transform with
+   * @param {vec2} vector the vector to transform
+   * @returns {vec2} out
+   */
+
+  /**
+   * Subtracts matrix b from matrix a
+   *
+   * @param {mat4} out the receiving matrix
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  const transform$9 = (matrix, path) =>
+    path.map((point, index) => (point === null) ? null : transform$8(matrix, point));
+
+  /**
+   * Transforms each path of Paths.
+   *
+   * @param {Paths} original - the Paths to transform.
+   * @param {Function} [transform=identity] - function used to transform the paths.
+   * @returns {Paths} the transformed paths.
+   */
+
+  const transform$a = (matrix, paths) => paths.map(path => transform$9(matrix, path));
+
+  // FIX: Deduplication.
+
+  const transform$b = (matrix, points) => points.map(point => transform$8(matrix, point));
+
+  /**
+   * Transforms the vertices of a polygon, producing a new poly3.
+   *
+   * The polygon does not need to be a poly3, but may be any array of
+   * points. The points being represented as arrays of values.
+   *
+   * If the original has a 'plane' property, the result will have a clone
+   * of the plane.
+   *
+   * @param {Function} [transform=vec3.clone] - function used to transform the vertices.
+   * @returns {Array} a copy with transformed vertices and copied properties.
+   *
+   * @example
+   * const vertices = [ [0, 0, 0], [0, 10, 0], [0, 10, 10] ]
+   * let observed = poly3.map(vertices)
+   */
+  const map$3 = (original, transform) => {
+    if (original === undefined) {
+      original = [];
+    }
+    if (transform === undefined) {
+      transform = _ => _;
+    }
+    return original.map(vertex => transform(vertex));
+  };
+
+  /**
+   * Emits the edges of a polygon in order.
+   *
+   * @param {function} the function to call with each edge in order.
+   * @param {Polygon} the polygon of which to emit the edges.
+   */
+
+  /**
+   * Flip the give polygon to face the opposite direction.
+   *
+   * @param {poly3} polygon - the polygon to flip
+   * @returns {poly3} a new poly3
+   */
+
+  /**
+   * Create a poly3 from the given points.
+   *
+   * @param {Array[]} points - list of points
+   * @param {plane} [planeof] - plane of the polygon
+   *
+   * @example
+   * const points = [
+   *   [0,  0, 0],
+   *   [0, 10, 0],
+   *   [0, 10, 10]
+   * ]
+   * const polygon = createFromPoints(points)
+   */
+
+  /**
+   * Compare the given planes for equality
+   * @return {boolean} true if planes are equal
+   */
+
+  /**
+   * Flip the given plane (vec4)
+   *
+   * @param {vec4} vec - plane to flip
+   * @return {vec4} flipped plane
+   */
+
+  /**
+   * Returns the polygon as an array of points.
+   * @param {Polygon}
+   * @returns {Points}
+   */
+
+  // Affine transformation of polygon. Returns a new polygon.
+  const transform$c = (matrix, polygon) => {
+    const transformed = map$3(polygon, vertex => transform$8(matrix, vertex));
+    if (isMirroring$1(matrix)) {
+      // Reverse the order to preserve the orientation.
+      transformed.reverse();
+    }
+    return transformed;
+  };
+
+  // Transforms
+  const transform$d = (matrix, surface) => surface.map(polygon => transform$c(matrix, polygon));
+
+  /**
+   * Transforms each polygon of the surface.
+   *
+   * @param {Polygons} original - the Polygons to transform.
+   * @param {Function} [transform=identity] - function used to transform the polygons.
+   * @returns {Polygons} a copy with transformed polygons.
+   */
+
+  // Internal function to massage data for passing to polygon-clipping.
+
+  const multiply$3 = (matrix, solid) => solid.map(surface => transform$d(matrix, surface));
+
+  // Relax the coplanar arrangement into polygon soup.
+
+  const map$4 = (geometry, operation) => {
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        return operation({ assembly: geometry.assembly.map(walk), tags: geometry.tags });
+      } else {
+        return operation(geometry);
+      }
+    };
+    return walk(geometry);
+  };
+
+  const eachItem$1 = (geometry, operation) => {
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        geometry.assembly.forEach(walk);
+      }
+      operation(geometry);
+    };
+    walk(geometry);
+  };
+
+  const transformItem$1 = (matrix, item) => {
+    const transformed = {};
+    if (item.assembly) {
+      transformed.assembly = item.assembly;
+    }
+    if (item.paths) {
+      transformed.paths = transform$a(matrix, item.paths);
+    }
+    if (item.points) {
+      transformed.points = transform$b(matrix, item.points);
+    }
+    if (item.solid) {
+      transformed.solid = multiply$3(matrix, item.solid);
+    }
+    if (item.z0Surface) {
+      // FIX: Handle transformations that take the surface out of z0.
+      transformed.z0Surface = transform$d(matrix, item.z0Surface);
+    }
+    transformed.tags = item.tags;
+    return transformed;
+  };
+
+  const transform$e = (matrix, assembly) => map$4(assembly, item => transformItem$1(matrix, item));
+
+  const scale$5 = (vector, assembly) => transform$e(fromScaling$1(vector), assembly);
+
   // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
   const fromSvgPath$1 = (options = {}, svgPath) =>
     fromSvgPath(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);
@@ -22949,7 +23564,7 @@ define("./webworker.js",[],function () { 'use strict';
           ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
 
           const output = (svgPath) =>
-            geometry.assembly.push(transform$6(scale(matrix), fromSvgPath$1({}, svgPath)));
+            geometry.assembly.push(transform$e(scale(matrix), fromSvgPath$1({}, svgPath)));
 
           // FIX: Should output a path given a stroke, should output a surface given a fill.
           switch (node.tagName) {
@@ -22991,7 +23606,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const toPolygons$1 = (geometry) => {
     const polygonSets = [];
-    eachItem(geometry,
+    eachItem$1(geometry,
              item => {
                if (item.z0Surface) {
                  polygonSets.push(item.z0Surface);
@@ -36884,7 +37499,7 @@ define("./webworker.js",[],function () { 'use strict';
                          [ldu(x3), ldu(y3), ldu(z3)]];
           if (!isStrictlyCoplanar(polygon)) throw Error('die');
           if (Direction() === 'CW') {
-            polygons.push(flip$3(polygon));
+            polygons.push(flip(polygon));
           } else {
             polygons.push(polygon);
           }
@@ -36898,10 +37513,10 @@ define("./webworker.js",[],function () { 'use strict';
                    [ldu(x4), ldu(y4), ldu(z4)]];
           if (Direction() === 'CW') {
             if (isStrictlyCoplanar(p)) {
-              polygons.push(flip$3(p));
+              polygons.push(flip(p));
             } else {
-              polygons.push(flip$3([p[0], p[1], p[3]]));
-              polygons.push(flip$3([p[2], p[3], p[1]]));
+              polygons.push(flip([p[0], p[1], p[3]]));
+              polygons.push(flip([p[2], p[3], p[1]]));
             }
           } else {
             if (isStrictlyCoplanar(p)) {
@@ -36971,12 +37586,15 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const writeShape = async (options, shape) => {
+    if (typeof options === 'string') {
+      options = { path: options };
+    }
     const { path, preview = true } = options;
     const geometry = toGeometry$1(options, shape);
     return writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$j = function (options = {}) { writeShape(options, this); return this; };
+  const method$j = function (options = {}) { return writeShape(options, this); };
 
   Shape.prototype.writeShape = method$j;
 
@@ -37585,7 +38203,8 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const toStl = async (options = {}, geometry) => {
-    let polygons = geometryToTriangles(geometry);
+    let keptGeometry = toKeptGeometry(geometry);
+    let polygons = geometryToTriangles(keptGeometry);
     if (!isWatertightPolygons(polygons)) {
       console.log(`polygonsToStla: Polygon is not watertight`);
       if (options.doMakeWatertight) {
@@ -38148,7 +38767,7 @@ define("./webworker.js",[],function () { 'use strict';
 
   const geometryToPaths = (geometry) => {
     const pathsets = [];
-    eachItem(geometry,
+    eachItem$1(geometry,
              item => {
                if (item.paths) {
                  pathsets.push(item.paths);
@@ -38210,12 +38829,17 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const writePdf = async (options, shape) => {
+    if (typeof options === 'string') {
+      // Support writePdf('foo', bar);
+      options = { path: options };
+    }
     const { path } = options;
-    const geometry = shape.toDisjointGeometry();
-    return writeFile({ geometry, preview: true }, path, toPdf({ preview: true, ...options }, geometry));
+    const geometry = shape.toKeptGeometry();
+    const pdf = await toPdf({ preview: true, ...options }, geometry);
+    return writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$p = function (options = {}) { writePdf(options, this); return this; };
+  const method$p = function (options = {}) { return writePdf(options, this); };
 
   Shape.prototype.writePdf = method$p;
 
@@ -38238,21 +38862,16 @@ define("./webworker.js",[],function () { 'use strict';
    *
    **/
 
-  const toGeometry$2 = ({ disjoint = true }, shape) => {
-    if (disjoint) {
-      return shape.toDisjointGeometry();
-    } else {
-      return shape.toGeometry();
-    }
-  };
-
   const writeStl = async (options, shape) => {
+    if (typeof options === 'string') {
+      options = { path: options };
+    }
     const { path } = options;
-    const geometry = toGeometry$2(options, shape);
+    const geometry = shape.toKeptGeometry();
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$q = function (options = {}) { writeStl(options, this); return this; };
+  const method$q = function (options = {}) { return writeStl(options, this); };
 
   Shape.prototype.writeStl = method$q;
 
@@ -38276,12 +38895,15 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const writeSvg = async (options, shape) => {
+    if (typeof options === 'string') {
+      options = { path: options };
+    }
     const { path } = options;
-    const geometry = shape.toDisjointGeometry();
+    const geometry = shape.toKeptGeometry();
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$r = function (options = {}) { writeSvg(options, this); return this; };
+  const method$r = function (options = {}) { return writeSvg(options, this); };
 
   Shape.prototype.writeSvg = method$r;
 
@@ -88651,7 +89273,7 @@ define("./webworker.js",[],function () { 'use strict';
     };
     for (const triangle of toTriangles({}, makeConvex$1({}, geometry))) {
       outputTriangle(triangle);
-      outputTriangle(flip$3(triangle));
+      outputTriangle(flip(triangle));
     }
     return { normals, positions };
   };
@@ -88751,7 +89373,7 @@ define("./webworker.js",[],function () { 'use strict';
 `  ;
 
   const toSvgSync = (options = {}, geometry) => {
-    const [scene, camera] = build$1(options, geometry);
+    const [scene, camera] = build$1(options, toKeptGeometry(geometry));
     const { includeXmlHeader = true, pageSize = [500, 500] } = options;
     const [pageWidth, pageHeight] = pageSize;
 
@@ -88844,22 +89466,28 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const writeSvgPhoto = async (options, shape) => {
+    if (typeof options === 'string') {
+      options = { path: options };
+    }
     const { path } = options;
-    const geometry = shape.toDisjointGeometry();
+    const geometry = shape.toKeptGeometry();
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$s = function (options = {}) { writeSvgPhoto(options, this); return this; };
+  const method$s = function (options = {}) { return writeSvgPhoto(options, this); };
 
   Shape.prototype.writeSvgPhoto = method$s;
 
   const writeThreejsPage = async (options, shape) => {
+    if (typeof options === 'string') {
+      options = { path: options };
+    }
     const { path } = options;
-    const geometry = shape.toDisjointGeometry();
+    const geometry = shape.toKeptGeometry();
     return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$t = function (options = {}) { writeThreejsPage(options, this); return this; };
+  const method$t = function (options = {}) { return writeThreejsPage(options, this); };
 
   Shape.prototype.writeThreejsPage = method$t;
 
@@ -88888,7 +89516,7 @@ define("./webworker.js",[],function () { 'use strict';
     cursor: cursor,
     cylinder: cylinder,
     difference: difference$5,
-    drop: drop,
+    drop: drop$1,
     extrude: extrude$1,
     front: front,
     hull: hull,
@@ -88926,7 +89554,7 @@ define("./webworker.js",[],function () { 'use strict';
     translate: translate$2,
     triangle: triangle,
     union: union$5,
-    keep: keep,
+    keep: keep$1,
     writePdf: writePdf,
     writeShape: writeShape,
     writeStl: writeStl,
@@ -108900,8 +109528,8 @@ define("./webworker.js",[],function () { 'use strict';
         console.log(`QQ/ecmascript: ${ecmascript}`);
         const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
         const shape = await code(api).main();
-        if (shape !== undefined) {
-          return shape.toDisjointGeometry();
+        if (shape.toKeptGeometry) {
+          return shape.toKeptGeometry();
         }
       }
     } catch (error) {

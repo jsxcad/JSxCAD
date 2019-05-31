@@ -1,6 +1,6 @@
 import { addTags, eachPoint,
-         toComponents, toDisjointGeometry, toKeptGeometry, toPoints,
-         transform } from '@jsxcad/geometry-eager';
+         toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
+         transform } from '@jsxcad/geometry-tagged';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
@@ -11,7 +11,7 @@ export class Shape {
   }
 
   close () {
-    const geometry = this.toGeometry();
+    const geometry = this.toKeptGeometry();
     if (!isSingleOpenPath(geometry)) {
       throw Error('Close requires a single open path.');
     }
@@ -21,7 +21,7 @@ export class Shape {
   concat (...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
-      const geometry = shape.toGeometry();
+      const geometry = shape.toKeptGeometry();
       if (!isSingleOpenPath(geometry)) {
         throw Error('Concatenation requires single open paths.');
       }
@@ -35,7 +35,7 @@ export class Shape {
   }
 
   eachPoint (options = {}, operation) {
-    eachPoint(options, operation, toGeometry(this));
+    eachPoint(options, operation, this.toKeptGeometry());
   }
 
   toComponents (options = {}) {
@@ -47,7 +47,7 @@ export class Shape {
   }
 
   toKeptGeometry (options = {}) {
-    return toKeptGeometry(toGeometry(this));
+    return toKeptTaggedGeometry(toGeometry(this));
   }
 
   toGeometry (options = {}) {
@@ -55,10 +55,11 @@ export class Shape {
   }
 
   toPoints (options = {}) {
-    return toPoints(options, this.toGeometry());
+    return toPoints(options, this.toKeptGeometry());
   }
 
   transform (matrix) {
+    if (matrix.some(item => item === -Infinity)) throw Error('die');
     return fromGeometry(transform(matrix, this.toGeometry()));
   }
 }
@@ -80,3 +81,4 @@ Shape.fromSolid = (solid) => fromGeometry({ solid: solid });
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
+export const toKeptGeometry = (shape) => shape.toKeptGeometry();

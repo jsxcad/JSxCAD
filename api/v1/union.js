@@ -1,5 +1,5 @@
-import { Shape, fromGeometry, toGeometry } from './Shape';
-import { union as unionGeometry } from '@jsxcad/geometry-eager';
+import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -58,7 +58,7 @@ export const union = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(unionGeometry(...shapes.map(toGeometry)));
+      return fromGeometry(unionGeometry(...shapes.map(toKeptGeometry)));
     }
   }
 };

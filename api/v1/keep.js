@@ -2,7 +2,7 @@ import { Shape, fromGeometry, toGeometry } from './Shape';
 import { assertShape, assertStrings } from './assert';
 
 import { dispatch } from './dispatch';
-import { keep as keepGeometry } from '@jsxcad/geometry-eager';
+import { keep as keepGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *

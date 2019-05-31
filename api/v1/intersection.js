@@ -1,5 +1,5 @@
-import { Shape, fromGeometry, toGeometry } from './Shape';
-import { intersection as intersectionGeometry } from '@jsxcad/geometry-eager';
+import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -59,7 +59,7 @@ export const intersection = (...shapes) => {
       return shapes[0];
     }
     default: {
-      return fromGeometry(intersectionGeometry(...shapes.map(toGeometry)));
+      return fromGeometry(intersectionGeometry(...shapes.map(toKeptGeometry)));
     }
   }
 };

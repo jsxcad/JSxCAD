@@ -26,7 +26,7 @@ export const writeStl = async (options, shape) => {
     options = { path: options };
   }
   const { path } = options;
-  const geometry = shape.toKeptGeometry(options);
+  const geometry = shape.toKeptGeometry();
   return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
 };
 

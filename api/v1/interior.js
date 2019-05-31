@@ -1,5 +1,5 @@
 import { Shape } from './Shape';
-import { getPaths } from '@jsxcad/geometry-eager';
+import { getPaths } from '@jsxcad/geometry-tagged';
 import { union } from '@jsxcad/geometry-z0surface';
 
 /**
