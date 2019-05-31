@@ -22,14 +22,21 @@ import { Shape } from './Shape';
  **/
 
 export const measureBoundingBox = (shape) => {
+  // FIX: Handle empty geometries.
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
+  let empty = true;
   shape.eachPoint({},
                   (point) => {
                     minPoint = min(minPoint, point);
                     maxPoint = max(maxPoint, point);
+                    empty = false;
                   });
-  return [minPoint, maxPoint];
+  if (empty) {
+    return [[0, 0, 0], [0, 0,0]];
+  } else {
+    return [minPoint, maxPoint];
+  }
 };
 
 const method = function () { return measureBoundingBox(this); };

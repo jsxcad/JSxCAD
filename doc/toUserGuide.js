@@ -105,6 +105,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
   md.use(MarkdownItContainer, 'illustration', { render });
   let markdownHtml = md.render(markdown);
   for (const { patch, options, text } of patches) {
+    console.log(`QQ/text: ${text}`);
     const geometry = await toOperator({ api }, text)();
     const svg = await toSvg({ includeXmlHeader: false, ...options },
                             geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
