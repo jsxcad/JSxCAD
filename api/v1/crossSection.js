@@ -3,8 +3,8 @@ import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { fromPoints } from '@jsxcad/math-plane';
-import { toPolygons } from '@jsxcad/geometry-solid';
 import { getSolids } from '@jsxcad/geometry-tagged';
+import { toPolygons } from '@jsxcad/geometry-solid';
 
 /**
  *
@@ -37,7 +37,6 @@ import { getSolids } from '@jsxcad/geometry-tagged';
  **/
 
 export const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-  const geometry = shape.toGeometry();
   const solids = getSolids(shape.toKeptGeometry());
   const shapes = [];
   for (const solid of solids) {

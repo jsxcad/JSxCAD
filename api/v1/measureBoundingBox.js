@@ -33,7 +33,7 @@ export const measureBoundingBox = (shape) => {
                     empty = false;
                   });
   if (empty) {
-    return [[0, 0, 0], [0, 0,0]];
+    return [[0, 0, 0], [0, 0, 0]];
   } else {
     return [minPoint, maxPoint];
   }
