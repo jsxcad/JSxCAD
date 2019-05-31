@@ -1,4 +1,4 @@
-import { assemble, cube, cylinder, sphere, writePdf } from '@jsxcad/api-v1';
+import { assemble, cube, cylinder, sphere } from '@jsxcad/api-v1';
 
 export const main = async () => {
   const scene = assemble(sphere(10).as('sphere'),

@@ -1,4 +1,4 @@
-import { assemble, cube, sphere, writeStl, writeSvgPhoto } from '@jsxcad/api-v1';
+import { assemble, cube, sphere, writeSvgPhoto } from '@jsxcad/api-v1';
 
 export const main = async () => {
   let x = assemble(sphere().as('a'),
