@@ -1,5 +1,5 @@
 import { eachEdge } from './eachEdge';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Empty polygon emits no edges.', t => {
   const collected = [];

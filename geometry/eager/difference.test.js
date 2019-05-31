@@ -3,7 +3,7 @@ import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shap
 
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Simple', t => {
   const differenced = difference({ assembly: [{ z0Surface: [unitSquarePolygon] }] },

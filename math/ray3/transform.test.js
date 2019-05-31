@@ -1,7 +1,7 @@
 import { canonicalize } from './canonicalize';
 import { create } from './create';
 import { fromPoints } from './fromPoints';
-import { test } from 'ava';
+import test from 'ava';
 import { transform } from './transform';
 
 test('line3: transform() called with two paramerters should return a line3 with correct values', (t) => {

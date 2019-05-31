@@ -1,7 +1,7 @@
 import { canonicalize, rotateZ } from '@jsxcad/geometry-surface';
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
-import { test } from 'ava';
+import test from 'ava';
 import { toDisjointGeometry } from './toDisjointGeometry';
 
 test('Simple', t => {

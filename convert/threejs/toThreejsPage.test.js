@@ -4,7 +4,7 @@ import { fromPolygons } from '@jsxcad/geometry-solid';
 import fs from 'fs';
 import { scale as scalePaths } from '@jsxcad/geometry-paths';
 import { scale as scaleSurface } from '@jsxcad/geometry-surface';
-import { test } from 'ava';
+import test from 'ava';
 import { toThreejsPage } from './toThreejsPage';
 
 const { readFile, writeFile } = fs.promises;

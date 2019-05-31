@@ -2,7 +2,7 @@ import { flip } from './flip';
 import { fromPoints } from './fromPoints';
 import { fromZRotation } from '@jsxcad/math-mat4';
 import { measureSignedVolume } from './measureSignedVolume';
-import { test } from 'ava';
+import test from 'ava';
 import { transform } from './transform';
 
 test('poly3: measureSignedVolume() should return correct values', (t) => {

@@ -1,5 +1,5 @@
 import { subtract } from './subtract';
-import { test } from 'ava';
+import test from 'ava';
 
 test('mat4: subtract() should return a new mat4 with correct values', (t) => {
   const obs1 = subtract([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],

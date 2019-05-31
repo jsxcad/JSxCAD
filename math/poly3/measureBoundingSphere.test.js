@@ -2,7 +2,7 @@ import { fromPoints } from './fromPoints';
 import { fromValues as fromValuesAVec3 } from '@jsxcad/math-vec3';
 import { fromZRotation } from '@jsxcad/math-mat4';
 import { measureBoundingSphere } from './measureBoundingSphere';
-import { test } from 'ava';
+import test from 'ava';
 import { transform } from './transform';
 
 const empty = [];

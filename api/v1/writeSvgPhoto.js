@@ -25,11 +25,14 @@ import { writeFile } from '@jsxcad/sys';
  **/
 
 export const writeSvgPhoto = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
   const { path } = options;
-  const geometry = shape.toDisjointGeometry();
+  const geometry = shape.toKeptGeometry();
   return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
 };
 
-const method = function (options = {}) { writeSvgPhoto(options, this); return this; };
+const method = function (options = {}) { return writeSvgPhoto(options, this); };
 
 Shape.prototype.writeSvgPhoto = method;

@@ -1,6 +1,6 @@
 import { fromPoints } from './fromPoints';
 import { isConvex } from './isConvex';
-import { test } from 'ava';
+import test from 'ava';
 
 test('poly3: convex poly3 is convex', (t) => {
   const ply2 = fromPoints([[1, 1, 0], [1, 0, 0], [0, 0, 0]]);

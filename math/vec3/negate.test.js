@@ -1,5 +1,5 @@
 import { negate } from './negate';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: negate() called with one paramerters should return a vec3 with correct values', (t) => {
   t.deepEqual(negate([0, 0, 0]), [-0, -0, -0]);

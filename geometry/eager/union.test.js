@@ -3,7 +3,7 @@ import { scale as scaleSolid, fromPolygons as solidFromPolygons, translate as tr
 import { unitCubePolygons, unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
 import { canonicalize } from './canonicalize';
-import { test } from 'ava';
+import test from 'ava';
 import { union } from './union';
 
 test('Surface', t => {

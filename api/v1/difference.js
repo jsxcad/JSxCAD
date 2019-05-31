@@ -1,4 +1,5 @@
-import { Shape, differenceLazily } from './Shape';
+import { Shape, fromGeometry, toGeometry } from './Shape';
+import { difference as differenceGeometry } from '@jsxcad/geometry-eager';
 
 /**
  *
@@ -29,7 +30,19 @@ import { Shape, differenceLazily } from './Shape';
  *
  **/
 
-export const difference = (...params) => differenceLazily(...params);
+export const difference = (...shapes) => {
+  switch (shapes.length) {
+    case 0: {
+      return fromGeometry({ assembly: [] });
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(differenceGeometry(...shapes.map(toGeometry)));
+    }
+  }
+};
 
 const method = function (...shapes) { return difference(this, ...shapes); };
 

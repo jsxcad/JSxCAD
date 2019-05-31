@@ -2,7 +2,7 @@ import { canonicalize, toPoints } from '@jsxcad/geometry-polygons';
 
 import { buildConvexHull } from './buildConvexHull';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
-import { test } from 'ava';
+import test from 'ava';
 import { unitCubePolygons } from '@jsxcad/data-shape';
 
 test('Hulling a cube produces triangulated output .', t => {

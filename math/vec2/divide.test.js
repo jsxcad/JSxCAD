@@ -1,5 +1,5 @@
 import { divide } from './divide';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec2: divide() called with two paramerters should return a vec2 with correct values', (t) => {
   t.deepEqual(divide([0, 0], [0, 0]), [0 / 0, 0 / 0]);

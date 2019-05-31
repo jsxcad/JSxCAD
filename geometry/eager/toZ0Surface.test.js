@@ -1,7 +1,7 @@
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
 import { canonicalize } from './canonicalize';
-import { test } from 'ava';
+import test from 'ava';
 import { toZ0Surface } from './toZ0Surface';
 
 test('Simple', t => {

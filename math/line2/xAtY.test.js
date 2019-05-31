@@ -1,6 +1,6 @@
 import { fromPoints } from './fromPoints';
 import { fromValues } from './fromValues';
-import { test } from 'ava';
+import test from 'ava';
 import { xAtY } from './xAtY';
 
 test('line2: xAtY() should return proper values', (t) => {

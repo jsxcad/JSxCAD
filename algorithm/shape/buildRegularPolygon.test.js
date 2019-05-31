@@ -4,7 +4,7 @@ import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shap
 
 import { buildRegularPolygon } from './buildRegularPolygon';
 import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius';
-import { test } from 'ava';
+import test from 'ava';
 
 test('A square', t => {
   const edgeLength = regularPolygonEdgeLengthToRadius(1, 4);

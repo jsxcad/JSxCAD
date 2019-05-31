@@ -4,7 +4,7 @@ import { buildConvexHull } from './buildConvexHull';
 import { buildConvexMinkowskiSum } from './buildConvexMinkowskiSum';
 import { canonicalize } from './canonicalize';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
-import { test } from 'ava';
+import test from 'ava';
 import { toPoints } from '@jsxcad/geometry-polygons';
 
 test('Minkowski sum of a cube and a sphere.', t => {

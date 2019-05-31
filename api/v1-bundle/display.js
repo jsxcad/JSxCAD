@@ -46,7 +46,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       contentOverflow,
       'position': { my: position, at: position },
       footerToolbar,
-      callback
+      callback,
+      headerControls: { close: 'remove' }
     });
     pages.push(panel);
     return panel;

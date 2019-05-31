@@ -1,6 +1,6 @@
 import { canonicalize } from './canonicalize';
 import { map } from './map';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Add tags', t => {
   const mapped = map({ assembly: [{ tags: ['a'] }, { tags: ['b'] }, { assembly: [{ tags: 'c' }], tags: ['d'] }], tags: ['e'] },

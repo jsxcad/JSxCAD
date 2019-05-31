@@ -2,7 +2,7 @@ import { createByteFetcher, fetchHeader, fromDst } from './fromDst';
 
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { readFileSync } from 'fs';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Fetch header', t => {
   const fetcher = createByteFetcher(readFileSync('test.dst'));

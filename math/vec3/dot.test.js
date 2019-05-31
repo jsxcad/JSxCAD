@@ -1,5 +1,5 @@
 import { dot } from './dot';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: dot() should return correct values', (t) => {
   t.is(dot([0, 0, 0], [0, 0, 0]), 0);

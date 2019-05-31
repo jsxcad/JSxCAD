@@ -1,6 +1,6 @@
 import { main } from './gear';
 import { readFileSync } from 'fs';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Expected stl', async (t) => {
   await main();

@@ -1,8 +1,8 @@
+import { Shape, fromGeometry, toGeometry } from './Shape';
 import { assertShape, assertStrings } from './assert';
 
-import { Shape } from './Shape';
-import { assemble } from './assemble';
 import { dispatch } from './dispatch';
+import { keep as keepGeometry } from '@jsxcad/geometry-eager';
 
 /**
  *
@@ -40,7 +40,7 @@ import { dispatch } from './dispatch';
  *
  **/
 
-export const fromValue = (tags, shape) => assemble(...shape.toComponents({ requires: tags }));
+export const fromValue = (tags, shape) => fromGeometry(keepGeometry(tags, toGeometry(shape)));
 
 export const keep = dispatch(
   'keep',

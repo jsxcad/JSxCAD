@@ -1,5 +1,5 @@
 import { isWatertightPolygons } from './isWatertightPolygons';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Leaky polygon array is not watertight', t => {
   const leaky = [[[-5, -5, -5], [-5, -5, 5], [-5, 5, 5], [-5, 5, -5]],

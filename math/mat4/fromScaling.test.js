@@ -1,5 +1,5 @@
 import { fromScaling } from './fromScaling';
-import { test } from 'ava';
+import test from 'ava';
 
 test('mat4: fromScaling() should return a new mat4 with correct values', (t) => {
   const obs1 = fromScaling([2, 4, 6]);

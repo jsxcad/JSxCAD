@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { fromSvg } from './fromSvg';
 import fs from 'fs';
-import { test } from 'ava';
+import test from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';
 const { writeFile } = fs.promises;
 

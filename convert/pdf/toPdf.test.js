@@ -1,5 +1,5 @@
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { test } from 'ava';
+import test from 'ava';
 import { toPdf } from './toPdf';
 
 test('Triangle', async t => {

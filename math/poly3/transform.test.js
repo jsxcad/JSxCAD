@@ -1,7 +1,7 @@
 import { canonicalize } from './canonicalize';
 import { equals } from './equals';
 import { fromPoints } from './fromPoints';
-import { test } from 'ava';
+import test from 'ava';
 import { transform } from './transform';
 
 test('poly3: identity transform should return a new poly3 with correct values', (t) => {

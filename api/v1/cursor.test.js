@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/geometry-path';
 import { cursor } from './cursor';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Simple', t => {
   const path = cursor()

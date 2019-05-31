@@ -1,4 +1,4 @@
-import { test } from 'ava';
+import test from 'ava';
 // const mirrorByPlane = require('./mirrorByPlane');
 // const plane = require('@jsxcad/math-plane');
 
