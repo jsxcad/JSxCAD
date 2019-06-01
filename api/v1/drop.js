@@ -1,14 +1,16 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { assertShape, assertStrings } from './assert';
+import { addTags, drop as dropGeometry } from '@jsxcad/geometry-tagged';
+import { assertEmpty, assertShape, assertStrings } from './assert';
 
 import { dispatch } from './dispatch';
-import { drop as dropGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
  * # Drop from assembly
  *
  * Generates an assembly from components in an assembly without a tag.
+ *
+ * If no tag is supplied, the whole shape is dropped.
  *
  * ::: illustration
  * ```
@@ -37,6 +39,12 @@ import { drop as dropGeometry } from '@jsxcad/geometry-tagged';
  *   .drop('A', 'B')
  * ```
  * :::
+ * ::: illustration
+ * ```
+ * assemble(cube(10).below(),
+ *          cube(8).below().drop())
+ * ```
+ * :::
  *
  **/
 
@@ -45,6 +53,13 @@ export const fromValue = (tags, shape) => fromGeometry(dropGeometry(tags, toGeom
 export const drop = dispatch(
   'drop',
   (tags, shape) => {
+    // assemble(circle(), circle().drop())
+    assertEmpty(tags);
+    assertShape(shape);
+    return () => fromGeometry(addTags(['@drop'], toGeometry(shape)));
+  },
+  (tags, shape) => {
+    // assemble(circle(), circle().as('a')).drop('a')
     assertStrings(tags);
     assertShape(shape);
     return () => fromValue(tags, shape);

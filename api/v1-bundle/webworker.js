@@ -13,7 +13,7 @@ const agent = async ({ ask, question }) => {
       console.log(`QQ/ecmascript: ${ecmascript}`);
       const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
       const shape = await code(api).main();
-      if (shape.toKeptGeometry) {
+      if (shape !== undefined && shape.toKeptGeometry) {
         return shape.toKeptGeometry();
       }
     }
