@@ -273,12 +273,6 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
-  const distance = ([ax, ay, az], [bx, by, bz]) => {
-    const x = bx - ax;
-    const y = by - ay;
-    const z = bz - az;
-    return Math.sqrt(x * x + y * y + z * z);
-  };
 
   /**
    * Divides two vec3's
@@ -1320,7 +1314,7 @@ define("./webworker.js",[],function () { 'use strict';
       return out
   }
 
-  var distance_1 = distance$1;
+  var distance_1 = distance;
 
   /**
    * Calculates the euclidian distance between two vec3's
@@ -1329,7 +1323,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
-  function distance$1(a, b) {
+  function distance(a, b) {
       var x = b[0] - a[0],
           y = b[1] - a[1],
           z = b[2] - a[2];
@@ -13144,29 +13138,18 @@ define("./webworker.js",[],function () { 'use strict';
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
   const measureBoundingBox$1 = (solid) => {
-    let max$1 = solid[0][0][0];
-    let min$1 = solid[0][0][0];
-    eachPoint$3({},
-              point => {
-                max$1 = max(max$1, point);
-                min$1 = min(min$1, point);
-              },
-              solid);
-    return [min$1, max$1];
-  };
-
-  /** Measure the bounding sphere of the given poly3
-   * @param {poly3} the poly3 to measure
-   * @returns computed bounding sphere; center (vec3) and radius
-   */
-  const measureBoundingSphere = (solid) => {
-    if (solid.boundingSphere === undefined) {
-      const [min, max] = measureBoundingBox$1(solid);
-      const center = scale(0.5, add(min, max));
-      const radius = distance(center, max);
-      solid.boundingSphere = [center, radius];
+    if (solid.measureBoundingBox === undefined) {
+      let max$1 = solid[0][0][0];
+      let min$1 = solid[0][0][0];
+      eachPoint$3({},
+                point => {
+                  max$1 = max(max$1, point);
+                  min$1 = min(min$1, point);
+                },
+                solid);
+      solid.measureBoundingBox = [min$1, max$1];
     }
-    return solid.boundingSphere;
+    return solid.measureBoundingBox;
   };
 
   // Relax the coplanar arrangement into polygon soup.
@@ -13218,11 +13201,15 @@ define("./webworker.js",[],function () { 'use strict';
     const coplanarBackPolygons = [];
     const frontPolygons = [];
     const backPolygons = [];
-    let polygonType = COPLANAR;
+    const pointType = [];
     for (const polygon of surface) {
+      pointType.length = 0;
+      let polygonType = COPLANAR;
       if (!equals$2(toPlane(polygon), plane)) {
         for (const point of polygon) {
-          polygonType |= toType(plane, point);
+          const type = toType(plane, point);
+          polygonType |= type;
+          pointType.push(type);
         }
       }
 
@@ -13248,9 +13235,10 @@ define("./webworker.js",[],function () { 'use strict';
           let frontPoints = [];
           let backPoints = [];
           let startPoint = polygon[polygon.length - 1];
-          let startType = toType(plane, startPoint);
-          for (const endPoint of polygon) {
-            const endType = toType(plane, endPoint);
+          let startType = pointType[polygon.length - 1];
+          for (let nth = 0; nth < polygon.length; nth++) {
+            const endPoint = polygon[nth];
+            const endType = pointType[nth];
             if (startType !== BACK) {
               // The inequality is important as it includes COPLANAR points.
               frontPoints.push(startPoint);
@@ -13417,10 +13405,22 @@ define("./webworker.js",[],function () { 'use strict';
     return surfaces;
   };
 
+  const iota = 1e-5;
+  const X$1 = 0;
+  const Y$1 = 1;
+  const Z$1 = 2;
+
+  // Tolerates overlap up to one iota.
   const doesNotOverlap = (a, b) => {
-    const [centerA, radiusA] = measureBoundingSphere(a);
-    const [centerB, radiusB] = measureBoundingSphere(b);
-    return distance(centerA, centerB) > radiusA + radiusB;
+    const [minA, maxA] = measureBoundingBox$1(a);
+    const [minB, maxB] = measureBoundingBox$1(b);
+    if (maxA[X$1] <= minB[X$1] + iota) { return true; }
+    if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
+    if (maxA[Z$1] <= minB[Z$1] + iota) { return true; }
+    if (maxB[X$1] <= minA[X$1] + iota) { return true; }
+    if (maxB[Y$1] <= minA[Y$1] + iota) { return true; }
+    if (maxB[Z$1] <= minA[Z$1] + iota) { return true; }
+    return false;
   };
 
   /**
@@ -13966,14 +13966,21 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const measureBoundingBox$2 = (shape) => {
+    // FIX: Handle empty geometries.
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
+    let empty = true;
     shape.eachPoint({},
                     (point) => {
                       minPoint = min(minPoint, point);
                       maxPoint = max(maxPoint, point);
+                      empty = false;
                     });
-    return [minPoint, maxPoint];
+    if (empty) {
+      return [[0, 0, 0], [0, 0, 0]];
+    } else {
+      return [minPoint, maxPoint];
+    }
   };
 
   const method = function () { return measureBoundingBox$2(this); };
@@ -14160,11 +14167,11 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const Z$1 = 2;
+  const Z$2 = 2;
 
   const above = (shape) => {
     const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, 0, minPoint[Z$1]]), shape);
+    return translate$2(negate([0, 0, minPoint[Z$2]]), shape);
   };
 
   const method$2 = function () { return above(this); };
@@ -14270,11 +14277,11 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const Y$1 = 1;
+  const Y$2 = 1;
 
   const back = (shape) => {
     const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, maxPoint[Y$1], 0]), shape);
+    return translate$2(negate([0, maxPoint[Y$2], 0]), shape);
   };
 
   const method$4 = function () { return back(this); };
@@ -14295,11 +14302,11 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const Z$2 = 2;
+  const Z$3 = 2;
 
   const below = (shape) => {
     const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, 0, maxPoint[Z$2]]), shape);
+    return translate$2(negate([0, 0, maxPoint[Z$3]]), shape);
   };
 
   const method$5 = function () { return below(this); };
@@ -15259,7 +15266,6 @@ define("./webworker.js",[],function () { 'use strict';
    **/
 
   const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-    const geometry = shape.toGeometry();
     const solids = getSolids(shape.toKeptGeometry());
     const shapes = [];
     for (const solid of solids) {
@@ -15743,11 +15749,11 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const Y$2 = 1;
+  const Y$3 = 1;
 
   const front = (shape) => {
     const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, minPoint[Y$2], 0]), shape);
+    return translate$2(negate([0, minPoint[Y$3], 0]), shape);
   };
 
   const method$b = function () { return front(this); };
@@ -15962,11 +15968,11 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const X$1 = 0;
+  const X$2 = 0;
 
   const left = (shape) => {
     const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([maxPoint[X$1], 0, 0]), shape);
+    return translate$2(negate([maxPoint[X$2], 0, 0]), shape);
   };
 
   const method$g = function () { return left(this); };
@@ -38296,11 +38302,11 @@ define("./webworker.js",[],function () { 'use strict';
    * :::
    **/
 
-  const X$2 = 0;
+  const X$3 = 0;
 
   const right = (shape) => {
     const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([minPoint[X$2], 0, 0]), shape);
+    return translate$2(negate([minPoint[X$3], 0, 0]), shape);
   };
 
   const method$k = function () { return right(this); };
@@ -38737,8 +38743,8 @@ define("./webworker.js",[],function () { 'use strict';
   triangle.fromRadius = fromRadius$6;
   triangle.fromDiameter = fromDiameter$6;
 
-  const X$3 = 0;
-  const Y$3 = 1;
+  const X$4 = 0;
+  const Y$4 = 1;
 
   // Not entirely sure how conformant this is, but it seems to work for simple
   // cases.
@@ -38791,7 +38797,7 @@ define("./webworker.js",[],function () { 'use strict';
     // Subtract the x min, and the y max, then add the page height to bring
     // it up to the top left. This positions the origin nicely for laser
     // cutting and printing.
-    const offset = [-min[X$3] * scale, (height - max[Y$3]) * scale, 0];
+    const offset = [-min[X$4] * scale, (height - max[Y$4]) * scale, 0];
     const matrix = multiply$1(fromTranslation(offset),
                             fromScaling([scale, scale, scale]));
     for (const path of transform$2(matrix, paths)) {
@@ -109528,7 +109534,7 @@ define("./webworker.js",[],function () { 'use strict';
         console.log(`QQ/ecmascript: ${ecmascript}`);
         const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
         const shape = await code(api).main();
-        if (shape.toKeptGeometry) {
+        if (shape !== undefined && shape.toKeptGeometry) {
           return shape.toKeptGeometry();
         }
       }
