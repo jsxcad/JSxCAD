@@ -6489,6 +6489,690 @@ define("./webworker.js",[],function () { 'use strict';
     return summedPoints;
   };
 
+  var twoProduct_1 = twoProduct;
+
+  var SPLITTER = +(Math.pow(2, 27) + 1.0);
+
+  function twoProduct(a, b, result) {
+    var x = a * b;
+
+    var c = SPLITTER * a;
+    var abig = c - a;
+    var ahi = c - abig;
+    var alo = a - ahi;
+
+    var d = SPLITTER * b;
+    var bbig = d - b;
+    var bhi = d - bbig;
+    var blo = b - bhi;
+
+    var err1 = x - (ahi * bhi);
+    var err2 = err1 - (alo * bhi);
+    var err3 = err2 - (ahi * blo);
+
+    var y = alo * blo - err3;
+
+    if(result) {
+      result[0] = y;
+      result[1] = x;
+      return result
+    }
+
+    return [ y, x ]
+  }
+
+  var robustSum = linearExpansionSum;
+
+  //Easy case: Add two scalars
+  function scalarScalar(a, b) {
+    var x = a + b;
+    var bv = x - a;
+    var av = x - bv;
+    var br = b - bv;
+    var ar = a - av;
+    var y = ar + br;
+    if(y) {
+      return [y, x]
+    }
+    return [x]
+  }
+
+  function linearExpansionSum(e, f) {
+    var ne = e.length|0;
+    var nf = f.length|0;
+    if(ne === 1 && nf === 1) {
+      return scalarScalar(e[0], f[0])
+    }
+    var n = ne + nf;
+    var g = new Array(n);
+    var count = 0;
+    var eptr = 0;
+    var fptr = 0;
+    var abs = Math.abs;
+    var ei = e[eptr];
+    var ea = abs(ei);
+    var fi = f[fptr];
+    var fa = abs(fi);
+    var a, b;
+    if(ea < fa) {
+      b = ei;
+      eptr += 1;
+      if(eptr < ne) {
+        ei = e[eptr];
+        ea = abs(ei);
+      }
+    } else {
+      b = fi;
+      fptr += 1;
+      if(fptr < nf) {
+        fi = f[fptr];
+        fa = abs(fi);
+      }
+    }
+    if((eptr < ne && ea < fa) || (fptr >= nf)) {
+      a = ei;
+      eptr += 1;
+      if(eptr < ne) {
+        ei = e[eptr];
+        ea = abs(ei);
+      }
+    } else {
+      a = fi;
+      fptr += 1;
+      if(fptr < nf) {
+        fi = f[fptr];
+        fa = abs(fi);
+      }
+    }
+    var x = a + b;
+    var bv = x - a;
+    var y = b - bv;
+    var q0 = y;
+    var q1 = x;
+    var _x, _bv, _av, _br, _ar;
+    while(eptr < ne && fptr < nf) {
+      if(ea < fa) {
+        a = ei;
+        eptr += 1;
+        if(eptr < ne) {
+          ei = e[eptr];
+          ea = abs(ei);
+        }
+      } else {
+        a = fi;
+        fptr += 1;
+        if(fptr < nf) {
+          fi = f[fptr];
+          fa = abs(fi);
+        }
+      }
+      b = q0;
+      x = a + b;
+      bv = x - a;
+      y = b - bv;
+      if(y) {
+        g[count++] = y;
+      }
+      _x = q1 + x;
+      _bv = _x - q1;
+      _av = _x - _bv;
+      _br = x - _bv;
+      _ar = q1 - _av;
+      q0 = _ar + _br;
+      q1 = _x;
+    }
+    while(eptr < ne) {
+      a = ei;
+      b = q0;
+      x = a + b;
+      bv = x - a;
+      y = b - bv;
+      if(y) {
+        g[count++] = y;
+      }
+      _x = q1 + x;
+      _bv = _x - q1;
+      _av = _x - _bv;
+      _br = x - _bv;
+      _ar = q1 - _av;
+      q0 = _ar + _br;
+      q1 = _x;
+      eptr += 1;
+      if(eptr < ne) {
+        ei = e[eptr];
+      }
+    }
+    while(fptr < nf) {
+      a = fi;
+      b = q0;
+      x = a + b;
+      bv = x - a;
+      y = b - bv;
+      if(y) {
+        g[count++] = y;
+      } 
+      _x = q1 + x;
+      _bv = _x - q1;
+      _av = _x - _bv;
+      _br = x - _bv;
+      _ar = q1 - _av;
+      q0 = _ar + _br;
+      q1 = _x;
+      fptr += 1;
+      if(fptr < nf) {
+        fi = f[fptr];
+      }
+    }
+    if(q0) {
+      g[count++] = q0;
+    }
+    if(q1) {
+      g[count++] = q1;
+    }
+    if(!count) {
+      g[count++] = 0.0;  
+    }
+    g.length = count;
+    return g
+  }
+
+  var twoSum = fastTwoSum;
+
+  function fastTwoSum(a, b, result) {
+  	var x = a + b;
+  	var bv = x - a;
+  	var av = x - bv;
+  	var br = b - bv;
+  	var ar = a - av;
+  	if(result) {
+  		result[0] = ar + br;
+  		result[1] = x;
+  		return result
+  	}
+  	return [ar+br, x]
+  }
+
+  var robustScale = scaleLinearExpansion;
+
+  function scaleLinearExpansion(e, scale) {
+    var n = e.length;
+    if(n === 1) {
+      var ts = twoProduct_1(e[0], scale);
+      if(ts[0]) {
+        return ts
+      }
+      return [ ts[1] ]
+    }
+    var g = new Array(2 * n);
+    var q = [0.1, 0.1];
+    var t = [0.1, 0.1];
+    var count = 0;
+    twoProduct_1(e[0], scale, q);
+    if(q[0]) {
+      g[count++] = q[0];
+    }
+    for(var i=1; i<n; ++i) {
+      twoProduct_1(e[i], scale, t);
+      var pq = q[1];
+      twoSum(pq, t[0], q);
+      if(q[0]) {
+        g[count++] = q[0];
+      }
+      var a = t[1];
+      var b = q[1];
+      var x = a + b;
+      var bv = x - a;
+      var y = b - bv;
+      q[1] = x;
+      if(y) {
+        g[count++] = y;
+      }
+    }
+    if(q[1]) {
+      g[count++] = q[1];
+    }
+    if(count === 0) {
+      g[count++] = 0.0;
+    }
+    g.length = count;
+    return g
+  }
+
+  var robustDiff = robustSubtract;
+
+  //Easy case: Add two scalars
+  function scalarScalar$1(a, b) {
+    var x = a + b;
+    var bv = x - a;
+    var av = x - bv;
+    var br = b - bv;
+    var ar = a - av;
+    var y = ar + br;
+    if(y) {
+      return [y, x]
+    }
+    return [x]
+  }
+
+  function robustSubtract(e, f) {
+    var ne = e.length|0;
+    var nf = f.length|0;
+    if(ne === 1 && nf === 1) {
+      return scalarScalar$1(e[0], -f[0])
+    }
+    var n = ne + nf;
+    var g = new Array(n);
+    var count = 0;
+    var eptr = 0;
+    var fptr = 0;
+    var abs = Math.abs;
+    var ei = e[eptr];
+    var ea = abs(ei);
+    var fi = -f[fptr];
+    var fa = abs(fi);
+    var a, b;
+    if(ea < fa) {
+      b = ei;
+      eptr += 1;
+      if(eptr < ne) {
+        ei = e[eptr];
+        ea = abs(ei);
+      }
+    } else {
+      b = fi;
+      fptr += 1;
+      if(fptr < nf) {
+        fi = -f[fptr];
+        fa = abs(fi);
+      }
+    }
+    if((eptr < ne && ea < fa) || (fptr >= nf)) {
+      a = ei;
+      eptr += 1;
+      if(eptr < ne) {
+        ei = e[eptr];
+        ea = abs(ei);
+      }
+    } else {
+      a = fi;
+      fptr += 1;
+      if(fptr < nf) {
+        fi = -f[fptr];
+        fa = abs(fi);
+      }
+    }
+    var x = a + b;
+    var bv = x - a;
+    var y = b - bv;
+    var q0 = y;
+    var q1 = x;
+    var _x, _bv, _av, _br, _ar;
+    while(eptr < ne && fptr < nf) {
+      if(ea < fa) {
+        a = ei;
+        eptr += 1;
+        if(eptr < ne) {
+          ei = e[eptr];
+          ea = abs(ei);
+        }
+      } else {
+        a = fi;
+        fptr += 1;
+        if(fptr < nf) {
+          fi = -f[fptr];
+          fa = abs(fi);
+        }
+      }
+      b = q0;
+      x = a + b;
+      bv = x - a;
+      y = b - bv;
+      if(y) {
+        g[count++] = y;
+      }
+      _x = q1 + x;
+      _bv = _x - q1;
+      _av = _x - _bv;
+      _br = x - _bv;
+      _ar = q1 - _av;
+      q0 = _ar + _br;
+      q1 = _x;
+    }
+    while(eptr < ne) {
+      a = ei;
+      b = q0;
+      x = a + b;
+      bv = x - a;
+      y = b - bv;
+      if(y) {
+        g[count++] = y;
+      }
+      _x = q1 + x;
+      _bv = _x - q1;
+      _av = _x - _bv;
+      _br = x - _bv;
+      _ar = q1 - _av;
+      q0 = _ar + _br;
+      q1 = _x;
+      eptr += 1;
+      if(eptr < ne) {
+        ei = e[eptr];
+      }
+    }
+    while(fptr < nf) {
+      a = fi;
+      b = q0;
+      x = a + b;
+      bv = x - a;
+      y = b - bv;
+      if(y) {
+        g[count++] = y;
+      } 
+      _x = q1 + x;
+      _bv = _x - q1;
+      _av = _x - _bv;
+      _br = x - _bv;
+      _ar = q1 - _av;
+      q0 = _ar + _br;
+      q1 = _x;
+      fptr += 1;
+      if(fptr < nf) {
+        fi = -f[fptr];
+      }
+    }
+    if(q0) {
+      g[count++] = q0;
+    }
+    if(q1) {
+      g[count++] = q1;
+    }
+    if(!count) {
+      g[count++] = 0.0;  
+    }
+    g.length = count;
+    return g
+  }
+
+  var orientation_1 = createCommonjsModule(function (module) {
+
+
+
+
+
+
+  var NUM_EXPAND = 5;
+
+  var EPSILON     = 1.1102230246251565e-16;
+  var ERRBOUND3   = (3.0 + 16.0 * EPSILON) * EPSILON;
+  var ERRBOUND4   = (7.0 + 56.0 * EPSILON) * EPSILON;
+
+  function cofactor(m, c) {
+    var result = new Array(m.length-1);
+    for(var i=1; i<m.length; ++i) {
+      var r = result[i-1] = new Array(m.length-1);
+      for(var j=0,k=0; j<m.length; ++j) {
+        if(j === c) {
+          continue
+        }
+        r[k++] = m[i][j];
+      }
+    }
+    return result
+  }
+
+  function matrix(n) {
+    var result = new Array(n);
+    for(var i=0; i<n; ++i) {
+      result[i] = new Array(n);
+      for(var j=0; j<n; ++j) {
+        result[i][j] = ["m", j, "[", (n-i-1), "]"].join("");
+      }
+    }
+    return result
+  }
+
+  function sign(n) {
+    if(n & 1) {
+      return "-"
+    }
+    return ""
+  }
+
+  function generateSum(expr) {
+    if(expr.length === 1) {
+      return expr[0]
+    } else if(expr.length === 2) {
+      return ["sum(", expr[0], ",", expr[1], ")"].join("")
+    } else {
+      var m = expr.length>>1;
+      return ["sum(", generateSum(expr.slice(0, m)), ",", generateSum(expr.slice(m)), ")"].join("")
+    }
+  }
+
+  function determinant(m) {
+    if(m.length === 2) {
+      return [["sum(prod(", m[0][0], ",", m[1][1], "),prod(-", m[0][1], ",", m[1][0], "))"].join("")]
+    } else {
+      var expr = [];
+      for(var i=0; i<m.length; ++i) {
+        expr.push(["scale(", generateSum(determinant(cofactor(m, i))), ",", sign(i), m[0][i], ")"].join(""));
+      }
+      return expr
+    }
+  }
+
+  function orientation(n) {
+    var pos = [];
+    var neg = [];
+    var m = matrix(n);
+    var args = [];
+    for(var i=0; i<n; ++i) {
+      if((i&1)===0) {
+        pos.push.apply(pos, determinant(cofactor(m, i)));
+      } else {
+        neg.push.apply(neg, determinant(cofactor(m, i)));
+      }
+      args.push("m" + i);
+    }
+    var posExpr = generateSum(pos);
+    var negExpr = generateSum(neg);
+    var funcName = "orientation" + n + "Exact";
+    var code = ["function ", funcName, "(", args.join(), "){var p=", posExpr, ",n=", negExpr, ",d=sub(p,n);\
+return d[d.length-1];};return ", funcName].join("");
+    var proc = new Function("sum", "prod", "scale", "sub", code);
+    return proc(robustSum, twoProduct_1, robustScale, robustDiff)
+  }
+
+  var orientation3Exact = orientation(3);
+  var orientation4Exact = orientation(4);
+
+  var CACHED = [
+    function orientation0() { return 0 },
+    function orientation1() { return 0 },
+    function orientation2(a, b) { 
+      return b[0] - a[0]
+    },
+    function orientation3(a, b, c) {
+      var l = (a[1] - c[1]) * (b[0] - c[0]);
+      var r = (a[0] - c[0]) * (b[1] - c[1]);
+      var det = l - r;
+      var s;
+      if(l > 0) {
+        if(r <= 0) {
+          return det
+        } else {
+          s = l + r;
+        }
+      } else if(l < 0) {
+        if(r >= 0) {
+          return det
+        } else {
+          s = -(l + r);
+        }
+      } else {
+        return det
+      }
+      var tol = ERRBOUND3 * s;
+      if(det >= tol || det <= -tol) {
+        return det
+      }
+      return orientation3Exact(a, b, c)
+    },
+    function orientation4(a,b,c,d) {
+      var adx = a[0] - d[0];
+      var bdx = b[0] - d[0];
+      var cdx = c[0] - d[0];
+      var ady = a[1] - d[1];
+      var bdy = b[1] - d[1];
+      var cdy = c[1] - d[1];
+      var adz = a[2] - d[2];
+      var bdz = b[2] - d[2];
+      var cdz = c[2] - d[2];
+      var bdxcdy = bdx * cdy;
+      var cdxbdy = cdx * bdy;
+      var cdxady = cdx * ady;
+      var adxcdy = adx * cdy;
+      var adxbdy = adx * bdy;
+      var bdxady = bdx * ady;
+      var det = adz * (bdxcdy - cdxbdy) 
+              + bdz * (cdxady - adxcdy)
+              + cdz * (adxbdy - bdxady);
+      var permanent = (Math.abs(bdxcdy) + Math.abs(cdxbdy)) * Math.abs(adz)
+                    + (Math.abs(cdxady) + Math.abs(adxcdy)) * Math.abs(bdz)
+                    + (Math.abs(adxbdy) + Math.abs(bdxady)) * Math.abs(cdz);
+      var tol = ERRBOUND4 * permanent;
+      if ((det > tol) || (-det > tol)) {
+        return det
+      }
+      return orientation4Exact(a,b,c,d)
+    }
+  ];
+
+  function slowOrient(args) {
+    var proc = CACHED[args.length];
+    if(!proc) {
+      proc = CACHED[args.length] = orientation(args.length);
+    }
+    return proc.apply(undefined, args)
+  }
+
+  function generateOrientationProc() {
+    while(CACHED.length <= NUM_EXPAND) {
+      CACHED.push(orientation(CACHED.length));
+    }
+    var args = [];
+    var procArgs = ["slow"];
+    for(var i=0; i<=NUM_EXPAND; ++i) {
+      args.push("a" + i);
+      procArgs.push("o" + i);
+    }
+    var code = [
+      "function getOrientation(", args.join(), "){switch(arguments.length){case 0:case 1:return 0;"
+    ];
+    for(var i=2; i<=NUM_EXPAND; ++i) {
+      code.push("case ", i, ":return o", i, "(", args.slice(0, i).join(), ");");
+    }
+    code.push("}var s=new Array(arguments.length);for(var i=0;i<arguments.length;++i){s[i]=arguments[i]};return slow(s);}return getOrientation");
+    procArgs.push(code.join(""));
+
+    var proc = Function.apply(undefined, procArgs);
+    module.exports = proc.apply(undefined, [slowOrient].concat(CACHED));
+    for(var i=0; i<=NUM_EXPAND; ++i) {
+      module.exports[i] = CACHED[i];
+    }
+  }
+
+  generateOrientationProc();
+  });
+
+  var monotoneConvexHull2d = monotoneConvexHull2D;
+
+  var orient = orientation_1[3];
+
+  function monotoneConvexHull2D(points) {
+    var n = points.length;
+
+    if(n < 3) {
+      var result = new Array(n);
+      for(var i=0; i<n; ++i) {
+        result[i] = i;
+      }
+
+      if(n === 2 &&
+         points[0][0] === points[1][0] &&
+         points[0][1] === points[1][1]) {
+        return [0]
+      }
+
+      return result
+    }
+
+    //Sort point indices along x-axis
+    var sorted = new Array(n);
+    for(var i=0; i<n; ++i) {
+      sorted[i] = i;
+    }
+    sorted.sort(function(a,b) {
+      var d = points[a][0]-points[b][0];
+      if(d) {
+        return d
+      }
+      return points[a][1] - points[b][1]
+    });
+
+    //Construct upper and lower hulls
+    var lower = [sorted[0], sorted[1]];
+    var upper = [sorted[0], sorted[1]];
+
+    for(var i=2; i<n; ++i) {
+      var idx = sorted[i];
+      var p   = points[idx];
+
+      //Insert into lower list
+      var m = lower.length;
+      while(m > 1 && orient(
+          points[lower[m-2]], 
+          points[lower[m-1]], 
+          p) <= 0) {
+        m -= 1;
+        lower.pop();
+      }
+      lower.push(idx);
+
+      //Insert into upper list
+      m = upper.length;
+      while(m > 1 && orient(
+          points[upper[m-2]], 
+          points[upper[m-1]], 
+          p) >= 0) {
+        m -= 1;
+        upper.pop();
+      }
+      upper.push(idx);
+    }
+
+    //Merge lists together
+    var result = new Array(upper.length + lower.length - 2);
+    var ptr    = 0;
+    for(var i=0, nl=lower.length; i<nl; ++i) {
+      result[ptr++] = lower[i];
+    }
+    for(var j=upper.length-2; j>0; --j) {
+      result[ptr++] = upper[j];
+    }
+
+    //Return result
+    return result
+  }
+
+  const buildConvexSurfaceHull = (options = {}, points) => {
+    const hull = [];
+    for (const nth of monotoneConvexHull2d(points)) {
+      hull.push(points[nth]);
+    }
+    return hull;
+  };
+
   const eachPoint$1 = (options = {}, thunk, points) => {
     for (const point of points) {
       thunk(point);
@@ -13629,18 +14313,21 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   const eachPoint$4 = (options, operation, geometry) => {
-    map$2(geometry,
-        (geometry) => {
-          if (geometry.points) {
-            eachPoint$1(options, operation, geometry.points);
-          } else if (geometry.paths) {
-            eachPoint(options, operation, geometry.paths);
-          } else if (geometry.solid) {
-            eachPoint$3(options, operation, geometry.solid);
-          } else if (geometry.z0Surface) {
-            eachPoint$2(options, operation, geometry.z0Surface);
-          }
-        });
+    const walk = (geometry) => {
+      if (geometry.assembly) {
+        geometry.assembly.forEach(walk);
+      } else if (geometry.points) {
+        eachPoint$1(options, operation, geometry.points);
+      } else if (geometry.paths) {
+        eachPoint(options, operation, geometry.paths);
+      } else if (geometry.solid) {
+        eachPoint$3(options, operation, geometry.solid);
+      } else if (geometry.z0Surface) {
+        eachPoint$2(options, operation, geometry.z0Surface);
+      }
+    };
+
+    walk(geometry);
   };
 
   const getPaths = (geometry) => {
@@ -13740,6 +14427,11 @@ define("./webworker.js",[],function () { 'use strict';
     } else if (base.paths) {
       differenced.paths = base.paths;
       // FIX: Figure out how paths differencing should work.
+    } else if (base.points) {
+      differenced.points = base.points;
+      // FIX: Figure out how points differencing should work.
+    } else {
+      throw Error('die');
     }
     return differenced;
   };
@@ -13970,47 +14662,6 @@ define("./webworker.js",[],function () { 'use strict';
   const toGeometry = (shape) => shape.toGeometry();
   const toKeptGeometry$1 = (shape) => shape.toKeptGeometry();
 
-  /**
-   *
-   * # Measure Bounding Box
-   *
-   * Provides the corners of the smallest orthogonal box containing the shape.
-   *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
-   * ```
-   * sphere(7)
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
-   * ```
-   * const [corner1, corner2] = sphere(7).measureBoundingBox();
-   * cube({ corner1, corner2 })
-   * ```
-   * :::
-   **/
-
-  const measureBoundingBox$2 = (shape) => {
-    // FIX: Handle empty geometries.
-    let minPoint = [Infinity, Infinity, Infinity];
-    let maxPoint = [-Infinity, -Infinity, -Infinity];
-    let empty = true;
-    shape.eachPoint({},
-                    (point) => {
-                      minPoint = min(minPoint, point);
-                      maxPoint = max(maxPoint, point);
-                      empty = false;
-                    });
-    if (empty) {
-      return [[0, 0, 0], [0, 0, 0]];
-    } else {
-      return [minPoint, maxPoint];
-    }
-  };
-
-  const method = function () { return measureBoundingBox$2(this); };
-
-  Shape.prototype.measureBoundingBox = method;
-
   const assert$1 = (value, message, pass) => {
     if (pass !== true) {
       throw Error(`${message}: ${value}`);
@@ -14083,6 +14734,74 @@ define("./webworker.js",[],function () { 'use strict';
     return true;
   };
 
+  /**
+   *
+   * # Assemble
+   *
+   * Produces an assembly of shapes that can be manipulated as a single shape.
+   *
+   * ::: illustration { "view": { "position": [80, 80, 80] } }
+   * ```
+   * assemble(circle(20).translate([0, 0, -12]),
+   *          square(40).translate([0, 0, 16]).outline(),
+   *          cylinder(10, 20));
+   * ```
+   * :::
+   *
+   * Components of the assembly can be extracted by tag filtering.
+   *
+   * Components later in the assembly project holes into components earlier in the assembly so that the geometries are disjoint.
+   *
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          cylinder(10, 40).above().as('cylinder'))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          cylinder(10, 40).above().as('cylinder'))
+   *   .keep('cube')
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          assemble(circle(40),
+   *                   circle(50).outline()).as('circles'))
+   *   .keep('circles')
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [100, 100, 100] } }
+   * ```
+   * assemble(cube(30).above().as('cube'),
+   *          assemble(circle(40).as('circle'),
+   *                   circle(50).outline().as('outline')))
+   *   .drop('outline')
+   * ```
+   * :::
+   *
+   **/
+
+  const assemble$1 = (...shapes) => {
+    switch (shapes.length) {
+      case 0: {
+        return Shape.fromGeometry({ assembly: [] });
+      }
+      case 1: {
+        return shapes[0];
+      }
+      default: {
+        return fromGeometry(assemble(...shapes.map(toGeometry)));
+      }
+    }
+  };
+
+  const method = function (...shapes) { return assemble$1(this, ...shapes); };
+
+  Shape.prototype.assemble = method;
+
   const dispatch = (name, ...dispatches) => {
     return (...params) => {
       for (const dispatch of dispatches) {
@@ -14099,6 +14818,47 @@ define("./webworker.js",[],function () { 'use strict';
       throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
     };
   };
+
+  /**
+   *
+   * # Measure Bounding Box
+   *
+   * Provides the corners of the smallest orthogonal box containing the shape.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere(7)
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * const [corner1, corner2] = sphere(7).measureBoundingBox();
+   * cube({ corner1, corner2 })
+   * ```
+   * :::
+   **/
+
+  const measureBoundingBox$2 = (shape) => {
+    // FIX: Handle empty geometries.
+    let minPoint = [Infinity, Infinity, Infinity];
+    let maxPoint = [-Infinity, -Infinity, -Infinity];
+    let empty = true;
+    shape.eachPoint({},
+                    (point) => {
+                      minPoint = min(minPoint, point);
+                      maxPoint = max(maxPoint, point);
+                      empty = false;
+                    });
+    if (empty) {
+      return [[0, 0, 0], [0, 0, 0]];
+    } else {
+      return [minPoint, maxPoint];
+    }
+  };
+
+  const method$1 = function () { return measureBoundingBox$2(this); };
+
+  Shape.prototype.measureBoundingBox = method$1;
 
   /**
    *
@@ -14174,14 +14934,14 @@ define("./webworker.js",[],function () { 'use strict';
   translate$2.fromValue = fromValue;
   translate$2.fromValues = fromValues$1;
 
-  const method$1 = function (...params) { return translate$2(...params, this); };
-  Shape.prototype.translate = method$1;
+  const method$2 = function (...params) { return translate$2(...params, this); };
+  Shape.prototype.translate = method$2;
 
   /**
    *
    * # Above
    *
-   * Moves the shape so that it is just above the origin.
+   * Moves the shape so that it is just above another shape (defaulting to the origin).
    *
    * ::: illustration { "view": { "position": [40, 40, 40] } }
    * ```
@@ -14189,18 +14949,44 @@ define("./webworker.js",[],function () { 'use strict';
    *          cylinder(2, 15).rotateY(90))
    * ```
    * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube(10).above(sphere(5))
+   * ```
+   * :::
    **/
 
   const Z$2 = 2;
 
-  const above = (shape) => {
+  const fromOrigin = (shape) => {
     const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, 0, minPoint[Z$2]]), shape);
+    return translate$2([0, 0, -minPoint[Z$2]], shape);
   };
 
-  const method$2 = function () { return above(this); };
+  const fromReference = (shape, reference) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    const [, maxRefPoint] = measureBoundingBox$2(reference);
+    return assemble$1(reference, translate$2([0, 0, maxRefPoint[Z$2] - minPoint[Z$2]], shape));
+  };
 
-  Shape.prototype.above = method$2;
+  const above = dispatch(
+    'above',
+    // above(cube())
+    (shape, ...rest) => {
+      assertShape(shape);
+      assertEmpty(rest);
+      return () => fromOrigin(shape);
+    },
+    // above(cube(), sphere())
+    (shape, reference) => {
+      assertShape(shape);
+      assertShape(reference);
+      return () => fromReference(shape, reference);
+    });
+
+  const method$3 = function (...params) { return above(this, ...params); };
+
+  Shape.prototype.above = method$3;
 
   /**
    *
@@ -14221,94 +15007,52 @@ define("./webworker.js",[],function () { 'use strict';
 
   /**
    *
-   * # Assemble
-   *
-   * Produces an assembly of shapes that can be manipulated as a single shape.
-   *
-   * ::: illustration { "view": { "position": [80, 80, 80] } }
-   * ```
-   * assemble(circle(20).translate([0, 0, -12]),
-   *          square(40).translate([0, 0, 16]).outline(),
-   *          cylinder(10, 20));
-   * ```
-   * :::
-   *
-   * Components of the assembly can be extracted by tag filtering.
-   *
-   * Components later in the assembly project holes into components earlier in the assembly so that the geometries are disjoint.
-   *
-   * ::: illustration { "view": { "position": [100, 100, 100] } }
-   * ```
-   * assemble(cube(30).above().as('cube'),
-   *          cylinder(10, 40).above().as('cylinder'))
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [100, 100, 100] } }
-   * ```
-   * assemble(cube(30).above().as('cube'),
-   *          cylinder(10, 40).above().as('cylinder'))
-   *   .keep('cube')
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [100, 100, 100] } }
-   * ```
-   * assemble(cube(30).above().as('cube'),
-   *          assemble(circle(40),
-   *                   circle(50).outline()).as('circles'))
-   *   .keep('circles')
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [100, 100, 100] } }
-   * ```
-   * assemble(cube(30).above().as('cube'),
-   *          assemble(circle(40).as('circle'),
-   *                   circle(50).outline().as('outline')))
-   *   .drop('outline')
-   * ```
-   * :::
-   *
-   **/
-
-  const assemble$1 = (...shapes) => {
-    switch (shapes.length) {
-      case 0: {
-        return Shape.fromGeometry({ assembly: [] });
-      }
-      case 1: {
-        return shapes[0];
-      }
-      default: {
-        return fromGeometry(assemble(...shapes.map(toGeometry)));
-      }
-    }
-  };
-
-  const method$3 = function (...shapes) { return assemble$1(this, ...shapes); };
-
-  Shape.prototype.assemble = method$3;
-
-  /**
-   *
    * # Back
    *
-   * Moves the shape so that it is just behind the origin.
+   * Moves the shape so that it is just before the origin.
    *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
    * ```
    * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
    *          cube(10).back())
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * cube(10).back(sphere(5))
    * ```
    * :::
    **/
 
   const Y$2 = 1;
 
-  const back = (shape) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, maxPoint[Y$2], 0]), shape);
+  const fromOrigin$1 = (shape) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    return translate$2([0, -minPoint[Y$2], 0], shape);
   };
 
-  const method$4 = function () { return back(this); };
+  const fromReference$1 = (shape, reference) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    const [, maxRefPoint] = measureBoundingBox$2(reference);
+    return assemble$1(reference, translate$2([0, maxRefPoint[Y$2] - minPoint[Y$2], 0], shape));
+  };
+
+  const back = dispatch(
+    'back',
+    // back(cube())
+    (shape, ...rest) => {
+      assertShape(shape);
+      assertEmpty(rest);
+      return () => fromOrigin$1(shape);
+    },
+    // back(cube(), sphere())
+    (shape, reference) => {
+      assertShape(shape);
+      assertShape(reference);
+      return () => fromReference$1(shape, reference);
+    });
+
+  const method$4 = function (...params) { return back(this, ...params); };
 
   Shape.prototype.back = method$4;
 
@@ -14324,16 +15068,42 @@ define("./webworker.js",[],function () { 'use strict';
    *          cube(10).below())
    * ```
    * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * cube(10).below(sphere(5))
+   * ```
+   * :::
    **/
 
   const Z$3 = 2;
 
-  const below = (shape) => {
+  const fromOrigin$2 = (shape) => {
     const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, 0, maxPoint[Z$3]]), shape);
+    return translate$2([0, 0, -maxPoint[Z$3]], shape);
   };
 
-  const method$5 = function () { return below(this); };
+  const fromReference$2 = (shape, reference) => {
+    const [, maxPoint] = measureBoundingBox$2(shape);
+    const [minRefPoint] = measureBoundingBox$2(reference);
+    return assemble$1(reference, translate$2([0, 0, minRefPoint[Z$3] - maxPoint[Z$3]], shape));
+  };
+
+  const below = dispatch(
+    'below',
+    // above(cube())
+    (shape, ...rest) => {
+      assertShape(shape);
+      assertEmpty(rest);
+      return () => fromOrigin$2(shape);
+    },
+    // above(cube(), sphere())
+    (shape, reference) => {
+      assertShape(shape);
+      assertShape(reference);
+      return () => fromReference$2(shape, reference);
+    });
+
+  const method$5 = function (...params) { return below(this, ...params); };
 
   Shape.prototype.below = method$5;
 
@@ -15780,22 +16550,48 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * Moves the shape so that it is just before the origin.
    *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
    * ```
    * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
    *          cube(10).front())
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * cube(10).front(sphere(5))
    * ```
    * :::
    **/
 
   const Y$3 = 1;
 
-  const front = (shape) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([0, minPoint[Y$3], 0]), shape);
+  const fromOrigin$3 = (shape) => {
+    const [, maxPoint] = measureBoundingBox$2(shape);
+    return translate$2([0, -maxPoint[Y$3], 0], shape);
   };
 
-  const method$b = function () { return front(this); };
+  const fromReference$3 = (shape, reference) => {
+    const [, maxPoint] = measureBoundingBox$2(shape);
+    const [minRefPoint] = measureBoundingBox$2(reference);
+    return assemble$1(reference, translate$2([0, minRefPoint[Y$3] - maxPoint[Y$3], 0], shape));
+  };
+
+  const front = dispatch(
+    'front',
+    // front(cube())
+    (shape, ...rest) => {
+      assertShape(shape);
+      assertEmpty(rest);
+      return () => fromOrigin$3(shape);
+    },
+    // front(cube(), sphere())
+    (shape, reference) => {
+      assertShape(shape);
+      assertShape(reference);
+      return () => fromReference$3(shape, reference);
+    });
+
+  const method$b = function (...params) { return front(this, ...params); };
 
   Shape.prototype.front = method$b;
 
@@ -15823,14 +16619,25 @@ define("./webworker.js",[],function () { 'use strict';
    * point([0, 0, 10]).hull(circle(10))
    * ```
    * :::
+   * ::: illustration { "view": { "position": [30, 30, 30] } }
+   * ```
+   * hull(circle(4),
+   *      circle(2).translate(8));
+   * ```
+   * :::
    *
    **/
 
+  const Z$4 = 2;
+
   const hull = (...shapes) => {
-    // FIX: Support z0Surface hulling.
     const points = [];
     shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
-    return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
+    if (points.every(point => point[Z$4] === 0)) {
+      return Shape.fromPolygonsToZ0Surface([buildConvexSurfaceHull({}, points)]);
+    } else {
+      return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
+    }
   };
 
   const method$c = function (...shapes) { return hull(this, ...shapes); };
@@ -15999,22 +16806,48 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * Moves the shape so that it is just to the left of the origin.
    *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
    * ```
    * assemble(cube(10).left(),
    *          cylinder(2, 15))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * cube(10).left(sphere(5))
    * ```
    * :::
    **/
 
   const X$2 = 0;
 
-  const left = (shape) => {
+  const fromOrigin$4 = (shape) => {
     const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([maxPoint[X$2], 0, 0]), shape);
+    return translate$2([-maxPoint[X$2], 0, 0], shape);
   };
 
-  const method$g = function () { return left(this); };
+  const fromReference$4 = (shape, reference) => {
+    const [, maxPoint] = measureBoundingBox$2(shape);
+    const [minRefPoint] = measureBoundingBox$2(reference);
+    return assemble$1(reference, translate$2([minRefPoint[X$2] - maxPoint[X$2], 0, 0], shape));
+  };
+
+  const left = dispatch(
+    'left',
+    // front(cube())
+    (shape, ...rest) => {
+      assertShape(shape);
+      assertEmpty(rest);
+      return () => fromOrigin$4(shape);
+    },
+    // front(cube(), sphere())
+    (shape, reference) => {
+      assertShape(shape);
+      assertShape(reference);
+      return () => fromReference$4(shape, reference);
+    });
+
+  const method$g = function (...params) { return left(this, ...params); };
 
   Shape.prototype.left = method$g;
 
@@ -37615,6 +38448,12 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [5, 5, 5] } }
    * ```
+   * cube().writeShape('cube.shape');
+   * readShape({ path: 'cube.shape' })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [5, 5, 5] } }
+   * ```
    * writeShape({ path: 'cube.shape' }, cube())
    * readShape({ path: 'cube.shape' })
    * ```
@@ -38333,22 +39172,48 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * Moves the shape so that it is just to the right of the origin.
    *
-   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
    * ```
    * assemble(cube(10).right(),
    *          cylinder(2, 15))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * cube(10).right(sphere(5))
    * ```
    * :::
    **/
 
   const X$3 = 0;
 
-  const right = (shape) => {
+  const fromOrigin$5 = (shape) => {
     const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2(negate([minPoint[X$3], 0, 0]), shape);
+    return translate$2([-minPoint[X$3], 0, 0], shape);
   };
 
-  const method$k = function () { return right(this); };
+  const fromReference$5 = (shape, reference) => {
+    const [minPoint] = measureBoundingBox$2(shape);
+    const [, maxRefPoint] = measureBoundingBox$2(reference);
+    return assemble$1(reference, translate$2([maxRefPoint[X$3] - minPoint[X$3], 0, 0], shape));
+  };
+
+  const right = dispatch(
+    'right',
+    // right(cube())
+    (shape, ...rest) => {
+      assertShape(shape);
+      assertEmpty(rest);
+      return () => fromOrigin$5(shape);
+    },
+    // right(cube(), sphere())
+    (shape, reference) => {
+      assertShape(shape);
+      assertShape(reference);
+      return () => fromReference$5(shape, reference);
+    });
+
+  const method$k = function (...params) { return right(this, ...params); };
 
   Shape.prototype.right = method$k;
 
@@ -38864,7 +39729,7 @@ define("./webworker.js",[],function () { 'use strict';
    * # Write PDF
    *
    * ```
-   * cube().crossSection().writePdf({ path: 'cube.pdf' });
+   * cube().crossSection().writePdf('cube.pdf');
    * ```
    *
    * ```
@@ -38894,7 +39759,7 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration { "view": { "position": [5, 5, 5] } }
    * ```
-   * cube().writeStl({ path: 'cube.stl' });
+   * cube().writeStl('cube.stl');
    * readStl({ path: 'cube.stl' });
    * ```
    * :::
@@ -38926,7 +39791,7 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * ::: illustration
    * ```
-   * cube().crossSection().writeSvg({ path: 'svg/cube1.svg' });
+   * cube().crossSection().writeSvg('svg/cube1.svg');
    * readSvg({ path: 'svg/cube1.svg' })
    * ```
    * :::
@@ -89494,6 +90359,8 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * This takes a scene and a camera position and generates a two-dimensional SVG representation
    * as a svg tag.
+   *
+   * Note: Illustrations broken due to scaling issue affecting readSvg.
    *
    * ::: illustration { "view": { "position": [0, -1, 2500] } }
    * ```
