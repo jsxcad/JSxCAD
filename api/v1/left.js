@@ -1,6 +1,9 @@
+import { assertEmpty, assertShape } from './assert';
+
 import { Shape } from './Shape';
+import { assemble } from './assemble';
+import { dispatch } from './dispatch';
 import { measureBoundingBox } from './measureBoundingBox';
-import { negate } from '@jsxcad/math-vec3';
 import { translate } from './translate';
 
 /**
@@ -9,21 +12,47 @@ import { translate } from './translate';
  *
  * Moves the shape so that it is just to the left of the origin.
  *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
  * assemble(cube(10).left(),
  *          cylinder(2, 15))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * cube(10).left(sphere(5))
  * ```
  * :::
  **/
 
 const X = 0;
 
-export const left = (shape) => {
+export const fromOrigin = (shape) => {
   const [, maxPoint] = measureBoundingBox(shape);
-  return translate(negate([maxPoint[X], 0, 0]), shape);
+  return translate([-maxPoint[X], 0, 0], shape);
 };
 
-const method = function () { return left(this); };
+export const fromReference = (shape, reference) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  const [minRefPoint] = measureBoundingBox(reference);
+  return assemble(reference, translate([minRefPoint[X] - maxPoint[X], 0, 0], shape));
+};
+
+export const left = dispatch(
+  'left',
+  // front(cube())
+  (shape, ...rest) => {
+    assertShape(shape);
+    assertEmpty(rest);
+    return () => fromOrigin(shape);
+  },
+  // front(cube(), sphere())
+  (shape, reference) => {
+    assertShape(shape);
+    assertShape(reference);
+    return () => fromReference(shape, reference);
+  });
+
+const method = function (...params) { return left(this, ...params); };
 
 Shape.prototype.left = method;

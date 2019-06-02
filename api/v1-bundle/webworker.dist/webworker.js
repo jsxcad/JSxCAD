@@ -13196,12 +13196,14 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
+  const pointType = [];
+
   const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
-    const coplanarFrontPolygons = [];
-    const coplanarBackPolygons = [];
-    const frontPolygons = [];
-    const backPolygons = [];
-    const pointType = [];
+    // assertCoplanar(surface);
+    let coplanarFrontPolygons;
+    let coplanarBackPolygons;
+    let frontPolygons;
+    let backPolygons;
     for (const polygon of surface) {
       pointType.length = 0;
       let polygonType = COPLANAR;
@@ -13217,17 +13219,29 @@ define("./webworker.js",[],function () { 'use strict';
       switch (polygonType) {
         case COPLANAR: {
           if (dot(plane, toPlane(polygon)) > 0) {
+            if (coplanarFrontPolygons === undefined) {
+              coplanarFrontPolygons = [];
+            }
             coplanarFrontPolygons.push(polygon);
           } else {
+            if (coplanarBackPolygons === undefined) {
+              coplanarBackPolygons = [];
+            }
             coplanarBackPolygons.push(polygon);
           }
           break;
         }
         case FRONT: {
+          if (frontPolygons === undefined) {
+            frontPolygons = [];
+          }
           frontPolygons.push(polygon);
           break;
         }
         case BACK: {
+          if (backPolygons === undefined) {
+            backPolygons = [];
+          }
           backPolygons.push(polygon);
           break;
         }
@@ -13261,26 +13275,36 @@ define("./webworker.js",[],function () { 'use strict';
           }
           if (frontPoints.length >= 3) {
           // Add the polygon that sticks out the front of the plane.
+            if (frontPolygons === undefined) {
+              frontPolygons = [];
+            }
             frontPolygons.push(frontPoints);
           }
           if (backPoints.length >= 3) {
           // Add the polygon that sticks out the back of the plane.
+            if (backPolygons === undefined) {
+              backPolygons = [];
+            }
             backPolygons.push(backPoints);
           }
           break;
         }
       }
     }
-    if (coplanarFrontPolygons.length > 0) {
+    if (coplanarFrontPolygons !== undefined) {
+      // assertCoplanar(coplanarFrontPolygons);
       coplanarFrontSurfaces.push(coplanarFrontPolygons);
     }
-    if (coplanarBackPolygons.length > 0) {
+    if (coplanarBackPolygons !== undefined) {
+      // assertCoplanar(coplanarBackPolygons);
       coplanarBackSurfaces.push(coplanarBackPolygons);
     }
-    if (frontPolygons.length > 0) {
+    if (frontPolygons !== undefined) {
+      // assertCoplanar(frontPolygons);
       frontSurfaces.push(frontPolygons);
     }
-    if (backPolygons.length > 0) {
+    if (backPolygons !== undefined) {
+      // assertCoplanar(backPolygons);
       backSurfaces.push(backPolygons);
     }
   };
@@ -15637,6 +15661,8 @@ define("./webworker.js",[],function () { 'use strict';
    *
    * Generates an assembly from components in an assembly without a tag.
    *
+   * If no tag is supplied, the whole shape is dropped.
+   *
    * ::: illustration
    * ```
    * assemble(circle(10).as('A'),
@@ -15664,6 +15690,12 @@ define("./webworker.js",[],function () { 'use strict';
    *   .drop('A', 'B')
    * ```
    * :::
+   * ::: illustration
+   * ```
+   * assemble(cube(10).below(),
+   *          cube(8).below().drop())
+   * ```
+   * :::
    *
    **/
 
@@ -15672,6 +15704,13 @@ define("./webworker.js",[],function () { 'use strict';
   const drop$1 = dispatch(
     'drop',
     (tags, shape) => {
+      // assemble(circle(), circle().drop())
+      assertEmpty(tags);
+      assertShape(shape);
+      return () => fromGeometry(addTags(['@drop'], toGeometry(shape)));
+    },
+    (tags, shape) => {
+      // assemble(circle(), circle().as('a')).drop('a')
       assertStrings(tags);
       assertShape(shape);
       return () => fromValue$4(tags, shape);

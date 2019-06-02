@@ -8,7 +8,7 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * cube().writeStl({ path: 'cube.stl' });
+ * cube().writeStl('cube.stl');
  * readStl({ path: 'cube.stl' });
  * ```
  * :::

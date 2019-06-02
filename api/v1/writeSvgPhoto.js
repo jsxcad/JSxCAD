@@ -9,6 +9,8 @@ import { writeFile } from '@jsxcad/sys';
  * This takes a scene and a camera position and generates a two-dimensional SVG representation
  * as a svg tag.
  *
+ * Note: Illustrations broken due to scaling issue affecting readSvg.
+ *
  * ::: illustration { "view": { "position": [0, -1, 2500] } }
  * ```
  * cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });

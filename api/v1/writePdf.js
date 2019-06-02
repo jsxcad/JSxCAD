@@ -7,7 +7,7 @@ import { writeFile } from '@jsxcad/sys';
  * # Write PDF
  *
  * ```
- * cube().crossSection().writePdf({ path: 'cube.pdf' });
+ * cube().crossSection().writePdf('cube.pdf');
  * ```
  *
  * ```

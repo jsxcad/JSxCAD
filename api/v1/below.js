@@ -1,6 +1,9 @@
+import { assertEmpty, assertShape } from './assert';
+
 import { Shape } from './Shape';
+import { assemble } from './assemble';
+import { dispatch } from './dispatch';
 import { measureBoundingBox } from './measureBoundingBox';
-import { negate } from '@jsxcad/math-vec3';
 import { translate } from './translate';
 
 /**
@@ -15,15 +18,41 @@ import { translate } from './translate';
  *          cube(10).below())
  * ```
  * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * cube(10).below(sphere(5))
+ * ```
+ * :::
  **/
 
 const Z = 2;
 
-export const below = (shape) => {
+export const fromOrigin = (shape) => {
   const [, maxPoint] = measureBoundingBox(shape);
-  return translate(negate([0, 0, maxPoint[Z]]), shape);
+  return translate([0, 0, -maxPoint[Z]], shape);
 };
 
-const method = function () { return below(this); };
+export const fromReference = (shape, reference) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  const [minRefPoint] = measureBoundingBox(reference);
+  return assemble(reference, translate([0, 0, minRefPoint[Z] - maxPoint[Z]], shape));
+};
+
+export const below = dispatch(
+  'below',
+  // above(cube())
+  (shape, ...rest) => {
+    assertShape(shape);
+    assertEmpty(rest);
+    return () => fromOrigin(shape);
+  },
+  // above(cube(), sphere())
+  (shape, reference) => {
+    assertShape(shape);
+    assertShape(reference);
+    return () => fromReference(shape, reference);
+  });
+
+const method = function (...params) { return below(this, ...params); };
 
 Shape.prototype.below = method;
