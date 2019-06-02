@@ -21,6 +21,11 @@ export const differenceItems = (base, ...subtractions) => {
   } else if (base.paths) {
     differenced.paths = base.paths;
     // FIX: Figure out how paths differencing should work.
+  } else if (base.points) {
+    differenced.points = base.points;
+    // FIX: Figure out how points differencing should work.
+  } else {
+    throw Error('die');
   }
   return differenced;
 };
