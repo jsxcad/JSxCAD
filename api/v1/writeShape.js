@@ -9,6 +9,12 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
+ * cube().writeShape('cube.shape');
+ * readShape({ path: 'cube.shape' })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
  * writeShape({ path: 'cube.shape' }, cube())
  * readShape({ path: 'cube.shape' })
  * ```

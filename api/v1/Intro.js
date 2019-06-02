@@ -9,11 +9,11 @@
  *
  * You have been warned. :)
  *
- * [Main Site](http://jsxcad.js.org)
+ * <p><a href="https://jsxcad.js.org" target="_blank">Main Site</a></p>
  *
- * [Discussion Forum](https://groups.google.com/forum/#!forum/jsxcad)
+ * <p><a href="https://groups.google.com/forum/#!forum/jsxcad" target="_blank">Discussion Forum</a></p>
  *
- * [Repository](https://github.com/jsxcad/JSxCAD)
+ * <p><a href="https://github.com/jsxcad/JSxCAD" target="_blank">Reponsitory</a></p>
  *
  * ***
  *
