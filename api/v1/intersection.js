@@ -56,7 +56,8 @@ export const intersection = (...shapes) => {
       return fromGeometry({ assembly: [] });
     }
     case 1: {
-      return shapes[0];
+      // We still want to produce a simple shape.
+      return fromGeometry(toKeptGeometry(shapes[0]));
     }
     default: {
       return fromGeometry(intersectionGeometry(...shapes.map(toKeptGeometry)));

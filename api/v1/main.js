@@ -25,6 +25,7 @@ import { difference } from './difference';
 import { drop } from './drop';
 import { extrude } from './extrude';
 import { front } from './front';
+import { fuse } from './fuse';
 import { hull } from './hull';
 import { interior } from './interior';
 import { intersection } from './intersection';
@@ -88,6 +89,7 @@ export {
   drop,
   extrude,
   front,
+  fuse,
   hull,
   interior,
   intersection,

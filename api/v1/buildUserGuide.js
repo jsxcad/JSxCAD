@@ -14,7 +14,7 @@ const paths = [
   'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cursor.js', 'cylinder.js',
   'difference.js',
   'drop.js',
-  'front.js',
+  'front.js', 'fuse.js',
   'extrude.js',
   'hull.js',
   'interior.js', 'intersection.js',
