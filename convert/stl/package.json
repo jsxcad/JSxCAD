@@ -21,9 +21,9 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-watertight": "^0.0.75",
-    "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-polygons": "^0.0.75",
     "@jsxcad/geometry-solid": "^0.0.75",
+    "@jsxcad/geometry-tagged": "^0.0.75",
     "@jsxcad/math-plane": "^0.0.75",
     "@jsxcad/math-poly3": "^0.0.75",
     "@jsxcad/math-vec3": "^0.0.75",
@@ -32,7 +32,7 @@
     "parse-stl-binary": "^1.0.1"
   },
   "devDependencies": {
-    "ava": "^0.23.0",
+    "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
     "eslint-config-standard": "^12.0.0",

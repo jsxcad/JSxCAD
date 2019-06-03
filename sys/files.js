@@ -13,4 +13,6 @@ export const getFile = (options, path) => {
   return file;
 };
 
-export const watchFileCreation = (thunk) => fileCreationWatchers.push(thunk);
+export const watchFileCreation = (thunk) => {
+  return fileCreationWatchers.push(thunk);
+};

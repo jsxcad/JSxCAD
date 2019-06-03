@@ -1,5 +1,5 @@
 import { fromTranslation } from './fromTranslation';
-import { test } from 'ava';
+import test from 'ava';
 
 test('mat4: fromTranslation() should return a new mat4 with correct values', (t) => {
   const obs1 = fromTranslation([2, 4, 6]);

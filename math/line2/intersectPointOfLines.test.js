@@ -3,7 +3,7 @@ import { canonicalize as canonicalizeVec2 } from '@jsxcad/math-vec2';
 import { fromPoints } from './fromPoints';
 import { fromValues } from './fromValues';
 import { intersectPointOfLines } from './intersectPointOfLines';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line2: intersectPointOfLines() should return proper points', (t) => {
   const line1 = fromValues();

@@ -1,9 +1,10 @@
+import { assertNumber, assertShape } from './assert';
+
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { assertNumber } from './assert';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { getZ0Surfaces } from '@jsxcad/geometry-eager';
+import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -28,20 +29,30 @@ import { getZ0Surfaces } from '@jsxcad/geometry-eager';
  **/
 
 export const fromHeight = ({ height }, shape) => {
-  const z0Surfaces = getZ0Surfaces(shape.toGeometry());
+  const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
   const solids = z0Surfaces.map(z0Surface => extrudeAlgorithm({ height: height }, z0Surface));
   const assembly = assemble(...solids.map(Shape.fromSolid));
   return assembly;
 };
 
+export const fromValue = (height, shape) => fromHeight({ height }, shape);
+
 export const extrude = dispatch(
   'extrude',
+  (height, shape) => {
+    assertNumber(height);
+    assertShape(shape);
+    return () => fromValue(height, shape);
+  },
   ({ height }, shape) => {
     assertNumber(height);
+    assertShape(shape);
     return () => fromHeight({ height }, shape);
   }
 );
 
-const method = function (options) { return extrude(options, this); };
+extrude.fromValue = fromValue;
+extrude.fromHeight = fromHeight;
 
+const method = function (options) { return extrude(options, this); };
 Shape.prototype.extrude = method;

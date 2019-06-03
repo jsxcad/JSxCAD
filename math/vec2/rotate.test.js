@@ -1,6 +1,6 @@
 import { canonicalize } from './canonicalize';
 import { rotate } from './rotate';
-import { test } from 'ava';
+import test from 'ava';
 
 const radians = 90 * Math.PI / 180;
 

@@ -1,5 +1,5 @@
 import { fromNormalAndPoint } from './fromNormalAndPoint';
-import { test } from 'ava';
+import test from 'ava';
 
 test('plane: fromNormalAndPoint() should return a new plant with correct values', (t) => {
   t.deepEqual(fromNormalAndPoint([5, 0, 0], [0, 0, 0]), [1, 0, 0, 0]);

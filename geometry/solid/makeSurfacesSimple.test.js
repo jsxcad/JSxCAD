@@ -1,6 +1,6 @@
 import { fromPolygons } from './fromPolygons';
 import { makeSurfacesSimple } from './makeSurfacesSimple';
-import { test } from 'ava';
+import test from 'ava';
 import { toGeneric } from './toGeneric';
 import { unitCubePolygons } from '@jsxcad/data-shape';
 

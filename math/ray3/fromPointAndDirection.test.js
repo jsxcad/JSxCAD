@@ -1,5 +1,5 @@
 import { fromPointAndDirection } from './fromPointAndDirection';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line3: fromPointAndDirection() should return a new line3 with correct values', (t) => {
   let obs = fromPointAndDirection([0, 0, 0], [1, 0, 0]);

@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { fromStl } from './fromStl';
 import { readFileSync } from 'fs';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Read example', async t => {
   const stl = readFileSync('fromStl.test.box.stl');

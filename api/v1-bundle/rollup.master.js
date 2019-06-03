@@ -12,11 +12,7 @@ export default {
     dir: 'webworker.dist',
     format: 'amd'
   },
-  external: [
-    //    'buffer',
-    //    'events',
-    //    'process'
-  ],
+  external: [],
   plugins: [
     loadz0r(),
     builtins(),
@@ -32,6 +28,6 @@ export default {
           'tty': ''
         }
       }),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ jsnext: true, preferBuiltins: true })
   ]
 };

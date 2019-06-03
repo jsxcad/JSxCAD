@@ -2,7 +2,7 @@ import { canonicalize } from '@jsxcad/math-vec3';
 import { closestPoint } from './closestPoint';
 import { create } from './create';
 import { fromPoints } from './fromPoints';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line3: closestPoint() should return proper values', (t) => {
   const line1 = create(); // line follows X axis

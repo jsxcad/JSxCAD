@@ -2,7 +2,7 @@ import { unitCubePolygons, unitGeodesicSphere20Polygons, unitRegularTetrahedronP
 
 import { cutTrianglesByPlane } from './cutTrianglesByPlane';
 import { fromPoints } from '@jsxcad/math-plane';
-import { test } from 'ava';
+import test from 'ava';
 import { toTriangles } from './toTriangles';
 
 test('Slice a cube to form a square.', t => {

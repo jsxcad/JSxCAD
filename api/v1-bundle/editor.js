@@ -1,6 +1,7 @@
 import { installCSS, installCSSLink } from './css';
 
 import CodeMirror from 'codemirror/src/codemirror.js';
+import { writeFile } from '@jsxcad/sys';
 
 export const installEditorCSS = (display) => {
   installCSSLink(document, 'https://codemirror.net/lib/codemirror.css');
@@ -11,7 +12,11 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
   let editor;
 
   // FIX: Need some visual indicator that the script is running.
-  const runScript = async () => evaluator(editor.getDoc().getValue('\n'));
+  const runScript = async () => {
+    const script = editor.getDoc().getValue('\n');
+    await writeFile({}, 'script', script);
+    return evaluator(script);
+  };
 
   const setupDocument = () => {
     editor = CodeMirror((domElement) => {
@@ -22,7 +27,7 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
         contentOverflow: 'hidden',
         size: '1000 600',
         position: 'top-left',
-        footerToolbar: `<button class="jsPanel-ftr-btn" id="runScript" style="padding: 5px; margin: 3 px;">Run Script</button>`,
+        footerToolbar: `<span id="evaluatorClock"></span><button class="jsPanel-ftr-btn" id="runScript" style="padding: 5px; margin: 3 px;">Run Script</button>`,
         callback: (panel) => document.getElementById(`runScript`).addEventListener('click', runScript)
       });
       document.getElementById('editor').appendChild(domElement);

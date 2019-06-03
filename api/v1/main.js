@@ -7,9 +7,6 @@
  * the api uses.
  */
 
-import { loadFont, text } from './text';
-
-import { Cursor } from './Cursor';
 import { Shape } from './Shape';
 import { above } from './above';
 import { acos } from './acos';
@@ -22,15 +19,23 @@ import { circle } from './circle';
 import { cos } from './cos';
 import { crossSection } from './crossSection';
 import { cube } from './cube';
+import { cursor } from './cursor';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
+import { drop } from './drop';
 import { extrude } from './extrude';
 import { front } from './front';
+import { fuse } from './fuse';
 import { hull } from './hull';
+import { interior } from './interior';
 import { intersection } from './intersection';
+import { keep } from './keep';
+import { left } from './left';
+import { lego } from './lego';
 import { log } from './log';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
+import { microGearMotor } from './microGearMotor';
 import { minkowski } from './minkowski';
 import { outline } from './outline';
 import { point } from './point';
@@ -38,8 +43,10 @@ import { points } from './points';
 import { polygon } from './polygon';
 import { polyhedron } from './polyhedron';
 import { readDst } from './readDst';
+import { readFont } from './readFont';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
+import { readShape } from './readShape';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
@@ -57,13 +64,13 @@ import { translate } from './translate';
 import { triangle } from './triangle';
 import { union } from './union';
 import { writePdf } from './writePdf';
+import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
 import { writeSvg } from './writeSvg';
 import { writeSvgPhoto } from './writeSvgPhoto';
 import { writeThreejsPage } from './writeThreejs';
 
 export {
-  Cursor,
   Shape,
   above,
   acos,
@@ -76,16 +83,22 @@ export {
   crossSection,
   cos,
   cube,
+  cursor,
   cylinder,
   difference,
+  drop,
   extrude,
   front,
+  fuse,
   hull,
+  interior,
   intersection,
-  loadFont,
+  left,
+  lego,
   log,
   max,
   measureBoundingBox,
+  microGearMotor,
   minkowski,
   outline,
   point,
@@ -93,8 +106,10 @@ export {
   polygon,
   polyhedron,
   readDst,
+  readFont,
   // readJscad,
   readLDraw,
+  readShape,
   readStl,
   readSvg,
   right,
@@ -108,11 +123,12 @@ export {
   square,
   svgPath,
   tetrahedron,
-  text,
   translate,
   triangle,
   union,
+  keep,
   writePdf,
+  writeShape,
   writeStl,
   writeSvg,
   writeSvgPhoto,

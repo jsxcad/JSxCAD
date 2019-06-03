@@ -1,5 +1,5 @@
 import { lerp } from './lerp';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: lerp() called with two paramerters should return a vec3 with correct values', (t) => {
   t.deepEqual(lerp(0, [0, 0, 0], [0, 0, 0]), [0, 0, 0]);

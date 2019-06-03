@@ -1,5 +1,5 @@
 import { multiply } from './multiply';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec2: multiply() called with two paramerters should return a vec2 with correct values', (t) => {
   t.deepEqual(multiply([0, 0], [0, 0]), [0, 0]);

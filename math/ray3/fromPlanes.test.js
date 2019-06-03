@@ -1,6 +1,6 @@
 import { fromPlanes } from './fromPlanes';
 import { fromPoints } from '@jsxcad/math-plane';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line3: fromPlanes() should return a new line3 with correct values', (t) => {
   const planeXY = fromPoints([0, 0, 0], [1, 0, 0], [1, 1, 0]); // flat on XY

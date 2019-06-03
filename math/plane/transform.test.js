@@ -1,5 +1,5 @@
 import { canonicalize as c } from './canonicalize';
-import { test } from 'ava';
+import test from 'ava';
 import { transform } from './transform';
 
 test('Identity', (t) => {

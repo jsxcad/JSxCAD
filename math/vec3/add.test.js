@@ -1,5 +1,5 @@
 import { add } from './add';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: add() called with two parameters should return a vec3 with correct values', (t) => {
   t.deepEqual(add([0, 0, 0], [0, 0, 0]), [0, 0, 0]);

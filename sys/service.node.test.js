@@ -1,5 +1,5 @@
 import { createService } from './service';
-import { test } from 'ava';
+import test from 'ava';
 
 test('Echo service', async t => {
   const agent = async ({ ask, question }) => `Secret ${question}`;

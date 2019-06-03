@@ -60,13 +60,12 @@
     "@jsxcad/convert-svg": "^0.0.75",
     "@jsxcad/convert-threejs": "^0.0.75",
     "@jsxcad/doc": "^0.0.75",
-    "@jsxcad/geometry-eager": "^0.0.75",
-    "@jsxcad/geometry-lazy": "^0.0.75",
     "@jsxcad/geometry-path": "^0.0.75",
     "@jsxcad/geometry-paths": "^0.0.75",
     "@jsxcad/geometry-points": "^0.0.75",
     "@jsxcad/geometry-polygons": "^0.0.75",
     "@jsxcad/geometry-solid": "^0.0.75",
+    "@jsxcad/geometry-tagged": "^0.0.75",
     "@jsxcad/geometry-z0surface": "^0.0.75",
     "@jsxcad/math-mat4": "^0.0.75",
     "@jsxcad/math-plane": "^0.0.75",
@@ -75,7 +74,7 @@
     "@jsxcad/sys": "^0.0.75"
   },
   "devDependencies": {
-    "ava": "^0.23.0",
+    "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
     "eslint-config-standard": "^12.0.0",

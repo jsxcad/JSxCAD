@@ -8,23 +8,28 @@ Error.stackTraceLimit = Infinity;
 const { writeFile } = fs.promises;
 
 const paths = [
+  'Intro.js',
   'above.js', 'acos.js', 'assemble.js',
   'back.js', 'below.js',
-  'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cylinder.js',
+  'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cursor.js', 'cylinder.js',
   'difference.js',
-  'front.js',
+  'drop.js',
+  'front.js', 'fuse.js',
   'extrude.js',
   'hull.js',
-  'intersection.js',
+  'interior.js', 'intersection.js',
+  'keep.js',
+  'left.js', 'lego.js',
   'log.js',
-  'max.js',
-  'measureBoundingBox.js',
+  'max.js', 'measureBoundingBox.js', 'microGearMotor.js',
   'minkowski.js',
   'outline.js',
   'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
-  'readDst.js', 'readLDraw.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
+  'readDst.js', 'readFont.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
   'scale.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
-  'tetrahedron.js'
+  'tetrahedron.js', 'translate.js', 'triangle.js',
+  'union.js',
+  'writePdf.js', 'writeShape.js', 'writeStl.js', 'writeSvg.js', 'writeSvgPhoto.js'
 ];
 
 toUserGuide({ api, paths, root: __dirname })

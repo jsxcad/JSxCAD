@@ -1,4 +1,5 @@
-import { Shape, assembleLazily } from './Shape';
+import { Shape, fromGeometry, toGeometry } from './Shape';
+import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -28,22 +29,38 @@ import { Shape, assembleLazily } from './Shape';
  * ```
  * assemble(cube(30).above().as('cube'),
  *          cylinder(10, 40).above().as('cylinder'))
- *   .toComponents({ requires: ['cube'] })[0]
+ *   .keep('cube')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(cube(30).above().as('cube'),
+ *          assemble(circle(40),
+ *                   circle(50).outline()).as('circles'))
+ *   .keep('circles')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(cube(30).above().as('cube'),
+ *          assemble(circle(40).as('circle'),
+ *                   circle(50).outline().as('outline')))
+ *   .drop('outline')
  * ```
  * :::
  *
  **/
 
-export const assemble = (...params) => {
-  switch (params.length) {
+export const assemble = (...shapes) => {
+  switch (shapes.length) {
     case 0: {
       return Shape.fromGeometry({ assembly: [] });
     }
     case 1: {
-      return params[0];
+      return shapes[0];
     }
     default: {
-      return assembleLazily(...params);
+      return fromGeometry(assembleGeometry(...shapes.map(toGeometry)));
     }
   }
 };

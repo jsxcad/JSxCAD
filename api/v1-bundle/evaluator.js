@@ -15,10 +15,22 @@ export const installEvaluatorCSS = () => {};
 export const installEvaluator = async () => {
   const { ask } = await createService({ webWorker: './webworker.js', agent });
   const evaluator = async (script) => {
+    let start = new Date().getTime();
+    let runClock = true;
+    const clockElement = document.getElementById('evaluatorClock');
+    const tick = () => {
+      if (runClock) {
+        setTimeout(tick, 100);
+        const duration = new Date().getTime() - start;
+        clockElement.textContent = `${(duration / 1000).toFixed(2)}`;
+      }
+    };
+    tick();
     const geometry = await ask({ evaluate: script });
     if (geometry) {
       await writeFile({ preview: true, geometry }, 'preview', 'preview');
     }
+    runClock = false;
   };
   return { evaluator };
 };

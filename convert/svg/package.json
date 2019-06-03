@@ -21,10 +21,10 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-shape": "^0.0.75",
-    "@jsxcad/geometry-eager": "^0.0.75",
     "@jsxcad/geometry-path": "^0.0.75",
     "@jsxcad/geometry-paths": "^0.0.75",
     "@jsxcad/geometry-polygons": "^0.0.75",
+    "@jsxcad/geometry-tagged": "^0.0.75",
     "@jsxcad/math-mat4": "^0.0.75",
     "@jsxcad/math-utils": "^0.0.75",
     "@jsxcad/math-vec2": "^0.0.75",
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@jsxcad/convert-pdf": "^0.0.75",
-    "ava": "^0.23.0",
+    "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
     "eslint-config-standard": "^12.0.0",

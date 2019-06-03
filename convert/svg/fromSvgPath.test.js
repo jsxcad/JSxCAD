@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/geometry-eager';
 import { fromSvgPath } from './fromSvgPath';
-import { test } from 'ava';
+import test from 'ava';
 
 // TODO: Add colinear point simplification.
 

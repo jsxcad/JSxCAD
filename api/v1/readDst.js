@@ -13,6 +13,13 @@ import { readFile } from '@jsxcad/sys';
  *                   { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
  * ```
  * :::
+ * ::: illustration { "view": { "position": [0, 0, 20] } }
+ * ```
+ * readDst({ path: 'dst/atg-sft003.dst',
+ *         sources: [{ file: 'dst/atg-sft003.dst' },
+ *                   { url: 'https://jsxcad.js.org/dst/atg-sft003.dst' }] })
+ * ```
+ * :::
  *
  **/
 

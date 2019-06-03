@@ -59,7 +59,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
     }
   }
   const markdown = markdowns.join('\n');
-  const md = new MarkdownIt();
+  const md = new MarkdownIt({ html: true });
   const patches = [];
   const render = (tokens, idx) => {
     switch (tokens[idx].type) {
@@ -105,8 +105,10 @@ export const toUserGuide = async ({ api, paths, root }) => {
   md.use(MarkdownItContainer, 'illustration', { render });
   let markdownHtml = md.render(markdown);
   for (const { patch, options, text } of patches) {
+    console.log(`QQ/text: ${text}`);
     const geometry = await toOperator({ api }, text)();
-    const svg = await toSvg(options, geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
+    const svg = await toSvg({ includeXmlHeader: false, ...options },
+                            geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
     markdownHtml = markdownHtml.replace(patch, svg);
   }
   const html = `

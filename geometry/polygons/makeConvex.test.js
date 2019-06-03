@@ -1,6 +1,6 @@
 import { blessAsConvex } from './blessAsConvex';
 import { makeConvex } from './makeConvex';
-import { test } from 'ava';
+import test from 'ava';
 import { toGeneric } from './toGeneric';
 import { unitRegularTriangularPrismPolygons } from '@jsxcad/data-shape';
 

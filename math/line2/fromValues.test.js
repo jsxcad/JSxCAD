@@ -1,5 +1,5 @@
 import { fromValues } from './fromValues';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line2: fromValues() should return a new line2 with correct values', (t) => {
   const obs1 = fromValues(0, 0, 0);

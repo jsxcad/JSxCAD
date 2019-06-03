@@ -13,12 +13,12 @@ const agent = async ({ ask, question }) => {
       console.log(`QQ/ecmascript: ${ecmascript}`);
       const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
       const shape = await code(api).main();
-      if (shape !== undefined) {
-        return shape.toDisjointGeometry();
+      if (shape !== undefined && shape.toKeptGeometry) {
+        return shape.toKeptGeometry();
       }
     }
   } catch (error) {
-    await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: error.toString() } });
+    await ask({ writeFile: { options: { ephemeral: true }, path: 'console/out', data: `${error.toString()}\n${error.stack}` } });
   }
 };
 const { ask, hear } = sys.conversation({ agent, say });

@@ -1,6 +1,6 @@
 import { equals } from './equals';
 import { fromValues } from './fromValues';
-import { test } from 'ava';
+import test from 'ava';
 
 test('line2: equals() should return correct booleans', (t) => {
   const line0 = fromValues(0, 0, 0);

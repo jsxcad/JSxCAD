@@ -20,6 +20,11 @@ import { dispatch } from './dispatch';
  * cube(10)
  * ```
  * :::
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * cube(10, 20, 30)
+ * ```
+ * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
  * cube({ radius: 8 })
@@ -52,6 +57,8 @@ const unitCube = () => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })
 
 export const fromValue = (value) => unitCube().scale(value);
 
+export const fromValues = (width, breadth, height) => unitCube().scale([width, breadth, height]);
+
 export const fromRadius = ({ radius }) => Shape.fromPolygonsToSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
 export const fromDiameter = ({ diameter }) => fromRadius({ radius: diameter / 2 });
@@ -74,9 +81,18 @@ export const cube = dispatch(
     return () => fromValue(1);
   },
   // cube(2)
-  (value) => {
+  (value, ...rest) => {
     assertNumber(value);
+    assertEmpty(rest);
     return () => fromValue(value);
+  },
+  // cube(2, 4, 6)
+  (width, breadth, height, ...rest) => {
+    assertNumber(width);
+    assertNumber(breadth);
+    assertNumber(height);
+    assertEmpty(rest);
+    return () => fromValues(width, breadth, height);
   },
   // cube({ radius: 2 })
   ({ radius }) => {
@@ -96,6 +112,7 @@ export const cube = dispatch(
   });
 
 cube.fromValue = fromValue;
+cube.fromValues = fromValues;
 cube.fromRadius = fromRadius;
 cube.fromDiameter = fromDiameter;
 cube.fromCorners = fromCorners;

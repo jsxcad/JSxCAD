@@ -1,6 +1,6 @@
 import { canonicalize as c } from './canonicalize';
 import { rotateZ } from './rotateZ';
-import { test } from 'ava';
+import test from 'ava';
 
 test('vec3: rotateZ() called with two paramerters should return a vec3 with correct values', (t) => {
   const radians = 90 * Math.PI / 180;
