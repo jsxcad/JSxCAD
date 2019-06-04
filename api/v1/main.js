@@ -20,6 +20,7 @@ import { cos } from './cos';
 import { crossSection } from './crossSection';
 import { cube } from './cube';
 import { cursor } from './cursor';
+import { cut } from './cut';
 import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { drop } from './drop';
@@ -83,6 +84,7 @@ export {
   crossSection,
   cos,
   cube,
+  cut,
   cursor,
   cylinder,
   difference,

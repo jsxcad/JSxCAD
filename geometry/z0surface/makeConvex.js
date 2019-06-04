@@ -1,10 +1,10 @@
-import Tess2 from 'tess2';
+import Tess2 from './tess2';
 import { blessAsConvex } from './blessAsConvex';
 
 const toContour = (polygon) => {
   const points = [];
-  for (const [x = 0, y = 0, z = 0] of polygon) {
-    points.push(x, y, z);
+  for (const [x = 0, y = 0] of polygon) {
+    points.push(x, y, 0);
   }
   return points;
 };

@@ -7336,7 +7336,11 @@ return d[d.length-1];};return ", funcName].join("");
   const toPlane = (polygon) => {
     if (polygon.plane === undefined) {
       if (polygon.length >= 3) {
-        polygon.plane = fromPoints$1(...polygon);
+        // FIX: Find a better way to handle polygons with colinear points.
+        for (let nth = 0; nth < polygon.length - 2; nth++) {
+          polygon.plane = fromPoints$1(polygon[nth], polygon[nth + 1], polygon[nth + 2]);
+          if (!isNaN(polygon.plane[0])) break;
+        }
       } else {
         throw Error('die');
       }
@@ -7500,6 +7504,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const toPlane$1 = (surface) => toPlane(surface[0]);
+  const canonicalize$4 = (surface) => surface.map(canonicalize$3);
 
   // Transforms
   const transform$5 = (matrix, surface) => surface.map(polygon => transform$4(matrix, polygon));
@@ -13707,8 +13712,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const toContour = (polygon) => {
     const points = [];
-    for (const [x = 0, y = 0, z = 0] of polygon) {
-      points.push(x, y, z);
+    for (const [x = 0, y = 0] of polygon) {
+      points.push(x, y, 0);
     }
     return points;
   };
@@ -13794,7 +13799,1131 @@ return d[d.length-1];};return ", funcName].join("");
   const rotateX = (radians, solid) => multiply$2(fromXRotation(radians), solid);
   const scale$4 = (vector, solid) => multiply$2(fromScaling(vector), solid);
 
-  const eachPoint$3 = (options = {}, thunk, solid) => {
+  const canonicalize$5 = (solid) => solid.map(canonicalize$4);
+
+  /**
+   * Adds two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
+   *
+   * @param {mat4} a The first matrix.
+   * @param {mat4} b The second matrix.
+   * @returns {Boolean} True if the matrices are equal, false otherwise.
+   */
+
+  /**
+   * Creates a matrix from a vector scaling
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.scale(dest, dest, vec);
+   *
+   * @param {vec3} v Scaling vector
+   * @returns {mat4} out
+   */
+  const fromScaling$1 = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
+
+  /**
+   * Creates a matrix from a vector translation
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.translate(dest, dest, vec);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {vec3} v Translation vector
+   * @returns {mat4} out
+   */
+
+  /**
+   * Create a new mat4 with the given values
+   *
+   * @param {Number} m00 Component in column 0, row 0 position (index 0)
+   * @param {Number} m01 Component in column 0, row 1 position (index 1)
+   * @param {Number} m02 Component in column 0, row 2 position (index 2)
+   * @param {Number} m03 Component in column 0, row 3 position (index 3)
+   * @param {Number} m10 Component in column 1, row 0 position (index 4)
+   * @param {Number} m11 Component in column 1, row 1 position (index 5)
+   * @param {Number} m12 Component in column 1, row 2 position (index 6)
+   * @param {Number} m13 Component in column 1, row 3 position (index 7)
+   * @param {Number} m20 Component in column 2, row 0 position (index 8)
+   * @param {Number} m21 Component in column 2, row 1 position (index 9)
+   * @param {Number} m22 Component in column 2, row 2 position (index 10)
+   * @param {Number} m23 Component in column 2, row 3 position (index 11)
+   * @param {Number} m30 Component in column 3, row 0 position (index 12)
+   * @param {Number} m31 Component in column 3, row 1 position (index 13)
+   * @param {Number} m32 Component in column 3, row 2 position (index 14)
+   * @param {Number} m33 Component in column 3, row 3 position (index 15)
+   * @returns {mat4} A new mat4
+   */
+
+  /**
+   * Creates a matrix from the given angle around the X axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateX(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from the given angle around the Y axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateY(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Creates a matrix from the given angle around the Z axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateZ(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Set a mat4 to the identity matrix
+   *
+   * @returns {mat4} out
+   */
+
+  /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec3} [out] - receiving vector
+   * @param {vec3} vec - given value
+   * @returns {vec3} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec3's
+   *
+   * @param {vec3} a the first vector to add
+   * @param {vec3} b the second vector to add
+   * @returns {vec3} the added vectors
+   */
+
+  /**
+   * Calculates the dot product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+  const dot$2 = ([ax, ay, az], [bx, by, bz]) => (ax * bx) + (ay * by) + (az * bz);
+
+  /**
+   * Scales a vec3 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec3} vector the vector to scale
+   * @returns {vec3} out
+   */
+
+  // radians = degrees * PI / 180
+
+  // TODO: Clean this up.
+
+  // degrees = radians * 180 / PI
+
+  const spatialResolution$1 = 1e5;
+
+  // Quantize values for use in spatial coordinates, and so on, even if the usual quantizeForSpace is disabled.
+  const reallyQuantizeForSpace$1 = (value) => (Math.round(value * spatialResolution$1) / spatialResolution$1);
+
+  const canonicalize$6 = ([x = 0, y = 0, z = 0]) => [reallyQuantizeForSpace$1(x), reallyQuantizeForSpace$1(y), reallyQuantizeForSpace$1(z)];
+
+  /**
+   * Computes the cross product of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+  const cross$2 = ([ax, ay, az], [bx, by, bz]) => [ay * bz - az * by,
+                                                        az * bx - ax * bz,
+                                                        ax * by - ay * bx];
+
+  /**
+   * Calculates the euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Creates a new vec3 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @param {Number} z Z component
+   * @returns {vec3} a new 3D vector
+   */
+
+  /** create a vec3 from a single scalar value
+   * all components of the resulting vec3 have the value of the
+   * input scalar
+   * @param  {Float} scalar
+   * @returns {Vec3}
+   */
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @param {Number} z Z component
+   * @returns {vec3} a new 3D vector
+   */
+
+  // extend to a 3D vector by adding a z coordinate:
+
+  /**
+   * Calculates the length of a vec3
+   *
+   * @param {vec3} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+
+  /**
+   * Performs a linear interpolation between two vec3's
+   *
+   * @param {Number} t interpolant (0.0 to 1.0) applied between the two inputs
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Returns the maximum of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Returns the minimum of two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Multiplies two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Negates the components of a vec3
+   *
+   * @param {vec3} a vector to negate
+   * @returns {vec3} out
+   */
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {vec3} out
+   */
+
+  /**
+   * Calculates the squared euclidian distance between two vec3's
+   *
+   * @param {vec3} a the first operand
+   * @param {vec3} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+
+  /**
+   * Calculates the squared length of a vec3
+   *
+   * @param {vec3} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Transforms the vec3 with a mat4.
+   * 4th vector component is implicitly '1'
+   * @param {[[<vec3>], <mat4> , <vec3>]} params
+   * @param {mat4} params[1] matrix matrix to transform with
+   * @param {vec3} params[2] vector the vector to transform
+   * @returns {vec3} out
+   */
+  const transform$6 = (matrix, [x = 0, y = 0, z = 0]) => {
+    let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
+    w = w || 1.0;
+    return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
+            (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
+            (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w];
+  };
+
+  /**
+   * determine whether the input matrix is a mirroring transformation
+   *
+   * @param {mat4} mat the input matrix
+   * @returns {boolean} output
+   */
+  const isMirroring$1 = (mat) => {
+    const u = [mat[0], mat[4], mat[8]];
+    const v = [mat[1], mat[5], mat[9]];
+    const w = [mat[2], mat[6], mat[10]];
+
+    // for a true orthogonal, non-mirrored base, u.cross(v) == w
+    // If they have an opposite direction then we are mirroring
+    const mirrorvalue = dot$2(cross$2(u, v), w);
+    const ismirror = (mirrorvalue < 0);
+    return ismirror;
+  };
+
+  /**
+   * m the mat4 by the dimensions in the given vec3
+   * create an affine matrix for mirroring into an arbitrary plane:
+   *
+   * @param {vec3} v the vec3 to mirror the matrix by
+   * @param {mat4} a the matrix to mirror
+   * @returns {mat4} out
+   */
+
+  /**
+   * Create an affine matrix for mirroring onto an arbitrary plane
+   *
+   * @param {vec4} plane to mirror the matrix by
+   * @returns {mat4} out
+   */
+
+  /**
+   * Multiplies two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Calculates the absolute value of the give vector
+   *
+   * @param {vec2} vec - given value
+   * @returns {vec2} absolute value of the vector
+   */
+
+  /**
+   * Adds two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  // y=sin, x=cos
+
+  /**
+   * Computes the cross product (3D) of two vectors
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec3} cross product
+   */
+
+  /**
+   * Calculates the euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} distance between a and b
+   */
+
+  /**
+   * Divides two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the dot product of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} dot product of a and b
+   */
+
+  /**
+   * Creates a new vec2 from the point given.
+   * Missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec2} a new 2D vector
+   */
+
+  /** Create a vec2 from a single scalar value
+   * @param  {Float} scalar
+   * @returns {Vec2} a new vec2
+   */
+
+  /**
+   * Creates a new vec3 initialized with the given values
+   * Any missing ranks are implicitly zero.
+   *
+   * @param {Number} x X component
+   * @param {Number} y Y component
+   * @returns {vec3} a new 2D vector
+   */
+
+  /**
+   * Calculates the length of a vec2
+   *
+   * @param {vec2} a vector to calculate length of
+   * @returns {Number} length of a
+   */
+
+  /**
+   * Performs a linear interpolation between two vec2's
+   *
+   * @param {Number} t interpolation amount between the two inputs
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the maximum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Returns the minimum of two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Multiplies two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Negates the components of a vec2
+   *
+   * @param {vec2} a vector to negate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Rotates a vec2 by an angle
+   *
+   * @param {Number} angle the angle of rotation (in radians)
+   * @param {vec2} vector the vector to rotate
+   * @returns {vec2} out
+   */
+
+  /**
+   * Normalize the given vector.
+   *
+   * @param {vec2} a vector to normalize
+   * @returns {vec2} normalized (unit) vector
+   */
+
+  /**
+   * Scales a vec2 by a scalar number
+   *
+   * @param {Number} amount amount to scale the vector by
+   * @param {vec2} vector the vector to scale
+   * @returns {vec2} out
+   */
+
+  /**
+   * Calculates the squared euclidian distance between two vec2's
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {Number} squared distance between a and b
+   */
+
+  /**
+   * Calculates the squared length of a vec2
+   *
+   * @param {vec2} a vector to calculate squared length of
+   * @returns {Number} squared length of a
+   */
+
+  /**
+   * Subtracts vector b from vector a
+   *
+   * @param {vec2} a the first operand
+   * @param {vec2} b the second operand
+   * @returns {vec2} out
+   */
+
+  /**
+   * Transforms the vec2 with a mat4
+   * 3rd vector component is implicitly '0'
+   * 4th vector component is implicitly '1'
+   *
+   * @param {mat4} matrix matrix to transform with
+   * @param {vec2} vector the vector to transform
+   * @returns {vec2} out
+   */
+
+  /**
+   * Subtracts matrix b from matrix a
+   *
+   * @param {mat4} out the receiving matrix
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  const canonicalizePoint$1 = (point, index) => {
+    if (point === null) {
+      if (index !== 0) throw Error('Path has null not at head');
+      return point;
+    } else {
+      return canonicalize$6(point);
+    }
+  };
+
+  const canonicalize$7 = (path) => path.map(canonicalizePoint$1);
+
+  const transform$7 = (matrix, path) =>
+    path.map((point, index) => (point === null) ? null : transform$6(matrix, point));
+
+  const canonicalize$8 = (paths) => {
+    let canonicalized = paths.map(canonicalize$7);
+    if (paths.properties !== undefined) {
+      // Transfer properties.
+      canonicalized.properties = paths.properties;
+    }
+    return canonicalized;
+  };
+
+  /**
+   * Transforms each path of Paths.
+   *
+   * @param {Paths} original - the Paths to transform.
+   * @param {Function} [transform=identity] - function used to transform the paths.
+   * @returns {Paths} the transformed paths.
+   */
+
+  const transform$8 = (matrix, paths) => paths.map(path => transform$7(matrix, path));
+
+  // FIX: Deduplication.
+
+  const isDegenerate = (polygon) => {
+    for (let nth = 0; nth < polygon.length; nth++) {
+      if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const canonicalize$9 = (polygons) => {
+    const canonicalized = [];
+    for (let polygon of polygons) {
+      polygon = canonicalize$3(polygon);
+      if (!isDegenerate(polygon)) {
+        canonicalized.push(polygon);
+      }
+    }
+    return canonicalized;
+  };
+
+  // Edge Properties.
+  const START = 0;
+  const END = 1;
+
+  const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
+    if (aX < bX) { return -1; }
+    if (aX > bX) { return 1; }
+    if (aY < bY) { return -1; }
+    if (aY > bY) { return 1; }
+    if (aZ < bZ) { return -1; }
+    if (aZ > bZ) { return 1; }
+    return 0;
+  };
+
+  const toLoops = ({ allowOpenPaths = false }, edges) => {
+    const extractSuccessor = (edges, start) => {
+      // FIX: Use a binary search to take advantage of the sorting of the edges.
+      for (let nth = 0; nth < edges.length; nth++) {
+        const candidate = edges[nth];
+        if (equals(candidate[START], start)) {
+          edges.splice(nth, 1);
+          return candidate;
+        }
+      }
+      // Given manifold geometry, there must always be a successor.
+      throw Error('Non-manifold');
+    };
+
+    // Sort the edges so that deduplication is efficient.
+    edges.sort(lexicographcalPointOrder);
+
+    // Assemble the edges into loops which are closed paths.
+    const loops = [];
+    while (edges.length > 0) {
+      let edge = edges.shift();
+      const loop = [edge[START]];
+      try {
+        while (!equals(edge[END], loop[0])) {
+          edge = extractSuccessor(edges, edge[END]);
+          loop.push(edge[START]);
+        }
+      } catch (e) {
+        if (allowOpenPaths) {
+          // FIX: Check the error.
+          loop.unshift(null);
+        } else {
+          throw e;
+        }
+      }
+      loops.push(loop);
+    }
+
+    return loops;
+  };
+
+  const EPSILON = 1e-5;
+
+  // Point Classification.
+  const COPLANAR = 0;
+  const FRONT = 1;
+  const BACK = 2;
+
+  // Plane Properties.
+  const W$2 = 3;
+
+  const toType = (plane, point) => {
+    let t = dot(plane, point) - plane[W$2];
+    if (t < -EPSILON) {
+      return BACK;
+    } else if (t > EPSILON) {
+      return FRONT;
+    } else {
+      return COPLANAR;
+    }
+  };
+
+  const spanPoint = (plane, startPoint, endPoint) => {
+    let t = (plane[W$2] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+    return canonicalize(lerp(t, startPoint, endPoint));
+  };
+
+  /**
+   * Takes a cross-section of a triangulated solid at a plane, yielding surface defining loops
+   * in that plane.
+   *
+   * FIX: Make sure this works properly for solids with holes in them, etc.
+   * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.
+   */
+  const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
+    let edges = [];
+    const addEdge = (start, end) => {
+      edges.push([canonicalize(start), canonicalize(end)]);
+    };
+
+    // Find the edges along the plane and fold them into paths to produce a set of closed loops.
+    for (let nth = 0; nth < triangles.length; nth++) {
+      const triangle = triangles[nth];
+      const [a, b, c] = triangle;
+      const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];
+
+      switch (aType) {
+        case FRONT:
+          switch (bType) {
+            case FRONT:
+              switch (cType) {
+                case FRONT:
+                  // No intersection.
+                  break;
+                case COPLANAR:
+                  // Corner touches.
+                  break;
+                case BACK:
+                  // b-c down c-a up
+                  addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));
+                  break;
+              }
+              break;
+            case COPLANAR:
+              switch (cType) {
+                case FRONT:
+                  // Corner touches.
+                  break;
+                case COPLANAR:
+                  // b-c along plane.
+                  addEdge(b, c);
+                  break;
+                case BACK:
+                  // down at b, up c-a.
+                  addEdge(b, spanPoint(plane, c, a));
+                  break;
+              }
+              break;
+            case BACK:
+              switch (cType) {
+                case FRONT:
+                  // a-b down, b-c up.
+                  addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));
+                  break;
+                case COPLANAR:
+                  // a-b down, c up.
+                  addEdge(spanPoint(plane, a, b), c);
+                  break;
+                case BACK:
+                  // a-b down, c-a up.
+                  addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));
+                  break;
+              }
+              break;
+          }
+          break;
+        case COPLANAR:
+          switch (bType) {
+            case FRONT:
+              switch (cType) {
+                case FRONT:
+                  // Corner touches.
+                  break;
+                case COPLANAR:
+                  // c-a along plane.
+                  addEdge(c, a);
+                  break;
+                case BACK:
+                  // down at b-c, up at a
+                  addEdge(spanPoint(plane, b, c), a);
+                  break;
+              }
+              break;
+            case COPLANAR:
+              switch (cType) {
+                case FRONT:
+                  // a-b along plane.
+                  addEdge(a, b);
+                  break;
+                case COPLANAR:
+                  // Entirely coplanar -- doesn't cut.
+                  break;
+                case BACK:
+                  // Wrong half-space.
+                  break;
+              }
+              break;
+            case BACK:
+              switch (cType) {
+                case FRONT:
+                  // down at a, up at b-c.
+                  addEdge(a, spanPoint(plane, b, c));
+                  break;
+                case COPLANAR:
+                  // Wrong half-space.
+                  break;
+                case BACK:
+                  // Wrong half-space.
+                  break;
+              }
+              break;
+          }
+          break;
+        case BACK:
+          switch (bType) {
+            case FRONT:
+              switch (cType) {
+                case FRONT:
+                  // down at c-a, up at a-b
+                  addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));
+                  break;
+                case COPLANAR:
+                  // down at c, up at a-b
+                  addEdge(c, spanPoint(plane, a, b));
+                  break;
+                case BACK:
+                  // down at b-c, up at a-b.
+                  addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));
+                  break;
+              }
+              break;
+            case COPLANAR:
+              switch (cType) {
+                case FRONT:
+                  // down at c-a, up at b.
+                  addEdge(spanPoint(plane, c, a), b);
+                  break;
+                case COPLANAR:
+                  // Wrong half-space.
+                  break;
+                case BACK:
+                  // Wrong half-space.
+                  break;
+              }
+              break;
+            case BACK:
+              switch (cType) {
+                case FRONT:
+                  // down at c-a, up at b-c.
+                  addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));
+                  break;
+                case COPLANAR:
+                  // Wrong half-space.
+                  break;
+                case BACK:
+                  // Wrong half-space.
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+    }
+
+    return toLoops({ allowOpenPaths }, edges);
+  };
+
+  const eachPoint$3 = (options = {}, thunk, polygons) => {
+    for (const polygon of polygons) {
+      for (const point of polygon) {
+        thunk(point);
+      }
+    }
+  };
+
+  /**
+   * Transforms each polygon of Polygons.
+   *
+   * @param {Polygons} original - the Polygons to transform.
+   * @param {Function} [transform=identity] - function used to transform the polygons.
+   * @returns {Polygons} a copy with transformed polygons.
+   */
+
+  const isTriangle = (path) => isClosed(path) && path.length === 3;
+
+  const blessAsConvex$1 = (paths) => { paths.isConvex = true; return paths; };
+
+  const toContour$1 = (polygon) => {
+    const points = [];
+    for (const [x = 0, y = 0, z = 0] of polygon) {
+      points.push(x, y, z);
+    }
+    return points;
+  };
+
+  const fromTessellation$1 = (tessellation) => {
+    const tessPolygons = tessellation.elements;
+    const vertices = tessellation.vertices;
+    const polygons = [];
+
+    const toPoint = (offset) => {
+      const vertex = tessPolygons[offset];
+      return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];
+    };
+
+    for (let nth = 0; nth < tessPolygons.length; nth += 3) {
+      polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);
+    }
+
+    return polygons;
+  };
+
+  // This currently does triangulation.
+  // Higher arities are possible, but end up being null padded.
+  // Let's see if they're useful.
+
+  // TODO: Call this toConvexPolygons
+  const makeConvex$2 = (options = {}, polygons) => {
+    if (polygons.isConvex) {
+      return polygons;
+    }
+    if (polygons.every(isConvex)) {
+      return blessAsConvex$1(polygons);
+    }
+    const contours = polygons.map(toContour$1);
+    // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
+    const convex = fromTessellation$1(
+      tess2$1.tesselate({ contours: contours,
+                        windingRule: tess2$1.WINDING_ODD,
+                        elementType: tess2$1.POLYGONS,
+                        polySize: 3,
+                        vertexSize: 3
+      }));
+    return blessAsConvex$1(convex);
+  };
+
+  // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
+  const measureBoundingBox$1 = (polygons) => {
+    let max$1 = polygons[0][0];
+    let min$1 = polygons[0][0];
+    eachPoint$3({},
+              point => {
+                max$1 = max(max$1, point);
+                min$1 = min(min$1, point);
+              },
+              polygons);
+    return [min$1, max$1];
+  };
+
+  const blessAsTriangles = (paths) => { paths.isTriangles = true; return paths; };
+
+  const toTriangles = (options = {}, paths) => {
+    if (paths.isTriangles) {
+      return paths;
+    }
+    if (paths.every(isTriangle)) {
+      return blessAsTriangles(paths);
+    }
+    const triangles = [];
+    for (const path of paths) {
+      for (let nth = 2; nth < path.length; nth++) {
+        triangles.push([path[0], path[nth - 1], path[nth]]);
+      }
+    }
+    return blessAsTriangles(triangles);
+  };
+
+  const transform$9 = (matrix, polygons) => polygons.map(polygon => transform$4(matrix, polygon));
+
+  const translate$2 = (vector, polygons) => transform$9(fromTranslation(vector), polygons);
+
+  const EPSILON$1 = 1e-5;
+
+  const COPLANAR$1 = 0; // Neither front nor back.
+  const FRONT$1 = 1;
+  const BACK$1 = 2;
+  const SPANNING = 3; // Both front and back.
+
+  const toType$1 = (plane, point) => {
+    let t = signedDistanceToPoint(plane, point);
+    if (t < -EPSILON$1) {
+      return BACK$1;
+    } else if (t > EPSILON$1) {
+      return FRONT$1;
+    } else {
+      return COPLANAR$1;
+    }
+  };
+
+  const pointType = [];
+
+  const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, frontEdges, backEdges, surface) => {
+    let coplanarFrontPolygons;
+    let coplanarBackPolygons;
+    let frontPolygons;
+    let backPolygons;
+    for (let polygon of surface) {
+      pointType.length = 0;
+      let polygonType = COPLANAR$1;
+      if (!equals$2(toPlane(polygon), plane)) {
+        for (const point of polygon) {
+          const type = toType$1(plane, point);
+          polygonType |= type;
+          pointType.push(type);
+        }
+      }
+
+      // Put the polygon in the correct list, splitting it when necessary.
+      switch (polygonType) {
+        case COPLANAR$1: {
+  console.log(`QQ/cut/type: COPLANAR`);
+          if (dot(plane, toPlane(polygon)) > 0) {
+            if (coplanarFrontPolygons === undefined) {
+              coplanarFrontPolygons = [];
+            }
+            coplanarFrontPolygons.push(polygon);
+          } else {
+            if (coplanarBackPolygons === undefined) {
+              coplanarBackPolygons = [];
+            }
+            coplanarBackPolygons.push(polygon);
+          }
+          break;
+        }
+        case FRONT$1: {
+  console.log(`QQ/cut/type: FRONT`);
+          if (frontPolygons === undefined) {
+            frontPolygons = [];
+          }
+          frontPolygons.push(polygon);
+          let startPoint = polygon[polygon.length - 1];
+          let startType = pointType[polygon.length - 1];
+          for (let nth = 0; nth < polygon.length; nth++) {
+            const endPoint = polygon[nth];
+            const endType = pointType[nth];
+            if (startType === COPLANAR$1 && endType === COPLANAR$1) {
+              frontEdges.push([startPoint, endPoint]);
+            }
+            startPoint = endPoint;
+            startType = endType;
+          }
+          break;
+        }
+        case BACK$1: {
+  console.log(`QQ/cut/type: BACK`);
+          if (backPolygons === undefined) {
+            backPolygons = [];
+          }
+          backPolygons.push(polygon);
+          let startPoint = polygon[polygon.length - 1];
+          let startType = pointType[polygon.length - 1];
+          for (let nth = 0; nth < polygon.length; nth++) {
+            const endPoint = polygon[nth];
+            const endType = pointType[nth];
+            if (startType === COPLANAR$1 && endType === COPLANAR$1) {
+              backEdges.push([startPoint, endPoint]);
+            }
+            startPoint = endPoint;
+            startType = endType;
+          }
+          break;
+        }
+        case SPANNING: {
+          // Make a local copy so that mutation does not propagate.
+          polygon = polygon.slice();
+          let backPoints = [];
+          let frontPoints = [];
+          // Add the colinear spanning point to the polygon.
+          {
+            let last = polygon.length - 1;
+            for (let current = 0; current < polygon.length; last = current++) {
+              const lastType = pointType[last];
+              const lastPoint = polygon[last];
+              if ((lastType | pointType[current]) === SPANNING) {
+                // Break spanning segments at the point of intersection.
+                const rawSpanPoint = splitLineSegmentByPlane(plane, lastPoint, polygon[current]);
+                const spanPoint = subtract(rawSpanPoint, scale(signedDistanceToPoint(toPlane(polygon), rawSpanPoint), plane));
+                // Note: Destructive modification of polygon here.
+                polygon.splice(current, 0, spanPoint);
+                pointType.splice(current, 0, COPLANAR$1);
+              }
+            }
+          }
+          // Spanning points have been inserted.
+          {
+            let last = polygon.length - 1;
+            let lastCoplanar = polygon[pointType.lastIndexOf(COPLANAR$1)];
+            for (let current = 0; current < polygon.length; last = current++) {
+              const point = polygon[current];
+              const type = pointType[current];
+              const lastType = pointType[last];
+              const lastPoint = polygon[last];
+              if (type !== FRONT$1) {
+                backPoints.push(point);
+              }
+              if (type !== BACK$1) {
+                frontPoints.push(point);
+              }
+              if (type === COPLANAR$1) {
+                if (lastType === COPLANAR$1) {
+                  frontEdges.push([lastPoint, point]);
+                  backEdges.push([lastPoint, point]);
+                } else if (lastType === BACK$1) {
+                  frontEdges.push([lastCoplanar, point]);
+                } else if (lastType === FRONT$1) {
+                  backEdges.push([lastCoplanar, point]);
+                }
+                lastCoplanar = point;
+              }
+            }
+          }
+          if (frontPoints.length >= 3) {
+          // Add the polygon that sticks out the front of the plane.
+            if (frontPolygons === undefined) {
+              frontPolygons = [];
+            }
+            frontPolygons.push(frontPoints);
+          }
+          if (backPoints.length >= 3) {
+          // Add the polygon that sticks out the back of the plane.
+            if (backPolygons === undefined) {
+              backPolygons = [];
+            }
+            backPolygons.push(backPoints);
+          }
+          break;
+        }
+      }
+    }
+    if (coplanarFrontPolygons !== undefined) {
+      coplanarFrontSurfaces.push(coplanarFrontPolygons);
+    }
+    if (coplanarBackPolygons !== undefined) {
+      coplanarBackSurfaces.push(coplanarBackPolygons);
+    }
+    if (frontPolygons !== undefined) {
+      frontSurfaces.push(frontPolygons);
+    }
+    if (backPolygons !== undefined) {
+      backSurfaces.push(backPolygons);
+    }
+  };
+
+  const cut = (plane, solid) => {
+    const front = [];
+    const back = [];
+    const frontEdges = [];
+    const backEdges = [];
+    for (const surface of canonicalize$5(solid)) {
+      cutSurface(plane, front, back, front, back, frontEdges, backEdges, surface);
+      if (frontEdges.some(edge => edge[1] === undefined)) {
+        throw Error(`die/end/missing: ${JSON.stringify(frontEdges)}`);
+      }
+    }
+
+    if (frontEdges.length > 0) {
+      // FIX: This can produce a solid with separate coplanar surfaces.
+  console.log(`QQ/solid/cut/frontEdges/push`);
+      front.push(flip$2(toLoops({}, canonicalize$8(frontEdges))));
+    }
+
+    if (backEdges.length > 0) {
+  console.log(`QQ/solid/cut/backEdges/push`);
+      back.push(flip$2(toLoops({}, canonicalize$8(backEdges))));
+    }
+
+    return [front, back];
+  };
+
+  const eachPoint$4 = (options = {}, thunk, solid) => {
     for (const surface of solid) {
       eachPoint$2(options, thunk, surface);
     }
@@ -13821,11 +14950,11 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$1 = (solid) => {
+  const measureBoundingBox$2 = (solid) => {
     if (solid.measureBoundingBox === undefined) {
       let max$1 = solid[0][0][0];
       let min$1 = solid[0][0][0];
-      eachPoint$3({},
+      eachPoint$4({},
                 point => {
                   max$1 = max(max$1, point);
                   min$1 = min(min$1, point);
@@ -13862,25 +14991,25 @@ return d[d.length-1];};return ", funcName].join("");
 
   const create = () => ({ surfaces: [] });
 
-  const EPSILON = 1e-5;
+  const EPSILON$2 = 1e-5;
 
-  const COPLANAR = 0; // Neither front nor back.
-  const FRONT = 1;
-  const BACK = 2;
-  const SPANNING = 3; // Both front and back.
+  const COPLANAR$2 = 0; // Neither front nor back.
+  const FRONT$2 = 1;
+  const BACK$2 = 2;
+  const SPANNING$1 = 3; // Both front and back.
 
-  const toType = (plane, point) => {
+  const toType$2 = (plane, point) => {
     let t = signedDistanceToPoint(plane, point);
-    if (t < -EPSILON) {
-      return BACK;
-    } else if (t > EPSILON) {
-      return FRONT;
+    if (t < -EPSILON$2) {
+      return BACK$2;
+    } else if (t > EPSILON$2) {
+      return FRONT$2;
     } else {
-      return COPLANAR;
+      return COPLANAR$2;
     }
   };
 
-  const pointType = [];
+  const pointType$1 = [];
 
   const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
     // assertCoplanar(surface);
@@ -13889,19 +15018,19 @@ return d[d.length-1];};return ", funcName].join("");
     let frontPolygons;
     let backPolygons;
     for (const polygon of surface) {
-      pointType.length = 0;
-      let polygonType = COPLANAR;
+      pointType$1.length = 0;
+      let polygonType = COPLANAR$2;
       if (!equals$2(toPlane(polygon), plane)) {
         for (const point of polygon) {
-          const type = toType(plane, point);
+          const type = toType$2(plane, point);
           polygonType |= type;
-          pointType.push(type);
+          pointType$1.push(type);
         }
       }
 
       // Put the polygon in the correct list, splitting it when necessary.
       switch (polygonType) {
-        case COPLANAR: {
+        case COPLANAR$2: {
           if (dot(plane, toPlane(polygon)) > 0) {
             if (coplanarFrontPolygons === undefined) {
               coplanarFrontPolygons = [];
@@ -13915,44 +15044,44 @@ return d[d.length-1];};return ", funcName].join("");
           }
           break;
         }
-        case FRONT: {
+        case FRONT$2: {
           if (frontPolygons === undefined) {
             frontPolygons = [];
           }
           frontPolygons.push(polygon);
           break;
         }
-        case BACK: {
+        case BACK$2: {
           if (backPolygons === undefined) {
             backPolygons = [];
           }
           backPolygons.push(polygon);
           break;
         }
-        case SPANNING: {
+        case SPANNING$1: {
           let frontPoints = [];
           let backPoints = [];
           let startPoint = polygon[polygon.length - 1];
-          let startType = pointType[polygon.length - 1];
+          let startType = pointType$1[polygon.length - 1];
           for (let nth = 0; nth < polygon.length; nth++) {
             const endPoint = polygon[nth];
-            const endType = pointType[nth];
-            if (startType !== BACK) {
+            const endType = pointType$1[nth];
+            if (startType !== BACK$2) {
               // The inequality is important as it includes COPLANAR points.
               frontPoints.push(startPoint);
             }
-            if (startType !== FRONT) {
+            if (startType !== FRONT$2) {
               // The inequality is important as it includes COPLANAR points.
               backPoints.push(startPoint);
             }
-            if ((startType | endType) === SPANNING) {
+            if ((startType | endType) === SPANNING$1) {
               // This should exclude COPLANAR points.
               // Compute the point that touches the splitting plane.
               const rawSpanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
               const spanPoint = subtract(rawSpanPoint, scale(signedDistanceToPoint(toPlane(polygon), rawSpanPoint), plane));
               frontPoints.push(spanPoint);
               backPoints.push(spanPoint);
-              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON) throw Error('die');
+              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON$2) throw Error('die');
             }
             startPoint = endPoint;
             startType = endType;
@@ -14088,11 +15217,32 @@ return d[d.length-1];};return ", funcName].join("");
     [bsp.front, bsp.back] = [bsp.back, bsp.front];
   };
 
+  const copyBsp = ({ plane, surfaces, front, back }) => {
+    const copy = {};
+    if (plane !== undefined) {
+      copy.plane = plane;
+    }
+    if (surfaces !== undefined) {
+      copy.surfaces = surfaces.slice();
+    }
+    if (front !== undefined) {
+      copy.front = copyBsp(front);
+    }
+    if (back !== undefined) {
+      copy.back = copyBsp(back);
+    }
+    return copy;
+  };
+
   const fromSurfaces = (options = {}, surfaces) => {
-    const bsp = create();
-    // Build is destructive.
-    build(bsp, surfaces.map(surface => surface.slice()));
-    return bsp;
+    if (surfaces.bsp === undefined) {
+      const bsp = create();
+      // Build is destructive.
+      build(bsp, surfaces.map(surface => surface.slice()));
+      surfaces.bsp = bsp;
+    }
+    // FIX: See if we can make the operations non-destructive so that we do not need to copy the cached tree.
+    return copyBsp(surfaces.bsp);
   };
 
   const gatherSurfaces = (bsp) => {
@@ -14120,8 +15270,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   // Tolerates overlap up to one iota.
   const doesNotOverlap = (a, b) => {
-    const [minA, maxA] = measureBoundingBox$1(a);
-    const [minB, maxB] = measureBoundingBox$1(b);
+    const [minA, maxA] = measureBoundingBox$2(a);
+    const [minB, maxB] = measureBoundingBox$2(b);
     if (maxA[X$1] <= minB[X$1] + iota) { return true; }
     if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
     if (maxA[Z$1] <= minB[Z$1] + iota) { return true; }
@@ -14312,7 +15462,7 @@ return d[d.length-1];};return ", funcName].join("");
     return walk(geometry);
   };
 
-  const eachPoint$4 = (options, operation, geometry) => {
+  const eachPoint$5 = (options, operation, geometry) => {
     const walk = (geometry) => {
       if (geometry.assembly) {
         geometry.assembly.forEach(walk);
@@ -14321,7 +15471,7 @@ return d[d.length-1];};return ", funcName].join("");
       } else if (geometry.paths) {
         eachPoint(options, operation, geometry.paths);
       } else if (geometry.solid) {
-        eachPoint$3(options, operation, geometry.solid);
+        eachPoint$4(options, operation, geometry.solid);
       } else if (geometry.z0Surface) {
         eachPoint$2(options, operation, geometry.z0Surface);
       }
@@ -14458,7 +15608,7 @@ return d[d.length-1];};return ", funcName].join("");
     return transformed;
   };
 
-  const transform$6 = (matrix, untransformed) => ({ matrix, untransformed });
+  const transform$a = (matrix, untransformed) => ({ matrix, untransformed });
 
   // Apply the accumulated matrix transformations and produce a geometry without them.
 
@@ -14555,7 +15705,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const toPoints$1 = (options = {}, geometry) => {
     const points = [];
-    eachPoint$4(options, point => points.push(point), geometry);
+    eachPoint$5(options, point => points.push(point), geometry);
     return { points };
   };
 
@@ -14614,7 +15764,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
 
     eachPoint (options = {}, operation) {
-      eachPoint$4(options, operation, this.toKeptGeometry());
+      eachPoint$5(options, operation, this.toKeptGeometry());
     }
 
     toComponents (options = {}) {
@@ -14639,7 +15789,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     transform (matrix) {
       if (matrix.some(item => item === -Infinity)) throw Error('die');
-      return fromGeometry(transform$6(matrix, this.toGeometry()));
+      return fromGeometry(transform$a(matrix, this.toGeometry()));
     }
   }
   const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
@@ -14838,7 +15988,7 @@ return d[d.length-1];};return ", funcName].join("");
    * :::
    **/
 
-  const measureBoundingBox$2 = (shape) => {
+  const measureBoundingBox$3 = (shape) => {
     // FIX: Handle empty geometries.
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
@@ -14856,7 +16006,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$1 = function () { return measureBoundingBox$2(this); };
+  const method$1 = function () { return measureBoundingBox$3(this); };
 
   Shape.prototype.measureBoundingBox = method$1;
 
@@ -14899,7 +16049,7 @@ return d[d.length-1];};return ", funcName].join("");
   const fromValue = ([x = 0, y = 0, z = 0], shape) => shape.transform(fromTranslation([x, y, z]));
   const fromValues$1 = (x = 0, y = 0, z = 0, shape) => shape.transform(fromTranslation([x, y, z]));
 
-  const translate$2 = dispatch(
+  const translate$3 = dispatch(
     'translate',
     (x, shape, ...rest) => {
       assertNumber(x);
@@ -14931,10 +16081,10 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromValue([x, y, z], shape);
     });
 
-  translate$2.fromValue = fromValue;
-  translate$2.fromValues = fromValues$1;
+  translate$3.fromValue = fromValue;
+  translate$3.fromValues = fromValues$1;
 
-  const method$2 = function (...params) { return translate$2(...params, this); };
+  const method$2 = function (...params) { return translate$3(...params, this); };
   Shape.prototype.translate = method$2;
 
   /**
@@ -14959,14 +16109,14 @@ return d[d.length-1];};return ", funcName].join("");
   const Z$2 = 2;
 
   const fromOrigin = (shape) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2([0, 0, -minPoint[Z$2]], shape);
+    const [minPoint] = measureBoundingBox$3(shape);
+    return translate$3([0, 0, -minPoint[Z$2]], shape);
   };
 
   const fromReference = (shape, reference) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    const [, maxRefPoint] = measureBoundingBox$2(reference);
-    return assemble$1(reference, translate$2([0, 0, maxRefPoint[Z$2] - minPoint[Z$2]], shape));
+    const [minPoint] = measureBoundingBox$3(shape);
+    const [, maxRefPoint] = measureBoundingBox$3(reference);
+    return assemble$1(reference, translate$3([0, 0, maxRefPoint[Z$2] - minPoint[Z$2]], shape));
   };
 
   const above = dispatch(
@@ -15027,14 +16177,14 @@ return d[d.length-1];};return ", funcName].join("");
   const Y$2 = 1;
 
   const fromOrigin$1 = (shape) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2([0, -minPoint[Y$2], 0], shape);
+    const [minPoint] = measureBoundingBox$3(shape);
+    return translate$3([0, -minPoint[Y$2], 0], shape);
   };
 
   const fromReference$1 = (shape, reference) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    const [, maxRefPoint] = measureBoundingBox$2(reference);
-    return assemble$1(reference, translate$2([0, maxRefPoint[Y$2] - minPoint[Y$2], 0], shape));
+    const [minPoint] = measureBoundingBox$3(shape);
+    const [, maxRefPoint] = measureBoundingBox$3(reference);
+    return assemble$1(reference, translate$3([0, maxRefPoint[Y$2] - minPoint[Y$2], 0], shape));
   };
 
   const back = dispatch(
@@ -15078,14 +16228,14 @@ return d[d.length-1];};return ", funcName].join("");
   const Z$3 = 2;
 
   const fromOrigin$2 = (shape) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2([0, 0, -maxPoint[Z$3]], shape);
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    return translate$3([0, 0, -maxPoint[Z$3]], shape);
   };
 
   const fromReference$2 = (shape, reference) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    const [minRefPoint] = measureBoundingBox$2(reference);
-    return assemble$1(reference, translate$2([0, 0, minRefPoint[Z$3] - maxPoint[Z$3]], shape));
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    const [minRefPoint] = measureBoundingBox$3(reference);
+    return assemble$1(reference, translate$3([0, 0, minRefPoint[Z$3] - maxPoint[Z$3]], shape));
   };
 
   const below = dispatch(
@@ -15129,9 +16279,9 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const center = (shape) => {
-    const [minPoint, maxPoint] = measureBoundingBox$2(shape);
+    const [minPoint, maxPoint] = measureBoundingBox$3(shape);
     let center = scale(0.5, add(minPoint, maxPoint));
-    return translate$2(negate(center), shape);
+    return translate$3(negate(center), shape);
   };
 
   const method$6 = function () { return center(this); };
@@ -15372,377 +16522,6 @@ return d[d.length-1];};return ", funcName].join("");
   var adaptiveBezierCurve = _function();
 
   const buildAdaptiveCubicBezierCurve = ({ scale = 2 }, [start, c1, c2, end]) => adaptiveBezierCurve(start, c1, c2, end, scale);
-
-  const isDegenerate = (polygon) => {
-    for (let nth = 0; nth < polygon.length; nth++) {
-      if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  const canonicalize$4 = (polygons) => {
-    const canonicalized = [];
-    for (let polygon of polygons) {
-      polygon = canonicalize$3(polygon);
-      if (!isDegenerate(polygon)) {
-        canonicalized.push(polygon);
-      }
-    }
-    return canonicalized;
-  };
-
-  const EPSILON$1 = 1e-5;
-
-  // Point Classification.
-  const COPLANAR$1 = 0;
-  const FRONT$1 = 1;
-  const BACK$1 = 2;
-
-  // Edge Properties.
-  const START = 0;
-  const END = 1;
-
-  // Plane Properties.
-  const W$2 = 3;
-
-  const toType$1 = (plane, point) => {
-    let t = dot(plane, point) - plane[W$2];
-    if (t < -EPSILON$1) {
-      return BACK$1;
-    } else if (t > EPSILON$1) {
-      return FRONT$1;
-    } else {
-      return COPLANAR$1;
-    }
-  };
-
-  const spanPoint = (plane, startPoint, endPoint) => {
-    let t = (plane[W$2] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
-    return canonicalize(lerp(t, startPoint, endPoint));
-  };
-
-  const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
-    if (aX < bX) { return -1; }
-    if (aX > bX) { return 1; }
-    if (aY < bY) { return -1; }
-    if (aY > bY) { return 1; }
-    if (aZ < bZ) { return -1; }
-    if (aZ > bZ) { return 1; }
-    return 0;
-  };
-
-  /**
-   * Takes a cross-section of a triangulated solid at a plane, yielding surface defining loops
-   * in that plane.
-   *
-   * FIX: Make sure this works properly for solids with holes in them, etc.
-   * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.
-   */
-  const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
-    let edges = [];
-    const addEdge = (start, end) => {
-      edges.push([canonicalize(start), canonicalize(end)]);
-    };
-
-    // Find the edges along the plane and fold them into paths to produce a set of closed loops.
-    for (let nth = 0; nth < triangles.length; nth++) {
-      const triangle = triangles[nth];
-      const [a, b, c] = triangle;
-      const [aType, bType, cType] = [toType$1(plane, a), toType$1(plane, b), toType$1(plane, c)];
-
-      switch (aType) {
-        case FRONT$1:
-          switch (bType) {
-            case FRONT$1:
-              switch (cType) {
-                case FRONT$1:
-                  // No intersection.
-                  break;
-                case COPLANAR$1:
-                  // Corner touches.
-                  break;
-                case BACK$1:
-                  // b-c down c-a up
-                  addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));
-                  break;
-              }
-              break;
-            case COPLANAR$1:
-              switch (cType) {
-                case FRONT$1:
-                  // Corner touches.
-                  break;
-                case COPLANAR$1:
-                  // b-c along plane.
-                  addEdge(b, c);
-                  break;
-                case BACK$1:
-                  // down at b, up c-a.
-                  addEdge(b, spanPoint(plane, c, a));
-                  break;
-              }
-              break;
-            case BACK$1:
-              switch (cType) {
-                case FRONT$1:
-                  // a-b down, b-c up.
-                  addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));
-                  break;
-                case COPLANAR$1:
-                  // a-b down, c up.
-                  addEdge(spanPoint(plane, a, b), c);
-                  break;
-                case BACK$1:
-                  // a-b down, c-a up.
-                  addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));
-                  break;
-              }
-              break;
-          }
-          break;
-        case COPLANAR$1:
-          switch (bType) {
-            case FRONT$1:
-              switch (cType) {
-                case FRONT$1:
-                  // Corner touches.
-                  break;
-                case COPLANAR$1:
-                  // c-a along plane.
-                  addEdge(c, a);
-                  break;
-                case BACK$1:
-                  // down at b-c, up at a
-                  addEdge(spanPoint(plane, b, c), a);
-                  break;
-              }
-              break;
-            case COPLANAR$1:
-              switch (cType) {
-                case FRONT$1:
-                  // a-b along plane.
-                  addEdge(a, b);
-                  break;
-                case COPLANAR$1:
-                  // Entirely coplanar -- doesn't cut.
-                  break;
-                case BACK$1:
-                  // Wrong half-space.
-                  break;
-              }
-              break;
-            case BACK$1:
-              switch (cType) {
-                case FRONT$1:
-                  // down at a, up at b-c.
-                  addEdge(a, spanPoint(plane, b, c));
-                  break;
-                case COPLANAR$1:
-                  // Wrong half-space.
-                  break;
-                case BACK$1:
-                  // Wrong half-space.
-                  break;
-              }
-              break;
-          }
-          break;
-        case BACK$1:
-          switch (bType) {
-            case FRONT$1:
-              switch (cType) {
-                case FRONT$1:
-                  // down at c-a, up at a-b
-                  addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));
-                  break;
-                case COPLANAR$1:
-                  // down at c, up at a-b
-                  addEdge(c, spanPoint(plane, a, b));
-                  break;
-                case BACK$1:
-                  // down at b-c, up at a-b.
-                  addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));
-                  break;
-              }
-              break;
-            case COPLANAR$1:
-              switch (cType) {
-                case FRONT$1:
-                  // down at c-a, up at b.
-                  addEdge(spanPoint(plane, c, a), b);
-                  break;
-                case COPLANAR$1:
-                  // Wrong half-space.
-                  break;
-                case BACK$1:
-                  // Wrong half-space.
-                  break;
-              }
-              break;
-            case BACK$1:
-              switch (cType) {
-                case FRONT$1:
-                  // down at c-a, up at b-c.
-                  addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));
-                  break;
-                case COPLANAR$1:
-                  // Wrong half-space.
-                  break;
-                case BACK$1:
-                  // Wrong half-space.
-                  break;
-              }
-              break;
-          }
-          break;
-      }
-    }
-
-    const extractSuccessor = (edges, start) => {
-      // FIX: Use a binary search to take advantage of the sorting of the edges.
-      for (let nth = 0; nth < edges.length; nth++) {
-        const candidate = edges[nth];
-        if (equals(candidate[START], start)) {
-          edges.splice(nth, 1);
-          return candidate;
-        }
-      }
-      // Given manifold geometry, there must always be a successor.
-      throw Error('Non-manifold');
-    };
-
-    // Sort the edges so that deduplication is efficient.
-    edges.sort(lexicographcalPointOrder);
-
-    // Assemble the edges into loops which are closed paths.
-    const loops = [];
-    while (edges.length > 0) {
-      let edge = edges.shift();
-      const loop = [edge[START]];
-      try {
-        while (!equals(edge[END], loop[0])) {
-          edge = extractSuccessor(edges, edge[END]);
-          loop.push(edge[START]);
-        }
-      } catch (e) {
-        if (allowOpenPaths) {
-          // FIX: Check the error.
-          loop.unshift(null);
-        } else {
-          throw e;
-        }
-      }
-      loops.push(loop);
-    }
-
-    return loops;
-  };
-
-  const eachPoint$5 = (options = {}, thunk, polygons) => {
-    for (const polygon of polygons) {
-      for (const point of polygon) {
-        thunk(point);
-      }
-    }
-  };
-
-  /**
-   * Transforms each polygon of Polygons.
-   *
-   * @param {Polygons} original - the Polygons to transform.
-   * @param {Function} [transform=identity] - function used to transform the polygons.
-   * @returns {Polygons} a copy with transformed polygons.
-   */
-
-  const isTriangle = (path) => isClosed(path) && path.length === 3;
-
-  const blessAsConvex$1 = (paths) => { paths.isConvex = true; return paths; };
-
-  const toContour$1 = (polygon) => {
-    const points = [];
-    for (const [x = 0, y = 0, z = 0] of polygon) {
-      points.push(x, y, z);
-    }
-    return points;
-  };
-
-  const fromTessellation$1 = (tessellation) => {
-    const tessPolygons = tessellation.elements;
-    const vertices = tessellation.vertices;
-    const polygons = [];
-
-    const toPoint = (offset) => {
-      const vertex = tessPolygons[offset];
-      return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];
-    };
-
-    for (let nth = 0; nth < tessPolygons.length; nth += 3) {
-      polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);
-    }
-
-    return polygons;
-  };
-
-  // This currently does triangulation.
-  // Higher arities are possible, but end up being null padded.
-  // Let's see if they're useful.
-
-  // TODO: Call this toConvexPolygons
-  const makeConvex$2 = (options = {}, polygons) => {
-    if (polygons.isConvex) {
-      return polygons;
-    }
-    if (polygons.every(isConvex)) {
-      return blessAsConvex$1(polygons);
-    }
-    const contours = polygons.map(toContour$1);
-    // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
-    const convex = fromTessellation$1(
-      tess2$1.tesselate({ contours: contours,
-                        windingRule: tess2$1.WINDING_ODD,
-                        elementType: tess2$1.POLYGONS,
-                        polySize: 3,
-                        vertexSize: 3
-      }));
-    return blessAsConvex$1(convex);
-  };
-
-  // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$3 = (polygons) => {
-    let max$1 = polygons[0][0];
-    let min$1 = polygons[0][0];
-    eachPoint$5({},
-              point => {
-                max$1 = max(max$1, point);
-                min$1 = min(min$1, point);
-              },
-              polygons);
-    return [min$1, max$1];
-  };
-
-  const blessAsTriangles = (paths) => { paths.isTriangles = true; return paths; };
-
-  const toTriangles = (options = {}, paths) => {
-    if (paths.isTriangles) {
-      return paths;
-    }
-    if (paths.every(isTriangle)) {
-      return blessAsTriangles(paths);
-    }
-    const triangles = [];
-    for (const path of paths) {
-      for (let nth = 2; nth < path.length; nth++) {
-        triangles.push([path[0], path[nth - 1], path[nth]]);
-      }
-    }
-    return blessAsTriangles(triangles);
-  };
-
-  const transform$7 = (matrix, polygons) => polygons.map(polygon => transform$4(matrix, polygon));
-
-  const translate$3 = (vector, polygons) => transform$7(fromTranslation(vector), polygons);
 
   /**
    * Construct a regular unit polygon of a given edge count.
@@ -16305,6 +17084,52 @@ return d[d.length-1];};return ", funcName].join("");
 
   const cursor = () => new Cursor();
 
+  /**
+   *
+   * # Cut
+   *
+   * Cuts a solid into two halves at z = 0, and returns each.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * const [top, bottom] = cube(10).cut();
+   * assemble(top.translate(0, 0, 1),
+   *          bottom.translate(0, 0, -1));
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * const [top, bottom] = sphere(10).cut();
+   * assemble(top.translate(0, 0, 2),
+   *          bottom.translate(0, 0, -2));
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * const [top, bottom] = sphere(10).rotateY(1).cut();
+   * assemble(top.translate(0, 0, 2),
+   *          bottom.translate(0, 0, -2));
+   * ```
+   * :::
+   *
+   **/
+
+  const cut$1 = ({ z = 0 } = {}, shape) => {
+    const solids = getSolids(shape.toKeptGeometry());
+    const fronts = [];
+    const backs = [];
+    for (const solid of solids) {
+      const [front, back] = cut(fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), solid);
+      fronts.push(Shape.fromSolid(front));
+      backs.push(Shape.fromSolid(back));
+    }
+    return [assemble$1(...fronts), assemble$1(...backs)];
+  };
+
+  const method$8 = function (options) { return cut$1(options, this); };
+
+  Shape.prototype.cut = method$8;
+
   const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
     return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
   };
@@ -16413,7 +17238,8 @@ return d[d.length-1];};return ", funcName].join("");
         return fromGeometry({ assembly: [] });
       }
       case 1: {
-        return shapes[0];
+        // We still want to produce a simple shape.
+        return fromGeometry(toKeptGeometry$1(shapes[0]));
       }
       default: {
         return fromGeometry(difference$4(...shapes.map(toKeptGeometry$1)));
@@ -16421,9 +17247,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$8 = function (...shapes) { return difference$5(this, ...shapes); };
+  const method$9 = function (...shapes) { return difference$5(this, ...shapes); };
 
-  Shape.prototype.difference = method$8;
+  Shape.prototype.difference = method$9;
 
   /**
    *
@@ -16489,9 +17315,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   drop$1.fromValues = fromValue$4;
 
-  const method$9 = function (...tags) { return drop$1(tags, this); };
+  const method$a = function (...tags) { return drop$1(tags, this); };
 
-  Shape.prototype.drop = method$9;
+  Shape.prototype.drop = method$a;
 
   /**
    *
@@ -16541,8 +17367,8 @@ return d[d.length-1];};return ", funcName].join("");
   extrude$1.fromValue = fromValue$5;
   extrude$1.fromHeight = fromHeight;
 
-  const method$a = function (options) { return extrude$1(options, this); };
-  Shape.prototype.extrude = method$a;
+  const method$b = function (options) { return extrude$1(options, this); };
+  Shape.prototype.extrude = method$b;
 
   /**
    *
@@ -16566,14 +17392,14 @@ return d[d.length-1];};return ", funcName].join("");
   const Y$3 = 1;
 
   const fromOrigin$3 = (shape) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2([0, -maxPoint[Y$3], 0], shape);
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    return translate$3([0, -maxPoint[Y$3], 0], shape);
   };
 
   const fromReference$3 = (shape, reference) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    const [minRefPoint] = measureBoundingBox$2(reference);
-    return assemble$1(reference, translate$2([0, minRefPoint[Y$3] - maxPoint[Y$3], 0], shape));
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    const [minRefPoint] = measureBoundingBox$3(reference);
+    return assemble$1(reference, translate$3([0, minRefPoint[Y$3] - maxPoint[Y$3], 0], shape));
   };
 
   const front = dispatch(
@@ -16591,9 +17417,29 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$3(shape, reference);
     });
 
-  const method$b = function (...params) { return front(this, ...params); };
+  const method$c = function (...params) { return front(this, ...params); };
 
-  Shape.prototype.front = method$b;
+  Shape.prototype.front = method$c;
+
+  /**
+   *
+   * # Fuse
+   *
+   * Fuse produces a simple version of a shape. All substructure is discarded.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * assemble(sphere(10), sphere(10).translate(2).drop()).fuse()
+   * ```
+   * :::
+   *
+   **/
+
+  const fuse = (shape) => fromGeometry(toKeptGeometry$1(shape));
+
+  const method$d = function () { return fuse(this); };
+
+  Shape.prototype.fuse = method$d;
 
   /**
    *
@@ -16640,9 +17486,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$c = function (...shapes) { return hull(this, ...shapes); };
+  const method$e = function (...shapes) { return hull(this, ...shapes); };
 
-  Shape.prototype.hull = method$c;
+  Shape.prototype.hull = method$e;
 
   /**
    *
@@ -16676,9 +17522,9 @@ return d[d.length-1];};return ", funcName].join("");
     return Shape.fromPathsToZ0Surface(union$2(...getPaths(shape.toGeometry())));
   };
 
-  const method$d = function (options) { return interior(options, this); };
+  const method$f = function (options) { return interior(options, this); };
 
-  Shape.prototype.interior = method$d;
+  Shape.prototype.interior = method$f;
 
   /**
    *
@@ -16735,7 +17581,8 @@ return d[d.length-1];};return ", funcName].join("");
         return fromGeometry({ assembly: [] });
       }
       case 1: {
-        return shapes[0];
+        // We still want to produce a simple shape.
+        return fromGeometry(toKeptGeometry$1(shapes[0]));
       }
       default: {
         return fromGeometry(intersection$4(...shapes.map(toKeptGeometry$1)));
@@ -16743,9 +17590,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$e = function (...shapes) { return intersection$5(this, ...shapes); };
+  const method$g = function (...shapes) { return intersection$5(this, ...shapes); };
 
-  Shape.prototype.intersection = method$e;
+  Shape.prototype.intersection = method$g;
 
   /**
    *
@@ -16796,9 +17643,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   keep$1.fromValues = fromValue$6;
 
-  const method$f = function (...tags) { return keep$1(tags, this); };
+  const method$h = function (...tags) { return keep$1(tags, this); };
 
-  Shape.prototype.keep = method$f;
+  Shape.prototype.keep = method$h;
 
   /**
    *
@@ -16822,14 +17669,14 @@ return d[d.length-1];};return ", funcName].join("");
   const X$2 = 0;
 
   const fromOrigin$4 = (shape) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    return translate$2([-maxPoint[X$2], 0, 0], shape);
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    return translate$3([-maxPoint[X$2], 0, 0], shape);
   };
 
   const fromReference$4 = (shape, reference) => {
-    const [, maxPoint] = measureBoundingBox$2(shape);
-    const [minRefPoint] = measureBoundingBox$2(reference);
-    return assemble$1(reference, translate$2([minRefPoint[X$2] - maxPoint[X$2], 0, 0], shape));
+    const [, maxPoint] = measureBoundingBox$3(shape);
+    const [minRefPoint] = measureBoundingBox$3(reference);
+    return assemble$1(reference, translate$3([minRefPoint[X$2] - maxPoint[X$2], 0, 0], shape));
   };
 
   const left = dispatch(
@@ -16847,9 +17694,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$4(shape, reference);
     });
 
-  const method$g = function (...params) { return left(this, ...params); };
+  const method$i = function (...params) { return left(this, ...params); };
 
-  Shape.prototype.left = method$g;
+  Shape.prototype.left = method$i;
 
   /**
    *
@@ -16905,7 +17752,8 @@ return d[d.length-1];};return ", funcName].join("");
         return fromGeometry({ assembly: [] });
       }
       case 1: {
-        return shapes[0];
+        // We still want to produce a simple shape.
+        return fromGeometry(toKeptGeometry$1(shapes[0]));
       }
       default: {
         return fromGeometry(union$4(...shapes.map(toKeptGeometry$1)));
@@ -16913,9 +17761,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$h = function (...shapes) { return union$5(this, ...shapes); };
+  const method$j = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$h;
+  Shape.prototype.union = method$j;
 
   /**
    *
@@ -20229,9 +21077,9 @@ return d[d.length-1];};return ", funcName].join("");
     return Shape.fromPaths(union$2(...getZ0Surfaces(shape.toGeometry())));
   };
 
-  const method$i = function (options) { return outline(options, this); };
+  const method$k = function (options) { return outline(options, this); };
 
-  Shape.prototype.outline = method$i;
+  Shape.prototype.outline = method$k;
 
   const fromValue$7 = (point) => Shape.fromPoint(point);
 
@@ -23658,529 +24506,7 @@ return d[d.length-1];};return ", funcName].join("");
     return pointsToD(points);
   };
 
-  /**
-   * Adds two mat4's
-   *
-   * @param {mat4} a the first operand
-   * @param {mat4} b the second operand
-   * @returns {mat4} out
-   */
-
-  /**
-   * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
-   *
-   * @param {mat4} a The first matrix.
-   * @param {mat4} b The second matrix.
-   * @returns {Boolean} True if the matrices are equal, false otherwise.
-   */
-
-  /**
-   * Creates a matrix from a vector scaling
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.scale(dest, dest, vec);
-   *
-   * @param {vec3} v Scaling vector
-   * @returns {mat4} out
-   */
-  const fromScaling$1 = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
-
-  /**
-   * Creates a matrix from a vector translation
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.translate(dest, dest, vec);
-   *
-   * @param {mat4} out mat4 receiving operation result
-   * @param {vec3} v Translation vector
-   * @returns {mat4} out
-   */
-
-  /**
-   * Create a new mat4 with the given values
-   *
-   * @param {Number} m00 Component in column 0, row 0 position (index 0)
-   * @param {Number} m01 Component in column 0, row 1 position (index 1)
-   * @param {Number} m02 Component in column 0, row 2 position (index 2)
-   * @param {Number} m03 Component in column 0, row 3 position (index 3)
-   * @param {Number} m10 Component in column 1, row 0 position (index 4)
-   * @param {Number} m11 Component in column 1, row 1 position (index 5)
-   * @param {Number} m12 Component in column 1, row 2 position (index 6)
-   * @param {Number} m13 Component in column 1, row 3 position (index 7)
-   * @param {Number} m20 Component in column 2, row 0 position (index 8)
-   * @param {Number} m21 Component in column 2, row 1 position (index 9)
-   * @param {Number} m22 Component in column 2, row 2 position (index 10)
-   * @param {Number} m23 Component in column 2, row 3 position (index 11)
-   * @param {Number} m30 Component in column 3, row 0 position (index 12)
-   * @param {Number} m31 Component in column 3, row 1 position (index 13)
-   * @param {Number} m32 Component in column 3, row 2 position (index 14)
-   * @param {Number} m33 Component in column 3, row 3 position (index 15)
-   * @returns {mat4} A new mat4
-   */
-
-  /**
-   * Creates a matrix from the given angle around the X axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateX(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-
-  /**
-   * Creates a matrix from the given angle around the Y axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateY(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-
-  /**
-   * Creates a matrix from the given angle around the Z axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateZ(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-
-  /**
-   * Set a mat4 to the identity matrix
-   *
-   * @returns {mat4} out
-   */
-
-  /**
-   * Calculates the absolute value of the give vector
-   *
-   * @param {vec3} [out] - receiving vector
-   * @param {vec3} vec - given value
-   * @returns {vec3} absolute value of the vector
-   */
-
-  /**
-   * Adds two vec3's
-   *
-   * @param {vec3} a the first vector to add
-   * @param {vec3} b the second vector to add
-   * @returns {vec3} the added vectors
-   */
-
-  /**
-   * Calculates the dot product of two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {Number} dot product of a and b
-   */
-  const dot$2 = ([ax, ay, az], [bx, by, bz]) => (ax * bx) + (ay * by) + (az * bz);
-
-  /**
-   * Scales a vec3 by a scalar number
-   *
-   * @param {Number} amount amount to scale the vector by
-   * @param {vec3} vector the vector to scale
-   * @returns {vec3} out
-   */
-
-  // radians = degrees * PI / 180
-
-  // TODO: Clean this up.
-
-  // degrees = radians * 180 / PI
-
-  /**
-   * Computes the cross product of two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-  const cross$2 = ([ax, ay, az], [bx, by, bz]) => [ay * bz - az * by,
-                                                        az * bx - ax * bz,
-                                                        ax * by - ay * bx];
-
-  /**
-   * Calculates the euclidian distance between two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {Number} distance between a and b
-   */
-
-  /**
-   * Divides two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-
-  /**
-   * Creates a new vec3 from the point given.
-   * Missing ranks are implicitly zero.
-   *
-   * @param {Number} x X component
-   * @param {Number} y Y component
-   * @param {Number} z Z component
-   * @returns {vec3} a new 3D vector
-   */
-
-  /** create a vec3 from a single scalar value
-   * all components of the resulting vec3 have the value of the
-   * input scalar
-   * @param  {Float} scalar
-   * @returns {Vec3}
-   */
-
-  /**
-   * Creates a new vec3 initialized with the given values
-   *
-   * @param {Number} x X component
-   * @param {Number} y Y component
-   * @param {Number} z Z component
-   * @returns {vec3} a new 3D vector
-   */
-
-  // extend to a 3D vector by adding a z coordinate:
-
-  /**
-   * Calculates the length of a vec3
-   *
-   * @param {vec3} a vector to calculate length of
-   * @returns {Number} length of a
-   */
-
-  /**
-   * Performs a linear interpolation between two vec3's
-   *
-   * @param {Number} t interpolant (0.0 to 1.0) applied between the two inputs
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-
-  /**
-   * Returns the maximum of two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-
-  /**
-   * Returns the minimum of two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-
-  /**
-   * Multiplies two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-
-  /**
-   * Negates the components of a vec3
-   *
-   * @param {vec3} a vector to negate
-   * @returns {vec3} out
-   */
-
-  /**
-   * Subtracts vector b from vector a
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {vec3} out
-   */
-
-  /**
-   * Calculates the squared euclidian distance between two vec3's
-   *
-   * @param {vec3} a the first operand
-   * @param {vec3} b the second operand
-   * @returns {Number} squared distance between a and b
-   */
-
-  /**
-   * Calculates the squared length of a vec3
-   *
-   * @param {vec3} a vector to calculate squared length of
-   * @returns {Number} squared length of a
-   */
-
-  /**
-   * Transforms the vec3 with a mat4.
-   * 4th vector component is implicitly '1'
-   * @param {[[<vec3>], <mat4> , <vec3>]} params
-   * @param {mat4} params[1] matrix matrix to transform with
-   * @param {vec3} params[2] vector the vector to transform
-   * @returns {vec3} out
-   */
-  const transform$8 = (matrix, [x = 0, y = 0, z = 0]) => {
-    let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
-    w = w || 1.0;
-    return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
-            (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
-            (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w];
-  };
-
-  /**
-   * determine whether the input matrix is a mirroring transformation
-   *
-   * @param {mat4} mat the input matrix
-   * @returns {boolean} output
-   */
-  const isMirroring$1 = (mat) => {
-    const u = [mat[0], mat[4], mat[8]];
-    const v = [mat[1], mat[5], mat[9]];
-    const w = [mat[2], mat[6], mat[10]];
-
-    // for a true orthogonal, non-mirrored base, u.cross(v) == w
-    // If they have an opposite direction then we are mirroring
-    const mirrorvalue = dot$2(cross$2(u, v), w);
-    const ismirror = (mirrorvalue < 0);
-    return ismirror;
-  };
-
-  /**
-   * m the mat4 by the dimensions in the given vec3
-   * create an affine matrix for mirroring into an arbitrary plane:
-   *
-   * @param {vec3} v the vec3 to mirror the matrix by
-   * @param {mat4} a the matrix to mirror
-   * @returns {mat4} out
-   */
-
-  /**
-   * Create an affine matrix for mirroring onto an arbitrary plane
-   *
-   * @param {vec4} plane to mirror the matrix by
-   * @returns {mat4} out
-   */
-
-  /**
-   * Multiplies two mat4's
-   *
-   * @param {mat4} a the first operand
-   * @param {mat4} b the second operand
-   * @returns {mat4} out
-   */
-
-  /**
-   * Calculates the absolute value of the give vector
-   *
-   * @param {vec2} vec - given value
-   * @returns {vec2} absolute value of the vector
-   */
-
-  /**
-   * Adds two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  // y=sin, x=cos
-
-  /**
-   * Computes the cross product (3D) of two vectors
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec3} cross product
-   */
-
-  /**
-   * Calculates the euclidian distance between two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {Number} distance between a and b
-   */
-
-  /**
-   * Divides two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Calculates the dot product of two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {Number} dot product of a and b
-   */
-
-  /**
-   * Creates a new vec2 from the point given.
-   * Missing ranks are implicitly zero.
-   *
-   * @param {Number} x X component
-   * @param {Number} y Y component
-   * @returns {vec2} a new 2D vector
-   */
-
-  /** Create a vec2 from a single scalar value
-   * @param  {Float} scalar
-   * @returns {Vec2} a new vec2
-   */
-
-  /**
-   * Creates a new vec3 initialized with the given values
-   * Any missing ranks are implicitly zero.
-   *
-   * @param {Number} x X component
-   * @param {Number} y Y component
-   * @returns {vec3} a new 2D vector
-   */
-
-  /**
-   * Calculates the length of a vec2
-   *
-   * @param {vec2} a vector to calculate length of
-   * @returns {Number} length of a
-   */
-
-  /**
-   * Performs a linear interpolation between two vec2's
-   *
-   * @param {Number} t interpolation amount between the two inputs
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Returns the maximum of two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Returns the minimum of two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Multiplies two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Negates the components of a vec2
-   *
-   * @param {vec2} a vector to negate
-   * @returns {vec2} out
-   */
-
-  /**
-   * Rotates a vec2 by an angle
-   *
-   * @param {Number} angle the angle of rotation (in radians)
-   * @param {vec2} vector the vector to rotate
-   * @returns {vec2} out
-   */
-
-  /**
-   * Normalize the given vector.
-   *
-   * @param {vec2} a vector to normalize
-   * @returns {vec2} normalized (unit) vector
-   */
-
-  /**
-   * Scales a vec2 by a scalar number
-   *
-   * @param {Number} amount amount to scale the vector by
-   * @param {vec2} vector the vector to scale
-   * @returns {vec2} out
-   */
-
-  /**
-   * Calculates the squared euclidian distance between two vec2's
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {Number} squared distance between a and b
-   */
-
-  /**
-   * Calculates the squared length of a vec2
-   *
-   * @param {vec2} a vector to calculate squared length of
-   * @returns {Number} squared length of a
-   */
-
-  /**
-   * Subtracts vector b from vector a
-   *
-   * @param {vec2} a the first operand
-   * @param {vec2} b the second operand
-   * @returns {vec2} out
-   */
-
-  /**
-   * Transforms the vec2 with a mat4
-   * 3rd vector component is implicitly '0'
-   * 4th vector component is implicitly '1'
-   *
-   * @param {mat4} matrix matrix to transform with
-   * @param {vec2} vector the vector to transform
-   * @returns {vec2} out
-   */
-
-  /**
-   * Subtracts matrix b from matrix a
-   *
-   * @param {mat4} out the receiving matrix
-   * @param {mat4} a the first operand
-   * @param {mat4} b the second operand
-   * @returns {mat4} out
-   */
-
-  const transform$9 = (matrix, path) =>
-    path.map((point, index) => (point === null) ? null : transform$8(matrix, point));
-
-  /**
-   * Transforms each path of Paths.
-   *
-   * @param {Paths} original - the Paths to transform.
-   * @param {Function} [transform=identity] - function used to transform the paths.
-   * @returns {Paths} the transformed paths.
-   */
-
-  const transform$a = (matrix, paths) => paths.map(path => transform$9(matrix, path));
-
-  // FIX: Deduplication.
-
-  const transform$b = (matrix, points) => points.map(point => transform$8(matrix, point));
+  const transform$b = (matrix, points) => points.map(point => transform$6(matrix, point));
 
   /**
    * Transforms the vertices of a polygon, producing a new poly3.
@@ -24257,7 +24583,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   // Affine transformation of polygon. Returns a new polygon.
   const transform$c = (matrix, polygon) => {
-    const transformed = map$3(polygon, vertex => transform$8(matrix, vertex));
+    const transformed = map$3(polygon, vertex => transform$6(matrix, vertex));
     if (isMirroring$1(matrix)) {
       // Reverse the order to preserve the orientation.
       transformed.reverse();
@@ -24309,7 +24635,7 @@ return d[d.length-1];};return ", funcName].join("");
       transformed.assembly = item.assembly;
     }
     if (item.paths) {
-      transformed.paths = transform$a(matrix, item.paths);
+      transformed.paths = transform$8(matrix, item.paths);
     }
     if (item.points) {
       transformed.points = transform$b(matrix, item.points);
@@ -24500,11 +24826,11 @@ return d[d.length-1];};return ", funcName].join("");
    */
   const toSvg = async ({ padding = 0 }, geometry) => {
     // FIX: SVG should handle both surfaces and paths.
-    const polygons = canonicalize$4(toPolygons$1(geometry));
-    const min = measureBoundingBox$3(polygons)[0];
+    const polygons = canonicalize$9(toPolygons$1(geometry));
+    const min = measureBoundingBox$1(polygons)[0];
     // TODO: Add transform and translate support to polygons.
-    const shiftedPolygons = canonicalize$4(translate$3(negate(min), polygons));
-    const [width, height] = measureBoundingBox$3(shiftedPolygons)[1];
+    const shiftedPolygons = canonicalize$9(translate$2(negate(min), polygons));
+    const [width, height] = measureBoundingBox$1(shiftedPolygons)[1];
 
     return [
       `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -38363,7 +38689,7 @@ return d[d.length-1];};return ", funcName].join("");
                                           flt(b), flt(e), flt(h), 0.0,
                                           flt(c), flt(f), flt(i), 0.0,
                                           ldu(x), ldu(y), ldu(z), 1.0);
-          polygons.push(...transform$7(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
+          polygons.push(...transform$9(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
           stack.pop();
           break;
         }
@@ -38478,9 +38804,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$j = function (options = {}) { return writeShape(options, this); };
+  const method$l = function (options = {}) { return writeShape(options, this); };
 
-  Shape.prototype.writeShape = method$j;
+  Shape.prototype.writeShape = method$l;
 
   /**
    *
@@ -39095,7 +39421,7 @@ return d[d.length-1];};return ", funcName].join("");
         polygons = makeWatertight(polygons);
       }
     }
-    return `solid JSxCAD\n${convertToFacets(options, canonicalize$4(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
+    return `solid JSxCAD\n${convertToFacets(options, canonicalize$9(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
   };
 
   const convertToFacets = (options, polygons) =>
@@ -39188,14 +39514,14 @@ return d[d.length-1];};return ", funcName].join("");
   const X$3 = 0;
 
   const fromOrigin$5 = (shape) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    return translate$2([-minPoint[X$3], 0, 0], shape);
+    const [minPoint] = measureBoundingBox$3(shape);
+    return translate$3([-minPoint[X$3], 0, 0], shape);
   };
 
   const fromReference$5 = (shape, reference) => {
-    const [minPoint] = measureBoundingBox$2(shape);
-    const [, maxRefPoint] = measureBoundingBox$2(reference);
-    return assemble$1(reference, translate$2([maxRefPoint[X$3] - minPoint[X$3], 0, 0], shape));
+    const [minPoint] = measureBoundingBox$3(shape);
+    const [, maxRefPoint] = measureBoundingBox$3(reference);
+    return assemble$1(reference, translate$3([maxRefPoint[X$3] - minPoint[X$3], 0, 0], shape));
   };
 
   const right = dispatch(
@@ -39213,9 +39539,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$5(shape, reference);
     });
 
-  const method$k = function (...params) { return right(this, ...params); };
+  const method$m = function (...params) { return right(this, ...params); };
 
-  Shape.prototype.right = method$k;
+  Shape.prototype.right = method$m;
 
   /**
    *
@@ -39237,9 +39563,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$l = function (angle) { return rotateX$1(angle, this); };
+  const method$n = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$l;
+  Shape.prototype.rotateX = method$n;
 
   /**
    *
@@ -39261,9 +39587,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$m = function (angle) { return rotateY(angle, this); };
+  const method$o = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$m;
+  Shape.prototype.rotateY = method$o;
 
   /**
    *
@@ -39285,9 +39611,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$n = function (angle) { return rotateZ(angle, this); };
+  const method$p = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$n;
+  Shape.prototype.rotateZ = method$p;
 
   /**
    *
@@ -39322,9 +39648,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$o = function (factor) { return scale$6(factor, this); };
+  const method$q = function (factor) { return scale$6(factor, this); };
 
-  Shape.prototype.scale = method$o;
+  Shape.prototype.scale = method$q;
 
   /**
    *
@@ -39749,9 +40075,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$p = function (options = {}) { return writePdf(options, this); };
+  const method$r = function (options = {}) { return writePdf(options, this); };
 
-  Shape.prototype.writePdf = method$p;
+  Shape.prototype.writePdf = method$r;
 
   /**
    *
@@ -39781,9 +40107,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$q = function (options = {}) { return writeStl(options, this); };
+  const method$s = function (options = {}) { return writeStl(options, this); };
 
-  Shape.prototype.writeStl = method$q;
+  Shape.prototype.writeStl = method$s;
 
   /**
    *
@@ -39813,9 +40139,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$r = function (options = {}) { return writeSvg(options, this); };
+  const method$t = function (options = {}) { return writeSvg(options, this); };
 
-  Shape.prototype.writeSvg = method$r;
+  Shape.prototype.writeSvg = method$t;
 
   // Polyfills
 
@@ -90158,20 +90484,22 @@ return d[d.length-1];};return ", funcName].join("");
     return segments;
   };
 
-  const solidToThreejsSolid = (geometry) => {
+  const solidToThreejsSolid = (solid) => {
     const normals = [];
     const positions = [];
-    for (const triangle of canonicalize$4(toTriangles({}, toPolygons({}, geometry)))) {
-      for (const point of triangle) {
-        const [x, y, z] = toPlane(triangle);
-        normals.push(x, y, z);
-        positions.push(...point);
+    for (const surface of solid) {
+      for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
+        for (const point of triangle) {
+          const [x, y, z] = toPlane(triangle);
+          normals.push(x, y, z);
+          positions.push(...point);
+        }
       }
     }
     return { normals, positions };
   };
 
-  const z0SurfaceToThreejsSurface = (geometry) => {
+  const z0SurfaceToThreejsSurface = (surface) => {
     const normals = [];
     const positions = [];
     const outputTriangle = (triangle) => {
@@ -90181,7 +90509,7 @@ return d[d.length-1];};return ", funcName].join("");
         positions.push(...point);
       }
     };
-    for (const triangle of toTriangles({}, makeConvex$1({}, geometry))) {
+    for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
       outputTriangle(triangle);
       outputTriangle(flip(triangle));
     }
@@ -90386,9 +90714,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$s = function (options = {}) { return writeSvgPhoto(options, this); };
+  const method$u = function (options = {}) { return writeSvgPhoto(options, this); };
 
-  Shape.prototype.writeSvgPhoto = method$s;
+  Shape.prototype.writeSvgPhoto = method$u;
 
   const writeThreejsPage = async (options, shape) => {
     if (typeof options === 'string') {
@@ -90399,9 +90727,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$t = function (options = {}) { return writeThreejsPage(options, this); };
+  const method$v = function (options = {}) { return writeThreejsPage(options, this); };
 
-  Shape.prototype.writeThreejsPage = method$t;
+  Shape.prototype.writeThreejsPage = method$v;
 
   /**
    *
@@ -90425,12 +90753,14 @@ return d[d.length-1];};return ", funcName].join("");
     crossSection: crossSection,
     cos: cos,
     cube: cube,
+    cut: cut$1,
     cursor: cursor,
     cylinder: cylinder,
     difference: difference$5,
     drop: drop$1,
     extrude: extrude$1,
     front: front,
+    fuse: fuse,
     hull: hull,
     interior: interior,
     intersection: intersection$5,
@@ -90438,7 +90768,7 @@ return d[d.length-1];};return ", funcName].join("");
     lego: lego,
     log: log$2,
     max: max$1,
-    measureBoundingBox: measureBoundingBox$2,
+    measureBoundingBox: measureBoundingBox$3,
     microGearMotor: microGearMotor,
     minkowski: minkowski,
     outline: outline,
@@ -90463,7 +90793,7 @@ return d[d.length-1];};return ", funcName].join("");
     square: square,
     svgPath: svgPath,
     tetrahedron: tetrahedron,
-    translate: translate$2,
+    translate: translate$3,
     triangle: triangle,
     union: union$5,
     keep: keep$1,

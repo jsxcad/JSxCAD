@@ -11,7 +11,7 @@ const paths = [
   'Intro.js',
   'above.js', 'acos.js', 'assemble.js',
   'back.js', 'below.js',
-  'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cursor.js', 'cylinder.js',
+  'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cut.js', 'cursor.js', 'cylinder.js',
   'difference.js',
   'drop.js',
   'front.js', 'fuse.js',

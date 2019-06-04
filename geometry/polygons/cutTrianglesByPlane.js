@@ -1,4 +1,6 @@
-import { canonicalize, dot, equals, lerp, subtract } from '@jsxcad/math-vec3';
+import { canonicalize, dot, lerp, subtract } from '@jsxcad/math-vec3';
+
+import { toLoops } from './toLoops';
 
 const EPSILON = 1e-5;
 
@@ -6,10 +8,6 @@ const EPSILON = 1e-5;
 const COPLANAR = 0;
 const FRONT = 1;
 const BACK = 2;
-
-// Edge Properties.
-const START = 0;
-const END = 1;
 
 // Plane Properties.
 const W = 3;
@@ -28,16 +26,6 @@ const toType = (plane, point) => {
 const spanPoint = (plane, startPoint, endPoint) => {
   let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
   return canonicalize(lerp(t, startPoint, endPoint));
-};
-
-const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
-  if (aX < bX) { return -1; }
-  if (aX > bX) { return 1; }
-  if (aY < bY) { return -1; }
-  if (aY > bY) { return 1; }
-  if (aZ < bZ) { return -1; }
-  if (aZ > bZ) { return 1; }
-  return 0;
 };
 
 /**
@@ -207,42 +195,5 @@ export const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles
     }
   }
 
-  const extractSuccessor = (edges, start) => {
-    // FIX: Use a binary search to take advantage of the sorting of the edges.
-    for (let nth = 0; nth < edges.length; nth++) {
-      const candidate = edges[nth];
-      if (equals(candidate[START], start)) {
-        edges.splice(nth, 1);
-        return candidate;
-      }
-    }
-    // Given manifold geometry, there must always be a successor.
-    throw Error('Non-manifold');
-  };
-
-  // Sort the edges so that deduplication is efficient.
-  edges.sort(lexicographcalPointOrder);
-
-  // Assemble the edges into loops which are closed paths.
-  const loops = [];
-  while (edges.length > 0) {
-    let edge = edges.shift();
-    const loop = [edge[START]];
-    try {
-      while (!equals(edge[END], loop[0])) {
-        edge = extractSuccessor(edges, edge[END]);
-        loop.push(edge[START]);
-      }
-    } catch (e) {
-      if (allowOpenPaths) {
-        // FIX: Check the error.
-        loop.unshift(null);
-      } else {
-        throw e;
-      }
-    }
-    loops.push(loop);
-  }
-
-  return loops;
+  return toLoops({ allowOpenPaths }, edges);
 };

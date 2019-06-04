@@ -1,9 +1,8 @@
-import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
 import { flip, toPlane } from '@jsxcad/math-poly3';
 
 import { makeConvex } from '@jsxcad/geometry-surface';
-import { toPolygons } from '@jsxcad/geometry-solid';
 import { toSegments } from '@jsxcad/geometry-path';
+import { toTriangles } from '@jsxcad/geometry-polygons';
 
 const pointsToThreejsPoints = (geometry) => {
   return geometry.points;
@@ -19,20 +18,22 @@ const pathsToThreejsSegments = (geometry) => {
   return segments;
 };
 
-const solidToThreejsSolid = (geometry) => {
+const solidToThreejsSolid = (solid) => {
   const normals = [];
   const positions = [];
-  for (const triangle of canonicalize(toTriangles({}, toPolygons({}, geometry)))) {
-    for (const point of triangle) {
-      const [x, y, z] = toPlane(triangle);
-      normals.push(x, y, z);
-      positions.push(...point);
+  for (const surface of solid) {
+    for (const triangle of toTriangles({}, makeConvex({}, surface))) {
+      for (const point of triangle) {
+        const [x, y, z] = toPlane(triangle);
+        normals.push(x, y, z);
+        positions.push(...point);
+      }
     }
   }
   return { normals, positions };
 };
 
-const z0SurfaceToThreejsSurface = (geometry) => {
+const z0SurfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
   const outputTriangle = (triangle) => {
@@ -42,7 +43,7 @@ const z0SurfaceToThreejsSurface = (geometry) => {
       positions.push(...point);
     }
   };
-  for (const triangle of toTriangles({}, makeConvex({}, geometry))) {
+  for (const triangle of toTriangles({}, makeConvex({}, surface))) {
     outputTriangle(triangle);
     outputTriangle(flip(triangle));
   }

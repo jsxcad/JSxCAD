@@ -11,6 +11,7 @@ import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { toGeneric } from './toGeneric';
+import { toLoops } from './toLoops';
 import { toPoints } from './toPoints';
 import { toTriangles } from './toTriangles';
 import { transform } from './transform';
@@ -33,6 +34,7 @@ export {
   measureBoundingBox,
   measureBoundingSphere,
   toGeneric,
+  toLoops,
   toPoints,
   toTriangles,
   rotateX,
