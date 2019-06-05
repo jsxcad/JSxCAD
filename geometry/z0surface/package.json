@@ -23,7 +23,7 @@
     "@jsxcad/geometry-path": "^0.0.75",
     "@jsxcad/geometry-paths": "^0.0.75",
     "@jsxcad/math-poly3": "^0.0.75",
-    "polygon-clipping": "^0.13.0"
+    "polygon-clipping": "^0.14.1"
   },
   "devDependencies": {
     "@jsxcad/geometry-polygons": "^0.0.75",

@@ -1,4 +1,4 @@
-import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
+import { clippingToPolygons, notEmpty, z0SurfaceToClipping } from './clippingToPolygons';
 import polygonClipping from 'polygon-clipping';
 
 /**
@@ -23,5 +23,10 @@ export const intersection = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }
-  return clippingToPolygons(polygonClipping.intersection(...z0Surfaces.map(z0SurfaceToClipping)));
+  const clipping = z0Surfaces.filter(notEmpty).map(surface => z0SurfaceToClipping(surface));
+  if (notEmpty(clipping)) {
+    return clippingToPolygons(polygonClipping.intersection(...z0Surfaces.map(z0SurfaceToClipping)));
+  } else {
+    return [];
+  }
 };
