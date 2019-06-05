@@ -24,7 +24,7 @@ import { union } from './union';
  * :::
  * ::: illustration { "view": { "position": [40, 40, -20] } }
  * ```
- * lego.socketSheet().drop('void')
+ * lego.socketSheet()
  * ```
  * :::
  * FIX: Does not drop deep 'void'.
@@ -32,7 +32,6 @@ import { union } from './union';
  * ```
  * assemble(cube(8, 8, 3.2).above().as('plate'),
  *          lego.socket().above().as('socket'))
- *   .drop('void')
  * ```
  * :::
  *
@@ -80,7 +79,7 @@ export const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1,
     }
   }
   return assemble(cube(width - play * 2, length - play * 2, height),
-                  assemble(...sockets).as('void'));
+                  assemble(...sockets).drop());
 };
 
 export const lego = {

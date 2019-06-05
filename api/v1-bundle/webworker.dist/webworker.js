@@ -21037,7 +21037,7 @@ return d[d.length-1];};return ", funcName].join("");
    * :::
    * ::: illustration { "view": { "position": [40, 40, -20] } }
    * ```
-   * lego.socketSheet().drop('void')
+   * lego.socketSheet()
    * ```
    * :::
    * FIX: Does not drop deep 'void'.
@@ -21045,7 +21045,6 @@ return d[d.length-1];};return ", funcName].join("");
    * ```
    * assemble(cube(8, 8, 3.2).above().as('plate'),
    *          lego.socket().above().as('socket'))
-   *   .drop('void')
    * ```
    * :::
    *
@@ -21091,7 +21090,7 @@ return d[d.length-1];};return ", funcName].join("");
       }
     }
     return assemble$1(cube(width - play * 2, length - play * 2, height),
-                    assemble$1(...sockets).as('void'));
+                    assemble$1(...sockets).drop());
   };
 
   const lego = {
