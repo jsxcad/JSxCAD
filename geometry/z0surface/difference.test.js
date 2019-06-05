@@ -27,10 +27,16 @@ test('difference: Difference of rectangle with itself rotated 90 degrees produce
 
 test('difference: Difference of rectangle with itself rotated -45 degrees produces shape', t => {
   t.deepEqual(canonicalize(difference(rectangle, transform(fromZRotation(degToRad(-45)), rectangle))),
-              [[[0, 0, 0], [0.70711, 0.70711, 0], [1.41422, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]]]);
+              [[[0, 0, 0], [0.70711, 0.70711, 0], [1.41421, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]]]);
 });
 
 test('difference: Difference of two non-overlapping squares and a rectangle', t => {
   t.deepEqual(canonicalize(difference(squares, rectangle)),
               [[[-0.5, -0.5, 0], [0.5, -0.5, 0], [0.5, 0, 0], [0, 0, 0], [0, 0.5, 0], [-0.5, 0.5, 0]]]);
+});
+
+test('difference: Handle empty geometries', t => {
+  t.deepEqual(canonicalize(difference([], rectangle)), []);
+  t.deepEqual(canonicalize(difference(rectangle, [])), rectangle);
+  t.deepEqual(canonicalize(difference([], [])), []);
 });

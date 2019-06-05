@@ -1,6 +1,5 @@
-import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
+import { clippingToPolygons, notEmpty, z0SurfaceToClipping } from './clippingToPolygons';
 
-import { canonicalize } from '@jsxcad/geometry-paths';
 import polygonClipping from 'polygon-clipping';
 
 /**
@@ -17,7 +16,11 @@ export const union = (...surfaces) => {
   if (surfaces.length === 1) {
     return surfaces[0];
   }
-  const clipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
-  const result = polygonClipping.union(...clipping);
-  return clippingToPolygons(result);
+  const clipping = surfaces.filter(notEmpty).map(surface => z0SurfaceToClipping(surface));
+  if (notEmpty(clipping)) {
+    const result = polygonClipping.union(...clipping);
+    return clippingToPolygons(result);
+  } else {
+    return [];
+  }
 };

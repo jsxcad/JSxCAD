@@ -1,6 +1,5 @@
-import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
+import { clippingToPolygons, notEmpty, z0SurfaceToClipping } from './clippingToPolygons';
 
-import { canonicalize } from '@jsxcad/geometry-paths';
 import polygonClipping from 'polygon-clipping';
 
 /**
@@ -22,13 +21,20 @@ import polygonClipping from 'polygon-clipping';
  *      |       |
  *      +-------+
  */
-export const difference = (baseSurface, ...surfaces) => {
-  if (surfaces.length === 0) {
-    return baseSurface;
+export const difference = (baseZ0Surface, ...z0Surfaces) => {
+  if (z0Surfaces.length === 0) {
+    return baseZ0Surface;
   }
-  const surfaceClipping = z0SurfaceToClipping(canonicalize(baseSurface));
-  const subtractionClipping = surfaces.map(surface => z0SurfaceToClipping(canonicalize(surface)));
-  const outputClipping = polygonClipping.difference(surfaceClipping, ...subtractionClipping);
-  const outputPaths = clippingToPolygons(outputClipping);
-  return outputPaths;
+  if (baseZ0Surface.length === 0) {
+    return [];
+  }
+  const baseClipping = z0SurfaceToClipping(baseZ0Surface);
+  const clipping = z0Surfaces.filter(notEmpty).map(z0Surface => z0SurfaceToClipping(z0Surface));
+  if (notEmpty(clipping)) {
+    const outputClipping = polygonClipping.difference(baseClipping, ...clipping);
+    const outputPaths = clippingToPolygons(outputClipping);
+    return outputPaths;
+  } else {
+    return baseZ0Surface;
+  }
 };

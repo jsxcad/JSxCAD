@@ -95,6 +95,9 @@ export const toEcmascript = (options, script) => {
 
   // Make arrow functions async.
   // Await on calls.
+  // FIX: assemble(...x.map(f => f + 1)) breaks because it doesn't realize that
+  // it's getting promises.
+  // Either await all arguments, or find a different approach.
   types.visit(ast, {
     visitArrowFunctionExpression: function (path) {
       this.traverse(path);

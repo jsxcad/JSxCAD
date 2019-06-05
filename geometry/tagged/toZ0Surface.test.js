@@ -9,5 +9,5 @@ test('Simple', t => {
                                 { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] }] };
   const z0Surface = toZ0Surface({}, assembly);
   t.deepEqual(canonicalize(z0Surface),
-              { z0Surface: [[[-0.5, -0.86603, 0], [1, 0, 0], [-0.5, 0.86603, 0]], [[0.13398, -0.5, 0], [0.5, -0.5, 0], [0.5, -0.28868, 0]]] });
+              { 'z0Surface': [[[-0.5, -0.86603, 0], [0.13398, -0.5, 0], [0.5, -0.5, 0], [0.5, -0.28868, 0], [1, 0, 0], [-0.5, 0.86603, 0]]] });
 });

@@ -1,4 +1,4 @@
-import { toPlane, transform } from './main';
+import { toPlane, transform } from './ops';
 
 import { assertCoplanar } from './assertCoplanar';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
