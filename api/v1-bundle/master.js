@@ -15,19 +15,47 @@ hull(point(0, 0, 10), circle(10))
 
 const installProject = async () => {
   const hash = location.hash.substring(1);
-  const [project, gist] = hash.split('@');
+  const [project, source] = hash.split('@');
   // Use the project identifier to select the filesystem.
   setupFilesystem({ fileBase: project });
-  if (gist !== undefined) {
-    // We expect a url like:
-    // https://api.github.com/gists/3c39d513e91278681eed2eea27b0e589
-    // FIX: Initialize the whole filesystem.
-    const response = await window.fetch(gist);
-    if (response.ok) {
-      const text = await response.text();
-      const data = JSON.parse(text);
-      if (data.files && data.files.script && data.files.script.content) {
-        return { initialScript: data.files.script.content };
+  if (source !== undefined) {
+    // GIST
+    if (source.startsWith('https://api.github.com/gists/')) {
+      // We expect a url like:
+      // https://api.github.com/gists/3c39d513e91278681eed2eea27b0e589
+      // FIX: Initialize the whole filesystem.
+      const response = await window.fetch(source);
+      if (response.ok) {
+        const text = await response.text();
+        const data = JSON.parse(text);
+        if (data.files && data.files.script && data.files.script.content) {
+          return { initialScript: data.files.script.content };
+        }
+      }
+    }
+    // GITHUB WIKI
+    if (source.startsWith('https://raw.githubusercontent.com/wiki/')) {
+      const response = await window.fetch(source);
+      if (response.ok) {
+        const text = await response.text();
+        let capture = false;
+        const captured = [];
+        for (const line of text.split('\n')) {
+          if (line === '```') {
+            capture = !capture;
+          } else if (capture) {
+            captured.push(line);
+          }
+        }
+        return { initialScript: captured.join('\n') };
+      }
+    }
+    // PASTEBIN
+    if (source.startsWith('https://pastebin.com/raw/')) {
+      const response = await window.fetch(source);
+      if (response.ok()) {
+        const text = await response.text();
+        return { initialScript: text };
       }
     }
   }
