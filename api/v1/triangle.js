@@ -1,21 +1,20 @@
 import { assertEmpty, assertNumber } from './assert';
 
-import { Shape } from './Shape';
-import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
+import { polygon } from './polygon';
 
 /**
  *
  * # Triangle
  *
- * ::: illustration { "view": { "position": [0, 0, 10] } }
+ * ::: illustration { "view": { "position": [0, 0, 5] } }
  * ```
  * triangle()
  * ```
  * :::
  * ::: illustration
  * ```
- * triangle(10)
+ * triangle(20)
  * ```
  * :::
  * ::: illustration
@@ -25,48 +24,58 @@ import { dispatch } from './dispatch';
  * :::
  * ::: illustration
  * ```
- * triangle({ diameter: 20 })
+ * assemble(circle(10),
+ *          triangle({ radius: 10 })
+ *            .drop())
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(triangle({ apothem: 5 }),
+ *          circle(5).drop())
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(triangle({ radius: 10 })
+ *            .rotateZ(180),
+ *          triangle({ diameter: 10 })
+ *            .drop())
  * ```
  * :::
  **/
-
-// FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified radius.
-// Is this the most useful measure?
-
-const unitTriangle = () =>
-  Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 3 }));
-
-export const fromValue = (radius) => unitTriangle({ resolution: 32 }).scale(radius);
-
-export const fromRadius = ({ radius, resolution = 32 }) => unitTriangle({ resolution }).scale(radius);
-
-export const fromDiameter = ({ diameter, resolution = 32 }) => unitTriangle({ resolution }).scale(diameter / 2);
 
 export const triangle = dispatch(
   'triangle',
   // triangle()
   (...rest) => {
     assertEmpty(rest);
-    return () => fromValue(1);
+    return () => polygon.fromEdge({ edge: 1, sides: 3 });
   },
   // triangle(2)
   (value) => {
     assertNumber(value);
-    return () => fromValue(value);
+    return () => polygon.fromEdge({ edge: value, sides: 3 });
   },
-  // triangle({ radius: 2, resolution: 32 })
-  ({ radius, resolution }) => {
+  // triangle({ edge: 10 })
+  ({ edge }) => {
+    assertNumber(edge);
+    return () => polygon.fromEdge({ edge, sides: 3 });
+  },
+  // triangle({ apothem: 10 })
+  ({ apothem }) => {
+    assertNumber(apothem);
+    return () => polygon.fromApothem({ apothem, sides: 3 });
+  },
+  // triangle({ radius: 10})
+  ({ radius }) => {
     assertNumber(radius);
-    return () => fromRadius({ radius });
+    return () => polygon.fromRadius({ radius, sides: 3 });
   },
-  // triangle({ diameter: 2, resolution: 32 })
-  ({ diameter, resolution }) => {
+  // triangle({ diameter: 10})
+  ({ diameter }) => {
     assertNumber(diameter);
-    return () => fromDiameter({ diameter });
+    return () => polygon.fromDiameter({ diameter, sides: 3 });
   });
-
-triangle.fromValue = fromValue;
-triangle.fromRadius = fromRadius;
-triangle.fromDiameter = fromDiameter;
 
 export default triangle;

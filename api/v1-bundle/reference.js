@@ -1,14 +1,13 @@
-import { installCSS } from './css';
+export const installReferenceCSS = () => {};
 
-export const installReferenceCSS = () =>
-  installCSS(document, `iframe { left: 0; top: 0; position: absolute; height: 100%; width: 100%; }`);
+const content = `
+<h1>Pre-Alpha Version</h1>
+<p>This is a pre-alpha release.</p>
+<p>Please understand that things will probably be broken.</p>
+<p>See the <a href="https://jsxcad.js.org/preAlpha/UserGuide.html" target="_blank">User Guide</a> for examples and more informations</p>
+`;
 
 export const installReference = ({ addPage, document, watchFile }) => {
-  addPage({ title: 'Reference', content: '<div id="reference"></div>', position: 'bottom-right', size: '600 200', contentOverflow: 'hidden' });
-  const viewerElement = document.getElementById('reference');
-  viewerElement.id = `viewer:reference`;
-  const frame = document.createElement('iframe');
-  frame.src = `https://jsxcad.js.org/preAlpha/UserGuide.html`;
-  viewerElement.appendChild(frame);
+  addPage({ title: 'Reference', content, position: 'bottom-right', size: '600 200', contentOverflow: 'hidden' });
   return {};
 };
