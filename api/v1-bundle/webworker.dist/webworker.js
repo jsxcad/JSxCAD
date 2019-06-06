@@ -45690,8 +45690,11 @@ return d[d.length-1];};return ", funcName].join("");
   const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
   const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale$1);
 
+  const toRadiusFromApothem = (radius, edges) => radius / Math.cos(Math.PI / edges);
+
   const fromSize = ({ size }) => unitSquare().scale(size);
   const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
+  const fromApothem = ({ apothem }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(toRadiusFromApothem(apothem, 4));
   const fromRadius$4 = ({ radius }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(radius);
   const fromDiameter$4 = ({ diameter }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(diameter / 2);
 
@@ -45719,6 +45722,11 @@ return d[d.length-1];};return ", funcName].join("");
     ({ radius }) => {
       assertNumber(radius);
       return () => fromRadius$4({ radius });
+    },
+    // square({ apothem: 5 })
+    ({ apothem }) => {
+      assertNumber(apothem);
+      return () => fromApothem({ apothem });
     },
     // square({ diameter: 5 })
     ({ diameter }) => {
