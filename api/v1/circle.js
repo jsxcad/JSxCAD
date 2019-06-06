@@ -1,8 +1,7 @@
 import { assertEmpty, assertNumber } from './assert';
 
-import { Shape } from './Shape';
-import { polygon } from './polygon';
 import { dispatch } from './dispatch';
+import { polygon } from './polygon';
 
 /**
  *
