@@ -17,7 +17,6 @@ import { center } from './center';
 import { chainHull } from './chainHull';
 import { circle } from './circle';
 import { cos } from './cos';
-import { crossSection } from './crossSection';
 import { cube } from './cube';
 import { cursor } from './cursor';
 import { cut } from './cut';
@@ -55,6 +54,7 @@ import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
 import { rotateZ } from './rotateZ';
 import { scale } from './scale';
+import { section } from './section';
 import { sin } from './sin';
 import { sphere } from './sphere';
 import { sqrt } from './sqrt';
@@ -64,6 +64,7 @@ import { tetrahedron } from './tetrahedron';
 import { translate } from './translate';
 import { triangle } from './triangle';
 import { union } from './union';
+import { wireframe } from './wireframe';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
@@ -81,7 +82,6 @@ export {
   center,
   chainHull,
   circle,
-  crossSection,
   cos,
   cube,
   cut,
@@ -119,6 +119,7 @@ export {
   rotateY,
   rotateZ,
   scale,
+  section,
   sin,
   sphere,
   sqrt,
@@ -129,6 +130,7 @@ export {
   triangle,
   union,
   keep,
+  wireframe,
   writePdf,
   writeShape,
   writeStl,

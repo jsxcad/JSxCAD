@@ -8,13 +8,13 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration
  * ```
- * cube().crossSection().writeSvg('svg/cube1.svg');
+ * cube().section().writeSvg('svg/cube1.svg');
  * readSvg({ path: 'svg/cube1.svg' })
  * ```
  * :::
  * ::: illustration
  * ```
- * writeSvg({ path: 'svg/cube2.svg' }, cube().crossSection());
+ * writeSvg({ path: 'svg/cube2.svg' }, cube().section());
  * readSvg({ path: 'svg/cube2.svg' })
  * ```
  * :::
