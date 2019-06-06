@@ -9,7 +9,7 @@ const toWireframe = (solid) => {
     paths.push(...surface);
   }
   return Shape.fromPaths(paths);
-}
+};
 
 /**
  *

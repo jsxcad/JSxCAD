@@ -5,7 +5,7 @@
  * @param {vec3} b the second operand
  * @returns {Number} distance between a and b
  */
-export const distance = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => {
+export const distance = ([ax, ay, az], [bx, by, bz]) => {
   const x = bx - ax;
   const y = by - ay;
   const z = bz - az;
