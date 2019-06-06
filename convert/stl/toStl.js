@@ -34,7 +34,7 @@ export const toStl = async (options = {}, geometry) => {
       polygons = makeWatertight(polygons);
     }
   }
-  return `solid JSxCAD\n${convertToFacets(options, canonicalize(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
+  return `solid JSxCAD\n${convertToFacets(options, toTriangles({}, polygons))}\nendsolid JSxCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>

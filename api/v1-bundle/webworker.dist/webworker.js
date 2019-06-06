@@ -13618,6 +13618,12 @@ return d[d.length-1];};return ", funcName].join("");
     return transform$5(from, retessellatedSurface);
   };
 
+  const makeSimple = (options = {}, surface) => {
+    const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
+    let simpleSurface = union$2(...transform$5(to, surface).map(polygon => [polygon]));
+    return transform$5(from, simpleSurface);
+  };
+
   const measureArea$1 = (surface) => {
     // CHECK: That this handles negative area properly.
     let total = 0;
@@ -13633,6 +13639,54 @@ return d[d.length-1];};return ", funcName].join("");
   const scale$4 = (vector, solid) => multiply$2(fromScaling(vector), solid);
 
   const canonicalize$4 = (solid) => solid.map(canonicalize$3);
+
+  const eachPoint$3 = (options = {}, thunk, solid) => {
+    for (const surface of solid) {
+      eachPoint$2(options, thunk, surface);
+    }
+  };
+
+  const toPoints$1 = (options = {}, solid) => {
+    const points = [];
+    eachPoint$3({}, point => points.push(point), solid);
+    return points;
+  };
+
+  const hash = (point) => JSON.stringify(canonicalize(point));
+
+  const cluster = (solid) => {
+    return solid; // DISABLED
+    const points = new Map();
+    for (const point of toPoints$1({}, solid)) {
+      const key = hash(point);
+      const values = points.get(key);
+      if (values === undefined) {
+        points.set(key, [point]);
+      } else {
+        values.push(point);
+      }
+    }
+
+    const selected = new Map();
+
+    for (const [key, values] of points) {
+      let sum = [0, 0, 0];
+      for (const value of values) {
+        sum = add(sum, value);
+      }
+      selected.set(key, scale(1 / values.length, sum));
+    }
+
+    return solid.map(surface => surface.map(path => path.map(point => {
+                                                                        const value = selected.get(hash(point));
+                                                                        if (value === undefined) {
+                                                                          return point;
+                                                                        } else {
+  console.log(`QQ/cluster/map: ${point} -> ${value}`);
+                                                                          return value;
+                                                                        }
+                                                                      })));
+  };
 
   /**
    * Adds two mat4's
@@ -14454,7 +14508,7 @@ return d[d.length-1];};return ", funcName].join("");
     return toLoops({ allowOpenPaths }, edges);
   };
 
-  const eachPoint$3 = (options = {}, thunk, polygons) => {
+  const eachPoint$4 = (options = {}, thunk, polygons) => {
     for (const polygon of polygons) {
       for (const point of polygon) {
         thunk(point);
@@ -17936,7 +17990,7 @@ return d[d.length-1];};return ", funcName].join("");
   const measureBoundingBox$1 = (polygons) => {
     let max$1 = polygons[0][0];
     let min$1 = polygons[0][0];
-    eachPoint$3({},
+    eachPoint$4({},
               point => {
                 max$1 = max(max$1, point);
                 min$1 = min(min$1, point);
@@ -18174,12 +18228,6 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const eachPoint$4 = (options = {}, thunk, solid) => {
-    for (const surface of solid) {
-      eachPoint$2(options, thunk, surface);
-    }
-  };
-
   const fromPolygons = (options = {}, polygons) => {
     const coplanarGroups = new Map();
 
@@ -18200,12 +18248,14 @@ return d[d.length-1];};return ", funcName].join("");
     return solid;
   };
 
+  const makeSurfacesSimple = (options = {}, solid) => solid.map(surface => makeSimple({}, surface));
+
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
   const measureBoundingBox$2 = (solid) => {
     if (solid.measureBoundingBox === undefined) {
       let max$1 = solid[0][0][0];
       let min$1 = solid[0][0][0];
-      eachPoint$4({},
+      eachPoint$3({},
                 point => {
                   max$1 = max(max$1, point);
                   min$1 = min(min$1, point);
@@ -18722,7 +18772,7 @@ return d[d.length-1];};return ", funcName].join("");
       } else if (geometry.paths) {
         eachPoint(options, operation, geometry.paths);
       } else if (geometry.solid) {
-        eachPoint$4(options, operation, geometry.solid);
+        eachPoint$3(options, operation, geometry.solid);
       } else if (geometry.z0Surface) {
         eachPoint$2(options, operation, geometry.z0Surface);
       }
@@ -18954,7 +19004,7 @@ return d[d.length-1];};return ", funcName].join("");
     return keptGeometry || {};
   };
 
-  const toPoints$1 = (options = {}, geometry) => {
+  const toPoints$2 = (options = {}, geometry) => {
     const points = [];
     eachPoint$5(options, point => points.push(point), geometry);
     return { points };
@@ -19035,7 +19085,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
 
     toPoints (options = {}) {
-      return toPoints$1(options, this.toKeptGeometry());
+      return toPoints$2(options, this.toKeptGeometry());
     }
 
     transform (matrix) {
@@ -19970,6 +20020,102 @@ return d[d.length-1];};return ", funcName].join("");
 
   const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
 
+  const unitPolygon = (sides) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: sides }));
+
+  // Note: radius here is circumradius.
+  const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
+  const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+
+  const fromEdge = ({ edge, sides }) => unitPolygon(sides).scale(toRadiusFromEdge(edge, sides));
+  const fromApothem = ({ apothem, sides }) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides));
+  const fromRadius = ({ radius, sides }) => unitPolygon(sides).scale(radius);
+  const fromDiameter = ({ diameter, sides }) => unitPolygon(sides).scale(diameter / 2);
+  const fromPoints$2 = (points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+
+  /**
+   *
+   * # Polygon
+   *
+   * ::: illustration { "view": { "position": [0, 0, 5] } }
+   * ```
+   * polygon([0, 1],
+   *         [1, 1],
+   *         [1, 0],
+   *         [0.2, 0.2])
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 50] } }
+   * ```
+   * polygon({ edge: 10, sides: 6 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 50] } }
+   * ```
+   * assemble(
+   *   polygon({ apothem: 10, sides: 5 }),
+   *   circle(10).drop())
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 50] } }
+   * ```
+   * assemble(
+   *   circle(10),
+   *   polygon({ radius: 10, sides: 5 }).drop())
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [0, -1, 50] } }
+   * ```
+   * polygon({ diameter: 20, sides: 3 })
+   * ```
+   * :::
+   *
+   **/
+
+  const polygon = dispatch(
+    'polygon',
+    // polygon([0, 0], [3, 0], [3, 3])
+    (...points) => {
+      assertPoints(points);
+      assert$2(points, 'Not at least three points', points.length >= 3);
+      return () => fromPoints$2(points);
+    },
+    // polygon({ points: [[0, 0], [3, 0], [3, 3]] })
+    ({ points }) => {
+      assertPoints(points);
+      assert$2(points, 'Not at least three points', points.length >= 3);
+      return () => fromPoints$2(points);
+    },
+    // polygon({ edge: 10, sides: 4 })
+    ({ edge, sides }) => {
+      assertNumber(edge);
+      assertNumber(sides);
+      return () => fromEdge({ edge, sides });
+    },
+    // polygon({ apothem: 10, sides: 27 })
+    ({ apothem, sides }) => {
+      assertNumber(apothem);
+      assertNumber(sides);
+      return () => fromApothem({ apothem, sides });
+    },
+    // polygon({ radius: 10, sides: 8 })
+    ({ radius, sides }) => {
+      assertNumber(radius);
+      assertNumber(sides);
+      return () => fromRadius({ radius, sides });
+    },
+    // polygon({ diameter: 10, sides: 7 })
+    ({ diameter, sides }) => {
+      assertNumber(diameter);
+      assertNumber(sides);
+      return () => fromDiameter({ diameter, sides });
+    });
+
+  polygon.fromEdge = fromEdge;
+  polygon.fromApothem = fromApothem;
+  polygon.fromRadius = fromRadius;
+  polygon.fromDiameter = fromDiameter;
+  polygon.fromPoints = fromPoints$2;
+
   /**
    *
    * # Circle (disc)
@@ -19992,55 +20138,59 @@ return d[d.length-1];};return ", funcName].join("");
    * ::: illustration
    * ```
    * circle({ radius: 10,
-   *          resolution: 8 })
+   *          sides: 8 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * circle({ apothem: 10,
+   *          sides: 8 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * assemble(circle({ apothem: 10, sides: 5 }),
+   *          circle({ radius: 10, sides: 5 }).drop(),
+   *          circle({ radius: 10 }).outline())
    * ```
    * :::
    * ::: illustration
    * ```
    * circle({ diameter: 20,
-   *          resolution: 16 })
+   *          sides: 16 })
    * ```
    * :::
    **/
-
-  // FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified circle.
-  // Is this the most useful measure?
-
-  const unitCircle = ({ resolution = 32 }) =>
-    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: resolution }));
-
-  const fromValue$1 = (radius) => unitCircle({ resolution: 32 }).scale(radius);
-
-  const fromRadius = ({ radius, resolution = 32 }) => unitCircle({ resolution }).scale(radius);
-
-  const fromDiameter = ({ diameter, resolution = 32 }) => unitCircle({ resolution }).scale(diameter / 2);
 
   const circle = dispatch(
     'circle',
     // circle()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$1(1);
+      return () => polygon.fromRadius({ radius: 1 });
     },
     // circle(2)
     (value) => {
       assertNumber(value);
-      return () => fromValue$1(value);
+      return () => polygon.fromRadius({ radius: value, sides: 32 });
     },
-    // circle({ radius: 2, resolution: 32 })
-    ({ radius, resolution }) => {
+    // circle({ radius: 2, sides: 32 })
+    ({ radius, sides = 32 }) => {
       assertNumber(radius);
-      return () => fromRadius({ radius, resolution });
+      return () => polygon.fromRadius({ radius, sides });
     },
-    // circle({ diameter: 2, resolution: 32 })
-    ({ diameter, resolution }) => {
+    // circle({ apothem: 2, sides: 32 })
+    ({ apothem, sides = 32 }) => {
+      assertNumber(apothem);
+      assertNumber(sides);
+      return () => polygon.fromApothem({ apothem, sides });
+    },
+    // circle({ diameter: 2, sides: 32 })
+    ({ diameter, sides = 32 }) => {
       assertNumber(diameter);
-      return () => fromDiameter({ diameter, resolution });
+      assertNumber(sides);
+      return () => polygon.fromDiameter({ diameter, sides });
     });
-
-  circle.fromValue = fromValue$1;
-  circle.fromRadius = fromRadius;
-  circle.fromDiameter = fromDiameter;
 
   /**
    *
@@ -20061,7 +20211,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
-   * # CrossSection
+   * # Section
    *
    * Produces a cross-section of a solid as a surface.
    *
@@ -20075,21 +20225,21 @@ return d[d.length-1];};return ", funcName].join("");
    * ```
    * difference(sphere(10),
    *            sphere(8))
-   *   .crossSection()
+   *   .section()
    * ```
    * :::
    * ::: illustration
    * ```
    * difference(sphere(10),
    *            sphere(8))
-   *   .crossSection()
+   *   .section()
    *   .outline()
    * ```
    * :::
    *
    **/
 
-  const crossSection = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
+  const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
     const solids = getSolids(shape.toKeptGeometry());
     const shapes = [];
     for (const solid of solids) {
@@ -20101,9 +20251,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...shapes);
   };
 
-  const method$7 = function (options) { return crossSection(options, this); };
+  const method$7 = function (options) { return section(options, this); };
 
-  Shape.prototype.crossSection = method$7;
+  Shape.prototype.section = method$7;
 
   /**
    *
@@ -20156,7 +20306,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   // Cube Interfaces.
 
-  const fromValue$2 = (value) => unitCube().scale(value);
+  const fromValue$1 = (value) => unitCube().scale(value);
 
   const fromValues$2 = (width, breadth, height) => unitCube().scale([width, breadth, height]);
 
@@ -20179,13 +20329,13 @@ return d[d.length-1];};return ", funcName].join("");
     // cube()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$2(1);
+      return () => fromValue$1(1);
     },
     // cube(2)
     (value, ...rest) => {
       assertNumber(value);
       assertEmpty(rest);
-      return () => fromValue$2(value);
+      return () => fromValue$1(value);
     },
     // cube(2, 4, 6)
     (width, breadth, height, ...rest) => {
@@ -20212,7 +20362,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromCorners({ corner1, corner2 });
     });
 
-  cube.fromValue = fromValue$2;
+  cube.fromValue = fromValue$1;
   cube.fromValues = fromValues$2;
   cube.fromRadius = fromRadius$1;
   cube.fromDiameter = fromDiameter$1;
@@ -20418,7 +20568,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromValue$3 = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
+  const fromValue$2 = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
 
   const fromRadius$2 = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
 
@@ -20429,13 +20579,13 @@ return d[d.length-1];};return ", funcName].join("");
     // cylinder()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$3(1);
+      return () => fromValue$2(1);
     },
     (radius, height = 1, resolution = 32) => {
       assertNumber(radius);
       assertNumber(height);
       assertNumber(resolution);
-      return () => fromValue$3(radius, height, resolution);
+      return () => fromValue$2(radius, height, resolution);
     },
     ({ radius, height = 1, resolution = 32 }) => {
       assertNumber(radius);
@@ -20450,7 +20600,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromDiameter$2({ diameter, height, resolution });
     });
 
-  cylinder.fromValue = fromValue$3;
+  cylinder.fromValue = fromValue$2;
   cylinder.fromRadius = fromRadius$2;
   cylinder.fromDiameter = fromDiameter$2;
 
@@ -20546,7 +20696,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromValue$4 = (tags, shape) => fromGeometry(drop(tags, toGeometry(shape)));
+  const fromValue$3 = (tags, shape) => fromGeometry(drop(tags, toGeometry(shape)));
 
   const drop$1 = dispatch(
     'drop',
@@ -20560,11 +20710,11 @@ return d[d.length-1];};return ", funcName].join("");
       // assemble(circle(), circle().as('a')).drop('a')
       assertStrings(tags);
       assertShape(shape);
-      return () => fromValue$4(tags, shape);
+      return () => fromValue$3(tags, shape);
     }
   );
 
-  drop$1.fromValues = fromValue$4;
+  drop$1.fromValues = fromValue$3;
 
   const method$a = function (...tags) { return drop$1(tags, this); };
 
@@ -20599,14 +20749,14 @@ return d[d.length-1];};return ", funcName].join("");
     return assembly;
   };
 
-  const fromValue$5 = (height, shape) => fromHeight({ height }, shape);
+  const fromValue$4 = (height, shape) => fromHeight({ height }, shape);
 
   const extrude$1 = dispatch(
     'extrude',
     (height, shape) => {
       assertNumber(height);
       assertShape(shape);
-      return () => fromValue$5(height, shape);
+      return () => fromValue$4(height, shape);
     },
     ({ height }, shape) => {
       assertNumber(height);
@@ -20615,7 +20765,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
   );
 
-  extrude$1.fromValue = fromValue$5;
+  extrude$1.fromValue = fromValue$4;
   extrude$1.fromHeight = fromHeight;
 
   const method$b = function (options) { return extrude$1(options, this); };
@@ -20881,18 +21031,18 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromValue$6 = (tags, shape) => fromGeometry(keep(tags, toGeometry(shape)));
+  const fromValue$5 = (tags, shape) => fromGeometry(keep(tags, toGeometry(shape)));
 
   const keep$1 = dispatch(
     'keep',
     (tags, shape) => {
       assertStrings(tags);
       assertShape(shape);
-      return () => fromValue$6(tags, shape);
+      return () => fromValue$5(tags, shape);
     }
   );
 
-  keep$1.fromValues = fromValue$6;
+  keep$1.fromValues = fromValue$5;
 
   const method$h = function (...tags) { return keep$1(tags, this); };
 
@@ -20968,7 +21118,7 @@ return d[d.length-1];};return ", funcName].join("");
    * union(sphere(5).left(),
    *       sphere(5),
    *       sphere(5).right())
-   *   .crossSection()
+   *   .section()
    *   .outline()
    * ```
    * :::
@@ -20990,7 +21140,7 @@ return d[d.length-1];};return ", funcName].join("");
    * union(assemble(cube().left(),
    *                cube().right()),
    *       cube().front())
-   *   .crossSection()
+   *   .section()
    *   .outline()
    * ```
    * :::
@@ -24332,7 +24482,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   Shape.prototype.outline = method$k;
 
-  const fromValue$7 = (point) => Shape.fromPoint(point);
+  const fromValue$6 = (point) => Shape.fromPoint(point);
 
   /**
    *
@@ -24393,19 +24543,19 @@ return d[d.length-1];};return ", funcName].join("");
       assertNumber(y);
       assertNumber(z);
       assertEmpty(rest);
-      return () => fromValue$7([x, y, z]);
+      return () => fromValue$6([x, y, z]);
     },
     // point([1, 2, 3])
     ([x = 0, y = 0, z = 0]) => {
       assertNumber(x);
       assertNumber(y);
       assertNumber(z);
-      return () => fromValue$7([x, y, z]);
+      return () => fromValue$6([x, y, z]);
     });
 
-  point.fromValue = fromValue$7;
+  point.fromValue = fromValue$6;
 
-  const fromPoints$2 = (points) => Shape.fromPoints(points);
+  const fromPoints$3 = (points) => Shape.fromPoints(points);
 
   /**
    *
@@ -24449,44 +24599,10 @@ return d[d.length-1];};return ", funcName].join("");
       for (const [x = 0, y = 0, z = 0] of points) {
         assertNumberTriple([x, y, z]);
       }
-      return () => fromPoints$2(points);
+      return () => fromPoints$3(points);
     });
 
-  points$1.fromPoints = fromPoints$2;
-
-  const fromValue$8 = (points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
-
-  /**
-   *
-   * # Polygon
-   *
-   * ::: illustration { "view": { "position": [0, 0, 5] } }
-   * ```
-   * polygon([0, 1],
-   *         [1, 1],
-   *         [1, 0],
-   *         [0.2, 0.2])
-   * ```
-   * :::
-   *
-   **/
-
-  const polygon = dispatch(
-    'polygon',
-    // polygon([0, 0], [3, 0], [3, 3])
-    (...points) => {
-      assertPoints(points);
-      assert$2(points, 'Not at least three points', points.length >= 3);
-      return () => fromValue$8(points);
-    },
-    // polygon({ points: [[0, 0], [3, 0], [3, 3]] })
-    ({ points }) => {
-      assertPoints(points);
-      assert$2(points, 'Not at least three points', points.length >= 3);
-      return () => fromValue$8(points);
-    });
-
-  polygon.fromValue = fromValue$8;
+  points$1.fromPoints = fromPoints$3;
 
   /**
    *
@@ -27262,7 +27378,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-  var toPoints$2 = function toPoints(_ref) {
+  var toPoints$3 = function toPoints(_ref) {
     var type = _ref.type,
         props = _objectWithoutProperties(_ref, ['type']);
 
@@ -27643,7 +27759,7 @@ return d[d.length-1];};return ", funcName].join("");
   var getPointsFromG = function getPointsFromG(_ref12) {
     var shapes = _ref12.shapes;
     return shapes.map(function (s) {
-      return toPoints$2(s);
+      return toPoints$3(s);
     });
   };
 
@@ -27745,8 +27861,8 @@ return d[d.length-1];};return ", funcName].join("");
     var isPoints = Array.isArray(s);
     var isGroup = isPoints ? Array.isArray(s[0]) : s.type === 'g';
     var points = isPoints ? s : isGroup ? s.shapes.map(function (shp) {
-      return toPoints$2(shp);
-    }) : toPoints$2(s);
+      return toPoints$3(shp);
+    }) : toPoints$3(s);
 
     if (isGroup) {
       return points.map(function (p) {
@@ -44901,7 +45017,7 @@ return d[d.length-1];};return ", funcName].join("");
    * @param {vec3} p2 end point of the line segment
    * @returns {line3} a new unbounded 3D line
    */
-  const fromPoints$3 = (p1, p2) => {
+  const fromPoints$4 = (p1, p2) => {
     const direction = subtract(p2, p1);
     return fromPointAndDirection(p1, direction);
   };
@@ -44941,7 +45057,7 @@ return d[d.length-1];};return ", funcName].join("");
     const lines = new Map();
     ends.forEach(end => {
       // These are not actually lines, but they all start at the same position, so we can pretend.
-      const ray = fromPoints$3(start, end);
+      const ray = fromPoints$4(start, end);
       ensureMapElement(lines, toIdentity(ray)).push(end);
     });
 
@@ -45308,7 +45424,7 @@ return d[d.length-1];};return ", funcName].join("");
     eachItem(geometry,
              item => {
                if (item.solid) {
-                 triangleSets.push(toTriangles({}, toPolygons({}, item.solid)));
+                 triangleSets.push(toTriangles({}, toPolygons({}, cluster(item.solid))));
                }
              });
     return [].concat(...triangleSets);
@@ -45323,7 +45439,7 @@ return d[d.length-1];};return ", funcName].join("");
         polygons = makeWatertight(polygons);
       }
     }
-    return `solid JSxCAD\n${convertToFacets(options, canonicalize$8(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
+    return `solid JSxCAD\n${convertToFacets(options, toTriangles({}, polygons))}\nendsolid JSxCAD\n`;
   };
 
   const convertToFacets = (options, polygons) =>
@@ -45602,7 +45718,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const unitSphere = ({ resolution = 32 } = {}) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
 
-  const fromValue$9 = (value) => unitSphere().scale(value);
+  const fromValue$7 = (value) => unitSphere().scale(value);
 
   const fromRadius$3 = ({ radius, resolution = 32 }) => unitSphere({ resolution }).scale(radius);
 
@@ -45613,12 +45729,12 @@ return d[d.length-1];};return ", funcName].join("");
     // sphere()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$9(1);
+      return () => fromValue$7(1);
     },
     // sphere(2)
     (value) => {
       assertNumber(value);
-      return () => fromValue$9(value);
+      return () => fromValue$7(value);
     },
     // sphere({ radius: 2, resolution: 5 })
     ({ radius, resolution = 32 }) => {
@@ -45633,7 +45749,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromDiameter$3({ diameter, resolution });
     });
 
-  sphere.fromValue = fromValue$9;
+  sphere.fromValue = fromValue$7;
   sphere.fromRadius = fromRadius$3;
   sphere.fromDiameter = fromDiameter$3;
 
@@ -45677,7 +45793,20 @@ return d[d.length-1];};return ", funcName].join("");
    * :::
    * ::: illustration
    * ```
-   * square({ radius: 10 })
+   * square({ edge: 10 })
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * assemble(circle(10),
+   *          square({ radius: 10 })
+   *            .drop())
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * assemble(square({ apothem: 10 }),
+   *          circle(10).drop())
    * ```
    * :::
    * ::: illustration
@@ -45690,13 +45819,8 @@ return d[d.length-1];};return ", funcName].join("");
   const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
   const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale$1);
 
-  const toRadiusFromApothem = (radius, edges) => radius / Math.cos(Math.PI / edges);
-
   const fromSize = ({ size }) => unitSquare().scale(size);
   const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
-  const fromApothem = ({ apothem }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(toRadiusFromApothem(apothem, 4));
-  const fromRadius$4 = ({ radius }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(radius);
-  const fromDiameter$4 = ({ diameter }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(diameter / 2);
 
   const square = dispatch(
     'square',
@@ -45718,20 +45842,25 @@ return d[d.length-1];};return ", funcName].join("");
       assertEmpty(rest);
       return () => fromDimensions({ width, length });
     },
-    // square({ radius: 5 })
-    ({ radius }) => {
-      assertNumber(radius);
-      return () => fromRadius$4({ radius });
+    // square({ edge: 10 })
+    ({ edge }) => {
+      assertNumber(edge);
+      return () => polygon.fromEdge({ edge, sides: 4 });
     },
-    // square({ apothem: 5 })
+    // polygon({ apothem: 10 })
     ({ apothem }) => {
       assertNumber(apothem);
-      return () => fromApothem({ apothem });
+      return () => polygon.fromApothem({ apothem, sides: 4 });
     },
-    // square({ diameter: 5 })
+    // polygon({ radius: 10})
+    ({ radius }) => {
+      assertNumber(radius);
+      return () => polygon.fromRadius({ radius, sides: 4 });
+    },
+    // polygon({ diameter: 10})
     ({ diameter }) => {
       assertNumber(diameter);
-      return () => fromDiameter$4({ diameter });
+      return () => polygon.fromDiameter({ diameter, sides: 4 });
     });
 
   /**
@@ -45785,51 +45914,51 @@ return d[d.length-1];};return ", funcName].join("");
 
   const unitTetrahedron = () => Shape.fromPolygonsToSolid(buildRegularTetrahedron({}));
 
-  const fromValue$a = (value) => unitTetrahedron().scale(value);
+  const fromValue$8 = (value) => unitTetrahedron().scale(value);
 
-  const fromRadius$5 = ({ radius }) => unitTetrahedron().scale(radius);
+  const fromRadius$4 = ({ radius }) => unitTetrahedron().scale(radius);
 
-  const fromDiameter$5 = ({ diameter }) => unitTetrahedron().scale(diameter / 2);
+  const fromDiameter$4 = ({ diameter }) => unitTetrahedron().scale(diameter / 2);
 
   const tetrahedron = dispatch(
     'tetrahedron',
     // tetrahedron()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$a(1);
+      return () => fromValue$8(1);
     },
     // tetrahedron(2)
     (value) => {
       assertNumber(value);
-      return () => fromValue$a(value);
+      return () => fromValue$8(value);
     },
     // tetrahedron({ radius: 2 })
     ({ radius }) => {
       assertNumber(radius);
-      return () => fromRadius$5({ radius });
+      return () => fromRadius$4({ radius });
     },
     // tetrahedron({ diameter: 2 })
     ({ diameter }) => {
       assertNumber(diameter);
-      return () => fromDiameter$5({ diameter });
+      return () => fromDiameter$4({ diameter });
     });
 
-  tetrahedron.fromValue = fromValue$a;
-  tetrahedron.fromRadius = fromRadius$5;
-  tetrahedron.fromDiameter = fromDiameter$5;
+  tetrahedron.fromValue = fromValue$8;
+  tetrahedron.fromRadius = fromRadius$4;
+  tetrahedron.fromDiameter = fromDiameter$4;
 
   /**
    *
    * # Triangle
    *
-   * ::: illustration { "view": { "position": [0, 0, 10] } }
+   * ::: illustration { "view": { "position": [0, 0, 5] } }
    * ```
    * triangle()
    * ```
    * :::
    * ::: illustration
    * ```
-   * triangle(10)
+   * triangle(20)
    * ```
    * :::
    * ::: illustration
@@ -45839,49 +45968,95 @@ return d[d.length-1];};return ", funcName].join("");
    * :::
    * ::: illustration
    * ```
-   * triangle({ diameter: 20 })
+   * assemble(circle(10),
+   *          triangle({ radius: 10 })
+   *            .drop())
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * assemble(triangle({ apothem: 5 }),
+   *          circle(5).drop())
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * assemble(triangle({ radius: 10 })
+   *            .rotateZ(180),
+   *          triangle({ diameter: 10 })
+   *            .drop())
    * ```
    * :::
    **/
-
-  // FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified radius.
-  // Is this the most useful measure?
-
-  const unitTriangle = () =>
-    Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 3 }));
-
-  const fromValue$b = (radius) => unitTriangle({ resolution: 32 }).scale(radius);
-
-  const fromRadius$6 = ({ radius, resolution = 32 }) => unitTriangle({ resolution }).scale(radius);
-
-  const fromDiameter$6 = ({ diameter, resolution = 32 }) => unitTriangle({ resolution }).scale(diameter / 2);
 
   const triangle = dispatch(
     'triangle',
     // triangle()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$b(1);
+      return () => polygon.fromEdge({ edge: 1, sides: 3 });
     },
     // triangle(2)
     (value) => {
       assertNumber(value);
-      return () => fromValue$b(value);
+      return () => polygon.fromEdge({ edge: value, sides: 3 });
     },
-    // triangle({ radius: 2, resolution: 32 })
-    ({ radius, resolution }) => {
+    // triangle({ edge: 10 })
+    ({ edge }) => {
+      assertNumber(edge);
+      return () => polygon.fromEdge({ edge, sides: 3 });
+    },
+    // triangle({ apothem: 10 })
+    ({ apothem }) => {
+      assertNumber(apothem);
+      return () => polygon.fromApothem({ apothem, sides: 3 });
+    },
+    // triangle({ radius: 10})
+    ({ radius }) => {
       assertNumber(radius);
-      return () => fromRadius$6({ radius });
+      return () => polygon.fromRadius({ radius, sides: 3 });
     },
-    // triangle({ diameter: 2, resolution: 32 })
-    ({ diameter, resolution }) => {
+    // triangle({ diameter: 10})
+    ({ diameter }) => {
       assertNumber(diameter);
-      return () => fromDiameter$6({ diameter });
+      return () => polygon.fromDiameter({ diameter, sides: 3 });
     });
 
-  triangle.fromValue = fromValue$b;
-  triangle.fromRadius = fromRadius$6;
-  triangle.fromDiameter = fromDiameter$6;
+  const toWireframe = (solid) => {
+    const paths = [];
+    for (const surface of makeSurfacesSimple({}, solid)) {
+      paths.push(...surface);
+    }
+    return Shape.fromPaths(paths);
+  };
+
+  /**
+   *
+   * # Wireframe
+   *
+   * Generates a set of paths outlining a solid.
+   *
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * cube(10).wireframe()
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * sphere(10).wireframe()
+   * ```
+   * :::
+   *
+   **/
+
+  const wireframe = (options = {}, shape) => {
+    const solids = getSolids(shape.toKeptGeometry());
+    return assemble$1(...solids.map(toWireframe));
+  };
+
+  const method$r = function (options) { return wireframe(options, this); };
+
+  Shape.prototype.wireframe = method$r;
 
   const X$4 = 0;
   const Y$4 = 1;
@@ -45965,11 +46140,11 @@ return d[d.length-1];};return ", funcName].join("");
    * # Write PDF
    *
    * ```
-   * cube().crossSection().writePdf('cube.pdf');
+   * cube().section().writePdf('cube.pdf');
    * ```
    *
    * ```
-   * writePdf({ path: 'cube.pdf' }, cube().crossSection());
+   * writePdf({ path: 'cube.pdf' }, cube().section());
    * ```
    *
    **/
@@ -45985,9 +46160,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$r = function (options = {}) { return writePdf(options, this); };
+  const method$s = function (options = {}) { return writePdf(options, this); };
 
-  Shape.prototype.writePdf = method$r;
+  Shape.prototype.writePdf = method$s;
 
   /**
    *
@@ -46017,9 +46192,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$s = function (options = {}) { return writeStl(options, this); };
+  const method$t = function (options = {}) { return writeStl(options, this); };
 
-  Shape.prototype.writeStl = method$s;
+  Shape.prototype.writeStl = method$t;
 
   /**
    *
@@ -46027,13 +46202,13 @@ return d[d.length-1];};return ", funcName].join("");
    *
    * ::: illustration
    * ```
-   * cube().crossSection().writeSvg('svg/cube1.svg');
+   * cube().section().writeSvg('svg/cube1.svg');
    * readSvg({ path: 'svg/cube1.svg' })
    * ```
    * :::
    * ::: illustration
    * ```
-   * writeSvg({ path: 'svg/cube2.svg' }, cube().crossSection());
+   * writeSvg({ path: 'svg/cube2.svg' }, cube().section());
    * readSvg({ path: 'svg/cube2.svg' })
    * ```
    * :::
@@ -46049,9 +46224,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$t = function (options = {}) { return writeSvg(options, this); };
+  const method$u = function (options = {}) { return writeSvg(options, this); };
 
-  Shape.prototype.writeSvg = method$t;
+  Shape.prototype.writeSvg = method$u;
 
   // Polyfills
 
@@ -96624,9 +96799,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$u = function (options = {}) { return writeSvgPhoto(options, this); };
+  const method$v = function (options = {}) { return writeSvgPhoto(options, this); };
 
-  Shape.prototype.writeSvgPhoto = method$u;
+  Shape.prototype.writeSvgPhoto = method$v;
 
   const writeThreejsPage = async (options, shape) => {
     if (typeof options === 'string') {
@@ -96637,9 +96812,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$v = function (options = {}) { return writeThreejsPage(options, this); };
+  const method$w = function (options = {}) { return writeThreejsPage(options, this); };
 
-  Shape.prototype.writeThreejsPage = method$v;
+  Shape.prototype.writeThreejsPage = method$w;
 
   /**
    *
@@ -96660,7 +96835,6 @@ return d[d.length-1];};return ", funcName].join("");
     center: center,
     chainHull: chainHull,
     circle: circle,
-    crossSection: crossSection,
     cos: cos,
     cube: cube,
     cut: cut$1,
@@ -96697,6 +96871,7 @@ return d[d.length-1];};return ", funcName].join("");
     rotateY: rotateY,
     rotateZ: rotateZ,
     scale: scale$6,
+    section: section,
     sin: sin$2,
     sphere: sphere,
     sqrt: sqrt$1,
@@ -96707,6 +96882,7 @@ return d[d.length-1];};return ", funcName].join("");
     triangle: triangle,
     union: union$5,
     keep: keep$1,
+    wireframe: wireframe,
     writePdf: writePdf,
     writeShape: writeShape,
     writeStl: writeStl,

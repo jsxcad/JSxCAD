@@ -119,8 +119,11 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           const segments = geometry.threejsSegments;
           const dataset = {};
           const threejsGeometry = new THREE.Geometry();
-          const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+          const material = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: THREE.VertexColors });
+          const colors = [];
           for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+            const color = new THREE.Color(Math.random(), Math.random(), Math.random());
+            threejsGeometry.colors.push(color, color);
             threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
           }
           dataset.mesh = new THREE.LineSegments(threejsGeometry, material);
