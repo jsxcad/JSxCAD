@@ -1,4 +1,4 @@
-import { triangle, difference, writeStl } from '@jsxcad/api-v1';
+import { difference, triangle, writeStl } from '@jsxcad/api-v1';
 
 export const main = async () => {
   const outside = triangle({ diameter: 64 });
