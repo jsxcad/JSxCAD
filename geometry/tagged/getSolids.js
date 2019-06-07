@@ -5,7 +5,7 @@ export const getSolids = (geometry) => {
   eachItem(geometry,
            item => {
              if (item.solid) {
-               solids.push(item.solid);
+               solids.push(item);
              }
            });
   return solids;

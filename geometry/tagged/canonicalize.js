@@ -2,8 +2,10 @@ import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
 import { canonicalize as canonicalizePoints } from '@jsxcad/geometry-points';
 import { canonicalize as canonicalizeSolid } from '@jsxcad/geometry-solid';
 import { canonicalize as canonicalizeSurface } from '@jsxcad/geometry-surface';
+import { toKeptGeometry } from './toKeptGeometry';
 
-export const canonicalize = (geometry) => {
+export const canonicalize = (rawGeometry) => {
+  const geometry = toKeptGeometry(rawGeometry);
   const canonicalized = {};
   if (geometry.points) {
     canonicalized.points = canonicalizePoints(geometry.points);

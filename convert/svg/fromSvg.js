@@ -2,8 +2,9 @@ import { fromScaling, fromTranslation, fromZRotation, identity, multiply } from 
 
 import { DOMParser } from 'xmldom/dom-parser';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
+import { close } from '@jsxcad/geometry-path';
 import { toPath } from 'svg-points';
-import { transform } from '@jsxcad/geometry-eager';
+import { transform } from '@jsxcad/geometry-tagged';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath = (options = {}, svgPath) =>
@@ -117,8 +118,18 @@ export const fromSvg = async (options = {}, svgString) => {
       case ELEMENT_NODE: {
         ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
 
-        const output = (svgPath) =>
-          geometry.assembly.push(transform(scale(matrix), fromSvgPath({}, svgPath)));
+        const output = (svgPath) => {
+          const paths = fromSvgPath({}, svgPath).paths;
+          const fill = node.getAttribute('fill');
+          if (fill !== undefined && fill !== 'none') {
+            // Does fill, etc, inherit?
+            geometry.assembly.push(transform(scale(matrix), { z0Surface: close(paths), tags: [`color/${fill}`] }));
+          }
+          const stroke = node.getAttribute('stroke');
+          if (stroke !== undefined && stroke !== 'none') {
+            geometry.assembly.push(transform(scale(matrix), { paths: paths, tags: [`color/${stroke}`] }));
+          }
+        };
 
         // FIX: Should output a path given a stroke, should output a surface given a fill.
         switch (node.tagName) {

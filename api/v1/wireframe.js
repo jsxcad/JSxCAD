@@ -31,8 +31,11 @@ const toWireframe = (solid) => {
  **/
 
 export const wireframe = (options = {}, shape) => {
-  const solids = getSolids(shape.toKeptGeometry());
-  return assemble(...solids.map(toWireframe));
+  const pieces = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    pieces.push(toWireframe(solid));
+  }
+  return assemble(...pieces);
 };
 
 const method = function (options) { return wireframe(options, this); };
