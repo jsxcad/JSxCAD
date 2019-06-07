@@ -49,6 +49,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-color": "^0.0.75",
     "@jsxcad/api-v1": "^0.0.75",
     "@jsxcad/compiler": "^0.0.75",
     "@jsxcad/convert-threejs": "^0.0.75",

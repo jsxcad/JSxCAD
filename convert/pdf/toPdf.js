@@ -2,7 +2,7 @@ import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
 import { getPaths, getZ0Surfaces, measureBoundingBox, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
 
 import { makeConvex } from '@jsxcad/geometry-z0surface';
-import { toRgb } from './color';
+import { toRgb } from '@jsxcad/algorithm-color';
 
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
 const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;

@@ -8,9 +8,23 @@ import { installCSS, installCSSLink } from './css';
 import TrackballControls from 'three-trackballcontrols';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
+import { toRgb } from '@jsxcad/algorithm-color';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 const buildMeshMaterial = (tags) => {
+  const rgb = toRgb(tags, null);
+  if (rgb !== null) {
+    const [r, g, b] = rgb;
+    const color = ((r << 16) | (g << 8) | b) >>> 0;
+    return new THREE.MeshPhysicalMaterial({
+      color,
+      roughness: 0.9,
+      metalness: 0.1,
+      clearCoat: 0.0,
+      clearCoatRoughness: 0.5,
+      reflectivity: 0.1
+    });
+  }
   // Default to normal material.
   return new THREE.MeshNormalMaterial();
 };
@@ -118,6 +132,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       datasets = [];
 
       const walk = (geometry) => {
+        const { tags } = geometry;
         if (geometry.assembly) {
           geometry.assembly.forEach(walk);
         } else if (geometry.threejsSegments) {
@@ -135,7 +150,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           scene.add(dataset.mesh);
           datasets.push(dataset);
         } else if (geometry.threejsSolid) {
-          const { positions, normals, tags } = geometry.threejsSolid;
+          const { positions, normals } = geometry.threejsSolid;
           const dataset = {};
           const threejsGeometry = new THREE.BufferGeometry();
           threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
