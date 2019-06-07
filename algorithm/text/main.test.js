@@ -1,4 +1,4 @@
-import { canonicalize } from '@jsxcad/geometry-eager';
+import { canonicalize } from '@jsxcad/geometry-tagged';
 import { readFile } from '@jsxcad/sys';
 import test from 'ava';
 import { toFont } from './main';

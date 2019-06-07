@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-solid",
+  "name": "@jsxcad/algorithm-color",
   "version": "0.0.75",
-  "description": "Operations on polygon arrays for JSxCAD",
+  "description": "Color algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "main.js",
@@ -20,17 +20,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-paths": "^0.0.75",
-    "@jsxcad/geometry-polygons": "^0.0.75",
-    "@jsxcad/geometry-surface": "^0.0.75",
-    "@jsxcad/geometry-z0surface": "^0.0.75",
-    "@jsxcad/math-mat4": "^0.0.75",
-    "@jsxcad/math-plane": "^0.0.75",
-    "@jsxcad/math-poly3": "^0.0.75",
-    "@jsxcad/math-vec3": "^0.0.75"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.75",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
