@@ -10,12 +10,14 @@
 import { Shape } from './Shape';
 import { above } from './above';
 import { acos } from './acos';
+import { as } from './as';
 import { assemble } from './assemble';
 import { back } from './back';
 import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { circle } from './circle';
+import { color } from './color';
 import { cos } from './cos';
 import { cube } from './cube';
 import { cursor } from './cursor';
@@ -33,6 +35,7 @@ import { keep } from './keep';
 import { left } from './left';
 import { lego } from './lego';
 import { log } from './log';
+import { material } from './material';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { microGearMotor } from './microGearMotor';
@@ -76,12 +79,14 @@ export {
   Shape,
   above,
   acos,
+  as,
   assemble,
   back,
   below,
   center,
   chainHull,
   circle,
+  color,
   cos,
   cube,
   cut,
@@ -98,6 +103,7 @@ export {
   left,
   lego,
   log,
+  material,
   max,
   measureBoundingBox,
   microGearMotor,

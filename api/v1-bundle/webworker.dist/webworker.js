@@ -18443,10 +18443,6 @@ return d[d.length-1];};return ", funcName].join("");
   const scale$5 = (vector, assembly) => transform$7(fromScaling(vector), assembly);
 
   class Shape {
-    as (...tags) {
-      return fromGeometry(addTags(tags, toGeometry(this)));
-    }
-
     close () {
       const geometry = this.toKeptGeometry();
       if (!isSingleOpenPath(geometry)) {
@@ -18865,6 +18861,37 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # As
+   *
+   * Produces a version of a shape with user defined tags.
+   *
+   * ::: illustration
+   * ```
+   * circle(10).as('A')
+   * ```
+   * :::
+   *
+   **/
+
+  const fromValue$1 = (tags, shape) => Shape.fromGeometry(addTags(tags.map(tag => `user/${tag}`), shape.toGeometry()));
+
+  const as = dispatch(
+    'as',
+    (tags, shape) => {
+      assertStrings(tags);
+      assertShape(shape);
+      return () => fromValue$1(tags, shape);
+    }
+  );
+
+  as.fromValues = fromValue$1;
+
+  const method$4 = function (...tags) { return as(tags, this); };
+
+  Shape.prototype.as = method$4;
+
+  /**
+   *
    * # Back
    *
    * Moves the shape so that it is just before the origin.
@@ -18910,9 +18937,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$1(shape, reference);
     });
 
-  const method$4 = function (...params) { return back(this, ...params); };
+  const method$5 = function (...params) { return back(this, ...params); };
 
-  Shape.prototype.back = method$4;
+  Shape.prototype.back = method$5;
 
   /**
    *
@@ -18961,9 +18988,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$2(shape, reference);
     });
 
-  const method$5 = function (...params) { return below(this, ...params); };
+  const method$6 = function (...params) { return below(this, ...params); };
 
-  Shape.prototype.below = method$5;
+  Shape.prototype.below = method$6;
 
   /**
    *
@@ -18992,9 +19019,9 @@ return d[d.length-1];};return ", funcName].join("");
     return translate$3(negate(center), shape);
   };
 
-  const method$6 = function () { return center(this); };
+  const method$7 = function () { return center(this); };
 
-  Shape.prototype.center = method$6;
+  Shape.prototype.center = method$7;
 
   /**
    *
@@ -19601,6 +19628,37 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # Color
+   *
+   * Produces a version of a shape the given color.
+   *
+   * ::: illustration
+   * ```
+   * circle(10).color('blue')
+   * ```
+   * :::
+   *
+   **/
+
+  const fromValue$2 = (tags, shape) => Shape.fromGeometry(addTags(tags.map(tag => `color/${tag}`), shape.toGeometry()));
+
+  const color = dispatch(
+    'color',
+    (tags, shape) => {
+      assertStrings(tags);
+      assertShape(shape);
+      return () => fromValue$2(tags, shape);
+    }
+  );
+
+  color.fromValues = fromValue$2;
+
+  const method$8 = function (...tags) { return color(tags, this); };
+
+  Shape.prototype.color = method$8;
+
+  /**
+   *
    * # Cosine
    *
    * Gives the cosine in degrees.
@@ -19667,7 +19725,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   // Cube Interfaces.
 
-  const fromValue$1 = (value) => unitCube().scale(value);
+  const fromValue$3 = (value) => unitCube().scale(value);
 
   const fromValues$2 = (width, breadth, height) => unitCube().scale([width, breadth, height]);
 
@@ -19690,13 +19748,13 @@ return d[d.length-1];};return ", funcName].join("");
     // cube()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$1(1);
+      return () => fromValue$3(1);
     },
     // cube(2)
     (value, ...rest) => {
       assertNumber(value);
       assertEmpty(rest);
-      return () => fromValue$1(value);
+      return () => fromValue$3(value);
     },
     // cube(2, 4, 6)
     (width, breadth, height, ...rest) => {
@@ -19723,7 +19781,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromCorners({ corner1, corner2 });
     });
 
-  cube.fromValue = fromValue$1;
+  cube.fromValue = fromValue$3;
   cube.fromValues = fromValues$2;
   cube.fromRadius = fromRadius$1;
   cube.fromDiameter = fromDiameter$1;
@@ -19888,9 +19946,9 @@ return d[d.length-1];};return ", funcName].join("");
     return [assemble$1(...fronts), assemble$1(...backs)];
   };
 
-  const method$7 = function (options) { return cut$1(options, this); };
+  const method$9 = function (options) { return cut$1(options, this); };
 
-  Shape.prototype.cut = method$7;
+  Shape.prototype.cut = method$9;
 
   const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
     return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
@@ -19936,12 +19994,12 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromValue$2 = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
+  const fromValue$4 = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
 
   const fromRadius$2 = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
 
   const toRadiusFromApothem$1 = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-  const fromApothem$1 = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius: toRadiusFromApothem$1(apothem, resolution), height, resolution });
+  const fromApothem$1 = ({ apothem, height = 1, resolution = 32 }) => buildCylinder({ radius: toRadiusFromApothem$1(apothem, resolution), height, resolution });
 
   const fromDiameter$2 = ({ diameter, height = 1, resolution = 32 }) => buildCylinder({ radius: diameter / 2, height, resolution });
 
@@ -19950,13 +20008,13 @@ return d[d.length-1];};return ", funcName].join("");
     // cylinder()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$2(1);
+      return () => fromValue$4(1);
     },
     (radius, height = 1, resolution = 32) => {
       assertNumber(radius);
       assertNumber(height);
       assertNumber(resolution);
-      return () => fromValue$2(radius, height, resolution);
+      return () => fromValue$4(radius, height, resolution);
     },
     ({ radius, height = 1, resolution = 32 }) => {
       assertNumber(radius);
@@ -19977,7 +20035,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromDiameter$2({ diameter, height, resolution });
     });
 
-  cylinder.fromValue = fromValue$2;
+  cylinder.fromValue = fromValue$4;
   cylinder.fromRadius = fromRadius$2;
   cylinder.fromDiameter = fromDiameter$2;
 
@@ -20025,9 +20083,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$8 = function (...shapes) { return difference$5(this, ...shapes); };
+  const method$a = function (...shapes) { return difference$5(this, ...shapes); };
 
-  Shape.prototype.difference = method$8;
+  Shape.prototype.difference = method$a;
 
   /**
    *
@@ -20073,7 +20131,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromValue$3 = (tags, shape) => fromGeometry(drop(tags, toGeometry(shape)));
+  const fromValue$5 = (tags, shape) => fromGeometry(drop(tags, toGeometry(shape)));
 
   const drop$1 = dispatch(
     'drop',
@@ -20087,15 +20145,15 @@ return d[d.length-1];};return ", funcName].join("");
       // assemble(circle(), circle().as('a')).drop('a')
       assertStrings(tags);
       assertShape(shape);
-      return () => fromValue$3(tags, shape);
+      return () => fromValue$5(tags.map(tag => `user/${tag}`), shape);
     }
   );
 
-  drop$1.fromValues = fromValue$3;
+  drop$1.fromValues = fromValue$5;
 
-  const method$9 = function (...tags) { return drop$1(tags, this); };
+  const method$b = function (...tags) { return drop$1(tags, this); };
 
-  Shape.prototype.drop = method$9;
+  Shape.prototype.drop = method$b;
 
   /**
    *
@@ -20126,14 +20184,14 @@ return d[d.length-1];};return ", funcName].join("");
     return assembly;
   };
 
-  const fromValue$4 = (height, shape) => fromHeight({ height }, shape);
+  const fromValue$6 = (height, shape) => fromHeight({ height }, shape);
 
   const extrude$1 = dispatch(
     'extrude',
     (height, shape) => {
       assertNumber(height);
       assertShape(shape);
-      return () => fromValue$4(height, shape);
+      return () => fromValue$6(height, shape);
     },
     ({ height }, shape) => {
       assertNumber(height);
@@ -20142,11 +20200,11 @@ return d[d.length-1];};return ", funcName].join("");
     }
   );
 
-  extrude$1.fromValue = fromValue$4;
+  extrude$1.fromValue = fromValue$6;
   extrude$1.fromHeight = fromHeight;
 
-  const method$a = function (options) { return extrude$1(options, this); };
-  Shape.prototype.extrude = method$a;
+  const method$c = function (options) { return extrude$1(options, this); };
+  Shape.prototype.extrude = method$c;
 
   /**
    *
@@ -20195,9 +20253,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$3(shape, reference);
     });
 
-  const method$b = function (...params) { return front(this, ...params); };
+  const method$d = function (...params) { return front(this, ...params); };
 
-  Shape.prototype.front = method$b;
+  Shape.prototype.front = method$d;
 
   /**
    *
@@ -20215,9 +20273,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const fuse = (shape) => fromGeometry(toKeptGeometry$1(shape));
 
-  const method$c = function () { return fuse(this); };
+  const method$e = function () { return fuse(this); };
 
-  Shape.prototype.fuse = method$c;
+  Shape.prototype.fuse = method$e;
 
   /**
    *
@@ -20264,9 +20322,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$d = function (...shapes) { return hull(this, ...shapes); };
+  const method$f = function (...shapes) { return hull(this, ...shapes); };
 
-  Shape.prototype.hull = method$d;
+  Shape.prototype.hull = method$f;
 
   /**
    *
@@ -20304,9 +20362,9 @@ return d[d.length-1];};return ", funcName].join("");
     return Shape.fromPathsToZ0Surface(union$2(...toUnion));
   };
 
-  const method$e = function (options) { return interior(options, this); };
+  const method$g = function (options) { return interior(options, this); };
 
-  Shape.prototype.interior = method$e;
+  Shape.prototype.interior = method$g;
 
   /**
    *
@@ -20372,9 +20430,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$f = function (...shapes) { return intersection$5(this, ...shapes); };
+  const method$h = function (...shapes) { return intersection$5(this, ...shapes); };
 
-  Shape.prototype.intersection = method$f;
+  Shape.prototype.intersection = method$h;
 
   /**
    *
@@ -20412,22 +20470,22 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromValue$5 = (tags, shape) => fromGeometry(keep(tags, toGeometry(shape)));
+  const fromValue$7 = (tags, shape) => fromGeometry(keep(tags.map(tag => `user/${tag}`), toGeometry(shape)));
 
   const keep$1 = dispatch(
     'keep',
     (tags, shape) => {
       assertStrings(tags);
       assertShape(shape);
-      return () => fromValue$5(tags, shape);
+      return () => fromValue$7(tags, shape);
     }
   );
 
-  keep$1.fromValues = fromValue$5;
+  keep$1.fromValues = fromValue$7;
 
-  const method$g = function (...tags) { return keep$1(tags, this); };
+  const method$i = function (...tags) { return keep$1(tags, this); };
 
-  Shape.prototype.keep = method$g;
+  Shape.prototype.keep = method$i;
 
   /**
    *
@@ -20476,9 +20534,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$4(shape, reference);
     });
 
-  const method$h = function (...params) { return left(this, ...params); };
+  const method$j = function (...params) { return left(this, ...params); };
 
-  Shape.prototype.left = method$h;
+  Shape.prototype.left = method$j;
 
   /**
    *
@@ -20543,9 +20601,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$i = function (...shapes) { return union$5(this, ...shapes); };
+  const method$k = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$i;
+  Shape.prototype.union = method$k;
 
   /**
    *
@@ -23698,6 +23756,49 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # Material
+   *
+   * Produces a version of a shape with a given material.
+   *
+   * Materials supported include 'paper', 'metal', 'glass'.
+   *
+   * ::: illustration
+   * ```
+   * cylinder(5, 10).material('paper').color('pink')
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * cylinder(5, 10).material('metal').color('green')
+   * ```
+   * :::
+   * ::: illustration
+   * ```
+   * cylinder(5, 10).material('glass').color('blue')
+   * ```
+   * :::
+   *
+   **/
+
+  const fromValue$8 = (tags, shape) => Shape.fromGeometry(addTags(tags.map(tag => `material/${tag}`), shape.toGeometry()));
+
+  const material = dispatch(
+    'material',
+    (tags, shape) => {
+      assertStrings(tags);
+      assertShape(shape);
+      return () => fromValue$8(tags, shape);
+    }
+  );
+
+  material.fromValues = fromValue$8;
+
+  const method$l = function (...tags) { return material(tags, this); };
+
+  Shape.prototype.material = method$l;
+
+  /**
+   *
    * # Max
    *
    * Produces the maximum of a series of numbers.
@@ -23797,11 +23898,11 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
   };
 
-  const method$j = function (options) { return outline(options, this); };
+  const method$m = function (options) { return outline(options, this); };
 
-  Shape.prototype.outline = method$j;
+  Shape.prototype.outline = method$m;
 
-  const fromValue$6 = (point) => Shape.fromPoint(point);
+  const fromValue$9 = (point) => Shape.fromPoint(point);
 
   /**
    *
@@ -23862,17 +23963,17 @@ return d[d.length-1];};return ", funcName].join("");
       assertNumber(y);
       assertNumber(z);
       assertEmpty(rest);
-      return () => fromValue$6([x, y, z]);
+      return () => fromValue$9([x, y, z]);
     },
     // point([1, 2, 3])
     ([x = 0, y = 0, z = 0]) => {
       assertNumber(x);
       assertNumber(y);
       assertNumber(z);
-      return () => fromValue$6([x, y, z]);
+      return () => fromValue$9([x, y, z]);
     });
 
-  point.fromValue = fromValue$6;
+  point.fromValue = fromValue$9;
 
   const fromPoints$3 = (points) => Shape.fromPoints(points);
 
@@ -41323,9 +41424,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$k = function (options = {}) { return writeShape(options, this); };
+  const method$n = function (options = {}) { return writeShape(options, this); };
 
-  Shape.prototype.writeShape = method$k;
+  Shape.prototype.writeShape = method$n;
 
   /**
    *
@@ -42058,9 +42159,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$5(shape, reference);
     });
 
-  const method$l = function (...params) { return right(this, ...params); };
+  const method$o = function (...params) { return right(this, ...params); };
 
-  Shape.prototype.right = method$l;
+  Shape.prototype.right = method$o;
 
   /**
    *
@@ -42082,9 +42183,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$m = function (angle) { return rotateX$1(angle, this); };
+  const method$p = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$m;
+  Shape.prototype.rotateX = method$p;
 
   /**
    *
@@ -42106,9 +42207,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$n = function (angle) { return rotateY(angle, this); };
+  const method$q = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$n;
+  Shape.prototype.rotateY = method$q;
 
   /**
    *
@@ -42130,9 +42231,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$o = function (angle) { return rotateZ(angle, this); };
+  const method$r = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$o;
+  Shape.prototype.rotateZ = method$r;
 
   /**
    *
@@ -42167,9 +42268,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$p = function (factor) { return scale$6(factor, this); };
+  const method$s = function (factor) { return scale$6(factor, this); };
 
-  Shape.prototype.scale = method$p;
+  Shape.prototype.scale = method$s;
 
   /**
    *
@@ -42213,9 +42314,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...shapes);
   };
 
-  const method$q = function (options) { return section(options, this); };
+  const method$t = function (options) { return section(options, this); };
 
-  Shape.prototype.section = method$q;
+  Shape.prototype.section = method$t;
 
   /**
    *
@@ -42265,7 +42366,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const unitSphere = ({ resolution = 32 } = {}) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
 
-  const fromValue$7 = (value) => unitSphere().scale(value);
+  const fromValue$a = (value) => unitSphere().scale(value);
 
   const fromRadius$3 = ({ radius, resolution = 32 }) => unitSphere({ resolution }).scale(radius);
 
@@ -42276,12 +42377,12 @@ return d[d.length-1];};return ", funcName].join("");
     // sphere()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$7(1);
+      return () => fromValue$a(1);
     },
     // sphere(2)
     (value) => {
       assertNumber(value);
-      return () => fromValue$7(value);
+      return () => fromValue$a(value);
     },
     // sphere({ radius: 2, resolution: 5 })
     ({ radius, resolution = 32 }) => {
@@ -42296,7 +42397,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromDiameter$3({ diameter, resolution });
     });
 
-  sphere.fromValue = fromValue$7;
+  sphere.fromValue = fromValue$a;
   sphere.fromRadius = fromRadius$3;
   sphere.fromDiameter = fromDiameter$3;
 
@@ -42461,7 +42562,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const unitTetrahedron = () => Shape.fromPolygonsToSolid(buildRegularTetrahedron({}));
 
-  const fromValue$8 = (value) => unitTetrahedron().scale(value);
+  const fromValue$b = (value) => unitTetrahedron().scale(value);
 
   const fromRadius$4 = ({ radius }) => unitTetrahedron().scale(radius);
 
@@ -42472,12 +42573,12 @@ return d[d.length-1];};return ", funcName].join("");
     // tetrahedron()
     (...rest) => {
       assertEmpty(rest);
-      return () => fromValue$8(1);
+      return () => fromValue$b(1);
     },
     // tetrahedron(2)
     (value) => {
       assertNumber(value);
-      return () => fromValue$8(value);
+      return () => fromValue$b(value);
     },
     // tetrahedron({ radius: 2 })
     ({ radius }) => {
@@ -42490,7 +42591,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromDiameter$4({ diameter });
     });
 
-  tetrahedron.fromValue = fromValue$8;
+  tetrahedron.fromValue = fromValue$b;
   tetrahedron.fromRadius = fromRadius$4;
   tetrahedron.fromDiameter = fromDiameter$4;
 
@@ -42604,9 +42705,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...pieces);
   };
 
-  const method$r = function (options) { return wireframe(options, this); };
+  const method$u = function (options) { return wireframe(options, this); };
 
-  Shape.prototype.wireframe = method$r;
+  Shape.prototype.wireframe = method$u;
 
   const colorToRgbMapping = {
     'aliceblue': [240, 248, 255],
@@ -42882,9 +42983,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$s = function (options = {}) { return writePdf(options, this); };
+  const method$v = function (options = {}) { return writePdf(options, this); };
 
-  Shape.prototype.writePdf = method$s;
+  Shape.prototype.writePdf = method$v;
 
   /**
    *
@@ -42914,9 +43015,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$t = function (options = {}) { return writeStl(options, this); };
+  const method$w = function (options = {}) { return writeStl(options, this); };
 
-  Shape.prototype.writeStl = method$t;
+  Shape.prototype.writeStl = method$w;
 
   /**
    *
@@ -42946,9 +43047,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$u = function (options = {}) { return writeSvg(options, this); };
+  const method$x = function (options = {}) { return writeSvg(options, this); };
 
-  Shape.prototype.writeSvg = method$u;
+  Shape.prototype.writeSvg = method$x;
 
   // Polyfills
 
@@ -93521,9 +93622,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$v = function (options = {}) { return writeSvgPhoto(options, this); };
+  const method$y = function (options = {}) { return writeSvgPhoto(options, this); };
 
-  Shape.prototype.writeSvgPhoto = method$v;
+  Shape.prototype.writeSvgPhoto = method$y;
 
   const writeThreejsPage = async (options, shape) => {
     if (typeof options === 'string') {
@@ -93534,9 +93635,9 @@ return d[d.length-1];};return ", funcName].join("");
     return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$w = function (options = {}) { return writeThreejsPage(options, this); };
+  const method$z = function (options = {}) { return writeThreejsPage(options, this); };
 
-  Shape.prototype.writeThreejsPage = method$w;
+  Shape.prototype.writeThreejsPage = method$z;
 
   /**
    *
@@ -93551,12 +93652,14 @@ return d[d.length-1];};return ", funcName].join("");
     Shape: Shape,
     above: above,
     acos: acos,
+    as: as,
     assemble: assemble$1,
     back: back,
     below: below,
     center: center,
     chainHull: chainHull,
     circle: circle,
+    color: color,
     cos: cos,
     cube: cube,
     cut: cut$1,
@@ -93573,6 +93676,7 @@ return d[d.length-1];};return ", funcName].join("");
     left: left,
     lego: lego,
     log: log$2,
+    material: material,
     max: max$1,
     measureBoundingBox: measureBoundingBox$3,
     microGearMotor: microGearMotor,

@@ -62,7 +62,7 @@ export const drop = dispatch(
     // assemble(circle(), circle().as('a')).drop('a')
     assertStrings(tags);
     assertShape(shape);
-    return () => fromValue(tags, shape);
+    return () => fromValue(tags.map(tag => `user/${tag}`), shape);
   }
 );
 

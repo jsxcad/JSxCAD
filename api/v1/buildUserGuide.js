@@ -9,9 +9,9 @@ const { writeFile } = fs.promises;
 
 const paths = [
   'Intro.js',
-  'above.js', 'acos.js', 'assemble.js',
+  'above.js', 'acos.js', 'assemble.js', 'as.js',
   'back.js', 'below.js',
-  'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'cube.js', 'cut.js', 'cursor.js', 'cylinder.js',
+  'center.js', 'chainHull.js', 'circle.js', 'color.js', 'cos.js', 'cube.js', 'cut.js', 'cursor.js', 'cylinder.js',
   'difference.js',
   'drop.js',
   'front.js', 'fuse.js',
@@ -21,8 +21,7 @@ const paths = [
   'keep.js',
   'left.js', 'lego.js',
   'log.js',
-  'max.js', 'measureBoundingBox.js', 'microGearMotor.js',
-  'minkowski.js',
+  'material.js', 'max.js', 'measureBoundingBox.js', 'microGearMotor.js', 'minkowski.js',
   'outline.js',
   'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
   'readDst.js', 'readFont.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
