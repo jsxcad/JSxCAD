@@ -13,7 +13,7 @@ import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 const buildMeshMaterial = (tags) => {
   // Default to normal material.
   return new THREE.MeshNormalMaterial();
-}
+};
 
 export const installDisplayCSS = (document) => {
   installCSSLink(document, 'https://unpkg.com/jspanel4@4.6.0/es6module/jspanel.css');
