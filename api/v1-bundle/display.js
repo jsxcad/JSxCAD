@@ -10,6 +10,11 @@ import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
+const buildMeshMaterial = (tags) => {
+  // Default to normal material.
+  return new THREE.MeshNormalMaterial();
+}
+
 export const installDisplayCSS = (document) => {
   installCSSLink(document, 'https://unpkg.com/jspanel4@4.6.0/es6module/jspanel.css');
   installCSS(document, `
@@ -130,12 +135,12 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           scene.add(dataset.mesh);
           datasets.push(dataset);
         } else if (geometry.threejsSolid) {
-          const { positions, normals } = geometry.threejsSolid;
+          const { positions, normals, tags } = geometry.threejsSolid;
           const dataset = {};
           const threejsGeometry = new THREE.BufferGeometry();
           threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
           threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-          const material = new THREE.MeshNormalMaterial();
+          const material = buildMeshMaterial(tags);
           dataset.mesh = new THREE.Mesh(threejsGeometry, material);
           dataset.name = toName(geometry);
           scene.add(dataset.mesh);
