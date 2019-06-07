@@ -11,21 +11,66 @@ import saveAs from 'file-saver';
 import { toRgb } from '@jsxcad/algorithm-color';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
-const buildMeshMaterial = (tags) => {
+const merge = (properties, parameters) => {
+  for (const key of Object.keys(properties)) {
+    parameters[key] = properties[key];
+  }
+};
+
+const setColor = (tags, parameters) => {
   const rgb = toRgb(tags, null);
   if (rgb !== null) {
     const [r, g, b] = rgb;
     const color = ((r << 16) | (g << 8) | b) >>> 0;
-    return new THREE.MeshPhysicalMaterial({
-      color,
-      roughness: 0.9,
-      metalness: 0.1,
-      clearCoat: 0.0,
-      clearCoatRoughness: 0.5,
-      reflectivity: 0.1
-    });
+    parameters.color = color;
   }
-  // Default to normal material.
+};
+
+const materialProperties = {
+  paper: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5
+  },
+  metal: {
+    roughness: 0.75,
+    metalness: 0.5,
+    reflectivity: 1
+  },
+  glass: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    opacity: 0.5,
+    transparent: true
+  }
+};
+
+const setMaterial = (tags, parameters) => {
+  for (const tag of tags) {
+    if (tag.startsWith('material/')) {
+      const material = tag.substring(9);
+      const properties = materialProperties[material];
+      if (properties !== undefined) {
+        merge(properties, parameters);
+      }
+    }
+  }
+};
+
+const buildMeshMaterial = (tags) => {
+  if (tags !== undefined) {
+    const parameters = {};
+    setColor(tags, parameters);
+    setMaterial(tags, parameters);
+    if (Object.keys(parameters).length > 0) {
+      return new THREE.MeshPhysicalMaterial(parameters);
+    }
+  }
+
+  // Else, default to normal material.
   return new THREE.MeshNormalMaterial();
 };
 
@@ -166,7 +211,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           const threejsGeometry = new THREE.BufferGeometry();
           threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
           threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-          const material = new THREE.MeshNormalMaterial();
+          const material = buildMeshMaterial(tags);
           dataset.mesh = new THREE.Mesh(threejsGeometry, material);
           dataset.name = toName(geometry);
           scene.add(dataset.mesh);
@@ -220,9 +265,9 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       }
 
       //
-      var ambientLight = new THREE.AmbientLight(0x222222);
+      var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambientLight);
-      var light = new THREE.DirectionalLight(0xffffff, 1);
+      var light = new THREE.DirectionalLight(0xffffff, 0.5);
       light.position.set(1, 1, 1);
       camera.add(light);
       renderer = new THREE.WebGLRenderer({ antialias: true });
