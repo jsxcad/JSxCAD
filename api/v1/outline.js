@@ -29,7 +29,7 @@ import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
 export const outline = (options = {}, shape) => {
   const surfaces = getZ0Surfaces(shape.toKeptGeometry());
   // FIX: Handle non-z0surfaces.
-  return assemble(...surfaces.map(surface => Shape.fromPaths(surface)));
+  return assemble(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
 };
 
 const method = function (options) { return outline(options, this); };

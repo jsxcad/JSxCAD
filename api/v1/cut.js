@@ -38,7 +38,7 @@ export const cut = ({ z = 0 } = {}, shape) => {
   const solids = getSolids(shape.toKeptGeometry());
   const fronts = [];
   const backs = [];
-  for (const solid of solids) {
+  for (const { solid } of solids) {
     const [front, back] = cutSolid(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), solid);
     fronts.push(Shape.fromSolid(front));
     backs.push(Shape.fromSolid(back));

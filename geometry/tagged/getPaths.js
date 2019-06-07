@@ -5,7 +5,7 @@ export const getPaths = (geometry) => {
   eachItem(geometry,
            item => {
              if (item.paths) {
-               paths.push(item.paths);
+               paths.push(item);
              }
            });
   return paths;

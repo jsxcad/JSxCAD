@@ -4,7 +4,7 @@ import { toPdf } from './toPdf';
 
 test('Triangle', async t => {
   // A polygon is a path.
-  const pdf = await toPdf({}, { paths: [buildRegularPolygon({ edges: 3 })] });
+  const pdf = await toPdf({}, { tags: ['color/blue'], paths: [buildRegularPolygon({ edges: 3 })] });
   t.is(pdf,
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
@@ -19,6 +19,7 @@ test('Triangle', async t => {
         '4 0 obj << >>',
         'stream',
         '0.096000000 w',
+        '0.000000000 0.000000000 1.000000000 RG',
         '4.251968501 839.434888090 m',
         '0.000000000 841.889763249 l',
         '0.000000000 836.980012932 l',
@@ -47,6 +48,7 @@ test('Triangle with a custom page size', async t => {
         '4 0 obj << >>',
         'stream',
         '0.096000000 w',
+        '0.000000000 0.000000000 0.000000000 RG',
         '4.251968501 564.474258342 m',
         '0.000000000 566.929133501 l',
         '0.000000000 562.019383184 l',

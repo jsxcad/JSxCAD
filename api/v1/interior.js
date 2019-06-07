@@ -31,7 +31,11 @@ import { union } from '@jsxcad/geometry-z0surface';
 
 export const interior = (options = {}, shape) => {
   // FIX: Handle non-z0surfaces.
-  return Shape.fromPathsToZ0Surface(union(...getPaths(shape.toGeometry())));
+  const toUnion = [];
+  for (const { paths } of getPaths(shape.toGeometry())) {
+    toUnion.push(paths);
+  }
+  return Shape.fromPathsToZ0Surface(union(...toUnion));
 };
 
 const method = function (options) { return interior(options, this); };

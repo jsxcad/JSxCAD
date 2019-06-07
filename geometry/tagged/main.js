@@ -14,6 +14,7 @@ import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { measureBoundingBox } from './measureBoundingBox';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
@@ -39,6 +40,7 @@ export {
   getZ0Surfaces,
   intersection,
   keep,
+  measureBoundingBox,
   toComponents,
   toDisjointGeometry,
   toKeptGeometry,

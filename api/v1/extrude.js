@@ -30,7 +30,7 @@ import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 export const fromHeight = ({ height }, shape) => {
   const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
-  const solids = z0Surfaces.map(z0Surface => extrudeAlgorithm({ height: height }, z0Surface));
+  const solids = z0Surfaces.map(({ z0Surface }) => extrudeAlgorithm({ height: height }, z0Surface));
   const assembly = assemble(...solids.map(Shape.fromSolid));
   return assembly;
 };

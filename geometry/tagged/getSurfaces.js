@@ -5,9 +5,9 @@ export const getSurfaces = (geometry) => {
   eachItem(geometry,
            item => {
              if (item.z0Surface) {
-               surfaces.push(item.z0Surface);
+               surfaces.push(item);
              } else if (item.surface) {
-               surfaces.push(item.surface);
+               surfaces.push(item);
              }
            });
   return surfaces;
