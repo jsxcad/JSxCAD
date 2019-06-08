@@ -64,9 +64,9 @@ endloop
 endfacet
 facet normal 0 0 1
 outer loop
+vertex 0 3 1
 vertex 10 3 1
 vertex 0 4 1
-vertex 0 3 1
 endloop
 endfacet
 facet normal 0 0 1
@@ -141,9 +141,9 @@ endloop
 endfacet
 facet normal 0 -1 0
 outer loop
+vertex 0 1 1
 vertex 40 1 1
 vertex 40 1 2.5
-vertex 0 1 1
 endloop
 endfacet
 facet normal 0 -1 0
@@ -169,7 +169,14 @@ endloop
 endfacet
 facet normal 0 1 0
 outer loop
+vertex 10 3 1
 vertex 0 3 1
+vertex 0 3 2.5
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 10 3 1
 vertex 0 3 2.5
 vertex 40 3 1
 endloop
@@ -211,7 +218,14 @@ endloop
 endfacet
 facet normal 0 1 0
 outer loop
+vertex 30 11 1
 vertex 0 11 1
+vertex 0 11 2.5
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 30 11 1
 vertex 0 11 2.5
 vertex 40 11 1
 endloop
@@ -225,9 +239,9 @@ endloop
 endfacet
 facet normal 0 -1 0
 outer loop
+vertex 0 13 1
 vertex 40 13 1
 vertex 40 13 2.5
-vertex 0 13 1
 endloop
 endfacet
 facet normal 0 -1 0
@@ -360,6 +374,20 @@ facet normal -1 0 0
 outer loop
 vertex 0 4 0
 vertex 0 0 1
+vertex 0 1 1
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 4 0
+vertex 0 1 1
+vertex 0 3 1
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 4 0
+vertex 0 3 1
 vertex 0 4 1
 endloop
 endfacet
@@ -374,6 +402,20 @@ facet normal 1 0 0
 outer loop
 vertex 40 0 0
 vertex 40 4 1
+vertex 40 3 1
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 40 0 0
+vertex 40 3 1
+vertex 40 1 1
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 40 0 0
+vertex 40 1 1
 vertex 40 0 1
 endloop
 endfacet
@@ -402,6 +444,20 @@ facet normal -1 0 0
 outer loop
 vertex 0 14 0
 vertex 0 10 1
+vertex 0 11 1
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 14 0
+vertex 0 11 1
+vertex 0 13 1
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 14 0
+vertex 0 13 1
 vertex 0 14 1
 endloop
 endfacet
@@ -416,6 +472,20 @@ facet normal 1 0 0
 outer loop
 vertex 40 10 0
 vertex 40 14 1
+vertex 40 13 1
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 40 10 0
+vertex 40 13 1
+vertex 40 11 1
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 40 10 0
+vertex 40 11 1
 vertex 40 10 1
 endloop
 endfacet

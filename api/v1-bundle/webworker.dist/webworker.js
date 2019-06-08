@@ -273,6 +273,12 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
+  const distance = ([ax, ay, az], [bx, by, bz]) => {
+    const x = bx - ax;
+    const y = by - ay;
+    const z = bz - az;
+    return Math.sqrt(x * x + y * y + z * z);
+  };
 
   /**
    * Divides two vec3's
@@ -731,21 +737,6 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {mat4} out
    */
 
-  const addTags = (tags, geometry) => {
-    if (tags === undefined) {
-      return geometry;
-    }
-    const copy = Object.assign({}, geometry);
-    if (copy.tags) {
-      copy.tags = [...tags, ...copy.tags];
-    } else {
-      copy.tags = [...tags];
-    }
-    return copy;
-  };
-
-  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
-
   const canonicalizePoint = (point, index) => {
     if (point === null) {
       if (index !== 0) throw Error('Path has null not at head');
@@ -769,6 +760,14 @@ define("./webworker.js",[],function () { 'use strict';
     return result;
   };
 
+  const flip = (path) => {
+    if (path[0] === null) {
+      return [null, ...path.slice(1).reverse()];
+    } else {
+      return path.slice().reverse();
+    }
+  };
+
   const open = (path) => isClosed(path) ? [null, ...path] : path;
 
   const toSegments = (options = {}, path) => {
@@ -788,6 +787,21 @@ define("./webworker.js",[],function () { 'use strict';
 
   const translate = (vector, path) => transform$1(fromTranslation(vector), path);
   const scale$1 = (vector, path) => transform$1(fromScaling(vector), path);
+
+  const addTags = (tags, geometry) => {
+    if (tags === undefined) {
+      return geometry;
+    }
+    const copy = Object.assign({}, geometry);
+    if (copy.tags) {
+      copy.tags = [...tags, ...copy.tags];
+    } else {
+      copy.tags = [...tags];
+    }
+    return copy;
+  };
+
+  const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
 
   const canonicalize$2 = (paths) => {
     let canonicalized = paths.map(canonicalize$1);
@@ -809,6 +823,8 @@ define("./webworker.js",[],function () { 'use strict';
       }
     }
   };
+
+  const flip$1 = (paths) => paths.map(flip);
 
   const intersection = (...pathsets) => { throw Error('Not implemented'); };
 
@@ -1288,7 +1304,7 @@ define("./webworker.js",[],function () { 'use strict';
       return out
   }
 
-  var distance_1 = distance;
+  var distance_1 = distance$1;
 
   /**
    * Calculates the euclidian distance between two vec3's
@@ -1297,7 +1313,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
-  function distance(a, b) {
+  function distance$1(a, b) {
       var x = b[0] - a[0],
           y = b[1] - a[1],
           z = b[2] - a[2];
@@ -7148,6 +7164,8 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
+  const flip$2 = (points) => points;
+
   /**
    * Transforms the vertices of a polygon, producing a new poly3.
    *
@@ -7198,7 +7216,7 @@ return d[d.length-1];};return ", funcName].join("");
    * @param {poly3} polygon - the polygon to flip
    * @returns {poly3} a new poly3
    */
-  const flip = (polygon) => [...polygon].reverse();
+  const flip$3 = (polygon) => [...polygon].reverse();
 
   /**
    * Create a poly3 from the given points.
@@ -7228,7 +7246,7 @@ return d[d.length-1];};return ", funcName].join("");
    * @param {vec4} vec - plane to flip
    * @return {vec4} flipped plane
    */
-  const flip$1 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
+  const flip$4 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
 
   /**
    * Create a new plane from the given points
@@ -7505,7 +7523,7 @@ return d[d.length-1];};return ", funcName].join("");
     return original.map(polygon => transform(polygon));
   };
 
-  const flip$2 = (surface) => map$1(surface, flip);
+  const flip$5 = (surface) => map$1(surface, flip$3);
 
   const notEmpty = (surface) => surface.length > 0;
 
@@ -13596,12 +13614,6 @@ return d[d.length-1];};return ", funcName].join("");
     return transform$5(from, retessellatedSurface);
   };
 
-  const makeSimple = (options = {}, surface) => {
-    const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
-    let simpleSurface = union$2(...transform$5(to, surface).map(polygon => [polygon]));
-    return transform$5(from, simpleSurface);
-  };
-
   const measureArea$1 = (surface) => {
     // CHECK: That this handles negative area properly.
     let total = 0;
@@ -17585,12 +17597,12 @@ return d[d.length-1];};return ", funcName].join("");
 
     if (frontEdges.length > 0) {
       // FIX: This can produce a solid with separate coplanar surfaces.
-      front.push(flip$2(toLoops({}, canonicalize$2(frontEdges))));
+      front.push(flip$5(toLoops({}, canonicalize$2(frontEdges))));
     }
 
     if (backEdges.length > 0) {
       // FIX: This can produce a solid with separate coplanar surfaces.
-      back.push(flip$2(toLoops({}, canonicalize$2(backEdges))));
+      back.push(flip$5(toLoops({}, canonicalize$2(backEdges))));
     }
 
     return [front, back];
@@ -17615,6 +17627,8 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
+  const flip$6 = (solid) => solid.map(surface => flip$5(surface));
+
   const fromPolygons = (options = {}, polygons) => {
     const coplanarGroups = new Map();
 
@@ -17634,8 +17648,6 @@ return d[d.length-1];};return ", funcName].join("");
 
     return solid;
   };
-
-  const makeSurfacesSimple = (options = {}, solid) => solid.map(surface => makeSimple({}, surface));
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
   const measureBoundingBox$1 = (solid) => {
@@ -17744,11 +17756,12 @@ return d[d.length-1];};return ", funcName].join("");
             if ((startType | endType) === SPANNING$1) {
               // This should exclude COPLANAR points.
               // Compute the point that touches the splitting plane.
-              const rawSpanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-              const spanPoint = subtract(rawSpanPoint, scale(signedDistanceToPoint(toPlane(polygon), rawSpanPoint), plane));
+              const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
               frontPoints.push(spanPoint);
               backPoints.push(spanPoint);
-              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON$2) throw Error('die');
+              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON$2) {
+                throw Error(`die: ${Math.abs(signedDistanceToPoint(plane, spanPoint))}`);
+              }
             }
             startPoint = endPoint;
             startType = endType;
@@ -17862,23 +17875,23 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const flip$3 = (bsp) => {
+  const flip$7 = (bsp) => {
     // Flip the polygons.
-    bsp.surfaces = bsp.surfaces.map(flip$2);
+    bsp.surfaces = bsp.surfaces.map(flip$5);
     // Recompute the plane.
     if (bsp.plane !== undefined) {
       // PROVE: General equivalence.
       // const a = toPlane(bsp.polygons[0]);
       // const b = plane.flip(bsp.plane);
       // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }
-      bsp.plane = flip$1(bsp.plane);
+      bsp.plane = flip$4(bsp.plane);
     }
     // Invert the children.
     if (bsp.front !== undefined) {
-      flip$3(bsp.front);
+      flip$7(bsp.front);
     }
     if (bsp.back !== undefined) {
-      flip$3(bsp.back);
+      flip$7(bsp.back);
     }
     // Swap the children.
     [bsp.front, bsp.back] = [bsp.back, bsp.front];
@@ -17987,16 +18000,16 @@ return d[d.length-1];};return ", funcName].join("");
       const baseBsp = fromSurfaces({}, base);
       const subtractBsp = fromSurfaces({}, subtractions[i]);
 
-      flip$3(baseBsp);
+      flip$7(baseBsp);
       clipTo(baseBsp, subtractBsp);
       clipTo(subtractBsp, baseBsp);
 
-      flip$3(subtractBsp);
+      flip$7(subtractBsp);
       clipTo(subtractBsp, baseBsp);
-      flip$3(subtractBsp);
+      flip$7(subtractBsp);
 
       build(baseBsp, toSurfaces({}, subtractBsp));
-      flip$3(baseBsp);
+      flip$7(baseBsp);
 
       // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.
       base = toSurfaces({}, baseBsp);
@@ -18031,15 +18044,15 @@ return d[d.length-1];};return ", funcName].join("");
       const aBsp = fromSurfaces({}, aSolid);
       const bBsp = fromSurfaces({}, bSolid);
 
-      flip$3(aBsp);
+      flip$7(aBsp);
       clipTo(bBsp, aBsp);
 
-      flip$3(bBsp);
+      flip$7(bBsp);
       clipTo(aBsp, bBsp);
       clipTo(bBsp, aBsp);
       build(aBsp, toSurfaces({}, bBsp));
 
-      flip$3(aBsp);
+      flip$7(aBsp);
 
       // Push back for the next generation.
       solids.push(toSurfaces({}, aBsp));
@@ -18065,9 +18078,9 @@ return d[d.length-1];};return ", funcName].join("");
       clipTo(bBsp, aBsp);
 
       // Turn b inside out and remove the bits that are in a.
-      flip$3(bBsp);
+      flip$7(bBsp);
       clipTo(bBsp, aBsp);
-      flip$3(bBsp);
+      flip$7(bBsp);
 
       // Now merge the two together.
       build(aBsp, toSurfaces({}, bBsp));
@@ -18297,6 +18310,25 @@ return d[d.length-1];};return ", funcName].join("");
     walk(geometry);
   };
 
+  const flip$8 = (geometry) => {
+    const flipped = {};
+    if (geometry.points) {
+      flipped.points = flip$2(geometry.points);
+    } else if (geometry.paths) {
+      flipped.paths = flip$1(geometry.paths);
+    } else if (geometry.z0Surface) {
+      flipped.surface = flip$5(geometry.z0Surface);
+    } else if (geometry.solid) {
+      flipped.solid = flip$6(geometry.solid);
+    } else if (geometry.assembly) {
+      flipped.assembly = geometry.assembly.map(flip$8);
+    } else {
+      throw Error(`die: ${JSON.stringify(geometry)}`);
+    }
+    flipped.tags = geometry.tags;
+    return flipped;
+  };
+
   const getPaths = (geometry) => {
     const paths = [];
     eachItem(geometry,
@@ -18469,6 +18501,10 @@ return d[d.length-1];};return ", funcName].join("");
 
     eachPoint (options = {}, operation) {
       eachPoint$5(options, operation, this.toKeptGeometry());
+    }
+
+    flip () {
+      return fromGeometry(flip$8(toKeptGeometry$1(this)));
     }
 
     toComponents (options = {}) {
@@ -41323,7 +41359,7 @@ return d[d.length-1];};return ", funcName].join("");
                          [ldu(x3), ldu(y3), ldu(z3)]];
           if (!isStrictlyCoplanar(polygon)) throw Error('die');
           if (Direction() === 'CW') {
-            polygons.push(flip(polygon));
+            polygons.push(flip$3(polygon));
           } else {
             polygons.push(polygon);
           }
@@ -41337,10 +41373,10 @@ return d[d.length-1];};return ", funcName].join("");
                    [ldu(x4), ldu(y4), ldu(z4)]];
           if (Direction() === 'CW') {
             if (isStrictlyCoplanar(p)) {
-              polygons.push(flip(p));
+              polygons.push(flip$3(p));
             } else {
-              polygons.push(flip([p[0], p[1], p[3]]));
-              polygons.push(flip([p[2], p[3], p[1]]));
+              polygons.push(flip$3([p[0], p[1], p[3]]));
+              polygons.push(flip$3([p[2], p[3], p[1]]));
             }
           } else {
             if (isStrictlyCoplanar(p)) {
@@ -42012,6 +42048,58 @@ return d[d.length-1];};return ", funcName].join("");
 
   const makeWatertight = polygons => fixTJunctions(polygons);
 
+  const copy$2 = ({ solid }) => ({ solid: solid.map(surface => surface.map(path => path.map(point => [...point]))) });
+
+  // FIX: This is neither efficient nor principled.
+  // We include this fix for now to better understand the cases where it fails.
+
+  // FIX: This introduces degenerate polygons.
+
+  const fixTJunctions$1 = (solids) => {
+    const points = new Map();
+
+    for (const { solid } of solids) {
+      for (const surface of solid) {
+        for (const path of surface) {
+          for (const point of path) {
+            points.set(JSON.stringify(point), point);
+          }
+        }
+      }
+    }
+
+    const fixed = [];
+
+    for (const geometry of solids) {
+      const { solid } = copy$2(geometry);
+      for (const surface of solid) {
+        for (const path of surface) {
+          let last = path.length - 1;
+          for (let current = 0; current < path.length; last = current++) {
+            const start = path[last];
+            const end = path[current];
+            const span = distance(start, end);
+            const colinear = [];
+            for (const [, point] of points) {
+              if (equals(point, start)) continue;
+              if (equals(point, end)) continue;
+              if (distance(start, point) + distance(point, end) === span) {
+                // The point is approximately colinear.
+                colinear.push(point);
+              }
+            }
+            colinear.sort((a, b) => distance(start, a) - distance(start, b));
+            path.splice(current, 0, ...colinear);
+            current += colinear.length;
+          }
+        }
+      }
+      fixed.push({ solid });
+    }
+
+    return fixed;
+  };
+
   /**
    * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
    * The exterior side of a polygon is determined by a CCW point ordering.
@@ -42021,20 +42109,18 @@ return d[d.length-1];};return ", funcName].join("");
    * @returns {String} - the ascii STL output.
    */
 
-  const geometryToTriangles = (geometry) => {
-    const triangleSets = [];
-    eachItem(geometry,
-             item => {
-               if (item.solid) {
-                 triangleSets.push(toTriangles({}, toPolygons({}, item.solid)));
-               }
-             });
-    return [].concat(...triangleSets);
+  const geometryToTriangles = (solids) => {
+    const triangles = [];
+    for (const { solid } of solids) {
+      triangles.push(...toTriangles({}, toPolygons({}, solid)));
+    }
+    return triangles;
   };
 
   const toStl = async (options = {}, geometry) => {
     let keptGeometry = toKeptGeometry(geometry);
-    let polygons = geometryToTriangles(keptGeometry);
+    let solids = getSolids(keptGeometry);
+    let polygons = geometryToTriangles(fixTJunctions$1(solids));
     if (!isWatertightPolygons(polygons)) {
       console.log(`polygonsToStla: Polygon is not watertight`);
       if (options.doMakeWatertight) {
@@ -42045,7 +42131,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const convertToFacets = (options, polygons) =>
-    polygons.map(convertToFacet).join('\n');
+    polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
 
   const toStlVector = vector =>
     `${vector[0]} ${vector[1]} ${vector[2]}`;
@@ -42053,14 +42139,18 @@ return d[d.length-1];};return ", funcName].join("");
   const toStlVertex = vertex =>
     `vertex ${toStlVector(vertex)}`;
 
-  const convertToFacet = polygon =>
-    `facet normal ${toStlVector(toPlane(polygon))}\n` +
-    `outer loop\n` +
-    `${toStlVertex(polygon[0])}\n` +
-    `${toStlVertex(polygon[1])}\n` +
-    `${toStlVertex(polygon[2])}\n` +
-    `endloop\n` +
-    `endfacet`;
+  const convertToFacet = (polygon) => {
+    const plane = toPlane(polygon);
+    if (!isNaN(plane[0])) {
+      return `facet normal ${toStlVector(toPlane(polygon))}\n` +
+             `outer loop\n` +
+             `${toStlVertex(polygon[0])}\n` +
+             `${toStlVertex(polygon[1])}\n` +
+             `${toStlVertex(polygon[2])}\n` +
+             `endloop\n` +
+             `endfacet`;
+    }
+  };
 
   /**
    *
@@ -42672,7 +42762,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   const toWireframe = (solid) => {
     const paths = [];
-    for (const surface of makeSurfacesSimple({}, solid)) {
+    // for (const surface of makeSurfacesSimple({}, solid)) {
+    for (const surface of solid) {
       paths.push(...surface);
     }
     return Shape.fromPaths(paths);
@@ -93419,7 +93510,7 @@ return d[d.length-1];};return ", funcName].join("");
     };
     for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
       outputTriangle(triangle);
-      outputTriangle(flip(triangle));
+      outputTriangle(flip$3(triangle));
     }
     return { normals, positions };
   };

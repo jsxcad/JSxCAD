@@ -3,25 +3,21 @@ import { flip as flipPoints } from '@jsxcad/geometry-points';
 import { flip as flipSolid } from '@jsxcad/geometry-solid';
 import { flip as flipSurface } from '@jsxcad/geometry-surface';
 
-const flipEntry = (entry) => {
+export const flip = (geometry) => {
   const flipped = {};
-  if (entry.points) {
-    flipped.points = flipPoints(entry.points);
+  if (geometry.points) {
+    flipped.points = flipPoints(geometry.points);
+  } else if (geometry.paths) {
+    flipped.paths = flipPaths(geometry.paths);
+  } else if (geometry.z0Surface) {
+    flipped.surface = flipSurface(geometry.z0Surface);
+  } else if (geometry.solid) {
+    flipped.solid = flipSolid(geometry.solid);
+  } else if (geometry.assembly) {
+    flipped.assembly = geometry.assembly.map(flip);
+  } else {
+    throw Error(`die: ${JSON.stringify(geometry)}`);
   }
-  if (entry.paths) {
-    flipped.paths = flipPaths(entry.paths);
-  }
-  if (entry.surface) {
-    flipped.surface = flipSurface(entry.surface);
-  }
-  if (entry.solid) {
-    flipped.solid = flipSolid(entry.solid);
-  }
-  if (entry.assembly) {
-    flipped.assembly = flip(entry.assembly);
-  }
-  flipped.tags = entry.tags;
+  flipped.tags = geometry.tags;
   return flipped;
 };
-
-export const flip = (assembly) => assembly.map(flipEntry);

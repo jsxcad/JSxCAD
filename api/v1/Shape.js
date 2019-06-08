@@ -1,5 +1,5 @@
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
-import { eachPoint, toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
+import { eachPoint, flip, toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
          transform } from '@jsxcad/geometry-tagged';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
@@ -31,6 +31,10 @@ export class Shape {
 
   eachPoint (options = {}, operation) {
     eachPoint(options, operation, this.toKeptGeometry());
+  }
+
+  flip () {
+    return fromGeometry(flip(toKeptGeometry(this)));
   }
 
   toComponents (options = {}) {

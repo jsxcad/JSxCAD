@@ -14,5 +14,5 @@ test('line3: equals() should return correct booleans', (t) => {
   t.false(equals(line0, line3));
 
   const line4 = fromPointAndDirection([1, 1, 1], [1, 1, 1]);
-  t.false(equals(line0, line4));
+  t.true(equals(line0, line4));
 });

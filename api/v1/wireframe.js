@@ -1,11 +1,11 @@
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { makeSurfacesSimple } from '@jsxcad/geometry-solid';
 
 const toWireframe = (solid) => {
   const paths = [];
-  for (const surface of makeSurfacesSimple({}, solid)) {
+  // for (const surface of makeSurfacesSimple({}, solid)) {
+  for (const surface of solid) {
     paths.push(...surface);
   }
   return Shape.fromPaths(paths);
