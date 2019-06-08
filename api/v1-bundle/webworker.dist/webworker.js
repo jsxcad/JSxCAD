@@ -273,6 +273,12 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
+  const distance = ([ax, ay, az], [bx, by, bz]) => {
+    const x = bx - ax;
+    const y = by - ay;
+    const z = bz - az;
+    return Math.sqrt(x * x + y * y + z * z);
+  };
 
   /**
    * Divides two vec3's
@@ -1298,7 +1304,7 @@ define("./webworker.js",[],function () { 'use strict';
       return out
   }
 
-  var distance_1 = distance;
+  var distance_1 = distance$1;
 
   /**
    * Calculates the euclidian distance between two vec3's
@@ -1307,7 +1313,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @param {vec3} b the second operand
    * @returns {Number} distance between a and b
    */
-  function distance(a, b) {
+  function distance$1(a, b) {
       var x = b[0] - a[0],
           y = b[1] - a[1],
           z = b[2] - a[2];
@@ -17750,12 +17756,12 @@ return d[d.length-1];};return ", funcName].join("");
             if ((startType | endType) === SPANNING$1) {
               // This should exclude COPLANAR points.
               // Compute the point that touches the splitting plane.
-              const rawSpanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
-              const spanPoint = subtract(rawSpanPoint, scale(signedDistanceToPoint(toPlane(polygon), rawSpanPoint), plane));
-              // const spanPoint = rawSpanPoint;
+              const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
               frontPoints.push(spanPoint);
               backPoints.push(spanPoint);
-              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON$2) throw Error('die');
+              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON$2) {
+                throw Error(`die: ${Math.abs(signedDistanceToPoint(plane, spanPoint))}`);
+              }
             }
             startPoint = endPoint;
             startType = endType;
@@ -42042,6 +42048,58 @@ return d[d.length-1];};return ", funcName].join("");
 
   const makeWatertight = polygons => fixTJunctions(polygons);
 
+  const copy$2 = ({ solid }) => ({ solid: solid.map(surface => surface.map(path => path.map(point => [...point]))) });
+
+  // FIX: This is neither efficient nor principled.
+  // We include this fix for now to better understand the cases where it fails.
+
+  // FIX: This introduces degenerate polygons.
+
+  const fixTJunctions$1 = (solids) => {
+    const points = new Map();
+
+    for (const { solid } of solids) {
+      for (const surface of solid) {
+        for (const path of surface) {
+          for (const point of path) {
+            points.set(JSON.stringify(point), point);
+          }
+        }
+      }
+    }
+
+    const fixed = [];
+
+    for (const geometry of solids) {
+      const { solid } = copy$2(geometry);
+      for (const surface of solid) {
+        for (const path of surface) {
+          let last = path.length - 1;
+          for (let current = 0; current < path.length; last = current++) {
+            const start = path[last];
+            const end = path[current];
+            const span = distance(start, end);
+            const colinear = [];
+            for (const [, point] of points) {
+              if (equals(point, start)) continue;
+              if (equals(point, end)) continue;
+              if (distance(start, point) + distance(point, end) === span) {
+                // The point is approximately colinear.
+                colinear.push(point);
+              }
+            }
+            colinear.sort((a, b) => distance(start, a) - distance(start, b));
+            path.splice(current, 0, ...colinear);
+            current += colinear.length;
+          }
+        }
+      }
+      fixed.push({ solid });
+    }
+
+    return fixed;
+  };
+
   /**
    * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
    * The exterior side of a polygon is determined by a CCW point ordering.
@@ -42051,20 +42109,18 @@ return d[d.length-1];};return ", funcName].join("");
    * @returns {String} - the ascii STL output.
    */
 
-  const geometryToTriangles = (geometry) => {
-    const triangleSets = [];
-    eachItem(geometry,
-             item => {
-               if (item.solid) {
-                 triangleSets.push(toTriangles({}, toPolygons({}, item.solid)));
-               }
-             });
-    return [].concat(...triangleSets);
+  const geometryToTriangles = (solids) => {
+    const triangles = [];
+    for (const { solid } of solids) {
+      triangles.push(...toTriangles({}, toPolygons({}, solid)));
+    }
+    return triangles;
   };
 
   const toStl = async (options = {}, geometry) => {
     let keptGeometry = toKeptGeometry(geometry);
-    let polygons = geometryToTriangles(keptGeometry);
+    let solids = getSolids(keptGeometry);
+    let polygons = geometryToTriangles(fixTJunctions$1(solids));
     if (!isWatertightPolygons(polygons)) {
       console.log(`polygonsToStla: Polygon is not watertight`);
       if (options.doMakeWatertight) {
@@ -42075,7 +42131,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const convertToFacets = (options, polygons) =>
-    polygons.map(convertToFacet).join('\n');
+    polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
 
   const toStlVector = vector =>
     `${vector[0]} ${vector[1]} ${vector[2]}`;
@@ -42083,14 +42139,18 @@ return d[d.length-1];};return ", funcName].join("");
   const toStlVertex = vertex =>
     `vertex ${toStlVector(vertex)}`;
 
-  const convertToFacet = polygon =>
-    `facet normal ${toStlVector(toPlane(polygon))}\n` +
-    `outer loop\n` +
-    `${toStlVertex(polygon[0])}\n` +
-    `${toStlVertex(polygon[1])}\n` +
-    `${toStlVertex(polygon[2])}\n` +
-    `endloop\n` +
-    `endfacet`;
+  const convertToFacet = (polygon) => {
+    const plane = toPlane(polygon);
+    if (!isNaN(plane[0])) {
+      return `facet normal ${toStlVector(toPlane(polygon))}\n` +
+             `outer loop\n` +
+             `${toStlVertex(polygon[0])}\n` +
+             `${toStlVertex(polygon[1])}\n` +
+             `${toStlVertex(polygon[2])}\n` +
+             `endloop\n` +
+             `endfacet`;
+    }
+  };
 
   /**
    *
