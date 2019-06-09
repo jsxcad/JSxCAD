@@ -8,6 +8,8 @@ import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { fuse } from './fuse';
+import { getClouds } from './getClouds';
 import { getPaths } from './getPaths';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
@@ -34,6 +36,8 @@ export {
   eachItem,
   eachPoint,
   flip,
+  fuse,
+  getClouds,
   getPaths,
   getSolids,
   getSurfaces,

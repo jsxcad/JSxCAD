@@ -7164,6 +7164,8 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
+  const union$1 = (...geometries) => [].concat(...geometries);
+
   const flip$2 = (points) => points;
 
   /**
@@ -10120,7 +10122,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   var operation = new Operation();
 
-  var union$1 = function union(geom) {
+  var union$2 = function union(geom) {
     for (var _len = arguments.length, moreGeoms = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       moreGeoms[_key - 1] = arguments[_key];
     }
@@ -10153,7 +10155,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   var index = {
-    union: union$1,
+    union: union$2,
     intersection: intersection$1$1,
     xor: xor,
     difference: difference$1
@@ -13588,7 +13590,7 @@ return d[d.length-1];};return ", funcName].join("");
    * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
    * @returns {Z0Surface} the resulting z0 surface.
    */
-  const union$2 = (...surfaces) => {
+  const union$3 = (...surfaces) => {
     if (surfaces.length === 0) {
       return [];
     }
@@ -18060,7 +18062,7 @@ return d[d.length-1];};return ", funcName].join("");
     return solids[0];
   };
 
-  const union$3 = (...solids) => {
+  const union$4 = (...solids) => {
     if (solids.length === 0) {
       return [];
     }
@@ -18329,6 +18331,17 @@ return d[d.length-1];};return ", funcName].join("");
     return flipped;
   };
 
+  const getClouds = (geometry) => {
+    const clouds = [];
+    eachItem(geometry,
+             item => {
+               if (item.points) {
+                 paths.push(item);
+               }
+             });
+    return clouds;
+  };
+
   const getPaths = (geometry) => {
     const paths = [];
     eachItem(geometry,
@@ -18360,6 +18373,36 @@ return d[d.length-1];};return ", funcName].join("");
                }
              });
     return z0Surfaces;
+  };
+
+  const fuse = (geometry) => {
+    const items = [];
+
+    const clouds = getClouds(geometry);
+    if (clouds.length > 0) {
+      items.push({ points: union$1(...clouds.map(item => item.points)) });
+    }
+
+    const pathsets = getPaths(geometry);
+    if (pathsets.length > 0) {
+      items.push({ paths: union(...pathsets.map(item => item.paths)) });
+    }
+
+    const solids = getSolids(geometry);
+    if (solids.length > 0) {
+      items.push({ solid: union$4(...solids.map(item => item.solid)) });
+    }
+
+    const z0Surfaces = getZ0Surfaces(geometry);
+    if (z0Surfaces.length > 0) {
+      items.push({ solid: union$3(...z0Surfaces.map(item => item.z0Surface)) });
+    }
+
+    if (items.length === 1) {
+      return items[0];
+    } else {
+      return { assembly: items };
+    }
   };
 
   const intersection$4 = (geometry, ...geometries) => {
@@ -18448,7 +18491,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   // FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
-  const union$4 = (geometry, ...geometries) => {
+  const union$5 = (geometry, ...geometries) => {
     if (geometries.length === 0) {
       // Nothing to do.
       return geometry;
@@ -18459,9 +18502,9 @@ return d[d.length-1];};return ", funcName].join("");
                      eachItem(unionGeometry,
                               (unionItem) => {
                                 if (item.solid && unionItem.solid) {
-                                  item = { solid: union$3(item.solid, unionItem.solid) };
+                                  item = { solid: union$4(item.solid, unionItem.solid) };
                                 } else if (item.z0Surface && unionItem.z0Surface) {
-                                  item = { z0Surface: union$2(item.z0Surface, unionItem.z0Surface) };
+                                  item = { z0Surface: union$3(item.z0Surface, unionItem.z0Surface) };
                                 } else if (item.paths && unionItem.paths) {
                                   item = { paths: union(item.paths, unionItem.paths) };
                                 }
@@ -20307,9 +20350,9 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fuse = (shape) => fromGeometry(toKeptGeometry$1(shape));
+  const fuse$1 = (shape) => Shape.fromGeometry(fuse(toKeptGeometry$1(shape)));
 
-  const method$e = function () { return fuse(this); };
+  const method$e = function () { return fuse$1(this); };
 
   Shape.prototype.fuse = method$e;
 
@@ -20395,7 +20438,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (const { paths } of getPaths(shape.toGeometry())) {
       toUnion.push(paths);
     }
-    return Shape.fromPathsToZ0Surface(union$2(...toUnion));
+    return Shape.fromPathsToZ0Surface(union$3(...toUnion));
   };
 
   const method$g = function (options) { return interior(options, this); };
@@ -20622,7 +20665,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const union$5 = (...shapes) => {
+  const union$6 = (...shapes) => {
     switch (shapes.length) {
       case 0: {
         return fromGeometry({ assembly: [] });
@@ -20632,12 +20675,12 @@ return d[d.length-1];};return ", funcName].join("");
         return fromGeometry(toKeptGeometry$1(shapes[0]));
       }
       default: {
-        return fromGeometry(union$4(...shapes.map(toKeptGeometry$1)));
+        return fromGeometry(union$5(...shapes.map(toKeptGeometry$1)));
       }
     }
   };
 
-  const method$k = function (...shapes) { return union$5(this, ...shapes); };
+  const method$k = function (...shapes) { return union$6(this, ...shapes); };
 
   Shape.prototype.union = method$k;
 
@@ -20698,7 +20741,7 @@ return d[d.length-1];};return ", funcName].join("");
     // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
     const bottom = 0.5;
     const topHeight = height - gripRingHeight - bottom;
-    return union$5(
+    return union$6(
       // flaired top
       cylinder({ diameter: (diameter + play), height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
       // grip ring
@@ -23875,7 +23918,7 @@ return d[d.length-1];};return ", funcName].join("");
   const gearbox = ({ play, motorWidth }) => cube(10 + play * 2, motorWidth + play * 2, 10).translate(0, 0, (15 + 10) / 2);
 
   const microGearMotor = ({ play = 0.2, shaftDiameter = 3.2, shaftPlay = 0, motorWidth = 12 } = {}) =>
-    union$5(motor({ play, motorWidth }),
+    union$6(motor({ play, motorWidth }),
           gearbox({ play, motorWidth }),
           flatShaft({ diameter: shaftDiameter, length: 10 + play * 2, flatLength: 7, flatOffset: 3, play: shaftPlay }).translate([0, 0, (15 + 10) / 2 + 10]),
           terminal().translate([0, 0, (15 + 2) / -2]));
@@ -41214,7 +41257,7 @@ return d[d.length-1];};return ", funcName].join("");
       for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
         pathsets.push(paths);
       }
-      return scale$5([factor, factor, factor], { z0Surface: union$2(...pathsets) });
+      return scale$5([factor, factor, factor], { z0Surface: union$3(...pathsets) });
     };
 
     return font;
@@ -93765,7 +93808,7 @@ return d[d.length-1];};return ", funcName].join("");
     drop: drop$1,
     extrude: extrude$1,
     front: front,
-    fuse: fuse,
+    fuse: fuse$1,
     hull: hull,
     interior: interior,
     intersection: intersection$5,
@@ -93802,7 +93845,7 @@ return d[d.length-1];};return ", funcName].join("");
     tetrahedron: tetrahedron,
     translate: translate$3,
     triangle: triangle,
-    union: union$5,
+    union: union$6,
     keep: keep$1,
     wireframe: wireframe,
     writePdf: writePdf,
