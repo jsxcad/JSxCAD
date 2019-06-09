@@ -22,6 +22,9 @@ const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
   if (rgb === null) {
     rgb = otherwise;
   }
+  if (rgb === null) {
+    return;
+  }
   const [r, g, b] = rgb;
   const color = ((r << 16) | (g << 8) | b) >>> 0;
   parameters.color = color;
@@ -40,9 +43,11 @@ const materialProperties = {
     reflectivity: 0.5
   },
   metal: {
-    roughness: 0.75,
+    roughness: 0.5,
     metalness: 0.5,
-    reflectivity: 1
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0
   },
   glass: {
     roughness: 0.5,
@@ -70,7 +75,7 @@ const setMaterial = (tags, parameters) => {
 const buildMeshMaterial = (tags) => {
   if (tags !== undefined) {
     const parameters = {};
-    setColor(tags, parameters);
+    setColor(tags, parameters, null);
     setMaterial(tags, parameters);
     if (Object.keys(parameters).length > 0) {
       return new THREE.MeshPhysicalMaterial(parameters);
@@ -200,7 +205,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           const dataset = {};
           const threejsGeometry = new THREE.Geometry();
           const material = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: THREE.VertexColors });
-          const color = setColor(tags).color;
+          const color = setColor(tags, {}, [0, 0, 0]).color;
           for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
             threejsGeometry.colors.push(color, color);
             threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
