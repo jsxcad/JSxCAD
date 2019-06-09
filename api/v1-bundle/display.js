@@ -17,17 +17,24 @@ const merge = (properties, parameters) => {
   }
 };
 
-const setColor = (tags, parameters) => {
-  const rgb = toRgb(tags, null);
-  if (rgb !== null) {
-    const [r, g, b] = rgb;
-    const color = ((r << 16) | (g << 8) | b) >>> 0;
-    parameters.color = color;
+const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
+  let rgb = toRgb(tags, null);
+  if (rgb === null) {
+    rgb = otherwise;
   }
+  const [r, g, b] = rgb;
+  const color = ((r << 16) | (g << 8) | b) >>> 0;
+  parameters.color = color;
+  return parameters;
 };
 
 const materialProperties = {
   paper: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5
+  },
+  wood: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5
@@ -156,7 +163,12 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     let viewerElement;
     const toName = (geometry) => {
       if (geometry.tags !== undefined && geometry.tags.length >= 1) {
-        return geometry.tags[0];
+        for (const tag of geometry.tags) {
+          console.log(`QQ/tag: ${tag}`);
+          if (tag.startsWith('user/')) {
+            return tag.substring(5);
+          }
+        }
       }
     };
     const updateDatasets = (geometry) => {
@@ -170,7 +182,10 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           scene.remove(mesh);
         }
         for (const controller of controllers) {
-          gui.remove(controller);
+          if (controller.ui === 'zap') {
+            throw Error('die');
+          }
+          gui.remove(controller.ui);
         }
       }
       // Build new datasets from the written data, and display them.
@@ -185,8 +200,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           const dataset = {};
           const threejsGeometry = new THREE.Geometry();
           const material = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: THREE.VertexColors });
+          const color = setColor(tags).color;
           for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
-            const color = new THREE.Color(Math.random(), Math.random(), Math.random());
             threejsGeometry.colors.push(color, color);
             threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
           }
@@ -227,10 +242,16 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
           if (dataset.name === undefined) { continue; }
           let controller = controllers[dataset.name];
           if (controller === undefined) {
-            controller = gui.add({ visible: true }, 'visible').name(`Show ${dataset.name}?`);
+            const ui = gui.add({ visible: true }, 'visible').name(`${dataset.name}`);
+            controller = { ui, datasets: [] };
             controllers[dataset.name] = controller;
+            controller.ui.listen()
+                .onChange((value) =>
+                  controller.datasets.forEach(dataset => {
+                    dataset.mesh.visible = value;
+                  }));
           }
-          controller.listen().onChange((value) => { dataset.mesh.visible = value; });
+          controller.datasets.push(dataset);
           dataset.controller = controller;
         }
       }

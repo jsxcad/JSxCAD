@@ -5,7 +5,7 @@ import { writeFile } from '@jsxcad/sys';
 
 export const installEditorCSS = (display) => {
   installCSSLink(document, 'https://codemirror.net/lib/codemirror.css');
-  installCSS(document, `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 20px; height: 100% }`);
+  installCSS(document, `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: "Corier Neu", monospace; font-size: 20px; height: 100% }`);
 };
 
 export const installEditor = ({ addPage, document, evaluator, initialScript, nextPage, lastPage }) => {
