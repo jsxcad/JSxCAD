@@ -50,18 +50,23 @@ const z0SurfaceToThreejsSurface = (surface) => {
   return { normals, positions };
 };
 
-export const toThreejsGeometry = (geometry) => {
+export const toThreejsGeometry = (geometry, supertags) => {
+  const tags = [...(supertags || []), ...(geometry.tags || [])];
   if (geometry.isThreejsGeometry) {
     return geometry;
   } else if (geometry.assembly) {
-    return { assembly: geometry.assembly.map(toThreejsGeometry), tags: geometry.tags, isThreejsGeometry: true };
+    return {
+      assembly: geometry.assembly.map(item => toThreejsGeometry(item, tags)),
+      tags: tags,
+      isThreejsGeometry: true
+    };
   } else if (geometry.paths) {
-    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: geometry.tags, isThreejsGeometry: true };
+    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: tags, isThreejsGeometry: true };
   } else if (geometry.points) {
-    return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: geometry.tags, isThreejsGeometry: true };
+    return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: tags, isThreejsGeometry: true };
   } else if (geometry.solid) {
-    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: geometry.tags, isThreejsGeometry: true };
+    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: tags, isThreejsGeometry: true };
   } else if (geometry.z0Surface) {
-    return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: geometry.tags, isThreejsGeometry: true };
+    return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: tags, isThreejsGeometry: true };
   }
 };
