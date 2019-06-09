@@ -47,7 +47,7 @@ const materialProperties = {
     metalness: 0.5,
     reflectivity: 0.9,
     clearCoat: 1,
-    clearCoatRoughness: 0,
+    clearCoatRoughness: 0
   },
   glass: {
     roughness: 0.5,
