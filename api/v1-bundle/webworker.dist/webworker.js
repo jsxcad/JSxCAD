@@ -18336,7 +18336,7 @@ return d[d.length-1];};return ", funcName].join("");
     eachItem(geometry,
              item => {
                if (item.points) {
-                 paths.push(item);
+                 clouds.push(item);
                }
              });
     return clouds;
