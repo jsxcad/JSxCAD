@@ -15,12 +15,12 @@ import { fromAngleRadians } from '@jsxcad/math-vec2';
  * const squarePoints = regularPolygon({ edges: 4 })
  * })
  */
-export const buildRegularPolygon = ({ edges = 32 }) => {
+export const buildRegularPolygon = ({ edges = 32 } = {}) => {
   let points = [];
   for (let i = 0; i < edges; i++) {
     let radians = 2 * Math.PI * i / edges;
-    let point = fromAngleRadians(radians);
-    points.push(point);
+    let [x, y] = fromAngleRadians(radians);
+    points.push([x, y, 0]);
   }
   return points;
 };

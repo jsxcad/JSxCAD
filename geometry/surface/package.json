@@ -24,9 +24,11 @@
     "@jsxcad/geometry-z0surface": "^0.0.75",
     "@jsxcad/math-mat4": "^0.0.75",
     "@jsxcad/math-plane": "^0.0.75",
-    "@jsxcad/math-poly3": "^0.0.75"
+    "@jsxcad/math-poly3": "^0.0.75",
+    "@jsxcad/math-vec3": "^0.0.75"
   },
   "devDependencies": {
+    "@jsxcad/algorithm-shape": "^0.0.75",
     "@jsxcad/data-shape": "^0.0.75",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",

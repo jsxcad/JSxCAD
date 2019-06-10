@@ -1,4 +1,5 @@
 import { canonicalize, rotateZ, scale, toPlane, transform } from './ops';
+import { cut, cutSurface } from './cut';
 
 import { assertCoplanar } from './assertCoplanar';
 import { eachPoint } from './eachPoint';
@@ -11,6 +12,8 @@ import { toGeneric } from './toGeneric';
 export {
   assertCoplanar,
   canonicalize,
+  cut,
+  cutSurface,
   eachPoint,
   flip,
   makeConvex,

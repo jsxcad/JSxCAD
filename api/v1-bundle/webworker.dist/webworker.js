@@ -7498,6 +7498,189 @@ return d[d.length-1];};return ", funcName].join("");
   // Transforms
   const transform$5 = (matrix, surface) => surface.map(polygon => transform$4(matrix, polygon));
 
+  const EPSILON = 1e-5;
+
+  const COPLANAR = 0; // Neither front nor back.
+  const FRONT = 1;
+  const BACK = 2;
+  const SPANNING = 3; // Both front and back.
+
+  const toType = (plane, point) => {
+    let t = signedDistanceToPoint(plane, point);
+    if (t < -EPSILON) {
+      return BACK;
+    } else if (t > EPSILON) {
+      return FRONT;
+    } else {
+      return COPLANAR;
+    }
+  };
+
+  const pointType = [];
+
+  const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, frontEdges, backEdges, surface) => {
+    let coplanarFrontPolygons;
+    let coplanarBackPolygons;
+    let frontPolygons;
+    let backPolygons;
+    for (let polygon of surface) {
+      pointType.length = 0;
+      let polygonType = COPLANAR;
+      if (!equals$2(toPlane(polygon), plane)) {
+        for (const point of polygon) {
+          const type = toType(plane, point);
+          polygonType |= type;
+          pointType.push(type);
+        }
+      }
+
+      // Put the polygon in the correct list, splitting it when necessary.
+      switch (polygonType) {
+        case COPLANAR: {
+          if (dot(plane, toPlane(polygon)) > 0) {
+            if (coplanarFrontPolygons === undefined) {
+              coplanarFrontPolygons = [];
+            }
+            coplanarFrontPolygons.push(polygon);
+          } else {
+            if (coplanarBackPolygons === undefined) {
+              coplanarBackPolygons = [];
+            }
+            coplanarBackPolygons.push(polygon);
+          }
+          break;
+        }
+        case FRONT: {
+          if (frontPolygons === undefined) {
+            frontPolygons = [];
+          }
+          frontPolygons.push(polygon);
+          let startPoint = polygon[polygon.length - 1];
+          let startType = pointType[polygon.length - 1];
+          for (let nth = 0; nth < polygon.length; nth++) {
+            const endPoint = polygon[nth];
+            const endType = pointType[nth];
+            if (startType === COPLANAR && endType === COPLANAR) {
+              frontEdges.push([startPoint, endPoint]);
+            }
+            startPoint = endPoint;
+            startType = endType;
+          }
+          break;
+        }
+        case BACK: {
+          if (backPolygons === undefined) {
+            backPolygons = [];
+          }
+          backPolygons.push(polygon);
+          let startPoint = polygon[polygon.length - 1];
+          let startType = pointType[polygon.length - 1];
+          for (let nth = 0; nth < polygon.length; nth++) {
+            const endPoint = polygon[nth];
+            const endType = pointType[nth];
+            if (startType === COPLANAR && endType === COPLANAR) {
+              backEdges.push([startPoint, endPoint]);
+            }
+            startPoint = endPoint;
+            startType = endType;
+          }
+          break;
+        }
+        case SPANNING: {
+          // Make a local copy so that mutation does not propagate.
+          polygon = polygon.slice();
+          let backPoints = [];
+          let frontPoints = [];
+          // Add the colinear spanning point to the polygon.
+          {
+            let last = polygon.length - 1;
+            for (let current = 0; current < polygon.length; last = current++) {
+              const lastType = pointType[last];
+              const lastPoint = polygon[last];
+              if ((lastType | pointType[current]) === SPANNING) {
+                // Break spanning segments at the point of intersection.
+                const rawSpanPoint = splitLineSegmentByPlane(plane, lastPoint, polygon[current]);
+                const spanPoint = subtract(rawSpanPoint, scale(signedDistanceToPoint(toPlane(polygon), rawSpanPoint), plane));
+                // Note: Destructive modification of polygon here.
+                polygon.splice(current, 0, spanPoint);
+                pointType.splice(current, 0, COPLANAR);
+              }
+            }
+          }
+          // Spanning points have been inserted.
+          {
+            let last = polygon.length - 1;
+            let lastCoplanar = polygon[pointType.lastIndexOf(COPLANAR)];
+            for (let current = 0; current < polygon.length; last = current++) {
+              const point = polygon[current];
+              const type = pointType[current];
+              const lastType = pointType[last];
+              const lastPoint = polygon[last];
+              if (type !== FRONT) {
+                backPoints.push(point);
+              }
+              if (type !== BACK) {
+                frontPoints.push(point);
+              }
+              if (type === COPLANAR) {
+                if (lastType === COPLANAR) {
+                  frontEdges.push([lastPoint, point]);
+                  backEdges.push([lastPoint, point]);
+                } else if (lastType === BACK) {
+                  frontEdges.push([lastCoplanar, point]);
+                } else if (lastType === FRONT) {
+                  backEdges.push([lastCoplanar, point]);
+                }
+                lastCoplanar = point;
+              }
+            }
+          }
+          if (frontPoints.length >= 3) {
+          // Add the polygon that sticks out the front of the plane.
+            if (frontPolygons === undefined) {
+              frontPolygons = [];
+            }
+            frontPolygons.push(frontPoints);
+          }
+          if (backPoints.length >= 3) {
+          // Add the polygon that sticks out the back of the plane.
+            if (backPolygons === undefined) {
+              backPolygons = [];
+            }
+            backPolygons.push(backPoints);
+          }
+          break;
+        }
+      }
+    }
+    if (coplanarFrontPolygons !== undefined) {
+      coplanarFrontSurfaces.push(coplanarFrontPolygons);
+    }
+    if (coplanarBackPolygons !== undefined) {
+      coplanarBackSurfaces.push(coplanarBackPolygons);
+    }
+    if (frontPolygons !== undefined) {
+      frontSurfaces.push(frontPolygons);
+    }
+    if (backPolygons !== undefined) {
+      backSurfaces.push(backPolygons);
+    }
+  };
+
+  const cut = (plane, surface) => {
+    const front = [];
+    const back = [];
+    const frontEdges = [];
+    const backEdges = [];
+
+    cutSurface(plane, front, back, front, back, frontEdges, backEdges, surface);
+    if (frontEdges.some(edge => edge[1] === undefined)) {
+      throw Error(`die/end/missing: ${JSON.stringify(frontEdges)}`);
+    }
+
+    return [[].concat(...front), [].concat(...back)];
+  };
+
   // import { isCoplanar } from '@jsxcad/math-poly3';
 
   const eachPoint$2 = (options = {}, thunk, surface) => {
@@ -13707,24 +13890,24 @@ return d[d.length-1];};return ", funcName].join("");
     return loops;
   };
 
-  const EPSILON = 1e-5;
+  const EPSILON$1 = 1e-5;
 
   // Point Classification.
-  const COPLANAR = 0;
-  const FRONT = 1;
-  const BACK = 2;
+  const COPLANAR$1 = 0;
+  const FRONT$1 = 1;
+  const BACK$1 = 2;
 
   // Plane Properties.
   const W$2 = 3;
 
-  const toType = (plane, point) => {
+  const toType$1 = (plane, point) => {
     let t = dot(plane, point) - plane[W$2];
-    if (t < -EPSILON) {
-      return BACK;
-    } else if (t > EPSILON) {
-      return FRONT;
+    if (t < -EPSILON$1) {
+      return BACK$1;
+    } else if (t > EPSILON$1) {
+      return FRONT$1;
     } else {
-      return COPLANAR;
+      return COPLANAR$1;
     }
   };
 
@@ -13750,51 +13933,51 @@ return d[d.length-1];};return ", funcName].join("");
     for (let nth = 0; nth < triangles.length; nth++) {
       const triangle = triangles[nth];
       const [a, b, c] = triangle;
-      const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];
+      const [aType, bType, cType] = [toType$1(plane, a), toType$1(plane, b), toType$1(plane, c)];
 
       switch (aType) {
-        case FRONT:
+        case FRONT$1:
           switch (bType) {
-            case FRONT:
+            case FRONT$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // No intersection.
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // Corner touches.
                   break;
-                case BACK:
+                case BACK$1:
                   // b-c down c-a up
                   addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));
                   break;
               }
               break;
-            case COPLANAR:
+            case COPLANAR$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // Corner touches.
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // b-c along plane.
                   addEdge(b, c);
                   break;
-                case BACK:
+                case BACK$1:
                   // down at b, up c-a.
                   addEdge(b, spanPoint(plane, c, a));
                   break;
               }
               break;
-            case BACK:
+            case BACK$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // a-b down, b-c up.
                   addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // a-b down, c up.
                   addEdge(spanPoint(plane, a, b), c);
                   break;
-                case BACK:
+                case BACK$1:
                   // a-b down, c-a up.
                   addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));
                   break;
@@ -13802,95 +13985,95 @@ return d[d.length-1];};return ", funcName].join("");
               break;
           }
           break;
-        case COPLANAR:
+        case COPLANAR$1:
           switch (bType) {
-            case FRONT:
+            case FRONT$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // Corner touches.
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // c-a along plane.
                   addEdge(c, a);
                   break;
-                case BACK:
+                case BACK$1:
                   // down at b-c, up at a
                   addEdge(spanPoint(plane, b, c), a);
                   break;
               }
               break;
-            case COPLANAR:
+            case COPLANAR$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // a-b along plane.
                   addEdge(a, b);
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // Entirely coplanar -- doesn't cut.
                   break;
-                case BACK:
+                case BACK$1:
                   // Wrong half-space.
                   break;
               }
               break;
-            case BACK:
+            case BACK$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // down at a, up at b-c.
                   addEdge(a, spanPoint(plane, b, c));
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // Wrong half-space.
                   break;
-                case BACK:
+                case BACK$1:
                   // Wrong half-space.
                   break;
               }
               break;
           }
           break;
-        case BACK:
+        case BACK$1:
           switch (bType) {
-            case FRONT:
+            case FRONT$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // down at c-a, up at a-b
                   addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // down at c, up at a-b
                   addEdge(c, spanPoint(plane, a, b));
                   break;
-                case BACK:
+                case BACK$1:
                   // down at b-c, up at a-b.
                   addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));
                   break;
               }
               break;
-            case COPLANAR:
+            case COPLANAR$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // down at c-a, up at b.
                   addEdge(spanPoint(plane, c, a), b);
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // Wrong half-space.
                   break;
-                case BACK:
+                case BACK$1:
                   // Wrong half-space.
                   break;
               }
               break;
-            case BACK:
+            case BACK$1:
               switch (cType) {
-                case FRONT:
+                case FRONT$1:
                   // down at c-a, up at b-c.
                   addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));
                   break;
-                case COPLANAR:
+                case COPLANAR$1:
                   // Wrong half-space.
                   break;
-                case BACK:
+                case BACK$1:
                   // Wrong half-space.
                   break;
               }
@@ -17416,176 +17599,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const translate$2 = (vector, polygons) => transform$6(fromTranslation(vector), polygons);
 
-  const EPSILON$1 = 1e-5;
-
-  const COPLANAR$1 = 0; // Neither front nor back.
-  const FRONT$1 = 1;
-  const BACK$1 = 2;
-  const SPANNING = 3; // Both front and back.
-
-  const toType$1 = (plane, point) => {
-    let t = signedDistanceToPoint(plane, point);
-    if (t < -EPSILON$1) {
-      return BACK$1;
-    } else if (t > EPSILON$1) {
-      return FRONT$1;
-    } else {
-      return COPLANAR$1;
-    }
-  };
-
-  const pointType = [];
-
-  const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, frontEdges, backEdges, surface) => {
-    let coplanarFrontPolygons;
-    let coplanarBackPolygons;
-    let frontPolygons;
-    let backPolygons;
-    for (let polygon of surface) {
-      pointType.length = 0;
-      let polygonType = COPLANAR$1;
-      if (!equals$2(toPlane(polygon), plane)) {
-        for (const point of polygon) {
-          const type = toType$1(plane, point);
-          polygonType |= type;
-          pointType.push(type);
-        }
-      }
-
-      // Put the polygon in the correct list, splitting it when necessary.
-      switch (polygonType) {
-        case COPLANAR$1: {
-          if (dot(plane, toPlane(polygon)) > 0) {
-            if (coplanarFrontPolygons === undefined) {
-              coplanarFrontPolygons = [];
-            }
-            coplanarFrontPolygons.push(polygon);
-          } else {
-            if (coplanarBackPolygons === undefined) {
-              coplanarBackPolygons = [];
-            }
-            coplanarBackPolygons.push(polygon);
-          }
-          break;
-        }
-        case FRONT$1: {
-          if (frontPolygons === undefined) {
-            frontPolygons = [];
-          }
-          frontPolygons.push(polygon);
-          let startPoint = polygon[polygon.length - 1];
-          let startType = pointType[polygon.length - 1];
-          for (let nth = 0; nth < polygon.length; nth++) {
-            const endPoint = polygon[nth];
-            const endType = pointType[nth];
-            if (startType === COPLANAR$1 && endType === COPLANAR$1) {
-              frontEdges.push([startPoint, endPoint]);
-            }
-            startPoint = endPoint;
-            startType = endType;
-          }
-          break;
-        }
-        case BACK$1: {
-          if (backPolygons === undefined) {
-            backPolygons = [];
-          }
-          backPolygons.push(polygon);
-          let startPoint = polygon[polygon.length - 1];
-          let startType = pointType[polygon.length - 1];
-          for (let nth = 0; nth < polygon.length; nth++) {
-            const endPoint = polygon[nth];
-            const endType = pointType[nth];
-            if (startType === COPLANAR$1 && endType === COPLANAR$1) {
-              backEdges.push([startPoint, endPoint]);
-            }
-            startPoint = endPoint;
-            startType = endType;
-          }
-          break;
-        }
-        case SPANNING: {
-          // Make a local copy so that mutation does not propagate.
-          polygon = polygon.slice();
-          let backPoints = [];
-          let frontPoints = [];
-          // Add the colinear spanning point to the polygon.
-          {
-            let last = polygon.length - 1;
-            for (let current = 0; current < polygon.length; last = current++) {
-              const lastType = pointType[last];
-              const lastPoint = polygon[last];
-              if ((lastType | pointType[current]) === SPANNING) {
-                // Break spanning segments at the point of intersection.
-                const rawSpanPoint = splitLineSegmentByPlane(plane, lastPoint, polygon[current]);
-                const spanPoint = subtract(rawSpanPoint, scale(signedDistanceToPoint(toPlane(polygon), rawSpanPoint), plane));
-                // Note: Destructive modification of polygon here.
-                polygon.splice(current, 0, spanPoint);
-                pointType.splice(current, 0, COPLANAR$1);
-              }
-            }
-          }
-          // Spanning points have been inserted.
-          {
-            let last = polygon.length - 1;
-            let lastCoplanar = polygon[pointType.lastIndexOf(COPLANAR$1)];
-            for (let current = 0; current < polygon.length; last = current++) {
-              const point = polygon[current];
-              const type = pointType[current];
-              const lastType = pointType[last];
-              const lastPoint = polygon[last];
-              if (type !== FRONT$1) {
-                backPoints.push(point);
-              }
-              if (type !== BACK$1) {
-                frontPoints.push(point);
-              }
-              if (type === COPLANAR$1) {
-                if (lastType === COPLANAR$1) {
-                  frontEdges.push([lastPoint, point]);
-                  backEdges.push([lastPoint, point]);
-                } else if (lastType === BACK$1) {
-                  frontEdges.push([lastCoplanar, point]);
-                } else if (lastType === FRONT$1) {
-                  backEdges.push([lastCoplanar, point]);
-                }
-                lastCoplanar = point;
-              }
-            }
-          }
-          if (frontPoints.length >= 3) {
-          // Add the polygon that sticks out the front of the plane.
-            if (frontPolygons === undefined) {
-              frontPolygons = [];
-            }
-            frontPolygons.push(frontPoints);
-          }
-          if (backPoints.length >= 3) {
-          // Add the polygon that sticks out the back of the plane.
-            if (backPolygons === undefined) {
-              backPolygons = [];
-            }
-            backPolygons.push(backPoints);
-          }
-          break;
-        }
-      }
-    }
-    if (coplanarFrontPolygons !== undefined) {
-      coplanarFrontSurfaces.push(coplanarFrontPolygons);
-    }
-    if (coplanarBackPolygons !== undefined) {
-      coplanarBackSurfaces.push(coplanarBackPolygons);
-    }
-    if (frontPolygons !== undefined) {
-      frontSurfaces.push(frontPolygons);
-    }
-    if (backPolygons !== undefined) {
-      backSurfaces.push(backPolygons);
-    }
-  };
-
-  const cut = (plane, solid) => {
+  const cut$1 = (plane, solid) => {
     const front = [];
     const back = [];
     const frontEdges = [];
@@ -17609,19 +17623,6 @@ return d[d.length-1];};return ", funcName].join("");
 
     return [front, back];
   };
-
-  /**
-   *
-   * FIX
-   *
-   * Some problematic examples -- try with different resolutions to break tess2.
-   *
-   * const [a, b] = cylinder({ radius: 10, height: 10, resolution: 6 }).rotateY(0).cut();
-   * assemble(a.translate(0, 0, 1),
-   *          b.translate(0, 0, -1),
-   *          cylinder({ radius: 5, height: 20, resolution: 6 }).drop());
-   *
-   **/
 
   const eachPoint$4 = (options = {}, thunk, solid) => {
     for (const surface of solid) {
@@ -19352,12 +19353,12 @@ return d[d.length-1];};return ", funcName].join("");
    * const squarePoints = regularPolygon({ edges: 4 })
    * })
    */
-  const buildRegularPolygon = ({ edges = 32 }) => {
+  const buildRegularPolygon = ({ edges = 32 } = {}) => {
     let points = [];
     for (let i = 0; i < edges; i++) {
       let radians = 2 * Math.PI * i / edges;
-      let point = fromAngleRadians(radians);
-      points.push(point);
+      let [x, y] = fromAngleRadians(radians);
+      points.push([x, y, 0]);
     }
     return points;
   };
@@ -19987,7 +19988,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    * # Cut
    *
-   * Cuts a solid into two halves at z = 0, and returns each.
+   * Cuts a shape into two halves at z = 0, and returns each.
    *
    * ::: illustration { "view": { "position": [40, 40, 60] } }
    * ```
@@ -20010,22 +20011,35 @@ return d[d.length-1];};return ", funcName].join("");
    *          bottom.translate(0, 0, -2));
    * ```
    * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * const [top, bottom] = circle(10).rotateY(90).cut();
+   * assemble(top.translate(0, 0, 2),
+   *          bottom.translate(0, 0, -2));
+   * ```
+   * :::
    *
    **/
 
-  const cut$1 = ({ z = 0 } = {}, shape) => {
-    const solids = getSolids(shape.toKeptGeometry());
+  const cut$2 = ({ z = 0 } = {}, shape) => {
     const fronts = [];
     const backs = [];
-    for (const { solid } of solids) {
-      const [front, back] = cut(fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), solid);
+    const keptGeometry = shape.toKeptGeometry();
+    for (const { solid } of getSolids(keptGeometry)) {
+      const [front, back] = cut$1(fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), solid);
       fronts.push(Shape.fromSolid(front));
       backs.push(Shape.fromSolid(back));
+    }
+    // FIX: Generalized surfaces.
+    for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
+      const [front, back] = cut(fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), z0Surface);
+      fronts.push(Shape.fromPathsToZ0Surface(front));
+      backs.push(Shape.fromPathsToZ0Surface(back));
     }
     return [assemble$1(...fronts), assemble$1(...backs)];
   };
 
-  const method$9 = function (options) { return cut$1(options, this); };
+  const method$9 = function (options) { return cut$2(options, this); };
 
   Shape.prototype.cut = method$9;
 
@@ -42727,6 +42741,43 @@ return d[d.length-1];};return ", funcName].join("");
   tetrahedron.fromValue = fromValue$b;
   tetrahedron.fromRadius = fromRadius$4;
   tetrahedron.fromDiameter = fromDiameter$4;
+
+  /**
+   *
+   * # Torus
+   *
+   * ::: illustration { "view": { "position": [-80, -80, 80] } }
+   * ```
+   * torus({ thickness: 5,
+   *         radius: 20 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-80, -80, 80] } }
+   * ```
+   * torus({ thickness: 5,
+   *         radius: 20,
+   *         sides: 4 })
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-80, -80, 80] } }
+   * ```
+   * torus({ thickness: 5,
+   *         radius: 20,
+   *         sides: 4,
+   *         rotation: 45 })
+   * ```
+   * :::
+   *
+   **/
+
+  const torus = ({ thickness = 1, radius = 1, segments = 32, sides = 32, rotation = 0 }) => {
+    const piece = circle({ radius: thickness, sides }).rotateZ(rotation).rotateX(90).translate(radius);
+    const pieces = [];
+    for (let angle = 0; angle < 361; angle += 360 / segments) {
+      pieces.push(piece.rotateZ(angle));
+    }
+    return chainHull(...pieces);
+  };
 
   /**
    *
@@ -93801,7 +93852,7 @@ return d[d.length-1];};return ", funcName].join("");
     color: color,
     cos: cos,
     cube: cube,
-    cut: cut$1,
+    cut: cut$2,
     cursor: cursor,
     cylinder: cylinder,
     difference: difference$5,
@@ -93843,6 +93894,7 @@ return d[d.length-1];};return ", funcName].join("");
     square: square,
     svgPath: svgPath,
     tetrahedron: tetrahedron,
+    torus: torus,
     translate: translate$3,
     triangle: triangle,
     union: union$6,

@@ -1,14 +1,16 @@
+import { getSolids, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { cut as cutSolid } from '@jsxcad/geometry-solid';
+import { cut as cutSurface } from '@jsxcad/geometry-surface';
 import { fromPoints } from '@jsxcad/math-plane';
-import { getSolids } from '@jsxcad/geometry-tagged';
 
 /**
  *
  * # Cut
  *
- * Cuts a solid into two halves at z = 0, and returns each.
+ * Cuts a shape into two halves at z = 0, and returns each.
  *
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
@@ -31,17 +33,31 @@ import { getSolids } from '@jsxcad/geometry-tagged';
  *          bottom.translate(0, 0, -2));
  * ```
  * :::
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * assemble(circle(10),
+ *          cylinder(5, 10))
+ *   .rotateY(90)
+ *   .cut()[0]
+ * ```
+ * :::
  *
  **/
 
 export const cut = ({ z = 0 } = {}, shape) => {
-  const solids = getSolids(shape.toKeptGeometry());
   const fronts = [];
   const backs = [];
-  for (const { solid } of solids) {
+  const keptGeometry = shape.toKeptGeometry();
+  for (const { solid } of getSolids(keptGeometry)) {
     const [front, back] = cutSolid(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), solid);
     fronts.push(Shape.fromSolid(front));
     backs.push(Shape.fromSolid(back));
+  }
+  // FIX: Generalized surfaces.
+  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
+    const [front, back] = cutSurface(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), z0Surface);
+    fronts.push(Shape.fromPathsToZ0Surface(front));
+    backs.push(Shape.fromPathsToZ0Surface(back));
   }
   return [assemble(...fronts), assemble(...backs)];
 };
