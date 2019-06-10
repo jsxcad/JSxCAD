@@ -8,14 +8,14 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * cube().writeStl('cube.stl');
- * readStl({ path: 'cube.stl' });
+ * await cube().writeStl('cube.stl');
+ * await readStl({ path: 'cube.stl' });
  * ```
  * :::
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * writeStl({ path: 'cube.stl' }, cube());
- * readStl({ path: 'cube.stl' });
+ * await writeStl({ path: 'cube.stl' }, cube());
+ * await readStl({ path: 'cube.stl' });
  * ```
  * :::
  *
@@ -27,7 +27,7 @@ export const writeStl = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  return writeFile({ preview: true, geometry }, path, toStl(options, geometry));
+  writeFile({ preview: true, geometry }, path, toStl(options, geometry));
 };
 
 const method = function (options = {}) { return writeStl(options, this); };

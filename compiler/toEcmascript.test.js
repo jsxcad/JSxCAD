@@ -7,11 +7,11 @@ test('Wrap and return.', t => {
                                    let a = 10;
                                    circle(foo(a));`);
   t.is(ecmascript,
-       `const foo = async x => x + 1;
+       `const foo = (x) => x + 1;
 
 const main = async () => {
     let a = 10;
-    return (await circle((await foo(a))));;
+    return circle(foo(a));;
 };
 
 return {
@@ -38,7 +38,19 @@ test('Bind await to calls properly.', t => {
   const ecmascript = toEcmascript({}, `foo().bar()`);
   t.is(ecmascript,
        `const main = async () => {
-    return (await (await foo()).bar());
+    return foo().bar();
+};
+
+return {
+    main: main
+};`);
+});
+
+test('Top level await.', t => {
+  const ecmascript = toEcmascript({}, `await foo()`);
+  t.is(ecmascript,
+       `const main = async () => {
+    return await foo();
 };
 
 return {

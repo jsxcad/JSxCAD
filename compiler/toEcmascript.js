@@ -1,8 +1,19 @@
+import { parse } from '@babel/parser';
 import recast from 'recast';
 import types from 'ast-types';
 
 export const toEcmascript = (options, script) => {
-  let ast = recast.parse(script);
+  let ast = recast.parse(script,
+                         {
+                           parser: {
+                             parse: (script) => parse(script,
+                                                      {
+                                                        allowAwaitOutsideFunction: true,
+                                                        allowReturnOutsideFunction: true,
+                                                        sourceType: 'module',
+                                                      })
+                           }
+                         });
 
   const exportNames = [];
   const expressions = [];
@@ -65,7 +76,8 @@ export const toEcmascript = (options, script) => {
             body: expressions
           },
           generator: false,
-          expression: true
+          expression: true,
+          async: true
         }
       }],
       kind: 'const'
@@ -94,12 +106,13 @@ export const toEcmascript = (options, script) => {
   };
 
   // Make arrow functions async, and await all expressions.
+  /*
   types.visit(ast, {
     visitArrowFunctionExpression: function (path) {
       this.traverse(path);
       path.node.async = true;
     },
-    visitExpression: function (path) {
+    visitCallExpression: function (path) {
       this.traverse(path);
       path.replace({
         type: 'ParenthesizedExpression',
@@ -110,6 +123,7 @@ export const toEcmascript = (options, script) => {
       });
     }
   });
+  */
 
   return recast.print(ast).code;
 };

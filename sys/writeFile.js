@@ -6,25 +6,25 @@ import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { base } from './filesystem';
 import { dirname } from 'path';
+import { fromByteArray } from 'base64-js';
 import { getFile } from './files';
 import localForage from 'localforage';
-import { fromByteArray } from 'base64-js';
 
 const { promises } = fs;
 
 // FIX Convert data by representation.
 
 export const writeFile = async (options, path, data) => {
+  data = await data;
+
   const { as = 'utf8', ephemeral } = options;
-  if (as === undefined || as == 'bytes') {
+  if (as === 'bytes') {
   } else {
     data = new TextEncoder(as).encode(data);
   }
   if (isWebWorker) {
     return self.ask({ writeFile: { options, path, data: await data } });
   }
-
-  data = await data;
   const file = getFile(options, path);
   file.data = data;
 

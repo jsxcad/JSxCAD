@@ -6,14 +6,14 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
-import { Buffer } from 'buffer';
 import { base } from './filesystem';
 import { getFile } from './files';
+import { isBase64 } from 'is-base64';
 import localForage from 'localforage';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
-import { writeFile } from './writeFile';
 import { toByteArray } from 'base64-js';
+import { writeFile } from './writeFile';
 
 const { promises } = fs;
 
@@ -33,7 +33,11 @@ const getFileFetcher = async () => {
     return async (path) => {
       const data = await localForage.getItem(`file/${path}`);
       if (data !== null) {
-        return toByteArray(data);
+        if (isBase64(data)) {
+          return toByteArray(data);
+        } else {
+          return new TextEncoder('utf8').encode(data);
+        }
       }
     };
   } else {
@@ -60,7 +64,7 @@ const fetchSources = async (options = {}, sources) => {
       log(`# Fetching ${source.url}`);
       const response = await fetchUrl(source.url);
       if (response.ok) {
-        return await response.arrayBuffer();
+        return new Uint8Array(await response.arrayBuffer());
       }
     } else if (source.file !== undefined) {
       try {
@@ -95,9 +99,11 @@ export const readFile = async (options, path) => {
       file.data = await file.data;
     }
   }
-  if (as === 'bytes' || as === undefined) {
-    return file.data;
-  } else {
-    return new TextDecoder('utf8').decode(file.data);;
+  if (file.data !== undefined) {
+    if (as === 'bytes') {
+      return file.data;
+    } else {
+      return new TextDecoder('utf8').decode(file.data);
+    }
   }
-}
+};

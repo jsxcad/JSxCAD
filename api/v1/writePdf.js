@@ -11,7 +11,7 @@ import { writeFile } from '@jsxcad/sys';
  * ```
  *
  * ```
- * writePdf({ path: 'cube.pdf' }, cube().section());
+ * await writePdf({ path: 'cube.pdf' }, cube().section());
  * ```
  *
  **/
@@ -24,7 +24,7 @@ export const writePdf = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toKeptGeometry();
   const pdf = await toPdf({ preview: true, ...options }, geometry);
-  return writeFile({ geometry, preview: true }, path, pdf);
+  writeFile({ geometry, preview: true }, path, pdf);
 };
 
 const method = function (options = {}) { return writePdf(options, this); };

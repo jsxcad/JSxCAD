@@ -13,14 +13,14 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [0, -1, 2500] } }
  * ```
- * cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
- * readSvg({ path: 'svg/cube3.svg' })
+ * await cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
+ * await readSvg({ path: 'svg/cube3.svg' })
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 2500] } }
  * ```
- * writeSvgPhoto({ path: 'svg/cube4.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } }, cube());
- * readSvg({ path: 'svg/cube4.svg' })
+ * await writeSvgPhoto({ path: 'svg/cube4.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } }, cube());
+ * await readSvg({ path: 'svg/cube4.svg' })
  * ```
  * :::
  *
@@ -32,7 +32,7 @@ export const writeSvgPhoto = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  return writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
+  writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
 };
 
 const method = function (options = {}) { return writeSvgPhoto(options, this); };
