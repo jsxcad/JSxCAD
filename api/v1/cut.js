@@ -44,18 +44,18 @@ import { fromPoints } from '@jsxcad/math-plane';
  *
  **/
 
-export const cut = ({ z = 0 } = {}, shape) => {
+export const cut = (plane = [0, 0, 1, 0], shape) => {
   const fronts = [];
   const backs = [];
   const keptGeometry = shape.toKeptGeometry();
   for (const { solid } of getSolids(keptGeometry)) {
-    const [front, back] = cutSolid(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), solid);
+    const [front, back] = cutSolid(plane, solid);
     fronts.push(Shape.fromSolid(front));
     backs.push(Shape.fromSolid(back));
   }
   // FIX: Generalized surfaces.
   for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    const [front, back] = cutSurface(fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), z0Surface);
+    const [front, back] = cutSurface(plane, z0Surface);
     fronts.push(Shape.fromPathsToZ0Surface(front));
     backs.push(Shape.fromPathsToZ0Surface(back));
   }

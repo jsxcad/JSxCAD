@@ -7,6 +7,8 @@
  * the api uses.
  */
 
+import { planeX, planeY, planeZ } from './plane';
+
 import { Shape } from './Shape';
 import { above } from './above';
 import { acos } from './acos';
@@ -110,6 +112,9 @@ export {
   microGearMotor,
   minkowski,
   outline,
+  planeX,
+  planeY,
+  planeZ,
   point,
   points,
   polygon,

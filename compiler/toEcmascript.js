@@ -93,17 +93,13 @@ export const toEcmascript = (options, script) => {
     body: out
   };
 
-  // Make arrow functions async.
-  // Await on calls.
-  // FIX: assemble(...x.map(f => f + 1)) breaks because it doesn't realize that
-  // it's getting promises.
-  // Either await all arguments, or find a different approach.
+  // Make arrow functions async, and await all expressions.
   types.visit(ast, {
     visitArrowFunctionExpression: function (path) {
       this.traverse(path);
       path.node.async = true;
     },
-    visitCallExpression: function (path) {
+    visitExpression: function (path) {
       this.traverse(path);
       path.replace({
         type: 'ParenthesizedExpression',
@@ -114,5 +110,6 @@ export const toEcmascript = (options, script) => {
       });
     }
   });
+
   return recast.print(ast).code;
 };

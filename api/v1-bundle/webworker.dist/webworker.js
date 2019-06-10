@@ -18670,6 +18670,36 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # Plane
+   *
+   * Generates a plane with the given constraints.
+   *
+   * ::: illustration { "view": { "position": [10, 10, 10] } }
+   * ```
+   * sphere(20).cut(planeX())[0];
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere(20).cut(planeY(5))[0];
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [80, 80, 80] } }
+   * ```
+   * sphere(20).cut(planeZ(-5))[0];
+   * ```
+   * :::
+   *
+   **/
+
+  // Plane Interfaces.
+
+  const planeX = (x = 0) => fromPoints$1([x, 0, 0], [x, 1, 0], [x, 0, 1]);
+  const planeY = (y = 0) => fromPoints$1([1, y, 0], [0, y, 0], [0, y, 1]);
+  const planeZ = (z = 0) => fromPoints$1([1, 0, z], [0, 1, z], [0, 0, z]);
+
+  /**
+   *
    * # Assemble
    *
    * Produces an assembly of shapes that can be manipulated as a single shape.
@@ -20013,26 +20043,27 @@ return d[d.length-1];};return ", funcName].join("");
    * :::
    * ::: illustration { "view": { "position": [40, 40, 60] } }
    * ```
-   * const [top, bottom] = circle(10).rotateY(90).cut();
-   * assemble(top.translate(0, 0, 2),
-   *          bottom.translate(0, 0, -2));
+   * assemble(circle(10),
+   *          cylinder(5, 10))
+   *   .rotateY(90)
+   *   .cut()[0]
    * ```
    * :::
    *
    **/
 
-  const cut$2 = ({ z = 0 } = {}, shape) => {
+  const cut$2 = (plane = [0, 0, 1, 0], shape) => {
     const fronts = [];
     const backs = [];
     const keptGeometry = shape.toKeptGeometry();
     for (const { solid } of getSolids(keptGeometry)) {
-      const [front, back] = cut$1(fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), solid);
+      const [front, back] = cut$1(plane, solid);
       fronts.push(Shape.fromSolid(front));
       backs.push(Shape.fromSolid(back));
     }
     // FIX: Generalized surfaces.
     for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-      const [front, back] = cut(fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), z0Surface);
+      const [front, back] = cut(plane, z0Surface);
       fronts.push(Shape.fromPathsToZ0Surface(front));
       backs.push(Shape.fromPathsToZ0Surface(back));
     }
@@ -23675,6 +23706,147 @@ return d[d.length-1];};return ", funcName].join("");
   });
   });
 
+  var toByteArray_1 = toByteArray$1;
+  var fromByteArray_1 = fromByteArray$1;
+
+  var lookup$1 = [];
+  var revLookup$1 = [];
+  var Arr$1 = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+
+  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  for (var i = 0, len = code.length; i < len; ++i) {
+    lookup$1[i] = code[i];
+    revLookup$1[code.charCodeAt(i)] = i;
+  }
+
+  // Support decoding URL-safe base64 strings, as Node.js does.
+  // See: https://en.wikipedia.org/wiki/Base64#URL_applications
+  revLookup$1['-'.charCodeAt(0)] = 62;
+  revLookup$1['_'.charCodeAt(0)] = 63;
+
+  function getLens (b64) {
+    var len = b64.length;
+
+    if (len % 4 > 0) {
+      throw new Error('Invalid string. Length must be a multiple of 4')
+    }
+
+    // Trim off extra bytes after placeholder bytes are found
+    // See: https://github.com/beatgammit/base64-js/issues/42
+    var validLen = b64.indexOf('=');
+    if (validLen === -1) validLen = len;
+
+    var placeHoldersLen = validLen === len
+      ? 0
+      : 4 - (validLen % 4);
+
+    return [validLen, placeHoldersLen]
+  }
+
+  function _byteLength (b64, validLen, placeHoldersLen) {
+    return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+  }
+
+  function toByteArray$1 (b64) {
+    var tmp;
+    var lens = getLens(b64);
+    var validLen = lens[0];
+    var placeHoldersLen = lens[1];
+
+    var arr = new Arr$1(_byteLength(b64, validLen, placeHoldersLen));
+
+    var curByte = 0;
+
+    // if there are placeholders, only get up to the last complete 4 chars
+    var len = placeHoldersLen > 0
+      ? validLen - 4
+      : validLen;
+
+    for (var i = 0; i < len; i += 4) {
+      tmp =
+        (revLookup$1[b64.charCodeAt(i)] << 18) |
+        (revLookup$1[b64.charCodeAt(i + 1)] << 12) |
+        (revLookup$1[b64.charCodeAt(i + 2)] << 6) |
+        revLookup$1[b64.charCodeAt(i + 3)];
+      arr[curByte++] = (tmp >> 16) & 0xFF;
+      arr[curByte++] = (tmp >> 8) & 0xFF;
+      arr[curByte++] = tmp & 0xFF;
+    }
+
+    if (placeHoldersLen === 2) {
+      tmp =
+        (revLookup$1[b64.charCodeAt(i)] << 2) |
+        (revLookup$1[b64.charCodeAt(i + 1)] >> 4);
+      arr[curByte++] = tmp & 0xFF;
+    }
+
+    if (placeHoldersLen === 1) {
+      tmp =
+        (revLookup$1[b64.charCodeAt(i)] << 10) |
+        (revLookup$1[b64.charCodeAt(i + 1)] << 4) |
+        (revLookup$1[b64.charCodeAt(i + 2)] >> 2);
+      arr[curByte++] = (tmp >> 8) & 0xFF;
+      arr[curByte++] = tmp & 0xFF;
+    }
+
+    return arr
+  }
+
+  function tripletToBase64$1 (num) {
+    return lookup$1[num >> 18 & 0x3F] +
+      lookup$1[num >> 12 & 0x3F] +
+      lookup$1[num >> 6 & 0x3F] +
+      lookup$1[num & 0x3F]
+  }
+
+  function encodeChunk$1 (uint8, start, end) {
+    var tmp;
+    var output = [];
+    for (var i = start; i < end; i += 3) {
+      tmp =
+        ((uint8[i] << 16) & 0xFF0000) +
+        ((uint8[i + 1] << 8) & 0xFF00) +
+        (uint8[i + 2] & 0xFF);
+      output.push(tripletToBase64$1(tmp));
+    }
+    return output.join('')
+  }
+
+  function fromByteArray$1 (uint8) {
+    var tmp;
+    var len = uint8.length;
+    var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
+    var parts = [];
+    var maxChunkLength = 16383; // must be multiple of 3
+
+    // go through the array every three bytes, we'll deal with trailing stuff later
+    for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+      parts.push(encodeChunk$1(
+        uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
+      ));
+    }
+
+    // pad the end with zeros, but make sure to not forget the extra bytes
+    if (extraBytes === 1) {
+      tmp = uint8[len - 1];
+      parts.push(
+        lookup$1[tmp >> 2] +
+        lookup$1[(tmp << 4) & 0x3F] +
+        '=='
+      );
+    } else if (extraBytes === 2) {
+      tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+      parts.push(
+        lookup$1[tmp >> 10] +
+        lookup$1[(tmp >> 4) & 0x3F] +
+        lookup$1[(tmp << 2) & 0x3F] +
+        '='
+      );
+    }
+
+    return parts.join('')
+  }
+
   /* global self */
 
   const { promises } = fs;
@@ -23683,13 +23855,15 @@ return d[d.length-1];};return ", funcName].join("");
 
   const writeFile = async (options, path, data) => {
     const { as = 'utf8', ephemeral } = options;
+    if (as === undefined || as == 'bytes') ; else {
+      data = new TextEncoder(as).encode(data);
+    }
     if (isWebWorker) {
-      return self.ask({ writeFile: { options: { as, ...options }, path, data: await data } });
+      return self.ask({ writeFile: { options, path, data: await data } });
     }
 
     data = await data;
     const file = getFile(options, path);
-    file.as = as;
     file.data = data;
 
     for (const watcher of file.watchers) {
@@ -23706,7 +23880,7 @@ return d[d.length-1];};return ", funcName].join("");
         }
         return promises.writeFile(persistentPath, data);
       } else if (isBrowser) {
-        return localforage.setItem(`file/${persistentPath}`, data);
+        return localforage.setItem(`file/${persistentPath}`, fromByteArray_1(data));
       }
     }
   };
@@ -23718,28 +23892,6 @@ return d[d.length-1];};return ", funcName].join("");
   /* global self */
 
   const { promises: promises$1 } = fs;
-
-  const dataAs = (as, data) => {
-    if (data !== undefined) {
-      switch (as) {
-        case 'utf8':
-          if (typeof data === 'string') {
-            return data;
-          } else if (Buffer.isBuffer(data)) {
-            const utf8 = data.toString('utf8');
-            return utf8;
-          }
-          break;
-        case 'bytes':
-          if (Buffer.isBuffer(data)) {
-            return data;
-          } else if (data instanceof ArrayBuffer) {
-            return new Uint8Array(data);
-          }
-          break;
-      }
-    }
-  };
 
   const getUrlFetcher = async () => {
     if (typeof window !== 'undefined') {
@@ -23757,7 +23909,7 @@ return d[d.length-1];};return ", funcName].join("");
       return async (path) => {
         const data = await localforage.getItem(`file/${path}`);
         if (data !== null) {
-          return data;
+          return toByteArray_1(data);
         }
       };
     } else {
@@ -23769,14 +23921,13 @@ return d[d.length-1];};return ", funcName].join("");
   const fetchPersistent = async ({ as }, path) => {
     try {
       const fetchFile = await getFileFetcher();
-      const data = await fetchFile(`${base}${path}`);
-      return dataAs(as, data);
+      return await fetchFile(`${base}${path}`);
     } catch (e) {
     }
   };
 
   // Fetch from external sources.
-  const fetchSources = async ({ as = 'utf8' }, sources) => {
+  const fetchSources = async (options = {}, sources) => {
     const fetchUrl = await getUrlFetcher();
     const fetchFile = await getFileFetcher();
     // Try to load the data from a source.
@@ -23785,19 +23936,11 @@ return d[d.length-1];};return ", funcName].join("");
         log$1(`# Fetching ${source.url}`);
         const response = await fetchUrl(source.url);
         if (response.ok) {
-          switch (as) {
-            case 'utf8':
-              return dataAs(as, await response.text());
-            case 'bytes':
-              return dataAs(as, await response.arrayBuffer());
-          }
+          return await response.arrayBuffer();
         }
       } else if (source.file !== undefined) {
         try {
-          const data = await fetchFile(source.file);
-          if (data !== undefined) {
-            return dataAs(as, data);
-          }
+          return await fetchFile(source.file);
         } catch (e) {}
       } else {
         throw Error('die');
@@ -23812,13 +23955,11 @@ return d[d.length-1];};return ", funcName].join("");
     }
     const { sources = [] } = options;
     const file = getFile(options, path);
-    if (file.data === undefined || file.as !== as) {
+    if (file.data === undefined) {
       file.data = await fetchPersistent({ as }, path);
-      file.as = as;
     }
-    if (file.data === undefined || file.as !== as) {
-      file.data = await fetchSources({ as }, sources);
-      file.as = as;
+    if (file.data === undefined) {
+      file.data = await fetchSources({}, sources);
       if (!ephemeral && file.data !== undefined) {
         // Update persistent storage.
         await writeFile(options, path, file.data);
@@ -23830,7 +23971,10 @@ return d[d.length-1];};return ", funcName].join("");
         file.data = await file.data;
       }
     }
-    return file.data;
+    if (as === 'bytes' || as === undefined) {
+      return file.data;
+    } else {
+      return new TextDecoder('utf8').decode(file.data);  }
   };
 
   /**
@@ -42770,8 +42914,8 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const torus = ({ thickness = 1, radius = 1, segments = 32, sides = 32, rotation = 0 }) => {
-    const piece = circle({ radius: thickness, sides }).rotateZ(rotation).rotateX(90).translate(radius);
+  const torus = ({ thickness = 1, radius = 1, segments = 32, sides = 32, rotation = 0 } = {}) => {
+    const piece = circle({ radius: thickness, sides }).rotateZ(rotation).rotateX(90).translate(radius).cut(planeX())[0];
     const pieces = [];
     for (let angle = 0; angle < 361; angle += 360 / segments) {
       pieces.push(piece.rotateZ(angle));
@@ -93872,6 +94016,9 @@ return d[d.length-1];};return ", funcName].join("");
     microGearMotor: microGearMotor,
     minkowski: minkowski,
     outline: outline,
+    planeX: planeX,
+    planeY: planeY,
+    planeZ: planeZ,
     point: point,
     points: points$1,
     polygon: polygon,
@@ -98133,9 +98280,9 @@ return d[d.length-1];};return ", funcName].join("");
   module.exports = exports["default"];
   });
 
-  var types$1 = unwrapExports(main_1);
+  unwrapExports(main_1);
 
-  var types$2 = createCommonjsModule(function (module, exports) {
+  var types$1 = createCommonjsModule(function (module, exports) {
   function __export(m) {
       for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
   }
@@ -98153,7 +98300,7 @@ return d[d.length-1];};return ", funcName].join("");
   module.exports = exports["default"];
   });
 
-  unwrapExports(types$2);
+  unwrapExports(types$1);
 
   function compare(a, b) {
     if (a === b) {
@@ -101805,7 +101952,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
   Object.defineProperty(exports, "__esModule", { value: true });
   var assert_1 = __importDefault(assert$3);
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
   var n = types_1.default.namedTypes;
   var source_map_1 = __importDefault(sourceMap);
   var SourceMapConsumer = source_map_1.default.SourceMapConsumer;
@@ -109924,7 +110071,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
   Object.defineProperty(exports, "__esModule", { value: true });
   var assert_1 = __importDefault(assert$3);
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
   var n = types_1.default.namedTypes;
   var isArray = types_1.default.builtInTypes.array;
   var isObject = types_1.default.builtInTypes.object;
@@ -110236,7 +110383,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
   Object.defineProperty(exports, "__esModule", { value: true });
   var assert_1 = __importDefault(assert$3);
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
   var b = types_1.default.builders;
   var isObject = types_1.default.builtInTypes.object;
   var isArray = types_1.default.builtInTypes.array;
@@ -110497,7 +110644,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
   Object.defineProperty(exports, "__esModule", { value: true });
   var assert_1 = __importDefault(assert$3);
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
   var n = types_1.default.namedTypes;
   var isArray = types_1.default.builtInTypes.array;
   var isNumber = types_1.default.builtInTypes.number;
@@ -111034,7 +111181,7 @@ return d[d.length-1];};return ", funcName].join("");
   Object.defineProperty(exports, "__esModule", { value: true });
   var assert_1 = __importDefault(assert$3);
   var linesModule = __importStar(lines);
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
   var Printable = types_1.default.namedTypes.Printable;
   var Expression = types_1.default.namedTypes.Expression;
   var ReturnStatement = types_1.default.namedTypes.ReturnStatement;
@@ -111432,7 +111579,7 @@ return d[d.length-1];};return ", funcName].join("");
 
 
 
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
   var namedTypes = types_1.default.namedTypes;
   var isString = types_1.default.builtInTypes.string;
   var isObject = types_1.default.builtInTypes.object;
@@ -113657,7 +113804,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
   Object.defineProperty(exports, "__esModule", { value: true });
   var fs_1 = __importDefault(require$$0);
-  var types_1 = __importDefault(types$2);
+  var types_1 = __importDefault(types$1);
 
 
   function print(node, options) {
@@ -113842,12 +113989,13 @@ return d[d.length-1];};return ", funcName].join("");
       body: out
     };
 
+    /*
     // Make arrow functions async.
     // Await on calls.
     // FIX: assemble(...x.map(f => f + 1)) breaks because it doesn't realize that
     // it's getting promises.
     // Either await all arguments, or find a different approach.
-    types$1.visit(ast, {
+    types.visit(ast, {
       visitArrowFunctionExpression: function (path) {
         this.traverse(path);
         path.node.async = true;
@@ -113863,6 +114011,7 @@ return d[d.length-1];};return ", funcName].join("");
         });
       }
     });
+    */
     return recast.print(ast).code;
   };
 

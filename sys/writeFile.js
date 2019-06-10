@@ -8,6 +8,7 @@ import { base } from './filesystem';
 import { dirname } from 'path';
 import { getFile } from './files';
 import localForage from 'localforage';
+import { fromByteArray } from 'base64-js';
 
 const { promises } = fs;
 
@@ -15,13 +16,16 @@ const { promises } = fs;
 
 export const writeFile = async (options, path, data) => {
   const { as = 'utf8', ephemeral } = options;
+  if (as === undefined || as == 'bytes') {
+  } else {
+    data = new TextEncoder(as).encode(data);
+  }
   if (isWebWorker) {
-    return self.ask({ writeFile: { options: { as, ...options }, path, data: await data } });
+    return self.ask({ writeFile: { options, path, data: await data } });
   }
 
   data = await data;
   const file = getFile(options, path);
-  file.as = as;
   file.data = data;
 
   for (const watcher of file.watchers) {
@@ -38,7 +42,7 @@ export const writeFile = async (options, path, data) => {
       }
       return promises.writeFile(persistentPath, data);
     } else if (isBrowser) {
-      return localForage.setItem(`file/${persistentPath}`, data);
+      return localForage.setItem(`file/${persistentPath}`, fromByteArray(data));
     }
   }
 };
