@@ -21,6 +21,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@babel/parser": "^7.4.5",
     "@jsxcad/convert-threejs": "^0.0.75",
     "ast-types": "^0.12.3",
     "recast": "^0.17.5",

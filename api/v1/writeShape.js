@@ -9,14 +9,14 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * cube().writeShape('cube.shape');
- * readShape({ path: 'cube.shape' })
+ * await cube().writeShape('cube.shape');
+ * await readShape({ path: 'cube.shape' })
  * ```
  * :::
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * writeShape({ path: 'cube.shape' }, cube())
- * readShape({ path: 'cube.shape' })
+ * await writeShape({ path: 'cube.shape' }, cube())
+ * await readShape({ path: 'cube.shape' })
  * ```
  * :::
  *
@@ -36,7 +36,7 @@ export const writeShape = async (options, shape) => {
   }
   const { path, preview = true } = options;
   const geometry = toGeometry(options, shape);
-  return writeFile({ preview, geometry }, path, JSON.stringify(geometry));
+  writeFile({ preview, geometry }, path, JSON.stringify(geometry));
 };
 
 const method = function (options = {}) { return writeShape(options, this); };

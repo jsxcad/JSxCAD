@@ -1,8 +1,19 @@
+import { parse } from '@babel/parser';
 import recast from 'recast';
 import types from 'ast-types';
 
 export const toEcmascript = (options, script) => {
-  let ast = recast.parse(script);
+  let ast = recast.parse(script,
+                         {
+                           parser: {
+                             parse: (script) => parse(script,
+                                                      {
+                                                        allowAwaitOutsideFunction: true,
+                                                        allowReturnOutsideFunction: true,
+                                                        sourceType: 'module',
+                                                      })
+                           }
+                         });
 
   const exportNames = [];
   const expressions = [];
@@ -65,7 +76,8 @@ export const toEcmascript = (options, script) => {
             body: expressions
           },
           generator: false,
-          expression: true
+          expression: true,
+          async: true
         }
       }],
       kind: 'const'
@@ -93,11 +105,8 @@ export const toEcmascript = (options, script) => {
     body: out
   };
 
-  // Make arrow functions async.
-  // Await on calls.
-  // FIX: assemble(...x.map(f => f + 1)) breaks because it doesn't realize that
-  // it's getting promises.
-  // Either await all arguments, or find a different approach.
+  // Make arrow functions async, and await all expressions.
+  /*
   types.visit(ast, {
     visitArrowFunctionExpression: function (path) {
       this.traverse(path);
@@ -114,5 +123,7 @@ export const toEcmascript = (options, script) => {
       });
     }
   });
+  */
+
   return recast.print(ast).code;
 };

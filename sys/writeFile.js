@@ -6,6 +6,7 @@ import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { base } from './filesystem';
 import { dirname } from 'path';
+import { fromByteArray } from 'base64-js';
 import { getFile } from './files';
 import localForage from 'localforage';
 
@@ -14,14 +15,17 @@ const { promises } = fs;
 // FIX Convert data by representation.
 
 export const writeFile = async (options, path, data) => {
-  const { as = 'utf8', ephemeral } = options;
-  if (isWebWorker) {
-    return self.ask({ writeFile: { options: { as, ...options }, path, data: await data } });
-  }
-
   data = await data;
+
+  const { as = 'utf8', ephemeral } = options;
+  if (as === 'bytes') {
+  } else {
+    data = new TextEncoder(as).encode(data);
+  }
+  if (isWebWorker) {
+    return self.ask({ writeFile: { options, path, data: await data } });
+  }
   const file = getFile(options, path);
-  file.as = as;
   file.data = data;
 
   for (const watcher of file.watchers) {
@@ -38,7 +42,7 @@ export const writeFile = async (options, path, data) => {
       }
       return promises.writeFile(persistentPath, data);
     } else if (isBrowser) {
-      return localForage.setItem(`file/${persistentPath}`, data);
+      return localForage.setItem(`file/${persistentPath}`, fromByteArray(data));
     }
   }
 };

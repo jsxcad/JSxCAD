@@ -13,25 +13,25 @@ import { toFont } from '@jsxcad/algorithm-text';
  *
  * ::: illustration { "view": { "position": [-50, -50, 50] } }
  * ```
- * const greatVibes = readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
+ * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
  * greatVibes({ emSize: 20 }, "M").extrude(5).rotateX(90).above().center()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 100] } }
  * ```
- * const greatVibes = readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
+ * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
  * greatVibes({ emSize: 10 }, "M").center()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 100] } }
  * ```
- * const greatVibes = readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
+ * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
  * greatVibes({ emSize: 20 }, "M").center()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 50] } }
  * ```
- * const greatVibes = readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
+ * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
  * greatVibes({ emSize: 16 }, "CA").center()
  * ```
  * :::

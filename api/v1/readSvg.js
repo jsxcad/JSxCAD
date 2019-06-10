@@ -9,9 +9,9 @@ import { readFile } from '@jsxcad/sys';
  * ::: illustration { "view": { "position": [0, 0, 100] } }
  * ```
  *
- * const svg = readSvg({ path: 'svg/butterfly.svg',
- *                       sources: [{ file: 'svg/butterfly.svg' },
- *                                 { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] });
+ * const svg = await readSvg({ path: 'svg/butterfly.svg',
+ *                             sources: [{ file: 'svg/butterfly.svg' },
+ *                                       { url: 'https://jsxcad.js.org/svg/butterfly.svg' }] });
  * svg.center().scale(0.02)
  * ```
  * :::
@@ -20,5 +20,6 @@ import { readFile } from '@jsxcad/sys';
 
 export const readSvg = async (options) => {
   const { path } = options;
-  return Shape.fromGeometry(await fromSvg(options, await readFile({ decode: 'utf8', ...options }, path)));
+  const data = await readFile({ decode: 'utf8', ...options }, path);
+  return Shape.fromGeometry(await fromSvg(options, data));
 };
