@@ -1,10 +1,39 @@
+import { chainHull } from './chainHull';
+import { circle } from './circle';
+
 /**
  *
- * torus();                    // ri = 1, ro = 4;
- * torus({ ri: 1.5, ro: 3 });
- * torus({ ri: 0.2 });
- * torus({ fni:4 });           // make inner circle fn = 4 => square
- * torus({ fni:4,roti:45 });   // rotate inner circle, so flat is top/bottom
- * torus({ fni:4,fno:4,roti:45 });
- * torus({ fni:4,fno:5,roti:45 });
- */
+ * # Torus
+ *
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * torus({ thickness: 5,
+ *         radius: 20 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * torus({ thickness: 5,
+ *         radius: 20,
+ *         sides: 4 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * torus({ thickness: 5,
+ *         radius: 20,
+ *         sides: 4,
+ *         rotation: 45 })
+ * ```
+ * :::
+ *
+ **/
+
+export const torus = ({ thickness = 1, radius = 1, segments = 32, sides = 32, rotation = 0 }) => {
+  const piece = circle({ radius: thickness, sides }).rotateZ(rotation).rotateX(90).translate(radius);
+  const pieces = [];
+  for (let angle = 0; angle < 361; angle += 360 / segments) {
+    pieces.push(piece.rotateZ(angle));
+  }
+  return chainHull(...pieces);
+}
