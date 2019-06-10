@@ -36,4 +36,4 @@ export const torus = ({ thickness = 1, radius = 1, segments = 32, sides = 32, ro
     pieces.push(piece.rotateZ(angle));
   }
   return chainHull(...pieces);
-}
+};
