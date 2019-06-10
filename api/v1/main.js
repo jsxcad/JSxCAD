@@ -64,6 +64,7 @@ import { sqrt } from './sqrt';
 import { square } from './square';
 import { svgPath } from './svgPath';
 import { tetrahedron } from './tetrahedron';
+import { torus } from './torus';
 import { translate } from './translate';
 import { triangle } from './triangle';
 import { union } from './union';
@@ -132,6 +133,7 @@ export {
   square,
   svgPath,
   tetrahedron,
+  torus,
   translate,
   triangle,
   union,
