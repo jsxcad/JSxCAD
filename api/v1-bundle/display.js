@@ -159,8 +159,9 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
         document.getElementById(`download/${path}`)
             .addEventListener('click',
                               async () => {
-                                const blob = new Blob([await readFile({}, path)],
-                                                      { type: 'text/plain;charset=utf-8' });
+                                const data = await readFile({ as: 'bytes' }, path);
+                                const blob = new Blob([data.buffer],
+                                                      { type: 'application/octet-stream' });
                                 saveAs(blob, path);
                               });
       }
