@@ -4,7 +4,6 @@ import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { cut as cutSolid } from '@jsxcad/geometry-solid';
 import { cut as cutSurface } from '@jsxcad/geometry-surface';
-import { fromPoints } from '@jsxcad/math-plane';
 
 /**
  *

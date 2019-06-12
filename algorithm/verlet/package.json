@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/verlet",
+  "name": "@jsxcad/algorithm-verlet",
   "version": "0.0.75",
   "description": "simple 2d physics for js.",
   "main": "main.js",

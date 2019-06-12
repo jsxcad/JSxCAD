@@ -9,7 +9,7 @@ const { writeFile } = fs.promises;
 
 const paths = [
   'Intro.js',
-  'above.js', 'acos.js', 'assemble.js', 'as.js',
+  'above.js', 'acos.js', 'armature.js', 'assemble.js', 'as.js',
   'back.js', 'below.js',
   'center.js', 'chainHull.js', 'circle.js', 'color.js', 'cos.js', 'cube.js', 'cut.js', 'cursor.js', 'cylinder.js',
   'difference.js',

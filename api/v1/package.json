@@ -51,6 +51,7 @@
   "dependencies": {
     "@jsxcad/algorithm-shape": "^0.0.75",
     "@jsxcad/algorithm-text": "^0.0.75",
+    "@jsxcad/algorithm-verlet": "^0.0.75",
     "@jsxcad/algorithm-watertight": "^0.0.75",
     "@jsxcad/convert-dst": "^0.0.75",
     "@jsxcad/convert-jscad": "^0.0.75",
