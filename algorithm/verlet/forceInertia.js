@@ -1,9 +1,12 @@
 import { add, scale, subtract } from '@jsxcad/math-vec3';
 
-export const force = ({ forces }, friction) => {
+export const force = ({ forces }, friction = 0.99) => {
   const applyInertia = ({ particle }) => {
     const velocity = scale(friction, subtract(particle.position, particle.lastPosition));
-    particle.position = add(particle.position, velocity);
+    if (velocity < 1e-5) {
+      console.log(`QQ/inertia/velocity: ${velocity}`);
+      particle.position = add(particle.position, velocity);
+    }
   };
   forces.push(applyInertia);
 };

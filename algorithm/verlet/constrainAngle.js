@@ -14,7 +14,7 @@ const rotate = ([pointX, pointY], [originX, originY], theta) => {
 };
 
 const relax = ({ pivot, left, right, radians, stiffness }, stepCoefficient) => {
-  const currentRadians = angle2(left.position, pivot.position, right.position);
+  const currentRadians = angle2(pivot.position, left.position, right.position);
   let diff = currentRadians - radians;
 
   if (diff <= -Math.PI) {

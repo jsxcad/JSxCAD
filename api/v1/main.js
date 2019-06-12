@@ -12,6 +12,7 @@ import { planeX, planeY, planeZ } from './plane';
 import { Shape } from './Shape';
 import { above } from './above';
 import { acos } from './acos';
+import { armature } from './armature';
 import { as } from './as';
 import { assemble } from './assemble';
 import { back } from './back';
@@ -82,6 +83,7 @@ export {
   Shape,
   above,
   acos,
+  armature,
   as,
   assemble,
   back,
