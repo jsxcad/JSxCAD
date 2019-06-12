@@ -1,38 +1,12 @@
-<html><head><title>JSxCAD Viewer</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-<style>
-body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #0.73505; margin: 0px; overflow: hidden; }
-.dg { position: absolute; top: 2px; left: 2px }
-.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; }
-.Console { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; color: black; }
-</style>
-<link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet"></head><body id="body"><!-- CodeMirror -->
-<script src="https://codemirror.net/lib/codemirror.js"></script>
-<script src="https://codemirror.net/addon/display/autorefresh.js"></script>
-<script src="https://codemirror.net/addon/display/fullscreen.js"></script>
-<script src="https://codemirror.net/mode/javascript/javascript.js"></script>
-<script src="https://riversun.github.io/jsframe/jsframe.js"></script>
-<!-- ThreeJS -->
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
-<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
-<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"></script>
-<script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"></script>
-<!-- FileSaver -->
-<script type="module">
-import { api, sys, toThreejsGeometry } from './bundle.js'
-const { readFile, watchFile, watchFileCreation, writeFile } = sys;
-const initialScript = "\nconst main = async () => {\n   const skeleton = await readLDraw({ part: '6260c01.dat' });\n   await writeStl({ path: 'window/skeleton' }, difference(skeleton.scale([0.1, 0.1, 0.1]), cube(5)));\n }\n";
-import { display } from './display.js';
-const jsFrame = new JSFrame();
-const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });
-import { editor } from './editor.js';
-editor({ CodeMirror, addPage, api, initialScript, nextPage, lastPage });
-import { console } from './console.js';
-console({ addPage, watchFile });
-const runApp = () => {
 
-}
-document.addEventListener("DOMContentLoaded", runApp);
-</script></body></html>
+<html>
+ <head>
+  <title>JSxCAD Viewer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+ </head>
+ <body>
+  <script type="text/javascript" src="./display.js"></script>
+  <script type="text/javascript">JSxCAD = {"geometry":{}};</script>
+ </body>
+</html>

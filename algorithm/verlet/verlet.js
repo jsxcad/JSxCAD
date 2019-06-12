@@ -35,7 +35,6 @@ export const update = ({ constraints, forces, particles }, step = 16) => {
 };
 
 export const isStopped = ({ particles }) => {
-  console.log(`QQ/particles: ${JSON.stringify(particles)}`);
   return particles.every(({ position, lastPosition }) => equals(position, lastPosition));
 };
 
