@@ -27,28 +27,3 @@ test('Simple case', t => {
   t.deepEqual(canonicalize(C), [0, 0, 0]);
   t.deepEqual(canonicalize(D), [1, 1, 0]);
 });
-
-test('Caught in local minima', t => {
-  const constraints = verlet();
-  const distance = createDistanceConstraint(constraints);
-  const pinned = createPinnedConstraint(constraints);
-
-  // Set up a problem that can only be solved by completing a square.
-
-  distance('A', 'D', 1);
-  distance('B', 'D', 1);
-  distance('C', 'D', Math.sqrt(2));
-  pinned('A', [1, 0, 0]);
-  pinned('B', [0, 1, 0]);
-  pinned('C', [1, 1, 0]);
-
-  solve(constraints);
-
-  const { A, B, C, D } = positions(constraints);
-  t.deepEqual(canonicalize(A), [1, 0, 0]);
-  t.deepEqual(canonicalize(B), [0, 1, 0]);
-  t.deepEqual(canonicalize(C), [1, 1, 0]);
-
-  // Caught in local minima -- unable to reach [0, 0, 0].
-  t.deepEqual(canonicalize(D), [1.7073, 0.24938, 0]);
-});
