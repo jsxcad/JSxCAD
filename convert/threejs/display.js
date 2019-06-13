@@ -15,7 +15,7 @@ export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   const container = document.body;
   container.appendChild(viewerElement);
 
-  const { trackball } = buildTrackballControls({ camera, render, viewerElement });
+  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
   const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
 
   resize();

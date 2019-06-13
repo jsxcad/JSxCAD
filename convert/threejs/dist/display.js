@@ -52277,7 +52277,8 @@ define("./display.js",['exports'], function (exports) { 'use strict';
 
   TrackballControls.prototype = Object.create( THREE$1.EventDispatcher.prototype );
 
-  const buildTrackballControls = ({ camera, render, viewerElement }) => {
+  const buildTrackballControls = ({ camera, render, viewerElement, view = {}}) => {
+    const { target = [0, 0, 0] } = view;
     const trackball = new threeTrackballcontrols(camera, viewerElement);
     trackball.rotateSpeed = 4.0;
     trackball.zoomSpeed = 4.0;
@@ -52288,7 +52289,7 @@ define("./display.js",['exports'], function (exports) { 'use strict';
     trackball.dynamicDampingFactor = 0.1;
     trackball.keys = [65, 83, 68];
     trackball.addEventListener('change', render);
-
+    trackball.target.set(...target);
     return { trackball };
   };
 
@@ -52622,7 +52623,7 @@ define("./display.js",['exports'], function (exports) { 'use strict';
   const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
     const { tags } = threejsGeometry;
     if (threejsGeometry.assembly) {
-      threejsGeometry.assembly.forEach(buildMeshes({ datasets, threejsGeometry, scene }));
+      threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene }));
     } else if (threejsGeometry.threejsSegments) {
       const segments = threejsGeometry.threejsSegments;
       const dataset = {};
@@ -52674,7 +52675,7 @@ define("./display.js",['exports'], function (exports) { 'use strict';
     const container = document.body;
     container.appendChild(viewerElement);
 
-    const { trackball } = buildTrackballControls({ camera, render, viewerElement });
+    const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
     const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
 
     resize();

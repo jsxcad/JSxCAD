@@ -2,7 +2,8 @@ import * as dat from 'dat.gui';
 
 import TrackballControls from 'three-trackballcontrols';
 
-export const buildTrackballControls = ({ camera, render, viewerElement }) => {
+export const buildTrackballControls = ({ camera, render, viewerElement, view = {}}) => {
+  const { target = [0, 0, 0] } = view;
   const trackball = new TrackballControls(camera, viewerElement);
   trackball.rotateSpeed = 4.0;
   trackball.zoomSpeed = 4.0;
@@ -13,7 +14,7 @@ export const buildTrackballControls = ({ camera, render, viewerElement }) => {
   trackball.dynamicDampingFactor = 0.1;
   trackball.keys = [65, 83, 68];
   trackball.addEventListener('change', render);
-
+  trackball.target.set(...target);
   return { trackball };
 };
 

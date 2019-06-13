@@ -139,8 +139,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     pages[0].front();
   };
 
-  const addDisplay = ({ view = {}, geometry } = {}, path) => {
-    const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+  const addDisplay = ({ geometry, view = {} } = {}, path) => {
     // Add a new display when we see a new file written.
     let datasets = [];
     let camera;
@@ -148,6 +147,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     let scene;
     let renderer;
     let gui;
+    let start;
     // FIX: Injection.
     const page = addPage({
       title: path,
@@ -177,7 +177,15 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
         }
       }
     };
-    const updateDatasets = (geometry) => {
+    const updateDatasets = ({ geometry, view = {} }) => {
+      {
+        const { target = [0, 0, 0], position = [-40, -40, 40], up = [0, 0, 1] } = view;
+        [camera.position.x, camera.position.y, camera.position.z] = position;
+        camera.up = new THREE.Vector3(...up);
+console.log(`QQ/view: ${JSON.stringify(view)}`);
+console.log(`QQ/lookAt: ${JSON.stringify(target)}`);
+        controls.target.set(...target);
+      }
       {
         // Delete any previous dataset in the window.
         const controllers = new Set();
@@ -263,21 +271,24 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       }
     };
 
-    watchFile(path, ({ geometry }, file) => {
+    watchFile(path, ({ geometry, view }, file) => {
       if (geometry !== undefined) {
         // We expect the geometry already includes threejs versions.
-        updateDatasets(toThreejsGeometry(geometry));
+        updateDatasets({ geometry: toThreejsGeometry(geometry), view });
       }
     });
 
-    init();
-    animate();
+    start = () => {
+      init();
+      animate();
+    }
+
     function init () {
       //
+      const { target = [0, 0, 0], position = [-40, -40, 40], up = [0, 0, 1] } = view;
       camera = new THREE.PerspectiveCamera(27, page.offsetWidth / page.offsetHeight, 1, 3500);
       [camera.position.x, camera.position.y, camera.position.z] = position;
-      camera.lookAt(...target);
-      camera.up.set(...up);
+      camera.up = new THREE.Vector3(...up);
       //
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xffffff);
@@ -320,6 +331,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       controls.dynamicDampingFactor = 0.1;
       controls.keys = [65, 83, 68];
       controls.addEventListener('change', render);
+      controls.target.set(...target);
       //
       onResize();
       new ResizeObserver(onResize).observe(container);
@@ -340,6 +352,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     function render () {
       renderer.render(scene, camera);
     }
+
+    start();
 
     if (geometry) {
       updateDatasets(geometry);
