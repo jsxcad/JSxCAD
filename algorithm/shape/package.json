@@ -49,6 +49,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-watertight": "^0.0.77",
+    "@jsxcad/geometry-path": "^0.0.77",
     "@jsxcad/data-shape": "^0.0.77",
     "@jsxcad/math-line2": "^0.0.77",
     "@jsxcad/math-mat4": "^0.0.77",
