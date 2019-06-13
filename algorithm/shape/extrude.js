@@ -1,6 +1,6 @@
 import { add } from '@jsxcad/math-vec3';
-import { fromPolygons } from '@jsxcad/geometry-solid';
-import { makeConvex } from '@jsxcad/geometry-z0surface';
+import { fromPolygons } from './fromPolygons';
+import { makeConvex } from './makeConvex';
 
 export const extrude = ({ height = 1 }, surface) => {
   const polygons = [];

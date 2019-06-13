@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-color",
-  "version": "0.0.75",
+  "version": "0.0.77",
   "description": "Color algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -19,8 +19,6 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {
-  },
   "devDependencies": {
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
@@ -38,5 +36,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

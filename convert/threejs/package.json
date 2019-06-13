@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/convert-threejs",
-  "version": "0.0.75",
+  "version": "0.0.77",
   "description": "ThreeJs integration algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -21,21 +21,21 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.75",
-    "@jsxcad/geometry-path": "^0.0.75",
-    "@jsxcad/geometry-polygons": "^0.0.75",
-    "@jsxcad/geometry-solid": "^0.0.75",
-    "@jsxcad/geometry-surface": "^0.0.75",
-    "@jsxcad/geometry-tagged": "^0.0.75",
-    "@jsxcad/math-poly3": "^0.0.75",
-    "@jsxcad/math-vec3": "^0.0.75",
-    "@jsxcad/sys": "^0.0.75",
+    "@jsxcad/algorithm-color": "^0.0.77",
+    "@jsxcad/geometry-path": "^0.0.77",
+    "@jsxcad/geometry-polygons": "^0.0.77",
+    "@jsxcad/geometry-solid": "^0.0.77",
+    "@jsxcad/geometry-surface": "^0.0.77",
+    "@jsxcad/geometry-tagged": "^0.0.77",
+    "@jsxcad/math-poly3": "^0.0.77",
+    "@jsxcad/math-vec3": "^0.0.77",
+    "@jsxcad/sys": "^0.0.77",
     "three": "^0.104.0",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.75",
-    "@jsxcad/geometry-paths": "^0.0.75",
+    "@jsxcad/data-shape": "^0.0.77",
+    "@jsxcad/geometry-paths": "^0.0.77",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
@@ -49,10 +49,10 @@
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-hypothetical": "^2.1.0",
     "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-loadz0r": "^0.7.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-loadz0r": "^0.7.1"
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"
@@ -60,5 +60,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

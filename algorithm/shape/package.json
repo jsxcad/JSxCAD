@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-shape",
-  "version": "0.0.75",
+  "version": "0.0.77",
   "description": "Shape generating algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,21 +48,19 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-watertight": "^0.0.75",
-    "@jsxcad/data-shape": "^0.0.75",
-    "@jsxcad/geometry-path": "^0.0.75",
-    "@jsxcad/geometry-paths": "^0.0.75",
-    "@jsxcad/geometry-points": "^0.0.75",
-    "@jsxcad/geometry-polygons": "^0.0.75",
-    "@jsxcad/geometry-solid": "^0.0.75",
-    "@jsxcad/geometry-z0surface": "^0.0.75",
-    "@jsxcad/math-line2": "^0.0.75",
-    "@jsxcad/math-mat4": "^0.0.75",
-    "@jsxcad/math-plane": "^0.0.75",
-    "@jsxcad/math-poly3": "^0.0.75",
-    "@jsxcad/math-vec2": "^0.0.75",
-    "@jsxcad/math-vec3": "^0.0.75",
-    "@jsxcad/math-vec4": "^0.0.75",
+    "@jsxcad/algorithm-watertight": "^0.0.77",
+    "@jsxcad/geometry-path": "^0.0.77",
+    "@jsxcad/geometry-paths": "^0.0.77",
+    "@jsxcad/geometry-points": "^0.0.77",
+    "@jsxcad/data-shape": "^0.0.77",
+    "@jsxcad/math-line2": "^0.0.77",
+    "@jsxcad/math-mat4": "^0.0.77",
+    "@jsxcad/math-plane": "^0.0.77",
+    "@jsxcad/math-poly3": "^0.0.77",
+    "@jsxcad/math-utils": "^0.0.77",
+    "@jsxcad/math-vec2": "^0.0.77",
+    "@jsxcad/math-vec3": "^0.0.77",
+    "@jsxcad/math-vec4": "^0.0.77",
     "adaptive-bezier-curve": "^1.0.3",
     "bezier": "^0.1.0"
   },
@@ -83,5 +81,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

@@ -1,5 +1,5 @@
 import { buildRegularPrism } from './buildRegularPrism';
-import { canonicalize } from '@jsxcad/geometry-polygons';
+import { canonicalize } from './canonicalize';
 import { isWatertightPolygons } from '@jsxcad/algorithm-watertight';
 import test from 'ava';
 

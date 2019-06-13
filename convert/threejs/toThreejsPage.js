@@ -11,8 +11,8 @@ export const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxC
  </head>
  <body>
   <script type="text/javascript" src="./display.js"></script>
-  <script type="text/javascript">JSxCAD = ${JSON.stringify({ geometry })};</script>
+  <script type="text/javascript">JSxCAD = ${JSON.stringify({ threejsGeometry })};</script>
  </body>
 </html>`;
   return html;
-}
+};

@@ -36,7 +36,7 @@ export const writeShape = async (options, shape) => {
   }
   const { path, preview = true } = options;
   const geometry = toGeometry(options, shape);
-  writeFile({ preview, geometry }, path, JSON.stringify(geometry));
+  await writeFile({ preview, geometry }, path, JSON.stringify(geometry));
 };
 
 const method = function (options = {}) { return writeShape(options, this); };

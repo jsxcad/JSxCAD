@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/compiler",
-  "version": "0.0.75",
+  "version": "0.0.77",
   "description": "Compiler support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -22,12 +22,12 @@
   "license": "MIT",
   "dependencies": {
     "@babel/parser": "^7.4.5",
-    "@jsxcad/convert-threejs": "^0.0.75",
+    "@jsxcad/convert-threejs": "^0.0.77",
     "ast-types": "^0.12.3",
-    "recast": "^0.17.5",
-    "esm": "^3.2.10",
     "escodegen": "^1.11.1",
-    "esprima": "^4.0.1"
+    "esm": "^3.2.10",
+    "esprima": "^4.0.1",
+    "recast": "^0.17.5"
   },
   "devDependencies": {
     "ava": "^1.4.1",
@@ -45,5 +45,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }
