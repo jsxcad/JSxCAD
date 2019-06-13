@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/compiler",
-  "version": "0.0.77",
+  "version": "0.0.78",
   "description": "Compiler support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/parser": "^7.4.5",
-    "@jsxcad/convert-threejs": "^0.0.77",
+    "@jsxcad/convert-threejs": "^0.0.78",
     "ast-types": "^0.12.3",
     "escodegen": "^1.11.1",
     "esm": "^3.2.10",

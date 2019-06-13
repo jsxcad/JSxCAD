@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-polygons",
-  "version": "0.0.77",
+  "version": "0.0.78",
   "description": "Operations on polygon arrays for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,13 +20,13 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/data-shape": "^0.0.77",
-    "@jsxcad/geometry-path": "^0.0.77",
-    "@jsxcad/math-line2": "^0.0.77",
-    "@jsxcad/math-mat4": "^0.0.77",
-    "@jsxcad/math-plane": "^0.0.77",
-    "@jsxcad/math-poly3": "^0.0.77",
-    "@jsxcad/math-vec3": "^0.0.77",
+    "@jsxcad/data-shape": "^0.0.78",
+    "@jsxcad/geometry-path": "^0.0.78",
+    "@jsxcad/math-line2": "^0.0.78",
+    "@jsxcad/math-mat4": "^0.0.78",
+    "@jsxcad/math-plane": "^0.0.78",
+    "@jsxcad/math-poly3": "^0.0.78",
+    "@jsxcad/math-vec3": "^0.0.78",
     "martinez-polygon-clipping": "^0.5.0",
     "tess2": "^1.0.0"
   },

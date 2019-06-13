@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-path",
-  "version": "0.0.77",
+  "version": "0.0.78",
   "description": "Path data algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,8 +20,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-mat4": "^0.0.77",
-    "@jsxcad/math-vec3": "^0.0.77"
+    "@jsxcad/math-mat4": "^0.0.78",
+    "@jsxcad/math-vec3": "^0.0.78"
   },
   "devDependencies": {
     "ava": "^1.4.1",
