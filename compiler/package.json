@@ -24,10 +24,10 @@
     "@babel/parser": "^7.4.5",
     "@jsxcad/convert-threejs": "^0.0.75",
     "ast-types": "^0.12.3",
-    "recast": "^0.17.5",
-    "esm": "^3.2.10",
     "escodegen": "^1.11.1",
-    "esprima": "^4.0.1"
+    "esm": "^3.2.10",
+    "esprima": "^4.0.1",
+    "recast": "^0.17.5"
   },
   "devDependencies": {
     "ava": "^1.4.1",
@@ -45,5 +45,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "a0d91569e75d7bbeaf056510ac08ef47ef050d58"
 }

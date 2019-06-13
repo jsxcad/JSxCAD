@@ -49,10 +49,10 @@
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-hypothetical": "^2.1.0",
     "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-loadz0r": "^0.7.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-loadz0r": "^0.7.1"
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"
@@ -60,5 +60,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+  "gitHead": "a0d91569e75d7bbeaf056510ac08ef47ef050d58"
 }

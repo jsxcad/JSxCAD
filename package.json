@@ -7,7 +7,7 @@
     "bootstrap": "lerna bootstrap --hoist",
     "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
-    "publish": "lerna publish",
+    "publish-npm": "lerna publish",
     "test": "lerna run tests",
     "tests": "lerna run tests"
   },
