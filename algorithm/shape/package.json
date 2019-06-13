@@ -50,12 +50,6 @@
   "dependencies": {
     "@jsxcad/algorithm-watertight": "^0.0.75",
     "@jsxcad/data-shape": "^0.0.75",
-    "@jsxcad/geometry-path": "^0.0.75",
-    "@jsxcad/geometry-paths": "^0.0.75",
-    "@jsxcad/geometry-points": "^0.0.75",
-    "@jsxcad/geometry-polygons": "^0.0.75",
-    "@jsxcad/geometry-solid": "^0.0.75",
-    "@jsxcad/geometry-z0surface": "^0.0.75",
     "@jsxcad/math-line2": "^0.0.75",
     "@jsxcad/math-mat4": "^0.0.75",
     "@jsxcad/math-plane": "^0.0.75",
@@ -83,5 +77,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "a0d91569e75d7bbeaf056510ac08ef47ef050d58"
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }
