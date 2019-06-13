@@ -52277,7 +52277,7 @@ define("./display.js",['exports'], function (exports) { 'use strict';
 
   TrackballControls.prototype = Object.create( THREE$1.EventDispatcher.prototype );
 
-  const buildTrackballControls = ({ camera, render, viewerElement, view = {}}) => {
+  const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
     const { target = [0, 0, 0] } = view;
     const trackball = new threeTrackballcontrols(camera, viewerElement);
     trackball.rotateSpeed = 4.0;
