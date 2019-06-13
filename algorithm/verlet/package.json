@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-verlet",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "description": "simple 2d physics for js.",
   "main": "main.js",
   "module": "main.js",
@@ -23,7 +23,7 @@
   ],
   "license": "BSD",
   "dependencies": {
-    "@jsxcad/math-vec3": "^0.0.78"
+    "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^1.4.1",

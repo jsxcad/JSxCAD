@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-color",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "description": "Color algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
