@@ -5,9 +5,10 @@ export const installConsole = ({ addPage, document, watchFile }) => {
   const viewerElement = document.getElementById('console');
   viewerElement.id = `viewer:console`;
   viewerElement.classList.add('Console');
+  const decoder = new TextDecoder('utf8');
   watchFile('console/out',
             (options, file) => {
-              viewerElement.appendChild(document.createTextNode(file.data));
+              viewerElement.appendChild(document.createTextNode(decoder.decode(file.data)));
               viewerElement.appendChild(document.createElement('br'));
               viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
             });
