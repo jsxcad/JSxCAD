@@ -83,128 +83,18 @@ if (!self.define) {
 define("./webworker.js",[],function () { 'use strict';
 
   /**
-   * Adds two mat4's
-   *
-   * @param {mat4} a the first operand
-   * @param {mat4} b the second operand
-   * @returns {mat4} out
+   * Compare the given planes for equality
+   * @return {boolean} true if planes are equal
    */
+  const equals = (a, b) => (a[0] === b[0]) && (a[1] === b[1]) && (a[2] === b[2]) && (a[3] === b[3]);
 
   /**
-   * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
+   * Flip the given plane (vec4)
    *
-   * @param {mat4} a The first matrix.
-   * @param {mat4} b The second matrix.
-   * @returns {Boolean} True if the matrices are equal, false otherwise.
+   * @param {vec4} vec - plane to flip
+   * @return {vec4} flipped plane
    */
-
-  /**
-   * Creates a matrix from a vector scaling
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.scale(dest, dest, vec);
-   *
-   * @param {vec3} v Scaling vector
-   * @returns {mat4} out
-   */
-  const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
-
-  /**
-   * Creates a matrix from a vector translation
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.translate(dest, dest, vec);
-   *
-   * @param {mat4} out mat4 receiving operation result
-   * @param {vec3} v Translation vector
-   * @returns {mat4} out
-   */
-  const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
-
-  /**
-   * Create a new mat4 with the given values
-   *
-   * @param {Number} m00 Component in column 0, row 0 position (index 0)
-   * @param {Number} m01 Component in column 0, row 1 position (index 1)
-   * @param {Number} m02 Component in column 0, row 2 position (index 2)
-   * @param {Number} m03 Component in column 0, row 3 position (index 3)
-   * @param {Number} m10 Component in column 1, row 0 position (index 4)
-   * @param {Number} m11 Component in column 1, row 1 position (index 5)
-   * @param {Number} m12 Component in column 1, row 2 position (index 6)
-   * @param {Number} m13 Component in column 1, row 3 position (index 7)
-   * @param {Number} m20 Component in column 2, row 0 position (index 8)
-   * @param {Number} m21 Component in column 2, row 1 position (index 9)
-   * @param {Number} m22 Component in column 2, row 2 position (index 10)
-   * @param {Number} m23 Component in column 2, row 3 position (index 11)
-   * @param {Number} m30 Component in column 3, row 0 position (index 12)
-   * @param {Number} m31 Component in column 3, row 1 position (index 13)
-   * @param {Number} m32 Component in column 3, row 2 position (index 14)
-   * @param {Number} m33 Component in column 3, row 3 position (index 15)
-   * @returns {mat4} A new mat4
-   */
-  const fromValues = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
-    [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
-
-  /**
-   * Creates a matrix from the given angle around the X axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateX(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromXRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-
-    // Perform axis-specific matrix multiplication
-    return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Creates a matrix from the given angle around the Y axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateY(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromYRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    // Perform axis-specific matrix multiplication
-    return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Creates a matrix from the given angle around the Z axis
-   * This is equivalent to (but much faster than):
-   *
-   *     mat4.identity(dest);
-   *     mat4.rotateZ(dest, dest, rad);
-   *
-   * @param {Number} rad the angle to rotate the matrix by
-   * @returns {mat4} out
-   */
-  const fromZRotation = (rad) => {
-    const s = Math.sin(rad);
-    const c = Math.cos(rad);
-    // Perform axis-specific matrix multiplication
-    return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-  };
-
-  /**
-   * Set a mat4 to the identity matrix
-   *
-   * @returns {mat4} out
-   */
-  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const flip = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
 
   /**
    * Calculates the absolute value of the give vector
@@ -288,7 +178,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {vec3} out
    */
 
-  const equals = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);
+  const equals$1 = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);
 
   /**
    * Creates a new vec3 from the point given.
@@ -451,6 +341,150 @@ define("./webworker.js",[],function () { 'use strict';
   };
 
   /**
+   * Create a new plane from the given points
+   *
+   * @param {Vec3} a - 3D point
+   * @param {Vec3} b - 3D point
+   * @param {Vec3} c - 3D point
+   * @returns {Vec4} a new plane with properly typed values
+   */
+  const fromPoints = (a, b, c) => {
+    // let n = b.minus(a).cross(c.minus(a)).unit()
+    // FIXME optimize later
+    const ba = subtract(b, a);
+    const ca = subtract(c, a);
+    const cr = cross(ba, ca);
+    const normal = unit(cr); // normal part
+    //
+    const w = dot(normal, a);
+    return [normal[0], normal[1], normal[2], w];
+  };
+
+  /**
+   * Adds two mat4's
+   *
+   * @param {mat4} a the first operand
+   * @param {mat4} b the second operand
+   * @returns {mat4} out
+   */
+
+  /**
+   * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
+   *
+   * @param {mat4} a The first matrix.
+   * @param {mat4} b The second matrix.
+   * @returns {Boolean} True if the matrices are equal, false otherwise.
+   */
+
+  /**
+   * Creates a matrix from a vector scaling
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.scale(dest, dest, vec);
+   *
+   * @param {vec3} v Scaling vector
+   * @returns {mat4} out
+   */
+  const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
+
+  /**
+   * Creates a matrix from a vector translation
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.translate(dest, dest, vec);
+   *
+   * @param {mat4} out mat4 receiving operation result
+   * @param {vec3} v Translation vector
+   * @returns {mat4} out
+   */
+  const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+
+  /**
+   * Create a new mat4 with the given values
+   *
+   * @param {Number} m00 Component in column 0, row 0 position (index 0)
+   * @param {Number} m01 Component in column 0, row 1 position (index 1)
+   * @param {Number} m02 Component in column 0, row 2 position (index 2)
+   * @param {Number} m03 Component in column 0, row 3 position (index 3)
+   * @param {Number} m10 Component in column 1, row 0 position (index 4)
+   * @param {Number} m11 Component in column 1, row 1 position (index 5)
+   * @param {Number} m12 Component in column 1, row 2 position (index 6)
+   * @param {Number} m13 Component in column 1, row 3 position (index 7)
+   * @param {Number} m20 Component in column 2, row 0 position (index 8)
+   * @param {Number} m21 Component in column 2, row 1 position (index 9)
+   * @param {Number} m22 Component in column 2, row 2 position (index 10)
+   * @param {Number} m23 Component in column 2, row 3 position (index 11)
+   * @param {Number} m30 Component in column 3, row 0 position (index 12)
+   * @param {Number} m31 Component in column 3, row 1 position (index 13)
+   * @param {Number} m32 Component in column 3, row 2 position (index 14)
+   * @param {Number} m33 Component in column 3, row 3 position (index 15)
+   * @returns {mat4} A new mat4
+   */
+  const fromValues = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
+    [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
+
+  /**
+   * Creates a matrix from the given angle around the X axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateX(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromXRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+
+    // Perform axis-specific matrix multiplication
+    return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Creates a matrix from the given angle around the Y axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateY(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromYRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    // Perform axis-specific matrix multiplication
+    return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Creates a matrix from the given angle around the Z axis
+   * This is equivalent to (but much faster than):
+   *
+   *     mat4.identity(dest);
+   *     mat4.rotateZ(dest, dest, rad);
+   *
+   * @param {Number} rad the angle to rotate the matrix by
+   * @returns {mat4} out
+   */
+  const fromZRotation = (rad) => {
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
+    // Perform axis-specific matrix multiplication
+    return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  };
+
+  /**
+   * Set a mat4 to the identity matrix
+   *
+   * @returns {mat4} out
+   */
+  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+  /**
    * determine whether the input matrix is a mirroring transformation
    *
    * @param {mat4} mat the input matrix
@@ -598,7 +632,7 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {Number} dot product of a and b
    */
 
-  const equals$1 = ([ax, ay], [bx, by]) => (ax === bx) && (ay === by);
+  const equals$2 = ([ax, ay], [bx, by]) => (ax === bx) && (ay === by);
 
   const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
 
@@ -737,6 +771,88 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {mat4} out
    */
 
+  const W = 3;
+
+  /**
+   * Calculate the distance to the given point
+   * @return {Number} signed distance to point
+   */
+  const signedDistanceToPoint = (plane, point) => dot(plane, point) - plane[W];
+
+  /**
+   * Split the given line by the given plane.
+   * Robust splitting, even if the line is parallel to the plane
+   * @return {vec3} a new point
+   */
+  const splitLineSegmentByPlane = (plane, p1, p2) => {
+    const direction = subtract(p2, p1);
+    let lambda = (plane[3] - dot(plane, p1)) / dot(plane, direction);
+    if (Number.isNaN(lambda)) lambda = 0;
+    if (lambda > 1) lambda = 1;
+    if (lambda < 0) lambda = 0;
+    return add(p1, scale(lambda, direction));
+  };
+
+  const X = 0;
+  const Y = 1;
+  const Z = 2;
+  const W$1 = 3;
+
+  const toXYPlaneTransforms = (plane, rightVector) => {
+    if (rightVector === undefined) {
+      rightVector = random(plane);
+    }
+
+    const v = unit(cross(plane, rightVector));
+    const u = cross(v, plane);
+    const p = multiply(plane, fromScalar(plane[W$1]));
+
+    return [
+      // to
+      fromValues(
+        u[X], v[X], plane[X], 0,
+        u[Y], v[Y], plane[Y], 0,
+        u[Z], v[Z], plane[Z], 0,
+        0, 0, -plane[W$1], 1),
+      // from
+      fromValues(
+        u[X], u[Y], u[Z], 0,
+        v[X], v[Y], v[Z], 0,
+        plane[X], plane[Y], plane[Z], 0,
+        p[X], p[Y], p[Z], 1)
+    ];
+  };
+
+  /**
+   *
+   * # Plane
+   *
+   * Generates a plane with the given constraints.
+   *
+   * ::: illustration { "view": { "position": [-100, -100, 100] } }
+   * ```
+   * sphere(20).cut(planeX())[0];
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-100, -100, 100] } }
+   * ```
+   * sphere(20).cut(planeY(0))[0];
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [-100, -100, 100] } }
+   * ```
+   * sphere(20).cut(planeZ(0))[1];
+   * ```
+   * :::
+   *
+   **/
+
+  // Plane Interfaces.
+
+  const planeX = (x = 0) => fromPoints([x, 0, 0], [x, 1, 0], [x, 0, 1]);
+  const planeY = (y = 0) => fromPoints([1, y, 0], [0, y, 0], [0, y, 1]);
+  const planeZ = (z = 0) => fromPoints([1, 0, z], [0, 1, z], [0, 0, z]);
+
   const canonicalizePoint = (point, index) => {
     if (point === null) {
       if (index !== 0) throw Error('Path has null not at head');
@@ -760,7 +876,7 @@ define("./webworker.js",[],function () { 'use strict';
     return result;
   };
 
-  const flip = (path) => {
+  const flip$1 = (path) => {
     if (path[0] === null) {
       return [null, ...path.slice(1).reverse()];
     } else {
@@ -824,7 +940,7 @@ define("./webworker.js",[],function () { 'use strict';
     }
   };
 
-  const flip$1 = (paths) => paths.map(flip);
+  const flip$2 = (paths) => paths.map(flip$1);
 
   const intersection = (...pathsets) => { throw Error('Not implemented'); };
 
@@ -7166,7 +7282,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const union$1 = (...geometries) => [].concat(...geometries);
 
-  const flip$2 = (points) => points;
+  const flip$3 = (points) => points;
 
   /**
    * Transforms the vertices of a polygon, producing a new poly3.
@@ -7218,7 +7334,7 @@ return d[d.length-1];};return ", funcName].join("");
    * @param {poly3} polygon - the polygon to flip
    * @returns {poly3} a new poly3
    */
-  const flip$3 = (polygon) => [...polygon].reverse();
+  const flip$4 = (polygon) => [...polygon].reverse();
 
   /**
    * Create a poly3 from the given points.
@@ -7234,100 +7350,14 @@ return d[d.length-1];};return ", funcName].join("");
    * ]
    * const polygon = createFromPoints(points)
    */
-  const fromPoints = (points, planeof) => [...points];
-
-  /**
-   * Compare the given planes for equality
-   * @return {boolean} true if planes are equal
-   */
-  const equals$2 = (a, b) => (a[0] === b[0]) && (a[1] === b[1]) && (a[2] === b[2]) && (a[3] === b[3]);
-
-  /**
-   * Flip the given plane (vec4)
-   *
-   * @param {vec4} vec - plane to flip
-   * @return {vec4} flipped plane
-   */
-  const flip$4 = ([x = 0, y = 0, z = 0, w = 0]) => [-x, -y, -z, -w];
-
-  /**
-   * Create a new plane from the given points
-   *
-   * @param {Vec3} a - 3D point
-   * @param {Vec3} b - 3D point
-   * @param {Vec3} c - 3D point
-   * @returns {Vec4} a new plane with properly typed values
-   */
-  const fromPoints$1 = (a, b, c) => {
-    // let n = b.minus(a).cross(c.minus(a)).unit()
-    // FIXME optimize later
-    const ba = subtract(b, a);
-    const ca = subtract(c, a);
-    const cr = cross(ba, ca);
-    const normal = unit(cr); // normal part
-    //
-    const w = dot(normal, a);
-    return [normal[0], normal[1], normal[2], w];
-  };
-
-  const W = 3;
-
-  /**
-   * Calculate the distance to the given point
-   * @return {Number} signed distance to point
-   */
-  const signedDistanceToPoint = (plane, point) => dot(plane, point) - plane[W];
-
-  /**
-   * Split the given line by the given plane.
-   * Robust splitting, even if the line is parallel to the plane
-   * @return {vec3} a new point
-   */
-  const splitLineSegmentByPlane = (plane, p1, p2) => {
-    const direction = subtract(p2, p1);
-    let lambda = (plane[3] - dot(plane, p1)) / dot(plane, direction);
-    if (Number.isNaN(lambda)) lambda = 0;
-    if (lambda > 1) lambda = 1;
-    if (lambda < 0) lambda = 0;
-    return add(p1, scale(lambda, direction));
-  };
-
-  const X = 0;
-  const Y = 1;
-  const Z = 2;
-  const W$1 = 3;
-
-  const toXYPlaneTransforms = (plane, rightVector) => {
-    if (rightVector === undefined) {
-      rightVector = random(plane);
-    }
-
-    const v = unit(cross(plane, rightVector));
-    const u = cross(v, plane);
-    const p = multiply(plane, fromScalar(plane[W$1]));
-
-    return [
-      // to
-      fromValues(
-        u[X], v[X], plane[X], 0,
-        u[Y], v[Y], plane[Y], 0,
-        u[Z], v[Z], plane[Z], 0,
-        0, 0, -plane[W$1], 1),
-      // from
-      fromValues(
-        u[X], u[Y], u[Z], 0,
-        v[X], v[Y], v[Z], 0,
-        plane[X], plane[Y], plane[Z], 0,
-        p[X], p[Y], p[Z], 1)
-    ];
-  };
+  const fromPoints$1 = (points, planeof) => [...points];
 
   const toPlane = (polygon) => {
     if (polygon.plane === undefined) {
       if (polygon.length >= 3) {
         // FIX: Find a better way to handle polygons with colinear points.
         for (let nth = 0; nth < polygon.length - 2; nth++) {
-          polygon.plane = fromPoints$1(polygon[nth], polygon[nth + 1], polygon[nth + 2]);
+          polygon.plane = fromPoints(polygon[nth], polygon[nth + 1], polygon[nth + 2]);
           if (!isNaN(polygon.plane[0])) break;
         }
       } else {
@@ -7383,7 +7413,7 @@ return d[d.length-1];};return ", funcName].join("");
   const isStrictlyCoplanar = (polygon) => {
     const plane = toPlane(polygon);
     for (let nth = 1; nth < polygon.length - 2; nth++) {
-      if (!equals$2(plane, toPlane(polygon.slice(nth)))) {
+      if (!equals(plane, toPlane(polygon.slice(nth)))) {
         return false;
       }
     }
@@ -7526,7 +7556,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (let polygon of surface) {
       pointType.length = 0;
       let polygonType = COPLANAR;
-      if (!equals$2(toPlane(polygon), plane)) {
+      if (!equals(toPlane(polygon), plane)) {
         for (const point of polygon) {
           const type = toType(plane, point);
           polygonType |= type;
@@ -7708,7 +7738,7 @@ return d[d.length-1];};return ", funcName].join("");
     return original.map(polygon => transform(polygon));
   };
 
-  const flip$5 = (surface) => map$1(surface, flip$3);
+  const flip$5 = (surface) => map$1(surface, flip$4);
 
   const notEmpty = (surface) => surface.length > 0;
 
@@ -13817,7 +13847,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const isDegenerate = (polygon) => {
     for (let nth = 0; nth < polygon.length; nth++) {
-      if (equals(polygon[nth], polygon[(nth + 1) % polygon.length])) {
+      if (equals$1(polygon[nth], polygon[(nth + 1) % polygon.length])) {
         return true;
       }
     }
@@ -13854,7 +13884,7 @@ return d[d.length-1];};return ", funcName].join("");
       // FIX: Use a binary search to take advantage of the sorting of the edges.
       for (let nth = 0; nth < edges.length; nth++) {
         const candidate = edges[nth];
-        if (equals(candidate[START], start)) {
+        if (equals$1(candidate[START], start)) {
           edges.splice(nth, 1);
           return candidate;
         }
@@ -13872,7 +13902,7 @@ return d[d.length-1];};return ", funcName].join("");
       let edge = edges.shift();
       const loop = [edge[START]];
       try {
-        while (!equals(edge[END], loop[0])) {
+        while (!equals$1(edge[END], loop[0])) {
           edge = extractSuccessor(edges, edge[END]);
           loop.push(edge[START]);
         }
@@ -17702,7 +17732,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (const polygon of surface) {
       pointType$1.length = 0;
       let polygonType = COPLANAR$2;
-      if (!equals$2(toPlane(polygon), plane)) {
+      if (!equals(toPlane(polygon), plane)) {
         for (const point of polygon) {
           const type = toType$2(plane, point);
           polygonType |= type;
@@ -17887,7 +17917,7 @@ return d[d.length-1];};return ", funcName].join("");
       // const a = toPlane(bsp.polygons[0]);
       // const b = plane.flip(bsp.plane);
       // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }
-      bsp.plane = flip$4(bsp.plane);
+      bsp.plane = flip(bsp.plane);
     }
     // Invert the children.
     if (bsp.front !== undefined) {
@@ -18316,9 +18346,9 @@ return d[d.length-1];};return ", funcName].join("");
   const flip$8 = (geometry) => {
     const flipped = {};
     if (geometry.points) {
-      flipped.points = flip$2(geometry.points);
+      flipped.points = flip$3(geometry.points);
     } else if (geometry.paths) {
-      flipped.paths = flip$1(geometry.paths);
+      flipped.paths = flip$2(geometry.paths);
     } else if (geometry.z0Surface) {
       flipped.surface = flip$5(geometry.z0Surface);
     } else if (geometry.solid) {
@@ -18670,36 +18700,6 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
-   * # Plane
-   *
-   * Generates a plane with the given constraints.
-   *
-   * ::: illustration { "view": { "position": [-100, -100, 100] } }
-   * ```
-   * sphere(20).cut(planeX())[0];
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [-100, -100, 100] } }
-   * ```
-   * sphere(20).cut(planeY(0))[0];
-   * ```
-   * :::
-   * ::: illustration { "view": { "position": [-100, -100, 100] } }
-   * ```
-   * sphere(20).cut(planeZ(0))[1];
-   * ```
-   * :::
-   *
-   **/
-
-  // Plane Interfaces.
-
-  const planeX = (x = 0) => fromPoints$1([x, 0, 0], [x, 1, 0], [x, 0, 1]);
-  const planeY = (y = 0) => fromPoints$1([1, y, 0], [0, y, 0], [0, y, 1]);
-  const planeZ = (z = 0) => fromPoints$1([1, 0, z], [0, 1, z], [0, 0, z]);
-
-  /**
-   *
    * # Assemble
    *
    * Produces an assembly of shapes that can be manipulated as a single shape.
@@ -18968,6 +18968,199 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+
+  const relax = (constraint, stepCoefficient) => constraint.relax(constraint, stepCoefficient);
+
+  const verlet = ({ forces = [], ids = {}, particles = [], constraints = [] } = {}) =>
+    ({ forces, ids, particles: Object.values(particles), constraints });
+
+  const positions = ({ particles }) => {
+    const positions = {};
+    for (const particle of particles) {
+      positions[particle.id] = particle.position;
+    }
+    return positions;
+  };
+
+  const update = ({ constraints, forces, particles }, step = 16) => {
+    for (const particle of particles) {
+      const { position } = particle;
+
+      for (const force of forces) {
+        force({ particle, particles });
+      }
+
+      particle.lastPosition = position;
+    }
+
+    // relax
+    const stepCoefficient = 1 / step;
+
+    for (let i = 0; i < step; i++) {
+      for (const constraint of constraints) {
+        relax(constraint, stepCoefficient);
+      }
+    }
+  };
+
+  const isStopped = ({ particles }) => {
+    return particles.every(({ position, lastPosition }) => equals$1(position, lastPosition));
+  };
+
+  const solve = (verlet) => {
+    do {
+      update(verlet);
+    } while (!isStopped(verlet));
+  };
+
+  const force = ({ forces }, friction = 0.99) => {
+    const applyInertia = ({ particle }) => {
+      const velocity = scale(friction, subtract(particle.position, particle.lastPosition));
+      if (velocity > 1e-5) {
+        particle.position = add(particle.position, velocity);
+      }
+    };
+    forces.push(applyInertia);
+  };
+
+  const particle = (id, [x = 0, y = 0, z = 0] = []) => ({ id, position: [x, y, z], lastPosition: [x, y, z] });
+
+  const ensureParticle = (ids, particles, id) => {
+    let p = ids[id];
+    if (p === undefined) {
+      p = particle(id, [Math.random() * 10, Math.random() * 10]);
+      ids[id] = p;
+      particles.push(p);
+    }
+    return p;
+  };
+
+  const angle = ([ax, ay], [bx, by]) => Math.atan2(ax * by - ay * bx, ax * bx + ay * by);
+
+  const angle2 = (pivot, left, right) => angle(subtract(left, pivot), subtract(right, pivot));
+
+  const rotate = ([pointX, pointY], [originX, originY], theta) => {
+    const x = pointX - originX;
+    const y = pointY - originY;
+    return [x * Math.cos(theta) - y * Math.sin(theta) + originX,
+            x * Math.sin(theta) + y * Math.cos(theta) + originY,
+            0];
+  };
+
+  const relax$1 = ({ pivot, left, right, radians, stiffness }, stepCoefficient) => {
+    const currentRadians = angle2(pivot.position, left.position, right.position);
+    let diff = currentRadians - radians;
+
+    if (diff <= -Math.PI) {
+      diff += 2 * Math.PI;
+    } else if (diff >= Math.PI) {
+      diff -= 2 * Math.PI;
+    }
+
+    diff *= stepCoefficient * stiffness;
+
+    left.position = rotate(left.position, pivot.position, diff);
+    right.position = rotate(right.position, pivot.position, -diff);
+    pivot.position = rotate(pivot.position, left.position, diff);
+    pivot.position = rotate(pivot.position, right.position, -diff);
+  };
+
+  const create$1 = ({ constraints, ids, particles }) => {
+    const constrain = (left, pivot, right, angle, stiffness = 0.5) => {
+      constraints.push({
+        pivot: ensureParticle(ids, particles, pivot),
+        left: ensureParticle(ids, particles, left),
+        right: ensureParticle(ids, particles, right),
+        stiffness,
+        radians: angle * Math.PI / 360,
+        relax: relax$1
+      });
+    };
+    return constrain;
+  };
+
+  // Distance
+
+  const relax$2 = ({ a, b, distance, stiffness }, stepCoefficient) => {
+    const normal = subtract(a.position, b.position);
+    let m = squaredDistance(normal, [0, 0, 0]);
+    if (m === 0) {
+      m = 1;
+    }
+    const scaledNormal = scale(((distance * distance - m) / m) * stiffness * stepCoefficient,
+                               normal);
+    a.position = add(a.position, scaledNormal);
+    b.position = subtract(b.position, scaledNormal);
+  };
+
+  const create$2 = ({ constraints, ids, particles }) => {
+    const constrain = (a, b, distance, stiffness = 0.5) => {
+      constraints.push({
+        a: ensureParticle(ids, particles, a),
+        b: ensureParticle(ids, particles, b),
+        distance,
+        relax: relax$2,
+        stiffness
+      });
+    };
+    return constrain;
+  };
+
+  // Pinning Constraint
+
+  const relax$3 = ({ particle, position }, stepCoefficient) => {
+    particle.position = position;
+  };
+
+  const create$3 = ({ constraints, ids, particles }) => {
+    const constrain = (particle, position) => {
+      constraints.push({
+        particle: ensureParticle(ids, particles, particle),
+        position,
+        relax: relax$3
+      });
+    };
+    return constrain;
+  };
+
+  /**
+   *
+   * # Armature
+   *
+   * Armature builds a set of points based on constraints.
+   *
+   * ::: illustration
+   * ```
+   * const { angle, compute, distance, pinned } = armature();
+   * angle('A', 'B', 'C', 90);
+   * distance('B', 'A', 20);
+   * distance('B', 'C', 10);
+   * const { A, B, C } = compute();
+   * polygon(A, B, C).center();
+   * ```
+   * :::
+   *
+   **/
+
+  const armature = () => {
+    const constraints = verlet();
+    force(constraints);
+    const angle = create$1(constraints);
+    const distance = create$2(constraints);
+    const pinned = create$3(constraints);
+
+    const compute = () => {
+      solve(constraints);
+      return positions(constraints);
+    };
+
+    return {
+      angle,
+      compute,
+      distance,
+      pinned
+    };
+  };
 
   /**
    *
@@ -27004,7 +27197,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (let nth = 1; nth < path.length; nth++) {
       const last = path[nth - 1];
       const current = path[nth];
-      if (last === null || !equals$1(last, current)) {
+      if (last === null || !equals$2(last, current)) {
         unrepeated.push(current);
       }
     }
@@ -27030,7 +27223,7 @@ return d[d.length-1];};return ", funcName].join("");
     const maybeClosePath = () => {
       path = removeRepeatedPoints(canonicalize$1(path));
       if (path.length > 3) {
-        if (path[0] === null && equals$1(path[1], path[path.length - 1])) {
+        if (path[0] === null && equals$2(path[1], path[path.length - 1])) {
           // The path is closed, remove the leading null, and the duplicate point at the end.
           path = path.slice(1, path.length - 1);
           newPath();
@@ -41604,7 +41797,7 @@ return d[d.length-1];};return ", funcName].join("");
                          [ldu(x3), ldu(y3), ldu(z3)]];
           if (!isStrictlyCoplanar(polygon)) throw Error('die');
           if (Direction() === 'CW') {
-            polygons.push(flip$3(polygon));
+            polygons.push(flip$4(polygon));
           } else {
             polygons.push(polygon);
           }
@@ -41618,10 +41811,10 @@ return d[d.length-1];};return ", funcName].join("");
                    [ldu(x4), ldu(y4), ldu(z4)]];
           if (Direction() === 'CW') {
             if (isStrictlyCoplanar(p)) {
-              polygons.push(flip$3(p));
+              polygons.push(flip$4(p));
             } else {
-              polygons.push(flip$3([p[0], p[1], p[3]]));
-              polygons.push(flip$3([p[2], p[3], p[1]]));
+              polygons.push(flip$4([p[0], p[1], p[3]]));
+              polygons.push(flip$4([p[2], p[3], p[1]]));
             }
           } else {
             if (isStrictlyCoplanar(p)) {
@@ -41950,7 +42143,7 @@ return d[d.length-1];};return ", funcName].join("");
     lines.forEach(ends => {
       ends.sort((a, b) => distance(a) - distance(b));
       for (let nth = 1; nth < ends.length; nth++) {
-        if (!equals(ends[nth], ends[nth - 1])) {
+        if (!equals$1(ends[nth], ends[nth - 1])) {
           violations.push(['unequal', [start, ...ends]]);
           violations.push(['unequal', [start, ...ends].reverse()]);
           break;
@@ -42036,8 +42229,8 @@ return d[d.length-1];};return ", funcName].join("");
     let sideobjs = sidemap[sidetag];
     for (let i = 0; i < sideobjs.length; i++) {
       let sideobj = sideobjs[i];
-      if (!equals(sideobj.vertex0, vertex0)) continue;
-      if (!equals(sideobj.vertex1, vertex1)) continue;
+      if (!equals$1(sideobj.vertex0, vertex0)) continue;
+      if (!equals$1(sideobj.vertex1, vertex1)) continue;
       if (polygonindex !== null) {
         if (sideobj.polygonindex !== polygonindex) continue;
       }
@@ -42236,7 +42429,7 @@ return d[d.length-1];};return ", funcName].join("");
                       // split the side by inserting the vertex:
                       let newvertices = polygon.slice(0);
                       newvertices.splice(insertionvertextagindex, 0, endvertex);
-                      let newpolygon = fromPoints(newvertices);
+                      let newpolygon = fromPoints$1(newvertices);
 
                       // calculate plane with differents point
                       if (isNaN(toPlane(newpolygon)[W$3])) {
@@ -42251,7 +42444,7 @@ return d[d.length-1];};return ", funcName].join("");
                         loop(function (a) {
                           loop(function (b) {
                             loop(function (c) {
-                              newpolygon.plane = fromPoints$1(a, b, c);
+                              newpolygon.plane = fromPoints(a, b, c);
                               if (!isNaN(toPlane(newpolygon)[W$3])) {
                                 found = true;
                               }
@@ -42326,8 +42519,8 @@ return d[d.length-1];};return ", funcName].join("");
             const span = distance(start, end);
             const colinear = [];
             for (const [, point] of points) {
-              if (equals(point, start)) continue;
-              if (equals(point, end)) continue;
+              if (equals$1(point, start)) continue;
+              if (equals$1(point, end)) continue;
               if (distance(start, point) + distance(point, end) === span) {
                 // The point is approximately colinear.
                 colinear.push(point);
@@ -42644,7 +42837,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (const { solid } of solids) {
       const polygons = toPolygons({}, solid);
       const triangles = toTriangles({}, polygons);
-      const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints$1([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
+      const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
       shapes.push(Shape.fromPathsToZ0Surface(paths));
     }
     return assemble$1(...shapes);
@@ -93793,7 +93986,7 @@ return d[d.length-1];};return ", funcName].join("");
     };
     for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
       outputTriangle(triangle);
-      outputTriangle(flip$3(triangle));
+      outputTriangle(flip$4(triangle));
     }
     return { normals, positions };
   };
@@ -93914,58 +94107,21 @@ return d[d.length-1];};return ", funcName].join("");
     return svg;
   };
 
-  const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer', includeEditor = false, includeEvaluator = false, initialScript = '', initialPage = 'editor', previewPage = 'default' }, geometry) => {
+  const toThreejsPage = async ({ cameraPosition = [0, 0, 16], title = 'JSxCAD Viewer' }, geometry) => {
     const threejsGeometry = toThreejsGeometry(geometry);
-    // FIX: Avoid injection issues.
-    const head = [
-      `<title>${title}</title>`,
-      `<meta charset="utf-8">`,
-      `<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">`,
-      `<style>`,
-      `body { color: #cccccc; font-family: Monospace; font-size: 13px; text-align: left; background-color: #0.73505; margin: 0px; overflow: hidden; }`,
-      `.dg { position: absolute; top: 2px; left: 2px }`,
-      `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; }`,
-      `.Console { border-top: 1px solid black; border-bottom: 1px solid black; font-family: Arial, monospace; font-size: 16px; color: black; }`,
-      `</style>`,
-      `<link href="https://codemirror.net/lib/codemirror.css" rel="stylesheet">`
-    ].join('\n');
-
-    const body = [
-      `<!-- CodeMirror -->`,
-      includeEditor ? `<script src="https://codemirror.net/lib/codemirror.js"><\\/script>`.replace('\\/', '/') : '',
-      includeEditor ? `<script src="https://codemirror.net/addon/display/autorefresh.js"><\\/script>`.replace('\\/', '/') : '',
-      includeEditor ? `<script src="https://codemirror.net/addon/display/fullscreen.js"><\\/script>`.replace('\\/', '/') : '',
-      includeEditor ? `<script src="https://codemirror.net/mode/javascript/javascript.js"><\\/script>`.replace('\\/', '/') : '',
-      includeEditor ? `<script src="https://riversun.github.io/jsframe/jsframe.js"><\\/script>`.replace('\\/', '/') : '',
-      `<!-- ThreeJS -->`,
-      `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"><\\/script>`.replace('\\/', '/'),
-      `<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"><\\/script>`.replace('\\/', '/'),
-      `<script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/TrackballControls.js"><\\/script>`.replace('\\/', '/'),
-      `<script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"><\\/script>`.replace('\\/', '/'),
-      `<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js//0.0.20/ami.min.js"><\\/script>`.replace('\\/', '/'),
-      `<!-- FileSaver -->`,
-      `<script type="module">`,
-      // `import { api, sys, toThreejsGeometry } from 'https://unpkg.com/@jsxcad/api-v1-bundle@^0.0.74/dist/bundle?module';`,
-      `import { api, sys, toThreejsGeometry } from './bundle.js'`,
-      `const { readFile, watchFile, watchFileCreation, writeFile } = sys;`,
-      initialScript !== '' ? `const initialScript = ${JSON.stringify(initialScript)};` : '',
-      // `import { display } from 'https://unpkg.com/@jsxcad/convert-threejs@^0.0.74/display.js?module';`,
-      `import { display } from './display.js';`,
-      `const jsFrame = new JSFrame();`,
-      `const { addPage, nextPage, lastPage } = display({ Blob, THREE, dat, jsFrame, readFile, requestAnimationFrame, toThreejsGeometry, watchFile, watchFileCreation });`,
-      // includeEditor ? `import { editor } from 'https://unpkg.com/@jsxcad/convert-threejs@^0.0.74/editor.js?module'` : '',
-      includeEditor ? `import { editor } from './editor.js';` : '',
-      includeEditor ? `editor({ CodeMirror, addPage, api, initialScript, nextPage, lastPage });` : '',
-      includeEditor ? `import { console } from './console.js';` : '',
-      includeEditor ? `console({ addPage, watchFile });` : '',
-      `const runApp = () => {`,
-      threejsGeometry ? `  writeFile({ geometry: ${JSON.stringify(threejsGeometry)} }, ${JSON.stringify(previewPage)}, '').then(_ => nextPage());` : '',
-      `}`,
-      `document.addEventListener("DOMContentLoaded", runApp);`,
-      `<\\/script>`.replace('\\/', '/')
-    ].join('\n');
-
-    return `<html><head>${head}</head><body id="body">${body}</body></html>`;
+    const html = `
+<html>
+ <head>
+  <title>JSxCAD Viewer</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+ </head>
+ <body>
+  <script type="text/javascript" src="./display.js"></script>
+  <script type="text/javascript">JSxCAD = ${JSON.stringify({ geometry })};</script>
+ </body>
+</html>`;
+    return html;
   };
 
   /**
@@ -94031,6 +94187,7 @@ return d[d.length-1];};return ", funcName].join("");
     Shape: Shape,
     above: above,
     acos: acos,
+    armature: armature,
     as: as,
     assemble: assemble$1,
     back: back,
@@ -121335,7 +121492,7 @@ return d[d.length-1];};return ", funcName].join("");
   var strSlice = makeSafeToCall(String.prototype.slice);
 
   var cloner = function(){};
-  function create$1(prototype) {
+  function create$4(prototype) {
     if (originalCreate) {
       return originalCreate.call(originalObject, prototype);
     }
@@ -121344,7 +121501,7 @@ return d[d.length-1];};return ", funcName].join("");
   }
 
   var rand = Math.random;
-  var uniqueKeys = create$1(null);
+  var uniqueKeys = create$4(null);
 
   function makeUniqueKey() {
     // Collisions are highly unlikely, but this module is in the business of
@@ -121387,12 +121544,12 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   function defaultCreatorFn(object) {
-    return create$1(null);
+    return create$4(null);
   }
 
   function makeAccessor(secretCreatorFn) {
     var brand = makeUniqueKey();
-    var passkey = create$1(null);
+    var passkey = create$4(null);
 
     secretCreatorFn = secretCreatorFn || defaultCreatorFn;
 
