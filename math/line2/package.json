@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-line2",
-  "version": "0.0.75",
+  "version": "0.0.76",
   "description": "2d lines for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,8 +48,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.75",
-    "@jsxcad/math-vec2": "^0.0.75",
+    "@jsxcad/math-utils": "^0.0.76",
+    "@jsxcad/math-vec2": "^0.0.76",
     "esm": "^3.2.10"
   },
   "devDependencies": {

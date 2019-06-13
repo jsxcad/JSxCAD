@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-mat4",
-  "version": "0.0.75",
+  "version": "0.0.76",
   "description": "4d matrices for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,9 +48,9 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.75",
-    "@jsxcad/math-vec2": "^0.0.75",
-    "@jsxcad/math-vec3": "^0.0.75"
+    "@jsxcad/math-utils": "^0.0.76",
+    "@jsxcad/math-vec2": "^0.0.76",
+    "@jsxcad/math-vec3": "^0.0.76"
   },
   "devDependencies": {
     "ava": "^1.4.1",
