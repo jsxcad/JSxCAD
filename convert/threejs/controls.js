@@ -2,7 +2,7 @@ import * as dat from 'dat.gui';
 
 import TrackballControls from 'three-trackballcontrols';
 
-export const buildTrackballControls = ({ camera, render, viewerElement, view = {}}) => {
+export const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
   const { target = [0, 0, 0] } = view;
   const trackball = new TrackballControls(camera, viewerElement);
   trackball.rotateSpeed = 4.0;
