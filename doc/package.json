@@ -42,7 +42,6 @@
   "ava": {
     "require": "esm"
   },
-  "private": true,
   "publishConfig": {
     "access": "public"
   }
