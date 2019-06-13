@@ -5,7 +5,7 @@ import { buildScene, createResizer } from './scene';
 
 import { buildMeshes } from './mesh';
 
-export const display = ({ view = {}, geometry } = {}, page) => {
+export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   let datasets = [];
 
   const { camera, renderer, scene, viewerElement } = buildScene({ width: page.offsetWidth, height: page.offsetHeight, view });
@@ -21,7 +21,7 @@ export const display = ({ view = {}, geometry } = {}, page) => {
   resize();
   new ResizeObserver(resize).observe(container);
 
-  buildMeshes({ datasets, geometry, scene });
+  buildMeshes({ datasets, threejsGeometry, scene });
   buildGuiControls({ datasets, gui });
 
   const animate = () => {

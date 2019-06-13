@@ -1,7 +1,7 @@
+import { cutSurface, flip } from '@jsxcad/geometry-surface';
+
 import { canonicalize } from './canonicalize';
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
-import { cutSurface } from '@jsxcad/geometry-surface';
-import { flip } from '@jsxcad/geometry-surface';
 import { toLoops } from '@jsxcad/geometry-polygons';
 
 export const cut = (plane, solid) => {

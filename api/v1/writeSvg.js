@@ -27,7 +27,7 @@ export const writeSvg = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
+  await writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
 };
 
 const method = function (options = {}) { return writeSvg(options, this); };
