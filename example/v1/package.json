@@ -58,6 +58,7 @@
     "@jsxcad/geometry-path": "^0.0.77",
     "@jsxcad/geometry-polygons": "^0.0.77",
     "@jsxcad/geometry-solid": "^0.0.77",
+    "@jsxcad/geometry-surface": "^0.0.77",
     "@jsxcad/geometry-tagged": "^0.0.77",
     "@jsxcad/geometry-z0surface": "^0.0.77",
     "@jsxcad/math-mat4": "^0.0.77",
