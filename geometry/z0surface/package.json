@@ -20,7 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-shape": "^0.0.75",
+    "@jsxcad/algorithm-shape": "^0.0.77",
     "@jsxcad/geometry-path": "^0.0.77",
     "@jsxcad/geometry-paths": "^0.0.77",
     "@jsxcad/math-poly3": "^0.0.77",

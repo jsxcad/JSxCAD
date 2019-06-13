@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/geometry-tagged",
-  "version": "0.0.75",
+  "version": "0.0.77",
   "description": "Assembly algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -20,17 +20,17 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp-surfaces": "^0.0.75",
-    "@jsxcad/geometry-paths": "^0.0.75",
-    "@jsxcad/geometry-points": "^0.0.75",
-    "@jsxcad/geometry-solid": "^0.0.75",
-    "@jsxcad/geometry-surface": "^0.0.75",
-    "@jsxcad/geometry-z0surface": "^0.0.75",
-    "@jsxcad/math-mat4": "^0.0.75",
-    "@jsxcad/math-vec3": "^0.0.75"
+    "@jsxcad/algorithm-bsp-surfaces": "^0.0.77",
+    "@jsxcad/geometry-paths": "^0.0.77",
+    "@jsxcad/geometry-points": "^0.0.77",
+    "@jsxcad/geometry-solid": "^0.0.77",
+    "@jsxcad/geometry-surface": "^0.0.77",
+    "@jsxcad/geometry-z0surface": "^0.0.77",
+    "@jsxcad/math-mat4": "^0.0.77",
+    "@jsxcad/math-vec3": "^0.0.77"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.75",
+    "@jsxcad/data-shape": "^0.0.77",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",
