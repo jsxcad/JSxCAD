@@ -43,6 +43,7 @@ import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { microGearMotor } from './microGearMotor';
 import { minkowski } from './minkowski';
+import { numbers } from './numbers';
 import { outline } from './outline';
 import { point } from './point';
 import { points } from './points';
@@ -113,6 +114,7 @@ export {
   measureBoundingBox,
   microGearMotor,
   minkowski,
+  numbers,
   outline,
   planeX,
   planeY,
