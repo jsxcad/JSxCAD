@@ -43,9 +43,18 @@ const convertArgs = (args) => {
 
 const convertAst = ({ name, args = [], children = [] }) => `${name}(${convertArgs(args)}, ${convertChildren(children)})`;
 
-test('Parse', t => {
+if (false)
+test('Parse CSG', t => {
   const code = readFileSync('./gears.test.csg', { encoding: 'utf8' });
   const ast = new SCADParser().parse(code, 'gears.test.csg');
+  console.log(`QQ/convert: ${convertAst(ast)}`);
+  console.log(`QQ/ast: ${stringify(strip(ast))}`);
+  t.true(true);
+});
+
+test('Parse CSG', t => {
+  const code = readFileSync('./gears.scad', { encoding: 'utf8' });
+  const ast = new SCADParser().parse(code, 'gears.scad');
   console.log(`QQ/convert: ${convertAst(ast)}`);
   console.log(`QQ/ast: ${stringify(strip(ast))}`);
   t.true(true);

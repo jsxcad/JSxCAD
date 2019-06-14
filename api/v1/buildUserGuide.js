@@ -22,6 +22,7 @@ const paths = [
   'left.js', 'lego.js',
   'log.js',
   'material.js', 'max.js', 'measureBoundingBox.js', 'microGearMotor.js', 'minkowski.js',
+  'numbers.js',
   'outline.js',
   'plane.js', 'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
   'readDst.js', 'readFont.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
