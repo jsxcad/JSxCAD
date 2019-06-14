@@ -16,4 +16,4 @@ export const numbers = ({ from = 0, to = 0, by = 1 }) => {
     numbers.push(number);
   }
   return numbers;
-}
+};
