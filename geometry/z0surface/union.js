@@ -1,7 +1,7 @@
-import { clippingToPolygons, notEmpty, z0SurfaceToClipping } from './clippingToPolygons';
-import { Polygon, point as createPoint } from "@flatten-js/core"
+import { fromSurface, toSurface } from './convert';
 
-import { unify } from "@flatten-js/boolean-op"
+import { doesNotOverlap } from './doesNotOverlap';
+import polybooljs from 'polybooljs';
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -10,32 +10,14 @@ import { unify } from "@flatten-js/boolean-op"
  * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
  * @returns {Z0Surface} the resulting z0 surface.
  */
-export const union = (z0Surface, ...z0Surfaces) => {
-  if (z0Surface === undefined || z0Surface.length === 0) {
+export const union = (baseZ0Surface, ...z0Surfaces) => {
+  z0Surfaces = z0Surfaces.filter(surface => !doesNotOverlap(baseZ0Surface, surface));
+  if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
   if (z0Surfaces.length === 0) {
-    return z0Surface;
+    return baseZ0Surface;
   }
-  const a = new Polygon();
-  for (const polygon of z0Surface) {
-    a.addFace(polygon.map(([x, y]) => createPoint(x, y)));
-  }
-  const b = new Polygon();
-  for (const surface of z0Surfaces) {
-    for (const polygon of surface) {
-      b.addFace(polygon.map(([x, y]) => createPoint(x, y)));
-    }
-  }
-  const c = unify(a, b);
-  const result = [];
-  for (const face of c.faces) {
-    const polygon = [];
-    for (const edge of face) {
-      const start = edge.start;
-      polygon.push([start.x, start.y, 0]);
-    }
-    result.push(polygon);
-  }
-  return result;
+  const result = polybooljs.union(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
+  return toSurface(result);
 };

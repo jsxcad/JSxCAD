@@ -1,5 +1,6 @@
 import { build } from './build';
 import { clipTo } from './clipTo';
+import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
@@ -27,6 +28,11 @@ export const intersection = (...solids) => {
   while (solids.length > 1) {
     const aSolid = solids.shift();
     const bSolid = solids.shift();
+
+    if (doesNotOverlap(aSolid, bSolid)) {
+      // Once we produce an empty geometry, all further intersections must be empty.
+      return [];
+    }
 
     const aBsp = fromSurfaces({}, aSolid);
     const bBsp = fromSurfaces({}, bSolid);
