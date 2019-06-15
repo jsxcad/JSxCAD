@@ -1,6 +1,5 @@
-import { flip, toPlane } from '@jsxcad/math-poly3';
-
 import { makeConvex } from '@jsxcad/geometry-surface';
+import { toPlane } from '@jsxcad/math-poly3';
 import { toSegments } from '@jsxcad/geometry-path';
 import { toTriangles } from '@jsxcad/geometry-polygons';
 
@@ -45,7 +44,6 @@ const z0SurfaceToThreejsSurface = (surface) => {
   };
   for (const triangle of toTriangles({}, makeConvex({}, surface))) {
     outputTriangle(triangle);
-    outputTriangle(flip(triangle));
   }
   return { normals, positions };
 };

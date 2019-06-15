@@ -13,9 +13,11 @@ import { getClouds } from './getClouds';
 import { getPaths } from './getPaths';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
+import { getTags } from './getTags';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
@@ -41,9 +43,11 @@ export {
   getPaths,
   getSolids,
   getSurfaces,
+  getTags,
   getZ0Surfaces,
   intersection,
   keep,
+  map,
   measureBoundingBox,
   toComponents,
   toDisjointGeometry,

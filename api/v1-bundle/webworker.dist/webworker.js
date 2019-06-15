@@ -7271,7 +7271,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (const nth of monotoneConvexHull2d(points)) {
       hull.push(points[nth]);
     }
-    return hull;
+    return hull.reverse();
   };
 
   const eachPoint$1 = (options = {}, thunk, points) => {
@@ -7696,48 +7696,6 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const flip$5 = (surface) => map$1(surface, flip$4);
-
-  const eachPoint$3 = (options = {}, thunk, surface) => {
-    for (const polygon of surface) {
-      for (const point of polygon) {
-        thunk(point);
-      }
-    }
-  };
-
-  // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox = (surface) => {
-    if (surface.measureBoundingBox === undefined) {
-      let max$1 = surface[0][0];
-      let min$1 = surface[0][0];
-      eachPoint$3({},
-                point => {
-                  max$1 = max(max$1, point);
-                  min$1 = min(min$1, point);
-                },
-                surface);
-      surface.measureBoundingBox = [min$1, max$1];
-    }
-    return surface.measureBoundingBox;
-  };
-
-  const iota = 1e-5;
-  const X$1 = 0;
-  const Y$1 = 1;
-
-  // Tolerates overlap up to one iota.
-  const doesNotOverlap = (a, b) => {
-    if (a.length === 0 || b.length === 0) {
-      return true;
-    }
-    const [minA, maxA] = measureBoundingBox(a);
-    const [minB, maxB] = measureBoundingBox(b);
-    if (maxA[X$1] <= minB[X$1] + iota) { return true; }
-    if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
-    if (maxB[X$1] <= minA[X$1] + iota) { return true; }
-    if (maxB[Y$1] <= minA[Y$1] + iota) { return true; }
-    return false;
-  };
 
   // (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
   // MIT License
@@ -9348,26 +9306,26 @@ return d[d.length-1];};return ", funcName].join("");
 
   var polybooljs = PolyBool;
 
-  // Extracted from polybooljs geojson code.
+  // Adapted from https://github.com/jsxcad/polybooljs/blob/master/lib/geojson.js
 
   const EPS = 1e-5;
 
   const fromSurface = (...surfaces) => {
     if (surfaces.length === 0) {
       return {
-               regions: [],
-               inverted: false
-             };
+        regions: [],
+        inverted: false
+      };
     } else if (surfaces.length === 1) {
       return {
-               regions: surfaces[0],
-               inverted: false
-             };
+        regions: surfaces[0],
+        inverted: false
+      };
     } else {
       return {
-               regions: [].concat(...surfaces),
-               inverted: false
-             };
+        regions: [].concat(...surfaces),
+        inverted: false
+      };
     }
   };
 
@@ -9375,15 +9333,12 @@ return d[d.length-1];};return ", funcName].join("");
     const eps = epsilon(EPS);
     // make sure out polygon is clean
     poly = polybooljs.polygon(polybooljs.segments(poly));
-  console.log(`QQ/poly: ${JSON.stringify(poly)}`);
-  console.log(`QQ/eps: ${JSON.stringify(eps)}`);
 
     // test if r1 is inside r2
-    function regionInsideRegion(r1, r2){
+    function regionInsideRegion (r1, r2) {
       // we're guaranteed no lines intersect (because the polygon is clean), but a vertex
       // could be on the edge -- so we just average pt[0] and pt[1] to produce a point on the
       // edge of the first line, which cannot be on an edge
-  console.log(`QQ/eps/2: ${JSON.stringify(Object.keys(eps))}`);
       return eps.pointInsideRegion([
         (r1[0][0] + r1[1][0]) * 0.5,
         (r1[0][1] + r1[1][1]) * 0.5
@@ -9402,7 +9357,7 @@ return d[d.length-1];};return ", funcName].join("");
     // | |_______| |_______| | | |___| |                |
     // |_____________________| |_______|                +-- E
 
-    function newNode(region){
+    function newNode (region) {
       return {
         region: region,
         children: []
@@ -9411,11 +9366,11 @@ return d[d.length-1];};return ", funcName].join("");
 
     var roots = newNode(null);
 
-    function addChild(root, region){
+    function addChild (root, region) {
       // first check if we're inside any children
-      for (var i = 0; i < root.children.length; i++){
+      for (var i = 0; i < root.children.length; i++) {
         var child = root.children[i];
-        if (regionInsideRegion(region, child.region)){
+        if (regionInsideRegion(region, child.region)) {
           // we are, so insert inside them instead
           addChild(child, region);
           return;
@@ -9424,9 +9379,9 @@ return d[d.length-1];};return ", funcName].join("");
 
       // not inside any children, so check to see if any children are inside us
       var node = newNode(region);
-      for (var i = 0; i < root.children.length; i++){
+      for (var i = 0; i < root.children.length; i++) {
         var child = root.children[i];
-        if (regionInsideRegion(child.region, region)){
+        if (regionInsideRegion(child.region, region)) {
           // oops... move the child beneath us, and remove them from root
           node.children.push(child);
           root.children.splice(i, 1);
@@ -9439,10 +9394,10 @@ return d[d.length-1];};return ", funcName].join("");
     }
 
     // add all regions to the root
-    for (var i = 0; i < poly.regions.length; i++){
+    for (var i = 0; i < poly.regions.length; i++) {
       var region = poly.regions[i];
       if (region.length < 3) // regions must have at least 3 points (sanity check)
-        continue;
+      { continue; }
       addChild(roots, region);
     }
 
@@ -9452,14 +9407,14 @@ return d[d.length-1];};return ", funcName].join("");
 
     // while we're at it, exteriors are counter-clockwise, and interiors are clockwise
 
-    function forceWinding(region, clockwise){
+    function forceWinding (region, clockwise) {
       // first, see if we're clockwise or counter-clockwise
       // https://en.wikipedia.org/wiki/Shoelace_formula
       var winding = 0;
       var last_x = region[region.length - 1][0];
       var last_y = region[region.length - 1][1];
       var copy = [];
-      for (var i = 0; i < region.length; i++){
+      for (var i = 0; i < region.length; i++) {
         var curr_x = region[i][0];
         var curr_y = region[i][1];
         copy.push([curr_x, curr_y, 0]); // create a copy while we're at it
@@ -9469,39 +9424,74 @@ return d[d.length-1];};return ", funcName].join("");
       }
       // this assumes Cartesian coordinates (Y is positive going up)
       var isclockwise = winding < 0;
-      if (isclockwise !== clockwise)
-        copy.reverse();
+      if (isclockwise !== clockwise) { copy.reverse(); }
       return copy;
     }
 
     var geopolys = [];
-  console.log(`QQ/geopolys/1: ${JSON.stringify(geopolys)}`);
 
-    function addExterior(node){
+    function addExterior (node) {
       var poly = [forceWinding(node.region, false)];
       geopolys.push(poly);
       // children of exteriors are interior
-      for (var i = 0; i < node.children.length; i++)
-        poly.push(getInterior(node.children[i]));
+      for (var i = 0; i < node.children.length; i++) { poly.push(getInterior(node.children[i])); }
     }
-  console.log(`QQ/geopolys/2: ${JSON.stringify(geopolys)}`);
 
-    function getInterior(node){
+    function getInterior (node) {
       // children of interiors are exterior
-      for (var i = 0; i < node.children.length; i++)
-        addExterior(node.children[i]);
+      for (var i = 0; i < node.children.length; i++) { addExterior(node.children[i]); }
       // return the clockwise interior
       return forceWinding(node.region, true);
     }
-  console.log(`QQ/geopolys/3: ${JSON.stringify(geopolys)}`);
 
     // root nodes are exterior
     for (var i = 0; i < roots.children.length; i++) {
       addExterior(roots.children[i]);
     }
-  console.log(`QQ/geopolys/4: ${JSON.stringify(geopolys)}`);
 
     return [].concat(...geopolys);
+  };
+
+  const eachPoint$3 = (options = {}, thunk, surface) => {
+    for (const polygon of surface) {
+      for (const point of polygon) {
+        thunk(point);
+      }
+    }
+  };
+
+  // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
+  const measureBoundingBox = (surface) => {
+    if (surface.measureBoundingBox === undefined) {
+      let max$1 = surface[0][0];
+      let min$1 = surface[0][0];
+      eachPoint$3({},
+                point => {
+                  max$1 = max(max$1, point);
+                  min$1 = min(min$1, point);
+                },
+                surface);
+      surface.measureBoundingBox = [min$1, max$1];
+    }
+    return surface.measureBoundingBox;
+  };
+
+  const iota = 1e-5;
+  const X$1 = 0;
+  const Y$1 = 1;
+
+  // Tolerates overlap up to one iota.
+  const doesNotOverlap = (a, b) => {
+    if (a.length === 0 || b.length === 0) {
+      return true;
+    }
+    const [minA, maxA] = measureBoundingBox(a);
+    const [minB, maxB] = measureBoundingBox(b);
+    if (maxA[X$1] <= minB[X$1] + iota) { return true; }
+    if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
+    if (maxB[X$1] <= minA[X$1] + iota) { return true; }
+    if (maxB[Y$1] <= minA[Y$1] + iota) { return true; }
+    return false;
   };
 
   /**
@@ -9561,7 +9551,7 @@ return d[d.length-1];};return ", funcName].join("");
     if (z0Surfaces.length === 0) {
       return baseZ0Surface;
     }
-    const result = polybooljs.intersection(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
+    const result = polybooljs.intersect(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
     return toSurface(result);
   };
 
@@ -13354,7 +13344,6 @@ return d[d.length-1];};return ", funcName].join("");
       return baseZ0Surface;
     }
     const result = polybooljs.union(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
-  console.log(`QQ/result: ${JSON.stringify(result)}`);
     return toSurface(result);
   };
 
@@ -14699,6 +14688,18 @@ return d[d.length-1];};return ", funcName].join("");
 
     flip () {
       return fromGeometry(flip$8(toKeptGeometry$1(this)));
+    }
+
+    getTags () {
+      return toGeometry(this).tags;
+    }
+
+    op (op, ...args) {
+      return op(this, ...args);
+    }
+
+    setTags (tags) {
+      return fromGeometry({ ...toGeometry(this), tags });
     }
 
     toComponents (options = {}) {
@@ -16216,12 +16217,20 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const fromHeight = ({ height }, shape) => {
-    const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
-    const solids = z0Surfaces.map(({ z0Surface }) => extrude({ height: height }, z0Surface));
-    const assembly = assemble$1(...solids.map(Shape.fromSolid));
-    return assembly;
-  };
+  const fromHeight = ({ height }, shape) =>
+    Shape.fromGeometry(
+      map$2(shape.toKeptGeometry(),
+          (item) => {
+            if (item.z0Surface) {
+              return { ...item, solid: extrude({ height: height }, item.z0Surface) };
+            } else {
+              return item;
+            }
+          }));
+  // const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
+  // const solids = z0Surfaces.map(({ z0Surface }) => extrudeAlgorithm({ height: height }, z0Surface));
+  // const assembly = assemble(...solids.map(Shape.fromSolid)).setTags(shape.getTags());
+  // return assembly;
 
   const fromValue$6 = (height, shape) => fromHeight({ height }, shape);
 
@@ -37394,7 +37403,8 @@ return d[d.length-1];};return ", funcName].join("");
       for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
         pathsets.push(paths);
       }
-      return scale$5([factor, factor, factor], { z0Surface: union$2(...pathsets) });
+      // return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
+      return scale$5([factor, factor, factor], { assembly: pathsets.map(paths => ({ z0Surface: paths })) });
     };
 
     return font;
@@ -89728,7 +89738,7 @@ return d[d.length-1];};return ", funcName].join("");
     };
     for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
       outputTriangle(triangle);
-      outputTriangle(flip$4(triangle));
+      // outputTriangle(flip(triangle));
     }
     return { normals, positions };
   };

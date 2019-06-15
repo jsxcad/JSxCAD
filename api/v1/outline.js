@@ -35,3 +35,4 @@ export const outline = (options = {}, shape) => {
 const method = function (options) { return outline(options, this); };
 
 Shape.prototype.outline = method;
+Shape.prototype.withOutline = function (options) { return assemble(this, outline(options, this)); };

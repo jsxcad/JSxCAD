@@ -1,10 +1,9 @@
 import { assertNumber, assertShape } from './assert';
 
 import { Shape } from './Shape';
-import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { map } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -28,12 +27,20 @@ import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const fromHeight = ({ height }, shape) => {
-  const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
-  const solids = z0Surfaces.map(({ z0Surface }) => extrudeAlgorithm({ height: height }, z0Surface));
-  const assembly = assemble(...solids.map(Shape.fromSolid));
-  return assembly;
-};
+export const fromHeight = ({ height }, shape) =>
+  Shape.fromGeometry(
+    map(shape.toKeptGeometry(),
+        (item) => {
+          if (item.z0Surface) {
+            return { ...item, solid: extrudeAlgorithm({ height: height }, item.z0Surface) };
+          } else {
+            return item;
+          }
+        }));
+// const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
+// const solids = z0Surfaces.map(({ z0Surface }) => extrudeAlgorithm({ height: height }, z0Surface));
+// const assembly = assemble(...solids.map(Shape.fromSolid)).setTags(shape.getTags());
+// return assembly;
 
 export const fromValue = (height, shape) => fromHeight({ height }, shape);
 
