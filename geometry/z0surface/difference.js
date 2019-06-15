@@ -1,6 +1,7 @@
 import { clippingToPolygons, notEmpty, z0SurfaceToClipping } from './clippingToPolygons';
+import { Polygon, point as createPoint } from "@flatten-js/core"
 
-import polygonClipping from 'polygon-clipping';
+import { subtract } from "@flatten-js/boolean-op"
 
 /**
  * Return a surface representing the difference between the first surface
@@ -22,19 +23,31 @@ import polygonClipping from 'polygon-clipping';
  *      +-------+
  */
 export const difference = (baseZ0Surface, ...z0Surfaces) => {
+  if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
+    return [];
+  }
   if (z0Surfaces.length === 0) {
     return baseZ0Surface;
   }
-  if (baseZ0Surface.length === 0) {
-    return [];
+  const a = new Polygon();
+  for (const polygon of baseZ0Surface) {
+    a.addFace(polygon.map(([x, y]) => createPoint(x, y)));
   }
-  const baseClipping = z0SurfaceToClipping(baseZ0Surface);
-  const clipping = z0Surfaces.filter(notEmpty).map(z0Surface => z0SurfaceToClipping(z0Surface));
-  if (notEmpty(clipping)) {
-    const outputClipping = polygonClipping.difference(baseClipping, ...clipping);
-    const outputPaths = clippingToPolygons(outputClipping);
-    return outputPaths;
-  } else {
-    return baseZ0Surface;
+  const b = new Polygon();
+  for (const surface of z0Surfaces) {
+    for (const polygon of surface) {
+      b.addFace(polygon.map(([x, y]) => createPoint(x, y)));
+    }
   }
+  const c = subtract(a, b);
+  const result = [];
+  for (const face of c.faces) {
+    const polygon = [];
+    for (const edge of face) {
+      const start = edge.start;
+      polygon.push([start.x, start.y, 0]);
+    }
+    result.push(polygon);
+  }
+  return result;
 };

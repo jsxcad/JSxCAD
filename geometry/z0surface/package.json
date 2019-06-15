@@ -20,11 +20,12 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@flatten-js/boolean-op": "^1.1.1",
+    "@flatten-js/core": "^1.0.15",
     "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "polygon-clipping": "^0.14.1"
+    "@jsxcad/math-poly3": "^0.0.79"
   },
   "devDependencies": {
     "@jsxcad/geometry-polygons": "^0.0.79",
