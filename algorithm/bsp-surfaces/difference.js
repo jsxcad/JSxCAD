@@ -1,7 +1,6 @@
-import { doesNotOverlap, measureBoundingBox } from '@jsxcad/geometry-solid';
-
 import { build } from './build';
 import { clipTo } from './clipTo';
+import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';

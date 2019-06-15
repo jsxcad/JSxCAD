@@ -1,7 +1,6 @@
 import { fromSvgPath } from '@jsxcad/convert-svg';
 import { parse } from 'opentype.js';
 import { scale } from '@jsxcad/geometry-tagged';
-import { union } from '@jsxcad/geometry-z0surface';
 
 export const toFont = (options = {}, bytes) => {
   const fontData = parse(bytes.buffer);
@@ -19,7 +18,8 @@ export const toFont = (options = {}, bytes) => {
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
       pathsets.push(paths);
     }
-    return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
+    // return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
+    return scale([factor, factor, factor], { assembly: pathsets.map(paths => ({ z0Surface: paths })) });
   };
 
   return font;
