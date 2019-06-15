@@ -2,6 +2,7 @@ import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } fr
 
 import { canonicalize } from './canonicalize';
 import { cut } from './cut';
+import { doesNotOverlap } from './doesNotOverlap';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
@@ -16,6 +17,7 @@ import { toPolygons } from './toPolygons';
 export {
   canonicalize,
   cut,
+  doesNotOverlap,
   eachPoint,
   flip,
   fromPolygons,

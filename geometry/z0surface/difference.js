@@ -1,6 +1,7 @@
-import { clippingToPolygons, notEmpty, z0SurfaceToClipping } from './clippingToPolygons';
+import { fromSurface, toSurface } from './convert';
 
-import polygonClipping from 'polygon-clipping';
+import { doesNotOverlap } from './doesNotOverlap';
+import polybooljs from 'polybooljs';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -22,19 +23,13 @@ import polygonClipping from 'polygon-clipping';
  *      +-------+
  */
 export const difference = (baseZ0Surface, ...z0Surfaces) => {
+  z0Surfaces = z0Surfaces.filter(surface => !doesNotOverlap(baseZ0Surface, surface));
+  if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
+    return [];
+  }
   if (z0Surfaces.length === 0) {
     return baseZ0Surface;
   }
-  if (baseZ0Surface.length === 0) {
-    return [];
-  }
-  const baseClipping = z0SurfaceToClipping(baseZ0Surface);
-  const clipping = z0Surfaces.filter(notEmpty).map(z0Surface => z0SurfaceToClipping(z0Surface));
-  if (notEmpty(clipping)) {
-    const outputClipping = polygonClipping.difference(baseClipping, ...clipping);
-    const outputPaths = clippingToPolygons(outputClipping);
-    return outputPaths;
-  } else {
-    return baseZ0Surface;
-  }
+  const result = polybooljs.difference(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
+  return toSurface(result);
 };
