@@ -37,6 +37,18 @@ export class Shape {
     return fromGeometry(flip(toKeptGeometry(this)));
   }
 
+  getTags () {
+    return toGeometry(this).tags;
+  }
+
+  op (op, ...args) {
+    return op(this, ...args);
+  }
+
+  setTags (tags) {
+    return fromGeometry({ ...toGeometry(this), tags });
+  }
+
   toComponents (options = {}) {
     return toComponents(options, toGeometry(this)).map(fromGeometry);
   }
