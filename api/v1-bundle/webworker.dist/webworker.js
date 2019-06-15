@@ -7271,7 +7271,7 @@ return d[d.length-1];};return ", funcName].join("");
     for (const nth of monotoneConvexHull2d(points)) {
       hull.push(points[nth]);
     }
-    return hull;
+    return hull.reverse();
   };
 
   const eachPoint$1 = (options = {}, thunk, points) => {
@@ -89738,7 +89738,7 @@ return d[d.length-1];};return ", funcName].join("");
     };
     for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
       outputTriangle(triangle);
-      outputTriangle(flip$4(triangle));
+      // outputTriangle(flip(triangle));
     }
     return { normals, positions };
   };

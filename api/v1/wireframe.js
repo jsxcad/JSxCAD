@@ -41,3 +41,4 @@ export const wireframe = (options = {}, shape) => {
 const method = function (options) { return wireframe(options, this); };
 
 Shape.prototype.wireframe = method;
+Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
