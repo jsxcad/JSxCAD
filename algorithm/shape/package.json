@@ -62,7 +62,8 @@
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/math-vec4": "^0.0.79",
     "adaptive-bezier-curve": "^1.0.3",
-    "bezier": "^0.1.0"
+    "bezier": "^0.1.0",
+    "points.js": "^1.1.4"
   },
   "devDependencies": {
     "ava": "^1.4.1",

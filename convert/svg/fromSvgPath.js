@@ -1,13 +1,21 @@
+import { canonicalize, isClosed } from '@jsxcad/geometry-path';
+
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
-import { canonicalize } from '@jsxcad/geometry-path';
 import curvifySvgPath from './curvify-svg-path/index.js';
 import { equals } from '@jsxcad/math-vec2';
 import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';
+import simplifyPath from 'simplify-path';
 import { transform } from '@jsxcad/geometry-paths';
 
-// FIX: Check scaling.
+const simplify = (path, tolerance) => {
+  if (isClosed(path)) {
+    return simplifyPath(path, tolerance);
+  } else {
+    return [null, ...simplifyPath(path.slice(1), tolerance)];
+  }
+};
 
 const removeRepeatedPoints = (path) => {
   const unrepeated = [path[0]];
@@ -21,7 +29,7 @@ const removeRepeatedPoints = (path) => {
   return unrepeated;
 };
 
-const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) => {
+const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
   const paths = [];
   let path = [null];
 
@@ -74,11 +82,13 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true }, svgPath) =
   maybeClosePath();
   newPath();
 
+  const simplifiedPaths = paths.map(path => simplify(path, tolerance));
+
   if (normalizeCoordinateSystem) {
     // Turn it upside down.
-    return transform(fromScaling([1, -1, 0]), paths);
+    return transform(fromScaling([1, -1, 0]), simplifiedPaths);
   } else {
-    return paths;
+    return simplifiedPaths;
   }
 };
 

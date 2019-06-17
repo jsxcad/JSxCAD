@@ -18,7 +18,6 @@ export const toFont = (options = {}, bytes) => {
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
       pathsets.push(paths);
     }
-    // return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
     return scale([factor, factor, factor], { assembly: pathsets.map(paths => ({ z0Surface: paths })) });
   };
 
