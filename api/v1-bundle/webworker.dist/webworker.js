@@ -13324,6 +13324,1831 @@ return d[d.length-1];};return ", funcName].join("");
     return fromPolygons({}, polygons);
   };
 
+  /** global: bx */
+
+  const applyFuncToShapes = (f, s, ...args) => {
+    if (isShapeArray(s)) {
+      return s.map(shape => f(shape, ...args))
+    }
+
+    return f(s, ...args)
+  };
+
+  const getShapeArray = s => isShapeArray(s) ? s : [ s ];
+
+  const isShapeArray = s => s && Array.isArray(s[ 0 ]);
+
+  const numberAtInterval = (a, b, interval) => {
+    const c = a === b ? 0 : Math.abs(b - a);
+    return c === 0 ? a : (a < b ? a + c * interval : a - c * interval)
+  };
+
+  const distance$2 = ({x, y}, {x: bx, y: by}) => {
+    return Math.sqrt((x - bx) * (x - bx) + (y - by) * (y - by))
+  };
+
+  const sqrt = ({x, y}) => Math.sqrt(x * x + y * y);
+
+  const splitSubPath = points => {
+    return points.reduce((lines, point) => {
+      if (point.moveTo) {
+        lines.push([]);
+      }
+
+      lines[lines.length - 1].push(point);
+
+      return lines
+    }, [])
+  };
+
+  const countSubPath = points => points.reduce((count, point) => point.moveTo ? count + 1 : count, 0);
+
+  const joinSubPath = shapes => shapes.reduce((prev, shape) => prev.concat(shape), []);
+
+  const countLinePoints = lines => lines.reduce((count, points) => (
+    count + countPoints(points)
+  ), 0);
+
+  const countPoints = points => points.length - (isJoined(points) ? 1 : 0);
+
+  const isJoined = points => {
+    const firstPoint = points[ 0 ];
+    const lastPoint = points[ points.length - 1 ];
+    return firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y
+  };
+
+  const joinLines = lines => lines.reduce((shape, line) => (
+    [ ...shape, ...line ]
+  ), []);
+
+  const nextIndex = (lines, offset) => {
+    for (let i = 0, l = lines.length; i < l; i++) {
+      const count = countPoints(lines[ i ]);
+
+      if (offset <= count - 1) {
+        return {
+          lineIndex: i,
+          pointIndex: offset
+        }
+      }
+
+      offset -= count;
+    }
+  };
+
+  const reorderLines = (lines, offset) => [ ...lines ]
+    .splice(offset)
+    .concat([ ...lines ].splice(0, offset));
+
+  const reorderPoints = (points, offset) => {
+    if (!offset) {
+      return points
+    }
+
+    const nextPoints = [
+      { x: points[ offset ].x, y: points[ offset ].y, moveTo: true },
+      ...[ ...points ].splice(offset + 1)
+    ];
+
+    if (isJoined(points)) {
+      return [
+        ...nextPoints,
+        ...[ ...points ].splice(1, offset)
+      ]
+    }
+
+    return [
+      ...nextPoints,
+      ...[ ...points ].splice(0, offset + 1)
+    ]
+  };
+
+  const splitLines = shape => shape.reduce((lines, point) => {
+    if (point.moveTo) {
+      lines.push([]);
+    }
+
+    lines[ lines.length - 1 ].push(point);
+
+    return lines
+  }, []);
+
+  const movePointsIndex = (shape, offset) => {
+    const lines = splitLines(shape);
+    const count = countLinePoints(lines);
+    const normalisedOffset = ((offset % count) + count) % count;
+
+    if (!normalisedOffset) {
+      return shape
+    }
+
+    const { lineIndex, pointIndex } = nextIndex(lines, normalisedOffset);
+    const reorderedLines = reorderLines(lines, lineIndex);
+    const firstLine = reorderPoints(reorderedLines[ 0 ], pointIndex);
+    const restOfLines = [ ...reorderedLines ].splice(1);
+
+    return joinLines([ firstLine, ...restOfLines ])
+  };
+
+  const moveIndex = (s, offset) => applyFuncToShapes(movePointsIndex, s, offset);
+
+  const autoCurveSinglePoint = (fromShape, toShape) => {
+    for (let index = 0, len = fromShape.length; index < len; index++) {
+      let point = fromShape[index];
+      let point2 = toShape[index];
+      if (point2 && !point.curve && point2.curve && !point.moveTo) {
+        let prevPoint = index === 0 ? null : fromShape[index - 1];
+        point.curve = {
+          type: 'cubic',
+          x1: prevPoint.x,
+          y1: prevPoint.y,
+          x2: point.x,
+          y2: point.y
+        };
+      }
+    }
+    return fromShape
+  };
+
+  const autoCurvePoint = (fromShape, toShape) => applyFuncToShapes(autoCurveSinglePoint, fromShape, toShape);
+
+  // I extracted this from the a2c function from
+  // SVG path – https://github.com/fontello/svgpath
+  //
+  // All credit goes to:
+  //
+  // Sergey Batishchev – https://github.com/snb2013
+  // Vitaly Puzrin – https://github.com/puzrin
+  // Alex Kocharin – https://github.com/rlidwka
+  /** global: x1 */
+  /** global: x2 */
+  /** global: y1 */
+  /** global: y2 */
+
+  const TAU = Math.PI * 2;
+
+  const mapToEllipse = ({ x, y }, rx, ry, cosphi, sinphi, centerx, centery) => {
+    x *= rx;
+    y *= ry;
+
+    const xp = cosphi * x - sinphi * y;
+    const yp = sinphi * x + cosphi * y;
+
+    return {
+      x: xp + centerx,
+      y: yp + centery
+    }
+  };
+
+  const approxUnitArc = (ang1, ang2) => {
+    const a = 4 / 3 * Math.tan(ang2 / 4);
+
+    const x1 = Math.cos(ang1);
+    const y1 = Math.sin(ang1);
+    const x2 = Math.cos(ang1 + ang2);
+    const y2 = Math.sin(ang1 + ang2);
+
+    return [
+      {
+        x: x1 - y1 * a,
+        y: y1 + x1 * a
+      },
+      {
+        x: x2 + y2 * a,
+        y: y2 - x2 * a
+      },
+      {
+        x: x2,
+        y: y2
+      }
+    ]
+  };
+
+  const vectorAngle = (ux, uy, vx, vy) => {
+    const sign = (ux * vy - uy * vx < 0) ? -1 : 1;
+    const umag = Math.sqrt(ux * ux + uy * uy);
+    const vmag = Math.sqrt(ux * ux + uy * uy);
+    const dot = ux * vx + uy * vy;
+
+    let div = dot / (umag * vmag);
+
+    if (div > 1) {
+      div = 1;
+    }
+
+    if (div < -1) {
+      div = -1;
+    }
+
+    return sign * Math.acos(div)
+  };
+
+  const getArcCenter = (
+    px,
+    py,
+    cx,
+    cy,
+    rx,
+    ry,
+    largeArcFlag,
+    sweepFlag,
+    sinphi,
+    cosphi,
+    pxp,
+    pyp
+  ) => {
+    const rxsq = Math.pow(rx, 2);
+    const rysq = Math.pow(ry, 2);
+    const pxpsq = Math.pow(pxp, 2);
+    const pypsq = Math.pow(pyp, 2);
+
+    let radicant = (rxsq * rysq) - (rxsq * pypsq) - (rysq * pxpsq);
+
+    if (radicant < 0) {
+      radicant = 0;
+    }
+
+    radicant /= (rxsq * pypsq) + (rysq * pxpsq);
+    radicant = Math.sqrt(radicant) * (largeArcFlag === sweepFlag ? -1 : 1);
+
+    const centerxp = radicant * rx / ry * pyp;
+    const centeryp = radicant * -ry / rx * pxp;
+
+    const centerx = cosphi * centerxp - sinphi * centeryp + (px + cx) / 2;
+    const centery = sinphi * centerxp + cosphi * centeryp + (py + cy) / 2;
+
+    const vx1 = (pxp - centerxp) / rx;
+    const vy1 = (pyp - centeryp) / ry;
+    const vx2 = (-pxp - centerxp) / rx;
+    const vy2 = (-pyp - centeryp) / ry;
+
+    let ang1 = vectorAngle(1, 0, vx1, vy1);
+    let ang2 = vectorAngle(vx1, vy1, vx2, vy2);
+
+    if (sweepFlag === 0 && ang2 > 0) {
+      ang2 -= TAU;
+    }
+
+    if (sweepFlag === 1 && ang2 < 0) {
+      ang2 += TAU;
+    }
+
+    return [ centerx, centery, ang1, ang2 ]
+  };
+
+  const arcToBezier = ({
+    px,
+    py,
+    cx,
+    cy,
+    rx,
+    ry,
+    xAxisRotation = 0,
+    largeArcFlag = 0,
+    sweepFlag = 0
+  }) => {
+    const curves = [];
+
+    if (rx === 0 || ry === 0) {
+      return []
+    }
+
+    const sinphi = Math.sin(xAxisRotation * TAU / 360);
+    const cosphi = Math.cos(xAxisRotation * TAU / 360);
+
+    const pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2;
+    const pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2;
+
+    if (pxp === 0 && pyp === 0) {
+      return []
+    }
+
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
+
+    const lambda =
+      Math.pow(pxp, 2) / Math.pow(rx, 2) +
+      Math.pow(pyp, 2) / Math.pow(ry, 2);
+
+    if (lambda > 1) {
+      rx *= Math.sqrt(lambda);
+      ry *= Math.sqrt(lambda);
+    }
+
+    let [ centerx, centery, ang1, ang2 ] = getArcCenter(
+      px,
+      py,
+      cx,
+      cy,
+      rx,
+      ry,
+      largeArcFlag,
+      sweepFlag,
+      sinphi,
+      cosphi,
+      pxp,
+      pyp
+    );
+
+    const segments = Math.max(Math.ceil(Math.abs(ang2) / (TAU / 4)), 1);
+
+    ang2 /= segments;
+
+    for (let i = 0; i < segments; i++) {
+      curves.push(approxUnitArc(ang1, ang2));
+      ang1 += ang2;
+    }
+
+    return curves.map(curve => {
+      const { x: x1, y: y1 } = mapToEllipse(curve[ 0 ], rx, ry, cosphi, sinphi, centerx, centery);
+      const { x: x2, y: y2 } = mapToEllipse(curve[ 1 ], rx, ry, cosphi, sinphi, centerx, centery);
+      const { x, y } = mapToEllipse(curve[ 2 ], rx, ry, cosphi, sinphi, centerx, centery);
+
+      return { curve: { type: 'cubic', x1, y1, x2, y2 }, x, y }
+    })
+  };
+
+  /** global: px */
+
+  const cubifyShape = shape => {
+    let i = 0;
+    while (i < shape.length) {
+      const point = shape[ i ];
+
+      if (point.curve && point.curve.type !== 'cubic') {
+        const { x: px, y: py } = shape[ i - 1 ];
+        const { x: cx, y: cy } = point;
+
+        if (point.curve.type === 'arc') {
+          const curves = arcToBezier({
+            px,
+            py,
+            cx,
+            cy,
+            rx: point.curve.rx,
+            ry: point.curve.ry,
+            xAxisRotation: point.curve.xAxisRotation,
+            largeArcFlag: point.curve.largeArcFlag,
+            sweepFlag: point.curve.sweepFlag
+          });
+
+          curves.forEach((point, offset) => {
+            shape.splice(i + offset, offset === 0 ? 1 : 0, point);
+          });
+        } else if (point.curve.type === 'quadratic') {
+          const x1 = px + (2 / 3 * (point.curve.x1 - px));
+          const y1 = py + (2 / 3 * (point.curve.y1 - py));
+          const x2 = cx + (2 / 3 * (point.curve.x1 - cx));
+          const y2 = cy + (2 / 3 * (point.curve.y1 - cy));
+
+          const curve = point.curve;
+
+          curve.type = 'cubic';
+          curve.x1 = x1;
+          curve.y1 = y1;
+          curve.x2 = x2;
+          curve.y2 = y2;
+
+          i++;
+        }
+      } else if (i > 0 && point.moveTo) {
+        if (shape[i - 1].moveTo) {
+          delete point.moveTo;
+        }
+        i++;
+      } else {
+        i++;
+      }
+    }
+
+    return shape
+  };
+
+  const cubify = s => applyFuncToShapes(cubifyShape, s);
+
+  const linearPoints = (from, to, t = 0.5) => [
+    {
+      x: numberAtInterval(from.x, to.x, t),
+      y: numberAtInterval(from.y, to.y, t)
+    },
+    to
+  ];
+
+  const curvedPoints = (from, to, t = 0.5) => {
+    const { x1, y1, x2, y2 } = to.curve;
+
+    const A = { x: from.x, y: from.y };
+    const B = { x: x1, y: y1 };
+    const C = { x: x2, y: y2 };
+    const D = { x: to.x, y: to.y };
+    const E = { x: numberAtInterval(A.x, B.x, t), y: numberAtInterval(A.y, B.y, t) };
+    const F = { x: numberAtInterval(B.x, C.x, t), y: numberAtInterval(B.y, C.y, t) };
+    const G = { x: numberAtInterval(C.x, D.x, t), y: numberAtInterval(C.y, D.y, t) };
+    const H = { x: numberAtInterval(E.x, F.x, t), y: numberAtInterval(E.y, F.y, t) };
+    const J = { x: numberAtInterval(F.x, G.x, t), y: numberAtInterval(F.y, G.y, t) };
+    const K = { x: numberAtInterval(H.x, J.x, t), y: numberAtInterval(H.y, J.y, t) };
+
+    return [
+      { x: K.x, y: K.y, curve: { type: 'cubic', x1: E.x, y1: E.y, x2: H.x, y2: H.y } },
+      { x: D.x, y: D.y, curve: { type: 'cubic', x1: J.x, y1: J.y, x2: G.x, y2: G.y } }
+    ]
+  };
+
+  const points$1 = (from, to, t = 0.5) => to.curve
+    ? curvedPoints(from, to, t)
+    : linearPoints(from, to, t);
+
+  let addPoints = (shape, pointsRequired) => {
+    if (shape.length >= pointsRequired) {
+      return shape
+    }
+
+    let maxDist = 0;
+    let maxDistIndex = 1;
+
+    if (shape.length === 1) {
+      const { x, y } = shape[0];
+      for (let i = 1, req = pointsRequired; i < req; i++) {
+        shape.push({x, y});
+      }
+      return shape
+    }
+
+    for (let i = 1, len = shape.length; i < len; i++) {
+      let point = shape[i];
+      let prevPoint = shape[i - 1];
+
+      if (point.moveTo) {
+        continue
+      } else {
+        let dist = distance$2(prevPoint, point);
+        if (dist > maxDist) {
+          maxDist = dist;
+          maxDistIndex = i;
+        }
+      }
+    }
+
+    const [ midPoint, replacementPoint ] = points$1(shape[maxDistIndex - 1], shape[maxDistIndex]);
+
+    shape.splice(maxDistIndex, 1, midPoint, replacementPoint);
+
+    return addPoints(shape, pointsRequired)
+  };
+
+  const add$2 = (shape, pointsRequired) => addPoints(cubify(shape), pointsRequired);
+
+  const isBetween = (a, b, c) => {
+    if (b.curve || c.curve) {
+      return false
+    }
+
+    const crossProduct =
+      (c.y - a.y) *
+      (b.x - a.x) -
+      (c.x - a.x) *
+      (b.y - a.y);
+
+    if (Math.abs(crossProduct) > Number.EPSILON) {
+      return false
+    }
+
+    const dotProduct =
+      (c.x - a.x) *
+      (b.x - a.x) +
+      (c.y - a.y) *
+      (b.y - a.y);
+
+    if (dotProduct < 0) {
+      return false
+    }
+
+    const squaredLengthBA =
+      (b.x - a.x) *
+      (b.x - a.x) +
+      (b.y - a.y) *
+      (b.y - a.y);
+
+    if (dotProduct > squaredLengthBA) {
+      return false
+    }
+
+    return true
+  };
+
+  const removePoints = shape => {
+    const s = [];
+
+    for (let i = 0, l = shape.length; i < l; i++) {
+      const a = s[ s.length - 1 ];
+      const b = shape[ i + 1 ];
+      const c = shape[ i ];
+
+      if (!(a && b && c) || !(isBetween(a, b, c))) {
+        s.push(c);
+      }
+    }
+
+    return s
+  };
+
+  const remove = s => applyFuncToShapes(removePoints, s);
+
+  const reversePoints = shape => {
+    let m;
+    let c;
+
+    return shape.reverse().map(({ x, y, moveTo, curve }, i) => {
+      const point = { x, y };
+
+      if (c) {
+        const { x1: x2, y1: y2, x2: x1, y2: y1 } = c;
+        point.curve = { type: 'cubic', x1, y1, x2, y2 };
+      }
+
+      if (i === 0 || m) {
+        point.moveTo = true;
+      }
+
+      m = moveTo;
+      c = curve || null;
+
+      return point
+    })
+  };
+
+  const reverse = s => applyFuncToShapes(reversePoints, cubify(s));
+
+  const boundingBox = s => {
+    let bottom;
+    let left;
+    let right;
+    let top;
+
+    const shapes = getShapeArray(s);
+
+    shapes.map(shape => shape.map(({ x, y }) => {
+      if (typeof bottom !== 'number' || y > bottom) {
+        bottom = y;
+      }
+
+      if (typeof left !== 'number' || x < left) {
+        left = x;
+      }
+
+      if (typeof right !== 'number' || x > right) {
+        right = x;
+      }
+
+      if (typeof top !== 'number' || y < top) {
+        top = y;
+      }
+    }));
+
+    return {
+      bottom,
+      center: {
+        x: left + ((right - left) / 2),
+        y: top + ((bottom - top) / 2)
+      },
+      left,
+      right,
+      top
+    }
+  };
+
+  /** global: x1 */
+  /** global: x2 */
+  /** global: y1 */
+  /** global: y2 */
+
+  const length$2 = (s) => {
+    return s.reduce((currentLength, { x: x2, y: y2, moveTo }, i) => {
+      if (!moveTo) {
+        const { x: x1, y: y1 } = s[ i - 1 ];
+        currentLength += linearLength(x1, y1, x2, y2);
+      }
+
+      return currentLength
+    }, 0)
+  };
+
+  const linearLength = (x1, y1, x2, y2) => Math.sqrt(
+    Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)
+  );
+
+  /** global: x1 */
+
+  const areaPoints = polygon => {
+    return polygon.reduce((area, {x, y}, i) => {
+      const {x: x1, y: y1} = i === 0 ? polygon[polygon.length - 1] : polygon[i - 1];
+      area += ((x1 + x) * (y1 - y)) / 2;
+      return area
+    }, 0)
+  };
+
+  const area = polygon => applyFuncToShapes(areaPoints, polygon);
+
+  const mapList = {
+    default () {
+      return 0
+    },
+    byPoint (a, b) {
+      return b.length - a.length
+    },
+    bySqrt (a, b) {
+      return sqrt(boundingBox(a).center) - sqrt(boundingBox(b).center)
+    },
+    byX (b, a) {
+      return b[0].x - a[0].x
+    },
+    byY (b, a) {
+      return b[0].y - a[0].y
+    },
+    byBBox (a, b) {
+      const bb = boundingBox(b)
+        .center;
+
+      const aa = boundingBox(a)
+      .center;
+
+      return (bb.x + bb.y) - (aa.x + aa.y)
+    },
+    byDirection (a, b) {
+      return area(b) - area(a)
+    },
+    auto (a, b) {
+      return b.length - a.length || sqrt(boundingBox(a).center) - sqrt(boundingBox(b).center) || length$2(b) - length$2(a) || area(b) - area(a)
+    },
+    byLength (a, b) {
+      return length$2(b) - length$2(a)
+    },
+    get (type) {
+      return typeof (type) === 'function' ? type : typeof (type) === 'string' && (type in mapList)
+        ? mapList[type] : null
+    }
+  };
+
+  const findNearestIndexPoints = (points, p, box = false) => {
+    let min = Infinity;
+    let isBBoxUse = box !== false;
+    let bbox = isBBoxUse ? boundingBox(points).center : p;
+
+    if (isBBoxUse) {
+      bbox.x += p.x;
+      bbox.y += p.y;
+    }
+
+    let bestIndex = 0;
+
+    for (let i = 0, len = points.length; i < len; i++) {
+      let sumOfSquares = 0;
+      let dist = distance$2(points[i], bbox);
+
+      sumOfSquares += dist * dist;
+
+      if (sumOfSquares < min) {
+        bestIndex = i;
+        min = sumOfSquares;
+      }
+    }
+
+    return points[bestIndex]
+  };
+
+  const findNearestIndex = (points, p, box) => applyFuncToShapes(findNearestIndexPoints, points, p, box);
+
+  var _slicedToArray = (function () { function sliceIterator (arr, i) { var _arr = []; var _n = true; var _d = false; var _e; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e } } return _arr } return function (arr, i) { if (Array.isArray(arr)) { return arr } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i) } else { throw new TypeError('Invalid attempt to destructure non-iterable instance') } } }());
+
+  // I extracted this from the a2c function from
+  // SVG path – https://github.com/fontello/svgpath
+  //
+  // All credit goes to:
+  //
+  // Sergey Batishchev – https://github.com/snb2013
+  // Vitaly Puzrin – https://github.com/puzrin
+  // Alex Kocharin – https://github.com/rlidwka
+
+  var TAU$1 = Math.PI * 2;
+
+  var mapToEllipse$1 = function mapToEllipse (_ref, rx, ry, cosphi, sinphi, centerx, centery) {
+    var x = _ref.x,
+      y = _ref.y;
+
+    x *= rx;
+    y *= ry;
+
+    var xp = cosphi * x - sinphi * y;
+    var yp = sinphi * x + cosphi * y;
+
+    return {
+      x: xp + centerx,
+      y: yp + centery
+    }
+  };
+
+  var approxUnitArc$1 = function approxUnitArc (ang1, ang2) {
+    var a = 4 / 3 * Math.tan(ang2 / 4);
+
+    var x1 = Math.cos(ang1);
+    var y1 = Math.sin(ang1);
+    var x2 = Math.cos(ang1 + ang2);
+    var y2 = Math.sin(ang1 + ang2);
+
+    return [{
+      x: x1 - y1 * a,
+      y: y1 + x1 * a
+    }, {
+      x: x2 + y2 * a,
+      y: y2 - x2 * a
+    }, {
+      x: x2,
+      y: y2
+    }]
+  };
+
+  var vectorAngle$1 = function vectorAngle (ux, uy, vx, vy) {
+    var sign = ux * vy - uy * vx < 0 ? -1 : 1;
+    var umag = Math.sqrt(ux * ux + uy * uy);
+    var vmag = Math.sqrt(ux * ux + uy * uy);
+    var dot = ux * vx + uy * vy;
+
+    var div = dot / (umag * vmag);
+
+    if (div > 1) {
+      div = 1;
+    }
+
+    if (div < -1) {
+      div = -1;
+    }
+
+    return sign * Math.acos(div)
+  };
+
+  var getArcCenter$1 = function getArcCenter (px, py, cx, cy, rx, ry, largeArcFlag, sweepFlag, sinphi, cosphi, pxp, pyp) {
+    var rxsq = Math.pow(rx, 2);
+    var rysq = Math.pow(ry, 2);
+    var pxpsq = Math.pow(pxp, 2);
+    var pypsq = Math.pow(pyp, 2);
+
+    var radicant = rxsq * rysq - rxsq * pypsq - rysq * pxpsq;
+
+    if (radicant < 0) {
+      radicant = 0;
+    }
+
+    radicant /= rxsq * pypsq + rysq * pxpsq;
+    radicant = Math.sqrt(radicant) * (largeArcFlag === sweepFlag ? -1 : 1);
+
+    var centerxp = radicant * rx / ry * pyp;
+    var centeryp = radicant * -ry / rx * pxp;
+
+    var centerx = cosphi * centerxp - sinphi * centeryp + (px + cx) / 2;
+    var centery = sinphi * centerxp + cosphi * centeryp + (py + cy) / 2;
+
+    var vx1 = (pxp - centerxp) / rx;
+    var vy1 = (pyp - centeryp) / ry;
+    var vx2 = (-pxp - centerxp) / rx;
+    var vy2 = (-pyp - centeryp) / ry;
+
+    var ang1 = vectorAngle$1(1, 0, vx1, vy1);
+    var ang2 = vectorAngle$1(vx1, vy1, vx2, vy2);
+
+    if (sweepFlag === 0 && ang2 > 0) {
+      ang2 -= TAU$1;
+    }
+
+    if (sweepFlag === 1 && ang2 < 0) {
+      ang2 += TAU$1;
+    }
+
+    return [centerx, centery, ang1, ang2]
+  };
+
+  var arcToBezier$1 = function arcToBezier (_ref2) {
+    var px = _ref2.px,
+      py = _ref2.py,
+      cx = _ref2.cx,
+      cy = _ref2.cy,
+      rx = _ref2.rx,
+      ry = _ref2.ry,
+      _ref2$xAxisRotation = _ref2.xAxisRotation,
+      xAxisRotation = _ref2$xAxisRotation === undefined ? 0 : _ref2$xAxisRotation,
+      _ref2$largeArcFlag = _ref2.largeArcFlag,
+      largeArcFlag = _ref2$largeArcFlag === undefined ? 0 : _ref2$largeArcFlag,
+      _ref2$sweepFlag = _ref2.sweepFlag,
+      sweepFlag = _ref2$sweepFlag === undefined ? 0 : _ref2$sweepFlag;
+
+    var curves = [];
+
+    if (rx === 0 || ry === 0) {
+      return []
+    }
+
+    var sinphi = Math.sin(xAxisRotation * TAU$1 / 360);
+    var cosphi = Math.cos(xAxisRotation * TAU$1 / 360);
+
+    var pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2;
+    var pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2;
+
+    if (pxp === 0 && pyp === 0) {
+      return []
+    }
+
+    rx = Math.abs(rx);
+    ry = Math.abs(ry);
+
+    var lambda = Math.pow(pxp, 2) / Math.pow(rx, 2) + Math.pow(pyp, 2) / Math.pow(ry, 2);
+
+    if (lambda > 1) {
+      rx *= Math.sqrt(lambda);
+      ry *= Math.sqrt(lambda);
+    }
+
+    var _getArcCenter = getArcCenter$1(px, py, cx, cy, rx, ry, largeArcFlag, sweepFlag, sinphi, cosphi, pxp, pyp),
+      _getArcCenter2 = _slicedToArray(_getArcCenter, 4),
+      centerx = _getArcCenter2[0],
+      centery = _getArcCenter2[1],
+      ang1 = _getArcCenter2[2],
+      ang2 = _getArcCenter2[3];
+
+    var segments = Math.max(Math.ceil(Math.abs(ang2) / (TAU$1 / 4)), 1);
+
+    ang2 /= segments;
+
+    for (var i = 0; i < segments; i++) {
+      curves.push(approxUnitArc$1(ang1, ang2));
+      ang1 += ang2;
+    }
+
+    return curves.map(function (curve) {
+      var _mapToEllipse = mapToEllipse$1(curve[0], rx, ry, cosphi, sinphi, centerx, centery),
+        x1 = _mapToEllipse.x,
+        y1 = _mapToEllipse.y;
+
+      var _mapToEllipse2 = mapToEllipse$1(curve[1], rx, ry, cosphi, sinphi, centerx, centery),
+        x2 = _mapToEllipse2.x,
+        y2 = _mapToEllipse2.y;
+
+      var _mapToEllipse3 = mapToEllipse$1(curve[2], rx, ry, cosphi, sinphi, centerx, centery),
+        x = _mapToEllipse3.x,
+        y = _mapToEllipse3.y;
+
+      return { x1: x1, y1: y1, x2: x2, y2: y2, x: x, y: y }
+    })
+  };
+
+  var toPoints$1 = function toPoints (props) {
+
+    switch (props.type) {
+      case 'circle':
+        return getPointsFromCircle(props)
+      case 'ellipse':
+        return getPointsFromEllipse(props)
+      case 'line':
+        return getPointsFromLine(props)
+      case 'path':
+        return getPointsFromPath(props)
+      case 'polygon':
+        return getPointsFromPolygon(props)
+      case 'polyline':
+        return getPointsFromPolyline(props)
+      case 'rect':
+        return getPointsFromRect(props)
+      case 'g':
+        return getPointsFromG(props)
+      default:
+        throw new Error('Not a valid shape type')
+    }
+  };
+
+  var getPointsFromCircle = function getPointsFromCircle (_ref2) {
+    var cx = _ref2.cx,
+      cy = _ref2.cy,
+      r = _ref2.r;
+
+    return [{ x: cx, y: cy - r, moveTo: true }, { x: cx, y: cy + r, curve: { type: 'arc', rx: r, ry: r, sweepFlag: 1 } }, { x: cx, y: cy - r, curve: { type: 'arc', rx: r, ry: r, sweepFlag: 1 } }]
+  };
+
+  var getPointsFromEllipse = function getPointsFromEllipse (_ref3) {
+    var cx = _ref3.cx,
+      cy = _ref3.cy,
+      rx = _ref3.rx,
+      ry = _ref3.ry;
+
+    return [{ x: cx, y: cy - ry, moveTo: true }, { x: cx, y: cy + ry, curve: { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 } }, { x: cx, y: cy - ry, curve: { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 } }]
+  };
+
+  var getPointsFromLine = function getPointsFromLine (_ref4) {
+    var x1 = _ref4.x1,
+      x2 = _ref4.x2,
+      y1 = _ref4.y1,
+      y2 = _ref4.y2;
+
+    return [{ x: x1, y: y1, moveTo: true }, { x: x2, y: y2 }]
+  };
+
+  var validCommands = /[MmLlHhVvCcSsQqTtAaZz]/g;
+
+  var commandLengths = {
+    A: 7,
+    C: 6,
+    H: 1,
+    L: 2,
+    M: 2,
+    Q: 4,
+    S: 4,
+    T: 2,
+    V: 1,
+    Z: 0
+  };
+
+  var relativeCommands = ['a', 'c', 'h', 'l', 'm', 'q', 's', 't', 'v'];
+
+  var isRelative = function isRelative (command) {
+    return relativeCommands.indexOf(command) !== -1
+  };
+
+  var optionalArcKeys = ['xAxisRotation', 'largeArcFlag', 'sweepFlag'];
+
+  var getCommands = function getCommands (d) {
+    return d.match(validCommands)
+  };
+
+  var getParams = function getParams (d) {
+    return d.split(validCommands).map(function (v) {
+      return v.replace(/[0-9]+-/g, function (m) {
+        return m.slice(0, -1) + ' -'
+      })
+    }).map(function (v) {
+      return v.replace(/\.[0-9]+/g, function (m) {
+        return m + ' '
+      })
+    }).map(function (v) {
+      return v.trim()
+    }).filter(function (v) {
+      return v.length > 0
+    }).map(function (v) {
+      return v.split(/[ ,]+/).map(parseFloat).filter(function (n) {
+        return !isNaN(n)
+      })
+    })
+  };
+
+  var getPointsFromPath = function getPointsFromPath (_ref5) {
+    var d = _ref5.d;
+
+    var commands = getCommands(d);
+    var params = getParams(d);
+
+    var points = [];
+
+    var moveTo = void 0;
+
+    for (var i = 0, l = commands.length; i < l; i++) {
+      var command = commands[i];
+      var upperCaseCommand = command.toUpperCase();
+      var commandLength = commandLengths[upperCaseCommand];
+      var relative = isRelative(command);
+      var prevPoint = i === 0 ? null : points[points.length - 1];
+
+      if (commandLength > 0) {
+        var commandParams = params.shift();
+        var iterations = commandParams.length / commandLength;
+
+        for (var j = 0; j < iterations; j++) {
+          switch (upperCaseCommand) {
+            case 'M':
+              var x = (relative && prevPoint ? prevPoint.x : 0) + commandParams.shift();
+              var y = (relative && prevPoint ? prevPoint.y : 0) + commandParams.shift();
+
+              moveTo = { x: x, y: y };
+
+              points.push({ x: x, y: y, moveTo: true });
+
+              break
+
+            case 'L':
+              points.push({
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break
+
+            case 'H':
+              points.push({
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: prevPoint.y
+              });
+
+              break
+
+            case 'V':
+              points.push({
+                x: prevPoint.x,
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break
+
+            case 'A':
+              points.push({
+                curve: {
+                  type: 'arc',
+                  rx: commandParams.shift(),
+                  ry: commandParams.shift(),
+                  xAxisRotation: commandParams.shift(),
+                  largeArcFlag: commandParams.shift(),
+                  sweepFlag: commandParams.shift()
+                },
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              var _iteratorNormalCompletion = true;
+              var _didIteratorError = false;
+              var _iteratorError;
+
+              try {
+                for (var _iterator = optionalArcKeys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                  var k = _step.value;
+
+                  if (points[points.length - 1]['curve'][k] === 0) {
+                    delete points[points.length - 1]['curve'][k];
+                  }
+                }
+              } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                  }
+                } finally {
+                  if (_didIteratorError) {
+                    throw _iteratorError
+                  }
+                }
+              }
+
+              break
+
+            case 'C':
+              points.push({
+                curve: {
+                  type: 'cubic',
+                  x1: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                  y1: (relative ? prevPoint.y : 0) + commandParams.shift(),
+                  x2: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                  y2: (relative ? prevPoint.y : 0) + commandParams.shift()
+                },
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break
+
+            case 'S':
+              var sx2 = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var sy2 = (relative ? prevPoint.y : 0) + commandParams.shift();
+              var sx = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var sy = (relative ? prevPoint.y : 0) + commandParams.shift();
+
+              var diff = {};
+
+              var sx1 = void 0;
+              var sy1 = void 0;
+
+              if (prevPoint.curve && prevPoint.curve.type === 'cubic') {
+                diff.x = Math.abs(prevPoint.x - prevPoint.curve.x2);
+                diff.y = Math.abs(prevPoint.y - prevPoint.curve.y2);
+                sx1 = prevPoint.x < prevPoint.curve.x2 ? prevPoint.x - diff.x : prevPoint.x + diff.x;
+                sy1 = prevPoint.y < prevPoint.curve.y2 ? prevPoint.y - diff.y : prevPoint.y + diff.y;
+              } else {
+                diff.x = Math.abs(sx - sx2);
+                diff.y = Math.abs(sy - sy2);
+                sx1 = prevPoint.x;
+                sy1 = prevPoint.y;
+              }
+
+              points.push({ curve: { type: 'cubic', x1: sx1, y1: sy1, x2: sx2, y2: sy2 }, x: sx, y: sy });
+
+              break
+
+            case 'Q':
+              points.push({
+                curve: {
+                  type: 'quadratic',
+                  x1: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                  y1: (relative ? prevPoint.y : 0) + commandParams.shift()
+                },
+                x: (relative ? prevPoint.x : 0) + commandParams.shift(),
+                y: (relative ? prevPoint.y : 0) + commandParams.shift()
+              });
+
+              break
+
+            case 'T':
+              var tx = (relative ? prevPoint.x : 0) + commandParams.shift();
+              var ty = (relative ? prevPoint.y : 0) + commandParams.shift();
+
+              var tx1 = void 0;
+              var ty1 = void 0;
+
+              if (prevPoint.curve && prevPoint.curve.type === 'quadratic') {
+                var _diff = {
+                  x: Math.abs(prevPoint.x - prevPoint.curve.x1),
+                  y: Math.abs(prevPoint.y - prevPoint.curve.y1)
+                };
+
+                tx1 = prevPoint.x < prevPoint.curve.x1 ? prevPoint.x - _diff.x : prevPoint.x + _diff.x;
+                ty1 = prevPoint.y < prevPoint.curve.y1 ? prevPoint.y - _diff.y : prevPoint.y + _diff.y;
+              } else {
+                tx1 = prevPoint.x;
+                ty1 = prevPoint.y;
+              }
+
+              points.push({ curve: { type: 'quadratic', x1: tx1, y1: ty1 }, x: tx, y: ty });
+
+              break
+          }
+        }
+      } else {
+        if (prevPoint.x !== moveTo.x || prevPoint.y !== moveTo.y) {
+          points.push({ x: moveTo.x, y: moveTo.y });
+        }
+      }
+    }
+
+    return points
+  };
+
+  var getPointsFromPolygon = function getPointsFromPolygon (_ref6) {
+    var points = _ref6.points;
+
+    return getPointsFromPoints({ closed: true, points: points })
+  };
+
+  var getPointsFromPolyline = function getPointsFromPolyline (_ref7) {
+    var points = _ref7.points;
+
+    return getPointsFromPoints({ closed: false, points: points })
+  };
+
+  var getPointsFromPoints = function getPointsFromPoints (_ref8) {
+    var closed = _ref8.closed,
+      points = _ref8.points;
+
+    var numbers = points.split(/[\s,]+/).map(function (n) {
+      return parseFloat(n)
+    });
+
+    var p = numbers.reduce(function (arr, point, i) {
+      if (i % 2 === 0) {
+        arr.push({ x: point });
+      } else {
+        arr[(i - 1) / 2].y = point;
+      }
+
+      return arr
+    }, []);
+
+    if (closed) {
+  	var firstPoint = p[0];
+      p.push({x:firstPoint.x,y:firstPoint.y});
+    }
+
+    p[0].moveTo = true;
+
+    return p
+  };
+
+  var getPointsFromRect = function getPointsFromRect (_ref9) {
+    var height = _ref9.height,
+      rx = _ref9.rx,
+      ry = _ref9.ry,
+      width = _ref9.width,
+      x = _ref9.x,
+      y = _ref9.y;
+
+    if (rx || ry) {
+      return getPointsFromRectWithCornerRadius({
+        height: height,
+        rx: rx || ry,
+        ry: ry || rx,
+        width: width,
+        x: x,
+        y: y
+      })
+    }
+
+    return getPointsFromBasicRect({ height: height, width: width, x: x, y: y })
+  };
+
+  var getPointsFromBasicRect = function getPointsFromBasicRect (_ref10) {
+    var height = _ref10.height,
+      width = _ref10.width,
+      x = _ref10.x,
+      y = _ref10.y;
+
+    return [{ x: x, y: y, moveTo: true }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }]
+  };
+
+  var getPointsFromRectWithCornerRadius = function getPointsFromRectWithCornerRadius (_ref11) {
+    var height = _ref11.height,
+      rx = _ref11.rx,
+      ry = _ref11.ry,
+      width = _ref11.width,
+      x = _ref11.x,
+      y = _ref11.y;
+
+    var curve = { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 };
+
+    return [{ x: x + rx, y: y, moveTo: true }, { x: x + width - rx, y: y }, { x: x + width, y: y + ry, curve: curve }, { x: x + width, y: y + height - ry }, { x: x + width - rx, y: y + height, curve: curve }, { x: x + rx, y: y + height }, { x: x, y: y + height - ry, curve: curve }, { x: x, y: y + ry }, { x: x + rx, y: y, curve: curve }]
+  };
+
+  var getPointsFromG = function getPointsFromG (_ref12) {
+    var shapes = _ref12.shapes;
+    return shapes.map(function (s) {
+      return toPoints$1(s)
+    })
+  };
+
+  // AntiGrain approximate bezier curve algorithm
+  // ported by @mattdesl
+  // thank you
+  // you're amazing
+
+  var vec2$1 = function (x, y) {
+  	return {
+  		x: x,
+  		y: y
+  	}
+  };
+
+  var recursionLimit = 20;
+  	var fltEpsilon = 1.19209290e-7;
+  	var pathDistEpsilon = 1.0;
+  	var mAngleTolerance = 0;
+
+  	/// /// Based on:
+  	/// /// https://github.com/pelson/antigrain/blob/master/agg-2.4/src/agg_curves.cpp
+
+  function CubicBezierApprox(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance) {
+  	if (!points) {
+  		points = [];
+  	}
+  	points.push(vec2$1(x1, y1));
+  	cubicApproxRecursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance || pathDistEpsilon, 0);
+  	points.push(vec2$1(x4, y4));
+  	return points
+  }
+
+  function QuadraticBezierApprox(x1, y1, x2, y2, x3, y3, points, distanceTolerance) {
+  	if (!points) {
+  		points = [];
+  	}
+  	points.push(vec2$1(x1, y1));
+  	quadraticApproxRecursive(x1, y1, x2, y2, x3, y3, points, distanceTolerance || pathDistEpsilon, 0);
+  	points.push(vec2$1(x4, y4));
+  	return points
+  }
+
+  function cubicApproxRecursive(x1, y1, x2, y2, x3, y3, x4, y4, points, distanceTolerance, level) {
+  	if (level > recursionLimit) {
+  		return
+  	}
+
+  	var pi = Math.PI;
+
+  		// Calculate all the mid-points of the line segments
+  		// ----------------------
+  		var x12 = (x1 + x2) / 2;
+  		var y12 = (y1 + y2) / 2;
+  		var x23 = (x2 + x3) / 2;
+  		var y23 = (y2 + y3) / 2;
+  		var x34 = (x3 + x4) / 2;
+  		var y34 = (y3 + y4) / 2;
+  		var x123 = (x12 + x23) / 2;
+  		var y123 = (y12 + y23) / 2;
+  		var x234 = (x23 + x34) / 2;
+  		var y234 = (y23 + y34) / 2;
+  		var x1234 = (x123 + x234) / 2;
+  		var y1234 = (y123 + y234) / 2;
+
+  		if (level > 0) { // Enforce subdivision first time
+  			// Try to approximate the full cubic curve by a single straight line
+  			// ------------------
+  			var dx = x4 - x1;
+  				var dy = y4 - y1;
+
+  				var d2 = Math.abs((x2 - x4) * dy - (y2 - y4) * dx);
+  				var d3 = Math.abs((x3 - x4) * dy - (y3 - y4) * dx);
+
+  				var da1,
+  			da2;
+
+  			if (d2 > fltEpsilon && d3 > fltEpsilon) {
+  				// Regular care
+  				// -----------------
+  				if ((d2 + d3) * (d2 + d3) <= distanceTolerance * (dx * dx + dy * dy)) {
+  					// If the curvature doesn't exceed the distanceTolerance value
+  					// we tend to finish subdivisions.
+  					// ----------------------
+  					{
+  						points.push(vec2$1(x1234, y1234));
+  						return
+  					}
+
+  					// Angle & Cusp Condition
+  					// ----------------------
+  					var a23 = Math.atan2(y3 - y2, x3 - x2);
+  						da1 = Math.abs(a23 - Math.atan2(y2 - y1, x2 - x1));
+  						da2 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - a23);
+  						if (da1 >= pi) {
+  							da1 = 2 * pi - da1;
+  						}
+  						if (da2 >= pi) {
+  							da2 = 2 * pi - da2;
+  						}
+
+  						if (da1 + da2 < mAngleTolerance) {
+  							// Finally we can stop the recursion
+  							// ----------------------
+  							points.push(vec2$1(x1234, y1234));
+  							return
+  						}
+  				}
+  			} else {
+  				if (d2 > fltEpsilon) {
+  					// p1,p3,p4 are collinear, p2 is considerable
+  					// ----------------------
+  					if (d2 * d2 <= distanceTolerance * (dx * dx + dy * dy)) {
+  						{
+  							points.push(vec2$1(x1234, y1234));
+  							return
+  						}
+
+  						// Angle Condition
+  						// ----------------------
+  						da1 = Math.abs(Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y2 - y1, x2 - x1));
+  							if (da1 >= pi) {
+  								da1 = 2 * pi - da1;
+  							}
+
+  							if (da1 < mAngleTolerance) {
+  								points.push(vec2$1(x2, y2));
+  								points.push(vec2$1(x3, y3));
+  								return
+  							}
+  					}
+  				} else if (d3 > fltEpsilon) {
+  					// p1,p2,p4 are collinear, p3 is considerable
+  					// ----------------------
+  					if (d3 * d3 <= distanceTolerance * (dx * dx + dy * dy)) {
+  						{
+  							points.push(vec2$1(x1234, y1234));
+  							return
+  						}
+
+  						// Angle Condition
+  						// ----------------------
+  						da1 = Math.abs(Math.atan2(y4 - y3, x4 - x3) - Math.atan2(y3 - y2, x3 - x2));
+  							if (da1 >= pi) {
+  								da1 = 2 * pi - da1;
+  							}
+
+  							if (da1 < mAngleTolerance) {
+  								points.push(vec2$1(x2, y2));
+  								points.push(vec2$1(x3, y3));
+  								return
+  							}
+  					}
+  				} else {
+  					// Collinear case
+  					// -----------------
+  					dx = x1234 - (x1 + x4) / 2;
+  						dy = y1234 - (y1 + y4) / 2;
+  						if (dx * dx + dy * dy <= distanceTolerance) {
+  							points.push(vec2$1(x1234, y1234));
+  							return
+  						}
+  				}
+  			}
+  		}
+
+  		// Continue subdivision
+  		// ----------------------
+  		cubicApproxRecursive(x1, y1, x12, y12, x123, y123, x1234, y1234, points, distanceTolerance, level + 1);
+  		cubicApproxRecursive(x1234, y1234, x234, y234, x34, y34, x4, y4, points, distanceTolerance, level + 1);
+  }
+
+  function quadraticApproxRecursive(x1, y1, x2, y2, x3, y3, points, distanceTolerance, level) {
+  	if (level > RECURSION_LIMIT) {
+  		return
+  	}
+
+  	var pi = Math.PI;
+
+  		// Calculate all the mid-points of the line segments
+  		// ----------------------
+  		var x12 = (x1 + x2) / 2;
+  		var y12 = (y1 + y2) / 2;
+  		var x23 = (x2 + x3) / 2;
+  		var y23 = (y2 + y3) / 2;
+  		var x123 = (x12 + x23) / 2;
+  		var y123 = (y12 + y23) / 2;
+
+  		var dx = x3 - x1;
+  		var dy = y3 - y1;
+  		var d = Math.abs((x2 - x3) * dy - (y2 - y3) * dx);
+
+  		if (d > FLT_EPSILON) {
+  			// Regular care
+  			// -----------------
+  			if (d * d <= distanceTolerance * (dx * dx + dy * dy)) {
+  				// If the curvature doesn't exceed the distance_tolerance value
+  				// we tend to finish subdivisions.
+  				// ----------------------
+  				if (m_angle_tolerance < curve_angle_tolerance_epsilon) {
+  					points.push(vec2$1(x123, y123));
+  					return
+  				}
+
+  				// Angle & Cusp Condition
+  				// ----------------------
+  				var da = Math.abs(Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y2 - y1, x2 - x1));
+  					if (da >= pi) {
+  						da = 2 * pi - da;
+  					}
+
+  					if (da < m_angle_tolerance) {
+  						// Finally we can stop the recursion
+  						// ----------------------
+  						points.push(vec2$1(x123, y123));
+  						return
+  					}
+  			}
+  		} else {
+  			// Collinear case
+  			// -----------------
+  			dx = x123 - (x1 + x3) / 2;
+  				dy = y123 - (y1 + y3) / 2;
+  				if (dx * dx + dy * dy <= distanceTolerance) {
+  					points.push(vec2$1(x123, y123));
+  					return
+  				}
+  		}
+
+  		// Continue subdivision
+  		// ----------------------
+  		quadraticApproxRecursive(x1, y1, x12, y12, x123, y123, points, distanceTolerance, level + 1);
+  		quadraticApproxRecursive(x123, y123, x23, y23, x3, y3, points, distanceTolerance, level + 1);
+  }
+
+  // Mod by @dalisoft
+
+
+  function ApproximateCurves(points) {
+  	if (typeof points === 'string') {
+  		points = toPoints$1({
+  				type: "path",
+  				d: points
+  			});
+  	} else if (typeof points === 'object' && points.type) {
+  		points = toPoints$1(points);
+  	}
+  	var i = 0,
+  	p,
+  	p0,
+  	type,
+  	x1,
+  	y1,
+  	x2,
+  	y2,
+  	_straightLines;
+  	while (i < points.length) {
+  		p = points[i];
+  			if (p.curve) {
+  				p0 = points[i - 1];
+  					type = p.curve.type;
+  					x1 = p.curve.x1;
+  					y1 = p.curve.y1;
+  					x2 = p.curve.x2;
+  					y2 = p.curve.y2;
+  					if (type === 'arc') {
+  						var curves = arcToBezier$1({
+  								px: p0.x,
+  								py: p0.y,
+  								cx: p.x,
+  								cy: p.y,
+  								rx: p.curve.rx,
+  								ry: p.curve.ry,
+  								xAxisRotation: p.curve.xAxisRotation,
+  								largeArcFlag: p.curve.largeArcFlag,
+  								sweepFlag: p.curve.sweepFlag
+  							});
+
+  							points.splice(i, 1);
+  							for (var i2 = 0, len = curves.length; i2 < len; i2++) {
+  								var _ref = curves[i],
+  								x1 = _ref.x1,
+  								y1 = _ref.y1,
+  								x2 = _ref.x2,
+  								y2 = _ref.y2,
+  								x = _ref.x,
+  								y = _ref.y;
+
+  									points.splice(i + i2, 0, {
+  										x: x,
+  										y: y,
+  										curve: {
+  											type: 'cubic',
+  											x1: x1,
+  											y1: y1,
+  											x2: x2,
+  											y2: y2
+  										}
+  									});
+  							}
+  							i--;
+  					} else if (type === 'cubic') {
+  						points.splice(i, 1);
+  						_straightLines = CubicBezierApprox(p0.x, p0.y, x1, y1, x2, y2, p.x, p.y);
+  							for (var i2 = 0, len = _straightLines.length; i2 < len; i2++) {
+  								points.splice(i + i2, 0, _straightLines[i2]);
+  							}
+  					} else if (type === 'quadratic') {
+  						points.splice(i, 1);
+  						_straightLines = QuadraticBezierApprox(p0.x, p0.y, x1, y1, p.x, p.y);
+  							for (var i2 = 0, len = _straightLines.length; i2 < len; i2++) {
+  								points.splice(i + i2, 0, _straightLines[i2]);
+  							}
+  					}
+  			} else {
+  				i++;
+  			}
+  	}
+  	return points
+  }
+
+  const autoNormalisePoints = (fromShape, toShape, {
+    map,
+    order,
+    bboxCenter,
+    approximate,
+    useAsArray,
+    moveIndex: moveIndex$1,
+    reverse: reverse$1,
+    closerBound
+  } = {}) => {
+    let fromShapeSubPathsCount = countSubPath(fromShape);
+    let toShapeSubPathsCount = countSubPath(toShape);
+    if (fromShapeSubPathsCount === 1 && toShapeSubPathsCount === 1) {
+      let diff = toShape.length - fromShape.length;
+      if (typeof moveIndex$1 === 'number' && moveIndex$1) {
+        fromShape = moveIndex(fromShape, moveIndex$1);
+      }
+      if (reverse$1 !== undefined) {
+        fromShape = reverse(fromShape);
+      }
+      if (diff > 0) {
+        fromShape = add$2(fromShape, toShape.length);
+      } else if (diff < 0) {
+        toShape = add$2(toShape, fromShape.length);
+      }
+      if (map) {
+        fromShape = map(fromShape, toShape, 0, diff, true);
+      }
+      fromShape = autoCurvePoint(fromShape, toShape);
+      toShape = autoCurvePoint(toShape, fromShape);
+      return [fromShape, toShape]
+    } else {
+      let fromShapeSubPaths = splitSubPath(fromShape);
+      let toShapeSubPaths = splitSubPath(toShape);
+
+      if (order) {
+        if (order.startOrder) {
+          fromShapeSubPaths.sort(mapList.get(order.startOrder));
+        } else if (order.endOrder) {
+          toShapeSubPaths.sort(mapList.get(order.endOrder));
+        } else {
+          fromShapeSubPaths.sort(mapList.get(order));
+          toShapeSubPaths.sort(mapList.get(order));
+        }
+      }
+      let largestShapeSubPathsMap = fromShapeSubPaths.length > toShapeSubPaths.length ? fromShapeSubPaths
+        : toShapeSubPaths;
+
+      // Permutes between multi-path shapes
+      if (closerBound && fromShapeSubPaths.length > 1) {
+        let i = 0;
+        let minDistance = Infinity;
+        let skipInfinity = false;
+        while (i < fromShapeSubPaths.length) {
+          if (fromShapeSubPaths[i]) {
+            let i2 = 0;
+            while (i2 < toShapeSubPaths.length) {
+              let currentDistance = distance$2(boundingBox(fromShapeSubPaths[i])
+                .center, boundingBox(toShapeSubPaths[i2])
+                .center);
+              if (currentDistance < minDistance) {
+                if (!isFinite(minDistance)) {
+                  skipInfinity = true;
+                }
+                if (skipInfinity && i !== i2 && fromShapeSubPaths[i2]) {
+                  let spliced = fromShapeSubPaths.splice(i2, 1);
+                  fromShapeSubPaths.splice(i, 0, spliced[0]);
+                }
+                minDistance = currentDistance;
+              }
+              i2++;
+            }
+          }
+          i++;
+        }
+      }
+
+      largestShapeSubPathsMap.map((d, i) => {
+        let fromSubPath = fromShapeSubPaths[i];
+        let toSubPath = toShapeSubPaths[i];
+        let prev;
+        let diff;
+        let x;
+        let y;
+
+        if (fromSubPath && !toSubPath) {
+          if (typeof moveIndex$1 === 'number' && moveIndex$1) {
+            fromSubPath = moveIndex(fromSubPath, moveIndex$1);
+          }
+          if (reverse$1 !== undefined) {
+            fromSubPath = reverse(fromSubPath);
+          }
+          fromSubPath = cubify(remove(fromSubPath));
+          if (bboxCenter) {
+            let findCloser = findNearestIndex(toShape, boundingBox(fromSubPath)
+              .center);
+            x = findCloser.x;
+            y = findCloser.y;
+          } else {
+            prev = toShapeSubPaths[i - 1];
+            prev = prev[prev.length - 1];
+            x = prev.x;
+            y = prev.y;
+          }
+          toSubPath = [{
+            x,
+            y,
+            moveTo: true
+          }, {
+            x,
+            y
+          }];
+          for (let ii = 0, len = fromSubPath.length; ii < len; ii++) {
+            if (toSubPath[ii] === undefined) {
+              toSubPath[ii] = {
+                x,
+                y
+              };
+            }
+          }
+        } else if (toSubPath && !fromSubPath) {
+          toSubPath = cubify(remove(toSubPath));
+          if (bboxCenter) {
+            let findCloser = findNearestIndex(fromShape, boundingBox(toSubPath)
+              .center);
+            x = findCloser.x;
+            y = findCloser.y;
+          } else {
+            prev = fromShapeSubPaths[i - 1];
+            prev = prev[prev.length - 1];
+            x = prev.x;
+            y = prev.y;
+          }
+          fromSubPath = [{
+            x,
+            y,
+            moveTo: true
+          }, {
+            x,
+            y
+          }];
+          for (let ii = 0, len = toSubPath.length; ii < len; ii++) {
+            if (fromSubPath[ii] === undefined) {
+              fromSubPath[ii] = {
+                x,
+                y
+              };
+            }
+          }
+        } else if (fromSubPath && toSubPath) {
+          if (typeof moveIndex$1 === 'number' && moveIndex$1) {
+            fromSubPath = moveIndex(fromSubPath, moveIndex$1);
+          }
+          if (reverse$1 !== undefined) {
+            fromSubPath = reverse(fromSubPath);
+          }
+          fromSubPath = cubify(remove(fromSubPath));
+          toSubPath = cubify(remove(toSubPath));
+          diff = toSubPath.length - fromSubPath.length;
+          if (diff > 0) {
+            fromSubPath = add$2(fromSubPath, toSubPath.length);
+          } else if (diff < 0) {
+            toSubPath = add$2(toSubPath, fromSubPath.length);
+          }
+        }
+
+        if (map) {
+          fromSubPath = map(fromSubPath, toSubPath, i, diff, false);
+        }
+
+        fromSubPath = autoCurvePoint(fromSubPath, toSubPath);
+        toSubPath = autoCurvePoint(toSubPath, fromSubPath);
+
+        if (approximate) {
+          fromSubPath = remove(ApproximateCurves(fromSubPath));
+          toSubPath = remove(ApproximateCurves(toSubPath));
+          if (useAsArray) {
+            fromSubPath = fromSubPath.map(p => [p.x, p.y]);
+            toSubPath = toSubPath.map(p => [p.x, p.y]);
+          }
+        }
+        fromShapeSubPaths[i] = fromSubPath;
+        toShapeSubPaths[i] = toSubPath;
+      });
+
+      return [useAsArray ? fromShapeSubPaths : joinSubPath(fromShapeSubPaths), useAsArray ? toShapeSubPaths : joinSubPath(toShapeSubPaths)]
+    }
+  };
+
+  const autoNormalise = (fromShape, toShape, param) => {
+    return applyFuncToShapes(autoNormalisePoints, fromShape, toShape, param)
+  };
+
+  /** global: x1 */
+
+  const fromPolygon = (options = {}, polygon) => polygon.map(([x, y], nth) => ({ x, y, moveTo: true }));
+  const toPolygon = ({ z = 0 }, points) => points.map(({ x, y }) => [x, y, z]);
+
+  const loft = ({ height = 1 }, from, to) => {
+  console.log(`QQ/from: ${JSON.stringify(from)}`);
+  console.log(`QQ/to: ${JSON.stringify(to)}`);
+    const fromShape = fromPolygon({}, from);
+    const toShape = fromPolygon({}, to);
+  console.log(`QQ/fromShape: ${JSON.stringify(fromShape)}`);
+  console.log(`QQ/toShape: ${JSON.stringify(toShape)}`);
+    const [normalizedFrom, normalizedTo] = autoNormalise(fromShape, toShape);
+  console.log(`QQ/normalizedFrom: ${JSON.stringify(normalizedFrom)}`);
+  console.log(`QQ/normalizedTo: ${JSON.stringify(normalizedTo)}`);
+    if (normalizedFrom.length !== normalizedTo.length) {
+      throw Error('die');
+    }
+    return enwall({ height }, toPolygon({ z: 0 }, normalizedFrom), toPolygon({ z: 1 }, normalizedTo));
+  };
+
+  const enwall = ({ height = 1 }, floor, ceiling) => {
+  console.log(`QQ/floor: ${JSON.stringify(floor)}`);
+  console.log(`QQ/ceiling: ${JSON.stringify(ceiling)}`);
+    // We assume the shapes are structurally congrent.
+    const polygons = [floor.slice().reverse(), ceiling];
+
+    const addTriangle = (a, b, c) => {
+      if (equals$1(a, b) || equals$1(a, c) || equals$1(b, c)) {
+        return;
+      }
+      polygons.push([a, b, c]);
+    };
+
+    const addSide = (floor, baseFloorStart, baseFloorEnd, ceiling, baseCeilingStart, baseCeilingEnd) => {
+      const floorStart = lerp(floor, baseFloorStart, baseCeilingStart);
+      const floorEnd = lerp(floor, baseFloorEnd, baseCeilingEnd);
+      const ceilingStart = lerp(ceiling, baseFloorStart, baseCeilingStart);
+      const ceilingEnd = lerp(ceiling, baseFloorEnd, baseCeilingEnd);
+      addTriangle(floorStart, floorEnd, ceilingEnd);
+      addTriangle(ceilingEnd, ceilingStart, floorStart);
+    };
+
+    // Build floor outline. This need not be a convex polygon.
+    // Walk around the floor to build the walls.
+
+    for (let i = 0; i < floor.length; i++) {
+      const floorStart = floor[i];
+      const floorEnd = floor[(i + 1) % floor.length];
+      const ceilingStart = ceiling[i];
+      const ceilingEnd = ceiling[(i + 1) % ceiling.length];
+      const resolution = 0.2;
+      for (let t = resolution; t <= 1; t += resolution) {
+        // Remember that we are walking CCW.
+        addSide(t - resolution, floorStart, floorEnd, t, ceilingStart, ceilingEnd);
+      }
+    }
+
+    return fromPolygons({}, polygons);
+  };
+
   const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
 
   const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
@@ -13714,8 +15539,15 @@ return d[d.length-1];};return ", funcName].join("");
     }
     const triangles = [];
     for (const path of paths) {
+      const a = path[0];
       for (let nth = 2; nth < path.length; nth++) {
-        triangles.push([path[0], path[nth - 1], path[nth]]);
+        const b = path[nth - 1];
+        const c = path[nth];
+        if (equals$1(a, b) || equals$1(a, c) || equals$1(b, c)) {
+          // Skip degenerate triangles introduced by colinear points.
+          continue;
+        }
+        triangles.push([a, b, c]);
       }
     }
     return blessAsTriangles(triangles);
@@ -14624,7 +16456,7 @@ return d[d.length-1];};return ", funcName].join("");
     return components;
   };
 
-  const toPoints$1 = (options = {}, geometry) => {
+  const toPoints$2 = (options = {}, geometry) => {
     const points = [];
     eachPoint$6(options, point => points.push(point), geometry);
     return { points };
@@ -14719,7 +16551,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
 
     toPoints (options = {}) {
-      return toPoints$1(options, this.toKeptGeometry());
+      return toPoints$2(options, this.toKeptGeometry());
     }
 
     transform (matrix) {
@@ -16710,7 +18542,7 @@ return d[d.length-1];};return ", funcName].join("");
     // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
     const bottom = 0.5;
     const topHeight = height - gripRingHeight - bottom;
-    return union$5(
+    return assemble$1(
       // flaired top
       cylinder({ diameter: (diameter + play), height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
       // grip ring
@@ -16735,6 +18567,38 @@ return d[d.length-1];};return ", funcName].join("");
     socket,
     studSheet,
     socketSheet
+  };
+
+  /**
+   *
+   * # Loft
+   *
+   * Generates a solid by interpolating between two surfaces.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * assemble(circle(10),
+   *          triangle(8).translate(0, 0, 10))
+   * ```
+   * :::
+   * ::: illustration { "view": { "position": [40, 40, 60] } }
+   * ```
+   * loft({ height: 10 },
+   *        circle(10),
+   *        triangle(8));
+   * ```
+   * :::
+   *
+   **/
+
+  const loft$1 = ({ height }, floors, ceilings) => {
+    const assembly = [];
+    for (const floor of getZ0Surfaces(floors.toKeptGeometry())) {
+      for (const ceiling of getZ0Surfaces(ceilings.toKeptGeometry())) {
+        assembly.push(Shape.fromGeometry({ solid: loft({ height }, floor.z0Surface[0], ceiling.z0Surface[0]) }));
+      }
+    }
+    return assemble$1(...assembly);
   };
 
   const conversation = ({ agent, say }) => {
@@ -20126,6 +21990,7 @@ return d[d.length-1];};return ", funcName].join("");
   const method$m = function (options) { return outline(options, this); };
 
   Shape.prototype.outline = method$m;
+  Shape.prototype.withOutline = function (options) { return assemble$1(this, outline(options, this)); };
 
   const fromValue$9 = (point) => Shape.fromPoint(point);
 
@@ -20237,7 +22102,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const points$1 = dispatch(
+  const points$2 = dispatch(
     'points',
     // points([1, 2, 3], [2, 3, 4])
     (...points) => {
@@ -20247,7 +22112,7 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromPoints$3(points);
     });
 
-  points$1.fromPoints = fromPoints$3;
+  points$2.fromPoints = fromPoints$3;
 
   /**
    *
@@ -22665,7 +24530,7 @@ return d[d.length-1];};return ", funcName].join("");
   var cos$1 = Math.cos;
   var tan = Math.tan;
   var acos$1 = Math.acos;
-  var sqrt = Math.sqrt;
+  var sqrt$1 = Math.sqrt;
   var ceil = Math.ceil;
   var τ = Math.PI * 2;
 
@@ -22694,8 +24559,8 @@ return d[d.length-1];};return ", funcName].join("");
     );
 
     if (lambda > 1) {
-      rx *= sqrt(lambda);
-      ry *= sqrt(lambda);
+      rx *= sqrt$1(lambda);
+      ry *= sqrt$1(lambda);
     }
 
     var centre = getArcCentre(px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp);
@@ -22710,7 +24575,7 @@ return d[d.length-1];};return ", funcName].join("");
     var curves = [];
     ang2 /= segments;
     while (segments--) {
-      curves.push(approxUnitArc(ang1, ang2));
+      curves.push(approxUnitArc$2(ang1, ang2));
       ang1 += ang2;
     }
 
@@ -22720,16 +24585,16 @@ return d[d.length-1];};return ", funcName].join("");
 
     while (i < l) {
       curve = curves[i++];
-      a = mapToEllipse(curve[0], rx, ry, cosphi, sinphi, centrex, centrey);
-      b = mapToEllipse(curve[1], rx, ry, cosphi, sinphi, centrex, centrey);
-      c = mapToEllipse(curve[2], rx, ry, cosphi, sinphi, centrex, centrey);
+      a = mapToEllipse$2(curve[0], rx, ry, cosphi, sinphi, centrex, centrey);
+      b = mapToEllipse$2(curve[1], rx, ry, cosphi, sinphi, centrex, centrey);
+      c = mapToEllipse$2(curve[2], rx, ry, cosphi, sinphi, centrex, centrey);
       result[result.length] = [a[0], a[1], b[0], b[1], c[0], c[1]];
     }
 
     return result
   }
 
-  function mapToEllipse (curve, rx, ry, cosphi, sinphi, centrex, centrey) {
+  function mapToEllipse$2 (curve, rx, ry, cosphi, sinphi, centrex, centrey) {
     var x = curve[0] * rx;
     var y = curve[1] * ry;
 
@@ -22739,7 +24604,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [xp + centrex, yp + centrey]
   }
 
-  function approxUnitArc (ang1, ang2) {
+  function approxUnitArc$2 (ang1, ang2) {
     var a = 4 / 3 * tan(ang2 / 4);
 
     var x1 = cos$1(ang1);
@@ -22764,7 +24629,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     if (radicant < 0) radicant = 0;
     radicant /= (rxsq * pypsq) + (rysq * pxpsq);
-    radicant = sqrt(radicant) * (large === sweep ? -1 : 1);
+    radicant = sqrt$1(radicant) * (large === sweep ? -1 : 1);
 
     var centrexp = radicant * rx / ry * pyp;
     var centreyp = radicant * -ry / rx * pxp;
@@ -22776,8 +24641,8 @@ return d[d.length-1];};return ", funcName].join("");
     var vx2 = (-pxp - centrexp) / rx;
     var vy2 = (-pyp - centreyp) / ry;
 
-    var ang1 = vectorAngle(1, 0, vx1, vy1);
-    var ang2 = vectorAngle(vx1, vy1, vx2, vy2);
+    var ang1 = vectorAngle$2(1, 0, vx1, vy1);
+    var ang2 = vectorAngle$2(vx1, vy1, vx2, vy2);
 
     if (sweep === 0 && ang2 > 0) ang2 -= τ;
     if (sweep === 1 && ang2 < 0) ang2 += τ;
@@ -22785,10 +24650,10 @@ return d[d.length-1];};return ", funcName].join("");
     return [centrex, centrey, ang1, ang2]
   }
 
-  function vectorAngle (ux, uy, vx, vy) {
+  function vectorAngle$2 (ux, uy, vx, vy) {
     var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
-    var umag = sqrt(ux * ux + uy * uy);
-    var vmag = sqrt(ux * ux + uy * uy);
+    var umag = sqrt$1(ux * ux + uy * uy);
+    var vmag = sqrt$1(ux * ux + uy * uy);
     var dot = ux * vx + uy * vy;
 
     var div = dot / (umag * vmag);
@@ -22891,7 +24756,7 @@ return d[d.length-1];};return ", funcName].join("");
    * @type {Object}
    */
 
-  var length$2 = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
+  var length$3 = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
 
   /**
    * segment pattern
@@ -22923,12 +24788,12 @@ return d[d.length-1];};return ", funcName].join("");
   		}
 
   		while (true) {
-  			if (args.length == length$2[type]) {
+  			if (args.length == length$3[type]) {
   				args.unshift(command);
   				return data.push(args)
   			}
-  			if (args.length < length$2[type]) throw new Error('malformed path data')
-  			data.push([command].concat(args.splice(0, length$2[type])));
+  			if (args.length < length$3[type]) throw new Error('malformed path data')
+  			data.push([command].concat(args.splice(0, length$3[type])));
   		}
   	});
   	return data
@@ -23023,33 +24888,33 @@ return d[d.length-1];};return ", funcName].join("");
 
   function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-  var toPoints$2 = function toPoints(_ref) {
+  var toPoints$3 = function toPoints(_ref) {
     var type = _ref.type,
         props = _objectWithoutProperties(_ref, ['type']);
 
     switch (type) {
       case 'circle':
-        return getPointsFromCircle(props);
+        return getPointsFromCircle$1(props);
       case 'ellipse':
-        return getPointsFromEllipse(props);
+        return getPointsFromEllipse$1(props);
       case 'line':
-        return getPointsFromLine(props);
+        return getPointsFromLine$1(props);
       case 'path':
-        return getPointsFromPath(props);
+        return getPointsFromPath$1(props);
       case 'polygon':
-        return getPointsFromPolygon(props);
+        return getPointsFromPolygon$1(props);
       case 'polyline':
-        return getPointsFromPolyline(props);
+        return getPointsFromPolyline$1(props);
       case 'rect':
-        return getPointsFromRect(props);
+        return getPointsFromRect$1(props);
       case 'g':
-        return getPointsFromG(props);
+        return getPointsFromG$1(props);
       default:
         throw new Error('Not a valid shape type');
     }
   };
 
-  var getPointsFromCircle = function getPointsFromCircle(_ref2) {
+  var getPointsFromCircle$1 = function getPointsFromCircle(_ref2) {
     var cx = _ref2.cx,
         cy = _ref2.cy,
         r = _ref2.r;
@@ -23057,7 +24922,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [{ x: cx, y: cy - r, moveTo: true }, { x: cx, y: cy + r, curve: { type: 'arc', rx: r, ry: r, sweepFlag: 1 } }, { x: cx, y: cy - r, curve: { type: 'arc', rx: r, ry: r, sweepFlag: 1 } }];
   };
 
-  var getPointsFromEllipse = function getPointsFromEllipse(_ref3) {
+  var getPointsFromEllipse$1 = function getPointsFromEllipse(_ref3) {
     var cx = _ref3.cx,
         cy = _ref3.cy,
         rx = _ref3.rx,
@@ -23066,7 +24931,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [{ x: cx, y: cy - ry, moveTo: true }, { x: cx, y: cy + ry, curve: { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 } }, { x: cx, y: cy - ry, curve: { type: 'arc', rx: rx, ry: ry, sweepFlag: 1 } }];
   };
 
-  var getPointsFromLine = function getPointsFromLine(_ref4) {
+  var getPointsFromLine$1 = function getPointsFromLine(_ref4) {
     var x1 = _ref4.x1,
         x2 = _ref4.x2,
         y1 = _ref4.y1,
@@ -23075,9 +24940,9 @@ return d[d.length-1];};return ", funcName].join("");
     return [{ x: x1, y: y1, moveTo: true }, { x: x2, y: y2 }];
   };
 
-  var validCommands = /[MmLlHhVvCcSsQqTtAaZz]/g;
+  var validCommands$1 = /[MmLlHhVvCcSsQqTtAaZz]/g;
 
-  var commandLengths = {
+  var commandLengths$1 = {
     A: 7,
     C: 6,
     H: 1,
@@ -23090,20 +24955,20 @@ return d[d.length-1];};return ", funcName].join("");
     Z: 0
   };
 
-  var relativeCommands = ['a', 'c', 'h', 'l', 'm', 'q', 's', 't', 'v'];
+  var relativeCommands$1 = ['a', 'c', 'h', 'l', 'm', 'q', 's', 't', 'v'];
 
-  var isRelative = function isRelative(command) {
-    return relativeCommands.indexOf(command) !== -1;
+  var isRelative$1 = function isRelative(command) {
+    return relativeCommands$1.indexOf(command) !== -1;
   };
 
-  var optionalArcKeys = ['xAxisRotation', 'largeArcFlag', 'sweepFlag'];
+  var optionalArcKeys$1 = ['xAxisRotation', 'largeArcFlag', 'sweepFlag'];
 
-  var getCommands = function getCommands(d) {
-    return d.match(validCommands);
+  var getCommands$1 = function getCommands(d) {
+    return d.match(validCommands$1);
   };
 
-  var getParams = function getParams(d) {
-    return d.split(validCommands).map(function (v) {
+  var getParams$1 = function getParams(d) {
+    return d.split(validCommands$1).map(function (v) {
       return v.replace(/[0-9]+-/g, function (m) {
         return m.slice(0, -1) + ' -';
       });
@@ -23122,11 +24987,11 @@ return d[d.length-1];};return ", funcName].join("");
     });
   };
 
-  var getPointsFromPath = function getPointsFromPath(_ref5) {
+  var getPointsFromPath$1 = function getPointsFromPath(_ref5) {
     var d = _ref5.d;
 
-    var commands = getCommands(d);
-    var params = getParams(d);
+    var commands = getCommands$1(d);
+    var params = getParams$1(d);
 
     var points = [];
 
@@ -23135,8 +25000,8 @@ return d[d.length-1];};return ", funcName].join("");
     for (var i = 0, l = commands.length; i < l; i++) {
       var command = commands[i];
       var upperCaseCommand = command.toUpperCase();
-      var commandLength = commandLengths[upperCaseCommand];
-      var relative = isRelative(command);
+      var commandLength = commandLengths$1[upperCaseCommand];
+      var relative = isRelative$1(command);
 
       if (commandLength > 0) {
         var commandParams = params.shift();
@@ -23202,7 +25067,7 @@ return d[d.length-1];};return ", funcName].join("");
               var _iteratorError = undefined;
 
               try {
-                for (var _iterator = optionalArcKeys[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = optionalArcKeys$1[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                   var k = _step.value;
 
                   if (points[points.length - 1]['curve'][k] === 0) {
@@ -23318,19 +25183,19 @@ return d[d.length-1];};return ", funcName].join("");
     return points;
   };
 
-  var getPointsFromPolygon = function getPointsFromPolygon(_ref6) {
+  var getPointsFromPolygon$1 = function getPointsFromPolygon(_ref6) {
     var points = _ref6.points;
 
-    return getPointsFromPoints({ closed: true, points: points });
+    return getPointsFromPoints$1({ closed: true, points: points });
   };
 
-  var getPointsFromPolyline = function getPointsFromPolyline(_ref7) {
+  var getPointsFromPolyline$1 = function getPointsFromPolyline(_ref7) {
     var points = _ref7.points;
 
-    return getPointsFromPoints({ closed: false, points: points });
+    return getPointsFromPoints$1({ closed: false, points: points });
   };
 
-  var getPointsFromPoints = function getPointsFromPoints(_ref8) {
+  var getPointsFromPoints$1 = function getPointsFromPoints(_ref8) {
     var closed = _ref8.closed,
         points = _ref8.points;
 
@@ -23357,7 +25222,7 @@ return d[d.length-1];};return ", funcName].join("");
     return p;
   };
 
-  var getPointsFromRect = function getPointsFromRect(_ref9) {
+  var getPointsFromRect$1 = function getPointsFromRect(_ref9) {
     var height = _ref9.height,
         rx = _ref9.rx,
         ry = _ref9.ry,
@@ -23366,7 +25231,7 @@ return d[d.length-1];};return ", funcName].join("");
         y = _ref9.y;
 
     if (rx || ry) {
-      return getPointsFromRectWithCornerRadius({
+      return getPointsFromRectWithCornerRadius$1({
         height: height,
         rx: rx || ry,
         ry: ry || rx,
@@ -23376,10 +25241,10 @@ return d[d.length-1];};return ", funcName].join("");
       });
     }
 
-    return getPointsFromBasicRect({ height: height, width: width, x: x, y: y });
+    return getPointsFromBasicRect$1({ height: height, width: width, x: x, y: y });
   };
 
-  var getPointsFromBasicRect = function getPointsFromBasicRect(_ref10) {
+  var getPointsFromBasicRect$1 = function getPointsFromBasicRect(_ref10) {
     var height = _ref10.height,
         width = _ref10.width,
         x = _ref10.x,
@@ -23388,7 +25253,7 @@ return d[d.length-1];};return ", funcName].join("");
     return [{ x: x, y: y, moveTo: true }, { x: x + width, y: y }, { x: x + width, y: y + height }, { x: x, y: y + height }, { x: x, y: y }];
   };
 
-  var getPointsFromRectWithCornerRadius = function getPointsFromRectWithCornerRadius(_ref11) {
+  var getPointsFromRectWithCornerRadius$1 = function getPointsFromRectWithCornerRadius(_ref11) {
     var height = _ref11.height,
         rx = _ref11.rx,
         ry = _ref11.ry,
@@ -23401,10 +25266,10 @@ return d[d.length-1];};return ", funcName].join("");
     return [{ x: x + rx, y: y, moveTo: true }, { x: x + width - rx, y: y }, { x: x + width, y: y + ry, curve: curve }, { x: x + width, y: y + height - ry }, { x: x + width - rx, y: y + height, curve: curve }, { x: x + rx, y: y + height }, { x: x, y: y + height - ry, curve: curve }, { x: x, y: y + ry }, { x: x + rx, y: y, curve: curve }];
   };
 
-  var getPointsFromG = function getPointsFromG(_ref12) {
+  var getPointsFromG$1 = function getPointsFromG(_ref12) {
     var shapes = _ref12.shapes;
     return shapes.map(function (s) {
-      return toPoints$2(s);
+      return toPoints$3(s);
     });
   };
 
@@ -23506,8 +25371,8 @@ return d[d.length-1];};return ", funcName].join("");
     var isPoints = Array.isArray(s);
     var isGroup = isPoints ? Array.isArray(s[0]) : s.type === 'g';
     var points = isPoints ? s : isGroup ? s.shapes.map(function (shp) {
-      return toPoints$2(shp);
-    }) : toPoints$2(s);
+      return toPoints$3(shp);
+    }) : toPoints$3(s);
 
     if (isGroup) {
       return points.map(function (p) {
@@ -37403,7 +39268,6 @@ return d[d.length-1];};return ", funcName].join("");
       for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
         pathsets.push(paths);
       }
-      // return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
       return scale$5([factor, factor, factor], { assembly: pathsets.map(paths => ({ z0Surface: paths })) });
     };
 
@@ -38697,7 +40561,7 @@ return d[d.length-1];};return ", funcName].join("");
    *
    **/
 
-  const sqrt$1 = Math.sqrt;
+  const sqrt$2 = Math.sqrt;
 
   /**
    *
@@ -39027,6 +40891,7 @@ return d[d.length-1];};return ", funcName].join("");
   const method$u = function (options) { return wireframe(options, this); };
 
   Shape.prototype.wireframe = method$u;
+  Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
 
   const colorToRgbMapping = {
     'aliceblue': [240, 248, 255],
@@ -67938,7 +69803,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   		again = false;
 
-  		if ( ! p.steiner && ( equals$4( p, p.next ) || area( p.prev, p, p.next ) === 0 ) ) {
+  		if ( ! p.steiner && ( equals$4( p, p.next ) || area$1( p.prev, p, p.next ) === 0 ) ) {
 
   			removeNode( p );
   			p = end = p.prev;
@@ -68036,14 +69901,14 @@ return d[d.length-1];};return ", funcName].join("");
   		b = ear,
   		c = ear.next;
 
-  	if ( area( a, b, c ) >= 0 ) return false; // reflex, can't be an ear
+  	if ( area$1( a, b, c ) >= 0 ) return false; // reflex, can't be an ear
 
   	// now make sure we don't have other points inside the potential ear
   	var p = ear.next.next;
 
   	while ( p !== ear.prev ) {
 
-  		if ( pointInTriangle( a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y ) && area( p.prev, p, p.next ) >= 0 ) {
+  		if ( pointInTriangle( a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y ) && area$1( p.prev, p, p.next ) >= 0 ) {
 
   			return false;
 
@@ -68063,7 +69928,7 @@ return d[d.length-1];};return ", funcName].join("");
   		b = ear,
   		c = ear.next;
 
-  	if ( area( a, b, c ) >= 0 ) return false; // reflex, can't be an ear
+  	if ( area$1( a, b, c ) >= 0 ) return false; // reflex, can't be an ear
 
   	// triangle bbox; min & max are calculated like this for speed
 
@@ -68085,7 +69950,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   		if ( p !== ear.prev && p !== ear.next &&
   				pointInTriangle( a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y ) &&
-  				area( p.prev, p, p.next ) >= 0 ) return false;
+  				area$1( p.prev, p, p.next ) >= 0 ) return false;
   		p = p.nextZ;
 
   	}
@@ -68098,7 +69963,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   		if ( p !== ear.prev && p !== ear.next &&
   				pointInTriangle( a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y ) &&
-  				area( p.prev, p, p.next ) >= 0 ) return false;
+  				area$1( p.prev, p, p.next ) >= 0 ) return false;
 
   		p = p.prevZ;
 
@@ -68467,7 +70332,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   // signed area of a triangle
 
-  function area( p, q, r ) {
+  function area$1( p, q, r ) {
 
   	return ( q.y - p.y ) * ( r.x - q.x ) - ( q.x - p.x ) * ( r.y - q.y );
 
@@ -68488,8 +70353,8 @@ return d[d.length-1];};return ", funcName].join("");
   	if ( ( equals$4( p1, q1 ) && equals$4( p2, q2 ) ) ||
   			( equals$4( p1, q2 ) && equals$4( p2, q1 ) ) ) return true;
 
-  	return area( p1, q1, p2 ) > 0 !== area( p1, q1, q2 ) > 0 &&
-  				 area( p2, q2, p1 ) > 0 !== area( p2, q2, q1 ) > 0;
+  	return area$1( p1, q1, p2 ) > 0 !== area$1( p1, q1, q2 ) > 0 &&
+  				 area$1( p2, q2, p1 ) > 0 !== area$1( p2, q2, q1 ) > 0;
 
   }
 
@@ -68520,9 +70385,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   function locallyInside( a, b ) {
 
-  	return area( a.prev, a, a.next ) < 0 ?
-  		area( a, b, a.next ) >= 0 && area( a, a.prev, b ) >= 0 :
-  		area( a, b, a.prev ) < 0 || area( a, a.next, b ) < 0;
+  	return area$1( a.prev, a, a.next ) < 0 ?
+  		area$1( a, b, a.next ) >= 0 && area$1( a, a.prev, b ) >= 0 :
+  		area$1( a, b, a.prev ) < 0 || area$1( a, a.next, b ) < 0;
 
   }
 
@@ -89738,7 +91603,6 @@ return d[d.length-1];};return ", funcName].join("");
     };
     for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
       outputTriangle(triangle);
-      // outputTriangle(flip(triangle));
     }
     return { normals, positions };
   };
@@ -89981,6 +91845,7 @@ return d[d.length-1];};return ", funcName].join("");
     intersection: intersection$4,
     left: left,
     lego: lego,
+    loft: loft$1,
     log: log$2,
     material: material,
     max: max$1,
@@ -89993,7 +91858,7 @@ return d[d.length-1];};return ", funcName].join("");
     planeY: planeY,
     planeZ: planeZ,
     point: point,
-    points: points$1,
+    points: points$2,
     polygon: polygon,
     polyhedron: polyhedron,
     readDst: readDst,
@@ -90010,7 +91875,7 @@ return d[d.length-1];};return ", funcName].join("");
     section: section,
     sin: sin$2,
     sphere: sphere,
-    sqrt: sqrt$1,
+    sqrt: sqrt$2,
     square: square,
     svgPath: svgPath,
     tetrahedron: tetrahedron,

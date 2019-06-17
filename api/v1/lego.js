@@ -1,7 +1,6 @@
 import { assemble } from './assemble';
 import { cube } from './cube';
 import { cylinder } from './cylinder';
-import { union } from './union';
 
 /**
  *
@@ -62,7 +61,7 @@ export const socket = ({ diameter = 5.1, height = 1.8, gripRingHeight = 0.4, gri
   // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
   const bottom = 0.5;
   const topHeight = height - gripRingHeight - bottom;
-  return union(
+  return assemble(
     // flaired top
     cylinder({ diameter: (diameter + play), height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
     // grip ring
