@@ -35,15 +35,16 @@ const solidToThreejsSolid = (solid) => {
 const z0SurfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
-  const outputTriangle = (triangle) => {
+  for (const triangle of toTriangles({}, makeConvex({}, surface))) {
     for (const point of triangle) {
-      const [x, y, z] = toPlane(triangle);
+      const [x, y, z, w] = toPlane(triangle);
       normals.push(x, y, z);
+      if (isNaN(x)) {
+        console.log(`QQ/triangle: ${triangle}`);
+        console.log(`QQ/normal: ${x} ${y} ${z} ${w}`);
+      }
       positions.push(...point);
     }
-  };
-  for (const triangle of toTriangles({}, makeConvex({}, surface))) {
-    outputTriangle(triangle);
   }
   return { normals, positions };
 };

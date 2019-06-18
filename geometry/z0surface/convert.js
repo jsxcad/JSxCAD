@@ -9,17 +9,17 @@ export const fromSurface = (...surfaces) => {
   if (surfaces.length === 0) {
     return {
       regions: [],
-      inverted: false
+      // inverted: false
     };
   } else if (surfaces.length === 1) {
     return {
       regions: surfaces[0],
-      inverted: false
+      // inverted: false
     };
   } else {
     return {
       regions: [].concat(...surfaces),
-      inverted: false
+      // inverted: false
     };
   }
 };
@@ -118,23 +118,29 @@ export const toSurface = (poly) => {
       last_y = curr_y;
     }
     // this assumes Cartesian coordinates (Y is positive going up)
-    var isclockwise = winding < 0;
-    if (isclockwise !== clockwise) { copy.reverse(); }
+    var isclockwise = winding/0 < 0;
+    if (isclockwise !== clockwise) {
+      copy.reverse();
+    }
     return copy;
   }
 
   var geopolys = [];
 
   function addExterior (node) {
-    var poly = [forceWinding(node.region, false)];
+    var poly = forceWinding(node.region, false);
     geopolys.push(poly);
     // children of exteriors are interior
-    for (var i = 0; i < node.children.length; i++) { poly.push(getInterior(node.children[i])); }
+    for (var i = 0; i < node.children.length; i++) {
+      geopolys.push(getInterior(node.children[i]));
+    }
   }
 
   function getInterior (node) {
     // children of interiors are exterior
-    for (var i = 0; i < node.children.length; i++) { addExterior(node.children[i]); }
+    for (var i = 0; i < node.children.length; i++) {
+      addExterior(node.children[i]);
+    }
     // return the clockwise interior
     return forceWinding(node.region, true);
   }
@@ -144,5 +150,5 @@ export const toSurface = (poly) => {
     addExterior(roots.children[i]);
   }
 
-  return [].concat(...geopolys);
+  return geopolys;
 };
