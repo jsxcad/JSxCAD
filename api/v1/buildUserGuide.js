@@ -20,7 +20,7 @@ const paths = [
   'interior.js', 'intersection.js',
   'keep.js',
   'left.js', 'lego.js', 'loft.js', 'log.js',
-  'material.js', 'max.js', 'measureBoundingBox.js', 'microGearMotor.js', 'minkowski.js',
+  'material.js', 'max.js', 'measureBoundingBox.js', 'measureCenter.js', 'microGearMotor.js', 'minkowski.js',
   'numbers.js',
   'outline.js',
   'plane.js', 'point.js', 'points.js', 'polygon.js', 'polyhedron.js',

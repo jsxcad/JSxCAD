@@ -799,6 +799,9 @@ define("./webworker.js",[],function () { 'use strict';
   const W$1 = 3;
 
   const toXYPlaneTransforms = (plane, rightVector) => {
+    if (isNaN(plane[X])) {
+      throw Error('die');
+    }
     if (rightVector === undefined) {
       rightVector = random(plane);
     }
@@ -13847,6 +13850,7 @@ return d[d.length-1];};return ", funcName].join("");
   const create = () => ({ surfaces: [] });
 
   const EPSILON$2 = 1e-5;
+  const THRESHOLD2 = 1e-10;
 
   const COPLANAR$2 = 0; // Neither front nor back.
   const FRONT$2 = 1;
@@ -13867,7 +13871,6 @@ return d[d.length-1];};return ", funcName].join("");
   const pointType$1 = [];
 
   const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
-    // assertCoplanar(surface);
     let coplanarFrontPolygons;
     let coplanarBackPolygons;
     let frontPolygons;
@@ -13933,10 +13936,11 @@ return d[d.length-1];};return ", funcName].join("");
               // This should exclude COPLANAR points.
               // Compute the point that touches the splitting plane.
               const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
-              frontPoints.push(spanPoint);
-              backPoints.push(spanPoint);
-              if (Math.abs(signedDistanceToPoint(plane, spanPoint)) > EPSILON$2) {
-                throw Error(`die: ${Math.abs(signedDistanceToPoint(plane, spanPoint))}`);
+              if (squaredDistance(spanPoint, startPoint) > THRESHOLD2) {
+                frontPoints.push(spanPoint);
+              }
+              if (squaredDistance(spanPoint, endPoint) > THRESHOLD2) {
+                backPoints.push(spanPoint);
               }
             }
             startPoint = endPoint;
@@ -13961,19 +13965,15 @@ return d[d.length-1];};return ", funcName].join("");
       }
     }
     if (coplanarFrontPolygons !== undefined) {
-      // assertCoplanar(coplanarFrontPolygons);
       coplanarFrontSurfaces.push(coplanarFrontPolygons);
     }
     if (coplanarBackPolygons !== undefined) {
-      // assertCoplanar(coplanarBackPolygons);
       coplanarBackSurfaces.push(coplanarBackPolygons);
     }
     if (frontPolygons !== undefined) {
-      // assertCoplanar(frontPolygons);
       frontSurfaces.push(frontPolygons);
     }
     if (backPolygons !== undefined) {
-      // assertCoplanar(backPolygons);
       backSurfaces.push(backPolygons);
     }
   };
@@ -14561,7 +14561,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     const z0Surfaces = getZ0Surfaces(geometry);
     if (z0Surfaces.length > 0) {
-      items.push({ solid: union$2(...z0Surfaces.map(item => item.z0Surface)) });
+      items.push({ z0Surface: union$2(...z0Surfaces.map(item => item.z0Surface)) });
     }
 
     if (items.length === 1) {
@@ -14633,17 +14633,13 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const toComponents = ({ requires, excludes }, geometry) => {
+  const toComponents = ({}, geometry) => {
     const components = [];
-    const walk = (geometry) => {
-      for (const item of geometry.assembly) {
-        if (hasMatchingTag(excludes, item.tags)) {
-          continue;
-        } else if (hasMatchingTag(requires, item.tags, true)) {
-          components.push(item);
-        } else if (item.assembly !== undefined) {
-          walk(item);
-        }
+    const walk = (item) => {
+      if (item.assembly) {
+        item.assembly.map(walk);
+      } else {
+        components.push(item);
       }
     };
     walk(toDisjointGeometry(geometry));
@@ -14950,7 +14946,6 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const measureBoundingBox$4 = (shape) => {
-    // FIX: Handle empty geometries.
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
     let empty = true;
@@ -19977,6 +19972,28 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # Measure Center
+   *
+   * Provides the center of the smallest orthogonal box containing the shape.
+   *
+   * ::: illustration { "view": { "position": [40, 40, 40] } }
+   * ```
+   * sphere(7)
+   * ```
+   * :::
+   **/
+
+  const measureCenter = (shape) => {
+    const [high, low] = measureBoundingBox$4(shape);
+    return scale(0.5, add(high, low))
+  };
+
+  const method$l = function () { return measureCenter(this); };
+
+  Shape.prototype.measureCenter = method$l;
+
+  /**
+   *
    * # Union
    *
    * Union produces a version of the first shape extended to cover the remaining shapes, as applicable.
@@ -20038,9 +20055,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$l = function (...shapes) { return union$5(this, ...shapes); };
+  const method$m = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$l;
+  Shape.prototype.union = method$m;
 
   /**
    *
@@ -20149,9 +20166,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
   };
 
-  const method$m = function (options) { return outline(options, this); };
+  const method$n = function (options) { return outline(options, this); };
 
-  Shape.prototype.outline = method$m;
+  Shape.prototype.outline = method$n;
   Shape.prototype.withOutline = function (options) { return assemble$1(this, outline(options, this)); };
 
   const fromValue$9 = (point) => Shape.fromPoint(point);
@@ -37792,9 +37809,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$n = function (options = {}) { return writeShape(options, this); };
+  const method$o = function (options = {}) { return writeShape(options, this); };
 
-  Shape.prototype.writeShape = method$n;
+  Shape.prototype.writeShape = method$o;
 
   /**
    *
@@ -39008,9 +39025,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$5(shape, reference);
     });
 
-  const method$o = function (...params) { return right(this, ...params); };
+  const method$p = function (...params) { return right(this, ...params); };
 
-  Shape.prototype.right = method$o;
+  Shape.prototype.right = method$p;
 
   /**
    *
@@ -39032,9 +39049,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$p = function (angle) { return rotateX$1(angle, this); };
+  const method$q = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$p;
+  Shape.prototype.rotateX = method$q;
 
   /**
    *
@@ -39056,9 +39073,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$q = function (angle) { return rotateY(angle, this); };
+  const method$r = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$q;
+  Shape.prototype.rotateY = method$r;
 
   /**
    *
@@ -39080,9 +39097,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$r = function (angle) { return rotateZ(angle, this); };
+  const method$s = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$r;
+  Shape.prototype.rotateZ = method$s;
 
   /**
    *
@@ -39117,9 +39134,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$s = function (factor) { return scale$6(factor, this); };
+  const method$t = function (factor) { return scale$6(factor, this); };
 
-  Shape.prototype.scale = method$s;
+  Shape.prototype.scale = method$t;
 
   /**
    *
@@ -39163,9 +39180,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...shapes);
   };
 
-  const method$t = function (options) { return section(options, this); };
+  const method$u = function (options) { return section(options, this); };
 
-  Shape.prototype.section = method$t;
+  Shape.prototype.section = method$u;
 
   /**
    *
@@ -39592,9 +39609,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...pieces);
   };
 
-  const method$u = function (options) { return wireframe(options, this); };
+  const method$v = function (options) { return wireframe(options, this); };
 
-  Shape.prototype.wireframe = method$u;
+  Shape.prototype.wireframe = method$v;
   Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
 
   const colorToRgbMapping = {
@@ -39871,9 +39888,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$v = function (options = {}) { return writePdf(options, this); };
+  const method$w = function (options = {}) { return writePdf(options, this); };
 
-  Shape.prototype.writePdf = method$v;
+  Shape.prototype.writePdf = method$w;
 
   /**
    *
@@ -39903,9 +39920,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$w = function (options = {}) { return writeStl(options, this); };
+  const method$x = function (options = {}) { return writeStl(options, this); };
 
-  Shape.prototype.writeStl = method$w;
+  Shape.prototype.writeStl = method$x;
 
   /**
    *
@@ -39935,9 +39952,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$x = function (options = {}) { return writeSvg(options, this); };
+  const method$y = function (options = {}) { return writeSvg(options, this); };
 
-  Shape.prototype.writeSvg = method$x;
+  Shape.prototype.writeSvg = method$y;
 
   // Polyfills
 
@@ -90496,9 +90513,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$y = function (options = {}) { return writeSvgPhoto(options, this); };
+  const method$z = function (options = {}) { return writeSvgPhoto(options, this); };
 
-  Shape.prototype.writeSvgPhoto = method$y;
+  Shape.prototype.writeSvgPhoto = method$z;
 
   const writeThreejsPage = async (options, shape) => {
     if (typeof options === 'string') {
@@ -90509,9 +90526,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, view, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$z = function (options = {}) { return writeThreejsPage(options, this); };
+  const method$A = function (options = {}) { return writeThreejsPage(options, this); };
 
-  Shape.prototype.writeThreejsPage = method$z;
+  Shape.prototype.writeThreejsPage = method$A;
 
   /**
    *
@@ -90554,6 +90571,7 @@ return d[d.length-1];};return ", funcName].join("");
     material: material,
     max: max$1,
     measureBoundingBox: measureBoundingBox$4,
+    measureCenter: measureCenter,
     microGearMotor: microGearMotor,
     minkowski: minkowski,
     numbers: numbers,

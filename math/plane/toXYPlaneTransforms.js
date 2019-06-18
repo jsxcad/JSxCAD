@@ -8,6 +8,9 @@ const Z = 2;
 const W = 3;
 
 export const toXYPlaneTransforms = (plane, rightVector) => {
+  if (isNaN(plane[X])) {
+    throw Error('die');
+  }
   if (rightVector === undefined) {
     rightVector = random(plane);
   }

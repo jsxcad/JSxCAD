@@ -41,6 +41,7 @@ import { log } from './log';
 import { material } from './material';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
+import { measureCenter } from './measureCenter';
 import { microGearMotor } from './microGearMotor';
 import { minkowski } from './minkowski';
 import { numbers } from './numbers';
@@ -112,6 +113,7 @@ export {
   material,
   max,
   measureBoundingBox,
+  measureCenter,
   microGearMotor,
   minkowski,
   numbers,

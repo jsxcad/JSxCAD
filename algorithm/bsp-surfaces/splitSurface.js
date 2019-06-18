@@ -1,10 +1,10 @@
+import { dot, squaredDistance } from '@jsxcad/math-vec3';
 import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
-import { assertCoplanar } from '@jsxcad/geometry-surface';
-import { dot } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const EPSILON = 1e-5;
+const THRESHOLD2 = 1e-10;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -25,7 +25,6 @@ const toType = (plane, point) => {
 const pointType = [];
 
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
-  // assertCoplanar(surface);
   let coplanarFrontPolygons;
   let coplanarBackPolygons;
   let frontPolygons;
@@ -91,16 +90,11 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
             // This should exclude COPLANAR points.
             // Compute the point that touches the splitting plane.
             const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
-            frontPoints.push(spanPoint);
-            backPoints.push(spanPoint);
-            if (Math.abs(planeDistance(plane, spanPoint)) > EPSILON) {
-              throw Error(`die: ${Math.abs(planeDistance(plane, spanPoint))}`);
+            if (squaredDistance(spanPoint, startPoint) > THRESHOLD2) {
+              frontPoints.push(spanPoint);
             }
-            if (frontPoints.length >= 3) {
-              assertCoplanar([frontPoints]);
-            }
-            if (backPoints.length >= 3) {
-              assertCoplanar([backPoints]);
+            if (squaredDistance(spanPoint, endPoint) > THRESHOLD2) {
+              backPoints.push(spanPoint);
             }
           }
           startPoint = endPoint;
@@ -129,19 +123,15 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
     }
   }
   if (coplanarFrontPolygons !== undefined) {
-    // assertCoplanar(coplanarFrontPolygons);
     coplanarFrontSurfaces.push(coplanarFrontPolygons);
   }
   if (coplanarBackPolygons !== undefined) {
-    // assertCoplanar(coplanarBackPolygons);
     coplanarBackSurfaces.push(coplanarBackPolygons);
   }
   if (frontPolygons !== undefined) {
-    // assertCoplanar(frontPolygons);
     frontSurfaces.push(frontPolygons);
   }
   if (backPolygons !== undefined) {
-    // assertCoplanar(backPolygons);
     backSurfaces.push(backPolygons);
   }
 };
