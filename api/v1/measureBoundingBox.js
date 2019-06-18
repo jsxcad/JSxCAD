@@ -22,7 +22,6 @@ import { Shape } from './Shape';
  **/
 
 export const measureBoundingBox = (shape) => {
-  // FIX: Handle empty geometries.
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
   let empty = true;

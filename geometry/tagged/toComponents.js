@@ -1,17 +1,12 @@
-import { hasMatchingTag } from './hasMatchingTag';
 import { toDisjointGeometry } from './toDisjointGeometry';
 
-export const toComponents = ({ requires, excludes }, geometry) => {
+export const toComponents = (options = {}, geometry) => {
   const components = [];
-  const walk = (geometry) => {
-    for (const item of geometry.assembly) {
-      if (hasMatchingTag(excludes, item.tags)) {
-        continue;
-      } else if (hasMatchingTag(requires, item.tags, true)) {
-        components.push(item);
-      } else if (item.assembly !== undefined) {
-        walk(item);
-      }
+  const walk = (item) => {
+    if (item.assembly) {
+      item.assembly.map(walk);
+    } else {
+      components.push(item);
     }
   };
   walk(toDisjointGeometry(geometry));

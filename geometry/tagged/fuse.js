@@ -27,7 +27,7 @@ export const fuse = (geometry) => {
 
   const z0Surfaces = getZ0Surfaces(geometry);
   if (z0Surfaces.length > 0) {
-    items.push({ solid: unionZ0Surfaces(...z0Surfaces.map(item => item.z0Surface)) });
+    items.push({ z0Surface: unionZ0Surfaces(...z0Surfaces.map(item => item.z0Surface)) });
   }
 
   if (items.length === 1) {
