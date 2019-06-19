@@ -13,7 +13,7 @@ export const toStandardGeometry = (geometry) => {
     } else {
       throw Error('die');
     }
-  }
+  };
 
   return walk(geometry);
-}
+};
