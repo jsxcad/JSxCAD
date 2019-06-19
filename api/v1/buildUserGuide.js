@@ -19,7 +19,7 @@ const paths = [
   'hull.js',
   'interior.js', 'intersection.js',
   'keep.js',
-  'left.js', 'lego.js', 'loft.js', 'log.js',
+  'left.js', 'lego.js', 'log.js',
   'material.js', 'max.js', 'measureBoundingBox.js', 'measureCenter.js', 'microGearMotor.js', 'minkowski.js',
   'numbers.js',
   'outline.js',

@@ -771,13 +771,38 @@ define("./webworker.js",[],function () { 'use strict';
    * @returns {mat4} out
    */
 
+  const X = 0;
+  const Y = 1;
+  const Z = 2;
   const W = 3;
+
+  // Newell's method for computing the plane of a polygon.
+  const fromPolygon = (polygon) => {
+    const normal = [0, 0, 0];
+    const reference = [0, 0, 0];
+    let lastPoint = polygon[polygon.length - 1];
+    for (const thisPoint of polygon) {
+      normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
+      normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
+      normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
+      reference[X] += lastPoint[X];
+      reference[Y] += lastPoint[Y];
+      reference[Z] += lastPoint[Z];
+      lastPoint = thisPoint;
+    }
+    const factor = 1 / length(normal);
+    const plane = scale(factor, normal);
+    plane[W] = dot(reference, normal) * factor / polygon.length;
+    return plane;
+  };
+
+  const W$1 = 3;
 
   /**
    * Calculate the distance to the given point
    * @return {Number} signed distance to point
    */
-  const signedDistanceToPoint = (plane, point) => dot(plane, point) - plane[W];
+  const signedDistanceToPoint = (plane, point) => dot(plane, point) - plane[W$1];
 
   /**
    * Split the given line by the given plane.
@@ -793,13 +818,13 @@ define("./webworker.js",[],function () { 'use strict';
     return add(p1, scale(lambda, direction));
   };
 
-  const X = 0;
-  const Y = 1;
-  const Z = 2;
-  const W$1 = 3;
+  const X$1 = 0;
+  const Y$1 = 1;
+  const Z$1 = 2;
+  const W$2 = 3;
 
   const toXYPlaneTransforms = (plane, rightVector) => {
-    if (isNaN(plane[X])) {
+    if (isNaN(plane[X$1])) {
       throw Error('die');
     }
     if (rightVector === undefined) {
@@ -808,21 +833,21 @@ define("./webworker.js",[],function () { 'use strict';
 
     const v = unit(cross(plane, rightVector));
     const u = cross(v, plane);
-    const p = multiply(plane, fromScalar(plane[W$1]));
+    const p = multiply(plane, fromScalar(plane[W$2]));
 
     return [
       // to
       fromValues(
-        u[X], v[X], plane[X], 0,
-        u[Y], v[Y], plane[Y], 0,
-        u[Z], v[Z], plane[Z], 0,
-        0, 0, -plane[W$1], 1),
+        u[X$1], v[X$1], plane[X$1], 0,
+        u[Y$1], v[Y$1], plane[Y$1], 0,
+        u[Z$1], v[Z$1], plane[Z$1], 0,
+        0, 0, -plane[W$2], 1),
       // from
       fromValues(
-        u[X], u[Y], u[Z], 0,
-        v[X], v[Y], v[Z], 0,
-        plane[X], plane[Y], plane[Z], 0,
-        p[X], p[Y], p[Z], 1)
+        u[X$1], u[Y$1], u[Z$1], 0,
+        v[X$1], v[Y$1], v[Z$1], 0,
+        plane[X$1], plane[Y$1], plane[Z$1], 0,
+        p[X$1], p[Y$1], p[Z$1], 1)
     ];
   };
 
@@ -7355,29 +7380,11 @@ return d[d.length-1];};return ", funcName].join("");
    */
   const fromPoints$1 = (points, planeof) => [...points];
 
-  const X$1 = 0;
-  const Y$1 = 1;
-  const Z$1 = 2;
-  const W$2 = 3;
-
-  // Newell's method for computing the plane of a polygon.
   const toPlane = (polygon) => {
-    const normal = [0, 0, 0];
-    const reference = [0, 0, 0];
-    let lastPoint = polygon[polygon.length - 1];
-    for (const thisPoint of polygon) {
-      normal[X$1] += (lastPoint[Y$1] - thisPoint[Y$1]) * (lastPoint[Z$1] + thisPoint[Z$1]);
-      normal[Y$1] += (lastPoint[Z$1] - thisPoint[Z$1]) * (lastPoint[X$1] + thisPoint[X$1]);
-      normal[Z$1] += (lastPoint[X$1] - thisPoint[X$1]) * (lastPoint[Y$1] + thisPoint[Y$1]);
-      reference[X$1] += lastPoint[X$1];
-      reference[Y$1] += lastPoint[Y$1];
-      reference[Z$1] += lastPoint[Z$1];
-      lastPoint = thisPoint;
+    if (polygon.plane === undefined) {
+      polygon.plane = fromPolygon(polygon);
     }
-    const factor = 1 / length(normal);
-    const plane = scale(factor, normal);
-    plane[W$2] = dot(reference, normal) * factor / polygon.length;
-    return plane;
+    return polygon.plane;
   };
 
   const isStrictlyCoplanar = (polygon) => {
@@ -14343,49 +14350,52 @@ return d[d.length-1];};return ", funcName].join("");
   const toDisjointGeometry = (untransformedGeometry) => {
     const geometry = toTransformedGeometry(untransformedGeometry);
 
-    if (geometry.assembly === undefined) {
-      // A singleton is disjoint.
-      return geometry;
-    } else if (geometry.disjointGeometry) {
-      return geometry.disjointGeometry;
-    } else {
-      const subtractions = [];
-      const walk = (geometry, disjointed) => {
-        for (let nth = geometry.assembly.length - 1; nth >= 0; nth--) {
-          const item = geometry.assembly[nth];
-          if (item.assembly !== undefined) {
-            disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));
-          } else {
-            const differenced = differenceItems(item, ...subtractions);
-            disjointed.assembly.push(differenced);
-            subtractions.push(differenced);
+    if (geometry.disjointGeometry === undefined) {
+      if (geometry.assembly === undefined) {
+        // A singleton is disjoint.
+        geometry.disjointGeometry = geometry;
+      } else {
+        const subtractions = [];
+        const walk = (geometry, disjointed) => {
+          for (let nth = geometry.assembly.length - 1; nth >= 0; nth--) {
+            const item = geometry.assembly[nth];
+            if (item.assembly !== undefined) {
+              disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));
+            } else {
+              const differenced = differenceItems(item, ...subtractions);
+              disjointed.assembly.push(differenced);
+              subtractions.push(differenced);
+            }
           }
-        }
-        return disjointed;
-      };
-      const result = walk(geometry, { assembly: [], tags: geometry.tags });
-      geometry.disjointGeometry = result;
-      return result;
+          return disjointed;
+        };
+        const result = walk(geometry, { assembly: [], tags: geometry.tags });
+        geometry.disjointGeometry = result;
+      }
     }
+    return geometry.disjointGeometry;
   };
 
   // Produce a disjoint geometry suitable for display.
 
   const toKeptGeometry = (geometry) => {
-    const disjointGeometry = toDisjointGeometry(geometry);
+    if (geometry.keptGeometry === undefined) {
+      const disjointGeometry = toDisjointGeometry(geometry);
 
-    const walk = (geometry) => {
-      if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {
-        if (geometry.assembly) {
-          return { ...geometry, assembly: geometry.assembly.map(walk).filter(item => item !== undefined) };
-        } else {
-          return geometry;
+      const walk = (geometry) => {
+        if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {
+          if (geometry.assembly) {
+            return { ...geometry, assembly: geometry.assembly.map(walk).filter(item => item !== undefined) };
+          } else {
+            return geometry;
+          }
         }
-      }
-    };
+      };
 
-    const keptGeometry = walk(disjointGeometry);
-    return keptGeometry || {};
+      const keptGeometry = walk(disjointGeometry);
+      geometry.keptGeometry = keptGeometry || {};
+    }
+    return geometry.keptGeometry;
   };
 
   const eachItem = (geometry, operation) => {
