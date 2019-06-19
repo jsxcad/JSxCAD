@@ -14633,7 +14633,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const toComponents = ({}, geometry) => {
+  const toComponents = (options = {}, geometry) => {
     const components = [];
     const walk = (item) => {
       if (item.assembly) {
@@ -19735,9 +19735,10 @@ return d[d.length-1];};return ", funcName].join("");
     data = await data;
 
     const { as = 'utf8', ephemeral } = options;
-    if (as === 'bytes') ; else {
+    if (typeof data === 'string') {
       data = new TextEncoder(as).encode(data);
     }
+
     if (isWebWorker) {
       return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
     }
@@ -19859,7 +19860,10 @@ return d[d.length-1];};return ", funcName].join("");
         }
       } else if (source.file !== undefined) {
         try {
-          return await fetchFile(source.file);
+          const data = await fetchFile(source.file);
+          if (data !== undefined) {
+            return data;
+          }
         } catch (e) {}
       } else {
         throw Error('die');
@@ -19985,7 +19989,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const measureCenter = (shape) => {
     const [high, low] = measureBoundingBox$4(shape);
-    return scale(0.5, add(high, low))
+    return scale(0.5, add(high, low));
   };
 
   const method$l = function () { return measureCenter(this); };

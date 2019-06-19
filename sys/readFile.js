@@ -68,7 +68,10 @@ const fetchSources = async (options = {}, sources) => {
       }
     } else if (source.file !== undefined) {
       try {
-        return await fetchFile(source.file);
+        const data = await fetchFile(source.file);
+        if (data !== undefined) {
+          return data;
+        }
       } catch (e) {}
     } else {
       throw Error('die');

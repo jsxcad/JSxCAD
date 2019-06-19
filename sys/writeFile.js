@@ -18,10 +18,10 @@ export const writeFile = async (options, path, data) => {
   data = await data;
 
   const { as = 'utf8', ephemeral } = options;
-  if (as === 'bytes') {
-  } else {
+  if (typeof data === 'string') {
     data = new TextEncoder(as).encode(data);
   }
+
   if (isWebWorker) {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   }
