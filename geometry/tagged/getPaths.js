@@ -1,12 +1,12 @@
 import { eachItem } from './eachItem';
 
 export const getPaths = (geometry) => {
-  const paths = [];
+  const pathsets = [];
   eachItem(geometry,
            item => {
              if (item.paths) {
-               paths.push(item);
+               pathsets.push(item);
              }
            });
-  return paths;
+  return pathsets;
 };
