@@ -29,8 +29,10 @@ import { cylinder } from './cylinder';
 import { difference } from './difference';
 import { drop } from './drop';
 import { extrude } from './extrude';
+import { fillet } from './fillet';
 import { front } from './front';
 import { fuse } from './fuse';
+import { getPathsets } from './getPathsets';
 import { hull } from './hull';
 import { interior } from './interior';
 import { intersection } from './intersection';
@@ -102,8 +104,10 @@ export {
   difference,
   drop,
   extrude,
+  fillet,
   front,
   fuse,
+  getPathsets,
   hull,
   interior,
   intersection,

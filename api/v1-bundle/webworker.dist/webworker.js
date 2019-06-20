@@ -14519,14 +14519,14 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   const getPaths = (geometry) => {
-    const paths = [];
+    const pathsets = [];
     eachItem(geometry,
              item => {
                if (item.paths) {
-                 paths.push(item);
+                 pathsets.push(item);
                }
              });
-    return paths;
+    return pathsets;
   };
 
   const getSolids = (geometry) => {
@@ -14660,6 +14660,26 @@ return d[d.length-1];};return ", funcName].join("");
     const points = [];
     eachPoint$6(options, point => points.push(point), geometry);
     return { points };
+  };
+
+  // Produce a standard geometry representation without caches, etc.
+
+  const toStandardGeometry = (geometry) => {
+    const walk = (item) => {
+      if (item.assembly) {
+        return { assembly: item.assembly.map(walk), tags: item.tags };
+      } else if (item.paths) {
+        return { paths: item.paths, tags: item.tags };
+      } else if (item.solid) {
+        return { solid: item.solid, tags: item.tags };
+      } else if (item.z0Surface) {
+        return { z0Surface: item.z0Surface, tags: item.tags };
+      } else {
+        throw Error('die');
+      }
+    };
+
+    return walk(geometry);
   };
 
   // FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
@@ -14902,6 +14922,7 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const assemble$1 = (...shapes) => {
+    shapes = shapes.filter(shape => shape !== undefined);
     switch (shapes.length) {
       case 0: {
         return Shape.fromGeometry({ assembly: [] });
@@ -16287,6 +16308,42 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # Fillet
+   *
+   * Fillets the top of a shape with the provided tool shape.
+   *
+   * ::: illustration { "view": { "position": [-40, -40, 40] } }
+   * ```
+   * const tool = hull(point(0, 0, -1), square(2));
+   * assemble(cube(20, 20, 5).below(),
+   *          cube(10, 10, 5).below().drop())
+   *   .fillet(tool);
+   * ```
+   * :::
+   *
+   **/
+
+  const fillet = (shape, tool) => {
+    // FIX: Identify surface to fillet properly.
+    const [x, y, z] = shape.measureBoundingBox()[1];
+    const cuts = [];
+    // Fix Remove the 0.1 z offsets.
+    for (const pathset of shape.section({ z: z - 0.1 }).outline().getPathsets()) {
+      for (const path of pathset) {
+        cuts.push(chainHull(...path.map(([x, y, z]) =>
+                                        tool.translate(x, y, z + 0.1))));
+      }
+    }
+    return assemble$1(shape, assemble$1(...cuts).drop());
+  };
+
+
+  const method$d = function (tool) { return fillet(this, tool); };
+
+  Shape.prototype.fillet = method$d;
+
+  /**
+   *
    * # Front
    *
    * Moves the shape so that it is just before the origin.
@@ -16332,9 +16389,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$3(shape, reference);
     });
 
-  const method$d = function (...params) { return front(this, ...params); };
+  const method$e = function (...params) { return front(this, ...params); };
 
-  Shape.prototype.front = method$d;
+  Shape.prototype.front = method$e;
 
   /**
    *
@@ -16352,9 +16409,23 @@ return d[d.length-1];};return ", funcName].join("");
 
   const fuse$1 = (shape) => Shape.fromGeometry(fuse(toKeptGeometry$1(shape)));
 
-  const method$e = function () { return fuse$1(this); };
+  const method$f = function () { return fuse$1(this); };
 
-  Shape.prototype.fuse = method$e;
+  Shape.prototype.fuse = method$f;
+
+  /**
+   *
+   * # Get Pathsets
+   *
+   * Extracts the paths of a geometry grouped by surface.
+   *
+   **/
+
+  const getPathsets = (shape) => getPaths(shape.toKeptGeometry()).map(({ paths }) => paths);
+
+  const method$g = function () { return getPathsets(this); };
+
+  Shape.prototype.getPathsets = method$g;
 
   /**
    *
@@ -16401,9 +16472,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$f = function (...shapes) { return hull(this, ...shapes); };
+  const method$h = function (...shapes) { return hull(this, ...shapes); };
 
-  Shape.prototype.hull = method$f;
+  Shape.prototype.hull = method$h;
 
   /**
    *
@@ -16441,9 +16512,9 @@ return d[d.length-1];};return ", funcName].join("");
     return Shape.fromPathsToZ0Surface(union$2(...toUnion));
   };
 
-  const method$g = function (options) { return interior(options, this); };
+  const method$i = function (options) { return interior(options, this); };
 
-  Shape.prototype.interior = method$g;
+  Shape.prototype.interior = method$i;
 
   /**
    *
@@ -16509,9 +16580,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$h = function (...shapes) { return intersection$4(this, ...shapes); };
+  const method$j = function (...shapes) { return intersection$4(this, ...shapes); };
 
-  Shape.prototype.intersection = method$h;
+  Shape.prototype.intersection = method$j;
 
   /**
    *
@@ -16562,9 +16633,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   keep$1.fromValues = fromValue$7;
 
-  const method$i = function (...tags) { return keep$1(tags, this); };
+  const method$k = function (...tags) { return keep$1(tags, this); };
 
-  Shape.prototype.keep = method$i;
+  Shape.prototype.keep = method$k;
 
   /**
    *
@@ -16613,9 +16684,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$4(shape, reference);
     });
 
-  const method$j = function (...params) { return left(this, ...params); };
+  const method$l = function (...params) { return left(this, ...params); };
 
-  Shape.prototype.left = method$j;
+  Shape.prototype.left = method$l;
 
   /**
    *
@@ -19966,9 +20037,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   material.fromValues = fromValue$8;
 
-  const method$k = function (...tags) { return material(tags, this); };
+  const method$m = function (...tags) { return material(tags, this); };
 
-  Shape.prototype.material = method$k;
+  Shape.prototype.material = method$m;
 
   /**
    *
@@ -20002,9 +20073,9 @@ return d[d.length-1];};return ", funcName].join("");
     return scale(0.5, add(high, low));
   };
 
-  const method$l = function () { return measureCenter(this); };
+  const method$n = function () { return measureCenter(this); };
 
-  Shape.prototype.measureCenter = method$l;
+  Shape.prototype.measureCenter = method$n;
 
   /**
    *
@@ -20069,9 +20140,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$m = function (...shapes) { return union$5(this, ...shapes); };
+  const method$o = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$m;
+  Shape.prototype.union = method$o;
 
   /**
    *
@@ -20180,9 +20251,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
   };
 
-  const method$n = function (options) { return outline(options, this); };
+  const method$p = function (options) { return outline(options, this); };
 
-  Shape.prototype.outline = method$n;
+  Shape.prototype.outline = method$p;
   Shape.prototype.withOutline = function (options) { return assemble$1(this, outline(options, this)); };
 
   const fromValue$9 = (point) => Shape.fromPoint(point);
@@ -37819,13 +37890,13 @@ return d[d.length-1];};return ", funcName].join("");
       options = { path: options };
     }
     const { path, preview = true } = options;
-    const geometry = toGeometry$1(options, shape);
+    const geometry = toStandardGeometry(toGeometry$1(options, shape));
     await writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$o = function (options = {}) { return writeShape(options, this); };
+  const method$q = function (options = {}) { return writeShape(options, this); };
 
-  Shape.prototype.writeShape = method$o;
+  Shape.prototype.writeShape = method$q;
 
   /**
    *
@@ -39039,9 +39110,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$5(shape, reference);
     });
 
-  const method$p = function (...params) { return right(this, ...params); };
+  const method$r = function (...params) { return right(this, ...params); };
 
-  Shape.prototype.right = method$p;
+  Shape.prototype.right = method$r;
 
   /**
    *
@@ -39063,9 +39134,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$q = function (angle) { return rotateX$1(angle, this); };
+  const method$s = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$q;
+  Shape.prototype.rotateX = method$s;
 
   /**
    *
@@ -39087,9 +39158,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$r = function (angle) { return rotateY(angle, this); };
+  const method$t = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$r;
+  Shape.prototype.rotateY = method$t;
 
   /**
    *
@@ -39111,9 +39182,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$s = function (angle) { return rotateZ(angle, this); };
+  const method$u = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$s;
+  Shape.prototype.rotateZ = method$u;
 
   /**
    *
@@ -39148,9 +39219,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$t = function (factor) { return scale$6(factor, this); };
+  const method$v = function (factor) { return scale$6(factor, this); };
 
-  Shape.prototype.scale = method$t;
+  Shape.prototype.scale = method$v;
 
   /**
    *
@@ -39194,9 +39265,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...shapes);
   };
 
-  const method$u = function (options) { return section(options, this); };
+  const method$w = function (options) { return section(options, this); };
 
-  Shape.prototype.section = method$u;
+  Shape.prototype.section = method$w;
 
   /**
    *
@@ -39623,9 +39694,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...pieces);
   };
 
-  const method$v = function (options) { return wireframe(options, this); };
+  const method$x = function (options) { return wireframe(options, this); };
 
-  Shape.prototype.wireframe = method$v;
+  Shape.prototype.wireframe = method$x;
   Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
 
   const colorToRgbMapping = {
@@ -39902,9 +39973,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$w = function (options = {}) { return writePdf(options, this); };
+  const method$y = function (options = {}) { return writePdf(options, this); };
 
-  Shape.prototype.writePdf = method$w;
+  Shape.prototype.writePdf = method$y;
 
   /**
    *
@@ -39934,9 +40005,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$x = function (options = {}) { return writeStl(options, this); };
+  const method$z = function (options = {}) { return writeStl(options, this); };
 
-  Shape.prototype.writeStl = method$x;
+  Shape.prototype.writeStl = method$z;
 
   /**
    *
@@ -39966,9 +40037,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$y = function (options = {}) { return writeSvg(options, this); };
+  const method$A = function (options = {}) { return writeSvg(options, this); };
 
-  Shape.prototype.writeSvg = method$y;
+  Shape.prototype.writeSvg = method$A;
 
   // Polyfills
 
@@ -90527,9 +90598,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$z = function (options = {}) { return writeSvgPhoto(options, this); };
+  const method$B = function (options = {}) { return writeSvgPhoto(options, this); };
 
-  Shape.prototype.writeSvgPhoto = method$z;
+  Shape.prototype.writeSvgPhoto = method$B;
 
   const writeThreejsPage = async (options, shape) => {
     if (typeof options === 'string') {
@@ -90540,9 +90611,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, view, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$A = function (options = {}) { return writeThreejsPage(options, this); };
+  const method$C = function (options = {}) { return writeThreejsPage(options, this); };
 
-  Shape.prototype.writeThreejsPage = method$A;
+  Shape.prototype.writeThreejsPage = method$C;
 
   /**
    *
@@ -90574,8 +90645,10 @@ return d[d.length-1];};return ", funcName].join("");
     difference: difference$4,
     drop: drop$1,
     extrude: extrude$1,
+    fillet: fillet,
     front: front,
     fuse: fuse$1,
+    getPathsets: getPathsets,
     hull: hull,
     interior: interior,
     intersection: intersection$4,
