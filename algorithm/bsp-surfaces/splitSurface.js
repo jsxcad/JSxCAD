@@ -1,8 +1,10 @@
 import { dot, squaredDistance } from '@jsxcad/math-vec3';
 import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
+import { measureBoundingSphere } from '@jsxcad/geometry-surface';
 
 import { toPlane } from '@jsxcad/math-poly3';
 
+const CONSERVATIVE_EPSILON = 1e-4;
 const EPSILON = 1e-5;
 const THRESHOLD2 = 1e-10;
 
@@ -25,6 +27,21 @@ const toType = (plane, point) => {
 const pointType = [];
 
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
+  // Try to classify the whole surface first.
+  const [sphereCenter, sphereRadius] = measureBoundingSphere(surface);
+  const sphereDistance = planeDistance(plane, sphereCenter);
+
+  if (sphereDistance - sphereRadius > CONSERVATIVE_EPSILON) {
+    frontSurfaces.push(surface);
+    return;
+  }
+
+  if (sphereDistance + sphereRadius < -CONSERVATIVE_EPSILON) {
+    backSurfaces.push(surface);
+    return;
+  }
+
+  // Consider the polygons within the surface.
   let coplanarFrontPolygons;
   let coplanarBackPolygons;
   let frontPolygons;
