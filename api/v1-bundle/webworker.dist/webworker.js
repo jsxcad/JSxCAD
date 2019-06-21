@@ -13394,6 +13394,32 @@ return d[d.length-1];};return ", funcName].join("");
     return total;
   };
 
+  // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
+  const measureBoundingBox$1 = (surface) => {
+    if (surface.measureBoundingBox === undefined) {
+      let max$1 = surface[0][0];
+      let min$1 = surface[0][0];
+      eachPoint$2({},
+                point => {
+                  max$1 = max(max$1, point);
+                  min$1 = min(min$1, point);
+                },
+                surface);
+      surface.measureBoundingBox = [min$1, max$1];
+    }
+    return surface.measureBoundingBox;
+  };
+
+  const measureBoundingSphere = (surface) => {
+    if (surface.measureBoundingSphere === undefined) {
+      const box = measureBoundingBox$1(surface);
+      const center = scale(0.5, add(box[0], box[1]));
+      const radius = distance(center, box[1]);
+      surface.measureBoundingSphere = [center, radius];
+    }
+    return surface.measureBoundingSphere;
+  };
+
   const multiply$2 = (matrix, solid) => solid.map(surface => transform$5(matrix, surface));
 
   const rotateX = (radians, solid) => multiply$2(fromXRotation(radians), solid);
@@ -13717,7 +13743,7 @@ return d[d.length-1];};return ", funcName].join("");
   */
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$1 = (polygons) => {
+  const measureBoundingBox$2 = (polygons) => {
     let max$1 = polygons[0][0];
     let min$1 = polygons[0][0];
     eachPoint$4({},
@@ -13793,7 +13819,7 @@ return d[d.length-1];};return ", funcName].join("");
   };
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-  const measureBoundingBox$2 = (solid) => {
+  const measureBoundingBox$3 = (solid) => {
     if (solid.measureBoundingBox === undefined) {
       let max$1 = solid[0][0][0];
       let min$1 = solid[0][0][0];
@@ -13818,8 +13844,8 @@ return d[d.length-1];};return ", funcName].join("");
     if (a.length === 0 || b.length === 0) {
       return true;
     }
-    const [minA, maxA] = measureBoundingBox$2(a);
-    const [minB, maxB] = measureBoundingBox$2(b);
+    const [minA, maxA] = measureBoundingBox$3(a);
+    const [minB, maxB] = measureBoundingBox$3(b);
     if (maxA[X$3] <= minB[X$3] + iota$1) { return true; }
     if (maxA[Y$3] <= minB[Y$3] + iota$1) { return true; }
     if (maxA[Z$2] <= minB[Z$2] + iota$1) { return true; }
@@ -13856,6 +13882,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   const create = () => ({ surfaces: [] });
 
+  const CONSERVATIVE_EPSILON = 1e-4;
   const EPSILON$2 = 1e-5;
   const THRESHOLD2 = 1e-10;
 
@@ -13878,6 +13905,21 @@ return d[d.length-1];};return ", funcName].join("");
   const pointType$1 = [];
 
   const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
+    // Try to classify the whole surface first.
+    const [sphereCenter, sphereRadius] = measureBoundingSphere(surface);
+    const sphereDistance = signedDistanceToPoint(plane, sphereCenter);
+
+    if (sphereDistance - sphereRadius > CONSERVATIVE_EPSILON) {
+      frontSurfaces.push(surface);
+      return;
+    }
+
+    if (sphereDistance + sphereRadius < -CONSERVATIVE_EPSILON) {
+      backSurfaces.push(surface);
+      return;
+    }
+    
+    // Consider the polygons within the surface.
     let coplanarFrontPolygons;
     let coplanarBackPolygons;
     let frontPolygons;
@@ -13985,10 +14027,16 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
+  let watermark = 0;
+
   // Build a BSP tree out of surfaces. When called on an existing tree, the
   // new surfaces are filtered down to the bottom of the tree and become new
   // nodes there. Each set of surfaces is partitioned using the surface with the largest area.
-  const build = (bsp, surfaces) => {
+  const build = (bsp, surfaces, depth = 0) => {
+    if (depth > watermark) {
+      watermark = depth;
+      console.log(`Watermark: ${watermark}`);
+    }
     if (surfaces.length === 0) {
       return;
     }
@@ -14011,13 +14059,13 @@ return d[d.length-1];};return ", funcName].join("");
       if (bsp.front === undefined) {
         bsp.front = create();
       }
-      build(bsp.front, front);
+      build(bsp.front, front, depth + 1);
     }
     if (back.length > 0) {
       if (bsp.back === undefined) {
         bsp.back = create();
       }
-      build(bsp.back, back);
+      build(bsp.back, back, depth + 1);
     }
   };
 
@@ -14295,6 +14343,16 @@ return d[d.length-1];};return ", funcName].join("");
     return differenced;
   };
 
+  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+    if (set === undefined) {
+      return whenSetUndefined;
+    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const transformItem = (matrix, item) => {
     const transformed = {};
     if (item.assembly) {
@@ -14362,9 +14420,16 @@ return d[d.length-1];};return ", funcName].join("");
             if (item.assembly !== undefined) {
               disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));
             } else {
-              const differenced = differenceItems(item, ...subtractions);
-              disjointed.assembly.push(differenced);
-              subtractions.push(differenced);
+              if (item.tags === undefined || !item.tags.includes('@drop')) {
+                // Undropped items need to be trimmed.
+                const differenced = differenceItems(item, ...subtractions);
+                disjointed.assembly.push(differenced);
+                subtractions.push(differenced);
+              } else {
+                // Dropped items do not need to be trimmed.
+                disjointed.assembly.push(item);
+                subtractions.push(item);
+              }
             }
           }
           return disjointed;
@@ -14440,16 +14505,6 @@ return d[d.length-1];};return ", funcName].join("");
                    }
                    return item;
                  });
-    }
-  };
-
-  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-    if (set === undefined) {
-      return whenSetUndefined;
-    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
-      return true;
-    } else {
-      return false;
     }
   };
 
@@ -14625,7 +14680,7 @@ return d[d.length-1];};return ", funcName].join("");
     return walk(geometry);
   };
 
-  const measureBoundingBox$3 = (geometry) => {
+  const measureBoundingBox$4 = (geometry) => {
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
     let empty = true;
@@ -14976,7 +15031,7 @@ return d[d.length-1];};return ", funcName].join("");
    * :::
    **/
 
-  const measureBoundingBox$4 = (shape) => {
+  const measureBoundingBox$5 = (shape) => {
     let minPoint = [Infinity, Infinity, Infinity];
     let maxPoint = [-Infinity, -Infinity, -Infinity];
     let empty = true;
@@ -14993,7 +15048,7 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$1 = function () { return measureBoundingBox$4(this); };
+  const method$1 = function () { return measureBoundingBox$5(this); };
 
   Shape.prototype.measureBoundingBox = method$1;
 
@@ -15096,13 +15151,13 @@ return d[d.length-1];};return ", funcName].join("");
   const Z$3 = 2;
 
   const fromOrigin = (shape) => {
-    const [minPoint] = measureBoundingBox$4(shape);
+    const [minPoint] = measureBoundingBox$5(shape);
     return translate$3([0, 0, -minPoint[Z$3]], shape);
   };
 
   const fromReference = (shape, reference) => {
-    const [minPoint] = measureBoundingBox$4(shape);
-    const [, maxRefPoint] = measureBoundingBox$4(reference);
+    const [minPoint] = measureBoundingBox$5(shape);
+    const [, maxRefPoint] = measureBoundingBox$5(reference);
     return assemble$1(reference, translate$3([0, 0, maxRefPoint[Z$3] - minPoint[Z$3]], shape));
   };
 
@@ -15388,13 +15443,13 @@ return d[d.length-1];};return ", funcName].join("");
   const Y$4 = 1;
 
   const fromOrigin$1 = (shape) => {
-    const [minPoint] = measureBoundingBox$4(shape);
+    const [minPoint] = measureBoundingBox$5(shape);
     return translate$3([0, -minPoint[Y$4], 0], shape);
   };
 
   const fromReference$1 = (shape, reference) => {
-    const [minPoint] = measureBoundingBox$4(shape);
-    const [, maxRefPoint] = measureBoundingBox$4(reference);
+    const [minPoint] = measureBoundingBox$5(shape);
+    const [, maxRefPoint] = measureBoundingBox$5(reference);
     return assemble$1(reference, translate$3([0, maxRefPoint[Y$4] - minPoint[Y$4], 0], shape));
   };
 
@@ -15439,13 +15494,13 @@ return d[d.length-1];};return ", funcName].join("");
   const Z$4 = 2;
 
   const fromOrigin$2 = (shape) => {
-    const [, maxPoint] = measureBoundingBox$4(shape);
+    const [, maxPoint] = measureBoundingBox$5(shape);
     return translate$3([0, 0, -maxPoint[Z$4]], shape);
   };
 
   const fromReference$2 = (shape, reference) => {
-    const [, maxPoint] = measureBoundingBox$4(shape);
-    const [minRefPoint] = measureBoundingBox$4(reference);
+    const [, maxPoint] = measureBoundingBox$5(shape);
+    const [minRefPoint] = measureBoundingBox$5(reference);
     return assemble$1(reference, translate$3([0, 0, minRefPoint[Z$4] - maxPoint[Z$4]], shape));
   };
 
@@ -15490,7 +15545,7 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const center = (shape) => {
-    const [minPoint, maxPoint] = measureBoundingBox$4(shape);
+    const [minPoint, maxPoint] = measureBoundingBox$5(shape);
     let center = scale(0.5, add(minPoint, maxPoint));
     return translate$3(negate(center), shape);
   };
@@ -16232,12 +16287,6 @@ return d[d.length-1];};return ", funcName].join("");
       assertEmpty(tags);
       assertShape(shape);
       return () => fromGeometry(addTags(['@drop'], toGeometry(shape)));
-    },
-    (tags, shape) => {
-      // assemble(circle(), circle().as('a')).drop('a')
-      assertStrings(tags);
-      assertShape(shape);
-      return () => fromValue$5(tags.map(tag => `user/${tag}`), shape);
     }
   );
 
@@ -16325,18 +16374,26 @@ return d[d.length-1];};return ", funcName].join("");
 
   const fillet = (shape, tool) => {
     // FIX: Identify surface to fillet properly.
-    const [x, y, z] = shape.measureBoundingBox()[1];
+    const [, , z] = shape.measureBoundingBox()[1];
     const cuts = [];
     // Fix Remove the 0.1 z offsets.
     for (const pathset of shape.section({ z: z - 0.1 }).outline().getPathsets()) {
       for (const path of pathset) {
-        cuts.push(chainHull(...path.map(([x, y, z]) =>
-                                        tool.translate(x, y, z + 0.1))));
+        const cut = [];
+        for (const position of path) {
+          if (position !== null) {
+            cut.push(tool.translate(position));
+          }
+        }
+        if (path[0] !== null) {
+         // Handle closed paths.
+         cut.push(tool.translate(path[0]));
+        }
+        cuts.push(chainHull(...cut));
       }
     }
     return assemble$1(shape, assemble$1(...cuts).drop());
   };
-
 
   const method$d = function (tool) { return fillet(this, tool); };
 
@@ -16364,13 +16421,13 @@ return d[d.length-1];};return ", funcName].join("");
   const Y$5 = 1;
 
   const fromOrigin$3 = (shape) => {
-    const [, maxPoint] = measureBoundingBox$4(shape);
+    const [, maxPoint] = measureBoundingBox$5(shape);
     return translate$3([0, -maxPoint[Y$5], 0], shape);
   };
 
   const fromReference$3 = (shape, reference) => {
-    const [, maxPoint] = measureBoundingBox$4(shape);
-    const [minRefPoint] = measureBoundingBox$4(reference);
+    const [, maxPoint] = measureBoundingBox$5(shape);
+    const [minRefPoint] = measureBoundingBox$5(reference);
     return assemble$1(reference, translate$3([0, minRefPoint[Y$5] - maxPoint[Y$5], 0], shape));
   };
 
@@ -16659,13 +16716,13 @@ return d[d.length-1];};return ", funcName].join("");
   const X$4 = 0;
 
   const fromOrigin$4 = (shape) => {
-    const [, maxPoint] = measureBoundingBox$4(shape);
+    const [, maxPoint] = measureBoundingBox$5(shape);
     return translate$3([-maxPoint[X$4], 0, 0], shape);
   };
 
   const fromReference$4 = (shape, reference) => {
-    const [, maxPoint] = measureBoundingBox$4(shape);
-    const [minRefPoint] = measureBoundingBox$4(reference);
+    const [, maxPoint] = measureBoundingBox$5(shape);
+    const [minRefPoint] = measureBoundingBox$5(reference);
     return assemble$1(reference, translate$3([minRefPoint[X$4] - maxPoint[X$4], 0, 0], shape));
   };
 
@@ -16817,198 +16874,6 @@ return d[d.length-1];};return ", funcName].join("");
   const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 
   /* global Worker */
-
-  var require$$0 = {};
-
-  var fs = /*#__PURE__*/Object.freeze({
-    'default': require$$0
-  });
-
-  let base = '';
-
-  // Copyright Joyent, Inc. and other Node contributors.
-
-  // Split a filename into [root, dir, basename, ext], unix version
-  // 'root' is just a slash, or nothing.
-  var splitPathRe =
-      /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-  var splitPath = function(filename) {
-    return splitPathRe.exec(filename).slice(1);
-  };
-
-  function dirname(path) {
-    var result = splitPath(path),
-        root = result[0],
-        dir = result[1];
-
-    if (!root && !dir) {
-      // No dirname whatsoever
-      return '.';
-    }
-
-    if (dir) {
-      // It has a dirname, strip trailing slash
-      dir = dir.substr(0, dir.length - 1);
-    }
-
-    return root + dir;
-  }
-
-  var toByteArray_1 = toByteArray$1;
-  var fromByteArray_1 = fromByteArray$1;
-
-  var lookup$1 = [];
-  var revLookup$1 = [];
-  var Arr$1 = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
-
-  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  for (var i = 0, len = code.length; i < len; ++i) {
-    lookup$1[i] = code[i];
-    revLookup$1[code.charCodeAt(i)] = i;
-  }
-
-  // Support decoding URL-safe base64 strings, as Node.js does.
-  // See: https://en.wikipedia.org/wiki/Base64#URL_applications
-  revLookup$1['-'.charCodeAt(0)] = 62;
-  revLookup$1['_'.charCodeAt(0)] = 63;
-
-  function getLens (b64) {
-    var len = b64.length;
-
-    if (len % 4 > 0) {
-      throw new Error('Invalid string. Length must be a multiple of 4')
-    }
-
-    // Trim off extra bytes after placeholder bytes are found
-    // See: https://github.com/beatgammit/base64-js/issues/42
-    var validLen = b64.indexOf('=');
-    if (validLen === -1) validLen = len;
-
-    var placeHoldersLen = validLen === len
-      ? 0
-      : 4 - (validLen % 4);
-
-    return [validLen, placeHoldersLen]
-  }
-
-  function _byteLength (b64, validLen, placeHoldersLen) {
-    return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-  }
-
-  function toByteArray$1 (b64) {
-    var tmp;
-    var lens = getLens(b64);
-    var validLen = lens[0];
-    var placeHoldersLen = lens[1];
-
-    var arr = new Arr$1(_byteLength(b64, validLen, placeHoldersLen));
-
-    var curByte = 0;
-
-    // if there are placeholders, only get up to the last complete 4 chars
-    var len = placeHoldersLen > 0
-      ? validLen - 4
-      : validLen;
-
-    for (var i = 0; i < len; i += 4) {
-      tmp =
-        (revLookup$1[b64.charCodeAt(i)] << 18) |
-        (revLookup$1[b64.charCodeAt(i + 1)] << 12) |
-        (revLookup$1[b64.charCodeAt(i + 2)] << 6) |
-        revLookup$1[b64.charCodeAt(i + 3)];
-      arr[curByte++] = (tmp >> 16) & 0xFF;
-      arr[curByte++] = (tmp >> 8) & 0xFF;
-      arr[curByte++] = tmp & 0xFF;
-    }
-
-    if (placeHoldersLen === 2) {
-      tmp =
-        (revLookup$1[b64.charCodeAt(i)] << 2) |
-        (revLookup$1[b64.charCodeAt(i + 1)] >> 4);
-      arr[curByte++] = tmp & 0xFF;
-    }
-
-    if (placeHoldersLen === 1) {
-      tmp =
-        (revLookup$1[b64.charCodeAt(i)] << 10) |
-        (revLookup$1[b64.charCodeAt(i + 1)] << 4) |
-        (revLookup$1[b64.charCodeAt(i + 2)] >> 2);
-      arr[curByte++] = (tmp >> 8) & 0xFF;
-      arr[curByte++] = tmp & 0xFF;
-    }
-
-    return arr
-  }
-
-  function tripletToBase64$1 (num) {
-    return lookup$1[num >> 18 & 0x3F] +
-      lookup$1[num >> 12 & 0x3F] +
-      lookup$1[num >> 6 & 0x3F] +
-      lookup$1[num & 0x3F]
-  }
-
-  function encodeChunk$1 (uint8, start, end) {
-    var tmp;
-    var output = [];
-    for (var i = start; i < end; i += 3) {
-      tmp =
-        ((uint8[i] << 16) & 0xFF0000) +
-        ((uint8[i + 1] << 8) & 0xFF00) +
-        (uint8[i + 2] & 0xFF);
-      output.push(tripletToBase64$1(tmp));
-    }
-    return output.join('')
-  }
-
-  function fromByteArray$1 (uint8) {
-    var tmp;
-    var len = uint8.length;
-    var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
-    var parts = [];
-    var maxChunkLength = 16383; // must be multiple of 3
-
-    // go through the array every three bytes, we'll deal with trailing stuff later
-    for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-      parts.push(encodeChunk$1(
-        uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
-      ));
-    }
-
-    // pad the end with zeros, but make sure to not forget the extra bytes
-    if (extraBytes === 1) {
-      tmp = uint8[len - 1];
-      parts.push(
-        lookup$1[tmp >> 2] +
-        lookup$1[(tmp << 4) & 0x3F] +
-        '=='
-      );
-    } else if (extraBytes === 2) {
-      tmp = (uint8[len - 2] << 8) + uint8[len - 1];
-      parts.push(
-        lookup$1[tmp >> 10] +
-        lookup$1[(tmp >> 4) & 0x3F] +
-        lookup$1[(tmp << 2) & 0x3F] +
-        '='
-      );
-    }
-
-    return parts.join('')
-  }
-
-  const files = {};
-  const fileCreationWatchers = [];
-
-  const getFile = (options, path) => {
-    let file = files[path];
-    if (file === undefined) {
-      file = { path: path, watchers: [] };
-      files[path] = file;
-      for (const watcher of fileCreationWatchers) {
-        watcher(options, file);
-      }
-    }
-    return file;
-  };
 
   var localforage = createCommonjsModule(function (module, exports) {
   /*!
@@ -19806,6 +19671,198 @@ return d[d.length-1];};return ", funcName].join("");
   });
   });
 
+  var require$$0 = {};
+
+  var fs = /*#__PURE__*/Object.freeze({
+    'default': require$$0
+  });
+
+  let base = '';
+
+  // Copyright Joyent, Inc. and other Node contributors.
+
+  // Split a filename into [root, dir, basename, ext], unix version
+  // 'root' is just a slash, or nothing.
+  var splitPathRe =
+      /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+  var splitPath = function(filename) {
+    return splitPathRe.exec(filename).slice(1);
+  };
+
+  function dirname(path) {
+    var result = splitPath(path),
+        root = result[0],
+        dir = result[1];
+
+    if (!root && !dir) {
+      // No dirname whatsoever
+      return '.';
+    }
+
+    if (dir) {
+      // It has a dirname, strip trailing slash
+      dir = dir.substr(0, dir.length - 1);
+    }
+
+    return root + dir;
+  }
+
+  var toByteArray_1 = toByteArray$1;
+  var fromByteArray_1 = fromByteArray$1;
+
+  var lookup$1 = [];
+  var revLookup$1 = [];
+  var Arr$1 = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+
+  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  for (var i = 0, len = code.length; i < len; ++i) {
+    lookup$1[i] = code[i];
+    revLookup$1[code.charCodeAt(i)] = i;
+  }
+
+  // Support decoding URL-safe base64 strings, as Node.js does.
+  // See: https://en.wikipedia.org/wiki/Base64#URL_applications
+  revLookup$1['-'.charCodeAt(0)] = 62;
+  revLookup$1['_'.charCodeAt(0)] = 63;
+
+  function getLens (b64) {
+    var len = b64.length;
+
+    if (len % 4 > 0) {
+      throw new Error('Invalid string. Length must be a multiple of 4')
+    }
+
+    // Trim off extra bytes after placeholder bytes are found
+    // See: https://github.com/beatgammit/base64-js/issues/42
+    var validLen = b64.indexOf('=');
+    if (validLen === -1) validLen = len;
+
+    var placeHoldersLen = validLen === len
+      ? 0
+      : 4 - (validLen % 4);
+
+    return [validLen, placeHoldersLen]
+  }
+
+  function _byteLength (b64, validLen, placeHoldersLen) {
+    return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+  }
+
+  function toByteArray$1 (b64) {
+    var tmp;
+    var lens = getLens(b64);
+    var validLen = lens[0];
+    var placeHoldersLen = lens[1];
+
+    var arr = new Arr$1(_byteLength(b64, validLen, placeHoldersLen));
+
+    var curByte = 0;
+
+    // if there are placeholders, only get up to the last complete 4 chars
+    var len = placeHoldersLen > 0
+      ? validLen - 4
+      : validLen;
+
+    for (var i = 0; i < len; i += 4) {
+      tmp =
+        (revLookup$1[b64.charCodeAt(i)] << 18) |
+        (revLookup$1[b64.charCodeAt(i + 1)] << 12) |
+        (revLookup$1[b64.charCodeAt(i + 2)] << 6) |
+        revLookup$1[b64.charCodeAt(i + 3)];
+      arr[curByte++] = (tmp >> 16) & 0xFF;
+      arr[curByte++] = (tmp >> 8) & 0xFF;
+      arr[curByte++] = tmp & 0xFF;
+    }
+
+    if (placeHoldersLen === 2) {
+      tmp =
+        (revLookup$1[b64.charCodeAt(i)] << 2) |
+        (revLookup$1[b64.charCodeAt(i + 1)] >> 4);
+      arr[curByte++] = tmp & 0xFF;
+    }
+
+    if (placeHoldersLen === 1) {
+      tmp =
+        (revLookup$1[b64.charCodeAt(i)] << 10) |
+        (revLookup$1[b64.charCodeAt(i + 1)] << 4) |
+        (revLookup$1[b64.charCodeAt(i + 2)] >> 2);
+      arr[curByte++] = (tmp >> 8) & 0xFF;
+      arr[curByte++] = tmp & 0xFF;
+    }
+
+    return arr
+  }
+
+  function tripletToBase64$1 (num) {
+    return lookup$1[num >> 18 & 0x3F] +
+      lookup$1[num >> 12 & 0x3F] +
+      lookup$1[num >> 6 & 0x3F] +
+      lookup$1[num & 0x3F]
+  }
+
+  function encodeChunk$1 (uint8, start, end) {
+    var tmp;
+    var output = [];
+    for (var i = start; i < end; i += 3) {
+      tmp =
+        ((uint8[i] << 16) & 0xFF0000) +
+        ((uint8[i + 1] << 8) & 0xFF00) +
+        (uint8[i + 2] & 0xFF);
+      output.push(tripletToBase64$1(tmp));
+    }
+    return output.join('')
+  }
+
+  function fromByteArray$1 (uint8) {
+    var tmp;
+    var len = uint8.length;
+    var extraBytes = len % 3; // if we have 1 byte left, pad 2 bytes
+    var parts = [];
+    var maxChunkLength = 16383; // must be multiple of 3
+
+    // go through the array every three bytes, we'll deal with trailing stuff later
+    for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+      parts.push(encodeChunk$1(
+        uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)
+      ));
+    }
+
+    // pad the end with zeros, but make sure to not forget the extra bytes
+    if (extraBytes === 1) {
+      tmp = uint8[len - 1];
+      parts.push(
+        lookup$1[tmp >> 2] +
+        lookup$1[(tmp << 4) & 0x3F] +
+        '=='
+      );
+    } else if (extraBytes === 2) {
+      tmp = (uint8[len - 2] << 8) + uint8[len - 1];
+      parts.push(
+        lookup$1[tmp >> 10] +
+        lookup$1[(tmp >> 4) & 0x3F] +
+        lookup$1[(tmp << 2) & 0x3F] +
+        '='
+      );
+    }
+
+    return parts.join('')
+  }
+
+  const files = {};
+  const fileCreationWatchers = [];
+
+  const getFile = (options, path) => {
+    let file = files[path];
+    if (file === undefined) {
+      file = { path: path, watchers: [] };
+      files[path] = file;
+      for (const watcher of fileCreationWatchers) {
+        watcher(options, file);
+      }
+    }
+    return file;
+  };
+
   /* global self */
 
   const { promises } = fs;
@@ -20069,7 +20126,7 @@ return d[d.length-1];};return ", funcName].join("");
    **/
 
   const measureCenter = (shape) => {
-    const [high, low] = measureBoundingBox$4(shape);
+    const [high, low] = measureBoundingBox$5(shape);
     return scale(0.5, add(high, low));
   };
 
@@ -23944,10 +24001,10 @@ return d[d.length-1];};return ", funcName].join("");
   const toSvg = async ({ padding = 0 }, geometry) => {
     // FIX: SVG should handle both surfaces and paths.
     const polygons = canonicalize$6(toPolygons$1(geometry));
-    const min = measureBoundingBox$1(polygons)[0];
+    const min = measureBoundingBox$2(polygons)[0];
     // TODO: Add transform and translate support to polygons.
     const shiftedPolygons = canonicalize$6(translate$2(negate(min), polygons));
-    const [width, height] = measureBoundingBox$1(shiftedPolygons)[1];
+    const [width, height] = measureBoundingBox$2(shiftedPolygons)[1];
 
     return [
       `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -39085,13 +39142,13 @@ return d[d.length-1];};return ", funcName].join("");
   const X$5 = 0;
 
   const fromOrigin$5 = (shape) => {
-    const [minPoint] = measureBoundingBox$4(shape);
+    const [minPoint] = measureBoundingBox$5(shape);
     return translate$3([-minPoint[X$5], 0, 0], shape);
   };
 
   const fromReference$5 = (shape, reference) => {
-    const [minPoint] = measureBoundingBox$4(shape);
-    const [, maxRefPoint] = measureBoundingBox$4(reference);
+    const [minPoint] = measureBoundingBox$5(shape);
+    const [, maxRefPoint] = measureBoundingBox$5(reference);
     return assemble$1(reference, translate$3([maxRefPoint[X$5] - minPoint[X$5], 0, 0], shape));
   };
 
@@ -39902,7 +39959,7 @@ return d[d.length-1];};return ", funcName].join("");
     const scale = 1 / pointSize;
     const [width, height] = size;
     const lines = [];
-    const [min, max] = measureBoundingBox$3(geometry);
+    const [min, max] = measureBoundingBox$4(geometry);
     // Currently the origin is at the bottom left.
     // Subtract the x min, and the y max, then add the page height to bring
     // it up to the top left. This positions the origin nicely for laser
@@ -90657,7 +90714,7 @@ return d[d.length-1];};return ", funcName].join("");
     log: log$2,
     material: material,
     max: max$1,
-    measureBoundingBox: measureBoundingBox$4,
+    measureBoundingBox: measureBoundingBox$5,
     measureCenter: measureCenter,
     microGearMotor: microGearMotor,
     minkowski: minkowski,

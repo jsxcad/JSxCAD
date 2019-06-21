@@ -170,7 +170,6 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     const toName = (geometry) => {
       if (geometry.tags !== undefined && geometry.tags.length >= 1) {
         for (const tag of geometry.tags) {
-          console.log(`QQ/tag: ${tag}`);
           if (tag.startsWith('user/')) {
             return tag.substring(5);
           }
@@ -182,8 +181,6 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
         const { target = [0, 0, 0], position = [-40, -40, 40], up = [0, 0, 1] } = view;
         [camera.position.x, camera.position.y, camera.position.z] = position;
         camera.up = new THREE.Vector3(...up);
-        console.log(`QQ/view: ${JSON.stringify(view)}`);
-        console.log(`QQ/lookAt: ${JSON.stringify(target)}`);
         controls.target.set(...target);
       }
       {

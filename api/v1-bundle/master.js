@@ -5,7 +5,7 @@ import { installDisplay, installDisplayCSS } from './display';
 import { installEditor, installEditorCSS } from './editor';
 import { installEvaluator, installEvaluatorCSS } from './evaluator';
 import { installReference, installReferenceCSS } from './reference';
-import { readFile, setupFilesystem, watchFile, watchFileCreation } from '@jsxcad/sys';
+import { listProjects, readFile, setupFilesystem, watchFile, watchFileCreation } from '@jsxcad/sys';
 
 const defaultScript =
 `
@@ -83,6 +83,17 @@ window.bootstrap = async () => {
   await installEditor({ addPage, document, evaluator, initialScript, nextPage, lastPage });
   await installConsole({ addPage, document, watchFile });
   await installReference({ addPage, document });
+  {
+    const names = new Set();
+    const projects = await listProjects();
+    for (const project of projects) {
+      const [, name] = project.split('/');
+      names.add(name);
+    }
+    for (const name of names) {
+      console.log(`QQ/project/name: ${name}`);
+    }
+  }
 };
 
 window.bootstrapCSS();

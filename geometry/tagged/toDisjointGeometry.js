@@ -17,9 +17,16 @@ export const toDisjointGeometry = (untransformedGeometry) => {
           if (item.assembly !== undefined) {
             disjointed.assembly.push(walk(item, { assembly: [], tags: item.tags }));
           } else {
-            const differenced = differenceItems(item, ...subtractions);
-            disjointed.assembly.push(differenced);
-            subtractions.push(differenced);
+            if (item.tags === undefined || !item.tags.includes('@drop')) {
+              // Undropped items need to be trimmed.
+              const differenced = differenceItems(item, ...subtractions);
+              disjointed.assembly.push(differenced);
+              subtractions.push(differenced);
+            } else {
+              // Dropped items do not need to be trimmed.
+              disjointed.assembly.push(item);
+              subtractions.push(item);
+            }
           }
         }
         return disjointed;
