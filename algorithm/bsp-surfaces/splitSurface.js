@@ -26,7 +26,15 @@ const toType = (plane, point) => {
 
 const pointType = [];
 
+let splitSurfaceCount = 0;
+let splitSurfaceMark = 1;
+
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
+  if (++splitSurfaceCount >= splitSurfaceMark) {
+    splitSurfaceMark *= 1.2;
+    console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
+  }
+
   // Try to classify the whole surface first.
   const [sphereCenter, sphereRadius] = measureBoundingSphere(surface);
   const sphereDistance = planeDistance(plane, sphereCenter);

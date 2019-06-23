@@ -4,9 +4,9 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
-import { base } from './filesystem';
 import { dirname } from 'path';
 import { fromByteArray } from 'base64-js';
+import { getBase } from './filesystem';
 import { getFile } from './files';
 import localForage from 'localforage';
 
@@ -32,7 +32,8 @@ export const writeFile = async (options, path, data) => {
     watcher(options, file);
   }
 
-  if (!ephemeral) {
+  const base = getBase();
+  if (!ephemeral && base !== undefined) {
     const persistentPath = `${base}${path}`;
     if (isNode) {
       try {

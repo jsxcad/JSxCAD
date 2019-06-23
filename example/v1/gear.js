@@ -1,5 +1,3 @@
-import { Shape, acos, cos, max, sin, sqrt, writePdf } from '@jsxcad/api-v1';
-
 // Probably derived from https://github.com/sadr0b0t/pd-gears/blob/master/pd-gears.scad
 // Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)
 // version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
@@ -33,8 +31,8 @@ const buildTooth = ({ r, b, c, k, numberOfTeeth }) =>
                       q7(0 / 5, r, b, c, k, -1),
                       polar(r, r < b ? -k : 180 / numberOfTeeth)]);
 
-const buildGear = ({ mmPerTooth = 3, numberOfTeeth = 11, teethToHide = 0, pressureAngle = 28,
-                     clearance = 0, backlash = 0 }) => {
+export const buildGear = ({ mmPerTooth = 3, numberOfTeeth = 11, teethToHide = 0, pressureAngle = 28,
+                            clearance = 0, backlash = 0 } = {}) => {
   const pi = Math.PI;
   const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
   const c = p + mmPerTooth / pi - clearance; // radius of outer circle
@@ -51,5 +49,5 @@ const buildGear = ({ mmPerTooth = 3, numberOfTeeth = 11, teethToHide = 0, pressu
 };
 
 export const main = async () => {
-  await writePdf({ path: 'tmp/gear.pdf' }, buildGear({}));
+  await buildGear().writePdf('pdf/gear.pdf');
 };

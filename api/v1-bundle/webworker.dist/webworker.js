@@ -13918,7 +13918,7 @@ return d[d.length-1];};return ", funcName].join("");
       backSurfaces.push(surface);
       return;
     }
-    
+
     // Consider the polygons within the surface.
     let coplanarFrontPolygons;
     let coplanarBackPolygons;
@@ -14034,7 +14034,7 @@ return d[d.length-1];};return ", funcName].join("");
   // nodes there. Each set of surfaces is partitioned using the surface with the largest area.
   const build = (bsp, surfaces, depth = 0) => {
     if (depth > watermark) {
-      watermark = depth;
+      watermark = watermark * 2 + 10;
       console.log(`Watermark: ${watermark}`);
     }
     if (surfaces.length === 0) {
@@ -14343,16 +14343,6 @@ return d[d.length-1];};return ", funcName].join("");
     return differenced;
   };
 
-  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-    if (set === undefined) {
-      return whenSetUndefined;
-    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   const transformItem = (matrix, item) => {
     const transformed = {};
     if (item.assembly) {
@@ -14505,6 +14495,16 @@ return d[d.length-1];};return ", funcName].join("");
                    }
                    return item;
                  });
+    }
+  };
+
+  const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+    if (set === undefined) {
+      return whenSetUndefined;
+    } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -15525,6 +15525,26 @@ return d[d.length-1];};return ", funcName].join("");
 
   /**
    *
+   * # BSP
+   *
+   * Generates a BSP tree of the solid.
+   *
+   **/
+
+  const bsp = (shape) => {
+    const bsps = [];
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      bsps.push(fromSurfaces({}, solid));
+    }
+    return bsps;
+  };
+
+  const method$7 = function () { return bsp(this); };
+
+  Shape.prototype.bsp = method$7;
+
+  /**
+   *
    * # Center
    *
    * Moves the shape so that it is centered on the origin.
@@ -15550,9 +15570,9 @@ return d[d.length-1];};return ", funcName].join("");
     return translate$3(negate(center), shape);
   };
 
-  const method$7 = function () { return center(this); };
+  const method$8 = function () { return center(this); };
 
-  Shape.prototype.center = method$7;
+  Shape.prototype.center = method$8;
 
   /**
    *
@@ -15786,9 +15806,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   color.fromValues = fromValue$2;
 
-  const method$8 = function (...tags) { return color(tags, this); };
+  const method$9 = function (...tags) { return color(tags, this); };
 
-  Shape.prototype.color = method$8;
+  Shape.prototype.color = method$9;
 
   /**
    *
@@ -16093,9 +16113,9 @@ return d[d.length-1];};return ", funcName].join("");
     return [assemble$1(...fronts), assemble$1(...backs)];
   };
 
-  const method$9 = function (options) { return cut$2(options, this); };
+  const method$a = function (options) { return cut$2(options, this); };
 
-  Shape.prototype.cut = method$9;
+  Shape.prototype.cut = method$a;
 
   const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
     return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
@@ -16230,9 +16250,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$a = function (...shapes) { return difference$4(this, ...shapes); };
+  const method$b = function (...shapes) { return difference$4(this, ...shapes); };
 
-  Shape.prototype.difference = method$a;
+  Shape.prototype.difference = method$b;
 
   /**
    *
@@ -16287,14 +16307,20 @@ return d[d.length-1];};return ", funcName].join("");
       assertEmpty(tags);
       assertShape(shape);
       return () => fromGeometry(addTags(['@drop'], toGeometry(shape)));
+    },
+    (tags, shape) => {
+      // assemble(circle(), circle().as('a')).drop('a')
+      assertStrings(tags);
+      assertShape(shape);
+      return () => fromValue$5(tags.map(tag => `user/${tag}`), shape);
     }
   );
 
   drop$1.fromValues = fromValue$5;
 
-  const method$b = function (...tags) { return drop$1(tags, this); };
+  const method$c = function (...tags) { return drop$1(tags, this); };
 
-  Shape.prototype.drop = method$b;
+  Shape.prototype.drop = method$c;
 
   /**
    *
@@ -16352,8 +16378,8 @@ return d[d.length-1];};return ", funcName].join("");
   extrude$1.fromValue = fromValue$6;
   extrude$1.fromHeight = fromHeight;
 
-  const method$c = function (options) { return extrude$1(options, this); };
-  Shape.prototype.extrude = method$c;
+  const method$d = function (options) { return extrude$1(options, this); };
+  Shape.prototype.extrude = method$d;
 
   /**
    *
@@ -16386,8 +16412,8 @@ return d[d.length-1];};return ", funcName].join("");
           }
         }
         if (path[0] !== null) {
-         // Handle closed paths.
-         cut.push(tool.translate(path[0]));
+          // Handle closed paths.
+          cut.push(tool.translate(path[0]));
         }
         cuts.push(chainHull(...cut));
       }
@@ -16395,9 +16421,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(shape, assemble$1(...cuts).drop());
   };
 
-  const method$d = function (tool) { return fillet(this, tool); };
+  const method$e = function (tool) { return fillet(this, tool); };
 
-  Shape.prototype.fillet = method$d;
+  Shape.prototype.fillet = method$e;
 
   /**
    *
@@ -16446,9 +16472,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$3(shape, reference);
     });
 
-  const method$e = function (...params) { return front(this, ...params); };
+  const method$f = function (...params) { return front(this, ...params); };
 
-  Shape.prototype.front = method$e;
+  Shape.prototype.front = method$f;
 
   /**
    *
@@ -16466,9 +16492,110 @@ return d[d.length-1];};return ", funcName].join("");
 
   const fuse$1 = (shape) => Shape.fromGeometry(fuse(toKeptGeometry$1(shape)));
 
-  const method$f = function () { return fuse$1(this); };
+  const method$g = function () { return fuse$1(this); };
 
-  Shape.prototype.fuse = method$f;
+  Shape.prototype.fuse = method$g;
+
+  /**
+   *
+   * # Max
+   *
+   * Produces the maximum of a series of numbers.
+   *
+   * ```
+   * max(1, 2, 3, 4) == 4
+   * ```
+   *
+   **/
+
+  const max$1 = Math.max;
+
+  /**
+   *
+   * # Sine
+   *
+   * Gives the sine in degrees.
+   * ```
+   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
+   *
+   * sin(0) = 0
+   * sin(45) = 0.707
+   * sin(90) = 1
+   * ```
+   *
+   **/
+
+  const sin$1 = (a) => Math.sin(a / 360 * Math.PI * 2);
+
+  /**
+   *
+   * # Square Root
+   *
+   * Gives the the square root of a number.
+   * ```
+   * sqrt(a) => Math.sqrt(a);
+   *
+   * sqrt(0) = 0
+   * sqrt(4) = 2
+   * sqrt(16) = 4
+   * ```
+   *
+   **/
+
+  const sqrt = Math.sqrt;
+
+  // Probably derived from https://github.com/sadr0b0t/pd-gears/blob/master/pd-gears.scad
+  // Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)
+  // version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
+
+  // convert polar to cartesian coordinates
+  const polar = (r, theta) => [r * sin$1(theta), r * cos(theta)];
+
+  // point at radius d on the involute curve
+  const q6 = (b, s, t, d) => polar(d, s * (iang(b, d) + t));
+
+  // radius a fraction f up the curved side of the tooth
+  const q7 = (f, r, b, r2, t, s) => q6(b, s, t, (1 - f) * max$1(b, r) + f * r2);
+
+  // unwind a string this many degrees to go from radius r1 to radius r2
+  const iang = (r1, r2) => sqrt((r2 / r1) * (r2 / r1) - 1) / Math.PI * 180 - acos(r1 / r2);
+
+  const buildTooth = ({ r, b, c, k, numberOfTeeth }) =>
+    Shape.fromOpenPath([polar(r, -181 / numberOfTeeth),
+                        polar(r, r < b ? k : -180 / numberOfTeeth),
+                        q7(0 / 5, r, b, c, k, 1),
+                        q7(1 / 5, r, b, c, k, 1),
+                        q7(2 / 5, r, b, c, k, 1),
+                        q7(3 / 5, r, b, c, k, 1),
+                        q7(4 / 5, r, b, c, k, 1),
+                        q7(5 / 5, r, b, c, k, 1),
+                        q7(5 / 5, r, b, c, k, -1),
+                        q7(4 / 5, r, b, c, k, -1),
+                        q7(3 / 5, r, b, c, k, -1),
+                        q7(2 / 5, r, b, c, k, -1),
+                        q7(1 / 5, r, b, c, k, -1),
+                        q7(0 / 5, r, b, c, k, -1),
+                        polar(r, r < b ? -k : 180 / numberOfTeeth)]);
+
+  const profile = ({ mmPerTooth = Math.PI, numberOfTeeth = 16, teethToHide = 0, pressureAngle = 20, clearance = 0, backlash = 0 }) => {
+    const pi = Math.PI;
+    const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
+    const c = p + mmPerTooth / pi - clearance; // radius of outer circle
+    const b = p * cos(pressureAngle); // radius of base circle
+    const r = p - (c - p) - clearance; // radius of the root circle
+    const t = mmPerTooth / 2 - backlash / 2; // tooth thickness at pitch circle
+    const k = -iang(b, p) - t / 2 / p / pi * 180; // angle to where involute meets base circle on each side of tooth
+    const tooth = buildTooth({ r, b, c, k, numberOfTeeth });
+    let profile = Shape.fromOpenPath([]);
+    for (let i = numberOfTeeth - teethToHide - 1; i >= 0; i--) {
+      profile = profile.concat(tooth.rotateZ(i * 360 / numberOfTeeth));
+    }
+    return profile.close();
+  };
+
+  const gear = {};
+
+  gear.profile = profile;
 
   /**
    *
@@ -16480,9 +16607,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const getPathsets = (shape) => getPaths(shape.toKeptGeometry()).map(({ paths }) => paths);
 
-  const method$g = function () { return getPathsets(this); };
+  const method$h = function () { return getPathsets(this); };
 
-  Shape.prototype.getPathsets = method$g;
+  Shape.prototype.getPathsets = method$h;
 
   /**
    *
@@ -16529,9 +16656,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$h = function (...shapes) { return hull(this, ...shapes); };
+  const method$i = function (...shapes) { return hull(this, ...shapes); };
 
-  Shape.prototype.hull = method$h;
+  Shape.prototype.hull = method$i;
 
   /**
    *
@@ -16569,9 +16696,9 @@ return d[d.length-1];};return ", funcName].join("");
     return Shape.fromPathsToZ0Surface(union$2(...toUnion));
   };
 
-  const method$i = function (options) { return interior(options, this); };
+  const method$j = function (options) { return interior(options, this); };
 
-  Shape.prototype.interior = method$i;
+  Shape.prototype.interior = method$j;
 
   /**
    *
@@ -16637,9 +16764,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$j = function (...shapes) { return intersection$4(this, ...shapes); };
+  const method$k = function (...shapes) { return intersection$4(this, ...shapes); };
 
-  Shape.prototype.intersection = method$j;
+  Shape.prototype.intersection = method$k;
 
   /**
    *
@@ -16690,9 +16817,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   keep$1.fromValues = fromValue$7;
 
-  const method$k = function (...tags) { return keep$1(tags, this); };
+  const method$l = function (...tags) { return keep$1(tags, this); };
 
-  Shape.prototype.keep = method$k;
+  Shape.prototype.keep = method$l;
 
   /**
    *
@@ -16741,9 +16868,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$4(shape, reference);
     });
 
-  const method$l = function (...params) { return left(this, ...params); };
+  const method$m = function (...params) { return left(this, ...params); };
 
-  Shape.prototype.left = method$l;
+  Shape.prototype.left = method$m;
 
   /**
    *
@@ -20094,23 +20221,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   material.fromValues = fromValue$8;
 
-  const method$m = function (...tags) { return material(tags, this); };
+  const method$n = function (...tags) { return material(tags, this); };
 
-  Shape.prototype.material = method$m;
-
-  /**
-   *
-   * # Max
-   *
-   * Produces the maximum of a series of numbers.
-   *
-   * ```
-   * max(1, 2, 3, 4) == 4
-   * ```
-   *
-   **/
-
-  const max$1 = Math.max;
+  Shape.prototype.material = method$n;
 
   /**
    *
@@ -20130,9 +20243,9 @@ return d[d.length-1];};return ", funcName].join("");
     return scale(0.5, add(high, low));
   };
 
-  const method$n = function () { return measureCenter(this); };
+  const method$o = function () { return measureCenter(this); };
 
-  Shape.prototype.measureCenter = method$n;
+  Shape.prototype.measureCenter = method$o;
 
   /**
    *
@@ -20197,9 +20310,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$o = function (...shapes) { return union$5(this, ...shapes); };
+  const method$p = function (...shapes) { return union$5(this, ...shapes); };
 
-  Shape.prototype.union = method$o;
+  Shape.prototype.union = method$p;
 
   /**
    *
@@ -20308,9 +20421,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
   };
 
-  const method$p = function (options) { return outline(options, this); };
+  const method$q = function (options) { return outline(options, this); };
 
-  Shape.prototype.outline = method$p;
+  Shape.prototype.outline = method$q;
   Shape.prototype.withOutline = function (options) { return assemble$1(this, outline(options, this)); };
 
   const fromValue$9 = (point) => Shape.fromPoint(point);
@@ -22847,11 +22960,11 @@ return d[d.length-1];};return ", funcName].join("");
   var max$2 = Math.max;
   var abs$1 = Math.abs;
   var pow = Math.pow;
-  var sin$1 = Math.sin;
+  var sin$2 = Math.sin;
   var cos$1 = Math.cos;
   var tan = Math.tan;
   var acos$1 = Math.acos;
-  var sqrt = Math.sqrt;
+  var sqrt$1 = Math.sqrt;
   var ceil = Math.ceil;
   var τ = Math.PI * 2;
 
@@ -22864,7 +22977,7 @@ return d[d.length-1];};return ", funcName].join("");
     large = large || 0;
     sweep = sweep || 0;
 
-    var sinphi = sin$1(xrot * τ / 360);
+    var sinphi = sin$2(xrot * τ / 360);
     var cosphi = cos$1(xrot * τ / 360);
 
     var pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2;
@@ -22880,8 +22993,8 @@ return d[d.length-1];};return ", funcName].join("");
     );
 
     if (lambda > 1) {
-      rx *= sqrt(lambda);
-      ry *= sqrt(lambda);
+      rx *= sqrt$1(lambda);
+      ry *= sqrt$1(lambda);
     }
 
     var centre = getArcCentre(px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp);
@@ -22929,9 +23042,9 @@ return d[d.length-1];};return ", funcName].join("");
     var a = 4 / 3 * tan(ang2 / 4);
 
     var x1 = cos$1(ang1);
-    var y1 = sin$1(ang1);
+    var y1 = sin$2(ang1);
     var x2 = cos$1(ang1 + ang2);
-    var y2 = sin$1(ang1 + ang2);
+    var y2 = sin$2(ang1 + ang2);
 
     return [
       [x1 - y1 * a, y1 + x1 * a ],
@@ -22950,7 +23063,7 @@ return d[d.length-1];};return ", funcName].join("");
 
     if (radicant < 0) radicant = 0;
     radicant /= (rxsq * pypsq) + (rysq * pxpsq);
-    radicant = sqrt(radicant) * (large === sweep ? -1 : 1);
+    radicant = sqrt$1(radicant) * (large === sweep ? -1 : 1);
 
     var centrexp = radicant * rx / ry * pyp;
     var centreyp = radicant * -ry / rx * pxp;
@@ -22973,8 +23086,8 @@ return d[d.length-1];};return ", funcName].join("");
 
   function vectorAngle (ux, uy, vx, vy) {
     var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
-    var umag = sqrt(ux * ux + uy * uy);
-    var vmag = sqrt(ux * ux + uy * uy);
+    var umag = sqrt$1(ux * ux + uy * uy);
+    var vmag = sqrt$1(ux * ux + uy * uy);
     var dot = ux * vx + uy * vy;
 
     var div = dot / (umag * vmag);
@@ -37951,9 +38064,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ preview, geometry }, path, JSON.stringify(geometry));
   };
 
-  const method$q = function (options = {}) { return writeShape(options, this); };
+  const method$r = function (options = {}) { return writeShape(options, this); };
 
-  Shape.prototype.writeShape = method$q;
+  Shape.prototype.writeShape = method$r;
 
   /**
    *
@@ -39167,9 +39280,9 @@ return d[d.length-1];};return ", funcName].join("");
       return () => fromReference$5(shape, reference);
     });
 
-  const method$r = function (...params) { return right(this, ...params); };
+  const method$s = function (...params) { return right(this, ...params); };
 
-  Shape.prototype.right = method$r;
+  Shape.prototype.right = method$s;
 
   /**
    *
@@ -39191,9 +39304,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateX$1 = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-  const method$s = function (angle) { return rotateX$1(angle, this); };
+  const method$t = function (angle) { return rotateX$1(angle, this); };
 
-  Shape.prototype.rotateX = method$s;
+  Shape.prototype.rotateX = method$t;
 
   /**
    *
@@ -39215,9 +39328,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateY = (angle, shape) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-  const method$t = function (angle) { return rotateY(angle, this); };
+  const method$u = function (angle) { return rotateY(angle, this); };
 
-  Shape.prototype.rotateY = method$t;
+  Shape.prototype.rotateY = method$u;
 
   /**
    *
@@ -39239,9 +39352,9 @@ return d[d.length-1];};return ", funcName].join("");
 
   const rotateZ = (angle, shape) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-  const method$u = function (angle) { return rotateZ(angle, this); };
+  const method$v = function (angle) { return rotateZ(angle, this); };
 
-  Shape.prototype.rotateZ = method$u;
+  Shape.prototype.rotateZ = method$v;
 
   /**
    *
@@ -39276,9 +39389,9 @@ return d[d.length-1];};return ", funcName].join("");
     }
   };
 
-  const method$v = function (factor) { return scale$6(factor, this); };
+  const method$w = function (factor) { return scale$6(factor, this); };
 
-  Shape.prototype.scale = method$v;
+  Shape.prototype.scale = method$w;
 
   /**
    *
@@ -39322,26 +39435,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...shapes);
   };
 
-  const method$w = function (options) { return section(options, this); };
+  const method$x = function (options) { return section(options, this); };
 
-  Shape.prototype.section = method$w;
-
-  /**
-   *
-   * # Sine
-   *
-   * Gives the sine in degrees.
-   * ```
-   * sin(a) => Math.sin(a / 360 * Math.PI * 2);
-   *
-   * sin(0) = 0
-   * sin(45) = 0.707
-   * sin(90) = 1
-   * ```
-   *
-   **/
-
-  const sin$2 = (a) => Math.sin(a / 360 * Math.PI * 2);
+  Shape.prototype.section = method$x;
 
   /**
    *
@@ -39408,23 +39504,6 @@ return d[d.length-1];};return ", funcName].join("");
   sphere.fromValue = fromValue$a;
   sphere.fromRadius = fromRadius$3;
   sphere.fromDiameter = fromDiameter$3;
-
-  /**
-   *
-   * # Square Root
-   *
-   * Gives the the square root of a number.
-   * ```
-   * sqrt(a) => Math.sqrt(a);
-   *
-   * sqrt(0) = 0
-   * sqrt(4) = 2
-   * sqrt(16) = 4
-   * ```
-   *
-   **/
-
-  const sqrt$1 = Math.sqrt;
 
   /**
    *
@@ -39751,9 +39830,9 @@ return d[d.length-1];};return ", funcName].join("");
     return assemble$1(...pieces);
   };
 
-  const method$x = function (options) { return wireframe(options, this); };
+  const method$y = function (options) { return wireframe(options, this); };
 
-  Shape.prototype.wireframe = method$x;
+  Shape.prototype.wireframe = method$y;
   Shape.prototype.withWireframe = function (options) { return assemble$1(this, wireframe(options, this)); };
 
   const colorToRgbMapping = {
@@ -40030,9 +40109,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, pdf);
   };
 
-  const method$y = function (options = {}) { return writePdf(options, this); };
+  const method$z = function (options = {}) { return writePdf(options, this); };
 
-  Shape.prototype.writePdf = method$y;
+  Shape.prototype.writePdf = method$z;
 
   /**
    *
@@ -40062,9 +40141,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ preview: true, geometry }, path, toStl(options, geometry));
   };
 
-  const method$z = function (options = {}) { return writeStl(options, this); };
+  const method$A = function (options = {}) { return writeStl(options, this); };
 
-  Shape.prototype.writeStl = method$z;
+  Shape.prototype.writeStl = method$A;
 
   /**
    *
@@ -40094,9 +40173,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, toSvg(options, geometry));
   };
 
-  const method$A = function (options = {}) { return writeSvg(options, this); };
+  const method$B = function (options = {}) { return writeSvg(options, this); };
 
-  Shape.prototype.writeSvg = method$A;
+  Shape.prototype.writeSvg = method$B;
 
   // Polyfills
 
@@ -90655,9 +90734,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, preview: true }, path, toSvg$1(options, geometry));
   };
 
-  const method$B = function (options = {}) { return writeSvgPhoto(options, this); };
+  const method$C = function (options = {}) { return writeSvgPhoto(options, this); };
 
-  Shape.prototype.writeSvgPhoto = method$B;
+  Shape.prototype.writeSvgPhoto = method$C;
 
   const writeThreejsPage = async (options, shape) => {
     if (typeof options === 'string') {
@@ -90668,9 +90747,9 @@ return d[d.length-1];};return ", funcName].join("");
     await writeFile({ geometry, view, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
   };
 
-  const method$C = function (options = {}) { return writeThreejsPage(options, this); };
+  const method$D = function (options = {}) { return writeThreejsPage(options, this); };
 
-  Shape.prototype.writeThreejsPage = method$C;
+  Shape.prototype.writeThreejsPage = method$D;
 
   /**
    *
@@ -90690,6 +90769,7 @@ return d[d.length-1];};return ", funcName].join("");
     assemble: assemble$1,
     back: back,
     below: below,
+    bsp: bsp,
     center: center,
     chainHull: chainHull,
     circle: circle,
@@ -90705,6 +90785,7 @@ return d[d.length-1];};return ", funcName].join("");
     fillet: fillet,
     front: front,
     fuse: fuse$1,
+    gear: gear,
     getPathsets: getPathsets,
     hull: hull,
     interior: interior,
@@ -90739,9 +90820,9 @@ return d[d.length-1];};return ", funcName].join("");
     rotateZ: rotateZ,
     scale: scale$6,
     section: section,
-    sin: sin$2,
+    sin: sin$1,
     sphere: sphere,
-    sqrt: sqrt$1,
+    sqrt: sqrt,
     square: square,
     svgPath: svgPath,
     tetrahedron: tetrahedron,

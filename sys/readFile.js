@@ -6,7 +6,7 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
-import { base } from './filesystem';
+import { getBase } from './filesystem';
 import { getFile } from './files';
 import { isBase64 } from 'is-base64';
 import localForage from 'localforage';
@@ -48,8 +48,11 @@ const getFileFetcher = async () => {
 // Fetch from internal store.
 const fetchPersistent = async ({ as }, path) => {
   try {
-    const fetchFile = await getFileFetcher();
-    return await fetchFile(`${base}${path}`);
+    const base = getBase();
+    if (base !== undefined) {
+      const fetchFile = await getFileFetcher();
+      return await fetchFile(`${base}${path}`);
+    }
   } catch (e) {
   }
 };
@@ -60,7 +63,16 @@ const fetchSources = async (options = {}, sources) => {
   const fetchFile = await getFileFetcher();
   // Try to load the data from a source.
   for (const source of sources) {
-    if (source.url !== undefined) {
+    if (typeof source === 'string') {
+      // FIX: Detect urls.
+      try {
+        const data = await fetchFile(source);
+        if (data !== undefined) {
+          return data;
+        }
+      } catch (e) {
+      }
+    } else if (source.url !== undefined) {
       log(`# Fetching ${source.url}`);
       const response = await fetchUrl(source.url);
       if (response.ok) {
