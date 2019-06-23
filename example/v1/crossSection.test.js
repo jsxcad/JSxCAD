@@ -1,9 +1,8 @@
-import { main } from './crossSection';
-import { readFileSync } from 'fs';
+import { isExpected, run } from './run';
+
 import test from 'ava';
 
-test('Expected pdf', async (t) => {
-  await main();
-  t.is(readFileSync('tmp/crossSection.pdf', { encoding: 'utf8' }),
-       readFileSync('crossSection.pdf', { encoding: 'utf8' }));
+test('Expected stl', async (t) => {
+  await run('crossSection');
+  isExpected(t, 'crossSection/pdf/crossSection.pdf');
 });

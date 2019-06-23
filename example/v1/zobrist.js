@@ -1,7 +1,3 @@
-import { cube, union, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
-
-Error.stackTraceLimit = Infinity;
-
 /**
 * A zobrist is a pattern within a 3x3x3 grid, with letters on the medial faces, a dot on the lower face, and a smile
 * on the upper face. The patterns used are fully connected, and have a maximum height of two cubes.
@@ -61,7 +57,5 @@ const zobristCubes = (specifications) => {
 
 const scaledCubes = zobristCubes().scale([10, 10, 10]);
 
-export const main = async () => {
-  await writeStl({ path: 'tmp/zobrist.stl' }, scaledCubes);
-  await writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/zobrist.html' }, scaledCubes);
-};
+await scaledCubes.writeStl('tmp/zobrist.stl');
+await scaledCubes.writeThreejsPage({ view: { position: [0, 0, 120], path: 'tmp/zobrist.html' });

@@ -17,6 +17,7 @@ import { as } from './as';
 import { assemble } from './assemble';
 import { back } from './back';
 import { below } from './below';
+import { bsp } from './bsp';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { circle } from './circle';
@@ -26,14 +27,17 @@ import { cube } from './cube';
 import { cursor } from './cursor';
 import { cut } from './cut';
 import { cylinder } from './cylinder';
+import { describe } from './describe';
 import { difference } from './difference';
 import { drop } from './drop';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
 import { front } from './front';
 import { fuse } from './fuse';
+import { gear } from './gear';
 import { getPathsets } from './getPathsets';
 import { hull } from './hull';
+import { importModule } from './importModule';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
@@ -46,6 +50,7 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { measureCenter } from './measureCenter';
 import { microGearMotor } from './microGearMotor';
 import { minkowski } from './minkowski';
+import { move } from './move';
 import { numbers } from './numbers';
 import { outline } from './outline';
 import { point } from './point';
@@ -92,6 +97,7 @@ export {
   assemble,
   back,
   below,
+  bsp,
   center,
   chainHull,
   circle,
@@ -101,14 +107,17 @@ export {
   cut,
   cursor,
   cylinder,
+  describe,
   difference,
   drop,
   extrude,
   fillet,
   front,
   fuse,
+  gear,
   getPathsets,
   hull,
+  importModule,
   interior,
   intersection,
   left,
@@ -120,6 +129,7 @@ export {
   measureCenter,
   microGearMotor,
   minkowski,
+  move,
   numbers,
   outline,
   planeX,

@@ -1,29 +1,26 @@
+import { promises, readFileSync } from 'fs';
+
 import argv from 'argv';
+import { importModule } from '@jsxcad/api-v1';
+import { setupFilesystem } from '@jsxcad/sys';
+import { toEcmascript } from '@jsxcad/compiler';
 
-const run = async () => {
-  const targets = [process.argv[2]];
-  for (const target of targets) {
-    const { main, getParameterDefinitions } = await import(`./${target}`);
+const { readFile } = promises;
 
-    let mainOptions = {};
-
-    if (getParameterDefinitions !== undefined) {
-      const definitions = getParameterDefinitions();
-      const { options } = argv.option(definitions).run();
-      for (const { name, initial } of definitions) {
-        if (options[name] === undefined) {
-          options[name] = initial;
-        }
-      }
-      mainOptions = options;
-    }
-    if (main !== undefined) {
-      await main(mainOptions);
-    }
-  }
+export const run = async (target = process.argv[2], base = 'observed') => {
+  setupFilesystem({ fileBase: `${base}/${target}` });
+  const module = await importModule('script', `${target}.js`);
+  await module.main();
 };
 
-run().catch(e => {
-  console.log(e.toString());
-  console.log(e.stack);
-});
+export const isExpected = (t, path) => {
+  t.is(readFileSync(`observed/${path}`, { encoding: 'utf8' }),
+       readFileSync(`expected/${path}`, { encoding: 'utf8' }));
+};
+
+if (module.parent === undefined) {
+  run().catch(e => {
+    console.log(e.toString());
+    console.log(e.stack);
+  });
+}

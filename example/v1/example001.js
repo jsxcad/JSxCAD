@@ -1,7 +1,3 @@
-import { cylinder, difference, rotate, sphere, writeStl, writeThreejsPage } from '@jsxcad/api-v1';
-
-Error.stackTraceLimit = Infinity;
-
 // title      : Example 001
 // author     : OpenSCAD.org, adapted by Rene K. Mueller
 // license    : MIT License
@@ -30,8 +26,6 @@ function example001 () {
   );
 }
 
-export const main = () => {
-  const solid = example001();
-  writeStl({ path: 'tmp/example001.stl' }, solid);
-  writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' }, solid);
-};
+const solid = example001();
+writeStl({ path: 'tmp/example001.stl' }, solid);
+writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' }, solid);

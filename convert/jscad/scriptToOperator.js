@@ -62,7 +62,8 @@ const replaceIncludes = async (ast) => {
     }
   });
   for (const include of includes) {
-    include.replace(await replaceIncludes(recast.parse(await readFile({}, include.node.arguments[0].value))));
+    const path = include.node.arguments[0].value;
+    include.replace(await replaceIncludes(recast.parse(await readFile({ path, sources: [path] }))));
   }
   return ast;
 };

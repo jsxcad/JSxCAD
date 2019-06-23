@@ -1,9 +1,8 @@
-import { main } from './atg-sft003';
-import { readFileSync } from 'fs';
+import { isExpected, run } from './run';
+
 import test from 'ava';
 
 test('Expected pdf', async (t) => {
-  await main();
-  t.is(readFileSync('tmp/atg-sft003.pdf', { encoding: 'utf8' }),
-       readFileSync('atg-sft003.pdf', { encoding: 'utf8' }));
+  await run('atg-sft003');
+  isExpected(t, 'atg-sft003/pdf/atg-sft003.pdf');
 });

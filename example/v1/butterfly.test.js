@@ -1,9 +1,8 @@
-import { main } from './butterfly';
-import { readFileSync } from 'fs';
+import { isExpected, run } from './run';
+
 import test from 'ava';
 
 test('Expected stl', async (t) => {
-  await main();
-  t.is(readFileSync('tmp/butterfly.pdf', { encoding: 'utf8' }),
-       readFileSync('butterfly.pdf', { encoding: 'utf8' }));
+  await run('butterfly');
+  isExpected(t, 'butterfly/pdf/butterfly.pdf');
 });

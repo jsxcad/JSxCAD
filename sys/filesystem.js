@@ -1,12 +1,15 @@
-export let base = '';
+// When base is undefined the persistent filesystem is disabled.
+let base;
 
 export const setupFilesystem = ({ fileBase }) => {
-  // A prefix used to partition the filesystem for multiple projects.
+  // A prefix used to partition the persistent filesystem for multiple projects.
   if (fileBase !== undefined) {
-    if (base.endsWith('/')) {
+    if (fileBase.endsWith('/')) {
       base = fileBase;
     } else {
       base = `${fileBase}/`;
     }
   }
 };
+
+export const getBase = () => base;

@@ -1,9 +1,8 @@
-import { main } from './sphereCubeHull';
-import { readFileSync } from 'fs';
+import { isExpected, run } from './run';
+
 import test from 'ava';
 
-test('Expected stl', async t => {
-  await main();
-  t.is(readFileSync('tmp/sphereCubeHull.stl', { encoding: 'utf8' }),
-       readFileSync('sphereCubeHull.stl', { encoding: 'utf8' }));
+test('Expected stl', async (t) => {
+  await run('sphereCubeHull');
+  isExpected(t, 'sphereCubeHull/stl/sphereCubeHull.stl');
 });

@@ -53,6 +53,7 @@
     "@jsxcad/algorithm-text": "^0.0.79",
     "@jsxcad/algorithm-watertight": "^0.0.79",
     "@jsxcad/api-v1": "^0.0.79",
+    "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/convert-stl": "^0.0.79",
     "@jsxcad/data-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",

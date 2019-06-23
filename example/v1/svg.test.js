@@ -1,9 +1,8 @@
-import { main } from './svg';
-import { readFileSync } from 'fs';
+import { isExpected, run } from './run';
+
 import test from 'ava';
 
-test('Expected svg', async (t) => {
-  await main();
-  t.is(readFileSync('tmp/cutSpheres.svg', { encoding: 'utf8' }),
-       readFileSync('cutSpheres.svg', { encoding: 'utf8' }));
+test('Expected stl', async (t) => {
+  await run('svg');
+  isExpected(t, 'svg/svg/cutSpheres.svg');
 });
