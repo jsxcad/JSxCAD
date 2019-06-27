@@ -7,19 +7,22 @@ export const transformItem = (matrix, item) => {
   const transformed = {};
   if (item.assembly) {
     transformed.assembly = item.assembly;
-  }
-  if (item.paths) {
+  } else if (item.disjointAssembly) {
+    transformed.disjointAssembly = item.disjointAssembly;
+  } else if (item.paths) {
     transformed.paths = transformPaths(matrix, item.paths);
-  }
-  if (item.points) {
+  } else if (item.points) {
     transformed.points = transformPoints(matrix, item.points);
-  }
-  if (item.solid) {
+  } else if (item.solid) {
     transformed.solid = transformSolid(matrix, item.solid);
-  }
-  if (item.z0Surface) {
+    if (item.solid.isConvex !== undefined) transformed.solid.isConvex = item.solid.isConvex;
+  } else if (item.z0Surface) {
     // FIX: Handle transformations that take the surface out of z0.
     transformed.z0Surface = transformSurface(matrix, item.z0Surface);
+  } else if (item.empty) {
+    transformed.empty = true;
+  } else {
+    throw Error(`die: ${JSON.stringify(item)}`);
   }
   transformed.tags = item.tags;
   return transformed;

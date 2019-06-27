@@ -38,6 +38,8 @@ const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => 
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
+    } else if (geometry.disjointAssembly) {
+      geometry.disjointAssembly.forEach(walk);
     } else if (geometry.threejsPoints) {
       const points = geometry.threejsPoints;
       const threejsGeometry = new THREE.Geometry();
@@ -70,7 +72,8 @@ const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => 
       scene.add(new THREE.Mesh(threejsGeometry, material));
     }
   };
-  walk(toThreejsGeometry(geometry));
+  const threejsGeometry = toThreejsGeometry(geometry);
+  walk(toThreejsGeometry(threejsGeometry));
 
   return [scene, camera];
 };
@@ -84,7 +87,8 @@ const header =
 `;
 
 export const toSvgSync = (options = {}, geometry) => {
-  const [scene, camera] = build(options, toKeptGeometry(geometry));
+  const keptGeometry = toKeptGeometry(geometry);
+  const [scene, camera] = build(options, keptGeometry);
   const { includeXmlHeader = true, pageSize = [500, 500] } = options;
   const [pageWidth, pageHeight] = pageSize;
 

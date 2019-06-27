@@ -1,8 +1,20 @@
-import { equals } from '@jsxcad/math-vec3';
+import { equals as equalsVec3, squaredDistance } from '@jsxcad/math-vec3';
 
 // Edge Properties.
 const START = 0;
 const END = 1;
+
+const THRESHOLD = 1e-5;
+
+const equals = (a, b) => {
+  if (equalsVec3(a, b)) {
+    return true;
+  }
+  if (squaredDistance(a, b) < THRESHOLD) {
+    return true;
+  }
+  return false;
+};
 
 const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
   if (aX < bX) { return -1; }
@@ -30,6 +42,15 @@ export const toLoops = ({ allowOpenPaths = false }, edges) => {
 
   // Sort the edges so that deduplication is efficient.
   edges.sort(lexicographcalPointOrder);
+
+  /*
+  console.log(`QQ/edges: ${JSON.stringify(edges)}`);
+  console.log(`digraph {`);
+  for (const edge of edges) {
+    console.log(`"${JSON.stringify(edge[0])}" -> "${JSON.stringify(edge[1])}"`);
+  }
+  console.log(`}`);
+*/
 
   // Assemble the edges into loops which are closed paths.
   const loops = [];

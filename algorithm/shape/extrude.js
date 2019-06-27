@@ -27,5 +27,9 @@ export const extrude = ({ height = 1 }, surface) => {
     polygons.push(roof, floor);
   }
 
-  return fromPolygons({}, polygons);
+  const solid = fromPolygons({}, polygons);
+  if (surface.isConvex) {
+    solid.isConvex = true;
+  }
+  return solid;
 };

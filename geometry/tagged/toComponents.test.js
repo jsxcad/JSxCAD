@@ -6,7 +6,7 @@ test('Requires A', t => {
                                 { solid: [], tags: ['b'] },
                                 { solid: [], tags: ['a', 'b'] }] };
   const components = toComponents({ }, assembly);
-  t.deepEqual(components, [{ 'tags': ['a', 'b'], 'solid': [] },
+  t.deepEqual(components, [{ 'tags': ['a'], 'solid': [] },
                            { 'tags': ['b'], 'solid': [] },
-                           { 'tags': ['a'], 'solid': [] }]);
+                           { 'tags': ['a', 'b'], 'solid': [] }]);
 });

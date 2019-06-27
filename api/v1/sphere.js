@@ -33,7 +33,12 @@ import { dispatch } from './dispatch';
  *
  **/
 
-const unitSphere = ({ resolution = 32 } = {}) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+const unitSphere = ({ resolution = 16 } = {}) => {
+  const shape = Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+  // Make convex.
+  shape.toGeometry().solid.isConvex = true;
+  return shape;
+};
 
 export const fromValue = (value) => unitSphere().scale(value);
 

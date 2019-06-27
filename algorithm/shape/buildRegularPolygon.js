@@ -22,5 +22,6 @@ export const buildRegularPolygon = ({ edges = 32 } = {}) => {
     let [x, y] = fromAngleRadians(radians);
     points.push([x, y, 0]);
   }
+  points.isConvex = true;
   return points;
 };

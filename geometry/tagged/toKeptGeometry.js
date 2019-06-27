@@ -8,8 +8,8 @@ export const toKeptGeometry = (geometry) => {
 
     const walk = (geometry) => {
       if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {
-        if (geometry.assembly) {
-          return { ...geometry, assembly: geometry.assembly.map(walk).filter(item => item !== undefined) };
+        if (geometry.disjointAssembly) {
+          return { ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined) };
         } else {
           return geometry;
         }

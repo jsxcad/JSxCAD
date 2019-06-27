@@ -1,18 +1,29 @@
 import { scale, translate } from '@jsxcad/geometry-path';
 
-import { buildConvexHull } from '@jsxcad/geometry-points';
 import { buildRegularPolygon } from './buildRegularPolygon';
-import { toPoints } from '@jsxcad/geometry-paths';
+
+const buildWalls = (polygons, floor, roof) => {
+  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+    // Remember that we are walking CCW.
+    polygons.push([floor[start], floor[end], roof[end], roof[start]]);
+  }
+};
 
 export const buildRingSphere = ({ resolution = 20 }) => {
-  const paths = [];
+  const polygons = [];
+  let lastPath;
   // Trace out latitudinal rings.
+  const ring = buildRegularPolygon({ edges: resolution });
   for (let slice = 0; slice <= resolution; slice++) {
-    let angle = Math.PI * 2.0 * slice / resolution;
-    let height = Math.sin(angle);
-    let radius = Math.cos(angle);
-    paths.push(translate([0, 0, height], scale([radius, radius, radius], buildRegularPolygon({ edges: resolution }))));
+    let angle = Math.PI * 1.0 * slice / resolution;
+    let height = Math.cos(angle);
+    let radius = Math.sin(angle);
+    const path = translate([0, 0, height], scale([radius, radius, radius], ring));
+    if (lastPath !== undefined) {
+      buildWalls(polygons, path, lastPath);
+    }
+    lastPath = path;
   }
-  // Hull the rings to form a sphere.
-  return buildConvexHull({}, toPoints({}, paths));
+  polygons.isConvex = true;
+  return polygons;
 };

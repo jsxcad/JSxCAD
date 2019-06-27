@@ -2,7 +2,8 @@ import { toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { toThreejsGeometry } from './toThreejsGeometry';
 
 export const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry) => {
-  const threejsGeometry = toThreejsGeometry(toKeptGeometry(geometry));
+  const keptGeometry = toKeptGeometry(geometry);
+  const threejsGeometry = toThreejsGeometry(keptGeometry);
   const html = `
 <html>
  <head>

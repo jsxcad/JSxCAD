@@ -59,6 +59,12 @@ export const toThreejsGeometry = (geometry, supertags) => {
       tags: tags,
       isThreejsGeometry: true
     };
+  } else if (geometry.disjointAssembly) {
+    return {
+      assembly: geometry.disjointAssembly.map(item => toThreejsGeometry(item, tags)),
+      tags: tags,
+      isThreejsGeometry: true
+    };
   } else if (geometry.paths) {
     return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags: tags, isThreejsGeometry: true };
   } else if (geometry.points) {

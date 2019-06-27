@@ -1,1 +1,3 @@
-export const difference = (pathset, ...pathsets) => { throw Error('Not implemented'); };
+// FIX: Determine the correct behaviour here.
+
+export const difference = (pathset, ...pathsets) => pathset;
