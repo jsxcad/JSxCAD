@@ -29,6 +29,7 @@ import { cut } from './cut';
 import { cylinder } from './cylinder';
 import { describe } from './describe';
 import { difference } from './difference';
+import { divide } from './divide';
 import { drop } from './drop';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
@@ -109,6 +110,7 @@ export {
   cylinder,
   describe,
   difference,
+  divide,
   drop,
   extrude,
   fillet,

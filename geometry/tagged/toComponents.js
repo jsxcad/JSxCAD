@@ -5,6 +5,8 @@ export const toComponents = (options = {}, geometry) => {
   const walk = (item) => {
     if (item.assembly) {
       item.assembly.map(walk);
+    } else if (item.disjointAssembly) {
+      item.disjointAssembly.map(walk);
     } else {
       components.push(item);
     }

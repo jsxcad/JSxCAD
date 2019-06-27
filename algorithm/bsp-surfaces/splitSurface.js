@@ -32,7 +32,7 @@ let splitSurfaceMark = 1;
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
   if (++splitSurfaceCount >= splitSurfaceMark) {
     splitSurfaceMark *= 1.2;
-    console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
+    // console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
   }
 
   // Try to classify the whole surface first.

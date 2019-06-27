@@ -1,6 +1,7 @@
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { chainHull } from './chainHull';
+import { union } from './union';
 
 /**
  *
@@ -39,7 +40,7 @@ export const fillet = (shape, tool) => {
       cuts.push(chainHull(...cut));
     }
   }
-  return assemble(shape, assemble(...cuts).drop());
+  return assemble(shape, union(...cuts).drop());
 };
 
 const method = function (tool) { return fillet(this, tool); };

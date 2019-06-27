@@ -10,12 +10,14 @@ const { readFile } = fs.promises;
 // The illustration operator.
 // This is a kind of immediate, single-expression version of the language.
 // FIX: Figure out the language generally.
-const toOperator = ({ api }, script) => {
+const toOperator = async ({ api }, script) => {
   let ecmascript;
   try {
     ecmascript = toEcmascript({}, script);
-    const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-    return code(api).main;
+    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+    const constructor = await builder(api);
+    const module = await constructor();
+    return module.main;
   } catch (error) {
     console.log(`toOperator/script: ${script}`);
     console.log(`toOperator/ecmascript: ${ecmascript}`);
@@ -106,7 +108,9 @@ export const toUserGuide = async ({ api, paths, root }) => {
   let markdownHtml = md.render(markdown);
   for (const { patch, options, text } of patches) {
     console.log(`QQ/text: ${text}`);
-    const geometry = await toOperator({ api }, text)();
+    console.log(`QQ/toOperator: ${toOperator}`);
+    const main = await toOperator({ api }, text);
+    const geometry = await main();
     const svg = await toSvg({ includeXmlHeader: false, ...options },
                             geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
     markdownHtml = markdownHtml.replace(patch, svg);

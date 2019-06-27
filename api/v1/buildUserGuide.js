@@ -1,6 +1,7 @@
 import * as api from './main';
 
 import fs from 'fs';
+import { setupFilesystem } from '@jsxcad/sys';
 import { toUserGuide } from '@jsxcad/doc';
 
 Error.stackTraceLimit = Infinity;
@@ -30,6 +31,8 @@ const paths = [
   'union.js',
   'wireframe.js', 'writePdf.js', 'writeShape.js', 'writeStl.js', 'writeSvg.js', 'writeSvgPhoto.js'
 ];
+
+setupFilesystem({ fileBase: '.' });
 
 toUserGuide({ api, paths, root: __dirname })
     .then(html => writeFile('UserGuide.html', html))
