@@ -1,5 +1,5 @@
 import { buildRegularPolygon } from './buildRegularPolygon';
-import { extrudeLinear } from './extrudeLinear';
+import { extrude } from './extrude';
 import { translate } from '@jsxcad/geometry-solid';
 
 /**
@@ -17,5 +17,5 @@ import { translate } from '@jsxcad/geometry-solid';
 export const buildRegularPrism = ({ edges = 32 }) => {
   const surface = [buildRegularPolygon({ edges: edges })];
   surface.isConvex = true;
-  return extrudeLinear({ height: 1 }, surface);
+  return translate([0, 0, -0.5], extrude({ height: 1 }, surface));
 };

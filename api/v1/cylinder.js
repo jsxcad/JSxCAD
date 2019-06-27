@@ -5,7 +5,7 @@ import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
 
 const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
-  return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
+  return Shape.fromSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
 };
 
 /**
