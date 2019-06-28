@@ -8,9 +8,10 @@ import { scriptToOperator } from '@jsxcad/convert-jscad';
  *
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * await readJscad({ path: "example001.jscad",
- *                   sources: [{ file: 'jscad/example001.jscad' },
- *                             { url: 'https://jsxcad.js.org/jscad/example001.jscad' }] });
+ * const op = await readJscad({ path: "example001.jscad",
+ *                              sources: [{ file: 'jscad/example001.jscad' },
+ *                                        { url: 'https://jsxcad.js.org/jscad/example001.jscad' }] });
+ * op();
  * ```
  * :::
  *
