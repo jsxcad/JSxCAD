@@ -25,7 +25,7 @@ const paths = [
   'numbers.js',
   'outline.js',
   'plane.js', 'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
-  'readDst.js', 'readFont.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
+  'readDst.js', 'readFont.js', 'readJscad.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
   'scale.js', 'section.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
   'tetrahedron.js', 'torus.js', 'translate.js', 'triangle.js',
   'union.js',
