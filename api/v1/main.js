@@ -8,6 +8,7 @@
  */
 
 import { planeX, planeY, planeZ } from './plane';
+import { getClock, startClock } from './clock';
 
 import { Shape } from './Shape';
 import { above } from './above';
@@ -117,6 +118,7 @@ export {
   front,
   fuse,
   gear,
+  getClock,
   getPathsets,
   hull,
   importModule,
@@ -158,6 +160,7 @@ export {
   sphere,
   sqrt,
   square,
+  startClock,
   svgPath,
   tetrahedron,
   torus,

@@ -12,11 +12,27 @@ const gatherSurfaces = (bsp) => {
   return surfaces;
 };
 
+const isConvexBspTree = (bsp) => {
+  while (bsp !== undefined) {
+    if (bsp.front !== undefined) {
+      return false;
+    }
+    bsp = bsp.back;
+  }
+  return true;
+};
+
 export const toSurfaces = (options = {}, bsp) => {
   const surfaces = gatherSurfaces(bsp);
   for (const surface of surfaces) {
     assertCoplanar(surface);
   }
+
+  if (isConvexBspTree(bsp)) {
+    console.log(`QQ/toSurfaces/isConvex`);
+    surfaces.isConvex = true;
+  }
+
   // Some of these surfaces may have cracked.
   return surfaces;
 };

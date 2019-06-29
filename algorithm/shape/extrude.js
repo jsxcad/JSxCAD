@@ -15,8 +15,9 @@ export const extrude = ({ height = 1 }, surface) => {
       const start = floor[i];
       const end = floor[(i + 1) % floor.length];
       // Remember that we are walking CCW.
-      polygons.push([start, add(start, up), end]);
-      polygons.push([end, add(start, up), add(end, up)]);
+      // polygons.push([start, add(start, up), end]);
+      // polygons.push([end, add(start, up), add(end, up)]);
+      polygons.push([start, add(start, up), add(end, up), end]);
     }
   }
 

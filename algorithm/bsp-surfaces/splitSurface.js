@@ -1,7 +1,7 @@
-import { dot, squaredDistance } from '@jsxcad/math-vec3';
-import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
-import { measureBoundingSphere } from '@jsxcad/geometry-surface';
+import { equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
+import { measureBoundingSphere } from '@jsxcad/geometry-surface';
+import { squaredDistance } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const CONSERVATIVE_EPSILON = 1e-4;
@@ -12,6 +12,11 @@ const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
 const BACK = 2;
 const SPANNING = 3; // Both front and back.
+
+export const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+//  dot(plane, point) - plane[W];
+export const planeDistance = (plane, point) => plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
 
 const toType = (plane, point) => {
   let t = planeDistance(plane, point);
