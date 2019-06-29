@@ -1,7 +1,7 @@
-import { dot as dot2, squaredDistance } from '@jsxcad/math-vec3';
-import { signedDistanceToPoint as planeDistance2, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
-import { measureBoundingSphere } from '@jsxcad/geometry-surface';
+import { equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
+import { measureBoundingSphere } from '@jsxcad/geometry-surface';
+import { squaredDistance } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const CONSERVATIVE_EPSILON = 1e-4;
