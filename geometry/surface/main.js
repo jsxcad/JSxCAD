@@ -7,6 +7,7 @@ import { flip } from './flip';
 import { makeConvex } from './makeConvex';
 import { makeSimple } from './makeSimple';
 import { measureArea } from './measureArea';
+import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { toGeneric } from './toGeneric';
 
@@ -20,6 +21,7 @@ export {
   makeConvex,
   makeSimple,
   measureArea,
+  measureBoundingBox,
   measureBoundingSphere,
   rotateZ,
   toGeneric,
