@@ -4,6 +4,7 @@ import { clean } from './clean';
 import { difference } from './difference';
 import { intersection } from './intersection';
 import { makeConvex } from './makeConvex';
+import { measureBoundingBox } from './measureBoundingBox';
 import { union } from './union';
 
 export {
@@ -11,6 +12,7 @@ export {
   clean,
   difference,
   makeConvex,
+  measureBoundingBox,
   intersection,
   rotateZ,
   scale,
