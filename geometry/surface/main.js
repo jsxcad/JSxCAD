@@ -1,4 +1,4 @@
-import { canonicalize, rotateZ, scale, toPlane, transform } from './ops';
+import { canonicalize, rotateZ, scale, toPlane, transform, translate } from './ops';
 import { cut, cutSurface } from './cut';
 
 import { assertCoplanar } from './assertCoplanar';
@@ -27,5 +27,6 @@ export {
   toGeneric,
   toPlane,
   transform,
+  translate,
   scale
 };

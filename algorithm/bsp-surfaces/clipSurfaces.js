@@ -1,11 +1,13 @@
 import { splitSurface } from './splitSurface';
 
+// Remove from surfaces those parts that are inside the solid delineated by bsp.
 export const clipSurfaces = (bsp, surfaces) => {
   if (surfaces.length === 0) {
-    // PROVE: Does this happen due to degeneracy?
+    // Nothing to do.
     return [];
   }
   if (bsp.plane === undefined) {
+    // An unclassified region -- how can this be?
     return surfaces.slice();
   }
   let front = [];

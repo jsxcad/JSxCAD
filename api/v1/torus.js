@@ -30,7 +30,7 @@ import { planeX } from './plane';
  *
  **/
 
-export const torus = ({ thickness = 1, radius = 1, segments = 32, sides = 32, rotation = 0 } = {}) => {
+export const torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) => {
   const piece = circle({ radius: thickness, sides }).rotateZ(rotation).rotateX(90).translate(radius).cut(planeX())[0];
   const pieces = [];
   for (let angle = 0; angle < 361; angle += 360 / segments) {
