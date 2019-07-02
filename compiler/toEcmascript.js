@@ -1,14 +1,70 @@
+// FIX: Is this specific to the v1 api? If so, move it there.
+
+import { parse } from '@babel/parser';
 import recast from 'recast';
-import types from 'ast-types';
+
+export const strip = (ast) => {
+  if (ast instanceof Array) {
+    return ast.map(strip);
+  } else if (ast instanceof Object) {
+    const stripped = {};
+    for (const key of Object.keys(ast)) {
+      if (['end', 'loc', 'start'].includes(key)) {
+        continue;
+      }
+      stripped[key] = strip(ast[key]);
+    }
+    return stripped;
+  } else {
+    return ast;
+  }
+};
+
+const fromObjectExpression = ({ properties }) => {
+  const object = {};
+  for (const { key, value } of properties) {
+    if (value.type === 'StringLiteral') {
+      object[key.value] = value.value;
+    } else if (value.type === 'ArrayExpression') {
+      object[key.value] = value.elements.map(element => element.value);
+    } else if (value.type === 'ObjectExpression') {
+      object[key.value] = fromObjectExpression(value);
+    } else {
+      throw Error('die');
+    }
+  }
+  return object;
+};
+
+const toExpression = (value) => {
+  if (typeof value === 'string') {
+    return { type: 'StringLiteral', value };
+  } else if (value instanceof Array) {
+    return { type: 'ArrayExpression', elements: value.map(toExpression) };
+  } else {
+    throw Error('die');
+  }
+};
 
 export const toEcmascript = (options, script) => {
-  let ast = recast.parse(script);
+  let ast = recast.parse(script,
+                         {
+                           parser: {
+                             parse: (script) => parse(script,
+                                                      {
+                                                        allowAwaitOutsideFunction: true,
+                                                        allowReturnOutsideFunction: true,
+                                                        sourceType: 'module'
+                                                      })
+                           }
+                         });
 
   const exportNames = [];
   const expressions = [];
 
   const body = ast.program.body;
   const out = [];
+  const annotations = { imports: {} };
 
   // Separate top level exports and expressions.
   // FIX: This will reorder things unnecessarily when export main is present.
@@ -26,14 +82,54 @@ export const toEcmascript = (options, script) => {
         }
         out.push(declaration);
       }
+    } else if (entry.type === 'ImportDeclaration') {
+      const entry = body[nth];
+      // Rewrite
+      //   import { foo } from 'bar';
+      // to
+      //   const { foo } = readScript('bar');
+      //
+      // FIX: Handle other variations.
+      const { specifiers, source } = entry;
+      const sources = toExpression(annotations.imports[source.value] || []);
+
+      const declarations = [];
+      for (const { imported } of specifiers) {
+        declarations.push({
+          type: 'VariableDeclarator',
+          kind: 'const',
+          id: {
+            type: 'ObjectPattern',
+            properties: [{
+              type: 'ObjectProperty',
+              key: { type: 'Identifier', name: imported.name },
+              value: { type: 'Identifier', name: imported.name }
+            }]
+          },
+          init: {
+            type: 'AwaitExpression',
+            argument: {
+              type: 'CallExpression',
+              callee: {
+                type: 'Identifier',
+                name: 'importModule'
+              },
+              arguments: [source, sources]
+            }
+          }
+        });
+      }
+      out.push({ type: 'VariableDeclaration', kind: 'const', declarations });
+    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
+      Object.assign(annotations, fromObjectExpression(entry.expression));
     } else {
       expressions.push(entry);
     }
   }
 
   // Set up a main.
-  if (exportNames.includes('main')) {
-    // They export a main function, so assume they know what they're doing.
+  if (exportNames.length > 0) {
+    // They export something, so assume they know what they're doing.
     out.push(...expressions);
   } else {
     // They don't export a main function, so build one for them.
@@ -44,7 +140,7 @@ export const toEcmascript = (options, script) => {
       if (tail.type === 'ExpressionStatement') {
         expressions[last] = {
           type: 'ReturnStatement',
-          argument: expressions[last]
+          argument: expressions[last].expression
         };
       }
     }
@@ -65,7 +161,8 @@ export const toEcmascript = (options, script) => {
             body: expressions
           },
           generator: false,
-          expression: true
+          expression: true,
+          async: true
         }
       }],
       kind: 'const'
@@ -90,26 +187,22 @@ export const toEcmascript = (options, script) => {
 
   ast = {
     type: 'Program',
-    body: out
+    body: [{
+      type: 'ReturnStatement',
+      argument: {
+        type: 'ArrowFunctionExpression',
+        id: null,
+        expression: true,
+        generator: false,
+        async: true,
+        params: [],
+        body: {
+          type: 'BlockStatement',
+          body: out
+        }
+      }
+    }]
   };
 
-  // Make arrow functions async.
-  // Await on calls.
-  types.visit(ast, {
-    visitArrowFunctionExpression: function (path) {
-      this.traverse(path);
-      path.node.async = true;
-    },
-    visitCallExpression: function (path) {
-      this.traverse(path);
-      path.replace({
-        type: 'ParenthesizedExpression',
-        expression: {
-          type: 'AwaitExpression',
-          argument: path.node
-        }
-      });
-    }
-  });
   return recast.print(ast).code;
 };

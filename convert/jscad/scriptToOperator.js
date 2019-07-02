@@ -1,4 +1,4 @@
-import * as api from './api';
+import api from './dist/api';
 
 import { fromPolygons } from '@jsxcad/geometry-solid';
 import { readFile } from '@jsxcad/sys';
@@ -9,30 +9,25 @@ const unpackApi = (api) => {
   const operators = {};
   for (const domain of Object.keys(api)) {
     for (const library of Object.keys(api[domain])) {
-      for (const operator of Object.keys(api[domain][library])) {
-        operators[operator] = api[domain][library][operator];
-      }
+      operators[library] = api[domain][library];
     }
   }
   return operators;
 };
-
-const operators = unpackApi(api);
 
 const csgToSolid = (csg) =>
   fromPolygons({}, csg.polygons.map(polygon =>
     polygon.vertices.map(vertex =>
       [vertex.pos.x, vertex.pos.y, vertex.pos.z])));
 
-const createJscadFunction = (script, operators) => {
-  const { main, getParameterDefinitions } =
-      new Function(`{ ${Object.keys(operators).join(', ')} }`,
-                   `
-                    function getParameterDefinitions () { return []; }
-                    ${script};
-                    return { main, getParameterDefinitions };
-                   `
-      )(operators);
+const createJscadFunction = (script, api) => {
+  const parameter = `{ ${Object.keys(api).join(', ')} }`;
+  const body = `
+                 function getParameterDefinitions () { return []; }
+                 ${script};
+                 return { main, getParameterDefinitions };
+                 `;
+  const { main, getParameterDefinitions } = new Function(parameter, body)(api);
   const getGeometry = (params) => {
     const output = main(params);
     const result = { assembly: [] };
@@ -62,12 +57,18 @@ const replaceIncludes = async (ast) => {
     }
   });
   for (const include of includes) {
-    include.replace(await replaceIncludes(recast.parse(await readFile({}, include.node.arguments[0].value))));
+    const path = include.node.arguments[0].value;
+    include.replace(await replaceIncludes(recast.parse(await readFile({ path, sources: [path] }))));
   }
   return ast;
 };
 
-export const scriptToOperator = async (options = {}, script) =>
-  replaceIncludes(recast.parse(script))
-      .then(ast => createJscadFunction(recast.print(ast).code, operators))
-      .catch(error => console.log(error));
+export const scriptToOperator = async (options = {}, script) => {
+  try {
+    const ast = await replaceIncludes(recast.parse(script));
+    const operator = createJscadFunction(recast.print(ast).code, unpackApi(api));
+    return operator;
+  } catch (e) {
+    console.log(e);
+  }
+};

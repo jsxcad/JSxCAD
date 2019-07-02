@@ -1,6 +1,6 @@
 import { Shape } from './Shape';
+import { assemble } from './assemble';
 import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
-import { union } from '@jsxcad/geometry-z0surface';
 
 /**
  *
@@ -27,10 +27,12 @@ import { union } from '@jsxcad/geometry-z0surface';
  **/
 
 export const outline = (options = {}, shape) => {
+  const surfaces = getZ0Surfaces(shape.toKeptGeometry());
   // FIX: Handle non-z0surfaces.
-  return Shape.fromPaths(union(...getZ0Surfaces(shape.toGeometry())));
+  return assemble(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
 };
 
 const method = function (options) { return outline(options, this); };
 
 Shape.prototype.outline = method;
+Shape.prototype.withOutline = function (options) { return assemble(this, outline(options, this)); };

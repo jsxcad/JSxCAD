@@ -1,4 +1,4 @@
-import { canonicalize } from '@jsxcad/geometry-eager';
+import { canonicalize } from '@jsxcad/geometry-tagged';
 import { fromStl } from './fromStl';
 import { readFileSync } from 'fs';
 import test from 'ava';

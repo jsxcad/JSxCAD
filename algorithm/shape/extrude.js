@@ -1,6 +1,7 @@
+import { flip, translate } from '@jsxcad/geometry-surface';
+
 import { add } from '@jsxcad/math-vec3';
-import { fromPolygons } from '@jsxcad/geometry-solid';
-import { makeConvex } from '@jsxcad/geometry-z0surface';
+import { fromPolygons } from './fromPolygons';
 
 export const extrude = ({ height = 1 }, surface) => {
   const polygons = [];
@@ -15,17 +16,27 @@ export const extrude = ({ height = 1 }, surface) => {
       const start = floor[i];
       const end = floor[(i + 1) % floor.length];
       // Remember that we are walking CCW.
-      polygons.push([start, add(start, up), end]);
-      polygons.push([end, add(start, up), add(end, up)]);
+      // polygons.push([start, add(start, up), end]);
+      // polygons.push([end, add(start, up), add(end, up)]);
+      polygons.push([start, add(start, up), add(end, up), end]);
     }
   }
 
-  // Build the roof and floor from convex polygons.
-  for (const polygon of makeConvex({}, surface)) {
-    const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
-    const roof = floor.map(vertex => add(vertex, up)).reverse();
-    polygons.push(roof, floor);
+  // Walls go around.
+  const walls = fromPolygons({}, polygons);
+
+  // Roof goes up.
+  const roof = translate([0, 0, height], surface);
+
+  // floor faces down.
+  const floor = flip(surface);
+
+  // And form a solid.
+  const solid = [roof, floor, ...walls];
+
+  if (surface.isConvex) {
+    solid.isConvex = true;
   }
 
-  return fromPolygons({}, polygons);
+  return solid;
 };

@@ -10,8 +10,8 @@ import { writeShape } from './writeShape';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * writeShape({ path: 'geometry/cube' }, cube())
- * readShape({ path: 'geometry/cube' })
+ * await writeShape({ path: 'geometry/cube' }, cube())
+ * await readShape({ path: 'geometry/cube' })
  * ```
  * :::
  *
@@ -23,8 +23,8 @@ import { writeShape } from './writeShape';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * readShape({ path: 'geometry/sphere' }, () => sphere())
- * readShape({ path: 'geometry/sphere' }, () => sphere())
+ * await readShape({ path: 'geometry/sphere' }, () => sphere())
+ * await readShape({ path: 'geometry/sphere' }, () => sphere())
  * ```
  * :::
  *

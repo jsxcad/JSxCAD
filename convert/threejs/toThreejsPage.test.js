@@ -19,7 +19,7 @@ test('No-eval geodesic sphere', async (t) => {
   t.is(html, await readFile('toThreejsPage.test.noeval.html', { encoding: 'utf8' }));
 });
 
-test('Eval geodesic sphere', async (t) => {
+test('Eval lego skeleton sphere', async (t) => {
   const html = await toThreejsPage(
     { includeEvaluator: true,
       includeEditor: true,
@@ -30,7 +30,7 @@ const main = async () => {
  }
 `
     },
-    {});
+    { empty: true });
   await writeFile('toThreejsPage.test.eval.html', html, { encoding: 'utf8' });
   t.is(html, await readFile('toThreejsPage.test.eval.html', { encoding: 'utf8' }));
 });

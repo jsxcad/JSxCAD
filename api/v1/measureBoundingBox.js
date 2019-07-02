@@ -1,6 +1,5 @@
-import { max, min } from '@jsxcad/math-vec3';
-
 import { Shape } from './Shape';
+import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -21,23 +20,7 @@ import { Shape } from './Shape';
  * :::
  **/
 
-export const measureBoundingBox = (shape) => {
-  // FIX: Handle empty geometries.
-  let minPoint = [Infinity, Infinity, Infinity];
-  let maxPoint = [-Infinity, -Infinity, -Infinity];
-  let empty = true;
-  shape.eachPoint({},
-                  (point) => {
-                    minPoint = min(minPoint, point);
-                    maxPoint = max(maxPoint, point);
-                    empty = false;
-                  });
-  if (empty) {
-    return [[0, 0, 0], [0, 0, 0]];
-  } else {
-    return [minPoint, maxPoint];
-  }
-};
+export const measureBoundingBox = (shape) => measureBoundingBoxOfGeometry(shape.toGeometry());
 
 const method = function () { return measureBoundingBox(this); };
 

@@ -6,37 +6,16 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
-import { Buffer } from 'buffer';
-import { base } from './filesystem';
+import { getBase } from './filesystem';
 import { getFile } from './files';
+import { isBase64 } from 'is-base64';
 import localForage from 'localforage';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
+import { toByteArray } from 'base64-js';
 import { writeFile } from './writeFile';
 
 const { promises } = fs;
-
-const dataAs = (as, data) => {
-  if (data !== undefined) {
-    switch (as) {
-      case 'utf8':
-        if (typeof data === 'string') {
-          return data;
-        } else if (Buffer.isBuffer(data)) {
-          const utf8 = data.toString('utf8');
-          return utf8;
-        }
-        break;
-      case 'bytes':
-        if (Buffer.isBuffer(data)) {
-          return data;
-        } else if (data instanceof ArrayBuffer) {
-          return new Uint8Array(data);
-        }
-        break;
-    }
-  }
-};
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
@@ -54,7 +33,11 @@ const getFileFetcher = async () => {
     return async (path) => {
       const data = await localForage.getItem(`file/${path}`);
       if (data !== null) {
-        return data;
+        if (isBase64(data)) {
+          return toByteArray(data);
+        } else {
+          return new TextEncoder('utf8').encode(data);
+        }
       }
     };
   } else {
@@ -65,35 +48,41 @@ const getFileFetcher = async () => {
 // Fetch from internal store.
 const fetchPersistent = async ({ as }, path) => {
   try {
-    const fetchFile = await getFileFetcher();
-    const data = await fetchFile(`${base}${path}`);
-    return dataAs(as, data);
+    const base = getBase();
+    if (base !== undefined) {
+      const fetchFile = await getFileFetcher();
+      return await fetchFile(`${base}${path}`);
+    }
   } catch (e) {
   }
 };
 
 // Fetch from external sources.
-const fetchSources = async ({ as = 'utf8' }, sources) => {
+const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
   const fetchFile = await getFileFetcher();
   // Try to load the data from a source.
   for (const source of sources) {
-    if (source.url !== undefined) {
+    if (typeof source === 'string') {
+      // FIX: Detect urls.
+      try {
+        const data = await fetchFile(source);
+        if (data !== undefined) {
+          return data;
+        }
+      } catch (e) {
+      }
+    } else if (source.url !== undefined) {
       log(`# Fetching ${source.url}`);
       const response = await fetchUrl(source.url);
       if (response.ok) {
-        switch (as) {
-          case 'utf8':
-            return dataAs(as, await response.text());
-          case 'bytes':
-            return dataAs(as, await response.arrayBuffer());
-        }
+        return new Uint8Array(await response.arrayBuffer());
       }
     } else if (source.file !== undefined) {
       try {
         const data = await fetchFile(source.file);
         if (data !== undefined) {
-          return dataAs(as, data);
+          return data;
         }
       } catch (e) {}
     } else {
@@ -109,13 +98,11 @@ export const readFile = async (options, path) => {
   }
   const { sources = [] } = options;
   const file = getFile(options, path);
-  if (file.data === undefined || file.as !== as) {
+  if (file.data === undefined) {
     file.data = await fetchPersistent({ as }, path);
-    file.as = as;
   }
-  if (file.data === undefined || file.as !== as) {
-    file.data = await fetchSources({ as }, sources);
-    file.as = as;
+  if (file.data === undefined) {
+    file.data = await fetchSources({}, sources);
     if (!ephemeral && file.data !== undefined) {
       // Update persistent storage.
       await writeFile(options, path, file.data);
@@ -127,5 +114,11 @@ export const readFile = async (options, path) => {
       file.data = await file.data;
     }
   }
-  return file.data;
+  if (file.data !== undefined) {
+    if (as === 'bytes') {
+      return file.data;
+    } else {
+      return new TextDecoder('utf8').decode(file.data);
+    }
+  }
 };

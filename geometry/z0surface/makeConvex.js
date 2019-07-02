@@ -1,10 +1,11 @@
-import Tess2 from 'tess2';
+import Tess2 from './tess2';
 import { blessAsConvex } from './blessAsConvex';
+import { toPlane } from '@jsxcad/math-poly3';
 
 const toContour = (polygon) => {
   const points = [];
-  for (const [x = 0, y = 0, z = 0] of polygon) {
-    points.push(x, y, z);
+  for (const [x = 0, y = 0] of polygon) {
+    points.push(x, y, 0);
   }
   return points;
 };
@@ -20,7 +21,14 @@ const fromTessellation = (tessellation) => {
   };
 
   for (let nth = 0; nth < tessPolygons.length; nth += 3) {
-    polygons.push([toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)]);
+    const polygon = [toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)];
+    if (!isNaN(toPlane(polygon)[0])) {
+      // FIX: Handle degeneracy better.
+      polygons.push(polygon);
+    } else {
+      // console.log(`QQ/fromTessellation: skip degenerate`);
+      // throw Error('die');
+    }
   }
 
   return polygons;

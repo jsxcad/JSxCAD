@@ -1,5 +1,3 @@
-import { assertCoplanar } from '@jsxcad/geometry-surface';
-
 const gatherSurfaces = (bsp) => {
   // PROVE: That we need this slice.
   let surfaces = bsp.surfaces.slice();
@@ -12,11 +10,23 @@ const gatherSurfaces = (bsp) => {
   return surfaces;
 };
 
+const isConvexBspTree = (bsp) => {
+  while (bsp !== undefined) {
+    if (bsp.front !== undefined) {
+      return false;
+    }
+    bsp = bsp.back;
+  }
+  return true;
+};
+
 export const toSurfaces = (options = {}, bsp) => {
   const surfaces = gatherSurfaces(bsp);
-  for (const surface of surfaces) {
-    assertCoplanar(surface);
+
+  if (isConvexBspTree(bsp)) {
+    surfaces.isConvex = true;
   }
+
   // Some of these surfaces may have cracked.
   return surfaces;
 };

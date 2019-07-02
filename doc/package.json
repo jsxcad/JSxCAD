@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/doc",
-  "version": "0.0.75",
+  "version": "0.0.79",
   "description": "System support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -21,8 +21,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/compiler": "^0.0.75",
-    "@jsxcad/convert-threejs": "^0.0.75",
+    "@jsxcad/compiler": "^0.0.79",
+    "@jsxcad/convert-threejs": "^0.0.79",
     "esm": "^3.2.10",
     "jsdoc-extractor": "^3.0.0",
     "markdown-it": "^8.4.2",
@@ -42,8 +42,8 @@
   "ava": {
     "require": "esm"
   },
-  "private": true,
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

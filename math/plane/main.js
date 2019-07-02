@@ -3,6 +3,7 @@ import { flip } from './flip';
 import { fromNormalAndPoint } from './fromNormalAndPoint';
 import { fromPoints } from './fromPoints';
 import { fromPointsRandom } from './fromPointsRandom';
+import { fromPolygon } from './fromPolygon';
 import { signedDistanceToPoint } from './signedDistanceToPoint';
 import { splitLineSegmentByPlane } from './splitLineSegmentByPlane';
 import { toXYPlaneTransforms } from './toXYPlaneTransforms';
@@ -14,6 +15,7 @@ export {
   fromNormalAndPoint,
   fromPoints,
   fromPointsRandom,
+  fromPolygon,
   signedDistanceToPoint,
   splitLineSegmentByPlane,
   toXYPlaneTransforms,

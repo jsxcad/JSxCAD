@@ -40,7 +40,7 @@ import { keep as keepGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const fromValue = (tags, shape) => fromGeometry(keepGeometry(tags, toGeometry(shape)));
+export const fromValue = (tags, shape) => fromGeometry(keepGeometry(tags.map(tag => `user/${tag}`), toGeometry(shape)));
 
 export const keep = dispatch(
   'keep',

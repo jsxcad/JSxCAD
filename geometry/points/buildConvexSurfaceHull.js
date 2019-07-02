@@ -5,5 +5,5 @@ export const buildConvexSurfaceHull = (options = {}, points) => {
   for (const nth of ConvexHull2d(points)) {
     hull.push(points[nth]);
   }
-  return hull;
+  return hull.reverse();
 };

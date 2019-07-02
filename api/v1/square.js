@@ -3,6 +3,7 @@ import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/a
 
 import { Shape } from './Shape';
 import { dispatch } from './dispatch';
+import { polygon } from './polygon';
 
 /**
  *
@@ -27,7 +28,20 @@ import { dispatch } from './dispatch';
  * :::
  * ::: illustration
  * ```
- * square({ radius: 10 })
+ * square({ edge: 10 })
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(circle(10),
+ *          square({ radius: 10 })
+ *            .drop())
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(square({ apothem: 10 }),
+ *          circle(10).drop())
  * ```
  * :::
  * ::: illustration
@@ -42,8 +56,6 @@ const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 
 
 export const fromSize = ({ size }) => unitSquare().scale(size);
 export const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
-export const fromRadius = ({ radius }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(radius);
-export const fromDiameter = ({ diameter }) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(diameter / 2);
 
 export const square = dispatch(
   'square',
@@ -65,15 +77,25 @@ export const square = dispatch(
     assertEmpty(rest);
     return () => fromDimensions({ width, length });
   },
-  // square({ radius: 5 })
+  // square({ edge: 10 })
+  ({ edge }) => {
+    assertNumber(edge);
+    return () => polygon.fromEdge({ edge, sides: 4 });
+  },
+  // polygon({ apothem: 10 })
+  ({ apothem }) => {
+    assertNumber(apothem);
+    return () => polygon.fromApothem({ apothem, sides: 4 });
+  },
+  // polygon({ radius: 10})
   ({ radius }) => {
     assertNumber(radius);
-    return () => fromRadius({ radius });
+    return () => polygon.fromRadius({ radius, sides: 4 });
   },
-  // square({ diameter: 5 })
+  // polygon({ diameter: 10})
   ({ diameter }) => {
     assertNumber(diameter);
-    return () => fromDiameter({ diameter });
+    return () => polygon.fromDiameter({ diameter, sides: 4 });
   });
 
 export default square;

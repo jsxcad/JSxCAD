@@ -1,12 +1,8 @@
-import { fromPoints } from '@jsxcad/math-plane';
+import { fromPolygon } from '@jsxcad/math-plane';
 
 export const toPlane = (polygon) => {
   if (polygon.plane === undefined) {
-    if (polygon.length >= 3) {
-      polygon.plane = fromPoints(...polygon);
-    } else {
-      throw Error('die');
-    }
+    polygon.plane = fromPolygon(polygon);
   }
   return polygon.plane;
 };

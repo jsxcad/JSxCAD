@@ -1,7 +1,6 @@
 import { assemble } from './assemble';
 import { cube } from './cube';
 import { cylinder } from './cylinder';
-import { union } from './union';
 
 /**
  *
@@ -24,7 +23,7 @@ import { union } from './union';
  * :::
  * ::: illustration { "view": { "position": [40, 40, -20] } }
  * ```
- * lego.socketSheet().drop('void')
+ * lego.socketSheet()
  * ```
  * :::
  * FIX: Does not drop deep 'void'.
@@ -32,7 +31,6 @@ import { union } from './union';
  * ```
  * assemble(cube(8, 8, 3.2).above().as('plate'),
  *          lego.socket().above().as('socket'))
- *   .drop('void')
  * ```
  * :::
  *
@@ -63,7 +61,7 @@ export const socket = ({ diameter = 5.1, height = 1.8, gripRingHeight = 0.4, gri
   // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
   const bottom = 0.5;
   const topHeight = height - gripRingHeight - bottom;
-  return union(
+  return assemble(
     // flaired top
     cylinder({ diameter: (diameter + play), height: topHeight }).translate([0, 0, topHeight / 2 + bottom + gripRingHeight]),
     // grip ring
@@ -80,7 +78,7 @@ export const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1,
     }
   }
   return assemble(cube(width - play * 2, length - play * 2, height),
-                  assemble(...sockets).as('void'));
+                  assemble(...sockets).drop());
 };
 
 export const lego = {

@@ -1,34 +1,7 @@
-/*
-import { scale, translate } from '@jsxcad/geometry-eager';
-
-import fontkit from 'fontkit/index.js';
-import { fromSvgPath } from '@jsxcad/convert-svg';
-import { union } from '@jsxcad/geometry-z0surface';
-
-export const toFont = ({ name }, bytes) => {
-  const fontData = fontkit.create(Buffer.from(bytes), name);
-
-  const font = ({ emSize = 1 }, text) => {
-    const { glyphs, positions } = fontData.layout(text);
-    const pathsets = [];
-    const factor = emSize / fontData.unitsPerEm;
-    let xOffset = 0;
-    for (let nth = 0; nth < glyphs.length; nth++) {
-      const { path } = glyphs[nth];
-      const { xAdvance } = positions[nth];
-      pathsets.push(translate([xOffset], fromSvgPath({ curveSegments: 32, normalizeCoordinateSystem: false }, path.toSVG())).paths);
-      xOffset += xAdvance;
-    }
-    return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
-  };
-  return font;
-};
-*/
-
+import { clean } from '@jsxcad/geometry-z0surface';
 import { fromSvgPath } from '@jsxcad/convert-svg';
 import { parse } from 'opentype.js';
-import { scale } from '@jsxcad/geometry-eager';
-import { union } from '@jsxcad/geometry-z0surface';
+import { scale } from '@jsxcad/geometry-tagged';
 
 export const toFont = (options = {}, bytes) => {
   const fontData = parse(bytes.buffer);
@@ -44,9 +17,10 @@ export const toFont = (options = {}, bytes) => {
                           });
     const pathsets = [];
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
-      pathsets.push(paths);
+      // Cleaning forces the first path to not be a hole.
+      pathsets.push(clean(paths));
     }
-    return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
+    return scale([factor, factor, factor], { assembly: pathsets.map(paths => ({ z0Surface: paths })) });
   };
 
   return font;

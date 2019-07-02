@@ -1,9 +1,9 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
-import { eachItem, toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
+import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { makeSurfacesConvex, toPolygons } from '@jsxcad/geometry-solid';
 
+import { fixTJunctions } from './fixTJunctions';
 import { toPlane } from '@jsxcad/math-poly3';
-import { toPolygons } from '@jsxcad/geometry-solid';
 
 /**
  * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
@@ -14,31 +14,23 @@ import { toPolygons } from '@jsxcad/geometry-solid';
  * @returns {String} - the ascii STL output.
  */
 
-const geometryToTriangles = (geometry) => {
-  const triangleSets = [];
-  eachItem(geometry,
-           item => {
-             if (item.solid) {
-               triangleSets.push(toTriangles({}, toPolygons({}, item.solid)));
-             }
-           });
-  return [].concat(...triangleSets);
+const geometryToTriangles = (solids) => {
+  const triangles = [];
+  for (const { solid } of solids) {
+    triangles.push(...toTriangles({}, toPolygons({}, makeSurfacesConvex({}, solid))));
+  }
+  return triangles;
 };
 
 export const toStl = async (options = {}, geometry) => {
   let keptGeometry = toKeptGeometry(geometry);
-  let polygons = geometryToTriangles(keptGeometry);
-  if (!isWatertightPolygons(polygons)) {
-    console.log(`polygonsToStla: Polygon is not watertight`);
-    if (options.doMakeWatertight) {
-      polygons = makeWatertight(polygons);
-    }
-  }
-  return `solid JSxCAD\n${convertToFacets(options, canonicalize(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
+  let solids = getSolids(keptGeometry);
+  let triangles = geometryToTriangles(fixTJunctions(solids));
+  return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>
-  polygons.map(convertToFacet).join('\n');
+  polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
 
 const toStlVector = vector =>
   `${vector[0]} ${vector[1]} ${vector[2]}`;
@@ -46,11 +38,15 @@ const toStlVector = vector =>
 const toStlVertex = vertex =>
   `vertex ${toStlVector(vertex)}`;
 
-const convertToFacet = polygon =>
-  `facet normal ${toStlVector(toPlane(polygon))}\n` +
-  `outer loop\n` +
-  `${toStlVertex(polygon[0])}\n` +
-  `${toStlVertex(polygon[1])}\n` +
-  `${toStlVertex(polygon[2])}\n` +
-  `endloop\n` +
-  `endfacet`;
+const convertToFacet = (polygon) => {
+  const plane = toPlane(polygon);
+  if (!isNaN(plane[0])) {
+    return `facet normal ${toStlVector(toPlane(polygon))}\n` +
+           `outer loop\n` +
+           `${toStlVertex(polygon[0])}\n` +
+           `${toStlVertex(polygon[1])}\n` +
+           `${toStlVertex(polygon[2])}\n` +
+           `endloop\n` +
+           `endfacet`;
+  }
+};

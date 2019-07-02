@@ -6,9 +6,9 @@ export const writeThreejsPage = async (options, shape) => {
   if (typeof options === 'string') {
     options = { path: options };
   }
-  const { path } = options;
+  const { path, view } = options;
   const geometry = shape.toKeptGeometry();
-  return writeFile({ geometry, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
+  await writeFile({ geometry, view, preview: true }, path, toThreejsPage(options, shape.toDisjointGeometry()));
 };
 
 const method = function (options = {}) { return writeThreejsPage(options, this); };

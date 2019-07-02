@@ -28,7 +28,7 @@ const exportedApi = {
   maths,
   text,
   OpenJsCad: {OpenJsCad: {log}},
-  debug: {echo}
+  debug: {echo},
 }
 
 module.exports = exportedApi

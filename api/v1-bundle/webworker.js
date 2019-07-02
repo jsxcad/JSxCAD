@@ -11,8 +11,10 @@ const agent = async ({ ask, question }) => {
       const ecmascript = toEcmascript({}, question.evaluate);
       console.log(`QQ/script: ${question.evaluate}`);
       console.log(`QQ/ecmascript: ${ecmascript}`);
-      const code = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-      const shape = await code(api).main();
+      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+      const constructor = await builder(api);
+      const module = await constructor();
+      const shape = await module.main();
       if (shape !== undefined && shape.toKeptGeometry) {
         return shape.toKeptGeometry();
       }

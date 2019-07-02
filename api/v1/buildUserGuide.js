@@ -1,6 +1,7 @@
 import * as api from './main';
 
 import fs from 'fs';
+import { setupFilesystem } from '@jsxcad/sys';
 import { toUserGuide } from '@jsxcad/doc';
 
 Error.stackTraceLimit = Infinity;
@@ -9,28 +10,29 @@ const { writeFile } = fs.promises;
 
 const paths = [
   'Intro.js',
-  'above.js', 'acos.js', 'assemble.js',
+  'above.js', 'acos.js', 'armature.js', 'assemble.js', 'as.js',
   'back.js', 'below.js',
-  'center.js', 'chainHull.js', 'circle.js', 'cos.js', 'crossSection.js', 'cube.js', 'cursor.js', 'cylinder.js',
+  'center.js', 'chainHull.js', 'circle.js', 'color.js', 'cos.js', 'cube.js', 'cut.js', 'cursor.js', 'cylinder.js',
   'difference.js',
   'drop.js',
-  'front.js', 'fuse.js',
+  'fillet.js', 'front.js', 'fuse.js',
   'extrude.js',
   'hull.js',
   'interior.js', 'intersection.js',
   'keep.js',
-  'left.js', 'lego.js',
-  'log.js',
-  'max.js', 'measureBoundingBox.js', 'microGearMotor.js',
-  'minkowski.js',
+  'left.js', 'lego.js', 'log.js',
+  'material.js', 'max.js', 'measureBoundingBox.js', 'measureCenter.js', 'microGearMotor.js', 'minkowski.js',
+  'numbers.js',
   'outline.js',
-  'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
-  'readDst.js', 'readFont.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
-  'scale.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
-  'tetrahedron.js', 'translate.js', 'triangle.js',
+  'plane.js', 'point.js', 'points.js', 'polygon.js', 'polyhedron.js',
+  'readDst.js', 'readFont.js', 'readJscad.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
+  'scale.js', 'section.js', 'sin.js', 'sphere.js', 'sqrt.js', 'square.js', 'svgPath.js',
+  'tetrahedron.js', 'torus.js', 'translate.js', 'triangle.js',
   'union.js',
-  'writePdf.js', 'writeShape.js', 'writeStl.js', 'writeSvg.js', 'writeSvgPhoto.js'
+  'wireframe.js', 'writePdf.js', 'writeShape.js', 'writeStl.js', 'writeSvg.js', 'writeSvgPhoto.js'
 ];
+
+setupFilesystem({ fileBase: '.' });
 
 toUserGuide({ api, paths, root: __dirname })
     .then(html => writeFile('UserGuide.html', html))

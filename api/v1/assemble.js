@@ -52,6 +52,7 @@ import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
  **/
 
 export const assemble = (...shapes) => {
+  shapes = shapes.filter(shape => shape !== undefined);
   switch (shapes.length) {
     case 0: {
       return Shape.fromGeometry({ assembly: [] });

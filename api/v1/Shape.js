@@ -1,15 +1,10 @@
-import { addTags, eachPoint,
-         toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
-         transform } from '@jsxcad/geometry-tagged';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
+import { eachPoint, flip, toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
+         transform } from '@jsxcad/geometry-tagged';
 
 import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
-  as (...tags) {
-    return fromGeometry(addTags(tags, toGeometry(this)));
-  }
-
   close () {
     const geometry = this.toKeptGeometry();
     if (!isSingleOpenPath(geometry)) {
@@ -36,6 +31,22 @@ export class Shape {
 
   eachPoint (options = {}, operation) {
     eachPoint(options, operation, this.toKeptGeometry());
+  }
+
+  flip () {
+    return fromGeometry(flip(toKeptGeometry(this)));
+  }
+
+  getTags () {
+    return toGeometry(this).tags;
+  }
+
+  op (op, ...args) {
+    return op(this, ...args);
+  }
+
+  setTags (tags) {
+    return fromGeometry({ ...toGeometry(this), tags });
   }
 
   toComponents (options = {}) {

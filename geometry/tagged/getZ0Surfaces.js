@@ -5,7 +5,7 @@ export const getZ0Surfaces = (geometry) => {
   eachItem(geometry,
            item => {
              if (item.z0Surface) {
-               z0Surfaces.push(item.z0Surface);
+               z0Surfaces.push(item);
              }
            });
   return z0Surfaces;

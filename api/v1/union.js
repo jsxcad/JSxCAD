@@ -20,7 +20,7 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  * union(sphere(5).left(),
  *       sphere(5),
  *       sphere(5).right())
- *   .crossSection()
+ *   .section()
  *   .outline()
  * ```
  * :::
@@ -42,7 +42,7 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  * union(assemble(cube().left(),
  *                cube().right()),
  *       cube().front())
- *   .crossSection()
+ *   .section()
  *   .outline()
  * ```
  * :::

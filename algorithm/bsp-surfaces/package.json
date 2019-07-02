@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/algorithm-bsp-surfaces",
-  "version": "0.0.75",
+  "version": "0.0.79",
   "description": "Surface soup BSP trees for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -24,15 +24,15 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.75",
-    "@jsxcad/geometry-solid": "^0.0.75",
-    "@jsxcad/geometry-surface": "^0.0.75",
-    "@jsxcad/math-mat4": "^0.0.75",
-    "@jsxcad/math-plane": "^0.0.75",
-    "@jsxcad/math-poly3": "^0.0.75",
-    "@jsxcad/math-ray3": "^0.0.75",
-    "@jsxcad/math-vec3": "^0.0.75",
-    "@jsxcad/math-vec4": "^0.0.75"
+    "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/geometry-solid": "^0.0.79",
+    "@jsxcad/geometry-surface": "^0.0.79",
+    "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-plane": "^0.0.79",
+    "@jsxcad/math-poly3": "^0.0.79",
+    "@jsxcad/math-ray3": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79",
+    "@jsxcad/math-vec4": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^1.4.1",
@@ -51,5 +51,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

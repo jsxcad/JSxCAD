@@ -4,22 +4,28 @@ import { addTags } from './addTags';
 import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
+import { divide } from './divide';
 import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { fuse } from './fuse';
+import { getClouds } from './getClouds';
 import { getPaths } from './getPaths';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
+import { getTags } from './getTags';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { map } from './map';
+import { measureBoundingBox } from './measureBoundingBox';
 import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
-import { toPaths } from './toPaths';
 import { toPoints } from './toPoints';
-import { toSolid } from './toSolid';
+import { toStandardGeometry } from './toStandardGeometry';
+import { toTransformedGeometry } from './toTransformedGeometry';
 import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
 import { union } from './union';
@@ -29,22 +35,28 @@ export {
   assemble,
   canonicalize,
   difference,
+  divide,
   drop,
   eachItem,
   eachPoint,
   flip,
+  fuse,
+  getClouds,
   getPaths,
   getSolids,
   getSurfaces,
+  getTags,
   getZ0Surfaces,
   intersection,
   keep,
+  map,
+  measureBoundingBox,
   toComponents,
   toDisjointGeometry,
   toKeptGeometry,
-  toPaths,
   toPoints,
-  toSolid,
+  toStandardGeometry,
+  toTransformedGeometry,
   toZ0Surface,
   transform,
   union

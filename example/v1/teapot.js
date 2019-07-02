@@ -1,6 +1,2 @@
-import { readStl, writeStl } from '@jsxcad/api-v1';
-
-export const main = async () => {
-  const teapot = await readStl({ path: 'teapot.stl', format: 'binary' });
-  await writeStl({ path: 'tmp/teapot.stla', format: 'ascii' }, teapot);
-};
+const teapot = await readStl({ path: 'teapot.stl', format: 'binary' });
+await teapot.writeStl('tmp/teapot.stl');

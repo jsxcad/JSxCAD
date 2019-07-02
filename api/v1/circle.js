@@ -1,8 +1,7 @@
 import { assertEmpty, assertNumber } from './assert';
 
-import { Shape } from './Shape';
-import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
+import { polygon } from './polygon';
 
 /**
  *
@@ -26,54 +25,58 @@ import { dispatch } from './dispatch';
  * ::: illustration
  * ```
  * circle({ radius: 10,
- *          resolution: 8 })
+ *          sides: 8 })
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * circle({ apothem: 10,
+ *          sides: 8 })
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(circle({ apothem: 10, sides: 5 }),
+ *          circle({ radius: 10, sides: 5 }).drop(),
+ *          circle({ radius: 10 }).outline())
  * ```
  * :::
  * ::: illustration
  * ```
  * circle({ diameter: 20,
- *          resolution: 16 })
+ *          sides: 16 })
  * ```
  * :::
  **/
-
-// FIX: This uses the circumradius rather than apothem, so that the produced polygon will fit into the specified circle.
-// Is this the most useful measure?
-
-const unitCircle = ({ resolution = 32 }) =>
-  Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: resolution }));
-
-export const fromValue = (radius) => unitCircle({ resolution: 32 }).scale(radius);
-
-export const fromRadius = ({ radius, resolution = 32 }) => unitCircle({ resolution }).scale(radius);
-
-export const fromDiameter = ({ diameter, resolution = 32 }) => unitCircle({ resolution }).scale(diameter / 2);
 
 export const circle = dispatch(
   'circle',
   // circle()
   (...rest) => {
     assertEmpty(rest);
-    return () => fromValue(1);
+    return () => polygon.fromRadius({ radius: 1 });
   },
   // circle(2)
   (value) => {
     assertNumber(value);
-    return () => fromValue(value);
+    return () => polygon.fromRadius({ radius: value, sides: 32 });
   },
-  // circle({ radius: 2, resolution: 32 })
-  ({ radius, resolution }) => {
+  // circle({ radius: 2, sides: 32 })
+  ({ radius, sides = 32 }) => {
     assertNumber(radius);
-    return () => fromRadius({ radius, resolution });
+    return () => polygon.fromRadius({ radius, sides });
   },
-  // circle({ diameter: 2, resolution: 32 })
-  ({ diameter, resolution }) => {
+  // circle({ apothem: 2, sides: 32 })
+  ({ apothem, sides = 32 }) => {
+    assertNumber(apothem);
+    assertNumber(sides);
+    return () => polygon.fromApothem({ apothem, sides });
+  },
+  // circle({ diameter: 2, sides: 32 })
+  ({ diameter, sides = 32 }) => {
     assertNumber(diameter);
-    return () => fromDiameter({ diameter, resolution });
+    assertNumber(sides);
+    return () => polygon.fromDiameter({ diameter, sides });
   });
-
-circle.fromValue = fromValue;
-circle.fromRadius = fromRadius;
-circle.fromDiameter = fromDiameter;
 
 export default circle;

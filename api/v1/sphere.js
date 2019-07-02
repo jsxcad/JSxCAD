@@ -33,13 +33,18 @@ import { dispatch } from './dispatch';
  *
  **/
 
-const unitSphere = ({ resolution = 32 } = {}) => Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+const unitSphere = ({ resolution = 16 } = {}) => {
+  const shape = Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+  // Make convex.
+  shape.toGeometry().solid.isConvex = true;
+  return shape;
+};
 
 export const fromValue = (value) => unitSphere().scale(value);
 
-export const fromRadius = ({ radius, resolution = 32 }) => unitSphere({ resolution }).scale(radius);
+export const fromRadius = ({ radius, resolution = 16 }) => unitSphere({ resolution }).scale(radius);
 
-export const fromDiameter = ({ diameter, resolution = 32 }) => unitSphere({ resolution }).scale(diameter / 2);
+export const fromDiameter = ({ diameter, resolution = 16 }) => unitSphere({ resolution }).scale(diameter / 2);
 
 export const sphere = dispatch(
   'sphere',
@@ -54,13 +59,13 @@ export const sphere = dispatch(
     return () => fromValue(value);
   },
   // sphere({ radius: 2, resolution: 5 })
-  ({ radius, resolution = 32 }) => {
+  ({ radius, resolution = 16 }) => {
     assertNumber(radius);
     assertNumber(resolution);
     return () => fromRadius({ radius, resolution });
   },
   // sphere({ diameter: 2, resolution: 25 })
-  ({ diameter, resolution = 32 }) => {
+  ({ diameter, resolution = 16 }) => {
     assertNumber(diameter);
     assertNumber(resolution);
     return () => fromDiameter({ diameter, resolution });

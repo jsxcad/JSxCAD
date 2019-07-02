@@ -5,7 +5,7 @@ import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
 
 const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
-  return Shape.fromPolygonsToSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
+  return Shape.fromSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
 };
 
 /**
@@ -33,6 +33,13 @@ const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
+ * cylinder({ apothem: 2,
+ *            height: 10,
+ *            resolution: 8 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
  * cylinder({ diameter: 6,
  *            height: 8,
  *            resolution: 16 })
@@ -44,6 +51,9 @@ const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
 export const fromValue = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
 
 export const fromRadius = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
+
+const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
+export const fromApothem = ({ apothem, height = 1, resolution = 32 }) => buildCylinder({ radius: toRadiusFromApothem(apothem, resolution), height, resolution });
 
 export const fromDiameter = ({ diameter, height = 1, resolution = 32 }) => buildCylinder({ radius: diameter / 2, height, resolution });
 
@@ -65,6 +75,12 @@ export const cylinder = dispatch(
     assertNumber(height);
     assertNumber(resolution);
     return () => fromRadius({ radius, height, resolution });
+  },
+  ({ apothem, height = 1, resolution = 32 }) => {
+    assertNumber(apothem);
+    assertNumber(height);
+    assertNumber(resolution);
+    return () => fromApothem({ apothem, height, resolution });
   },
   ({ diameter, height = 1, resolution = 32 }) => {
     assertNumber(diameter);

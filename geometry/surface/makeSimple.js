@@ -1,4 +1,4 @@
-import { toPlane, transform } from './main';
+import { toPlane, transform } from './ops';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { union } from '@jsxcad/geometry-z0surface';
 

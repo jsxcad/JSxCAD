@@ -1,9 +1,10 @@
-import { main } from './assembly';
-import { readFileSync } from 'fs';
+import { isExpected, run } from './run';
+
 import test from 'ava';
 
-test('Expected html', async (t) => {
-  await main();
-  t.is(readFileSync('tmp/assembly.html', { encoding: 'utf8' }),
-       readFileSync('assembly.html', { encoding: 'utf8' }));
+test('Expected stl', async (t) => {
+  await run('assembly');
+  isExpected(t, 'assembly/stl/cube.stl');
+  isExpected(t, 'assembly/stl/cylinder.stl');
+  isExpected(t, 'assembly/stl/cube-cylinder.stl');
 });

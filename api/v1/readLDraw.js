@@ -7,7 +7,7 @@ import { fromLDraw } from '@jsxcad/convert-ldraw';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * readLDraw({ part: '3004.dat' })
+ * await readLDraw({ part: '3004.dat' })
  * ```
  * :::
  *

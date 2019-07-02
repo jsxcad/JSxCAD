@@ -22,5 +22,8 @@ export const fromPolygons = (options = {}, polygons) => {
     assertCoplanar(surface);
   }
 
+  if (polygons.isConvex === true) {
+    solid.isConvex = true;
+  }
   return solid;
 };

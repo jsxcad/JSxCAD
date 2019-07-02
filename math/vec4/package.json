@@ -1,6 +1,6 @@
 {
   "name": "@jsxcad/math-vec4",
-  "version": "0.0.75",
+  "version": "0.0.79",
   "description": "4d vectors for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
@@ -48,7 +48,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-utils": "^0.0.75"
+    "@jsxcad/math-utils": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^1.4.1",
@@ -67,5 +67,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "d9c37177f04c86c1c05500f68f55b53ffe5ea958"
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

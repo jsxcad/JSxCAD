@@ -1,5 +1,7 @@
-import { clippingToPolygons, z0SurfaceToClipping } from './clippingToPolygons';
-import polygonClipping from 'polygon-clipping';
+import { fromSurface, toSurface } from './convert';
+
+import { doesNotOverlap } from './doesNotOverlap';
+import polybooljs from 'polybooljs';
 
 /**
  * Produce a surface that is the intersection of all provided surfaces.
@@ -19,9 +21,14 @@ import polygonClipping from 'polygon-clipping';
  *      |       |
  *      +-------+
  */
-export const intersection = (...z0Surfaces) => {
-  if (z0Surfaces.length === 0) {
+export const intersection = (baseZ0Surface, ...z0Surfaces) => {
+  z0Surfaces = z0Surfaces.filter(surface => !doesNotOverlap(baseZ0Surface, surface));
+  if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
-  return clippingToPolygons(polygonClipping.intersection(...z0Surfaces.map(z0SurfaceToClipping)));
+  if (z0Surfaces.length === 0) {
+    return baseZ0Surface;
+  }
+  const result = polybooljs.intersect(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
+  return toSurface(result);
 };
