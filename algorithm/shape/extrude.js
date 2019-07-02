@@ -1,6 +1,7 @@
+import { flip, translate } from '@jsxcad/geometry-surface';
+
 import { add } from '@jsxcad/math-vec3';
 import { fromPolygons } from './fromPolygons';
-import { makeConvex } from './makeConvex';
 
 export const extrude = ({ height = 1 }, surface) => {
   const polygons = [];
@@ -21,16 +22,21 @@ export const extrude = ({ height = 1 }, surface) => {
     }
   }
 
-  // Build the roof and floor from convex polygons.
-  for (const polygon of makeConvex({}, surface)) {
-    const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
-    const roof = floor.map(vertex => add(vertex, up)).reverse();
-    polygons.push(roof, floor);
-  }
+  // Walls go around.
+  const walls = fromPolygons({}, polygons);
 
-  const solid = fromPolygons({}, polygons);
+  // Roof goes up.
+  const roof = translate([0, 0, height], surface);
+
+  // floor faces down.
+  const floor = flip(surface);
+
+  // And form a solid.
+  const solid = [roof, floor, ...walls];
+
   if (surface.isConvex) {
     solid.isConvex = true;
   }
+
   return solid;
 };

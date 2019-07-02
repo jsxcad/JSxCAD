@@ -34,7 +34,7 @@ export const measureBoundingBox = (rawGeometry) => {
     empty = false;
     minPoint = min(minPoint, itemMinPoint);
     maxPoint = max(maxPoint, itemMaxPoint);
-  }
+  };
 
   const walk = (item) => {
     if (item.assembly) {
@@ -54,7 +54,7 @@ export const measureBoundingBox = (rawGeometry) => {
     } else {
       update(measureBoundingBoxGeneric(item));
     }
-  }
+  };
 
   walk(geometry);
 

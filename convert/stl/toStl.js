@@ -1,10 +1,9 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
 import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { isWatertightPolygons, makeWatertight } from '@jsxcad/algorithm-watertight';
+import { makeSurfacesConvex, toPolygons } from '@jsxcad/geometry-solid';
 
 import { fixTJunctions } from './fixTJunctions';
 import { toPlane } from '@jsxcad/math-poly3';
-import { toPolygons } from '@jsxcad/geometry-solid';
 
 /**
  * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
@@ -18,7 +17,7 @@ import { toPolygons } from '@jsxcad/geometry-solid';
 const geometryToTriangles = (solids) => {
   const triangles = [];
   for (const { solid } of solids) {
-    triangles.push(...toTriangles({}, toPolygons({}, solid)));
+    triangles.push(...toTriangles({}, toPolygons({}, makeSurfacesConvex({}, solid))));
   }
   return triangles;
 };
@@ -26,14 +25,8 @@ const geometryToTriangles = (solids) => {
 export const toStl = async (options = {}, geometry) => {
   let keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry);
-  let polygons = geometryToTriangles(fixTJunctions(solids));
-  if (!isWatertightPolygons(polygons)) {
-    console.log(`polygonsToStla: Polygon is not watertight`);
-    if (options.doMakeWatertight) {
-      polygons = makeWatertight(polygons);
-    }
-  }
-  return `solid JSxCAD\n${convertToFacets(options, canonicalize(toTriangles({}, polygons)))}\nendsolid JSxCAD\n`;
+  let triangles = geometryToTriangles(fixTJunctions(solids));
+  return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
 };
 
 const convertToFacets = (options, polygons) =>

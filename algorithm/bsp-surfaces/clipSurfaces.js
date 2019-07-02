@@ -1,11 +1,13 @@
 import { splitSurface } from './splitSurface';
 
+// Remove from surfaces those parts that are inside the solid delineated by bsp.
 export const clipSurfaces = (bsp, surfaces) => {
   if (surfaces.length === 0) {
-    // PROVE: Does this happen due to degeneracy?
+    // Nothing to do.
     return [];
   }
   if (bsp.plane === undefined) {
+    // An unclassified region -- how can this be?
     return surfaces.slice();
   }
   let front = [];
@@ -19,8 +21,8 @@ export const clipSurfaces = (bsp, surfaces) => {
   if (bsp.back !== undefined) {
     back = clipSurfaces(bsp.back, back);
   } else {
-    // PROVE: Explain this asymmetry.
-    // These surfaces are behind a face, and inside the tree.
+    // These surfaces are definitely inside the volume delineated by bsp.
+    // Discard them.
     back = [];
   }
   return front.concat(back);

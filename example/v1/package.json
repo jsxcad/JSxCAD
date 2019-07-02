@@ -9,7 +9,7 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "example": "node -r esm run",
-    "profile": "node -r esm --prof --logfile=prof.log --no-logfile-per-isolate run",
+    "profile": "node --max-old-space-size=8192 -r esm --prof --logfile=prof.log --no-logfile-per-isolate run",
     "test": "ava",
     "tests": "ava *.test.js"
   },

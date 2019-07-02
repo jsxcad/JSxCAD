@@ -18,7 +18,7 @@ export const isExpected = (t, path) => {
        readFileSync(`expected/${path}`, { encoding: 'utf8' }));
 };
 
-if (module.parent === undefined) {
+if (process.mainModule.filename === __filename) {
   run().catch(e => {
     console.log(e.toString());
     console.log(e.stack);

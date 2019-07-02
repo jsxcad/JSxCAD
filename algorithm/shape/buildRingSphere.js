@@ -9,13 +9,18 @@ const buildWalls = (polygons, floor, roof) => {
   }
 };
 
+// Approximates a UV sphere.
 export const buildRingSphere = ({ resolution = 20 }) => {
   const polygons = [];
   let lastPath;
+
+  const latitudinalResolution = 2 + resolution;
+  const longitudinalResolution = 2 * latitudinalResolution;
+
   // Trace out latitudinal rings.
-  const ring = buildRegularPolygon({ edges: resolution });
-  for (let slice = 0; slice <= resolution; slice++) {
-    let angle = Math.PI * 1.0 * slice / resolution;
+  const ring = buildRegularPolygon({ edges: longitudinalResolution });
+  for (let slice = 0; slice <= latitudinalResolution; slice++) {
+    let angle = Math.PI * 1.0 * slice / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
     const path = translate([0, 0, height], scale([radius, radius, radius], ring));

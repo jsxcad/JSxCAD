@@ -5,6 +5,9 @@ export const fromPolygons = (options = {}, polygons) => {
 
   for (const polygon of polygons) {
     const plane = toPlane(polygon);
+    if (isNaN(plane[0])) {
+      throw Error('die');
+    }
     const key = JSON.stringify(plane);
     const groups = coplanarGroups.get(key);
     if (groups === undefined) {
