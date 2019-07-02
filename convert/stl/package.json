@@ -23,6 +23,7 @@
     "@jsxcad/algorithm-watertight": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
+    "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",

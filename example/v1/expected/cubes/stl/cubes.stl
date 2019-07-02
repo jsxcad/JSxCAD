@@ -1,9 +1,44 @@
 solid JSxCAD
-facet normal 0 -1 0
+facet normal 0 0 1
 outer loop
-vertex 0 0 0
+vertex 10 4.14214 10
 vertex 7.07107 0 10
+vertex 10 0 10
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
 vertex 0 0 10
+vertex 7.07107 0 10
+vertex 0 10 10
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 0 10 10
+vertex 10 4.14214 10
+vertex 10 10 10
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 10 4.14214 10
+vertex 0 10 10
+vertex 4.14214 4.14214 10
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 7.07107 10 0
+vertex 0 0 0
+vertex 0 10 0
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 10 10 0
+vertex 10 5.85786 0
+vertex 7.07107 10 0
 endloop
 endfacet
 facet normal 0 -1 0
@@ -13,144 +48,116 @@ vertex 10 0 5.85786
 vertex 10 0 10
 endloop
 endfacet
-facet normal -1 0 0
+facet normal 0 -1 0
 outer loop
 vertex 0 0 0
+vertex 7.07107 0 10
+vertex 0 0 10
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 10 0
+vertex 0 7.07107 7.07107
+vertex 0 10 10
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 7.07107 7.07107
+vertex 0 10 0
+vertex 0 0 0
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 7.07107 7.07107
 vertex 0 0 10
 vertex 0 10 10
 endloop
 endfacet
 facet normal -1 0 0
 outer loop
-vertex 0 10 4.14214
 vertex 0 7.07107 7.07107
-vertex 0 10 10
+vertex 0 0 0
+vertex 0 0 10
 endloop
 endfacet
-facet normal -1 0 0
+facet normal 0 1 0
 outer loop
-vertex 0 10 4.14214
+vertex 4.14214 10 4.14214
 vertex 0 10 0
-vertex 0 0 0
+vertex 0 10 10
 endloop
 endfacet
-facet normal -0.9999999999999999 0 0
+facet normal 0 1 2.425941331304818e-16
 outer loop
-vertex 0 10 4.14214
-vertex 0 0 0
-vertex 0 7.07107 7.07107
+vertex 0 10 0
+vertex 4.14214 10 4.14214
+vertex 7.07107 10 0
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-vertex 10 10 4.14214
-vertex 0 10 4.14214
-vertex 0 10 10
-endloop
-endfacet
-facet normal 0 1 0
-outer loop
-vertex 10 10 4.14214
-vertex 0 10 10
+vertex 4.14214 10 4.14214
 vertex 10 10 10
+vertex 10 10 4.14214
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-vertex 10 10 4.14214
+vertex 10 10 10
+vertex 4.14214 10 4.14214
+vertex 0 10 10
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
 vertex 10 10 0
 vertex 7.07107 10 0
+vertex 10 10 4.14214
 endloop
 endfacet
-facet normal 0 1 0
+facet normal 1 0 0
 outer loop
-vertex 7.07107 10 0
-vertex 0 10 0
-vertex 0 10 4.14214
+vertex 10 0 10
+vertex 10 0 5.85786
+vertex 10 4.14214 10
 endloop
 endfacet
-facet normal 0 1 0
+facet normal 1 0 0
 outer loop
+vertex 10 10 10
+vertex 10 4.14214 10
+vertex 10 10 4.14214
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 10 10 4.14214
+vertex 10 5.85786 0
+vertex 10 10 0
+endloop
+endfacet
+facet normal -0.707107418855292 0.49999954909970024 -0.49999954909969974
+outer loop
+vertex 10 4.14214 10
+vertex 10 0 5.85786
+vertex 7.07107 0 10
+endloop
+endfacet
+facet normal 0.7071061435149278 -0.5000022544970282 0.4999986472995058
+outer loop
+vertex 0 7.07107 7.07107
 vertex 7.07107 10 0
-vertex 0 10 4.14214
 vertex 4.14214 10 4.14214
 endloop
 endfacet
-facet normal 1 0 0
-outer loop
-vertex 10 10 4.14214
-vertex 10 10 10
-vertex 10 4.14214 10
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-vertex 10 5.85786 0
-vertex 10 10 0
-vertex 10 10 4.14214
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-vertex 10 0 10
-vertex 10 0 5.85786
-vertex 10 4.14214 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 7.07107 0 10
-vertex 4.14214 4.14214 10
-vertex 0 10 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 7.07107 0 10
-vertex 0 10 10
-vertex 0 0 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 4.14214 4.14214 10
-vertex 10 4.14214 10
-vertex 10 10 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 4.14214 4.14214 10
-vertex 10 10 10
-vertex 0 10 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 7.07107 0 10
-vertex 10 0 10
-vertex 10 4.14214 10
-endloop
-endfacet
-facet normal 0 0 -1
+facet normal 0.7071066717798298 -0.5000000773622201 0.50000007736222
 outer loop
 vertex 7.07107 10 0
-vertex 10 10 0
-vertex 10 5.85786 0
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
-vertex 0 10 0
-vertex 7.07107 10 0
-vertex 0 0 0
-endloop
-endfacet
-facet normal 0.7071066717798297 0.5000000773622201 -0.50000007736222
-outer loop
-vertex 7.07107 0 10
-vertex 0 0 0
 vertex 0 7.07107 7.07107
+vertex 0 0 0
 endloop
 endfacet
 facet normal 0.7071061435149276 0.49999864729950605 -0.5000022544970278
@@ -160,18 +167,11 @@ vertex 0 7.07107 7.07107
 vertex 4.14214 4.14214 10
 endloop
 endfacet
-facet normal 4.141345272863847e-16 -0.7071067811865477 -0.7071067811865475
+facet normal 0.7071066717798297 0.5000000773622201 -0.50000007736222
 outer loop
-vertex 4.14214 4.14214 10
 vertex 0 7.07107 7.07107
-vertex 4.14214 10 4.14214
-endloop
-endfacet
-facet normal 0 -0.7071067811865478 -0.7071067811865471
-outer loop
-vertex 4.14214 4.14214 10
-vertex 4.14214 10 4.14214
-vertex 10 10 4.14214
+vertex 7.07107 0 10
+vertex 0 0 0
 endloop
 endfacet
 facet normal 0 -0.7071067811865471 -0.7071067811865478
@@ -181,32 +181,25 @@ vertex 10 10 4.14214
 vertex 10 4.14214 10
 endloop
 endfacet
+facet normal 0 -0.7071067811865478 -0.7071067811865471
+outer loop
+vertex 4.14214 4.14214 10
+vertex 4.14214 10 4.14214
+vertex 10 10 4.14214
+endloop
+endfacet
+facet normal 4.141345272863847e-16 -0.7071067811865477 -0.7071067811865475
+outer loop
+vertex 4.14214 10 4.14214
+vertex 4.14214 4.14214 10
+vertex 0 7.07107 7.07107
+endloop
+endfacet
 facet normal -0.7071074188552919 -0.49999954909970024 0.49999954909969996
 outer loop
 vertex 7.07107 10 0
 vertex 10 5.85786 0
 vertex 10 10 4.14214
-endloop
-endfacet
-facet normal -0.707107418855292 0.49999954909970024 -0.49999954909969974
-outer loop
-vertex 7.07107 0 10
-vertex 10 4.14214 10
-vertex 10 0 5.85786
-endloop
-endfacet
-facet normal 0.7071066717798298 -0.5000000773622201 0.50000007736222
-outer loop
-vertex 0 7.07107 7.07107
-vertex 0 0 0
-vertex 7.07107 10 0
-endloop
-endfacet
-facet normal 0.7071061435149278 -0.5000022544970282 0.4999986472995058
-outer loop
-vertex 0 7.07107 7.07107
-vertex 7.07107 10 0
-vertex 4.14214 10 4.14214
 endloop
 endfacet
 endsolid JSxCAD

@@ -10,10 +10,6 @@ const unpackApi = (api) => {
   for (const domain of Object.keys(api)) {
     for (const library of Object.keys(api[domain])) {
       operators[library] = api[domain][library];
-      continue;
-      for (const operator of Object.keys(api[domain][library])) {
-        operators[operator] = api[domain][library][operator];
-      }
     }
   }
   return operators;
@@ -69,10 +65,10 @@ const replaceIncludes = async (ast) => {
 
 export const scriptToOperator = async (options = {}, script) => {
   try {
-    const ast = await replaceIncludes(recast.parse(script))
+    const ast = await replaceIncludes(recast.parse(script));
     const operator = createJscadFunction(recast.print(ast).code, unpackApi(api));
     return operator;
   } catch (e) {
     console.log(e);
   }
-}
+};

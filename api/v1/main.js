@@ -7,8 +7,8 @@
  * the api uses.
  */
 
-import { planeX, planeY, planeZ } from './plane';
 import { getClock, startClock } from './clock';
+import { planeX, planeY, planeZ } from './plane';
 
 import { Shape } from './Shape';
 import { above } from './above';

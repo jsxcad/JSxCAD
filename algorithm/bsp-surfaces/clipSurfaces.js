@@ -21,8 +21,8 @@ export const clipSurfaces = (bsp, surfaces) => {
   if (bsp.back !== undefined) {
     back = clipSurfaces(bsp.back, back);
   } else {
-    // PROVE: Explain this asymmetry.
-    // These surfaces are behind a face, and inside the tree.
+    // These surfaces are definitely inside the volume delineated by bsp.
+    // Discard them.
     back = [];
   }
   return front.concat(back);

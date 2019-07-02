@@ -9,6 +9,7 @@ const buildWalls = (polygons, floor, roof) => {
   }
 };
 
+// Approximates a UV sphere.
 export const buildRingSphere = ({ resolution = 20 }) => {
   const polygons = [];
   let lastPath;

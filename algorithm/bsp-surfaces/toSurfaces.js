@@ -24,7 +24,6 @@ export const toSurfaces = (options = {}, bsp) => {
   const surfaces = gatherSurfaces(bsp);
 
   if (isConvexBspTree(bsp)) {
-    console.log(`QQ/toSurfaces/isConvex`);
     surfaces.isConvex = true;
   }
 

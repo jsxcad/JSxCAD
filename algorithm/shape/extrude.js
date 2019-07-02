@@ -1,6 +1,7 @@
+import { flip, translate } from '@jsxcad/geometry-surface';
+
 import { add } from '@jsxcad/math-vec3';
 import { fromPolygons } from './fromPolygons';
-import { flip, translate } from '@jsxcad/geometry-surface';
 
 export const extrude = ({ height = 1 }, surface) => {
   const polygons = [];
