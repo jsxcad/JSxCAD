@@ -1,4 +1,3 @@
-import { build } from './build';
 import { clipTo } from './clipTo';
 import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
@@ -31,11 +30,8 @@ export const union = (...solids) => {
       clipTo(bBsp, aBsp);
       flip(bBsp);
 
-      // Now merge the two together.
-      build(aBsp, toSurfaces({}, bBsp));
-
-      // And build a geometry from the result.
-      solids.push(toSurfaces({}, aBsp));
+      // FIX: We may have separate surfaces in the same plane.
+      solids.push([...toSurfaces({}, aBsp), ...toSurfaces({}, bBsp)]);
     }
   }
   return solids[0];

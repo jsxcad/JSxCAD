@@ -19,7 +19,8 @@ export const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 export const planeDistance = (plane, point) => plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
 
 const toType = (plane, point) => {
-  let t = planeDistance(plane, point);
+  // const t = planeDistance(plane, point);
+  const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
   if (t < -EPSILON) {
     return BACK;
   } else if (t > EPSILON) {
@@ -31,18 +32,13 @@ const toType = (plane, point) => {
 
 const pointType = [];
 
-let splitSurfaceCount = 0;
-let splitSurfaceMark = 1;
+// let splitSurfaceCount = 0;
 
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
-  if (++splitSurfaceCount >= splitSurfaceMark) {
-    splitSurfaceMark *= 1.2;
-    // console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
-  }
-
   // Try to classify the whole surface first.
   const [sphereCenter, sphereRadius] = measureBoundingSphere(surface);
-  const sphereDistance = planeDistance(plane, sphereCenter);
+  // const sphereDistance = planeDistance(plane, sphereCenter);
+  const sphereDistance = plane[0] * sphereCenter[0] + plane[1] * sphereCenter[1] + plane[2] * sphereCenter[2] - plane[3];
 
   if (sphereDistance - sphereRadius > CONSERVATIVE_EPSILON) {
     frontSurfaces.push(surface);
@@ -53,6 +49,12 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
     backSurfaces.push(surface);
     return;
   }
+
+  /*
+  if (++splitSurfaceCount % 1000 === 0) {
+    console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
+  }
+  */
 
   // Consider the polygons within the surface.
   let coplanarFrontPolygons;

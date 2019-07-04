@@ -12,7 +12,13 @@ const Polygon = require('./math/Polygon3')
 // In case the polygon is spanning, returns:
 // .front: a Polygon of the front part
 // .back: a Polygon of the back part
+
+let splitPolygonByPlaneCount = 0;
+
 function splitPolygonByPlane (plane, polygon) {
+  if (++splitPolygonByPlaneCount % 1000 === 0) {
+    console.log(`QQ/splitPolygonByPlane: ${splitPolygonByPlaneCount}`);
+  }
   let result = {
     type: null,
     front: null,
