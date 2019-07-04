@@ -1,5 +1,3 @@
-import { eachItem } from './eachItem';
-
 // FIX: Refactor the geometry walkers.
 
 export const allTags = (geometry) => {
@@ -20,4 +18,4 @@ export const allTags = (geometry) => {
   };
   walk(geometry);
   return tags;
-}
+};
