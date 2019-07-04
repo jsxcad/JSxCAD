@@ -16,11 +16,9 @@ const Polygon = require('./math/Polygon3')
 let splitPolygonByPlaneCount = 0;
 
 function splitPolygonByPlane (plane, polygon) {
-/*
   if (++splitPolygonByPlaneCount % 1000 === 0) {
     console.log(`QQ/splitPolygonByPlane: ${splitPolygonByPlaneCount}`);
   }
-*/
   let result = {
     type: null,
     front: null,
