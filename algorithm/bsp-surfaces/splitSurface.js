@@ -32,7 +32,7 @@ const toType = (plane, point) => {
 
 const pointType = [];
 
-// let splitSurfaceCount = 0;
+let splitSurfaceCount = 0;
 
 export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, surface) => {
   // Try to classify the whole surface first.
@@ -50,11 +50,9 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
     return;
   }
 
-  /*
   if (++splitSurfaceCount % 1000 === 0) {
     console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
   }
-  */
 
   // Consider the polygons within the surface.
   let coplanarFrontPolygons;
