@@ -77,6 +77,7 @@ import { sphere } from './sphere';
 import { sqrt } from './sqrt';
 import { square } from './square';
 import { svgPath } from './svgPath';
+import { tags } from './tags';
 import { tetrahedron } from './tetrahedron';
 import { torus } from './torus';
 import { translate } from './translate';
@@ -162,6 +163,7 @@ export {
   square,
   startClock,
   svgPath,
+  tags,
   tetrahedron,
   torus,
   translate,
