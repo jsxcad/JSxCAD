@@ -70,15 +70,23 @@ CSG.prototype = {
     if (!this.mayOverlap(csg)) {
       return this.unionForNonIntersecting(csg)
     } else {
+console.log(`QQ/unionSub`);
       let a = new Tree(this.polygons)
+console.log(`QQ/built/a`);
       let b = new Tree(csg.polygons)
+console.log(`QQ/built/b`);
       a.clipTo(b, false)
+console.log(`QQ: a.clipTo(b, false)`);
 
             // b.clipTo(a, true); // ERROR: this doesn't work
       b.clipTo(a)
+console.log(`QQ: b.clipTo(a)`);
       b.invert()
+console.log(`QQ: b.invert()`);
       b.clipTo(a)
+console.log(`QQ: b.clipTo(a)`);
       b.invert()
+console.log(`QQ: b.invert())`);
 
       let newpolygons = a.allPolygons().concat(b.allPolygons())
       let result = fromPolygons(newpolygons)

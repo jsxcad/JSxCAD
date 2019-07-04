@@ -1,6 +1,6 @@
-import { build } from './build';
+import { doesNotOverlap, flip as flipSolid } from '@jsxcad/geometry-solid';
+
 import { clipTo } from './clipTo';
-import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
@@ -43,12 +43,12 @@ export const intersection = (...solids) => {
     flip(bBsp);
     clipTo(aBsp, bBsp);
     clipTo(bBsp, aBsp);
-    build(aBsp, toSurfaces({}, bBsp));
 
-    flip(aBsp);
+    // build(aBsp, toSurfaces({}, bBsp));
+    // flip(aBsp);
 
     // Push back for the next generation.
-    solids.push(toSurfaces({}, aBsp));
+    solids.push(flipSolid([...toSurfaces({}, aBsp), ...toSurfaces({}, bBsp)]));
   }
   return solids[0];
 };

@@ -1,5 +1,4 @@
-import { build, buildConvex } from './build';
-
+import { build } from './build';
 import { create } from './create';
 
 const copyBsp = ({ plane, surfaces, front, back }) => {
@@ -22,12 +21,15 @@ const copyBsp = ({ plane, surfaces, front, back }) => {
 export const fromSurfaces = (options = {}, surfaces) => {
   if (surfaces.bsp === undefined) {
     const bsp = create();
+    /*
     if (surfaces.isConvex) {
+      // FIX: Figure out why this is slowing things down
+      // (91346 with isConvex vs 69531 without).
       buildConvex(bsp, surfaces.map(surface => surface.slice()));
-    } else {
-      // Build is destructive.
-      build(bsp, surfaces.map(surface => surface.slice()));
-    }
+    } else
+    */
+    // Build is destructive.
+    build(bsp, surfaces.map(surface => surface.slice()));
     surfaces.bsp = bsp;
   }
   // FIX: See if we can make the operations non-destructive so that we do not need to copy the cached tree.

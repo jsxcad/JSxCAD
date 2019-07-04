@@ -2,13 +2,23 @@ import { create } from './create';
 import { splitSurface } from './splitSurface';
 import { toPlane } from '@jsxcad/geometry-surface';
 
+const shuffle = (unshuffled) => {
+  const shuffled = [];
+  while (unshuffled.length > 0) {
+    const index = Math.floor(Math.random() * unshuffled.length);
+    shuffled.push(unshuffled[index]);
+    unshuffled[index] = unshuffled.pop();
+  }
+  return shuffled;
+};
+
 // A convex BSP tree is always arbitrarily degenerate.
 export const buildConvex = (bsp, surfaces) => {
   while (bsp.back !== undefined) {
     bsp = bsp.back;
   }
 
-  for (const surface of surfaces) {
+  for (const surface of shuffle(surfaces)) {
     if (bsp.plane !== undefined) {
       bsp.back = create();
       bsp = bsp.back;

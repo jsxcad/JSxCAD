@@ -1,6 +1,6 @@
-import { build } from './build';
+import { doesNotOverlap, flip as flipSolid } from '@jsxcad/geometry-solid';
+
 import { clipTo } from './clipTo';
-import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
@@ -52,11 +52,12 @@ export const difference = (base, ...subtractions) => {
     clipTo(subtractBsp, baseBsp);
     flip(subtractBsp);
 
-    build(baseBsp, toSurfaces({}, subtractBsp));
-    flip(baseBsp);
+    // build(baseBsp, toSurfaces({}, subtractBsp));
+    // flip(baseBsp);
 
     // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.
-    base = toSurfaces({}, baseBsp);
+    // base = toSurfaces({}, baseBsp);
+    base = flipSolid([...toSurfaces({}, baseBsp), ...toSurfaces({}, subtractBsp)]);
   }
   return base;
 };
