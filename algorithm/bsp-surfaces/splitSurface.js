@@ -50,16 +50,16 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
     return;
   }
 
-  if (++splitSurfaceCount % 1000 === 0) {
-    console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
-  }
-
   // Consider the polygons within the surface.
   let coplanarFrontPolygons;
   let coplanarBackPolygons;
   let frontPolygons;
   let backPolygons;
   for (const polygon of surface) {
+    if (++splitSurfaceCount % 1000 === 0) {
+      console.log(`QQ/splitSurfaceCount: ${splitSurfaceCount}`);
+    }
+
     pointType.length = 0;
     let polygonType = COPLANAR;
     if (!planeEquals(toPlane(polygon), plane)) {
