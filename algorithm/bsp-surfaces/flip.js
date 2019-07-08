@@ -1,24 +1,15 @@
-import { flip as flipPlane } from '@jsxcad/math-plane';
-import { flip as flipSurface } from '@jsxcad/geometry-surface';
+import { flip as flipPolygon } from '@jsxcad/math-poly3';
 
 export const flip = (bsp) => {
-  // Flip the polygons.
-  bsp.surfaces = bsp.surfaces.map(flipSurface);
-  // Recompute the plane.
-  if (bsp.plane !== undefined) {
-    // PROVE: General equivalence.
-    // const a = toPlane(bsp.polygons[0]);
-    // const b = plane.flip(bsp.plane);
-    // if (!plane.equals(a, b)) { throw Error(`die: ${JSON.stringify([a, b])}`); }
-    bsp.plane = flipPlane(bsp.plane);
+  if (bsp === null) {
+    return null;
   }
-  // Invert the children.
-  if (bsp.front !== undefined) {
-    flip(bsp.front);
-  }
-  if (bsp.back !== undefined) {
-    flip(bsp.back);
-  }
-  // Swap the children.
-  [bsp.front, bsp.back] = [bsp.back, bsp.front];
+
+  const flipped = {
+    back: flip(bsp.front),
+    front: flip(bsp.back),
+    same: bsp.same === null ? null : bsp.same.map(flipPolygon)
+  };
+
+  return flipped;
 };

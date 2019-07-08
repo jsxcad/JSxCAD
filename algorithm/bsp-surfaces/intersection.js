@@ -1,9 +1,8 @@
-import { doesNotOverlap, flip as flipSolid } from '@jsxcad/geometry-solid';
-
-import { clipTo } from './clipTo';
+import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
-import { fromSurfaces } from './fromSurfaces';
-import { toSurfaces } from './toSurfaces';
+import { fromSolid } from './fromSolid';
+import { removeInterior } from './removeInterior';
+import { toSolid } from './toSolid';
 
 /**
  * Return a solid representing filled volume present in all provided solids.
@@ -34,21 +33,15 @@ export const intersection = (...solids) => {
       return [];
     }
 
-    const aBsp = fromSurfaces({}, aSolid);
-    const bBsp = fromSurfaces({}, bSolid);
+    const a = fromSolid(aSolid);
+    const b = fromSolid(bSolid);
 
-    flip(aBsp);
-    clipTo(bBsp, aBsp);
+    const aFlipped = flip(a);
+    const bFlipped = flip(b);
+    const aClipped = removeInterior(aFlipped, bFlipped);
+    const bClipped = removeInterior(bFlipped, aFlipped);
 
-    flip(bBsp);
-    clipTo(aBsp, bBsp);
-    clipTo(bBsp, aBsp);
-
-    // build(aBsp, toSurfaces({}, bBsp));
-    // flip(aBsp);
-
-    // Push back for the next generation.
-    solids.push(flipSolid([...toSurfaces({}, aBsp), ...toSurfaces({}, bBsp)]));
+    solids.push([...toSolid(flip(aClipped)), ...toSolid(flip(bClipped))]);
   }
   return solids[0];
 };

@@ -1,6 +1,20 @@
 solid JSxCAD
 facet normal 0 0 1
 outer loop
+vertex 10 10 10
+vertex 4.14214 4.14214 10
+vertex 10 4.14214 10
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 4.14214 4.14214 10
+vertex 10 10 10
+vertex 0 10 10
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
 vertex 10 4.14214 10
 vertex 7.07107 0 10
 vertex 10 0 10
@@ -8,30 +22,16 @@ endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex 0 0 10
+vertex 0 10 10
 vertex 7.07107 0 10
-vertex 0 10 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 0 10 10
-vertex 10 4.14214 10
-vertex 10 10 10
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 10 4.14214 10
-vertex 0 10 10
 vertex 4.14214 4.14214 10
 endloop
 endfacet
-facet normal 0 0 -1
+facet normal 0 0 1
 outer loop
-vertex 7.07107 10 0
-vertex 0 0 0
-vertex 0 10 0
+vertex 7.07107 0 10
+vertex 0 10 10
+vertex 0 0 10
 endloop
 endfacet
 facet normal 0 0 -1
@@ -39,6 +39,13 @@ outer loop
 vertex 10 10 0
 vertex 10 5.85786 0
 vertex 7.07107 10 0
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 7.07107 10 0
+vertex 0 0 0
+vertex 0 10 0
 endloop
 endfacet
 facet normal 0 -1 0
@@ -57,6 +64,20 @@ endloop
 endfacet
 facet normal -1 0 0
 outer loop
+vertex 0 7.07107 7.07107
+vertex 0 0 10
+vertex 0 10 10
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 7.07107 7.07107
+vertex 0 0 0
+vertex 0 0 10
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
 vertex 0 10 0
 vertex 0 7.07107 7.07107
 vertex 0 10 10
@@ -69,18 +90,25 @@ vertex 0 10 0
 vertex 0 0 0
 endloop
 endfacet
-facet normal -1 0 0
+facet normal 0 1 0
 outer loop
-vertex 0 7.07107 7.07107
-vertex 0 0 10
+vertex 10 10 10
+vertex 4.14214 10 4.14214
 vertex 0 10 10
 endloop
 endfacet
-facet normal -1 0 0
+facet normal 0 1 0
 outer loop
-vertex 0 7.07107 7.07107
-vertex 0 0 0
-vertex 0 0 10
+vertex 10 10 4.14214
+vertex 4.14214 10 4.14214
+vertex 10 10 10
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 10 10 4.14214
+vertex 10 10 0
+vertex 7.07107 10 0
 endloop
 endfacet
 facet normal 0 1 0
@@ -97,24 +125,10 @@ vertex 4.14214 10 4.14214
 vertex 7.07107 10 0
 endloop
 endfacet
-facet normal 0 1 0
-outer loop
-vertex 4.14214 10 4.14214
-vertex 10 10 10
-vertex 10 10 4.14214
-endloop
-endfacet
-facet normal 0 1 0
+facet normal 1 0 0
 outer loop
 vertex 10 10 10
-vertex 4.14214 10 4.14214
-vertex 0 10 10
-endloop
-endfacet
-facet normal 0 1 0
-outer loop
-vertex 10 10 0
-vertex 7.07107 10 0
+vertex 10 4.14214 10
 vertex 10 10 4.14214
 endloop
 endfacet
@@ -123,13 +137,6 @@ outer loop
 vertex 10 0 10
 vertex 10 0 5.85786
 vertex 10 4.14214 10
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-vertex 10 10 10
-vertex 10 4.14214 10
-vertex 10 10 4.14214
 endloop
 endfacet
 facet normal 1 0 0
