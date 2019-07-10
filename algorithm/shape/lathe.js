@@ -1,6 +1,4 @@
-import { rotateX, scale, translate } from '@jsxcad/geometry-path';
-
-import { buildRegularPolygon } from './buildRegularPolygon';
+import { rotateX } from '@jsxcad/geometry-path';
 
 const buildWalls = (polygons, floor, roof) => {
   for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {

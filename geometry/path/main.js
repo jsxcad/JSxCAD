@@ -1,4 +1,4 @@
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
+import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 
 import { canonicalize } from './canonicalize';
 import { close } from './close';
