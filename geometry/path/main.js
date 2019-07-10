@@ -1,4 +1,4 @@
-import { fromScaling, fromTranslation } from '@jsxcad/math-mat4';
+import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
 
 import { canonicalize } from './canonicalize';
 import { close } from './close';
@@ -29,4 +29,7 @@ export {
 };
 
 export const translate = (vector, path) => transform(fromTranslation(vector), path);
+export const rotateX = (radians, path) => transform(fromXRotation(radians), path);
+export const rotateY = (radians, path) => transform(fromYRotation(radians), path);
+export const rotateZ = (radians, path) => transform(fromZRotation(radians), path);
 export const scale = (vector, path) => transform(fromScaling(vector), path);

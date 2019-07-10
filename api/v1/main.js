@@ -43,6 +43,7 @@ import { importModule } from './importModule';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { lathe } from './lathe';
 import { left } from './left';
 import { lego } from './lego';
 import { log } from './log';
@@ -125,6 +126,7 @@ export {
   importModule,
   interior,
   intersection,
+  lathe,
   left,
   lego,
   log,
