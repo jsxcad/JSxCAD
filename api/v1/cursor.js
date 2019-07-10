@@ -78,6 +78,10 @@ class Cursor {
     return this.close().toShape().interior();
   }
 
+  move (...params) {
+    return this.translate(...params);
+  }
+
   outline () {
     return this.close().toShape();
   }
