@@ -14,7 +14,7 @@ import { lathe as lathePath } from '@jsxcad/algorithm-shape';
  **/
 
 export const lathe = ({ sides = 16 }, shape) => {
-  const [left] = shape.cut([0, 1, 0, 0]);
+  const [left] = shape.cut();
   const outline = left.outline();
   const polygons = [];
   for (const { paths } of getPaths(outline.toKeptGeometry())) {
