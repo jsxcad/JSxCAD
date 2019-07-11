@@ -11,7 +11,6 @@ export const addSource = (path, source) => {
 };
 
 export const getSources = (path) => {
-  console.log(`QQ/getSources/path: ${path}`);
   if (sources.has(path)) {
     return sources.get(path);
   } else {
