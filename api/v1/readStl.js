@@ -1,6 +1,7 @@
+import { getSources, readFile } from '@jsxcad/sys';
+
 import { Shape } from './Shape';
 import { fromStl } from '@jsxcad/convert-stl';
-import { readFile } from '@jsxcad/sys';
 
 /**
  *
@@ -26,7 +27,10 @@ const formatToAs = (format) => {
 };
 
 export const readStl = async (options) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
   const { path, format = 'ascii' } = options;
   const as = formatToAs(format);
-  return Shape.fromGeometry(await fromStl(options, await readFile({ as, ...options }, path)));
+  return Shape.fromGeometry(await fromStl(options, await readFile({ as, sources: getSources(path), ...options }, path)));
 };

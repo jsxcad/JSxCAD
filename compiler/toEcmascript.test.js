@@ -92,7 +92,7 @@ test('Import', t => {
   t.is(ecmascript, `return async () => {
     const {
         foo: foo
-    } = await importModule("bar", []);
+    } = await importModule("bar");
 
     const main = async () => {};
 
@@ -102,23 +102,10 @@ test('Import', t => {
 };`);
 });
 
-test('Import Map', t => {
-  const ecmascript = toEcmascript({}, `
-    ({
-       "imports": {
-         "moment": "/node_modules/moment/src/moment.js",
-         "lodash": ["/node_modules/lodash-es/lodash.js"]
-       }
-     })
-
-    import { foo } from "moment";
-
-    foo();
-    `);
+test('Source stays at top level to support import', t => {
+  const ecmascript = toEcmascript({}, `source('a', 'b'); foo();`);
   t.is(ecmascript, `return async () => {
-    const {
-        foo: foo
-    } = await importModule("moment", "/node_modules/moment/src/moment.js");
+    source('a', 'b');
 
     const main = async () => {
         return foo();

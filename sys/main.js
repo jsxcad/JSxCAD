@@ -1,3 +1,5 @@
+import { addSource, getSources } from './source';
+
 import { conversation } from './conversation';
 import { createService } from './service';
 import { listProjects } from './listProjects';
@@ -9,8 +11,10 @@ import { watchFileCreation } from './files';
 import { writeFile } from './writeFile';
 
 export {
+  addSource,
   createService,
   conversation,
+  getSources,
   listProjects,
   log,
   readFile,

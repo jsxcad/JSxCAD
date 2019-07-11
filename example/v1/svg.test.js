@@ -2,7 +2,7 @@ import { isExpected, run } from './run';
 
 import test from 'ava';
 
-test('Expected stl', async (t) => {
+test('Expected svg', async (t) => {
   await run('svg');
-  isExpected(t, 'svg/svg/cutSpheres.svg');
+  isExpected(t, 'svg/cutSpheres.svg');
 });

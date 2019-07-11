@@ -1,15 +1,14 @@
+import { addSource, setupFilesystem } from '@jsxcad/sys';
 import { promises, readFileSync } from 'fs';
 
 import argv from 'argv';
 import { importModule } from '@jsxcad/api-v1';
-import { setupFilesystem } from '@jsxcad/sys';
 import { toEcmascript } from '@jsxcad/compiler';
-
-const { readFile } = promises;
 
 export const run = async (target = process.argv[2], base = 'observed') => {
   setupFilesystem({ fileBase: `${base}/${target}` });
-  const module = await importModule('script', `${target}.js`);
+  addSource(target, `./${target}.js`);
+  const module = await importModule(target);
   await module.main();
 };
 

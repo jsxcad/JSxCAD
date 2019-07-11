@@ -36,16 +36,6 @@ const fromObjectExpression = ({ properties }) => {
   return object;
 };
 
-const toExpression = (value) => {
-  if (typeof value === 'string') {
-    return { type: 'StringLiteral', value };
-  } else if (value instanceof Array) {
-    return { type: 'ArrayExpression', elements: value.map(toExpression) };
-  } else {
-    throw Error('die');
-  }
-};
-
 export const toEcmascript = (options, script) => {
   let ast = recast.parse(script,
                          {
@@ -91,7 +81,6 @@ export const toEcmascript = (options, script) => {
       //
       // FIX: Handle other variations.
       const { specifiers, source } = entry;
-      const sources = toExpression(annotations.imports[source.value] || []);
 
       const declarations = [];
       for (const { imported } of specifiers) {
@@ -114,7 +103,7 @@ export const toEcmascript = (options, script) => {
                 type: 'Identifier',
                 name: 'importModule'
               },
-              arguments: [source, sources]
+              arguments: [source]
             }
           }
         });
@@ -122,6 +111,9 @@ export const toEcmascript = (options, script) => {
       out.push({ type: 'VariableDeclaration', kind: 'const', declarations });
     } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
       Object.assign(annotations, fromObjectExpression(entry.expression));
+    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'CallExpression' && entry.expression.callee.name === 'source') {
+      // source('a', 'b') needs to be kept at the top level to support imports and avoid repetition.
+      out.push(entry);
     } else {
       expressions.push(entry);
     }

@@ -1,6 +1,7 @@
+import { getSources, readFile } from '@jsxcad/sys';
+
 import { Shape } from './Shape';
 import { fromSvg } from '@jsxcad/convert-svg';
-import { readFile } from '@jsxcad/sys';
 
 /**
  *
@@ -19,7 +20,10 @@ import { readFile } from '@jsxcad/sys';
  **/
 
 export const readSvg = async (options) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
   const { path } = options;
-  const data = await readFile({ decode: 'utf8', ...options }, path);
+  const data = await readFile({ decode: 'utf8', sources: getSources(path), ...options }, path);
   return Shape.fromGeometry(await fromSvg(options, data));
 };
