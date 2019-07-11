@@ -1,7 +1,7 @@
 import { canonicalize, transform } from '@jsxcad/geometry-polygons';
 
 import { degToRad } from '@jsxcad/math-utils';
-import { fromZRotation } from '@jsxcad/math-mat4';
+import { fromTranslation, fromZRotation } from '@jsxcad/math-mat4';
 import test from 'ava';
 import { union } from './union';
 
