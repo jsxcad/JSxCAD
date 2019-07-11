@@ -25,7 +25,6 @@ export const fromSurface = (...surfaces) => {
 };
 
 export const toSurface = (poly) => {
-console.log(`QQ/toSurface/poly: ${JSON.stringify(poly)}`);
   const eps = Epsilon(EPS);
   // make sure out polygon is clean
   // poly = polybooljs.polygon(polybooljs.segments(poly));
@@ -91,7 +90,6 @@ console.log(`QQ/toSurface/poly: ${JSON.stringify(poly)}`);
 
   // add all regions to the root
   for (var i = 0; i < poly.regions.length; i++) {
-console.log(`QQ/toSurface/root/poly/region`);
     var region = poly.regions[i];
     if (region.length < 3) {
        // regions must have at least 3 points (sanity check)
@@ -151,7 +149,6 @@ console.log(`QQ/toSurface/root/poly/region`);
 
   // root nodes are exterior
   for (var i = 0; i < roots.children.length; i++) {
-console.log(`QQ/toSurface/root`);
     addExterior(roots.children[i]);
   }
 
