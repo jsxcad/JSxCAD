@@ -1,3 +1,5 @@
+import { BRANCH } from './bsp';
+
 const deduplicate = (surface) => {
   // return surface;
   const unique = new Map();
@@ -10,13 +12,9 @@ const deduplicate = (surface) => {
 export const toSolid = (bsp) => {
   const solid = [];
   const walk = (bsp) => {
-    if (bsp.same !== null) {
+    if (bsp.kind === BRANCH) {
       solid.push(deduplicate(bsp.same));
-    }
-    if (bsp.back !== null) {
       walk(bsp.back);
-    }
-    if (bsp.front !== null) {
       walk(bsp.front);
     }
   };

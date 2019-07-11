@@ -33,7 +33,7 @@ const toType = (plane, point) => {
 
 const pointType = [];
 
-export const splitPolygon = (plane, polygon, emit) => {
+const splitPolygon = (plane, polygon, emit) => {
   const last = polygon.length - 1;
   pointType.length = 0;
   let polygonType = COPLANAR;
@@ -99,4 +99,12 @@ export const splitPolygon = (plane, polygon, emit) => {
       break;
     }
   }
+};
+
+export {
+  BACK,
+  COPLANAR_BACK,
+  COPLANAR_FRONT,
+  FRONT,
+  splitPolygon,
 };
