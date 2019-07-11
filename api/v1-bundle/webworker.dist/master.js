@@ -80977,9 +80977,12 @@ return d[d.length-1];};return ", funcName].join("");
         try {
           await promises.mkdir(dirname(persistentPath), { recursive: true });
         } catch (error) {
-          console.log(`QQ/mkdir: ${error.toString()}`);
         }
-        return promises.writeFile(persistentPath, data);
+        try {
+          await promises.writeFile(persistentPath, data);
+        } catch (error) {
+          console.log(`QQ/writeFile/error: ${error.toString()}`);
+        }
       } else if (isBrowser) {
         return localforage.setItem(`file/${persistentPath}`, fromByteArray_1(data));
       }
@@ -81024,8 +81027,6 @@ return d[d.length-1];};return ", funcName].join("");
   })();
   });
   var isBase64_1 = isBase64.isBase64;
-
-  var nodeFetch = {};
 
   /*! https://mths.be/punycode v1.4.1 by @mathias */
 
@@ -83779,6 +83780,8 @@ return d[d.length-1];};return ", funcName].join("");
       return false
     }
   };
+
+  var nodeFetch = {};
 
   /* global self */
 
