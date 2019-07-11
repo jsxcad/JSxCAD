@@ -27,7 +27,7 @@ export const fromSurface = (...surfaces) => {
 export const toSurface = (poly) => {
   const eps = Epsilon(EPS);
   // make sure out polygon is clean
-  poly = polybooljs.polygon(polybooljs.segments(poly));
+  // poly = polybooljs.polygon(polybooljs.segments(poly));
 
   // test if r1 is inside r2
   function regionInsideRegion (r1, r2) {
@@ -91,8 +91,10 @@ export const toSurface = (poly) => {
   // add all regions to the root
   for (var i = 0; i < poly.regions.length; i++) {
     var region = poly.regions[i];
-    if (region.length < 3) // regions must have at least 3 points (sanity check)
-    { continue; }
+    if (region.length < 3) {
+       // regions must have at least 3 points (sanity check)
+    continue;
+    }
     addChild(roots, region);
   }
 

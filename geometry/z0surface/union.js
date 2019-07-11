@@ -1,6 +1,5 @@
 import { fromSurface, toSurface } from './convert';
 
-import { doesNotOverlap } from './doesNotOverlap';
 import polybooljs from 'polybooljs';
 
 /**
@@ -11,7 +10,6 @@ import polybooljs from 'polybooljs';
  * @returns {Z0Surface} the resulting z0 surface.
  */
 export const union = (baseZ0Surface, ...z0Surfaces) => {
-  z0Surfaces = z0Surfaces.filter(surface => !doesNotOverlap(baseZ0Surface, surface));
   if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
