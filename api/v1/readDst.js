@@ -1,6 +1,7 @@
+import { getSources, readFile } from '@jsxcad/sys';
+
 import { Shape } from './Shape';
 import { fromDst } from '@jsxcad/convert-dst';
-import { readFile } from '@jsxcad/sys';
 
 /**
  *
@@ -24,6 +25,9 @@ import { readFile } from '@jsxcad/sys';
  **/
 
 export const readDst = async (options) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
   const { path } = options;
-  return Shape.fromGeometry(await fromDst(options, await readFile({ as: 'bytes', ...options }, path)));
+  return Shape.fromGeometry(await fromDst(options, await readFile({ as: 'bytes', sources: getSources(path), ...options }, path)));
 };

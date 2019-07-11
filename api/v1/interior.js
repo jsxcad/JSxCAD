@@ -1,4 +1,5 @@
 import { Shape } from './Shape';
+import { close } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
 import { union } from '@jsxcad/geometry-z0surface';
 
@@ -32,8 +33,8 @@ import { union } from '@jsxcad/geometry-z0surface';
 export const interior = (options = {}, shape) => {
   // FIX: Handle non-z0surfaces.
   const toUnion = [];
-  for (const { paths } of getPaths(shape.toGeometry())) {
-    toUnion.push(paths);
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    toUnion.push(paths.map(path => close(path)));
   }
   return Shape.fromPathsToZ0Surface(union(...toUnion));
 };

@@ -1,5 +1,6 @@
+import { getSources, readFile } from '@jsxcad/sys';
+
 import { Shape } from './Shape';
-import { readFile } from '@jsxcad/sys';
 import { writeShape } from './writeShape';
 
 /**
@@ -31,8 +32,11 @@ import { writeShape } from './writeShape';
  **/
 
 export const readShape = async (options, build) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
   const { ephemeral, path } = options;
-  const data = await readFile({ as: 'utf8', ...options }, path);
+  const data = await readFile({ as: 'utf8', sources: getSources(path), ...options }, path);
   if (data === undefined && build !== undefined) {
     const shape = await build();
     if (!ephemeral) {

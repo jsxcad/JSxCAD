@@ -1,5 +1,5 @@
 import { Shape } from './Shape';
-import { fromSurfaces } from '@jsxcad/algorithm-bsp-surfaces';
+import { fromSolid } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids } from '@jsxcad/geometry-tagged';
 
 /**
@@ -13,7 +13,7 @@ import { getSolids } from '@jsxcad/geometry-tagged';
 export const bsp = (shape) => {
   const bsps = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    bsps.push(fromSurfaces({}, solid));
+    bsps.push(fromSolid(solid));
   }
   return bsps;
 };

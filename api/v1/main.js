@@ -43,6 +43,7 @@ import { importModule } from './importModule';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { lathe } from './lathe';
 import { left } from './left';
 import { lego } from './lego';
 import { log } from './log';
@@ -73,10 +74,12 @@ import { rotateZ } from './rotateZ';
 import { scale } from './scale';
 import { section } from './section';
 import { sin } from './sin';
+import { source } from './source';
 import { sphere } from './sphere';
 import { sqrt } from './sqrt';
 import { square } from './square';
 import { svgPath } from './svgPath';
+import { tags } from './tags';
 import { tetrahedron } from './tetrahedron';
 import { torus } from './torus';
 import { translate } from './translate';
@@ -124,6 +127,7 @@ export {
   importModule,
   interior,
   intersection,
+  lathe,
   left,
   lego,
   log,
@@ -157,11 +161,13 @@ export {
   scale,
   section,
   sin,
+  source,
   sphere,
   sqrt,
   square,
   startClock,
   svgPath,
+  tags,
   tetrahedron,
   torus,
   translate,

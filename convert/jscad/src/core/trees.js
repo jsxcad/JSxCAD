@@ -12,6 +12,9 @@ const Polygon = require('./math/Polygon3')
 // In case the polygon is spanning, returns:
 // .front: a Polygon of the front part
 // .back: a Polygon of the back part
+
+let splitPolygonByPlaneCount = 0;
+
 function splitPolygonByPlane (plane, polygon) {
   let result = {
     type: null,
@@ -244,6 +247,9 @@ PolygonTreeNode.prototype = {
   _splitByPlane: function (plane, coplanarfrontnodes, coplanarbacknodes, frontnodes, backnodes) {
     let polygon = this.polygon
     if (polygon) {
+      if (++splitPolygonByPlaneCount % 1000 === 0) {
+        // console.log(`QQ/splitByPlane: ${splitPolygonByPlaneCount}`);
+      }
       let bound = polygon.boundingSphere()
       let sphereradius = bound[1] + EPS // FIXME Why add imprecision?
       let planenormal = plane.normal

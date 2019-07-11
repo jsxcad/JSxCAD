@@ -15,6 +15,8 @@ export const flip = (geometry) => {
     flipped.solid = flipSolid(geometry.solid);
   } else if (geometry.assembly) {
     flipped.assembly = geometry.assembly.map(flip);
+  } else if (geometry.disjointAssembly) {
+    flipped.assembly = geometry.disjointAssembly.map(flip);
   } else {
     throw Error(`die: ${JSON.stringify(geometry)}`);
   }

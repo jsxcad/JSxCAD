@@ -1,4 +1,4 @@
-({ 'imports': { 'gear': './gear.js' } })
+source('gear', './gear.js');
 
 import { buildGear } from 'gear';
 

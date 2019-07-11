@@ -39,9 +39,12 @@ export const writeFile = async (options, path, data) => {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
       } catch (error) {
-        console.log(`QQ/mkdir: ${error.toString()}`);
       }
-      return promises.writeFile(persistentPath, data);
+      try {
+        await promises.writeFile(persistentPath, data);
+      } catch (error) {
+        console.log(`QQ/writeFile/error: ${error.toString()}`);
+      }
     } else if (isBrowser) {
       return localForage.setItem(`file/${persistentPath}`, fromByteArray(data));
     }

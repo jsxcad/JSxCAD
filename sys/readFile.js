@@ -9,6 +9,7 @@ import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 import { getBase } from './filesystem';
 import { getFile } from './files';
 import { isBase64 } from 'is-base64';
+import isUrlHttp from 'is-url-http';
 import localForage from 'localforage';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
@@ -64,21 +65,31 @@ const fetchSources = async (options = {}, sources) => {
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
-      // FIX: Detect urls.
       try {
-        const data = await fetchFile(source);
-        if (data !== undefined) {
-          return data;
+        if (isUrlHttp(source)) {
+          log(`# Fetching ${source}`);
+          const response = await fetchUrl(source);
+          if (response.ok) {
+            return new Uint8Array(await response.arrayBuffer());
+          }
+        } else {
+          // Assume a file path.
+          const data = await fetchFile(source);
+          if (data !== undefined) {
+            return data;
+          }
         }
       } catch (e) {
       }
     } else if (source.url !== undefined) {
+      // DEPRECATE
       log(`# Fetching ${source.url}`);
       const response = await fetchUrl(source.url);
       if (response.ok) {
         return new Uint8Array(await response.arrayBuffer());
       }
     } else if (source.file !== undefined) {
+      // DEPRECATE
       try {
         const data = await fetchFile(source.file);
         if (data !== undefined) {
