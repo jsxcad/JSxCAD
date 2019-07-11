@@ -1,6 +1,5 @@
 import { fromSurface, toSurface } from './convert';
 
-import { doesNotOverlap } from './doesNotOverlap';
 import polybooljs from 'polybooljs';
 
 /**
