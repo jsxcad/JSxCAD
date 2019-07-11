@@ -74,6 +74,7 @@ import { rotateZ } from './rotateZ';
 import { scale } from './scale';
 import { section } from './section';
 import { sin } from './sin';
+import { source } from './source';
 import { sphere } from './sphere';
 import { sqrt } from './sqrt';
 import { square } from './square';
@@ -160,6 +161,7 @@ export {
   scale,
   section,
   sin,
+  source,
   sphere,
   sqrt,
   square,

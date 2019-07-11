@@ -1,5 +1,6 @@
 import { Shape } from './Shape';
 import { fromLDraw } from '@jsxcad/convert-ldraw';
+import { getSources } from '@jsxcad/sys';
 
 /**
  *
@@ -14,5 +15,9 @@ import { fromLDraw } from '@jsxcad/convert-ldraw';
  **/
 
 export const readLDraw = async (options) => {
-  return Shape.fromGeometry(await fromLDraw(options));
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  return Shape.fromGeometry(await fromLDraw({ sources: getSources(path), ...options }));
 };
