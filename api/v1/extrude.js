@@ -1,9 +1,10 @@
 import { assertNumber, assertShape } from './assert';
 
 import { Shape } from './Shape';
+import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { map } from '@jsxcad/geometry-tagged';
+import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -27,20 +28,25 @@ import { map } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const fromHeight = ({ height }, shape) =>
-  Shape.fromGeometry(
-    map(shape.toKeptGeometry(),
-        (item) => {
-          if (item.z0Surface) {
-            return { ...item, solid: extrudeAlgorithm({ height: height }, item.z0Surface) };
-          } else {
-            return item;
-          }
-        }));
-// const z0Surfaces = getZ0Surfaces(shape.toKeptGeometry());
-// const solids = z0Surfaces.map(({ z0Surface }) => extrudeAlgorithm({ height: height }, z0Surface));
-// const assembly = assemble(...solids.map(Shape.fromSolid)).setTags(shape.getTags());
-// return assembly;
+export const fromHeight = ({ height }, shape) => {
+  // FIX: Handle extrusion along a vector properly.
+  const solids = [];
+  if (height === 0) {
+    return shape;
+  }
+  for (const { tags, z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+    solids.push(Shape.fromGeometry({
+      solid: extrudeAlgorithm({ height }, z0Surface),
+      tags
+    }));
+  }
+  if (height < 0) {
+    // Turn negative extrusions inside out.
+    return assemble(...solids).flip();
+  } else {
+    return assemble(...solids);
+  }
+};
 
 export const fromValue = (height, shape) => fromHeight({ height }, shape);
 
