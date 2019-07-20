@@ -1,7 +1,9 @@
+import { build } from './build';
+import { clipTo } from './clipTo';
 import { doesNotOverlap } from '@jsxcad/geometry-solid';
-import { fromSolid } from './fromSolid';
-import { removeInterior } from './removeInterior';
-import { toSolid } from './toSolid';
+import { flip } from './flip';
+import { fromSurfaces } from './fromSurfaces';
+import { toSurfaces } from './toSurfaces';
 
 export const union = (...solids) => {
   if (solids.length === 0) {
@@ -15,15 +17,25 @@ export const union = (...solids) => {
       // Simple composition suffices.
       solids.push([...aSolid, ...bSolid]);
     } else {
-      const a = fromSolid(aSolid);
-      const b = fromSolid(bSolid);
+      const aBsp = fromSurfaces({}, aSolid);
+      const bBsp = fromSurfaces({}, bSolid);
 
-      // FIX: See if we can apply work stealing.
+      // Remove the bits of a that are in b.
+      clipTo(aBsp, bBsp);
 
-      const aOutsideB = removeInterior(a, b);
-      const bOutsideA = removeInterior(b, a);
+      // Remove the bits of b that are in a.
+      clipTo(bBsp, aBsp);
 
-      solids.push([...toSolid(aOutsideB), ...toSolid(bOutsideA)]);
+      // Turn b inside out and remove the bits that are in a.
+      flip(bBsp);
+      clipTo(bBsp, aBsp);
+      flip(bBsp);
+
+      // Now merge the two together.
+      build(aBsp, toSurfaces({}, bBsp));
+
+      // And build a geometry from the result.
+      solids.push(toSurfaces({}, aBsp));
     }
   }
   return solids[0];
