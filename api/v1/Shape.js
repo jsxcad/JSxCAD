@@ -70,7 +70,9 @@ export class Shape {
   }
 
   transform (matrix) {
-    if (matrix.some(item => item === -Infinity)) throw Error('die');
+    if (matrix.some(item => item === -Infinity)) {
+      throw Error('die');
+    }
     return fromGeometry(transform(matrix, this.toGeometry()));
   }
 }
@@ -82,6 +84,7 @@ Shape.fromOpenPath = (path) => fromGeometry({ paths: [openPath(path)] });
 Shape.fromPath = (path) => fromGeometry({ paths: [path] });
 Shape.fromPaths = (paths) => fromGeometry({ paths: paths });
 Shape.fromPathToZ0Surface = (path) => fromGeometry({ z0Surface: [path] });
+Shape.fromPathsToSurface = (paths) => fromGeometry({ surface: paths });
 Shape.fromPathsToZ0Surface = (paths) => fromGeometry({ z0Surface: paths });
 Shape.fromPoint = (point) => fromGeometry({ points: [point] });
 Shape.fromPoints = (points) => fromGeometry({ points: points });

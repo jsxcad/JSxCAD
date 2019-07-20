@@ -2,7 +2,7 @@ import { max, min } from '@jsxcad/math-vec3';
 
 import { eachPoint } from './eachPoint';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
-import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
+import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
 import { toTransformedGeometry } from './toTransformedGeometry';
 
 const measureBoundingBoxGeneric = (geometry) => {

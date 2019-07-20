@@ -17,31 +17,41 @@ const COPLANAR_BACK = 5;
 export const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 
 //  dot(plane, point) - plane[W];
-export const planeDistance = (plane, point) => plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+export const planeDistance = (plane, point) =>
+  plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
 
-const toType = (plane, point) => {
-  // const t = planeDistance(plane, point);
-  const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
-  if (t < -EPSILON) {
-    return BACK;
-  } else if (t > EPSILON) {
-    return FRONT;
-  } else {
-    return COPLANAR;
-  }
-};
+// const toType = (plane, point) => {
+//   // const t = planeDistance(plane, point);
+//   const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+//   if (t < -EPSILON) {
+//     return BACK;
+//   } else if (t > EPSILON) {
+//     return FRONT;
+//   } else {
+//     return COPLANAR;
+//   }
+// };
 
 const pointType = [];
 
-const splitPolygon = (plane, polygon, emit) => {
-  const last = polygon.length - 1;
-  pointType.length = 0;
+const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) => {
   let polygonType = COPLANAR;
   if (!planeEquals(toPlane(polygon), plane)) {
-    for (const point of polygon) {
-      const type = toType(plane, point);
-      polygonType |= type;
-      pointType.push(type);
+    for (let nth = 0; nth < polygon.length; nth++) {
+      // const type = toType(plane, polygon[nth]);
+      // const t = planeDistance(plane, point);
+      const point = polygon[nth];
+      const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+      if (t < -EPSILON) {
+        polygonType |= BACK;
+        pointType[nth] = BACK;
+      } else if (t > EPSILON) {
+        polygonType |= FRONT;
+        pointType[nth] = FRONT;
+      } else {
+        polygonType |= COPLANAR;
+        pointType[nth] = COPLANAR;
+      }
     }
   }
 
@@ -49,20 +59,21 @@ const splitPolygon = (plane, polygon, emit) => {
   switch (polygonType) {
     case COPLANAR:
       if (dot(plane, toPlane(polygon)) > 0) {
-        emit(polygon, COPLANAR_FRONT);
+        coplanarFront.push(polygon);
       } else {
-        emit(polygon, COPLANAR_BACK);
+        coplanarBack.push(polygon);
       }
-      break;
+      return;
     case FRONT:
-      emit(polygon, FRONT);
-      break;
+      front.push(polygon);
+      return;
     case BACK:
-      emit(polygon, BACK);
-      break;
+      back.push(polygon);
+      return;
     case SPANNING: {
-      let frontPoints = [];
-      let backPoints = [];
+      const frontPoints = [];
+      const backPoints = [];
+      const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
       for (let nth = 0; nth < polygon.length; nth++) {
@@ -79,7 +90,8 @@ const splitPolygon = (plane, polygon, emit) => {
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
-          const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
+          // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
+          const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
           if (squaredDistance(spanPoint, startPoint) > THRESHOLD2) {
             frontPoints.push(spanPoint);
           }
@@ -91,10 +103,10 @@ const splitPolygon = (plane, polygon, emit) => {
         startType = endType;
       }
       if (frontPoints.length >= 3) {
-        emit(frontPoints, FRONT);
+        front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
-        emit(backPoints, BACK);
+        back.push(backPoints);
       }
       break;
     }
@@ -106,5 +118,5 @@ export {
   COPLANAR_BACK,
   COPLANAR_FRONT,
   FRONT,
-  splitPolygon,
+  splitPolygon
 };

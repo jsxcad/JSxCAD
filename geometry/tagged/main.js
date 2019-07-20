@@ -27,7 +27,6 @@ import { toKeptGeometry } from './toKeptGeometry';
 import { toPoints } from './toPoints';
 import { toStandardGeometry } from './toStandardGeometry';
 import { toTransformedGeometry } from './toTransformedGeometry';
-import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
 import { union } from './union';
 
@@ -59,7 +58,6 @@ export {
   toPoints,
   toStandardGeometry,
   toTransformedGeometry,
-  toZ0Surface,
   transform,
   union
 };

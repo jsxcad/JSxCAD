@@ -1,61 +1,34 @@
-import { splitPolygon } from './splitPolygon';
-import { toPlane } from '@jsxcad/math-poly3';
+import { inLeaf, outLeaf } from './bsp';
 
-const FRONT = 1;
-const BACK = 2;
-const COPLANAR_FRONT = 4;
-const COPLANAR_BACK = 5;
+import { splitPolygon } from './splitPolygon';
 
 // Remove from surfaces those parts that are inside the solid delineated by bsp.
-export const removeExteriorPolygons = (bsp, polygons, alsoRemoveCoplanarBack = false) => {
-  if (bsp === null || bsp.same === null || polygons === null) {
+export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = false) => {
+  if (bsp === inLeaf) {
     return polygons;
-  }
-  if (polygons.length === 0) {
-    return null;
-  }
-  const plane = toPlane(bsp.same[0]);
-  let front = null;
-  let back = null;
-
-  const emit = (polygon, kind) => {
-    switch (kind) {
-      case COPLANAR_BACK:
-        if (alsoRemoveCoplanarBack) {
-          if (front === null) { front = [polygon]; } else { front.push(polygon); }
-        } else {
-          if (back === null) { back = [polygon]; } else { back.push(polygon); }
-        }
-        break;
-      case BACK:
-        if (back === null) { back = [polygon]; } else { back.push(polygon); }
-        break;
-      case COPLANAR_FRONT:
-      case FRONT:
-        if (front === null) { front = [polygon]; } else { front.push(polygon); }
-        break;
-      default:
-        throw Error('die');
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    const junk = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back=*/back,
+                   /* coplanarBack=*/back,
+                   /* coplanarFront=*/back,
+                   /* front=*/front);
     }
-  };
+    const trimmedFront = removeExteriorPolygons(bsp.front, front, removeSurfacePolygons);
+    const trimmedBack = removeExteriorPolygons(bsp.back, back, removeSurfacePolygons);
 
-  for (let i = 0; i < polygons.length; i++) {
-    splitPolygon(plane, polygons[i], emit);
-  }
-
-  if (bsp.front !== null && front !== null) {
-    front = removeExteriorPolygons(bsp.front, front, alsoRemoveCoplanarBack);
-  } else {
-    front = null;
-  }
-
-  if (bsp.back !== null && back !== null) {
-    back = removeExteriorPolygons(bsp.back, back, alsoRemoveCoplanarBack);
-  }
-
-  if (front === null) {
-    if (back === null) { return null; } else { return back; }
-  } else {
-    if (back === null) { return front; } else { return front.concat(front, back); }
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
   }
 };

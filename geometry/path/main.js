@@ -5,6 +5,8 @@ import { close } from './close';
 import { concatenate } from './concatenate';
 import { flip } from './flip';
 import { isClosed } from './isClosed';
+import { isClockwise } from './isClockwise';
+import { isCounterClockwise } from './isCounterClockwise';
 import { measureArea } from './measureArea';
 import { open } from './open';
 import { toGeneric } from './toGeneric';
@@ -18,7 +20,9 @@ export {
   close,
   concatenate,
   flip,
+  isClockwise,
   isClosed,
+  isCounterClockwise,
   measureArea,
   open,
   toGeneric,

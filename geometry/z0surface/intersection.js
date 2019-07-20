@@ -22,13 +22,18 @@ import polybooljs from 'polybooljs';
  *      +-------+
  */
 export const intersection = (baseZ0Surface, ...z0Surfaces) => {
-  z0Surfaces = z0Surfaces.filter(surface => !doesNotOverlap(baseZ0Surface, surface));
   if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
   if (z0Surfaces.length === 0) {
     return baseZ0Surface;
   }
-  const result = polybooljs.intersect(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
-  return toSurface(result);
+  for (const surface of z0Surfaces) {
+    if (doesNotOverlap(surface, baseZ0Surface)) {
+      return [];
+    }
+    const result = polybooljs.intersect(fromSurface(baseZ0Surface), fromSurface(surface));
+    baseZ0Surface = toSurface(result);
+  }
+  return baseZ0Surface;
 };

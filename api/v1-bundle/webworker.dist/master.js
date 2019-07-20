@@ -62707,14 +62707,6 @@ return d[d.length-1];};return ", funcName].join("");
 
   // import { isCoplanar } from '@jsxcad/math-poly3';
 
-  /**
-   * Transforms each polygon of the surface.
-   *
-   * @param {Polygons} original - the Polygons to transform.
-   * @param {Function} [transform=identity] - function used to transform the polygons.
-   * @returns {Polygons} a copy with transformed polygons.
-   */
-
   // (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
   // MIT License
   // Project Home: https://github.com/voidqk/polybooljs
@@ -67683,6 +67675,14 @@ return d[d.length-1];};return ", funcName].join("");
     return blessAsConvex(convex);
   };
 
+  /**
+   * Transforms each polygon of the surface.
+   *
+   * @param {Polygons} original - the Polygons to transform.
+   * @param {Function} [transform=identity] - function used to transform the polygons.
+   * @returns {Polygons} a copy with transformed polygons.
+   */
+
   const makeConvex$1 = (options = {}, surface) => {
     if (surface.length === 0) {
       // An empty surface is not non-convex.
@@ -67759,9 +67759,89 @@ return d[d.length-1];};return ", funcName].join("");
     return blessAsTriangles(triangles);
   };
 
+  // The resolution is 1 / multiplier.
+
   // Relax the coplanar arrangement into polygon soup.
 
+  /*
+  export const difference = (geometry, ...subtractGeometries) => {
+    if (subtractGeometries.length === 0) {
+      // Nothing to do.
+      return geometry;
+    } else {
+      return map(geometry,
+                 (item) => {
+                   for (const subtractGeometry of subtractGeometries) {
+                     eachItem(subtractGeometry,
+                              (subtractItem) => {
+                                if (item.solid && subtractItem.solid) {
+                                  item = { ...item, solid: solidDifference(item.solid, subtractItem.solid) };
+                                } else if (item.z0Surface && subtractItem.z0Surface) {
+                                  item = { ...item, z0Surface: z0SurfaceDifference(item.z0Surface, subtractItem.z0Surface) };
+                                } else if (item.paths && subtractItem.paths) {
+                                  item = { ...item, paths: pathsDifference(item.paths, subtractItem.paths) };
+                                }
+                              });
+                   }
+                   return item;
+                 });
+    }
+  };
+  */
+
+  /*
+    if (geometries.length === 0) {
+      // Nothing to do.
+      return geometry;
+    } else {
+      return map(geometry,
+                 (item) => {
+                   for (const intersectGeometry of geometries) {
+                     eachItem(intersectGeometry,
+                              (intersectItem) => {
+                                if (item.solid && intersectItem.solid) {
+                                  item = { solid: solidIntersection(item.solid, intersectItem.solid) };
+                                } else if (item.z0Surface && intersectItem.z0Surface) {
+                                  item = { z0Surface: z0SurfaceIntersection(item.z0Surface, intersectItem.z0Surface) };
+                                } else if (item.paths && intersectItem.paths) {
+                                  item = { paths: pathsIntersection(item.paths, intersectItem.paths) };
+                                }
+                              });
+                   }
+                   return item;
+                 });
+    }
+  };
+  */
+
   // Produce a standard geometry representation without caches, etc.
+
+  /*
+  // FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
+  export const union = (geometry, ...geometries) => {
+    if (geometries.length === 0) {
+      // Nothing to do.
+      return geometry;
+    } else {
+      return map(geometry,
+                 (item) => {
+                   for (const unionGeometry of geometries) {
+                     eachItem(unionGeometry,
+                              (unionItem) => {
+                                if (item.solid && unionItem.solid) {
+                                  item = { solid: solidUnion(item.solid, unionItem.solid) };
+                                } else if (item.z0Surface && unionItem.z0Surface) {
+                                  item = { z0Surface: z0SurfaceUnion(item.z0Surface, unionItem.z0Surface) };
+                                } else if (item.paths && unionItem.paths) {
+                                  item = { paths: pathsUnion(item.paths, unionItem.paths) };
+                                }
+                              });
+                   }
+                   return item;
+                 });
+    }
+  };
+  */
 
   const pointsToThreejsPoints = (geometry) => {
     return geometry.points;
@@ -67792,7 +67872,7 @@ return d[d.length-1];};return ", funcName].join("");
     return { normals, positions };
   };
 
-  const z0SurfaceToThreejsSurface = (surface) => {
+  const surfaceToThreejsSurface = (surface) => {
     const normals = [];
     const positions = [];
     for (const triangle of toTriangles({}, makeConvex$1({}, surface))) {
@@ -67831,8 +67911,10 @@ return d[d.length-1];};return ", funcName].join("");
       return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: tags, isThreejsGeometry: true };
     } else if (geometry.solid) {
       return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: tags, isThreejsGeometry: true };
+    } else if (geometry.surface) {
+      return { threejsSurface: surfaceToThreejsSurface(geometry.surface), tags: tags, isThreejsGeometry: true };
     } else if (geometry.z0Surface) {
-      return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: tags, isThreejsGeometry: true };
+      return { threejsSurface: surfaceToThreejsSurface(geometry.z0Surface), tags: tags, isThreejsGeometry: true };
     }
   };
 

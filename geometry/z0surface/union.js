@@ -9,13 +9,15 @@ import polybooljs from 'polybooljs';
  * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
  * @returns {Z0Surface} the resulting z0 surface.
  */
-export const union = (baseZ0Surface, ...z0Surfaces) => {
-  if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
+export const union = (...surfaces) => {
+  if (surfaces.length === 0) {
     return [];
   }
-  if (z0Surfaces.length === 0) {
-    return baseZ0Surface;
+  while (surfaces.length >= 2) {
+    const a = surfaces.shift();
+    const b = surfaces.shift();
+    const result = polybooljs.union(fromSurface(a), fromSurface(b));
+    surfaces.push(toSurface(result));
   }
-  const result = polybooljs.union(fromSurface(baseZ0Surface), fromSurface(...z0Surfaces));
-  return toSurface(result);
+  return surfaces[0];
 };

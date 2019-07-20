@@ -1,47 +1,54 @@
-import { doesNotOverlap } from '@jsxcad/geometry-solid';
-import { flip } from './flip';
-import { fromSolid } from './fromSolid';
-import { removeInterior } from './removeInterior';
-import { toSolid } from './toSolid';
+import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { inLeaf, outLeaf, fromPolygons as toBspFromPolygons, fromSolid as toBspFromSolid } from './bsp';
 
-/**
- * Return a solid representing filled volume present in all provided solids.
- * A pairwise generational reduction is used.
- * @param {Array<Polygons>} solids - list Polygons.
- * @returns {Polygons} the resulting solid.
- * @example
- * let C = intersection(A, B)
- * @example
- * +--------+
- * |        |
- * |   A    |
- * |    +---+----+       +---+
- * |    |   |    |   =   + C +
- * +----+---+    |       +---+
- *      |    B   |
- *      |        |
- *      +--------+
- */
-export const intersection = (...solids) => {
-  // Run a queue so that intersections are generally against intersections of the same generation.
-  while (solids.length > 1) {
-    const aSolid = solids.shift();
-    const bSolid = solids.shift();
+import { splitPolygon } from './splitPolygon';
 
-    if (doesNotOverlap(aSolid, bSolid)) {
-      // Once we produce an empty geometry, all further intersections must be empty.
-      return [];
+// Remove from surfaces those parts that are inside the solid delineated by bsp.
+export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = false) => {
+  if (bsp === inLeaf) {
+    return polygons;
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    const junk = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /*back=*/back,
+                   /*coplanarBack=*/front, // was back
+                   /*coplanarFront=*/back, // was back
+                   /*front=*/front);
     }
+    const trimmedFront = removeExteriorPolygons(bsp.front, front, removeSurfacePolygons);
+    const trimmedBack = removeExteriorPolygons(bsp.back, back, removeSurfacePolygons);
 
-    const a = fromSolid(aSolid);
-    const b = fromSolid(bSolid);
-
-    const aFlipped = flip(a);
-    const bFlipped = flip(b);
-    const aClipped = removeInterior(aFlipped, bFlipped);
-    const bClipped = removeInterior(bFlipped, aFlipped);
-
-    solids.push([...toSolid(flip(aClipped)), ...toSolid(flip(bClipped))]);
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
   }
-  return solids[0];
+};
+
+export const intersection = (...solids) => {
+  if (solids.length === 0) {
+    return [];
+  }
+  if (solids.length === 1) {
+    return solid[0];
+  }
+  const bsps = solids.map(solid => toBspFromSolid(solid));
+  const polygons = solids.map(solid => toPolygonsFromSolid({}, solid));
+  for (let nth = 0; nth < solids.length; nth++) {
+    for (const bsp of bsps) {
+      // Polygons which fall OUT are removed.
+      // Coplanars must fall IN-ward.
+      polygons[nth] = removeExteriorPolygons(bsp, polygons[nth]);
+    }
+  }
+  return toSolidFromPolygons({}, [].concat(...polygons));
 };

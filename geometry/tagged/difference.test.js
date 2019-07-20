@@ -1,3 +1,5 @@
+Error.stackTraceLimit = Infinity
+
 import { rotateZ, scale } from '@jsxcad/geometry-surface';
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
