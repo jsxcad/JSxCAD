@@ -1,19 +1,25 @@
-import { clipPolygons } from './clipPolygons';
+import { build } from './build';
+import { clipSurfaces } from './clipSurfaces';
+import { clipTo } from './clipTo';
 import { create } from './create';
 import { difference } from './difference';
 import { flip } from './flip';
-import { fromSolid } from './fromSolid';
+import { fromSurfaces } from './fromSurfaces';
 import { intersection } from './intersection';
-import { toSolid } from './toSolid';
+import { splitSurface } from './splitSurface';
+import { toSurfaces } from './toSurfaces';
 import { union } from './union';
 
 export {
-  clipPolygons,
+  build,
+  clipSurfaces,
+  clipTo,
   create,
   difference,
   flip,
-  fromSolid,
+  fromSurfaces,
   intersection,
-  toSolid,
+  splitSurface,
+  toSurfaces,
   union
 };

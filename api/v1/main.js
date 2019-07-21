@@ -18,7 +18,6 @@ import { as } from './as';
 import { assemble } from './assemble';
 import { back } from './back';
 import { below } from './below';
-import { bsp } from './bsp';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { circle } from './circle';
@@ -102,7 +101,6 @@ export {
   assemble,
   back,
   below,
-  bsp,
   center,
   chainHull,
   circle,
