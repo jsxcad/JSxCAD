@@ -11,7 +11,7 @@
     "test": "ava",
     "tests": "ava *.test.js",
     "rollup": "rollup -c rollup.master.js && rollup -c rollup.webworker.js",
-    "rollupMaslow": "rollup -c rollup.maslowWorker.js"
+    "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js"
     
   },
   "contributors": [
