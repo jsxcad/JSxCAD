@@ -1,5 +1,7 @@
+source('ttf/GreatVibes.ttf', './great-vibes/GreatVibes-Regular.ttf');
+
 const string = 'JSxCAD';
-const greatVibes = await readFont({ path: 'ttf/GreatVibes.ttf', sources: ['./great-vibes/GreatVibes-Regular.ttf'] });
+const greatVibes = await readFont('ttf/GreatVibes.ttf');
 const letters = greatVibes({}, string);
 
 await letters.writePdf('pdf/text.pdf');
