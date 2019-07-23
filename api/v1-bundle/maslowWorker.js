@@ -20,6 +20,8 @@ const agent = async ({ ask, question }) => {
         return api.circle({ radius: values[0], center: true, resolution: values[1] }).toDisjointGeometry();
       case 'difference':
         return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+      case 'drop':
+        api.Shape.fromGeometry(values[0]).drop().toDisjointGeometry();
       case 'extrude':
         return api.Shape.fromGeometry(values[0]).extrude({ height: values[1] }).toDisjointGeometry();
       case 'hull':
