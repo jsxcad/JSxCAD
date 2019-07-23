@@ -2,6 +2,7 @@ import { canonicalize, rotateZ, scale, toPlane, transform, translate } from './o
 import { cut, cutSurface } from './cut';
 
 import { assertCoplanar } from './assertCoplanar';
+import { assertGood } from './assertGood';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { makeConvex } from './makeConvex';
@@ -13,6 +14,7 @@ import { toGeneric } from './toGeneric';
 
 export {
   assertCoplanar,
+  assertGood,
   canonicalize,
   cut,
   cutSurface,

@@ -5,6 +5,8 @@ import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { assertGood as assertGoodSolid } from '@jsxcad/geometry-solid';
+import { assertGood as assertGoodSurface } from '@jsxcad/geometry-surface';
 
 /**
  *
@@ -32,13 +34,14 @@ export const fromHeight = ({ height }, shape) => {
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   if (height === 0) {
+    throw Error('die');
     return shape;
   }
   for (const { tags, z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
-    solids.push(Shape.fromGeometry({
-      solid: extrudeAlgorithm({ height }, z0Surface),
-      tags
-    }));
+    assertGoodSurface(z0Surface);
+    const solid = extrudeAlgorithm({ height }, z0Surface);
+    assertGoodSolid(solid);
+    solids.push(Shape.fromGeometry({ solid, tags }));
   }
   if (height < 0) {
     // Turn negative extrusions inside out.

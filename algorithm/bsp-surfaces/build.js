@@ -17,14 +17,8 @@ export const build = (bsp, surfaces, depth = 0) => {
     return;
   }
   if (bsp.plane === undefined) {
-    let largestSurface = surfaces[0];
-    for (let nth = 1; nth < surfaces.length; nth++) {
-      if (measureArea(surfaces[nth]) > measureArea(largestSurface)) {
-        largestSurface = surfaces[nth];
-      }
-    }
     // Use the plane of the surface to partition the branches.
-    bsp.plane = toPlane(largestSurface);
+    bsp.plane = toPlane(surfaces[0]);
   }
   let front = [];
   let back = [];
