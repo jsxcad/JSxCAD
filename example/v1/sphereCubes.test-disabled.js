@@ -1,3 +1,5 @@
+Error.stackTraceLimit = Infinity;
+
 import { isExpected, run } from './run';
 
 import test from 'ava';

@@ -1,6 +1,5 @@
-import { canonicalize, isClosed } from '@jsxcad/geometry-path';
+import { assertGood, canonicalize, isClosed } from '@jsxcad/geometry-path';
 
-import { assertGood } from '@jsxcad/geometry-path';
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
 import curvifySvgPath from './curvify-svg-path/index.js';
@@ -100,4 +99,4 @@ export const fromSvgPath = (options = {}, svgPath) => {
   }
   const geometry = { paths };
   return geometry;
-}
+};

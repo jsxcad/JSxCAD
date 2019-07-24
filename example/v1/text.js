@@ -1,3 +1,5 @@
+console.log(`QQ/1`);
+
 source('ttf/GreatVibes.ttf', './great-vibes/GreatVibes-Regular.ttf');
 
 const string = 'JSxCAD';

@@ -52,6 +52,5 @@ export const fixTJunctions = (solids) => {
     }
     fixed.push({ solid });
   }
-
   return fixed;
 };

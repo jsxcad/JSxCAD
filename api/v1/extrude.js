@@ -1,12 +1,12 @@
-import { assertNumber, assertShape } from './assert';
+import { assertNonZeroNumber, assertShape } from './assert';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
+import { assertGood as assertGoodSolid } from '@jsxcad/geometry-solid';
+import { assertGood as assertGoodSurface } from '@jsxcad/geometry-surface';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
-import { assertGood as assertGoodSolid } from '@jsxcad/geometry-solid';
-import { assertGood as assertGoodSurface } from '@jsxcad/geometry-surface';
 
 /**
  *
@@ -31,12 +31,9 @@ import { assertGood as assertGoodSurface } from '@jsxcad/geometry-surface';
  **/
 
 export const fromHeight = ({ height }, shape) => {
+  console.log(`QQ/fromHeight: ${height}`);
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
-  if (height === 0) {
-    throw Error('die');
-    return shape;
-  }
   for (const { tags, z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
     assertGoodSurface(z0Surface);
     const solid = extrudeAlgorithm({ height }, z0Surface);
@@ -56,12 +53,12 @@ export const fromValue = (height, shape) => fromHeight({ height }, shape);
 export const extrude = dispatch(
   'extrude',
   (height, shape) => {
-    assertNumber(height);
+    assertNonZeroNumber(height);
     assertShape(shape);
     return () => fromValue(height, shape);
   },
   ({ height }, shape) => {
-    assertNumber(height);
+    assertNonZeroNumber(height);
     assertShape(shape);
     return () => fromHeight({ height }, shape);
   }

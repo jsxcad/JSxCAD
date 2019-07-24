@@ -1,9 +1,9 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
 import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { makeSurfacesConvex, toPolygons } from '@jsxcad/geometry-solid';
 
 import { assertUnique } from '@jsxcad/geometry-path';
 import { fixTJunctions } from './fixTJunctions';
+import { makeSurfacesConvex } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
 
 /**
@@ -19,9 +19,11 @@ const geometryToTriangles = (solids) => {
   const triangles = [];
   for (const { solid } of fixTJunctions(solids)) {
     let convex = makeSurfacesConvex({}, solid);
-    for (const triangle of toTriangles({}, convex)) {
-      assertUnique(triangle);
-      triangles.push(triangle);
+    for (const surface of convex) {
+      for (const triangle of toTriangles({}, surface)) {
+        assertUnique(triangle);
+        triangles.push(triangle);
+      }
     }
   }
   return triangles;

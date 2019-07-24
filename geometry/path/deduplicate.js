@@ -10,5 +10,4 @@ export const deduplicate = (path) => {
     last = point;
   }
   return unique;
-}
-
+};

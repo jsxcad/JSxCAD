@@ -4,4 +4,4 @@ export const assertGood = (solid) => {
   for (const surface of solid) {
     assertGoodSurface(surface);
   }
-}
+};

@@ -4,11 +4,13 @@ let x = assemble(sphere().as('a'),
 
 await x.writeStl('stl/sphereCubes.stl');
 
-await x.rotateX(-15)
-       .rotateY(-15)
-       .writeSvgPhoto({ path: 'svg/sphereCubes.svg', view: { position: [0, 0, 6] } });
+await x.writeSvgPhoto({ path: 'svg/sphereCubes.svg', view: { position: [6, 6, 6] } });
+await x.keep('a').writeSvgPhoto({ path: 'svg/sphereCubesA.svg', view: { position: [-6, 6, 6] } });
 
+/*
+// Some rotations are producing repeated coordinates.
 await x.rotateX(-15)
        .rotateY(-15)
        .keep('a')
        .writeSvgPhoto({ path: 'svg/sphereCubesA.svg', view: { position: [0, 0, 6] } });
+*/

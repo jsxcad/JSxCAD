@@ -8,4 +8,4 @@ export const toPlane = (surface) => {
     }
   }
   throw Error('die');
-}
+};

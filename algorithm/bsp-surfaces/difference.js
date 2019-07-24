@@ -1,6 +1,7 @@
+import { assertGood, doesNotOverlap } from '@jsxcad/geometry-solid';
+
 import { build } from './build';
 import { clipTo } from './clipTo';
-import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
@@ -41,7 +42,10 @@ export const difference = (base, ...subtractions) => {
       // Nothing to do.
       continue;
     }
+    assertGood(base);
     const baseBsp = fromSurfaces({}, base);
+
+    assertGood(subtractions[i]);
     const subtractBsp = fromSurfaces({}, subtractions[i]);
 
     flip(baseBsp);
@@ -57,6 +61,7 @@ export const difference = (base, ...subtractions) => {
 
     // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.
     base = toSurfaces({}, baseBsp);
+    assertGood(base);
   }
   return base;
 };

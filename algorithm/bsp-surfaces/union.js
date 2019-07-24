@@ -1,6 +1,7 @@
+import { assertGood, doesNotOverlap } from '@jsxcad/geometry-solid';
+
 import { build } from './build';
 import { clipTo } from './clipTo';
-import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
@@ -11,7 +12,10 @@ export const union = (...solids) => {
   }
   while (solids.length > 1) {
     const aSolid = solids.shift();
+    assertGood(aSolid);
+
     const bSolid = solids.shift();
+    assertGood(bSolid);
 
     if (doesNotOverlap(aSolid, bSolid)) {
       // Simple composition suffices.
@@ -38,5 +42,6 @@ export const union = (...solids) => {
       solids.push(toSurfaces({}, aBsp));
     }
   }
+  assertGood(solids[0]);
   return solids[0];
 };
