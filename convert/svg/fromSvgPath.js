@@ -1,4 +1,4 @@
-import { canonicalize, isClosed } from '@jsxcad/geometry-path';
+import { assertGood, canonicalize, isClosed } from '@jsxcad/geometry-path';
 
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
@@ -92,5 +92,11 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
   }
 };
 
-export const fromSvgPath = (options = {}, svgPath) =>
-  ({ paths: toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath)))) });
+export const fromSvgPath = (options = {}, svgPath) => {
+  const paths = toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));
+  for (const path of paths) {
+    assertGood(path);
+  }
+  const geometry = { paths };
+  return geometry;
+};

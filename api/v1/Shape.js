@@ -1,8 +1,7 @@
+import { assertGood as assertGoodSolid, fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 import { eachPoint, flip, toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
          transform } from '@jsxcad/geometry-tagged';
-
-import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
   close () {
@@ -85,10 +84,17 @@ Shape.fromPathToZ0Surface = (path) => fromGeometry({ z0Surface: [path] });
 Shape.fromPathsToZ0Surface = (paths) => fromGeometry({ z0Surface: paths });
 Shape.fromPoint = (point) => fromGeometry({ points: [point] });
 Shape.fromPoints = (points) => fromGeometry({ points: points });
-Shape.fromPolygonsToSolid = (polygons) => fromGeometry({ solid: fromPolygonsToSolid({}, polygons) });
+Shape.fromPolygonsToSolid = (polygons) => {
+  const solid = fromPolygonsToSolid({}, polygons);
+  assertGoodSolid(solid);
+  return fromGeometry({ solid });
+};
 Shape.fromPolygonsToZ0Surface = (polygons) => fromGeometry({ z0Surface: polygons });
 Shape.fromSurfaces = (surfaces) => fromGeometry({ solid: surfaces });
-Shape.fromSolid = (solid) => fromGeometry({ solid: solid });
+Shape.fromSolid = (solid) => {
+  assertGoodSolid(solid);
+  return fromGeometry({ solid: solid });
+};
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

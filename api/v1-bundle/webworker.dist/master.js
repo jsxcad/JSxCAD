@@ -56445,6 +56445,16 @@ define("./master.js",[],function () { 'use strict';
 
   // FIX: Refactor the geometry walkers.
 
+  const assertUnique = (path) => {
+    let last = null;
+    for (const point of path) {
+      if (last !== null && equals$1(point, last)) {
+        throw Error('die');
+      }
+      last = point;
+    }
+  };
+
   const toSegments = (options = {}, path) => {
     const segments = [];
     if (path[0] !== null) {
@@ -62707,6 +62717,15 @@ return d[d.length-1];};return ", funcName].join("");
 
   // import { isCoplanar } from '@jsxcad/math-poly3';
 
+  const assertGood = (surface) => {
+    for (const path of surface) {
+      assertUnique(path);
+      if (isNaN(toPlane(path)[0])) {
+        throw Error('die');
+      }
+    }
+  };
+
   /**
    * Transforms each polygon of the surface.
    *
@@ -67688,6 +67707,7 @@ return d[d.length-1];};return ", funcName].join("");
       // An empty surface is not non-convex.
       return surface;
     }
+    assertGood(surface);
     const [to, from] = toXYPlaneTransforms(toPlane$1(surface));
     let retessellatedSurface = makeConvex({}, transform$2(to, surface));
     return transform$2(from, retessellatedSurface);
