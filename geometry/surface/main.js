@@ -4,6 +4,7 @@ import { cut, cutSurface } from './cut';
 import { assertCoplanar } from './assertCoplanar';
 import { clean } from './clean';
 import { difference } from './difference';
+import { assertGood } from './assertGood';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
@@ -14,10 +15,12 @@ import { measureArea } from './measureArea';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { toGeneric } from './toGeneric';
+import { toPolygons } from './toPolygons';
 import { union } from './union';
 
 export {
   assertCoplanar,
+  assertGood,
   canonicalize,
   clean,
   cut,
@@ -35,6 +38,7 @@ export {
   rotateZ,
   toGeneric,
   toPlane,
+  toPolygons,
   transform,
   translate,
   scale,

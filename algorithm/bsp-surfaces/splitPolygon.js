@@ -103,9 +103,11 @@ const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) 
         startType = endType;
       }
       if (frontPoints.length >= 3) {
+        frontPoints.plane = polygon.plane;
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
+        backPoints.plane = polygon.plane;
         back.push(backPoints);
       }
       break;

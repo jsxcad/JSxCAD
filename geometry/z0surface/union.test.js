@@ -23,7 +23,7 @@ test('union: Union of rectangle with itself produces itself', t => {
 test('union: Union of rectangle with itself rotated 90 degrees produces L', t => {
   const result = union(rectangle, transform(fromZRotation(degToRad(90)), rectangle));
   t.deepEqual(canonicalize(result),
-              [[[0, 1, 0], [0, 2, 0], [-1, 2, 0], [-1, 0, 0], [2, 0, 0], [2, 1, 0]]]);
+              [[[0, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]], [[0, 0, 0], [0, 2, 0], [-1, 2, 0], [-1, 0, 0]]]);
 });
 
 test("polybooljs breakage." => {

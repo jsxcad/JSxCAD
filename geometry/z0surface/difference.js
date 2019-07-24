@@ -2,6 +2,7 @@ import { fromSurface, toSurface } from './convert';
 
 import { doesNotOverlap } from './doesNotOverlap';
 import polybooljs from 'polybooljs';
+import { union } from './union';
 
 /**
  * Return a surface representing the difference between the first surface

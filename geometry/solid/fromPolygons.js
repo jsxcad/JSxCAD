@@ -21,7 +21,9 @@ export const fromPolygons = (options = {}, polygons) => {
     const key = normalize4(toPlane(polygon));
     const groups = coplanarGroups.get(key);
     if (groups === undefined) {
-      coplanarGroups.set(key, [polygon]);
+      const group = [polygon];
+      group.plane = key;
+      coplanarGroups.set(key, group);
     } else {
       groups.push(polygon);
     }
@@ -30,18 +32,13 @@ export const fromPolygons = (options = {}, polygons) => {
   // The solid is a list of surfaces, which are lists of coplanar polygons.
   const solid = [];
 
-  for (const polygons of coplanarGroups.values()) {
+  for (const [plane, polygons] of coplanarGroups) {
     if (polygons.length === 1) {
       // A single polygon forms a valid surface.
       solid.push(polygons);
-    } else if (true) {
-      const surface = fromPolygonsToSurface(polygons);
-      console.log(`QQ/polygons: ${JSON.stringify(canonicalize(polygons))}`);
-      console.log(`QQ/surface: ${JSON.stringify(canonicalize(surface))}`);
-      solid.push(surface);
     } else {
-      const pick = Math.floor(Math.random() * polygons.length);
-      solid.push([polygons[pick]]);
+      const surface = fromPolygonsToSurface({ plane }, polygons);
+      solid.push(surface);
     }
   }
 

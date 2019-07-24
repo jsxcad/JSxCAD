@@ -1,5 +1,8 @@
 // Adapted from https://github.com/jsxcad/polybooljs/blob/master/lib/geojson.js
 
+import { assertUnique } from '@jsxcad/geometry-path';
+import { toPlane } from '@jsxcad/math-poly3';
+
 import polybooljs from 'polybooljs';
 import Epsilon from 'polybooljs/lib/epsilon';
 

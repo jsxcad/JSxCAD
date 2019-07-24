@@ -1,8 +1,11 @@
 import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 
+import { assertGood } from './assertGood';
+import { assertUnique } from './assertUnique';
 import { canonicalize } from './canonicalize';
 import { close } from './close';
 import { concatenate } from './concatenate';
+import { deduplicate } from './deduplicate';
 import { flip } from './flip';
 import { isClosed } from './isClosed';
 import { isClockwise } from './isClockwise';
@@ -16,9 +19,12 @@ import { toZ0Polygon } from './toZ0Polygon';
 import { transform } from './transform';
 
 export {
+  assertGood,
+  assertUnique,
   canonicalize,
   close,
   concatenate,
+  deduplicate,
   flip,
   isClockwise,
   isClosed,

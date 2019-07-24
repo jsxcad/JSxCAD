@@ -4,18 +4,17 @@ import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';
 
-export const fromPolygons = (polygons) => {
+export const fromPolygons = ({ plane }, polygons) => {
   if (polygons.length === 0) {
     throw Error('die');
   }
-  // This might do it upside down.
-  const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(polygons));
+  if (plane === undefined) {
+    plane = toPlane(polygons);
+  }
+  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
   const z0Polygons = transform(toZ0, polygons);
-  // FIX: Detect when the polygons aren't in the same plane.
-
-  console.log(`QQ/surface/fromPolygons/polygons: ${JSON.stringify(polygons)}`);
-  // This could be more efficient.
-  const z0Surface = unionZ0Surface(...z0Polygons.map(polygon => [polygon]));
-  console.log(`QQ/surface/fromPolygons/z0surface: ${JSON.stringify(z0Surface)}`);
-  return transform(fromZ0, z0Surface);
+  const z0Surface = cleanZ0Surface(z0Polygons);
+  const surface = transform(fromZ0, z0Surface);
+  surface.plane = plane;
+  return surface;
 };

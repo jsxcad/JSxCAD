@@ -74,6 +74,18 @@ export const assertPoints = (value) => {
   return true;
 };
 
+export const assertNonZeroNumber = (...values) => {
+  for (const value of values) {
+    if (typeof value !== 'number') {
+      throw Error(`Not a number: ${value}`);
+    }
+    if (value === 0) {
+      throw Error(`Not a non-zero number: ${value}`);
+    }
+  }
+  return true;
+};
+
 export const assertNumber = (...values) => {
   for (const value of values) {
     if (typeof value !== 'number') {

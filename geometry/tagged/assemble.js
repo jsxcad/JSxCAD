@@ -1,1 +1,3 @@
-export const assemble = (...taggedGeometries) => ({ assembly: taggedGeometries });
+import { assertGood } from './assertGood';
+
+export const assemble = (...taggedGeometries) => assertGood({ assembly: taggedGeometries });
