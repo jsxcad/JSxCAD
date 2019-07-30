@@ -1,4 +1,4 @@
-import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { doesNotOverlap, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 import { inLeaf, outLeaf, fromPolygons as toBspFromPolygons, fromSolid as toBspFromSolid } from './bsp';
 
 import { splitPolygon } from './splitPolygon';
@@ -41,6 +41,7 @@ export const intersection = (...solids) => {
   if (solids.length === 1) {
     return solid[0];
   }
+  solids = solids.map(solid => makeSurfacesConvex({}, solid));
   const bsps = solids.map(solid => toBspFromSolid(solid));
   const polygons = solids.map(solid => toPolygonsFromSolid({}, solid));
   for (let nth = 0; nth < solids.length; nth++) {

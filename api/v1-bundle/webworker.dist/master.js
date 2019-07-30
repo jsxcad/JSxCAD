@@ -61620,6 +61620,8 @@ define("./master.js",[],function () { 'use strict';
 
   // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 
+  // The resolution is 1 / multiplier.
+
   // FIX: Determine the correct behaviour here.
 
   /**

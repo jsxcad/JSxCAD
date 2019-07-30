@@ -1,17 +1,8 @@
 import { canonicalize, clean, fromPolygons as fromPolygonsToSurface, union } from '@jsxcad/geometry-surface';
+
+import { alignVertices } from './alignVertices';
 import { createNormalize4 } from './createNormalize4';
 import { toPlane } from '@jsxcad/math-poly3';
-
-const deduplicate = (polygons) => {
-  const map = new Map();
-  for (const polygon of polygons) {
-    const key = JSON.stringify(polygon);
-    if (!map.has(key)) {
-      map.set(key, polygon);
-    }
-  }
-  return [...map.values()];
-}
 
 export const fromPolygons = (options = {}, polygons) => {
   const normalize4 = createNormalize4();
@@ -45,5 +36,6 @@ export const fromPolygons = (options = {}, polygons) => {
   if (polygons.isConvex === true) {
     solid.isConvex = true;
   }
-  return solid;
+
+  return alignVertices(solid);
 };

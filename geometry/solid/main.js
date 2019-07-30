@@ -1,5 +1,6 @@
 import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } from './ops';
 
+import { alignVertices } from './alignVertices';
 import { assertGood } from './assertGood';
 import { canonicalize } from './canonicalize';
 import { cut } from './cut';
@@ -17,6 +18,7 @@ import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
 
 export {
+  alignVertices,
   assertGood,
   canonicalize,
   cut,
