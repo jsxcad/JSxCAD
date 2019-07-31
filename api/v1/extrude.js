@@ -1,12 +1,12 @@
+import { assertGood as assertGoodSolid, transform as transformSolid } from '@jsxcad/geometry-solid';
+import { assertGood as assertGoodSurface, toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 import { assertNonZeroNumber, assertShape } from './assert';
+import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { assertGood as assertGoodSolid, transform as transformSolid } from '@jsxcad/geometry-solid';
-import { assertGood as assertGoodSurface, toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 /**
@@ -32,7 +32,6 @@ import { toXYPlaneTransforms } from '@jsxcad/math-plane';
  **/
 
 export const fromHeight = ({ height }, shape) => {
-  console.log(`QQ/fromHeight: ${height}`);
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();

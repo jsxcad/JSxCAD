@@ -1,7 +1,8 @@
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
-import { getPaths, getZ0Surfaces, measureBoundingBox, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
+import { getPaths, getSurfaces, getZ0Surfaces, measureBoundingBox, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
 
-import { makeConvex } from '@jsxcad/geometry-z0surface';
+import { makeConvex as makeConvexSurface } from '@jsxcad/geometry-surface';
+import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toRgb } from '@jsxcad/algorithm-color';
 
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
@@ -52,9 +53,23 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
   const matrix = multiply(fromTranslation(offset),
                           fromScaling([scale, scale, scale]));
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
+  for (const { tags, surface } of getSurfaces(keptGeometry)) {
+    lines.push(toFillColor(toRgb(tags)));
+    for (const path of makeConvexSurface({}, surface)) {
+      let nth = (path[0] === null) ? 1 : 0;
+      const [x1, y1] = path[nth];
+      lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
+      for (nth++; nth < path.length; nth++) {
+        const [x2, y2] = path[nth];
+        lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
+      }
+      lines.push(`h`); // Surface paths are always closed.
+      lines.push(`f`); // Surface paths are always filled.
+    }
+  }
   for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
     lines.push(toFillColor(toRgb(tags)));
-    for (const path of makeConvex({}, z0Surface)) {
+    for (const path of makeConvexZ0Surface({}, z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.

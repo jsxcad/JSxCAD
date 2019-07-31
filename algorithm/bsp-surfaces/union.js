@@ -11,14 +11,13 @@ export const removeInteriorPolygons = (bsp, polygons) => {
   } else {
     const front = [];
     const back = [];
-    const junk = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(bsp.plane,
                    polygons[i],
-                   /*back=*/back,
-                   /*coplanarBack=*/back,
-                   /*coplanarFront=*/front,
-                   /*front=*/front);
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */front,
+                   /* front= */front);
     }
     const trimmedFront = removeInteriorPolygons(bsp.front, front);
     const trimmedBack = removeInteriorPolygons(bsp.back, back);

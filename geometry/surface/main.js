@@ -2,9 +2,9 @@ import { canonicalize, rotateZ, scale, toPlane, transform, translate } from './o
 import { cut, cutSurface } from './cut';
 
 import { assertCoplanar } from './assertCoplanar';
+import { assertGood } from './assertGood';
 import { clean } from './clean';
 import { difference } from './difference';
-import { assertGood } from './assertGood';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';

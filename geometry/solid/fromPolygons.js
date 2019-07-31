@@ -1,7 +1,6 @@
-import { canonicalize, clean, fromPolygons as fromPolygonsToSurface, union } from '@jsxcad/geometry-surface';
-
 import { alignVertices } from './alignVertices';
 import { createNormalize4 } from './createNormalize4';
+import { fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export const fromPolygons = (options = {}, polygons) => {

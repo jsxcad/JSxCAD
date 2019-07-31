@@ -1,4 +1,3 @@
-import { clean } from '@jsxcad/geometry-surface';
 import { splitPolygon } from './splitPolygon';
 import { toPlane } from '@jsxcad/math-poly3';
 
@@ -88,28 +87,6 @@ const toPolygons = (bsp) => {
   return polygons;
 };
 
-const toSolid = (bsp) => {
-  throw Error('die');
-  const solid = [];
-  const walk = (bsp) => {
-    switch (bsp.kind) {
-      case BRANCH: {
-        if (bsp.same.length > 0) {
-          solid.push(clean(bsp.same));
-        }
-        walk(bsp.back);
-        walk(bsp.front);
-        break;
-      }
-      case IN_LEAF:
-      case OUT_LEAF:
-        break;
-    }
-  };
-  walk(bsp);
-  return solid;
-};
-
 const toString = (bsp) => {
   switch (bsp.kind) {
     case IN_LEAF:
@@ -136,6 +113,5 @@ export {
   inLeaf,
   outLeaf,
   toPolygons,
-  toSolid,
   toString
 };

@@ -1,6 +1,6 @@
 import { assertGood as assertGoodSolid, fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
-import { eachPoint, flip, toComponents, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
          transform } from '@jsxcad/geometry-tagged';
 
 export class Shape {
@@ -46,10 +46,6 @@ export class Shape {
 
   setTags (tags) {
     return fromGeometry({ ...toGeometry(this), tags });
-  }
-
-  toComponents (options = {}) {
-    return toComponents(options, toGeometry(this)).map(fromGeometry);
   }
 
   toDisjointGeometry (options = {}) {

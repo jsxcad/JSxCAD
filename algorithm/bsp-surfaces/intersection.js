@@ -1,5 +1,5 @@
-import { doesNotOverlap, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { inLeaf, outLeaf, fromPolygons as toBspFromPolygons, fromSolid as toBspFromSolid } from './bsp';
+import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
+import { makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 import { splitPolygon } from './splitPolygon';
 
@@ -12,14 +12,13 @@ export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = fa
   } else {
     const front = [];
     const back = [];
-    const junk = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(bsp.plane,
                    polygons[i],
-                   /*back=*/back,
-                   /*coplanarBack=*/front, // was back
-                   /*coplanarFront=*/back, // was back
-                   /*front=*/front);
+                   /* back= */back,
+                   /* coplanarBack= */front, // was back
+                   /* coplanarFront= */back, // was back
+                   /* front= */front);
     }
     const trimmedFront = removeExteriorPolygons(bsp.front, front, removeSurfacePolygons);
     const trimmedBack = removeExteriorPolygons(bsp.back, back, removeSurfacePolygons);
@@ -39,7 +38,7 @@ export const intersection = (...solids) => {
     return [];
   }
   if (solids.length === 1) {
-    return solid[0];
+    return solids[0];
   }
   solids = solids.map(solid => makeSurfacesConvex({}, solid));
   const bsps = solids.map(solid => toBspFromSolid(solid));

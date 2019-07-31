@@ -7,4 +7,4 @@ export const toPolygons = (options = {}, solid) => {
     polygons.push(...toPolygonsFromSurface({}, surface));
   }
   return polygons;
-}
+};

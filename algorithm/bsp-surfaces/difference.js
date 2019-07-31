@@ -1,5 +1,5 @@
-import { doesNotOverlap, makeSurfacesConvex, flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { inLeaf, outLeaf, fromPolygons as toBspFromPolygons, fromSolid as toBspFromSolid, toSolid as toSolidFromBsp } from './bsp';
+import { flip, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 
 import { splitPolygon } from './splitPolygon';
 
@@ -12,14 +12,13 @@ export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = fa
   } else {
     const front = [];
     const back = [];
-    const junk = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(bsp.plane,
                    polygons[i],
-                   /*back=*/back,
-                   /*coplanarBack=*/front,
-                   /*coplanarFront=*/back,
-                   /*front=*/front);
+                   /* back= */back,
+                   /* coplanarBack= */front,
+                   /* coplanarFront= */back,
+                   /* front= */front);
     }
     const trimmedFront = removeExteriorPolygons(bsp.front, front, removeSurfacePolygons);
     const trimmedBack = removeExteriorPolygons(bsp.back, back, removeSurfacePolygons);
@@ -42,14 +41,13 @@ export const removeInteriorPolygons = (bsp, polygons) => {
   } else {
     const front = [];
     const back = [];
-    const junk = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(bsp.plane,
                    polygons[i],
-                   /*back=*/back,
-                   /*coplanarBack=*/front, // was back
-                   /*coplanarFront=*/back, // was back
-                   /*front=*/front);
+                   /* back= */back,
+                   /* coplanarBack= */front, // was back
+                   /* coplanarFront= */back, // was back
+                   /* front= */front);
     }
     const trimmedFront = removeInteriorPolygons(bsp.front, front);
     const trimmedBack = removeInteriorPolygons(bsp.back, back);
