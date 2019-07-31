@@ -1,4 +1,5 @@
 import { add, distance, equals, length, scale, subtract } from '@jsxcad/math-vec3';
+import { assertUnique, deduplicate } from '@jsxcad/geometry-path';
 
 import createTree from 'yaot';
 import { eachPoint } from '@jsxcad/geometry-solid';
@@ -19,8 +20,10 @@ export const fixTJunctions = (solids) => {
   const fixed = [];
   for (const geometry of solids) {
     const { solid } = copy(geometry);
-    for (const surface of solid) {
-      for (const path of surface) {
+    for (let nthSurface = 0; nthSurface < solid.length; nthSurface++) {
+      const surface = solid[nthSurface];
+      for (let nthPath = 0; nthPath < surface.length; nthPath++) {
+        const path = surface[nthPath];
         let last = path.length - 1;
         for (let current = 0; current < path.length; last = current++) {
           const start = path[last];
@@ -43,10 +46,11 @@ export const fixTJunctions = (solids) => {
           path.splice(current, 0, ...colinear);
           current += colinear.length;
         }
+        surface[nthPath] = deduplicate(path);
+        assertUnique(surface[nthPath]);
       }
     }
     fixed.push({ solid });
   }
-
   return fixed;
 };
