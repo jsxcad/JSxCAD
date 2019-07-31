@@ -1,5 +1,6 @@
 import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } from './ops';
 
+import { assertGood } from './assertGood';
 import { canonicalize } from './canonicalize';
 import { cut } from './cut';
 import { divide } from './divide';
@@ -16,6 +17,7 @@ import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
 
 export {
+  assertGood,
   canonicalize,
   cut,
   divide,

@@ -1,11 +1,11 @@
-import { scale, translate } from '@jsxcad/geometry-path';
+import { assertGood, deduplicate, scale, translate } from '@jsxcad/geometry-path';
 
 import { buildRegularPolygon } from './buildRegularPolygon';
 
 const buildWalls = (polygons, floor, roof) => {
   for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
     // Remember that we are walking CCW.
-    polygons.push([floor[start], floor[end], roof[end], roof[start]]);
+    polygons.push(deduplicate([floor[start], floor[end], roof[end], roof[start]]));
   }
 };
 
@@ -30,5 +30,8 @@ export const buildRingSphere = ({ resolution = 20 }) => {
     lastPath = path;
   }
   polygons.isConvex = true;
+  for (const polygon of polygons) {
+    assertGood(polygon);
+  }
   return polygons;
 };
