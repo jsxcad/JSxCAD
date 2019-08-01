@@ -45,8 +45,7 @@ const agent = async ({ ask, question }) => {
         console.log("STL Called with: ")
         console.log(values)
         console.log("Inflated: ")
-        const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
-        console.log(JSON.stringify(inflated))
+        const inflated = api.Shape.fromGeometry(values[0]);
         return toStl({}, inflated );
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
