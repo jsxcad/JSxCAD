@@ -1,4 +1,4 @@
-import { getSolids, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
@@ -52,11 +52,15 @@ export const cut = (plane = [0, 0, 1, 0], shape) => {
     fronts.push(Shape.fromSolid(front));
     backs.push(Shape.fromSolid(back));
   }
-  // FIX: Generalized surfaces.
   for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
     const [front, back] = cutSurface(plane, z0Surface);
     fronts.push(Shape.fromPathsToZ0Surface(front));
     backs.push(Shape.fromPathsToZ0Surface(back));
+  }
+  for (const { surface } of getSurfaces(keptGeometry)) {
+    const [front, back] = cutSurface(plane, surface);
+    fronts.push(Shape.fromPathsToSurface(front));
+    backs.push(Shape.fromPathsToSurface(back));
   }
   return [assemble(...fronts), assemble(...backs)];
 };

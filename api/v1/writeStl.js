@@ -22,7 +22,6 @@ import { writeFile } from '@jsxcad/sys';
  **/
 
 export const writeStl = async (options, shape) => {
-  console.log(`QQ/api/writeStl`);
   if (typeof options === 'string') {
     options = { path: options };
   }
