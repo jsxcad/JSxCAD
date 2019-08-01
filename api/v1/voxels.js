@@ -11,20 +11,17 @@ const Y = 1;
 const Z = 2;
 
 export const voxels = ({ resolution = 1 }, shape) => {
+  const offset = resolution / 2;
   const voxels = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
-console.log(`QQ/bounds: ${max} ${min}`);
     const bsp = fromSolid(solid);
-    for (let x = min[X]; x <= max[X]; x += resolution) {
-      for (let y = min[Y]; y <= max[Y]; y += resolution) {
-        for (let z = min[Z]; z <= max[Z]; z += resolution) {
-console.log(`QQ/point: ${[x, y, z]}`);
+    for (let x = min[X] + offset; x <= max[X] - offset; x += resolution) {
+      for (let y = min[Y] + offset; y <= max[Y] - offset; y += resolution) {
+        for (let z = min[Z] + offset; z <= max[Z] - offset; z += resolution) {
           if (containsPoint(bsp, [x, y, z])) {
-console.log(`QQ/point/in`);
+            // FIX: Produce walls at transition boundaries instead of cubes.
             voxels.push(cube(resolution).move(x, y, z));
-          } else {
-console.log(`QQ/point/out`);
           }
         }
       }
