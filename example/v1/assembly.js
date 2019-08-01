@@ -1,7 +1,7 @@
 const assembly = assemble(cube(30).as('cube'),
                           cylinder(5, 30).as('cylinder'));
 
-await assembly.keep('cube').drop('cylinder').writeStl('stl/cube.stl');
+await assembly.keep('cube').writeStl('stl/cube.stl');
 
 // This should produce the cube with a hole in it filled by the cylinder.
 await assembly.keep('cube', 'cylinder').writeStl('stl/cube-cylinder.stl');

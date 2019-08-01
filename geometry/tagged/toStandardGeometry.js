@@ -8,6 +8,8 @@ export const toStandardGeometry = (geometry) => {
       return { paths: item.paths, tags: item.tags };
     } else if (item.solid) {
       return { solid: item.solid, tags: item.tags };
+    } else if (item.surface) {
+      return { surface: item.surface, tags: item.tags };
     } else if (item.z0Surface) {
       return { z0Surface: item.z0Surface, tags: item.tags };
     } else {

@@ -1,67 +1,96 @@
-import { assertGood, doesNotOverlap } from '@jsxcad/geometry-solid';
+import { flip, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 
-import { build } from './build';
-import { clipTo } from './clipTo';
-import { flip } from './flip';
-import { fromSurfaces } from './fromSurfaces';
-import { toSurfaces } from './toSurfaces';
+import { splitPolygon } from './splitPolygon';
 
-/**
-   * Given a solid and a set of solids to subtract produce the resulting solid.
-   * @param {Polygons} base - Polygons for the base to subtract from.
-   * @param {Array<Polygons>} subtractions - a list of Polygons to subtract.
-   * @returns {Polygons} the resulting Polygons.
-   * @example
-   * let C = difference(A, B);
-   * @example
-   * +-------+            +-------+
-   * |       |            |       |
-   * |   A   |            |       |
-   * |    +--+----+   =   |    +--+
-   * +----+--+    |       +----+
-   *      |   B   |
-   *      |       |
-   *      +-------+
-   */
-export const difference = (base, ...subtractions) => {
-  if (base.length === 0) {
-    return base;
-  }
-  if (subtractions.length === 0) {
-    return base;
-  }
-  // TODO: Figure out why we do not subtract the union of the remainder of
-  // the geometries. This approach chains subtractions rather than producing
-  // a generational tree.
-  for (let i = 0; i < subtractions.length; i++) {
-    if (subtractions[i].length === 0) {
-      // Nothing to do.
-      continue;
+// Remove from surfaces those parts that are inside the solid delineated by bsp.
+export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = false) => {
+  if (bsp === inLeaf) {
+    return polygons;
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */front,
+                   /* coplanarFront= */back,
+                   /* front= */front);
     }
-    if (doesNotOverlap(base, subtractions[i])) {
-      // Nothing to do.
-      continue;
+    const trimmedFront = removeExteriorPolygons(bsp.front, front, removeSurfacePolygons);
+    const trimmedBack = removeExteriorPolygons(bsp.back, back, removeSurfacePolygons);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
     }
-    assertGood(base);
-    const baseBsp = fromSurfaces({}, base);
-
-    assertGood(subtractions[i]);
-    const subtractBsp = fromSurfaces({}, subtractions[i]);
-
-    flip(baseBsp);
-    clipTo(baseBsp, subtractBsp);
-    clipTo(subtractBsp, baseBsp);
-
-    flip(subtractBsp);
-    clipTo(subtractBsp, baseBsp);
-    flip(subtractBsp);
-
-    build(baseBsp, toSurfaces({}, subtractBsp));
-    flip(baseBsp);
-
-    // PROVE: That the round-trip to solids and back is unnecessary for the intermediate stages.
-    base = toSurfaces({}, baseBsp);
-    assertGood(base);
   }
-  return base;
+};
+
+export const removeInteriorPolygons = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return polygons;
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */front, // was back
+                   /* coplanarFront= */back, // was back
+                   /* front= */front);
+    }
+    const trimmedFront = removeInteriorPolygons(bsp.front, front);
+    const trimmedBack = removeInteriorPolygons(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
+export const difference = (aSolid, ...bSolids) => {
+  if (aSolid === undefined) {
+    return [];
+  }
+  if (bSolids.length === 0) {
+    return aSolid;
+  }
+  aSolid = makeSurfacesConvex({}, aSolid);
+  bSolids = bSolids.map(bSolid => makeSurfacesConvex({}, bSolid));
+  let aPolygons = toPolygonsFromSolid({}, aSolid);
+  const bBsp = [];
+  for (let i = 0; i < bSolids.length; i++) {
+    const bSolid = bSolids[i];
+    bBsp[i] = toBspFromSolid(bSolid);
+    aPolygons = removeInteriorPolygons(bBsp[i], aPolygons);
+  }
+  const aBsp = toBspFromSolid(aSolid);
+  const polygons = [];
+  for (let i = 0; i < bSolids.length; i++) {
+    const bSolid = bSolids[i];
+    let bPolygons = toPolygonsFromSolid({}, flip(bSolid));
+    bPolygons = removeExteriorPolygons(aBsp, bPolygons);
+    for (let j = 0; j < bSolids.length; j++) {
+      if (j !== i) {
+        bPolygons = removeInteriorPolygons(bBsp[j], bPolygons);
+      }
+    }
+    polygons.push(...bPolygons);
+  }
+  polygons.push(...aPolygons);
+  return toSolidFromPolygons({}, polygons);
 };

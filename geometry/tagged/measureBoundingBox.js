@@ -2,6 +2,7 @@ import { max, min } from '@jsxcad/math-vec3';
 
 import { eachPoint } from './eachPoint';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
+import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
 import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toTransformedGeometry } from './toTransformedGeometry';
 
@@ -49,6 +50,8 @@ export const measureBoundingBox = (rawGeometry) => {
       }
     } else if (item.solid) {
       update(measureBoundingBoxOfSolid(item.solid));
+    } else if (item.surface) {
+      update(measureBoundingBoxOfSurface(item.surface));
     } else if (item.z0Surface) {
       update(measureBoundingBoxOfZ0Surface(item.z0Surface));
     } else {

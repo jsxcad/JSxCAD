@@ -9,8 +9,10 @@ export const flip = (geometry) => {
     flipped.points = flipPoints(geometry.points);
   } else if (geometry.paths) {
     flipped.paths = flipPaths(geometry.paths);
+  } else if (geometry.surface) {
+    flipped.surface = flipSurface(geometry.surface);
   } else if (geometry.z0Surface) {
-    flipped.surface = flipSurface(geometry.z0Surface);
+    flipped.z0surface = flipSurface(geometry.z0Surface);
   } else if (geometry.solid) {
     flipped.solid = flipSolid(geometry.solid);
   } else if (geometry.assembly) {

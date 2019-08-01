@@ -21,13 +21,11 @@ import { intersection } from './intersection';
 import { keep } from './keep';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
-import { toComponents } from './toComponents';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
 import { toPoints } from './toPoints';
 import { toStandardGeometry } from './toStandardGeometry';
 import { toTransformedGeometry } from './toTransformedGeometry';
-import { toZ0Surface } from './toZ0Surface';
 import { transform } from './transform';
 import { union } from './union';
 
@@ -53,13 +51,11 @@ export {
   keep,
   map,
   measureBoundingBox,
-  toComponents,
   toDisjointGeometry,
   toKeptGeometry,
   toPoints,
   toStandardGeometry,
   toTransformedGeometry,
-  toZ0Surface,
   transform,
   union
 };
