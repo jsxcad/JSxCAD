@@ -13,7 +13,8 @@ const Z = 2;
 export const voxels = ({ resolution = 1 }, shape) => {
   const offset = resolution / 2;
   const voxels = [];
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid, tags = [] } of getSolids(shape.toKeptGeometry())) {
+    const cubes = [];
     const [min, max] = measureBoundingBox(solid);
     const bsp = fromSolid(solid);
     for (let x = min[X] + offset; x <= max[X] - offset; x += resolution) {
@@ -21,15 +22,16 @@ export const voxels = ({ resolution = 1 }, shape) => {
         for (let z = min[Z] + offset; z <= max[Z] - offset; z += resolution) {
           if (containsPoint(bsp, [x, y, z])) {
             // FIX: Produce walls at transition boundaries instead of cubes.
-            voxels.push(cube(resolution).move(x, y, z));
+            cubes.push(cube(resolution).move(x, y, z));
           }
         }
       }
     }
+    voxels.push(assemble(...cubes).as(...tags));
   }
   return assemble(...voxels);
-}
+};
 
-const method = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); }
+const method = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
 
 Shape.prototype.voxels = method;

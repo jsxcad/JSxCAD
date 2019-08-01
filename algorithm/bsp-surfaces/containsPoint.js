@@ -1,7 +1,5 @@
 import { inLeaf, outLeaf } from './bsp';
 
-const EPSILON = 1e-5;
-
 export const containsPoint = (bsp, point) => {
   while (true) {
     if (bsp === inLeaf) {
