@@ -1,8 +1,8 @@
 import { containsPoint, fromSolid } from '@jsxcad/algorithm-bsp-surfaces';
 
+import { Cube } from './Cube';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { cube } from './cube';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { measureBoundingBox } from '@jsxcad/geometry-solid';
 
@@ -22,7 +22,7 @@ export const voxels = ({ resolution = 1 }, shape) => {
         for (let z = min[Z] + offset; z <= max[Z] - offset; z += resolution) {
           if (containsPoint(bsp, [x, y, z])) {
             // FIX: Produce walls at transition boundaries instead of cubes.
-            cubes.push(cube(resolution).move(x, y, z));
+            cubes.push(Cube(resolution).move(x, y, z));
           }
         }
       }

@@ -14,21 +14,21 @@ import { toPolygons } from '@jsxcad/geometry-solid';
  *
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * difference(cylinder(10, 10),
- *            cylinder(8, 10))
+ * difference(Cylinder(10, 10),
+ *            Cylinder(8, 10))
  * ```
  * :::
  * ::: illustration
  * ```
- * difference(sphere(10),
- *            sphere(8))
+ * difference(Sphere(10),
+ *            Sphere(8))
  *   .section()
  * ```
  * :::
  * ::: illustration
  * ```
- * difference(sphere(10),
- *            sphere(8))
+ * difference(Sphere(10),
+ *            Sphere(8))
  *   .section()
  *   .outline()
  * ```

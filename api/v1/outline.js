@@ -11,16 +11,16 @@ import { assemble } from './assemble';
  *
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(2).translate([-4]),
- *            circle(2).translate([4]))
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
  * ```
  * :::
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(2).translate([-4]),
- *            circle(2).translate([4]))
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
  *   .outline()
  * ```
  * :::

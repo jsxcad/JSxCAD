@@ -14,13 +14,13 @@ import { translate } from './translate';
  *
  * ::: illustration { "view": { "position": [40, 40, 10] } }
  * ```
- * assemble(cylinder(2, 15).rotateY(90),
- *          cube(10).below())
+ * assemble(Cylinder(2, 15).rotateY(90),
+ *          Cube(10).below())
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * cube(10).below(sphere(5))
+ * Cube(10).below(Sphere(5))
  * ```
  * :::
  **/

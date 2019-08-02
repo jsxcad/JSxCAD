@@ -12,7 +12,7 @@ import { dispatch } from './dispatch';
  *
  * ::: illustration
  * ```
- * circle(10).as('A')
+ * Circle(10).as('A')
  * ```
  * :::
  *

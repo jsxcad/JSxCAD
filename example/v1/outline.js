@@ -1,6 +1,6 @@
-const scene = assemble(sphere(10).as('sphere'),
-                       cube(10).front().right().above().as('cube'),
-                       cylinder(3, 27).as('cylinder'));
+const scene = assemble(Sphere(10).as('sphere'),
+                       Cube(10).front().right().above().as('cube'),
+                       Cylinder(3, 27).as('cylinder'));
 
 await scene.keep('sphere')
            .writeStl('stl/sphere.stl');

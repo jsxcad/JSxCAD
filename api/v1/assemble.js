@@ -9,9 +9,9 @@ import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration { "view": { "position": [80, 80, 80] } }
  * ```
- * assemble(circle(20).translate([0, 0, -12]),
- *          square(40).translate([0, 0, 16]).outline(),
- *          cylinder(10, 20));
+ * assemble(Circle(20).translate([0, 0, -12]),
+ *          Square(40).translate([0, 0, 16]).outline(),
+ *          Cylinder(10, 20));
  * ```
  * :::
  *
@@ -21,30 +21,30 @@ import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * assemble(cube(30).above().as('cube'),
- *          cylinder(10, 40).above().as('cylinder'))
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
  * ```
  * :::
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * assemble(cube(30).above().as('cube'),
- *          cylinder(10, 40).above().as('cylinder'))
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
  *   .keep('cube')
  * ```
  * :::
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * assemble(cube(30).above().as('cube'),
- *          assemble(circle(40),
- *                   circle(50).outline()).as('circles'))
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40),
+ *                   Circle(50).outline()).as('circles'))
  *   .keep('circles')
  * ```
  * :::
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * assemble(cube(30).above().as('cube'),
- *          assemble(circle(40).as('circle'),
- *                   circle(50).outline().as('outline')))
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40).as('circle'),
+ *                   Circle(50).outline().as('outline')))
  *   .drop('outline')
  * ```
  * :::

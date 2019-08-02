@@ -1,4 +1,4 @@
-await difference(sphere(30),
-                 sphere(15))
+await difference(Sphere(30),
+                 Sphere(15))
         .section()
         .writeSvg('cutSpheres.svg');

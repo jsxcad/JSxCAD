@@ -11,7 +11,7 @@ import { measureBoundingBox } from './measureBoundingBox';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * sphere(7)
+ * Sphere(7)
  * ```
  * :::
  **/

@@ -19,12 +19,12 @@ const toWireframe = (solid) => {
  *
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * cube(10).wireframe()
+ * Cube(10).wireframe()
  * ```
  * :::
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * sphere(10).wireframe()
+ * Sphere(10).wireframe()
  * ```
  * :::
  *

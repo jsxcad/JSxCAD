@@ -8,13 +8,7 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * await cube().writeStl('cube.stl');
- * await readStl({ path: 'cube.stl' });
- * ```
- * :::
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await writeStl({ path: 'cube.stl' }, cube());
+ * await Cube().writeStl('cube.stl');
  * await readStl({ path: 'cube.stl' });
  * ```
  * :::

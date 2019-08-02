@@ -10,17 +10,17 @@ import { buildConvexHull } from '@jsxcad/geometry-points';
  *
  * ::: illustration { "view": { "position": [30, 30, 30] } }
  * ```
- * chainHull(cube(3).translate([-5, 5]),
- *           sphere(3).translate([5, -5]),
- *           cylinder(3, 10).translate([-10, -10]))
+ * chainHull(Cube(3).translate([-5, 5]),
+ *           Sphere(3).translate([5, -5]),
+ *           Cylinder(3, 10).translate([-10, -10]))
  *   .translate([10, 10])
  * ```
  * :::
  * ::: illustration { "view": { "position": [80, 80, 0] } }
  * ```
- * chainHull(circle(20).translate([0, 0, -10]),
- *           circle(10),
- *           circle(20).translate([0, 0, 10]))
+ * chainHull(Circle(20).translate([0, 0, -10]),
+ *           Circle(10),
+ *           Circle(20).translate([0, 0, 10]))
  * ```
  * :::
  *

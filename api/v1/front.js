@@ -15,13 +15,13 @@ import { translate } from './translate';
  *
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * assemble(cylinder(2, 15).translate([0, 0, 2.5]),
- *          cube(10).front())
+ * assemble(Cylinder(2, 15).translate([0, 0, 2.5]),
+ *          Cube(10).front())
  * ```
  * :::
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * cube(10).front(sphere(5))
+ * Cube(10).front(Sphere(5))
  * ```
  * :::
  **/
