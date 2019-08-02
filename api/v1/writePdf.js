@@ -7,11 +7,7 @@ import { writeFile } from '@jsxcad/sys';
  * # Write PDF
  *
  * ```
- * cube().section().writePdf('cube.pdf');
- * ```
- *
- * ```
- * await writePdf({ path: 'cube.pdf' }, cube().section());
+ * Cube().section().writePdf('cube.pdf');
  * ```
  *
  **/

@@ -1,2 +1,2 @@
 const length = 30;
-await square(length).writePdf('pdf/square.pdf');
+await Square(length).writePdf('pdf/square.pdf');

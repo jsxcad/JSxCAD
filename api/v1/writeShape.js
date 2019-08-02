@@ -10,13 +10,7 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * await cube().writeShape('cube.shape');
- * await readShape({ path: 'cube.shape' })
- * ```
- * :::
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await writeShape({ path: 'cube.shape' }, cube())
+ * await Cube().writeShape('cube.shape');
  * await readShape({ path: 'cube.shape' })
  * ```
  * :::

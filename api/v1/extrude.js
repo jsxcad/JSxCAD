@@ -17,14 +17,14 @@ import { toXYPlaneTransforms } from '@jsxcad/math-plane';
  *
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(8))
+ * difference(Circle(10),
+ *            Circle(8))
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * difference(circle(10),
- *            circle(8))
+ * difference(Circle(10),
+ *            Circle(8))
  *   .extrude({ height: 10 })
  * ```
  * :::

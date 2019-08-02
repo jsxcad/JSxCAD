@@ -13,14 +13,8 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [0, -1, 2500] } }
  * ```
- * await cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
+ * await Cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
  * await readSvg({ path: 'svg/cube3.svg' })
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 2500] } }
- * ```
- * await writeSvgPhoto({ path: 'svg/cube4.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } }, cube());
- * await readSvg({ path: 'svg/cube4.svg' })
  * ```
  * :::
  *

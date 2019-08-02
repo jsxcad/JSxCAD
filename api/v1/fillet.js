@@ -11,9 +11,9 @@ import { union } from './union';
  *
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * const tool = hull(point(0, 0, -1), square(2));
- * assemble(cube(20, 20, 5).below(),
- *          cube(10, 10, 5).below().drop())
+ * const tool = hull(Point(0, 0, -1), Square(2));
+ * assemble(Cube(20, 20, 5).below(),
+ *          Cube(10, 10, 5).below().drop())
  *   .fillet(tool);
  * ```
  * :::

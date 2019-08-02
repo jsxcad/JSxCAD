@@ -8,17 +8,17 @@ import { fromPoints } from '@jsxcad/math-plane';
  *
  * ::: illustration { "view": { "position": [-100, -100, 100] } }
  * ```
- * sphere(20).cut(planeX())[0];
+ * Sphere(20).cut(planeX())[0];
  * ```
  * :::
  * ::: illustration { "view": { "position": [-100, -100, 100] } }
  * ```
- * sphere(20).cut(planeY(0))[0];
+ * Sphere(20).cut(planeY(0))[0];
  * ```
  * :::
  * ::: illustration { "view": { "position": [-100, -100, 100] } }
  * ```
- * sphere(20).cut(planeZ(0))[1];
+ * Sphere(20).cut(planeZ(0))[1];
  * ```
  * :::
  *

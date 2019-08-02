@@ -11,18 +11,18 @@ import { union } from '@jsxcad/geometry-z0surface';
  *
  * ::: illustration
  * ```
- * circle(10)
+ * Circle(10)
  * ```
  * :::
  * ::: illustration
  * ```
- * circle(10)
+ * Circle(10)
  *   .outline()
  * ```
  * :::
  * ::: illustration
  * ```
- * circle(10)
+ * Circle(10)
  *   .outline()
  *   .interior()
  * ```

@@ -10,21 +10,21 @@ import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * difference(cube(10).below(),
- *            cube(5).below())
+ * difference(Cube(10).below(),
+ *            Cube(5).below())
  * ```
  * :::
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(2.5))
+ * difference(Circle(10),
+ *            Circle(2.5))
  * ```
  * :::
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * difference(assemble(cube().below(),
- *                     cube().above()),
- *            cube().right())
+ * difference(assemble(Cube().below(),
+ *                     Cube().above()),
+ *            Cube().right())
  * ```
  * :::
  *

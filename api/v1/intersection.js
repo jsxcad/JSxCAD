@@ -11,41 +11,41 @@ import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * intersection(cube(12),
- *              sphere(8))
+ * intersection(Cube(12),
+ *              Sphere(8))
  * ```
  * :::
  * ::: illustration
  * ```
- * intersection(circle(10).translate(-5),
- *              circle(10).translate(5))
+ * intersection(Circle(10).move(-5),
+ *              Circle(10).move(5))
  * ```
  * :::
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * intersection(assemble(cube().below(),
- *                       cube().above()),
- *              sphere(1))
+ * intersection(assemble(Cube().below(),
+ *                       Cube().above()),
+ *              Sphere(1))
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(difference(square(10),
- *                     square(7))
+ * assemble(difference(Square(10),
+ *                     Square(7))
  *            .translate(-2, -2),
- *          difference(square(10),
- *                     square(7))
- *            .translate(2, 2));
+ *          difference(Square(10),
+ *                     Square(7))
+ *            .move(2, 2));
  * ```
  * :::
  * ::: illustration
  * ```
- * intersection(difference(square(10),
- *                         square(7))
+ * intersection(difference(Square(10),
+ *                         Square(7))
  *                .translate(-2, -2),
- *              difference(square(10),
- *                         square(7))
- *                .translate(2, 2));
+ *              difference(Square(10),
+ *                         Square(7))
+ *                .move(2, 2));
  * ```
  * :::
  **/

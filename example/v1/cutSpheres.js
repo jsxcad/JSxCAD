@@ -1,4 +1,4 @@
-const differenced = difference(sphere(30), sphere(15));
+const differenced = difference(Sphere(30), Sphere(15));
 const crossSectioned = differenced.section();
-await writeStl({ path: 'tmp/cutSpheres.difference.stl' }, differenced);
-await writePdf({ path: 'tmp/cutSpheres.crossSection.pdf' }, crossSectioned);
+await differenced.writeStl('tmp/cutSpheres.difference.stl');
+await crossSectioned.writePdf('tmp/cutSpheres.crossSection.pdf');

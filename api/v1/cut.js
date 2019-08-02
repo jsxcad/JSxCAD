@@ -13,29 +13,29 @@ import { cut as cutSurface } from '@jsxcad/geometry-surface';
  *
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * const [top, bottom] = cube(10).cut();
+ * const [top, bottom] = Cube(10).cut();
  * assemble(top.translate(0, 0, 1),
  *          bottom.translate(0, 0, -1));
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * const [top, bottom] = sphere(10).cut();
+ * const [top, bottom] = Sphere(10).cut();
  * assemble(top.translate(0, 0, 2),
  *          bottom.translate(0, 0, -2));
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * const [top, bottom] = sphere(10).rotateY(1).cut();
+ * const [top, bottom] = Sphere(10).rotateY(1).cut();
  * assemble(top.translate(0, 0, 2),
  *          bottom.translate(0, 0, -2));
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * assemble(circle(10),
- *          cylinder(5, 10))
+ * assemble(Circle(10),
+ *          Cylinder(5, 10))
  *   .rotateY(90)
  *   .cut()[0]
  * ```

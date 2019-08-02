@@ -9,17 +9,17 @@ import { fromScaling } from '@jsxcad/math-mat4';
  *
  * ::: illustration { "view": { "position": [10, 10, 10] } }
  * ```
- * cube()
+ * Cube()
  * ```
  * :::
  * ::: illustration { "view": { "position": [10, 10, 10] } }
  * ```
- * cube().scale(2)
+ * Cube().scale(2)
  * ```
  * :::
  * ::: illustration { "view": { "position": [10, 10, 10] } }
  * ```
- * cube().scale([1, 2, 3])
+ * Cube().scale([1, 2, 3])
  * ```
  * :::
  **/
