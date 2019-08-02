@@ -1,5 +1,5 @@
-import { doesNotOverlap, flip, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { inLeaf, outLeaf, fromPolygons as toBspFromPolygons, fromSolid as toBspFromSolid } from './bsp';
+import { flip, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 
 import { splitPolygon } from './splitPolygon';
 
@@ -69,45 +69,28 @@ export const difference = (aSolid, ...bSolids) => {
   if (bSolids.length === 0) {
     return aSolid;
   }
-  let polygons;
-  let aPolygons;
-  let aBsp;
+  aSolid = makeSurfacesConvex({}, aSolid);
+  bSolids = bSolids.map(bSolid => makeSurfacesConvex({}, bSolid));
+  let aPolygons = toPolygonsFromSolid({}, aSolid);
   const bBsp = [];
   for (let i = 0; i < bSolids.length; i++) {
     const bSolid = bSolids[i];
-    if (doesNotOverlap(aSolid, bSolid)) {
-      continue;
-    }
-    let bPolygons = toPolygonsFromSolid({}, flip(bSolid));
-    if (aPolygons === undefined) {
-      aPolygons = toPolygonsFromSolid({}, makeSurfacesConvex({}, aSolid));
-    }
-    if (aBsp === undefined) {
-      aBsp = toBspFromPolygons(aPolygons);
-    }
-    if (bBsp[i] === undefined) {
-      bBsp[i] = toBspFromSolid(bSolid);
-    }
+    bBsp[i] = toBspFromSolid(bSolid);
     aPolygons = removeInteriorPolygons(bBsp[i], aPolygons);
+  }
+  const aBsp = toBspFromSolid(aSolid);
+  const polygons = [];
+  for (let i = 0; i < bSolids.length; i++) {
+    const bSolid = bSolids[i];
+    let bPolygons = toPolygonsFromSolid({}, flip(bSolid));
     bPolygons = removeExteriorPolygons(aBsp, bPolygons);
     for (let j = 0; j < bSolids.length; j++) {
-      if (j === i || doesNotOverlap(bSolid[i], bSolid[j])) {
-        continue;
+      if (j !== i) {
+        bPolygons = removeInteriorPolygons(bBsp[j], bPolygons);
       }
-      if (bBsp[j] === undefined) {
-        bBsp[j] = toBspFromSolid(bSolid);
-      }
-      bPolygons = removeInteriorPolygons(bBsp[j], bPolygons);
-    }
-    if (polygons === undefined) {
-      polygons = [];
     }
     polygons.push(...bPolygons);
   }
-  if (polygons === undefined) {
-    return aSolid;
-  } else {
-    polygons.push(...aPolygons);
-    return toSolidFromPolygons({}, polygons);
-  }
+  polygons.push(...aPolygons);
+  return toSolidFromPolygons({}, polygons);
 };
