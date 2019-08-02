@@ -1,8 +1,8 @@
 /* global postMessage, onmessage:writable, self */
 
 import * as api from '@jsxcad/api-v1';
-import * as convertStl from '@jsxcad/convert-stl';
-import * as convertSvg from '@jsxcad/convert-svg';
+import { toStl } from '@jsxcad/convert-stl';
+import { toSvg } from '@jsxcad/convert-svg';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 
@@ -38,12 +38,12 @@ const agent = async ({ ask, question }) => {
       case 'scale':
         return api.Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry();
       case 'stl':
-        return convertStl.toStl({}, api.Shape.fromGeometry(values[0]).toDisjointGeometry());
+        return toStl({}, api.Shape.fromGeometry(values[0]).toDisjointGeometry());
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
       case 'svg':
         const crossSection = api.Shape.fromGeometry(values[0]).center().crossSection().toDisjointGeometry();
-        return convertSvg.toSvg({}, crossSection);
+        return toSvg({}, crossSection);
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
         const bounds = shape.measureBoundingBox();
