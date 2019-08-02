@@ -84,6 +84,7 @@ import { torus } from './torus';
 import { translate } from './translate';
 import { triangle } from './triangle';
 import { union } from './union';
+import { voxels } from './voxels';
 import { wireframe } from './wireframe';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
@@ -172,6 +173,7 @@ export {
   triangle,
   union,
   keep,
+  voxels,
   wireframe,
   writePdf,
   writeShape,
