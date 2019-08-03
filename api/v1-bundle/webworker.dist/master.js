@@ -56622,6 +56622,20 @@ define("./master.js",[],function () { 'use strict';
     return segments;
   };
 
+  const assertGood = (surface) => {
+    for (const path of surface) {
+      assertUnique(path);
+      /*
+      if (false && path.plane === undefined) {
+        throw Error('die: no plane');
+      }
+  */
+      if (isNaN(toPlane(path)[0])) {
+        throw Error('die');
+      }
+    }
+  };
+
   // (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
   // MIT License
   // Project Home: https://github.com/voidqk/polybooljs
@@ -61588,15 +61602,6 @@ define("./master.js",[],function () { 'use strict';
                         vertexSize: 3
       }));
     return blessAsConvex(convex);
-  };
-
-  const assertGood = (surface) => {
-    for (const path of surface) {
-      assertUnique(path);
-      if (isNaN(toPlane(path)[0])) {
-        throw Error('die');
-      }
-    }
   };
 
   /**
@@ -67783,93 +67788,7 @@ return d[d.length-1];};return ", funcName].join("");
 
   var orient = orientation_1[3];
 
-  /*
-  export const difference = (geometry, ...subtractGeometries) => {
-    assertGood(geometry);
-    if (subtractGeometries.length === 0) {
-      // Nothing to do.
-      return geometry;
-    } else {
-      return map(geometry,
-                 (item) => {
-                   assertGood(item);
-                   for (const subtractGeometry of subtractGeometries) {
-                     assertGood(subtractGeometry);
-                     eachItem(subtractGeometry,
-                              (subtractItem) => {
-                                assertGood(subtractItem);
-                                if (item.solid && subtractItem.solid) {
-                                  assertGoodSolid(item.solid);
-                                  assertGoodSolid(subtractItem.solid);
-                                  const solid = solidDifference(item.solid, subtractItem.solid);
-                                  assertGoodSolid(solid);
-                                  item = { ...item, solid };
-                                } else if (item.z0Surface && subtractItem.z0Surface) {
-                                  item = { ...item, z0Surface: z0SurfaceDifference(item.z0Surface, subtractItem.z0Surface) };
-                                } else if (item.paths && subtractItem.paths) {
-                                  item = { ...item, paths: pathsDifference(item.paths, subtractItem.paths) };
-                                }
-                              });
-                   }
-                   return item;
-                 });
-    }
-  };
-  */
-
-  /*
-    if (geometries.length === 0) {
-      // Nothing to do.
-      return geometry;
-    } else {
-      return map(geometry,
-                 (item) => {
-                   for (const intersectGeometry of geometries) {
-                     eachItem(intersectGeometry,
-                              (intersectItem) => {
-                                if (item.solid && intersectItem.solid) {
-                                  item = { solid: solidIntersection(item.solid, intersectItem.solid) };
-                                } else if (item.z0Surface && intersectItem.z0Surface) {
-                                  item = { z0Surface: z0SurfaceIntersection(item.z0Surface, intersectItem.z0Surface) };
-                                } else if (item.paths && intersectItem.paths) {
-                                  item = { paths: pathsIntersection(item.paths, intersectItem.paths) };
-                                }
-                              });
-                   }
-                   return item;
-                 });
-    }
-  };
-  */
-
   // Produce a standard geometry representation without caches, etc.
-
-  /*
-  // FIX: Due to disjointedness, it should be correct to only extend the most recently added items in an assembly.
-  export const union = (geometry, ...geometries) => {
-    if (geometries.length === 0) {
-      // Nothing to do.
-      return geometry;
-    } else {
-      return map(geometry,
-                 (item) => {
-                   for (const unionGeometry of geometries) {
-                     eachItem(unionGeometry,
-                              (unionItem) => {
-                                if (item.solid && unionItem.solid) {
-                                  item = { solid: solidUnion(item.solid, unionItem.solid) };
-                                } else if (item.z0Surface && unionItem.z0Surface) {
-                                  item = { z0Surface: z0SurfaceUnion(item.z0Surface, unionItem.z0Surface) };
-                                } else if (item.paths && unionItem.paths) {
-                                  item = { paths: pathsUnion(item.paths, unionItem.paths) };
-                                }
-                              });
-                   }
-                   return item;
-                 });
-    }
-  };
-  */
 
   const pointsToThreejsPoints = (geometry) => {
     return geometry.points;

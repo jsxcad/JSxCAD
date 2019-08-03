@@ -10,8 +10,8 @@ import { Shape } from './Shape';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * minkowski(cube(10),
- *           sphere(3));
+ * minkowski(Cube(10),
+ *           Sphere(3));
  * ```
  * :::
  *

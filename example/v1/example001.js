@@ -9,7 +9,7 @@ function radiusFromDiameter (d) {
 }
 
 function rotcy (rot, r, h) {
-  return rotate(rot, cylinder(r, h));
+  return rotate(rot, Cylinder(r, h));
 }
 
 function example001 () {
@@ -19,7 +19,7 @@ function example001 () {
   var height = radiusFromDiameter(size * 2.5);
 
   return difference(
-    sphere({ r: radiusFromDiameter(size) }),
+    Sphere({ r: radiusFromDiameter(size) }),
     rotcy([0, 0, 0], radius, height),
     rotcy([90, 0, 0], radius, height),
     rotcy([0, 90, 0], radius, height)
@@ -27,5 +27,5 @@ function example001 () {
 }
 
 const solid = example001();
-writeStl({ path: 'tmp/example001.stl' }, solid);
-writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' }, solid);
+solid.writeStl('tmp/example001.stl');
+solid.writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' });

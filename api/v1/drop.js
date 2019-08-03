@@ -14,35 +14,35 @@ import { dispatch } from './dispatch';
  *
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  *   .drop('A')
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  *   .drop('B')
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  *   .drop('A', 'B')
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(cube(10).below(),
- *          cube(8).below().drop())
+ * assemble(Cube(10).below(),
+ *          Cube(8).below().drop())
  * ```
  * :::
  *

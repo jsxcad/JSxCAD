@@ -12,28 +12,28 @@ import { keep as keepGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  *   .keep('A')
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  *   .keep('B')
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(circle(10).as('A'),
- *          square(10).as('B'))
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
  *   .keep('A', 'B')
  * ```
  * :::

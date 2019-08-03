@@ -14,13 +14,13 @@ import { translate } from './translate';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * assemble(cube(10).above(),
- *          cylinder(2, 15).rotateY(90))
+ * assemble(Cube(10).above(),
+ *          Cylinder(2, 15).rotateY(90))
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * cube(10).above(sphere(5))
+ * Cube(10).above(Sphere(5))
  * ```
  * :::
  **/
@@ -40,13 +40,13 @@ export const fromReference = (shape, reference) => {
 
 export const above = dispatch(
   'above',
-  // above(cube())
+  // above(Cube())
   (shape, ...rest) => {
     assertShape(shape);
     assertEmpty(rest);
     return () => fromOrigin(shape);
   },
-  // above(cube(), sphere())
+  // above(Cube(), Sphere())
   (shape, reference) => {
     assertShape(shape);
     assertShape(reference);

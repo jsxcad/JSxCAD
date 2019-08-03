@@ -1,24 +1,32 @@
-import { flip, translate } from '@jsxcad/geometry-surface';
+import { flip as flipPath, rotateZ as rotateZPath, translate as translatePath } from '@jsxcad/geometry-path';
+import { flip as flipSurface, rotateZ as rotateZSurface, translate as translateSurface } from '@jsxcad/geometry-surface';
 
-import { add } from '@jsxcad/math-vec3';
 import { fromPolygons } from './fromPolygons';
 
-export const extrude = ({ height = 1 }, surface) => {
+// FIX: Consider a general transformation, rather than just twist.
+export const extrude = ({ height = 1, steps = 1, twistRadians = 0 }, surface) => {
   const polygons = [];
-  const up = [0, 0, height];
+  const stepHeight = height / steps;
 
   // Build the walls.
   for (const polygon of surface) {
-    // Build floor outline. This need not be a convex polygon.
-    const floor = polygon.map(point => [point[0], point[1], 0]).reverse();
-    // Walk around the floor to build the walls.
-    for (let i = 0; i < floor.length; i++) {
-      const start = floor[i];
-      const end = floor[(i + 1) % floor.length];
-      // Remember that we are walking CCW.
-      // polygons.push([start, add(start, up), end]);
-      // polygons.push([end, add(start, up), add(end, up)]);
-      polygons.push([start, add(start, up), add(end, up), end]);
+    const wall = flipPath(polygon.map(([x = 0, y = 0]) => [x, y, 0]));
+    for (let step = 0; step < steps; step++) {
+      const floor = translatePath([0, 0, stepHeight * (step + 0)], rotateZPath(twistRadians * (step + 0), wall));
+      const roof = translatePath([0, 0, stepHeight * (step + 1)], rotateZPath(twistRadians * (step + 1), wall));
+      // Walk around the floor to build the walls.
+      for (let i = 0; i < floor.length; i++) {
+        const floorStart = floor[i];
+        const floorEnd = floor[(i + 1) % floor.length];
+        const roofStart = roof[i];
+        const roofEnd = roof[(i + 1) % roof.length];
+        if (twistRadians === 0) {
+          polygons.push([floorStart, roofStart, roofEnd, floorEnd]);
+        } else {
+          polygons.push([floorStart, roofStart, floorEnd]);
+          polygons.push([roofStart, roofEnd, floorEnd]);
+        }
+      }
     }
   }
 
@@ -26,10 +34,10 @@ export const extrude = ({ height = 1 }, surface) => {
   const walls = fromPolygons({}, polygons);
 
   // Roof goes up.
-  const roof = translate([0, 0, height], surface);
+  const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));
 
   // floor faces down.
-  const floor = flip(surface);
+  const floor = flipSurface(surface);
 
   // And form a solid.
   const solid = [roof, floor, ...walls];

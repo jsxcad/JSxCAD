@@ -11,7 +11,7 @@ import { writeShape } from './writeShape';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * await writeShape({ path: 'geometry/cube' }, cube())
+ * await Cube().writeShape({ path: 'geometry/cube' })
  * await readShape({ path: 'geometry/cube' })
  * ```
  * :::
@@ -24,8 +24,8 @@ import { writeShape } from './writeShape';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * await readShape({ path: 'geometry/sphere' }, () => sphere())
- * await readShape({ path: 'geometry/sphere' }, () => sphere())
+ * await readShape({ path: 'geometry/sphere' }, () => Sphere())
+ * await readShape({ path: 'geometry/sphere' }, () => Sphere())
  * ```
  * :::
  *

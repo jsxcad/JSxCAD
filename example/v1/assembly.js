@@ -1,5 +1,5 @@
-const assembly = assemble(cube(30).as('cube'),
-                          cylinder(5, 30).as('cylinder'));
+const assembly = assemble(Cube(30).as('cube'),
+                          Cylinder(5, 30).as('cylinder'));
 
 await assembly.keep('cube').writeStl('stl/cube.stl');
 

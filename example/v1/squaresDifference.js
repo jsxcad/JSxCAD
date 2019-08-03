@@ -1,5 +1,5 @@
-await difference(union(square(7).move(-10, 0),
-                       square(7).move(10, 0)),
-                 square(5).move(-10, 0),
-                 square(5).move(10, 0))
+await difference(union(Square(7).move(-10, 0),
+                       Square(7).move(10, 0)),
+                 Square(5).move(-10, 0),
+                 Square(5).move(10, 0))
         .writePdf('tmp/squaresDifference.pdf');

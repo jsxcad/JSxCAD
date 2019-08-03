@@ -9,7 +9,7 @@ import { fuse as fuseGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * assemble(sphere(10), sphere(10).translate(2).drop()).fuse()
+ * assemble(Sphere(10), Sphere(10).translate(2).drop()).fuse()
  * ```
  * :::
  *

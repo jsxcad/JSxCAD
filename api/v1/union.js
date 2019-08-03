@@ -10,38 +10,38 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * union(sphere(5).left(),
- *       sphere(5),
- *       sphere(5).right())
+ * union(Sphere(5).left(),
+ *       Sphere(5),
+ *       Sphere(5).right())
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * union(sphere(5).left(),
- *       sphere(5),
- *       sphere(5).right())
+ * union(Sphere(5).left(),
+ *       Sphere(5),
+ *       Sphere(5).right())
  *   .section()
  *   .outline()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, 0, 5] } }
  * ```
- * union(triangle(),
- *       triangle().rotateZ(180))
+ * union(Triangle(),
+ *       Triangle().rotateZ(180))
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, 0, 5] } }
  * ```
- * union(triangle(),
- *       triangle().rotateZ(180))
+ * union(Triangle(),
+ *       Triangle().rotateZ(180))
  *   .outline()
  * ```
  * :::
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * union(assemble(cube().left(),
- *                cube().right()),
- *       cube().front())
+ * union(assemble(Cube().left(),
+ *                Cube().right()),
+ *       Cube().front())
  *   .section()
  *   .outline()
  * ```

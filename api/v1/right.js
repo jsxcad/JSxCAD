@@ -14,13 +14,13 @@ import { translate } from './translate';
  *
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * assemble(cube(10).right(),
- *          cylinder(2, 15))
+ * assemble(Cube(10).right(),
+ *          Cylinder(2, 15))
  * ```
  * :::
  * ::: illustration { "view": { "position": [-40, -40, 40] } }
  * ```
- * cube(10).right(sphere(5))
+ * Cube(10).right(Sphere(5))
  * ```
  * :::
  **/
@@ -40,13 +40,13 @@ export const fromReference = (shape, reference) => {
 
 export const right = dispatch(
   'right',
-  // right(cube())
+  // right(Cube())
   (shape, ...rest) => {
     assertShape(shape);
     assertEmpty(rest);
     return () => fromOrigin(shape);
   },
-  // right(cube(), sphere())
+  // right(Cube(), Sphere())
   (shape, reference) => {
     assertShape(shape);
     assertShape(reference);
