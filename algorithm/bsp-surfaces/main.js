@@ -1,25 +1,13 @@
-import { build } from './build';
-import { clipSurfaces } from './clipSurfaces';
-import { clipTo } from './clipTo';
-import { create } from './create';
+import { containsPoint } from './containsPoint';
 import { difference } from './difference';
-import { flip } from './flip';
-import { fromSurfaces } from './fromSurfaces';
+import { fromSolid } from './bsp';
 import { intersection } from './intersection';
-import { splitSurface } from './splitSurface';
-import { toSurfaces } from './toSurfaces';
 import { union } from './union';
 
 export {
-  build,
-  clipSurfaces,
-  clipTo,
-  create,
+  containsPoint,
   difference,
-  flip,
-  fromSurfaces,
+  fromSolid,
   intersection,
-  splitSurface,
-  toSurfaces,
   union
 };

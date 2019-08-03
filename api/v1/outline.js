@@ -1,6 +1,7 @@
+import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -10,16 +11,16 @@ import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(2).translate([-4]),
- *            circle(2).translate([4]))
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
  * ```
  * :::
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(2).translate([-4]),
- *            circle(2).translate([4]))
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
  *   .outline()
  * ```
  * :::
@@ -27,9 +28,11 @@ import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
  **/
 
 export const outline = (options = {}, shape) => {
-  const surfaces = getZ0Surfaces(shape.toKeptGeometry());
-  // FIX: Handle non-z0surfaces.
-  return assemble(...surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)));
+  const keptGeometry = shape.toKeptGeometry();
+  const z0Surfaces = getZ0Surfaces(keptGeometry);
+  const surfaces = getSurfaces(keptGeometry);
+  return assemble(...z0Surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)),
+                  ...surfaces.map(({ surface }) => Shape.fromPaths(surface)));
 };
 
 const method = function (options) { return outline(options, this); };

@@ -1,29 +1,40 @@
-import { assertCoplanar } from '@jsxcad/geometry-surface';
+import { alignVertices } from './alignVertices';
+import { createNormalize4 } from './createNormalize4';
+import { fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export const fromPolygons = (options = {}, polygons) => {
+  const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
   for (const polygon of polygons) {
-    const plane = toPlane(polygon);
-    const key = JSON.stringify(plane);
+    const key = normalize4(toPlane(polygon));
     const groups = coplanarGroups.get(key);
     if (groups === undefined) {
-      coplanarGroups.set(key, [polygon]);
+      const group = [polygon];
+      group.plane = key;
+      coplanarGroups.set(key, group);
     } else {
       groups.push(polygon);
     }
   }
 
   // The solid is a list of surfaces, which are lists of coplanar polygons.
-  const solid = [...coplanarGroups.values()];
+  const solid = [];
 
-  for (const surface of solid) {
-    assertCoplanar(surface);
+  for (const [plane, polygons] of coplanarGroups) {
+    if (polygons.length === 1) {
+      // A single polygon forms a valid surface.
+      solid.push(polygons);
+    } else {
+      const surface = fromPolygonsToSurface({ plane }, polygons);
+      solid.push(surface);
+    }
   }
 
   if (polygons.isConvex === true) {
     solid.isConvex = true;
   }
-  return solid;
+
+  return alignVertices(solid);
 };

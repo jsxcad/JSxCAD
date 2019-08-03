@@ -12,13 +12,13 @@ import { translate } from './translate';
  *
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * cube({ corner1: [30, -30, 10],
+ * Cube({ corner1: [30, -30, 10],
  *        corner2: [10, -10, 0] })
  * ```
  * :::
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```
- * cube({ corner1: [30, -30, 10],
+ * Cube({ corner1: [30, -30, 10],
  *        corner2: [10, -10, 0] })
  *   .center()
  * ```

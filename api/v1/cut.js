@@ -1,4 +1,4 @@
-import { getSolids, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
@@ -13,29 +13,29 @@ import { cut as cutSurface } from '@jsxcad/geometry-surface';
  *
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * const [top, bottom] = cube(10).cut();
+ * const [top, bottom] = Cube(10).cut();
  * assemble(top.translate(0, 0, 1),
  *          bottom.translate(0, 0, -1));
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * const [top, bottom] = sphere(10).cut();
+ * const [top, bottom] = Sphere(10).cut();
  * assemble(top.translate(0, 0, 2),
  *          bottom.translate(0, 0, -2));
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * const [top, bottom] = sphere(10).rotateY(1).cut();
+ * const [top, bottom] = Sphere(10).rotateY(1).cut();
  * assemble(top.translate(0, 0, 2),
  *          bottom.translate(0, 0, -2));
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * assemble(circle(10),
- *          cylinder(5, 10))
+ * assemble(Circle(10),
+ *          Cylinder(5, 10))
  *   .rotateY(90)
  *   .cut()[0]
  * ```
@@ -52,11 +52,15 @@ export const cut = (plane = [0, 0, 1, 0], shape) => {
     fronts.push(Shape.fromSolid(front));
     backs.push(Shape.fromSolid(back));
   }
-  // FIX: Generalized surfaces.
   for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
     const [front, back] = cutSurface(plane, z0Surface);
     fronts.push(Shape.fromPathsToZ0Surface(front));
     backs.push(Shape.fromPathsToZ0Surface(back));
+  }
+  for (const { surface } of getSurfaces(keptGeometry)) {
+    const [front, back] = cutSurface(plane, surface);
+    fronts.push(Shape.fromPathsToSurface(front));
+    backs.push(Shape.fromPathsToSurface(back));
   }
   return [assemble(...fronts), assemble(...backs)];
 };

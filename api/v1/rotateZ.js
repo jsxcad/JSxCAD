@@ -9,12 +9,12 @@ import { fromZRotation } from '@jsxcad/math-mat4';
  *
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * square(10)
+ * Square(10)
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
- * square(10).rotateZ(45)
+ * Square(10).rotateZ(45)
  * ```
  * :::
  **/

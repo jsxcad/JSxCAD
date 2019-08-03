@@ -14,17 +14,17 @@ import { dispatch } from './dispatch';
  *
  * ::: illustration
  * ```
- * cylinder(5, 10).material('paper').color('pink')
+ * Cylinder(5, 10).material('paper').color('pink')
  * ```
  * :::
  * ::: illustration
  * ```
- * cylinder(5, 10).material('metal').color('green')
+ * Cylinder(5, 10).material('metal').color('green')
  * ```
  * :::
  * ::: illustration
  * ```
- * cylinder(5, 10).material('glass').color('blue')
+ * Cylinder(5, 10).material('glass').color('blue')
  * ```
  * :::
  *

@@ -8,13 +8,7 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration { "view": { "position": [5, 5, 5] } }
  * ```
- * await cube().writeStl('cube.stl');
- * await readStl({ path: 'cube.stl' });
- * ```
- * :::
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await writeStl({ path: 'cube.stl' }, cube());
+ * await Cube().writeStl('cube.stl');
  * await readStl({ path: 'cube.stl' });
  * ```
  * :::
@@ -22,7 +16,6 @@ import { writeFile } from '@jsxcad/sys';
  **/
 
 export const writeStl = async (options, shape) => {
-  console.log(`QQ/api/writeStl`);
   if (typeof options === 'string') {
     options = { path: options };
   }

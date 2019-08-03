@@ -1,9 +1,9 @@
+import { Cursor } from './Cursor';
 import { canonicalize } from '@jsxcad/geometry-path';
-import { cursor } from './cursor';
 import test from 'ava';
 
 test('Simple', t => {
-  const path = cursor()
+  const path = Cursor.fromOrigin()
       .translate(1)
       .rotateZ(90)
       .translate(1)

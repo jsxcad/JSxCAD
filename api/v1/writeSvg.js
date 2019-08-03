@@ -8,14 +8,8 @@ import { writeFile } from '@jsxcad/sys';
  *
  * ::: illustration
  * ```
- * await cube().section().writeSvg('svg/cube1.svg');
+ * await Cube().section().writeSvg('svg/cube1.svg');
  * await readSvg({ path: 'svg/cube1.svg' })
- * ```
- * :::
- * ::: illustration
- * ```
- * await writeSvg({ path: 'svg/cube2.svg' }, cube().section());
- * await readSvg({ path: 'svg/cube2.svg' })
  * ```
  * :::
  *

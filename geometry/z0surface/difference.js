@@ -2,7 +2,6 @@ import { fromSurface, toSurface } from './convert';
 
 import { doesNotOverlap } from './doesNotOverlap';
 import polybooljs from 'polybooljs';
-import { union } from './union';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -24,13 +23,15 @@ import { union } from './union';
  *      +-------+
  */
 export const difference = (baseZ0Surface, ...z0Surfaces) => {
-  z0Surfaces = z0Surfaces.filter(surface => !doesNotOverlap(baseZ0Surface, surface));
   if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
-  if (z0Surfaces.length === 0) {
-    return baseZ0Surface;
+  for (const surface of z0Surfaces) {
+    if (doesNotOverlap(surface, baseZ0Surface)) {
+      continue;
+    }
+    const result = polybooljs.difference(fromSurface(baseZ0Surface), fromSurface(surface));
+    baseZ0Surface = toSurface(result);
   }
-  const result = polybooljs.difference(fromSurface(baseZ0Surface), fromSurface(union(...z0Surfaces)));
-  return toSurface(result);
+  return baseZ0Surface;
 };

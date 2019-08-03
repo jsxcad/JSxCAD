@@ -16,9 +16,11 @@ export const transformItem = (matrix, item) => {
   } else if (item.solid) {
     transformed.solid = transformSolid(matrix, item.solid);
     if (item.solid.isConvex !== undefined) transformed.solid.isConvex = item.solid.isConvex;
+  } else if (item.surface) {
+    transformed.surface = transformSurface(matrix, item.surface);
   } else if (item.z0Surface) {
-    // FIX: Handle transformations that take the surface out of z0.
-    transformed.z0Surface = transformSurface(matrix, item.z0Surface);
+    // FIX: Consider transforms that preserve z0.
+    transformed.surface = transformSurface(matrix, item.z0Surface);
   } else if (item.empty) {
     transformed.empty = true;
   } else {

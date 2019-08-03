@@ -7,7 +7,9 @@ import { close } from './close';
 import { concatenate } from './concatenate';
 import { deduplicate } from './deduplicate';
 import { flip } from './flip';
+import { isClockwise } from './isClockwise';
 import { isClosed } from './isClosed';
+import { isCounterClockwise } from './isCounterClockwise';
 import { measureArea } from './measureArea';
 import { open } from './open';
 import { toGeneric } from './toGeneric';
@@ -24,7 +26,9 @@ export {
   concatenate,
   deduplicate,
   flip,
+  isClockwise,
   isClosed,
+  isCounterClockwise,
   measureArea,
   open,
   toGeneric,

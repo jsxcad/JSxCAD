@@ -4,19 +4,20 @@ import { toTransformedGeometry } from './toTransformedGeometry';
 import { transform } from './transform';
 
 test('Deferred translation.', t => {
-  const geometry = transform(fromTranslation([1, 1, 1]), { points: [[0, 0]] });
+  const geometry = transform(fromTranslation([1, 1, 1]), { points: [[0, 0]], tags: ['a'] });
   t.deepEqual(geometry,
               {
                 matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
                 untransformed: {
-                  points: [[0, 0]]
+                  points: [[0, 0]],
+                  tags: ['a']
                 }
               });
   const transformed = toTransformedGeometry(geometry);
   t.deepEqual(transformed,
               {
                 points: [[1, 1, 1]],
-                tags: undefined
+                tags: ['a']
               });
 });
 

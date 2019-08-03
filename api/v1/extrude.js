@@ -1,12 +1,13 @@
+import { assertGood as assertGoodSolid, transform as transformSolid } from '@jsxcad/geometry-solid';
+import { assertGood as assertGoodSurface, toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 import { assertNonZeroNumber, assertShape } from './assert';
+import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { assertGood as assertGoodSolid } from '@jsxcad/geometry-solid';
-import { assertGood as assertGoodSurface } from '@jsxcad/geometry-surface';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 /**
  *
@@ -16,27 +17,37 @@ import { getZ0Surfaces } from '@jsxcad/geometry-tagged';
  *
  * ::: illustration
  * ```
- * difference(circle(10),
- *            circle(8))
+ * difference(Circle(10),
+ *            Circle(8))
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * difference(circle(10),
- *            circle(8))
+ * difference(Circle(10),
+ *            Circle(8))
  *   .extrude({ height: 10 })
  * ```
  * :::
  *
  **/
 
-export const fromHeight = ({ height }, shape) => {
-  console.log(`QQ/fromHeight: ${height}`);
+export const fromHeight = ({ height, steps = 1, twist = 0 }, shape) => {
+  const twistRadians = twist * Math.PI / 180;
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
-  for (const { tags, z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+  const keptGeometry = shape.toKeptGeometry();
+  for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
     assertGoodSurface(z0Surface);
-    const solid = extrudeAlgorithm({ height }, z0Surface);
+    const solid = extrudeAlgorithm({ height, steps, twistRadians }, z0Surface);
+    assertGoodSolid(solid);
+    solids.push(Shape.fromGeometry({ solid, tags }));
+  }
+  for (const { tags, surface } of getSurfaces(keptGeometry)) {
+    assertGoodSurface(surface);
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
+    const z0Solid = extrudeAlgorithm({ height, steps, twistRadians }, transformSurface(toZ0, surface));
+    assertGoodSolid(z0Solid);
+    const solid = transformSolid(fromZ0, z0Solid);
     assertGoodSolid(solid);
     solids.push(Shape.fromGeometry({ solid, tags }));
   }
@@ -57,10 +68,10 @@ export const extrude = dispatch(
     assertShape(shape);
     return () => fromValue(height, shape);
   },
-  ({ height }, shape) => {
+  ({ height, steps = 1, twist = 0 }, shape) => {
     assertNonZeroNumber(height);
     assertShape(shape);
-    return () => fromHeight({ height }, shape);
+    return () => fromHeight({ height, steps, twist }, shape);
   }
 );
 

@@ -12,28 +12,28 @@ import { fromTranslation } from '@jsxcad/math-mat4';
  *
  * ::: illustration { "view": { "position": [10, 0, 10] } }
  * ```
- * assemble(circle(),
- *          sphere().above())
+ * assemble(Circle(),
+ *          Sphere().above())
  * ```
  * :::
  * ::: illustration { "view": { "position": [10, 0, 10] } }
  * ```
- * assemble(circle(),
- *          sphere().above()
+ * assemble(Circle(),
+ *          Sphere().above()
  *                  .translate(0, 0, 1))
  * ```
  * :::
  * ::: illustration { "view": { "position": [10, 0, 10] } }
  * ```
- * assemble(circle(),
- *          sphere().above()
+ * assemble(Circle(),
+ *          Sphere().above()
  *                  .translate(0, 1, 0))
  * ```
  * :::
  * ::: illustration { "view": { "position": [10, 0, 10] } }
  * ```
- * assemble(circle(),
- *          sphere().above()
+ * assemble(Circle(),
+ *          Sphere().above()
  *                  .translate([-1, -1, 1]))
  * ```
  * :::

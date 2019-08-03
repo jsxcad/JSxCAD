@@ -7,7 +7,6 @@ export const toKeptGeometry = (geometry) => {
   assertGood(geometry);
   if (geometry.keptGeometry === undefined) {
     const disjointGeometry = toDisjointGeometry(geometry);
-
     const walk = (geometry) => {
       assertGood(geometry);
       if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {

@@ -15,6 +15,8 @@ export const eachPoint = (options, operation, geometry) => {
       eachPointOfPaths(options, operation, geometry.paths);
     } else if (geometry.solid) {
       eachPointOfSolid(options, operation, geometry.solid);
+    } else if (geometry.surface) {
+      eachPointOfSurface(options, operation, geometry.surface);
     } else if (geometry.z0Surface) {
       eachPointOfSurface(options, operation, geometry.z0Surface);
     }

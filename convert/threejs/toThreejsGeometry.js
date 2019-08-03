@@ -32,7 +32,7 @@ const solidToThreejsSolid = (solid) => {
   return { normals, positions };
 };
 
-const z0SurfaceToThreejsSurface = (surface) => {
+const surfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
   for (const triangle of toTriangles({}, makeConvex({}, surface))) {
@@ -71,7 +71,9 @@ export const toThreejsGeometry = (geometry, supertags) => {
     return { threejsSegments: pointsToThreejsPoints(geometry.points), tags: tags, isThreejsGeometry: true };
   } else if (geometry.solid) {
     return { threejsSolid: solidToThreejsSolid(geometry.solid), tags: tags, isThreejsGeometry: true };
+  } else if (geometry.surface) {
+    return { threejsSurface: surfaceToThreejsSurface(geometry.surface), tags: tags, isThreejsGeometry: true };
   } else if (geometry.z0Surface) {
-    return { threejsSurface: z0SurfaceToThreejsSurface(geometry.z0Surface), tags: tags, isThreejsGeometry: true };
+    return { threejsSurface: surfaceToThreejsSurface(geometry.z0Surface), tags: tags, isThreejsGeometry: true };
   }
 };
