@@ -9,6 +9,7 @@ test('Simple', t => {
   const disjoint = toDisjointGeometry({ assembly: [{ z0Surface: [unitSquarePolygon], tags: ['a'] },
                                                    { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] },
                                                    { z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]), tags: ['c'] }] });
+  console.log(JSON.stringify(canonicalize(disjoint)));
   t.deepEqual(canonicalize(disjoint),
               { 'disjointAssembly': [
                 { 'disjointAssembly': [{ 'surface': [[[0.28868, 0.5, 0], [0.36603, 0.36603, 0], [0.5, 0.28868, 0], [0.5, 0.5, 0]]],
