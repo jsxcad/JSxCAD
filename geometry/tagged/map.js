@@ -6,6 +6,7 @@ export const map = (geometry, operation) => {
       // FIX: Consider the case where the operation does not preserve disjoinedness.
       return operation({ disjointAssembly: geometry.disjointAssembly.map(walk), tags: geometry.tags });
     } else {
+      // What about matrix?
       return operation(geometry);
     }
   };
