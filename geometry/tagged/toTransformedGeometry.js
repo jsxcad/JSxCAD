@@ -10,9 +10,7 @@ export const toTransformedGeometry = (geometry) => {
     const walk = (matrix, geometry) => {
       if (geometry.matrix) {
         // Preserve any tags applied to the untransformed geometry.
-        return addTags(geometry.tags,
-                       walk(multiply(matrix, geometry.matrix),
-                            geometry.untransformed));
+        return walk(multiply(matrix, geometry.matrix));
       }
 
       if (geometry.assembly) {
