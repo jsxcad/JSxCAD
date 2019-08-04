@@ -11,8 +11,7 @@ test('Deferred translation.', t => {
                 untransformed: {
                   points: [[0, 0]],
                   tags: ['a']
-                },
-                tags: ['a']
+                }
               });
   const transformed = toTransformedGeometry(geometry);
   t.deepEqual(transformed,

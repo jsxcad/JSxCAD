@@ -1,5 +1,6 @@
 import { identity, multiply } from '@jsxcad/math-mat4';
 
+import { addTags } from './addTags';
 import { transformItem } from './transform';
 
 // Apply the accumulated matrix transformations and produce a geometry without them.
@@ -9,9 +10,9 @@ export const toTransformedGeometry = (geometry) => {
     const walk = (matrix, geometry) => {
       if (geometry.matrix) {
         // Preserve any tags applied to the untransformed geometry.
-        // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
-        return walk(multiply(matrix, geometry.matrix),
-                    geometry.untransformed);
+        return addTags(geometry.tags,
+                       walk(multiply(matrix, geometry.matrix),
+                            geometry.untransformed));
       }
 
       if (geometry.assembly) {

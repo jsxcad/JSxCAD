@@ -4,8 +4,8 @@ import { Shape } from './Shape';
 import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
 
-const buildCylinder = ({ radius = 1, height = 1, sides = 32 }) => {
-  return Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
+const buildCylinder = ({ radius = 1, height = 1, resolution = 32 }) => {
+  return Shape.fromSolid(buildRegularPrism({ edges: resolution })).scale([radius, radius, height]);
 };
 
 /**
@@ -28,34 +28,34 @@ const buildCylinder = ({ radius = 1, height = 1, sides = 32 }) => {
  * ```
  * Cylinder({ radius: 2,
  *            height: 10,
- *            sides: 8 })
+ *            resolution: 8 })
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
  * Cylinder({ apothem: 2,
  *            height: 10,
- *            sides: 8 })
+ *            resolution: 8 })
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
  * Cylinder({ diameter: 6,
  *            height: 8,
- *            sides: 16 })
+ *            resolution: 16 })
  * ```
  * :::
  *
  **/
 
-export const fromValue = (radius, height = 1, sides = 32) => buildCylinder({ radius, height, sides });
+export const fromValue = (radius, height = 1, resolution = 32) => buildCylinder({ radius, height, resolution });
 
-export const fromRadius = ({ radius, height = 1, sides = 32 }) => buildCylinder({ radius, height, sides });
+export const fromRadius = ({ radius, height = 1, resolution = 32 }) => buildCylinder({ radius, height, resolution });
 
 const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-export const fromApothem = ({ apothem, height = 1, sides = 32 }) => buildCylinder({ radius: toRadiusFromApothem(apothem, sides), height, sides });
+export const fromApothem = ({ apothem, height = 1, resolution = 32 }) => buildCylinder({ radius: toRadiusFromApothem(apothem, resolution), height, resolution });
 
-export const fromDiameter = ({ diameter, height = 1, sides = 32 }) => buildCylinder({ radius: diameter / 2, height, sides });
+export const fromDiameter = ({ diameter, height = 1, resolution = 32 }) => buildCylinder({ radius: diameter / 2, height, resolution });
 
 export const Cylinder = dispatch(
   'cylinder',
@@ -64,29 +64,29 @@ export const Cylinder = dispatch(
     assertEmpty(rest);
     return () => fromValue(1);
   },
-  (radius, height = 1, sides = 32) => {
+  (radius, height = 1, resolution = 32) => {
     assertNumber(radius);
     assertNumber(height);
-    assertNumber(sides);
-    return () => fromValue(radius, height, sides);
+    assertNumber(resolution);
+    return () => fromValue(radius, height, resolution);
   },
-  ({ radius, height = 1, sides = 32 }) => {
+  ({ radius, height = 1, resolution = 32 }) => {
     assertNumber(radius);
     assertNumber(height);
-    assertNumber(sides);
-    return () => fromRadius({ radius, height, sides });
+    assertNumber(resolution);
+    return () => fromRadius({ radius, height, resolution });
   },
-  ({ apothem, height = 1, sides = 32 }) => {
+  ({ apothem, height = 1, resolution = 32 }) => {
     assertNumber(apothem);
     assertNumber(height);
-    assertNumber(sides);
-    return () => fromApothem({ apothem, height, sides });
+    assertNumber(resolution);
+    return () => fromApothem({ apothem, height, resolution });
   },
-  ({ diameter, height = 1, sides = 32 }) => {
+  ({ diameter, height = 1, resolution = 32 }) => {
     assertNumber(diameter);
     assertNumber(height);
-    assertNumber(sides);
-    return () => fromDiameter({ diameter, height, sides });
+    assertNumber(resolution);
+    return () => fromDiameter({ diameter, height, resolution });
   });
 
 Cylinder.fromValue = fromValue;

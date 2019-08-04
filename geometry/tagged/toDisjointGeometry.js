@@ -16,7 +16,7 @@ const toDisjointAssembly = (geometry) => {
       assertGood(item);
       disjoint.unshift(difference(item, ...disjoint));
     }
-    const disjointAssembly = { disjointAssembly: disjoint };
+    const disjointAssembly = { disjointAssembly: disjoint, tags: geometry.tags };
     geometry.disjoint = disjointAssembly;
     assertGood(disjointAssembly);
     return disjointAssembly;

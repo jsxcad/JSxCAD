@@ -13,13 +13,13 @@ import { lathe as lathePath } from '@jsxcad/algorithm-shape';
  *
  **/
 
-export const lathe = ({ sides = 16, loops = 1, loopOffset = 0 }, shape) => {
+export const lathe = ({ sides = 16 }, shape) => {
   const [left] = shape.cut();
   const outline = left.outline();
   const polygons = [];
   for (const { paths } of getPaths(outline.toKeptGeometry())) {
     for (const path of paths) {
-      polygons.push(...lathePath({ sides, loops, loopOffset }, path));
+      polygons.push(...lathePath({ sides }, path));
     }
   }
   return Shape.fromPolygonsToSolid(polygons);

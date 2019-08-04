@@ -30,4 +30,4 @@ export const transformItem = (matrix, item) => {
   return transformed;
 };
 
-export const transform = (matrix, untransformed) => ({ matrix, untransformed, tags: untransformed.tags });
+export const transform = (matrix, untransformed) => ({ matrix, untransformed });
