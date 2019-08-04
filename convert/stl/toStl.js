@@ -34,8 +34,6 @@ export const toStl = async (options = {}, geometry) => {
   let solids = getSolids(keptGeometry);
   let triangles = geometryToTriangles(solids);
   let returnVal = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
-  console.log("This is running from within toStl: ");
-  console.log(returnVal);
   return returnVal;
 };
 

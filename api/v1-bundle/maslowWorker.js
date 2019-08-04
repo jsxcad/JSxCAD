@@ -10,6 +10,7 @@ const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
   try {
     var { key, values } = question;
+    console.log("Running : " + key)
     switch (key) {
       case 'assemble':
         values = values.map(api.Shape.fromGeometry);
@@ -17,7 +18,7 @@ const agent = async ({ ask, question }) => {
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
-        return api.circle({ radius: values[0]/2, center: true, resolution: values[1] }).toDisjointGeometry();
+        return api.Circle({ radius: values[0]/2, center: true, resolution: values[1] }).toDisjointGeometry();
       case 'color':
         return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
       case 'difference':
@@ -32,7 +33,7 @@ const agent = async ({ ask, question }) => {
       case 'intersection':
         return api.intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'rectangle':
-        return api.square(values[0], values[1]).toDisjointGeometry();
+        return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'regular polygon':
         return api.circle({ radius: values[0], center: true, resolution: values[1] }).toDisjointGeometry();
       case 'render':
@@ -42,19 +43,12 @@ const agent = async ({ ask, question }) => {
       case 'scale':
         return api.Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry();
       case 'stl':
-        console.log("Worker Thread Called With: ")
-        console.log(values)
         const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
-        console.log("toStl called with: ")
-        console.log(inflated)
         const stlString = await toStl({}, inflated )
-        console.log("toStl generates the string: ")
-        console.log(stlString)
         return stlString
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
       case 'svg':
-        console.log(api.Shape.fromGeometry(values[0]).center())
         const crosssection = api.Shape.fromGeometry(values[0]).center().crossSection();
         return convertSvg.toSvg({}, crossSection);
       case 'SVG Picture':
@@ -72,6 +66,8 @@ const agent = async ({ ask, question }) => {
         return -1;
     }
   } catch (error) {
+    console.log("Called with: ")
+    console.log(question)
     console.log(error);
     return -1;
   }
