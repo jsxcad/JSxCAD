@@ -18,7 +18,7 @@ const agent = async ({ ask, question }) => {
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
-        return api.Circle({ radius: values[0]/2, center: true, resolution: values[1] }).toDisjointGeometry();
+        return api.Circle({ radius: values[0]/2, center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
         return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
       case 'difference':
