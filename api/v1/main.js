@@ -30,6 +30,7 @@ import { SvgPath } from './SvgPath';
 import { Tetrahedron } from './Tetrahedron';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
+import { Wave } from './Wave';
 
 import { above } from './above';
 import { acos } from './acos';
@@ -190,5 +191,6 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
-  union
+  union,
+  Wave
 };
