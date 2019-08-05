@@ -24,6 +24,7 @@ import { Polygon } from './Polygon';
 import { Polyhedron } from './Polyhedron';
 import { Shape } from './Shape';
 import { Sphere } from './Sphere';
+import { Spiral } from './Spiral';
 import { Square } from './Square';
 import { SvgPath } from './SvgPath';
 import { Tetrahedron } from './Tetrahedron';
@@ -182,6 +183,7 @@ export {
   source,
   Sphere,
   sqrt,
+  Spiral,
   Square,
   startClock,
   SvgPath,
