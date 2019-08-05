@@ -25,15 +25,3 @@ test('union: Union of rectangle with itself rotated 90 degrees produces L', t =>
   t.deepEqual(canonicalize(result),
               [[[0, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]], [[0, 0, 0], [0, 2, 0], [-1, 2, 0], [-1, 0, 0]]]);
 });
-
-test('Bad case', t => {
-  const a = [[[ -24.500000000000046, 10.883801392734448, -1.4210854715202004e-14 ],
-              [ -22.5, 10.4917328314162, 0 ],
-              [ -22.499999999999996, 10.883801392734448, -1.4210854715202004e-14 ]]];
-  const b = [[[ -22.5, 10.4917328314162, 0 ],
-              [ -24.500000000000046, 10.883801392734448, -1.4210854715202004e-14 ],
-              [ -24.50000000000005, 10.491732831416194, 1.4210854715202004e-14 ]]];
-  const result = union(a, b);
-console.log(`QQ/result: ${JSON.stringify(canonicalize(result))}`);
-  t.deepEqual(canonicalize(result), []);
-})
