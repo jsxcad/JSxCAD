@@ -33,7 +33,8 @@ export const toStl = async (options = {}, geometry) => {
   let keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry);
   let triangles = geometryToTriangles(solids);
-  return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
+  let returnVal = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
+  return returnVal;
 };
 
 const convertToFacets = (options, polygons) =>
