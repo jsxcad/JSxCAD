@@ -6,8 +6,6 @@ import { toPlane } from '@jsxcad/math-poly3';
 import polybooljs from 'polybooljs';
 import Epsilon from 'polybooljs/lib/epsilon';
 
-const EPS = 1e-5;
-
 export const fromSurface = (...surfaces) => {
   if (surfaces.length === 0) {
     return {
@@ -28,7 +26,7 @@ export const fromSurface = (...surfaces) => {
 };
 
 export const toSurface = (poly) => {
-  const eps = Epsilon(EPS);
+  const eps = Epsilon();
   // make sure out polygon is clean
   // poly = polybooljs.polygon(polybooljs.segments(poly));
 

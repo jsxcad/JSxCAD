@@ -141,9 +141,9 @@ endloop
 endfacet
 facet normal 1 0 0
 outer loop
-vertex 10 10 10
 vertex 10 4.14214 10
 vertex 10 10 4.14214
+vertex 10 10 10
 endloop
 endfacet
 facet normal 1 0 0
@@ -155,16 +155,16 @@ endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 7.07107 10 0
 vertex 10 10 0
 vertex 10 5.85786 0
+vertex 7.07107 10 0
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
+vertex 0 10 0
 vertex 7.07107 10 0
 vertex 0 0 0
-vertex 0 10 0
 endloop
 endfacet
 facet normal -1 0 0
@@ -183,44 +183,44 @@ endloop
 endfacet
 facet normal 0 1 0
 outer loop
-vertex 10 10 4.14214
-vertex 0 10 10
+vertex 7.07107 10 4.14214
 vertex 10 10 10
-endloop
-endfacet
-facet normal 0 1 0
-outer loop
-vertex 7.07107 10 4.14214
-vertex 0 10 10
 vertex 10 10 4.14214
 endloop
 endfacet
-facet normal 0 1 0
+facet normal 0 1 4.141352742202524e-16
 outer loop
 vertex 4.14214 10 4.14214
-vertex 0 10 10
+vertex 10 10 10
 vertex 7.07107 10 4.14214
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
+vertex 10 10 10
 vertex 4.14214 10 4.14214
-vertex 0 10 0
 vertex 0 10 10
 endloop
 endfacet
-facet normal 0 1 2.425941331304818e-16
+facet normal 0 1 0
 outer loop
-vertex 0 10 0
-vertex 4.14214 10 4.14214
 vertex 7.07107 10 0
+vertex 0 10 10
+vertex 4.14214 10 4.14214
 endloop
 endfacet
 facet normal 0 1 0
 outer loop
-vertex 10 10 4.14214
+vertex 0 10 10
+vertex 7.07107 10 0
+vertex 0 10 0
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
 vertex 10 10 0
 vertex 7.07107 10 0
+vertex 10 10 4.14214
 endloop
 endfacet
 endsolid JSxCAD
