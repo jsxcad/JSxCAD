@@ -10,7 +10,6 @@ const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
   try {
     var { key, values } = question;
-    console.log("Running : " + key)
     switch (key) {
       case 'assemble':
         values = values.map(api.Shape.fromGeometry);
