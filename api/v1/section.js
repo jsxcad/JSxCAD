@@ -1,6 +1,7 @@
 import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
 
 import { Shape } from './Shape';
+import { alignVertices } from '@jsxcad/geometry-solid';
 import { assemble } from './assemble';
 import { fromPoints } from '@jsxcad/math-plane';
 import { getSolids } from '@jsxcad/geometry-tagged';
@@ -40,7 +41,7 @@ export const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
   const solids = getSolids(shape.toKeptGeometry());
   const shapes = [];
   for (const { solid } of solids) {
-    const polygons = toPolygons({}, solid);
+    const polygons = toPolygons({}, alignVertices(solid));
     const triangles = toTriangles({}, polygons);
     const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
     shapes.push(Shape.fromPathsToZ0Surface(paths));

@@ -1,7 +1,8 @@
 import { fromSurface, toSurface } from './convert';
 
+import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from './doesNotOverlap';
-import polybooljs from 'polybooljs';
+import polygonClipping from 'polygon-clipping';
 
 /**
  * Produce a surface that is the intersection of all provided surfaces.
@@ -25,14 +26,11 @@ export const intersection = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }
-  while (z0Surfaces.length >= 2) {
-    const a = z0Surfaces.shift();
-    const b = z0Surfaces.shift();
-    if (doesNotOverlap(a, b)) {
-      return [];
-    }
-    const result = polybooljs.intersect(fromSurface(a), fromSurface(b));
-    z0Surfaces.push(toSurface(result));
+  if (z0Surfaces.length === 1) {
+    return z0Surfaces[0];
   }
-  return z0Surfaces[0];
+  const normalize2 = createNormalize2();
+  const input = z0Surfaces.map(surface => fromSurface(normalize2, surface));
+  const result = polygonClipping.intersection(...input);
+  return toSurface(result);
 };

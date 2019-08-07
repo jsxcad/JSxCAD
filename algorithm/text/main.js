@@ -1,4 +1,4 @@
-import { clean, union } from '@jsxcad/geometry-z0surface';
+import { union } from '@jsxcad/geometry-z0surface';
 
 import { assertGood } from '@jsxcad/geometry-surface';
 import { fromSvgPath } from '@jsxcad/convert-svg';
@@ -21,9 +21,13 @@ export const toFont = (options = {}, bytes) => {
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
       // Cleaning forces the first path to not be a hole.
       assertGood(paths);
-      const cleaned = clean(paths);
-      assertGood(cleaned);
-      pathsets.push(cleaned);
+      for (const path of paths) {
+        if (path[0] === null) {
+          // Paths should be closed.
+          throw Error('die');
+        }
+      }
+      pathsets.push(paths);
     }
     return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
   };

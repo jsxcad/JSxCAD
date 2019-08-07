@@ -10,6 +10,7 @@ export const assertGood = (surface) => {
     }
 */
     if (isNaN(toPlane(path)[0])) {
+console.log(`QQ/path: ${JSON.stringify(path)}`);
       throw Error('die');
     }
   }

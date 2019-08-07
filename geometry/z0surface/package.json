@@ -24,7 +24,8 @@
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
-    "polybooljs": "^1.2.0"
+    "polygon-clipping": "^0.14.2",
+    "splaytree": "^3.0.0"
   },
   "devDependencies": {
     "@jsxcad/geometry-polygons": "^0.0.79",
