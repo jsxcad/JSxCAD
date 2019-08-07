@@ -63,7 +63,7 @@ export const fromRadius = ({ radius }) => Shape.fromSolid(buildRegularPrism({ ed
 
 export const fromDiameter = ({ diameter }) => fromRadius({ radius: diameter / 2 });
 
-export const fromCorners = ({ corner1, corner2 }) => {
+export const fromCorners = (corner1, corner2) => {
   const [c1x, c1y, c1z] = corner1;
   const [c2x, c2y, c2z] = corner2;
   const length = c2x - c1x;
@@ -108,7 +108,7 @@ export const Cube = dispatch(
   ({ corner1, corner2 }) => {
     assertNumberTriple(corner1);
     assertNumberTriple(corner2);
-    return () => fromCorners({ corner1, corner2 });
+    return () => fromCorners(corner1, corner2);
   });
 
 Cube.fromValue = fromValue;
