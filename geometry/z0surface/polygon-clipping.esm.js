@@ -140,55 +140,6 @@ var cosineOfAngle = function cosineOfAngle(pShared, pBase, pAngle) {
   };
   return dotProduct(vAngle, vBase) / length(vAngle) / length(vBase);
 };
-/* Get the closest point on an line (defined by two points)
- * to another point. */
-
-var closestPoint = function closestPoint(ptA1, ptA2, ptB) {
-  if (ptA1.x === ptA2.x) return {
-    x: ptA1.x,
-    y: ptB.y // vertical vector
-
-  };
-  if (ptA1.y === ptA2.y) return {
-    x: ptB.x,
-    y: ptA1.y // horizontal vector
-    // determinne which point is further away
-    // we use the further point as our base in the calculation, so that the
-    // vectors are more parallel, providing more accurate dot product
-
-  };
-  var v1 = {
-    x: ptB.x - ptA1.x,
-    y: ptB.y - ptA1.y
-  };
-  var v2 = {
-    x: ptB.x - ptA2.x,
-    y: ptB.y - ptA2.y
-  };
-  var vFar, vA, farPt;
-
-  if (dotProduct(v1, v1) > dotProduct(v2, v2)) {
-    vFar = v1;
-    vA = {
-      x: ptA2.x - ptA1.x,
-      y: ptA2.y - ptA1.y
-    };
-    farPt = ptA1;
-  } else {
-    vFar = v2;
-    vA = {
-      x: ptA1.x - ptA2.x,
-      y: ptA1.y - ptA2.y
-    };
-    farPt = ptA2;
-  }
-
-  var dist = dotProduct(vA, vFar) / dotProduct(vA, vA);
-  return {
-    x: farPt.x + dist * vA.x,
-    y: farPt.y + dist * vA.y
-  };
-};
 /* Get the x coordinate where the given line (defined by a point and vector)
  * crosses the horizontal line with the given y coordiante.
  * In the case of parrallel lines (including overlapping ones) returns null. */
@@ -817,73 +768,44 @@ function () {
     value: function isAnEndpoint(pt) {
       return pt.x === this.leftSE.point.x && pt.y === this.leftSE.point.y || pt.x === this.rightSE.point.x && pt.y === this.rightSE.point.y;
     }
-    /* Does the given point touch this segment? */
-
-  }, {
-    key: "touchesPoint",
-    value: function touchesPoint(pt) {
-      if (this.isAnEndpoint(pt)) return true;
-      if (!isInBbox(this.bbox(), pt)) return false;
-      var interPt = closestPoint(this.leftSE.point, this.rightSE.point, pt); // use cmp() to do the same rounding as would apply in rounder.round
-      // but avoid using rounder.round for performance boost, and to avoid
-      // saving the result in the rounding trees
-
-      var cmpX = cmp(interPt.x, pt.x);
-      var cmpY = cmp(interPt.y, pt.y); // if the coordinates are in agreement, we're done
-
-      if (cmpX === 0 && cmpY === 0) return true;
-      if (cmpX !== 0 && cmpY !== 0) return false; // Because of rounding effects on near vertical and near horizontal
-      // segments, the 'closest' point on a segment jumps around. To avoid
-      // loops, we catch those affects here.
-
-      var interLPt = closestPoint(this.leftSE.point, interPt, pt);
-      if (cmp(interLPt.x, pt.x) === 0 && cmp(interLPt.y, pt.y) === 0) return true;
-      var interRPt = closestPoint(this.rightSE.point, interPt, pt);
-      if (cmp(interRPt.x, pt.x) === 0 && cmp(interRPt.y, pt.y) === 0) return true;
-      return false;
-    }
-    /* Compare this segment with a point. Return value indicates:
-     *     1: point lies above the segment (to the left of vertical)
-     *     0: point is colinear to segment
-     *    -1: point lies below the segment (to the right of vertical) */
+    /* Compare this segment with a point.
+     *
+     * A point P is considered to be colinear to a segment if there
+     * exists a distance D such that if we travel along the segment
+     * from one * endpoint towards the other a distance D, we find
+     * ourselves at point P.
+     *
+     * Return value indicates:
+     *
+     *   1: point lies above the segment (to the left of vertical)
+     *   0: point is colinear to segment
+     *  -1: point lies below the segment (to the right of vertical)
+     */
 
   }, {
     key: "comparePoint",
     value: function comparePoint(point) {
       if (this.isAnEndpoint(point)) return 0;
-      var interPt = closestPoint(this.leftSE.point, this.rightSE.point, point); // For nearly vertical segments, the y coordinate may move in
-      // the 'wrong' direction due to rounding errors.
+      var lPt = this.leftSE.point;
+      var rPt = this.rightSE.point;
+      var v = this.vector(); // Exactly vertical segments.
 
-      var dx = this.rightSE.point.x - this.leftSE.point.x;
-      var dy = this.rightSE.point.y - this.leftSE.point.y; // is this a more vertical upward sloping segment?
-
-      if (dy >= dx) {
-        if (interPt.x < point.x) return -1;
-        if (interPt.x > point.x) return 1;
-      } // is this a more vertical downward sloping segment?
-
-
-      if (dy <= -1 * dx) {
-        if (interPt.x < point.x) return 1;
-        if (interPt.x > point.x) return -1;
-      } // this is a mostly horizontal segment
+      if (lPt.x === rPt.x) {
+        if (point.x === lPt.x) return 0;
+        return point.x < lPt.x ? 1 : -1;
+      } // Nearly vertical segments with an intersection.
+      // Check to see where a point on the line with matching Y coordinate is.
 
 
-      if (interPt.y < point.y) return 1;
-      if (interPt.y > point.y) return -1; // mostly horizontal but slight upward
+      var yDist = (point.y - lPt.y) / v.y;
+      var xFromYDist = lPt.x + yDist * v.x;
+      if (point.x === xFromYDist) return 0; // General case.
+      // Check to see where a point on the line with matching X coordinate is.
 
-      if (dy >= 0) {
-        if (interPt.x < point.x) return -1;
-        if (interPt.x > point.x) return 1;
-      } // mostly horizontal but slight downward
-
-
-      if (dy < 0) {
-        if (interPt.x < point.x) return 1;
-        if (interPt.x > point.x) return -1;
-      }
-
-      return 0;
+      var xDist = (point.x - lPt.x) / v.x;
+      var yFromXDist = lPt.y + xDist * v.y;
+      if (point.y === yFromXDist) return 0;
+      return point.y < yFromXDist ? -1 : 1;
     }
     /**
      * Given another segment, returns the first non-trivial intersection
@@ -905,7 +827,9 @@ function () {
     key: "getIntersection",
     value: function getIntersection(other) {
       // If bboxes don't overlap, there can't be any intersections
-      var bboxOverlap = getBboxOverlap(this.bbox(), other.bbox());
+      var tBbox = this.bbox();
+      var oBbox = other.bbox();
+      var bboxOverlap = getBboxOverlap(tBbox, oBbox);
       if (bboxOverlap === null) return null; // We first check to see if the endpoints can be considered intersections.
       // This will 'snap' intersections to endpoints if possible, and will
       // handle cases of colinearity.
@@ -917,10 +841,10 @@ function () {
       // note that we restrict the 'touching' definition to only allow segments
       // to touch endpoints that lie forward from where we are in the sweep line pass
 
-      var touchesOtherLSE = this.touchesPoint(olp);
-      var touchesThisLSE = other.touchesPoint(tlp);
-      var touchesOtherRSE = this.touchesPoint(orp);
-      var touchesThisRSE = other.touchesPoint(trp); // do left endpoints match?
+      var touchesOtherLSE = isInBbox(tBbox, olp) && this.comparePoint(olp) === 0;
+      var touchesThisLSE = isInBbox(oBbox, tlp) && other.comparePoint(tlp) === 0;
+      var touchesOtherRSE = isInBbox(tBbox, orp) && this.comparePoint(orp) === 0;
+      var touchesThisRSE = isInBbox(oBbox, trp) && other.comparePoint(trp) === 0; // do left endpoints match?
 
       if (touchesThisLSE && touchesOtherLSE) {
         // these two cases are for colinear segments with matching left

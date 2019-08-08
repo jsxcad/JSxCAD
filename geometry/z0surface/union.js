@@ -13,7 +13,6 @@ import polygonClipping from './polygon-clipping.esm.js';
  * @returns {Z0Surface} the resulting z0 surface.
  */
 export const union = (...z0Surfaces) => {
-// console.log(`QQ/union/z0Surfaces: ${JSON.stringify(z0Surfaces)}`);
   if (z0Surfaces.length === 0) {
     return [];
   }
@@ -22,7 +21,12 @@ export const union = (...z0Surfaces) => {
   }
   const normalize2 = createNormalize2();
   const input = z0Surfaces.map(surface => fromSurface(normalize2, surface));
-// console.log(`QQ/union/input: ${JSON.stringify(input)}`);
-  const result = polygonClipping.union(...input);
+  let result;
+  try {
+    result = polygonClipping.union(...input);
+  } catch (e) {
+    console.log(`QQ/z0Surface/union/input: ${JSON.stringify(input)}`);
+    throw e;
+  }
   return toSurface(result);
 };
