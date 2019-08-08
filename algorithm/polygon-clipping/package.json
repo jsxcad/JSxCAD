@@ -1,0 +1,52 @@
+{
+  "name": "@jsxcad/algorithm-polygon-clipping",
+  "version": "0.0.79",
+  "description": "Interface to polygon-clipping library.",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "module": "main.js",
+  "scripts": {
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/geometry-path": "^0.0.79",
+    "@jsxcad/geometry-paths": "^0.0.79",
+    "@jsxcad/geometry-z0surface": "^0.0.79",
+    "@jsxcad/math-poly3": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79",
+    "polygon-clipping": "^0.14.2",
+    "splaytree": "^3.0.0"
+  },
+  "devDependencies": {
+    "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-utils": "^0.0.79",
+    "ava": "^1.4.1",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.15.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "esm": "^3.2.10"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
+}
