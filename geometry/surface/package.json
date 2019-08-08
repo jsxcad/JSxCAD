@@ -20,6 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-polygon-clipping": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/geometry-z0surface": "^0.0.79",

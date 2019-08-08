@@ -1,7 +1,7 @@
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';
-import { union as unionZ0Surface } from '@jsxcad/geometry-z0surface';
+import { union as unionZ0Surface } from '@jsxcad/algorithm-polygon-clipping';
 
 export const fromPolygons = ({ plane }, polygons) => {
   if (polygons.length === 0) {

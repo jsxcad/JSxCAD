@@ -5,7 +5,7 @@ import { getZ0Surfaces } from './getZ0Surfaces';
 import { union as pathsUnion } from '@jsxcad/geometry-paths';
 import { union as solidUnion } from '@jsxcad/algorithm-bsp-surfaces';
 import { union as surfaceUnion } from '@jsxcad/geometry-surface';
-import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface';
+import { union as z0SurfaceUnion } from '@jsxcad/algorithm-polygon-clipping';
 
 export const union = (baseGeometry, ...geometries) => {
   const result = { assembly: [] };

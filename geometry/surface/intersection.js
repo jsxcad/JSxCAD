@@ -1,4 +1,4 @@
-import { intersection as intersectionZ0Surfaces } from '@jsxcad/geometry-z0surface';
+import { intersection as intersectionZ0Surfaces } from '@jsxcad/algorithm-polygon-clipping';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';
