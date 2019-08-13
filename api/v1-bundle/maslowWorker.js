@@ -34,7 +34,8 @@ const agent = async ({ ask, question }) => {
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'regular polygon':
-        return api.circle({ radius: values[0], center: true, resolution: values[1] }).toDisjointGeometry();
+        console.log("Regular polygon ran")
+        return api.circle({ radius: values[0]/2, center: true, sides: values[1] }).toDisjointGeometry();
       case 'render':
         return convertThree.toThreejsGeometry(api.Shape.fromGeometry(values).toDisjointGeometry());
       case 'rotate':
