@@ -3,8 +3,8 @@ import { equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-pla
 import { squaredDistance } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
-const EPSILON = 1e-5;
-const THRESHOLD2 = 1e-10;
+const EPSILON = 1e-4;
+const EPSILON2 = EPSILON * EPSILON;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -92,10 +92,10 @@ const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) 
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (squaredDistance(spanPoint, startPoint) > THRESHOLD2) {
+          if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
             frontPoints.push(spanPoint);
           }
-          if (squaredDistance(spanPoint, endPoint) > THRESHOLD2) {
+          if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
             backPoints.push(spanPoint);
           }
         }

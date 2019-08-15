@@ -22,8 +22,10 @@
   "dependencies": {
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
+    "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-z0surface": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
+    "@jsxcad/math-vec2": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "polygon-clipping": "^0.14.2",
     "splaytree": "^3.0.0"

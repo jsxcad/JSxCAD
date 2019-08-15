@@ -1,5 +1,7 @@
-import { fromSurface, toSurface } from './convert';
+import { clean, fromSurface, toSurface } from './convert';
 
+import { assertGood } from '@jsxcad/geometry-surface';
+import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from '@jsxcad/geometry-z0surface';
 import polygonClipping from 'polygon-clipping';
 
@@ -28,7 +30,24 @@ export const intersection = (...z0Surfaces) => {
   if (z0Surfaces.length === 1) {
     return z0Surfaces[0];
   }
-  const input = z0Surfaces.map(surface => fromSurface(surface));
-  const result = polygonClipping.intersection(...input);
-  return toSurface(result);
+  const normalize2 = createNormalize2();
+  const clippings = z0Surfaces.map(surface => fromSurface(normalize2, surface));
+  const clipping = intersectionClipping(normalize2, clippings);
+  const surface = toSurface(normalize2, clipping);
+  assertGood(surface);
+  return surface;
+}
+
+export const intersectionClipping = (normalize2, clippings) => {
+  while (clippings.length >= 2) {
+    const a = clippings.shift();
+    const b = clippings.shift();
+    const result = polygonClipping.intersection(a, b);
+    const cleaned = clean(normalize2, result);
+    if (cleaned.length === 0) {
+      return [];
+    }
+    clippings.push(cleaned);
+  }
+  return clippings[0];
 };

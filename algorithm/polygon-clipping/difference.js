@@ -1,7 +1,10 @@
-import { fromSurface, toSurface } from './convert';
+import { clean, fromSurface, toSurface } from './convert';
 
+import { assertGood } from '@jsxcad/geometry-surface';
+import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from '@jsxcad/geometry-z0surface';
 import polygonClipping from 'polygon-clipping';
+import { unionClipping } from './union';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -22,15 +25,23 @@ import polygonClipping from 'polygon-clipping';
  *      |       |
  *      +-------+
  */
-export const difference = (...z0Surfaces) => {
-  if (z0Surfaces.length === 0) {
+export const difference = (minuend, ...subtrahends) => {
+  if (minuend.length === 0) {
     return [];
   }
-  if (z0Surfaces.length === 1) {
-    return z0Surfaces[0];
+  if (subtrahends.length === 0) {
+    return minuend;
   }
-  const input = z0Surfaces.map(z0Surface => fromSurface(z0Surface));
-console.log(`QQ/input: ${JSON.stringify(input)}`);
-  const result = polygonClipping.difference(...input);
-  return toSurface(result);
+  const normalize2 = createNormalize2();
+  const subtrahend = unionClipping(normalize2, subtrahends.map(subtrahend => fromSurface(normalize2, subtrahend)));
+  const result = differenceClipping(normalize2, fromSurface(normalize2, minuend), subtrahend);
+  const surface = toSurface(normalize2, result);
+  assertGood(surface);
+  return surface;
 };
+
+export const differenceClipping = (normalize2, minuend, subtrahend) => {
+  const result = polygonClipping.union(minuend, subtrahend);
+  const cleaned = clean(normalize2, result);
+  return cleaned;
+}

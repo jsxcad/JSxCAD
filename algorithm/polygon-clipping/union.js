@@ -1,5 +1,7 @@
-import { fromSurface, toSurface } from './convert';
+import { clean, fromSurface, toSurface } from './convert';
 
+import { assertGood } from '@jsxcad/geometry-surface';
+import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from '@jsxcad/geometry-z0surface';
 import polygonClipping from './polygon-clipping.esm.js';
 
@@ -17,13 +19,27 @@ export const union = (...z0Surfaces) => {
   if (z0Surfaces.length === 1) {
     return z0Surfaces[0];
   }
-  const input = z0Surfaces.map(surface => fromSurface(surface));
-  let result;
-  try {
-    result = polygonClipping.union(...input);
-  } catch (e) {
-    console.log(`QQ/z0Surface/union/input: ${JSON.stringify(input)}`);
-    throw e;
+  const normalize2 = createNormalize2();
+  const clippings = z0Surfaces.map(surface => fromSurface(normalize2, surface));
+  const clipping = unionClipping(normalize2, clippings);
+  const surface = toSurface(normalize2, clipping);
+  assertGood(surface);
+  return surface;
+}
+
+export const unionClipping = (normalize2, clippings) => {
+  while (clippings.length >= 2) {
+    const a = clippings.shift();
+    const b = clippings.shift();
+    let result;
+    try {
+      result = polygonClipping.union(a, b);
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+    const cleaned = clean(normalize2, result);
+    clippings.push(cleaned);
   }
-  return toSurface(result);
+  return clippings[0];
 };

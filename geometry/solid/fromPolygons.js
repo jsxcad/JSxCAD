@@ -1,10 +1,11 @@
 import { createNormalize3 } from './createNormalize3';
 import { createNormalize4 } from './createNormalize4';
 import { deduplicate } from '@jsxcad/geometry-path';
-import { fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
+import { assertGood, fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export const fromPolygons = (options = {}, polygons) => {
+  assertGood(polygons);
   const normalize4 = createNormalize4();
   const normalize3 = createNormalize3();
   const coplanarGroups = new Map();
@@ -30,11 +31,13 @@ export const fromPolygons = (options = {}, polygons) => {
   const solid = [];
 
   for (const [plane, polygons] of coplanarGroups) {
+    assertGood(polygons);
     if (polygons.length === 1) {
       // A single polygon forms a valid surface.
       solid.push(polygons);
     } else {
       const surface = fromPolygonsToSurface({ plane }, polygons);
+      assertGood(surface);
       solid.push(surface);
     }
   }

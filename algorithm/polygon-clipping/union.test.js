@@ -18,6 +18,7 @@ test('union: Union of one geometry produces that geometry', t => {
 
 test('union: Union of rectangle with itself produces itself', t => {
   const result = union(rectangle, rectangle);
+console.log(`QQ/result: ${JSON.stringify(result)}`);
   t.deepEqual(canonicalize(result),
               [[[0,0,0],[2,0,0],[2,1,0],[0,1,0]]]);
 });
