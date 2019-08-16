@@ -1,8 +1,7 @@
 import { fromSurface, toSurface } from './convert';
 
-import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from './doesNotOverlap';
-import polygonClipping from 'polygon-clipping';
+import polybooljs from 'polybooljs';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -23,16 +22,16 @@ import polygonClipping from 'polygon-clipping';
  *      |       |
  *      +-------+
  */
-export const difference = (...z0Surfaces) => {
-  if (z0Surfaces.length === 0) {
+export const difference = (baseZ0Surface, ...z0Surfaces) => {
+  if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
-  if (z0Surfaces.length === 1) {
-    return z0Surfaces[0];
+  for (const surface of z0Surfaces) {
+    if (doesNotOverlap(surface, baseZ0Surface)) {
+      continue;
+    }
+    const result = polybooljs.difference(fromSurface(baseZ0Surface), fromSurface(surface));
+    baseZ0Surface = toSurface(result);
   }
-  const normalize2 = createNormalize2();
-  const input = z0Surfaces.map(z0Surface => fromSurface(normalize2, z0Surface));
-console.log(`QQ/input: ${JSON.stringify(input)}`);
-  const result = polygonClipping.difference(...input);
-  return toSurface(result);
+  return baseZ0Surface;
 };

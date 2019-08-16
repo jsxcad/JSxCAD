@@ -1,19 +1,19 @@
 import { canonicalize, rotateZ, scale, transform, translate } from './ops';
-import { difference, intersection, union } from '@jsxcad/algorithm-polygon-clipping';
 
 import { clean } from './clean';
-import { doesNotOverlap } from './doesNotOverlap';
+import { difference } from './difference';
+import { intersection } from './intersection';
 import { makeConvex } from './makeConvex';
 import { measureBoundingBox } from './measureBoundingBox';
+import { union } from './union';
 
 export {
   canonicalize,
   clean,
   difference,
-  doesNotOverlap,
-  intersection,
   makeConvex,
   measureBoundingBox,
+  intersection,
   rotateZ,
   scale,
   transform,

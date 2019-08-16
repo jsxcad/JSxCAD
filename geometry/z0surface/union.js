@@ -1,9 +1,7 @@
 import { fromSurface, toSurface } from './convert';
 
-import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from './doesNotOverlap';
-// import polygonClipping from 'polygon-clipping';
-import polygonClipping from './polygon-clipping.esm.js';
+import polybooljs from 'polybooljs';
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -16,17 +14,15 @@ export const union = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }
-  if (z0Surfaces.length === 1) {
-    return z0Surfaces[0];
+  while (z0Surfaces.length >= 2) {
+    const a = z0Surfaces.shift();
+    const b = z0Surfaces.shift();
+    if (doesNotOverlap(a, b)) {
+      z0Surfaces.push([].concat(a, b));
+    } else {
+      const result = polybooljs.union(fromSurface(a), fromSurface(b));
+      z0Surfaces.push(toSurface(result));
+    }
   }
-  const normalize2 = createNormalize2();
-  const input = z0Surfaces.map(surface => fromSurface(normalize2, surface));
-  let result;
-  try {
-    result = polygonClipping.union(...input);
-  } catch (e) {
-    console.log(`QQ/z0Surface/union/input: ${JSON.stringify(input)}`);
-    throw e;
-  }
-  return toSurface(result);
+  return z0Surfaces[0];
 };
