@@ -9,7 +9,6 @@ export const fromSurface = (surface) => {
 };
 
 export const toSurface = (flattenPolygon) => {
-console.log(`QQ/toSurface/svg: ${flattenPolygon.svg()}`);
   const z0Surface = [];
   for (const face of flattenPolygon.faces) {
     const z0Polygon = [];
@@ -20,4 +19,4 @@ console.log(`QQ/toSurface/svg: ${flattenPolygon.svg()}`);
     z0Surface.push(z0Polygon);
   }
   return z0Surface;
-}
+};
