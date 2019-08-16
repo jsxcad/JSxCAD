@@ -1,21 +1,18 @@
 import { canonicalize, rotateZ, scale, transform, translate } from './ops';
+import { clean, difference, intersection, union } from '@jsxcad/algorithm-polybooljs';
 
-import { clean } from './clean';
-import { difference } from './difference';
 import { doesNotOverlap } from './doesNotOverlap';
-import { intersection } from './intersection';
 import { makeConvex } from './makeConvex';
 import { measureBoundingBox } from './measureBoundingBox';
-import { union } from './union';
 
 export {
   canonicalize,
   clean,
   difference,
   doesNotOverlap,
+  intersection,
   makeConvex,
   measureBoundingBox,
-  intersection,
   rotateZ,
   scale,
   transform,
