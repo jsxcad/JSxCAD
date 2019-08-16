@@ -6,12 +6,6 @@ import { toPlane } from '@jsxcad/math-poly3';
 import polybooljs from 'polybooljs';
 import Epsilon from 'polybooljs/lib/epsilon';
 
-const EPS = 0.0000000001
-
-// polybooljs.epsilon(EPS * 1000);
-
-polybooljs.epsilon(1e-7);
-
 export const fromSurface = (...surfaces) => {
   if (surfaces.length === 0) {
     return {
