@@ -5,7 +5,7 @@ import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
 import { intersection as solidIntersection } from '@jsxcad/algorithm-bsp-surfaces';
 import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface';
-import { intersection as z0SurfaceIntersection } from '@jsxcad/algorithm-polygon-clipping';
+import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface';
 
 export const intersection = (baseGeometry, ...geometries) => {
   const result = { assembly: [] };

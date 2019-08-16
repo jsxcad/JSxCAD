@@ -5,7 +5,7 @@ import { getZ0Surfaces } from './getZ0Surfaces';
 import { difference as pathsDifference } from '@jsxcad/geometry-paths';
 import { difference as solidDifference } from '@jsxcad/algorithm-bsp-surfaces';
 import { difference as surfaceDifference } from '@jsxcad/geometry-surface';
-import { difference as z0SurfaceDifference } from '@jsxcad/algorithm-polygon-clipping';
+import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface';
 
 export const difference = (baseGeometry, ...geometries) => {
   const result = { disjointAssembly: [] };
