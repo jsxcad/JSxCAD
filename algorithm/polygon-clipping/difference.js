@@ -2,7 +2,6 @@ import { clean, fromSurface, toSurface } from './convert';
 
 import { assertGood } from '@jsxcad/geometry-surface';
 import { createNormalize2 } from './createNormalize2';
-import { doesNotOverlap } from '@jsxcad/geometry-z0surface';
 import polygonClipping from 'polygon-clipping';
 import { unionClipping } from './union';
 
@@ -44,4 +43,4 @@ export const differenceClipping = (normalize2, minuend, subtrahend) => {
   const result = polygonClipping.difference(minuend, subtrahend);
   const cleaned = clean(normalize2, result);
   return cleaned;
-}
+};

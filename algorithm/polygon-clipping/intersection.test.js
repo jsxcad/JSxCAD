@@ -23,5 +23,5 @@ test('Intersection of rectangle with itself produces itself', t => {
 test('Intersection of rectangle with itself translated by one produces square', t => {
   const result = intersection(rectangle, transform(fromTranslation([-1, 0, 0]), rectangle));
   t.deepEqual(canonicalize(result),
-              [[[0,0,0],[1,0,0],[1,1,0],[0,1,0]]]);
+              [[[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]]);
 });

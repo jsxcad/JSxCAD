@@ -1,11 +1,10 @@
+import { alignVertices, toPolygons } from '@jsxcad/geometry-solid';
 import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
 
 import { Shape } from './Shape';
-import { alignVertices } from '@jsxcad/geometry-solid';
 import { assemble } from './assemble';
 import { fromPoints } from '@jsxcad/math-plane';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { toPolygons } from '@jsxcad/geometry-solid';
 
 /**
  *

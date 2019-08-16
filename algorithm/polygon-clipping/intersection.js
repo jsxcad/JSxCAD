@@ -2,7 +2,6 @@ import { clean, fromSurface, toSurface } from './convert';
 
 import { assertGood } from '@jsxcad/geometry-surface';
 import { createNormalize2 } from './createNormalize2';
-import { doesNotOverlap } from '@jsxcad/geometry-z0surface';
 import polygonClipping from 'polygon-clipping';
 
 /**
@@ -36,7 +35,7 @@ export const intersection = (...z0Surfaces) => {
   const surface = toSurface(normalize2, clipping);
   assertGood(surface);
   return surface;
-}
+};
 
 export const intersectionClipping = (normalize2, clippings) => {
   while (clippings.length >= 2) {
