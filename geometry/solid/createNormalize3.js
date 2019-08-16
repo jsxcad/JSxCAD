@@ -1,5 +1,3 @@
-import { canonicalize } from '@jsxcad/math-vec3';
-
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
@@ -28,17 +26,16 @@ export const createNormalize3 = () => {
     const ny1 = ny0 + 1;
     const nz1 = nz0 + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    const normalized = coordinate;
-    map.set(`${nx0}/${ny0}/${nz0}`, normalized);
-    map.set(`${nx0}/${ny0}/${nz1}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz0}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz1}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz0}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz1}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz0}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz1}`, normalized);
+    map.set(`${nx0}/${ny0}/${nz0}`, coordinate);
+    map.set(`${nx0}/${ny0}/${nz1}`, coordinate);
+    map.set(`${nx0}/${ny1}/${nz0}`, coordinate);
+    map.set(`${nx0}/${ny1}/${nz1}`, coordinate);
+    map.set(`${nx1}/${ny0}/${nz0}`, coordinate);
+    map.set(`${nx1}/${ny0}/${nz1}`, coordinate);
+    map.set(`${nx1}/${ny1}/${nz0}`, coordinate);
+    map.set(`${nx1}/${ny1}/${nz1}`, coordinate);
     // This is now the normalized coordinate for this region.
-    return normalized;
+    return coordinate;
   };
   return normalize3;
 };
