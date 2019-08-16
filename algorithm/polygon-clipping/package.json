@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-z0surface",
+  "name": "@jsxcad/algorithm-polygon-clipping",
   "version": "0.0.79",
-  "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
+  "description": "Interface to polygon-clipping library.",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "main.js",
@@ -20,11 +20,15 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-polybooljs": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
+    "@jsxcad/geometry-surface": "^0.0.79",
+    "@jsxcad/geometry-z0surface": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "@jsxcad/math-vec2": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79",
+    "polygon-clipping": "^0.14.2",
+    "splaytree": "^3.0.0"
   },
   "devDependencies": {
     "@jsxcad/geometry-polygons": "^0.0.79",

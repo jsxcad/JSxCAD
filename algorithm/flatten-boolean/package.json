@@ -1,5 +1,5 @@
 {
-  "name": "@jsxcad/geometry-z0surface",
+  "name": "@jsxcad/algorithm-flatten-boolean",
   "version": "0.0.79",
   "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
@@ -20,7 +20,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-polybooljs": "^0.0.79",
+    "@flatten-js/boolean-op": "^1.1.2",
+    "@flatten-js/core": "^1.0.15",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
