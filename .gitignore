@@ -1,3 +1,4 @@
 node_modules
 example/v1/tmp
 app/v1/dist/JSxCAD.js
+api/v1-bundle/webworker.dist/maslowWorker.js
