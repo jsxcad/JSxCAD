@@ -4,7 +4,7 @@ import { fromValues } from './fromValues';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 
-test('line2: distanceToPoint() should return proper values', (t) => {
+test('distanceToPoint() should return proper values', (t) => {
   const line1 = fromValues();
   const dis1 = distanceToPoint([0, 0], line1);
   t.is(dis1, 0);
@@ -26,4 +26,9 @@ test('line2: distanceToPoint() should return proper values', (t) => {
   t.is(q(dis8), 3.53553);
   const dis9 = distanceToPoint([5, 0], line2);
   t.is(q(dis9), 4.24264);
+});
+
+test('distanceToPoint should be zero for a point on the line', (t) => {
+  t.is(q(distanceToPoint([1, 1], fromPoints([0, 0], [2, 2]))), 0);
+  t.is(q(distanceToPoint([1, 2], fromPoints([0, 1], [2, 3]))), 0);
 });
