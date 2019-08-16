@@ -37,4 +37,4 @@ test('equals() should work on lines formed from colinear points', (t) => {
   const cd = fromPoints(c, d);
 
   t.true(equals(ab, cd));
-})
+});

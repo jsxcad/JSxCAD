@@ -17,11 +17,11 @@ test('Intersection of one geometry produces that geometry', t => {
 test('Intersection of rectangle with itself produces itself', t => {
   const result = intersection(rectangle, rectangle);
   t.deepEqual(canonicalize(result),
-              rectangle);
+              canonicalize(rectangle));
 });
 
 test('Intersection of rectangle with itself translated by one produces square', t => {
   const result = intersection(rectangle, transform(fromTranslation([-1, 0, 0]), rectangle));
-  t.deepEqual(intersection(result),
+  t.deepEqual(canonicalize(result),
               [[[0,0,0],[1,0,0],[1,1,0],[0,1,0]]]);
 });

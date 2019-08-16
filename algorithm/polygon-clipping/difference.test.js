@@ -3,7 +3,7 @@ import { canonicalize, transform } from '@jsxcad/geometry-polygons';
 import { degToRad } from '@jsxcad/math-utils';
 import { difference } from './difference';
 import { fromZRotation } from '@jsxcad/math-mat4';
-// import polygonClipping from 'polygon-clipping';
+import polygonClipping from 'polygon-clipping';
 import test from 'ava';
 
 // FIX: Check multipolygon construction against example/v1/squares*.js
@@ -18,7 +18,8 @@ test('difference: Difference of one geometry produces that geometry', t => {
 });
 
 test('difference: Difference of rectangle with itself produces an empty geometry', t => {
-  t.deepEqual(difference(rectangle, rectangle), []);
+  const result = difference(rectangle, rectangle);
+  t.deepEqual(canonicalize(result), []);
 });
 
 test('difference: Difference of rectangle with itself rotated 90 degrees produces rectangle', t => {

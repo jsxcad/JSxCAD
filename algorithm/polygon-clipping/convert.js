@@ -57,6 +57,8 @@ export const fromSurface = (normalize2, z0Surface) => {
       polygon.push(polygon[0]);
       // polygon-clipping requires repeating the first point to be closed.
       polygons.push(polygon);
+    } else {
+      console.log(`QQ/fromSurface/Degenerate`);
     }
   }
   return polygons;
@@ -70,6 +72,8 @@ export const clean = (normalize2, multiPolygon) => {
       const cleanPolygon = normalizeClipping(normalize2, polygon);
       if (!isDegeneratePolygon(cleanPolygon)) {
         cleanPolygons.push(cleanPolygon);
+      } else {
+        console.log(`QQ/clean/degenerate`);
       }
     }
     if (cleanPolygons.length > 0) {
@@ -99,6 +103,8 @@ export const toSurface = (normalize2, multiPolygon) => {
       z0Polygon.pop();
       if (!isDegenerateZ0Polygon(z0Polygon)) {
         z0Surface.push(z0Polygon);
+      } else {
+        console.log(`QQ/toSurface/degenerate`);
       }
     }
   }

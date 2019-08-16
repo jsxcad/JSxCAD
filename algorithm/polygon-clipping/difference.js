@@ -41,7 +41,7 @@ export const difference = (minuend, ...subtrahends) => {
 };
 
 export const differenceClipping = (normalize2, minuend, subtrahend) => {
-  const result = polygonClipping.union(minuend, subtrahend);
+  const result = polygonClipping.difference(minuend, subtrahend);
   const cleaned = clean(normalize2, result);
   return cleaned;
 }
