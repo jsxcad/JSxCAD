@@ -30,21 +30,8 @@ const isDegenerateZ0Polygon = (z0Polygon) => {
   return false;
 };
 
-export const measureAreaOfPolygon = (polygon) => {
-  let last = polygon.length - 1;
-  let current = 0;
-  let twiceArea = 0;
-  for (; current < polygon.length - 1; last = current++) {
-    twiceArea += polygon[last][X] * polygon[current][Y] - polygon[last][Y] * polygon[current][X];
-  }
-  return twiceArea / 2;
-};
-
 const isDegeneratePolygon = (polygon) => {
   if (polygon.length < 4) { return true; }
-  if (measureAreaOfPolygon(polygon) < EPS) {
-    return true;
-  }
   return false;
 };
 

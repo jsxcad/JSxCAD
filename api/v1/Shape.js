@@ -1,4 +1,4 @@
-import { assertGood as assertGoodSolid, fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
+import { alignVertices, assertGood as assertGoodSolid, fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
          transform } from '@jsxcad/geometry-tagged';
@@ -84,7 +84,7 @@ Shape.fromPathsToZ0Surface = (paths) => fromGeometry({ z0Surface: paths });
 Shape.fromPoint = (point) => fromGeometry({ points: [point] });
 Shape.fromPoints = (points) => fromGeometry({ points: points });
 Shape.fromPolygonsToSolid = (polygons) => {
-  const solid = fromPolygonsToSolid({}, polygons);
+  const solid = alignVertices(fromPolygonsToSolid({}, polygons));
   assertGoodSolid(solid);
   return fromGeometry({ solid });
 };

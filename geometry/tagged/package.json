@@ -20,7 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
+    "@jsxcad/algorithm-bsp-classic": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/geometry-points": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",

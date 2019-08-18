@@ -20,13 +20,13 @@ export const createNormalize2 = (multiplier = 1e4) => {
     }
     // One of the ~0 or ~1 values will match the rounded values above.
     // The other will match the adjacent cell.
-    const nx0 = nx - 1;
-    const ny0 = ny - 1;
-    const nx1 = nx;
-    const ny1 = ny;
+    const nx0 = nx;
+    const ny0 = ny;
+    const nx1 = nx + 1;
+    const ny1 = ny + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    const normalized = [coordinate[X], coordinate[Y]];
-    // const normalized = [nx / multiplier, ny / multiplier];
+    // const normalized = [coordinate[X], coordinate[Y]];
+    const normalized = [nx1 / multiplier, ny1 / multiplier];
     update(`${nx0}/${ny0}`, normalized);
     update(`${nx0}/${ny1}`, normalized);
     update(`${nx1}/${ny0}`, normalized);

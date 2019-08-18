@@ -20,7 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-polybooljs": "^0.0.79",
+    "@jsxcad/algorithm-polygon-clipping": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
