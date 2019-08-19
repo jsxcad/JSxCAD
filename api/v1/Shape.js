@@ -84,7 +84,8 @@ Shape.fromPathsToZ0Surface = (paths) => fromGeometry({ z0Surface: paths });
 Shape.fromPoint = (point) => fromGeometry({ points: [point] });
 Shape.fromPoints = (points) => fromGeometry({ points: points });
 Shape.fromPolygonsToSolid = (polygons) => {
-  const solid = alignVertices(fromPolygonsToSolid({}, polygons));
+  // const solid = alignVertices(fromPolygonsToSolid({}, polygons));
+  const solid = fromPolygonsToSolid({}, polygons);
   assertGoodSolid(solid);
   return fromGeometry({ solid });
 };

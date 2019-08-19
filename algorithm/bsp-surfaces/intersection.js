@@ -1,6 +1,7 @@
 import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
-import { makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
+import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { splitPolygon } from './splitPolygon';
 
 // Remove from surfaces those parts that are inside the solid delineated by bsp.
@@ -40,7 +41,7 @@ export const intersection = (...solids) => {
   if (solids.length === 1) {
     return solids[0];
   }
-  solids = solids.map(solid => makeSurfacesConvex({}, solid));
+  solids = solids.map(solid => makeSurfacesConvex(solid));
   const bsps = solids.map(solid => toBspFromSolid(solid));
   const polygons = solids.map(solid => toPolygonsFromSolid({}, solid));
   for (let nth = 0; nth < solids.length; nth++) {

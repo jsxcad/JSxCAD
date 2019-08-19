@@ -5,49 +5,22 @@ import { deduplicate } from '@jsxcad/geometry-path';
 import { fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
-const assertWellConnected = (rawPolygons) => {
-  return;
-  if (rawPolygons.length < 2) { return; }
-  const normalize3 = createNormalize3();
-  const polygons = rawPolygons.map(polygon => polygon.map(normalize3));
-  const vertices = new Map();
-  for (const polygon of polygons) {
-    for (const vertex of polygon) {
-      if (!vertices.has(vertex)) {
-        vertices.set(vertex, [polygon]);
-      } else {
-        vertices.get(vertex).push(polygon);
-      }
-    }
-  }
-  const seen = new Set();
-  const walk = (polygon) => {
-    if (seen.has(polygon)) { return; }
-    seen.add(polygon)
-    // Let's assume that a shared vertex implies a shared edge.
-    for (const vertex of polygon) {
-      for (const neighbour of vertices.get(vertex)) {
-        walk(neighbour);
-      }
-    }
-  }
-  walk(polygons[0]);
-  for (const polygon of polygons) {
-    if (!seen.has(polygon)) {
-      throw Error('die');
-    }
-  }
-}
-
 export const fromPolygons = (options = {}, polygons) => {
+  // return polygons.map(polygon => [polygon]);
+
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
-  const normalize3 = createNormalize3();
+  // const normalize3 = createNormalize3();
 
   for (const polygon of polygons) {
     if (polygon.length < 3) {
       // Polygon became degenerate.
+      continue;
+    }
+    const plane = toPlane(polygon);
+    if (isNaN(plane[0])) {
+      console.log(`QQ/fromPolygons/degenerate`);
       continue;
     }
     const key = normalize4(toPlane(polygon));
@@ -73,11 +46,6 @@ export const fromPolygons = (options = {}, polygons) => {
         solid.push(polygons);
       } else {
         const surface = fromPolygonsToSurface({ plane }, polygons);
-        if (surface.length > 1) {
-          console.log(`QQ/not defragmented`);
-          const surface2 = fromPolygonsToSurface({ plane }, polygons);
-          console.log(`QQ/${JSON.stringify(surface2)}`);
-        }
         solid.push(surface);
       }
     }
