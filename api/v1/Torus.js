@@ -32,6 +32,6 @@ import { lathe } from './lathe';
 export const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) =>
   lathe({ sides: segments },
         Circle({ sides, radius: thickness })
-          .rotateZ(rotation)
-          .move(0, radius))
-    .rotateY(90)
+            .rotateZ(rotation)
+            .move(0, radius))
+      .rotateY(90);
