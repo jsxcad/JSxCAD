@@ -1,6 +1,5 @@
 import { Circle } from './Circle';
-import { chainHull } from './chainHull';
-import { planeX } from './plane';
+import { lathe } from './lathe';
 
 /**
  *
@@ -30,12 +29,9 @@ import { planeX } from './plane';
  *
  **/
 
-// FIX: Use lathe instead of chainhull.
-export const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) => {
-  const piece = Circle({ radius: thickness, sides }).rotateZ(rotation).rotateX(90).translate(radius).cut(planeX())[0];
-  const pieces = [];
-  for (let angle = 0; angle < 361; angle += 360 / segments) {
-    pieces.push(piece.rotateZ(angle));
-  }
-  return chainHull(...pieces);
-};
+export const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) =>
+  lathe({ sides: segments },
+        Circle({ sides, radius: thickness })
+            .rotateZ(rotation)
+            .move(0, radius))
+      .rotateY(90);
