@@ -24,13 +24,11 @@ import { Polygon } from './Polygon';
 import { Polyhedron } from './Polyhedron';
 import { Shape } from './Shape';
 import { Sphere } from './Sphere';
-import { Spiral } from './Spiral';
 import { Square } from './Square';
 import { SvgPath } from './SvgPath';
 import { Tetrahedron } from './Tetrahedron';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
-import { Wave } from './Wave';
 
 import { above } from './above';
 import { acos } from './acos';
@@ -184,13 +182,11 @@ export {
   source,
   Sphere,
   sqrt,
-  Spiral,
   Square,
   startClock,
   SvgPath,
   Tetrahedron,
   Torus,
   Triangle,
-  union,
-  Wave
+  union
 };

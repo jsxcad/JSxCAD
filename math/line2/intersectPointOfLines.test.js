@@ -17,7 +17,7 @@ test('line2: intersectPointOfLines() should return proper points', (t) => {
   const int3 = canonicalizeVec2(intersectPointOfLines(line3, line2));
   t.deepEqual(int3, [NaN, NaN]);
 
-  // parallel lines
+  // paralell lines
   const line4 = canonicalize(fromPoints([0, 6], [6, 0]));
   const int4 = canonicalizeVec2(intersectPointOfLines(line4, line3));
   t.deepEqual(int4, [Infinity, -Infinity]);

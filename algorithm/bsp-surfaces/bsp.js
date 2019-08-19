@@ -31,8 +31,7 @@ outLeaf.front = outLeaf;
 
 const fromPolygons = (polygons) => {
   if (polygons.length === 0) {
-    // Everything is outside of an empty geometry.
-    return outLeaf;
+    throw Error('die');
   }
   let same = [];
   let front = [];
