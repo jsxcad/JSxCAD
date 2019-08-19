@@ -1,4 +1,4 @@
-import { difference, intersection, union } from '@jsxcad/algorithm-bsp-classic';
+import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
 import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } from './ops';
 
 import { alignVertices } from './alignVertices';
