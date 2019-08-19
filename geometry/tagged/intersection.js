@@ -3,7 +3,7 @@ import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
-import { intersection as solidIntersection } from '@jsxcad/algorithm-bsp-surfaces';
+import { intersection as solidIntersection } from '@jsxcad/geometry-solid';
 import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface';
 import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface';
 

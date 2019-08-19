@@ -1,3 +1,4 @@
+import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
 import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } from './ops';
 
 import { alignVertices } from './alignVertices';
@@ -22,11 +23,13 @@ export {
   assertGood,
   canonicalize,
   cut,
+  difference,
   divide,
   doesNotOverlap,
   eachPoint,
   flip,
   fromPolygons,
+  intersection,
   makeSurfacesConvex,
   makeSurfacesSimple,
   measureBoundingBox,
@@ -39,5 +42,6 @@ export {
   toPoints,
   toPolygons,
   transform,
-  translate
+  translate,
+  union,
 };

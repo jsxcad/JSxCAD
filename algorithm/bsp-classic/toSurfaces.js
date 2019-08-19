@@ -1,5 +1,7 @@
 import { assertCoplanar } from '@jsxcad/geometry-surface';
+import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
+/*
 const gatherSurfaces = (bsp) => {
   // PROVE: That we need this slice.
   let surfaces = bsp.surfaces.slice();
@@ -19,4 +21,23 @@ export const toSurfaces = (options = {}, bsp) => {
   }
   // Some of these surfaces may have cracked.
   return surfaces;
+};
+*/
+
+export const toSurfaces = (options = {}, bsp) => {
+  const polygons = [];
+  const gatherPolygons = (bsp) => {
+    if (bsp !== undefined) {
+      for (const surface of bsp.surfaces) {
+        for (const polygon of surface) {
+          polygons.push(polygon);
+        }
+      }
+      gatherPolygons(bsp.front);
+      gatherPolygons(bsp.back);
+    }
+  }
+  gatherPolygons(bsp);
+
+  return toSolidFromPolygons({}, polygons);
 };

@@ -1,6 +1,7 @@
-import { flip, makeSurfacesConvex, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 
+import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { splitPolygon } from './splitPolygon';
 
 // Remove from surfaces those parts that are inside the solid delineated by bsp.
@@ -69,8 +70,8 @@ export const difference = (aSolid, ...bSolids) => {
   if (bSolids.length === 0) {
     return aSolid;
   }
-  aSolid = makeSurfacesConvex({}, aSolid);
-  bSolids = bSolids.map(bSolid => makeSurfacesConvex({}, bSolid));
+  aSolid = makeSurfacesConvex(aSolid);
+  bSolids = bSolids.map(bSolid => makeSurfacesConvex(bSolid));
   let aPolygons = toPolygonsFromSolid({}, aSolid);
   const bBsp = [];
   for (let i = 0; i < bSolids.length; i++) {
