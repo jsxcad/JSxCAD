@@ -83,6 +83,7 @@ import { scale } from './scale';
 import { section } from './section';
 import { sin } from './sin';
 import { source } from './source';
+import { specify } from './specify';
 import { sqrt } from './sqrt';
 import { tags } from './tags';
 import { translate } from './translate';
@@ -125,6 +126,7 @@ const methods = [
   rotateZ,
   scale,
   section,
+  specify,
   tags,
   translate,
   keep,
@@ -182,6 +184,7 @@ export {
   readSvg,
   sin,
   source,
+  specify,
   Sphere,
   sqrt,
   Spiral,

@@ -14,6 +14,8 @@ export const allTags = (geometry) => {
       item.disjointAssembly.forEach(walk);
     } else if (item.untransformed) {
       walk(item.untransformed);
+    } else if (item.item) {
+      walk(item.item);
     }
   };
   walk(geometry);

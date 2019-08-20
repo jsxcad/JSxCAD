@@ -21,6 +21,8 @@ export const canonicalize = (rawGeometry) => {
     canonicalized.assembly = geometry.assembly.map(canonicalize);
   } else if (geometry.disjointAssembly !== undefined) {
     canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize);
+  } else if (geometry.item !== undefined) {
+    canonicalized.item = geometry.item(canonicalize);
   } else {
     throw Error('die');
   }

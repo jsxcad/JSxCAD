@@ -21,6 +21,7 @@ import { intersection } from './intersection';
 import { keep } from './keep';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
+import { specify } from './specify';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
 import { toPoints } from './toPoints';
@@ -51,6 +52,7 @@ export {
   keep,
   map,
   measureBoundingBox,
+  specify,
   toDisjointGeometry,
   toKeptGeometry,
   toPoints,

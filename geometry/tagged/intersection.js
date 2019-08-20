@@ -8,6 +8,10 @@ import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface';
 import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface';
 
 export const intersection = (baseGeometry, ...geometries) => {
+  if (baseGeometry.item) {
+    return { ...baseGeometry, item: intersection(baseGeometry.item, ...geometries) };
+  }
+
   const result = { assembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));

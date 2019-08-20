@@ -8,6 +8,10 @@ import { union as surfaceUnion } from '@jsxcad/geometry-surface';
 import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface';
 
 export const union = (baseGeometry, ...geometries) => {
+  if (baseGeometry.item) {
+    return { ...baseGeometry, item: union(baseGeometry.item, ...geometries) };
+  }
+
   const result = { assembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
