@@ -9,6 +9,8 @@ export const transformItem = (matrix, item) => {
     transformed.assembly = item.assembly;
   } else if (item.disjointAssembly) {
     transformed.disjointAssembly = item.disjointAssembly;
+  } else if (item.item) {
+    transformed.item = item.item;
   } else if (item.paths) {
     transformed.paths = transformPaths(matrix, item.paths);
   } else if (item.points) {

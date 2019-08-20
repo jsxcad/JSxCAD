@@ -206,6 +206,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
         const { tags } = geometry;
         if (geometry.assembly) {
           geometry.assembly.forEach(walk);
+        } else if (geometry.item) {
+          walk(geometry.item);
         } else if (geometry.threejsSegments) {
           const segments = geometry.threejsSegments;
           const dataset = {};

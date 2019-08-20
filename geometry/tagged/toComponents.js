@@ -1,6 +1,7 @@
 import { toDisjointGeometry } from './toDisjointGeometry';
 
 export const toComponents = (options = {}, geometry) => {
+  throw Error('die');
   const components = [];
   const walk = (item) => {
     if (item.assembly) {

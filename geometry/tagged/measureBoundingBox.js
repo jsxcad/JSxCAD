@@ -48,6 +48,8 @@ export const measureBoundingBox = (rawGeometry) => {
       for (const subitem of item.disjointAssembly) {
         walk(subitem);
       }
+    } else if (item.item) {
+      walk(item.item);
     } else if (item.solid) {
       update(measureBoundingBoxOfSolid(item.solid));
     } else if (item.surface) {

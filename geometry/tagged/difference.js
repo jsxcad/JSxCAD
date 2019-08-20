@@ -8,6 +8,10 @@ import { difference as surfaceDifference } from '@jsxcad/geometry-surface';
 import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface';
 
 export const difference = (baseGeometry, ...geometries) => {
+  if (baseGeometry.item) {
+    return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };
+  }
+
   const result = { disjointAssembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
