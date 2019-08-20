@@ -17,8 +17,8 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene }));
-  if (threejsGeometry.item) {
-    buildMeshes({ datasets, threejsGeometry.item, scene });
+  } else if (threejsGeometry.item) {
+    buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
   } else if (threejsGeometry.threejsSegments) {
     const segments = threejsGeometry.threejsSegments;
     const dataset = {};
