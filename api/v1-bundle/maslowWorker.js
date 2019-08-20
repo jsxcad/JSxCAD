@@ -12,8 +12,13 @@ const agent = async ({ ask, question }) => {
     var { key, values } = question;
     switch (key) {
       case 'assemble':
-        values = values.map(api.Shape.fromGeometry);
-        return api.assemble(...values).drop('cutAway').toKeptGeometry();
+        const inputs = values[0].map(api.Shape.fromGeometry);
+        if(values[1]){
+            return api.assemble(...inputs).drop('cutAway').toKeptGeometry();
+        }
+        else{
+            return api.assemble(...inputs).toDisjointGeometry()
+        }
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
