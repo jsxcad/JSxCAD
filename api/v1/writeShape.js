@@ -1,5 +1,5 @@
 import { Shape } from './Shape';
-import { toStandardGeometry } from '@jsxcad/geometry-tagged';
+import { toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { writeFile } from '@jsxcad/sys';
 
 /**
@@ -30,7 +30,7 @@ export const writeShape = async (options, shape) => {
     options = { path: options };
   }
   const { path, preview = true } = options;
-  const geometry = toStandardGeometry(toGeometry(options, shape));
+  const geometry = toKeptGeometry(toGeometry(options, shape));
   await writeFile({ preview, geometry }, path, JSON.stringify(geometry));
 };
 

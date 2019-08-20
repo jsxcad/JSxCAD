@@ -4,6 +4,7 @@ import { doesNotOverlap } from '@jsxcad/geometry-solid';
 import { flip } from './flip';
 import { fromSurfaces } from './fromSurfaces';
 import { toSurfaces } from './toSurfaces';
+import { union } from './union';
 
 /**
    * Given a solid and a set of solids to subtract produce the resulting solid.
@@ -28,6 +29,9 @@ export const difference = (base, ...subtractions) => {
   }
   if (subtractions.length === 0) {
     return base;
+  }
+  if (subtractions.length >= 2) {
+    subtractions = [union(...subtractions)];
   }
   // TODO: Figure out why we do not subtract the union of the remainder of
   // the geometries. This approach chains subtractions rather than producing

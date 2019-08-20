@@ -4,7 +4,7 @@ import { squaredDistance } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const EPSILON = 1e-5;
-const THRESHOLD2 = 1e-10;
+const EPSILON2 = 1e-10;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -36,7 +36,11 @@ const pointType = [];
 
 const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) => {
   let polygonType = COPLANAR;
-  if (!planeEquals(toPlane(polygon), plane)) {
+  const polygonPlane = toPlane(polygon);
+  if (isNaN(polygonPlane[0])) {
+    throw Error(`QQ/splitPolygon/polygonPlane: bad`);
+  }
+  if (!planeEquals(polygonPlane, plane)) {
     for (let nth = 0; nth < polygon.length; nth++) {
       // const type = toType(plane, polygon[nth]);
       // const t = planeDistance(plane, point);
@@ -58,7 +62,7 @@ const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) 
   // Put the polygon in the correct list, splitting it when necessary.
   switch (polygonType) {
     case COPLANAR:
-      if (dot(plane, toPlane(polygon)) > 0) {
+      if (dot(plane, polygonPlane) > 0) {
         coplanarFront.push(polygon);
       } else {
         coplanarBack.push(polygon);
@@ -92,10 +96,10 @@ const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) 
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (squaredDistance(spanPoint, startPoint) > THRESHOLD2) {
+          if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
             frontPoints.push(spanPoint);
           }
-          if (squaredDistance(spanPoint, endPoint) > THRESHOLD2) {
+          if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
             backPoints.push(spanPoint);
           }
         }

@@ -405,21 +405,27 @@ var cleanMultiPoly = function cleanMultiPoly(multipoly) {
 
 var cleanRing = function cleanRing(ring) {
   if (ring.length === 0) return;
-  var firstPt = ring[0];
-  var lastPt = ring[ring.length - 1];
-  if (firstPt.x === lastPt.x && firstPt.y === lastPt.y) ring.pop();
-
-  var isPointUncessary = function isPointUncessary(prevPt, pt, nextPt) {
-    return prevPt.x === pt.x && prevPt.y === pt.y || nextPt.x === pt.x && nextPt.y === pt.y || compareVectorAngles(pt, prevPt, nextPt) === 0;
-  };
-
   var i = 0;
-  var prevPt, nextPt;
+  var pt, prevPt, nextPt;
 
   while (i < ring.length) {
+    pt = ring[i];
     prevPt = i === 0 ? ring[ring.length - 1] : ring[i - 1];
+
+    if (pt.x === prevPt.x && pt.y === prevPt.y) {
+      ring.splice(i - 1, 1);
+      continue;
+    }
+
     nextPt = i === ring.length - 1 ? ring[0] : ring[i + 1];
-    if (isPointUncessary(prevPt, ring[i], nextPt)) ring.splice(i, 1);else i++;
+
+    if (compareVectorAngles(pt, prevPt, nextPt) === 0) {
+      ring.splice(i, 1);
+      if (i > 0) i--;
+      continue;
+    }
+
+    i++;
   } // if our ring has less than 3 distinct points now (so is degenerate)
   // shrink it down to the empty array to communicate to our caller to
   // drop it
@@ -1717,10 +1723,7 @@ function () {
           var mySplitter = null;
           if (prevMySplitter === null) mySplitter = nextMySplitter;else if (nextMySplitter === null) mySplitter = prevMySplitter;else {
             var cmpSplitters = SweepEvent.comparePoints(prevMySplitter, nextMySplitter);
-            if (cmpSplitters < 0) mySplitter = prevMySplitter;
-            if (cmpSplitters > 0) mySplitter = nextMySplitter; // the two splitters are the exact same point
-
-            mySplitter = prevMySplitter;
+            mySplitter = cmpSplitters <= 0 ? prevMySplitter : nextMySplitter;
           } // Rounding errors can cause changes in ordering,
           // so remove afected segments and right sweep events before splitting
 

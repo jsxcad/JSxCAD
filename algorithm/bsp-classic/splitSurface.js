@@ -111,6 +111,7 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
           if (frontPolygons === undefined) {
             frontPolygons = [];
           }
+          frontPoints.plane = surface.plane;
           frontPolygons.push(frontPoints);
         } else {
           // throw Error('die');
@@ -120,6 +121,7 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
           if (backPolygons === undefined) {
             backPolygons = [];
           }
+          backPoints.plane = surface.plane;
           backPolygons.push(backPoints);
         } else {
           // throw Error('die');
@@ -138,10 +140,12 @@ export const splitSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces,
   }
   if (frontPolygons !== undefined) {
     // assertCoplanar(frontPolygons);
+    frontPolygons.plane = surface.plane;
     frontSurfaces.push(frontPolygons);
   }
   if (backPolygons !== undefined) {
     // assertCoplanar(backPolygons);
+    backPolygons.plane = surface.plane;
     backSurfaces.push(backPolygons);
   }
 };

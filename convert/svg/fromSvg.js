@@ -81,10 +81,19 @@ export const fromSvg = async (options = {}, svgString) => {
   const geometry = { assembly: [] };
   const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
 
+  const getAttribute = (node, attribute, otherwise) => {
+    const value = node.getAttribute(attribute);
+    if (value === '' || value === null) {
+      return otherwise;
+    } else {
+      return value;
+    }
+  };
+
   const measureScale = (node) => {
     // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.
-    const width = parseFloat(node.getAttribute('width')) * 10;
-    const height = parseFloat(node.getAttribute('height')) * 10;
+    const width = parseFloat(getAttribute(node, 'width', '1')) * 10;
+    const height = parseFloat(getAttribute(node, 'height', '1')) * 10;
     const [minX, minY, maxX, maxY] = node.getAttribute('viewBox').split(/ +/).map(text => parseFloat(text));
     const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];
     return scaling;
