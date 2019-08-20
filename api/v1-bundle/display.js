@@ -306,6 +306,8 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
       light.position.set(1, 1, 1);
       camera.add(light);
       renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.gammaInput = true;
+      renderer.gammaOutput = true;
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px';
       viewerElement = document.createElement('div');

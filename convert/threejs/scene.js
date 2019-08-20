@@ -40,6 +40,8 @@ export const buildScene = ({ width, height, view }) => {
   camera.add(light);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.inputGamma = true;
+  renderer.outputGamma = true;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px';
   const viewerElement = document.createElement('div');
