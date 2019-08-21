@@ -4,24 +4,38 @@ import { setColor } from './color';
 
 const loader = new THREE.TextureLoader();
 
+const loadTexture = (url) => {
+  const texture = loader.load(url);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.offset.set( 0, 0 );
+  texture.repeat.set( 1, 1 );
+  return texture;
+}
+
 const materialProperties = {
   paper: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loader.load("https://jsxcad.js.org/texture/paper.png"),
+    map: loadTexture("https://jsxcad.js.org/texture/paper.png"),
   },
   wood: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loader.load("https://jsxcad.js.org/texture/wood.png"),
+    map: loadTexture("https://jsxcad.js.org/texture/wood.png"),
+  },
+  brick: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: loadTexture("https://jsxcad.js.org/texture/brick.png"),
   },
   rock: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loader.load("https://jsxcad.js.org/texture/rock.png"),
+    map: loadTexture("https://jsxcad.js.org/texture/rock.png"),
   },
   'sheet-metal': {
     roughness: 0.5,
@@ -29,7 +43,7 @@ const materialProperties = {
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
-    map: loader.load("https://jsxcad.js.org/texture/sheet-metal.png"),
+    map: loadTexture("https://jsxcad.js.org/texture/sheet-metal.png"),
   },
   metal: {
     roughness: 0.5,
