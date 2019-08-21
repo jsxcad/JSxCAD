@@ -2,23 +2,41 @@ import * as THREE from 'three';
 
 import { setColor } from './color';
 
+const loader = new THREE.TextureLoader();
+
 const materialProperties = {
   paper: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5
+    reflectivity: 0.5,
+    map: loader.load("https://jsxcad.js.org/texture/paper.png"),
   },
   wood: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5
+    reflectivity: 0.5,
+    map: loader.load("https://jsxcad.js.org/texture/wood.png"),
+  },
+  rock: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: loader.load("https://jsxcad.js.org/texture/rock.png"),
+  },
+  'sheet-metal': {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: loader.load("https://jsxcad.js.org/texture/sheet-metal.png"),
   },
   metal: {
     roughness: 0.5,
     metalness: 0.5,
     reflectivity: 0.9,
     clearCoat: 1,
-    clearCoatRoughness: 0
+    clearCoatRoughness: 0,
   },
   glass: {
     roughness: 0.5,
