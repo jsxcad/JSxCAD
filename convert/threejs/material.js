@@ -4,6 +4,7 @@ import { setColor } from './color';
 
 const loader = new THREE.TextureLoader();
 
+// FIX: Make this lazy.
 const loadTexture = (url) => {
   const texture = loader.load(url);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -60,6 +61,16 @@ const materialProperties = {
     clearCoatRoughness: 0,
     opacity: 0.5,
     transparent: true
+  },
+  'wet-glass': {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    opacity: 0.5,
+    transparent: true,
+    map: loadTexture("https://jsxcad.js.org/texture/wet-glass.png"),
   }
 };
 
