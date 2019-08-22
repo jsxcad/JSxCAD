@@ -16,6 +16,7 @@ export const addTags = (tags, geometry, condition) => {
     if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
     if (geometry.item) { return { item: geometry.item, tags: composeTags(geometry.tags) }; }
     if (geometry.paths) { return { paths: geometry.paths, tags: composeTags(geometry.tags) }; }
+    if (geometry.plan) { return { plan: geometry.plan, marks: geometry.marks, tags: composeTags(geometry.tags) }; }
     if (geometry.points) { return { points: geometry.points, tags: composeTags(geometry.tags) }; }
     if (geometry.solid) { return { solid: geometry.solid, tags: composeTags(geometry.tags) }; }
     if (geometry.surface) { return { surface: geometry.surface, tags: composeTags(geometry.tags) }; }
