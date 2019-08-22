@@ -16,6 +16,7 @@ import { Cube } from './Cube';
 import { Cursor } from './Cursor';
 import { Cylinder } from './Cylinder';
 import { Gear } from './Gear';
+import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
 import { Point } from './Point';
@@ -161,6 +162,7 @@ export {
   Gear,
   getClock,
   hull,
+  Icosahedron,
   importModule,
   intersection,
   lathe,
