@@ -73,6 +73,8 @@ export const toThreejsGeometry = (geometry, supertags) => {
     };
   } else if (geometry.paths) {
     return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags, isThreejsGeometry: true };
+  } else if (geometry.plan) {
+    return { threejsPlan: geometry.plan, threejsMarks: geometry.marks, tags, isThreejsGeometry: true };
   } else if (geometry.points) {
     return { threejsSegments: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
   } else if (geometry.solid) {

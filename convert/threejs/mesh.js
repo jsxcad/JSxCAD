@@ -222,3 +222,37 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
     datasets.push(dataset);
   }
 };
+
+export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
+  if (threejsGeometry === undefined) {
+    return;
+  }
+  const ctx = hudCanvas.getContext('2d');
+  ctx.fillStyle = '#00FF00';
+  ctx.strokeStyle = '#000000';
+  ctx.font = '30px "Arial Black", Gadget, sans-serif';
+  const walk = (threejsGeometry) => {
+    if (threejsGeometry.assembly) {
+      threejsGeometry.assembly.forEach(walk);
+    } else if (threejsGeometry.threejsPlan) {
+      const { threejsPlan, threejsMarks } = threejsGeometry;
+      const { label } = threejsPlan;
+      if (label) {
+        const vector = new THREE.Vector3();
+        vector.set(...threejsMarks[0]);
+        // map to normalized device coordinate (NDC) space
+        vector.project(camera);
+        // map to 2D screen space
+        const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
+        const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
+        const [dX, dY] = [x + 0, y - 0];
+        // ctx.moveTo(x, y);
+        // ctx.lineTo(dY, dY);
+        // ctx.stroke();
+        ctx.fillText(label, dX, dY);
+        ctx.strokeText(label, dX, dY);
+      }
+    }
+  };
+  walk(threejsGeometry);
+}

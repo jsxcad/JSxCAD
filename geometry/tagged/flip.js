@@ -19,6 +19,10 @@ export const flip = (geometry) => {
     flipped.assembly = geometry.assembly.map(flip);
   } else if (geometry.disjointAssembly) {
     flipped.assembly = geometry.disjointAssembly.map(flip);
+  } else if (geometry.plan) {
+    // FIX: How should plans deal with flip?
+    flipped.plan = plan;
+    flipped.marks = marks;
   } else if (geometry.item) {
     // FIX: How should items deal with flip?
     flipped.item = item;

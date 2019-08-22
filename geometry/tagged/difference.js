@@ -1,4 +1,5 @@
 import { getPaths } from './getPaths';
+import { getPlans } from './getPlans';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
@@ -33,6 +34,10 @@ export const difference = (baseGeometry, ...geometries) => {
   const pathsets = geometries.flatMap(geometry => getPaths(geometry).map(item => item.paths));
   for (const { paths, tags } of getPaths(baseGeometry)) {
     result.disjointAssembly.push({ paths: pathsDifference(paths, ...pathsets), tags });
+  }
+  // Plans
+  for (const plan of getPlans(baseGeometry)) {
+    result.disjointAssembly.push(plan);
   }
   // FIX: Surfaces, Paths, etc.
   return result;

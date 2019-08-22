@@ -1,10 +1,10 @@
 /* global Blob, ResizeObserver */
 
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
+import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
 import { installCSS, installCSSLink } from './css';
 
-import { buildMeshes } from '@jsxcad/convert-threejs/mesh';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
@@ -82,27 +82,50 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     });
 
     let datasets = [];
-
-    const { camera, renderer, scene, viewerElement } = buildScene({ width: page.offsetWidth, height: page.offsetHeight, view });
+    let threejsGeometry;
+    let width = page.offsetWidth;
+    let height = page.offsetHeight;
+    const { camera, hudCamera, hudCanvas, hudScene, hudTexture, renderer, scene, viewerElement } = buildScene({ width, height, view });
     const { gui } = buildGui({ viewerElement });
+    const hudContext = hudCanvas.getContext('2d');
     const render = () => renderer.render(scene, camera);
+    const renderHud = () => renderer.render(hudScene, hudCamera);
+    const updateHud = () => {
+                        hudTexture.needsUpdate = false;
+                        hudContext.clearRect(0, 0, width, height);
+                        drawHud({ camera, datasets, threejsGeometry, hudCanvas });
+                        hudContext.fillStyle = '#FF0000';
+                        hudTexture.needsUpdate = true;
+                      };
 
     const container = document.getElementById(path);
     container.appendChild(viewerElement);
 
-    const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
+    const animate = () => {
+      updateHud();
+      render();
+      renderHud();
+    };
+
+    const { trackball } = buildTrackballControls({ camera, render: animate, view, viewerElement });
+
     const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
 
     resize();
-    new ResizeObserver(resize).observe(container);
+    new ResizeObserver(() => {
+                         ({ width, height } = resize());
+                         hudCanvas.width = width;
+                         hudCanvas.height = height;
+                       })
+      .observe(container);
 
-    const animate = () => {
-      window.requestAnimationFrame(animate);
-      render();
+    const track = () => {
+      animate();
       trackball.update();
-    };
+      window.requestAnimationFrame(track);
+    }
 
-    animate();
+    track();
 
     watchFile(path,
               ({ geometry, view }, file) => {
@@ -119,7 +142,7 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
                     gui.remove(controller.ui);
                   }
 
-                  const threejsGeometry = toThreejsGeometry(geometry);
+                  threejsGeometry = toThreejsGeometry(geometry);
 
                   // Build new datasets from the written data, and display them.
                   datasets = [];

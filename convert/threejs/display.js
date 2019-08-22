@@ -6,11 +6,20 @@ import { buildScene, createResizer } from './scene';
 import { buildMeshes } from './mesh';
 
 export const display = ({ view = {}, threejsGeometry } = {}, page) => {
-  let datasets = [];
-
-  const { camera, renderer, scene, viewerElement } = buildScene({ width: page.offsetWidth, height: page.offsetHeight, view });
+  const datasets = [];
+  const width = page.offsetWidth;
+  const height = page.offsetHeight;
+  const { camera, hudCamera, hudCanvas, hudScene, hudTexture, renderer, scene, viewerElement } = buildScene({ width, height, view });
   const { gui } = buildGui({ viewerElement });
   const render = () => renderer.render(scene, camera);
+  const renderHud = () => renderer.render(hudScene, hudCamera);
+  const updateHud = () => {
+                      const ctx = hudCanvas.getContext('2d');
+                      ctx.clearRect(0, 0, width, height);
+                      ctx.fillStyle = '#FF0000';
+                      ctx.fillText("HUD", 50, 50);
+                      hudTexture.needsUpdate = true;
+                    };
 
   const container = document.body;
   container.appendChild(viewerElement);
@@ -25,9 +34,11 @@ export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   buildGuiControls({ datasets, gui });
 
   const animate = () => {
-    window.requestAnimationFrame(animate);
+    updateHud();
     render();
+    renderHud();
     trackball.update();
+    window.requestAnimationFrame(animate);
   };
 
   animate();
