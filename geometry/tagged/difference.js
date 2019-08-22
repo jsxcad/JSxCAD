@@ -1,4 +1,5 @@
 import { getPaths } from './getPaths';
+import { getPlans } from './getPlans';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
@@ -8,6 +9,10 @@ import { difference as surfaceDifference } from '@jsxcad/geometry-surface';
 import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface';
 
 export const difference = (baseGeometry, ...geometries) => {
+  if (baseGeometry.item) {
+    return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };
+  }
+
   const result = { disjointAssembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
@@ -29,6 +34,10 @@ export const difference = (baseGeometry, ...geometries) => {
   const pathsets = geometries.flatMap(geometry => getPaths(geometry).map(item => item.paths));
   for (const { paths, tags } of getPaths(baseGeometry)) {
     result.disjointAssembly.push({ paths: pathsDifference(paths, ...pathsets), tags });
+  }
+  // Plans
+  for (const plan of getPlans(baseGeometry)) {
+    result.disjointAssembly.push(plan);
   }
   // FIX: Surfaces, Paths, etc.
   return result;

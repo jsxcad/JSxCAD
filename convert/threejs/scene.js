@@ -8,6 +8,7 @@ export const createResizer = ({ camera, renderer, trackball, viewerElement }) =>
     camera.updateProjectionMatrix();
     trackball.handleResize();
     renderer.setSize(width, height);
+    return { width, height };
   };
 
   return { resize };
@@ -40,6 +41,10 @@ export const buildScene = ({ width, height, view }) => {
   camera.add(light);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.antiAlias = false;
+  renderer.inputGamma = true;
+  renderer.outputGamma = true;
+  renderer.autoClear = false;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px';
   const viewerElement = document.createElement('div');
@@ -47,5 +52,27 @@ export const buildScene = ({ width, height, view }) => {
   viewerElement.style.height = '100%';
   viewerElement.appendChild(renderer.domElement);
 
-  return { camera, renderer, scene, viewerElement };
+  const hudCanvas = document.createElement('canvas');
+  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; display: none;';
+  hudCanvas.id = 'hudCanvas';
+  hudCanvas.width = width;
+  hudCanvas.height = height;
+  viewerElement.appendChild(hudCanvas);
+
+  const hudCamera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 0, 30 );
+  const hudScene = new THREE.Scene();
+
+  const hudTexture = new THREE.Texture(hudCanvas) 
+  hudTexture.needsUpdate = true;
+
+  {
+    const hudMaterial = new THREE.MeshBasicMaterial({ map: hudTexture });
+    // const hudMaterial = new THREE.MeshBasicMaterial({});
+    hudMaterial.transparent = true;
+    const hudPlaneGeometry = new THREE.PlaneGeometry(width, height);
+    const hudPlane = new THREE.Mesh(hudPlaneGeometry, hudMaterial);
+    hudScene.add(hudPlane);
+  }
+
+  return { camera, hudCamera, hudCanvas, hudScene, hudTexture, renderer, scene, viewerElement };
 };

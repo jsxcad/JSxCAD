@@ -45,7 +45,7 @@ import { cos } from './cos';
 import { cut } from './cut';
 import { describe } from './describe';
 import { difference } from './difference';
-import { divide } from './divide';
+// import { divide } from './divide';
 import { drop } from './drop';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
@@ -68,6 +68,7 @@ import { minkowski } from './minkowski';
 import { move } from './move';
 import { numbers } from './numbers';
 import { outline } from './outline';
+import { plan } from './plan';
 import { readDst } from './readDst';
 import { readFont } from './readFont';
 import { readJscad } from './readJscad';
@@ -83,6 +84,7 @@ import { scale } from './scale';
 import { section } from './section';
 import { sin } from './sin';
 import { source } from './source';
+import { specify } from './specify';
 import { sqrt } from './sqrt';
 import { tags } from './tags';
 import { translate } from './translate';
@@ -105,7 +107,7 @@ const methods = [
   color,
   cut,
   describe,
-  divide,
+  // divide,
   drop,
   extrude,
   fillet,
@@ -119,12 +121,14 @@ const methods = [
   measureCenter,
   move,
   outline,
+  plan,
   right,
   rotateX,
   rotateY,
   rotateZ,
   scale,
   section,
+  specify,
   tags,
   translate,
   keep,
@@ -166,6 +170,7 @@ export {
   MicroGearMotor,
   minkowski,
   numbers,
+  plan,
   planeX,
   planeY,
   planeZ,
@@ -182,6 +187,7 @@ export {
   readSvg,
   sin,
   source,
+  specify,
   Sphere,
   sqrt,
   Spiral,

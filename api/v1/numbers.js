@@ -10,10 +10,10 @@
  *
  **/
 
-export const numbers = ({ from = 0, to = 0, by = 1 }) => {
+export const numbers = ({ from = 0, to = 0, by = 1 }, thunk = (n => n)) => {
   const numbers = [];
   for (let number = from; number < to; number += by) {
-    numbers.push(number);
+    numbers.push(thunk(number));
   }
   return numbers;
 };

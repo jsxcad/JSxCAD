@@ -5,7 +5,6 @@ import { allTags } from './allTags';
 import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
-import { divide } from './divide';
 import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
@@ -13,6 +12,7 @@ import { flip } from './flip';
 import { fuse } from './fuse';
 import { getClouds } from './getClouds';
 import { getPaths } from './getPaths';
+import { getPlans } from './getPlans';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getTags } from './getTags';
@@ -21,6 +21,7 @@ import { intersection } from './intersection';
 import { keep } from './keep';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
+import { specify } from './specify';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
 import { toPoints } from './toPoints';
@@ -35,7 +36,6 @@ export {
   assemble,
   canonicalize,
   difference,
-  divide,
   drop,
   eachItem,
   eachPoint,
@@ -43,6 +43,7 @@ export {
   fuse,
   getClouds,
   getPaths,
+  getPlans,
   getSolids,
   getSurfaces,
   getTags,
@@ -51,6 +52,7 @@ export {
   keep,
   map,
   measureBoundingBox,
+  specify,
   toDisjointGeometry,
   toKeptGeometry,
   toPoints,
