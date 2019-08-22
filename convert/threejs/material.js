@@ -4,6 +4,7 @@ import { setColor } from './color';
 
 const loader = new THREE.TextureLoader();
 
+// FIX: Make this lazy.
 const loadTexture = (url) => {
   const texture = loader.load(url);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -17,25 +18,37 @@ const materialProperties = {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loadTexture("https://jsxcad.js.org/texture/paper.png"),
+    map: "https://jsxcad.js.org/texture/paper.png",
   },
   wood: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loadTexture("https://jsxcad.js.org/texture/wood.png"),
+    map: "https://jsxcad.js.org/texture/wood.png",
+  },
+  water: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: "https://jsxcad.js.org/texture/water.png",
+  },
+  grass: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: "https://jsxcad.js.org/texture/grass.png",
   },
   brick: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loadTexture("https://jsxcad.js.org/texture/brick.png"),
+    map: "https://jsxcad.js.org/texture/brick.png",
   },
   rock: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: loadTexture("https://jsxcad.js.org/texture/rock.png"),
+    map: "https://jsxcad.js.org/texture/rock.png",
   },
   'sheet-metal': {
     roughness: 0.5,
@@ -43,7 +56,7 @@ const materialProperties = {
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
-    map: loadTexture("https://jsxcad.js.org/texture/sheet-metal.png"),
+    map: "https://jsxcad.js.org/texture/sheet-metal.png",
   },
   metal: {
     roughness: 0.5,
@@ -60,12 +73,26 @@ const materialProperties = {
     clearCoatRoughness: 0,
     opacity: 0.5,
     transparent: true
+  },
+  'wet-glass': {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    opacity: 0.5,
+    transparent: true,
+    map: "https://jsxcad.js.org/texture/wet-glass.png",
   }
 };
 
 const merge = (properties, parameters) => {
   for (const key of Object.keys(properties)) {
-    parameters[key] = properties[key];
+    if (key === 'map') {
+      parameters[key] = loadTexture(properties[key]);
+    } else {
+      parameters[key] = properties[key];
+    }
   }
 };
 

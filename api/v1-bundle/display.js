@@ -85,17 +85,14 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     let threejsGeometry;
     let width = page.offsetWidth;
     let height = page.offsetHeight;
-    const { camera, hudCamera, hudCanvas, hudScene, hudTexture, renderer, scene, viewerElement } = buildScene({ width, height, view });
+    const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
     const { gui } = buildGui({ viewerElement });
     const hudContext = hudCanvas.getContext('2d');
     const render = () => renderer.render(scene, camera);
-    const renderHud = () => renderer.render(hudScene, hudCamera);
     const updateHud = () => {
-                        hudTexture.needsUpdate = false;
                         hudContext.clearRect(0, 0, width, height);
                         drawHud({ camera, datasets, threejsGeometry, hudCanvas });
                         hudContext.fillStyle = '#FF0000';
-                        hudTexture.needsUpdate = true;
                       };
 
     const container = document.getElementById(path);
@@ -104,7 +101,6 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     const animate = () => {
       updateHud();
       render();
-      renderHud();
     };
 
     const { trackball } = buildTrackballControls({ camera, render: animate, view, viewerElement });
