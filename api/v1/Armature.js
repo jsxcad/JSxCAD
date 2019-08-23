@@ -31,9 +31,12 @@ export const Armature = () => {
   const angle = createAngleConstraint(constraints);
   const distance = createDistanceConstraint(constraints);
   const pinned = createPinnedConstraint(constraints);
+  let solved = false;
 
-  const compute = () => {
-    solve(constraints);
+  const isSolved = () => solved;
+
+  const compute = (limit = 0) => {
+    solved = solve(constraints, limit);
     return positions(constraints);
   };
 
@@ -41,6 +44,7 @@ export const Armature = () => {
     angle,
     compute,
     distance,
+    isSolved,
     pinned
   };
 };
