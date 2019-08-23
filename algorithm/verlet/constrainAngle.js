@@ -38,7 +38,7 @@ export const create = ({ constraints, ids, particles }) => {
       left: ensureParticle(ids, particles, left),
       right: ensureParticle(ids, particles, right),
       stiffness,
-      radians: angle * Math.PI / 360,
+      radians: angle * Math.PI / 180,
       relax
     });
   };

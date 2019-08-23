@@ -3,6 +3,7 @@ import { assertEmpty, assertNumber } from './assert';
 import { Shape } from './Shape';
 import { buildRegularPrism } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
+import { distance } from '@jsxcad/math-vec3';
 
 const buildCylinder = ({ radius = 1, height = 1, sides = 32 }) => {
   return Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
@@ -57,8 +58,18 @@ export const fromApothem = ({ apothem, height = 1, sides = 32 }) => buildCylinde
 
 export const fromDiameter = ({ diameter, height = 1, sides = 32 }) => buildCylinder({ radius: diameter / 2, height, sides });
 
+export const betweenRadius = ({ radius, sides = 32 }, from, to) =>
+    fromRadius({ radius, sides, height: distance(from, to) })
+      .above()
+      .orient({ from, at: to });
+
+export const betweenDiameter = ({ diameter, sides = 32 }, from, to) =>
+    fromDiameter({ diameter, sides, height: distance(from, to) })
+      .above()
+      .orient({ from, at: to });
+
 export const Cylinder = dispatch(
-  'cylinder',
+  'Cylinder',
   // cylinder()
   (...rest) => {
     assertEmpty(rest);
@@ -89,8 +100,22 @@ export const Cylinder = dispatch(
     return () => fromDiameter({ diameter, height, sides });
   });
 
+export const between = dispatch(
+  'Cylinder.between',
+  ({ radius, sides = 32 }, from, to) => {
+    assertNumber(radius);
+    return () => betweenRadius({ radius, sides }, from, to);
+  },
+  ({ diameter, sides = 32 }, from, to) => {
+    assertNumber(diameter);
+    return () => betweenDiameter({ diameter, sides }, from, to);
+  });
+
 Cylinder.fromValue = fromValue;
 Cylinder.fromRadius = fromRadius;
 Cylinder.fromDiameter = fromDiameter;
+Cylinder.between = between;
+Cylinder.betweenRadius = betweenRadius;
+Cylinder.betweenDiameter = betweenDiameter;
 
 export default Cylinder;

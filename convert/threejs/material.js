@@ -26,6 +26,12 @@ const materialProperties = {
     reflectivity: 0.5,
     map: "https://jsxcad.js.org/texture/wood.png",
   },
+  leaves: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: "https://jsxcad.js.org/texture/leaves.png",
+  },
   water: {
     roughness: 0.5,
     metalness: 0.0,
