@@ -11,6 +11,7 @@ import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fuse } from './fuse';
 import { getClouds } from './getClouds';
+import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
 import { getSolids } from './getSolids';
@@ -42,6 +43,7 @@ export {
   flip,
   fuse,
   getClouds,
+  getItems,
   getPaths,
   getPlans,
   getSolids,

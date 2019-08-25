@@ -1,3 +1,4 @@
+import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
 import { getSolids } from './getSolids';
@@ -38,6 +39,10 @@ export const difference = (baseGeometry, ...geometries) => {
   // Plans
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  // Items
+  for (const item of getItems(baseGeometry)) {
+    result.disjointAssembly.push(item);
   }
   // FIX: Surfaces, Paths, etc.
   return result;
