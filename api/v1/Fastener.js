@@ -10,6 +10,7 @@ import { dispatch } from './dispatch';
 import { distance } from '@jsxcad/math-vec3';
 import { intersection } from './intersection';
 import { lathe } from './lathe';
+import { specify } from './specify';
 
 const buildCylinder = ({ radius = 1, height = 1, sides = 32 }) => {
   return Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
@@ -44,12 +45,9 @@ export const Nail = dispatch(
   (length, diameter) => {
     assertNumber(length);
     assertNumber(diameter);
-    return () => assemble(Head({ style: 'flat', radius: diameter, thickness: 1 }).above(),
-                          Shank({ radius: diameter / 2, length: length }).below());
-  },
-  ({ shank = {}, head = {} }) => {
-    return () => assemble(Head(head).above(),
-                          Shank(shank).below());
+    return () => specify(['Nail', length, diameter],
+                         Head({ style: 'flat', radius: diameter, thickness: 1 }).above(),
+                         Shank({ radius: diameter / 2, length: length }).below());
   });
 
 const Thread = ({ radius = 1, height = 1, pitch = 1, sides = 16 } = {}) => {
@@ -88,15 +86,17 @@ export const Bolt = dispatch(
   (length, diameter) => {
     assertNumber(length);
     assertNumber(diameter);
-    return () => assemble(Nut({ radius: diameter / 2, height: 3 }).above(),
-                          ThreadedRod({ radius: diameter / 2, height: length }).below());
+    return () => specify(['Bolt', length, diameter],
+                         Nut({ radius: diameter / 2, height: 3 }).above(),
+                         ThreadedRod({ radius: diameter / 2, height: length }).below());
   });
 
 Bolt.M = (m, length) => {
   // See: http://www.atlrod.com/metric-hex-bolt-dimensions/
   const build = (dMax, dMin, hMax, hMin, fMax, fMin, cMax, cMin) =>
-      assemble(Nut({ radius: cMax / 2, height: hMax }).above(),
-               ThreadedRod({ radius: dMin / 2, height: length }).below());
+      specify(['Bolt.M', m, length],
+              Nut({ radius: cMax / 2, height: hMax }).above(),
+              ThreadedRod({ radius: dMin / 2, height: length }).below());
   switch (m) {
     case 10: return build(10.00, 9.78, 6.63, 6.17, 17, 15.73, 18.48, 17.77);
     case 12: return build(12.00, 11.73, 7.76, 4.24, 19, 17.73, 20.78, 20.03);
