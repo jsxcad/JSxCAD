@@ -24,6 +24,13 @@ export const assertEmpty = (value) => {
   return true;
 };
 
+export const assertFunction = (value) => {
+  if (typeof value !== 'function') {
+    throw Error(`Is not function: ${value}`);
+  }
+  return true;
+}
+
 export const assertShape = (value) => {
   if (value instanceof Shape) {
     return true;
@@ -36,6 +43,13 @@ export const assertString = (value) => {
     return true;
   }
   throw Error(`Is not string: ${value}`);
+};
+
+export const assertEquals = (value, match) => {
+  if (value === match) {
+    return true;
+  }
+  throw Error(`Does not match ${match}: ${value}`);
 };
 
 export const assertStrings = (value) => {

@@ -1,11 +1,11 @@
-import { assertEmpty, assertNumber } from './assert';
+import { assertEmpty, assertFunction, assertNumber } from './assert';
 
 import { Shape } from './Shape';
-import { buildRegularPrism } from '@jsxcad/algorithm-shape';
+import { buildFromSlices, buildRegularPrism } from '@jsxcad/algorithm-shape';
 import { dispatch } from './dispatch';
 import { distance } from '@jsxcad/math-vec3';
 
-const buildCylinder = ({ radius = 1, height = 1, sides = 32 }) => {
+const buildPrism = ({ radius = 1, height = 1, sides = 32 }) => {
   return Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
 };
 
@@ -49,14 +49,14 @@ const buildCylinder = ({ radius = 1, height = 1, sides = 32 }) => {
  *
  **/
 
-export const fromValue = (radius, height = 1, sides = 32) => buildCylinder({ radius, height, sides });
+export const fromValue = (radius, height = 1, sides = 32) => buildPrism({ radius, height, sides });
 
-export const fromRadius = ({ radius, height = 1, sides = 32 }) => buildCylinder({ radius, height, sides });
+export const fromRadius = ({ radius, height = 1, sides = 32 }) => buildPrism({ radius, height, sides });
 
 const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-export const fromApothem = ({ apothem, height = 1, sides = 32 }) => buildCylinder({ radius: toRadiusFromApothem(apothem, sides), height, sides });
+export const fromApothem = ({ apothem, height = 1, sides = 32 }) => buildPrism({ radius: toRadiusFromApothem(apothem, sides), height, sides });
 
-export const fromDiameter = ({ diameter, height = 1, sides = 32 }) => buildCylinder({ radius: diameter / 2, height, sides });
+export const fromDiameter = ({ diameter, height = 1, sides = 32 }) => buildPrism({ radius: diameter / 2, height, sides });
 
 export const betweenRadius = ({ radius, sides = 32 }, from, to) =>
     fromRadius({ radius, sides, height: distance(from, to) })
@@ -67,6 +67,11 @@ export const betweenDiameter = ({ diameter, sides = 32 }, from, to) =>
     fromDiameter({ diameter, sides, height: distance(from, to) })
       .above()
       .orient({ from, at: to });
+
+export const fromFunction = ({ buildPath, slices }) => {
+  const build = (slice) => buildPath(slice).toPoints().points;
+  return Shape.fromPolygonsToSolid(buildFromSlices({ buildPath: build, slices }));
+}
 
 export const Cylinder = dispatch(
   'Cylinder',
@@ -98,6 +103,11 @@ export const Cylinder = dispatch(
     assertNumber(height);
     assertNumber(sides);
     return () => fromDiameter({ diameter, height, sides });
+  },
+  ({ slices }, buildPath) => {
+    assertNumber(slices);
+    assertFunction(buildPath);
+    return () => fromFunction({ buildPath, slices });
   });
 
 export const between = dispatch(
@@ -114,6 +124,7 @@ export const between = dispatch(
 Cylinder.fromValue = fromValue;
 Cylinder.fromRadius = fromRadius;
 Cylinder.fromDiameter = fromDiameter;
+Cylinder.fromFunction = fromFunction;
 Cylinder.between = between;
 Cylinder.betweenRadius = betweenRadius;
 Cylinder.betweenDiameter = betweenDiameter;

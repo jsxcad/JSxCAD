@@ -1,4 +1,5 @@
 import { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve';
+import { buildFromSlices } from './buildFromSlices';
 import { buildGeodesicSphere } from './buildGeodesicSphere';
 import { buildRegularIcosahedron } from './buildRegularIcosahedron';
 import { buildRegularPolygon } from './buildRegularPolygon';
@@ -14,6 +15,7 @@ import { subdivideTriangularMesh } from './subdivideTriangularMesh';
 
 export {
   buildAdaptiveCubicBezierCurve,
+  buildFromSlices,
   buildGeodesicSphere,
   buildRegularIcosahedron,
   buildRegularPolygon,
