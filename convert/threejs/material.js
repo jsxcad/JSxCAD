@@ -26,6 +26,11 @@ const materialProperties = {
     reflectivity: 0.5,
     map: "https://jsxcad.js.org/texture/wood.png",
   },
+  plastic: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+  },
   leaves: {
     roughness: 0.5,
     metalness: 0.0,
@@ -56,7 +61,7 @@ const materialProperties = {
     reflectivity: 0.5,
     map: "https://jsxcad.js.org/texture/rock.png",
   },
-  'sheet-metal': {
+  'steel': {
     roughness: 0.5,
     metalness: 0.5,
     reflectivity: 0.9,
@@ -64,12 +69,13 @@ const materialProperties = {
     clearCoatRoughness: 0,
     map: "https://jsxcad.js.org/texture/sheet-metal.png",
   },
-  metal: {
+  copper: {
     roughness: 0.5,
     metalness: 0.5,
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
+    map: "https://jsxcad.js.org/texture/copper.png",
   },
   glass: {
     roughness: 0.5,

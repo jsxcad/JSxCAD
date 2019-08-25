@@ -15,6 +15,7 @@ import { Circle } from './Circle';
 import { Cube } from './Cube';
 import { Cursor } from './Cursor';
 import { Cylinder } from './Cylinder';
+import { Fastener } from './Fastener';
 import { Gear } from './Gear';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
@@ -164,6 +165,7 @@ export {
   Cursor,
   Cylinder,
   difference,
+  Fastener,
   Gear,
   getClock,
   hull,
