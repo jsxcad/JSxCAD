@@ -67,6 +67,7 @@ import { material } from './material';
 import { max } from './max';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureCenter } from './measureCenter';
+import memoizeOne from 'memoize-one';
 import { minkowski } from './minkowski';
 import { move } from './move';
 import { numbers } from './numbers';
@@ -157,7 +158,20 @@ if (methods.includes(undefined)) {
   throw Error('die');
 }
 
-export {
+const cached = (operators) => {
+  const memoized = {};
+  const blacklist = [importScripts];
+  for (const key of Object.keys(operators)) {
+    if (blacklist.includes(key)) {
+      memoized[key] = operators[key];
+    } else {
+      memoized[key] = memoizeOne(operators[key]);
+    }
+  }
+  return memoized;
+};
+
+const exports = cached({
   Shape,
   acos,
   Armature,
@@ -213,4 +227,6 @@ export {
   Triangle,
   union,
   Wave
-};
+});
+
+export default exports;

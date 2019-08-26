@@ -75,7 +75,8 @@
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/sys": "^0.0.79",
+    "memoize-one": "^5.1.1"
   },
   "devDependencies": {
     "ava": "^1.4.1",
