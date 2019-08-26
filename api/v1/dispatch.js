@@ -1,5 +1,7 @@
+import { cache } from './cache';
+
 export const dispatch = (name, ...dispatches) => {
-  return (...params) => {
+  const op = (...params) => {
     for (const dispatch of dispatches) {
       // For each signature
       let operation;
@@ -13,4 +15,6 @@ export const dispatch = (name, ...dispatches) => {
     }
     throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
   };
+
+  return cache(op);
 };

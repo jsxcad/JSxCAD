@@ -1,6 +1,8 @@
 import { Shape, fromGeometry, toKeptGeometry } from './Shape';
 import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 
+import { dispatch } from './dispatch';
+
 /**
  *
  * # Union
@@ -49,7 +51,7 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const union = (...shapes) => {
+const unionOfShapes = (...shapes) => {
   switch (shapes.length) {
     case 0: {
       return fromGeometry({ assembly: [] });
@@ -63,6 +65,12 @@ export const union = (...shapes) => {
     }
   }
 };
+
+export const union = dispatch(
+  'union',
+  (...shapes) => {
+    return () => unionOfShapes(...shapes);
+  });
 
 const method = function (...shapes) { return union(this, ...shapes); };
 

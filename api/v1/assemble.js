@@ -1,5 +1,7 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
+
 import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
+import { dispatch } from './dispatch';
 
 /**
  *
@@ -51,7 +53,7 @@ import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const assemble = (...shapes) => {
+const assembleShapes = (...shapes) => {
   shapes = shapes.filter(shape => shape !== undefined);
   switch (shapes.length) {
     case 0: {
@@ -65,6 +67,12 @@ export const assemble = (...shapes) => {
     }
   }
 };
+
+export const assemble = dispatch(
+  'assemble',
+  (...shapes) => {
+    return () => assembleShapes(...shapes);
+  });
 
 const method = function (...shapes) { return assemble(this, ...shapes); };
 
