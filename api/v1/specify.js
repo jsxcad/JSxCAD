@@ -1,5 +1,5 @@
 import { Shape, toGeometry } from './Shape';
-import { specify as specifyGeometry } from '@jsxcad/geometry-tagged';
+import { addTags, specify as specifyGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -9,19 +9,21 @@ import { specify as specifyGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const specify = (...shapes) => {
+export const specify = (specification, ...shapes) => {
   shapes = shapes.filter(shape => shape !== undefined);
+  let geometry;
   switch (shapes.length) {
     case 0: {
-      return Shape.fromGeometry(specifyGeometry({ assembly: [] }));
+      geometry = specifyGeometry({ assembly: [] });
     }
     case 1: {
-      return Shape.fromGeometry(specifyGeometry(toGeometry(shapes[0])));
+      geometry = specifyGeometry(toGeometry(shapes[0]));
     }
     default: {
-      return Shape.fromGeometry(specifyGeometry({ assembly: shapes.map(toGeometry) }));
+      geometry = specifyGeometry({ assembly: shapes.map(toGeometry) });
     }
   }
+  return Shape.fromGeometry(addTags([`item/${JSON.stringify(specification)}`], geometry));
 };
 
 const method = function (...shapes) { return specify(this, ...shapes); };

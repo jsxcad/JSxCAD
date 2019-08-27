@@ -11,7 +11,7 @@ const { writeFile } = fs.promises;
 const paths = [
   'Armature.js',
   'Circle.js', 'Cube.js', 'Cursor.js', 'Cylinder.js',
-  'Intro.js',
+  'Icosahedron.js', 'Intro.js',
   'Lego.js',
   'MicroGearMotor.js',
   'Point.js', 'Points.js', 'Polygon.js', 'Polyhedron.js',

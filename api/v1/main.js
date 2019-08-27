@@ -15,9 +15,12 @@ import { Circle } from './Circle';
 import { Cube } from './Cube';
 import { Cursor } from './Cursor';
 import { Cylinder } from './Cylinder';
+import { Fastener } from './Fastener';
 import { Gear } from './Gear';
+import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
+import { Path } from './Path';
 import { Point } from './Point';
 import { Points } from './Points';
 import { Polygon } from './Polygon';
@@ -67,6 +70,7 @@ import { measureCenter } from './measureCenter';
 import { minkowski } from './minkowski';
 import { move } from './move';
 import { numbers } from './numbers';
+import { orient } from './orient';
 import { outline } from './outline';
 import { plan } from './plan';
 import { readDst } from './readDst';
@@ -77,6 +81,7 @@ import { readShape } from './readShape';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
+import { rotate } from './rotate';
 import { rotateX } from './rotateX';
 import { rotateY } from './rotateY';
 import { rotateZ } from './rotateZ';
@@ -87,6 +92,8 @@ import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
 import { tags } from './tags';
+import { toBillOfMaterial } from './toBillOfMaterial';
+import { toItems } from './toItems';
 import { translate } from './translate';
 import { union } from './union';
 import { voxels } from './voxels';
@@ -120,9 +127,11 @@ const methods = [
   measureBoundingBox,
   measureCenter,
   move,
+  orient,
   outline,
   plan,
   right,
+  rotate,
   rotateX,
   rotateY,
   rotateZ,
@@ -130,6 +139,8 @@ const methods = [
   section,
   specify,
   tags,
+  toBillOfMaterial,
+  toItems,
   translate,
   keep,
   voxels,
@@ -158,9 +169,11 @@ export {
   Cursor,
   Cylinder,
   difference,
+  Fastener,
   Gear,
   getClock,
   hull,
+  Icosahedron,
   importModule,
   intersection,
   lathe,
@@ -174,6 +187,7 @@ export {
   planeX,
   planeY,
   planeZ,
+  Path,
   Point,
   Points,
   Polygon,
