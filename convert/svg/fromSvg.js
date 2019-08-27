@@ -28,7 +28,10 @@ const applyTransforms = ({ matrix }, transformText) => {
   if (match) {
     const [operator, operandText, rest] = match.slice(1);
     const operands = operandText.split(/ +/).map(operand => parseFloat(operand));
-    switch (operator) {
+    if (operands.some(operand => isNaN(operand))) {
+      throw Error(`die: Bad operand in ${transformText}.`);
+    }
+    switch (operator.trim()) {
       case 'matrix': {
         // a b c
         const [a, b, c, d, tx, ty] = operands;
@@ -67,7 +70,7 @@ const applyTransforms = ({ matrix }, transformText) => {
         break;
       }
       default: {
-        throw Error(`die: Unknown operator '${operator}'.`);
+        throw Error(`die: Unknown operator '${operator}' of ${transformText}.`);
       }
     }
     if (rest) {
@@ -94,7 +97,8 @@ export const fromSvg = async (options = {}, svgString) => {
     // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.
     const width = parseFloat(getAttribute(node, 'width', '1')) * 10;
     const height = parseFloat(getAttribute(node, 'height', '1')) * 10;
-    const [minX, minY, maxX, maxY] = node.getAttribute('viewBox').split(/ +/).map(text => parseFloat(text));
+    const [minX, minY, maxX, maxY] = getAttribute(node, 'viewBox', `0 0 ${width} ${height}`)
+                                       .split(/ +/).map(text => parseFloat(text));
     const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];
     return scaling;
   };
@@ -103,6 +107,9 @@ export const fromSvg = async (options = {}, svgString) => {
   const scale = (matrix) => multiply(fromScaling(scaling), matrix);
 
   const walk = ({ matrix }, node) => {
+    if (matrix.some(element => isNaN(element))) {
+      throw Error(`die: Bad element in matrix ${matrix}.`);
+    }
     const buildShape = (...attrs) => {
       const result = { type: node.tagName };
       for (const attr of attrs) {
@@ -127,6 +134,10 @@ export const fromSvg = async (options = {}, svgString) => {
       case ELEMENT_NODE: {
         ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
 
+        if (matrix.some(element => isNaN(element))) {
+          throw Error(`die: Bad element in matrix ${matrix}.`);
+        }
+
         const output = (svgPath) => {
           const paths = fromSvgPath({}, svgPath).paths;
           const fill = node.getAttribute('fill');
@@ -136,7 +147,14 @@ export const fromSvg = async (options = {}, svgString) => {
           }
           const stroke = node.getAttribute('stroke');
           if (stroke !== undefined && stroke !== 'none') {
-            geometry.assembly.push(transform(scale(matrix), { paths: paths, tags: [`color/${stroke}`] }));
+            if (matrix.some(element => isNaN(element))) {
+              throw Error(`die: Bad element in matrix ${matrix}.`);
+            }
+            const scaledMatrix = scale(matrix);
+            if (scaledMatrix.some(element => isNaN(element))) {
+              throw Error(`die: Bad element in matrix ${matrix}.`);
+            }
+            geometry.assembly.push(transform(scaledMatrix, { paths: paths, tags: [`color/${stroke}`] }));
           }
         };
 

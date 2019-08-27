@@ -14,7 +14,7 @@ const Y = 1;
 // Not entirely sure how conformant this is, but it seems to work for simple
 // cases.
 
-// Width are height are in post-script points.
+// Width and height are in post-script points.
 const header = ({ width = 595, height = 841, lineWidth = 0.096 }) =>
   [`%PDF-1.5`,
    `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
@@ -44,13 +44,7 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
   const scale = 1 / pointSize;
   const [width, height] = size;
   const lines = [];
-  const [min, max] = measureBoundingBox(geometry);
-  // Currently the origin is at the bottom left.
-  // Subtract the x min, and the y max, then add the page height to bring
-  // it up to the top left. This positions the origin nicely for laser
-  // cutting and printing.
-  const offset = [-min[X] * scale, (height - max[Y]) * scale, 0];
-  const matrix = multiply(fromTranslation(offset),
+  const matrix = multiply(fromTranslation([width * scale / 2, height * scale / 2, 0]),
                           fromScaling([scale, scale, scale]));
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
   for (const { tags, surface } of getSurfaces(keptGeometry)) {
@@ -69,6 +63,7 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
   }
   for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
     lines.push(toFillColor(toRgb(tags)));
+    // FIX: Avoid making the surface convex.
     for (const path of makeConvexZ0Surface({}, z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];

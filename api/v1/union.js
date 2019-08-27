@@ -1,5 +1,8 @@
 import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+
 import { union as unionGeometry } from '@jsxcad/geometry-tagged';
+import { cache } from './cache';
+import { dispatch } from './dispatch';
 
 /**
  *
@@ -49,20 +52,27 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const union = (...shapes) => {
-  switch (shapes.length) {
-    case 0: {
-      return fromGeometry({ assembly: [] });
-    }
-    case 1: {
-      // We still want to produce a simple shape.
-      return fromGeometry(toKeptGeometry(shapes[0]));
-    }
-    default: {
-      return fromGeometry(unionGeometry(...shapes.map(toKeptGeometry)));
-    }
-  }
-};
+const unionOfShapes =
+  cache((...shapes) => {
+        switch (shapes.length) {
+          case 0: {
+            return fromGeometry({ assembly: [] });
+          }
+          case 1: {
+            // We still want to produce a simple shape.
+            return fromGeometry(toKeptGeometry(shapes[0]));
+          }
+          default: {
+            return fromGeometry(unionGeometry(...shapes.map(toKeptGeometry)));
+          }
+        }
+      });
+
+export const union = dispatch(
+  'union',
+  (...shapes) => {
+    return () => unionOfShapes(...shapes);
+  });
 
 const method = function (...shapes) { return union(this, ...shapes); };
 

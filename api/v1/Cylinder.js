@@ -2,12 +2,12 @@ import { assertEmpty, assertFunction, assertNumber } from './assert';
 
 import { Shape } from './Shape';
 import { buildFromSlices, buildRegularPrism } from '@jsxcad/algorithm-shape';
+import { cache } from './cache';
 import { dispatch } from './dispatch';
 import { distance } from '@jsxcad/math-vec3';
 
-const buildPrism = ({ radius = 1, height = 1, sides = 32 }) => {
-  return Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
-};
+const buildPrism = (radius = 1, height = 1, sides = 32) =>
+  Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
 
 /**
  *
@@ -49,14 +49,14 @@ const buildPrism = ({ radius = 1, height = 1, sides = 32 }) => {
  *
  **/
 
-export const fromValue = (radius, height = 1, sides = 32) => buildPrism({ radius, height, sides });
+export const fromValue = (radius, height = 1, sides = 32) => buildPrism(radius, height, sides);
 
-export const fromRadius = ({ radius, height = 1, sides = 32 }) => buildPrism({ radius, height, sides });
+export const fromRadius = ({ radius, height = 1, sides = 32 }) => buildPrism(radius, height, sides);
 
 const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-export const fromApothem = ({ apothem, height = 1, sides = 32 }) => buildPrism({ radius: toRadiusFromApothem(apothem, sides), height, sides });
+export const fromApothem = ({ apothem, height = 1, sides = 32 }) => buildPrism(toRadiusFromApothem(apothem, sides), height, sides);
 
-export const fromDiameter = ({ diameter, height = 1, sides = 32 }) => buildPrism({ radius: diameter / 2, height, sides });
+export const fromDiameter = ({ diameter, height = 1, sides = 32 }) => buildPrism(diameter / 2, height, sides);
 
 export const betweenRadius = ({ radius, sides = 32 }, from, to) =>
     fromRadius({ radius, sides, height: distance(from, to) })
