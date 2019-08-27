@@ -1,6 +1,7 @@
 import { assertEmpty, assertNumber } from './assert';
 
 import { Polygon } from './Polygon';
+import { cache } from './cache';
 import { dispatch } from './dispatch';
 
 /**
@@ -54,29 +55,29 @@ export const Circle = dispatch(
   // Circle()
   (...rest) => {
     assertEmpty(rest);
-    return () => Polygon.fromRadius({ radius: 1 });
+    return () => Polygon.fromRadius(1);
   },
   // circle(2)
   (value) => {
     assertNumber(value);
-    return () => Polygon.fromRadius({ radius: value, sides: 32 });
+    return () => Polygon.fromRadius(value, 32);
   },
   // circle({ radius: 2, sides: 32 })
   ({ radius, sides = 32 }) => {
     assertNumber(radius);
-    return () => Polygon.fromRadius({ radius, sides });
+    return () => Polygon.fromRadius(radius, sides);
   },
   // circle({ apothem: 2, sides: 32 })
   ({ apothem, sides = 32 }) => {
     assertNumber(apothem);
     assertNumber(sides);
-    return () => Polygon.fromApothem({ apothem, sides });
+    return () => Polygon.fromApothem(apothem, sides);
   },
   // circle({ diameter: 2, sides: 32 })
   ({ diameter, sides = 32 }) => {
     assertNumber(diameter);
     assertNumber(sides);
-    return () => Polygon.fromDiameter({ diameter, sides });
+    return () => Polygon.fromDiameter(diameter, sides);
   });
 
 export default Circle;

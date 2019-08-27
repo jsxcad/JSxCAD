@@ -1,5 +1,6 @@
 import { Shape, fromGeometry, toKeptGeometry } from './Shape';
 
+import { cache } from './cache';
 import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
 import { dispatch } from './dispatch';
 
@@ -52,20 +53,21 @@ import { dispatch } from './dispatch';
  * :::
  **/
 
-const intersectionOfShapes = (...shapes) => {
-  switch (shapes.length) {
-    case 0: {
-      return fromGeometry({ assembly: [] });
-    }
-    case 1: {
-      // We still want to produce a simple shape.
-      return fromGeometry(toKeptGeometry(shapes[0]));
-    }
-    default: {
-      return fromGeometry(intersectionGeometry(...shapes.map(toKeptGeometry)));
-    }
-  }
-};
+const intersectionOfShapes =
+  cache((...shapes) => {
+        switch (shapes.length) {
+          case 0: {
+            return fromGeometry({ assembly: [] });
+          }
+          case 1: {
+            // We still want to produce a simple shape.
+            return fromGeometry(toKeptGeometry(shapes[0]));
+          }
+          default: {
+            return fromGeometry(intersectionGeometry(...shapes.map(toKeptGeometry)));
+          }
+        }
+      });
 
 export const intersection = dispatch(
   'intersection',

@@ -1,5 +1,3 @@
-import { cache } from './cache';
-
 export const dispatch = (name, ...dispatches) => {
   const op = (...params) => {
     for (const dispatch of dispatches) {
@@ -16,5 +14,5 @@ export const dispatch = (name, ...dispatches) => {
     throw Error(`Unsupported interface for ${name}: ${JSON.stringify(params)}`);
   };
 
-  return cache(op);
+  return op;
 };
