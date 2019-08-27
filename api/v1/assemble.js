@@ -1,7 +1,7 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
 
-import { cache } from './cache';
 import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
+import { cache } from './cache';
 import { dispatch } from './dispatch';
 
 /**
@@ -56,19 +56,19 @@ import { dispatch } from './dispatch';
 
 const assembleShapes =
   cache((...shapes) => {
-        shapes = shapes.filter(shape => shape !== undefined);
-        switch (shapes.length) {
-          case 0: {
-            return Shape.fromGeometry({ assembly: [] });
-          }
-          case 1: {
-            return shapes[0];
-          }
-          default: {
-            return fromGeometry(assembleGeometry(...shapes.map(toGeometry)));
-          }
-        }
-      });
+    shapes = shapes.filter(shape => shape !== undefined);
+    switch (shapes.length) {
+      case 0: {
+        return Shape.fromGeometry({ assembly: [] });
+      }
+      case 1: {
+        return shapes[0];
+      }
+      default: {
+        return fromGeometry(assembleGeometry(...shapes.map(toGeometry)));
+      }
+    }
+  });
 
 export const assemble = dispatch(
   'assemble',

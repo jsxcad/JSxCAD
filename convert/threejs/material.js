@@ -8,58 +8,58 @@ const loader = new THREE.TextureLoader();
 const loadTexture = (url) => {
   const texture = loader.load(url);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.offset.set( 0, 0 );
-  texture.repeat.set( 1, 1 );
+  texture.offset.set(0, 0);
+  texture.repeat.set(1, 1);
   return texture;
-}
+};
 
 const materialProperties = {
   paper: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/paper.png",
+    map: 'https://jsxcad.js.org/texture/paper.png'
   },
   wood: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/wood.png",
+    map: 'https://jsxcad.js.org/texture/wood.png'
   },
   plastic: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5,
+    reflectivity: 0.5
   },
   leaves: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/leaves.png",
+    map: 'https://jsxcad.js.org/texture/leaves.png'
   },
   water: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/water.png",
+    map: 'https://jsxcad.js.org/texture/water.png'
   },
   grass: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/grass.png",
+    map: 'https://jsxcad.js.org/texture/grass.png'
   },
   brick: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/brick.png",
+    map: 'https://jsxcad.js.org/texture/brick.png'
   },
   rock: {
     roughness: 0.5,
     metalness: 0.0,
     reflectivity: 0.5,
-    map: "https://jsxcad.js.org/texture/rock.png",
+    map: 'https://jsxcad.js.org/texture/rock.png'
   },
   'steel': {
     roughness: 0.5,
@@ -67,7 +67,7 @@ const materialProperties = {
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
-    map: "https://jsxcad.js.org/texture/sheet-metal.png",
+    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
   },
   copper: {
     roughness: 0.5,
@@ -75,7 +75,7 @@ const materialProperties = {
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
-    map: "https://jsxcad.js.org/texture/copper.png",
+    map: 'https://jsxcad.js.org/texture/copper.png'
   },
   glass: {
     roughness: 0.5,
@@ -94,7 +94,7 @@ const materialProperties = {
     clearCoatRoughness: 0,
     opacity: 0.5,
     transparent: true,
-    map: "https://jsxcad.js.org/texture/wet-glass.png",
+    map: 'https://jsxcad.js.org/texture/wet-glass.png'
   }
 };
 

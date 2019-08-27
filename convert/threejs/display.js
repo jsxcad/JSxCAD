@@ -13,11 +13,11 @@ export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   const { gui } = buildGui({ viewerElement });
   const render = () => renderer.render(scene, camera);
   const updateHud = () => {
-                      const ctx = hudCanvas.getContext('2d');
-                      ctx.clearRect(0, 0, width, height);
-                      ctx.fillStyle = '#FF0000';
-                      ctx.fillText("HUD", 50, 50);
-                    };
+    const ctx = hudCanvas.getContext('2d');
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#FF0000';
+    ctx.fillText('HUD', 50, 50);
+  };
 
   const container = document.body;
   container.appendChild(viewerElement);

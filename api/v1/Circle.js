@@ -1,7 +1,6 @@
 import { assertEmpty, assertNumber } from './assert';
 
 import { Polygon } from './Polygon';
-import { cache } from './cache';
 import { dispatch } from './dispatch';
 
 /**

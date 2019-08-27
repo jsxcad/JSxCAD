@@ -1,5 +1,5 @@
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
-import { getPaths, getSurfaces, getZ0Surfaces, measureBoundingBox, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
+import { getPaths, getSurfaces, getZ0Surfaces, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
 
 import { makeConvex as makeConvexSurface } from '@jsxcad/geometry-surface';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
@@ -8,27 +8,36 @@ import { toRgb } from '@jsxcad/algorithm-color';
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
 const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
 
-const X = 0;
-const Y = 1;
-
 // Not entirely sure how conformant this is, but it seems to work for simple
 // cases.
 
 // Width and height are in post-script points.
-const header = ({ width = 595, height = 841, lineWidth = 0.096 }) =>
-  [`%PDF-1.5`,
-   `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
-   `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,
-   `3 0 obj <<`,
-   `  /Contents 4 0 R`,
-   `  /MediaBox [ 0 0 ${width.toFixed(9)} ${height.toFixed(9)} ]`,
-   `  /Parent 2 0 R`,
-   `  /Type /Page`,
-   `>>`,
-   `endobj`,
-   `4 0 obj << >>`,
-   `stream`,
-   `${lineWidth.toFixed(9)} w`];
+const header = ({ scale = 1, width = 210, height = 297, trim = 5, lineWidth = 0.096 }) => {
+  const mediaX1 = 0 * scale;
+  const mediaY1 = 0 * scale;
+  const mediaX2 = width * scale;
+  const mediaY2 = height * scale;
+  const trimX1 = trim * scale;
+  const trimY1 = trim * scale;
+  const trimX2 = (width - trim) * scale;
+  const trimY2 = (height - trim) * scale;
+  return [
+    `%PDF-1.5`,
+    `1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj`,
+    `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,
+    `3 0 obj <<`,
+    `  /Contents 4 0 R`,
+    `  /MediaBox [ ${mediaX1.toFixed(9)} ${mediaY1.toFixed(9)} ${mediaX2.toFixed(9)} ${mediaY2.toFixed(9)} ]`,
+    `  /TrimBox [ ${trimX1.toFixed(9)} ${trimY1.toFixed(9)} ${trimX2.toFixed(9)} ${trimY2.toFixed(9)} ]`,
+    `  /Parent 2 0 R`,
+    `  /Type /Page`,
+    `>>`,
+    `endobj`,
+    `4 0 obj << >>`,
+    `stream`,
+    `${lineWidth.toFixed(9)} w`
+  ];
+};
 
 const footer =
    [`endstream`,
@@ -94,7 +103,7 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
     }
   }
 
-  return [].concat(header({ width: width * scale, height: height * scale, lineWidth: lineWidth }),
+  return [].concat(header({ scale, width, height, lineWidth }),
                    lines,
                    footer).join('\n');
 };

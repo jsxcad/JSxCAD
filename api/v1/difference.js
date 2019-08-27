@@ -35,19 +35,19 @@ import { dispatch } from './dispatch';
 
 const differenceOfShapes =
   cache((...shapes) => {
-        switch (shapes.length) {
-          case 0: {
-            return fromGeometry({ assembly: [] });
-          }
-          case 1: {
-            // We still want to produce a simple shape.
-            return fromGeometry(toKeptGeometry(shapes[0]));
-          }
-          default: {
-            return fromGeometry(differenceGeometry(...shapes.map(toKeptGeometry)));
-          }
-        }
-      });
+    switch (shapes.length) {
+      case 0: {
+        return fromGeometry({ assembly: [] });
+      }
+      case 1: {
+        // We still want to produce a simple shape.
+        return fromGeometry(toKeptGeometry(shapes[0]));
+      }
+      default: {
+        return fromGeometry(differenceGeometry(...shapes.map(toKeptGeometry)));
+      }
+    }
+  });
 
 export const difference = dispatch(
   'difference',

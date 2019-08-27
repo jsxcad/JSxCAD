@@ -1,0 +1,34 @@
+{
+  "name": "@jsxcad/geometry-z0surface-boolean",
+  "version": "0.0.79",
+  "description": "Boolean operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "module": "main.js",
+  "scripts": {
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/algorithm-polybooljs": "^0.0.79",
+    "@jsxcad/algorithm-polygon-clipping": "^0.0.79",
+    "@jsxcad/algorithm-flatten-boolean": "^0.0.79"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
+}

@@ -1,17 +1,11 @@
 import { alignVertices } from './alignVertices';
-import { createNormalize3 } from './createNormalize3';
 import { createNormalize4 } from './createNormalize4';
-import { deduplicate } from '@jsxcad/geometry-path';
 import { fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export const fromPolygons = (options = {}, polygons) => {
-  // return polygons.map(polygon => [polygon]);
-
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
-
-  // const normalize3 = createNormalize3();
 
   for (const polygon of polygons) {
     if (polygon.length < 3) {
@@ -38,16 +32,12 @@ export const fromPolygons = (options = {}, polygons) => {
   const solid = [];
 
   for (const [plane, polygons] of coplanarGroups) {
-    if (false) {
+    if (polygons.length === 1) {
+      // A single polygon forms a valid surface.
       solid.push(polygons);
     } else {
-      if (polygons.length === 1) {
-        // A single polygon forms a valid surface.
-        solid.push(polygons);
-      } else {
-        const surface = fromPolygonsToSurface({ plane }, polygons);
-        solid.push(surface);
-      }
+      const surface = fromPolygonsToSurface({ plane }, polygons);
+      solid.push(surface);
     }
   }
 

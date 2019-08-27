@@ -1,7 +1,6 @@
 import { cross, dot, negate, normalize, subtract } from '@jsxcad/math-vec3';
 
 import { Shape } from './Shape';
-import { fromRotation } from '@jsxcad/math-mat4';
 
 /**
  *
@@ -22,7 +21,6 @@ import { fromRotation } from '@jsxcad/math-mat4';
  **/
 
 export const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }, shape) => {
-  const normalizedFrom = normalize(from);
   const normalizedFacing = normalize(facing);
   const normalizedAt = normalize(subtract(at, from));
 
@@ -30,10 +28,10 @@ export const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0],
   const axis = normalize(cross(normalizedFacing, normalizedAt));
 
   return shape
-           .move(negate(center))
-           .rotate(angle, axis)
-           .move(from);
-}
+      .move(negate(center))
+      .rotate(angle, axis)
+      .move(from);
+};
 
 const method = function (options = {}) { return orient(options, this); };
 
