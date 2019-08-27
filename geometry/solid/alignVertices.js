@@ -5,7 +5,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 export const alignVertices = (solid) => {
   const normalize3 = createNormalize3();
   return solid.map(surface =>
-                     surface.map(polygon => deduplicate(polygon.map(normalize3)))
-                            .filter(polygon => polygon.length >= 3)
-                            .filter(polygon => !isNaN(toPlane(polygon)[0])));
+    surface.map(polygon => deduplicate(polygon.map(normalize3)))
+        .filter(polygon => polygon.length >= 3)
+        .filter(polygon => !isNaN(toPlane(polygon)[0])));
 };

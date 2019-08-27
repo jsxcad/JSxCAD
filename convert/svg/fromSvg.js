@@ -98,7 +98,7 @@ export const fromSvg = async (options = {}, svgString) => {
     const width = parseFloat(getAttribute(node, 'width', '1')) * 10;
     const height = parseFloat(getAttribute(node, 'height', '1')) * 10;
     const [minX, minY, maxX, maxY] = getAttribute(node, 'viewBox', `0 0 ${width} ${height}`)
-                                       .split(/ +/).map(text => parseFloat(text));
+        .split(/ +/).map(text => parseFloat(text));
     const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];
     return scaling;
   };

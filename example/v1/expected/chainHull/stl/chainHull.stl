@@ -377,18 +377,18 @@ vertex -9.2388 3.82683 -10
 vertex -8.3147 5.5557 -10
 endloop
 endfacet
-facet normal -4.894314413853157e-15 0 -1
+facet normal -6.525752551804209e-15 0 -1
 outer loop
-vertex -9.2388 -3.82683 -10
-vertex -9.80785 1.9509 -10
+vertex -9.80785 -1.9509 -10
 vertex -9.2388 3.82683 -10
+vertex -9.2388 -3.82683 -10
 endloop
 endfacet
-facet normal 0 0 -1
+facet normal 3.2001826897612522e-15 0 -1
 outer loop
 vertex -9.80785 -1.9509 -10
 vertex -9.80785 1.9509 -10
-vertex -9.2388 -3.82683 -10
+vertex -9.2388 3.82683 -10
 endloop
 endfacet
 facet normal 0 0 -1

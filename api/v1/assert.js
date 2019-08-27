@@ -29,7 +29,7 @@ export const assertFunction = (value) => {
     throw Error(`Is not function: ${value}`);
   }
   return true;
-}
+};
 
 export const assertShape = (value) => {
   if (value instanceof Shape) {

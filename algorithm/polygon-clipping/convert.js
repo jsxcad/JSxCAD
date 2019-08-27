@@ -1,7 +1,3 @@
-import { distance } from '@jsxcad/math-vec2';
-import { equals } from '@jsxcad/math-vec3';
-import { toPlane } from '@jsxcad/math-poly3';
-
 const X = 0;
 const Y = 1;
 
@@ -25,6 +21,7 @@ export const toSurface = (normalize2, multiPolygon) => {
         z0Polygon.push([point[X], point[Y], 0]);
       }
       z0Polygon.pop();
+      z0Surface.push(z0Polygon);
     }
   }
   return z0Surface;

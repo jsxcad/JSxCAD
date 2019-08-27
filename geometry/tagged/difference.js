@@ -5,9 +5,9 @@ import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { difference as pathsDifference } from '@jsxcad/geometry-paths';
-import { difference as solidDifference } from '@jsxcad/geometry-solid';
-import { difference as surfaceDifference } from '@jsxcad/geometry-surface';
-import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface';
+import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
+import { difference as surfaceDifference } from '@jsxcad/geometry-surface-boolean';
+import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface-boolean';
 
 export const difference = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
