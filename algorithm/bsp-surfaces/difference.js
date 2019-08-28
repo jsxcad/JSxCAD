@@ -1,4 +1,4 @@
-import { flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { doesNotOverlap, flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 
 import { makeSurfacesConvex } from './makeSurfacesConvex';
@@ -67,6 +67,7 @@ export const difference = (aSolid, ...bSolids) => {
   if (aSolid === undefined) {
     return [];
   }
+  bSolids = bSolids.filter(bSolid => doesNotOverlap(aSolid, bSolid));
   if (bSolids.length === 0) {
     return aSolid;
   }
