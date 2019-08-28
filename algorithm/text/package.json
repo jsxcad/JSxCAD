@@ -28,6 +28,7 @@
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-z0surface": "^0.0.79",
+    "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
