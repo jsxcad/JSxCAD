@@ -3,9 +3,9 @@ import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
-import { intersection as solidIntersection } from '@jsxcad/geometry-solid';
-import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface';
-import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface';
+import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolean';
+import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface-boolean';
+import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface-boolean';
 
 export const intersection = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {

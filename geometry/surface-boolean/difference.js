@@ -1,4 +1,4 @@
-import { difference as differenceZ0Surfaces } from '@jsxcad/geometry-z0surface';
+import { difference as differenceZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';

@@ -6,28 +6,28 @@ import { dispatch } from './dispatch';
 
 /**
  *
- * # Icsahedron
+ * # Icosahedron
  *
  * Generates tetrahedrons.
  *
  * ::: illustration { "view": { "position": [8, 8, 8] } }
  * ```
- * Icsahedron()
+ * Icosahedron()
  * ```
  * :::
  * ::: illustration { "view": { "position": [80, 80, 80] } }
  * ```
- * Icsahedron(10)
+ * Icosahedron(10)
  * ```
  * :::
  * ::: illustration { "view": { "position": [60, 60, 60] } }
  * ```
- * Icsahedron({ radius: 8 })
+ * Icosahedron({ radius: 8 })
  * ```
  * :::
  * ::: illustration { "view": { "position": [60, 60, 60] } }
  * ```
- * Icsahedron({ diameter: 16 })
+ * Icosahedron({ diameter: 16 })
  * ```
  * :::
  *

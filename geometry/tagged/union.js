@@ -3,9 +3,9 @@ import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { union as pathsUnion } from '@jsxcad/geometry-paths';
-import { union as solidUnion } from '@jsxcad/geometry-solid';
-import { union as surfaceUnion } from '@jsxcad/geometry-surface';
-import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface';
+import { union as solidUnion } from '@jsxcad/geometry-solid-boolean';
+import { union as surfaceUnion } from '@jsxcad/geometry-surface-boolean';
+import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface-boolean';
 
 export const union = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {

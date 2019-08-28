@@ -54,48 +54,48 @@ import { dispatch } from './dispatch';
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale);
 
-export const fromSize = ({ size }) => unitSquare().scale(size);
-export const fromDimensions = ({ width, length }) => unitSquare().scale([width, length, 1]);
+export const fromSize = (size) => unitSquare().scale(size);
+export const fromDimensions = (width, length) => unitSquare().scale([width, length, 1]);
 
 export const Square = dispatch(
   'Square',
   // square()
   (...args) => {
     assertEmpty(args);
-    return () => fromSize({ size: 1 });
+    return () => fromSize(1);
   },
   // square(4)
   (size, ...rest) => {
     assertNumber(size);
     assertEmpty(rest);
-    return () => fromSize({ size });
+    return () => fromSize(size);
   },
   // square(4, 6)
   (width, length, ...rest) => {
     assertNumber(width);
     assertNumber(length);
     assertEmpty(rest);
-    return () => fromDimensions({ width, length });
+    return () => fromDimensions(width, length);
   },
   // square({ edge: 10 })
   ({ edge }) => {
     assertNumber(edge);
-    return () => Polygon.fromEdge({ edge, sides: 4 });
+    return () => Polygon.fromEdge(edge, 4);
   },
   // Polygon({ apothem: 10 })
   ({ apothem }) => {
     assertNumber(apothem);
-    return () => Polygon.fromApothem({ apothem, sides: 4 });
+    return () => Polygon.fromApothem(apothem, 4);
   },
   // Polygon({ radius: 10})
   ({ radius }) => {
     assertNumber(radius);
-    return () => Polygon.fromRadius({ radius, sides: 4 });
+    return () => Polygon.fromRadius(radius, 4);
   },
   // Polygon({ diameter: 10})
   ({ diameter }) => {
     assertNumber(diameter);
-    return () => Polygon.fromDiameter({ diameter, sides: 4 });
+    return () => Polygon.fromDiameter(diameter, 4);
   });
 
 export default Square;

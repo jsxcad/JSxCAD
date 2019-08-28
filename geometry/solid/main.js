@@ -43,5 +43,5 @@ export {
   toPolygons,
   transform,
   translate,
-  union,
+  union
 };

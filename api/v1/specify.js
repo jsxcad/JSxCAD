@@ -15,12 +15,15 @@ export const specify = (specification, ...shapes) => {
   switch (shapes.length) {
     case 0: {
       geometry = specifyGeometry({ assembly: [] });
+      break;
     }
     case 1: {
       geometry = specifyGeometry(toGeometry(shapes[0]));
+      break;
     }
     default: {
       geometry = specifyGeometry({ assembly: shapes.map(toGeometry) });
+      break;
     }
   }
   return Shape.fromGeometry(addTags([`item/${JSON.stringify(specification)}`], geometry));

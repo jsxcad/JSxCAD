@@ -1,4 +1,4 @@
-import { assertGood, deduplicate, flip as flipPath, scale, translate } from '@jsxcad/geometry-path';
+import { assertGood, deduplicate, flip as flipPath } from '@jsxcad/geometry-path';
 
 import { flip as flipPolygons } from '@jsxcad/geometry-polygons';
 

@@ -4,8 +4,8 @@ import { getSolids } from './getSolids';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { union as unionPaths } from '@jsxcad/geometry-paths';
 import { union as unionPoints } from '@jsxcad/geometry-points';
-import { union as unionSolids } from '@jsxcad/algorithm-bsp-surfaces';
-import { union as unionZ0Surfaces } from '@jsxcad/geometry-z0surface';
+import { union as unionSolids } from '@jsxcad/geometry-solid-boolean';
+import { union as unionZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 
 export const fuse = (geometry) => {
   const items = [];

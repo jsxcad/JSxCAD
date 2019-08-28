@@ -1,4 +1,4 @@
-import { clean, union } from '@jsxcad/geometry-z0surface';
+import { clean, union } from '@jsxcad/geometry-z0surface-boolean';
 
 import { assertGood } from '@jsxcad/geometry-surface';
 import { fromSvgPath } from '@jsxcad/convert-svg';

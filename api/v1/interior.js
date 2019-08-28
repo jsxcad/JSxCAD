@@ -1,7 +1,7 @@
 import { Shape } from './Shape';
 import { close } from '@jsxcad/geometry-path';
 import { getPaths } from '@jsxcad/geometry-tagged';
-import { union } from '@jsxcad/geometry-z0surface';
+import { union } from '@jsxcad/geometry-z0surface-boolean';
 
 /**
  *

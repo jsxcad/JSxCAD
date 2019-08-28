@@ -1,7 +1,7 @@
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';
-import { union as unionZ0Surfaces } from '@jsxcad/geometry-z0surface';
+import { union as unionZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 
 export const union = (...surfaces) => {
   surfaces = surfaces.filter(surface => surface.length >= 1);

@@ -2,19 +2,20 @@ import { assert, assertNumber, assertPoints } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
+import { cache } from './cache';
 import { dispatch } from './dispatch';
 
-const unitPolygon = (sides) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: sides }));
+const unitPolygon = (sides = 16) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: sides }));
 
 // Note: radius here is circumradius.
-const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+const toRadiusFromApothem = (apothem, sides = 16) => apothem / Math.cos(Math.PI / sides);
+const toRadiusFromEdge = (edge, sides = 16) => edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-export const fromEdge = ({ edge, sides }) => unitPolygon(sides).scale(toRadiusFromEdge(edge, sides));
-export const fromApothem = ({ apothem, sides }) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides));
-export const fromRadius = ({ radius, sides }) => unitPolygon(sides).scale(radius);
-export const fromDiameter = ({ diameter, sides }) => unitPolygon(sides).scale(diameter / 2);
-export const fromPoints = (points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+export const fromEdge = cache((edge, sides = 16) => unitPolygon(sides).scale(toRadiusFromEdge(edge, sides)));
+export const fromApothem = cache((apothem, sides = 16) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides)));
+export const fromRadius = cache((radius, sides = 16) => unitPolygon(sides).scale(radius));
+export const fromDiameter = cache((diameter, sides = 16) => unitPolygon(sides).scale(diameter / 2));
+export const fromPoints = cache((points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z])));
 
 /**
  *
@@ -73,25 +74,25 @@ export const Polygon = dispatch(
   ({ edge, sides }) => {
     assertNumber(edge);
     assertNumber(sides);
-    return () => fromEdge({ edge, sides });
+    return () => fromEdge(edge, sides);
   },
   // polygon({ apothem: 10, sides: 27 })
   ({ apothem, sides }) => {
     assertNumber(apothem);
     assertNumber(sides);
-    return () => fromApothem({ apothem, sides });
+    return () => fromApothem(apothem, sides);
   },
   // polygon({ radius: 10, sides: 8 })
   ({ radius, sides }) => {
     assertNumber(radius);
     assertNumber(sides);
-    return () => fromRadius({ radius, sides });
+    return () => fromRadius(radius, sides);
   },
   // polygon({ diameter: 10, sides: 7 })
   ({ diameter, sides }) => {
     assertNumber(diameter);
     assertNumber(sides);
-    return () => fromDiameter({ diameter, sides });
+    return () => fromDiameter(diameter, sides);
   });
 
 export default Polygon;

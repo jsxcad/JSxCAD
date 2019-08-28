@@ -90,10 +90,10 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
     const hudContext = hudCanvas.getContext('2d');
     const render = () => renderer.render(scene, camera);
     const updateHud = () => {
-                        hudContext.clearRect(0, 0, width, height);
-                        drawHud({ camera, datasets, threejsGeometry, hudCanvas });
-                        hudContext.fillStyle = '#FF0000';
-                      };
+      hudContext.clearRect(0, 0, width, height);
+      drawHud({ camera, datasets, threejsGeometry, hudCanvas });
+      hudContext.fillStyle = '#FF0000';
+    };
 
     const container = document.getElementById(path);
     container.appendChild(viewerElement);
@@ -109,17 +109,17 @@ export const installDisplay = async ({ document, readFile, watchFile, watchFileC
 
     resize();
     new ResizeObserver(() => {
-                         ({ width, height } = resize());
-                         hudCanvas.width = width;
-                         hudCanvas.height = height;
-                       })
-      .observe(container);
+      ({ width, height } = resize());
+      hudCanvas.width = width;
+      hudCanvas.height = height;
+    })
+        .observe(container);
 
     const track = () => {
       animate();
       trackball.update();
       window.requestAnimationFrame(track);
-    }
+    };
 
     track();
 
