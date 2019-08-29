@@ -1,7 +1,7 @@
 import { fromSurface, toSurface } from './convert';
 
 import { doesNotOverlap } from './doesNotOverlap';
-import polybooljs from 'polybooljs';
+import polybooljs from './polybooljs/index';
 
 /**
  * Produces a surface that is the union of all provided surfaces.
