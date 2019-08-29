@@ -1,6 +1,5 @@
 import { clean, fromSurface, toSurface } from './convert';
 
-import { assertGood } from '@jsxcad/geometry-surface';
 import { createNormalize2 } from './createNormalize2';
 import polygonClipping from 'polygon-clipping';
 
@@ -33,7 +32,6 @@ export const intersection = (...z0Surfaces) => {
   const clippings = z0Surfaces.map(surface => fromSurface(normalize2, surface));
   const clipping = intersectionClipping(normalize2, clippings);
   const surface = toSurface(normalize2, clipping);
-  assertGood(surface);
   return surface;
 };
 
