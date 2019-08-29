@@ -83,7 +83,7 @@ export const Bolt = dispatch(
     assertNumber(length);
     assertNumber(diameter);
     return () => specify(['Bolt', length, diameter],
-                         Nut(diameter / 2, 3).above(),
+                         Nut(diameter, 3).above(),
                          ThreadedRod(diameter / 2, length).below());
   });
 
@@ -116,5 +116,6 @@ Bolt.M =
 
 export const Fastener = {
   Bolt,
-  Nail
+  Nail,
+  ThreadedRod,
 };
