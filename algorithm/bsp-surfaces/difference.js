@@ -4,7 +4,7 @@ import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { splitPolygon } from './splitPolygon';
 
-const doesOverlap = (a, b) => !doesNotOverlap(a, b);
+const mayOverlap = (a, b) => !doesNotOverlap(a, b);
 
 // Remove from surfaces those parts that are inside the solid delineated by bsp.
 export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = false) => {
@@ -69,7 +69,7 @@ export const difference = (aSolid, ...bSolids) => {
   if (aSolid === undefined) {
     return [];
   }
-  bSolids = bSolids.filter(bSolid => doesOverlap(aSolid, bSolid));
+  bSolids = bSolids.filter(bSolid => mayOverlap(aSolid, bSolid));
   if (bSolids.length === 0) {
     return aSolid;
   }

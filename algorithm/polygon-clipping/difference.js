@@ -1,6 +1,5 @@
 import { clean, fromSurface, toSurface } from './convert';
 
-import { assertGood } from '@jsxcad/geometry-surface';
 import { createNormalize2 } from './createNormalize2';
 import polygonClipping from 'polygon-clipping';
 import { unionClipping } from './union';
@@ -35,7 +34,6 @@ export const difference = (minuend, ...subtrahends) => {
   const subtrahend = unionClipping(normalize2, subtrahends.map(subtrahend => fromSurface(normalize2, subtrahend)));
   const result = differenceClipping(normalize2, fromSurface(normalize2, minuend), subtrahend);
   const surface = toSurface(normalize2, result);
-  assertGood(surface);
   return surface;
 };
 

@@ -1,5 +1,5 @@
-import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
 
 import { makeSurfacesConvex } from './makeSurfacesConvex';
 import { splitPolygon } from './splitPolygon';
