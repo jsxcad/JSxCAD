@@ -117,5 +117,5 @@ Bolt.M =
 export const Fastener = {
   Bolt,
   Nail,
-  ThreadedRod,
+  ThreadedRod
 };
