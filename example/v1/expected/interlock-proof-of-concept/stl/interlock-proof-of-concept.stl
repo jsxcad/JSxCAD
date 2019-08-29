@@ -113,16 +113,16 @@ endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex 0 3 2.5
-vertex 40 1 2.5
+vertex 0 1 2.5
 vertex 40 3 2.5
+vertex 0 3 2.5
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex 40 1 2.5
-vertex 0 3 2.5
+vertex 40 3 2.5
 vertex 0 1 2.5
+vertex 40 1 2.5
 endloop
 endfacet
 facet normal 0 0 -1
