@@ -98,6 +98,7 @@ import { translate } from './translate';
 import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
+import { writeDxf } from './writeDxf';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
@@ -145,6 +146,7 @@ const methods = [
   keep,
   voxels,
   wireframe,
+  writeDxf,
   writePdf,
   writeShape,
   writeStl,
