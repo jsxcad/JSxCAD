@@ -56,6 +56,7 @@
     "@jsxcad/algorithm-watertight": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/convert-dst": "^0.0.79",
+    "@jsxcad/convert-dxf": "^0.0.79",
     "@jsxcad/convert-jscad": "^0.0.79",
     "@jsxcad/convert-ldraw": "^0.0.79",
     "@jsxcad/convert-pdf": "^0.0.79",
