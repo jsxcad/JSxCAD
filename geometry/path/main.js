@@ -6,6 +6,7 @@ import { canonicalize } from './canonicalize';
 import { close } from './close';
 import { concatenate } from './concatenate';
 import { deduplicate } from './deduplicate';
+import { getEdges } from './getEdges';
 import { flip } from './flip';
 import { isClockwise } from './isClockwise';
 import { isClosed } from './isClosed';
@@ -25,6 +26,7 @@ export {
   close,
   concatenate,
   deduplicate,
+  getEdges,
   flip,
   isClockwise,
   isClosed,
