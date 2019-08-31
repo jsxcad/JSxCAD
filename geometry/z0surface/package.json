@@ -20,6 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/cache": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/math-line2": "^0.0.79",

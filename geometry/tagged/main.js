@@ -9,6 +9,7 @@ import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { fromPathToZ0Surface } from './fromPathToZ0Surface';
 import { fuse } from './fuse';
 import { getClouds } from './getClouds';
 import { getItems } from './getItems';
@@ -41,6 +42,7 @@ export {
   eachItem,
   eachPoint,
   flip,
+  fromPathToZ0Surface,
   fuse,
   getClouds,
   getItems,

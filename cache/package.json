@@ -21,6 +21,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "fast-equals": "^2.0.0",
     "micro-memoize": "^4.0.8"
   },
   "devDependencies": {

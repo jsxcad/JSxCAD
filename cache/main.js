@@ -1,5 +1,6 @@
-import { cache } from './cache';
+import { cache, cacheTransform } from './cache';
 
 export {
   cache,
+  cacheTransform
 };
