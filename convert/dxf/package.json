@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-z0surface",
+  "name": "@jsxcad/convert-dxf",
   "version": "0.0.79",
-  "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
+  "description": "DXF algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "main.js",
@@ -21,16 +21,11 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/geometry-paths": "^0.0.79",
-    "@jsxcad/math-line2": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec2": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "@jsxcad/geometry-tagged": "^0.0.79",
+    "dxf-writer": "^1.2.1"
   },
   "devDependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-utils": "^0.0.79",
+    "@jsxcad/algorithm-shape": "^0.0.79",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",

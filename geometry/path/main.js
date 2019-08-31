@@ -7,6 +7,7 @@ import { close } from './close';
 import { concatenate } from './concatenate';
 import { deduplicate } from './deduplicate';
 import { flip } from './flip';
+import { getEdges } from './getEdges';
 import { isClockwise } from './isClockwise';
 import { isClosed } from './isClosed';
 import { isCounterClockwise } from './isCounterClockwise';
@@ -26,6 +27,7 @@ export {
   concatenate,
   deduplicate,
   flip,
+  getEdges,
   isClockwise,
   isClosed,
   isCounterClockwise,
