@@ -2,7 +2,6 @@ import { assertEmpty, assertNumber, assertNumberTriple } from './assert';
 import { buildRegularPrism, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
-import { cache } from './cache';
 import { dispatch } from './dispatch';
 
 /**
@@ -56,11 +55,11 @@ const unitCube = () => Shape.fromSolid(buildRegularPrism({ edges: 4 }))
 
 // Cube Interfaces.
 
-export const fromValue = cache((value) => unitCube().scale(value));
+export const fromValue = (value) => unitCube().scale(value);
 
-export const fromValues = cache((width, breadth, height) => unitCube().scale([width, breadth, height]));
+export const fromValues = (width, breadth, height) => unitCube().scale([width, breadth, height]);
 
-export const fromRadius = cache((radius) => Shape.fromSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]));
+export const fromRadius = (radius) => Shape.fromSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
 export const fromDiameter = (diameter) => fromRadius(diameter / 2);
 
