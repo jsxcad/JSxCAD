@@ -18,7 +18,7 @@ export const buildRingSphere = ({ resolution = 20 }) => {
   const longitudinalResolution = 2 * latitudinalResolution;
 
   // Trace out latitudinal rings.
-  const ring = buildRegularPolygon({ edges: longitudinalResolution });
+  const ring = buildRegularPolygon(longitudinalResolution);
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
     let angle = Math.PI * 1.0 * slice / latitudinalResolution;
     let height = Math.cos(angle);

@@ -4,7 +4,7 @@ import { toPdf } from './toPdf';
 
 test('Triangle', async t => {
   // A polygon is a path.
-  const pdf = await toPdf({}, { tags: ['color/blue'], paths: [buildRegularPolygon({ edges: 3 })] });
+  const pdf = await toPdf({}, { tags: ['color/blue'], paths: [buildRegularPolygon(3)] });
   t.is(pdf,
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
@@ -34,7 +34,7 @@ test('Triangle', async t => {
 
 test('Triangle with a custom page size', async t => {
   // A polygon is a path.
-  const pdf = await toPdf({ size: [100, 200] }, { paths: [buildRegularPolygon({ edges: 3 })] });
+  const pdf = await toPdf({ size: [100, 200] }, { paths: [buildRegularPolygon(3)] });
   t.is(pdf,
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
