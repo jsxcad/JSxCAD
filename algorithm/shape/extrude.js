@@ -1,10 +1,10 @@
 import { flip as flipPath, rotateZ as rotateZPath, translate as translatePath } from '@jsxcad/geometry-path';
-import { flip as flipSurface, rotateZ as rotateZSurface, translate as translateSurface } from '@jsxcad/geometry-surface';
-
-import { fromPolygons } from './fromPolygons';
+import { flip as flipSurface, makeConvex, retessellate, rotateZ as rotateZSurface, translate as translateSurface } from '@jsxcad/geometry-surface';
+import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 // FIX: Consider a general transformation, rather than just twist.
-export const extrude = ({ height = 1, steps = 1, twistRadians = 0 }, surface) => {
+export const extrude = ({ height = 1, steps = 1, twistRadians = 0 }, rawSurface) => {
+  const surface = retessellate(makeConvex({}, rawSurface));
   const polygons = [];
   const stepHeight = height / steps;
 
@@ -30,21 +30,14 @@ export const extrude = ({ height = 1, steps = 1, twistRadians = 0 }, surface) =>
     }
   }
 
-  // Walls go around.
-  const walls = fromPolygons({}, polygons);
-
   // Roof goes up.
   const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));
 
   // floor faces down.
   const floor = flipSurface(surface);
 
-  // And form a solid.
-  const solid = [roof, floor, ...walls];
+  polygons.push(...roof);
+  polygons.push(...floor);
 
-  if (surface.isConvex) {
-    solid.isConvex = true;
-  }
-
-  return solid;
+  return toSolidFromPolygons({}, polygons);
 };
