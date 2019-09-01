@@ -12,7 +12,13 @@ export const makeConvex = (options = {}, surface) => {
   }
   assertCoplanar(surface);
   assertGood(surface);
-  const [to, from] = toXYPlaneTransforms(toPlane(surface));
-  let retessellatedSurface = makeConvexZ0Surface({}, transform(to, surface));
-  return transform(from, retessellatedSurface);
+  const plane = toPlane(surface);
+  const [to, from] = toXYPlaneTransforms(plane);
+  const retessellatedZ0Surface = makeConvexZ0Surface({}, transform(to, surface));
+  const retessellatedSurface = transform(from, retessellatedZ0Surface);
+  // FIX: Is this plane enforecement necessary.
+  for (const retessellatedPolygon of retessellatedSurface) {
+    retessellatedPolygon.plane = plane;
+  }
+  return retessellatedSurface;
 };
