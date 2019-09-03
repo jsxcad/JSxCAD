@@ -24,6 +24,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
     points.push([x, y, 0]);
   }
   points.isConvex = true;
+  // FIX: Clean up the consumers of this result.
   return { z0Surface: [points] };
 };
 
