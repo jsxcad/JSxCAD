@@ -1,6 +1,5 @@
-import { buildConvexHull, buildConvexMinkowskiSum } from '@jsxcad/geometry-points';
-
 import { Shape } from './Shape';
+import { buildConvexMinkowskiSum } from '@jsxcad/algorithm-shape';
 
 /**
  *
@@ -23,5 +22,5 @@ export const minkowski = (a, b) => {
   const bPoints = [];
   a.eachPoint({}, point => aPoints.push(point));
   b.eachPoint({}, point => bPoints.push(point));
-  return Shape.fromPolygonsToSolid(buildConvexHull({}, buildConvexMinkowskiSum({}, aPoints, bPoints)));
+  return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };

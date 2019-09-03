@@ -1,4 +1,4 @@
-import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/geometry-points';
+import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
 
@@ -41,9 +41,9 @@ export const hull = (...shapes) => {
   const points = [];
   shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
   if (points.every(point => point[Z] === 0)) {
-    return Shape.fromPolygonsToZ0Surface([buildConvexSurfaceHull({}, points)]);
+    return Shape.fromGeometry(buildConvexSurfaceHull(points));
   } else {
-    return Shape.fromPolygonsToSolid(buildConvexHull({}, points));
+    return Shape.fromGeometry(buildConvexHull(points));
   }
 };
 
