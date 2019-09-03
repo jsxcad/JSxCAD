@@ -1,6 +1,6 @@
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { buildConvexHull } from '@jsxcad/geometry-points';
+import { buildConvexHull } from '@jsxcad/algorithm-shape';
 
 /**
  *
@@ -30,7 +30,7 @@ export const chainHull = (...shapes) => {
   const pointsets = shapes.map(shape => shape.toPoints().points);
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
-    chain.push(Shape.fromPolygonsToSolid(buildConvexHull({}, [...pointsets[nth - 1], ...pointsets[nth]])));
+    chain.push(Shape.fromGeometry(buildConvexHull([...pointsets[nth - 1], ...pointsets[nth]])));
   }
   return assemble(...chain);
 };

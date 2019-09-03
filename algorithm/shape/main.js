@@ -1,4 +1,7 @@
 import { buildAdaptiveCubicBezierCurve } from './buildAdaptiveCubicBezierCurve';
+import { buildConvexHull } from './buildConvexHull';
+import { buildConvexMinkowskiSum } from './buildConvexMinkowskiSum';
+import { buildConvexSurfaceHull } from './buildConvexSurfaceHull';
 import { buildFromFunction } from './buildFromFunction';
 import { buildFromSlices } from './buildFromSlices';
 import { buildGeodesicSphere } from './buildGeodesicSphere';
@@ -16,6 +19,9 @@ import { subdivideTriangularMesh } from './subdivideTriangularMesh';
 
 export {
   buildAdaptiveCubicBezierCurve,
+  buildConvexHull,
+  buildConvexMinkowskiSum,
+  buildConvexSurfaceHull,
   buildFromFunction,
   buildFromSlices,
   buildGeodesicSphere,

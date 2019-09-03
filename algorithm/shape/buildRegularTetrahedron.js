@@ -1,4 +1,4 @@
-import { buildConvexHull } from '@jsxcad/geometry-points';
+import { buildConvexHull } from './buildConvexHull';
 
 // Unit tetrahedron vertices.
 const points = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],
@@ -6,4 +6,4 @@ const points = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],
                 [1, 1, 1], [1, -1, -1], [-1, -1, 1],
                 [1, 1, 1], [-1, -1, 1], [-1, 1, -1]];
 
-export const buildRegularTetrahedron = (options = {}) => buildConvexHull({}, points);
+export const buildRegularTetrahedron = (options = {}) => buildConvexHull(points);
