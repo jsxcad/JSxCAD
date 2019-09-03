@@ -20,7 +20,7 @@ import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geom
  * :::
  **/
 
-export const measureBoundingBox = (shape) => measureBoundingBoxOfGeometry(shape.toGeometry());
+export const measureBoundingBox = (shape) => measureBoundingBoxOfGeometry(shape.toKeptGeometry());
 
 const method = function () { return measureBoundingBox(this); };
 
