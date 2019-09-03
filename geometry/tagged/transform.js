@@ -1,3 +1,4 @@
+import { cacheTransform } from '@jsxcad/cache';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
@@ -35,4 +36,8 @@ export const transformItem = (matrix, item) => {
   return transformed;
 };
 
-export const transform = (matrix, untransformed) => ({ matrix, untransformed, tags: untransformed.tags });
+const transformImpl = (matrix, untransformed) => {
+  return { matrix, untransformed, tags: untransformed.tags };
+};
+
+export const transform = cacheTransform(transformImpl);

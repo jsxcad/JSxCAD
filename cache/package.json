@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-tagged",
+  "name": "@jsxcad/cache",
   "version": "0.0.79",
-  "description": "Assembly algorithms for JSxCAD",
+  "description": "Caching for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "main.js",
@@ -9,7 +9,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
-    "tests": "ava *.test.js"
+    "tests": "ava *.test.js",
+    "rollup": "rollup -c rollup.config.js"
   },
   "contributors": [
     {
@@ -20,20 +21,10 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/cache": "^0.0.79",
-    "@jsxcad/geometry-paths": "^0.0.79",
-    "@jsxcad/geometry-points": "^0.0.79",
-    "@jsxcad/geometry-solid": "^0.0.79",
-    "@jsxcad/geometry-solid-boolean": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/geometry-surface-boolean": "^0.0.79",
-    "@jsxcad/geometry-z0surface": "^0.0.79",
-    "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "fast-equals": "^2.0.0",
+    "micro-memoize": "^4.0.8"
   },
   "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.79",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",

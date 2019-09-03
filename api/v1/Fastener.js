@@ -4,7 +4,6 @@ import { Cube } from './Cube';
 import { Cylinder } from './Cylinder';
 import { Triangle } from './Triangle';
 import { assemble } from './assemble';
-import { cache } from './cache';
 import { dispatch } from './dispatch';
 import { intersection } from './intersection';
 import { lathe } from './lathe';
@@ -45,7 +44,7 @@ export const Nail = dispatch(
   });
 
 const Thread =
-  cache((radius = 1, height = 1, pitch = 1, sides = 16) => {
+  (radius = 1, height = 1, pitch = 1, sides = 16) => {
     const Y = 1;
     const Z = 2;
     const thread =
@@ -60,10 +59,10 @@ const Thread =
                         thread)
         .rotateY(-90)
         .center();
-  });
+  };
 
 const ThreadedRod =
-  cache((radius = 1, height = 1, pitch = 1, sides = 16, play = 0) => {
+  (radius = 1, height = 1, pitch = 1, sides = 16, play = 0) => {
     if (play !== 0) {
       return assemble(ThreadedRod(radius, height, pitch, sides).drop(),
                       ThreadedRod(radius - play, height, pitch, sides));
@@ -71,11 +70,11 @@ const ThreadedRod =
       return assemble(Thread(radius, height, pitch, sides),
                       Cylinder({ radius, height, sides }));
     }
-  });
+  };
 
 const Nut =
-  cache((radius = 1, height = 1, sides = 6) =>
-    Cylinder(radius, height, sides));
+  (radius = 1, height = 1, sides = 6) =>
+    Cylinder(radius, height, sides);
 
 export const Bolt = dispatch(
   'Bolt',
@@ -88,7 +87,7 @@ export const Bolt = dispatch(
   });
 
 Bolt.M =
-  cache((m, length) => {
+  (m, length) => {
     // See: http://www.atlrod.com/metric-hex-bolt-dimensions/
     const build = (dMax, dMin, hMax, hMin, fMax, fMin, cMax, cMin) =>
       specify(['Bolt.M', m, length],
@@ -112,7 +111,7 @@ Bolt.M =
       case 90: return build(90.00, 89.13, 57.74, 54.26, 130, 125.50, 150.11, 143.07);
       default: throw Error('Unsupported metric bolt size');
     }
-  });
+  };
 
 export const Fastener = {
   Bolt,

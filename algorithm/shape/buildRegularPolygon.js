@@ -1,3 +1,4 @@
+import { cache } from '@jsxcad/cache';
 import { fromAngleRadians } from '@jsxcad/math-vec2';
 
 /**
@@ -5,23 +6,26 @@ import { fromAngleRadians } from '@jsxcad/math-vec2';
  * Note: radius and length must not conflict.
  *
  * @param {Object} [options] - options for construction
- * @param {Integer} [options.edges=32] - how many edges the polygon has.
+ * @param {Integer} [options.sides=32] - how many sides the polygon has.
  * @returns {PointArray} Array of points along the path of the circle in CCW winding.
  *
  * @example
- * const circlePoints = regularPolygon({ edges: 32 })
+ * const circlePoints = regularPolygon(32)
  *
  * @example
- * const squarePoints = regularPolygon({ edges: 4 })
+ * const squarePoints = regularPolygon(4)
  * })
  */
-export const buildRegularPolygon = ({ edges = 32 } = {}) => {
+const buildRegularPolygonImpl = (sides = 32) => {
   let points = [];
-  for (let i = 0; i < edges; i++) {
-    let radians = 2 * Math.PI * i / edges;
+  for (let i = 0; i < sides; i++) {
+    let radians = 2 * Math.PI * i / sides;
     let [x, y] = fromAngleRadians(radians);
     points.push([x, y, 0]);
   }
   points.isConvex = true;
-  return points;
+  // FIX: Clean up the consumers of this result.
+  return { z0Surface: [points] };
 };
+
+export const buildRegularPolygon = cache(buildRegularPolygonImpl);

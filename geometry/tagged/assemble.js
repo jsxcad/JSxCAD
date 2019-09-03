@@ -1,3 +1,6 @@
 import { assertGood } from './assertGood';
+import { cache } from '@jsxcad/cache';
 
-export const assemble = (...taggedGeometries) => assertGood({ assembly: taggedGeometries });
+const assembleImpl = (...taggedGeometries) => assertGood({ assembly: taggedGeometries });
+
+export const assemble = cache(assembleImpl);

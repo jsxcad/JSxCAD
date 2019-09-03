@@ -2,20 +2,19 @@ import { assert, assertNumber, assertPoints } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
-import { cache } from './cache';
 import { dispatch } from './dispatch';
 
-const unitPolygon = (sides = 16) => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: sides }));
+const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
 const toRadiusFromApothem = (apothem, sides = 16) => apothem / Math.cos(Math.PI / sides);
 const toRadiusFromEdge = (edge, sides = 16) => edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-export const fromEdge = cache((edge, sides = 16) => unitPolygon(sides).scale(toRadiusFromEdge(edge, sides)));
-export const fromApothem = cache((apothem, sides = 16) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides)));
-export const fromRadius = cache((radius, sides = 16) => unitPolygon(sides).scale(radius));
-export const fromDiameter = cache((diameter, sides = 16) => unitPolygon(sides).scale(diameter / 2));
-export const fromPoints = cache((points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z])));
+export const fromEdge = (edge, sides = 16) => unitPolygon(sides).scale(toRadiusFromEdge(edge, sides));
+export const fromApothem = (apothem, sides = 16) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides));
+export const fromRadius = (radius, sides = 16) => unitPolygon(sides).scale(radius);
+export const fromDiameter = (diameter, sides = 16) => unitPolygon(sides).scale(diameter / 2);
+export const fromPoints = (points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
  *
