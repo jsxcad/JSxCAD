@@ -4,7 +4,7 @@ import test from 'ava';
 import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
 test('A regular triangular polygon', t => {
-  t.deepEqual(canonicalize([buildRegularPolygon(3)]),
+  t.deepEqual(canonicalize(buildRegularPolygon(3).z0Surface),
               [unitRegularTrianglePolygon]);
 });
 

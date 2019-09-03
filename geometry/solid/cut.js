@@ -1,10 +1,11 @@
 import { cutSurface, flip } from '@jsxcad/geometry-surface';
 
+import { cacheCut } from '@jsxcad/cache';
 import { canonicalize } from './canonicalize';
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
 import { toLoops } from '@jsxcad/geometry-polygons';
 
-export const cut = (plane, solid) => {
+const cutImpl = (plane, solid) => {
   const front = [];
   const back = [];
   const frontEdges = [];
@@ -28,3 +29,5 @@ export const cut = (plane, solid) => {
 
   return [front, back];
 };
+
+export const cut = cacheCut(cutImpl);

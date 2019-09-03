@@ -1,12 +1,11 @@
-import { assertGood as assertGoodSolid, transform as transformSolid } from '@jsxcad/geometry-solid';
-import { assertGood as assertGoodSurface, toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 import { assertNonZeroNumber, assertShape } from './assert';
-import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getSurfaces, getZ0Surfaces, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
+import { toPlane as toPlaneOfSurface } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 /**
@@ -36,20 +35,15 @@ export const fromHeight = (shape, height = 1, steps = 1, twist = 0) => {
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
-  for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
-    assertGoodSurface(z0Surface);
-    const solid = extrudeAlgorithm({ height, steps, twistRadians }, z0Surface);
-    assertGoodSolid(solid);
-    solids.push(Shape.fromGeometry({ solid, tags }));
+  for (const z0SurfaceGeometry of getZ0Surfaces(keptGeometry)) {
+    const solidGeometry = extrudeAlgorithm(z0SurfaceGeometry, height, steps, twistRadians);
+    solids.push(Shape.fromGeometry(solidGeometry));
   }
-  for (const { tags, surface } of getSurfaces(keptGeometry)) {
-    assertGoodSurface(surface);
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
-    const z0Solid = extrudeAlgorithm({ height, steps, twistRadians }, transformSurface(toZ0, surface));
-    assertGoodSolid(z0Solid);
-    const solid = transformSolid(fromZ0, z0Solid);
-    assertGoodSolid(solid);
-    solids.push(Shape.fromGeometry({ solid, tags }));
+  for (const surfaceGeometry of getSurfaces(keptGeometry)) {
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surfaceGeometry.surface));
+    const z0SolidGeometry = extrudeAlgorithm(toKeptGeometry(transform(toZ0, surfaceGeometry)), height, steps, twistRadians);
+    const solidGeometry = transform(fromZ0, z0SolidGeometry);
+    solids.push(Shape.fromGeometry(solidGeometry));
   }
   if (height < 0) {
     // Turn negative extrusions inside out.

@@ -34,7 +34,7 @@ import { dispatch } from './dispatch';
  **/
 
 const unitSphere = ({ resolution = 16 } = {}) => {
-  const shape = Shape.fromPolygonsToSolid(buildRingSphere({ resolution }));
+  const shape = Shape.fromGeometry(buildRingSphere(resolution));
   // Make convex.
   shape.toGeometry().solid.isConvex = true;
   return shape;

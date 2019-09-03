@@ -1,6 +1,7 @@
 import { buildRegularPolygon } from './buildRegularPolygon';
+import { cache } from '@jsxcad/cache';
 import { extrude } from './extrude';
-import { translate } from '@jsxcad/geometry-solid';
+import { translate } from '@jsxcad/geometry-tagged';
 
 /**
  * Construct a regular unit prism of a given edge count.
@@ -14,8 +15,10 @@ import { translate } from '@jsxcad/geometry-solid';
  * const circlePoints = regularPolygon({ edges: 32 })
  */
 
-export const buildRegularPrism = ({ edges = 32 }) => {
-  const surface = [buildRegularPolygon(edges)];
+const buildRegularPrismImpl = (edges = 32) => {
+  const surface = buildRegularPolygon(edges);
   surface.isConvex = true;
-  return translate([0, 0, -0.5], extrude({ height: 1 }, surface));
+  return translate([0, 0, -0.5], extrude(surface, 1));
 };
+
+export const buildRegularPrism = cache(buildRegularPrismImpl);

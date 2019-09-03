@@ -36,6 +36,8 @@ export const transformItem = (matrix, item) => {
   return transformed;
 };
 
-const transformImpl = (matrix, untransformed) => ({ matrix, untransformed, tags: untransformed.tags });
+const transformImpl = (matrix, untransformed) => {
+  return { matrix, untransformed, tags: untransformed.tags };
+};
 
 export const transform = cacheTransform(transformImpl);

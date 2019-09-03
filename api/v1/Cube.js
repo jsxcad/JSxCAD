@@ -49,7 +49,7 @@ import { dispatch } from './dispatch';
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 // Note: We can't call this while bootstrapping, but we could memoize the result afterward.
-const unitCube = () => Shape.fromSolid(buildRegularPrism({ edges: 4 }))
+const unitCube = () => Shape.fromGeometry(buildRegularPrism(4))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
@@ -59,7 +59,7 @@ export const fromValue = (value) => unitCube().scale(value);
 
 export const fromValues = (width, breadth, height) => unitCube().scale([width, breadth, height]);
 
-export const fromRadius = (radius) => Shape.fromSolid(buildRegularPrism({ edges: 4 })).rotateZ(45).scale([radius, radius, radius / edgeScale]);
+export const fromRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4)).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
 export const fromDiameter = (diameter) => fromRadius(diameter / 2);
 

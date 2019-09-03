@@ -1,16 +1,32 @@
 import { deepEqual } from 'fast-equals';
 import memoize from 'micro-memoize';
 
+// This is a very thin abstraction layer to decouple from any particular cache implementation.
+
 const maxSize = 50;
 
-// This is a very thin abstraction layer to decouple from any particular cache implementation.
+// Keyed by identity
 
 export const cache = (op) => memoize(op, { maxSize });
 
-// Transform requires deep equality on the matrix argument;
+// Keyed by matrix structure and geometry identity.
 
-const isMatchingTransformKey = ([aMatrix, aGeometry], [bMatrix, bGeometry]) => {
-  return aGeometry === bGeometry && deepEqual(aMatrix, bMatrix);
-};
+const isMatchingTransformKey = ([aMatrix, aGeometry], [bMatrix, bGeometry]) =>
+  aGeometry === bGeometry && deepEqual(aMatrix, bMatrix);
 
 export const cacheTransform = (op) => memoize(op, { isMatchingKey: isMatchingTransformKey, maxSize });
+
+// Keyed by tag-list and geometry identity.
+
+const isMatchingAddTagsKey = ([aTags, aGeometry, aConditionTags, aConditionSpec],
+                              [bTags, bGeometry, bConditionTags, bConditionSpec]) =>
+  aGeometry === bGeometry && aConditionSpec === bConditionSpec && deepEqual(aConditionTags, bConditionTags) && deepEqual(aTags, bTags);
+
+export const cacheAddTags = (op) => memoize(op, { isMatchingKey: isMatchingAddTagsKey, maxSize });
+
+// Keyed by plane structure and geometry identity.
+
+const isMatchingCutKey = ([aPlane, aGeometry], [bPlane, bGeometry]) =>
+  aGeometry === bGeometry && deepEqual(aPlane, bPlane);
+
+export const cacheCut = (op) => memoize(op, { isMatchingKey: isMatchingCutKey, maxSize });

@@ -24,7 +24,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
     points.push([x, y, 0]);
   }
   points.isConvex = true;
-  return points;
+  return { z0Surface: [points] };
 };
 
 export const buildRegularPolygon = cache(buildRegularPolygonImpl);

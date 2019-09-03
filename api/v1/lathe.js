@@ -1,4 +1,5 @@
 import { Shape } from './Shape';
+import { assemble } from './assemble';
 import { getPaths } from '@jsxcad/geometry-tagged';
 import { lathe as lathePath } from '@jsxcad/algorithm-shape';
 
@@ -16,13 +17,13 @@ import { lathe as lathePath } from '@jsxcad/algorithm-shape';
 export const lathe = ({ sides = 16, loops = 1, loopOffset = 0 }, shape) => {
   const [left] = shape.cut();
   const outline = left.outline();
-  const polygons = [];
-  for (const { paths } of getPaths(outline.toKeptGeometry())) {
-    for (const path of paths) {
-      polygons.push(...lathePath({ sides, loops, loopOffset }, path));
+  const solids = [];
+  for (const geometry of getPaths(outline.toKeptGeometry())) {
+    for (const path of geometry.paths) {
+      solids.push(Shape.fromGeometry(lathePath(path, sides, loops, loopOffset)));
     }
   }
-  return Shape.fromPolygonsToSolid(polygons);
+  return assemble(...solids);
 };
 
 const method = function (options) { return lathe(options, this); };

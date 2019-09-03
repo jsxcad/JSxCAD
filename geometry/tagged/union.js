@@ -1,3 +1,4 @@
+import { cache } from '@jsxcad/cache';
 import { getPaths } from './getPaths';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
@@ -7,7 +8,7 @@ import { union as solidUnion } from '@jsxcad/geometry-solid-boolean';
 import { union as surfaceUnion } from '@jsxcad/geometry-surface-boolean';
 import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface-boolean';
 
-export const union = (baseGeometry, ...geometries) => {
+const unionImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
     return { ...baseGeometry, item: union(baseGeometry.item, ...geometries) };
   }
@@ -36,3 +37,5 @@ export const union = (baseGeometry, ...geometries) => {
   // FIX: Surfaces, Paths, etc.
   return result;
 };
+
+export const union = cache(unionImpl);

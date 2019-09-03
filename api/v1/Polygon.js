@@ -4,7 +4,7 @@ import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/a
 import { Shape } from './Shape';
 import { dispatch } from './dispatch';
 
-const unitPolygon = (sides = 16) => Shape.fromPathToZ0Surface(buildRegularPolygon(sides));
+const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
 const toRadiusFromApothem = (apothem, sides = 16) => apothem / Math.cos(Math.PI / sides);

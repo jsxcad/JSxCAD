@@ -1,3 +1,4 @@
+import { cache } from '@jsxcad/cache';
 import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
@@ -9,7 +10,7 @@ import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
 import { difference as surfaceDifference } from '@jsxcad/geometry-surface-boolean';
 import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface-boolean';
 
-export const difference = (baseGeometry, ...geometries) => {
+const differenceImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
     return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };
   }
@@ -47,3 +48,5 @@ export const difference = (baseGeometry, ...geometries) => {
   // FIX: Surfaces, Paths, etc.
   return result;
 };
+
+export const difference = cache(differenceImpl);
