@@ -17,7 +17,6 @@ export const toKeptGeometry = (geometry) => {
         }
       }
     };
-
     const keptGeometry = walk(disjointGeometry);
     assertGood(keptGeometry);
     geometry.keptGeometry = keptGeometry || {};

@@ -1,6 +1,6 @@
 import { fromSurface, toSurface } from './convert';
 
-import { doesNotOverlap } from './doesNotOverlap';
+import { doesNotOverlapOrAbut } from './doesNotOverlap';
 import { unify } from '@flatten-js/boolean-op';
 
 /**
@@ -17,7 +17,7 @@ export const union = (...z0Surfaces) => {
   while (z0Surfaces.length >= 2) {
     const a = z0Surfaces.shift();
     const b = z0Surfaces.shift();
-    if (doesNotOverlap(a, b)) {
+    if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
       const result = unify(fromSurface(a), fromSurface(b));

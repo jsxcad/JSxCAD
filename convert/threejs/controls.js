@@ -20,7 +20,7 @@ export const buildTrackballControls = ({ camera, render, viewerElement, view = {
 
 export const buildGui = ({ viewerElement }) => {
   const gui = new dat.GUI({ autoPlace: false });
-  gui.domElement.style = 'padding: 5px';
+  gui.domElement.style = 'padding: 5px; z-index: 3';
   viewerElement.appendChild(gui.domElement);
 
   return { gui };

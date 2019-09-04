@@ -1,16 +1,16 @@
 solid JSxCAD
 facet normal 0 -1 0
 outer loop
-vertex 0 -1.5 -0.5
-vertex 1 -1.5 0.5
 vertex 0 -1.5 0.5
+vertex 1 -1.5 -0.5
+vertex 1 -1.5 0.5
 endloop
 endfacet
 facet normal 0 -1 0
 outer loop
-vertex 1 -1.5 0.5
-vertex 0 -1.5 -0.5
 vertex 1 -1.5 -0.5
+vertex 0 -1.5 0.5
+vertex 0 -1.5 -0.5
 endloop
 endfacet
 facet normal 0 -0.894427190999916 0.447213595499958
@@ -57,30 +57,30 @@ endloop
 endfacet
 facet normal 1 0 0
 outer loop
-vertex 1 -1.5 0.5
+vertex 1 0 3.5
+vertex 1 0 0
 vertex 1 1 2.5
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 1 0 3.5
+vertex 1 -0.5 -0.5
+vertex 1 0 0
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 1 -1.5 0.5
+vertex 1 -0.5 -0.5
 vertex 1 0 3.5
 endloop
 endfacet
 facet normal 1 0 0
 outer loop
-vertex 1 -1.5 0.5
-vertex 1 0 0
-vertex 1 1 2.5
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-vertex 1 -1.5 -0.5
-vertex 1 0 0
-vertex 1 -1.5 0.5
-endloop
-endfacet
-facet normal 1 0 0
-outer loop
-vertex 1 0 0
-vertex 1 -1.5 -0.5
 vertex 1 -0.5 -0.5
+vertex 1 -1.5 0.5
+vertex 1 -1.5 -0.5
 endloop
 endfacet
 facet normal -0.7711921042138633 -0.5693945826213621 0.2846972913106811
@@ -1847,11 +1847,11 @@ vertex 1 -1.5 -0.5
 vertex 0.262 -0.21985 -0.93969
 endloop
 endfacet
-facet normal 0.2082089592991006 -0.20820895929909827 -0.9556662903624736
+facet normal 0.2082089592991007 -0.2082089592990982 -0.9556662903624737
 outer loop
+vertex 0.262 -0.21985 -0.93969
 vertex 1 -1.5 -0.5
 vertex 0.21985 -0.262 -0.93969
-vertex 0.262 -0.21985 -0.93969
 endloop
 endfacet
 facet normal -0.34666121900325514 0.7433192899322112 -0.5721035155055861
