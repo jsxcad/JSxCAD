@@ -4,7 +4,7 @@ import { eachPoint } from './eachPoint';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
 import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
 import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
-import { toTransformedGeometry } from './toTransformedGeometry';
+import { toKeptGeometry } from './toKeptGeometry';
 
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
@@ -25,7 +25,7 @@ const measureBoundingBoxGeneric = (geometry) => {
 };
 
 export const measureBoundingBox = (rawGeometry) => {
-  const geometry = toTransformedGeometry(rawGeometry);
+  const geometry = toKeptGeometry(rawGeometry);
   let empty = true;
 
   let minPoint = [Infinity, Infinity, Infinity];

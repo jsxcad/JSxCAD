@@ -1,8 +1,8 @@
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 export const measureBoundingBox = (surface) => {
   if (surface.measureBoundingBox === undefined) {
-    let max = surface[0][0];
-    let min = surface[0][0];
+    let max = [-Infinity, -Infinity, 0];
+    let min = [Infinity, Infinity, 0];
     for (const polygon of surface) {
       for (const point of polygon) {
         if (point[0] < min[0]) min[0] = point[0];

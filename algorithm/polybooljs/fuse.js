@@ -10,7 +10,7 @@ import polybooljs from './polybooljs/index';
  * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
  * @returns {Z0Surface} the resulting z0 surface.
  */
-export const union = (...z0Surfaces) => {
+export const fuse = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }

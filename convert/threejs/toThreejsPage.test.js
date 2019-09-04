@@ -26,7 +26,7 @@ test('Eval lego skeleton sphere', async (t) => {
       initialScript: `
 const main = async () => {
    const skeleton = await readLDraw({ part: '6260c01.dat' });
-   await writeStl({ path: 'window/skeleton' }, difference(skeleton.scale([0.1, 0.1, 0.1]), cube(5)));
+   await writeStl({ path: 'window/skeleton' }, difference(skeleton.scale([0.1, 0.1, 0.1]), Cube(5)));
  }
 `
     },

@@ -13,7 +13,6 @@ const buildCondition = (conditionTags, conditionSpec) => {
 };
 
 const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
-  console.log(`QQ/addTags/Impl`);
   const condition = buildCondition(conditionTags, conditionSpec);
   const composeTags = (geometryTags) => {
     if (condition === undefined || condition(geometryTags)) {

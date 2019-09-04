@@ -5,6 +5,7 @@ import { buildConvexSurfaceHull } from './buildConvexSurfaceHull';
 import { buildFromFunction } from './buildFromFunction';
 import { buildFromSlices } from './buildFromSlices';
 import { buildGeodesicSphere } from './buildGeodesicSphere';
+import { buildPolygonFromPoints } from './buildPolygonFromPoints';
 import { buildRegularIcosahedron } from './buildRegularIcosahedron';
 import { buildRegularPolygon } from './buildRegularPolygon';
 import { buildRegularPrism } from './buildRegularPrism';
@@ -25,6 +26,7 @@ export {
   buildFromFunction,
   buildFromSlices,
   buildGeodesicSphere,
+  buildPolygonFromPoints,
   buildRegularIcosahedron,
   buildRegularPolygon,
   buildRegularPrism,

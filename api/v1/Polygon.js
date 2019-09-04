@@ -1,5 +1,5 @@
 import { assert, assertNumber, assertPoints } from './assert';
-import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+import { buildPolygonFromPoints, buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
 import { dispatch } from './dispatch';
@@ -14,7 +14,7 @@ export const fromEdge = (edge, sides = 16) => unitPolygon(sides).scale(toRadiusF
 export const fromApothem = (apothem, sides = 16) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides));
 export const fromRadius = (radius, sides = 16) => unitPolygon(sides).scale(radius);
 export const fromDiameter = (diameter, sides = 16) => unitPolygon(sides).scale(diameter / 2);
-export const fromPoints = (points) => Shape.fromPathToZ0Surface(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+export const fromPoints = (points) => Shape.fromGeometry(buildPolygonFromPoints(points));
 
 /**
  *

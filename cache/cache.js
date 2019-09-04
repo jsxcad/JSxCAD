@@ -3,7 +3,7 @@ import memoize from 'micro-memoize';
 
 // This is a very thin abstraction layer to decouple from any particular cache implementation.
 
-const maxSize = 50;
+const maxSize = 500;
 
 // Keyed by identity
 
@@ -30,3 +30,9 @@ const isMatchingCutKey = ([aPlane, aGeometry], [bPlane, bGeometry]) =>
   aGeometry === bGeometry && deepEqual(aPlane, bPlane);
 
 export const cacheCut = (op) => memoize(op, { isMatchingKey: isMatchingCutKey, maxSize });
+
+// Keyed by points structure.
+
+const isMatchingPointsKey = ([aPoints], [bPoints]) => deepEqual(aPoints, bPoints);
+
+export const cachePoints = (op) => memoize(op, { isMatchingKey: isMatchingPointsKey, maxSize });
