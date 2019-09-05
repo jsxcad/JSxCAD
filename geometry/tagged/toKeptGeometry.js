@@ -9,9 +9,13 @@ export const toKeptGeometry = (geometry) => {
     const disjointGeometry = toDisjointGeometry(geometry);
     const walk = (geometry) => {
       assertGood(geometry);
-      if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {
+      if (geometry.keptGeometry !== undefined) {
+        return geometry.keptGeometry;
+      } else if (geometry.tags === undefined || !geometry.tags.includes('@drop')) {
         if (geometry.disjointAssembly) {
-          return { ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined) };
+          const keptGeometry = { ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined) };
+          geometry.keptGeometry = keptGeometry;
+          return keptGeometry;
         } else {
           return geometry;
         }

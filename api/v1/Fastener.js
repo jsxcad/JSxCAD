@@ -72,9 +72,7 @@ const ThreadedRod =
     }
   };
 
-const Nut =
-  (radius = 1, height = 1, sides = 6) =>
-    Cylinder(radius, height, sides);
+const Nut = (radius = 1, height = 1, sides = 6) => Cylinder(radius, height, sides);
 
 export const Bolt = dispatch(
   'Bolt',
