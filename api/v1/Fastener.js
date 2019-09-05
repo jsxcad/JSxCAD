@@ -48,7 +48,7 @@ const Thread =
     const Y = 1;
     const Z = 2;
     const thread =
-            lathe({ loops: height / pitch, loopOffset: pitch, sides },
+            lathe({ loops: (height / pitch) + 2, loopOffset: pitch, sides },
                   Triangle()
                       .scale(pitch)
                       .rotateZ(90)
@@ -56,7 +56,7 @@ const Thread =
     const [min, max] = thread.measureBoundingBox();
     return intersection(Cube.fromCorners([0, min[Y], min[Z]],
                                          [height, max[Y], max[Z]]),
-                        thread)
+                        thread.move(-pitch, 0, 0))
         .rotateY(-90)
         .center();
   };
@@ -72,9 +72,7 @@ const ThreadedRod =
     }
   };
 
-const Nut =
-  (radius = 1, height = 1, sides = 6) =>
-    Cylinder(radius, height, sides);
+const Nut = (radius = 1, height = 1, sides = 6) => Cylinder(radius, height, sides);
 
 export const Bolt = dispatch(
   'Bolt',

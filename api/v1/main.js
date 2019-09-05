@@ -44,6 +44,7 @@ import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { color } from './color';
+import { coordinates } from './coordinates';
 import { cos } from './cos';
 import { cut } from './cut';
 import { describe } from './describe';
@@ -166,6 +167,7 @@ export {
   assemble,
   chainHull,
   Circle,
+  coordinates,
   cos,
   Cube,
   Cursor,
