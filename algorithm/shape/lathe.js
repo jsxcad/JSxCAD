@@ -1,5 +1,8 @@
 import { flip, rotateX, translate } from '@jsxcad/geometry-path';
 
+import { cache } from '@jsxcad/cache';
+import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+
 const buildWalls = (polygons, floor, roof, loopOffset) => {
   for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
     if (floor[start] === null || floor[end] === null) {
@@ -16,7 +19,7 @@ const buildWalls = (polygons, floor, roof, loopOffset) => {
 };
 
 // Rotate a path around the X axis to produce the polygons of a solid.
-export const lathe = ({ sides = 5, loops = 1, loopOffset = 0 }, path) => {
+const latheImpl = (path, sides = 5, loops = 1, loopOffset = 0) => {
   const sideRadians = Math.PI * -2 / sides;
   let lastPath;
   const stepOffset = loopOffset / sides;
@@ -41,5 +44,7 @@ export const lathe = ({ sides = 5, loops = 1, loopOffset = 0 }, path) => {
       polygons.push(flip(end));
     }
   }
-  return polygons;
+  return { solid: toSolidFromPolygons({}, polygons) };
 };
+
+export const lathe = cache(latheImpl);

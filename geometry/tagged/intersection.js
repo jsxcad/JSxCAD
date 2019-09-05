@@ -1,3 +1,4 @@
+import { cache } from '@jsxcad/cache';
 import { getPaths } from './getPaths';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
@@ -7,7 +8,7 @@ import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolea
 import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface-boolean';
 import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface-boolean';
 
-export const intersection = (baseGeometry, ...geometries) => {
+const intersectionImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
     return { ...baseGeometry, item: intersection(baseGeometry.item, ...geometries) };
   }
@@ -36,3 +37,5 @@ export const intersection = (baseGeometry, ...geometries) => {
   // FIX: Surfaces, Paths, etc.
   return result;
 };
+
+export const intersection = cache(intersectionImpl);

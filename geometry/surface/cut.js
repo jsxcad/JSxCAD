@@ -1,6 +1,7 @@
 import { dot, scale, subtract } from '@jsxcad/math-vec3';
 import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
+import { cacheCut } from '@jsxcad/cache';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const EPSILON = 1e-5;
@@ -172,7 +173,7 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
   }
 };
 
-export const cut = (plane, surface) => {
+const cutImpl = (plane, surface) => {
   const front = [];
   const back = [];
   const frontEdges = [];
@@ -185,3 +186,5 @@ export const cut = (plane, surface) => {
 
   return [[].concat(...front), [].concat(...back)];
 };
+
+export const cut = cacheCut(cutImpl);

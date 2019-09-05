@@ -6,7 +6,7 @@ import { dispatch } from './dispatch';
 import { distance } from '@jsxcad/math-vec3';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
-  Shape.fromSolid(buildRegularPrism({ edges: sides })).scale([radius, radius, height]);
+  Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
 
 /**
  *

@@ -1,7 +1,6 @@
-import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
-
 import { Shape } from './Shape';
 import { assemble } from './assemble';
+import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -27,13 +26,7 @@ import { assemble } from './assemble';
  *
  **/
 
-export const outline = (options = {}, shape) => {
-  const keptGeometry = shape.toKeptGeometry();
-  const z0Surfaces = getZ0Surfaces(keptGeometry);
-  const surfaces = getSurfaces(keptGeometry);
-  return assemble(...z0Surfaces.map(({ z0Surface }) => Shape.fromPaths(z0Surface)),
-                  ...surfaces.map(({ surface }) => Shape.fromPaths(surface)));
-};
+export const outline = (options = {}, shape) => Shape.fromGeometry(outlineGeometry(shape.toGeometry()));
 
 const method = function (options) { return outline(options, this); };
 

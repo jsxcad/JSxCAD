@@ -1,6 +1,8 @@
 import { assertGood, deduplicate, scale, translate } from '@jsxcad/geometry-path';
 
 import { buildRegularPolygon } from './buildRegularPolygon';
+import { cache } from '@jsxcad/cache';
+import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 const buildWalls = (polygons, floor, roof) => {
   for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
@@ -10,7 +12,7 @@ const buildWalls = (polygons, floor, roof) => {
 };
 
 // Approximates a UV sphere.
-export const buildRingSphere = ({ resolution = 20 }) => {
+const buildRingSphereImpl = (resolution = 20) => {
   const polygons = [];
   let lastPath;
 
@@ -18,12 +20,15 @@ export const buildRingSphere = ({ resolution = 20 }) => {
   const longitudinalResolution = 2 * latitudinalResolution;
 
   // Trace out latitudinal rings.
-  const ring = buildRegularPolygon({ edges: longitudinalResolution });
+  const ring = buildRegularPolygon(longitudinalResolution);
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
     let angle = Math.PI * 1.0 * slice / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
-    const path = translate([0, 0, height], scale([radius, radius, radius], ring));
+    const points = ring.z0Surface[0]; // FIX: Make this less fragile.
+    const scaledPath = scale([radius, radius, radius], points);
+    const translatedPath = translate([0, 0, height], scaledPath);
+    const path = translatedPath;
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
     }
@@ -33,5 +38,8 @@ export const buildRingSphere = ({ resolution = 20 }) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  return polygons;
+  const solid = { solid: toSolidFromPolygons({}, polygons) };
+  return solid;
 };
+
+export const buildRingSphere = cache(buildRingSphereImpl);

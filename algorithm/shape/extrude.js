@@ -1,9 +1,14 @@
 import { flip as flipPath, rotateZ as rotateZPath, translate as translatePath } from '@jsxcad/geometry-path';
 import { flip as flipSurface, makeConvex, retessellate, rotateZ as rotateZSurface, translate as translateSurface } from '@jsxcad/geometry-surface';
+
+import { cache } from '@jsxcad/cache';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
-// FIX: Consider a general transformation, rather than just twist.
-export const extrude = ({ height = 1, steps = 1, twistRadians = 0 }, rawSurface) => {
+// FIX: Rewrite via buildFromFunction.
+const extrudeImpl = (geometry, height = 1, steps = 1, twistRadians = 0) => {
+  // This should be a surface in z0.
+  const rawSurface = geometry.surface || geometry.z0Surface;
+  const tags = geometry.tags;
   const surface = retessellate(makeConvex({}, rawSurface));
   const polygons = [];
   const stepHeight = height / steps;
@@ -39,5 +44,7 @@ export const extrude = ({ height = 1, steps = 1, twistRadians = 0 }, rawSurface)
   polygons.push(...roof);
   polygons.push(...floor);
 
-  return toSolidFromPolygons({}, polygons);
+  return { solid: toSolidFromPolygons({}, polygons), tags };
 };
+
+export const extrude = cache(extrudeImpl);

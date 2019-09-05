@@ -52,7 +52,7 @@ import { dispatch } from './dispatch';
  **/
 
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
-const unitSquare = () => Shape.fromPathToZ0Surface(buildRegularPolygon({ edges: 4 })).rotateZ(45).scale(edgeScale);
+const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale);
 
 export const fromSize = (size) => unitSquare().scale(size);
 export const fromDimensions = (width, length) => unitSquare().scale([width, length, 1]);

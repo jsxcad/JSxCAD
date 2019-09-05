@@ -20,12 +20,12 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "dxf-writer": "^1.2.1"
   },
   "devDependencies": {
-    "@jsxcad/algorithm-shape": "^0.0.79",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.0",

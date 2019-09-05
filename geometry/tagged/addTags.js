@@ -1,4 +1,19 @@
-export const addTags = (tags, geometry, condition) => {
+import { cacheAddTags } from '@jsxcad/cache';
+import { hasMatchingTag } from './hasMatchingTag';
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
   const composeTags = (geometryTags) => {
     if (condition === undefined || condition(geometryTags)) {
       if (geometryTags === undefined) {
@@ -27,3 +42,5 @@ export const addTags = (tags, geometry, condition) => {
 
   return walk(geometry);
 };
+
+export const addTags = cacheAddTags(addTagsImpl);

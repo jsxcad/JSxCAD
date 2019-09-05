@@ -74,11 +74,13 @@ export const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1,
   const sockets = [];
   for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
     for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-      sockets.push(socket(stud).translate(x - width / 2, y - length / 2, height / -2));
+      sockets.push(assemble(
+        Cube(8, 8, height).above(),
+        socket(stud).drop())
+          .translate(x - width / 2, y - length / 2, height / -2));
     }
   }
-  return assemble(Cube(width - play * 2, length - play * 2, height),
-                  assemble(...sockets).drop());
+  return assemble(...sockets);
 };
 
 export const Lego = {

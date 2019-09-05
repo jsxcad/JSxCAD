@@ -9,7 +9,10 @@ import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
-import { fuse } from './fuse';
+import { fromPathToZ0Surface } from './fromPathToZ0Surface';
+import { fromPathsToSurface } from './fromPathsToSurface';
+import { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
+import { fromSurfaceToPaths } from './fromSurfaceToPaths';
 import { getClouds } from './getClouds';
 import { getItems } from './getItems';
 import { getPaths } from './getPaths';
@@ -22,6 +25,7 @@ import { intersection } from './intersection';
 import { keep } from './keep';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
+import { outline } from './outline';
 import { specify } from './specify';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
@@ -41,7 +45,10 @@ export {
   eachItem,
   eachPoint,
   flip,
-  fuse,
+  fromPathToZ0Surface,
+  fromPathsToSurface,
+  fromPathsToZ0Surface,
+  fromSurfaceToPaths,
   getClouds,
   getItems,
   getPaths,
@@ -54,6 +61,7 @@ export {
   keep,
   map,
   measureBoundingBox,
+  outline,
   specify,
   toDisjointGeometry,
   toKeptGeometry,
