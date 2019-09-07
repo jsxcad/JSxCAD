@@ -6,6 +6,9 @@ export const eachItem = (geometry, operation) => {
       walk(geometry.item);
     } else if (geometry.disjointAssembly) {
       geometry.disjointAssembly.forEach(walk);
+      if (geometry.nonNegative) {
+        geometry.nonNegative.forEach(walk);
+      }
     }
     operation(geometry);
   };

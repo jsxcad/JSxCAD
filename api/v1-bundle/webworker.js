@@ -16,7 +16,8 @@ const agent = async ({ ask, question }) => {
       const module = await constructor();
       const shape = await module.main();
       if (shape !== undefined && shape.toKeptGeometry) {
-        return shape.toKeptGeometry();
+        const keptGeometry = shape.toKeptGeometry();
+        return keptGeometry;
       }
     }
   } catch (error) {

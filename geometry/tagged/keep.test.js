@@ -11,8 +11,8 @@ test('Deep keep', t => {
                                                tags: ['void'] }] }] };
   const kept = keep(['void'], assembly);
   t.deepEqual(kept,
-              { 'assembly': [{ 'solid': [], 'tags': ['@drop', 'plate'] },
-                             { 'assembly': [{ 'solid': [], 'tags': ['@drop'] },
+              { 'assembly': [{ 'solid': [], 'tags': ['compose/non-positive', 'plate'] },
+                             { 'assembly': [{ 'solid': [], 'tags': ['compose/non-positive'] },
                                             { 'assembly': [{ 'solid': [], 'tags': ['void'] },
                                                            { 'solid': [], 'tags': ['void'] },
                                                            { 'solid': [], 'tags': ['void'] }] }] }] });

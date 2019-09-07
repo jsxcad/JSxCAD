@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 import { assertPoints } from './assert';
 import { dispatch } from './dispatch';
 
-export const fromPoints = (points) => Shape.fromPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+export const fromPoints = (points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
  *

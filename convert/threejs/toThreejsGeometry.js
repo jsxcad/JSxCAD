@@ -60,8 +60,12 @@ export const toThreejsGeometry = (geometry, supertags) => {
       isThreejsGeometry: true
     };
   } else if (geometry.disjointAssembly) {
+    const items = geometry.disjointAssembly;
+    if (geometry.nonNegative) {
+      items.push(...geometry.nonNegative);
+    }
     return {
-      assembly: geometry.disjointAssembly.map(item => toThreejsGeometry(item, tags)),
+      assembly: items.map(item => toThreejsGeometry(item, tags)),
       tags,
       isThreejsGeometry: true
     };

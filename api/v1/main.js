@@ -21,6 +21,7 @@ import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
 import { Path } from './Path';
+import { Plan } from './Plan';
 import { Point } from './Point';
 import { Points } from './Points';
 import { Polygon } from './Polygon';
@@ -70,10 +71,10 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { measureCenter } from './measureCenter';
 import { minkowski } from './minkowski';
 import { move } from './move';
+import { nocut } from './nocut';
 import { numbers } from './numbers';
 import { orient } from './orient';
 import { outline } from './outline';
-import { plan } from './plan';
 import { readDst } from './readDst';
 import { readFont } from './readFont';
 import { readJscad } from './readJscad';
@@ -129,9 +130,9 @@ const methods = [
   measureBoundingBox,
   measureCenter,
   move,
+  nocut,
   orient,
   outline,
-  plan,
   right,
   rotate,
   rotateX,
@@ -187,7 +188,7 @@ export {
   MicroGearMotor,
   minkowski,
   numbers,
-  plan,
+  Plan,
   planeX,
   planeY,
   planeZ,
