@@ -12,8 +12,12 @@ const agent = async ({ ask, question }) => {
     var { key, values } = question;
     switch (key) {
       case 'assemble':
-        values = values.map(api.Shape.fromGeometry);
-        return api.assemble(...values).drop('cutAway').toKeptGeometry();
+        const inputs = values[0].map(api.Shape.fromGeometry);
+        if (values[1]) {
+          return api.assemble(...inputs).drop('cutAway').toKeptGeometry();
+        } else {
+          return api.assemble(...inputs).toDisjointGeometry();
+        }
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
@@ -22,8 +26,8 @@ const agent = async ({ ask, question }) => {
         return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
       case 'difference':
         return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
-      case 'cutAway':
-        return api.Shape.fromGeometry(values[0]).as('cutAway').toDisjointGeometry();
+      case 'extractTag':
+        return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
       case 'extrude':
         return api.Shape.fromGeometry(values[0]).extrude({ height: values[1] }).toDisjointGeometry();
       case 'hull':
@@ -33,8 +37,6 @@ const agent = async ({ ask, question }) => {
         return api.intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
-      case 'regular polygon':
-        return api.circle({ radius: values[0], center: true, resolution: values[1] }).toDisjointGeometry();
       case 'render':
         return convertThree.toThreejsGeometry(api.Shape.fromGeometry(values).toDisjointGeometry());
       case 'rotate':
@@ -56,6 +58,11 @@ const agent = async ({ ask, question }) => {
         return convertThree.toSvg({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
       case 'tag':
         return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
+      case 'specify':
+        console.log('Printing: ');
+        console.log(api.Shape.fromGeometry(values[0]).specify([values[1]]));
+        console.log('Done printing');
+        return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
       case 'translate':
         return api.Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry();
       case 'union':
