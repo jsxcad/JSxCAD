@@ -10,6 +10,7 @@ export const transformItem = (matrix, item) => {
     transformed.assembly = item.assembly;
   } else if (item.disjointAssembly) {
     transformed.disjointAssembly = item.disjointAssembly;
+    transformed.nonNegative = item.nonNegative;
   } else if (item.item) {
     transformed.item = item.item;
   } else if (item.paths) {

@@ -8,8 +8,10 @@ import { Shape } from './Shape';
  *
  **/
 
-export const plan = (options = {}) => {
+export const Plan = (options = {}) => {
   const { plan, marks } = options;
   // FIX: Add validation.
   return Shape.fromGeometry({ plan, marks });
 };
+
+Plan.Label = (mark, label) => Plan({ plan: { label }, marks: [mark] });

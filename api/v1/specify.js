@@ -29,6 +29,6 @@ export const specify = (specification, ...shapes) => {
   return Shape.fromGeometry(addTags([`item/${JSON.stringify(specification)}`], geometry));
 };
 
-const method = function (...shapes) { return specify(this, ...shapes); };
+const method = function (specification) { return specify(specification, this); };
 
 Shape.prototype.specify = method;

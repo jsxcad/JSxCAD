@@ -20,10 +20,18 @@ export const toTransformedGeometry = (geometry) => {
           assembly: geometry.assembly.map(geometry => walk(matrix, geometry))
         };
       } else if (geometry.disjointAssembly) {
-        return {
-          ...geometry,
-          disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry))
-        };
+        if (geometry.nonNegative) {
+          return {
+            ...geometry,
+            disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
+            nonNegative: geometry.nonNegative.map(geometry => walk(matrix, geometry))
+          };
+        } else {
+          return {
+            ...geometry,
+            disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry))
+          };
+        }
       } else if (geometry.item) {
         return {
           ...geometry,
