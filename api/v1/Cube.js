@@ -57,7 +57,7 @@ const unitCube = () => Shape.fromGeometry(buildRegularPrism(4))
 
 export const fromValue = (value) => unitCube().scale(value);
 
-export const fromValues = (width, breadth, height) => unitCube().scale([width, breadth, height]);
+export const fromValues = (width, length, height) => unitCube().scale([width, length, height]);
 
 export const fromRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4)).rotateZ(45).scale([radius, radius, radius / edgeScale]);
 
@@ -87,12 +87,12 @@ export const Cube = dispatch(
     return () => fromValue(value);
   },
   // cube(2, 4, 6)
-  (width, breadth, height, ...rest) => {
+  (width, length, height, ...rest) => {
     assertNumber(width);
-    assertNumber(breadth);
+    assertNumber(length);
     assertNumber(height);
     assertEmpty(rest);
-    return () => fromValues(width, breadth, height);
+    return () => fromValues(width, length, height);
   },
   // cube({ radius: 2 })
   ({ radius }) => {
