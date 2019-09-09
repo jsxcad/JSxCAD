@@ -11,6 +11,7 @@ import { getClock, startClock } from './clock';
 import { planeX, planeY, planeZ } from './plane';
 
 import { Armature } from './Armature';
+import { Board } from './Board';
 import { Circle } from './Circle';
 import { Cube } from './Cube';
 import { Cursor } from './Cursor';
@@ -20,6 +21,7 @@ import { Gear } from './Gear';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
+import { Nail } from './Nail';
 import { Path } from './Path';
 import { Plan } from './Plan';
 import { Point } from './Point';
@@ -32,6 +34,7 @@ import { Spiral } from './Spiral';
 import { Square } from './Square';
 import { SvgPath } from './SvgPath';
 import { Tetrahedron } from './Tetrahedron';
+import { ThreadedRod } from './ThreadedRod';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
 import { Wave } from './Wave';
@@ -166,6 +169,7 @@ export {
   acos,
   Armature,
   assemble,
+  Board,
   chainHull,
   Circle,
   coordinates,
@@ -187,6 +191,7 @@ export {
   max,
   MicroGearMotor,
   minkowski,
+  Nail,
   numbers,
   Plan,
   planeX,
@@ -214,6 +219,7 @@ export {
   startClock,
   SvgPath,
   Tetrahedron,
+  ThreadedRod,
   Torus,
   Triangle,
   union,
