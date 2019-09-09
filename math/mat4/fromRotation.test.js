@@ -1,4 +1,5 @@
 import { fromRotation } from './fromRotation';
+import { identity } from './identity';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 
@@ -7,7 +8,7 @@ test('mat4: fromRotation() should return a new mat4 with correct values', (t) =>
 
   // Test invalid condition when axis is 0,0,0
   const obs1 = fromRotation(rotation, [0, 0, 0]);
-  t.true(obs1 === undefined);
+  t.deepEqual(obs1, identity());
 
   const obs2 = fromRotation(rotation, [0, 0, 1]);
   t.deepEqual(obs2.map(q), [0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
