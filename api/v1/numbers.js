@@ -11,9 +11,18 @@
  *
  **/
 
-export const numbers = ({ from = 0, to = 0, by = 1 }, thunk = (n => n)) => {
+const EPSILON = 1e-5;
+
+export const numbers = ({ from = 0, to = 1, by, resolution }, thunk = (n => n)) => {
   const numbers = [];
-  for (let number = from; number < to; number += by) {
+  if (by === undefined) {
+    if (resolution !== undefined) {
+      by = to / resolution;
+    } else {
+      by = 1;
+    }
+  }
+  for (let number = from; number <= to + EPSILON; number += by) {
     numbers.push(thunk(number));
   }
   return numbers;

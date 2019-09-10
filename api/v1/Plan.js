@@ -1,4 +1,6 @@
 import { Shape } from './Shape';
+import { assemble } from './assemble';
+import { getPlans } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -14,4 +16,21 @@ export const Plan = (options = {}) => {
   return Shape.fromGeometry({ plan, marks });
 };
 
-Plan.Label = (mark, label) => Plan({ plan: { label }, marks: [mark] });
+const labels = (geometry) => {
+  const labels = {};
+  for (const { plan, marks } of getPlans(geometry)) {
+    if (plan.label) {
+      labels[plan.label] = marks[0];
+    }
+  }
+  return labels;
+};
+
+Plan.Label = (label, mark = [0, 0, 0]) => Plan({ plan: { label }, marks: [mark] });
+
+const withLabelMethod = function (label) { return assemble(this, Plan.Label(label)); };
+
+const labelsMethod = function () { return labels(this.toKeptGeometry()); };
+
+Shape.prototype.labels = labelsMethod;
+Shape.prototype.withLabel = withLabelMethod;

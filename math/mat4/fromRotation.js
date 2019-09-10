@@ -1,3 +1,5 @@
+import { identity } from './identity';
+
 const EPSILON = 1e-5;
 
 /**
@@ -16,7 +18,7 @@ export const fromRotation = (rad, [x, y, z]) => {
   let len = Math.sqrt(x * x + y * y + z * z);
 
   if (Math.abs(len) < EPSILON) {
-    return;
+    return identity();
   }
 
   len = 1 / len;

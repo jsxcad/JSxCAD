@@ -7,6 +7,8 @@
  * the api uses.
  */
 
+import * as vec from '@jsxcad/math-vec3';
+
 import { getClock, startClock } from './clock';
 import { planeX, planeY, planeZ } from './plane';
 
@@ -223,5 +225,6 @@ export {
   Torus,
   Triangle,
   union,
+  vec,
   Wave
 };
