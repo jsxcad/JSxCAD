@@ -10,7 +10,6 @@ export const transformItem = (matrix, item) => {
     transformed.assembly = item.assembly;
   } else if (item.disjointAssembly) {
     transformed.disjointAssembly = item.disjointAssembly;
-    transformed.nonNegative = item.nonNegative;
   } else if (item.item) {
     transformed.item = item.item;
   } else if (item.paths) {
@@ -22,7 +21,6 @@ export const transformItem = (matrix, item) => {
     transformed.points = transformPoints(matrix, item.points);
   } else if (item.solid) {
     transformed.solid = transformSolid(matrix, item.solid);
-    if (item.solid.isConvex !== undefined) transformed.solid.isConvex = item.solid.isConvex;
   } else if (item.surface) {
     transformed.surface = transformSurface(matrix, item.surface);
   } else if (item.z0Surface) {

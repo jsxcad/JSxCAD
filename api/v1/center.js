@@ -28,7 +28,8 @@ import { translate } from './translate';
 export const center = (shape) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   let center = scale(0.5, add(minPoint, maxPoint));
-  return translate(negate(center), shape);
+  const moved = shape.move(negate(center));
+  return moved;
 };
 
 const method = function () { return center(this); };

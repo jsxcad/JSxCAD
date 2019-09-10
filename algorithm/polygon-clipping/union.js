@@ -17,14 +17,13 @@ export const union = (...z0Surfaces) => {
   if (z0Surfaces.length === 1) {
     return z0Surfaces[0];
   }
-  const normalize2 = createNormalize2();
-  const clippings = z0Surfaces.map(surface => fromSurface(normalize2, surface));
-  const clipping = unionClipping(normalize2, clippings);
-  const surface = toSurface(normalize2, clipping);
+  const clippings = z0Surfaces.map(surface => fromSurface(surface));
+  const clipping = unionClipping(clippings);
+  const surface = toSurface(clipping);
   return surface;
 };
 
-export const unionClipping = (normalize2, clippings) => {
+export const unionClipping = (clippings) => {
   while (clippings.length >= 2) {
     const a = clippings.shift();
     const b = clippings.shift();
@@ -35,7 +34,7 @@ export const unionClipping = (normalize2, clippings) => {
       console.log(e);
       throw e;
     }
-    const cleaned = clean(normalize2, result);
+    const cleaned = clean(result);
     clippings.push(cleaned);
   }
   return clippings[0];

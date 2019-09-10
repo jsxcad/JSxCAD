@@ -1,8 +1,8 @@
 import { clean, fromSurface, toSurface } from './convert';
 
 import { createNormalize2 } from './createNormalize2';
+import { doesNotOverlap } from './doesNotOverlap';
 import polygonClipping from 'polygon-clipping';
-import { unionClipping } from './union';
 
 /**
  * Return a surface representing the difference between the first surface
@@ -30,15 +30,12 @@ export const difference = (minuend, ...subtrahends) => {
   if (subtrahends.length === 0) {
     return minuend;
   }
-  const normalize2 = createNormalize2();
-  const subtrahend = unionClipping(normalize2, subtrahends.map(subtrahend => fromSurface(normalize2, subtrahend)));
-  const result = differenceClipping(normalize2, fromSurface(normalize2, minuend), subtrahend);
-  const surface = toSurface(normalize2, result);
-  return surface;
-};
-
-export const differenceClipping = (normalize2, minuend, subtrahend) => {
-  const result = polygonClipping.difference(minuend, subtrahend);
-  const cleaned = clean(normalize2, result);
-  return cleaned;
+  while (subtrahends.length > 0) {
+    const subtrahend = subtrahends.pop();
+    if (doesNotOverlap(minuend, subtrahend)) {
+      continue;
+    }
+    minuend = toSurface(polygonClipping.difference(fromSurface(minuend), fromSurface(subtrahend)));
+  }
+  return minuend;
 };

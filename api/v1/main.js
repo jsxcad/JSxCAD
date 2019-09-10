@@ -85,6 +85,7 @@ import { readFont } from './readFont';
 import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readShape } from './readShape';
+import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
@@ -209,6 +210,7 @@ export {
   readJscad,
   readLDraw,
   readShape,
+  readShapefile,
   readStl,
   readSvg,
   sin,

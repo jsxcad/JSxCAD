@@ -28,23 +28,21 @@ export const intersection = (...z0Surfaces) => {
   if (z0Surfaces.length === 1) {
     return z0Surfaces[0];
   }
-  const normalize2 = createNormalize2();
-  const clippings = z0Surfaces.map(surface => fromSurface(normalize2, surface));
-  const clipping = intersectionClipping(normalize2, clippings);
-  const surface = toSurface(normalize2, clipping);
+  const clippings = z0Surfaces.map(surface => fromSurface(surface));
+  const clipping = intersectionClipping(clippings);
+  const surface = toSurface(clipping);
   return surface;
 };
 
-export const intersectionClipping = (normalize2, clippings) => {
+export const intersectionClipping = (clippings) => {
   while (clippings.length >= 2) {
     const a = clippings.shift();
     const b = clippings.shift();
     const result = polygonClipping.intersection(a, b);
-    const cleaned = clean(normalize2, result);
-    if (cleaned.length === 0) {
+    if (result.length === 0) {
       return [];
     }
-    clippings.push(cleaned);
+    clippings.push(result);
   }
   return clippings[0];
 };
