@@ -10,7 +10,7 @@ const toTags = (properties) => {
     }
   }
   return tags;
-}
+};
 
 const toGeometry = (geometry, properties) => {
   const tags = toTags(properties);

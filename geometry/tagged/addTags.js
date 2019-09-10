@@ -28,9 +28,6 @@ const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
 
   // FIX: Minimize identity churn.
   const walk = (geometry) => {
-    if (geometry.tags) {
-      console.log(`QQ/addTags/walk: ${JSON.stringify(geometry.tags.filter(t => t.startsWith('user/shapefile/SOVEREIGNT/')))}`);
-    }
     if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
     if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
     if (geometry.item) { return { item: walk(geometry.item), tags: composeTags(geometry.tags) }; }
