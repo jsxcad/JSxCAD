@@ -26,7 +26,9 @@ export const difference = (baseZ0Surface, ...z0Surfaces) => {
   if (baseZ0Surface === undefined || baseZ0Surface.length === 0) {
     return [];
   }
+  let nth = 0;
   for (const z0Surface of z0Surfaces) {
+    console.log(`QQ/difference/z0Surfaces/length: ${z0Surfaces.length - nth++}`);
     if (doesNotOverlap(z0Surface, baseZ0Surface)) {
       continue;
     }

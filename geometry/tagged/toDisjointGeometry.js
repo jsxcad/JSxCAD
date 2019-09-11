@@ -13,7 +13,12 @@ const toDisjointAssembly = (geometry) => {
     const disjoint = [];
     for (let nth = geometry.assembly.length - 1; nth >= 0; nth--) {
       const item = toDisjointAssembly(geometry.assembly[nth]);
-      disjoint.unshift(difference(item, ...disjoint));
+      if (item !== undefined) {
+        disjoint.unshift(difference(item, ...disjoint));
+      }
+    }
+    if (disjoint.length === 0) {
+      return;
     }
     const disjointAssembly = { disjointAssembly: disjoint };
     geometry.disjoint = disjointAssembly;
@@ -23,4 +28,11 @@ const toDisjointAssembly = (geometry) => {
   }
 };
 
-export const toDisjointGeometry = (inputGeometry) => toDisjointAssembly(inputGeometry);
+export const toDisjointGeometry = (inputGeometry) => {
+  const disjointAssembly = toDisjointAssembly(inputGeometry);
+  if (disjointAssembly === undefined) {
+    return { disjointAssembly };
+  } else {
+    return disjointAssembly;
+  }
+};

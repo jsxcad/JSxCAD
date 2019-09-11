@@ -26,6 +26,7 @@ const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
     }
   };
 
+  // FIX: Minimize identity churn.
   const walk = (geometry) => {
     if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
     if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }

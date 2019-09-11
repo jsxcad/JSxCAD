@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/convert-pdf",
+  "name": "@jsxcad/convert-shapefile",
   "version": "0.0.79",
-  "description": "Pdf algorithms for JSxCAD",
+  "description": "Shapefile algorithms for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "main.js",
@@ -27,7 +27,8 @@
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/geometry-z0surface": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "@jsxcad/math-vec3": "^0.0.79",
+    "shapefile": "^0.6.6"
   },
   "devDependencies": {
     "ava": "^1.4.1",
