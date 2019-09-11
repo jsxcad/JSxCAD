@@ -2,7 +2,6 @@ import { add, negate, scale } from '@jsxcad/math-vec3';
 
 import { Shape } from './Shape';
 import { measureBoundingBox } from './measureBoundingBox';
-import { translate } from './translate';
 
 /**
  *

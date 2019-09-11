@@ -1,6 +1,6 @@
-import { clean, fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from './convert';
 
-import { createNormalize2 } from './createNormalize2';
+import { doesNotOverlap } from './doesNotOverlap';
 import polygonClipping from 'polygon-clipping';
 
 /**
@@ -28,21 +28,14 @@ export const intersection = (...z0Surfaces) => {
   if (z0Surfaces.length === 1) {
     return z0Surfaces[0];
   }
-  const clippings = z0Surfaces.map(surface => fromSurface(surface));
-  const clipping = intersectionClipping(clippings);
-  const surface = toSurface(clipping);
-  return surface;
-};
-
-export const intersectionClipping = (clippings) => {
-  while (clippings.length >= 2) {
-    const a = clippings.shift();
-    const b = clippings.shift();
-    const result = polygonClipping.intersection(a, b);
-    if (result.length === 0) {
+  while (z0Surfaces.length >= 2) {
+    const a = z0Surfaces.shift();
+    const b = z0Surfaces.shift();
+    if (doesNotOverlap(a, b)) {
       return [];
+    } else {
+      z0Surfaces.push(toSurface(polygonClipping.intersection(fromSurface(a), fromSurface(b))));
     }
-    clippings.push(result);
   }
-  return clippings[0];
+  return z0Surfaces[0];
 };

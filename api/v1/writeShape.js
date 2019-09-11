@@ -1,5 +1,4 @@
 import { Shape } from './Shape';
-import { toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { writeFile } from '@jsxcad/sys';
 
 /**

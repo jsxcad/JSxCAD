@@ -13,7 +13,7 @@
 
 const EPSILON = 1e-5;
 
-export const numbers = ({ from = 0, to = 1, by, resolution }, thunk = (n => n)) => {
+export const numbers = ({ from = 0, to, upto, by, resolution }, thunk = (n => n)) => {
   const numbers = [];
   if (by === undefined) {
     if (resolution !== undefined) {
@@ -22,8 +22,21 @@ export const numbers = ({ from = 0, to = 1, by, resolution }, thunk = (n => n)) 
       by = 1;
     }
   }
-  for (let number = from; number <= to + EPSILON; number += by) {
-    numbers.push(thunk(number));
+
+  if (to === undefined && upto === undefined) {
+    upto = 1;
+  }
+
+  if (upto !== undefined) {
+    // Exclusive
+    for (let number = from; number < to - EPSILON; number += by) {
+      numbers.push(thunk(number));
+    }
+  } else if (to !== undefined) {
+    // Inclusive
+    for (let number = from; number <= to + EPSILON; number += by) {
+      numbers.push(thunk(number));
+    }
   }
   return numbers;
 };

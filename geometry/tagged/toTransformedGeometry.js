@@ -17,17 +17,17 @@ export const toTransformedGeometry = (geometry) => {
       if (geometry.assembly) {
         return {
           assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
-          tags: geometry.tags,
+          tags: geometry.tags
         };
       } else if (geometry.disjointAssembly) {
         return {
           disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
-          tags: geometry.tags,
+          tags: geometry.tags
         };
       } else if (geometry.item) {
         return {
           item: walk(matrix, geometry.item),
-          tags: geometry.tags,
+          tags: geometry.tags
         };
       }
 

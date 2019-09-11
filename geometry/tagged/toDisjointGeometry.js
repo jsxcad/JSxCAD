@@ -33,6 +33,6 @@ export const toDisjointGeometry = (inputGeometry) => {
   if (disjointAssembly === undefined) {
     return { disjointAssembly };
   } else {
-    return disjointAssembly
+    return disjointAssembly;
   }
-}
+};

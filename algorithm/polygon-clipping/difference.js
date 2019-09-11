@@ -1,6 +1,5 @@
-import { clean, fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from './convert';
 
-import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlap } from './doesNotOverlap';
 import polygonClipping from 'polygon-clipping';
 

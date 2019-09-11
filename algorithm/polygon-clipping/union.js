@@ -1,6 +1,6 @@
-import { clean, fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from './convert';
 
-import { createNormalize2 } from './createNormalize2';
+import { doesNotOverlapOrAbut } from './doesNotOverlap';
 import polygonClipping from './polygon-clipping.esm.js';
 
 /**
@@ -17,25 +17,14 @@ export const union = (...z0Surfaces) => {
   if (z0Surfaces.length === 1) {
     return z0Surfaces[0];
   }
-  const clippings = z0Surfaces.map(surface => fromSurface(surface));
-  const clipping = unionClipping(clippings);
-  const surface = toSurface(clipping);
-  return surface;
-};
-
-export const unionClipping = (clippings) => {
-  while (clippings.length >= 2) {
-    const a = clippings.shift();
-    const b = clippings.shift();
-    let result;
-    try {
-      result = polygonClipping.union(a, b);
-    } catch (e) {
-      console.log(e);
-      throw e;
+  while (z0Surfaces.length >= 2) {
+    const a = z0Surfaces.shift();
+    const b = z0Surfaces.shift();
+    if (doesNotOverlapOrAbut(a, b)) {
+      z0Surfaces.push([].concat(a, b));
+    } else {
+      z0Surfaces.push(toSurface(polygonClipping.union(fromSurface(a), fromSurface(b))));
     }
-    const cleaned = clean(result);
-    clippings.push(cleaned);
   }
-  return clippings[0];
+  return z0Surfaces[0];
 };

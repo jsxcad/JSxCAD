@@ -2,7 +2,6 @@ import { cache } from '@jsxcad/cache';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { toKeptGeometry } from './toKeptGeometry';
-import { union } from './union';
 
 const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
