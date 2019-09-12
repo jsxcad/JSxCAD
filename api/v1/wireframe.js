@@ -1,14 +1,18 @@
+import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { getSolids } from '@jsxcad/geometry-tagged';
 
-const toWireframe = (solid) => {
+const toWireframeFromSolid = (solid) => {
   const paths = [];
-  // for (const surface of makeSurfacesSimple({}, solid)) {
   for (const surface of solid) {
     paths.push(...surface);
   }
   return Shape.fromPaths(paths);
+};
+
+const toWireframeFromSurface = (surface) => {
+  return Shape.fromPaths(surface);
 };
 
 /**
@@ -33,7 +37,13 @@ const toWireframe = (solid) => {
 export const wireframe = (options = {}, shape) => {
   const pieces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    pieces.push(toWireframe(solid));
+    pieces.push(toWireframeFromSolid(solid));
+  }
+  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(surface));
+  }
+  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(z0Surface));
   }
   return assemble(...pieces);
 };

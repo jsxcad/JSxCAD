@@ -1,5 +1,5 @@
 import { assertEmpty, assertFunction, assertNumber } from './assert';
-import { buildFromSlices, buildRegularPrism } from '@jsxcad/algorithm-shape';
+import { buildFromFunction, buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
 import { dispatch } from './dispatch';
@@ -68,10 +68,8 @@ export const betweenDiameter = (from, to, diameter, sides = 32) =>
       .above()
       .orient({ from, at: to });
 
-export const fromFunction = (buildPath, slices) => {
-  const build = (slice) => buildPath(slice).toPoints().points;
-  return Shape.fromPolygonsToSolid(buildFromSlices({ buildPath: build, slices }));
-};
+export const fromFunction = (op, resolution, cap = true, context) =>
+  Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
 
 export const Cylinder = dispatch(
   'Cylinder',

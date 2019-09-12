@@ -1,10 +1,10 @@
 const X = 0;
 const Y = 1;
 
-export const fromSurface = (normalize2, z0Surface) => {
+export const fromSurface = (z0Surface) => {
   const polygons = [];
   for (const z0Polygon of z0Surface) {
-    const polygon = z0Polygon.map(([x, y]) => normalize2([x, y]));
+    const polygon = z0Polygon.map(([x, y]) => [x, y]);
     // polygon-clipping requires repeating the first point to be closed.
     polygon.push(polygon[0]);
     polygons.push(polygon);
@@ -12,7 +12,7 @@ export const fromSurface = (normalize2, z0Surface) => {
   return polygons;
 };
 
-export const toSurface = (normalize2, multiPolygon) => {
+export const toSurface = (multiPolygon) => {
   const z0Surface = [];
   for (const polygons of multiPolygon) {
     for (const polygon of polygons) {
@@ -27,4 +27,4 @@ export const toSurface = (normalize2, multiPolygon) => {
   return z0Surface;
 };
 
-export const clean = (normalize2, multiPolygon) => multiPolygon;
+export const clean = (multiPolygon) => multiPolygon;

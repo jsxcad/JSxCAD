@@ -16,18 +16,18 @@ export const toTransformedGeometry = (geometry) => {
 
       if (geometry.assembly) {
         return {
-          ...geometry,
-          assembly: geometry.assembly.map(geometry => walk(matrix, geometry))
+          assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
+          tags: geometry.tags
         };
       } else if (geometry.disjointAssembly) {
         return {
-          ...geometry,
-          disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry))
+          disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
+          tags: geometry.tags
         };
       } else if (geometry.item) {
         return {
-          ...geometry,
-          item: walk(matrix, geometry.item)
+          item: walk(matrix, geometry.item),
+          tags: geometry.tags
         };
       }
 

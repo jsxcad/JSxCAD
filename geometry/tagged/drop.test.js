@@ -11,7 +11,7 @@ test('Deep drop', t => {
   t.deepEqual(dropped,
               { 'assembly': [{ 'solid': [], 'tags': ['plate'] },
                              { 'assembly': [{ 'solid': [], tags: undefined },
-                                            { 'assembly': [{ 'solid': [], 'tags': ['@drop', 'void'] },
-                                                           { 'solid': [], 'tags': ['@drop', 'void'] },
-                                                           { 'solid': [], 'tags': ['@drop', 'void'] }] }] }] });
+                                            { 'assembly': [{ 'solid': [], 'tags': ['compose/non-positive', 'void'] },
+                                                           { 'solid': [], 'tags': ['compose/non-positive', 'void'] },
+                                                           { 'solid': [], 'tags': ['compose/non-positive', 'void'] }] }] }] });
 });

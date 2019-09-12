@@ -56,7 +56,7 @@ export const drop = dispatch(
     // assemble(circle(), circle().drop())
     assertEmpty(tags);
     assertShape(shape);
-    return () => fromGeometry(addTags(['@drop'], toGeometry(shape)));
+    return () => fromGeometry(addTags(['compose/non-positive'], toGeometry(shape)));
   },
   (tags, shape) => {
     // assemble(circle(), circle().as('a')).drop('a')

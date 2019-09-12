@@ -35,11 +35,21 @@ export const planeDistance = (plane, point) =>
 const pointType = [];
 
 const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) => {
+  /*
+    // This slows things down on average, probably due to not having the bounding sphere computed.
+    // Check for non-intersection due to distance from the plane.
+    const [center, radius] = measureBoundingSphere(polygon);
+    let distance = planeDistance(plane, center) + EPSILON;
+    if (distance > radius) {
+      front.push(polygon);
+      return;
+    } else if (distance < -radius) {
+      back.push(polygon);
+      return;
+    }
+  */
   let polygonType = COPLANAR;
   const polygonPlane = toPlane(polygon);
-  if (isNaN(polygonPlane[0])) {
-    throw Error(`QQ/splitPolygon/polygonPlane: bad`);
-  }
   if (!planeEquals(polygonPlane, plane)) {
     for (let nth = 0; nth < polygon.length; nth++) {
       // const type = toType(plane, polygon[nth]);

@@ -7,10 +7,13 @@
  * the api uses.
  */
 
+import * as vec from '@jsxcad/math-vec3';
+
 import { getClock, startClock } from './clock';
 import { planeX, planeY, planeZ } from './plane';
 
 import { Armature } from './Armature';
+import { Board } from './Board';
 import { Circle } from './Circle';
 import { Cube } from './Cube';
 import { Cursor } from './Cursor';
@@ -20,7 +23,9 @@ import { Gear } from './Gear';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
+import { Nail } from './Nail';
 import { Path } from './Path';
+import { Plan } from './Plan';
 import { Point } from './Point';
 import { Points } from './Points';
 import { Polygon } from './Polygon';
@@ -31,6 +36,7 @@ import { Spiral } from './Spiral';
 import { Square } from './Square';
 import { SvgPath } from './SvgPath';
 import { Tetrahedron } from './Tetrahedron';
+import { ThreadedRod } from './ThreadedRod';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
 import { Wave } from './Wave';
@@ -70,15 +76,16 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { measureCenter } from './measureCenter';
 import { minkowski } from './minkowski';
 import { move } from './move';
+import { nocut } from './nocut';
 import { numbers } from './numbers';
 import { orient } from './orient';
 import { outline } from './outline';
-import { plan } from './plan';
 import { readDst } from './readDst';
 import { readFont } from './readFont';
 import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readShape } from './readShape';
+import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { right } from './right';
@@ -129,9 +136,9 @@ const methods = [
   measureBoundingBox,
   measureCenter,
   move,
+  nocut,
   orient,
   outline,
-  plan,
   right,
   rotate,
   rotateX,
@@ -165,6 +172,7 @@ export {
   acos,
   Armature,
   assemble,
+  Board,
   chainHull,
   Circle,
   coordinates,
@@ -186,8 +194,9 @@ export {
   max,
   MicroGearMotor,
   minkowski,
+  Nail,
   numbers,
-  plan,
+  Plan,
   planeX,
   planeY,
   planeZ,
@@ -201,6 +210,7 @@ export {
   readJscad,
   readLDraw,
   readShape,
+  readShapefile,
   readStl,
   readSvg,
   sin,
@@ -213,8 +223,10 @@ export {
   startClock,
   SvgPath,
   Tetrahedron,
+  ThreadedRod,
   Torus,
   Triangle,
   union,
+  vec,
   Wave
 };
