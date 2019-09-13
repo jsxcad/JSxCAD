@@ -35,7 +35,7 @@ test('difference: Difference of rectangle with itself rotated -45 degrees produc
 test('difference: Difference of two non-overlapping squares and a rectangle', t => {
   const result = difference(squares, rectangle);
   t.deepEqual(canonicalize(result),
-              [[[0.5, 0, 0], [0, 0, 0], [-0, 0.5, 0], [-0.5, 0.5, 0], [-0.5, -0.5, 0], [0.5, -0.5, 0]], [[2, 0, 0], [1.5, -0, 0], [1.5, -0.5, 0], [2, -0.5, 0]]]);
+              [[[0.5, 0, 0], [0, 0, 0], [0, 0.5, 0], [-0.5, 0.5, 0], [-0.5, -0.5, 0], [0.5, -0.5, 0]], [[2, 0, 0], [1.5, 0, 0], [1.5, -0.5, 0], [2, -0.5, 0]]]);
 });
 
 test('difference: Handle empty geometries', t => {

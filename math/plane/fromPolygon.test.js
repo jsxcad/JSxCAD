@@ -9,5 +9,5 @@ test('Colinear points.', t => {
 
 test('Degenerate', t => {
   const plane = fromPolygon([[0.16591068104034595, -18.077097809025855, 0], [0.30991597596125525, -17.309113083487336, 0], [0.21982597323543568, -17.789565875554132, 0]]);
-  t.deepEqual(plane, [NaN, NaN, NaN, NaN]);
+  t.is(plane, undefined);
 });

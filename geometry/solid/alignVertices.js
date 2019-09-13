@@ -7,5 +7,5 @@ export const alignVertices = (solid) => {
   return solid.map(surface =>
     surface.map(polygon => deduplicate(polygon.map(normalize3)))
         .filter(polygon => polygon.length >= 3)
-        .filter(polygon => !isNaN(toPlane(polygon)[0])));
+        .filter(polygon => toPlane(polygon) !== undefined));
 };

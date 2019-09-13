@@ -22,6 +22,6 @@ test('Slice a sphere to form a circle.', t => {
   const input = toTriangles({}, unitGeodesicSphere20Polygons);
   const polygons = cutTrianglesByPlane({}, fromPoints([0, 0, 0], [1, 0, 0], [0, 1, 0]), input);
   t.deepEqual(polygons,
-              [[[-0.52573, -0.85065, -0], [0.52573, -0.85065, -0], [0.85065, 0, 0], [0.52573, 0.85065, 0], [-0.52573, 0.85065, 0],
+              [[[-0.52573, -0.85065, 0], [0.52573, -0.85065, 0], [0.85065, 0, 0], [0.52573, 0.85065, 0], [-0.52573, 0.85065, 0],
                 [-0.85065, 0, 0]]]);
 });

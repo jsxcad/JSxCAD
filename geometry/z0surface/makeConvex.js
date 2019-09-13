@@ -22,7 +22,7 @@ const fromTessellation = (tessellation) => {
 
   for (let nth = 0; nth < tessPolygons.length; nth += 3) {
     const polygon = [toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)];
-    if (!isNaN(toPlane(polygon)[0])) {
+    if (toPlane(polygon)) {
       // FIX: Handle degeneracy better.
       polygons.push(polygon);
     } else {
