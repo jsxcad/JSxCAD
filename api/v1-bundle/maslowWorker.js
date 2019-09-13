@@ -59,12 +59,11 @@ const agent = async ({ ask, question }) => {
       case 'tag':
         return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
       case 'specify':
-        console.log('Printing: ');
-        console.log(api.Shape.fromGeometry(values[0]).specify([values[1]]));
-        console.log('Done printing');
         return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
       case 'translate':
         return api.Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry();
+      case 'getBOM':
+        return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
       case 'union':
         return api.union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       default:
