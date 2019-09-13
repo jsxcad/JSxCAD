@@ -1,5 +1,6 @@
 import { difference as differenceZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { distance } from '@jsxcad/math-vec3';
+import { equals } from './equals';
 import { measureBoundingSphere } from '@jsxcad/geometry-surface';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -13,7 +14,9 @@ export const difference = (baseSurface, ...surfaces) => {
     return [];
   }
   const baseBounds = measureBoundingSphere(baseSurface);
-  surfaces = surfaces.filter(surface => surface.length >= 1 && mayOverlap(baseBounds, measureBoundingSphere(surface)));
+  surfaces = surfaces.filter(surface => surface.length >= 1 &&
+                                        equals(toPlane(baseSurface), toPlane(surface)) &&
+                                        mayOverlap(baseBounds, measureBoundingSphere(surface)));
   if (surfaces.length === 0) {
     // Nothing to be removed.
     return baseSurface;

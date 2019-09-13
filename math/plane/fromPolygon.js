@@ -22,5 +22,9 @@ export const fromPolygon = (polygon) => {
   const factor = 1 / length(normal);
   const plane = scale(factor, normal);
   plane[W] = dot(reference, normal) * factor / polygon.length;
-  return plane;
+  if (isNaN(plane[0])) {
+    return undefined;
+  } else {
+    return plane;
+  }
 };

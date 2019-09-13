@@ -15,7 +15,7 @@ test('line3: closestPoint() should return proper values', (t) => {
 
   const line2 = fromPoints([-5, -5, -5], [5, 5, 5]);
   const x4 = closestPoint([0, 0, 0], line2);
-  t.deepEqual(canonicalize(x4), [-0, -0, -0]);
+  t.deepEqual(canonicalize(x4), [0, 0, 0]);
   const x5 = closestPoint([1, 0, 0], line2);
   t.deepEqual(canonicalize(x5), [0.33333, 0.33333, 0.33333]);
   const x6 = closestPoint([2, 0, 0], line2);

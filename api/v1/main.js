@@ -84,6 +84,7 @@ import { readDst } from './readDst';
 import { readFont } from './readFont';
 import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
+import { readPng } from './readPng';
 import { readShape } from './readShape';
 import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
@@ -209,6 +210,7 @@ export {
   readFont,
   readJscad,
   readLDraw,
+  readPng,
   readShape,
   readShapefile,
   readStl,

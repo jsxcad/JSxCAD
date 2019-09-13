@@ -13,7 +13,7 @@ export const fromPolygons = (options = {}, polygons) => {
       continue;
     }
     const plane = toPlane(polygon);
-    if (isNaN(plane[0])) {
+    if (plane === undefined) {
       console.log(`QQ/fromPolygons/degenerate`);
       continue;
     }
