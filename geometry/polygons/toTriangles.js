@@ -17,7 +17,7 @@ export const toTriangles = (options = {}, paths) => {
         continue;
       }
       const triangle = [a, b, c];
-      if (isNaN(toPlane(triangle)[0])) {
+      if (!toPlane(triangle)) {
         // FIX: Why isn't this degeneracy detected above?
         // Skip degenerate triangles introduced by colinear points.
         continue;

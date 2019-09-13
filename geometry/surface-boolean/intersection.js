@@ -1,3 +1,4 @@
+import { equals } from './equals';
 import { intersection as intersectionZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -8,7 +9,7 @@ export const intersection = (...surfaces) => {
     return [];
   }
   for (const surface of surfaces) {
-    if (surface.length === 0) {
+    if (surface.length === 0 || !equals(toPlane(surfaces[0]), toPlane(surface))) {
       return [];
     }
   }

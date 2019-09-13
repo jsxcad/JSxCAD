@@ -7,6 +7,6 @@ test('vec3: rotateZ() called with two paramerters should return a vec3 with corr
 
   t.deepEqual(c(rotateZ(0, [0, 0, 0], [0, 0, 0])), [0, 0, 0]);
   t.deepEqual(c(rotateZ(0, [1, 2, 3], [3, 2, 1])), [3, 2, 1]);
-  t.deepEqual(c(rotateZ(radians, [1, 2, 3], [-1, -2, -3])), [5, -0, -3]);
+  t.deepEqual(c(rotateZ(radians, [1, 2, 3], [-1, -2, -3])), [5, 0, -3]);
   t.deepEqual(c(rotateZ(-radians, [-1, -2, -3], [1, 2, 3])), [3, -4, 3]);
 });

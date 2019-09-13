@@ -7,6 +7,9 @@ import { toPlane } from './toPlane';
  * @returns {boolean}
  */
 const areVerticesConvex = (vertices, plane) => {
+  if (plane === undefined) {
+    return false;
+  }
   const numvertices = vertices.length;
   if (numvertices > 2) {
     let prevprevpos = vertices[numvertices - 2];

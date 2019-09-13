@@ -9,6 +9,7 @@ import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { fromPathToSurface } from './fromPathToSurface';
 import { fromPathToZ0Surface } from './fromPathToZ0Surface';
 import { fromPathsToSurface } from './fromPathsToSurface';
 import { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
@@ -46,6 +47,7 @@ export {
   eachItem,
   eachPoint,
   flip,
+  fromPathToSurface,
   fromPathToZ0Surface,
   fromPathsToSurface,
   fromPathsToZ0Surface,

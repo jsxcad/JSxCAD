@@ -1,7 +1,6 @@
 import { Shape } from './Shape';
-import { close } from '@jsxcad/geometry-path';
+import { assemble } from './assemble';
 import { getPaths } from '@jsxcad/geometry-tagged';
-import { union } from '@jsxcad/geometry-z0surface-boolean';
 
 /**
  *
@@ -31,12 +30,12 @@ import { union } from '@jsxcad/geometry-z0surface-boolean';
  **/
 
 export const interior = (options = {}, shape) => {
-  // FIX: Handle non-z0surfaces.
-  const toUnion = [];
+  const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    toUnion.push(paths.map(path => close(path)));
+    // FIX: Check paths for coplanarity.
+    surfaces.push(Shape.fromPathsToSurface(paths));
   }
-  return Shape.fromPathsToZ0Surface(union(...toUnion));
+  return assemble(...surfaces);
 };
 
 const method = function (options) { return interior(options, this); };

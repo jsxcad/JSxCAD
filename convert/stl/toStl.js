@@ -47,7 +47,7 @@ const toStlVertex = vertex =>
 
 const convertToFacet = (polygon) => {
   const plane = toPlane(polygon);
-  if (!isNaN(plane[0])) {
+  if (plane !== undefined) {
     return `facet normal ${toStlVector(toPlane(polygon))}\n` +
            `outer loop\n` +
            `${toStlVertex(polygon[0])}\n` +

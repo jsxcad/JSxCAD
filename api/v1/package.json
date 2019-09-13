@@ -60,6 +60,7 @@
     "@jsxcad/convert-jscad": "^0.0.79",
     "@jsxcad/convert-ldraw": "^0.0.79",
     "@jsxcad/convert-pdf": "^0.0.79",
+    "@jsxcad/convert-png": "^0.0.79",
     "@jsxcad/convert-shapefile": "^0.0.79",
     "@jsxcad/convert-stl": "^0.0.79",
     "@jsxcad/convert-svg": "^0.0.79",
