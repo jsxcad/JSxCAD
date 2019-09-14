@@ -13,6 +13,5 @@ export const toPlane = (surface) => {
         return surface.plane;
       }
     }
-    return;
   }
 };
