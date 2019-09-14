@@ -17,7 +17,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 
 const geometryToTriangles = (solids) => {
   const triangles = [];
-  for (const { solid } of fixTJunctions(solids)) {
+  for (const { solid } of solids) {
     let convex = makeSurfacesConvex({}, solid);
     for (const surface of convex) {
       for (const triangle of toTriangles({}, surface)) {
@@ -30,9 +30,13 @@ const geometryToTriangles = (solids) => {
 };
 
 export const toStl = async (options = {}, geometry) => {
-  let keptGeometry = toKeptGeometry(geometry);
+  const { doFixTJunctions = true } = options;
+  const keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry);
-  let triangles = geometryToTriangles(solids);
+  if (doFixTJunctions) {
+    solids = fixTJunctions(solids);
+  }
+  const triangles = geometryToTriangles(solids);
   return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
 };
 

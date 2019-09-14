@@ -2,7 +2,7 @@ import { dot, scale, subtract } from '@jsxcad/math-vec3';
 import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
 import { cacheCut } from '@jsxcad/cache';
-import { toPlane } from '@jsxcad/math-poly3';
+import { toPlane } from './toPlane';
 
 const EPSILON = 1e-5;
 
@@ -25,6 +25,11 @@ const toType = (plane, point) => {
 const pointType = [];
 
 export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, frontEdges, backEdges, surface) => {
+  const surfacePlane = toPlane(surface);
+  if (surfacePlane === undefined) {
+    // Degenerate.
+    return;
+  }
   let coplanarFrontPolygons;
   let coplanarBackPolygons;
   let frontPolygons;
@@ -32,7 +37,7 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
   for (let polygon of surface) {
     pointType.length = 0;
     let polygonType = COPLANAR;
-    if (!planeEquals(toPlane(polygon), plane)) {
+    if (!planeEquals(surfacePlane, plane)) {
       for (const point of polygon) {
         const type = toType(plane, point);
         polygonType |= type;
@@ -43,7 +48,7 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
     // Put the polygon in the correct list, splitting it when necessary.
     switch (polygonType) {
       case COPLANAR: {
-        if (dot(plane, toPlane(polygon)) > 0) {
+        if (dot(plane, surfacePlane) > 0) {
           if (coplanarFrontPolygons === undefined) {
             coplanarFrontPolygons = [];
           }
@@ -106,7 +111,7 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
             if ((lastType | pointType[current]) === SPANNING) {
               // Break spanning segments at the point of intersection.
               const rawSpanPoint = splitLineSegmentByPlane(plane, lastPoint, polygon[current]);
-              const spanPoint = subtract(rawSpanPoint, scale(planeDistance(toPlane(polygon), rawSpanPoint), plane));
+              const spanPoint = subtract(rawSpanPoint, scale(planeDistance(surfacePlane, rawSpanPoint), plane));
               // Note: Destructive modification of polygon here.
               polygon.splice(current, 0, spanPoint);
               pointType.splice(current, 0, COPLANAR);
