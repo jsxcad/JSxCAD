@@ -24,6 +24,19 @@ const agent = async ({ ask, question }) => {
         return api.Circle({ radius: values[0] / 2, center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
         return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+      case 'getLayoutSvgs':
+        // Extract shapes
+        var items = api.Shape.fromGeometry(values[0]).toItems();
+
+        // Center each one and grab a .svg of it
+        var svgArray = [];
+        var item;
+        for (item in items) {
+          const svgString = await toSvg({}, items[item].center().section().outline().toKeptGeometry());
+          svgArray.push(svgString);
+        }
+
+        return svgArray;
       case 'difference':
         return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'extractTag':
@@ -50,7 +63,8 @@ const agent = async ({ ask, question }) => {
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
       case 'svg':
-        return toSvg({}, api.Shape.fromGeometry(values[0]).center().crossSection());
+        const svgString = await toSvg({}, api.Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
+        return svgString;
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
         const bounds = shape.measureBoundingBox();
