@@ -14,7 +14,7 @@ export const difference = (baseSurface, ...surfaces) => {
     return [];
   }
   const baseBounds = measureBoundingSphere(baseSurface);
-  surfaces = surfaces.filter(surface => surface.length >= 1 &&
+  surfaces = surfaces.filter(surface => surface.length > 0 &&
                                         equals(toPlane(baseSurface), toPlane(surface)) &&
                                         mayOverlap(baseBounds, measureBoundingSphere(surface)));
   if (surfaces.length === 0) {
@@ -22,7 +22,7 @@ export const difference = (baseSurface, ...surfaces) => {
     return baseSurface;
   }
   // FIX: Detect when the surfaces aren't in the same plane.
-  const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surfaces[0]));
+  const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(baseSurface));
   const z0Surface = transform(toZ0, baseSurface);
   const z0Surfaces = surfaces.map(surface => transform(toZ0, surface));
   const z0Difference = differenceZ0Surfaces(z0Surface, ...z0Surfaces);
