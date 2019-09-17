@@ -71,7 +71,7 @@ export const binPolygons = (sourcePolygons) => {
   const normalizedPolygons = [];
   const polygonTopVertexIndexes = []; // array of indexes of topmost vertex per polygon
   const topYToPolygonIndexes = {};
-  const topYToPolygon = new Map();
+  const topYToPolygons = new Map();
   const yCoordinateToPolygonIndexes = {};
 
   const yCoordinateBins = new Map();
@@ -104,8 +104,17 @@ export const binPolygons = (sourcePolygons) => {
         // degenerate polygon, all vertices have same y coordinate. Just ignore it from now:
         continue;
       }
-      if (topYToPolygon.has(minY)) {
+      if (topYToPolygons.has(minY)) {
         // Look for a duplicate polygon.
+        for (const otherIndex of topYToPolygonIndexes[minY]) {
+          const otherPolygon = normalizedPolyons[otherIndex];
+          if (otherPolygon.length === points.length) {
+            skip = true;
+          }
+        }
+      }
+      if (skip === true) {
+        continue;
       }
       for (let index = 0; index < polygon.length; index++) {
         const y = polygon[index][Y];
@@ -128,9 +137,10 @@ export const binPolygons = (sourcePolygons) => {
           topYToPolygonIndexes[minY] = [];
         }
         topYToPolygonIndexes[minY].push(polygonIndex);
-        if (!topYToPolygon.has(minY)) {
-          topYToPolygon.set(minY, polygon);
+        if (!topYToPolygons.has(minY)) {
+          topYToPolygons.set(minY, new Set());
         }
+        topYToPolygons.get(minY).add(polygon);
       }
     }
     // We push empty polygons on here, too.
