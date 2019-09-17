@@ -24,16 +24,18 @@ const differenceImpl = (baseGeometry, ...geometries) => {
   for (const { solid, tags } of getSolids(baseGeometry)) {
     result.disjointAssembly.push({ solid: solidDifference(solid, ...solids), tags });
   }
-  // Surfaces.
-  // FIX: Needs co-planar grouping.
-  const surfaces = geometries.flatMap(geometry => getSurfaces(geometry)).filter(isNegative).map(item => item.surface);
-  for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.disjointAssembly.push({ surface: surfaceDifference(surface, ...surfaces), tags });
-  }
-  // Z0Surfaces.
-  const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry)).filter(isNegative).map(item => item.z0Surface);
+  // Surfaces -- generalize to surface unless specializable upon z0surface.
+  const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).filter(isNegative).map(item => item.z0Surface));
+  const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).filter(isNegative).map(item => item.surface));
   for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-    result.disjointAssembly.push({ z0Surface: z0SurfaceDifference(z0Surface, ...z0Surfaces), tags });
+    if (surfaces.length === 0) {
+      result.disjointAssembly.push({ z0Surface: z0SurfaceDifference(z0Surface, ...z0Surfaces), tags });
+    } else {
+      result.disjointAssembly.push({ surface: surfaceDifference(z0Surface, ...z0Surfaces, ...surfaces), tags });
+    }
+  }
+  for (const { surface, tags } of getSurfaces(baseGeometry)) {
+    result.disjointAssembly.push({ surface: surfaceDifference(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
