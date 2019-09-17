@@ -13,6 +13,9 @@ const toDisjointAssembly = (geometry) => {
     if (geometry.assembly.length === 0) {
       return { disjointAssembly: [] };
     }
+    if (geometry.assembly.length === 1) {
+      return toDisjointAssembly(geometry.assembly[0]);
+    }
     const disjoint = [];
     for (let nth = geometry.assembly.length - 1; nth >= 0; nth--) {
       const item = toDisjointAssembly(geometry.assembly[nth]);

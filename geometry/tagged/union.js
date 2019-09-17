@@ -19,15 +19,18 @@ const unionImpl = (baseGeometry, ...geometries) => {
   for (const { solid, tags } of getSolids(baseGeometry)) {
     result.assembly.push({ solid: solidUnion(solid, ...solids), tags });
   }
-  // Z0Surfaces.
+  // Surfaces -- generalize to surface unless specializable upon z0surface.
   const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
-  for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-    result.assembly.push({ z0Surface: z0SurfaceUnion(z0Surface, ...z0Surfaces), tags });
-  }
-  // Surfaces.
   const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
+  for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
+    if (surfaces.length === 0) {
+      result.assembly.push({ z0Surface: z0SurfaceUnion(z0Surface, ...z0Surfaces), tags });
+    } else {
+      result.assembly.push({ surface: surfaceUnion(z0Surface, ...z0Surfaces, ...surfaces), tags });
+    }
+  }
   for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.assembly.push({ surface: surfaceUnion(surface, ...surfaces), tags });
+    result.assembly.push({ surface: surfaceUnion(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry).map(item => item.paths));
