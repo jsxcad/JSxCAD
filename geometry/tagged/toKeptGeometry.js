@@ -24,7 +24,7 @@ export const toKeptGeometry = (geometry) => {
       }
     };
     const keptGeometry = walk(disjointGeometry);
-    geometry.keptGeometry = keptGeometry || {};
+    geometry.keptGeometry = keptGeometry || { disjointAssembly: [] };
   }
   return geometry.keptGeometry;
 };
