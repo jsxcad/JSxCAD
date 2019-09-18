@@ -15,7 +15,6 @@ export const union = (...z0Surfaces) => {
     return [];
   }
   while (z0Surfaces.length >= 2) {
-    console.log(`QQ/union/z0Surfaces/length: ${z0Surfaces.length}`);
     const a = z0Surfaces.shift();
     const b = z0Surfaces.shift();
     if (doesNotOverlapOrAbut(a, b)) {
