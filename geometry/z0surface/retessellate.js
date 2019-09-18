@@ -1,6 +1,7 @@
 import { direction, fromPoints as toLineFromPoints } from '@jsxcad/math-line2';
 
 import { distance } from '@jsxcad/math-vec2';
+import { equals as equalsPoint } from '@jsxcad/math-vec3';
 
 const EPS = 1e-5;
 
@@ -100,12 +101,17 @@ export const binPolygons = (sourcePolygons) => {
         }
         points.push([point[X], y]);
       }
+/*
+      if (isDuplicate(points, minY, minIndex, normalizedPolygons, topYToPolygonIndexes, polygonTopVertexIndexes)) {
+        continue;
+      }
+*/
       for (let index = polygon.length - 1; index >= 0; index--) {
         const y = points[index][Y];
         if (!(y in yCoordinateToPolygonIndexes)) {
           yCoordinateToPolygonIndexes[y] = {};
         }
-        yCoordinateToPolygonIndexes[y][polygonIndex] = true;
+        yCoordinateToPolygonIndexes[y][normalizedPolygons.length] = true;
         if (!yCoordinateToPolygons.has(y)) {
           yCoordinateToPolygons.set(y, []);
         }
@@ -120,7 +126,7 @@ export const binPolygons = (sourcePolygons) => {
         if (!(minY in topYToPolygonIndexes)) {
           topYToPolygonIndexes[minY] = [];
         }
-        topYToPolygonIndexes[minY].unshift(polygonIndex);
+        topYToPolygonIndexes[minY].unshift(normalizedPolygons.length);
         if (!topYToPolygon.has(minY)) {
           topYToPolygon.set(minY, polygon);
         }
@@ -131,85 +137,6 @@ export const binPolygons = (sourcePolygons) => {
     normalizedPolygons.push(points);
     polygonTopVertexIndexes.push(minIndex);
   }
-
-  const yCoordinates = [...yCoordinateToPolygons.keys()].sort(fnNumberSort);
-
-  return {
-    yCoordinates,
-    yCoordinateToPolygons,
-    yCoordinateToPolygonIndexes,
-    topYToPolygonIndexes,
-    normalizedPolygons,
-    polygonTopVertexIndexes
-  };
-};
-
-export const binPolygonsOld = (sourcePolygons) => {
-  const normalizedPolygons = [];
-  const polygonTopVertexIndexes = []; // array of indexes of topmost vertex per polygon
-  const topYToPolygonIndexes = {};
-  const topYToPolygon = new Map();
-  const yCoordinateToPolygonIndexes = {};
-
-  const yCoordinateBins = new Map();
-  const yCoordinateToPolygons = new Map();
-
-  // Make a list of all encountered y coordinates
-  // And build a map of all polygons that have a vertex at a certain y coordinate:
-  for (let polygonIndex = 0; polygonIndex < sourcePolygons.length; polygonIndex++) {
-    const polygon = sourcePolygons[polygonIndex];
-    let points = [];
-    let minIndex = -1;
-    if (polygon.length > 0) {
-      let minY = Infinity;
-      let maxY = -Infinity;
-      for (let index = 0; index < polygon.length; index++) {
-        const point = polygon[index];
-        // perform binning of y coordinates: If we have multiple vertices very
-        // close to each other, give them the same y coordinate:
-        const newY = binY(yCoordinateBins, point[Y]);
-        points.push([point[X], newY]);
-        const y = newY;
-        if (y < minY) {
-          minY = y;
-          minIndex = index;
-        }
-        if (y > maxY) {
-          maxY = y;
-        }
-        if (!(y in yCoordinateToPolygonIndexes)) {
-          yCoordinateToPolygonIndexes[y] = {};
-        }
-        yCoordinateToPolygonIndexes[y][polygonIndex] = true;
-        if (!yCoordinateToPolygons.has(y)) {
-          yCoordinateToPolygons.set(y, []);
-        }
-        yCoordinateToPolygons.get(y).push(polygon);
-      }
-      if (minY >= maxY) {
-        // degenerate polygon, all vertices have same y coordinate. Just ignore it from now:
-        throw Error('die');
-      } else {
-        if (!(minY in topYToPolygonIndexes)) {
-          topYToPolygonIndexes[minY] = [];
-        }
-        topYToPolygonIndexes[minY].push(polygonIndex);
-        if (!topYToPolygon.has(minY)) {
-          topYToPolygon.set(minY, polygon);
-        }
-      }
-    }
-    // We push empty polygons on here, too.
-    // reverse the vertex order:
-    // PROVE: Why are we reversing the order?
-    points.reverse();
-    minIndex = polygon.length - minIndex - 1;
-    // These are keyed by the polygon index.
-    normalizedPolygons.push(points);
-    polygonTopVertexIndexes.push(minIndex);
-  }
-
-  console.log(`QQ/normalizedPolygons: ${JSON.stringify(normalizedPolygons)}`);
 
   const yCoordinates = [...yCoordinateToPolygons.keys()].sort(fnNumberSort);
 
@@ -279,6 +206,10 @@ const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonI
   for (let polygonIndexKey in startingPolygonIndexes) {
     const polygonIndex = startingPolygonIndexes[polygonIndexKey];
     const polygon = normalizedPolygons[polygonIndex];
+    if (polygon === undefined) {
+      console.log(`QQ/findNextYCoordinate/index: ${polygonIndex}`);
+      console.log(`QQ/normalizedPolygons/length: ${normalizedPolygons.length}`);
+    }
     const numVertices = polygon.length;
     const topVertexIndex = polygonTopVertexIndexes[polygonIndex];
     // the top of the polygon may be a horizontal line. In that case topVertexIndex can point to any point on this line.
@@ -321,6 +252,27 @@ const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonI
     });
   }
   return nextYCoordinate;
+};
+
+const equalsPolygon = (a, b) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (!equalsPoint(a[i], b[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+const includesPolygon = (polygons, candidate) => {
+  for (const polygon of polygons) {
+    if (equalsPolygon(candidate, polygon)) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons }) => {
@@ -404,6 +356,7 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
         }
       }
     }
+    const staging = [];
     for (let ii = 0; ii < previousPolygonRow.length; ii++) {
       if (!previousContinuedIndexes[ii]) {
         // polygon ends here
@@ -417,9 +370,12 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
         // reverse the left half so we get a counterclockwise circle:
         previousPolygon.outPolygon.leftPoints.reverse();
         const polygon = previousPolygon.outPolygon.rightPoints.concat(previousPolygon.outPolygon.leftPoints);
-        destinationPolygons.push(polygon);
+        if (!includesPolygon(staging, polygon)) {
+          staging.push(polygon);
+        }
       }
     }
+    destinationPolygons.push(...staging);
   }
 
   // Prepare for the next new row.

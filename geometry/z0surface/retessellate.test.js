@@ -28,8 +28,7 @@ test('overlapping', t => {
   const a = [[0, -5, 0], [10, -5, 0], [10, 5, 0], [0, 5, 0]];
   const b = [[0, -5, 0], [10, -5, 0], [10, 5, 0], [0, 5, 0]];
   const r = retessellate([a, b]);
-  // This is producing duplicates
-  t.deepEqual(r, [[[10, -5], [10, 5], [0, 5], [0, -5]], [[10, -5], [10, 5], [0, 5], [0, -5]]]);
+  t.deepEqual(r, [[[10, -5], [10, 5], [0, 5], [0, -5]]]);
 });
 
 test('random 1', t => {
