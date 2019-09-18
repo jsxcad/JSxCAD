@@ -1,6 +1,7 @@
+import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/algorithm-shape';
+
 import { Shape } from './Shape';
-import { assemble } from './assemble';
-import { buildConvexHull } from '@jsxcad/algorithm-shape';
+import { union } from './union';
 
 /**
  *
@@ -26,11 +27,18 @@ import { buildConvexHull } from '@jsxcad/algorithm-shape';
  *
  **/
 
+const Z = 2;
+
 export const chainHull = (...shapes) => {
   const pointsets = shapes.map(shape => shape.toPoints().points);
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
-    chain.push(Shape.fromGeometry(buildConvexHull([...pointsets[nth - 1], ...pointsets[nth]])));
+    const points = [...pointsets[nth - 1], ...pointsets[nth]];
+    if (points.every(point => point[Z] === 0)) {
+      chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
+    } else {
+      chain.push(Shape.fromGeometry(buildConvexHull(points)));
+    }
   }
-  return assemble(...chain);
+  return union(...chain);
 };
