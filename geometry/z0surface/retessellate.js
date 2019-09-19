@@ -371,5 +371,5 @@ export const retessellate = (sourcepolygons) => {
       prevoutpolygonrow = newoutpolygonrow
     }
   } // for yindex
-  return destpolygons
+  return destpolygons.map(polygon => polygon.map(([x, y]) => [x, y, 0]));
 }

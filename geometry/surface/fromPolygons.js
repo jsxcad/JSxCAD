@@ -1,3 +1,4 @@
+import { makeConvex } from './makeConvex';
 import { retessellate } from '@jsxcad/geometry-z0surface';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -11,7 +12,7 @@ const clean = (surface) => {
     return surface;
   }
   return union(...surface.map(polygon => [polygon]));
-}
+};
 
 export const fromPolygons = ({ plane }, polygons) => {
   if (polygons.length === 0) {
@@ -22,8 +23,14 @@ export const fromPolygons = ({ plane }, polygons) => {
   }
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
   const z0Polygons = transform(toZ0, polygons);
-  const z0Surface = clean(retessellate(z0Polygons));
-  const surface = transform(fromZ0, z0Surface);
+  let retessellation = retessellate(z0Polygons);
+  if (retessellation.length >= 2) {
+    // Sometimes overlapping into to retessellation results in overlapping output.
+    // Clean these up and retessellate again.
+    // FIX: Eliminate overlapping output in retessellate.
+    retessellation = retessellate(makeConvex({}, clean(retessellation)));
+  }
+  const surface = transform(fromZ0, retessellation);
   surface.plane = plane;
   return surface;
 };
