@@ -110,6 +110,7 @@ import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
 import { writeDxf } from './writeDxf';
+import { writeGcode } from './writeGcode';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
@@ -160,6 +161,7 @@ const methods = [
   voxels,
   wireframe,
   writeDxf,
+  writeGcode,
   writePdf,
   writeShape,
   writeStl,
