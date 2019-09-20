@@ -51,6 +51,9 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
+// NOTE: Perhaps we should make union(a, b, c) equivalent to emptyGeometry.union(a, b, c);
+// This would restore commutation.
+
 const unionOfShapes = (...shapes) => {
   switch (shapes.length) {
     case 0: {
