@@ -100,7 +100,9 @@ import { sin } from './sin';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
+import { sweep } from './sweep';
 import { tags } from './tags';
+import { toolpath } from './toolpath';
 import { toBillOfMaterial } from './toBillOfMaterial';
 import { toItems } from './toItems';
 import { translate } from './translate';
@@ -148,7 +150,9 @@ const methods = [
   scale,
   section,
   specify,
+  sweep,
   tags,
+  toolpath,
   toBillOfMaterial,
   toItems,
   translate,

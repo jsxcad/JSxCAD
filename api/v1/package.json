@@ -52,6 +52,7 @@
     "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
     "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/algorithm-text": "^0.0.79",
+    "@jsxcad/algorithm-toolpath": "^0.0.79",
     "@jsxcad/algorithm-verlet": "^0.0.79",
     "@jsxcad/algorithm-watertight": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
