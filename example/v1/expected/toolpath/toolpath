@@ -1,0 +1,3 @@
+await difference(Triangle(25), Triangle(20))
+        .toolpath(0.9)
+        .writePdf('triangle_toolpath.pdf');
