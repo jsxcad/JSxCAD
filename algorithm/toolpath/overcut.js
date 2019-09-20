@@ -4,7 +4,7 @@ import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { getEdges } from '@jsxcad/geometry-path';
 
 export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
- const cuts = [];
+  const cuts = [];
   for (const [start, end] of getEdges(path)) {
     const direction = normalize(subtract(start, end));
     const angleRadians = Math.PI / 2;
@@ -17,7 +17,7 @@ export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
     cuts.push([startCut, endCut]);
   }
   return cuts;
-}
+};
 
 export const overcut = (geometry, radius = 1, overcut = 0) => {
   const cuts = [];

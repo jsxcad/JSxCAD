@@ -1,4 +1,3 @@
-import { Circle } from './Circle';
 import { Shape } from './Shape';
 import { chainHull } from './chainHull';
 import { getPaths } from '@jsxcad/geometry-tagged';
@@ -23,7 +22,7 @@ export const sweep = (tool, ...toolpaths) => {
     }
   }
   return union(...chains);
-}
+};
 
 const method = function (...toolpaths) { return sweep(this, ...toolpaths); };
 
