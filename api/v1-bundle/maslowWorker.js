@@ -50,6 +50,15 @@ const agent = async ({ ask, question }) => {
         return api.intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
+      case 'Overcut Inside Corners':
+        const overcutShape = api.Shape.fromGeometry(values[0]);
+        const toolpath = overcutShape.toolpath(4);
+        console.log("Toolpath: ")
+        console.log(toolpath)
+        console.log("Outline: ")
+        console.log(overcutShape.outline());
+        const sweep = api.Circle(4).sweep(toolpath)
+        return toolpath.toDisjointGeometry();
       case 'render':
         return convertThree.toThreejsGeometry(api.Shape.fromGeometry(values).toDisjointGeometry());
       case 'rotate':
