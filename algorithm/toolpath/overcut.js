@@ -4,19 +4,18 @@ import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import { getEdges } from '@jsxcad/geometry-path';
 
-
 const intersectionPoints = (cuts) => {
-    cuts.push(cuts[0])
-    var intersectionPoints = [];
-    var i = 0;
-    while(i < cuts.length-1){
-        const point = intersectPointOfLines(fromPoints(...cuts[i]), fromPoints(...cuts[i+1]));
-        point.push(cuts[i][0][2])
-        intersectionPoints.push(point)
-        i++;
-    }
-    return intersectionPoints;
-}
+  cuts.push(cuts[0]);
+  var intersectionPoints = [];
+  var i = 0;
+  while (i < cuts.length - 1) {
+    const point = intersectPointOfLines(fromPoints(...cuts[i]), fromPoints(...cuts[i + 1]));
+    point.push(cuts[i][0][2]);
+    intersectionPoints.push(point);
+    i++;
+  }
+  return intersectionPoints;
+};
 
 export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
   const cuts = [];
@@ -31,7 +30,7 @@ export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
     const endCut = add(end, add(frontcut, offset));
     cuts.push([startCut, endCut]);
   }
-  var points = intersectionPoints(cuts)
+  var points = intersectionPoints(cuts);
   return points;
 };
 

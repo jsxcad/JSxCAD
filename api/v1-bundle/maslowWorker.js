@@ -53,10 +53,6 @@ const agent = async ({ ask, question }) => {
       case 'Overcut Inside Corners':
         const overcutShape = api.Shape.fromGeometry(values[0]);
         const toolpath = overcutShape.toolpath(4);
-        console.log("Toolpath: ")
-        console.log(toolpath)
-        console.log("Outline: ")
-        console.log(overcutShape.outline());
         const sweep = api.Circle(4).sweep(toolpath)
         return toolpath.toDisjointGeometry();
       case 'render':
