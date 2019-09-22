@@ -33,7 +33,10 @@ const agent = async ({ ask, question }) => {
                 inputs[key] = values[1][key];
             }
         }
-        return eval(values[0]).toDisjointGeometry();
+        const signature = "{ " + Object.keys(api).join(', ') + ", " + Object.keys(inputs).join(', ') +" }";
+        const foo = new Function(signature, values[0]);
+        const returnVal = foo({...api, ...inputs});
+        return returnVal.toDisjointGeometry()
       case 'getLayoutSvgs':
         // Extract shapes
         var items = api.Shape.fromGeometry(values[0]).toItems();
