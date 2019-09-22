@@ -17,8 +17,8 @@ const intersectionPoints = (cuts) => {
   return intersectionPoints;
 };
 
-export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
-  const cuts = [];
+export const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
+  var cuts = [];
   for (const [start, end] of getEdges(path)) {
     const direction = normalize(subtract(start, end));
     const angleRadians = Math.PI / 2;
@@ -30,20 +30,22 @@ export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
     const endCut = add(end, add(frontcut, offset));
     cuts.push([startCut, endCut]);
   }
-  var points = intersectionPoints(cuts);
-  return points;
+  if(joinPaths){
+    cuts = [intersectionPoints(cuts, overcut)];
+  }
+  return cuts;
 };
 
-export const overcut = (geometry, radius = 1, overcut = 0) => {
+export const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
   const cuts = [];
   for (const { surface } of getSurfaces(geometry)) {
     for (const path of surface) {
-      cuts.push(overcutPathEdges(path, radius, overcut));
+      cuts.push(...overcutPathEdges(path, radius, overcut, joinPaths));
     }
   }
   for (const { z0Surface } of getZ0Surfaces(geometry)) {
     for (const path of z0Surface) {
-      cuts.push(overcutPathEdges(path, radius, overcut));
+      cuts.push(...overcutPathEdges(path, radius, overcut, joinPaths));
     }
   }
   return cuts;
