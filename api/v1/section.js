@@ -5,8 +5,6 @@ import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { fromPoints } from '@jsxcad/math-plane';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { outline } from './outline';
-import { union } from './union';
 
 /**
  *
