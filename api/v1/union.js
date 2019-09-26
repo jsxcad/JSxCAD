@@ -60,7 +60,6 @@ const unionOfShapes = (...shapes) => {
       return fromGeometry({ assembly: [] });
     }
     case 1: {
-      // We still want to produce a simple shape.
       return shapes[0];
     }
     default: {

@@ -46,7 +46,6 @@ export const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
     const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
     shapes.push(Shape.fromPathsToZ0Surface(paths));
   }
-  // return outline({}, assemble(...shapes));
   return assemble(...shapes);
 };
 
