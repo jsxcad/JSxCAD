@@ -1,5 +1,5 @@
 import { add, normalize, rotateZ, scale, subtract } from '@jsxcad/math-vec3';
-import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getPaths } from '@jsxcad/geometry-tagged';
 
 import { getEdges } from '@jsxcad/geometry-path';
 
@@ -21,13 +21,8 @@ export const overcutPathEdges = (path, radius = 1, overcut = 0) => {
 
 export const overcut = (geometry, radius = 1, overcut = 0) => {
   const cuts = [];
-  for (const { surface } of getSurfaces(geometry)) {
-    for (const path of surface) {
-      cuts.push(...overcutPathEdges(path, radius, overcut));
-    }
-  }
-  for (const { z0Surface } of getZ0Surfaces(geometry)) {
-    for (const path of z0Surface) {
+  for (const { paths } of getPaths(geometry)) {
+    for (const path of paths) {
       cuts.push(...overcutPathEdges(path, radius, overcut));
     }
   }

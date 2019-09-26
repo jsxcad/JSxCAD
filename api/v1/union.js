@@ -61,7 +61,7 @@ const unionOfShapes = (...shapes) => {
     }
     case 1: {
       // We still want to produce a simple shape.
-      return fromGeometry(toKeptGeometry(shapes[0]));
+      return shapes[0];
     }
     default: {
       return fromGeometry(unionGeometry(...shapes.map(toKeptGeometry)));

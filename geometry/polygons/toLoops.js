@@ -1,4 +1,5 @@
 import { equals as equalsVec3, squaredDistance } from '@jsxcad/math-vec3';
+import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 
 // Edge Properties.
 const START = 0;
@@ -70,7 +71,10 @@ export const toLoops = ({ allowOpenPaths = false }, edges) => {
         throw e;
       }
     }
-    loops.push(loop);
+    const plane = toPlaneFromPolygon(loop);
+    if (plane !== undefined) {
+      loops.push(loop);
+    }
   }
 
   return loops;
