@@ -1,3 +1,5 @@
+// FIX Replace this whole thing with a bsp classification of a plane.
+
 import { canonicalize, dot, lerp, subtract } from '@jsxcad/math-vec3';
 
 import { toLoops } from './toLoops';
