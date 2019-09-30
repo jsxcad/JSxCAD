@@ -12,7 +12,7 @@ export const flip = (geometry) => {
   } else if (geometry.surface) {
     flipped.surface = flipSurface(geometry.surface);
   } else if (geometry.z0Surface) {
-    flipped.z0surface = flipSurface(geometry.z0Surface);
+    flipped.z0Surface = flipSurface(geometry.z0Surface);
   } else if (geometry.solid) {
     flipped.solid = flipSolid(geometry.solid);
   } else if (geometry.assembly) {

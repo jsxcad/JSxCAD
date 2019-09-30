@@ -25,6 +25,9 @@ export class Shape {
   }
 
   constructor (geometry = fromGeometry({ assembly: [] })) {
+    if (geometry.geometry) {
+      throw Error('die');
+    }
     this.geometry = geometry;
   }
 
