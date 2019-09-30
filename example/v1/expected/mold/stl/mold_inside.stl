@@ -1,0 +1,58 @@
+solid JSxCAD
+facet normal -1 0 0
+outer loop
+vertex -15 25.98076 0
+vertex -15 -25.98076 1
+vertex -15 25.98076 1
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex -15 -25.98076 1
+vertex -15 25.98076 0
+vertex -15 -25.98076 0
+endloop
+endfacet
+facet normal 0.4999999694937756 0.8660254213972148 0
+outer loop
+vertex 30 0 0
+vertex -15 25.98076 1
+vertex 30 0 1
+endloop
+endfacet
+facet normal 0.4999999694937756 0.8660254213972148 0
+outer loop
+vertex -15 25.98076 1
+vertex 30 0 0
+vertex -15 25.98076 0
+endloop
+endfacet
+facet normal 0.4999999694937756 -0.8660254213972148 0
+outer loop
+vertex -15 -25.98076 0
+vertex 30 0 1
+vertex -15 -25.98076 1
+endloop
+endfacet
+facet normal 0.4999999694937756 -0.8660254213972148 0
+outer loop
+vertex 30 0 1
+vertex -15 -25.98076 0
+vertex 30 0 0
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 30 0 1
+vertex -15 25.98076 1
+vertex -15 -25.98076 1
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 30 0 0
+vertex -15 -25.98076 0
+vertex -15 25.98076 0
+endloop
+endfacet
+endsolid JSxCAD
