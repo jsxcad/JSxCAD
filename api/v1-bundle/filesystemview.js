@@ -155,7 +155,7 @@ const displayFilesystemviewFile = async (file) => {
 
 const openFilesystemviewFile = (file) => {
   if (file.endsWith('.stl')) {
-    displayFilesystemviewFile(file).then(_ => _).catch(_ => _);
+    displayFilesystemviewFile(`geometry/${file}`).then(_ => _).catch(_ => _);
   }
 }
 
