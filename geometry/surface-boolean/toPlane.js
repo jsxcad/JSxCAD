@@ -8,7 +8,7 @@ export const toPlane = (surface) => {
   } else {
     for (const polygon of surface) {
       const plane = toPlaneOfPolygon(polygon);
-      if (!isNaN(plane[0])) {
+      if (plane !== undefined) {
         surface.plane = plane;
         return surface.plane;
       }
