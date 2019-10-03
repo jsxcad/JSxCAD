@@ -12,7 +12,7 @@ const agent = async ({ ask, question }) => {
     var { key, values } = question;
     switch (key) {
       case 'assemble':
-        const inputs = values[0].map(api.Shape.fromGeometry);
+        var inputs = values[0].map(api.Shape.fromGeometry);
         if (values[1]) {
           return api.assemble(...inputs).drop('cutAway').toKeptGeometry();
         } else {
@@ -23,7 +23,24 @@ const agent = async ({ ask, question }) => {
       case 'circle':
         return api.Circle({ radius: values[0] / 2, center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
-        return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+        if (values[1] === 'Keep Out') {
+          return api.Shape.fromGeometry(values[0]).color('Red').material('keepout').toDisjointGeometry();
+        } else {
+          return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+        }
+      case 'code':
+        inputs = {};
+        for (key in values[1]) {
+          if (values[1][key] != null && typeof values[1][key] === 'object') {
+            inputs[key] = api.Shape.fromGeometry(values[1][key]);
+          } else {
+            inputs[key] = values[1][key];
+          }
+        }
+        const signature = '{ ' + Object.keys(api).join(', ') + ', ' + Object.keys(inputs).join(', ') + ' }';
+        const foo = new Function(signature, values[0]);
+        const returnVal = foo({ ...api, ...inputs });
+        return returnVal.toDisjointGeometry();
       case 'getLayoutSvgs':
         // Extract shapes
         var items = api.Shape.fromGeometry(values[0]).toItems();
