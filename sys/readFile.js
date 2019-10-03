@@ -47,7 +47,7 @@ const getFileFetcher = async () => {
 };
 
 // Fetch from internal store.
-const fetchPersistent = async ({ as }, path) => {
+const fetchPersistent = async (path) => {
   try {
     const base = getBase();
     if (base !== undefined) {
@@ -110,7 +110,7 @@ export const readFile = async (options, path) => {
   const { sources = [] } = options;
   const file = getFile(options, path);
   if (file.data === undefined) {
-    file.data = await fetchPersistent({ as }, path);
+    file.data = await fetchPersistent(path);
   }
   if (file.data === undefined) {
     file.data = await fetchSources({}, sources);

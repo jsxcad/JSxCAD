@@ -4,7 +4,7 @@ export const installCSS = (document, text) => {
   document.head.appendChild(style);
 };
 
-export const installCSSLink = async (document, href) =>
+export const installCSSLink = (document, href) =>
   new Promise((resolve, reject) => {
     var link = document.createElement('link');
     link.rel = 'stylesheet';

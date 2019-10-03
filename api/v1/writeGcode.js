@@ -20,7 +20,8 @@ export const writeGcode = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toKeptGeometry();
   const gcode = await toGcode({ preview: true, ...options }, geometry);
-  await writeFile({ geometry, preview: true }, path, gcode);
+  await writeFile({}, `file/${path}`, gcode);
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
 const method = function (options = {}) { return writeGcode(options, this); };

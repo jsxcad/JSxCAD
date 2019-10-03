@@ -4,13 +4,15 @@ import { installConsole, installConsoleCSS } from './console';
 import { installDisplay, installDisplayCSS } from './display';
 import { installEditor, installEditorCSS } from './editor';
 import { installEvaluator, installEvaluatorCSS } from './evaluator';
+import { installFilesystemview } from './filesystemview';
 import { installReference, installReferenceCSS } from './reference';
-import { listProjects, readFile, setupFilesystem, watchFile, watchFileCreation } from '@jsxcad/sys';
+import { listFiles, listFilesystems, readFile, setupFilesystem, watchFile, watchFileCreation } from '@jsxcad/sys';
 
 const defaultScript =
 `
-hull(point(0, 0, 10), circle(10))
-  .writeStl({ path: 'cone.stl' })
+hull(Point(0, 0, 10),
+     Circle(10))
+  .writeStl('cone.stl')
 `;
 
 const installProject = async () => {
@@ -62,12 +64,12 @@ const installProject = async () => {
   return {};
 };
 
-window.bootstrapCSS = () => {
-  installConsoleCSS(document);
-  installEditorCSS(document);
-  installDisplayCSS(document);
-  installEvaluatorCSS(document);
-  installReferenceCSS(document);
+window.bootstrapCSS = async () => {
+  await installConsoleCSS(document)
+  await installEditorCSS(document);
+  await installDisplayCSS(document);
+  await installEvaluatorCSS(document);
+  await installReferenceCSS(document);
 };
 
 window.bootstrap = async () => {
@@ -81,22 +83,18 @@ window.bootstrap = async () => {
   const { addPage, nextPage, lastPage } = await installDisplay({ document, readFile, watchFile, watchFileCreation, window });
   const { evaluator } = await installEvaluator({});
   await installEditor({ addPage, document, evaluator, initialScript, nextPage, lastPage });
+  await installFilesystemview({ document });
   await installConsole({ addPage, document, watchFile });
   await installReference({ addPage, document });
-  {
-    const names = new Set();
-    const projects = await listProjects();
-    for (const project of projects) {
-      const [, name] = project.split('/');
-      names.add(name);
-    }
-    for (const name of names) {
-      console.log(`QQ/project/name: ${name}`);
-    }
+  for (const filesystem of await listFilesystems()) {
+    console.log(`QQ/filesystem: ${filesystem}`);
+  }
+  for (const file of await listFiles()) {
+    console.log(`QQ/file: ${file}`);
   }
 };
 
-window.bootstrapCSS();
+window.bootstrapCSS().then(_ => _).catch(_ => _);
 
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {

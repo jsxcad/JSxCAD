@@ -9,9 +9,11 @@ import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
-export const installDisplayCSS = (document) => {
-  installCSSLink(document, 'https://unpkg.com/jspanel4@4.6.0/es6module/jspanel.css');
-  installCSS(document, `
+export const installDisplayCSS = async (document) => {
+  // await installCSSLink(document, 'https://cdn.jsdelivr.net/npm/jspanel4@4.6.0/dist/jspanel.css');
+  await installCSSLink(document, 'https://jspanel.de/dist/jspanel.min.css');
+  await installCSSLink(document, 'https://fonts.googleapis.com/icon?family=Material+Icons');
+  await installCSS(document, `
                .dg { position: absolute; top: 2px; left: 2px; background: #ffffff; color: #000000 }
                .dg.main.taller-than-window .close-button { border-top: 1px solid #ddd; }
                .dg.main .close-button { background-color: #ccc; } 
