@@ -1,4 +1,4 @@
-import { cache, cacheTransform } from './cache';
+import { cache, cacheTransform, clearCache } from './cache';
 
 import test from 'ava';
 
@@ -19,4 +19,22 @@ test('cacheTransform supports deep equality of the first argument and shallow eq
   t.is(foo([0], 1), foo([0], 1));
   t.not(foo([0], 1), foo([0], 2));
   t.not(foo([0], 1), foo([1], 1));
+});
+
+test('Test clearing the caches', t => {
+  const fooImpl = (a) => [a];
+  const foo = cache(fooImpl);
+
+  const a = foo('a');
+
+  // Memoization applies.
+  t.is(foo('a'), a);
+
+  clearCache();
+
+  // Memoization has failed.
+  t.not(foo('a'), a);
+
+  // Memoization has resumed.
+  t.is(foo('a'), foo('a'));
 });
