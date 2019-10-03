@@ -5,14 +5,8 @@ import { canonicalize } from '@jsxcad/geometry-paths';
 import test from 'ava';
 import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
-test('surface', t => {
-  const cuts = overcut({ surface: [unitRegularTrianglePolygon] }, 0, 0);
-  t.deepEqual(canonicalize(cuts),
-              [[[1, 0, 0], [-0.5, 0.86603, 0]], [[-0.5, 0.86603, 0], [-0.5, -0.86603, 0]], [[-0.5, -0.86603, 0], [1, 0, 0]]]);
-});
-
-test('z0Surface', t => {
-  const cuts = overcut({ z0Surface: [unitRegularTrianglePolygon] }, 0, 0);
+test('paths', t => {
+  const cuts = overcut({ paths: [unitRegularTrianglePolygon] }, 0, 0);
   t.deepEqual(canonicalize(cuts),
               [[[1, 0, 0], [-0.5, 0.86603, 0]], [[-0.5, 0.86603, 0], [-0.5, -0.86603, 0]], [[-0.5, -0.86603, 0], [1, 0, 0]]]);
 });
