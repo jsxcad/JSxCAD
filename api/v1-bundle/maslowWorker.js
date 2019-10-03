@@ -23,7 +23,11 @@ const agent = async ({ ask, question }) => {
       case 'circle':
         return api.Circle({ radius: values[0] / 2, center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
-        return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+        if(values[1] == "Keep Out"){
+            return api.Shape.fromGeometry(values[0]).color("Red").material('keepout').toDisjointGeometry();
+        }else{
+            return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+        }
       case 'code':
         var inputs = {};
         for(var key in values[1]) {
