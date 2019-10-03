@@ -1,11 +1,14 @@
-const files = {};
+import { getBase } from './filesystem';
+
+const files = new Map();
 const fileCreationWatchers = [];
 
-export const getFile = (options, path) => {
-  let file = files[path];
+export const getFile = (options, unqualifiedPath) => {
+  const path = `${getBase()}/${unqualifiedPath}`;
+  let file = files.get(path);
   if (file === undefined) {
-    file = { path: path, watchers: [] };
-    files[path] = file;
+    file = { path: unqualifiedPath, watchers: [] };
+    files.set(path, file);
     for (const watcher of fileCreationWatchers) {
       watcher(options, file);
     }

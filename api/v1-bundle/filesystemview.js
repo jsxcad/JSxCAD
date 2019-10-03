@@ -3,13 +3,14 @@
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
-import { getFilesystem, listFiles, listFilesystems, readFile, setupFilesystem, watchFile } from '@jsxcad/sys';
+import { createService, getFilesystem, listFiles, listFilesystems, readFile, setupFilesystem, watchFile, writeFile } from '@jsxcad/sys';
 
+import CodeMirror from 'codemirror/src/codemirror.js';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
-let filesystemview;
+let panels = new Set();
 
 const buttonStyle = [
   `box-shadow:inset 0px 1px 0px 0px #ffffff;`,
@@ -38,14 +39,21 @@ const updateFilesystemviewHTML = async () => {
     entries.push(`<hr>`);
     entries.push(`<br>`);
 
-    for (const path of await listFiles()) {
+    const paths = new Set(await listFiles());
+    for (const path of paths) {
       if (!path.startsWith('file/')) {
         continue;
       }
       const file = path.substring(5);
-      entries.push(`<button style='${buttonStyle}' onclick="openFilesystemviewFile('${file}')">${file}</button>`);
+      entries.push(file);
+      if (paths.has(`geometry/${file}`)) {
+        entries.push(`<button style='${buttonStyle}' onclick="viewGeometry('${file}')">View</button>`);
+      }
+      if (path.endsWith('.jsx')) {
+        entries.push(`<button style='${buttonStyle}' onclick="editFile('${file}')">Edit</button>`);
+      }
+      entries.push(`<br>`);
     }
-    entries.push(`<br>`);
     entries.push(`<hr>`);
   }
 
@@ -56,32 +64,35 @@ const updateFilesystemviewHTML = async () => {
   return entries.join('\n');
 };
 
-const displayFilesystemviewFile = async (file) => {
-  const page = jsPanel.create({
-    headerTitle: file,
-    content: `<div id="${file}"></div>`,
+const displayGeometry = async (path) => {
+  const panel = jsPanel.create({
+    headerTitle: path,
+    content: `<div id="${path}"></div>`,
     contentOverflow: 'hidden',
     position: { my: 'right-top', at: 'right-top' },
-    footerToolbar: `</span><button class="jsPanel-ftr-btn" id="download/${file}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${file}</button>`,
-    // iconfont: 'material-icons',
+    panelSize: { width: '66%', height: '100%' },
+    footerToolbar: `</span><button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
     headerControls: { size: 'xs' },
+    onclosed: (panel) => panels.delete(panel),
     callback: (panel) => {
-                           document.getElementById(`download/${file}`)
+                           document.getElementById(`download/${path}`)
                                    .addEventListener('click',
                                                      async () => {
-                                                       const data = await readFile({ as: 'bytes' }, file);
+                                                       const data = await readFile({ as: 'bytes' }, `file/${path}`);
                                                        const blob = new Blob([data.buffer],
                                                                              { type: 'application/octet-stream' });
-                                                       saveAs(blob, file);
+                                                       saveAs(blob, path);
                                                      });
                          }
   });
 
+  panels.add(panel);
+
   const view = {};
   let datasets = [];
   let threejsGeometry;
-  let width = page.offsetWidth;
-  let height = page.offsetHeight;
+  let width = panel.offsetWidth;
+  let height = panel.offsetHeight;
   const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
   const { gui } = buildGui({ viewerElement });
   const hudContext = hudCanvas.getContext('2d');
@@ -92,7 +103,7 @@ const displayFilesystemviewFile = async (file) => {
     hudContext.fillStyle = '#FF0000';
   };
 
-  const container = document.getElementById(file);
+  const container = document.getElementById(path);
   container.appendChild(viewerElement);
 
   const animate = () => {
@@ -120,8 +131,7 @@ const displayFilesystemviewFile = async (file) => {
 
   track();
 
-  // const geometryFile = `geometry/${file}`;
-  const geometryFile = file;
+  const geometryPath = `geometry/${path}`;
 
   const updateGeometry = (geometry) => {
     if (geometry !== undefined) {
@@ -147,27 +157,112 @@ const displayFilesystemviewFile = async (file) => {
     }
   }
 
-  updateGeometry(JSON.parse(await readFile({}, geometryFile)));
+  updateGeometry(JSON.parse(await readFile({}, geometryPath)));
 
-  watchFile(geometryFile,
-            async () => updateGeometry(JSON.parse(await readFile({}, geometryFile))));
+  watchFile(geometryPath,
+            async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
 }
 
-const openFilesystemviewFile = (file) => {
-  if (file.endsWith('.stl')) {
-    displayFilesystemviewFile(`geometry/${file}`).then(_ => _).catch(_ => _);
+const displayEditor = async (path) => {
+
+  const agent = async ({ ask, question }) => {
+    if (question.readFile) {
+      const { options, path } = question.readFile;
+      return readFile(options, path);
+    } else if (question.writeFile) {
+      const { options, path, data } = question.writeFile;
+      return writeFile(options, path, data);
+    }
+  };
+
+  const { ask } = await createService({ webWorker: './webworker.js', agent });
+
+  const evaluator = async (script) => {
+    let start = new Date().getTime();
+    let runClock = true;
+    const clockElement = document.getElementById(`evaluatorClock/${path}`);
+    const tick = () => {
+      if (runClock) {
+        setTimeout(tick, 100);
+        const duration = new Date().getTime() - start;
+        clockElement.textContent = `${(duration / 1000).toFixed(2)}`;
+      }
+    };
+    tick();
+    const geometry = await ask({ evaluate: script });
+    if (geometry) {
+      await writeFile({}, 'file/preview', 'preview');
+      await writeFile({}, 'geometry/preview', JSON.stringify(geometry));
+    }
+    runClock = false;
+  };
+
+  let editor;
+
+  // FIX: Need some visual indicator that the script is running.
+  const runScript = async () => {
+    const script = editor.getDoc().getValue('\n');
+    // Save any changes.
+    await writeFile({}, `file/${path}`, script);
+    return evaluator(script);
+  };
+
+  const editId = `${getFilesystem()}/edit/${path}`;
+
+  const content = await readFile({}, `file/${path}`);
+
+  const panel = jsPanel.create({
+    headerTitle: path,
+    content: `<textarea id="${editId}">${content}</textarea>`,
+    contentOverflow: 'hidden',
+    panelSize: { width: '66%', height: '100%' },
+    position: { my: 'left-top', at: 'left-top' },
+    headerControls: { size: 'xs' },
+    footerToolbar: `<span id="evaluatorClock/${path}"></span><button class="jsPanel-ftr-btn" id="runScript/${path}" style="padding: 5px; margin: 3 px;">Run</button>`,
+    onclosed: (panel) => { editor.toTextArea(); panels.delete(panel); },
+    callback: (panel) => document.getElementById(`runScript/${path}`).addEventListener('click', runScript)
+  });
+  panels.add(panel);
+
+  const textarea = document.getElementById(editId);
+
+  editor = CodeMirror.fromTextArea(textarea,
+                                   {
+                                     autoRefresh: true,
+                                     mode: 'javascript',
+                                     theme: 'default',
+                                     fullScreen: true,
+                                     lineNumbers: true,
+                                     gutter: true,
+                                     lineWrapping: true,
+                                     extraKeys: { 'Shift-Enter': runScript },
+                                   });
+}
+
+const viewGeometry = (file) => {
+  displayGeometry(file).then(_ => _).catch(_ => _);
+}
+
+const editFile = (file) => {
+  displayEditor(file).then(_ => _).catch(_ => _);
+}
+
+const closePanels = async () => {
+  for (const panel of panels) {
+    await new Promise((resolve, reject) => { panel.close(resolve); });
   }
 }
 
 const switchFilesystemview = (filesystem) => {
-  // FIX: Save any open windows.
-  setupFilesystem({ fileBase: filesystem });
-  filesystemview.close(id => id);
-  updateFilesystemview().then(_ => _).catch(_ => _);
+  closePanels()
+    .then(_ => setupFilesystem({ fileBase: filesystem }))
+    .then(_ => updateFilesystemview())
+    .then(_ => _)
+    .catch(_ => _);
 }
 
 const updateFilesystemview = async () => {
-  filesystemview = jsPanel.create({
+  const panel = jsPanel.create({
     id: 'filesystemview',
     headerTitle: `Project: ${getFilesystem()}`,
     position: { my: 'right-bottom', at: 'right-bottom' },
@@ -175,14 +270,16 @@ const updateFilesystemview = async () => {
     panelSize: { width: 512, height: '100%' },
     border: '2px solid',
     borderRadius: 12,
-    // iconfont: 'material-icons',
     headerControls: { close: 'remove', size: 'xs' },
     content: await updateFilesystemviewHTML(),
+    onclosed: (panel) => panels.delete(panel),
   });
+  panels.add(panel);
 }
 
 export const installFilesystemview = async ({ document }) => {
-  document.openFilesystemviewFile = openFilesystemviewFile;
+  document.editFile = editFile;
+  document.viewGeometry = viewGeometry;
   document.switchFilesystemview = switchFilesystemview;
   await updateFilesystemview();
 }
