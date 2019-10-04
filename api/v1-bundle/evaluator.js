@@ -28,7 +28,8 @@ export const installEvaluator = async () => {
     tick();
     const geometry = await ask({ evaluate: script });
     if (geometry) {
-      await writeFile({ preview: true, geometry }, 'preview', 'preview');
+      await writeFile({}, 'file/preview', 'preview');
+      await writeFile({}, 'geometry/preview', JSON.stringify(geometry));
     }
     runClock = false;
   };

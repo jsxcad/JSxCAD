@@ -4,5 +4,5 @@ import test from 'ava';
 
 test('Expected stl', async (t) => {
   await run('sphereCubeHull');
-  isExpected(t, 'sphereCubeHull/stl/sphereCubeHull.stl');
+  isExpected(t, 'sphereCubeHull/file/stl/sphereCubeHull.stl');
 });

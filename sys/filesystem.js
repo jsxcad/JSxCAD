@@ -13,3 +13,10 @@ export const setupFilesystem = ({ fileBase }) => {
     }
   }
 };
+
+export const getFilesystem = () => {
+  if (base !== undefined) {
+    const [filesystem] = base.split('/');
+    return filesystem;
+  }
+};

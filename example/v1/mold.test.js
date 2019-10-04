@@ -4,6 +4,6 @@ import test from 'ava';
 
 test('Expected stl', async (t) => {
   await run('mold');
-  isExpected(t, 'mold/stl/mold_inside.stl');
-  isExpected(t, 'mold/stl/mold_perimeter.stl');
+  isExpected(t, 'mold/file/stl/mold_inside.stl');
+  isExpected(t, 'mold/file/stl/mold_perimeter.stl');
 });

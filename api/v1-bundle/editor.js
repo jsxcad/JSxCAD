@@ -14,6 +14,7 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
   // FIX: Need some visual indicator that the script is running.
   const runScript = async () => {
     const script = editor.getDoc().getValue('\n');
+    // Save any changes.
     await writeFile({}, 'script', script);
     return evaluator(script);
   };
