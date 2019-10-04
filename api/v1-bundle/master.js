@@ -1,20 +1,6 @@
-/* global location */
-
-import { installConsole, installConsoleCSS } from './console';
-import { installDisplay, installDisplayCSS } from './display';
-import { installEditor, installEditorCSS } from './editor';
-import { installEvaluator, installEvaluatorCSS } from './evaluator';
 import { installFilesystemview } from './filesystemview';
-import { installReference, installReferenceCSS } from './reference';
-import { listFiles, listFilesystems, readFile, setupFilesystem, watchFile, watchFileCreation } from '@jsxcad/sys';
 
-const defaultScript =
-`
-hull(Point(0, 0, 10),
-     Circle(10))
-  .writeStl('cone.stl')
-`;
-
+/*
 const installProject = async () => {
   const hash = location.hash.substring(1);
   const [project, source] = hash.split('@');
@@ -63,16 +49,20 @@ const installProject = async () => {
   }
   return {};
 };
+*/
 
 window.bootstrapCSS = async () => {
-  await installConsoleCSS(document)
+  /*
+  await installConsoleCSS(document);
   await installEditorCSS(document);
   await installDisplayCSS(document);
   await installEvaluatorCSS(document);
   await installReferenceCSS(document);
+  */
 };
 
 window.bootstrap = async () => {
+  /*
   let { initialScript } = await installProject();
   if (initialScript === undefined) {
     initialScript = await readFile({}, 'script');
@@ -83,7 +73,9 @@ window.bootstrap = async () => {
   const { addPage, nextPage, lastPage } = await installDisplay({ document, readFile, watchFile, watchFileCreation, window });
   const { evaluator } = await installEvaluator({});
   await installEditor({ addPage, document, evaluator, initialScript, nextPage, lastPage });
+  */
   await installFilesystemview({ document });
+  /*
   await installConsole({ addPage, document, watchFile });
   await installReference({ addPage, document });
   for (const filesystem of await listFilesystems()) {
@@ -92,6 +84,7 @@ window.bootstrap = async () => {
   for (const file of await listFiles()) {
     console.log(`QQ/file: ${file}`);
   }
+  */
 };
 
 window.bootstrapCSS().then(_ => _).catch(_ => _);

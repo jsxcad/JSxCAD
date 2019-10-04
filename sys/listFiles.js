@@ -12,7 +12,7 @@ const getKeys = async () => {
     watchFileCreation(updateCachedKeys);
   }
   return cachedKeys;
-}
+};
 
 export const listFilesystems = async () => {
   const keys = await getKeys();

@@ -24,4 +24,4 @@ export const watchFileCreation = (thunk) => {
 export const unwatchFileCreation = (thunk) => {
   fileCreationWatchers.delete(thunk);
   return thunk;
-}
+};

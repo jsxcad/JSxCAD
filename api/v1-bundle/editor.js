@@ -63,6 +63,6 @@ export const installEditor = ({ addPage, document, evaluator, initialScript, nex
                               });
     lastPage();
   };
-  // setupDocument();
+  setupDocument();
   return {};
 };

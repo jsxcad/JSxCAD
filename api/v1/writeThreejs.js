@@ -6,7 +6,7 @@ export const writeThreejsPage = async (options, shape) => {
   if (typeof options === 'string') {
     options = { path: options };
   }
-  const { path, view } = options;
+  const { path } = options;
   const geometry = shape.toKeptGeometry();
   await writeFile({}, `file/${path}`, toThreejsPage(options, geometry));
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));

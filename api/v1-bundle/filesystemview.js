@@ -29,12 +29,12 @@ const buttonStyle = [
   `margin:4px;`,
   `text-decoration:none;`,
   `text-shadow:0px 1px 0px #ffffff;`,
-  `align-self: flex-end;`,
+  `align-self: flex-end;`
 ].join(' ');
 
 const updateFilesystemviewHTML = async () => {
   const entries = [];
-  
+
   const filesystem = getFilesystem();
   if (filesystem) {
     entries.push(`<hr>`);
@@ -98,15 +98,15 @@ const displayGeometry = async (path) => {
     headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
     onclosed: (panel) => panels.delete(panel),
     callback: (panel) => {
-                           document.getElementById(`download/${path}`)
-                                   .addEventListener('click',
-                                                     async () => {
-                                                       const data = await readFile({ as: 'bytes' }, `file/${path}`);
-                                                       const blob = new Blob([data.buffer],
-                                                                             { type: 'application/octet-stream' });
-                                                       saveAs(blob, path);
-                                                     });
-                         }
+      document.getElementById(`download/${path}`)
+          .addEventListener('click',
+                            async () => {
+                              const data = await readFile({ as: 'bytes' }, `file/${path}`);
+                              const blob = new Blob([data.buffer],
+                                                    { type: 'application/octet-stream' });
+                              saveAs(blob, path);
+                            });
+    }
   });
 
   panels.add(panel);
@@ -178,16 +178,15 @@ const displayGeometry = async (path) => {
       buildMeshes({ datasets, threejsGeometry, scene });
       buildGuiControls({ datasets, gui });
     }
-  }
+  };
 
   updateGeometry(JSON.parse(await readFile({}, geometryPath)));
 
   watchFile(geometryPath,
             async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
-}
+};
 
 const displayEditor = async (path) => {
-
   const agent = async ({ ask, question }) => {
     if (question.readFile) {
       const { options, path } = question.readFile;
@@ -262,7 +261,7 @@ const displayEditor = async (path) => {
                                      lineNumbers: true,
                                      gutter: true,
                                      lineWrapping: true,
-                                     extraKeys: { 'Shift-Enter': runScript },
+                                     extraKeys: { 'Shift-Enter': runScript }
                                    });
 
   log = jsPanel.create({
@@ -276,18 +275,18 @@ const displayEditor = async (path) => {
     headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
     onclosed: (panel) => { panels.delete(panel); log = null; },
     callback: (panel) => {
-                const viewerElement = document.getElementById('log');
-                const decoder = new TextDecoder('utf8');
-                watchFile('console/out',
-                          (options, file) => {
-                            viewerElement.appendChild(document.createTextNode(decoder.decode(file.data)));
-                            viewerElement.appendChild(document.createElement('br'));
-                            viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
-                          });
-              }
+      const viewerElement = document.getElementById('log');
+      const decoder = new TextDecoder('utf8');
+      watchFile('console/out',
+                (options, file) => {
+                  viewerElement.appendChild(document.createTextNode(decoder.decode(file.data)));
+                  viewerElement.appendChild(document.createElement('br'));
+                  viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
+                });
+    }
   });
   panels.add(log);
-}
+};
 
 const addFile = () => {
   const file = document.getElementById('fs/file/add').value;
@@ -295,40 +294,40 @@ const addFile = () => {
     // FIX: Prevent this from overwriting existing files.
     writeFile({}, `file/${file}`, '').then(_ => _).catch(_ => _);
   }
-}
+};
 
 const addFilesystem = () => {
   const filesystem = document.getElementById('fs/filesystem/add').value;
   if (filesystem.length > 0) {
     // FIX: Prevent this from overwriting existing filesystems.
-    setupFilesystem({ fileBase: filesystem })
+    setupFilesystem({ fileBase: filesystem });
     writeFile({}, 'file/script.jsx', '')
-      .then(_ => switchFilesystemview(filesystem))
-      .catch(_ => _);
+        .then(_ => switchFilesystemview(filesystem))
+        .catch(_ => _);
   }
-}
+};
 
 const viewGeometry = (file) => {
   displayGeometry(file).then(_ => _).catch(_ => _);
-}
+};
 
 const editFile = (file) => {
   displayEditor(file).then(_ => _).catch(_ => _);
-}
+};
 
 const closePanels = async () => {
   for (const panel of panels) {
     await new Promise((resolve, reject) => { panel.close(resolve); });
   }
-}
+};
 
 const switchFilesystemview = (filesystem) => {
   return closePanels()
-    .then(_ => setupFilesystem({ fileBase: filesystem }))
-    .then(_ => updateFilesystemview())
-    .then(_ => _)
-    .catch(_ => _);
-}
+      .then(_ => setupFilesystem({ fileBase: filesystem }))
+      .then(_ => updateFilesystemview())
+      .then(_ => _)
+      .catch(_ => _);
+};
 
 const updateFilesystemview = async () => {
   let watcher;
@@ -342,11 +341,11 @@ const updateFilesystemview = async () => {
     borderRadius: 12,
     headerControls: { close: 'remove', maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
     content: await updateFilesystemviewHTML(),
-    onclosed: (panel) => { panels.delete(panel); unwatchFileCreation(watcher); },
+    onclosed: (panel) => { panels.delete(panel); unwatchFileCreation(watcher); }
   });
   panels.add(panel);
   watcher = watchFileCreation(() => updateFilesystemviewHTML().then(innerHTML => { panel.content.innerHTML = innerHTML; }).catch(_ => _));
-}
+};
 
 export const installFilesystemview = async ({ document }) => {
   document.addFile = addFile;
@@ -355,4 +354,4 @@ export const installFilesystemview = async ({ document }) => {
   document.viewGeometry = viewGeometry;
   document.switchFilesystemview = switchFilesystemview;
   await updateFilesystemview();
-}
+};
