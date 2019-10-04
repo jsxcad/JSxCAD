@@ -8,6 +8,6 @@ const content = `
 `;
 
 export const installReference = ({ addPage, document, watchFile }) => {
-  addPage({ title: 'Reference', content, position: 'bottom-right', size: '600 200', contentOverflow: 'hidden' });
+  // addPage({ title: 'Reference', content, position: 'bottom-right', size: '600 200', contentOverflow: 'hidden' });
   return {};
 };

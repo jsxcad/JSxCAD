@@ -3,7 +3,7 @@
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
-import { createService, getFilesystem, listFiles, listFilesystems, readFile, setupFilesystem, watchFile, writeFile } from '@jsxcad/sys';
+import { createService, getFilesystem, listFiles, listFilesystems, readFile, setupFilesystem, unwatchFileCreation, watchFile, watchFileCreation, writeFile } from '@jsxcad/sys';
 
 import CodeMirror from 'codemirror/src/codemirror.js';
 import { jsPanel } from 'jspanel4';
@@ -29,6 +29,7 @@ const buttonStyle = [
   `margin:4px;`,
   `text-decoration:none;`,
   `text-shadow:0px 1px 0px #ffffff;`,
+  `align-self: flex-end;`,
 ].join(' ');
 
 const updateFilesystemviewHTML = async () => {
@@ -40,25 +41,45 @@ const updateFilesystemviewHTML = async () => {
     entries.push(`<br>`);
 
     const paths = new Set(await listFiles());
+
+    if (!paths.has('file/script.jsx') && paths.has('script')) {
+      // Copy scripts from preAlpha to preAlpha2.
+      // FIX: Remove this hack.
+      await writeFile({}, 'file/script.jsx', await readFile({}, 'script'));
+    }
+
     for (const path of paths) {
       if (!path.startsWith('file/')) {
         continue;
       }
       const file = path.substring(5);
-      entries.push(file);
+      entries.push(`<div style="display: inline-block; width: 33%">${file}</div>`);
       if (paths.has(`geometry/${file}`)) {
         entries.push(`<button style='${buttonStyle}' onclick="viewGeometry('${file}')">View</button>`);
       }
       if (path.endsWith('.jsx')) {
         entries.push(`<button style='${buttonStyle}' onclick="editFile('${file}')">Edit</button>`);
       }
+      entries.push(`</span>`);
       entries.push(`<br>`);
     }
+
+    entries.push(`<div style="display: inline-block; width: 33%">`);
+    entries.push(`<input type="text" id="fs/file/add"></input>`);
+    entries.push(`</div>`);
+    entries.push(`<button style='${buttonStyle}' onclick="addFile()">Add File</button>`);
     entries.push(`<hr>`);
   }
 
+  entries.push(`<div style="display: inline-block; width: 33%">`);
+  entries.push(`<input type="text" id="fs/filesystem/add"></input>`);
+  entries.push(`</div>`);
+  entries.push(`<button style='${buttonStyle}' onclick="addFilesystem()">Add Project</button>`);
+
   for (const filesystem of await listFilesystems()) {
-    entries.push(`<button style='${buttonStyle}' onclick="switchFilesystemview('${filesystem}')">${filesystem}</button>`);
+    entries.push(`<div style="display: inline-block; width: 33%">${filesystem}</div>`);
+    entries.push(`<button style='${buttonStyle}' onclick="switchFilesystemview('${filesystem}')">View</button>`);
+    entries.push(`<br>`);
   }
 
   return entries.join('\n');
@@ -72,7 +93,9 @@ const displayGeometry = async (path) => {
     position: { my: 'right-top', at: 'right-top' },
     panelSize: { width: '66%', height: '100%' },
     footerToolbar: `</span><button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
-    headerControls: { size: 'xs' },
+    border: '2px solid',
+    borderRadius: 12,
+    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
     onclosed: (panel) => panels.delete(panel),
     callback: (panel) => {
                            document.getElementById(`download/${path}`)
@@ -88,7 +111,7 @@ const displayGeometry = async (path) => {
 
   panels.add(panel);
 
-  const view = {};
+  const view = { target: [0, 0, 0], position: [0, 0, 100], up: [0, 1, 0] };
   let datasets = [];
   let threejsGeometry;
   let width = panel.offsetWidth;
@@ -211,15 +234,19 @@ const displayEditor = async (path) => {
 
   const content = await readFile({}, `file/${path}`);
 
+  let log = null;
+
   const panel = jsPanel.create({
     headerTitle: path,
     content: `<textarea id="${editId}">${content}</textarea>`,
     contentOverflow: 'hidden',
-    panelSize: { width: '66%', height: '100%' },
+    panelSize: { width: '66%', height: '66%' },
     position: { my: 'left-top', at: 'left-top' },
-    headerControls: { size: 'xs' },
+    border: '2px solid',
+    borderRadius: 12,
+    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
     footerToolbar: `<span id="evaluatorClock/${path}"></span><button class="jsPanel-ftr-btn" id="runScript/${path}" style="padding: 5px; margin: 3 px;">Run</button>`,
-    onclosed: (panel) => { editor.toTextArea(); panels.delete(panel); },
+    onclosed: (panel) => { editor.toTextArea(); panels.delete(panel); if (log !== null) log.close(); },
     callback: (panel) => document.getElementById(`runScript/${path}`).addEventListener('click', runScript)
   });
   panels.add(panel);
@@ -237,6 +264,48 @@ const displayEditor = async (path) => {
                                      lineWrapping: true,
                                      extraKeys: { 'Shift-Enter': runScript },
                                    });
+
+  log = jsPanel.create({
+    headerTitle: 'Log',
+    content: `<div id="log"></div>`,
+    contentOverflow: 'scroll',
+    panelSize: { width: '66%', height: '33%' },
+    position: { my: 'left-bottom', at: 'left-bottom' },
+    border: '2px solid',
+    borderRadius: 12,
+    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
+    onclosed: (panel) => { panels.delete(panel); log = null; },
+    callback: (panel) => {
+                const viewerElement = document.getElementById('log');
+                const decoder = new TextDecoder('utf8');
+                watchFile('console/out',
+                          (options, file) => {
+                            viewerElement.appendChild(document.createTextNode(decoder.decode(file.data)));
+                            viewerElement.appendChild(document.createElement('br'));
+                            viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
+                          });
+              }
+  });
+  panels.add(log);
+}
+
+const addFile = () => {
+  const file = document.getElementById('fs/file/add').value;
+  if (file.length > 0) {
+    // FIX: Prevent this from overwriting existing files.
+    writeFile({}, `file/${file}`, '').then(_ => _).catch(_ => _);
+  }
+}
+
+const addFilesystem = () => {
+  const filesystem = document.getElementById('fs/filesystem/add').value;
+  if (filesystem.length > 0) {
+    // FIX: Prevent this from overwriting existing filesystems.
+    setupFilesystem({ fileBase: filesystem })
+    writeFile({}, 'file/script.jsx', '')
+      .then(_ => switchFilesystemview(filesystem))
+      .catch(_ => _);
+  }
 }
 
 const viewGeometry = (file) => {
@@ -254,7 +323,7 @@ const closePanels = async () => {
 }
 
 const switchFilesystemview = (filesystem) => {
-  closePanels()
+  return closePanels()
     .then(_ => setupFilesystem({ fileBase: filesystem }))
     .then(_ => updateFilesystemview())
     .then(_ => _)
@@ -262,6 +331,7 @@ const switchFilesystemview = (filesystem) => {
 }
 
 const updateFilesystemview = async () => {
+  let watcher;
   const panel = jsPanel.create({
     id: 'filesystemview',
     headerTitle: `Project: ${getFilesystem()}`,
@@ -270,14 +340,17 @@ const updateFilesystemview = async () => {
     panelSize: { width: 512, height: '100%' },
     border: '2px solid',
     borderRadius: 12,
-    headerControls: { close: 'remove', size: 'xs' },
+    headerControls: { close: 'remove', maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
     content: await updateFilesystemviewHTML(),
-    onclosed: (panel) => panels.delete(panel),
+    onclosed: (panel) => { panels.delete(panel); unwatchFileCreation(watcher); },
   });
   panels.add(panel);
+  watcher = watchFileCreation(() => updateFilesystemviewHTML().then(innerHTML => { panel.content.innerHTML = innerHTML; }).catch(_ => _));
 }
 
 export const installFilesystemview = async ({ document }) => {
+  document.addFile = addFile;
+  document.addFilesystem = addFilesystem;
   document.editFile = editFile;
   document.viewGeometry = viewGeometry;
   document.switchFilesystemview = switchFilesystemview;

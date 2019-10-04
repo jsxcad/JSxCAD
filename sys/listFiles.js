@@ -1,12 +1,15 @@
 import { getBase } from './filesystem';
 import localForage from 'localforage';
+import { watchFileCreation } from './files';
 
 let cachedKeys;
 
+const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
+
 const getKeys = async () => {
-  // FIX: Install a watcher to keep the cache up-to-date.
   if (cachedKeys === undefined) {
-    cachedKeys = await localForage.keys();
+    cachedKeys = new Set(await localForage.keys());
+    watchFileCreation(updateCachedKeys);
   }
   return cachedKeys;
 }
