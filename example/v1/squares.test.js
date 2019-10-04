@@ -4,5 +4,5 @@ import test from 'ava';
 
 test('Expected pdf', async (t) => {
   await run('squares');
-  isExpected(t, 'squares/pdf/squares.pdf');
+  isExpected(t, 'squares/file/pdf/squares.pdf');
 });

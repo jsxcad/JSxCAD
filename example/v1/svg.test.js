@@ -4,5 +4,5 @@ import test from 'ava';
 
 test('Expected svg', async (t) => {
   await run('svg');
-  isExpected(t, 'svg/cutSpheres.svg');
+  isExpected(t, 'svg/file/cutSpheres.svg');
 });
