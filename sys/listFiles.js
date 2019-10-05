@@ -12,7 +12,7 @@ const getFileLister = async () => {
     return async () => {
       const qualifiedPaths = new Set();
       const walk = async (path) => {
-        for (const file of await promises.readdir(path === '' ? '.' : path)) {
+        for (const file of await promises.readdir(path)) {
           if (file.startsWith('.') || file === 'node_modules') {
             continue;
           }
@@ -25,12 +25,12 @@ const getFileLister = async () => {
           }
         }
       };
-      await walk('');
+      await walk('jsxcad/');
       return qualifiedPaths;
     };
   } else if (isBrowser) {
     return async () => {
-      // Fix prefixes
+      // FIX: Remove this once all fs's are migrated.
       for (const key of await localForage.keys()) {
         if (key.startsWith('file/')) {
           const fixed = `jsxcad/${key.substring(5)}`;
