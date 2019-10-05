@@ -3,6 +3,7 @@
 import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
+import { clearCache } from '@jsxcad/cache';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -10,6 +11,7 @@ const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
   try {
     var { key, values } = question;
+    clearCache();
     switch (key) {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
