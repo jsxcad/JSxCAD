@@ -1,5 +1,21 @@
 import { deepEqual } from 'fast-equals';
-import memoize from 'micro-memoize';
+import memoizeImpl from 'micro-memoize';
+
+const memoizedOps = new Set();
+
+const memoize = (op, options) => {
+  const memoizedOp = memoizeImpl(op, options);
+  memoizedOps.add(memoizedOp);
+  return memoizedOp;
+};
+
+export const clearCache = () => {
+  for (const memoizedOp of memoizedOps) {
+    const cache = memoizedOp.cache;
+    cache.keys.length = 0;
+    cache.values.length = 0;
+  }
+};
 
 // This is a very thin abstraction layer to decouple from any particular cache implementation.
 
