@@ -21,7 +21,9 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/sys": "^0.0.79",
-    "do-not-zip": "^1.0.0"
+    "do-not-zip": "^1.0.0",
+    "node-blob": "^0.0.2",
+    "unzipit": "^0.1.5"
   },
   "devDependencies": {
     "ava": "^1.4.1",
