@@ -1,4 +1,4 @@
-/* global Blob, ResizeObserver */
+/* global Blob, FileReader, ResizeObserver */
 
 import './codemirror-global';
 import 'codemirror/mode/javascript/javascript.js';
@@ -7,12 +7,12 @@ import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/conv
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
 import { createService, getFilesystem, listFiles, listFilesystems, readFile, setupFilesystem, unwatchFileCreation, watchFile, watchFileCreation, writeFile } from '@jsxcad/sys';
+import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import CodeMirror from 'codemirror/src/codemirror.js';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
-import { toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 let panels = new Set();
 
@@ -69,10 +69,12 @@ const updateFilesystemviewHTML = async () => {
     }
 
     entries.push(`<div style="display: inline-block; width: 33%">`);
-    entries.push(`<input type="text" id="fs/file/add"></input>`);
+    entries.push(`<input type="text" id="fs/file/add">`);
     entries.push(`</div>`);
-    entries.push(`<button style='${buttonStyle}' onclick="addFile()">Add File</button>`);
-    entries.push(`<button style='${buttonStyle}' onclick="exportFilesystem()">Export Project</button>`);
+    entries.push(`<button style="${buttonStyle}" onclick="addFile()">Add File</button>`);
+    entries.push(`<br>`);
+    entries.push(`<button style="${buttonStyle}" onclick="exportFilesystem()">Export</button>`);
+    entries.push(`Import <input type="file" multiple="false" accept="application/zip" id="fs/filesystem/import" onchange="importFilesystem()">`);
     entries.push(`<hr>`);
   }
 
@@ -311,6 +313,16 @@ const exportFilesystem = () => {
       .then(blob => saveAs(blob, getFilesystem()));
 };
 
+const importFilesystem = (e) => {
+  const file = document.getElementById('fs/filesystem/import').files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const zip = e.target.result;
+    fromZipToFilesystem({}, zip).then(_ => _);
+  };
+  reader.readAsArrayBuffer(file);
+};
+
 const defaultScript = `// Circle(10);`;
 
 const addFilesystem = () => {
@@ -369,6 +381,7 @@ export const installFilesystemview = async ({ document }) => {
   document.addFilesystem = addFilesystem;
   document.editFile = editFile;
   document.exportFilesystem = exportFilesystem;
+  document.importFilesystem = importFilesystem;
   document.viewGeometry = viewGeometry;
   document.switchFilesystemview = switchFilesystemview;
   await updateFilesystemview();
