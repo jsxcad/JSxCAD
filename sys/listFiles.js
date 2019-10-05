@@ -41,7 +41,7 @@ const getFileLister = async () => {
       }
       const qualifiedPaths = new Set(await localForage.keys());
       return qualifiedPaths;
-    }
+    };
   } else {
     throw Error('die');
   }
