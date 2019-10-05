@@ -7,7 +7,7 @@ export const getFile = (options, unqualifiedPath) => {
   const path = `${getBase()}${unqualifiedPath}`;
   let file = files.get(path);
   if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: [], storageKey: `file/${path}` };
+    file = { path: unqualifiedPath, watchers: [], storageKey: `jsxcad/${path}` };
     files.set(path, file);
     for (const watcher of fileCreationWatchers) {
       watcher(options, file);

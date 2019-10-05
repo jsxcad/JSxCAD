@@ -34,7 +34,7 @@ export const writeFile = async (options, path, data) => {
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
-    const persistentPath = `${base}${path}`;
+    const persistentPath = `jsxcad/${base}${path}`;
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
@@ -46,7 +46,7 @@ export const writeFile = async (options, path, data) => {
         console.log(`QQ/writeFile/error: ${error.toString()}`);
       }
     } else if (isBrowser) {
-      return localForage.setItem(`file/${persistentPath}`, fromByteArray(data));
+      return localForage.setItem(persistentPath, fromByteArray(data));
     }
   }
 };
