@@ -1,5 +1,8 @@
 /* global Blob, ResizeObserver */
 
+import './codemirror-global';
+import 'codemirror/mode/javascript/javascript.js';
+
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
@@ -9,6 +12,7 @@ import CodeMirror from 'codemirror/src/codemirror.js';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
+import { toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 let panels = new Set();
 
@@ -68,6 +72,7 @@ const updateFilesystemviewHTML = async () => {
     entries.push(`<input type="text" id="fs/file/add"></input>`);
     entries.push(`</div>`);
     entries.push(`<button style='${buttonStyle}' onclick="addFile()">Add File</button>`);
+    entries.push(`<button style='${buttonStyle}' onclick="exportFilesystem()">Export Project</button>`);
     entries.push(`<hr>`);
   }
 
@@ -221,11 +226,15 @@ const displayEditor = async (path) => {
 
   let editor;
 
-  // FIX: Need some visual indicator that the script is running.
-  const runScript = async () => {
+  const saveScript = async () => {
     const script = editor.getDoc().getValue('\n');
     // Save any changes.
     await writeFile({}, `file/${path}`, script);
+    return script;
+  };
+
+  const runScript = async () => {
+    const script = await saveScript();
     return evaluator(script);
   };
 
@@ -261,7 +270,7 @@ const displayEditor = async (path) => {
                                      lineNumbers: true,
                                      gutter: true,
                                      lineWrapping: true,
-                                     extraKeys: { 'Shift-Enter': runScript }
+                                     extraKeys: { 'Shift-Enter': runScript, 'Control-S': saveScript }
                                    });
 
   log = jsPanel.create({
@@ -280,7 +289,7 @@ const displayEditor = async (path) => {
       watchFile('console/out',
                 (options, file) => {
                   viewerElement.appendChild(document.createTextNode(decoder.decode(file.data)));
-                  viewerElement.appendChild(document.createElement('br'));
+                  viewerElement.appendChild(document.createElement('hr'));
                   viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
                 });
     }
@@ -296,12 +305,20 @@ const addFile = () => {
   }
 };
 
+const exportFilesystem = () => {
+  toZipFromFilesystem()
+      .then(data => new Blob([data.buffer], { type: 'application/zip' }))
+      .then(blob => saveAs(blob, getFilesystem()));
+};
+
+const defaultScript = `// Circle(10);`;
+
 const addFilesystem = () => {
   const filesystem = document.getElementById('fs/filesystem/add').value;
   if (filesystem.length > 0) {
     // FIX: Prevent this from overwriting existing filesystems.
     setupFilesystem({ fileBase: filesystem });
-    writeFile({}, 'file/script.jsx', '')
+    writeFile({}, 'file/script.jsx', defaultScript)
         .then(_ => switchFilesystemview(filesystem))
         .catch(_ => _);
   }
@@ -351,6 +368,7 @@ export const installFilesystemview = async ({ document }) => {
   document.addFile = addFile;
   document.addFilesystem = addFilesystem;
   document.editFile = editFile;
+  document.exportFilesystem = exportFilesystem;
   document.viewGeometry = viewGeometry;
   document.switchFilesystemview = switchFilesystemview;
   await updateFilesystemview();

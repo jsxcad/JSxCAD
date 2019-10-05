@@ -29,11 +29,13 @@
     "@jsxcad/convert-stl": "^0.0.79",
     "@jsxcad/convert-svg": "^0.0.79",
     "@jsxcad/convert-threejs": "^0.0.79",
+    "@jsxcad/convert-zip": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "codemirror": "^5.46.0",
     "dat.gui": "^0.7.6",
     "file-saver": "^2.0.2",
     "jspanel4": "^4.6.0",
+    "jszip": "^3.2.2",
     "three": "^0.104.0",
     "three-trackballcontrols": "^0.0.7"
   },

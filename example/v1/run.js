@@ -13,7 +13,7 @@ export const run = async (target = process.argv[2], base = 'observed') => {
 };
 
 export const isExpected = (t, path) => {
-  t.is(readFileSync(`observed/${path}`, { encoding: 'utf8' }),
+  t.is(readFileSync(`jsxcad/observed/${path}`, { encoding: 'utf8' }),
        readFileSync(`expected/${path}`, { encoding: 'utf8' }));
 };
 
