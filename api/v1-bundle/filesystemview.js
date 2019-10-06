@@ -1,6 +1,5 @@
 /* global Blob, FileReader, ResizeObserver */
 
-import './SvgPathEditor';
 import './codemirror-global';
 import 'codemirror/mode/javascript/javascript.js';
 
@@ -11,7 +10,9 @@ import { createService, getFilesystem, listFiles, listFilesystems, readFile, set
 import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import CodeMirror from 'codemirror/src/codemirror.js';
+import React from 'react';
 import ReactDOM from 'react-dom';
+import SvgPathEditor from './SvgPathEditor';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
