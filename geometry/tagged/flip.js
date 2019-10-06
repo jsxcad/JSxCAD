@@ -12,14 +12,13 @@ export const flip = (geometry) => {
   } else if (geometry.surface) {
     flipped.surface = flipSurface(geometry.surface);
   } else if (geometry.z0Surface) {
-    flipped.z0surface = flipSurface(geometry.z0Surface);
+    flipped.z0Surface = flipSurface(geometry.z0Surface);
   } else if (geometry.solid) {
     flipped.solid = flipSolid(geometry.solid);
   } else if (geometry.assembly) {
     flipped.assembly = geometry.assembly.map(flip);
   } else if (geometry.disjointAssembly) {
     flipped.assembly = geometry.disjointAssembly.map(flip);
-    flipped.nonNegative = geometry.nonNegative.map(flip);
   } else if (geometry.plan) {
     // FIX: How should plans deal with flip?
     flipped.plan = geometry.plan;

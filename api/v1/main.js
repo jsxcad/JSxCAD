@@ -89,6 +89,7 @@ import { readShape } from './readShape';
 import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
+import { readSvgPath } from './readSvgPath';
 import { right } from './right';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
@@ -100,14 +101,17 @@ import { sin } from './sin';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
+import { sweep } from './sweep';
 import { tags } from './tags';
 import { toBillOfMaterial } from './toBillOfMaterial';
 import { toItems } from './toItems';
+import { toolpath } from './toolpath';
 import { translate } from './translate';
 import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
 import { writeDxf } from './writeDxf';
+import { writeGcode } from './writeGcode';
 import { writePdf } from './writePdf';
 import { writeShape } from './writeShape';
 import { writeStl } from './writeStl';
@@ -148,7 +152,9 @@ const methods = [
   scale,
   section,
   specify,
+  sweep,
   tags,
+  toolpath,
   toBillOfMaterial,
   toItems,
   translate,
@@ -156,6 +162,7 @@ const methods = [
   voxels,
   wireframe,
   writeDxf,
+  writeGcode,
   writePdf,
   writeShape,
   writeStl,
@@ -215,6 +222,7 @@ export {
   readShapefile,
   readStl,
   readSvg,
+  readSvgPath,
   sin,
   source,
   specify,

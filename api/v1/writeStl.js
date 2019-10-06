@@ -21,7 +21,8 @@ export const writeStl = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  await writeFile({ preview: true, geometry }, path, toStl(options, geometry));
+  await writeFile({}, `file/${path}`, toStl(options, geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
 const method = function (options = {}) { return writeStl(options, this); };

@@ -206,10 +206,6 @@ const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonI
   for (let polygonIndexKey in startingPolygonIndexes) {
     const polygonIndex = startingPolygonIndexes[polygonIndexKey];
     const polygon = normalizedPolygons[polygonIndex];
-    if (polygon === undefined) {
-      console.log(`QQ/findNextYCoordinate/index: ${polygonIndex}`);
-      console.log(`QQ/normalizedPolygons/length: ${normalizedPolygons.length}`);
-    }
     const numVertices = polygon.length;
     const topVertexIndex = polygonTopVertexIndexes[polygonIndex];
     // the top of the polygon may be a horizontal line. In that case topVertexIndex can point to any point on this line.
@@ -266,15 +262,6 @@ const equalsPolygon = (a, b) => {
   return true;
 }
 
-const includesPolygon = (polygons, candidate) => {
-  for (const polygon of polygons) {
-    if (equalsPolygon(candidate, polygon)) {
-      return true;
-    }
-  }
-  return false;
-};
-
 const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons }) => {
   // Now activePolygons is up to date
 
@@ -299,7 +286,10 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
       rightLine: toLineFromPoints(bottomRight, topRight)
     };
     if (newPolygonRow.length > 0) {
+      // Stitch together congruent edges.
       const previousOutPolygon = newPolygonRow[newPolygonRow.length - 1];
+      // Note that y is aligned, so we can compare the dimensions separately.
+      // Which means that we can compare for overlap in x.
       const d1 = distance(outPolygon.topLeft, previousOutPolygon.topRight);
       const d2 = distance(outPolygon.bottomLeft, previousOutPolygon.bottomRight);
       if ((d1 < EPS) && (d2 < EPS)) {
@@ -307,7 +297,8 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
         outPolygon.topLeft = previousOutPolygon.topLeft;
         outPolygon.leftLine = previousOutPolygon.leftLine;
         outPolygon.bottomLeft = previousOutPolygon.bottomLeft;
-        newPolygonRow.splice(newPolygonRow.length - 1, 1);
+        // newPolygonRow.splice(newPolygonRow.length - 1, 1);
+        newPolygonRow.pop();
       }
     }
     newPolygonRow.push(outPolygon);
@@ -370,9 +361,7 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
         // reverse the left half so we get a counterclockwise circle:
         previousPolygon.outPolygon.leftPoints.reverse();
         const polygon = previousPolygon.outPolygon.rightPoints.concat(previousPolygon.outPolygon.leftPoints);
-        if (!includesPolygon(staging, polygon)) {
-          staging.push(polygon);
-        }
+        staging.push(polygon);
       }
     }
     destinationPolygons.push(...staging);
@@ -443,5 +432,5 @@ export const retessellate = (sourcePolygons) => {
     }
     previousPolygonRow = buildOutputPolygons({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons });
   }
-  return destinationPolygons;
+  return destinationPolygons.map(polygon => polygon.map(([x, y]) => [x, y, 0]));
 };

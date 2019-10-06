@@ -1,5 +1,4 @@
 import Tess2 from './tess2';
-import { blessAsConvex } from './blessAsConvex';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const toContour = (polygon) => {
@@ -52,5 +51,5 @@ export const makeConvex = (options = {}, polygons) => {
                       polySize: 3,
                       vertexSize: 3
     }));
-  return blessAsConvex(convex);
+  return convex; // retessellate(convex);
 };

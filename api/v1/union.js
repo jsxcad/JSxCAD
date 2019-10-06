@@ -51,14 +51,16 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
+// NOTE: Perhaps we should make union(a, b, c) equivalent to emptyGeometry.union(a, b, c);
+// This would restore commutation.
+
 const unionOfShapes = (...shapes) => {
   switch (shapes.length) {
     case 0: {
       return fromGeometry({ assembly: [] });
     }
     case 1: {
-      // We still want to produce a simple shape.
-      return fromGeometry(toKeptGeometry(shapes[0]));
+      return shapes[0];
     }
     default: {
       return fromGeometry(unionGeometry(...shapes.map(toKeptGeometry)));
