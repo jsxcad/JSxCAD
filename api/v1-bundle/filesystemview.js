@@ -104,7 +104,7 @@ const displayGeometry = async (path) => {
     content: `<div id="${path}"></div>`,
     contentOverflow: 'hidden',
     position: { my: 'right-top', at: 'right-top' },
-    panelSize: { width: '66%', height: '100%' },
+    panelSize: { width: '33%', height: '66%' },
     footerToolbar: `</span><button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
     border: '2px solid',
     borderRadius: 12,

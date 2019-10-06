@@ -101,6 +101,93 @@ const toString = (bsp) => {
   }
 };
 
+const removeInteriorPolygons = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return polygons;
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */front,
+                   /* front= */front);
+    }
+    const trimmedFront = removeInteriorPolygons(bsp.front, front);
+    const trimmedBack = removeInteriorPolygons(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
+const removeInteriorPolygonsAndSkin = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return polygons;
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */front,
+                   /* coplanarFront= */back,
+                   /* front= */front);
+    }
+    const trimmedFront = removeInteriorPolygonsAndSkin(bsp.front, front);
+    const trimmedBack = removeInteriorPolygonsAndSkin(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
+const removeExteriorPolygons = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return polygons;
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */front, // was back
+                   /* coplanarFront= */back, // was back
+                   /* front= */front);
+    }
+    const trimmedFront = removeExteriorPolygons(bsp.front, front);
+    const trimmedBack = removeExteriorPolygons(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 export {
   BACK,
   BRANCH,
@@ -113,6 +200,9 @@ export {
   fromSolid,
   inLeaf,
   outLeaf,
+  removeExteriorPolygons,
+  removeInteriorPolygons,
+  removeInteriorPolygonsAndSkin,
   toPolygons,
   toString
 };

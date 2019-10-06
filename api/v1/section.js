@@ -1,8 +1,5 @@
-import { alignVertices, toPolygons } from '@jsxcad/geometry-solid';
-import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
-
 import { Shape } from './Shape';
-import { fromPoints } from '@jsxcad/math-plane';
+import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { union } from './union';
 
@@ -36,13 +33,16 @@ import { union } from './union';
  *
  **/
 
+const X = 0;
+const Y = 1;
+
 export const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
   const shapes = [];
+  const [min, max] = shape.measureBoundingBox();
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    const polygons = toPolygons({}, alignVertices(solid));
-    const triangles = toTriangles({}, polygons);
-    const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
-    shapes.push(Shape.fromPathsToZ0Surface(paths));
+    const polygon = [[min[X], min[Y], z], [max[X], min[Y], z], [max[X], max[Y], z], [min[X], max[Y], z]];
+    const surface = bspSection(solid, polygon);
+    shapes.push(Shape.fromGeometry({ surface }));
   }
   return union(...shapes);
 };
