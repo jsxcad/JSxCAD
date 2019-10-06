@@ -89,6 +89,7 @@ import { readShape } from './readShape';
 import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
+import { readSvgPath } from './readSvgPath';
 import { right } from './right';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
@@ -221,6 +222,7 @@ export {
   readShapefile,
   readStl,
   readSvg,
+  readSvgPath,
   sin,
   source,
   specify,
