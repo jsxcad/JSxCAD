@@ -1,5 +1,6 @@
 /* global Blob, FileReader, ResizeObserver */
 
+import './SvgPathEditor';
 import './codemirror-global';
 import 'codemirror/mode/javascript/javascript.js';
 
@@ -10,6 +11,7 @@ import { createService, getFilesystem, listFiles, listFilesystems, readFile, set
 import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import CodeMirror from 'codemirror/src/codemirror.js';
+import ReactDOM from 'react-dom';
 import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
@@ -62,7 +64,10 @@ const updateFilesystemviewHTML = async () => {
         entries.push(`<button style='${buttonStyle}' onclick="viewGeometry('${file}')">View</button>`);
       }
       if (path.endsWith('.jsx')) {
-        entries.push(`<button style='${buttonStyle}' onclick="editFile('${file}')">Edit</button>`);
+        entries.push(`<button style='${buttonStyle}' onclick="editFile('${file}')">Edit Text</button>`);
+      }
+      if (path.endsWith('.svp')) {
+        entries.push(`<button style='${buttonStyle}' onclick="editSvgPath('${file}')">Edit SvgPath</button>`);
       }
       entries.push(`</span>`);
       entries.push(`<br>`);
@@ -193,7 +198,7 @@ const displayGeometry = async (path) => {
             async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
 };
 
-const displayEditor = async (path) => {
+const displayTextEditor = async (path) => {
   const agent = async ({ ask, question }) => {
     if (question.readFile) {
       const { options, path } = question.readFile;
@@ -299,6 +304,29 @@ const displayEditor = async (path) => {
   panels.add(log);
 };
 
+const displaySvgPathEditor = async (path) => {
+  const panel = jsPanel.create({
+    headerTitle: 'SvgPath',
+    content: `<div id="edit/svgpath"></div>`,
+    contentOverflow: 'scroll',
+    panelSize: { width: '66%', height: '100%' },
+    position: { my: 'left-top', at: 'left-top' },
+    border: '2px solid',
+    borderRadius: 12,
+    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
+    onclosed: (panel) => { panels.delete(panel); },
+    callback: (panel) => {
+      const save = (svgpath) => {
+        writeFile({}, `file/${path}`, svgpath).then(_ => panel.close());
+      };
+      readFile({}, `file/${path}`)
+          .then(path => ReactDOM.render(<SvgPathEditor path={path} onsave={save}/>,
+                                        document.getElementById('edit/svgpath')));
+    }
+  });
+  panels.add(panel);
+};
+
 const addFile = () => {
   const file = document.getElementById('fs/file/add').value;
   if (file.length > 0) {
@@ -341,7 +369,11 @@ const viewGeometry = (file) => {
 };
 
 const editFile = (file) => {
-  displayEditor(file).then(_ => _).catch(_ => _);
+  displayTextEditor(file).then(_ => _).catch(_ => _);
+};
+
+const editSvgPath = (file) => {
+  displaySvgPathEditor(file).then(_ => _).catch(_ => _);
 };
 
 const closePanels = async () => {
@@ -380,6 +412,7 @@ export const installFilesystemview = async ({ document }) => {
   document.addFile = addFile;
   document.addFilesystem = addFilesystem;
   document.editFile = editFile;
+  document.editSvgPath = editSvgPath;
   document.exportFilesystem = exportFilesystem;
   document.importFilesystem = importFilesystem;
   document.viewGeometry = viewGeometry;

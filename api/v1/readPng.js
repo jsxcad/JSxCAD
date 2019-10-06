@@ -13,7 +13,7 @@ export const readPng = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  const data = await readFile({ as: 'bytes', sources: getSources(path), ...options }, path);
+  const data = await readFile({ as: 'bytes', sources: getSources(path), ...options }, `file/${path}`);
   const raster = await fromPng({}, data);
   return raster;
 };

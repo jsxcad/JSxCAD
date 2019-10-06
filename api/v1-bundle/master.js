@@ -2,9 +2,6 @@ import { installCSS, installCSSLink } from './css';
 
 import { installFilesystemview } from './filesystemview';
 
-// import { installEditorCSS } from './editor';
-// import { installDisplayCSS } from './display';
-
 /*
 const installProject = async () => {
   const hash = location.hash.substring(1);
