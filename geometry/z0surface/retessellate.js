@@ -101,11 +101,6 @@ export const binPolygons = (sourcePolygons) => {
         }
         points.push([point[X], y]);
       }
-/*
-      if (isDuplicate(points, minY, minIndex, normalizedPolygons, topYToPolygonIndexes, polygonTopVertexIndexes)) {
-        continue;
-      }
-*/
       for (let index = polygon.length - 1; index >= 0; index--) {
         const y = points[index][Y];
         if (!(y in yCoordinateToPolygonIndexes)) {
@@ -189,8 +184,8 @@ const recomputeActivePolygons = ({ activePolygons, polygonIndexesWithCorner, nor
         if (nextRightVertexIndex < 0) nextRightVertexIndex = numVertices - 1;
         activePolygon.bottomRight = polygon[nextRightVertexIndex];
       }
-    } // if polygon has corner here
-  } // for activePolygonIndex
+    }
+  }
 };
 
 const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes, activePolygons }) => {
@@ -288,17 +283,34 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
     if (newPolygonRow.length > 0) {
       // Stitch together congruent edges.
       const previousOutPolygon = newPolygonRow[newPolygonRow.length - 1];
-      // Note that y is aligned, so we can compare the dimensions separately.
+      // Note that must be equal for all tops and all bottoms.
       // Which means that we can compare for overlap in x.
-      const d1 = distance(outPolygon.topLeft, previousOutPolygon.topRight);
-      const d2 = distance(outPolygon.bottomLeft, previousOutPolygon.bottomRight);
-      if ((d1 < EPS) && (d2 < EPS)) {
-        // we can join this polygon with the one to the left:
-        outPolygon.topLeft = previousOutPolygon.topLeft;
-        outPolygon.leftLine = previousOutPolygon.leftLine;
-        outPolygon.bottomLeft = previousOutPolygon.bottomLeft;
-        // newPolygonRow.splice(newPolygonRow.length - 1, 1);
-        newPolygonRow.pop();
+
+      switch ('old') {
+        case 'old': {
+          const d1 = distance(outPolygon.topLeft, previousOutPolygon.topRight);
+          const d2 = distance(outPolygon.bottomLeft, previousOutPolygon.bottomRight);
+          if ((d1 < EPS) && (d2 < EPS)) {
+            // we can join this polygon with the one to the left:
+            outPolygon.topLeft = previousOutPolygon.topLeft;
+            outPolygon.leftLine = previousOutPolygon.leftLine;
+            outPolygon.bottomLeft = previousOutPolygon.bottomLeft;
+            // newPolygonRow.splice(newPolygonRow.length - 1, 1);
+            newPolygonRow.pop();
+          }
+          break;
+        }
+        case 'new': {
+          if (outPolygon.topLeft[X] <= previousOutPolygon.topRight[X] + EPS) {
+            // These polygons overlap x-wise.
+            // we can join this polygon with the one to the left:
+            outPolygon.topLeft = previousOutPolygon.topLeft;
+            outPolygon.leftLine = previousOutPolygon.leftLine;
+            outPolygon.bottomLeft = previousOutPolygon.bottomLeft;
+            newPolygonRow.pop();
+          }
+          break;
+        }
       }
     }
     newPolygonRow.push(outPolygon);

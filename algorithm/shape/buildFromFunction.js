@@ -16,7 +16,7 @@ const buildWalls = (polygons, floor, roof) => {
     if (toPlaneFromPolygon(a)) {
       polygons.push(a);
     }
-    
+
     if (toPlaneFromPolygon(b)) {
       polygons.push(b);
     }
