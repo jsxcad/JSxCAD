@@ -1,6 +1,7 @@
 import { Shape } from './Shape';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids } from '@jsxcad/geometry-tagged';
+import { retessellate } from '@jsxcad/geometry-z0surface';
 import { union } from './union';
 
 /**
@@ -41,7 +42,7 @@ export const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
   const [min, max] = shape.measureBoundingBox();
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     const polygon = [[min[X], min[Y], z], [max[X], min[Y], z], [max[X], max[Y], z], [min[X], max[Y], z]];
-    const surface = bspSection(solid, polygon);
+    const surface = retessellate(bspSection(solid, polygon));
     shapes.push(Shape.fromGeometry({ surface }));
   }
   return union(...shapes);
