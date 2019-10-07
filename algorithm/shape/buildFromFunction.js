@@ -1,6 +1,7 @@
 import { assertGood, deduplicate, flip as flipPath } from '@jsxcad/geometry-path';
 
 import { cache } from '@jsxcad/cache';
+import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 const EPSILON = 1e-5;
@@ -8,8 +9,17 @@ const EPSILON = 1e-5;
 const buildWalls = (polygons, floor, roof) => {
   for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
     // Remember that we are walking CCW.
-    polygons.push(deduplicate([floor[start], floor[end], roof[start]]));
-    polygons.push(deduplicate([floor[end], roof[end], roof[start]]));
+    const a = deduplicate([floor[start], floor[end], roof[start]]);
+    const b = deduplicate([floor[end], roof[end], roof[start]]);
+
+    // Some of these polygons may become degenerate -- skip those.
+    if (toPlaneFromPolygon(a)) {
+      polygons.push(a);
+    }
+
+    if (toPlaneFromPolygon(b)) {
+      polygons.push(b);
+    }
   }
 };
 
