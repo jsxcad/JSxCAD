@@ -1,5 +1,4 @@
 import { retessellate as retessellateZ0Surface } from '@jsxcad/geometry-z0surface';
-
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';

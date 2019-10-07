@@ -64,7 +64,7 @@ export class Shape {
   }
 
   toPoints (options = {}) {
-    return toPoints(options, this.toKeptGeometry());
+    return toPoints(options, this.toKeptGeometry()).points;
   }
 
   transform (matrix) {
