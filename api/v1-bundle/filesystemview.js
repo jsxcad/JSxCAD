@@ -17,6 +17,14 @@ import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
+import { Responsive, WidthProvider } from 'react-grid-layout-fabric';
+
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import ListGroup from 'react-bootstrap/Button';
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
+
 let panels = new Set();
 
 const buttonStyle = [
@@ -422,4 +430,17 @@ export const installFilesystemview = async ({ document, project }) => {
     await setupFilesystem({ fileBase: project });
   }
   await updateFilesystemview();
+
+  ReactDOM.render(<ResponsiveGridLayout width="100%" height="100%" cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}} breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}>
+                    <ListGroup key="a">
+                      <ListGroup.Item>
+                        <DropdownButton id="dropdown-basic-button" title="Dropdown button">
+                          <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+                          <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
+                          <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+                        </DropdownButton>
+                      </ListGroup.Item>
+                    </ListGroup>
+                  </ResponsiveGridLayout>,
+                  document.getElementById('top'));
 };
