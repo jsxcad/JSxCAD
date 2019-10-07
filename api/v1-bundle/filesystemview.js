@@ -387,7 +387,7 @@ const switchFilesystemview = (filesystem) => {
   return closePanels()
       .then(_ => setupFilesystem({ fileBase: filesystem }))
       .then(_ => updateFilesystemview())
-      .then(_ => _)
+      .then(_ => history.pushState(null, null, `#${getFilesystem()}`))
       .catch(_ => _);
 };
 
@@ -409,7 +409,7 @@ const updateFilesystemview = async () => {
   watcher = watchFileCreation(() => updateFilesystemviewHTML().then(innerHTML => { panel.content.innerHTML = innerHTML; }).catch(_ => _));
 };
 
-export const installFilesystemview = async ({ document }) => {
+export const installFilesystemview = async ({ document, project }) => {
   document.addFile = addFile;
   document.addFilesystem = addFilesystem;
   document.editFile = editFile;
@@ -418,5 +418,8 @@ export const installFilesystemview = async ({ document }) => {
   document.importFilesystem = importFilesystem;
   document.viewGeometry = viewGeometry;
   document.switchFilesystemview = switchFilesystemview;
+  if (project !== '') {
+    await setupFilesystem({ fileBase: project });
+  }
   await updateFilesystemview();
 };

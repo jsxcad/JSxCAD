@@ -82,29 +82,9 @@ window.bootstrapCSS = async () => {
 };
 
 window.bootstrap = async () => {
-  /*
-  let { initialScript } = await installProject();
-  if (initialScript === undefined) {
-    initialScript = await readFile({}, 'script');
-  }
-  if (initialScript === undefined) {
-    initialScript = defaultScript;
-  }
-  const { addPage, nextPage, lastPage } = await installDisplay({ document, readFile, watchFile, watchFileCreation, window });
-  const { evaluator } = await installEvaluator({});
-  await installEditor({ addPage, document, evaluator, initialScript, nextPage, lastPage });
-  */
-  await installFilesystemview({ document });
-  /*
-  await installConsole({ addPage, document, watchFile });
-  await installReference({ addPage, document });
-  for (const filesystem of await listFilesystems()) {
-    console.log(`QQ/filesystem: ${filesystem}`);
-  }
-  for (const file of await listFiles()) {
-    console.log(`QQ/file: ${file}`);
-  }
-  */
+  const hash = location.hash.substring(1);
+  const [project, source] = hash.split('@');
+  await installFilesystemview({ document, project, source });
 };
 
 window.bootstrapCSS().then(_ => _).catch(_ => _);
