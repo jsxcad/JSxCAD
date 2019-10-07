@@ -1,6 +1,6 @@
 import test from 'ava';
 
-// Placeholder.
+// A placeholder.
 test('null test', t => {
   t.true(true);
 });
