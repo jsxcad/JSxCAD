@@ -1,3 +1,5 @@
+/* global location */
+
 import { installCSS, installCSSLink } from './css';
 
 import { installFilesystemview } from './filesystemview';
