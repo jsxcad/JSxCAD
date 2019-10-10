@@ -9,6 +9,7 @@ import { fromByteArray } from 'base64-js';
 import { getBase } from './filesystem';
 import { getFile } from './files';
 import localForage from 'localforage';
+import { log } from './log';
 
 const { promises } = fs;
 
@@ -25,6 +26,7 @@ export const writeFile = async (options, path, data) => {
   if (isWebWorker) {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   }
+  await log(`Write ${path}`);
   const file = getFile(options, path);
   file.data = data;
 

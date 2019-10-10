@@ -20,15 +20,24 @@ export default {
     babel({
       babelrc: false,
       exclude: [/node_modules/, /polybooljs/],
-      presets: [/* '@babel/env', */ '@babel/preset-react',
-                                    ['@babel/env', { 'targets': { 'browsers': 'last 1 chrome versions' } }]],
+      presets: ['@babel/preset-react',
+                ['@babel/env', { 'targets': { 'browsers': 'last 1 chrome versions' } }]],
       plugins: [
-        // ['@babel/transform-react-jsx', { pragma: 'h' }],
         '@babel/transform-react-jsx',
         '@babel/plugin-proposal-class-properties'
       ]
     }),
-    commonjs(),
+    commonjs({
+      namedExports: {
+        '../../node_modules/react/index.js': [
+          'Children', 'Component', 'PropTypes', 'createElement', 'cloneElement', 'createContext',
+          'useRef', 'useState', 'useCallback', 'useEffect', 'useMemo', 'useContext', 'useReducer'
+        ],
+        '../../node_modules/react-dom/index.js': [
+          'findDOMNode'
+        ]
+      }
+    }),
     globals(),
     hypothetical(
       {

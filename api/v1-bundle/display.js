@@ -14,7 +14,7 @@ export const installDisplayCSS = async (document) => {
   await installCSSLink(document, 'https://jspanel.de/dist/jspanel.min.css');
   await installCSSLink(document, 'https://fonts.googleapis.com/icon?family=Material+Icons');
   await installCSS(document, `
-               .dg { position: absolute; top: 2px; left: 2px; background: #ffffff; color: #000000 }
+               .dg { position: absolute; top: 2px; right: 2px; background: #ffffff; color: #000000 }
                .dg.main.taller-than-window .close-button { border-top: 1px solid #ddd; }
                .dg.main .close-button { background-color: #ccc; } 
                .dg.main .close-button:hover { background-color: #ddd; }

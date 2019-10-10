@@ -7,7 +7,7 @@ import parseSvgPath from 'parse-svg-path';
 
 const Component = React.Component;
 
-class Container extends Component {
+class SvgPathEditor extends Component {
   constructor (props) {
     super(props);
 
@@ -48,13 +48,13 @@ class Container extends Component {
   }
 
   componentWillMount () {
-    document.addEventListener('keydown', this.handleKeyDown, false);
-    document.addEventListener('keyup', this.handleKeyUp, false);
+    // document.addEventListener('keydown', this.handleKeyDown, false);
+    // document.addEventListener('keyup', this.handleKeyUp, false);
   }
 
   componentWillUnmount () {
-    document.removeEventListener('keydown');
-    document.removeEventListener('keyup');
+    // document.removeEventListener('keydown');
+    // document.removeEventListener('keyup');
   }
 
   positiveNumber (n) {
@@ -319,6 +319,7 @@ class Container extends Component {
           activePoint: points.length - 1
         });
       }
+      e.stopPropagation();
     };
 
     removeActivePoint = (e) => {
@@ -345,6 +346,7 @@ class Container extends Component {
           this.setCubicCoords(this.getMouseCoords(e), this.state.draggedCubic);
         }
       }
+      e.stopPropagation();
     };
 
     handleKeyDown = (e) => {
@@ -396,10 +398,10 @@ class Container extends Component {
     render () {
       return (
         <div
-          className="ad-Container"
+          className="ad-SvgPathEditor"
           onMouseUp={ this.cancelDragging }>
-          <div className="ad-Container-main">
-            <div className="ad-Container-svg">
+          <div className="ad-SvgPathEditor-main">
+            <div className="ad-SvgPathEditor-svg">
               <SVG
                 ref="svg"
                 path={ this.generatePath() }
@@ -413,7 +415,7 @@ class Container extends Component {
             <Foot />
           </div>
 
-          <div className="ad-Container-controls">
+          <div className="ad-SvgPathEditor-controls">
             <Controls
               { ...this.state }
               reset={ this.reset }
@@ -539,8 +541,8 @@ class SVG extends Component {
         className="ad-SVG"
         width={ w }
         height={ h }
-        onClick={ (e) => addPoint(e) }
-        onMouseMove={ (e) => handleMouseMove(e) }>
+        onClickCapture={ (e) => addPoint(e) }
+        onMouseMoveCapture={ (e) => handleMouseMove(e) }>
         <Grid
           w={ w }
           h={ h }
@@ -1030,4 +1032,4 @@ function Range (props) {
   );
 }
 
-export default Container;
+export default SvgPathEditor;

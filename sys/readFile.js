@@ -109,6 +109,7 @@ export const readFile = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
+  log(`Read ${path}`);
   const { sources = [] } = options;
   const file = getFile(options, path);
   if (file.data === undefined) {
