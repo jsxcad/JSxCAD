@@ -171,12 +171,41 @@ const removeExteriorPolygons = (bsp, polygons) => {
       splitPolygon(bsp.plane,
                    polygons[i],
                    /* back= */back,
-                   /* coplanarBack= */front, // was back
-                   /* coplanarFront= */back, // was back
+                   /* coplanarBack= */front,
+                   /* coplanarFront= */front,
                    /* front= */front);
     }
     const trimmedFront = removeExteriorPolygons(bsp.front, front);
     const trimmedBack = removeExteriorPolygons(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
+const removeExteriorPolygonsKeepingSkin = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return polygons;
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */back,
+                   /* front= */front);
+    }
+    const trimmedFront = removeExteriorPolygonsKeepingSkin(bsp.front, front);
+    const trimmedBack = removeExteriorPolygonsKeepingSkin(bsp.back, back);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -201,6 +230,7 @@ export {
   inLeaf,
   outLeaf,
   removeExteriorPolygons,
+  removeExteriorPolygonsKeepingSkin,
   removeInteriorPolygons,
   removeInteriorPolygonsAndSkin,
   toPolygons,

@@ -34,3 +34,23 @@ export const difference = (aSolid, ...bSolids) => {
   polygons.push(...aPolygons);
   return toSolidFromPolygons({}, polygons);
 };
+
+/*
+export const difference = (aSolid, ...bSolids) => {
+  while (bSolids.length > 0) {
+    const a = aSolid;
+    const aPolygons = toPolygonsFromSolid({}, a);
+    const aBsp = toBspFromSolid(a);
+
+    const b = bSolids.shift();
+    const bPolygons = toPolygonsFromSolid({}, b);
+    const bBsp = toBspFromSolid(b);
+
+    const aTrimmed = removeInteriorPolygonsAndSkin(bBsp, aPolygons);
+    const bTrimmed = removeExteriorPolygons(aBsp, bPolygons);
+
+    aSolid = toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]);
+  }
+  return aSolid;
+}
+*/
