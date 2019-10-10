@@ -1,11 +1,12 @@
 import { addSource, getSources } from './source';
 import { getFilesystem, setupFilesystem } from './filesystem';
 import { listFiles, listFilesystems } from './listFiles';
-import { unwatchFileCreation, watchFileCreation } from './files';
+import { log, unwatchLog, watchLog } from './log';
+import { unwatchFileCreation, unwatchFileDeletion, watchFileCreation, watchFileDeletion } from './files';
 
 import { conversation } from './conversation';
 import { createService } from './service';
-import { log } from './log';
+import { deleteFile } from './deleteFile';
 import { readFile } from './readFile';
 import { watchFile } from './watchFile';
 import { writeFile } from './writeFile';
@@ -14,6 +15,7 @@ export {
   addSource,
   createService,
   conversation,
+  deleteFile,
   getFilesystem,
   getSources,
   listFiles,
@@ -22,7 +24,11 @@ export {
   readFile,
   setupFilesystem,
   unwatchFileCreation,
+  unwatchFileDeletion,
+  unwatchLog,
   watchFile,
   watchFileCreation,
+  watchFileDeletion,
+  watchLog,
   writeFile
 };

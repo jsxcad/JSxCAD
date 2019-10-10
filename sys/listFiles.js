@@ -1,8 +1,10 @@
 import * as fs from 'fs';
+
 import { isBrowser, isNode } from './browserOrNode';
+import { watchFileCreation, watchFileDeletion } from './files';
+
 import { getBase } from './filesystem';
 import localForage from 'localforage';
-import { watchFileCreation } from './files';
 
 const { promises } = fs;
 
@@ -50,12 +52,14 @@ const getFileLister = async () => {
 let cachedKeys;
 
 const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
+const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
 
 const getKeys = async () => {
   if (cachedKeys === undefined) {
     const listFiles = await getFileLister();
     cachedKeys = await listFiles();
     watchFileCreation(updateCachedKeys);
+    watchFileDeletion(deleteCachedKeys);
   }
   return cachedKeys;
 };

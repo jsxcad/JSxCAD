@@ -6,10 +6,11 @@ import 'codemirror/mode/javascript/javascript.js';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
-import { createService, getFilesystem, listFiles, listFilesystems, readFile, setupFilesystem, unwatchFileCreation, watchFile, watchFileCreation, writeFile } from '@jsxcad/sys';
+import { createService, deleteFile, getFilesystem, listFiles, listFilesystems, log, readFile, setupFilesystem, unwatchFileCreation, watchFile, watchLog, watchFileCreation, watchFileDeletion, writeFile } from '@jsxcad/sys';
 import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
-import CodeMirror from 'codemirror/src/codemirror.js';
+// import CodeMirror from 'codemirror/src/codemirror.js';
+import { UnControlled as CodeMirror } from 'react-codemirror2';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SvgPathEditor from './SvgPathEditor';
@@ -19,11 +20,108 @@ import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 import { Responsive, WidthProvider } from 'react-grid-layout-fabric';
 
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+import Card from 'react-bootstrap/Card';
+import Container from 'react-bootstrap/Container';
+import Col from 'react-bootstrap/Col';
+import Draggable from 'react-draggable';
 import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import ListGroup from 'react-bootstrap/Button';
+import Row from 'react-bootstrap/Row';
+import SplitButton from 'react-bootstrap/SplitButton';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Table from 'react-bootstrap/Table';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
+
+class UI extends React.PureComponent {
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      items: [],
+      nextItem: 0,
+    }
+
+    this.onAddItem = this.onAddItem.bind(this);
+    this.onBreakpointChange = this.onBreakpointChange.bind(this);
+    this.onDropKeys = this.onDropKeys.bind(this);
+    this.onKeepKeys = this.onKeepKeys.bind(this);
+    this.onLayoutChange = this.onLayoutChange.bind(this);
+  }
+
+  addItem (item, options = {}) {
+    return this.onAddItem(item, options);
+  }
+
+  dropKeys (keys) {
+    return this.onDropKeys(keys);
+  }
+
+  keepKeys (keys) {
+    return this.onKeepKeys(keys);
+  }
+
+  onAddItem (item, { key, x = 0, y = 0, width = 3, height = 3, removeable = true } = {}) {
+    if (key === undefined) {
+      key = this.state.nextItem;
+    }
+
+    const removeItem = () => {
+      this.dropKeys([key]);
+    }
+
+    const addItem = removeable
+                    ?  <div key={key} style={{ display: 'block' }} data-grid={{ x, y, w: width, h: height }}>
+                         {item}
+                         <span style={{position: 'absolute', right: '2px', top: 0, cursor: 'pointer'}} onClick={removeItem}>
+                           &#128473;
+                         </span>
+                       </div>
+                    :  <div key={key} style={{ display: 'block' }} data-grid={{ x, y, w: width, h: height }}>
+                         {item}
+                       </div>;
+
+    this.setState({
+      items: [...this.state.items.filter(item => item.key !== key), addItem],
+      nextItem: this.state.nextItem + 1
+    });
+  }
+
+  onDropKeys (keys) {
+    this.setState({
+      items: [...this.state.items.filter(item => !keys.includes(item.key))],
+    });
+  }
+
+  onKeepKeys (keys) {
+    this.setState({
+      items: [...this.state.items.filter(item => keys.includes(item.key))],
+    });
+  }
+
+  onBreakpointChange (breakpoint, cols) {
+    this.setState({ breakpoint, cols });
+  }
+
+  onLayoutChange (layout) {
+    this.setState({ layout });
+  }
+
+  render () {
+    return (
+      <div>
+        <ResponsiveGridLayout onLayoutChange={this.onLayoutChange}
+                              onBreakpointChange={this.onBreakpointChange}
+                              {...this.props}>
+          {this.state.items}
+        </ResponsiveGridLayout>
+      </div>
+    );
+  }
+}
 
 let panels = new Set();
 
@@ -47,96 +145,228 @@ const buttonStyle = [
   `align-self: flex-end;`
 ].join(' ');
 
-const updateFilesystemviewHTML = async () => {
-  const entries = [];
+let ui;
 
-  const filesystem = getFilesystem();
-  if (filesystem) {
-    entries.push(`<hr>`);
-    entries.push(`<br>`);
+const installUi = async () => {
+  ui = ReactDOM.render(<UI width="100%" height="100%" cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}} breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}>
+                       </UI>,
+                       document.getElementById('top'));
+  return ui;
+}
 
-    const paths = new Set(await listFiles());
+const displayProjectsEntry = (project, index) => {
+  const selectProject = async () => {
+                          setupFilesystem({ fileBase: project });
+                          ui.keepKeys(['projects', 'project']);
+                          await displayProject(project);
+                        };
+  return (
+    <tr key={index}>
+      <td>
+        {project}
+      </td>
+      <td>
+        <SplitButton size="sm" id="dropdown-basic-button" title="Open" variant="outline-primary" onClick={selectProject}>
+          <Dropdown.Item href="#/action-1">View</Dropdown.Item>
+          <Dropdown.Item href="#/action-2">Delete</Dropdown.Item>
+        </SplitButton>
+      </td>
+    </tr>
+  );
+};
 
-    if (!paths.has('file/script.jsx') && paths.has('script')) {
-      // Copy scripts from preAlpha to preAlpha2.
-      // FIX: Remove this hack.
-      await writeFile({}, 'file/script.jsx', await readFile({}, 'script'));
+const displayProjects = async () => {
+  const projects = await (
+    <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <Card.Title>Projects</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
+        <Col>
+          <Table size='sm'>
+            <tbody>
+              {(await listFilesystems()).map(displayProjectsEntry)}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+    </Container>
+  );
+
+  ui.addItem(projects, { key: 'projects', width: 2, height: 3, removeable: false });
+};
+
+let projectOpen = false;
+
+const buildProject = async () => {
+  const paths = new Set(await listFiles());
+
+  const handler = (action, file) => {
+    switch (action) {
+      case 'Delete':
+        return async () => deleteFile({}, `file/${file}`);
+      case 'Download':
+        return async () => downloadFile(`file/${file}`);
+      case 'Edit Script':
+        return async () => editScript(file);
+      case 'Edit SvgPath':
+        return async () => editSvgPath(file);
+      case 'Run':
+        return async () => runScript(file);
+      case 'View':
+        return async () => viewGeometry(file);
     }
+  }
 
+  const build = async () => {
+    const buttons = [];
     for (const path of paths) {
       if (!path.startsWith('file/')) {
         continue;
       }
       const file = path.substring(5);
-      entries.push(`<div style="display: inline-block; width: 33%">${file}</div>`);
+      const todo = [];
+
       if (paths.has(`geometry/${file}`)) {
-        entries.push(`<button style='${buttonStyle}' onclick="viewGeometry('${file}')">View</button>`);
+        todo.push('View');
       }
       if (path.endsWith('.jsx')) {
-        entries.push(`<button style='${buttonStyle}' onclick="editFile('${file}')">Edit Text</button>`);
+        todo.push('Run');
+        todo.push('Edit Script');
       }
       if (path.endsWith('.svp')) {
-        entries.push(`<button style='${buttonStyle}' onclick="editSvgPath('${file}')">Edit SvgPath</button>`);
+        todo.push('Edit SvgPath');
       }
-      entries.push(`</span>`);
-      entries.push(`<br>`);
+
+      todo.push('Download');
+      todo.push('Delete');
+
+      const primary = todo.shift();
+      const secondary = todo;
+
+      const doPrimary = handler(primary, file);
+      const doSecondary = secondary.map(action => handler(action, file));
+
+      if (secondary.length > 0) {
+        buttons.push(<tr key={buttons.length}>
+                       <td>
+                         {file}
+                       </td>
+                       <td>
+                         <SplitButton size="sm" title={primary} variant="outline-primary" onClick={doPrimary}>
+                           {secondary.map((label, index) => <Dropdown.Item key={index} onClick={doSecondary[index]}>{label}</Dropdown.Item>)}
+                         </SplitButton>
+                       </td>
+                     </tr>);
+      } else {
+        buttons.push(<tr key={buttons.length}>
+                       <td>
+                         {file}
+                       </td>
+                       <td>
+                         <Button size="sm" variant="outline-primary" onClick={doPrimary}>
+                           {primary}
+                         </Button>
+                       </td>
+                     </tr>);
+      }
     }
-
-    entries.push(`<div style="display: inline-block; width: 33%">`);
-    entries.push(`<input type="text" id="fs/file/add">`);
-    entries.push(`</div>`);
-    entries.push(`<button style="${buttonStyle}" onclick="addFile()">Add File</button>`);
-    entries.push(`<br>`);
-    entries.push(`<button style="${buttonStyle}" onclick="exportFilesystem()">Export</button>`);
-    entries.push(`Import <input type="file" multiple="false" accept="application/zip" id="fs/filesystem/import" onchange="importFilesystem()">`);
-    entries.push(`<hr>`);
+    return buttons;
   }
 
-  entries.push(`<div style="display: inline-block; width: 33%">`);
-  entries.push(`<input type="text" id="fs/filesystem/add"></input>`);
-  entries.push(`</div>`);
-  entries.push(`<button style='${buttonStyle}' onclick="addFilesystem()">Add Project</button>`);
+  projectOpen = true;
 
-  for (const filesystem of await listFilesystems()) {
-    entries.push(`<div style="display: inline-block; width: 33%">${filesystem}</div>`);
-    entries.push(`<button style='${buttonStyle}' onclick="switchFilesystemview('${filesystem}')">View</button>`);
-    entries.push(`<br>`);
-  }
-
-  return entries.join('\n');
+  return await (
+    <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <Card.Title>Project: {getFilesystem()}</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
+        <Col>
+          <Table size='sm'>
+            <tbody>
+              {await build()}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <ButtonGroup>
+            <Button onClick={downloadProject} variant='outline-primary'>
+              Download
+            </Button>
+          </ButtonGroup>
+        </Col>
+      </Row>
+    </Container>
+  );
 };
 
-const displayGeometry = async (path) => {
-  const panel = jsPanel.create({
-    headerTitle: path,
-    content: `<div id="${path}"></div>`,
-    contentOverflow: 'hidden',
-    position: { my: 'right-top', at: 'right-top' },
-    panelSize: { width: '33%', height: '66%' },
-    footerToolbar: `</span><button class="jsPanel-ftr-btn" id="download/${path}" style="padding: 5px; margin: 3 px; display: inline-block;">Download ${path}</button>`,
-    border: '2px solid',
-    borderRadius: 12,
-    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
-    onclosed: (panel) => panels.delete(panel),
-    callback: (panel) => {
-      document.getElementById(`download/${path}`)
-          .addEventListener('click',
-                            async () => {
-                              const data = await readFile({ as: 'bytes' }, `file/${path}`);
-                              const blob = new Blob([data.buffer],
-                                                    { type: 'application/octet-stream' });
-                              saveAs(blob, path);
-                            });
-    }
-  });
+const displayProject = async () => {
+  const project = await buildProject();
+  ui.addItem(project, { key: 'project', width: 2, height: 2 });
+};
 
-  panels.add(panel);
+let console;
 
-  const view = { target: [0, 0, 0], position: [0, 0, 100], up: [0, 1, 0] };
+const viewConsole = async () => {
+  if (console) {
+    // Already set up.
+    return;
+  }
+
+  const key = 'console';
+
+  console = await (
+    <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <Card.Title>Console</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '1 1 auto', height: '100%', overflow: 'auto' }}>
+        <div id='console' style={{ paddingLeft: '20px', width: '100%' }}></div>
+      </Row>
+    </Container>
+  );
+
+  ui.addItem(console, { key, x: 2, width: 5, height: 1, removeable: false });
+
+  const viewerElement = document.getElementById('console');
+  watchLog((entry) => {
+             const div = viewerElement.appendChild(document.createElement('div'));
+             div.appendChild(document.createTextNode(entry));
+             div.style.cssText = 'border: 1px solid black; border-radius: 4px; padding: 2px; width: 100%';
+             viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
+           });
+}
+
+const viewGeometry = async (path) => {
+  const key = `viewGeometry/${getFilesystem()}/${path}`;
+
+  const viewer = await (
+    <Card style={{ height: '100%', overflow: 'hidden', display: 'block'}}>
+      <Card.Body style={{ height: '100%', width: '100%', overflow: 'hidden', display: 'block'}}>
+        <Card.Title>View: {path}</Card.Title>
+        <div id={key}></div>
+      </Card.Body>
+    </Card>
+  );
+
+  ui.addItem(viewer, { key, x: 7, width: 3, height: 3 });
+
+  const container = document.getElementById(key);
+
+  const view = { target: [0, 0, 0], position: [0, 0, 200], up: [0, 1, 0] };
   let datasets = [];
   let threejsGeometry;
-  let width = panel.offsetWidth;
-  let height = panel.offsetHeight;
+  let width = container.offsetWidth;
+  let height = container.offsetHeight;
   const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
   const { gui } = buildGui({ viewerElement });
   const hudContext = hudCanvas.getContext('2d');
@@ -147,7 +377,6 @@ const displayGeometry = async (path) => {
     hudContext.fillStyle = '#FF0000';
   };
 
-  const container = document.getElementById(path);
   container.appendChild(viewerElement);
 
   const animate = () => {
@@ -201,29 +430,71 @@ const displayGeometry = async (path) => {
     }
   };
 
-  updateGeometry(JSON.parse(await readFile({}, geometryPath)));
+  const json = await readFile({}, geometryPath);
+  updateGeometry(JSON.parse(json));
 
   watchFile(geometryPath,
             async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
 };
 
-const displayTextEditor = async (path) => {
-  const agent = async ({ ask, question }) => {
-    if (question.readFile) {
-      const { options, path } = question.readFile;
-      return readFile(options, path);
-    } else if (question.writeFile) {
-      const { options, path, data } = question.writeFile;
-      return writeFile(options, path, data);
-    }
-  };
+const downloadFile = async (path) => {
+  const data = await readFile({ as: 'bytes' }, path);
+  const blob = new Blob([data.buffer], { type: 'application/zip' });
+  saveAs(blob, path.split('/').pop());
+};
 
-  const { ask } = await createService({ webWorker: './webworker.js', agent });
+const downloadProject = async (path) => {
+  const data = await toZipFromFilesystem();
+  const blob = new Blob([data.buffer], { type: 'application/zip' });
+  saveAs(blob, getFilesystem());
+};
+
+let ask;
+
+const getAsk = async () => {
+  if (ask === undefined) {
+    const agent = async ({ ask, question }) => {
+      if (question.readFile) {
+        const { options, path } = question.readFile;
+        return readFile(options, path);
+      } else if (question.writeFile) {
+        const { options, path, data } = question.writeFile;
+        return writeFile(options, path, data);
+      } else if (question.deleteFile) {
+        const { options, path } = question.deleteFile;
+        return deleteFile(options, path);
+      } else if (question.log) {
+        const { entry } = question.log;
+        return log(entry);
+      }
+    };
+
+    ({ ask } = await createService({ webWorker: './webworker.js', agent }));
+  }
+
+  return ask;
+}
+
+const runScript = async (path) => {
+  await viewConsole();
+  const ask = await getAsk();
+  const script = await readFile({}, `file/${path}`);
+  const geometry = await ask({ evaluate: script });
+  if (geometry) {
+    await writeFile({}, 'file/preview', 'preview');
+    await writeFile({}, 'geometry/preview', JSON.stringify(geometry));
+  }
+}
+
+const editScript = async (path) => {
+  const key = `editScript/${getFilesystem()}/${path}`;
+  const clockId = `${key}/clock`;
+  const ask = await getAsk();
 
   const evaluator = async (script) => {
     let start = new Date().getTime();
     let runClock = true;
-    const clockElement = document.getElementById(`evaluatorClock/${path}`);
+    const clockElement = document.getElementById(clockId);
     const tick = () => {
       if (runClock) {
         setTimeout(tick, 100);
@@ -240,13 +511,13 @@ const displayTextEditor = async (path) => {
     runClock = false;
   };
 
-  let editor;
+  const content = await readFile({}, `file/${path}`);
+  let updated = content;
 
   const saveScript = async () => {
-    const script = editor.getDoc().getValue('\n');
     // Save any changes.
-    await writeFile({}, `file/${path}`, script);
-    return script;
+    await writeFile({}, `file/${path}`, updated);
+    return updated;
   };
 
   const runScript = async () => {
@@ -254,86 +525,77 @@ const displayTextEditor = async (path) => {
     return evaluator(script);
   };
 
-  const editId = `${getFilesystem()}/edit/${path}`;
+  const options = {
+    // autoRefresh: true,
+    autofocus: true,
+    mode: 'javascript',
+    // theme: 'default',
+    // fullScreen: true,
+    lineNumbers: true,
+    gutter: true,
+    lineWrapping: true,
+    extraKeys: { 'Shift-Enter': runScript, 'Control-S': saveScript }
+  };
 
-  const content = await readFile({}, `file/${path}`);
+  const update = (editor, data, value) => { updated = value; }
 
-  let log = null;
+  const stop = (e) => e.stopPropagation();
 
-  const panel = jsPanel.create({
-    headerTitle: path,
-    content: `<textarea id="${editId}">${content}</textarea>`,
-    contentOverflow: 'hidden',
-    panelSize: { width: '66%', height: '66%' },
-    position: { my: 'left-top', at: 'left-top' },
-    border: '2px solid',
-    borderRadius: 12,
-    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
-    footerToolbar: `<span id="evaluatorClock/${path}"></span><button class="jsPanel-ftr-btn" id="runScript/${path}" style="padding: 5px; margin: 3 px;">Run</button>`,
-    onclosed: (panel) => { editor.toTextArea(); panels.delete(panel); if (log !== null) log.close(); },
-    callback: (panel) => document.getElementById(`runScript/${path}`).addEventListener('click', runScript)
-  });
-  panels.add(panel);
+  const editor = await (
+    <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <Card.Title>Edit Script: {path}</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '1 1 auto', height: '100%' }}>
+        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%', display: 'block' }}>
+          <CodeMirror value={content} onChange={update} options={options} style={{ height: '100%' }}>
+          </CodeMirror>
+        </Col>
+      </Row>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <ButtonGroup>
+            <Button onClick={runScript} variant='outline-primary'>
+              Run <span id={clockId}></span>
+            </Button>
+            <Button onClick={saveScript} variant='outline-primary'>
+              Save
+            </Button>
+          </ButtonGroup>
+        </Col>
+      </Row>
+    </Container>
+  );
 
-  const textarea = document.getElementById(editId);
-
-  editor = CodeMirror.fromTextArea(textarea,
-                                   {
-                                     autoRefresh: true,
-                                     mode: 'javascript',
-                                     theme: 'default',
-                                     fullScreen: true,
-                                     lineNumbers: true,
-                                     gutter: true,
-                                     lineWrapping: true,
-                                     extraKeys: { 'Shift-Enter': runScript, 'Control-S': saveScript }
-                                   });
-
-  log = jsPanel.create({
-    headerTitle: 'Log',
-    content: `<div id="log"></div>`,
-    contentOverflow: 'scroll',
-    panelSize: { width: '66%', height: '33%' },
-    position: { my: 'left-bottom', at: 'left-bottom' },
-    border: '2px solid',
-    borderRadius: 12,
-    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
-    onclosed: (panel) => { panels.delete(panel); log = null; },
-    callback: (panel) => {
-      const viewerElement = document.getElementById('log');
-      const decoder = new TextDecoder('utf8');
-      watchFile('console/out',
-                (options, file) => {
-                  viewerElement.appendChild(document.createTextNode(decoder.decode(file.data)));
-                  viewerElement.appendChild(document.createElement('hr'));
-                  viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
-                });
-    }
-  });
-  panels.add(log);
+  ui.addItem(editor, { x: 2, key, width: 5, height: 5 });
 };
 
-const displaySvgPathEditor = async (path) => {
-  const panel = jsPanel.create({
-    headerTitle: 'SvgPath',
-    content: `<div id="edit/svgpath"></div>`,
-    contentOverflow: 'scroll',
-    panelSize: { width: '66%', height: '100%' },
-    position: { my: 'left-top', at: 'left-top' },
-    border: '2px solid',
-    borderRadius: 12,
-    headerControls: { maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
-    onclosed: (panel) => { panels.delete(panel); },
-    callback: (panel) => {
-      const save = (svgpath) => {
-        writeFile({}, `file/${path}`, svgpath).then(_ => panel.close());
-      };
-      readFile({}, `file/${path}`)
-          .then(path => ReactDOM.render(<SvgPathEditor path={path} onsave={save}/>,
-                                        document.getElementById('edit/svgpath')));
-    }
-  });
-  panels.add(panel);
+const editSvgPath = async (path) => {
+  const key = `editSvgPath/${getFilesystem()}/${path}`;
+  const data = await readFile({}, `file/${path}`);
+
+  const save = async (svgpath) => writeFile({}, `file/${path}`, svgpath);
+
+  const stop = (e) => e.stopPropagation();
+
+  const editor = await (
+    <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <Card.Title>Edit SvgPath: {path}</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
+        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop}>
+          <SvgPathEditor path={data} onsave={save}/>,
+        </Col>
+      </Row>
+    </Container>
+  );
+
+  ui.addItem(editor, { key, x: 2, width: 7, height: 5 });
 };
 
 const addFile = () => {
@@ -373,74 +635,16 @@ const addFilesystem = () => {
   }
 };
 
-const viewGeometry = (file) => {
-  displayGeometry(file).then(_ => _).catch(_ => _);
-};
-
 const editFile = (file) => {
   displayTextEditor(file).then(_ => _).catch(_ => _);
 };
 
-const editSvgPath = (file) => {
-  displaySvgPathEditor(file).then(_ => _).catch(_ => _);
-};
-
-const closePanels = async () => {
-  for (const panel of panels) {
-    await new Promise((resolve, reject) => { panel.close(resolve); });
-  }
-};
-
-const switchFilesystemview = (filesystem) => {
-  return closePanels()
-      .then(_ => setupFilesystem({ fileBase: filesystem }))
-      .then(_ => updateFilesystemview())
-      .then(_ => history.pushState(null, null, `#${getFilesystem()}`))
-      .catch(_ => _);
-};
-
-const updateFilesystemview = async () => {
-  let watcher;
-  const panel = jsPanel.create({
-    id: 'filesystemview',
-    headerTitle: `Project: ${getFilesystem()}`,
-    position: { my: 'right-bottom', at: 'right-bottom' },
-    contentOverflow: 'scroll',
-    panelSize: { width: 512, height: '100%' },
-    border: '2px solid',
-    borderRadius: 12,
-    headerControls: { close: 'remove', maximize: 'remove', normalize: 'remove', minimize: 'remove', smallify: 'remove', size: 'lg' },
-    content: await updateFilesystemviewHTML(),
-    onclosed: (panel) => { panels.delete(panel); unwatchFileCreation(watcher); }
-  });
-  panels.add(panel);
-  watcher = watchFileCreation(() => updateFilesystemviewHTML().then(innerHTML => { panel.content.innerHTML = innerHTML; }).catch(_ => _));
-};
-
 export const installFilesystemview = async ({ document, project }) => {
-  document.addFile = addFile;
-  document.addFilesystem = addFilesystem;
-  document.editFile = editFile;
-  document.editSvgPath = editSvgPath;
-  document.exportFilesystem = exportFilesystem;
-  document.importFilesystem = importFilesystem;
-  document.viewGeometry = viewGeometry;
-  document.switchFilesystemview = switchFilesystemview;
   if (project !== '') {
     await setupFilesystem({ fileBase: project });
   }
-  await updateFilesystemview();
-
-  ReactDOM.render(<ResponsiveGridLayout width="100%" height="100%" cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}} breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}>
-                    <ListGroup key="a">
-                      <ListGroup.Item>
-                        <DropdownButton id="dropdown-basic-button" title="Dropdown button">
-                          <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                          <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-                          <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-                        </DropdownButton>
-                      </ListGroup.Item>
-                    </ListGroup>
-                  </ResponsiveGridLayout>,
-                  document.getElementById('top'));
+  await installUi();
+  await displayProjects();
+  watchFileCreation(async () => { if (projectOpen) { ui.dropKeys(['project']); displayProject(); } });
+  watchFileDeletion(async () => { if (projectOpen) { ui.dropKeys(['project']); displayProject(); } });
 };
