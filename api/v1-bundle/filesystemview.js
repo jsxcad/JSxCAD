@@ -157,7 +157,7 @@ const installUi = async () => {
 const displayProjectsEntry = (project, index) => {
   const selectProject = async () => {
                           setupFilesystem({ fileBase: project });
-                          ui.keepKeys(['projects', 'project']);
+                          ui.keepKeys(['console', 'projects', 'project']);
                           await displayProject(project);
                         };
   return (
