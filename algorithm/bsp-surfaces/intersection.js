@@ -1,7 +1,7 @@
 import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { removeExteriorPolygons, fromSolid as toBspFromSolid } from './bsp';
+import { removeExteriorPolygons, removeExteriorPolygonsKeepingSkin, fromSolid as toBspFromSolid } from './bsp';
 
-export const intersection = (...solids) => {
+export const intersectionNway = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
@@ -25,4 +25,26 @@ export const intersection = (...solids) => {
     }
   }
   return toSolidFromPolygons({}, [].concat(...polygons));
+};
+
+// An asymmetric binary merge.
+export const intersection = (...solids) => {
+  if (solids.length === 0) {
+    return [];
+  }
+  while (solids.length > 1) {
+    const a = solids.shift();
+    const aPolygons = toPolygonsFromSolid({}, a);
+    const aBsp = toBspFromSolid(a);
+
+    const b = solids.shift();
+    const bPolygons = toPolygonsFromSolid({}, b);
+    const bBsp = toBspFromSolid(b);
+
+    const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aPolygons);
+    const bTrimmed = removeExteriorPolygons(aBsp, bPolygons);
+
+    solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]));
+  }
+  return solids[0];
 };
