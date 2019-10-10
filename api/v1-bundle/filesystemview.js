@@ -314,6 +314,7 @@ const displayProject = async () => {
 
 let console;
 
+// FIX: Rename as log.
 const viewConsole = async () => {
   if (console) {
     // Already set up.
@@ -326,7 +327,7 @@ const viewConsole = async () => {
     <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
       <Row style={{ flex: '0 0 auto' }}>
         <Col>
-          <Card.Title>Console</Card.Title>
+          <Card.Title>Log</Card.Title>
         </Col>
       </Row>
       <Row style={{ flex: '1 1 auto', height: '100%', overflow: 'auto' }}>
@@ -492,6 +493,8 @@ const editScript = async (path) => {
   const ask = await getAsk();
 
   const evaluator = async (script) => {
+    // FIX: Use runScript.
+    await viewConsole();
     let start = new Date().getTime();
     let runClock = true;
     const clockElement = document.getElementById(clockId);
@@ -541,6 +544,8 @@ const editScript = async (path) => {
 
   const stop = (e) => e.stopPropagation();
 
+        // <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%', display: 'block' }}>
+
   const editor = await (
     <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
       <Row style={{ flex: '0 0 auto' }}>
@@ -549,7 +554,7 @@ const editScript = async (path) => {
         </Col>
       </Row>
       <Row style={{ flex: '1 1 auto', height: '100%' }}>
-        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%', display: 'block' }}>
+        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%' }}>
           <CodeMirror value={content} onChange={update} options={options} style={{ height: '100%' }}>
           </CodeMirror>
         </Col>
