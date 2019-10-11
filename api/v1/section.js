@@ -1,7 +1,7 @@
 import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
-import { Z0 } from './Z0';
+import { Z } from './Z';
 import { assemble } from './assemble';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
 import { retessellate } from '@jsxcad/geometry-z0surface';
@@ -37,7 +37,7 @@ import { union } from './union';
  *
  **/
 
-export const section = (solidShape, surfaceShape = Z0()) => {
+export const section = (solidShape, surfaceShape = Z()) => {
   const shapes = [];
   const sections = [];
   for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {

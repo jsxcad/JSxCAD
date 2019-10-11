@@ -36,6 +36,8 @@ import SplitButton from 'react-bootstrap/SplitButton';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Table from 'react-bootstrap/Table';
 
+import Drawer from 'rc-drawer';
+
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 class UI extends React.PureComponent {
@@ -115,6 +117,9 @@ class UI extends React.PureComponent {
   render () {
     return (
       <div>
+        <Drawer width="20vw" placement="left">
+          <Card.Title>Hello</Card.Title>
+        </Drawer>
         <ResponsiveGridLayout onLayoutChange={this.onLayoutChange}
                               onBreakpointChange={this.onBreakpointChange}
                               {...this.props}>

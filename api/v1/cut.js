@@ -1,7 +1,7 @@
 import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
-import { Z0 } from './Z0';
+import { Z } from './Z';
 import { assemble } from './assemble';
 import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
 
@@ -43,7 +43,7 @@ import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
  *
  **/
 
-export const cut = (solidShape, surfaceShape = Z0()) => {
+export const cut = (solidShape, surfaceShape = Z()) => {
   const shapes = [];
   const cuts = [];
   for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
