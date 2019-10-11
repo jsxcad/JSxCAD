@@ -29,6 +29,8 @@ import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
 import Draggable from 'react-draggable';
 import Dropdown from 'react-bootstrap/Dropdown';
+import FormControl from 'react-bootstrap/FormControl';
+import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 import SplitButton from 'react-bootstrap/SplitButton';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -192,6 +194,21 @@ const displayProjects = async () => {
           </Table>
         </Col>
       </Row>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col>
+          <Card.Title>Actions</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%' }}>
+          <InputGroup>
+            <InputGroup.Prepend>
+              <Button onClick={newProject} id="projects/new" variant='outline-primary'>New Project</Button>
+            </InputGroup.Prepend>
+            <FormControl id="projects/new/name" placeholder="Project Name" />
+          </InputGroup>
+        </Col>
+      </Row>
     </Container>
   );
 
@@ -278,6 +295,12 @@ const buildProject = async () => {
 
   projectOpen = true;
 
+  const stop = (e) => e.stopPropagation();
+
+  const clickImportProject = () => {
+    document.getElementById('project/import').click();
+  }
+
   return await (
     <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
       <Row style={{ flex: '0 0 auto' }}>
@@ -296,11 +319,29 @@ const buildProject = async () => {
       </Row>
       <Row style={{ flex: '0 0 auto' }}>
         <Col>
-          <ButtonGroup>
-            <Button onClick={downloadProject} variant='outline-primary'>
-              Download
-            </Button>
-          </ButtonGroup>
+          <Card.Title>Actions</Card.Title>
+        </Col>
+      </Row>
+      <Row style={{ flex: '0 0 auto' }}>
+        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%' }}>
+          <InputGroup>
+            <InputGroup.Prepend>
+              <Button onClick={newFile} id="project/new" variant='outline-primary'>New File</Button>
+            </InputGroup.Prepend>
+            <FormControl id="project/new/name" placeholder="File Name" />
+          </InputGroup>
+          <InputGroup>
+            <InputGroup.Prepend>
+              <Button onClick={exportProject} variant='outline-primary'>Export</Button>
+            </InputGroup.Prepend>
+            <FormControl id="project/export/name" placeholder="Zip Name" />
+          </InputGroup>
+          <InputGroup>
+            <InputGroup.Prepend>
+              <Button onClick={clickImportProject} id="project/import/button" variant="outline-primary">Import</Button>
+            </InputGroup.Prepend>
+            <FormControl as="input" type="file" multiple={false} id="project/import" onChange={importProject} style={{ display: 'none' }} />
+          </InputGroup>
         </Col>
       </Row>
     </Container>
@@ -309,7 +350,7 @@ const buildProject = async () => {
 
 const displayProject = async () => {
   const project = await buildProject();
-  ui.addItem(project, { key: 'project', width: 2, height: 2 });
+  ui.addItem(project, { key: 'project', width: 2, height: 3 });
 };
 
 let console;
@@ -444,10 +485,43 @@ const downloadFile = async (path) => {
   saveAs(blob, path.split('/').pop());
 };
 
-const downloadProject = async (path) => {
+const newFile = async () => {
+  const file = document.getElementById('project/new/name').value;
+  if (file.length > 0) {
+    // FIX: Prevent this from overwriting existing files.
+    await writeFile({}, `file/${file}`, '').then(_ => _).catch(_ => _);
+  }
+};
+
+const newProject = async () => {
+  const filesystem = document.getElementById('fs/filesystem/add').value;
+  if (filesystem.length > 0) {
+    // FIX: Prevent this from overwriting existing filesystems.
+    setupFilesystem({ fileBase: filesystem });
+    await writeFile({}, 'file/script.jsx', defaultScript);
+    ui.dropKeys(['projects']);
+    await displayProjects();
+    await switchFilesystemview(filesystem);
+  }
+};
+
+const exportProject = async (path) => {
+  const file = document.getElementById('project/export/name').value;
   const data = await toZipFromFilesystem();
   const blob = new Blob([data.buffer], { type: 'application/zip' });
   saveAs(blob, getFilesystem());
+};
+
+const importProject = async (e) => {
+  const file = document.getElementById('project/import').files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const zip = e.target.result;
+    fromZipToFilesystem({}, zip)
+      .then(_ => ui.dropKeys(['project']))
+      .then(_ => displayProject());
+  };
+  reader.readAsArrayBuffer(file);
 };
 
 let ask;
@@ -543,8 +617,6 @@ const editScript = async (path) => {
   const update = (editor, data, value) => { updated = value; }
 
   const stop = (e) => e.stopPropagation();
-
-        // <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%', display: 'block' }}>
 
   const editor = await (
     <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
@@ -650,6 +722,6 @@ export const installFilesystemview = async ({ document, project }) => {
   }
   await installUi();
   await displayProjects();
-  watchFileCreation(async () => { if (projectOpen) { ui.dropKeys(['project']); displayProject(); } });
-  watchFileDeletion(async () => { if (projectOpen) { ui.dropKeys(['project']); displayProject(); } });
+  watchFileCreation(async () => { if (projectOpen) { ui.dropKeys(['project']); await displayProject(); } });
+  watchFileDeletion(async () => { if (projectOpen) { ui.dropKeys(['project']); await displayProject(); } });
 };
