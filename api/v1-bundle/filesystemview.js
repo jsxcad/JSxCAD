@@ -162,6 +162,16 @@ const installUi = async () => {
 }
 
 const displayProjectsEntry = (project, index) => {
+  const deleteProject = async () => {
+                          setupFilesystem({ fileBase: project });
+                          for (const file of await listFiles()) {
+                            await deleteFile({}, file);
+                          }
+                          ui.dropKeys(['projects', 'project']);
+                          setupFilesystem({ fileBase: '' });
+                          await displayProjects();
+                        };
+
   const selectProject = async () => {
                           setupFilesystem({ fileBase: project });
                           ui.keepKeys(['console', 'projects', 'project']);
@@ -174,8 +184,7 @@ const displayProjectsEntry = (project, index) => {
       </td>
       <td>
         <SplitButton size="sm" id="dropdown-basic-button" title="Open" variant="outline-primary" onClick={selectProject}>
-          <Dropdown.Item href="#/action-1">View</Dropdown.Item>
-          <Dropdown.Item href="#/action-2">Delete</Dropdown.Item>
+          <Dropdown.Item onClick={deleteProject}>Delete</Dropdown.Item>
         </SplitButton>
       </td>
     </tr>
@@ -183,6 +192,8 @@ const displayProjectsEntry = (project, index) => {
 };
 
 const displayProjects = async () => {
+  const stop = (e) => e.stopPropagation();
+
   const projects = await (
     <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
       <Row style={{ flex: '0 0 auto' }}>
@@ -354,8 +365,10 @@ const buildProject = async () => {
 };
 
 const displayProject = async () => {
-  const project = await buildProject();
-  ui.addItem(project, { key: 'project', width: 2, height: 3 });
+  if (getFilesystem() !== '' ) {
+    const project = await buildProject();
+    ui.addItem(project, { key: 'project', width: 2, height: 3 });
+  }
 };
 
 let console;
@@ -499,7 +512,7 @@ const newFile = async () => {
 };
 
 const newProject = async () => {
-  const filesystem = document.getElementById('fs/filesystem/add').value;
+  const filesystem = document.getElementById('projects/new/name').value;
   if (filesystem.length > 0) {
     // FIX: Prevent this from overwriting existing filesystems.
     setupFilesystem({ fileBase: filesystem });
