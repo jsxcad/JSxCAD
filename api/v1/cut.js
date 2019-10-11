@@ -1,9 +1,9 @@
-import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
+import { Z0 } from './Z0';
 import { assemble } from './assemble';
-import { cut as cutSolid } from '@jsxcad/geometry-solid';
-import { cut as cutSurface } from '@jsxcad/geometry-surface';
+import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
 
 /**
  *
@@ -43,28 +43,20 @@ import { cut as cutSurface } from '@jsxcad/geometry-surface';
  *
  **/
 
-export const cut = (plane = [0, 0, 1, 0], shape) => {
-  const fronts = [];
-  const backs = [];
-  const keptGeometry = shape.toKeptGeometry();
-  for (const { solid } of getSolids(keptGeometry)) {
-    const [front, back] = cutSolid(plane, solid);
-    fronts.push(Shape.fromSolid(front));
-    backs.push(Shape.fromSolid(back));
+export const cut = (solidShape, surfaceShape = Z0()) => {
+  const shapes = [];
+  const cuts = [];
+  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
+    const anySurface = surface || z0Surface;
+    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+      const cutResult = bspCut(solid, anySurface);
+      shapes.push(Shape.fromGeometry({ solid: cutResult }));
+    }
+    cuts.push(...shapes);
   }
-  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    const [front, back] = cutSurface(plane, z0Surface);
-    fronts.push(Shape.fromPathsToZ0Surface(front));
-    backs.push(Shape.fromPathsToZ0Surface(back));
-  }
-  for (const { surface } of getSurfaces(keptGeometry)) {
-    const [front, back] = cutSurface(plane, surface);
-    fronts.push(Shape.fromPathsToSurface(front));
-    backs.push(Shape.fromPathsToSurface(back));
-  }
-  return [assemble(...fronts), assemble(...backs)];
+  return assemble(...cuts);
 };
 
-const method = function (options) { return cut(options, this); };
+const method = function (surface) { return cut(this, surface); };
 
 Shape.prototype.cut = method;

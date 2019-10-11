@@ -1,6 +1,9 @@
+import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
+
 import { Shape } from './Shape';
+import { Z0 } from './Z0';
+import { assemble } from './assemble';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
-import { getSolids } from '@jsxcad/geometry-tagged';
 import { retessellate } from '@jsxcad/geometry-z0surface';
 import { union } from './union';
 
@@ -34,20 +37,20 @@ import { union } from './union';
  *
  **/
 
-const X = 0;
-const Y = 1;
-
-export const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
+export const section = (solidShape, surfaceShape = Z0()) => {
   const shapes = [];
-  const [min, max] = shape.measureBoundingBox();
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    const polygon = [[min[X], min[Y], z], [max[X], min[Y], z], [max[X], max[Y], z], [min[X], max[Y], z]];
-    const surface = retessellate(bspSection(solid, polygon));
-    shapes.push(Shape.fromGeometry({ surface }));
+  const sections = [];
+  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
+    const anySurface = surface || z0Surface;
+    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+      const surface = retessellate(bspSection(solid, anySurface));
+      shapes.push(Shape.fromGeometry({ surface }));
+    }
+    sections.push(union(...shapes));
   }
-  return union(...shapes);
+  return assemble(...sections);
 };
 
-const method = function (options) { return section(options, this); };
+const method = function (surface) { return section(this, surface); };
 
 Shape.prototype.section = method;

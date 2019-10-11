@@ -40,6 +40,7 @@ import { ThreadedRod } from './ThreadedRod';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
 import { Wave } from './Wave';
+import { Z0 } from './Z0';
 
 import { above } from './above';
 import { acos } from './acos';
@@ -76,6 +77,9 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { measureCenter } from './measureCenter';
 import { minkowski } from './minkowski';
 import { move } from './move';
+import { moveX } from './moveX';
+import { moveY } from './moveY';
+import { moveZ } from './moveZ';
 import { nocut } from './nocut';
 import { numbers } from './numbers';
 import { orient } from './orient';
@@ -141,6 +145,9 @@ const methods = [
   measureBoundingBox,
   measureCenter,
   move,
+  moveX,
+  moveY,
+  moveZ,
   nocut,
   orient,
   outline,
@@ -238,5 +245,6 @@ export {
   Triangle,
   union,
   vec,
-  Wave
+  Wave,
+  Z0
 };
