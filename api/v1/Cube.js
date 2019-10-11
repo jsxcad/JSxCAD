@@ -46,22 +46,21 @@ import { dispatch } from './dispatch';
 
 // Geometry construction.
 
+const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
-// Note: We can't call this while bootstrapping, but we could memoize the result afterward.
 const unitCube = () => Shape.fromGeometry(buildRegularPrism(4))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
 // Cube Interfaces.
 
-export const fromValue = (value) => unitCube().scale(value);
+export const ofEdge = (value) => unitCube().scale(value);
+export const ofEdges = (width, length, height) => unitCube().scale([width, length, height]);
 
-export const fromValues = (width, length, height) => unitCube().scale([width, length, height]);
-
-export const fromRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4)).rotateZ(45).scale([radius, radius, radius / edgeScale]);
-
-export const fromDiameter = (diameter) => fromRadius(diameter / 2);
+export const ofRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4)).rotateZ(45).scale([radius, radius, radius / edgeScale]);
+export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));
+export const ofDiameter = (diameter) => ofRadius(diameter / 2);
 
 export const fromCorners = (corner1, corner2) => {
   const [c1x, c1y, c1z] = corner1;
@@ -78,13 +77,13 @@ export const Cube = dispatch(
   // cube()
   (...rest) => {
     assertEmpty(rest);
-    return () => fromValue(1);
+    return () => ofEdge(1);
   },
   // cube(2)
   (value, ...rest) => {
     assertNumber(value);
     assertEmpty(rest);
-    return () => fromValue(value);
+    return () => ofEdge(value);
   },
   // cube(2, 4, 6)
   (width, length, height, ...rest) => {
@@ -92,17 +91,22 @@ export const Cube = dispatch(
     assertNumber(length);
     assertNumber(height);
     assertEmpty(rest);
-    return () => fromValues(width, length, height);
+    return () => ofEdges(width, length, height);
   },
   // cube({ radius: 2 })
   ({ radius }) => {
     assertNumber(radius);
-    return () => fromRadius(radius);
+    return () => ofRadius(radius);
   },
   // cube({ diameter: 2 })
   ({ diameter }) => {
     assertNumber(diameter);
-    return () => fromDiameter(diameter);
+    return () => ofDiameter(diameter);
+  },
+  // cube({ apothem: 2 })
+  ({ apothem }) => {
+    assertNumber(apothem);
+    return () => ofApothem(apothem);
   },
   // cube({ corner1: [2, 2, 2], corner2: [1, 1, 1] })
   ({ corner1, corner2 }) => {
@@ -111,10 +115,11 @@ export const Cube = dispatch(
     return () => fromCorners(corner1, corner2);
   });
 
-Cube.fromValue = fromValue;
-Cube.fromValues = fromValues;
-Cube.fromRadius = fromRadius;
-Cube.fromDiameter = fromDiameter;
+Cube.ofEdge = ofEdge;
+Cube.ofEdges = ofEdges;
+Cube.ofRadius = ofRadius;
+Cube.ofApothem = ofApothem;
+Cube.ofDiameter = ofDiameter;
 Cube.fromCorners = fromCorners;
 
 export default Cube;
