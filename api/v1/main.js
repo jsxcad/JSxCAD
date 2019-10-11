@@ -40,7 +40,9 @@ import { ThreadedRod } from './ThreadedRod';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
 import { Wave } from './Wave';
-import { Z0 } from './Z0';
+import { X } from './X';
+import { Y } from './Y';
+import { Z } from './Z';
 
 import { above } from './above';
 import { acos } from './acos';
@@ -246,5 +248,7 @@ export {
   union,
   vec,
   Wave,
-  Z0
+  X,
+  Y,
+  Z
 };

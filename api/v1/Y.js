@@ -4,9 +4,9 @@ import { Shape } from './Shape';
 // Unfortunately this makes things like interpolation tricky,
 // so we approximate it with a very large polygon instead.
 
-export const Z0 = () => {
+export const Y = (y = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  return Shape.fromPathToZ0Surface([[max, min, 0], [max, max, 0], [min, max, 0], [min, min, 0]]);
+  return Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
 };
