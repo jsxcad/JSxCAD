@@ -10,7 +10,6 @@
 import * as vec from '@jsxcad/math-vec3';
 
 import { getClock, startClock } from './clock';
-import { planeX, planeY, planeZ } from './plane';
 
 import { Armature } from './Armature';
 import { Board } from './Board';
@@ -214,9 +213,6 @@ export {
   Nail,
   numbers,
   Plan,
-  planeX,
-  planeY,
-  planeZ,
   Path,
   Point,
   Points,
