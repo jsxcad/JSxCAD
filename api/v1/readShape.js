@@ -36,7 +36,9 @@ export const readShape = async (options, build) => {
     options = { path: options };
   }
   const { ephemeral, path } = options;
+
   const data = await readFile({ as: 'utf8', sources: getSources(path), ...options }, `file/${path}`);
+
   if (data === undefined && build !== undefined) {
     const shape = await build();
     if (!ephemeral) {
