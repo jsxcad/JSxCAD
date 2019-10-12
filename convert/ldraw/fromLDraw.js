@@ -13,6 +13,7 @@ const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 const readPart = async (part) => {
   part = part.toLowerCase().replace(/\\/, '/');
   return readFile({
+    ephemeral: true,
     sources: [{ url: `${URL_PREFIX}/parts/${part}` },
               { url: `${URL_PREFIX}/p/48/${part}` },
               { url: `${URL_PREFIX}/p/${part}` }],

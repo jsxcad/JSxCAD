@@ -4,9 +4,9 @@
 
 import * as fs from 'fs';
 
+import { getBase, getFilesystem, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
-import { getBase } from './filesystem';
 import { getFile } from './files';
 import { isBase64 } from 'is-base64';
 import isUrlHttp from 'is-url-http';
@@ -109,11 +109,22 @@ export const readFile = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
-  log(`Read ${path}`);
-  const { sources = [] } = options;
+  const { sources = [], project = getFilesystem() } = options;
+  let originalProject = getFilesystem();
+  if (project !== originalProject) {
+    log(`Read ${path} of ${project}`);
+    // Switch to the source filesystem, if necessary.
+    setupFilesystem({ fileBase: project });
+  } else {
+    log(`Read ${path}`);
+  }
   const file = getFile(options, path);
   if (file.data === undefined) {
     file.data = await fetchPersistent(path);
+  }
+  if (project !== originalProject) {
+    // Switch back to the original filesystem, if necessary.
+    setupFilesystem({ fileBase: originalProject });
   }
   if (file.data === undefined) {
     file.data = await fetchSources({}, sources);
