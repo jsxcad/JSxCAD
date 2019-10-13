@@ -3,7 +3,7 @@ import { removeExteriorPolygons, removeInteriorPolygonsAndSkin, fromSolid as toB
 
 const mayOverlap = (a, b) => !doesNotOverlap(a, b);
 
-export const difference = (aSolid, ...bSolids) => {
+export const differenceNway = (aSolid, ...bSolids) => {
   if (aSolid === undefined) {
     return [];
   }
@@ -35,15 +35,19 @@ export const difference = (aSolid, ...bSolids) => {
   return toSolidFromPolygons({}, polygons);
 };
 
-/*
 export const difference = (aSolid, ...bSolids) => {
   while (bSolids.length > 0) {
     const a = aSolid;
+    const b = bSolids.shift();
+
+    if (doesNotOverlap(a, b)) {
+      continue;
+    }
+
     const aPolygons = toPolygonsFromSolid({}, a);
     const aBsp = toBspFromSolid(a);
 
-    const b = bSolids.shift();
-    const bPolygons = toPolygonsFromSolid({}, b);
+    const bPolygons = toPolygonsFromSolid({}, flip(b));
     const bBsp = toBspFromSolid(b);
 
     const aTrimmed = removeInteriorPolygonsAndSkin(bBsp, aPolygons);
@@ -52,5 +56,4 @@ export const difference = (aSolid, ...bSolids) => {
     aSolid = toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]);
   }
   return aSolid;
-}
-*/
+};

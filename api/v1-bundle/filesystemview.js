@@ -266,8 +266,8 @@ const buildProject = async () => {
         todo.push('View');
       }
       if (path.endsWith('.jsx')) {
-        todo.push('Run');
         todo.push('Edit Script');
+        todo.push('Run');
       }
       if (path.endsWith('.svp')) {
         todo.push('Edit SvgPath');
@@ -283,14 +283,21 @@ const buildProject = async () => {
       const doSecondary = secondary.map(action => handler(action, file));
 
       if (secondary.length > 0) {
+        /*
+                         <SplitButton size="sm" title={primary} variant="outline-primary" onClick={doPrimary}>
+                           {secondary.map((label, index) => <Dropdown.Item key={index} onClick={doSecondary[index]}>{label}</Dropdown.Item>)}
+                         </SplitButton>
+        */
         buttons.push(<tr key={buttons.length}>
                        <td>
                          {file}
                        </td>
                        <td>
-                         <SplitButton size="sm" title={primary} variant="outline-primary" onClick={doPrimary}>
-                           {secondary.map((label, index) => <Dropdown.Item key={index} onClick={doSecondary[index]}>{label}</Dropdown.Item>)}
-                         </SplitButton>
+                         <ButtonGroup vertical size="sm">
+                           <Button onClick={doPrimary} variant="outline-primary">{primary}</Button>
+                           {secondary.map((label, index) =>
+                                          <Button onClick={doSecondary[index]} variant="outline-primary">{label}</Button>)}
+                         </ButtonGroup>
                        </td>
                      </tr>);
       } else {
