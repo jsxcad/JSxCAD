@@ -24,15 +24,15 @@ export const fromPolygons = ({ plane }, polygons) => {
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
   const z0Polygons = transform(toZ0, polygons);
 
-  switch (1) {
-    case 1: {
+  switch ('cleaned') {
+    case 'uncleaned': {
       // const z0Surface = clean(retessellate(z0Polygons));
       const z0Surface = retessellate(z0Polygons);
       const surface = transform(fromZ0, z0Surface);
       surface.plane = plane;
       return surface;
     }
-    case 2: {
+    case 'cleaned': {
       let retessellation = retessellate(z0Polygons);
       if (retessellation.length >= 2) {
         // Sometimes overlapping into to retessellation results in overlapping output.

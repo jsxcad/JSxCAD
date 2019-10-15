@@ -1,5 +1,5 @@
 import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { removeInteriorPolygons, removeInteriorPolygonsAndSkin, fromSolid as toBspFromSolid } from './bsp';
+import { removeInteriorPolygonsKeepingSkin, fromSolid as toBspFromSolid } from './bsp';
 
 // An n-way merge, potentially producing duplicate coplanars.
 export const unionNway = (...solids) => {
@@ -25,7 +25,7 @@ export const unionNway = (...solids) => {
       if (bsps[b] === undefined) {
         bsps[b] = toBspFromSolid(solids[b]);
       }
-      polygonSets[a] = removeInteriorPolygons(bsps[b], polygonSets[a]);
+      polygonSets[a] = removeInteriorPolygonsKeepingSkin(bsps[b], polygonSets[a]);
     }
   }
   return toSolidFromPolygons({}, [].concat(...polygonSets));
@@ -45,8 +45,8 @@ export const union = (...solids) => {
     const bPolygons = toPolygonsFromSolid({}, b);
     const bBsp = toBspFromSolid(b);
 
-    const aTrimmed = removeInteriorPolygons(bBsp, aPolygons);
-    const bTrimmed = removeInteriorPolygonsAndSkin(aBsp, bPolygons);
+    const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons);
+    const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons);
 
     solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]));
   }
