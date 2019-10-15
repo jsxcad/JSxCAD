@@ -1,6 +1,7 @@
 import { doesNotOverlap, flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { removeExteriorPolygons, removeInteriorPolygonsAndSkin, fromSolid as toBspFromSolid } from './bsp';
+import { removeExteriorPolygonsAndSkin, removeInteriorPolygonsAndSkin, fromSolid as toBspFromSolid } from './bsp';
 
+/*
 const mayOverlap = (a, b) => !doesNotOverlap(a, b);
 
 export const differenceNway = (aSolid, ...bSolids) => {
@@ -16,7 +17,7 @@ export const differenceNway = (aSolid, ...bSolids) => {
   for (let i = 0; i < bSolids.length; i++) {
     const bSolid = bSolids[i];
     bBsp[i] = toBspFromSolid(bSolid);
-    aPolygons = removeInteriorPolygonsAndSkin(bBsp[i], aPolygons);
+    aPolygons = removeInteriorPolygonsKeepingSkin(bBsp[i], aPolygons);
   }
   const aBsp = toBspFromSolid(aSolid);
   const polygons = [];
@@ -26,7 +27,7 @@ export const differenceNway = (aSolid, ...bSolids) => {
     bPolygons = removeExteriorPolygons(aBsp, bPolygons);
     for (let j = 0; j < bSolids.length; j++) {
       if (j !== i) {
-        bPolygons = removeInteriorPolygonsAndSkin(bBsp[j], bPolygons);
+        bPolygons = removeInteriorPolygonsKeepingSkin(bBsp[j], bPolygons);
       }
     }
     polygons.push(...bPolygons);
@@ -34,6 +35,7 @@ export const differenceNway = (aSolid, ...bSolids) => {
   polygons.push(...aPolygons);
   return toSolidFromPolygons({}, polygons);
 };
+*/
 
 export const difference = (aSolid, ...bSolids) => {
   while (bSolids.length > 0) {
@@ -51,7 +53,7 @@ export const difference = (aSolid, ...bSolids) => {
     const bBsp = toBspFromSolid(b);
 
     const aTrimmed = removeInteriorPolygonsAndSkin(bBsp, aPolygons);
-    const bTrimmed = removeExteriorPolygons(aBsp, bPolygons);
+    const bTrimmed = removeExteriorPolygonsAndSkin(aBsp, bPolygons);
 
     aSolid = toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]);
   }
