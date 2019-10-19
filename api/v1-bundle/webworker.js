@@ -7,6 +7,8 @@ import { toEcmascript } from '@jsxcad/compiler';
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
   try {
+    await sys.log({ op: 'clear' });
+    await sys.log({ op: 'evaluate', status: 'run' });
     await sys.log('Evaluation Started');
     if (question.evaluate) {
       const ecmascript = toEcmascript({}, question.evaluate);
@@ -16,6 +18,8 @@ const agent = async ({ ask, question }) => {
       const constructor = await builder(api);
       const module = await constructor();
       const shape = await module.main();
+      await sys.log('Evaluation Succeeded');
+      await sys.log({ op: 'evaluate', status: 'success' });
       if (shape !== undefined && shape.toKeptGeometry) {
         const keptGeometry = shape.toKeptGeometry();
         return keptGeometry;
@@ -24,9 +28,8 @@ const agent = async ({ ask, question }) => {
   } catch (error) {
     await sys.log(error.stack);
     await sys.log('Evaluation Failed');
-    return;
+    await sys.log({ op: 'evaluate', status: 'failure' });
   }
-  await sys.log('Evaluation Succeeded');
 };
 const { ask, hear } = sys.conversation({ agent, say });
 self.ask = ask;

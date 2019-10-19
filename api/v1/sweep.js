@@ -1,4 +1,5 @@
 import { Shape } from './Shape';
+import { assemble } from './assemble';
 import { chainHull } from './chainHull';
 import { getPaths } from '@jsxcad/geometry-tagged';
 import { union } from './union';
@@ -12,18 +13,17 @@ import { union } from './union';
  **/
 
 // FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
-export const sweep = (tool, ...toolpaths) => {
+export const sweep = (toolpath, tool) => {
   const chains = [];
-  for (const toolpath of toolpaths) {
-    for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
-      for (const path of paths) {
-        chains.push(chainHull(...path.map(point => tool.move(point))));
-      }
+  for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
+    for (const path of paths) {
+      chains.push(chainHull(...path.map(point => tool.move(point))));
     }
   }
   return union(...chains);
 };
 
-const method = function (...toolpaths) { return sweep(this, ...toolpaths); };
+const method = function (tool) { return sweep(this, tool); };
 
 Shape.prototype.sweep = method;
+Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, tool)); };

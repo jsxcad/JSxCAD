@@ -178,18 +178,18 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
   }
 };
 
-const cutImpl = (plane, surface) => {
+const cutImpl = (planeSurface, surface) => {
   const front = [];
   const back = [];
   const frontEdges = [];
   const backEdges = [];
 
-  cutSurface(plane, front, back, front, back, frontEdges, backEdges, surface);
+  cutSurface(toPlane(planeSurface), front, back, front, back, frontEdges, backEdges, surface);
   if (frontEdges.some(edge => edge[1] === undefined)) {
     throw Error(`die/end/missing: ${JSON.stringify(frontEdges)}`);
   }
 
-  return [[].concat(...front), [].concat(...back)];
+  return [].concat(...back);
 };
 
 export const cut = cacheCut(cutImpl);
