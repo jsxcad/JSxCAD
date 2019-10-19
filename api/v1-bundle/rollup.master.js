@@ -35,6 +35,9 @@ export default {
         ],
         '../../node_modules/react-dom/index.js': [
           'findDOMNode'
+        ],
+        '../../node_modules/react-recollect/index.js': [
+          'collect'
         ]
       }
     }),

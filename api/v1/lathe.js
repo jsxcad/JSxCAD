@@ -1,4 +1,5 @@
 import { Shape } from './Shape';
+import { Y } from './Y';
 import { assemble } from './assemble';
 import { getPaths } from '@jsxcad/geometry-tagged';
 import { lathe as lathePath } from '@jsxcad/algorithm-shape';
@@ -15,8 +16,8 @@ import { lathe as lathePath } from '@jsxcad/algorithm-shape';
  **/
 
 export const lathe = ({ sides = 16, loops = 1, loopOffset = 0 }, shape) => {
-  const [left] = shape.cut();
-  const outline = left.outline();
+  const profile = shape.cut(Y(0));
+  const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
     for (const path of geometry.paths) {

@@ -4,6 +4,7 @@ import { Shape } from './Shape';
 import { Z } from './Z';
 import { assemble } from './assemble';
 import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
+import { cut as surfaceCut } from '@jsxcad/geometry-surface';
 
 /**
  *
@@ -43,17 +44,25 @@ import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
  *
  **/
 
-export const cut = (solidShape, surfaceShape = Z()) => {
-  const shapes = [];
+export const cut = (shape, planeShape = Z()) => {
   const cuts = [];
-  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
-    const anySurface = surface || z0Surface;
-    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const cutResult = bspCut(solid, anySurface);
-      shapes.push(Shape.fromGeometry({ solid: cutResult }));
+  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
+    const planeSurface = surface || z0Surface;
+    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+      const cutResult = bspCut(solid, planeSurface);
+      cuts.push(Shape.fromGeometry({ solid: cutResult }));
     }
-    cuts.push(...shapes);
   }
+
+  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
+    const planeSurface = surface || z0Surface;
+    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+      const cutSurface = surface || z0Surface;
+      const cutResult = surfaceCut(planeSurface, cutSurface);
+      cuts.push(Shape.fromGeometry({ surface: cutResult }));
+    }
+  }
+
   return assemble(...cuts);
 };
 

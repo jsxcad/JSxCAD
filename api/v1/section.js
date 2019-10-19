@@ -38,10 +38,10 @@ import { union } from './union';
  **/
 
 export const section = (solidShape, surfaceShape = Z()) => {
-  const shapes = [];
   const sections = [];
   for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
     const anySurface = surface || z0Surface;
+    const shapes = [];
     for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
       const surface = retessellate(bspSection(solid, anySurface));
       shapes.push(Shape.fromGeometry({ surface }));
