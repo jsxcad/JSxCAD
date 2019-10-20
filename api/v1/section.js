@@ -4,7 +4,7 @@ import { Shape } from './Shape';
 import { Z } from './Z';
 import { assemble } from './assemble';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
-import { retessellate } from '@jsxcad/geometry-z0surface';
+import { retessellate } from '@jsxcad/geometry-surface';
 import { union } from './union';
 
 /**

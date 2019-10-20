@@ -68,7 +68,7 @@ class UI extends React.Component {
       projects: this.props.projects,
       layout: [],
       panes: [],
-      project: '',
+      project: this.props.project,
       build: 0,
     };
 
@@ -80,11 +80,17 @@ class UI extends React.Component {
   }
 
   async componentDidMount () {
+    const { project } = this.state;
+
     const self = this;
     const fileUpdater = () => listFilesystems().then(projects => self.setState({ projects }));
     const creationWatcher = watchFileCreation(fileUpdater);
     const deletionWatcher = watchFileDeletion(fileUpdater);
     this.setState({ creationWatcher, deletionWatcher });
+
+    if (project) {
+      await this.selectProject(project);
+    }
   }
 
   async componentWillUnmount () {
@@ -148,6 +154,8 @@ class UI extends React.Component {
 
   async selectProject (project) {
     setupFilesystem({ fileBase: project });
+    const encodedProject = encodeURIComponent(project);
+    history.pushState(null, null, `#${encodedProject}`);
     const layoutData = await readFile({}, 'ui/layout');
     let layout;
     if (layoutData !== undefined) {
@@ -220,7 +228,7 @@ class UI extends React.Component {
 
     return (
       <div>
-        <Drawer width="20vw" placement="left" open={project === '' ? true : undefined} defaultOpen={true}>
+        <Drawer width="20vw" placement="left" open={project === '' ? true : undefined} defaultOpen={project === '' ? true: undefined}>
           <InputGroup>
             <FormControl id="project/add/name" placeholder="Project Name" />
             <InputGroup.Append>
@@ -575,6 +583,7 @@ class JSEditorUI extends React.Component {
       code: ''
     };
 
+    this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
     this.run = this.run.bind(this);
     this.save = this.save.bind(this);
@@ -609,6 +618,50 @@ class JSEditorUI extends React.Component {
     e.stopPropagation();
   }
 
+  preventDefault (e) {
+    e.preventDefault();
+    return false;
+  }
+
+  onKeyDown (e) {
+    const ENTER = 13;
+    const S = 83;
+    const SHIFT = 16;
+    const CONTROL = 17;
+
+    const key = e.which || e.keyCode || 0;
+
+    switch (key) {
+      case CONTROL:
+      case SHIFT:
+        return true;
+    }
+
+    const { ctrlKey, shiftKey } = e;
+    switch (key) {
+      case ENTER: {
+        if (shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.run();
+          return false;
+        }
+        break;
+      }
+      case S: {
+        if (ctrlKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          this.save();
+          return false;
+        }
+        break;
+      }
+    }
+  }
+
+  /* Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop} onKeyDown={this.preventDefault} onKeyPress={this.preventDefault} */
+
   render () {
     const self = this;
     const { code } = this.state;
@@ -621,7 +674,7 @@ class JSEditorUI extends React.Component {
           </Col>
         </Row>
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
             <Editor key={this.key}
                     value={code}
                     onValueChange={this.onValueChange}
@@ -755,8 +808,10 @@ let ui;
 
 const installUI = async () => {
   const filesystems = await listFilesystems();
-
-  ui = ReactDOM.render(<UI projects={[...filesystems]} width="100%" height="100%" cols={24} rowHeight={30} breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}>
+  const hash = location.hash.substring(1);
+  const [encodedProject] = hash.split('@');
+  const project = decodeURIComponent(encodedProject);
+  ui = ReactDOM.render(<UI projects={[...filesystems]} project={project} width="100%" height="100%" cols={24} rowHeight={30} breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}>
                        </UI>,
                        document.getElementById('top'));
   return ui;
