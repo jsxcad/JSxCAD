@@ -38,6 +38,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Modal from 'react-bootstrap/Modal';
 import Row from 'react-bootstrap/Row';
 import SplitButton from 'react-bootstrap/SplitButton';
 import Spinner from 'react-bootstrap/Spinner';
@@ -117,15 +118,15 @@ class UI extends React.Component {
       const [fs, op, ...args] = i.split(':');
       switch (op) {
         case 'log':
-          panes.push(<LogUI key={key} ui={this} project={fs}></LogUI>);
+          panes.push(<LogUI key={key} id={key} ui={this} project={fs}></LogUI>);
           break;
         case 'project': {
-          panes.push(<ProjectUI key={key} ui={this} project={fs}></ProjectUI>);
+          panes.push(<ProjectUI key={key} id={key} ui={this} project={fs}></ProjectUI>);
           break;
         }
         case 'editScript': {
           const [path] = args;
-          panes.push(<JSEditorUI key={key} ui={this} path={path}></JSEditorUI>);
+          panes.push(<JSEditorUI key={key} id={key} ui={this} path={path}></JSEditorUI>);
           break;
         }
         case 'editSvgPath':
@@ -133,7 +134,7 @@ class UI extends React.Component {
           break;
         case 'viewGeometry': {
           const [path] = args;
-          panes.push(<ViewUI key={key} ui={this} path={path}></ViewUI>);
+          panes.push(<ViewUI key={key} id={key} ui={this} path={path}></ViewUI>);
           break;
         }
       }
@@ -270,14 +271,17 @@ class ProjectUI extends React.Component {
     super(props);
 
     this.state = {
+      doShowDeleteProject: false,
       paths: [],
       project: '',
     };
 
     this.addFile = this.addFile.bind(this);
-    this.importProject = this.importProject.bind(this);
-    this.exportProject = this.exportProject.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
+    this.exportProject = this.exportProject.bind(this);
+    this.hideDeleteProject = this.hideDeleteProject.bind(this);
+    this.importProject = this.importProject.bind(this);
+    this.showDeleteProject = this.showDeleteProject.bind(this);
   }
 
   async componentDidMount () {
@@ -373,7 +377,7 @@ class ProjectUI extends React.Component {
   }
 
   async addFile () {
-    const file = document.getElementById('fs/file/add').value;
+    const file = document.getElementById('file/add/name').value;
     if (file.length > 0) {
       // FIX: Prevent this from overwriting existing files.
       await writeFile({}, `file/${file}`, '');
@@ -396,6 +400,14 @@ class ProjectUI extends React.Component {
     reader.readAsArrayBuffer(file);
   };
 
+  async hideDeleteProject () {
+    this.setState({ doShowDeleteProject: false });
+  }
+
+  async showDeleteProject () {
+    this.setState({ doShowDeleteProject: true });
+  }
+
   async deleteProject () {
     for (const file of await listFiles()) {
       await deleteFile({}, file);
@@ -404,7 +416,7 @@ class ProjectUI extends React.Component {
   }
 
   render () {
-    const { project } = this.state;
+    const { doShowDeleteProject, project } = this.state;
 
     return (
       <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
@@ -430,7 +442,7 @@ class ProjectUI extends React.Component {
         <Row style={{ flex: '0 0 auto' }}>
           <Col onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop} style={{ height: '100%' }}>
             <InputGroup>
-              <FormControl id="project/add/name" placeholder="File Name" />
+              <FormControl id="file/add/name" placeholder="File Name" />
               <InputGroup.Append>
                 <Button onClick={this.addFile} variant='outline-primary'>Add</Button>
               </InputGroup.Append>
@@ -451,9 +463,23 @@ class ProjectUI extends React.Component {
             <InputGroup>
               <FormControl disabled placeholder="" />
               <InputGroup.Append>
-                <Button onClick={this.deleteProject} id="project/delete/button" variant="outline-primary">Delete</Button>
+                <Button onClick={this.showDeleteProject} id="project/delete/button" variant="outline-primary">Delete</Button>
               </InputGroup.Append>
             </InputGroup>
+            <Modal show={doShowDeleteProject} onHide={this.hideDeleteProject}>
+              <Modal.Header closeButton>
+                <Modal.Title>Confirm</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>Delete the {project} project?</Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={this.deleteProject}>
+                  Delete
+                </Button>
+                <Button variant="primary" onClick={this.hideDeleteProject}>
+                  Cancel
+                </Button>
+              </Modal.Footer>
+            </Modal>
           </Col>
         </Row>
       </Container>
@@ -467,7 +493,7 @@ class ViewUI extends React.Component {
 
     this.state = {
       path: props.path,
-      containerId: `${this.key}/container`
+      containerId: `${props.id}/container`
     }
   }
 
@@ -708,7 +734,7 @@ class LogUI extends React.Component {
 
     this.state = {
       mode: 'idle',
-      viewerElementId: `${this.key}/viewer`,
+      viewerElementId: `${props.id}/viewer`,
     }
   }
 

@@ -1,4 +1,4 @@
-import { rotateX, rotateY, rotateZ, scale, multiply as transform, translate } from './ops';
+import { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
 
 import { alignVertices } from './alignVertices';
 import { assertGood } from './assertGood';
