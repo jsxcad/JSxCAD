@@ -1,6 +1,7 @@
 import { assertGood, deduplicate, flip as flipPath } from '@jsxcad/geometry-path';
 
 import { cache } from '@jsxcad/cache';
+import { makeConvex } from '@jsxcad/geometry-surface';
 import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
@@ -44,7 +45,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       buildWalls(polygons, path, lastPath);
     } else {
       if (cap) {
-        polygons.push(deduplicate(path));
+        polygons.push(...makeConvex({}, [deduplicate(path)]));
       }
     }
     lastPath = path;
@@ -53,7 +54,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
     assertGood(polygon);
   }
   if (cap) {
-    polygons.push(deduplicate(flipPath(lastPath)));
+    polygons.push(...makeConvex({}, [deduplicate(flipPath(lastPath))]));
   }
   const solid = { solid: toSolidFromPolygons({}, polygons) };
   return solid;

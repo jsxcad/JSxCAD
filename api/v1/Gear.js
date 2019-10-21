@@ -38,7 +38,7 @@ const buildTooth = ({ r, b, c, k, numberOfTeeth }) =>
                       polar(r, r < b ? k : -180 / numberOfTeeth),
                       polar(r, -181 / numberOfTeeth)]);
 
-export const profile = ({ mmPerTooth = Math.PI, numberOfTeeth = 16, teethToHide = 0, pressureAngle = 20, clearance = 0, backlash = 0 }) => {
+export const profile = ({ mmPerTooth = Math.PI, numberOfTeeth = 16, teethToHide = 0, pressureAngle = 20, clearance = 0, backlash = 0 } = {}) => {
   const pi = Math.PI;
   const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
   const c = p + mmPerTooth / pi - clearance; // radius of outer circle
