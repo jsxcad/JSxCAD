@@ -1,9 +1,10 @@
 import { assertEmpty, assertFunction, assertNumber } from './assert';
-import { buildFromFunction, buildRegularPrism } from '@jsxcad/algorithm-shape';
+import { buildFromFunction, buildFromSlices, buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
 import { dispatch } from './dispatch';
 import { distance } from '@jsxcad/math-vec3';
+import { getPaths } from '@jsxcad/geometry-tagged';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
@@ -68,8 +69,20 @@ export const betweenDiameter = (from, to, diameter, sides = 32) =>
       .above()
       .orient({ from, at: to });
 
+const toPathFromShape = (shape) => {
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    for (const path of paths) {
+      return path;
+    }
+  }
+  return [];
+};
+
 export const fromFunction = (op, resolution, cap = true, context) =>
   Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
+
+export const fromSlices = (op, slices, cap = true) =>
+  Shape.fromGeometry(buildFromSlices(slice => toPathFromShape(op(slice)), slices, cap));
 
 export const Cylinder = dispatch(
   'Cylinder',
@@ -123,6 +136,7 @@ Cylinder.fromValue = fromValue;
 Cylinder.fromRadius = fromRadius;
 Cylinder.fromDiameter = fromDiameter;
 Cylinder.fromFunction = fromFunction;
+Cylinder.fromSlices = fromSlices;
 Cylinder.between = between;
 Cylinder.betweenRadius = betweenRadius;
 Cylinder.betweenDiameter = betweenDiameter;

@@ -22,12 +22,12 @@ const fromTessellation = (tessellation) => {
 
   for (let nth = 0; nth < tessPolygons.length; nth += 3) {
     const polygon = [toPoint(nth + 0), toPoint(nth + 1), toPoint(nth + 2)];
-    if (!isNaN(toPlane(polygon)[0])) {
-      // FIX: Handle degeneracy better.
-      polygons.push(polygon);
-    } else {
+    // FIX: Handle degeneracy better.
+    if (toPlane(polygon) === undefined) {
       console.log(`QQ/fromTessellation: skip degenerate`);
       // throw Error('die');
+    } else {
+      polygons.push(polygon);
     }
   }
 
