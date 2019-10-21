@@ -59,8 +59,10 @@ import { describe } from './describe';
 import { difference } from './difference';
 // import { divide } from './divide';
 import { drop } from './drop';
+import { ease } from './ease';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
+import { flat } from './flat';
 import { front } from './front';
 // import { fuse } from './fuse';
 import { getPathsets } from './getPathsets';
@@ -135,11 +137,13 @@ const methods = [
   describe,
   // divide,
   drop,
+  ease,
   extrude,
   fillet,
   front,
   // fuse,
   getPathsets,
+  flat,
   interior,
   left,
   material,
@@ -197,6 +201,8 @@ export {
   Cursor,
   Cylinder,
   difference,
+  ease,
+  flat,
   Fastener,
   Gear,
   getClock,
