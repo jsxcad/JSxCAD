@@ -108,6 +108,7 @@ import { sin } from './sin';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
+import { stretch } from './stretch';
 import { sweep } from './sweep';
 import { tags } from './tags';
 import { toBillOfMaterial } from './toBillOfMaterial';
@@ -239,6 +240,7 @@ export {
   specify,
   Sphere,
   sqrt,
+  stretch,
   Spiral,
   Square,
   startClock,
