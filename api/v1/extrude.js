@@ -1,12 +1,13 @@
 import { assertNonZeroNumber, assertShape } from './assert';
-import { getSurfaces, getZ0Surfaces, toKeptGeometry, transform } from '@jsxcad/geometry-tagged';
+import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
-import { toPlane as toPlaneOfSurface } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
+import { transform as transformSolid } from '@jsxcad/geometry-solid';
 
 /**
  *
@@ -35,15 +36,15 @@ export const fromHeight = (shape, height = 1, steps = 1, twist = 0) => {
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
-  for (const z0SurfaceGeometry of getZ0Surfaces(keptGeometry)) {
-    const solidGeometry = extrudeAlgorithm(z0SurfaceGeometry, height, steps, twistRadians);
-    solids.push(Shape.fromGeometry(solidGeometry));
+  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
+    const solid = extrudeAlgorithm(z0Surface, height, steps, twistRadians);
+    solids.push(Shape.fromGeometry({ solid }));
   }
-  for (const surfaceGeometry of getSurfaces(keptGeometry)) {
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surfaceGeometry.surface));
-    const z0SolidGeometry = extrudeAlgorithm(toKeptGeometry(transform(toZ0, surfaceGeometry)), height, steps, twistRadians);
-    const solidGeometry = transform(fromZ0, z0SolidGeometry);
-    solids.push(Shape.fromGeometry(solidGeometry));
+  for (const { surface } of getSurfaces(keptGeometry)) {
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
+    const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, steps, twistRadians);
+    const solid = transformSolid(fromZ0, z0SolidGeometry);
+    solids.push(Shape.fromGeometry({ solid }));
   }
   if (height < 0) {
     // Turn negative extrusions inside out.

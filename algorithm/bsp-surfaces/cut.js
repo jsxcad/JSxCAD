@@ -16,3 +16,14 @@ export const cut = (solid, surface) => {
 
   return toSolidFromPolygons({}, [...trimmedSolid, ...trimmedPolygons]);
 };
+
+export const cutOpen = (solid, surface) => {
+  // Build a classifier from the planar polygon.
+  const cutBsp = toBspFromPolygons(surface);
+  const solidPolygons = toPolygonsFromSolid({}, solid);
+
+  // Classify the solid with it.
+  const trimmedSolid = removeExteriorPolygons(cutBsp, solidPolygons);
+
+  return toSolidFromPolygons({}, trimmedSolid);
+};
