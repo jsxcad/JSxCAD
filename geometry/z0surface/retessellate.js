@@ -444,5 +444,7 @@ export const retessellate = (sourcePolygons) => {
     }
     previousPolygonRow = buildOutputPolygons({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons });
   }
-  return destinationPolygons.map(polygon => polygon.map(([x, y]) => [x, y, 0]));
+  return destinationPolygons
+           .filter(polygon => polygon.length >= 3)
+           .map(polygon => polygon.map(([x, y]) => [x, y, 0]));
 };
