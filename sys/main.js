@@ -1,4 +1,5 @@
 import { addSource, getSources } from './source';
+import { ask, setHandleAskUser } from './ask';
 import { getFilesystem, setupFilesystem } from './filesystem';
 import { listFiles, listFilesystems } from './listFiles';
 import { log, unwatchLog, watchLog } from './log';
@@ -13,11 +14,13 @@ import { writeFile } from './writeFile';
 
 export {
   addSource,
+  ask,
   createService,
   conversation,
   deleteFile,
   getFilesystem,
   getSources,
+  setHandleAskUser,
   listFiles,
   listFilesystems,
   log,

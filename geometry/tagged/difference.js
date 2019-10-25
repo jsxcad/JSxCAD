@@ -2,6 +2,7 @@ import { cache } from '@jsxcad/cache';
 import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
+import { getPoints } from './getPoints';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
@@ -50,7 +51,11 @@ const differenceImpl = (baseGeometry, ...geometries) => {
   for (const item of getItems(baseGeometry)) {
     result.disjointAssembly.push(item);
   }
-  // FIX: Surfaces, Paths, etc.
+  // Points
+  for (const points of getPoints(baseGeometry)) {
+    // FIX: Actually subtract points.
+    result.disjointAssembly.push(points);
+  }
   return result;
 };
 

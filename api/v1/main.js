@@ -46,6 +46,7 @@ import { Z } from './Z';
 import { above } from './above';
 import { acos } from './acos';
 import { as } from './as';
+import { ask } from './ask';
 import { assemble } from './assemble';
 import { back } from './back';
 import { below } from './below';
@@ -191,6 +192,7 @@ if (methods.includes(undefined)) {
 export {
   Shape,
   acos,
+  ask,
   Armature,
   assemble,
   Board,
