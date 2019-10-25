@@ -391,6 +391,7 @@ class ProjectUI extends React.Component {
     };
 
     this.addFile = this.addFile.bind(this);
+    this.copyProject = this.copyProject.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.exportProject = this.exportProject.bind(this);
     this.hideDeleteProject = this.hideDeleteProject.bind(this);
@@ -500,7 +501,7 @@ class ProjectUI extends React.Component {
 
   async exportProject () {
     const zip = await toZipFromFilesystem();
-    const blob = new Blob([data.buffer], { type: 'application/zip' });
+    const blob = new Blob([zip.buffer], { type: 'application/zip' });
     saveAs(blob, getFilesystem());
   };
 
@@ -527,6 +528,14 @@ class ProjectUI extends React.Component {
       await deleteFile({}, file);
     }
     this.props.ui.closeProject();
+  }
+
+  async copyProject () {
+    const newProject = document.getElementById('project/copy/name').value;
+    for (const file of await listFiles()) {
+      const data = await readFile({ as: 'bytes' }, file);
+      await writeFile({ as: 'bytes', project: newProject }, file, data);
+    }
   }
 
   render () {
@@ -572,6 +581,12 @@ class ProjectUI extends React.Component {
               <FormControl disabled placeholder="" />
               <InputGroup.Append>
                 <Button onClick={this.clickImportProject} id="project/import/button" variant="outline-primary">Import</Button>
+              </InputGroup.Append>
+            </InputGroup>
+            <InputGroup>
+              <FormControl id="project/copy/name" placeholder="New Project" />
+              <InputGroup.Append>
+                <Button onClick={this.copyProject} variant='outline-primary'>Copy</Button>
               </InputGroup.Append>
             </InputGroup>
             <InputGroup>

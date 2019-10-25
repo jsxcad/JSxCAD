@@ -37,14 +37,18 @@ export const fromHeight = (shape, height = 1, steps = 1, twist = 0) => {
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
   for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    const solid = extrudeAlgorithm(z0Surface, height, steps, twistRadians);
-    solids.push(Shape.fromGeometry({ solid }));
+    if (z0Surface.length > 0) {
+      const solid = extrudeAlgorithm(z0Surface, height, steps, twistRadians);
+      solids.push(Shape.fromGeometry({ solid }));
+    }
   }
   for (const { surface } of getSurfaces(keptGeometry)) {
-    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
-    const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, steps, twistRadians);
-    const solid = transformSolid(fromZ0, z0SolidGeometry);
-    solids.push(Shape.fromGeometry({ solid }));
+    if (surface.length > 0) {
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
+      const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, steps, twistRadians);
+      const solid = transformSolid(fromZ0, z0SolidGeometry);
+      solids.push(Shape.fromGeometry({ solid }));
+    }
   }
   if (height < 0) {
     // Turn negative extrusions inside out.
