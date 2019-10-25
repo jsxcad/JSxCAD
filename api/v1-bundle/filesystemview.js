@@ -8,7 +8,7 @@ import 'codemirror/mode/javascript/javascript.js';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
-import { createService, deleteFile, getFilesystem, listFiles, listFilesystems, log, readFile, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, watchFile, watchLog, watchFileCreation, watchFileDeletion, writeFile } from '@jsxcad/sys';
+import { ask as askSys, createService, deleteFile, getFilesystem, listFiles, listFilesystems, log, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, watchFile, watchLog, watchFileCreation, watchFileDeletion, writeFile } from '@jsxcad/sys';
 import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import { UnControlled as CodeMirror } from 'react-codemirror2';
@@ -66,6 +66,7 @@ class UI extends React.Component {
     super(props);
 
     this.state = {
+      parameters: [],
       projects: this.props.projects,
       layout: [],
       panes: [],
@@ -74,6 +75,7 @@ class UI extends React.Component {
     };
 
     this.addLayout = this.addLayout.bind(this);
+    this.askUser = this.askUser.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
     this.addProject = this.addProject.bind(this);
 
@@ -88,6 +90,7 @@ class UI extends React.Component {
     const creationWatcher = watchFileCreation(fileUpdater);
     const deletionWatcher = watchFileDeletion(fileUpdater);
     this.setState({ creationWatcher, deletionWatcher });
+    setHandleAskUser(this.askUser);
 
     if (project) {
       await this.selectProject(project);
@@ -99,6 +102,20 @@ class UI extends React.Component {
 
     unwatchFileCreation(creationWatcher);
     unwatchFileDeletion(deletionWatcher);
+  }
+
+  async askUser (identifier, options) {
+    const { panes, parameters, project } = this.state;
+
+    for (const parameter of parameters) {
+      if (parameter.identifier === identifier) {
+        return parameter.value;
+      }
+    }
+
+    this.removePaneByKey(`${project}:parameters`);
+    this.setState({ parameters: [...parameters, { identifier, options }] });
+    this.addLayout({ x: 2, y: 0, w: 5, h: 5, i: `${project}:parameters` });
   }
 
   async addLayout (paneLayout) {
@@ -120,10 +137,18 @@ class UI extends React.Component {
         case 'log':
           panes.push(<LogUI key={key} id={key} ui={this} project={fs}></LogUI>);
           break;
-        case 'project': {
-          panes.push(<ProjectUI key={key} id={key} ui={this} project={fs}></ProjectUI>);
+        case 'parameters': {
+          const self = this;
+          const { parameters } = this.state;
+
+          const onChange = (parameters) => this.setState({ parameters });
+
+          panes.push(<ParameterUI key={key} id={key} ui={this} project={fs} parameters={parameters} onChange={onChange}></ParameterUI>);
           break;
         }
+        case 'project':
+          panes.push(<ProjectUI key={key} id={key} ui={this} project={fs}></ProjectUI>);
+          break;
         case 'editScript': {
           const [path] = args;
           panes.push(<JSEditorUI key={key} id={key} ui={this} path={path}></JSEditorUI>);
@@ -202,6 +227,16 @@ class UI extends React.Component {
     this.setState({ panes });
   }
 
+  removePaneByKey (key) {
+    const { panes} = this.state;
+
+    for (const pane of panes) {
+      if (pane.key === key) {
+        this.removePane(pane);
+      }
+    }
+  }
+
   showPane (pane) {
     if (pane.props.setup) {
       setTimeout(pane.props.setup, 100);
@@ -223,7 +258,7 @@ class UI extends React.Component {
 
   render () {
     const self = this;
-    const { project } = this.state;
+    const { ask, project } = this.state;
     const { cols, rowHeight } = this.props;
     const prefix = `${project}:`;
 
@@ -265,6 +300,85 @@ class UI extends React.Component {
     );
   }
 };
+
+class ParameterUI extends React.Component {
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      parameters: this.props.parameters,
+      project: this.props.project,
+      ui: this.props.ui,
+      onChange: this.props.onChange,
+    };
+
+    this.renderParameter = this.renderParameter.bind(this);
+  }
+
+  updateParameterValue (newParameter, event) {
+    const { onChange, parameters } = this.state;
+    const value = event.target.value;
+
+    const updated = [];
+
+    for (const oldParameter of parameters) {
+      if (oldParameter.identifier === newParameter.identifier) {
+        updated.push({ ...oldParameter, value });
+      } else {
+        updated.push(oldParameter);
+      }
+    }
+
+    this.setState({ parameters: updated });
+
+    if (onChange) {
+      onChange(updated);
+    }
+  }
+
+  renderParameter (parameter) {
+    const self = this;
+    const { identifier, prompt, value = '' } = parameter;
+    const { project } = this.state;
+    const id = `parameter/${project}/${identifier}`;
+
+    const onChange = (event) => self.updateParameterValue(parameter, event);
+
+    return (
+      <InputGroup key={id}>
+        <InputGroup.Prepend>
+          <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
+        </InputGroup.Prepend>
+        <FormControl key={id} id={id} placeholder={value} onChange={onChange}/>
+      </InputGroup>
+    );
+  }
+
+  stop (e) {
+    e.stopPropagation();
+  }
+
+  render () {
+    const { parameters } = this.state;
+
+    return (
+      <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+        <Row style={{ flex: '0 0 auto' }}>
+          <Col>
+            <Card.Title>Parameters</Card.Title>
+          </Col>
+        </Row>
+        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
+          <Col>
+            <InputGroup>
+              {parameters.map(this.renderParameter)}
+            </InputGroup>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+}
 
 class ProjectUI extends React.Component {
   constructor (props) {
@@ -843,278 +957,10 @@ const installUI = async () => {
   return ui;
 }
 
-const displayProjectsEntry = (project, index) => {
-  const deleteProject = async () => {
-                          setupFilesystem({ fileBase: project });
-                          for (const file of await listFiles()) {
-                            await deleteFile({}, file);
-                          }
-                          ui.dropKeys(['projects', 'project']);
-                          setupFilesystem({ fileBase: '' });
-                          await displayProjects();
-                        };
-
-  const selectProject = async () => {
-                          setupFilesystem({ fileBase: project });
-                          ui.keepKeys(['projects', 'project']);
-                          const layoutsData = await readFile({}, 'ui/layout');
-                          if (layoutsData !== undefined) {
-                            const layouts = JSON.parse(layoutsData);
-                            await ui.restoreLayout(layouts);
-                          }
-                          await displayProject(project);
-                        };
-  return (
-    <tr key={index}>
-      <td>
-        <SplitButton size="sm" id="dropdown-basic-button" title={project} variant="outline-primary" onClick={selectProject}>
-          <Dropdown.Item onClick={deleteProject}>Delete</Dropdown.Item>
-        </SplitButton>
-      </td>
-    </tr>
-  );
-};
-
-const displayProjects = async () => {
-  const stop = (e) => e.stopPropagation();
-
-  return await (
-    <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-      <Row style={{ flex: '0 0 auto' }}>
-        <Col>
-          <Card.Title>Projects</Card.Title>
-        </Col>
-      </Row>
-      <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
-        <Col>
-          <Table size='sm'>
-            <tbody>
-              {(await listFilesystems()).map(displayProjectsEntry)}
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
-      <Row style={{ flex: '0 0 auto' }}>
-        <Col>
-          <Card.Title>Actions</Card.Title>
-        </Col>
-      </Row>
-      <Row style={{ flex: '0 0 auto' }}>
-        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop} style={{ height: '100%' }}>
-          <InputGroup>
-            <InputGroup.Prepend>
-              <Button onClick={newProject} id="projects/new" variant='outline-primary'>New Project</Button>
-            </InputGroup.Prepend>
-            <FormControl id="projects/new/name" placeholder="Project Name" />
-          </InputGroup>
-        </Col>
-      </Row>
-    </Container>
-  );
-
-  // ui.addItem(projects, { key: 'projects', width: 2, height: 3, removeable: false });
-};
-
-// FIX: Rename as log.
-const viewLog = async (key) => {
-  // ui.addItem(log, { key, x: 2, width: 5, height: 1, removeable: false });
-
-  let watcher;
-
-  const setup = () => {
-    const viewerElement = document.getElementById('log');
-    if (viewerElement === null) {
-      setTimeout(setup, 100);
-      return;
-    }
-    watcher = watchLog((entry) => {
-                         const div = viewerElement.appendChild(document.createElement('div'));
-                         div.appendChild(document.createTextNode(entry));
-                         div.style.cssText = 'border: 1px solid black; border-radius: 4px; padding: 2px; width: 100%';
-                         viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
-                       });
-  }
-
-  const shutdown = () => {
-    if (watcher) {
-      unwatchLog(watcher);
-    }
-  }
-
-  const setupOnce = once(setup);
-  const shutdownOnce = once(shutdown);
-
-  const log = await (
-    <Container key={key} setup={setupOnce} shutdown={shutdownOnce} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-      <Row style={{ flex: '0 0 auto' }}>
-        <Col>
-          <Card.Title>Log</Card.Title>
-        </Col>
-      </Row>
-      <Row style={{ flex: '1 1 auto', height: '100%', overflow: 'auto' }}>
-        <div id='log' style={{ paddingLeft: '20px', width: '100%' }}></div>
-      </Row>
-    </Container>
-  );
-
-  return log;
-}
-
-const viewGeometry = async (key, path) => {
-  const containerId = `${key}/container`
-  let isSetup = false;
-
-  let watcher;
-
-  const setup = async () => {
-    const container = document.getElementById(containerId);
-
-    if (container === null) {
-      setTimeout(setup, 100);
-      return;
-    }
-
-    const view = { target: [0, 0, 0], position: [0, 0, 200], up: [0, 1, 0] };
-    let datasets = [];
-    let threejsGeometry;
-    let width = container.offsetWidth;
-    let height = container.offsetHeight;
-    const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
-    const { gui } = buildGui({ viewerElement });
-    const hudContext = hudCanvas.getContext('2d');
-    const render = () => renderer.render(scene, camera);
-    const updateHud = () => {
-      hudContext.clearRect(0, 0, width, height);
-      drawHud({ camera, datasets, threejsGeometry, hudCanvas });
-      hudContext.fillStyle = '#FF0000';
-    };
-
-    container.appendChild(viewerElement);
-
-    const animate = () => {
-      updateHud();
-      render();
-    };
-
-    const { trackball } = buildTrackballControls({ camera, render: animate, view, viewerElement });
-
-    const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
-
-    resize();
-    new ResizeObserver(() => {
-      ({ width, height } = resize());
-      hudCanvas.width = width;
-      hudCanvas.height = height;
-    })
-        .observe(container);
-
-    const track = () => {
-      animate();
-      trackball.update();
-      window.requestAnimationFrame(track);
-    };
-
-    track();
-
-    const geometryPath = `geometry/${path}`;
-
-    const updateGeometry = (geometry) => {
-      if (geometry !== undefined) {
-        // Delete any previous dataset in the window.
-        const controllers = new Set();
-        for (const { controller, mesh } of datasets) {
-          if (controller) {
-            controllers.add(controller);
-          }
-          scene.remove(mesh);
-        }
-        for (const controller of controllers) {
-          gui.remove(controller.ui);
-        }
-
-        threejsGeometry = toThreejsGeometry(geometry);
-
-        // Build new datasets from the written data, and display them.
-        datasets = [];
-
-        buildMeshes({ datasets, threejsGeometry, scene });
-        buildGuiControls({ datasets, gui });
-      }
-    };
-
-    const json = await readFile({}, geometryPath);
-    if (json !== undefined) {
-      updateGeometry(JSON.parse(json));
-    }
-
-    watcher = watchFile(geometryPath,
-                        async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
-  }
-
-  const shutdown = () => {
-    if (watcher) {
-      unwatchFile(watcher);
-    }
-  }
-
-  const setupOnce = once(setup);
-  const shutdownOnce = once(shutdown);
-
-  const viewer = await (
-    <Card key={key} style={{ height: '100%', overflow: 'hidden', display: 'block'}} setup={setupOnce} shutdown={shutdownOnce}>
-      <Card.Body style={{ height: '100%', width: '100%', overflow: 'hidden', display: 'block'}}>
-        <Card.Title>View: {path}</Card.Title>
-        <div id={containerId}></div>
-      </Card.Body>
-    </Card>
-  );
-
-  return viewer;
-};
-
 const downloadFile = async (path) => {
   const data = await readFile({ as: 'bytes' }, path);
   const blob = new Blob([data.buffer], { type: 'application/zip' });
   saveAs(blob, path.split('/').pop());
-};
-
-const newFile = async () => {
-  const file = document.getElementById('project/new/name').value;
-  if (file.length > 0) {
-    // FIX: Prevent this from overwriting existing files.
-    await writeFile({}, `file/${file}`, '').then(_ => _).catch(_ => _);
-  }
-};
-
-const newProject = async () => {
-  const filesystem = document.getElementById('projects/new/name').value;
-  if (filesystem.length > 0) {
-    // FIX: Prevent this from overwriting existing filesystems.
-    setupFilesystem({ fileBase: filesystem });
-    await writeFile({}, 'file/script.jsx', defaultScript);
-    ui.dropKeys(['projects']);
-    await displayProjects();
-    await switchFilesystemview(filesystem);
-  }
-};
-
-const exportProject = async (path) => {
-  const file = document.getElementById('project/export/name').value;
-  const data = await toZipFromFilesystem();
-  const blob = new Blob([data.buffer], { type: 'application/zip' });
-  saveAs(blob, getFilesystem());
-};
-
-const importProject = async (e) => {
-  const file = document.getElementById('project/import').files[0];
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const zip = e.target.result;
-    fromZipToFilesystem({}, zip)
-      .then(_ => ui.dropKeys(['project']))
-      .then(_ => displayProject());
-  };
-  reader.readAsArrayBuffer(file);
 };
 
 let ask;
@@ -1122,7 +968,10 @@ let ask;
 const getAsk = async () => {
   if (ask === undefined) {
     const agent = async ({ ask, question }) => {
-      if (question.readFile) {
+      if (question.ask) {
+        const { identifier, options } = question.ask;
+        return askSys(identifier, options);
+      } else if (question.readFile) {
         const { options, path } = question.readFile;
         return readFile(options, path);
       } else if (question.writeFile) {
@@ -1144,7 +993,6 @@ const getAsk = async () => {
 }
 
 const runScript = async (path, ui) => {
-  // await viewLog();
   const project = getFilesystem();
   await ui.addLayout({ x: 2, y: 5, w: 5, h: 3, i: `${project}:log` });
   const ask = await getAsk();
@@ -1228,7 +1076,4 @@ export const installFilesystemview = async ({ document, project }) => {
     await setupFilesystem({ fileBase: project });
   }
   await installUI();
-  // await displayProjects();
-  // watchFileCreation(async () => { if (projectOpen) { ui.dropKeys(['project']); await displayProject(); } });
-  // watchFileDeletion(async () => { if (projectOpen) { ui.dropKeys(['project']); await displayProject(); } });
 };
