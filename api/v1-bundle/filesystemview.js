@@ -338,20 +338,34 @@ class ParameterUI extends React.Component {
 
   renderParameter (parameter) {
     const self = this;
-    const { identifier, prompt, value = '' } = parameter;
+    const { identifier, options, value = '' } = parameter;
+    const { choices, prompt } = options;
     const { project } = this.state;
     const id = `parameter/${project}/${identifier}`;
 
     const onChange = (event) => self.updateParameterValue(parameter, event);
 
-    return (
-      <InputGroup key={id}>
-        <InputGroup.Prepend>
-          <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
-        </InputGroup.Prepend>
-        <FormControl key={id} id={id} placeholder={value} onChange={onChange}/>
-      </InputGroup>
-    );
+    if (choices) {
+      return (
+        <InputGroup key={id}>
+          <InputGroup.Prepend>
+            <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
+          </InputGroup.Prepend>
+          <FormControl as="select" key={id} id={id} placeholder={value} onChange={onChange}>
+            {choices.map(choice => <option>{choice}</option>)}
+          </FormControl>
+        </InputGroup>
+      );
+    } else {
+      return (
+        <InputGroup key={id}>
+          <InputGroup.Prepend>
+            <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
+          </InputGroup.Prepend>
+          <FormControl key={id} id={id} placeholder={value} onChange={onChange}/>
+        </InputGroup>
+      );
+    }
   }
 
   stop (e) {
