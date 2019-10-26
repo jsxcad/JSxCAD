@@ -298,6 +298,20 @@ class UI extends React.Component {
                       </span>
                     </div>)}
         </GridLayout>
+        <Mosaic
+          renderTile={(count, path) => (
+                       <MosaicWindow
+                         title={`Window ${count}`}
+                         path={path}>
+                         <div>
+                         </div>
+                       </MosaicWindow>
+                     )}
+          zeroStateView={<MosaicZeroState createNode={this.createNode}/>}
+          value={this.state.currentNode}
+          onChange={this.onChange}
+          onRelease={this.onRelease}>
+        </Mosaic>
       </div>
     );
   }
