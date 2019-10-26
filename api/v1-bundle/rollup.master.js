@@ -49,7 +49,9 @@ export default {
           'fs': 'export const promises = {};',
           'node-fetch': 'export default {};',
           'os': '',
-          'tty': ''
+          'tty': '',
+          '@blueprintjs/core': '',
+          '@blueprintjs/icons': '',
         }
       }),
     nodeResolve({ jsnext: true, preferBuiltins: true })
