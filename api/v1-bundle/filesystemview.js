@@ -45,6 +45,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Table from 'react-bootstrap/Table';
 
+import { Mosaic, MosaicZeroState } from 'react-mosaic-component';
+
 import Editor from 'react-simple-code-editor';
 
 import Drawer from 'rc-drawer';
