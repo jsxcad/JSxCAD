@@ -74,6 +74,16 @@ class UI extends React.Component {
       panes: [],
       project: this.props.project,
       build: 0,
+      currentNode: {
+        direction: 'row',
+        first: 1,
+        second: {
+          direction: 'column',
+          first: 2,
+          second: 3,
+        },
+        splitPercentage: 40,
+      },
     };
 
     this.addLayout = this.addLayout.bind(this);
@@ -256,6 +266,17 @@ class UI extends React.Component {
       }
     }
     return { x: 0, y: 0, w: 2, h: 2, i: pane.key };
+  }
+
+  createNode () {
+    windowCount += 1;
+  }
+
+  onChange (currentNode) {
+    this.setState({ currentNode });
+  }
+
+  onRelease (currentNode) {
   }
 
   render () {
