@@ -35,7 +35,7 @@ export default {
                 rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
               }
               return rnds;
-            }`,
+            }`
         }
       }),
     loadz0r(),

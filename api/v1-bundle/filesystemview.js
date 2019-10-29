@@ -2,8 +2,8 @@
 
 Error.stackTraceLimit = Infinity;
 
-import './codemirror-global';
-import 'codemirror/mode/javascript/javascript.js';
+// import './codemirror-global';
+// import 'codemirror/mode/javascript/javascript.js';
 
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
@@ -15,7 +15,6 @@ import { UnControlled as CodeMirror } from 'react-codemirror2';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SvgPathEditor from './SvgPathEditor';
-import { jsPanel } from 'jspanel4';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 import Recollect from 'react-recollect';
@@ -44,8 +43,9 @@ import SplitButton from 'react-bootstrap/SplitButton';
 import Spinner from 'react-bootstrap/Spinner';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Table from 'react-bootstrap/Table';
+import Toast from 'react-bootstrap/Toast';
 
-import { Mosaic, MosaicWindow, MosaicZeroState } from 'react-mosaic-component';
+import { Mosaic, MosaicWindow, MosaicZeroState, RemoveButton as MosaicRemoveButton, SplitButton as MosaicSplitButton } from 'react-mosaic-component';
 
 import Editor from 'react-simple-code-editor';
 
@@ -63,18 +63,8 @@ const once = (op) => {
   return guard;
 }
 
-class UI extends React.Component {
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      parameters: [],
-      projects: this.props.projects,
-      layout: [],
-      panes: [],
-      project: this.props.project,
-      build: 0,
-      currentNode: {
+/*
+      paneLayout: {
         direction: 'row',
         first: 1,
         second: {
@@ -84,12 +74,36 @@ class UI extends React.Component {
         },
         splitPercentage: 40,
       },
+*/
+
+class UI extends React.Component {
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      atLeft: false,
+      isLogOpen: false,
+      isParametersOpen: false,
+      log: [],
+      parameters: [],
+      projects: this.props.projects,
+      layout: [],
+      panes: [],
+      project: this.props.project,
+      files: [],
+      build: 0,
+      paneLayout: 0,
+      paneViews: [],
+      toast: [],
     };
 
-    this.addLayout = this.addLayout.bind(this);
     this.askUser = this.askUser.bind(this);
-    this.onLayoutChange = this.onLayoutChange.bind(this);
     this.addProject = this.addProject.bind(this);
+    this.createNode = this.createNode.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.onRelease = this.onRelease.bind(this);
+    this.openLog = this.openLog.bind(this);
+    this.openParameters = this.openParameters.bind(this);
 
     this.switchingProjects = false;
   }
@@ -101,19 +115,56 @@ class UI extends React.Component {
     const fileUpdater = () => listFilesystems().then(projects => self.setState({ projects }));
     const creationWatcher = watchFileCreation(fileUpdater);
     const deletionWatcher = watchFileDeletion(fileUpdater);
-    this.setState({ creationWatcher, deletionWatcher });
+
+    const mouseWatcher = (event) => {
+                           const { atLeft } = this.state;
+                           if (event.pageX <= 5) {
+                             this.setState({ atLeft: true });
+                           } else if (event.pageX > 400 && atLeft) {
+                             this.setState({ atLeft: false });
+                           }
+                         }
+
+    document.addEventListener('mousemove', mouseWatcher, false);
+    document.addEventListener('mouseenter', mouseWatcher, false);
+
+    const logUpdater = (entry) => {
+      const { op, status } = entry;
+      switch (op) {
+        case 'clear':
+          this.setState({ log: [] });
+          return;
+        case 'open':
+          // this.openLog();
+          return;
+        default: {
+          const { log, toast } = this.state;
+          this.setState({
+            log: [...log, entry],
+            toast: [...toast, entry].filter(entry => entry.op === 'text' && entry.level === 'serious')
+          });
+          return;
+        }
+      }
+    }
+    const logWatcher = watchLog(logUpdater);
+    this.setState({ creationWatcher, deletionWatcher, mouseWatcher });
     setHandleAskUser(this.askUser);
 
     if (project) {
       await this.selectProject(project);
     }
+
   }
 
   async componentWillUnmount () {
-    const { creationWatcher, deletionWatcher } = this.state;
+    const { creationWatcher, deletionWatcher, mouseWatcher } = this.state;
 
     unwatchFileCreation(creationWatcher);
     unwatchFileDeletion(deletionWatcher);
+
+    document.removeEventListener('mousemove', mouseWatcher);
+    document.removeEventListener('mouseenter', mouseWatcher);
   }
 
   async askUser (identifier, options) {
@@ -127,57 +178,10 @@ class UI extends React.Component {
 
     this.removePaneByKey(`${project}:parameters`);
     this.setState({ parameters: [...parameters, { identifier, options }] });
-    this.addLayout({ x: 2, y: 0, w: 5, h: 5, i: `${project}:parameters` });
   }
 
-  async addLayout (paneLayout) {
-    if (!this.state.layout.some(entry => entry.i === paneLayout.i)) {
-      const layout = [...this.state.layout, paneLayout];
-      this.setState({ layout });
-      return this.buildPanes(layout);
-    }
-  }
-
-  async buildPanes (layout) {
-    const panes = [];
-    const build = this.state.build + 1;
-
-    for (const { i } of layout) {
-      const key = i;
-      const [fs, op, ...args] = i.split(':');
-      switch (op) {
-        case 'log':
-          panes.push(<LogUI key={key} id={key} ui={this} project={fs}></LogUI>);
-          break;
-        case 'parameters': {
-          const self = this;
-          const { parameters } = this.state;
-
-          const onChange = (parameters) => this.setState({ parameters });
-
-          panes.push(<ParameterUI key={key} id={key} ui={this} project={fs} parameters={parameters} onChange={onChange}></ParameterUI>);
-          break;
-        }
-        case 'project':
-          panes.push(<ProjectUI key={key} id={key} ui={this} project={fs}></ProjectUI>);
-          break;
-        case 'editScript': {
-          const [path] = args;
-          panes.push(<JSEditorUI key={key} id={key} ui={this} path={path}></JSEditorUI>);
-          break;
-        }
-        case 'editSvgPath':
-          panes.push(await editSvgPath(key, ...args));
-          break;
-        case 'viewGeometry': {
-          const [path] = args;
-          panes.push(<ViewUI key={key} id={key} ui={this} path={path}></ViewUI>);
-          break;
-        }
-      }
-    }
-
-    this.setState({ build, panes });
+  updateParameters (parameters) {
+    this.setState({ parameters });
   }
 
   async addProject () {
@@ -194,41 +198,30 @@ class UI extends React.Component {
     setupFilesystem({ fileBase: project });
     const encodedProject = encodeURIComponent(project);
     history.pushState(null, null, `#${encodedProject}`);
-    const layoutData = await readFile({}, 'ui/layout');
-    let layout;
-    if (layoutData !== undefined) {
-      layout = JSON.parse(layoutData);
-      if (layout.length) {
-        for (const entry of layout) {
-          if (entry === undefined) {
-            throw Error('die');
-          }
-        }
-      }
+    const paneLayoutData = await readFile({}, 'ui/paneLayout');
+    let paneLayout;
+    if (paneLayoutData !== undefined) {
+      paneLayout = JSON.parse(paneLayoutData);
     } else {
-      layout = [];
+      paneLayout = 0;
     }
 
-    // FIX: Remove patch.
-    layout = layout.filter(entry => entry.i.startsWith(`${project}:`));
-
-    if (!layout.some(entry => entry.i === `${project}:project`)) {
-      layout.push({ x: 0, y: 0, w: 2, h: 5, i: `${project}:project` });
+    const paneViewsData = await readFile({}, 'ui/paneViews');
+    let paneViews;
+    if (paneViewsData !== undefined) {
+      paneViews = JSON.parse(paneViewsData);
+    } else {
+      paneViews = [];
     }
+
     this.switchingProjects = true;
-    this.setState({ layout, project });
+    const files = [...await listFiles()];
+    this.setState({ paneLayout, paneViews, project, files: [...await listFiles()] });
     this.switchingProjects = false;
-    await this.buildPanes(layout);
   };
 
   closeProject () {
     this.setState({ project: '' });
-  }
-
-  async onLayoutChange (layout) {
-    if (this.switchingProjects) { return; }
-    this.setState({ layout });
-    await writeFile({}, 'ui/layout', JSON.stringify(layout));
   }
 
   removePane (pane) {
@@ -269,25 +262,178 @@ class UI extends React.Component {
   }
 
   createNode () {
-    windowCount += 1;
+    const { paneLayout } = this.state;
+
+    const ids = new Set();
+
+    const walk = (node) => {
+      if (node === undefined) {
+        return;
+      }
+
+      if (typeof node === 'number') {
+        ids.add(node);
+        return;
+      }
+
+      walk(node.first);
+      walk(node.second);
+    }
+
+    walk(paneLayout);
+
+    for (let id = 0; ; id++) {
+      if (!ids.has(id)) {
+        return id;
+      }
+    }
   }
 
-  onChange (currentNode) {
-    this.setState({ currentNode });
+  async onChange (paneLayout) {
+    this.setState({ paneLayout });
+    console.log(`QQ/onChange/paneLayout: ${JSON.stringify(paneLayout)}`);
+    await writeFile({}, 'ui/paneLayout', JSON.stringify(paneLayout));
   }
 
-  onRelease (currentNode) {
+  onRelease (paneLayout) {
+  }
+
+  buildViews (files) {
+    const views = [];
+
+    for (const file of files) {
+      if (file.startsWith('geometry/')) {
+        views.push({ view: 'geometry', file, title: `View ${file.substring(9)}` });
+      }
+      if (file.startsWith('file/') && file.endsWith('.jsx')) {
+        views.push({ view: 'editScript', file, title: `Edit ${file.substring(5)}` });
+      }
+      if (file.startsWith('file/') && file.endsWith('.svp')) {
+        views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(5)}` });
+      }
+    }
+
+    views.push({ view: 'log', title: 'Log' });
+
+    views.push({ view: 'files', title: 'Files' });
+
+    views.push({ view: 'project', title: 'Project' });
+
+    return views;
+  }
+
+  getPaneView (queryId) {
+    const { paneViews } = this.state;
+
+    for (const [id, view] of paneViews) {
+      if (id === queryId) {
+        return view;
+      }
+    }
+
+    return {};
+  }
+
+  async setPaneView (queryId, newView) {
+    console.log(`QQ/setPaneView/queryId: ${queryId}`);
+    console.log(`QQ/setPaneView/newView: ${newView}`);
+    const { paneViews } = this.state;
+    const newPaneViews = []
+    let found = false;
+
+    for (const [paneId, view] of paneViews) {
+      if (paneId === queryId) {
+        newPaneViews.push([paneId, newView]);
+        found = true;
+      } else {
+        newPaneViews.push([paneId, view]);
+      }
+    }
+
+    if (!found) {
+      newPaneViews.push([queryId, newView]);
+    }
+
+    this.setState({ paneViews: newPaneViews });
+
+    await writeFile({}, 'ui/paneViews', JSON.stringify(newPaneViews));
+  }
+
+  renderView (id) {
+    const { view, file } = this.getPaneView(id);
+
+    switch (view) {
+      case 'geometry':
+        return <ViewUI key={id} id={id} file={file}/>;
+      case 'editScript':
+        return <JSEditorUI key={id} id={id} file={file}/>;
+      case 'files':
+        return <FilesUI key={id} id={id}/>;
+      case 'project':
+        return <ProjectUI key={id} id={id} ui={this}/>;
+      case 'log': {
+        const { log } = this.state;
+        return <LogUI key={id} id={id} log={log}/>;
+      }
+    }
+  }
+
+  openLog () {
+    this.setState({ isLogOpen: true });
+  }
+
+  openParameters () {
+    this.setState({ isParametersOpen: true });
   }
 
   render () {
     const self = this;
-    const { ask, project } = this.state;
-    const { cols, rowHeight } = this.props;
+    const { atLeft, ask, project, files, isLogOpen, isParametersOpen, log, parameters, toast } = this.state;
+    const views = this.buildViews(files);
     const prefix = `${project}:`;
+
+    const logPane = isLogOpen
+      ? <Alert key="log" variant="info" dismissible style={{ zIndex: 997, position: 'absolute', width: '100%', height: '100%' }} onClose={() => this.setState({ isLogOpen: false })}>
+          <Alert.Heading>Log</Alert.Heading>
+          { log.map(({ op, text, status }, index) => (op === 'text' ? <Alert key={index} variant="warning">{text}</Alert> : [])) }
+        </Alert>
+      : [];
+
+    const parametersPane = isParametersOpen
+      ?  <Alert key="parameters" variant="primary" dismissible style={{ zIndex: 998, position: 'absolute', width: '100%', height: '100%' }} onClose={() => this.setState({ isParametersOpen: false })}>
+           <Alert.Heading>Parameters</Alert.Heading>
+           <ParametersUI key="parameters" id="parameters" parameters={parameters} onChange={this.updateParameters}>
+           </ParametersUI>
+         </Alert>
+      : [];
+
+    const toasts = toast.map((entry, index) => 
+                     <Toast key={`toast/${index}`}
+                            variant="info"
+                            delay={1000}
+                            show={true}
+                            autohide
+                            onClose={() => this.setState({ toast: toast.filter(item => item !== entry) })}>
+                       {entry.text}
+                     </Toast>
+                   );
+
+    const toastDiv = toasts.length > 0
+                     ? <Alert key="toasts"
+                              variant="primary"
+                              style={{ position: 'absolute', zIndex: 1000, top: 0, left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
+                         {toasts}
+                       </Alert>
+                     : [];
+
+    const drawerOpen = (project === '' || atLeft) ? true : undefined;
 
     return (
       <div>
-        <Drawer width="20vw" placement="left" open={project === '' ? true : undefined} defaultOpen={project === '' ? true: undefined}>
+        {toastDiv}
+        {parametersPane}
+        {logPane}
+        <Drawer key="drawer" width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
           <InputGroup>
             <FormControl id="project/add/name" placeholder="Project Name" />
             <InputGroup.Append>
@@ -304,48 +450,41 @@ class UI extends React.Component {
                       </Button>)}
           </ButtonGroup>
         </Drawer>
-        <GridLayout onLayoutChange={this.onLayoutChange}
-                    compactType={'vertical'}
-                    width="100%" height="100%" cols={cols} rowHeight={rowHeight}
-                    layout={this.state.layout}>
-          {this.state
-               .panes
-               .filter(pane => pane.key.startsWith(prefix))
-               .map(pane =>
-                    <div key={pane.key} style={{ display: 'block' }} data-grid={this.toLayoutEntry(pane)}>
-                      {this.showPane(pane)}
-                      <span style={{position: 'absolute', right: '2px', top: 0, cursor: 'pointer'}} onClick={() => self.removePane(pane)}>
-                        &#128473;
-                      </span>
-                    </div>)}
-        </GridLayout>
         <Mosaic
-          renderTile={(count, path) => (
+          key="mosaic"
+          renderTile={(id, path) => (
                        <MosaicWindow
-                         title={`Window ${count}`}
+                         key={id}
+                         createNode={this.createNode}
+                         title={this.getPaneView(id).title}
+                         toolbarControls={[<DropdownButton key="actions" size="sm" title={'View'} variant="outline-primary">
+                                            { views.map((view, index) => <Dropdown.Item key={`select/${index}`} onClick={() => this.setPaneView(id, view)}>{view.title}</Dropdown.Item>) }
+                                           </DropdownButton>,
+                                           <MosaicSplitButton/>,
+                                           <MosaicRemoveButton/>
+                                          ]}
                          path={path}>
-                         <div>
-                         </div>
+                         {this.renderView(id)}
                        </MosaicWindow>
                      )}
           zeroStateView={<MosaicZeroState createNode={this.createNode}/>}
-          value={this.state.currentNode}
+          value={this.state.paneLayout}
           onChange={this.onChange}
-          onRelease={this.onRelease}>
+          onRelease={this.onRelease}
+          className={''}>
         </Mosaic>
       </div>
     );
   }
 };
 
-class ParameterUI extends React.Component {
+class ParametersUI extends React.Component {
   constructor (props) {
     super(props);
 
     this.state = {
       parameters: this.props.parameters,
       project: this.props.project,
-      ui: this.props.ui,
       onChange: this.props.onChange,
     };
 
@@ -400,11 +539,6 @@ class ParameterUI extends React.Component {
 
     return (
       <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <Card.Title>Parameters</Card.Title>
-          </Col>
-        </Row>
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
           <Col>
             <InputGroup>
@@ -423,11 +557,9 @@ class ProjectUI extends React.Component {
 
     this.state = {
       doShowDeleteProject: false,
-      paths: [],
       project: '',
     };
 
-    this.addFile = this.addFile.bind(this);
     this.copyProject = this.copyProject.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.exportProject = this.exportProject.bind(this);
@@ -437,87 +569,8 @@ class ProjectUI extends React.Component {
   }
 
   async componentDidMount () {
-    const self = this;
-    const paths = new Set(await listFiles());
     const project = getFilesystem();
-    const fileUpdater = () => listFiles().then(files => self.setState({ paths: new Set(files) }));
-    const creationWatcher = watchFileCreation(fileUpdater);
-    const deletionWatcher = watchFileDeletion(fileUpdater);
-    this.setState({ paths, project, creationWatcher, deletionWatcher });
-  }
-
-  async componentWillUnmount () {
-    const { creationWatcher, deletionWatcher } = this.state;
-
-    unwatchFileCreation(creationWatcher);
-    unwatchFileDeletion(deletionWatcher);
-  }
-
-  handler (action, file) {
-    const { project, ui } = this.props;
-
-    switch (action) {
-      case 'Delete':
-        return async () => deleteFile({}, `file/${file}`);
-      case 'Download':
-        return async () => downloadFile(`file/${file}`);
-      case 'Edit Script':
-        return async () => {
-          await ui.addLayout({ x: 2, y: 0, w: 5, h: 5, i: `${project}:editScript:${file}` });
-        }
-      case 'Edit SvgPath':
-        return async () => editSvgPath(file);
-      case 'Run':
-        return async () => runScript(ui, file);
-      case 'View':
-        return async () => {
-          await ui.addLayout({ x: 7, y: 0, w: 5, h: 5, i: `${project}:viewGeometry:${file}` });
-        }
-    }
-  }
-
-  buildFiles () {
-    const { paths } = this.state;
-
-    const buttons = [];
-    for (const path of paths) {
-      if (!path.startsWith('file/')) {
-        continue;
-      }
-      const file = path.substring(5);
-      const todo = [];
-
-      if (paths.has(`geometry/${file}`)) {
-        todo.push('View');
-      }
-      if (path.endsWith('.jsx')) {
-        todo.push('Edit Script');
-        todo.push('Run');
-      }
-      if (path.endsWith('.svp')) {
-        todo.push('Edit SvgPath');
-      }
-
-      todo.push('Download');
-      todo.push('Delete');
-
-      const primary = todo.shift();
-      const secondary = todo;
-
-      const doPrimary = this.handler(primary, file);
-      const doSecondary = secondary.map(action => this.handler(action, file));
-
-      buttons.push(<tr key={buttons.length}>
-                     <td>
-                       <DropdownButton size="sm" title={file} variant="outline-primary">
-                         <Dropdown.Item key={-1} onClick={doPrimary}>{primary}</Dropdown.Item>
-                         {secondary.map((label, index) =>
-                                        <Dropdown.Item key={index} onClick={doSecondary[index]}>{label}</Dropdown.Item>)}
-                       </DropdownButton>
-                     </td>
-                   </tr>);
-    }
-    return buttons;
+    this.setState({ project });
   }
 
   stop (e) {
@@ -527,14 +580,6 @@ class ProjectUI extends React.Component {
   clickImportProject () {
     document.getElementById('project/import').click();
   }
-
-  async addFile () {
-    const file = document.getElementById('file/add/name').value;
-    if (file.length > 0) {
-      // FIX: Prevent this from overwriting existing files.
-      await writeFile({}, `file/${file}`, '');
-    }
-  };
 
   async exportProject () {
     const zip = await toZipFromFilesystem();
@@ -582,31 +627,6 @@ class ProjectUI extends React.Component {
       <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
         <Row style={{ flex: '0 0 auto' }}>
           <Col>
-            <Card.Title>{project}</Card.Title>
-          </Col>
-        </Row>
-        <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
-          <Col>
-            <Table size='sm'>
-              <tbody>
-                {this.buildFiles()}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <Card.Title>Actions</Card.Title>
-          </Col>
-        </Row>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop} style={{ height: '100%' }}>
-            <InputGroup>
-              <FormControl id="file/add/name" placeholder="File Name" />
-              <InputGroup.Append>
-                <Button onClick={this.addFile} variant='outline-primary'>Add</Button>
-              </InputGroup.Append>
-            </InputGroup>
             <InputGroup>
               <FormControl id="project/export/name" placeholder="Zip Name" />
               <InputGroup.Append>
@@ -653,18 +673,87 @@ class ProjectUI extends React.Component {
   }
 };
 
+class FilesUI extends React.Component {
+  constructor (props) {
+    super(props);
+
+    this.state = {
+      files: [],
+    };
+
+    this.addFile = this.addFile.bind(this);
+  }
+
+  async componentDidMount () {
+    const files = await listFiles();
+    const fileUpdater = () => listFiles().then(files => this.setState({ files }));
+    const creationWatcher = watchFileCreation(fileUpdater);
+    const deletionWatcher = watchFileDeletion(fileUpdater);
+    this.setState({ files, creationWatcher, deletionWatcher });
+  }
+
+  async componentWillUnmount () {
+    const { creationWatcher, deletionWatcher } = this.state;
+
+    unwatchFileCreation(creationWatcher);
+    unwatchFileDeletion(deletionWatcher);
+  }
+
+  stop (e) {
+    e.stopPropagation();
+  }
+
+  async addFile () {
+    const file = document.getElementById('file/add/name').value;
+    if (file.length > 0) {
+      // FIX: Prevent this from overwriting existing files.
+      await writeFile({}, `file/${file}`, '');
+    }
+  };
+
+  buildFiles () {
+    const { files } = this.state;
+    return files.map(file =>
+                       <InputGroup key={file}>
+                         <FormControl disabled placeholder={file} />
+                         <InputGroup.Append>
+                           <Button onClick={() => deleteFile({}, file)} variant="outline-primary">Delete</Button>
+                         </InputGroup.Append>
+                       </InputGroup>
+                     );
+  }
+
+  render () {
+    return (
+      <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+        <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
+          <Col>
+            <InputGroup>
+              <FormControl id="file/add/name" placeholder="File Name" />
+              <InputGroup.Append>
+                <Button onClick={this.addFile} variant='outline-primary'>Add</Button>
+              </InputGroup.Append>
+            </InputGroup>
+            {this.buildFiles()}
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+};
+
 class ViewUI extends React.Component {
   constructor (props) {
     super(props);
 
     this.state = {
-      path: props.path,
+      file: props.file,
       containerId: `${props.id}/container`
     }
   }
 
   async componentDidMount () {
-    const { containerId, path } = this.state;
+    const { containerId, file } = this.state;
     const container = document.getElementById(containerId);
 
     const view = { target: [0, 0, 0], position: [0, 0, 200], up: [0, 1, 0] };
@@ -709,7 +798,7 @@ class ViewUI extends React.Component {
 
     track();
 
-    const geometryPath = `geometry/${path}`;
+    const geometryPath = file;
 
     const updateGeometry = (geometry) => {
       if (geometry !== undefined) {
@@ -759,7 +848,6 @@ class ViewUI extends React.Component {
     return (
       <Card key={this.key} style={{ height: '100%', overflow: 'hidden', display: 'block'}}>
         <Card.Body style={{ height: '100%', width: '100%', overflow: 'hidden', display: 'block'}}>
-          <Card.Title>View: {path}</Card.Title>
           <div id={containerId}></div>
         </Card.Body>
       </Card>
@@ -782,19 +870,19 @@ class JSEditorUI extends React.Component {
   }
 
   async run () {
-    const { path, ui } = this.props;
+    const { file, ui } = this.props;
 
     await this.save();
-    await runScript(path, ui);
+    await runScript(file, ui);
   }
 
   async save () {
     const { code } = this.state;
-    await writeFile({}, `file/${this.props.path}`, code);
+    await writeFile({}, this.props.file, code);
   }
 
   async componentDidMount () {
-    const code = await readFile({}, `file/${this.props.path}`);
+    const code = await readFile({}, this.props.file);
     this.setState({ code });
   }
 
@@ -860,11 +948,6 @@ class JSEditorUI extends React.Component {
 
     return (
       <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <Card.Title>{this.props.path}</Card.Title>
-          </Col>
-        </Row>
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
           <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
             <Editor key={this.key}
@@ -898,56 +981,7 @@ class LogUI extends React.Component {
   constructor (props) {
     super(props);
 
-    this.state = {
-      mode: 'idle',
-      viewerElementId: `${props.id}/viewer`,
-    }
-  }
-
-  async componentDidMount () {
-    const self = this;
-    const { viewerElementId } = this.state;
-
-    const viewerElement = document.getElementById(viewerElementId);
-
-    const watcher = watchLog((entry) => {
-                             switch (typeof entry) {
-                               case 'string':
-                                 const div = viewerElement.appendChild(document.createElement('div'));
-                                 div.appendChild(document.createTextNode(entry));
-                                 div.style.cssText = 'border: 1px solid black; border-radius: 4px; padding: 2px; width: 100%';
-                                 viewerElement.parentNode.scrollTop = viewerElement.parentNode.scrollHeight;
-                                 break;
-                               case 'object':
-                                 const { op, status } = entry;
-                                 switch (op) {
-                                   case 'evaluate':
-                                     switch (status) {
-                                       case 'run':
-                                         self.setState({ mode: 'run' });
-                                         break;
-                                       default:
-                                         self.setState({ mode: 'idle' });
-                                     }
-                                     break;
-                                   case 'clear':
-                                     while (viewerElement.firstChild) {
-                                       viewerElement.removeChild(viewerElement.firstChild);
-                                     }
-                                     break;
-                                 }
-                             }
-                           });
-
-    this.setState({ watcher });
-  }
-
-  componentWillUnmount = () => {
-    const { watcher } = this.state;
-
-    if (watcher) {
-      unwatchLog(watcher);
-    }
+    this.state = {}
   }
 
   render () {
@@ -958,23 +992,20 @@ class LogUI extends React.Component {
                  style={{ height: '100%', display: 'flex', flexFlow: 'column',
                           padding: '4px', border: '1px solid rgba(0,0,0,.125)',
                           borderRadius: '.25rem' }}>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <Card.Title style={{ display: 'inline-block' }}>Log</Card.Title>
-            {mode === 'run' && <Spinner animation="border" size="sm" style={{ position: 'absolute', right: '30px', top: '2px' }}><span className="sr-only">Running</span></Spinner>}
-          </Col>
-        </Row>
         <Row style={{ flex: '1 1 auto', height: '100%', overflow: 'auto' }}>
-          <div id={viewerElementId} style={{ paddingLeft: '20px', width: '100%' }}></div>
+          <Col>
+            {this.props.log.filter(entry => entry.op === 'text')
+                           .map((entry, index) =>
+                                  <div key={index} style={{ padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+                                    {entry.text}
+                                  </div>
+                                )}
+          </Col>
         </Row>
       </Container>
     );
   }
 }
-
-// const UI = Recollect.collect(UIBase);
-
-let panels = new Set();
 
 const buttonStyle = [
   `box-shadow:inset 0px 1px 0px 0px #ffffff;`,
@@ -1045,42 +1076,15 @@ const getAsk = async () => {
 }
 
 const runScript = async (path, ui) => {
+  log({ op: 'open' });
   const project = getFilesystem();
-  await ui.addLayout({ x: 2, y: 5, w: 5, h: 3, i: `${project}:log` });
   const ask = await getAsk();
-  const script = await readFile({}, `file/${path}`);
+  const script = await readFile({}, path);
   const geometry = await ask({ evaluate: script });
   if (geometry) {
-    await writeFile({}, 'file/preview', 'preview');
     await writeFile({}, 'geometry/preview', JSON.stringify(geometry));
   }
 }
-
-const editSvgPath = async (key, path) => {
-  const data = await readFile({}, `file/${path}`);
-
-  const save = async (svgpath) => writeFile({}, `file/${path}`, svgpath);
-
-  const stop = (e) => e.stopPropagation();
-
-  const editor = await (
-    <Container key={key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-      <Row style={{ flex: '0 0 auto' }}>
-        <Col>
-          <Card.Title>Edit SvgPath: {path}</Card.Title>
-        </Col>
-      </Row>
-      <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
-        <Col onMouseDown={stop} onMouseMove={stop} onMouseUp={stop}>
-          <SvgPathEditor path={data} onsave={save}/>,
-        </Col>
-      </Row>
-    </Container>
-  );
-
-  // ui.addItem(editor, { key, x: 2, width: 7, height: 5 });
-  return editor;
-};
 
 const addFile = () => {
   const file = document.getElementById('fs/file/add').value;

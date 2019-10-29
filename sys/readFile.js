@@ -69,7 +69,7 @@ const fetchSources = async (options = {}, sources) => {
     if (typeof source === 'string') {
       try {
         if (isUrlHttp(source)) {
-          log(`# Fetching ${source}`);
+          log({ op: 'text', text: `# Fetching ${source}` });
           const response = await fetchUrl(source);
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
@@ -85,7 +85,7 @@ const fetchSources = async (options = {}, sources) => {
       }
     } else if (source.url !== undefined) {
       // DEPRECATE
-      log(`# Fetching ${source.url}`);
+      log({ op: 'text', text: `# Fetching ${source.url}` });
       const response = await fetchUrl(source.url);
       if (response.ok) {
         return new Uint8Array(await response.arrayBuffer());
@@ -112,11 +112,11 @@ export const readFile = async (options, path) => {
   const { sources = [], project = getFilesystem() } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
-    log(`Read ${path} of ${project}`);
+    log({ op: 'text', text: `Read ${path} of ${project}` });
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: project });
   } else {
-    log(`Read ${path}`);
+    log({ op: 'text', text: `Read ${path}` });
   }
   const file = getFile(options, path);
   if (file.data === undefined) {
