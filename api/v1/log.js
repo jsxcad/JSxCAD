@@ -12,4 +12,4 @@ import { log as sysLog } from '@jsxcad/sys';
  *
  **/
 
-export const log = (text) => sysLog(String(text));
+export const log = (text) => sysLog({ op: 'text', text: String(text) });

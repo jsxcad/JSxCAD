@@ -15,6 +15,29 @@ export default {
   },
   external: [],
   plugins: [
+    hypothetical(
+      {
+        allowFallthrough: true,
+        files: {
+          'fs': 'export const promises = {};',
+          'node-fetch': 'export default {};',
+          'os': '',
+          'tty': '',
+          '@blueprintjs/core': '',
+          '@blueprintjs/icons': '',
+          'crypto': `
+            let rnds = new Array(16);
+            export const randomBytes = () => {
+              for (let i = 0, r; i < 16; i++) {
+                if ((i & 0x03) === 0) {
+                  r = Math.random() * 0x100000000;
+                }
+                rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+              }
+              return rnds;
+            }`
+        }
+      }),
     loadz0r(),
     builtins(),
     babel({
@@ -42,16 +65,6 @@ export default {
       }
     }),
     globals(),
-    hypothetical(
-      {
-        allowFallthrough: true,
-        files: {
-          'fs': 'export const promises = {};',
-          'node-fetch': 'export default {};',
-          'os': '',
-          'tty': ''
-        }
-      }),
     nodeResolve({ jsnext: true, preferBuiltins: true })
   ]
 };

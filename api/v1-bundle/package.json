@@ -45,7 +45,7 @@
     "react-codemirror2": "^6.0.0",
     "react-dom": ">=16.8.2",
     "react-grid-layout-fabric": "^0.16.7",
-    "react-recollect": "^3.1.2",
+    "react-mosaic-component": "^3.2.0",
     "react-simple-code-editor": "^0.10.0",
     "rc-drawer": "^3.0.0",
     "three": "^0.104.0",

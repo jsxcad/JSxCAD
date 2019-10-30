@@ -25,7 +25,7 @@ export const writeFile = async (options, path, data) => {
   const { as = 'utf8', ephemeral, project = getFilesystem() } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
-    log(`Write ${path} of ${project}`);
+    log({ op: 'text', text: `Write ${path} of ${project}` });
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: project });
   }
@@ -34,7 +34,7 @@ export const writeFile = async (options, path, data) => {
     data = new TextEncoder(as).encode(data);
   }
 
-  await log(`Write ${path}`);
+  await log({ op: 'text', text: `Write ${path}` });
   const file = getFile(options, path);
   file.data = data;
 
