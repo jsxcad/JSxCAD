@@ -72,7 +72,7 @@ const once = (op) => {
       },
 */
 
-class UI extends React.Component {
+class UI extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -100,6 +100,7 @@ class UI extends React.Component {
     this.onRelease = this.onRelease.bind(this);
     this.openLog = this.openLog.bind(this);
     this.openParameters = this.openParameters.bind(this);
+    this.updateParameters = this.updateParameters.bind(this);
 
     this.switchingProjects = false;
   }
@@ -107,8 +108,7 @@ class UI extends React.Component {
   async componentDidMount () {
     const { project } = this.state;
 
-    const self = this;
-    const fileUpdater = () => listFilesystems().then(projects => self.setState({ projects }));
+    const fileUpdater = () => listFilesystems().then(projects => this.setState({ projects }));
     const creationWatcher = watchFileCreation(fileUpdater);
     const deletionWatcher = watchFileDeletion(fileUpdater);
 
@@ -150,7 +150,6 @@ class UI extends React.Component {
     if (project) {
       await this.selectProject(project);
     }
-
   }
 
   async componentWillUnmount () {
@@ -172,8 +171,18 @@ class UI extends React.Component {
       }
     }
 
-    this.removePaneByKey(`${project}:parameters`);
-    this.setState({ parameters: [...parameters, { identifier, options }] });
+    let { choices, initially } = options;
+
+    if (initially === undefined && choices.length > 0) {
+      initially = choices[0];
+    }
+
+    this.setState({
+      // isParametersOpen: true,
+      parameters: [...parameters, { identifier, options, value: initially }]
+    });
+
+    return initially;
   }
 
   updateParameters (parameters) {
@@ -218,43 +227,6 @@ class UI extends React.Component {
 
   closeProject () {
     this.setState({ project: '' });
-  }
-
-  removePane (pane) {
-    if (pane.props.shutdown) {
-      setTimeout(pane.props.shutdown, 100);
-    }
-    const panes = this.state.panes.filter(item => item !== pane);
-    this.setState({ panes });
-  }
-
-  removePaneByKey (key) {
-    const { panes} = this.state;
-
-    for (const pane of panes) {
-      if (pane.key === key) {
-        this.removePane(pane);
-      }
-    }
-  }
-
-  showPane (pane) {
-    if (pane.props.setup) {
-      setTimeout(pane.props.setup, 100);
-    }
-    return pane;
-  }
-
-  toLayoutEntry (pane) {
-    for (const entry of this.state.layout) {
-      if (entry === undefined) {
-        throw Error('die');
-      }
-      if (entry.i === pane.key) {
-        return entry;
-      }
-    }
-    return { x: 0, y: 0, w: 2, h: 2, i: pane.key };
   }
 
   createNode () {
@@ -309,10 +281,9 @@ class UI extends React.Component {
       }
     }
 
-    views.push({ view: 'log', title: 'Log' });
-
     views.push({ view: 'files', title: 'Files' });
-
+    views.push({ view: 'log', title: 'Log' });
+    views.push({ view: 'parameters', title: 'Parameters' });
     views.push({ view: 'project', title: 'Project' });
 
     return views;
@@ -365,12 +336,18 @@ class UI extends React.Component {
         return <JSEditorUI key={id} id={id} file={file}/>;
       case 'files':
         return <FilesUI key={id} id={id}/>;
+      case 'parameters': {
+        const { parameters } = this.state;
+        return <ParametersUI key={id} id={id} parameters={parameters} onChange={this.updateParameters}/>
+      }
       case 'project':
         return <ProjectUI key={id} id={id} ui={this}/>;
       case 'log': {
         const { log } = this.state;
         return <LogUI key={id} id={id} log={log}/>;
       }
+      default:
+        return <div/>;
     }
   }
 
@@ -383,7 +360,6 @@ class UI extends React.Component {
   }
 
   render () {
-    const self = this;
     const { atLeft, ask, project, files, isLogOpen, isParametersOpen, log, parameters, toast } = this.state;
     const views = this.buildViews(files);
     const prefix = `${project}:`;
@@ -429,7 +405,7 @@ class UI extends React.Component {
         {toastDiv}
         {parametersPane}
         {logPane}
-        <Drawer key="drawer" width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
+        <Drawer key={`drawer/${project}`} width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
           <InputGroup>
             <FormControl id="project/add/name" placeholder="Project Name" />
             <InputGroup.Append>
@@ -441,23 +417,23 @@ class UI extends React.Component {
             {this.state
                  .projects
                  .map((project, index) =>
-                      <Button key={index} variant="outline-primary" style={{ textAlign: 'left' }} onClick={() => self.selectProject(project)}>
+                      <Button key={index} variant="outline-primary" style={{ textAlign: 'left' }} onClick={() => this.selectProject(project)}>
                         {project}
                       </Button>)}
           </ButtonGroup>
         </Drawer>
         <Mosaic
-          key="mosaic"
+          key={`mosaic/${project}`}
           renderTile={(id, path) => (
                        <MosaicWindow
-                         key={id}
+                         key={`window/${project}/${id}`}
                          createNode={this.createNode}
                          title={this.getPaneView(id).title}
                          toolbarControls={[<DropdownButton key="actions" size="sm" title={'View'} variant="outline-primary">
                                             { views.map((view, index) => <Dropdown.Item key={`select/${index}`} onClick={() => this.setPaneView(id, view)}>{view.title}</Dropdown.Item>) }
                                            </DropdownButton>,
-                                           <MosaicSplitButton/>,
-                                           <MosaicRemoveButton/>
+                                           <MosaicSplitButton key="split" />,
+                                           <MosaicRemoveButton key="remove"/>
                                           ]}
                          path={path}>
                          {this.renderView(id)}
@@ -474,21 +450,18 @@ class UI extends React.Component {
   }
 };
 
-class ParametersUI extends React.Component {
+class ParametersUI extends React.PureComponent {
   constructor (props) {
     super(props);
 
-    this.state = {
-      parameters: this.props.parameters,
-      project: this.props.project,
-      onChange: this.props.onChange,
-    };
+    this.state = {};
 
     this.renderParameter = this.renderParameter.bind(this);
+    this.updateParameterValue = this.updateParameterValue.bind(this);
   }
 
   updateParameterValue (newParameter, event) {
-    const { onChange, parameters } = this.state;
+    const { onChange, parameters } = this.props;
     const value = event.target.value;
 
     const updated = [];
@@ -501,41 +474,48 @@ class ParametersUI extends React.Component {
       }
     }
 
-    this.setState({ parameters: updated });
-
     if (onChange) {
       onChange(updated);
     }
   }
 
   renderParameter (parameter) {
-    const self = this;
-    const { identifier, prompt, value = '' } = parameter;
-    const { project } = this.state;
+    const { identifier, prompt, value = '', options = {}} = parameter;
+    const { choices } = options;
+    const { project } = this.props;
     const id = `parameter/${project}/${identifier}`;
 
-    const onChange = (event) => self.updateParameterValue(parameter, event);
+    const onChange = (event) => this.updateParameterValue(parameter, event);
 
-    return (
-      <InputGroup key={id}>
-        <InputGroup.Prepend>
-          <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
-        </InputGroup.Prepend>
-        <FormControl key={id} id={id} placeholder={value} onChange={onChange}/>
-      </InputGroup>
-    );
-  }
-
-  stop (e) {
-    e.stopPropagation();
+    if (choices !== undefined) {
+      return (
+        <InputGroup key={id}>
+          <InputGroup.Prepend>
+            <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
+          </InputGroup.Prepend>
+          <FormControl key={id} as="select" defaultValue={choices[0]} onChange={onChange}>
+          {choices.map((choice, index) => <option>{choice}</option>)}
+          </FormControl>
+        </InputGroup>
+      );
+    } else {
+      return (
+        <InputGroup key={id}>
+          <InputGroup.Prepend>
+            <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
+          </InputGroup.Prepend>
+          <FormControl key={id} id={id} defaultValue={value} onChange={onChange}/>
+        </InputGroup>
+      );
+    }
   }
 
   render () {
-    const { parameters } = this.state;
+    const { parameters } = this.props;
 
     return (
       <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
+        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
           <Col>
             <InputGroup>
               {parameters.map(this.renderParameter)}
@@ -547,7 +527,7 @@ class ParametersUI extends React.Component {
   }
 }
 
-class ProjectUI extends React.Component {
+class ProjectUI extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -669,7 +649,7 @@ class ProjectUI extends React.Component {
   }
 };
 
-class FilesUI extends React.Component {
+class FilesUI extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -738,7 +718,7 @@ class FilesUI extends React.Component {
   }
 };
 
-class ViewUI extends React.Component {
+class ViewUI extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -851,7 +831,7 @@ class ViewUI extends React.Component {
   }
 }
 
-class JSEditorUI extends React.Component {
+class JSEditorUI extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -939,7 +919,6 @@ class JSEditorUI extends React.Component {
   /* Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop} onKeyDown={this.preventDefault} onKeyPress={this.preventDefault} */
 
   render () {
-    const self = this;
     const { code } = this.state;
 
     return (
@@ -973,7 +952,7 @@ class JSEditorUI extends React.Component {
   }
 };
 
-class LogUI extends React.Component {
+class LogUI extends React.PureComponent {
   constructor (props) {
     super(props);
 
