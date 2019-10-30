@@ -23,8 +23,6 @@ import PrismJS from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 
-import BaseGridLayout, { WidthProvider } from 'react-grid-layout-fabric';
-
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -50,8 +48,6 @@ import { Mosaic, MosaicWindow, MosaicZeroState, RemoveButton as MosaicRemoveButt
 import Editor from 'react-simple-code-editor';
 
 import Drawer from 'rc-drawer';
-
-const GridLayout = WidthProvider(BaseGridLayout);
 
 const once = (op) => {
   let triggered = false;
