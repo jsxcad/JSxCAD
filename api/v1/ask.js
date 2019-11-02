@@ -12,18 +12,33 @@ import { ask as askSys } from '@jsxcad/sys';
  *
  **/
 
-const askForString = async (identifier, options = {}) => {
-  const result = await askSys(identifier, options);
-  if (result === undefined) {
-    throw Error('Die');
+const askForString = async (identifier, value, options = {}) => {
+  if (value instanceof Array) {
+    return askForString(identifier, value[0], { ...options, choices: value });
+  } else {
+    return askSys(identifier, { ...options, initially: value });
   }
-  return result;
 };
 
-export const ask = async (...args) => {
-  const result = askForString(...args);
-  return Number(await result);
+const askForBool = async (identifier, value = false, options = {}) => {
+  return askForString(identifier, value, { ...options, choices: [true, false] });
 };
 
-ask.forNumber = ask;
+export const askForNumber = async (identifier, value = 0, options = {}) => {
+  const result = await askForString(identifier, value, options);
+  if (typeof result === 'string') {
+    try {
+      return Number(result);
+    } catch (e) {
+      return value;
+    }
+  } else {
+    return result;
+  }
+};
+
+export const ask = async (...args) => askForNumber(...args);
+
+ask.forNumber = askForNumber;
 ask.forString = askForString;
+ask.forBool = askForBool;

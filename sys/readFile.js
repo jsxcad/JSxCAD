@@ -8,7 +8,6 @@ import { getBase, getFilesystem, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { getFile } from './files';
-import { isBase64 } from 'is-base64';
 import isUrlHttp from 'is-url-http';
 import localForage from 'localforage';
 import { log } from './log';
@@ -36,11 +35,7 @@ const getFileFetcher = async (prefix) => {
     return async (path) => {
       const data = await localForage.getItem(`${prefix}${path}`);
       if (data !== null) {
-        if (isBase64(data)) {
-          return toByteArray(data);
-        } else {
-          return new TextEncoder('utf8').encode(data);
-        }
+        return new Uint8Array(toByteArray(data));
       }
     };
   } else {
@@ -54,9 +49,11 @@ const fetchPersistent = async (path) => {
     const base = getBase();
     if (base !== undefined) {
       const fetchFile = await getFileFetcher('jsxcad/');
-      return await fetchFile(`${base}${path}`);
+      const data = await fetchFile(`${base}${path}`);
+      return data;
     }
   } catch (e) {
+    console.log(e);
   }
 };
 
@@ -118,7 +115,7 @@ export const readFile = async (options, path) => {
   } else {
     log({ op: 'text', text: `Read ${path}` });
   }
-  const file = getFile(options, path);
+  const file = await getFile(options, path);
   if (file.data === undefined) {
     file.data = await fetchPersistent(path);
   }

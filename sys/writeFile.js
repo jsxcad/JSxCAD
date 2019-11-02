@@ -35,11 +35,11 @@ export const writeFile = async (options, path, data) => {
   }
 
   await log({ op: 'text', text: `Write ${path}` });
-  const file = getFile(options, path);
+  const file = await getFile(options, path);
   file.data = data;
 
   for (const watcher of file.watchers) {
-    watcher(options, file);
+    await watcher(options, file);
   }
 
   const base = getBase();

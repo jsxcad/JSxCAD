@@ -4,20 +4,20 @@ const files = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
-export const getFile = (options, unqualifiedPath) => {
+export const getFile = async (options, unqualifiedPath) => {
   const path = `${getBase()}${unqualifiedPath}`;
   let file = files.get(path);
   if (file === undefined) {
     file = { path: unqualifiedPath, watchers: new Set(), storageKey: `jsxcad/${path}` };
     files.set(path, file);
     for (const watcher of fileCreationWatchers) {
-      watcher(options, file);
+      await watcher(options, file);
     }
   }
   return file;
 };
 
-export const deleteFile = (options, unqualifiedPath) => {
+export const deleteFile = async (options, unqualifiedPath) => {
   const path = `${getBase()}${unqualifiedPath}`;
   let file = files.get(path);
   if (file !== undefined) {
@@ -27,26 +27,26 @@ export const deleteFile = (options, unqualifiedPath) => {
     file = { path: unqualifiedPath, storageKey: `jsxcad/${path}` };
   }
   for (const watcher of fileDeletionWatchers) {
-    watcher(options, file);
+    await watcher(options, file);
   }
 };
 
-export const watchFileCreation = (thunk) => {
+export const watchFileCreation = async (thunk) => {
   fileCreationWatchers.add(thunk);
   return thunk;
 };
 
-export const unwatchFileCreation = (thunk) => {
+export const unwatchFileCreation = async (thunk) => {
   fileCreationWatchers.delete(thunk);
   return thunk;
 };
 
-export const watchFileDeletion = (thunk) => {
+export const watchFileDeletion = async (thunk) => {
   fileDeletionWatchers.add(thunk);
   return thunk;
 };
 
-export const unwatchFileDeletion = (thunk) => {
+export const unwatchFileDeletion = async (thunk) => {
   fileCreationWatchers.delete(thunk);
   return thunk;
 };

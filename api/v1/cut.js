@@ -48,18 +48,18 @@ export const cut = (shape, planeShape = Z()) => {
   const cuts = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
-    for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
       const cutResult = bspCut(solid, planeSurface);
-      cuts.push(Shape.fromGeometry({ solid: cutResult }));
+      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
     }
   }
 
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
-    for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
       const cutSurface = surface || z0Surface;
       const cutResult = surfaceCut(planeSurface, cutSurface);
-      cuts.push(Shape.fromGeometry({ surface: cutResult }));
+      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
     }
   }
 

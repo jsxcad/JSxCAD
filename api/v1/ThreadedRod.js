@@ -51,3 +51,5 @@ export const ThreadedRod = dispatch(
     assertNumber(sides);
     return () => fromRadius({ radius, height, sides, bore });
   });
+
+ThreadedRod.ofRadius = (radius, height, sides) => ThreadedRod(radius, height, sides);

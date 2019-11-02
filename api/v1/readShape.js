@@ -42,7 +42,7 @@ export const readShape = async (options, build) => {
   if (data === undefined && build !== undefined) {
     const shape = await build();
     if (!ephemeral) {
-      writeShape(options, shape);
+      await writeShape(options, shape);
     }
     return shape;
   }
