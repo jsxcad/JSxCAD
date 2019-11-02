@@ -4,9 +4,9 @@ import { isWebWorker } from './browserOrNode';
 
 let handleAskUser;
 
-const askUser = async (parameters, identifier, options) => {
+const askUser = async (identifier, options) => {
   if (handleAskUser) {
-    return handleAskUser(parameters, identifier, options);
+    return handleAskUser(identifier, options);
   } else {
     return { identifier, value: '', type: 'string' };
   }

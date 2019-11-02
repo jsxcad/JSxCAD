@@ -36,18 +36,18 @@ export const fromHeight = (shape, height = 1, steps = 1, twist = 0) => {
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
-  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
+  for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
       const solid = extrudeAlgorithm(z0Surface, height, steps, twistRadians);
-      solids.push(Shape.fromGeometry({ solid }));
+      solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
-  for (const { surface } of getSurfaces(keptGeometry)) {
+  for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
       const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
       const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, steps, twistRadians);
       const solid = transformSolid(fromZ0, z0SolidGeometry);
-      solids.push(Shape.fromGeometry({ solid }));
+      solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
   if (height < 0) {

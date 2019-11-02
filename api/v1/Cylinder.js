@@ -132,11 +132,10 @@ export const between = dispatch(
     return () => betweenDiameter(from, to, diameter, sides);
   });
 
-Cylinder.fromValue = fromValue;
-Cylinder.fromRadius = fromRadius;
-Cylinder.fromDiameter = fromDiameter;
-Cylinder.fromFunction = fromFunction;
-Cylinder.fromSlices = fromSlices;
+Cylinder.ofRadius = fromRadius;
+Cylinder.ofDiameter = fromDiameter;
+Cylinder.ofFunction = fromFunction;
+Cylinder.ofSlices = fromSlices;
 Cylinder.between = between;
 Cylinder.betweenRadius = betweenRadius;
 Cylinder.betweenDiameter = betweenDiameter;

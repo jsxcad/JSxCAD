@@ -32,5 +32,5 @@ export const deleteFile = async (options, path) => {
   const deleter = await getFileDeleter('jsxcad/');
   const base = getBase();
   await deleter(`${base}${path}`);
-  deleteCachedFile(options, path);
+  await deleteCachedFile(options, path);
 };

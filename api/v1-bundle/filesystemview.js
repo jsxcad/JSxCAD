@@ -2,9 +2,6 @@
 
 Error.stackTraceLimit = Infinity;
 
-// import './codemirror-global';
-// import 'codemirror/mode/javascript/javascript.js';
-
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
@@ -17,11 +14,14 @@ import ReactDOM from 'react-dom';
 import SvgPathEditor from './SvgPathEditor';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
-import Recollect from 'react-recollect';
 
 import PrismJS from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
+
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/theme-github';
 
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
@@ -33,6 +33,7 @@ import Col from 'react-bootstrap/Col';
 import Draggable from 'react-draggable';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
@@ -48,29 +49,6 @@ import { Mosaic, MosaicWindow, MosaicZeroState, RemoveButton as MosaicRemoveButt
 import Editor from 'react-simple-code-editor';
 
 import Drawer from 'rc-drawer';
-
-const once = (op) => {
-  let triggered = false;
-  const guard = (...args) => {
-    if (triggered) { return; }
-    triggered = true;
-    return op(...args);
-  }
-  return guard;
-}
-
-/*
-      paneLayout: {
-        direction: 'row',
-        first: 1,
-        second: {
-          direction: 'column',
-          first: 2,
-          second: 3,
-        },
-        splitPercentage: 40,
-      },
-*/
 
 class UI extends React.PureComponent {
   constructor (props) {
@@ -108,9 +86,9 @@ class UI extends React.PureComponent {
   async componentDidMount () {
     const { project } = this.state;
 
-    const fileUpdater = () => listFilesystems().then(projects => this.setState({ projects }));
-    const creationWatcher = watchFileCreation(fileUpdater);
-    const deletionWatcher = watchFileDeletion(fileUpdater);
+    const fileUpdater = async () => this.setState({ projects: await listFilesystems() });
+    const creationWatcher = await watchFileCreation(fileUpdater);
+    const deletionWatcher = await watchFileDeletion(fileUpdater);
 
     const mouseWatcher = (event) => {
                            const { atLeft } = this.state;
@@ -155,8 +133,8 @@ class UI extends React.PureComponent {
   async componentWillUnmount () {
     const { creationWatcher, deletionWatcher, mouseWatcher } = this.state;
 
-    unwatchFileCreation(creationWatcher);
-    unwatchFileDeletion(deletionWatcher);
+    await unwatchFileCreation(creationWatcher);
+    await unwatchFileDeletion(deletionWatcher);
 
     document.removeEventListener('mousemove', mouseWatcher);
     document.removeEventListener('mouseenter', mouseWatcher);
@@ -178,7 +156,6 @@ class UI extends React.PureComponent {
     }
 
     this.setState({
-      // isParametersOpen: true,
       parameters: [...parameters, { identifier, options, value: initially }]
     });
 
@@ -252,7 +229,7 @@ class UI extends React.PureComponent {
 
     for (let id = 0; ; id++) {
       if (!ids.has(id)) {
-        return id;
+        return `${id}`;
       }
     }
   }
@@ -331,9 +308,9 @@ class UI extends React.PureComponent {
 
     switch (view) {
       case 'geometry':
-        return <ViewUI key={id} id={id} file={file}/>;
+        return <ViewUI key={`${id}/geometry/${file}`} id={id} file={file}/>;
       case 'editScript':
-        return <JSEditorUI key={id} id={id} file={file}/>;
+        return <JSEditorUI key={`${id}/editScript/${file}`} id={id} file={file}/>;
       case 'files':
         return <FilesUI key={id} id={id}/>;
       case 'parameters': {
@@ -364,21 +341,6 @@ class UI extends React.PureComponent {
     const views = this.buildViews(files);
     const prefix = `${project}:`;
 
-    const logPane = isLogOpen
-      ? <Alert key="log" variant="info" dismissible style={{ zIndex: 997, position: 'absolute', width: '100%', height: '100%' }} onClose={() => this.setState({ isLogOpen: false })}>
-          <Alert.Heading>Log</Alert.Heading>
-          { log.map(({ op, text, status }, index) => (op === 'text' ? <Alert key={index} variant="warning">{text}</Alert> : [])) }
-        </Alert>
-      : [];
-
-    const parametersPane = isParametersOpen
-      ?  <Alert key="parameters" variant="primary" dismissible style={{ zIndex: 998, position: 'absolute', width: '100%', height: '100%' }} onClose={() => this.setState({ isParametersOpen: false })}>
-           <Alert.Heading>Parameters</Alert.Heading>
-           <ParametersUI key="parameters" id="parameters" parameters={parameters} onChange={this.updateParameters}>
-           </ParametersUI>
-         </Alert>
-      : [];
-
     const toasts = toast.map((entry, index) => 
                      <Toast key={`toast/${index}`}
                             variant="info"
@@ -403,8 +365,6 @@ class UI extends React.PureComponent {
     return (
       <div>
         {toastDiv}
-        {parametersPane}
-        {logPane}
         <Drawer key={`drawer/${project}`} width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
           <InputGroup>
             <FormControl id="project/add/name" placeholder="Project Name" />
@@ -462,7 +422,9 @@ class ParametersUI extends React.PureComponent {
 
   updateParameterValue (newParameter, event) {
     const { onChange, parameters } = this.props;
-    const value = event.target.value;
+    const value = (event.target.checked === undefined)
+                  ? event.target.value
+                  : event.target.checked;
 
     const updated = [];
 
@@ -483,26 +445,35 @@ class ParametersUI extends React.PureComponent {
     const { identifier, prompt, value = '', options = {}} = parameter;
     const { choices } = options;
     const { project } = this.props;
+    const label = (prompt || identifier);
     const id = `parameter/${project}/${identifier}`;
 
     const onChange = (event) => this.updateParameterValue(parameter, event);
 
     if (choices !== undefined) {
-      return (
-        <InputGroup key={id}>
-          <InputGroup.Prepend>
-            <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
-          </InputGroup.Prepend>
-          <FormControl key={id} as="select" defaultValue={choices[0]} onChange={onChange}>
-          {choices.map((choice, index) => <option>{choice}</option>)}
-          </FormControl>
-        </InputGroup>
-      );
+      if (choices.every(choice => [true, false].includes(choice))) {
+        return (
+          <InputGroup key={id}>
+            <Form.Check type="checkbox" key={id} label={label} onChange={onChange}/>
+          </InputGroup>
+        );
+      } else {
+        return (
+          <InputGroup key={id}>
+            <InputGroup.Prepend>
+              <InputGroup.Text>{label}</InputGroup.Text>
+            </InputGroup.Prepend>
+            <FormControl key={id} as="select" defaultValue={choices[0]} onChange={onChange}>
+            {choices.map((choice, index) => <option>{choice}</option>)}
+            </FormControl>
+          </InputGroup>
+        );
+      }
     } else {
       return (
         <InputGroup key={id}>
           <InputGroup.Prepend>
-            <InputGroup.Text>{prompt || identifier}</InputGroup.Text>
+            <InputGroup.Text>{label}</InputGroup.Text>
           </InputGroup.Prepend>
           <FormControl key={id} id={id} defaultValue={value} onChange={onChange}/>
         </InputGroup>
@@ -511,10 +482,10 @@ class ParametersUI extends React.PureComponent {
   }
 
   render () {
-    const { parameters } = this.props;
+    const { id, parameters } = this.props;
 
     return (
-      <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
           <Col>
             <InputGroup>
@@ -597,10 +568,11 @@ class ProjectUI extends React.PureComponent {
   }
 
   render () {
+    const { id } = this.props;
     const { doShowDeleteProject, project } = this.state;
 
     return (
-      <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
         <Row style={{ flex: '0 0 auto' }}>
           <Col>
             <InputGroup>
@@ -658,25 +630,23 @@ class FilesUI extends React.PureComponent {
     };
 
     this.addFile = this.addFile.bind(this);
+    this.clickImportFile = this.clickImportFile.bind(this);
+    this.importFile = this.importFile.bind(this);
   }
 
   async componentDidMount () {
     const files = await listFiles();
-    const fileUpdater = () => listFiles().then(files => this.setState({ files }));
-    const creationWatcher = watchFileCreation(fileUpdater);
-    const deletionWatcher = watchFileDeletion(fileUpdater);
+    const fileUpdater = async () => this.setState({ files: await listFiles() });
+    const creationWatcher = await watchFileCreation(fileUpdater);
+    const deletionWatcher = await watchFileDeletion(fileUpdater);
     this.setState({ files, creationWatcher, deletionWatcher });
   }
 
   async componentWillUnmount () {
     const { creationWatcher, deletionWatcher } = this.state;
 
-    unwatchFileCreation(creationWatcher);
-    unwatchFileDeletion(deletionWatcher);
-  }
-
-  stop (e) {
-    e.stopPropagation();
+    await unwatchFileCreation(creationWatcher);
+    await unwatchFileDeletion(deletionWatcher);
   }
 
   async addFile () {
@@ -686,6 +656,25 @@ class FilesUI extends React.PureComponent {
       await writeFile({}, `file/${file}`, '');
     }
   };
+
+  async importFile (e) {
+    const { id } = this.props;
+
+    const file = document.getElementById(`file/${id}/import`).files[0];
+    const name = document.getElementById(`file/${id}/name`).value;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = e.target.result;
+      writeFile({}, `file/${name}`, new Uint8Array(data));
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  clickImportFile () {
+    const { id } = this.props;
+
+    document.getElementById(`file/${id}/import`).click();
+  }
 
   buildFiles () {
     const { files } = this.state;
@@ -700,14 +689,23 @@ class FilesUI extends React.PureComponent {
   }
 
   render () {
+    const { id } = this.props;
+
     return (
-      <Container key={this.key} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
         <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
           <Col>
             <InputGroup>
               <FormControl id="file/add/name" placeholder="File Name" />
               <InputGroup.Append>
                 <Button onClick={this.addFile} variant='outline-primary'>Add</Button>
+              </InputGroup.Append>
+            </InputGroup>
+            <InputGroup>
+              <FormControl as="input" type="file" id={`file/${id}/import`} multiple={false} onChange={this.importFile} style={{ display: 'none' }} />
+              <FormControl id={`file/${id}/name`} placeholder="" />
+              <InputGroup.Append>
+                <Button onClick={this.clickImportFile} variant="outline-primary">Import</Button>
               </InputGroup.Append>
             </InputGroup>
             {this.buildFiles()}
@@ -724,7 +722,7 @@ class ViewUI extends React.PureComponent {
 
     this.state = {
       file: props.file,
-      containerId: `${props.id}/container`
+      containerId: `${props.id}/container/${props.file}`
     }
   }
 
@@ -805,24 +803,36 @@ class ViewUI extends React.PureComponent {
       updateGeometry(JSON.parse(json));
     }
 
-    const watcher = watchFile(geometryPath,
-                              async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
+    const watcher = await watchFile(geometryPath,
+                                    async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
 
     this.setState({ watcher });
   }
 
-  componentWillUnmount () {
-    const { watcher } = this.state;
+  async componentWillUnmount () {
+    const { containerId, watcher } = this.state;
+    const container = document.getElementById(containerId);
+
+    while (true) {
+      const child = container.firstElementChild;
+      if (child) {
+        container.removeChild(child);
+        continue;
+      }
+      break;
+    }
+
     if (watcher) {
-      unwatchFile(watcher);
+      await unwatchFile(watcher);
     }
   }
 
   render () {
+    const { id } = this.props;
     const { path, containerId } = this.state;
 
     return (
-      <Card key={this.key} style={{ height: '100%', overflow: 'hidden', display: 'block'}}>
+      <Card key={id} style={{ height: '100%', overflow: 'hidden', display: 'block'}}>
         <Card.Body style={{ height: '100%', width: '100%', overflow: 'hidden', display: 'block'}}>
           <div id={containerId}></div>
         </Card.Body>
@@ -843,6 +853,22 @@ class JSEditorUI extends React.PureComponent {
     this.onValueChange = this.onValueChange.bind(this);
     this.run = this.run.bind(this);
     this.save = this.save.bind(this);
+  }
+
+  saveShortcut () {
+    return {
+             name: "save",
+             bindKey: { win: "Ctrl-S", mac: "Command-S"},
+             exec: () => this.save()
+           };
+  }
+
+  runShortcut () {
+    return {
+             name: "run",
+             bindKey: { win: "Shift-Enter", mac: "Shift-Enter"},
+             exec: () => this.run()
+           };
   }
 
   async run () {
@@ -919,22 +945,32 @@ class JSEditorUI extends React.PureComponent {
   /* Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop} onKeyDown={this.preventDefault} onKeyPress={this.preventDefault} */
 
   render () {
+    const { id } = this.props;
     const { code } = this.state;
 
     return (
       <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
+        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
           <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
-            <Editor key={this.key}
-                    value={code}
-                    onValueChange={this.onValueChange}
-                    highlight={this.highlight}
-                    padding={10}
-                    style={{ fontFamily: '"Fira code", "Fira Mono", monospace', fontSize: 12, border: '1px solid turquoise' }}>
-            </Editor>
+            <AceEditor
+               commands={[this.runShortcut(), this.saveShortcut()]}
+               editorProps={{ $blockScrolling: true }}
+               height='100%'
+               highlightActiveLine={true}
+               key={id}
+               mode="javascript"
+               name={id}
+               onChange={this.onValueChange}
+               showGutter={true}
+               showPrintMargin={true}
+               theme="github"
+               value={code}
+               width='100%'
+               >
+            </AceEditor>
           </Col>
         </Row>
-        <Row style={{ flex: '0 0 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop}>
+        <Row style={{ flex: '0 0 auto' }}>
           <Col>
             <br/>
             <ButtonGroup>
@@ -960,10 +996,11 @@ class LogUI extends React.PureComponent {
   }
 
   render () {
+    const { id } = this.props;
     const { mode, viewerElementId } = this.state;
 
     return (
-      <Container key={this.key}
+      <Container key={id}
                  style={{ height: '100%', display: 'flex', flexFlow: 'column',
                           padding: '4px', border: '1px solid rgba(0,0,0,.125)',
                           borderRadius: '.25rem' }}>
