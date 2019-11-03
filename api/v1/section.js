@@ -1,9 +1,10 @@
-import { alignVertices, toPolygons } from '@jsxcad/geometry-solid';
-import { cutTrianglesByPlane, toTriangles } from '@jsxcad/geometry-polygons';
+import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
+import { retessellate, toPlane } from '@jsxcad/geometry-surface';
 
 import { Shape } from './Shape';
-import { fromPoints } from '@jsxcad/math-plane';
-import { getSolids } from '@jsxcad/geometry-tagged';
+import { Z } from './Z';
+import { assemble } from './assemble';
+import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
 import { union } from './union';
 
 /**
@@ -36,17 +37,22 @@ import { union } from './union';
  *
  **/
 
-export const section = ({ allowOpenPaths = false, z = 0 } = {}, shape) => {
-  const shapes = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    const polygons = toPolygons({}, alignVertices(solid));
-    const triangles = toTriangles({}, polygons);
-    const paths = cutTrianglesByPlane({ allowOpenPaths }, fromPoints([0, 0, z], [1, 0, z], [0, 1, z]), triangles);
-    shapes.push(Shape.fromPathsToZ0Surface(paths));
+export const section = (solidShape, surfaceShape = Z()) => {
+  const sections = [];
+  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
+    const anySurface = surface || z0Surface;
+    const shapes = [];
+    const plane = toPlane(anySurface);
+    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+      const surface = retessellate(bspSection(solid, anySurface));
+      surface.plane = plane;
+      shapes.push(Shape.fromGeometry({ surface }));
+    }
+    sections.push(union(...shapes));
   }
-  return union(...shapes);
+  return assemble(...sections);
 };
 
-const method = function (options) { return section(options, this); };
+const method = function (surface) { return section(this, surface); };
 
 Shape.prototype.section = method;

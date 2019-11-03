@@ -1,8 +1,10 @@
 import * as fs from 'fs';
+
 import { isBrowser, isNode } from './browserOrNode';
+import { watchFileCreation, watchFileDeletion } from './files';
+
 import { getBase } from './filesystem';
 import localForage from 'localforage';
-import { watchFileCreation } from './files';
 
 const { promises } = fs;
 
@@ -12,7 +14,7 @@ const getFileLister = async () => {
     return async () => {
       const qualifiedPaths = new Set();
       const walk = async (path) => {
-        for (const file of await promises.readdir(path === '' ? '.' : path)) {
+        for (const file of await promises.readdir(path)) {
           if (file.startsWith('.') || file === 'node_modules') {
             continue;
           }
@@ -25,12 +27,12 @@ const getFileLister = async () => {
           }
         }
       };
-      await walk('');
+      await walk('jsxcad/');
       return qualifiedPaths;
     };
   } else if (isBrowser) {
     return async () => {
-      // Fix prefixes
+      // FIX: Remove this once all fs's are migrated.
       for (const key of await localForage.keys()) {
         if (key.startsWith('file/')) {
           const fixed = `jsxcad/${key.substring(5)}`;
@@ -50,12 +52,14 @@ const getFileLister = async () => {
 let cachedKeys;
 
 const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
+const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
 
 const getKeys = async () => {
   if (cachedKeys === undefined) {
     const listFiles = await getFileLister();
     cachedKeys = await listFiles();
     watchFileCreation(updateCachedKeys);
+    watchFileDeletion(deleteCachedKeys);
   }
   return cachedKeys;
 };

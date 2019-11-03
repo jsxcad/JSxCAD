@@ -30,7 +30,7 @@ import { union } from './union';
 const Z = 2;
 
 export const chainHull = (...shapes) => {
-  const pointsets = shapes.map(shape => shape.toPoints().points);
+  const pointsets = shapes.map(shape => shape.toPoints());
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];

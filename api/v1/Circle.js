@@ -49,34 +49,44 @@ import { dispatch } from './dispatch';
  * :::
  **/
 
+export const ofEdge = (edge, sides = 32) => Polygon.ofEdge(edge, sides);
+export const ofApothem = (apothem, sides = 32) => Polygon.ofApothem(apothem, sides);
+export const ofRadius = (radius, sides = 32) => Polygon.ofRadius(radius, sides);
+export const ofDiameter = (diameter, sides = 32) => Polygon.ofDiameter(diameter, sides);
+
 export const Circle = dispatch(
   'Circle',
   // Circle()
   (...rest) => {
     assertEmpty(rest);
-    return () => Polygon.fromRadius(1);
+    return () => ofRadius(1);
   },
   // circle(2)
   (value) => {
     assertNumber(value);
-    return () => Polygon.fromRadius(value, 32);
+    return () => ofRadius(value);
   },
   // circle({ radius: 2, sides: 32 })
   ({ radius, sides = 32 }) => {
     assertNumber(radius);
-    return () => Polygon.fromRadius(radius, sides);
+    return () => ofRadius(radius, sides);
   },
   // circle({ apothem: 2, sides: 32 })
   ({ apothem, sides = 32 }) => {
     assertNumber(apothem);
     assertNumber(sides);
-    return () => Polygon.fromApothem(apothem, sides);
+    return () => ofApothem(apothem, sides);
   },
   // circle({ diameter: 2, sides: 32 })
   ({ diameter, sides = 32 }) => {
     assertNumber(diameter);
     assertNumber(sides);
-    return () => Polygon.fromDiameter(diameter, sides);
+    return () => ofDiameter(diameter, sides);
   });
+
+Circle.ofEdge = ofEdge;
+Circle.ofApothem = ofApothem;
+Circle.ofRadius = ofRadius;
+Circle.ofDiameter = ofDiameter;
 
 export default Circle;

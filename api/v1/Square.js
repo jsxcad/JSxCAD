@@ -1,7 +1,6 @@
 import { assertEmpty, assertNumber } from './assert';
 import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
 
-import { Polygon } from './Polygon';
 import { Shape } from './Shape';
 import { dispatch } from './dispatch';
 
@@ -51,51 +50,72 @@ import { dispatch } from './dispatch';
  * :::
  **/
 
+const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
+
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale);
 
-export const fromSize = (size) => unitSquare().scale(size);
-export const fromDimensions = (width, length) => unitSquare().scale([width, length, 1]);
+export const ofEdge = (size) => unitSquare().scale(size);
+export const ofEdges = (width, length) => unitSquare().scale([width, length, 1]);
+export const ofRadius = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
+export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));
+export const ofDiameter = (diameter) => ofRadius(diameter / 2);
+
+export const fromCorners = (corner1, corner2) => {
+  const [c1x, c1y] = corner1;
+  const [c2x, c2y] = corner2;
+  const length = c2x - c1x;
+  const width = c2y - c1y;
+  const center = [(c1x + c2x) / 2, (c1y + c2y) / 2];
+  return unitSquare().scale([length, width]).translate(center);
+};
 
 export const Square = dispatch(
   'Square',
   // square()
   (...args) => {
     assertEmpty(args);
-    return () => fromSize(1);
+    return () => ofEdge(1);
   },
   // square(4)
   (size, ...rest) => {
     assertNumber(size);
     assertEmpty(rest);
-    return () => fromSize(size);
+    return () => ofEdge(size);
   },
   // square(4, 6)
   (width, length, ...rest) => {
     assertNumber(width);
     assertNumber(length);
     assertEmpty(rest);
-    return () => fromDimensions(width, length);
+    return () => ofEdges(width, length);
   },
   // square({ edge: 10 })
   ({ edge }) => {
     assertNumber(edge);
-    return () => Polygon.fromEdge(edge, 4);
+    return () => ofEdge(edge);
   },
   // Polygon({ apothem: 10 })
   ({ apothem }) => {
     assertNumber(apothem);
-    return () => Polygon.fromApothem(apothem, 4);
+    return () => ofApothem(apothem);
   },
   // Polygon({ radius: 10})
   ({ radius }) => {
     assertNumber(radius);
-    return () => Polygon.fromRadius(radius, 4);
+    return () => ofRadius(radius);
   },
   // Polygon({ diameter: 10})
   ({ diameter }) => {
     assertNumber(diameter);
-    return () => Polygon.fromDiameter(diameter, 4);
+    return () => ofDiameter(diameter);
   });
+
+Square.ofEdge = ofEdge;
+Square.ofEdges = ofEdges;
+Square.ofRadius = ofRadius;
+Square.ofApothem = ofApothem;
+Square.ofDiameter = ofDiameter;
+Square.fromCorners = fromCorners;
 
 export default Square;

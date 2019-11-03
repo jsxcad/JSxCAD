@@ -1,5 +1,6 @@
 import { Cube } from './Cube';
 import { Cylinder } from './Cylinder';
+import { Shape } from './Shape';
 import { assemble } from './assemble';
 
 /**
@@ -83,9 +84,29 @@ export const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1,
   return assemble(...sockets);
 };
 
+export const axleProfile = () =>
+  Shape.fromPathToSurface(
+    [[0.00, 2.24, 0.80],
+     [0.00, 0.80, 0.80],
+     [0.00, 0.80, 2.24],
+     [0.00, 0.00, 2.4],
+     [0.00, -0.80, 2.24],
+     [0.00, -0.80, 0.80],
+     [0.00, -2.24, 0.80],
+     [0.00, -2.4, 0.00],
+     [0.00, -2.24, -0.80],
+     [0.00, -0.80, -0.80],
+     [0.00, -0.80, -2.24],
+     [0.00, 0.00, -2.40],
+     [0.00, 0.80, -2.24],
+     [0.00, 0.80, -0.80],
+     [0.00, 2.24, -0.80],
+     [0.00, 2.4, 0.00]]);
+
 export const Lego = {
   stud,
   socket,
   studSheet,
-  socketSheet
+  socketSheet,
+  axleProfile
 };

@@ -1,9 +1,10 @@
-import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
+import { Z } from './Z';
 import { assemble } from './assemble';
-import { cut as cutSolid } from '@jsxcad/geometry-solid';
-import { cut as cutSurface } from '@jsxcad/geometry-surface';
+import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
+import { cut as surfaceCut } from '@jsxcad/geometry-surface';
 
 /**
  *
@@ -43,28 +44,28 @@ import { cut as cutSurface } from '@jsxcad/geometry-surface';
  *
  **/
 
-export const cut = (plane = [0, 0, 1, 0], shape) => {
-  const fronts = [];
-  const backs = [];
-  const keptGeometry = shape.toKeptGeometry();
-  for (const { solid } of getSolids(keptGeometry)) {
-    const [front, back] = cutSolid(plane, solid);
-    fronts.push(Shape.fromSolid(front));
-    backs.push(Shape.fromSolid(back));
+export const cut = (shape, planeShape = Z()) => {
+  const cuts = [];
+  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
+    const planeSurface = surface || z0Surface;
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const cutResult = bspCut(solid, planeSurface);
+      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+    }
   }
-  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    const [front, back] = cutSurface(plane, z0Surface);
-    fronts.push(Shape.fromPathsToZ0Surface(front));
-    backs.push(Shape.fromPathsToZ0Surface(back));
+
+  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
+    const planeSurface = surface || z0Surface;
+    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+      const cutSurface = surface || z0Surface;
+      const cutResult = surfaceCut(planeSurface, cutSurface);
+      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
+    }
   }
-  for (const { surface } of getSurfaces(keptGeometry)) {
-    const [front, back] = cutSurface(plane, surface);
-    fronts.push(Shape.fromPathsToSurface(front));
-    backs.push(Shape.fromPathsToSurface(back));
-  }
-  return [assemble(...fronts), assemble(...backs)];
+
+  return assemble(...cuts);
 };
 
-const method = function (options) { return cut(options, this); };
+const method = function (surface) { return cut(this, surface); };
 
 Shape.prototype.cut = method;

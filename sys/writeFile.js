@@ -2,13 +2,14 @@
 
 import * as fs from 'fs';
 
+import { getBase, getFilesystem, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { dirname } from 'path';
 import { fromByteArray } from 'base64-js';
-import { getBase } from './filesystem';
 import { getFile } from './files';
 import localForage from 'localforage';
+import { log } from './log';
 
 const { promises } = fs;
 
@@ -17,19 +18,28 @@ const { promises } = fs;
 export const writeFile = async (options, path, data) => {
   data = await data;
 
-  const { as = 'utf8', ephemeral } = options;
+  if (isWebWorker) {
+    return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
+  }
+
+  const { as = 'utf8', ephemeral, project = getFilesystem() } = options;
+  let originalProject = getFilesystem();
+  if (project !== originalProject) {
+    log({ op: 'text', text: `Write ${path} of ${project}` });
+    // Switch to the source filesystem, if necessary.
+    setupFilesystem({ fileBase: project });
+  }
+
   if (typeof data === 'string') {
     data = new TextEncoder(as).encode(data);
   }
 
-  if (isWebWorker) {
-    return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
-  }
-  const file = getFile(options, path);
+  await log({ op: 'text', text: `Write ${path}` });
+  const file = await getFile(options, path);
   file.data = data;
 
   for (const watcher of file.watchers) {
-    watcher(options, file);
+    await watcher(options, file);
   }
 
   const base = getBase();
@@ -46,7 +56,12 @@ export const writeFile = async (options, path, data) => {
         console.log(`QQ/writeFile/error: ${error.toString()}`);
       }
     } else if (isBrowser) {
-      return localForage.setItem(persistentPath, fromByteArray(data));
+      await localForage.setItem(persistentPath, fromByteArray(data));
     }
+  }
+
+  if (project !== originalProject) {
+    // Switch back to the original filesystem, if necessary.
+    setupFilesystem({ fileBase: originalProject });
   }
 };
