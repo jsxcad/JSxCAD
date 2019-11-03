@@ -66,7 +66,7 @@ class UI extends React.PureComponent {
       project: this.props.project,
       files: [],
       build: 0,
-      paneLayout: 0,
+      paneLayout: '0',
       paneViews: [],
       toast: [],
     };
@@ -182,10 +182,10 @@ class UI extends React.PureComponent {
     history.pushState(null, null, `#${encodedProject}`);
     const paneLayoutData = await readFile({}, 'ui/paneLayout');
     let paneLayout;
-    if (paneLayoutData !== undefined) {
+    if (paneLayoutData !== undefined && paneLayoutData !== "null") {
       paneLayout = JSON.parse(paneLayoutData);
     } else {
-      paneLayout = 0;
+      paneLayout = '0';
     }
 
     const paneViewsData = await readFile({}, 'ui/paneViews');
@@ -216,7 +216,7 @@ class UI extends React.PureComponent {
         return;
       }
 
-      if (typeof node === 'number') {
+      if (typeof node === 'string') {
         ids.add(node);
         return;
       }
@@ -227,14 +227,18 @@ class UI extends React.PureComponent {
 
     walk(paneLayout);
 
-    for (let id = 0; ; id++) {
+    for (let n = 0; ; n++) {
+      const id = `${n}`;
       if (!ids.has(id)) {
-        return `${id}`;
+        return id;
       }
     }
   }
 
   async onChange (paneLayout) {
+    if (paneLayout === null) {
+      paneLayout = '0';
+    }
     this.setState({ paneLayout });
     console.log(`QQ/onChange/paneLayout: ${JSON.stringify(paneLayout)}`);
     await writeFile({}, 'ui/paneLayout', JSON.stringify(paneLayout));
@@ -389,9 +393,11 @@ class UI extends React.PureComponent {
                          key={`window/${project}/${id}`}
                          createNode={this.createNode}
                          title={this.getPaneView(id).title}
-                         toolbarControls={[<DropdownButton key="actions" size="sm" title={'View'} variant="outline-primary">
-                                            { views.map((view, index) => <Dropdown.Item key={`select/${index}`} onClick={() => this.setPaneView(id, view)}>{view.title}</Dropdown.Item>) }
-                                           </DropdownButton>,
+                         toolbarControls={[<ButtonGroup>
+                                             <DropdownButton key="actions" size="sm" title={'View'} variant="outline-primary">
+                                              { views.map((view, index) => <Dropdown.Item key={`select/${index}`} onClick={() => this.setPaneView(id, view)}>{view.title}</Dropdown.Item>) }
+                                             </DropdownButton>
+                                           </ButtonGroup>,
                                            <MosaicSplitButton key="split" />,
                                            <MosaicRemoveButton key="remove"/>
                                           ]}
