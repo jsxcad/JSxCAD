@@ -8,7 +8,7 @@ import { scale as scaleSurface } from '@jsxcad/geometry-surface';
 import test from 'ava';
 import { toSvg } from './toSvg';
 
-const { readFile } = fs.promises;
+const { writeFile, readFile } = fs.promises;
 
 test('Example', async (t) => {
   const svg = await toSvg(
