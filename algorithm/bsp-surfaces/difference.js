@@ -1,5 +1,5 @@
 import { doesNotOverlap, flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { removeExteriorPolygonsAndSkin, removeInteriorPolygonsAndSkin, fromSolid as toBspFromSolid } from './bsp';
+import { removeExteriorPolygons2, removeInteriorPolygonsKeepingSkin2, fromSolid as toBspFromSolid } from './bsp';
 
 /*
 const mayOverlap = (a, b) => !doesNotOverlap(a, b);
@@ -52,8 +52,8 @@ export const difference = (aSolid, ...bSolids) => {
     const bPolygons = toPolygonsFromSolid({}, flip(b));
     const bBsp = toBspFromSolid(b);
 
-    const aTrimmed = removeInteriorPolygonsAndSkin(bBsp, aPolygons);
-    const bTrimmed = removeExteriorPolygonsAndSkin(aBsp, bPolygons);
+    const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aPolygons);
+    const bTrimmed = removeExteriorPolygons2(aBsp, bPolygons);
 
     aSolid = toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]);
   }
