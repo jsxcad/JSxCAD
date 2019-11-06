@@ -19,6 +19,7 @@ import { Cursor } from './Cursor';
 import { Cylinder } from './Cylinder';
 import { Fastener } from './Fastener';
 import { Gear } from './Gear';
+import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
@@ -29,6 +30,7 @@ import { Point } from './Point';
 import { Points } from './Points';
 import { Polygon } from './Polygon';
 import { Polyhedron } from './Polyhedron';
+import { Prism } from './Prism';
 import { Shape } from './Shape';
 import { Sphere } from './Sphere';
 import { Spiral } from './Spiral';
@@ -209,6 +211,7 @@ export {
   Fastener,
   Gear,
   getClock,
+  Hexagon,
   hull,
   Icosahedron,
   importModule,
@@ -227,6 +230,7 @@ export {
   Points,
   Polygon,
   Polyhedron,
+  Prism,
   readDst,
   readFont,
   readJscad,

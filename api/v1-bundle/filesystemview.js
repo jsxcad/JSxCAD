@@ -2,6 +2,7 @@
 
 Error.stackTraceLimit = Infinity;
 
+import { deepEqual } from 'fast-equals';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
@@ -86,7 +87,10 @@ class UI extends React.PureComponent {
   async componentDidMount () {
     const { project } = this.state;
 
-    const fileUpdater = async () => this.setState({ projects: await listFilesystems() });
+    const fileUpdater = async () => this.setState({
+                                                     projects: await listFilesystems(),
+                                                     files: await listFiles()
+                                                  });
     const creationWatcher = await watchFileCreation(fileUpdater);
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 
@@ -302,7 +306,7 @@ class UI extends React.PureComponent {
       newPaneViews.push([queryId, newView]);
     }
 
-    this.setState({ paneViews: newPaneViews });
+    this.setState({ paneViews: newPaneViews, switchView: undefined });
 
     await writeFile({}, 'ui/paneViews', JSON.stringify(newPaneViews));
   }
@@ -366,8 +370,59 @@ class UI extends React.PureComponent {
 
     const drawerOpen = (project === '' || atLeft) ? true : undefined;
 
+    const buildButtons = (id) => {
+      return (
+        <Button key="actions"
+                size="sm"
+                variant="outline-info"
+                onClick={() => this.setState({ switchView: id })}>
+          Switch
+        </Button>
+      );
+    }
+
+    const switchViewModal = () => {
+      const { switchView } = this.state;
+
+      if (switchView === undefined) {
+        return;
+      }
+
+      const paneView = this.getPaneView(switchView);
+
+      return (
+        <Container>
+          <Row>
+            <Col>
+              <Modal show={switchView !== undefined}
+                     onHide={() => this.setState({ switchView: undefined })}
+                     keyboard>
+                <Modal.Header closeButton>
+                  <Modal.Title>
+                    Select Content
+                  </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <ButtonGroup vertical style={{ width: '100%' }}>
+                    {views.map((viewOption, index) =>
+                               <Button key={`switch/${index}`}
+                                       variant='outline-primary'
+                                       active={deepEqual(paneView, viewOption)}
+                                       onClick={() => this.setPaneView(switchView, viewOption)}>
+                                 {viewOption.title}
+                               </Button>) }
+                  </ButtonGroup>
+                </Modal.Body>
+              </Modal>
+            </Col>
+          </Row>
+        </Container>
+      );
+    };
+
     return (
       <div>
+        {switchViewModal()}
         {toastDiv}
         <Drawer key={`drawer/${project}`} width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
           <InputGroup>
@@ -393,14 +448,9 @@ class UI extends React.PureComponent {
                          key={`window/${project}/${id}`}
                          createNode={this.createNode}
                          title={this.getPaneView(id).title}
-                         toolbarControls={[<ButtonGroup>
-                                             <DropdownButton key="actions" size="sm" title={'View'} variant="outline-primary">
-                                              { views.map((view, index) => <Dropdown.Item key={`select/${index}`} onClick={() => this.setPaneView(id, view)}>{view.title}</Dropdown.Item>) }
-                                             </DropdownButton>
-                                           </ButtonGroup>,
+                         toolbarControls={[<ButtonGroup>{ buildButtons(id) }</ButtonGroup>,
                                            <MosaicSplitButton key="split" />,
-                                           <MosaicRemoveButton key="remove"/>
-                                          ]}
+                                           <MosaicRemoveButton key="remove"/>]}
                          path={path}>
                          {this.renderView(id)}
                        </MosaicWindow>
@@ -835,14 +885,33 @@ class ViewUI extends React.PureComponent {
 
   render () {
     const { id } = this.props;
-    const { path, containerId } = this.state;
+    const { file, containerId } = this.state;
+    const filePath = `file/${file.substring(9)}`;
+
+    const buttons = (file === 'geometry/preview')
+                    ? []
+                    : <Row style={{ flex: '0 0 auto' }}>
+                        <Col>
+                          <br/>
+                          <ButtonGroup>
+                            <Button size='sm'
+                                    onClick={() => downloadFile(filePath)}
+                                    variant='outline-primary'>
+                              Download
+                            </Button>
+                          </ButtonGroup>
+                        </Col>
+                      </Row>;
 
     return (
-      <Card key={id} style={{ height: '100%', overflow: 'hidden', display: 'block'}}>
-        <Card.Body style={{ height: '100%', width: '100%', overflow: 'hidden', display: 'block'}}>
-          <div id={containerId}></div>
-        </Card.Body>
-      </Card>
+      <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
+        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
+          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+            <div id={containerId}></div>
+          </Col>
+        </Row>
+        {buttons}
+      </Container>
     );
   }
 }
@@ -878,10 +947,10 @@ class JSEditorUI extends React.PureComponent {
   }
 
   async run () {
-    const { file, ui } = this.props;
+    const { file } = this.props;
 
     await this.save();
-    await runScript(file, ui);
+    await runScript(file);
   }
 
   async save () {
@@ -954,8 +1023,11 @@ class JSEditorUI extends React.PureComponent {
     const { id } = this.props;
     const { code } = this.state;
 
+    //  <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}/>
+    //      <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
+
     return (
-      <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}>
+      <Container style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
           <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
             <AceEditor
@@ -980,10 +1052,14 @@ class JSEditorUI extends React.PureComponent {
           <Col>
             <br/>
             <ButtonGroup>
-              <Button onClick={this.run} variant='outline-primary'>
+              <Button size='sm'
+                      onClick={this.run}
+                      variant='outline-primary'>
                 Run
               </Button>
-              <Button onClick={this.save} variant='outline-primary'>
+              <Button size='sm'
+                      onClick={this.save}
+                      variant='outline-primary'>
                 Save
               </Button>
             </ButtonGroup>
@@ -1060,7 +1136,7 @@ const installUI = async () => {
 
 const downloadFile = async (path) => {
   const data = await readFile({ as: 'bytes' }, path);
-  const blob = new Blob([data.buffer], { type: 'application/zip' });
+  const blob = new Blob([data.buffer], { type: 'application/octet-stream' });
   saveAs(blob, path.split('/').pop());
 };
 
@@ -1093,7 +1169,7 @@ const getAsk = async () => {
   return ask;
 }
 
-const runScript = async (path, ui) => {
+const runScript = async (path) => {
   log({ op: 'open' });
   const project = getFilesystem();
   const ask = await getAsk();
