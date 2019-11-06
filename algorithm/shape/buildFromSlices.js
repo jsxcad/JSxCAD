@@ -28,8 +28,8 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
   const polygons = [];
   const step = 1 / resolution;
   let lastPath;
-  for (let slice = 0; slice <= 1; slice += step) {
-    const path = buildPath(slice);
+  for (let t = 0; t <= 1; t += step) {
+    const path = buildPath(t);
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
     } else {
