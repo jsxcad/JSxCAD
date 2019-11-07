@@ -1,8 +1,5 @@
-import { assertEmpty, assertNumber } from './assert';
-
 import { Shape } from './Shape';
 import { buildRingSphere } from '@jsxcad/algorithm-shape';
-import { dispatch } from './dispatch';
 
 /**
  *
@@ -33,6 +30,8 @@ import { dispatch } from './dispatch';
  *
  **/
 
+const toRadiusFromApothem = (apothem, sides = 16) => apothem / Math.cos(Math.PI / sides);
+
 const unitSphere = ({ resolution = 16 } = {}) => {
   const shape = Shape.fromGeometry(buildRingSphere(resolution));
   // Make convex.
@@ -40,39 +39,13 @@ const unitSphere = ({ resolution = 16 } = {}) => {
   return shape;
 };
 
-export const fromValue = (value) => unitSphere().scale(value);
+export const ofApothem = (apothem = 1, resolution = 16) => ofRadius(toRadiusFromApothem(apothem), resolution);
+export const ofRadius = (radius = 1, resolution = 16) => unitSphere({ resolution }).scale(radius);
+export const ofDiameter = (diameter = 1, resolution = 16) => unitSphere({ resolution }).scale(diameter / 2);
 
-export const fromRadius = ({ radius, resolution = 16 }) => unitSphere({ resolution }).scale(radius);
+export const Sphere = (...args) => ofRadius(...args);
 
-export const fromDiameter = ({ diameter, resolution = 16 }) => unitSphere({ resolution }).scale(diameter / 2);
-
-export const Sphere = dispatch(
-  'Sphere',
-  // sphere()
-  (...rest) => {
-    assertEmpty(rest);
-    return () => fromValue(1);
-  },
-  // sphere(2)
-  (value) => {
-    assertNumber(value);
-    return () => fromValue(value);
-  },
-  // sphere({ radius: 2, resolution: 5 })
-  ({ radius, resolution = 16 }) => {
-    assertNumber(radius);
-    assertNumber(resolution);
-    return () => fromRadius({ radius, resolution });
-  },
-  // sphere({ diameter: 2, resolution: 25 })
-  ({ diameter, resolution = 16 }) => {
-    assertNumber(diameter);
-    assertNumber(resolution);
-    return () => fromDiameter({ diameter, resolution });
-  });
-
-Sphere.fromValue = fromValue;
-Sphere.fromRadius = fromRadius;
-Sphere.fromDiameter = fromDiameter;
+Sphere.ofRadius = ofRadius;
+Sphere.ofDiameter = ofDiameter;
 
 export default Sphere;
