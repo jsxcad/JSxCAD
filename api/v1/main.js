@@ -55,6 +55,7 @@ import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { color } from './color';
+import { contract } from './contract';
 import { coordinates } from './coordinates';
 import { cos } from './cos';
 import { cut } from './cut';
@@ -63,6 +64,7 @@ import { difference } from './difference';
 // import { divide } from './divide';
 import { drop } from './drop';
 import { ease } from './ease';
+import { expand } from './expand';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
 import { flat } from './flat';
@@ -88,6 +90,7 @@ import { moveY } from './moveY';
 import { moveZ } from './moveZ';
 import { nocut } from './nocut';
 import { numbers } from './numbers';
+import { offset } from './offset';
 import { orient } from './orient';
 import { outline } from './outline';
 import { readDst } from './readDst';
@@ -107,6 +110,7 @@ import { rotateY } from './rotateY';
 import { rotateZ } from './rotateZ';
 import { scale } from './scale';
 import { section } from './section';
+import { shell } from './shell';
 import { sin } from './sin';
 import { source } from './source';
 import { specify } from './specify';
@@ -137,11 +141,13 @@ const methods = [
   below,
   center,
   color,
+  contract,
   cut,
   describe,
   // divide,
   drop,
   ease,
+  expand,
   extrude,
   fillet,
   front,
@@ -158,6 +164,7 @@ const methods = [
   moveY,
   moveZ,
   nocut,
+  offset,
   orient,
   outline,
   right,
@@ -167,6 +174,7 @@ const methods = [
   rotateZ,
   scale,
   section,
+  shell,
   specify,
   sweep,
   tags,
@@ -241,6 +249,7 @@ export {
   readStl,
   readSvg,
   readSvgPath,
+  shell,
   sin,
   source,
   specify,
