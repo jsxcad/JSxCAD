@@ -11,3 +11,7 @@ export const ease = (start = 0.00, end = 1.00, op = t => 1) => {
   };
   return compose;
 };
+
+export const linear = (start, end) => t => start + t * (end - start);
+
+ease.linear = linear;

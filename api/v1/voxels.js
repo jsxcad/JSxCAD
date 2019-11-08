@@ -1,10 +1,9 @@
 import { containsPoint, fromSolid } from '@jsxcad/algorithm-bsp-surfaces';
+import { fromPolygons, measureBoundingBox } from '@jsxcad/geometry-solid';
 
-import { Cube } from './Cube';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { measureBoundingBox } from '@jsxcad/geometry-solid';
 
 const X = 0;
 const Y = 1;
@@ -13,21 +12,39 @@ const Z = 2;
 export const voxels = ({ resolution = 1 }, shape) => {
   const offset = resolution / 2;
   const voxels = [];
-  for (const { solid, tags = [] } of getSolids(shape.toKeptGeometry())) {
-    const cubes = [];
+  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
     const bsp = fromSolid(solid);
-    for (let x = min[X] + offset; x <= max[X] - offset; x += resolution) {
-      for (let y = min[Y] + offset; y <= max[Y] - offset; y += resolution) {
-        for (let z = min[Z] + offset; z <= max[Z] - offset; z += resolution) {
-          if (containsPoint(bsp, [x, y, z])) {
-            // FIX: Produce walls at transition boundaries instead of cubes.
-            cubes.push(Cube(resolution).move(x, y, z));
+    const polygons = [];
+    for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
+      for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
+        for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
+          const state = containsPoint(bsp, [x, y, z]);
+          if (state !== containsPoint(bsp, [x + resolution, y, z])) {
+            const face = [[x + offset, y - offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x + offset, y - offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
+          }
+          if (state !== containsPoint(bsp, [x, y + resolution, z])) {
+            const face = [[x - offset, y + offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face.reverse() : face);
+          }
+          if (state !== containsPoint(bsp, [x, y, z + resolution])) {
+            const face = [[x - offset, y - offset, z + offset],
+                          [x + offset, y - offset, z + offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
           }
         }
       }
     }
-    voxels.push(assemble(...cubes).as(...tags));
+    voxels.push(Shape.fromGeometry({ solid: fromPolygons({}, polygons), tags }));
   }
   return assemble(...voxels);
 };

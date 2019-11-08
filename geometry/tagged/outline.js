@@ -1,8 +1,7 @@
 import { makeConvex, toPlane as toPlaneFromSurface } from '@jsxcad/geometry-surface';
 
 import { cache } from '@jsxcad/cache';
-import { getSurfaces } from './getSurfaces';
-import { getZ0Surfaces } from './getZ0Surfaces';
+import { getAnySurfaces } from './getAnySurfaces';
 import { toKeptGeometry } from './toKeptGeometry';
 import { union } from '@jsxcad/geometry-surface-boolean';
 
@@ -21,16 +20,12 @@ const toOutlineFromSurface = (surface) => {
 const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
-  const z0Surfaces = getZ0Surfaces(keptGeometry);
-  const surfaces = getSurfaces(keptGeometry);
   const outlines = [];
-  for (const { z0Surface } of z0Surfaces) {
-    outlines.push(...toOutlineFromSurface(z0Surface));
+  for (const { surface, z0Surface } of getAnySurfaces(keptGeometry)) {
+    const anySurface = surface || z0Surface;
+    outlines.push(toOutlineFromSurface(anySurface));
   }
-  for (const { surface } of surfaces) {
-    outlines.push(...toOutlineFromSurface(surface));
-  }
-  return { paths: outlines };
+  return outlines.map(outline => ({ paths: outline }));
 };
 
 export const outline = cache(outlineImpl);
