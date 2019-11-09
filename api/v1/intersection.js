@@ -75,4 +75,5 @@ export const intersection = dispatch(
 
 const method = function (...shapes) { return intersection(this, ...shapes); };
 
+Shape.prototype.intersect = method;
 Shape.prototype.intersection = method;
