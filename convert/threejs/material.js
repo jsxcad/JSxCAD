@@ -55,6 +55,12 @@ const materialProperties = {
     reflectivity: 0.5,
     map: 'https://jsxcad.js.org/texture/brick.png'
   },
+  circuit: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/circuit.png'
+  },
   rock: {
     roughness: 0.5,
     metalness: 0.0,

@@ -12,7 +12,6 @@
     "tests": "ava *.test.js",
     "rollup": "rollup -c rollup.master.js && rollup -c rollup.webworker.js",
     "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js"
-    
   },
   "contributors": [
     {
@@ -32,17 +31,29 @@
     "@jsxcad/convert-threejs": "^0.0.79",
     "@jsxcad/convert-zip": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
-    "codemirror": "^5.46.0",
+    "abs-svg-path": "^0.1.1",
+    "bootstrap": "^4.3.1",
     "dat.gui": "^0.7.6",
+    "fast-equals": "^2.0.0",
     "file-saver": "^2.0.2",
+    "jquery": "1.9.1",
     "jspanel4": "^4.6.0",
     "jszip": "^3.2.2",
+    "parse-svg-path": "^0.1.2",
+    "prismjs": "^1.17.1",
+    "react": ">=16.8.2",
+    "react-ace": "^8.0.0",
+    "react-bootstrap": "^1.0.0-beta.14",
+    "react-dom": ">=16.8.2",
+    "react-mosaic-component": "^3.2.0",
+    "rc-drawer": "^3.0.0",
     "three": "^0.104.0",
     "three-trackballcontrols": "^0.0.7"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-env": "^7.4.4",
-    "@purtuga/esm-webpack-plugin": "^1.0.1",
+    "@babel/preset-react": "^7.0.0",
     "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-esm-plugin": "^0.4.0",
@@ -55,15 +66,14 @@
     "eslint-plugin-standard": "^4.0.0",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
+    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-hypothetical": "^2.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-loadz0r": "^0.7.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.1"
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"

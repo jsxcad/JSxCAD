@@ -32,7 +32,6 @@ const paths = [
   'material.js', 'max.js', 'measureBoundingBox.js', 'measureCenter.js', 'minkowski.js',
   'numbers.js',
   'outline.js',
-  'plane.js',
   'readDst.js', 'readFont.js', 'readJscad.js', 'readLDraw.js', 'readShape.js', 'readStl.js', 'readSvg.js', 'right.js', 'rotateX.js', 'rotateY.js', 'rotateZ.js',
   'scale.js', 'section.js', 'sin.js', 'sqrt.js',
   'translate.js',

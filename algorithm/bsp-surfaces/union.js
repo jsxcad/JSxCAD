@@ -1,38 +1,8 @@
 import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { inLeaf, outLeaf, fromSolid as toBspFromSolid } from './bsp';
+import { removeInteriorPolygonsKeepingSkin, fromSolid as toBspFromSolid } from './bsp';
 
-import { splitPolygon } from './splitPolygon';
-
-export const removeInteriorPolygons = (bsp, polygons) => {
-  if (bsp === inLeaf) {
-    return [];
-  } else if (bsp === outLeaf) {
-    return polygons;
-  } else {
-    const front = [];
-    const back = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(bsp.plane,
-                   polygons[i],
-                   /* back= */back,
-                   /* coplanarBack= */back,
-                   /* coplanarFront= */front,
-                   /* front= */front);
-    }
-    const trimmedFront = removeInteriorPolygons(bsp.front, front);
-    const trimmedBack = removeInteriorPolygons(bsp.back, back);
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return [].concat(trimmedFront, trimmedBack);
-    }
-  }
-};
-
-export const union = (...solids) => {
+// An n-way merge, potentially producing duplicate coplanars.
+export const unionNway = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
@@ -55,8 +25,30 @@ export const union = (...solids) => {
       if (bsps[b] === undefined) {
         bsps[b] = toBspFromSolid(solids[b]);
       }
-      polygonSets[a] = removeInteriorPolygons(bsps[b], polygonSets[a]);
+      polygonSets[a] = removeInteriorPolygonsKeepingSkin(bsps[b], polygonSets[a]);
     }
   }
   return toSolidFromPolygons({}, [].concat(...polygonSets));
+};
+
+// An asymmetric binary merge.
+export const union = (...solids) => {
+  if (solids.length === 0) {
+    return [];
+  }
+  while (solids.length > 1) {
+    const a = solids.shift();
+    const aPolygons = toPolygonsFromSolid({}, a);
+    const aBsp = toBspFromSolid(a);
+
+    const b = solids.shift();
+    const bPolygons = toPolygonsFromSolid({}, b);
+    const bBsp = toBspFromSolid(b);
+
+    const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons);
+    const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons);
+
+    solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]));
+  }
+  return solids[0];
 };

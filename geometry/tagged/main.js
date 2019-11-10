@@ -14,10 +14,11 @@ import { fromPathToZ0Surface } from './fromPathToZ0Surface';
 import { fromPathsToSurface } from './fromPathsToSurface';
 import { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
 import { fromSurfaceToPaths } from './fromSurfaceToPaths';
-import { getClouds } from './getClouds';
+import { getAnySurfaces } from './getAnySurfaces';
 import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
+import { getPoints } from './getPoints';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getTags } from './getTags';
@@ -52,7 +53,8 @@ export {
   fromPathsToSurface,
   fromPathsToZ0Surface,
   fromSurfaceToPaths,
-  getClouds,
+  getAnySurfaces,
+  getPoints,
   getItems,
   getPaths,
   getPlans,

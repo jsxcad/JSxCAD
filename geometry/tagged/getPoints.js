@@ -1,12 +1,12 @@
 import { eachItem } from './eachItem';
 
-export const getClouds = (geometry) => {
-  const clouds = [];
+export const getPoints = (geometry) => {
+  const pointsets = [];
   eachItem(geometry,
            item => {
              if (item.points) {
-               clouds.push(item);
+               pointsets.push(item);
              }
            });
-  return clouds;
+  return pointsets;
 };

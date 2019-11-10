@@ -25,7 +25,7 @@ export const readJscad = async (options = {}) => {
   let { path, script } = options;
   if (script === undefined) {
     if (path !== undefined) {
-      script = await readFile({ sources: getSources(path), options }, path);
+      script = await readFile({ sources: getSources(path), options }, `file/${path}`);
     }
   }
   const { getGeometry, getParameterDefinitions } = await scriptToOperator({}, script);

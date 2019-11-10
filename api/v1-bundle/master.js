@@ -1,9 +1,6 @@
-import { installCSS, installCSSLink } from './css';
+/* global location */
 
 import { installFilesystemview } from './filesystemview';
-
-// import { installEditorCSS } from './editor';
-// import { installDisplayCSS } from './display';
 
 /*
 const installProject = async () => {
@@ -57,6 +54,7 @@ const installProject = async () => {
 */
 
 window.bootstrapCSS = async () => {
+/*
   // Editor
   await installCSSLink(document, 'https://codemirror.net/lib/codemirror.css');
   await installCSS(document, `.CodeMirror { border-top: 1px solid black; border-bottom: 1px solid black; font-family: "Corier Neu", monospace; font-size: 20px; height: 100% }`);
@@ -65,49 +63,30 @@ window.bootstrapCSS = async () => {
   await installCSSLink(document, 'https://jspanel.de/dist/jspanel.min.css');
   await installCSSLink(document, 'https://fonts.googleapis.com/icon?family=Material+Icons');
   await installCSS(document, `
-               .dg { position: absolute; top: 2px; left: 2px; background: #ffffff; color: #000000 }
+               .dg { position: absolute; bottom: 12px; right: 30px; background: #ffffff; color: #000000 }
                .dg.main.taller-than-window .close-button { border-top: 1px solid #ddd; }
-               .dg.main .close-button { background-color: #ccc; } 
+               .dg.main .close-button { background-color: #ccc; }
                .dg.main .close-button:hover { background-color: #ddd; }
-               .dg { color: #555; text-shadow: none !important; } 
-               .dg.main::-webkit-scrollbar { background: #fafafa; } 
-               .dg.main::-webkit-scrollbar-thumb { background: #bbb; } 
-               .dg li:not(.folder) { background: #fafafa; border-bottom: 1px solid #ddd; } 
-               .dg li.save-row .button { text-shadow: none !important; } 
+               .dg { color: #555; text-shadow: none !important; }
+               .dg.main::-webkit-scrollbar { background: #fafafa; }
+               .dg.main::-webkit-scrollbar-thumb { background: #bbb; }
+               .dg li:not(.folder) { background: #fafafa; border-bottom: 1px solid #ddd; }
+               .dg li.save-row .button { text-shadow: none !important; }
                .dg li.title { background: #e8e8e8 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat; }
-               .dg .cr.function:hover,.dg .cr.boolean:hover { background: #fff; } 
-               .dg .c input[type=text] { background: #e9e9e9; } 
-               .dg .c input[type=text]:hover { background: #eee; } 
-               .dg .c input[type=text]:focus { background: #eee; color: #555; } 
-               .dg .c .slider { background: #e9e9e9; } 
+               .dg .cr.function:hover,.dg .cr.boolean:hover { background: #fff; }
+               .dg .c input[type=text] { background: #e9e9e9; }
+               .dg .c input[type=text]:hover { background: #eee; }
+               .dg .c input[type=text]:focus { background: #eee; color: #555; }
+               .dg .c .slider { background: #e9e9e9; }
                .dg .c .slider:hover { background: #eee; }
              `);
+*/
 };
 
 window.bootstrap = async () => {
-  /*
-  let { initialScript } = await installProject();
-  if (initialScript === undefined) {
-    initialScript = await readFile({}, 'script');
-  }
-  if (initialScript === undefined) {
-    initialScript = defaultScript;
-  }
-  const { addPage, nextPage, lastPage } = await installDisplay({ document, readFile, watchFile, watchFileCreation, window });
-  const { evaluator } = await installEvaluator({});
-  await installEditor({ addPage, document, evaluator, initialScript, nextPage, lastPage });
-  */
-  await installFilesystemview({ document });
-  /*
-  await installConsole({ addPage, document, watchFile });
-  await installReference({ addPage, document });
-  for (const filesystem of await listFilesystems()) {
-    console.log(`QQ/filesystem: ${filesystem}`);
-  }
-  for (const file of await listFiles()) {
-    console.log(`QQ/file: ${file}`);
-  }
-  */
+  const hash = location.hash.substring(1);
+  const [project, source] = hash.split('@');
+  await installFilesystemview({ document, project, source });
 };
 
 window.bootstrapCSS().then(_ => _).catch(_ => _);

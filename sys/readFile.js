@@ -4,11 +4,10 @@
 
 import * as fs from 'fs';
 
+import { getBase, getFilesystem, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
-import { getBase } from './filesystem';
 import { getFile } from './files';
-import { isBase64 } from 'is-base64';
 import isUrlHttp from 'is-url-http';
 import localForage from 'localforage';
 import { log } from './log';
@@ -36,11 +35,7 @@ const getFileFetcher = async (prefix) => {
     return async (path) => {
       const data = await localForage.getItem(`${prefix}${path}`);
       if (data !== null) {
-        if (isBase64(data)) {
-          return toByteArray(data);
-        } else {
-          return new TextEncoder('utf8').encode(data);
-        }
+        return new Uint8Array(toByteArray(data));
       }
     };
   } else {
@@ -54,9 +49,11 @@ const fetchPersistent = async (path) => {
     const base = getBase();
     if (base !== undefined) {
       const fetchFile = await getFileFetcher('jsxcad/');
-      return await fetchFile(`${base}${path}`);
+      const data = await fetchFile(`${base}${path}`);
+      return data;
     }
   } catch (e) {
+    console.log(e);
   }
 };
 
@@ -69,7 +66,7 @@ const fetchSources = async (options = {}, sources) => {
     if (typeof source === 'string') {
       try {
         if (isUrlHttp(source)) {
-          log(`# Fetching ${source}`);
+          log({ op: 'text', text: `# Fetching ${source}` });
           const response = await fetchUrl(source);
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
@@ -85,7 +82,7 @@ const fetchSources = async (options = {}, sources) => {
       }
     } else if (source.url !== undefined) {
       // DEPRECATE
-      log(`# Fetching ${source.url}`);
+      log({ op: 'text', text: `# Fetching ${source.url}` });
       const response = await fetchUrl(source.url);
       if (response.ok) {
         return new Uint8Array(await response.arrayBuffer());
@@ -109,10 +106,22 @@ export const readFile = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
-  const { sources = [] } = options;
-  const file = getFile(options, path);
+  const { sources = [], project = getFilesystem() } = options;
+  let originalProject = getFilesystem();
+  if (project !== originalProject) {
+    log({ op: 'text', text: `Read ${path} of ${project}` });
+    // Switch to the source filesystem, if necessary.
+    setupFilesystem({ fileBase: project });
+  } else {
+    log({ op: 'text', text: `Read ${path}` });
+  }
+  const file = await getFile(options, path);
   if (file.data === undefined) {
     file.data = await fetchPersistent(path);
+  }
+  if (project !== originalProject) {
+    // Switch back to the original filesystem, if necessary.
+    setupFilesystem({ fileBase: originalProject });
   }
   if (file.data === undefined) {
     file.data = await fetchSources({}, sources);

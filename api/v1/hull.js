@@ -40,6 +40,7 @@ const Z = 2;
 export const hull = (...shapes) => {
   const points = [];
   shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
+  // FIX: Detect planar hulls properly.
   if (points.every(point => point[Z] === 0)) {
     return Shape.fromGeometry(buildConvexSurfaceHull(points));
   } else {

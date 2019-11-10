@@ -5,11 +5,9 @@ import { cache } from '@jsxcad/cache';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 // FIX: Rewrite via buildFromFunction.
-const extrudeImpl = (geometry, height = 1, steps = 1, twistRadians = 0) => {
-  // This should be a surface in z0.
-  const rawSurface = geometry.surface || geometry.z0Surface;
-  const tags = geometry.tags;
-  const surface = retessellate(makeConvex({}, rawSurface));
+// FIX: This only works on z0surface.
+const extrudeImpl = (z0Surface, height = 1, steps = 1, twistRadians = 0, cap = true) => {
+  const surface = z0Surface;
   const polygons = [];
   const stepHeight = height / steps;
 
@@ -35,16 +33,21 @@ const extrudeImpl = (geometry, height = 1, steps = 1, twistRadians = 0) => {
     }
   }
 
-  // Roof goes up.
-  const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));
+  if (cap) {
+    const surface = retessellate(makeConvex({}, z0Surface));
 
-  // floor faces down.
-  const floor = flipSurface(surface);
+    // Roof goes up.
+    const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));
 
-  polygons.push(...roof);
-  polygons.push(...floor);
+    // floor faces down.
+    const floor = flipSurface(surface);
 
-  return { solid: toSolidFromPolygons({}, polygons), tags };
+    polygons.push(...roof);
+    polygons.push(...floor);
+  }
+
+  const solid = toSolidFromPolygons({}, polygons);
+  return solid;
 };
 
 export const extrude = cache(extrudeImpl);

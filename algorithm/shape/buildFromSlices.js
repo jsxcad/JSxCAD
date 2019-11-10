@@ -1,28 +1,40 @@
-import { assertGood, deduplicate, flip as flipPath } from '@jsxcad/geometry-path';
+import { assertGood, deduplicate } from '@jsxcad/geometry-path';
 
 import { flip as flipPolygons } from '@jsxcad/geometry-polygons';
+import { makeConvex } from '@jsxcad/geometry-surface';
+import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
+import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 const buildWalls = (polygons, floor, roof) => {
   for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
     // Remember that we are walking CCW.
-    polygons.push(deduplicate([floor[start], floor[end], roof[start]]));
-    polygons.push(deduplicate([floor[end], roof[end], roof[start]]));
+    const a = deduplicate([floor[start], floor[end], roof[start]]);
+    const b = deduplicate([floor[end], roof[end], roof[start]]);
+
+    // Some of these polygons may become degenerate -- skip those.
+    if (toPlaneFromPolygon(a)) {
+      polygons.push(a);
+    }
+
+    if (toPlaneFromPolygon(b)) {
+      polygons.push(b);
+    }
   }
 };
 
 // Build a tube from generated path slices.
 // The paths are assumed to connect in a 1:1 vertical relationship before deduplication.
-export const buildFromSlices = ({ buildPath, slices, cap = true }) => {
+export const buildFromSlices = (buildPath, resolution, cap = true) => {
   const polygons = [];
-  const step = 1 / slices;
+  const step = 1 / resolution;
   let lastPath;
-  for (let slice = 0; slice <= 1; slice += step) {
-    const path = buildPath(slice);
+  for (let t = 0; t <= 1; t += step) {
+    const path = buildPath(t);
     if (lastPath !== undefined) {
       buildWalls(polygons, path, lastPath);
     } else {
       if (cap) {
-        polygons.push(path);
+        polygons.push(...makeConvex({}, [deduplicate(path)]));
       }
     }
     lastPath = path;
@@ -31,7 +43,8 @@ export const buildFromSlices = ({ buildPath, slices, cap = true }) => {
     assertGood(polygon);
   }
   if (cap) {
-    polygons.push(flipPath(lastPath));
+    polygons.push(...flipPolygons(makeConvex({}, [deduplicate(lastPath)])));
   }
-  return flipPolygons(polygons);
+
+  return { solid: toSolidFromPolygons({}, flipPolygons(polygons)) };
 };

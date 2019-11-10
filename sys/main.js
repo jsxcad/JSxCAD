@@ -1,28 +1,38 @@
 import { addSource, getSources } from './source';
+import { ask, setHandleAskUser } from './ask';
 import { getFilesystem, setupFilesystem } from './filesystem';
 import { listFiles, listFilesystems } from './listFiles';
-import { unwatchFileCreation, watchFileCreation } from './files';
+import { log, unwatchLog, watchLog } from './log';
+import { unwatchFile, watchFile } from './watchFile';
+import { unwatchFileCreation, unwatchFileDeletion, watchFileCreation, watchFileDeletion } from './files';
 
 import { conversation } from './conversation';
 import { createService } from './service';
-import { log } from './log';
+import { deleteFile } from './deleteFile';
 import { readFile } from './readFile';
-import { watchFile } from './watchFile';
 import { writeFile } from './writeFile';
 
 export {
   addSource,
+  ask,
   createService,
   conversation,
+  deleteFile,
   getFilesystem,
   getSources,
+  setHandleAskUser,
   listFiles,
   listFilesystems,
   log,
   readFile,
   setupFilesystem,
+  unwatchFile,
   unwatchFileCreation,
+  unwatchFileDeletion,
+  unwatchLog,
   watchFile,
   watchFileCreation,
+  watchFileDeletion,
+  watchLog,
   writeFile
 };

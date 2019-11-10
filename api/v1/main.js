@@ -10,7 +10,6 @@
 import * as vec from '@jsxcad/math-vec3';
 
 import { getClock, startClock } from './clock';
-import { planeX, planeY, planeZ } from './plane';
 
 import { Armature } from './Armature';
 import { Board } from './Board';
@@ -20,6 +19,7 @@ import { Cursor } from './Cursor';
 import { Cylinder } from './Cylinder';
 import { Fastener } from './Fastener';
 import { Gear } from './Gear';
+import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
@@ -30,6 +30,7 @@ import { Point } from './Point';
 import { Points } from './Points';
 import { Polygon } from './Polygon';
 import { Polyhedron } from './Polyhedron';
+import { Prism } from './Prism';
 import { Shape } from './Shape';
 import { Sphere } from './Sphere';
 import { Spiral } from './Spiral';
@@ -40,16 +41,21 @@ import { ThreadedRod } from './ThreadedRod';
 import { Torus } from './Torus';
 import { Triangle } from './Triangle';
 import { Wave } from './Wave';
+import { X } from './X';
+import { Y } from './Y';
+import { Z } from './Z';
 
 import { above } from './above';
 import { acos } from './acos';
 import { as } from './as';
+import { ask } from './ask';
 import { assemble } from './assemble';
 import { back } from './back';
 import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { color } from './color';
+import { contract } from './contract';
 import { coordinates } from './coordinates';
 import { cos } from './cos';
 import { cut } from './cut';
@@ -57,8 +63,11 @@ import { describe } from './describe';
 import { difference } from './difference';
 // import { divide } from './divide';
 import { drop } from './drop';
+import { ease } from './ease';
+import { expand } from './expand';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
+import { flat } from './flat';
 import { front } from './front';
 // import { fuse } from './fuse';
 import { getPathsets } from './getPathsets';
@@ -76,8 +85,12 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { measureCenter } from './measureCenter';
 import { minkowski } from './minkowski';
 import { move } from './move';
+import { moveX } from './moveX';
+import { moveY } from './moveY';
+import { moveZ } from './moveZ';
 import { nocut } from './nocut';
 import { numbers } from './numbers';
+import { offset } from './offset';
 import { orient } from './orient';
 import { outline } from './outline';
 import { readDst } from './readDst';
@@ -89,6 +102,7 @@ import { readShape } from './readShape';
 import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
+import { readSvgPath } from './readSvgPath';
 import { right } from './right';
 import { rotate } from './rotate';
 import { rotateX } from './rotateX';
@@ -96,10 +110,12 @@ import { rotateY } from './rotateY';
 import { rotateZ } from './rotateZ';
 import { scale } from './scale';
 import { section } from './section';
+import { shell } from './shell';
 import { sin } from './sin';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
+import { stretch } from './stretch';
 import { sweep } from './sweep';
 import { tags } from './tags';
 import { toBillOfMaterial } from './toBillOfMaterial';
@@ -125,22 +141,30 @@ const methods = [
   below,
   center,
   color,
+  contract,
   cut,
   describe,
   // divide,
   drop,
+  ease,
+  expand,
   extrude,
   fillet,
   front,
   // fuse,
   getPathsets,
+  flat,
   interior,
   left,
   material,
   measureBoundingBox,
   measureCenter,
   move,
+  moveX,
+  moveY,
+  moveZ,
   nocut,
+  offset,
   orient,
   outline,
   right,
@@ -150,6 +174,7 @@ const methods = [
   rotateZ,
   scale,
   section,
+  shell,
   specify,
   sweep,
   tags,
@@ -177,6 +202,7 @@ if (methods.includes(undefined)) {
 export {
   Shape,
   acos,
+  ask,
   Armature,
   assemble,
   Board,
@@ -188,9 +214,12 @@ export {
   Cursor,
   Cylinder,
   difference,
+  ease,
+  flat,
   Fastener,
   Gear,
   getClock,
+  Hexagon,
   hull,
   Icosahedron,
   importModule,
@@ -204,14 +233,12 @@ export {
   Nail,
   numbers,
   Plan,
-  planeX,
-  planeY,
-  planeZ,
   Path,
   Point,
   Points,
   Polygon,
   Polyhedron,
+  Prism,
   readDst,
   readFont,
   readJscad,
@@ -221,11 +248,14 @@ export {
   readShapefile,
   readStl,
   readSvg,
+  readSvgPath,
+  shell,
   sin,
   source,
   specify,
   Sphere,
   sqrt,
+  stretch,
   Spiral,
   Square,
   startClock,
@@ -236,5 +266,8 @@ export {
   Triangle,
   union,
   vec,
-  Wave
+  Wave,
+  X,
+  Y,
+  Z
 };
