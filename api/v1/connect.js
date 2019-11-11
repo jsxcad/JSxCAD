@@ -1,7 +1,9 @@
 import { distance, negate } from '@jsxcad/math-vec3';
 
+import { Plan } from './Plan';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
+import { drop } from '@jsxcad/geometry-tagged';
 
 const X = 0;
 const Y = 1;
@@ -26,7 +28,7 @@ const angleX = (cord1, cord2) => {
 const moveToOrigin = (shape, connectorName) => {
   const connectors = shape.connectors();
   const connector = connectors[connectorName];
-  const [A, B, C] = connector;
+  const [A, B, C] = connector.marks;
 
   // Move both shapes so point A is a the origin,
   // then correct each angle.
@@ -39,12 +41,18 @@ const moveToOrigin = (shape, connectorName) => {
   return result;
 };
 
+export const dropConnector = (shape, connector) => Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
+
 // Connect two shapes at the specified connector.
 export const connect = (aShape, aConnector, bShape, bConnector) => {
   const [, aOrigin, [aX, aY, aZ]] = moveToOrigin(aShape, aConnector);
   const [bMoved] = moveToOrigin(bShape, bConnector);
   const bConnected = bMoved.rotateX(aX).rotateY(-aY).rotateZ(aZ).move(aOrigin);
-  return assemble(aShape, bConnected);
+  return assemble(
+             dropConnector(aShape, aConnector),
+             dropConnector(bConnected, bConnector))
+           .with(Plan.Label(`${aConnector} + ${bConnector}`)
+                     .move(aOrigin));
 };
 
 const method = function (...args) { return connect(this, ...args); };

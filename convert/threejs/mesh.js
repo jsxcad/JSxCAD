@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+import { add, normalize, scale, subtract } from '@jsxcad/math-vec2';
+
 import { buildMeshMaterial } from './material';
 import { setColor } from './color';
 
@@ -221,30 +223,84 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
   if (threejsGeometry === undefined) {
     return;
   }
+
+  const project = (point) => {
+    const vector = new THREE.Vector3();
+    vector.set(...point);
+    // map to normalized device coordinate (NDC) space
+    vector.project(camera);
+    // map to 2D screen space
+    const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
+    const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
+    return [x, y];
+  }
+
   const ctx = hudCanvas.getContext('2d');
-  ctx.fillStyle = '#00FF00';
+  ctx.fillStyle = '#000000';
   ctx.strokeStyle = '#000000';
-  ctx.font = '30px "Arial Black", Gadget, sans-serif';
+  // ctx.font = '16px "Arial Black", Gadget, sans-serif';
+  ctx.font = '16px "Courier", Gadget, sans-serif';
+  const margin = 10;
+
+  const drawLabel = (label, x, y) => {
+    ctx.shadowBlur = 7;
+    ctx.setLineDash([3, 3]);
+
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.moveTo(x, y);
+    ctx.lineTo(margin + ctx.measureText(label).width + margin, y);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    ctx.strokeText(label, margin, y);
+    ctx.fillText(label, margin, y);
+
+    ctx.shadowBlur = 0;
+  }
+
   const walk = (threejsGeometry) => {
     if (threejsGeometry.assembly) {
       threejsGeometry.assembly.forEach(walk);
     } else if (threejsGeometry.threejsPlan) {
       const { threejsPlan, threejsMarks } = threejsGeometry;
-      const { label } = threejsPlan;
-      if (label) {
-        const vector = new THREE.Vector3();
-        vector.set(...threejsMarks[0]);
-        // map to normalized device coordinate (NDC) space
-        vector.project(camera);
-        // map to 2D screen space
-        const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
-        const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
-        const [dX, dY] = [x + 0, y - 0];
-        // ctx.moveTo(x, y);
-        // ctx.lineTo(dY, dY);
-        // ctx.stroke();
-        ctx.fillText(label, dX, dY);
-        ctx.strokeText(label, dX, dY);
+      if (threejsPlan.label) {
+        ctx.strokeStyle = "#000000";
+        ctx.fillStyle = "#000000";
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 7;
+
+        const [dX, dY] = project(threejsMarks[0]);
+        ctx.beginPath();
+        ctx.arc(dX, dY, 4, 0, Math.PI * 2);
+        ctx.stroke();
+        drawLabel(threejsPlan.label, dX, dY);
+      } else if (threejsPlan.connector) {
+        ctx.strokeStyle = "#000000";
+        ctx.fillStyle = "#000000";
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 7;
+
+        const [aX, aY] = project(threejsMarks[0]);
+        const [bX, bY] = project(threejsMarks[1]);
+        const [cX, cY] = project(threejsMarks[2]);
+
+        const normalizedLine = (origin, point, length) =>
+            add(origin, scale(length, normalize(subtract(point, origin))));
+
+        const [bXN, bYN] = normalizedLine([aX, aY], [bX, bY], 25 / 2);
+        const [cXN, cYN] = normalizedLine([aX, aY], [cX, cY], 100 / 2);
+
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.moveTo(bXN, bYN);
+        ctx.lineTo(aX, aY);
+        ctx.lineTo(cXN, cYN);
+        ctx.closePath();
+        ctx.stroke();
+
+        drawLabel(threejsPlan.connector, aX, aY);
       }
     }
   };
