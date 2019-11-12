@@ -1,5 +1,7 @@
 import { distance, negate } from '@jsxcad/math-vec3';
+import { drop, rotateY, rotateZ, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
 
+import { Plan } from './Plan';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 
@@ -18,33 +20,51 @@ const angleX = (cord1, cord2) => {
   const l2 = distance([0, 0, 0], [100, 0, 0]);
 
   const l3 = distance([cord1, cord2, 0], [100, 0, 0]);
-  const rotation = Math.acos((l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2)) * (180 / Math.PI) * Math.sign(cord2);
-  return rotation;
+
+  return Math.acos((l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2)) * (180 / Math.PI) * Math.sign(cord2);
 };
 
 // Move the target shape to the origin and align with axis
 const moveToOrigin = (shape, connectorName) => {
   const connectors = shape.connectors();
-  const connector = connectors[connectorName];
-  const [A, B, C] = connector;
+  let connector = connectors[connectorName];
+  const [origin] = connector.marks;
 
   // Move both shapes so point A is a the origin,
   // then correct each angle.
 
-  const z = angleX(B[X], B[Y]);
-  const y = angleX(B[X], B[Z]);
-  const x = angleX(C[Y], C[Z]);
+  connector = toTransformedGeometry(translate(negate(origin), connector));
+  const z = (([, B]) => angleX(B[X], B[Y]))(connector.marks);
 
-  const result = [shape.move(negate(A)).rotateZ(-z).rotateY(y).rotateX(-x), A, [x, y, z]];
-  return result;
+  connector = toTransformedGeometry(rotateZ(-z, connector));
+  const y = (([, B]) => angleX(B[X], B[Z]))(connector.marks);
+
+  connector = toTransformedGeometry(rotateY(y, connector));
+  const x = (([, , C]) => angleX(C[Y], C[Z]))(connector.marks);
+
+  return [origin, x, y, z];
 };
+
+export const dropConnector = (shape, connector) => Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
 
 // Connect two shapes at the specified connector.
 export const connect = (aShape, aConnector, bShape, bConnector) => {
-  const [, aOrigin, [aX, aY, aZ]] = moveToOrigin(aShape, aConnector);
-  const [bMoved] = moveToOrigin(bShape, bConnector);
-  const bConnected = bMoved.rotateX(aX).rotateY(-aY).rotateZ(aZ).move(aOrigin);
-  return assemble(aShape, bConnected);
+  const [aOrigin, aX, aY, aZ] = moveToOrigin(aShape, aConnector);
+  const [bOrigin, bX, bY, bZ] = moveToOrigin(bShape, bConnector);
+  return assemble(
+    dropConnector(aShape,
+                  aConnector),
+    dropConnector(bShape.move(negate(bOrigin))
+        .rotateZ(-bZ)
+        .rotateY(bY)
+        .rotateX(-bX)
+        .rotateX(aX)
+        .rotateY(-aY)
+        .rotateZ(aZ)
+        .move(aOrigin),
+                  bConnector))
+      .with(Plan.Label(`${aConnector} + ${bConnector}`)
+          .move(aOrigin));
 };
 
 const method = function (...args) { return connect(this, ...args); };

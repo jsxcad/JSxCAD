@@ -11,20 +11,21 @@ import { getPlans } from '@jsxcad/geometry-tagged';
  **/
 
 export const Plan = (options = {}) => {
-  const { plan, marks } = options;
+  const { plan, marks, tags } = options;
   // FIX: Add validation.
-  return Shape.fromGeometry({ plan, marks });
+  return Shape.fromGeometry({ plan, marks, tags });
 };
 
 // Connectors
 
-Plan.Connector = (connector, a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0]) => Plan({ plan: { connector }, marks: [a, b, c] });
+Plan.Connector = (connector, a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0]) =>
+  Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] });
 
 const connectors = (geometry) => {
   const connectors = {};
-  for (const { plan, marks } of getPlans(geometry)) {
-    if (plan.connector) {
-      connectors[plan.connector] = marks;
+  for (const entry of getPlans(geometry)) {
+    if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
+      connectors[entry.plan.connector] = entry;
     }
   }
   return connectors;
