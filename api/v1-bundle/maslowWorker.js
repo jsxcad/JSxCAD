@@ -45,17 +45,39 @@ const agent = async ({ ask, question }) => {
         return returnVal.toDisjointGeometry();
       case 'getLayoutSvgs':
         // Extract shapes
-        var items = api.Shape.fromGeometry(values[0]).toItems();
+        let items = api.Shape.fromGeometry(values[0]).toItems();
+        let shiftedItems = [];
+        const spacing = values[1];
+        const sheetX = values[2];
+        const sheetY = values[3];
+        let lengths =[];
+        let widths =[];
+        let flattenedItems =[];
 
-        // Center each one and grab a .svg of it
-        var svgArray = [];
-        var item;
-        for (item in items) {
-          const svgString = await toSvg({}, items[item].center().section().outline().toKeptGeometry());
-          svgArray.push(svgString);
-        }
+        items.forEach(item => { 
+          let flatItem = item.flat()
+          flattenedItems.push(flatItem)
+          let length = flatItem.measureBoundingBox()[1][1] - flatItem.measureBoundingBox()[0][1];
+          let width = flatItem.measureBoundingBox()[1][0] - flatItem.measureBoundingBox()[0][0];     
+          lengths.push(length);
+          widths.push(width);
+        });
+        const maxFlatLength = Math.max(...lengths); 
+        const maxFlatWidth = Math.max(...widths);
+        let translatedDistanceY = maxFlatLength/2 + spacing;
+        let translatedDistanceX = maxFlatWidth;
 
-        return svgArray;
+        flattenedItems.forEach(flatItem => {
+          const centeredItem = flatItem.center()
+          const flatWidth = (centeredItem.measureBoundingBox()[1][0] - centeredItem.measureBoundingBox()[0][0])
+          if ((translatedDistanceX + flatWidth) >= sheetX){
+            translatedDistanceX = maxFlatWidth;
+            translatedDistanceY += maxFlatLength + spacing; 
+          }
+          shiftedItems.push(centeredItem.translate([translatedDistanceX, translatedDistanceY, 0]));
+          translatedDistanceX += flatWidth + spacing;
+        });
+        return api.assemble(...shiftedItems).toDisjointGeometry();
       case 'difference':
         return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'extractTag':
