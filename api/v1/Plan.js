@@ -19,7 +19,7 @@ export const Plan = (options = {}) => {
 // Connectors
 
 Plan.Connector = (connector, a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0]) =>
-    Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] });
+  Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] });
 
 const connectors = (geometry) => {
   const connectors = {};

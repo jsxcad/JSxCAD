@@ -233,7 +233,7 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
     const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
     const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
     return [x, y];
-  }
+  };
 
   const ctx = hudCanvas.getContext('2d');
   ctx.fillStyle = '#000000';
@@ -258,7 +258,7 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
     ctx.fillText(label, margin, y);
 
     ctx.shadowBlur = 0;
-  }
+  };
 
   const walk = (threejsGeometry) => {
     if (threejsGeometry.assembly) {
@@ -266,8 +266,8 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
     } else if (threejsGeometry.threejsPlan) {
       const { threejsPlan, threejsMarks } = threejsGeometry;
       if (threejsPlan.label) {
-        ctx.strokeStyle = "#000000";
-        ctx.fillStyle = "#000000";
+        ctx.strokeStyle = '#000000';
+        ctx.fillStyle = '#000000';
         ctx.shadowColor = '#FFFFFF';
         ctx.shadowBlur = 7;
 
@@ -277,8 +277,8 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
         ctx.stroke();
         drawLabel(threejsPlan.label, dX, dY);
       } else if (threejsPlan.connector) {
-        ctx.strokeStyle = "#000000";
-        ctx.fillStyle = "#000000";
+        ctx.strokeStyle = '#000000';
+        ctx.fillStyle = '#000000';
         ctx.shadowColor = '#FFFFFF';
         ctx.shadowBlur = 7;
 
@@ -287,7 +287,7 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
         const [cX, cY] = project(threejsMarks[2]);
 
         const normalizedLine = (origin, point, length) =>
-            add(origin, scale(length, normalize(subtract(point, origin))));
+          add(origin, scale(length, normalize(subtract(point, origin))));
 
         const [bXN, bYN] = normalizedLine([aX, aY], [bX, bY], 25 / 2);
         const [cXN, cYN] = normalizedLine([aX, aY], [cX, cY], 100 / 2);

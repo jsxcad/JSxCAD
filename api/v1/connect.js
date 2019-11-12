@@ -49,10 +49,10 @@ export const connect = (aShape, aConnector, bShape, bConnector) => {
   const [bMoved] = moveToOrigin(bShape, bConnector);
   const bConnected = bMoved.rotateX(aX).rotateY(-aY).rotateZ(aZ).move(aOrigin);
   return assemble(
-             dropConnector(aShape, aConnector),
-             dropConnector(bConnected, bConnector))
-           .with(Plan.Label(`${aConnector} + ${bConnector}`)
-                     .move(aOrigin));
+    dropConnector(aShape, aConnector),
+    dropConnector(bConnected, bConnector))
+      .with(Plan.Label(`${aConnector} + ${bConnector}`)
+          .move(aOrigin));
 };
 
 const method = function (...args) { return connect(this, ...args); };
