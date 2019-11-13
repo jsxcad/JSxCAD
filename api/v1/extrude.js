@@ -56,9 +56,9 @@ const op = (shape, twist = 0, steps = 1, heights) => {
   return assemble(...solids);
 };
 
-export const withTwist = (shape, twist, { steps, heights = [] }) => op(shape, twist, steps, heights);
+export const withTwist = (shape, twist, { steps, height = [] }) => op(shape, twist, steps, height);
 
-export const toHeight = (shape, ...heights) => op(shape, 0, 1, heights);
+export const toHeight = (shape, ...height) => op(shape, 0, 1, height);
 
 export const extrude = (...args) => extrude.toHeight(...args);
 extrude.toHeight = toHeight;
