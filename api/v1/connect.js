@@ -48,23 +48,28 @@ const moveToOrigin = (shape, connectorName) => {
 export const dropConnector = (shape, connector) => Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
 
 // Connect two shapes at the specified connector.
-export const connect = (aShape, aConnector, bShape, bConnector) => {
+export const connect = (aShape, aConnector, bShape, bConnector, doAssemble = true) => {
   const [aOrigin, aX, aY, aZ] = moveToOrigin(aShape, aConnector);
   const [bOrigin, bX, bY, bZ] = moveToOrigin(bShape, bConnector);
-  return assemble(
-    dropConnector(aShape,
-                  aConnector),
-    dropConnector(bShape.move(negate(bOrigin))
-        .rotateZ(-bZ)
-        .rotateY(bY)
-        .rotateX(-bX)
-        .rotateX(aX)
-        .rotateY(-aY)
-        .rotateZ(aZ)
-        .move(aOrigin),
-                  bConnector))
-      .with(Plan.Label(`${aConnector} + ${bConnector}`)
-          .move(aOrigin));
+  const bMoved = bShape.move(negate(bOrigin))
+      .rotateZ(-bZ)
+      .rotateY(bY)
+      .rotateX(-bX)
+      .rotateX(aX)
+      .rotateY(-aY)
+      .rotateZ(aZ)
+      .move(aOrigin);
+  if (doAssemble) {
+    return assemble(
+      dropConnector(aShape,
+                    aConnector),
+      dropConnector(bMoved,
+                    bConnector))
+        .with(Plan.Label(`${aConnector} + ${bConnector}`)
+            .move(aOrigin));
+  } else {
+    return bMoved;
+  }
 };
 
 const method = function (...args) { return connect(this, ...args); };

@@ -6,17 +6,19 @@ import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
-const extrudeImpl = (z0Surface, height = 1, steps = 1, twistRadians = 0, cap = true) => {
+const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians = 0, cap = true) => {
   const surface = z0Surface;
   const polygons = [];
-  const stepHeight = height / steps;
+  const stepHeight = (height - depth) / steps;
 
   // Build the walls.
   for (const polygon of surface) {
     const wall = flipPath(polygon.map(([x = 0, y = 0]) => [x, y, 0]));
     for (let step = 0; step < steps; step++) {
-      const floor = translatePath([0, 0, stepHeight * (step + 0)], rotateZPath(twistRadians * (step + 0), wall));
-      const roof = translatePath([0, 0, stepHeight * (step + 1)], rotateZPath(twistRadians * (step + 1), wall));
+      const floor = translatePath([0, 0, depth + stepHeight * (step + 0)],
+                                  rotateZPath(twistRadians * (step + 0), wall));
+      const roof = translatePath([0, 0, depth + stepHeight * (step + 1)],
+                                 rotateZPath(twistRadians * (step + 1), wall));
       // Walk around the floor to build the walls.
       for (let i = 0; i < floor.length; i++) {
         const floorStart = floor[i];
@@ -40,7 +42,7 @@ const extrudeImpl = (z0Surface, height = 1, steps = 1, twistRadians = 0, cap = t
     const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));
 
     // floor faces down.
-    const floor = flipSurface(surface);
+    const floor = translateSurface([0, 0, depth], flipSurface(surface));
 
     polygons.push(...roof);
     polygons.push(...floor);
