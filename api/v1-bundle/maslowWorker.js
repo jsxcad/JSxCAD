@@ -83,7 +83,7 @@ const agent = async ({ ask, question }) => {
       case 'extractTag':
         return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
       case 'extrude':
-        return api.Shape.fromGeometry(values[0]).extrude({ height: values[1] }).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
       case 'hull':
         values = values.map(api.Shape.fromGeometry);
         return api.hull(...values).toDisjointGeometry();
