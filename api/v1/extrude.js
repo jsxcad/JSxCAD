@@ -1,10 +1,8 @@
-import { assertNonZeroNumber, assertShape } from './assert';
 import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
-import { dispatch } from './dispatch';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
@@ -31,7 +29,12 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  *
  **/
 
-export const fromHeight = (shape, height = 1, steps = 1, twist = 0) => {
+const op = (shape, twist = 0, steps = 1, heights) => {
+  if (typeof heights === 'number') {
+    heights = [heights];
+  }
+  const depth = heights.length > 1 ? Math.min(...heights) : 0;
+  const height = heights.length > 0 ? Math.max(...heights) : 1;
   const twistRadians = twist * Math.PI / 180;
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
@@ -45,37 +48,27 @@ export const fromHeight = (shape, height = 1, steps = 1, twist = 0) => {
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
       const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
-      const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, steps, twistRadians);
+      const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, depth, steps, twistRadians);
       const solid = transformSolid(fromZ0, z0SolidGeometry);
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
-  if (height < 0) {
-    // Turn negative extrusions inside out.
-    return assemble(...solids).flip();
-  } else {
-    return assemble(...solids);
-  }
+  return assemble(...solids);
 };
 
-export const fromValue = (shape, height) => fromHeight(shape, height);
+export const withTwist = (shape, twist, { steps, height = [] }) => op(shape, twist, steps, height);
 
-export const extrude = dispatch(
-  'extrude',
-  (height, shape) => {
-    assertNonZeroNumber(height);
-    assertShape(shape);
-    return () => fromValue(shape, height);
-  },
-  ({ height, steps = 1, twist = 0 }, shape) => {
-    assertNonZeroNumber(height);
-    assertShape(shape);
-    return () => fromHeight(shape, height, steps, twist);
-  }
-);
+export const toHeight = (shape, ...height) => op(shape, 0, 1, height);
 
-extrude.fromValue = fromValue;
-extrude.fromHeight = fromHeight;
+export const extrude = (...args) => extrude.toHeight(...args);
+extrude.toHeight = toHeight;
+extrude.withTwist = withTwist;
 
-const method = function (options) { return extrude(options, this); };
-Shape.prototype.extrude = method;
+const extrudeMethod = function (...args) { return extrude(this, ...args); };
+Shape.prototype.extrude = extrudeMethod;
+
+const extrudeToHeightMethod = function (...args) { return toHeight(this, ...args); };
+Shape.prototype.extrudeToHeight = extrudeToHeightMethod;
+
+const extrudeWithTwistMethod = function (...args) { return withTwist(this, ...args); };
+Shape.prototype.extrudeWithTwist = extrudeWithTwistMethod;

@@ -76,7 +76,7 @@ export const socketSheet = ({ width = 32, length = 32, height = 1.8, play = 0.1,
   for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
     for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
       sockets.push(assemble(
-        Cube(8, 8, height).above(),
+        Cube(8 - play * 2, 8 - play * 2, height).above(),
         socket(stud).drop())
           .translate(x - width / 2, y - length / 2, height / -2));
     }

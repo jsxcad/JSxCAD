@@ -28,6 +28,7 @@
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
+    "@jsxcad/math-vec2": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "three": "^0.104.0",

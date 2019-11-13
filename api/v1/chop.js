@@ -44,7 +44,7 @@ import { cut as surfaceCut } from '@jsxcad/geometry-surface';
  *
  **/
 
-export const cut = (shape, planeShape = Z()) => {
+export const chop = (shape, planeShape = Z()) => {
   const cuts = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
@@ -66,6 +66,6 @@ export const cut = (shape, planeShape = Z()) => {
   return assemble(...cuts);
 };
 
-const method = function (surface) { return cut(this, surface); };
+const method = function (surface) { return chop(this, surface); };
 
-Shape.prototype.cut = method;
+Shape.prototype.chop = method;

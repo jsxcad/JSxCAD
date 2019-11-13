@@ -78,8 +78,8 @@ export {
   union
 };
 
-export const rotateX = (angle, assembly) => transform(fromXRotation(angle), assembly);
-export const rotateY = (angle, assembly) => transform(fromYRotation(angle), assembly);
-export const rotateZ = (angle, assembly) => transform(fromZRotation(angle), assembly);
+export const rotateX = (angle, assembly) => transform(fromXRotation(angle * Math.PI / 180), assembly);
+export const rotateY = (angle, assembly) => transform(fromYRotation(angle * Math.PI / 180), assembly);
+export const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 180), assembly);
 export const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 export const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
