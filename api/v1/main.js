@@ -70,13 +70,13 @@ import { extrude } from './extrude';
 import { fillet } from './fillet';
 import { flat } from './flat';
 import { front } from './front';
-import { fuse } from './fuse';
 import { getPathsets } from './getPathsets';
 import { hull } from './hull';
 import { importModule } from './importModule';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { kept } from './kept';
 import { lathe } from './lathe';
 import { left } from './left';
 import { log } from './log';
@@ -153,10 +153,10 @@ const methods = [
   extrude,
   fillet,
   front,
-  fuse,
   getPathsets,
   flat,
   interior,
+  kept,
   left,
   material,
   measureBoundingBox,
