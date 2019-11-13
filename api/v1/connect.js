@@ -52,13 +52,13 @@ export const connect = (aShape, aConnector, bShape, bConnector, doAssemble = tru
   const [aOrigin, aX, aY, aZ] = moveToOrigin(aShape, aConnector);
   const [bOrigin, bX, bY, bZ] = moveToOrigin(bShape, bConnector);
   const bMoved = bShape.move(negate(bOrigin))
-                       .rotateZ(-bZ)
-                       .rotateY(bY)
-                       .rotateX(-bX)
-                       .rotateX(aX)
-                       .rotateY(-aY)
-                       .rotateZ(aZ)
-                       .move(aOrigin);
+      .rotateZ(-bZ)
+      .rotateY(bY)
+      .rotateX(-bX)
+      .rotateX(aX)
+      .rotateY(-aY)
+      .rotateZ(aZ)
+      .move(aOrigin);
   if (doAssemble) {
     return assemble(
       dropConnector(aShape,
