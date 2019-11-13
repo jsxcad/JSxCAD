@@ -70,7 +70,7 @@ import { extrude } from './extrude';
 import { fillet } from './fillet';
 import { flat } from './flat';
 import { front } from './front';
-// import { fuse } from './fuse';
+import { fuse } from './fuse';
 import { getPathsets } from './getPathsets';
 import { hull } from './hull';
 import { importModule } from './importModule';
@@ -153,7 +153,7 @@ const methods = [
   extrude,
   fillet,
   front,
-  // fuse,
+  fuse,
   getPathsets,
   flat,
   interior,

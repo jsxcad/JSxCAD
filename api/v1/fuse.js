@@ -1,5 +1,4 @@
 import { Shape, toKeptGeometry } from './Shape';
-import { fuse as fuseGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -15,7 +14,7 @@ import { fuse as fuseGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const fuse = (shape) => Shape.fromGeometry(fuseGeometry(toKeptGeometry(shape)));
+export const fuse = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
 
 const method = function () { return fuse(this); };
 
