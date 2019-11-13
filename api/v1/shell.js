@@ -3,7 +3,6 @@ import { getSolids, outline } from '@jsxcad/geometry-tagged';
 import { Circle } from './Circle';
 import { Shape } from './Shape';
 import { Sphere } from './Sphere';
-import { assemble } from './assemble';
 import { hull } from './hull';
 import { toSegments } from '@jsxcad/geometry-path';
 import { union } from './union';
