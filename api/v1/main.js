@@ -54,12 +54,12 @@ import { back } from './back';
 import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
+import { chop } from './chop';
 import { color } from './color';
 import { connect } from './connect';
 import { contract } from './contract';
 import { coordinates } from './coordinates';
 import { cos } from './cos';
-import { cut } from './cut';
 import { describe } from './describe';
 import { difference } from './difference';
 // import { divide } from './divide';
@@ -70,13 +70,13 @@ import { extrude } from './extrude';
 import { fillet } from './fillet';
 import { flat } from './flat';
 import { front } from './front';
-// import { fuse } from './fuse';
 import { getPathsets } from './getPathsets';
 import { hull } from './hull';
 import { importModule } from './importModule';
 import { interior } from './interior';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { kept } from './kept';
 import { lathe } from './lathe';
 import { left } from './left';
 import { log } from './log';
@@ -141,10 +141,10 @@ const methods = [
   back,
   below,
   center,
+  chop,
   color,
   connect,
   contract,
-  cut,
   describe,
   // divide,
   drop,
@@ -153,10 +153,10 @@ const methods = [
   extrude,
   fillet,
   front,
-  // fuse,
   getPathsets,
   flat,
   interior,
+  kept,
   left,
   material,
   measureBoundingBox,

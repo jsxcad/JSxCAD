@@ -3,9 +3,9 @@ import { getSolids, outline } from '@jsxcad/geometry-tagged';
 import { Circle } from './Circle';
 import { Shape } from './Shape';
 import { Sphere } from './Sphere';
-import { assemble } from './assemble';
 import { hull } from './hull';
 import { toSegments } from '@jsxcad/geometry-path';
+import { union } from './union';
 
 /**
  *
@@ -32,7 +32,7 @@ export const shell = (shape, radius = 1, resolution = 8) => {
         pieces.push(hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
       }
     }
-    shells.push(assemble(...pieces).as(...tags));
+    shells.push(union(...pieces).as(...tags));
   }
   for (const { paths, tags = [] } of outline(keptGeometry)) {
     const pieces = [];
@@ -42,9 +42,9 @@ export const shell = (shape, radius = 1, resolution = 8) => {
         pieces.push(hull(...segment.map(([x, y]) => Circle(radius, resolution).move(x, y))));
       }
     }
-    shells.push(assemble(...pieces).as(...tags));
+    shells.push(union(...pieces).as(...tags));
   }
-  return assemble(...shells);
+  return union(...shells);
 };
 
 const method = function (radius, resolution) { return shell(this, radius, resolution); };

@@ -121,6 +121,18 @@ export class Cursor {
   turn (angle) {
     return this.rotateZ(angle);
   }
+
+  left (angle) {
+    return this.turn(-angle);
+  }
+
+  right (angle) {
+    return this.turn(angle);
+  }
+
+  forward (distance) {
+    return this.move(distance);
+  }
 }
 
 export const fromOrigin = () => new Cursor();
