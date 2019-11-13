@@ -8,9 +8,9 @@ test('Retrieve no sources', t => {
 });
 
 test('Retrieve multiple sources in reverse order', t => {
-  addSource('hello', '/tmp/hello.txt');
+  addSource('hello', 'file/tmp/hello.txt');
   addSource('hello', 'http://hello.com');
 
   const sources = getSources('hello');
-  t.deepEqual(sources, ['http://hello.com', '/tmp/hello.txt']);
+  t.deepEqual(sources, ['http://hello.com', 'file/tmp/hello.txt']);
 });

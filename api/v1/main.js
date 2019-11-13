@@ -55,6 +55,7 @@ import { below } from './below';
 import { center } from './center';
 import { chainHull } from './chainHull';
 import { color } from './color';
+import { connect } from './connect';
 import { contract } from './contract';
 import { coordinates } from './coordinates';
 import { cos } from './cos';
@@ -141,6 +142,7 @@ const methods = [
   below,
   center,
   color,
+  connect,
   contract,
   cut,
   describe,
@@ -208,6 +210,7 @@ export {
   Board,
   chainHull,
   Circle,
+  connect,
   coordinates,
   cos,
   Cube,

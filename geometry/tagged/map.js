@@ -1,16 +1,14 @@
 export const map = (geometry, operation) => {
+  const present = item => item !== undefined;
   const walk = (geometry) => {
     if (geometry.assembly) {
-      return operation({ assembly: geometry.assembly.map(walk), tags: geometry.tags });
+      const assembly = geometry.assembly.map(walk).filter(present);
+      return operation({ assembly, tags: geometry.tags });
     } else if (geometry.disjointAssembly) {
       // FIX: Consider the case where the operation does not preserve disjoinedness.
-      if (geometry.nonNegative) {
-        return operation({ disjointAssembly: geometry.disjointAssembly.map(walk), nonNegative: geometry.nonNegative.map(walk), tags: geometry.tags });
-      } else {
-        return operation({ disjointAssembly: geometry.disjointAssembly.map(walk), tags: geometry.tags });
-      }
+      const disjointAssembly = geometry.disjointAssembly.map(walk).filter(present);
+      return operation({ disjointAssembly, tags: geometry.tags });
     } else {
-      // What about matrix?
       return operation(geometry);
     }
   };

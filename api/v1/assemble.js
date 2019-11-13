@@ -77,3 +77,4 @@ export const assemble = dispatch(
 const method = function (...shapes) { return assemble(this, ...shapes); };
 
 Shape.prototype.assemble = method;
+Shape.prototype.with = method;

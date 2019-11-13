@@ -53,6 +53,9 @@ const fetchPersistent = async (path) => {
       return data;
     }
   } catch (e) {
+    if (e.code && e.code === 'ENOENT') {
+      return;
+    }
     console.log(e);
   }
 };
@@ -80,21 +83,6 @@ const fetchSources = async (options = {}, sources) => {
         }
       } catch (e) {
       }
-    } else if (source.url !== undefined) {
-      // DEPRECATE
-      log({ op: 'text', text: `# Fetching ${source.url}` });
-      const response = await fetchUrl(source.url);
-      if (response.ok) {
-        return new Uint8Array(await response.arrayBuffer());
-      }
-    } else if (source.file !== undefined) {
-      // DEPRECATE
-      try {
-        const data = await fetchFile(source.file);
-        if (data !== undefined) {
-          return data;
-        }
-      } catch (e) {}
     } else {
       throw Error('die');
     }
