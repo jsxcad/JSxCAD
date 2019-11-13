@@ -56,4 +56,4 @@ export const difference = dispatch(
 const method = function (...shapes) { return difference(this, ...shapes); };
 
 Shape.prototype.difference = method;
-Shape.prototype.subtract = method;
+Shape.prototype.cut = method;
