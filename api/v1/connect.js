@@ -9,6 +9,15 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+const sign = (value) => {
+  const indicator = 1 / value;
+  if (indicator < 0) {
+    return -1;
+  } else {
+    return 1;
+  }
+};
+
 // Find the angle between the passed vector and the x-axis (in the given reference frame)
 const angleX = (cord1, cord2) => {
   // Compute the angle from the given cordinates to 100, 0 (the x axis) (in the passed reference plane)
@@ -21,7 +30,25 @@ const angleX = (cord1, cord2) => {
 
   const l3 = distance([cord1, cord2, 0], [100, 0, 0]);
 
-  return Math.acos((l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2)) * (180 / Math.PI) * Math.sign(cord2);
+  // The below seems incorrect -- if l1 or l2 is zero then it will fail equivalently.
+
+  const v1 = l1 * l1 + l2 * l2 - l3 * l3;
+
+  if (v1 === 0) {
+    return Math.acos(0) * 180 / Math.PI * sign(cord2);
+  }
+
+  const v2 = 2 * l1 * l2;
+
+  if (v2 === 0) {
+    return Math.acos(sign(v1)) * 180 / Math.PI * sign(cord2);
+  }
+
+  const result = Math.acos(v1 / v2) * (180 / Math.PI) * sign(cord2);
+  if (isNaN(result)) {
+    throw Error('die');
+  }
+  return result;
 };
 
 // Move the target shape to the origin and align with axis
