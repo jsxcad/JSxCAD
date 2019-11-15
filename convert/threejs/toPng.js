@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
 import GL from 'gl';
+import { buildMeshes } from './mesh';
 import { encode } from 'fast-png';
 import { toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { toThreejsGeometry } from './toThreejsGeometry';
-import { buildMeshes } from './mesh';
 
 export const toPng = async ({ view = {}, pageSize = [256, 256], grid = false }, geometry) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 1, 1], near = 1, far = 3500 } = view;
@@ -18,12 +18,12 @@ export const toPng = async ({ view = {}, pageSize = [256, 256], grid = false }, 
   camera.lookAt(...target);
   scene.add(camera);
 
-  const canvas = new Object();
+  const canvas = {};
   canvas.addEventListener = () => undefined;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, width, height, canvas, context: GL(width, height) });
 
-  const threejsGeometry = toThreejsGeometry(geometry);
+  const threejsGeometry = toThreejsGeometry(toKeptGeometry(geometry));
   const datasets = [];
   buildMeshes({ datasets, threejsGeometry, scene });
 
@@ -37,4 +37,4 @@ export const toPng = async ({ view = {}, pageSize = [256, 256], grid = false }, 
   const pngData = encode({ width, height, data, depth: 8, channels: 4 });
 
   return pngData;
-}
+};
