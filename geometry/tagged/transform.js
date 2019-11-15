@@ -17,6 +17,12 @@ export const transformItem = (matrix, item) => {
   } else if (item.plan) {
     transformed.plan = item.plan;
     transformed.marks = transformPoints(matrix, item.marks);
+    if (item.plan.connector === 'Flat Top') {
+      console.log('RRR');
+    }
+    if (item.marks.some(value => typeof value === 'number' && isNaN(value))) {
+      throw Error('die');
+    }
   } else if (item.points) {
     transformed.points = transformPoints(matrix, item.points);
   } else if (item.solid) {
@@ -36,6 +42,9 @@ export const transformItem = (matrix, item) => {
 };
 
 const transformImpl = (matrix, untransformed) => {
+  if (matrix.some(value => typeof value !== 'number' || isNaN(value))) {
+    throw Error('die');
+  }
   return { matrix, untransformed, tags: untransformed.tags };
 };
 

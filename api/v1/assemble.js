@@ -19,7 +19,8 @@ import { dispatch } from './dispatch';
  *
  * Components of the assembly can be extracted by tag filtering.
  *
- * Components later in the assembly project holes into components earlier in the assembly so that the geometries are disjoint.
+ * Components later in the assembly project holes into components earlier in the
+ * assembly so that the geometries are disjoint.
  *
  * ::: illustration { "view": { "position": [100, 100, 100] } }
  * ```

@@ -29,5 +29,11 @@ export const readDst = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  return Shape.fromGeometry(await fromDst(options, await readFile({ as: 'bytes', sources: getSources(`file/${path}`), ...options }, `file/${path}`)));
+  const data = await readFile({
+    as: 'bytes',
+    sources: getSources(`file/${path}`),
+    ...options
+  },
+                              `file/${path}`);
+  return Shape.fromGeometry(await fromDst(options, data));
 };

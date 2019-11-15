@@ -56,10 +56,15 @@ const unitCube = () => Shape.fromGeometry(buildRegularPrism(4))
 // Cube Interfaces.
 
 export const ofEdge = (value) => unitCube().scale(value);
+
 export const ofEdges = (width, length, height) => unitCube().scale([width, length, height]);
 
-export const ofRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4)).rotateZ(45).scale([radius, radius, radius / edgeScale]);
+export const ofRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4))
+    .rotateZ(45)
+    .scale([radius, radius, radius / edgeScale]);
+
 export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));
+
 export const ofDiameter = (diameter) => ofRadius(diameter / 2);
 
 export const fromCorners = (corner1, corner2) => {
@@ -69,7 +74,7 @@ export const fromCorners = (corner1, corner2) => {
   const width = c2y - c1y;
   const height = c2z - c1z;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
-  return unitCube().scale([length, width, height]).translate(center);
+  return unitCube().scale([length, width, height]).move(...center);
 };
 
 export const Cube = dispatch(

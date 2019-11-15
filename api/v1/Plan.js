@@ -18,28 +18,45 @@ export const Plan = (options = {}) => {
 
 // Connectors
 
-Plan.Connector = (connector, a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0]) =>
-  Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] });
+export const shapeToConnect = Symbol('shapeToConnect');
 
-const connectors = (geometry) => {
+const isNan = (v) => typeof v === 'number' && isNaN(v);
+
+export const Connector = (connector, a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0]) => {
+  if (isNan(a) || isNan(b) || isNan(c)) {
+    throw Error('die');
+  }
+  return Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] });
+};
+
+Plan.Connector = Connector;
+
+const connectors = (shape) => {
   const connectors = {};
-  for (const entry of getPlans(geometry)) {
+  for (const entry of getPlans(shape.toKeptGeometry())) {
     if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-      connectors[entry.plan.connector] = entry;
+      connectors[entry.plan.connector] = Shape.fromGeometry(entry, { [shapeToConnect]: shape });
     }
   }
   return connectors;
 };
 
-const withConnectorMethod = function (...args) { return assemble(this, Plan.Connector(...args)); };
-const connectorsMethod = function () { return connectors(this.toKeptGeometry()); };
+const connector = (geometry, id) => connectors(geometry)[id];
 
+const connectorMethod = function (id) { return connector(this, id); };
+Shape.prototype.connector = connectorMethod;
+
+const connectorsMethod = function () { return connectors(this); };
 Shape.prototype.connectors = connectorsMethod;
+
+const withConnectorMethod = function (...args) { return assemble(this, Plan.Connector(...args)); };
 Shape.prototype.withConnector = withConnectorMethod;
 
 // Labels
 
-Plan.Label = (label, mark = [0, 0, 0]) => Plan({ plan: { label }, marks: [mark] });
+export const Label = (label, mark = [0, 0, 0]) => Plan({ plan: { label }, marks: [mark] });
+
+Plan.Label = Label;
 
 const labels = (geometry) => {
   const labels = {};
@@ -51,8 +68,8 @@ const labels = (geometry) => {
   return labels;
 };
 
-const withLabelMethod = function (...args) { return assemble(this, Plan.Label(...args)); };
 const labelsMethod = function () { return labels(this.toKeptGeometry()); };
-
 Shape.prototype.labels = labelsMethod;
+
+const withLabelMethod = function (...args) { return assemble(this, Plan.Label(...args)); };
 Shape.prototype.withLabel = withLabelMethod;

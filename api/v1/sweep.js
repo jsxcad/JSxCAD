@@ -17,7 +17,7 @@ export const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      chains.push(chainHull(...path.map(point => tool.move(point))));
+      chains.push(chainHull(...path.map(point => tool.move(...point))));
     }
   }
   return union(...chains);

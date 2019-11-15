@@ -1,13 +1,41 @@
+import { Plan, shapeToConnect } from './Plan';
 import { distance, negate } from '@jsxcad/math-vec3';
 import { drop, rotateY, rotateZ, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
 
-import { Plan } from './Plan';
 import { Shape } from './Shape';
 import { assemble } from './assemble';
+
+/**
+ *
+ * # Connect
+ *
+ * Connects two connectors.
+ *
+ * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
+ * ```
+ * Cube(10)
+ *   .with(Plan.Connector('top').moveZ(5))
+ *   .connector('top')
+ *   .connect(
+ *     Sphere(10)
+ *       .with(Plan.Connector('bottom').moveZ(-10))
+ *       .connector('bottom'))
+ * ```
+ * :::
+ **/
 
 const X = 0;
 const Y = 1;
 const Z = 2;
+
+const sign = (value) => {
+  const indicator = 1 / value;
+  if (indicator < 0) {
+    return -1;
+  } else {
+    return 1;
+  }
+};
 
 // Find the angle between the passed vector and the x-axis (in the given reference frame)
 const angleX = (cord1, cord2) => {
@@ -21,13 +49,32 @@ const angleX = (cord1, cord2) => {
 
   const l3 = distance([cord1, cord2, 0], [100, 0, 0]);
 
-  return Math.acos((l1 * l1 + l2 * l2 - l3 * l3) / (2 * l1 * l2)) * (180 / Math.PI) * Math.sign(cord2);
+  // The below seems incorrect -- if l1 or l2 is zero then it will fail equivalently.
+
+  const v1 = l1 * l1 + l2 * l2 - l3 * l3;
+
+  if (v1 === 0) {
+    return Math.acos(0) * 180 / Math.PI * sign(cord2);
+  }
+
+  const v2 = 2 * l1 * l2;
+
+  if (v2 === 0) {
+    return Math.acos(sign(v1)) * 180 / Math.PI * sign(cord2);
+  }
+
+  const v3 = Math.max(-1, Math.min(1, v1 / v2));
+
+  const result = Math.acos(v3) * (180 / Math.PI) * sign(cord2);
+  if (isNaN(result)) {
+    throw Error('die');
+  }
+  return result;
 };
 
 // Move the target shape to the origin and align with axis
-const moveToOrigin = (shape, connectorName) => {
-  const connectors = shape.connectors();
-  let connector = connectors[connectorName];
+const moveToOrigin = (connectorShape) => {
+  let connector = toTransformedGeometry(connectorShape.toGeometry());
   const [origin] = connector.marks;
 
   // Move both shapes so point A is a the origin,
@@ -45,31 +92,35 @@ const moveToOrigin = (shape, connectorName) => {
   return [origin, x, y, z];
 };
 
-export const dropConnector = (shape, connector) => Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
+export const dropConnector = (shape, connector) =>
+  Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
 
 // Connect two shapes at the specified connector.
-export const connect = (aShape, aConnector, bShape, bConnector, doAssemble = true) => {
-  const [aOrigin, aX, aY, aZ] = moveToOrigin(aShape, aConnector);
-  const [bOrigin, bX, bY, bZ] = moveToOrigin(bShape, bConnector);
-  const bMoved = bShape.move(negate(bOrigin))
+export const connect = (aConnector, bConnector, { doAssemble = true, label } = {}) => {
+  const [aOrigin, aX, aY, aZ] = moveToOrigin(aConnector);
+  const [bOrigin, bX, bY, bZ] = moveToOrigin(bConnector.flip());
+  // TODO: use a symbol.
+  const aShape = aConnector.getContext(shapeToConnect);
+  const bShape = bConnector.getContext(shapeToConnect);
+  const bMoved = bShape.move(...negate(bOrigin))
       .rotateZ(-bZ)
       .rotateY(bY)
       .rotateX(-bX)
-      .rotateX(aX)
-      .rotateY(-aY)
-      .rotateZ(aZ)
-      .move(aOrigin);
+      .rotateX(-aX)
+      .rotateY(aY)
+      .rotateZ(-aZ)
+      .move(...aOrigin);
+  let result;
   if (doAssemble) {
-    return assemble(
-      dropConnector(aShape,
-                    aConnector),
-      dropConnector(bMoved,
-                    bConnector))
-        .with(Plan.Label(`${aConnector} + ${bConnector}`)
-            .move(aOrigin));
+    result = assemble(dropConnector(aShape, aConnector),
+                      dropConnector(bMoved, bConnector));
   } else {
-    return bMoved;
+    result = bMoved;
   }
+  if (label !== undefined) {
+    result = result.with(Plan.Label(label).move(...aOrigin));
+  }
+  return result;
 };
 
 const method = function (...args) { return connect(this, ...args); };

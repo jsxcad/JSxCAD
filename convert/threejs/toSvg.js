@@ -25,7 +25,9 @@ const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => 
     const grid = new THREE.GridHelper(100, 10, 'green', 'blue');
     grid.material = new THREE.LineBasicMaterial({ color: 0x000000 });
     grid.rotation.x = -Math.PI / 2;
-    // grid.material.transparent = true;
+    grid.position.x = 0;
+    grid.position.y = 0;
+    grid.position.z = 0;
     scene.add(grid);
   }
   //

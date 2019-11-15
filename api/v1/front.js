@@ -5,7 +5,7 @@ import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { dispatch } from './dispatch';
 import { measureBoundingBox } from './measureBoundingBox';
-import { translate } from './translate';
+import { moveY } from './moveY';
 
 /**
  *
@@ -30,13 +30,13 @@ const Y = 1;
 
 export const fromOrigin = (shape) => {
   const [, maxPoint] = measureBoundingBox(shape);
-  return translate([0, -maxPoint[Y], 0], shape);
+  return moveY(shape, -maxPoint[Y]);
 };
 
 export const fromReference = (shape, reference) => {
   const [, maxPoint] = measureBoundingBox(shape);
   const [minRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, translate([0, minRefPoint[Y] - maxPoint[Y], 0], shape));
+  return assemble(reference, moveY(shape, minRefPoint[Y] - maxPoint[Y]));
 };
 
 export const front = dispatch(
