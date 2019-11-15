@@ -31,6 +31,8 @@
     "@jsxcad/math-vec2": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
+    "fast-png": "^5.0.1",
+    "gl": "^4.4.0",
     "three": "^0.104.0",
     "xmldom": "^0.1.27"
   },
