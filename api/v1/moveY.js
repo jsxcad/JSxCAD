@@ -9,7 +9,7 @@ import { move } from './move';
  *
  */
 
-export const moveY = (y, shape) => move(0, y, shape);
+export const moveY = (shape, y) => move(shape, 0, y);
 
-const method = function (y) { return moveY(y, this); };
+const method = function (y) { return moveY(this, y); };
 Shape.prototype.moveY = method;

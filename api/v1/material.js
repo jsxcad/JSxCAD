@@ -30,7 +30,8 @@ import { dispatch } from './dispatch';
  *
  **/
 
-export const fromValue = (tags, shape) => Shape.fromGeometry(addTags(tags.map(tag => `material/${tag}`), shape.toGeometry()));
+export const fromValue = (tags, shape) => Shape.fromGeometry(addTags(tags.map(tag => `material/${tag}`),
+                                                                     shape.toGeometry()));
 
 export const material = dispatch(
   'material',

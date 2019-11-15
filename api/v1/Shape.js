@@ -1,7 +1,18 @@
-import { assertGood as assertGoodSolid, fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 import { close as closePath, concatenate as concatenatePath, open as openPath } from '@jsxcad/geometry-path';
-import { eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, toDisjointGeometry, toKeptGeometry as toKeptTaggedGeometry, toPoints,
-         transform } from '@jsxcad/geometry-tagged';
+import {
+  eachPoint,
+  flip,
+  fromPathToSurface,
+  fromPathToZ0Surface,
+  fromPathsToSurface,
+  fromPathsToZ0Surface,
+  toDisjointGeometry,
+  toKeptGeometry as toKeptTaggedGeometry,
+  toPoints,
+  transform
+} from '@jsxcad/geometry-tagged';
+
+import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 
 export class Shape {
   close () {
@@ -24,11 +35,13 @@ export class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor (geometry = fromGeometry({ assembly: [] })) {
+  constructor (geometry = fromGeometry({ assembly: [] }),
+               context) {
     if (geometry.geometry) {
       throw Error('die');
     }
     this.geometry = geometry;
+    this.context = context;
   }
 
   eachPoint (options = {}, operation) {
@@ -36,7 +49,7 @@ export class Shape {
   }
 
   flip () {
-    return fromGeometry(flip(toKeptGeometry(this)));
+    return fromGeometry(flip(toKeptGeometry(this)), this.context);
   }
 
   getTags () {
@@ -48,7 +61,7 @@ export class Shape {
   }
 
   setTags (tags) {
-    return fromGeometry({ ...toGeometry(this), tags });
+    return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
 
   toDisjointGeometry (options = {}) {
@@ -59,7 +72,11 @@ export class Shape {
     return toKeptTaggedGeometry(toGeometry(this));
   }
 
-  toGeometry (options = {}) {
+  getContext (symbol) {
+    return this.context[symbol];
+  }
+
+  toGeometry () {
     return this.geometry;
   }
 
@@ -71,33 +88,26 @@ export class Shape {
     if (matrix.some(item => item === -Infinity)) {
       throw Error('die');
     }
-    return fromGeometry(transform(matrix, this.toGeometry()));
+    return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
 }
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
-Shape.fromClosedPath = (path) => fromGeometry({ paths: [closePath(path)] });
-Shape.fromGeometry = (geometry) => new Shape(geometry);
-Shape.fromOpenPath = (path) => fromGeometry({ paths: [openPath(path)] });
-Shape.fromPath = (path) => fromGeometry({ paths: [path] });
-Shape.fromPaths = (paths) => fromGeometry({ paths: paths });
-Shape.fromPathToSurface = (path) => fromGeometry(fromPathToSurface(path));
-Shape.fromPathToZ0Surface = (path) => fromGeometry(fromPathToZ0Surface(path));
-Shape.fromPathsToSurface = (paths) => fromGeometry(fromPathsToSurface(paths));
-Shape.fromPathsToZ0Surface = (paths) => fromGeometry(fromPathsToZ0Surface(paths));
-Shape.fromPoint = (point) => fromGeometry({ points: [point] });
-Shape.fromPoints = (points) => fromGeometry({ points: points });
-Shape.fromPolygonsToSolid = (polygons) => {
-  const solid = fromPolygonsToSolid({}, polygons);
-  assertGoodSolid(solid);
-  return fromGeometry({ solid });
-};
-Shape.fromPolygonsToZ0Surface = (polygons) => fromGeometry({ z0Surface: polygons });
-Shape.fromSurfaces = (surfaces) => fromGeometry({ solid: surfaces });
-Shape.fromSolid = (solid) => {
-  assertGoodSolid(solid);
-  return fromGeometry({ solid: solid });
-};
+Shape.fromClosedPath = (path, context) => fromGeometry({ paths: [closePath(path)] }, context);
+Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
+Shape.fromOpenPath = (path, context) => fromGeometry({ paths: [openPath(path)] }, context);
+Shape.fromPath = (path, context) => fromGeometry({ paths: [path] }, context);
+Shape.fromPaths = (paths, context) => fromGeometry({ paths: paths }, context);
+Shape.fromPathToSurface = (path, context) => fromGeometry(fromPathToSurface(path), context);
+Shape.fromPathToZ0Surface = (path, context) => fromGeometry(fromPathToZ0Surface(path), context);
+Shape.fromPathsToSurface = (paths, context) => fromGeometry(fromPathsToSurface(paths), context);
+Shape.fromPathsToZ0Surface = (paths, context) => fromGeometry(fromPathsToZ0Surface(paths), context);
+Shape.fromPoint = (point, context) => fromGeometry({ points: [point] }, context);
+Shape.fromPoints = (points, context) => fromGeometry({ points: points }, context);
+Shape.fromPolygonsToSolid = (polygons, context) => fromGeometry({ solid: fromPolygonsToSolid({}, polygons) }, context);
+Shape.fromPolygonsToZ0Surface = (polygons, context) => fromGeometry({ z0Surface: polygons }, context);
+Shape.fromSurfaces = (surfaces, context) => fromGeometry({ solid: surfaces }, context);
+Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

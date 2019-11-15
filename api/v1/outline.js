@@ -26,7 +26,8 @@ import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const outline = (shape) => assemble(...outlineGeometry(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
+export const outline = (shape) =>
+  assemble(...outlineGeometry(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
 
 const method = function (options) { return outline(this); };
 

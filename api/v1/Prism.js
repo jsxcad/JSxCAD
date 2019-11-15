@@ -21,22 +21,24 @@ const buildPrism = (radius = 1, height = 1, sides = 32) =>
  *
  **/
 
-export const ofValue = (radius, height = 1, sides = 5) => buildPrism(radius, height, sides);
+export const ofValue = (radius, height = 1, sides = 3) => buildPrism(radius, height, sides);
 
-export const ofRadius = (radius, height = 1, sides = 5) => buildPrism(radius, height, sides);
+export const ofRadius = (radius, height = 1, sides = 3) => buildPrism(radius, height, sides);
 
 const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
 
-export const ofApothem = (apothem, height = 1, sides = 5) => buildPrism(toRadiusFromApothem(apothem, sides), height, sides);
+export const ofApothem = (apothem, height = 1, sides = 3) => buildPrism(toRadiusFromApothem(apothem, sides),
+                                                                        height,
+                                                                        sides);
 
-export const ofDiameter = (diameter, height = 1, sides = 5) => buildPrism(diameter / 2, height, sides);
+export const ofDiameter = (diameter, height = 1, sides = 3) => buildPrism(diameter / 2, height, sides);
 
-export const betweenRadius = (from, to, radius, sides = 5) =>
+export const betweenRadius = (from, to, radius, sides = 3) =>
   ofRadius(radius, distance(from, to), sides)
       .above()
       .orient({ from, at: to });
 
-export const betweenDiameter = (from, to, diameter, sides = 5) =>
+export const betweenDiameter = (from, to, diameter, sides = 3) =>
   ofDiameter(diameter, distance(from, to), sides)
       .above()
       .orient({ from, at: to });

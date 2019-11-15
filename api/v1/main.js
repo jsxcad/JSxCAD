@@ -9,6 +9,7 @@
 
 import * as vec from '@jsxcad/math-vec3';
 
+import { Connector, Label, Plan } from './Plan';
 import { getClock, startClock } from './clock';
 
 import { Armature } from './Armature';
@@ -25,7 +26,6 @@ import { Lego } from './Lego';
 import { MicroGearMotor } from './MicroGearMotor';
 import { Nail } from './Nail';
 import { Path } from './Path';
-import { Plan } from './Plan';
 import { Point } from './Point';
 import { Points } from './Points';
 import { Polygon } from './Polygon';
@@ -210,6 +210,7 @@ export {
   Board,
   chainHull,
   Circle,
+  Connector,
   connect,
   coordinates,
   cos,
@@ -228,6 +229,7 @@ export {
   importModule,
   intersection,
   lathe,
+  Label,
   Lego,
   log,
   max,

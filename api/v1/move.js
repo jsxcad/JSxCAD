@@ -11,9 +11,7 @@ import { translate } from './translate';
 
 const move = translate;
 
-export {
-  move
-};
+export { move };
 
-const method = function (...params) { return translate(...params, this); };
+const method = function (...params) { return translate(this, ...params); };
 Shape.prototype.move = method;

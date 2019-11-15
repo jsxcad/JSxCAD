@@ -27,7 +27,7 @@ import { measureBoundingBox } from './measureBoundingBox';
 export const center = (shape) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   let center = scale(0.5, add(minPoint, maxPoint));
-  const moved = shape.move(negate(center));
+  const moved = shape.move(...negate(center));
   return moved;
 };
 

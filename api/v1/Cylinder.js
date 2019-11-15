@@ -1,8 +1,6 @@
-import { assertEmpty, assertFunction, assertNumber } from './assert';
 import { buildFromFunction, buildFromSlices, buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 import { Shape } from './Shape';
-import { dispatch } from './dispatch';
 import { distance } from '@jsxcad/math-vec3';
 import { getPaths } from '@jsxcad/geometry-tagged';
 
@@ -49,23 +47,23 @@ const buildPrism = (radius = 1, height = 1, sides = 32) =>
  *
  **/
 
-export const fromValue = (radius, height = 1, sides = 32) => buildPrism(radius, height, sides);
-
-export const fromRadius = (radius, height = 1, sides = 32) => buildPrism(radius, height, sides);
+export const ofRadius = (radius, height = 1, sides = 32) => buildPrism(radius, height, sides);
 
 const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
 
-export const fromApothem = (apothem, height = 1, sides = 32) => buildPrism(toRadiusFromApothem(apothem, sides), height, sides);
+export const ofApothem = (apothem, height = 1, sides = 32) => buildPrism(toRadiusFromApothem(apothem, sides),
+                                                                         height,
+                                                                         sides);
 
-export const fromDiameter = (diameter, height = 1, sides = 32) => buildPrism(diameter / 2, height, sides);
+export const ofDiameter = (diameter, height = 1, sides = 32) => buildPrism(diameter / 2, height, sides);
 
 export const betweenRadius = (from, to, radius, sides = 32) =>
-  fromRadius(radius, distance(from, to), sides)
+  ofRadius(radius, distance(from, to), sides)
       .above()
       .orient({ from, at: to });
 
 export const betweenDiameter = (from, to, diameter, sides = 32) =>
-  fromDiameter(diameter, distance(from, to), sides)
+  ofDiameter(diameter, distance(from, to), sides)
       .above()
       .orient({ from, at: to });
 
@@ -78,65 +76,19 @@ const toPathFromShape = (shape) => {
   return [];
 };
 
-export const fromFunction = (op, resolution, cap = true, context) =>
+export const ofFunction = (op, resolution, cap = true, context) =>
   Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
 
-export const fromSlices = (op, slices, cap = true) =>
+export const ofSlices = (op, slices, cap = true) =>
   Shape.fromGeometry(buildFromSlices(slice => toPathFromShape(op(slice)), slices, cap));
 
-export const Cylinder = dispatch(
-  'Cylinder',
-  // cylinder()
-  (...rest) => {
-    assertEmpty(rest);
-    return () => fromValue(1);
-  },
-  (radius, height = 1, sides = 32) => {
-    assertNumber(radius);
-    assertNumber(height);
-    assertNumber(sides);
-    return () => fromValue(radius, height, sides);
-  },
-  ({ radius, height = 1, sides = 32 }) => {
-    assertNumber(radius);
-    assertNumber(height);
-    assertNumber(sides);
-    return () => fromRadius(radius, height, sides);
-  },
-  ({ apothem, height = 1, sides = 32 }) => {
-    assertNumber(apothem);
-    assertNumber(height);
-    assertNumber(sides);
-    return () => fromApothem(apothem, height, sides);
-  },
-  ({ diameter, height = 1, sides = 32 }) => {
-    assertNumber(diameter);
-    assertNumber(height);
-    assertNumber(sides);
-    return () => fromDiameter(diameter, height, sides);
-  },
-  ({ slices }, buildPath) => {
-    assertNumber(slices);
-    assertFunction(buildPath);
-    return () => fromFunction(buildPath, slices);
-  });
+export const Cylinder = (...args) => ofRadius(...args);
 
-export const between = dispatch(
-  'Cylinder.between',
-  ({ radius, sides = 32 }, from, to) => {
-    assertNumber(radius);
-    return () => betweenRadius(from, to, radius, sides);
-  },
-  ({ diameter, sides = 32 }, from, to) => {
-    assertNumber(diameter);
-    return () => betweenDiameter(from, to, diameter, sides);
-  });
-
-Cylinder.ofRadius = fromRadius;
-Cylinder.ofDiameter = fromDiameter;
-Cylinder.ofFunction = fromFunction;
-Cylinder.ofSlices = fromSlices;
-Cylinder.between = between;
+Cylinder.ofRadius = ofRadius;
+Cylinder.ofApothem = ofApothem;
+Cylinder.ofDiameter = ofDiameter;
+Cylinder.ofFunction = ofFunction;
+Cylinder.ofSlices = ofSlices;
 Cylinder.betweenRadius = betweenRadius;
 Cylinder.betweenDiameter = betweenDiameter;
 
