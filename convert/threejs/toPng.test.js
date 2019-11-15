@@ -11,8 +11,10 @@ import { toPng } from './toPng';
 const { readFile, writeFile } = fs.promises;
 
 test('Example', async (t) => {
-  if (GL(256, 256) !== null) {
-    // Only run this test in a suitable environment.
+  if (GL(256, 256) === null) {
+    // Skip this test if we can't do GL.
+    t.true(true);
+  } else {
     const png = await toPng(
       { view: { position: [0, 0, 32] } },
       { assembly: [{ paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]), tags: ['paths'] },
