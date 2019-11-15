@@ -45,13 +45,15 @@ import { addTags, drop as dropGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const drop = (...tags) => {
-  if (tag.length === 0) {
+export const drop = (shape, ...tags) => {
+  if (tags.length === 0) {
     return fromGeometry(addTags(['compose/non-positive'], toGeometry(shape)));
   } else {
     return fromGeometry(dropGeometry(tags.map(tag => `user/${tag}`), toGeometry(shape)));
   }
 };
 
-const method = function (...tags) { return drop(tags, this); };
+const method = function (...tags) { return drop(this, ...tags); };
 Shape.prototype.drop = method;
+
+export default drop;

@@ -76,5 +76,6 @@ export const union = dispatch(
 
 const method = function (...shapes) { return union(this, ...shapes); };
 
-Shape.prototype.add = method;
 Shape.prototype.union = method;
+
+export default union;

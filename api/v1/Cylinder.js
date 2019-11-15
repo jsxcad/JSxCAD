@@ -1,7 +1,6 @@
 import { buildFromFunction, buildFromSlices, buildRegularPrism } from '@jsxcad/algorithm-shape';
 
 import Shape from './Shape';
-import { distance } from '@jsxcad/math-vec3';
 import { getPaths } from '@jsxcad/geometry-tagged';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>

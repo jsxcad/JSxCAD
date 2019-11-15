@@ -1,4 +1,3 @@
-import Plan from './Plan';
 import Shape from './Shape';
 import connectors from './connectors';
 

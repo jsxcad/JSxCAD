@@ -15,6 +15,7 @@ const paths = [
   'center.js', 'chainHull.js', 'chop.js', 'Circle.js', 'color.js', 'connect.js', 'Connector.js', 'connector.js',
   'connectors.js', 'contract.js', 'coordinates.js', 'cos.js', 'Cube.js', 'Cursor.js', 'cut.js', 'Cylinder.js',
   'drop.js',
+  'ease.js'
 ];
 
 setupFilesystem({ fileBase: '.' });

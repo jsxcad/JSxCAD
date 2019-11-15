@@ -1,5 +1,4 @@
 import Shape from './Shape';
-import assemble from './assemble';
 import measureBoundingBox from './measureBoundingBox';
 import moveY from './moveY';
 

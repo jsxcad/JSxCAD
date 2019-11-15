@@ -7,6 +7,10 @@
  * the api uses.
  */
 
+import './add';
+import './cut';
+import './with';
+
 import * as vec from '@jsxcad/math-vec3';
 
 import { Label, Plan } from './Plan';
@@ -61,11 +65,10 @@ import connectors from './connectors';
 import contract from './contract';
 import coordinates from './coordinates';
 import cos from './cos';
-import cut from './cut';
-import { difference } from './difference';
-import { drop } from './drop';
-import { ease } from './ease';
-import { expand } from './expand';
+import difference from './difference';
+import drop from './drop';
+import ease from './ease';
+import expand from './expand';
 import { extrude } from './extrude';
 import { fillet } from './fillet';
 import { flat } from './flat';
@@ -126,7 +129,6 @@ import { translate } from './translate';
 import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
-import './with';
 import { writeDxf } from './writeDxf';
 import { writeGcode } from './writeGcode';
 import { writePdf } from './writePdf';

@@ -1,4 +1,4 @@
-import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { fromGeometry, toKeptGeometry } from './Shape';
 
 import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
 

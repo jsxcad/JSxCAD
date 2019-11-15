@@ -1,3 +1,14 @@
+/**
+ *
+ * # Ease
+ *
+ * Produces a function for composing easing functions.
+ * ```
+ * ease(0.00, 0.25, t => sin(t * 25))(ease(0.25, 1.00, t => 5)())
+ * ```
+ *
+ **/
+
 export const ease = (start = 0.00, end = 1.00, op = t => 1) => {
   const compose = (next = t => 1) => {
     const fn = t => {
@@ -13,5 +24,6 @@ export const ease = (start = 0.00, end = 1.00, op = t => 1) => {
 };
 
 export const linear = (start, end) => t => start + t * (end - start);
-
 ease.linear = linear;
+
+export default ease;

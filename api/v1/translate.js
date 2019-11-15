@@ -1,4 +1,4 @@
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { fromTranslation } from '@jsxcad/math-mat4';
 
 /**
@@ -41,3 +41,5 @@ export const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTra
 
 const method = function (...args) { return translate(this, ...args); };
 Shape.prototype.translate = method;
+
+export default translate;

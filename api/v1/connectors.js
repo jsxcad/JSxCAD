@@ -1,4 +1,3 @@
-import Plan from './Plan';
 import Shape from './Shape';
 import { getPlans } from '@jsxcad/geometry-tagged';
 import { shapeToConnect } from './Connector';
