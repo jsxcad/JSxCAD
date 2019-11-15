@@ -49,3 +49,5 @@ export const shell = (shape, radius = 1, resolution = 8) => {
 
 const method = function (radius, resolution) { return shell(this, radius, resolution); };
 Shape.prototype.shell = method;
+
+export default shell;

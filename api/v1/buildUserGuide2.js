@@ -16,6 +16,7 @@ const paths = [
   'connectors.js', 'contract.js', 'coordinates.js', 'cos.js', 'Cube.js', 'Cursor.js', 'cut.js', 'Cylinder.js',
   'drop.js',
   'ease.js'
+  // 'material.js',
 ];
 
 setupFilesystem({ fileBase: '.' });
