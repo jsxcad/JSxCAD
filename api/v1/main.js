@@ -9,14 +9,13 @@
 
 import * as vec from '@jsxcad/math-vec3';
 
-import { Connector, Label, Plan } from './Plan';
-import { getClock, startClock } from './clock';
+import { Label, Plan } from './Plan';
 
-import { Armature } from './Armature';
-import { Board } from './Board';
-import { Circle } from './Circle';
-import { Cube } from './Cube';
-import { Cursor } from './Cursor';
+import Armature from './Armature';
+import Circle from './Circle';
+import Connector from './Connector';
+import Cube from './Cube';
+import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
 import { Fastener } from './Fastener';
 import { Gear } from './Gear';
@@ -45,24 +44,25 @@ import { X } from './X';
 import { Y } from './Y';
 import { Z } from './Z';
 
-import { above } from './above';
-import { acos } from './acos';
-import { as } from './as';
-import { ask } from './ask';
-import { assemble } from './assemble';
-import { back } from './back';
-import { below } from './below';
-import { center } from './center';
-import { chainHull } from './chainHull';
-import { chop } from './chop';
-import { color } from './color';
-import { connect } from './connect';
-import { contract } from './contract';
-import { coordinates } from './coordinates';
-import { cos } from './cos';
-import { describe } from './describe';
+import above from './above';
+import acos from './acos';
+import as from './as';
+import ask from './ask';
+import assemble from './assemble';
+import back from './back';
+import below from './below';
+import center from './center';
+import chainHull from './chainHull';
+import chop from './chop';
+import color from './color';
+import connect from './connect';
+import connector from './connector';
+import connectors from './connectors';
+import contract from './contract';
+import coordinates from './coordinates';
+import cos from './cos';
+import cut from './cut';
 import { difference } from './difference';
-// import { divide } from './divide';
 import { drop } from './drop';
 import { ease } from './ease';
 import { expand } from './expand';
@@ -126,6 +126,7 @@ import { translate } from './translate';
 import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
+import './with';
 import { writeDxf } from './writeDxf';
 import { writeGcode } from './writeGcode';
 import { writePdf } from './writePdf';
@@ -144,9 +145,9 @@ const methods = [
   chop,
   color,
   connect,
+  connector,
+  connectors,
   contract,
-  describe,
-  // divide,
   drop,
   ease,
   expand,
@@ -207,11 +208,9 @@ export {
   ask,
   Armature,
   assemble,
-  Board,
   chainHull,
   Circle,
   Connector,
-  connect,
   coordinates,
   cos,
   Cube,
@@ -222,7 +221,6 @@ export {
   flat,
   Fastener,
   Gear,
-  getClock,
   Hexagon,
   hull,
   Icosahedron,
@@ -263,7 +261,6 @@ export {
   stretch,
   Spiral,
   Square,
-  startClock,
   SvgPath,
   Tetrahedron,
   ThreadedRod,

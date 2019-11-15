@@ -112,7 +112,7 @@ export const toUserGuide = async ({ api, paths, root }) => {
     const main = await toOperator({ api }, text);
     const geometry = await main();
     const svg = await toSvg({ includeXmlHeader: false, ...options },
-                            geometry.above().translate([0, 0, 0.001]).toDisjointGeometry());
+                            geometry.above().moveZ(0.001).toDisjointGeometry());
     markdownHtml = markdownHtml.replace(patch, svg);
   }
   const html = `

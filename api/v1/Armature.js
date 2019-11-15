@@ -1,10 +1,12 @@
-import { addInertia,
-         createAngleConstraint,
-         createDistanceConstraint,
-         createPinnedConstraint,
-         positions,
-         solve,
-         verlet } from '@jsxcad/algorithm-verlet';
+import {
+  addInertia,
+  createAngleConstraint,
+  createDistanceConstraint,
+  createPinnedConstraint,
+  positions,
+  solve,
+  verlet
+} from '@jsxcad/algorithm-verlet';
 
 /**
  *
@@ -12,14 +14,15 @@ import { addInertia,
  *
  * Armature builds a set of points based on constraints.
  *
- * ::: illustration
+ * ::: illustration { "view": { "position": [40, -40, 40], "target": [0, 0, 0] } }
  * ```
  * const { angle, compute, distance, pinned } = Armature();
+ * pinned('A', [0, 0, 0]);
  * angle('A', 'B', 'C', 90);
  * distance('B', 'A', 20);
  * distance('B', 'C', 10);
  * const { A, B, C } = compute();
- * Polygon(A, B, C).center();
+ * Polygon(A, B, C).outline().center();
  * ```
  * :::
  *
@@ -48,3 +51,5 @@ export const Armature = () => {
     pinned
   };
 };
+
+export default Armature;

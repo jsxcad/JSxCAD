@@ -77,3 +77,5 @@ const method = function (...shapes) { return intersection(this, ...shapes); };
 
 Shape.prototype.clip = method;
 Shape.prototype.intersection = method;
+
+export default intersection;

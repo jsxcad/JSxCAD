@@ -56,6 +56,32 @@
  *
  * ***
  *
+ * # Syntax
+ *
+ * Constructors and classes are capitalized. e.g., Circle, Shape.
+ * Operations are lowercase. e.g., assemble.
+ *
+ * Functions are generally of the following form. The slots are optional.
+ * ```
+ * op(subject, ...arguments, { ...parameters }, ...objects)
+ * ```
+ *
+ * Methods are of the same form:
+ * ```
+ * subject.op(...arguments, { ...parameters }, ...objects)
+ * ```
+ *
+ * The number of arguments may vary for different operations.
+ * These should be fundamental to the operation, such as Circle.ofRadius(radius).
+ *
+ * Parameters should supply non-fundamental values that are clarified by the parameter names.
+ * e.g., Circle.ofRadius(radius, { sides: 8 }).
+ *
+ * Objects are a variable length list, generally of shapes.
+ * e.g., Cube().with(Cube().moveX(1), Cube().moveX(2)).
+ *
+ * ***
+ *
  * # Operator Guide
  *
  **/

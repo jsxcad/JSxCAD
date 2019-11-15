@@ -15,7 +15,7 @@ import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geom
  * ::: illustration { "view": { "position": [40, 40, 40] } }
  * ```
  * const [corner1, corner2] = Sphere(7).measureBoundingBox();
- * Cube({ corner1, corner2 })
+ * Cube.fromCorners(corner1, corner2)
  * ```
  * :::
  **/
@@ -23,5 +23,6 @@ import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geom
 export const measureBoundingBox = (shape) => measureBoundingBoxOfGeometry(shape.toGeometry());
 
 const method = function () { return measureBoundingBox(this); };
-
 Shape.prototype.measureBoundingBox = method;
+
+export default measureBoundingBox;

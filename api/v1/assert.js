@@ -1,4 +1,4 @@
-import { Shape } from './Shape';
+import Shape from './Shape';
 
 export const assert = (value, message, pass) => {
   if (pass !== true) {

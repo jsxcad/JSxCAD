@@ -1,4 +1,4 @@
-import { Polygon } from './Polygon';
+import Polygon from './Polygon';
 
 /**
  *
@@ -21,35 +21,37 @@ import { Polygon } from './Polygon';
  * :::
  * ::: illustration
  * ```
- * Circle({ radius: 10,
- *          sides: 8 })
+ * Circle.ofRadius(10, { sides: 8 })
  * ```
  * :::
  * ::: illustration
  * ```
- * Circle({ apothem: 10,
- *          sides: 8 })
+ * Circle.ofApothem(10, { sides: 8 })
  * ```
  * :::
  * ::: illustration
  * ```
- * assemble(Circle({ apothem: 10, sides: 5 }),
- *          Circle({ radius: 10, sides: 5 }).drop(),
- *          Circle({ radius: 10 }).outline())
+ * Circle.ofApothem(10, { sides: 5 })
+ *       .with(Circle.ofRadius(10, { sides: 5 }).drop(),
+ *             Circle.ofRadius(10).outline().moveZ(0.01))
  * ```
  * :::
  * ::: illustration
  * ```
- * Circle({ diameter: 20,
- *          sides: 16 })
+ * Circle.ofDiameter(20, { sides: 16 })
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * Circle.ofEdge(5, { sides: 5 })
  * ```
  * :::
  **/
 
-export const ofEdge = (edge = 1, sides = 32) => Polygon.ofEdge(edge, sides);
-export const ofApothem = (apothem = 1, sides = 32) => Polygon.ofApothem(apothem, sides);
-export const ofRadius = (radius = 1, sides = 32) => Polygon.ofRadius(radius, sides);
-export const ofDiameter = (diameter = 1, sides = 32) => Polygon.ofDiameter(diameter, sides);
+export const ofEdge = (edge = 1, { sides = 32 } = {}) => Polygon.ofEdge(edge, sides);
+export const ofApothem = (apothem = 1, { sides = 32 } = {}) => Polygon.ofApothem(apothem, sides);
+export const ofRadius = (radius = 1, { sides = 32 } = {}) => Polygon.ofRadius(radius, sides);
+export const ofDiameter = (diameter = 1, { sides = 32 } = {}) => Polygon.ofDiameter(diameter, sides);
 
 export const Circle = (...args) => ofRadius(...args);
 

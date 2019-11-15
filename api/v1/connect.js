@@ -1,9 +1,10 @@
-import { Plan, shapeToConnect } from './Plan';
 import { distance, negate } from '@jsxcad/math-vec3';
 import { drop, rotateY, rotateZ, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
 
-import { Shape } from './Shape';
-import { assemble } from './assemble';
+import Plan from './Plan';
+import Shape from './Shape';
+import assemble from './assemble';
+import { shapeToConnect } from './Connector';
 
 /**
  *
@@ -13,13 +14,8 @@ import { assemble } from './assemble';
  *
  * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
  * ```
- * Cube(10)
- *   .with(Plan.Connector('top').moveZ(5))
- *   .connector('top')
- *   .connect(
- *     Sphere(10)
- *       .with(Plan.Connector('bottom').moveZ(-10))
- *       .connector('bottom'))
+ * Cube(10).Connector('top').moveZ(5)
+ *         .connect(Sphere(10).Connector('bottom').flip().moveZ(-9))
  * ```
  * :::
  **/
@@ -125,3 +121,5 @@ export const connect = (aConnector, bConnector, { doAssemble = true, label } = {
 
 const method = function (...args) { return connect(this, ...args); };
 Shape.prototype.connect = method;
+
+export default connect;

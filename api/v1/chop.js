@@ -1,44 +1,25 @@
 import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
 
-import { Shape } from './Shape';
-import { Z } from './Z';
-import { assemble } from './assemble';
+import Shape from './Shape';
+import Z from './Z';
+import assemble from './assemble';
 import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
 import { cut as surfaceCut } from '@jsxcad/geometry-surface';
 
 /**
  *
- * # Cut
+ * # Chop
  *
- * Cuts a shape into two halves at z = 0, and returns each.
+ * Remove the parts of a shape above surface, defaulting to Z(0).
  *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
  * ```
- * const [top, bottom] = Cube(10).cut();
- * assemble(top.translate(0, 0, 1),
- *          bottom.translate(0, 0, -1));
+ * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
  * ```
  * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
  * ```
- * const [top, bottom] = Sphere(10).cut();
- * assemble(top.translate(0, 0, 2),
- *          bottom.translate(0, 0, -2));
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * const [top, bottom] = Sphere(10).rotateY(1).cut();
- * assemble(top.translate(0, 0, 2),
- *          bottom.translate(0, 0, -2));
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * assemble(Circle(10),
- *          Cylinder(5, 10))
- *   .rotateY(90)
- *   .cut()[0]
+ * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
  * ```
  * :::
  *
@@ -66,6 +47,7 @@ export const chop = (shape, planeShape = Z()) => {
   return assemble(...cuts);
 };
 
-const method = function (surface) { return chop(this, surface); };
+const chopMethod = function (surface) { return chop(this, surface); };
+Shape.prototype.chop = chopMethod;
 
-Shape.prototype.chop = method;
+export default chop;

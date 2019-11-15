@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { shell } from './shell';
+import Shape from './Shape';
+import shell from './shell';
 
 export const expand = (shape, radius = 1, resolution = 16) =>
   (radius >= 0) ? shape.union(shell(shape, radius, resolution))

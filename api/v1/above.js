@@ -1,6 +1,6 @@
-import { Shape } from './Shape';
-import { measureBoundingBox } from './measureBoundingBox';
-import { moveZ } from './moveZ';
+import Shape from './Shape';
+import measureBoundingBox from './measureBoundingBox';
+import moveZ from './moveZ';
 
 /**
  *
@@ -8,9 +8,9 @@ import { moveZ } from './moveZ';
  *
  * Moves the shape so that its lowest point is at z = 0.
  *
- * ::: illustration { "view": { "position": [60, -60, 0], "target": [0, 0, 0] } }
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
  * ```
- * Cube(10).above()
+ * Circle(20).with(Cube(10).above())
  * ```
  * :::
  **/
@@ -24,3 +24,5 @@ export const above = (shape, reference) => {
 
 const aboveMethod = function (...params) { return above(this, ...params); };
 Shape.prototype.above = aboveMethod;
+
+export default above;

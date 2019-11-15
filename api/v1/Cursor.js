@@ -1,7 +1,7 @@
 import { add, transform } from '@jsxcad/math-vec3';
 import { fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
 
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { close } from '@jsxcad/geometry-path';
 
 // Normalize (1, 2, 3) and ([1, 2, 3]).
@@ -24,37 +24,19 @@ const normalizeVector = (...params) => {
  * ::: illustration { "view": { "position": [0, -1, 40] } }
  * ```
  * Cursor.fromOrigin()
- *       .translate(5)
- *       .turn(45)
- *       .translate(5)
+ *       .forward(5)
+ *       .right(45)
+ *       .forward(5)
  *       .interior()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 40] } }
  * ```
  * Cursor.fromOrigin()
- *       .translate(5)
- *       .turn(-45)
- *       .translate(5)
- *       .interior()
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 25] } }
- * ```
- * Cursor.fromOrigin()
- *       .translate(5)
- *       .corner(45)
- *       .translate(5)
- *       .interior()
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 25] } }
- * ```
- * Cursor.fromOrigin()
- *       .translate(5)
- *       .corner(-45)
- *       .translate(5)
- *       .interior()
+ *       .forward(5)
+ *       .left(135)
+ *       .forward(5)
+ *       .outline()
  * ```
  * :::
  *
@@ -68,10 +50,6 @@ export class Cursor {
 
   close () {
     return new Cursor({ matrix: this.matrix, path: close(this.path) });
-  }
-
-  corner (angle) {
-    return this.rotateZ(180 - angle);
   }
 
   interior () {
@@ -136,5 +114,6 @@ export class Cursor {
 }
 
 export const fromOrigin = () => new Cursor();
-
 Cursor.fromOrigin = fromOrigin;
+
+export default Cursor;

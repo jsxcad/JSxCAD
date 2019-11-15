@@ -40,3 +40,5 @@ export const numbers = ({ from = 0, to, upto, by, resolution }, thunk = (n => n)
   }
   return numbers;
 };
+
+export default numbers;
