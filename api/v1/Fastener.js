@@ -1,13 +1,13 @@
 import { assertEquals, assertNumber, assertString } from './assert';
 
-import { Cube } from './Cube';
-import { Cylinder } from './Cylinder';
-import { Triangle } from './Triangle';
-import { assemble } from './assemble';
+import Cube from './Cube';
+import Cylinder from './Cylinder';
+import Triangle from './Triangle';
+import assemble from './assemble';
 import { dispatch } from './dispatch';
-import { intersection } from './intersection';
-import { lathe } from './lathe';
-import { specify } from './specify';
+import intersection from './intersection';
+import lathe from './lathe';
+import specify from './specify';
 
 /**
  *

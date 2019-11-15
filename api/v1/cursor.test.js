@@ -1,4 +1,4 @@
-import { Cursor } from './Cursor';
+import Cursor from './Cursor';
 import { canonicalize } from '@jsxcad/geometry-path';
 import test from 'ava';
 

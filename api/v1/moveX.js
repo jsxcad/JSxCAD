@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { move } from './move';
+import Shape from './Shape';
+import move from './move';
 
 /**
  *
@@ -13,3 +13,5 @@ export const moveX = (shape, x) => move(shape, x);
 
 const method = function (x) { return moveX(this, x); };
 Shape.prototype.moveX = method;
+
+export default moveX;

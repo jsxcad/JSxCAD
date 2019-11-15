@@ -1,4 +1,4 @@
-import { numbers } from './numbers';
+import numbers from './numbers';
 
 /**
  *
@@ -16,3 +16,5 @@ export const coordinates = (xSpec, ySpec, zSpec, thunk) => {
   numbers(xSpec, x => numbers(ySpec, y => numbers(zSpec, z => coordinates.push(thunk(x, y, z)))));
   return coordinates;
 };
+
+export default coordinates;

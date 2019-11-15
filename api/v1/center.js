@@ -1,25 +1,17 @@
 import { add, negate, scale } from '@jsxcad/math-vec3';
 
-import { Shape } from './Shape';
-import { measureBoundingBox } from './measureBoundingBox';
+import Shape from './Shape';
+import measureBoundingBox from './measureBoundingBox';
 
 /**
  *
  * # Center
  *
- * Moves the shape so that it is centered on the origin.
+ * Moves the shape so that its bounding box is centered on the origin.
  *
- * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
  * ```
- * Cube({ corner1: [30, -30, 10],
- *        corner2: [10, -10, 0] })
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * Cube({ corner1: [30, -30, 10],
- *        corner2: [10, -10, 0] })
- *   .center()
+ * Circle(20).with(Cube(10).center())
  * ```
  * :::
  **/
@@ -31,6 +23,7 @@ export const center = (shape) => {
   return moved;
 };
 
-const method = function () { return center(this); };
+const centerMethod = function (...params) { return center(this, ...params); };
+Shape.prototype.center = centerMethod;
 
-Shape.prototype.center = method;
+export default center;

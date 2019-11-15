@@ -1,8 +1,5 @@
-import { assertShape, assertStrings } from './assert';
-
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { addTags } from '@jsxcad/geometry-tagged';
-import { dispatch } from './dispatch';
 
 /**
  *
@@ -18,20 +15,10 @@ import { dispatch } from './dispatch';
  *
  **/
 
-export const fromValue = (tags, shape) =>
+export const as = (tags, shape) =>
   Shape.fromGeometry(addTags(tags.map(tag => `user/${tag}`), shape.toGeometry()));
 
-export const as = dispatch(
-  'as',
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue(tags, shape);
-  }
-);
-
-as.fromValues = fromValue;
-
 const method = function (...tags) { return as(tags, this); };
-
 Shape.prototype.as = method;
+
+export default as;

@@ -2,7 +2,7 @@ import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { chainHull } from './chainHull';
 import { getPaths } from '@jsxcad/geometry-tagged';
-import { union } from './union';
+import union from './union';
 
 /**
  *

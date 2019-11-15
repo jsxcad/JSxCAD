@@ -85,7 +85,7 @@ export class Shape {
   }
 
   transform (matrix) {
-    if (matrix.some(item => item === -Infinity)) {
+    if (matrix.some(item => typeof item !== 'number' || isNaN(item))) {
       throw Error('die');
     }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
@@ -112,3 +112,5 @@ Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
 export const toKeptGeometry = (shape) => shape.toKeptGeometry();
+
+export default Shape;

@@ -1,7 +1,6 @@
-import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { fromGeometry, toKeptGeometry } from './Shape';
 
 import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
-import { dispatch } from './dispatch';
 
 /**
  *
@@ -32,7 +31,7 @@ import { dispatch } from './dispatch';
  *
  **/
 
-const differenceOfShapes = (...shapes) => {
+export const difference = (...shapes) => {
   switch (shapes.length) {
     case 0: {
       return fromGeometry({ assembly: [] });
@@ -47,13 +46,4 @@ const differenceOfShapes = (...shapes) => {
   }
 };
 
-export const difference = dispatch(
-  'difference',
-  (...shapes) => {
-    return () => differenceOfShapes(...shapes);
-  });
-
-const method = function (...shapes) { return difference(this, ...shapes); };
-
-Shape.prototype.difference = method;
-Shape.prototype.cut = method;
+export default difference;

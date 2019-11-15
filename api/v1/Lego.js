@@ -40,9 +40,9 @@ import { assemble } from './assemble';
 export const stud = ({ diameter = 5, height = 1.8, play = 0.1, faces = 32 } = {}) => {
   const top = 0.5;
   const expansion = 0.2;
-  return assemble(Cylinder.ofDiameter(diameter - play - expansion, { height: height })
+  return assemble(Cylinder.ofDiameter(diameter - play - expansion, height)
       .moveZ(height / 2),
-                  Cylinder.ofDiameter(diameter - play, { height: top })
+                  Cylinder.ofDiameter(diameter - play, top)
                       .moveZ(height - top / 2)
   );
 };
@@ -85,13 +85,13 @@ export const socket =
       const topHeight = height - gripRingHeight - bottom;
       return assemble(
         // flaired top
-        Cylinder.ofDiameter(diameter + play, { height: topHeight })
+        Cylinder.ofDiameter(diameter + play, topHeight)
             .moveZ(topHeight / 2 + bottom + gripRingHeight),
         // grip ring
-        Cylinder.ofDiameter(diameter + play - gripRingContraction, { height: gripRingHeight })
+        Cylinder.ofDiameter(diameter + play - gripRingContraction, gripRingHeight)
             .moveZ(gripRingHeight / 2 + bottom),
         // flaired base
-        Cylinder.ofDiameter(diameter + play, { height: bottom })
+        Cylinder.ofDiameter(diameter + play, bottom)
             .moveZ(bottom / 2));
     };
 

@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { translate } from './translate';
+import Shape from './Shape';
+import translate from './translate';
 
 /**
  *
@@ -15,3 +15,5 @@ export { move };
 
 const method = function (...params) { return translate(this, ...params); };
 Shape.prototype.move = method;
+
+export default move;
