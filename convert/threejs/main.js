@@ -1,3 +1,4 @@
+import { toPng } from './toPng';
 import { toSvg, toSvgSync } from './toSvg';
 
 import { toThreejsGeometry } from './toThreejsGeometry';
