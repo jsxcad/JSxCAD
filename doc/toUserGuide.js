@@ -1,9 +1,10 @@
 import MarkdownIt from 'markdown-it';
 import MarkdownItContainer from 'markdown-it-container';
+import { fromByteArray } from 'base64-js';
 import fs from 'fs';
 import jsdocExtractor from 'jsdoc-extractor';
 import { toEcmascript } from '@jsxcad/compiler';
-import { toSvg } from '@jsxcad/convert-threejs';
+import { toPng } from '@jsxcad/convert-threejs';
 
 const { readFile } = fs.promises;
 
@@ -111,9 +112,9 @@ export const toUserGuide = async ({ api, paths, root }) => {
     console.log(`QQ/toOperator: ${toOperator}`);
     const main = await toOperator({ api }, text);
     const geometry = await main();
-    const svg = await toSvg({ includeXmlHeader: false, ...options },
-                            geometry.above().moveZ(0.001).toDisjointGeometry());
-    markdownHtml = markdownHtml.replace(patch, svg);
+    const png = await toPng({ includeXmlHeader: false, ...options },
+                            geometry.toDisjointGeometry());
+    markdownHtml = markdownHtml.replace(patch, `<img src="data:image/png;base64,${fromByteArray(png)}">`);
   }
   const html = `
 <html>
