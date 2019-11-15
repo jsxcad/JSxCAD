@@ -20,6 +20,7 @@ export default {
         allowFallthrough: true,
         files: {
           'fs': 'export const promises = {};',
+          'gl': '',
           'node-fetch': 'export default {};',
           'os': '',
           'tty': '',

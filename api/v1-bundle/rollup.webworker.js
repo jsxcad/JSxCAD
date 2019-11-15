@@ -1,3 +1,5 @@
+Error.stackTraceLimit = Infinity;
+
 // rollup.config.js
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
@@ -19,21 +21,23 @@ export default {
     //    'process'
   ],
   plugins: [
-    loadz0r(),
-    builtins(),
-    commonjs(),
-    globals(),
-    json(),
     hypothetical(
       {
         allowFallthrough: true,
         files: {
           'fs': 'export const promises = {};',
+          'fast-png': '',
+          'gl': '',
           'node-fetch': 'export default {};',
           'os': '',
           'tty': ''
         }
       }),
+    loadz0r(),
+    builtins(),
+    commonjs(),
+    globals(),
+    json(),
     nodeResolve({ jsnext: true, preferBuiltins: true })
   ]
 };

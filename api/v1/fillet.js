@@ -20,12 +20,11 @@ import union from './union';
  *
  **/
 
-export const fillet = (shape, tool) => {
+export const fillet = (shape, tool, surface = Z(0)) => {
   // FIX: Identify surface to fillet properly.
-  const [, , z] = shape.measureBoundingBox()[1];
   const cuts = [];
   // Fix Remove the 0.1 z offsets.
-  for (const pathset of shape.section({ z: z - 0.1 }).outline().getPathsets()) {
+  for (const pathset of shape.section(surface).outline().getPathsets()) {
     for (const path of pathset) {
       const cut = [];
       for (const position of path) {
@@ -43,6 +42,7 @@ export const fillet = (shape, tool) => {
   return assemble(shape, union(...cuts).drop());
 };
 
-const method = function (tool) { return fillet(this, tool); };
-
+const method = function (...args) { return fillet(this, ...args); };
 Shape.prototype.fillet = method;
+
+export default fillet;
