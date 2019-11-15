@@ -1,4 +1,5 @@
 import Shape from './Shape';
+import Z from './Z';
 import assemble from './assemble';
 import chainHull from './chainHull';
 import union from './union';

@@ -16,7 +16,7 @@ const paths = [
   'connectors.js', 'contract.js', 'coordinates.js', 'cos.js', 'Cube.js', 'Cursor.js', 'cut.js', 'Cylinder.js',
   'drop.js',
   'ease.js', 'expand.js', 'extrude.js',
-  'fillet.js',
+  'fillet.js'
   // 'material.js',
 ];
 

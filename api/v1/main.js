@@ -21,7 +21,7 @@ import Connector from './Connector';
 import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
-import { Fastener } from './Fastener';
+// import { Fastener } from './Fastener';
 import { Gear } from './Gear';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
@@ -221,7 +221,7 @@ export {
   difference,
   ease,
   flat,
-  Fastener,
+  // Fastener,
   Gear,
   Hexagon,
   hull,

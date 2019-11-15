@@ -1,5 +1,3 @@
-Error.stackTraceLimit = Infinity;
-
 // rollup.config.js
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
@@ -8,6 +6,8 @@ import hypothetical from 'rollup-plugin-hypothetical';
 import json from 'rollup-plugin-json';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
+
+Error.stackTraceLimit = Infinity;
 
 export default {
   input: 'webworker.js',
@@ -25,9 +25,9 @@ export default {
       {
         allowFallthrough: true,
         files: {
+          'fast-png': 'export const encode = {}; export const decode = {};',
           'fs': 'export const promises = {};',
-          'fast-png': '',
-          'gl': '',
+          'gl': 'const dummy = {}; export default dummy;',
           'node-fetch': 'export default {};',
           'os': '',
           'tty': ''
