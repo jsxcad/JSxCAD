@@ -10,3 +10,5 @@ export const Y = (y = 0) => {
   const max = size;
   return Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
 };
+
+export default Y;

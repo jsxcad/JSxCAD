@@ -1,7 +1,7 @@
 import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/algorithm-shape';
 
-import { Shape } from './Shape';
-import { union } from './union';
+import Shape from './Shape';
+import union from './union';
 
 /**
  *
@@ -11,17 +11,17 @@ import { union } from './union';
  *
  * ::: illustration { "view": { "position": [30, 30, 30] } }
  * ```
- * chainHull(Cube(3).translate([-5, 5]),
- *           Sphere(3).translate([5, -5]),
- *           Cylinder(3, 10).translate([-10, -10]))
- *   .translate([10, 10])
+ * chainHull(Cube(3).move(-5, 5),
+ *           Sphere(3).move(5, -5),
+ *           Cylinder(3, 10).move(-10, -10))
+ *   .move(10, 10)
  * ```
  * :::
  * ::: illustration { "view": { "position": [80, 80, 0] } }
  * ```
- * chainHull(Circle(20).translate([0, 0, -10]),
+ * chainHull(Circle(20).moveZ(-10),
  *           Circle(10),
- *           Circle(20).translate([0, 0, 10]))
+ *           Circle(20).moveZ(10))
  * ```
  * :::
  *
@@ -42,3 +42,5 @@ export const chainHull = (...shapes) => {
   }
   return union(...chain);
 };
+
+export default chainHull;

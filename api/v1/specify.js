@@ -30,5 +30,6 @@ export const specify = (specification, ...shapes) => {
 };
 
 const method = function (specification) { return specify(specification, this); };
-
 Shape.prototype.specify = method;
+
+export default specify;

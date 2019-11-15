@@ -42,3 +42,5 @@ export const ask = async (...args) => askForNumber(...args);
 ask.forNumber = askForNumber;
 ask.forString = askForString;
 ask.forBool = askForBool;
+
+export default ask;

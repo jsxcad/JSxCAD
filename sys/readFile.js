@@ -29,6 +29,7 @@ const getFileFetcher = async (prefix) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
+      console.log(`readFile: ${prefix}${path}`);
       return promises.readFile(`${prefix}${path}`);
     };
   } else if (isBrowser) {

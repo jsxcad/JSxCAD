@@ -1,8 +1,8 @@
 import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 
-import { Shape } from './Shape';
-import { assemble } from './assemble';
+import Shape from './Shape';
+import assemble from './assemble';
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
@@ -23,7 +23,7 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  * ```
  * difference(Circle(10),
  *            Circle(8))
- *   .extrude({ height: 10 })
+ *   .extrude(10)
  * ```
  * :::
  *

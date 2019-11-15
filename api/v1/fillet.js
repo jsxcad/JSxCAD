@@ -1,7 +1,7 @@
-import { Shape } from './Shape';
-import { assemble } from './assemble';
-import { chainHull } from './chainHull';
-import { union } from './union';
+import Shape from './Shape';
+import assemble from './assemble';
+import chainHull from './chainHull';
+import union from './union';
 
 /**
  *

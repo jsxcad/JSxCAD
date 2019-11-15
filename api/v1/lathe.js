@@ -28,5 +28,6 @@ export const lathe = ({ sides = 16, loops = 1, loopOffset = 0 }, shape) => {
 };
 
 const method = function (options) { return lathe(options, this); };
-
 Shape.prototype.lathe = method;
+
+export default lathe;

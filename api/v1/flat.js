@@ -1,6 +1,6 @@
 import { measureBoundingBox, transform } from '@jsxcad/geometry-solid';
 
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { toPlane } from '@jsxcad/geometry-surface';

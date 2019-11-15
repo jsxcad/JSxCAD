@@ -38,21 +38,29 @@ const buildTooth = ({ r, b, c, k, numberOfTeeth }) =>
                       polar(r, r < b ? k : -180 / numberOfTeeth),
                       polar(r, -181 / numberOfTeeth)]);
 
-export const profile = ({ mmPerTooth = Math.PI, numberOfTeeth = 16, teethToHide = 0, pressureAngle = 20, clearance = 0, backlash = 0 } = {}) => {
-  const pi = Math.PI;
-  const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
-  const c = p + mmPerTooth / pi - clearance; // radius of outer circle
-  const b = p * cos(pressureAngle); // radius of base circle
-  const r = p - (c - p) - clearance; // radius of the root circle
-  const t = mmPerTooth / 2 - backlash / 2; // tooth thickness at pitch circle
-  const k = -iang(b, p) - t / 2 / p / pi * 180; // angle to where involute meets base circle on each side of tooth
-  const tooth = buildTooth({ r, b, c, k, numberOfTeeth });
-  let profile = Shape.fromOpenPath([]);
-  for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
-    profile = profile.concat(tooth.rotateZ(i * 360 / numberOfTeeth));
-  }
-  return profile.close();
-};
+export const profile =
+    ({
+      mmPerTooth = Math.PI,
+      numberOfTeeth = 16,
+      teethToHide = 0,
+      pressureAngle = 20,
+      clearance = 0,
+      backlash = 0
+    } = {}) => {
+      const pi = Math.PI;
+      const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
+      const c = p + mmPerTooth / pi - clearance; // radius of outer circle
+      const b = p * cos(pressureAngle); // radius of base circle
+      const r = p - (c - p) - clearance; // radius of the root circle
+      const t = mmPerTooth / 2 - backlash / 2; // tooth thickness at pitch circle
+      const k = -iang(b, p) - t / 2 / p / pi * 180; // angle to where involute meets base circle on each side of tooth
+      const tooth = buildTooth({ r, b, c, k, numberOfTeeth });
+      let profile = Shape.fromOpenPath([]);
+      for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
+        profile = profile.concat(tooth.rotateZ(i * 360 / numberOfTeeth));
+      }
+      return profile.close();
+    };
 
 export const Gear = {
   profile

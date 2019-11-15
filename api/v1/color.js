@@ -1,36 +1,32 @@
-import { assertShape, assertStrings } from './assert';
-
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { addTags } from '@jsxcad/geometry-tagged';
-import { dispatch } from './dispatch';
 
 /**
  *
  * # Color
  *
  * Produces a version of a shape the given color.
+ * FIX: Support color in convert/threejs/toSvg.
  *
  * ::: illustration
  * ```
  * Circle(10).color('blue')
  * ```
  * :::
+ * ::: illustration
+ * ```
+ * Triangle(10).color('chartreuse')
+ * ```
+ * :::
  *
  **/
 
-export const fromValue = (tags, shape) => Shape.fromGeometry(addTags(tags.map(tag => `color/${tag}`), shape.toGeometry()));
+export const fromName = (tags, shape) =>
+  Shape.fromGeometry(addTags(tags.map(tag => `color/${tag}`), shape.toGeometry()));
 
-export const color = dispatch(
-  'color',
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue(tags, shape);
-  }
-);
+export const color = (...args) => fromName(...args);
 
-color.fromValues = fromValue;
+const colorMethod = function (...tags) { return color(tags, this); };
+Shape.prototype.color = colorMethod;
 
-const method = function (...tags) { return color(tags, this); };
-
-Shape.prototype.color = method;
+export default color;

@@ -10,36 +10,17 @@ import { getPlans } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const Plan = (options = {}) => {
+export const Plan = (options = {}, context) => {
   const { plan, marks, tags } = options;
   // FIX: Add validation.
-  return Shape.fromGeometry({ plan, marks, tags });
+  return Shape.fromGeometry({ plan, marks, tags }, context);
 };
-
-// Connectors
-
-Plan.Connector = (connector, a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0]) =>
-  Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] });
-
-const connectors = (geometry) => {
-  const connectors = {};
-  for (const entry of getPlans(geometry)) {
-    if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-      connectors[entry.plan.connector] = entry;
-    }
-  }
-  return connectors;
-};
-
-const withConnectorMethod = function (...args) { return assemble(this, Plan.Connector(...args)); };
-const connectorsMethod = function () { return connectors(this.toKeptGeometry()); };
-
-Shape.prototype.connectors = connectorsMethod;
-Shape.prototype.withConnector = withConnectorMethod;
 
 // Labels
 
-Plan.Label = (label, mark = [0, 0, 0]) => Plan({ plan: { label }, marks: [mark] });
+export const Label = (label, mark = [0, 0, 0]) => Plan({ plan: { label }, marks: [mark] });
+
+Plan.Label = Label;
 
 const labels = (geometry) => {
   const labels = {};
@@ -51,8 +32,10 @@ const labels = (geometry) => {
   return labels;
 };
 
-const withLabelMethod = function (...args) { return assemble(this, Plan.Label(...args)); };
 const labelsMethod = function () { return labels(this.toKeptGeometry()); };
-
 Shape.prototype.labels = labelsMethod;
+
+const withLabelMethod = function (...args) { return assemble(this, Plan.Label(...args)); };
 Shape.prototype.withLabel = withLabelMethod;
+
+export default Plan;
