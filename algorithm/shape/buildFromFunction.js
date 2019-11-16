@@ -45,7 +45,10 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       buildWalls(polygons, path, lastPath);
     } else {
       if (cap) {
-        polygons.push(...makeConvex({}, [deduplicate(path)]));
+        const deduplicatedPath = deduplicate(path);
+        if (deduplicatedPath.length > 0) {
+          polygons.push(...makeConvex({}, [deduplicatedPath]));
+        }
       }
     }
     lastPath = path;
@@ -54,7 +57,10 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
     assertGood(polygon);
   }
   if (cap) {
-    polygons.push(...makeConvex({}, [deduplicate(flipPath(lastPath))]));
+    const deduplicatedPath = deduplicate(flipPath(lastPath));
+    if (deduplicatedPath.length > 0) {
+      polygons.push(...makeConvex({}, [deduplicatedPath]));
+    }
   }
   const solid = { solid: toSolidFromPolygons({}, polygons) };
   return solid;

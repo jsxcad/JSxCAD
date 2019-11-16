@@ -1,4 +1,4 @@
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { fromScaling } from '@jsxcad/math-mat4';
 
 /**
@@ -29,7 +29,6 @@ export const scale = (factor, shape) => {
     const [x = 1, y = 1, z = 1] = factor;
     return shape.transform(fromScaling([x, y, z]));
   } else {
-    // scale(4)
     return shape.transform(fromScaling([factor, factor, factor]));
   }
 };

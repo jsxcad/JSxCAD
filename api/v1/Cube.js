@@ -1,4 +1,4 @@
-import { buildRegularPrism, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+import { buildRegularPrism, regularPolygonEdgeLengthToRadius, toRadiusFromApothem } from '@jsxcad/algorithm-shape';
 
 import Shape from './Shape';
 
@@ -48,7 +48,6 @@ import Shape from './Shape';
 
 // Geometry construction.
 
-const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
 const unitCube = () => Shape.fromGeometry(buildRegularPrism(4))

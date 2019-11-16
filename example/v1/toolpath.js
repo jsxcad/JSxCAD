@@ -24,10 +24,7 @@ const cutShape    = shapeTwo.cut(cutAwayArea);
 await cutShape.writePdf('overcut_corners_shape.pdf');
 
 //An example of over-cutting corners in three dimensions
-const shape3D = Square(200, 200)
-                  .cut(Square(50, 50)
-                         .translate(0, 75, 0))
-                  .extrude(10);
+const shape3D = Square(200, 200).cut(Square(50, 50).translate(0, 75, 0)).extrude(10);
 const cutAwayVolume = shape3D.section().toolpath(6.35, true, true).sweep(Circle(6.35)).extrude(10);
 const cutShape3d = shape3D.cut(cutAwayVolume);
 

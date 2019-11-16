@@ -18,6 +18,9 @@ import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRa
 import { subdivideTriangle } from './subdivideTriangle';
 import { subdivideTriangularMesh } from './subdivideTriangularMesh';
 
+export const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
+export const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+
 export {
   buildAdaptiveCubicBezierCurve,
   buildConvexHull,

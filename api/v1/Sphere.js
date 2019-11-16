@@ -1,5 +1,6 @@
+import { buildRingSphere, toRadiusFromApothem } from '@jsxcad/algorithm-shape';
+
 import { Shape } from './Shape';
-import { buildRingSphere } from '@jsxcad/algorithm-shape';
 
 /**
  *
@@ -29,8 +30,6 @@ import { buildRingSphere } from '@jsxcad/algorithm-shape';
  * :::
  *
  **/
-
-const toRadiusFromApothem = (apothem, sides = 16) => apothem / Math.cos(Math.PI / sides);
 
 const unitSphere = ({ resolution = 16 } = {}) => {
   const shape = Shape.fromGeometry(buildRingSphere(resolution));
