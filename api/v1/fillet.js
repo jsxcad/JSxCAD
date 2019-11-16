@@ -1,6 +1,5 @@
 import Shape from './Shape';
 import Z from './Z';
-import assemble from './assemble';
 import chainHull from './chainHull';
 import union from './union';
 
@@ -30,17 +29,17 @@ export const fillet = (shape, tool, surface = Z(0)) => {
       const cut = [];
       for (const position of path) {
         if (position !== null) {
-          cut.push(tool.translate(position));
+          cut.push(tool.move(...position));
         }
       }
       if (path[0] !== null) {
         // Handle closed paths.
-        cut.push(tool.translate(path[0]));
+        cut.push(tool.move(...path[0]));
       }
       cuts.push(chainHull(...cut));
     }
   }
-  return assemble(shape, union(...cuts).drop());
+  return shape.with(union(...cuts).drop());
 };
 
 const method = function (...args) { return fillet(this, ...args); };
