@@ -34,7 +34,10 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
       buildWalls(polygons, path, lastPath);
     } else {
       if (cap) {
-        polygons.push(...makeConvex({}, [deduplicate(path)]));
+        const deduplicatedPath = deduplicate(path);
+        if (deduplicatedPath.length > 0) {
+          polygons.push(...makeConvex({}, [deduplicatedPath]));
+        }
       }
     }
     lastPath = path;
@@ -43,7 +46,10 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
     assertGood(polygon);
   }
   if (cap) {
-    polygons.push(...flipPolygons(makeConvex({}, [deduplicate(lastPath)])));
+    const deduplicatedPath = deduplicate(lastPath);
+    if (deduplicatedPath.length > 0) {
+      polygons.push(...flipPolygons(makeConvex({}, [deduplicatedPath])));
+    }
   }
 
   return { solid: toSolidFromPolygons({}, flipPolygons(polygons)) };

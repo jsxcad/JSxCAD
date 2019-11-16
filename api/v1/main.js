@@ -17,6 +17,7 @@ import { Label, Plan } from './Plan';
 
 import Armature from './Armature';
 import Circle from './Circle';
+import Cone from './Cone';
 import Connector from './Connector';
 import Cube from './Cube';
 import Cursor from './Cursor';
@@ -70,7 +71,6 @@ import drop from './drop';
 import ease from './ease';
 import expand from './expand';
 import extrude from './extrude';
-import fillet from './fillet';
 import { flat } from './flat';
 import { front } from './front';
 import { getPathsets } from './getPathsets';
@@ -154,7 +154,6 @@ const methods = [
   ease,
   expand,
   extrude,
-  fillet,
   front,
   getPathsets,
   flat,
@@ -212,6 +211,7 @@ export {
   assemble,
   chainHull,
   Circle,
+  Cone,
   Connector,
   coordinates,
   cos,
