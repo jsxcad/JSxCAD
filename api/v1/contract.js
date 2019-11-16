@@ -14,7 +14,7 @@ import expand from './expand';
  * :::
  **/
 
-export const byRadius = (shape, radius = 1, { resolution = 16 } = {}) => expand(shape, -radius, resolution);
+export const byRadius = (shape, amount = 1, { resolution = 16 } = {}) => expand(shape, -amount, resolution);
 
 export const contract = (...args) => byRadius(...args);
 

@@ -7,6 +7,8 @@ import json from 'rollup-plugin-json';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
+Error.stackTraceLimit = Infinity;
+
 export default {
   input: 'webworker.js',
   output: {
@@ -19,21 +21,23 @@ export default {
     //    'process'
   ],
   plugins: [
-    loadz0r(),
-    builtins(),
-    commonjs(),
-    globals(),
-    json(),
     hypothetical(
       {
         allowFallthrough: true,
         files: {
+          'fast-png': 'export const encode = {}; export const decode = {};',
           'fs': 'export const promises = {};',
+          'gl': 'const dummy = {}; export default dummy;',
           'node-fetch': 'export default {};',
           'os': '',
           'tty': ''
         }
       }),
+    loadz0r(),
+    builtins(),
+    commonjs(),
+    globals(),
+    json(),
     nodeResolve({ jsnext: true, preferBuiltins: true })
   ]
 };

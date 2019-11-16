@@ -15,33 +15,35 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  *
  * ::: illustration
  * ```
- * difference(Circle(10),
- *            Circle(8))
+ * Circle(10).cut(Circle(8))
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * difference(Circle(10),
- *            Circle(8))
- *   .extrude(10)
+ * Circle(10).cut(Circle(8)).extrude(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * Triangle(10).extrude(5, 5)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
  * ```
  * :::
  *
  **/
 
-const op = (shape, twist = 0, steps = 1, heights) => {
-  if (typeof heights === 'number') {
-    heights = [heights];
-  }
-  const depth = heights.length > 1 ? Math.min(...heights) : 0;
-  const height = heights.length > 0 ? Math.max(...heights) : 1;
+export const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) => {
   const twistRadians = twist * Math.PI / 180;
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
   for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
-      const solid = extrudeAlgorithm(z0Surface, height, steps, twistRadians);
+      const solid = extrudeAlgorithm(z0Surface, height, depth, steps, twistRadians);
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
@@ -56,19 +58,7 @@ const op = (shape, twist = 0, steps = 1, heights) => {
   return assemble(...solids);
 };
 
-export const withTwist = (shape, twist, { steps, height = [] }) => op(shape, twist, steps, height);
-
-export const toHeight = (shape, ...height) => op(shape, 0, 1, height);
-
-export const extrude = (...args) => extrude.toHeight(...args);
-extrude.toHeight = toHeight;
-extrude.withTwist = withTwist;
-
 const extrudeMethod = function (...args) { return extrude(this, ...args); };
 Shape.prototype.extrude = extrudeMethod;
 
-const extrudeToHeightMethod = function (...args) { return toHeight(this, ...args); };
-Shape.prototype.extrudeToHeight = extrudeToHeightMethod;
-
-const extrudeWithTwistMethod = function (...args) { return withTwist(this, ...args); };
-Shape.prototype.extrudeWithTwist = extrudeWithTwistMethod;
+export default extrude;

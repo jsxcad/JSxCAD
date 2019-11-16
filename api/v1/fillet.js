@@ -1,5 +1,5 @@
 import Shape from './Shape';
-import assemble from './assemble';
+import Z from './Z';
 import chainHull from './chainHull';
 import union from './union';
 
@@ -20,29 +20,29 @@ import union from './union';
  *
  **/
 
-export const fillet = (shape, tool) => {
+export const fillet = (shape, tool, surface = Z(0)) => {
   // FIX: Identify surface to fillet properly.
-  const [, , z] = shape.measureBoundingBox()[1];
   const cuts = [];
   // Fix Remove the 0.1 z offsets.
-  for (const pathset of shape.section({ z: z - 0.1 }).outline().getPathsets()) {
+  for (const pathset of shape.section(surface).outline().getPathsets()) {
     for (const path of pathset) {
       const cut = [];
       for (const position of path) {
         if (position !== null) {
-          cut.push(tool.translate(position));
+          cut.push(tool.move(...position));
         }
       }
       if (path[0] !== null) {
         // Handle closed paths.
-        cut.push(tool.translate(path[0]));
+        cut.push(tool.move(...path[0]));
       }
       cuts.push(chainHull(...cut));
     }
   }
-  return assemble(shape, union(...cuts).drop());
+  return shape.with(union(...cuts).drop());
 };
 
-const method = function (tool) { return fillet(this, tool); };
-
+const method = function (...args) { return fillet(this, ...args); };
 Shape.prototype.fillet = method;
+
+export default fillet;

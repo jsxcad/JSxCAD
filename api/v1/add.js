@@ -1,5 +1,5 @@
 import Shape from './Shape';
-import difference from './difference';
+import union from './union';
 
 /**
  *
@@ -17,5 +17,5 @@ import difference from './difference';
  *
  **/
 
-const method = function (...shapes) { return difference(this, ...shapes); };
+const method = function (...shapes) { return union(this, ...shapes); };
 Shape.prototype.add = method;

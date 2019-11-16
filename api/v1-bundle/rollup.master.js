@@ -19,7 +19,9 @@ export default {
       {
         allowFallthrough: true,
         files: {
+          'fast-png': 'export const encode = {}; export const decode = {};',
           'fs': 'export const promises = {};',
+          'gl': 'const dummy = {}; export default dummy;',
           'node-fetch': 'export default {};',
           'os': '',
           'tty': '',

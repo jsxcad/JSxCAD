@@ -21,7 +21,7 @@ import Connector from './Connector';
 import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
-import { Fastener } from './Fastener';
+// import { Fastener } from './Fastener';
 import { Gear } from './Gear';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
@@ -69,8 +69,8 @@ import difference from './difference';
 import drop from './drop';
 import ease from './ease';
 import expand from './expand';
-import { extrude } from './extrude';
-import { fillet } from './fillet';
+import extrude from './extrude';
+import fillet from './fillet';
 import { flat } from './flat';
 import { front } from './front';
 import { getPathsets } from './getPathsets';
@@ -221,7 +221,7 @@ export {
   difference,
   ease,
   flat,
-  Fastener,
+  // Fastener,
   Gear,
   Hexagon,
   hull,
