@@ -52,10 +52,6 @@ export class Shape {
     return fromGeometry(flip(toKeptGeometry(this)), this.context);
   }
 
-  getTags () {
-    return toGeometry(this).tags;
-  }
-
   op (op, ...args) {
     return op(this, ...args);
   }
