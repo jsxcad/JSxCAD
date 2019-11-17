@@ -99,6 +99,7 @@ import { offset } from './offset';
 import { orient } from './orient';
 import { outline } from './outline';
 import { readDst } from './readDst';
+import { readDxf } from './readDxf';
 import { readFont } from './readFont';
 import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
@@ -254,6 +255,7 @@ export {
   Polyhedron,
   Prism,
   readDst,
+  readDxf,
   readFont,
   readJscad,
   readLDraw,

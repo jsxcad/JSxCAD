@@ -15,3 +15,5 @@ export const toDxf = async (options = {}, geometry) => {
   }
   return drawing.toDxfString();
 };
+
+export default toDxf;

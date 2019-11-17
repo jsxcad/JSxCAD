@@ -16,9 +16,6 @@ export default {
     format: 'amd'
   },
   external: [
-    //    'buffer',
-    //    'events',
-    //    'process'
   ],
   plugins: [
     hypothetical(
