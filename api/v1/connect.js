@@ -119,7 +119,4 @@ export const connect = (aConnector, bConnector, { doAssemble = true, label } = {
   return result;
 };
 
-const method = function (...args) { return connect(this, ...args); };
-Shape.prototype.connect = method;
-
 export default connect;

@@ -9,6 +9,7 @@
 
 import './add';
 import './cut';
+import './to';
 import './with';
 
 import * as vec from '@jsxcad/math-vec3';
@@ -126,6 +127,10 @@ import { toBillOfMaterial } from './toBillOfMaterial';
 import { toItems } from './toItems';
 import { toolpath } from './toolpath';
 import { translate } from './translate';
+import { turn } from './turn';
+import { turnX } from './turnX';
+import { turnY } from './turnY';
+import { turnZ } from './turnZ';
 import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
@@ -186,6 +191,10 @@ const methods = [
   toBillOfMaterial,
   toItems,
   translate,
+  turn,
+  turnX,
+  turnY,
+  turnZ,
   keep,
   voxels,
   wireframe,
