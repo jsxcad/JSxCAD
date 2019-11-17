@@ -19,8 +19,8 @@ import { fromXRotation } from '@jsxcad/math-mat4';
  * :::
  **/
 
-export const rotateX = (angle, shape) => shape.transform(fromXRotation(angle * 0.017453292519943295));
+export const rotateX = (shape, angle) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-const method = function (angle) { return rotateX(angle, this); };
+const method = function (angle) { return rotateX(this, angle); };
 
 Shape.prototype.rotateX = method;

@@ -16,6 +16,11 @@ export const Plan = (options = {}, context) => {
   return Shape.fromGeometry({ plan, marks, tags }, context);
 };
 
+// Radius
+
+export const Radius = (label, radius = 1, center = [0, 0, 0]) => Plan({ plan: { radius }, marks: [center] });
+Plan.Radius = Radius;
+
 // Labels
 
 export const Label = (label, mark = [0, 0, 0]) => Plan({ plan: { label }, marks: [mark] });

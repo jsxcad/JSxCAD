@@ -1,6 +1,6 @@
 import { add, scale } from '@jsxcad/math-vec3';
 
-import { Shape } from './Shape';
+import Shape from './Shape';
 import { measureBoundingBox } from './measureBoundingBox';
 
 /**
@@ -17,6 +17,12 @@ import { measureBoundingBox } from './measureBoundingBox';
  **/
 
 export const measureCenter = (shape) => {
+  // FIX: Produce a clearer definition of center.
+  const geometry = shape.toKeptGeometry();
+  if (geometry.plan && geometry.plan.connector) {
+    // Return the center of the connector.
+    return geometry.marks[0];
+  }
   const [high, low] = measureBoundingBox(shape);
   return scale(0.5, add(high, low));
 };

@@ -57,7 +57,7 @@ const toPathFromShape = (shape) => {
 export const ofFunction = (op, { resolution, cap = true, context } = {}) =>
   Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
 
-export const ofSlices = (op, { slices, cap = true } = {}) =>
+export const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(buildFromSlices(slice => toPathFromShape(op(slice)), slices, cap));
 
 export const Cylinder = (...args) => ofRadius(...args);
