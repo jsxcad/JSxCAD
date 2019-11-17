@@ -1,6 +1,7 @@
 import { Shape } from './Shape';
 import { assemble } from './assemble';
 import { getPaths } from '@jsxcad/geometry-tagged';
+import { isClosed } from '@jsxcad/geometry-path';
 
 /**
  *
@@ -33,7 +34,7 @@ export const interior = (options = {}, shape) => {
   const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
     // FIX: Check paths for coplanarity.
-    surfaces.push(Shape.fromPathsToSurface(paths));
+    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed)));
   }
   return assemble(...surfaces);
 };

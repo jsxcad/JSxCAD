@@ -1,45 +1,58 @@
+import { scale, translate } from '@jsxcad/geometry-tagged';
+
 import DxfParser from 'dxf-parser';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { scale } from '@jsxcad/geometry-tagged';
+import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
 
 export const fromDxf = async (options = {}, data) => {
   const parser = new DxfParser();
   const dxf = parser.parseSync(data);
-console.log(`QQ/dxf: ${JSON.stringify(dxf)}`);
   const assembly = [];
-  const paths = [];
   for (const entity of dxf.entities) {
-    const { layer = 0, colorIndex = 0, color = 0 } = entity;
+    const { handle, layer } = entity;
+    let tags = [];
+    if (handle !== undefined) {
+      tags.push(`user/dxf/handle:${handle}`);
+    }
+    if (layer !== undefined) {
+      tags.push(`user/dxf/layer:${layer}`);
+      if (dxf.tables && dxf.tables.layer && dxf.tables.layer.layers) {
+        const color = dxf.tables.layer.layers[layer].color;
+        if (color !== undefined) {
+          tags.push(toTagFromRgbInt(color));
+        }
+      }
+    }
+    if (tags.length === 0) tags = undefined;
     switch (entity.type) {
       case 'LINE':
       case 'LWPOLYLINE':
       case 'POLYLINE': {
         const { shape, vertices } = entity;
-        const path = entity.vertices.map(({ x = 0, y = 0, z = 0 }) => [x, y, z]);
+        const path = vertices.map(({ x = 0, y = 0, z = 0 }) => [x, y, z]);
         if (shape !== true) {
           // Shape false means closed.
           path.unshift(null);
         }
-        paths.push(path);
+        assembly.push({ paths: [path], tags });
         break;
       }
       case 'INSERT': {
-        const { x = 0, y = 0, z = 0 } = entity.position;
-        const { xScale, rotation } = entity;
+        // const { x = 0, y = 0, z = 0 } = entity.position;
+        // const { xScale, rotation } = entity;
         break;
       }
       case 'CIRCLE': {
         const { x = 0, y = 0, z = 0 } = entity.center;
         const { radius = 1 } = entity;
-        assembly.push(scale([radius, radius, radius], buildRegularPolygon(32)));
+        assembly.push(translate([x, y, z], scale([radius, radius, radius], { ...buildRegularPolygon(32), tags })));
         break;
       }
       default:
         throw Error(`die: entity type [${entity.type}]`);
     }
   }
-  assembly.push({ paths });
   return { assembly };
-}
+};
 
 export default fromDxf;

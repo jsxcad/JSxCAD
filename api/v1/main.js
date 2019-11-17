@@ -8,6 +8,7 @@
  */
 
 import './add';
+import './colors';
 import './cut';
 import './to';
 import './with';
