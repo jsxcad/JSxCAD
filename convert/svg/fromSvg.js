@@ -4,6 +4,7 @@ import { DOMParser } from 'xmldom/dom-parser';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
 import { close } from '@jsxcad/geometry-path';
 import { toPath } from 'svg-points';
+import { toTagsFromName } from '@jsxcad/algorithm-color';
 import { transform } from '@jsxcad/geometry-tagged';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
@@ -141,12 +142,13 @@ export const fromSvg = async (options = {}, svgString) => {
         const output = (svgPath) => {
           const paths = fromSvgPath({}, svgPath).paths;
           const fill = node.getAttribute('fill');
-          if (fill !== undefined && fill !== 'none') {
+          if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
-            geometry.assembly.push(transform(scale(matrix), { z0Surface: close(paths), tags: [`color/${fill}`] }));
+            const tags = toTagsFromName(fill);
+            geometry.assembly.push(transform(scale(matrix), { z0Surface: close(paths), tags }));
           }
           const stroke = node.getAttribute('stroke');
-          if (stroke !== undefined && stroke !== 'none') {
+          if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
             if (matrix.some(element => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
@@ -154,7 +156,8 @@ export const fromSvg = async (options = {}, svgString) => {
             if (scaledMatrix.some(element => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
-            geometry.assembly.push(transform(scaledMatrix, { paths: paths, tags: [`color/${stroke}`] }));
+            const tags = toTagsFromName(stroke);
+            geometry.assembly.push(transform(scaledMatrix, { paths: paths, tags }));
           }
         };
 

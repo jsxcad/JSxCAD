@@ -1,4 +1,5 @@
 // rollup.config.js
+import babel from 'rollup-plugin-babel';
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
@@ -15,8 +16,7 @@ export default {
     dir: 'webworker.dist',
     format: 'amd'
   },
-  external: [
-  ],
+  external: [],
   plugins: [
     hypothetical(
       {
@@ -32,6 +32,16 @@ export default {
       }),
     loadz0r(),
     builtins(),
+    babel({
+      babelrc: false,
+      exclude: [/node_modules/, /polybooljs/],
+      presets: ['@babel/preset-react',
+                ['@babel/env', { 'targets': { 'browsers': 'last 1 chrome versions' } }]],
+      plugins: [
+        '@babel/transform-react-jsx',
+        '@babel/plugin-proposal-class-properties'
+      ]
+    }),
     commonjs(),
     globals(),
     json(),

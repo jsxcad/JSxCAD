@@ -9,7 +9,6 @@ import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
 import { ask as askSys, createService, deleteFile, getFilesystem, listFiles, listFilesystems, log, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, watchFile, watchLog, watchFileCreation, watchFileDeletion, writeFile } from '@jsxcad/sys';
 import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
-import { UnControlled as CodeMirror } from 'react-codemirror2';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SvgPathEditor from './SvgPathEditor';
@@ -31,7 +30,6 @@ import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
-import Draggable from 'react-draggable';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Form from 'react-bootstrap/Form';
@@ -46,8 +44,6 @@ import Table from 'react-bootstrap/Table';
 import Toast from 'react-bootstrap/Toast';
 
 import { Mosaic, MosaicWindow, MosaicZeroState, RemoveButton as MosaicRemoveButton, SplitButton as MosaicSplitButton } from 'react-mosaic-component';
-
-import Editor from 'react-simple-code-editor';
 
 import Drawer from 'rc-drawer';
 

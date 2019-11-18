@@ -20,7 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "color-namer": "^1.4.0"
+    "chroma-js": "^2.1.0"
   },
   "devDependencies": {
     "ava": "^1.4.1",

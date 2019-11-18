@@ -58,6 +58,7 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
   for (const { tags, surface } of getSurfaces(keptGeometry)) {
     lines.push(toFillColor(toRgb(tags)));
+    lines.push(toStrokeColor(toRgb(tags)));
     for (const path of makeConvexSurface({}, surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
@@ -66,12 +67,13 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
         const [x2, y2] = path[nth];
         lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
       }
-      lines.push(`h`); // Surface paths are always closed.
+      // lines.push(`h`); // Surface paths are always closed.
       lines.push(`f`); // Surface paths are always filled.
     }
   }
   for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
     lines.push(toFillColor(toRgb(tags)));
+    lines.push(toStrokeColor(toRgb(tags)));
     // FIX: Avoid making the surface convex.
     for (const path of makeConvexZ0Surface({}, z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
@@ -81,7 +83,7 @@ export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth =
         const [x2, y2] = path[nth];
         lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
       }
-      lines.push(`h`); // Surface paths are always closed.
+      // lines.push(`h`); // Surface paths are always closed.
       lines.push(`f`); // Surface paths are always filled.
     }
   }

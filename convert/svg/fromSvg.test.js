@@ -3,7 +3,7 @@ import fs from 'fs';
 import test from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';
 
-const { readFile } = fs.promises;
+const { readFile, writeFile } = fs.promises;
 
 test('Rectangle', async t => {
   const assembly = await fromSvg({},
@@ -20,6 +20,7 @@ test('Rectangle', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.rectangle.pdf', pdf);
   t.is(pdf, await readFile('test.rectangle.pdf', { encoding: 'utf8' }));
 });
 
@@ -47,6 +48,7 @@ test('Rounded Rectangle', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.rounded-rectangle.pdf', pdf);
   t.is(pdf, await readFile('test.rounded-rectangle.pdf', { encoding: 'utf8' }));
 });
 
@@ -71,6 +73,7 @@ test('Polyline', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.polyline.pdf', pdf);
   t.is(pdf, await readFile('test.polyline.pdf', { encoding: 'utf8' }));
 });
 
@@ -89,6 +92,7 @@ test('Circle', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.circle.pdf', pdf);
   t.is(pdf, await readFile('test.circle.pdf', { encoding: 'utf8' }));
 });
 
@@ -112,6 +116,7 @@ test('Ellipse', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.ellipse.pdf', pdf);
   t.is(pdf, await readFile('test.ellipse.pdf', { encoding: 'utf8' }));
 });
 
@@ -135,6 +140,7 @@ test('Polygon', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.polygon.pdf', pdf);
   t.is(pdf, await readFile('test.polygon.pdf', { encoding: 'utf8' }));
 });
 
@@ -169,5 +175,6 @@ test('Complex', async t => {
                             </svg>
                            `);
   const pdf = await toPdf({}, assembly);
+  await writeFile('out.complex.pdf', pdf);
   t.is(pdf, await readFile('test.complex.pdf', { encoding: 'utf8' }));
 });
