@@ -29,6 +29,7 @@ import { Gear } from './Gear';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
+import { Line } from './Line';
 import { MicroGearMotor } from './MicroGearMotor';
 import { Nail } from './Nail';
 import { Path } from './Path';
@@ -119,6 +120,7 @@ import { scale } from './scale';
 import { section } from './section';
 import { shell } from './shell';
 import { sin } from './sin';
+import { solids } from './solids';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
@@ -186,6 +188,7 @@ const methods = [
   scale,
   section,
   shell,
+  solids,
   specify,
   sweep,
   tags,
@@ -242,6 +245,7 @@ export {
   lathe,
   Label,
   Lego,
+  Line,
   log,
   max,
   MicroGearMotor,
