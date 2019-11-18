@@ -1,5 +1,6 @@
 import Shape from './Shape';
 import { addTags } from '@jsxcad/geometry-tagged';
+import { toTagFromName } from '@jsxcad/algorithm-color';
 
 /**
  *
@@ -21,12 +22,12 @@ import { addTags } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const fromName = (tags, shape) =>
-  Shape.fromGeometry(addTags(tags.map(tag => `color/${tag}`), shape.toGeometry()));
+export const fromName = (shape, name) =>
+  Shape.fromGeometry(addTags([toTagFromName(name)], shape.toGeometry()));
 
 export const color = (...args) => fromName(...args);
 
-const colorMethod = function (...tags) { return color(tags, this); };
+const colorMethod = function (...args) { return color(this, ...args); };
 Shape.prototype.color = colorMethod;
 
 export default color;

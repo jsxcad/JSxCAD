@@ -20,9 +20,11 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
+    "dxf-parser": "^1.0.0-alpha.1",
     "dxf-writer": "^1.2.1"
   },
   "devDependencies": {
