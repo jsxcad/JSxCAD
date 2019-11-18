@@ -49,7 +49,7 @@ export const fromDxf = async (options = {}, data) => {
         break;
       }
       default:
-        throw Error(`die: entity type [${entity.type}]`);
+        throw Error(`die due to entity: ${JSON.stringify(entity)}`);
     }
   }
   return { assembly };
