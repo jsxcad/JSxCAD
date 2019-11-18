@@ -7,7 +7,7 @@ import hypothetical from 'rollup-plugin-hypothetical';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
-const watcher = {
+export const watcher = {
   transform (code, id) {
     console.log(id);
     console.log(code);
@@ -23,7 +23,7 @@ export default {
   },
   external: [],
   plugins: [
-    watcher,
+    // watcher,
     hypothetical(
       {
         allowFallthrough: true,

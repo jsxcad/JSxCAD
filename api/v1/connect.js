@@ -108,8 +108,8 @@ export const connect = (aConnector, bConnector, { doAssemble = true, label } = {
       .move(...aOrigin);
   let result;
   if (doAssemble) {
-    result = assemble(dropConnector(aShape, aConnector),
-                      dropConnector(bMoved, bConnector));
+    result = assemble(dropConnector(aShape, aConnector.toTransformedGeometry().plan.connector),
+                      dropConnector(bMoved, bConnector.toTransformedGeometry().plan.connector));
   } else {
     result = bMoved;
   }
