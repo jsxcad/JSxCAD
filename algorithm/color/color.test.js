@@ -3,7 +3,7 @@ import { toRgb, toTagFromRgbInt } from './color';
 import test from 'ava';
 
 test('Default works.', t => {
-  t.deepEqual(toRgb(['color/imaginary']), [0, 0, 0]);
+  t.deepEqual(toRgb(['color/black']), [0, 0, 0]);
 });
 
 test('Blue works.', t => {

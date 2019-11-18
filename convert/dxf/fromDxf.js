@@ -9,6 +9,7 @@ export const fromDxf = async (options = {}, data) => {
   const dxf = parser.parseSync(data);
   const assembly = [];
   for (const entity of dxf.entities) {
+    console.log(JSON.stringify(entity));
     const { handle, layer } = entity;
     let tags = [];
     if (handle !== undefined) {

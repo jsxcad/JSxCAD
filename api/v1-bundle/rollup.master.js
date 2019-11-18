@@ -7,6 +7,14 @@ import hypothetical from 'rollup-plugin-hypothetical';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
+const watcher = {
+  transform (code, id) {
+    console.log(id);
+    console.log(code);
+    // not returning anything, so doesn't affect bundle
+  }
+};
+
 export default {
   input: 'master.js',
   output: {
@@ -15,6 +23,7 @@ export default {
   },
   external: [],
   plugins: [
+    watcher,
     hypothetical(
       {
         allowFallthrough: true,
@@ -67,6 +76,7 @@ export default {
       }
     }),
     globals(),
-    nodeResolve({ jsnext: true, preferBuiltins: true })
+    // nodeResolve({ jsnext: true, preferBuiltins: true })
+    nodeResolve({ preferBuiltins: true })
   ]
 };

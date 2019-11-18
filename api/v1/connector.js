@@ -18,7 +18,13 @@ import connectors from './connectors';
  * :::
  **/
 
-const connector = (geometry, id) => connectors(geometry)[id];
+const connector = (geometry, id) => {
+  for (const connector of connectors(geometry)) {
+    if (connector.toGeometry().plan.conector === id) {
+      return connector;
+    }
+  }
+};
 
 const connectorMethod = function (id) { return connector(this, id); };
 Shape.prototype.connector = connectorMethod;

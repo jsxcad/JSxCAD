@@ -20,10 +20,10 @@ import { shapeToConnect } from './Connector';
  **/
 
 export const connectors = (shape) => {
-  const connectors = {};
+  const connectors = [];
   for (const entry of getPlans(shape.toKeptGeometry())) {
     if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-      connectors[entry.plan.connector] = Shape.fromGeometry(entry, { [shapeToConnect]: shape });
+      connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
     }
   }
   return connectors;
