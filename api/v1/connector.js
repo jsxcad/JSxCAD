@@ -18,9 +18,9 @@ import connectors from './connectors';
  * :::
  **/
 
-const connector = (geometry, id) => {
-  for (const connector of connectors(geometry)) {
-    if (connector.toGeometry().plan.conector === id) {
+const connector = (shape, id) => {
+  for (const connector of connectors(shape)) {
+    if (connector.toGeometry().plan.connector === id) {
       return connector;
     }
   }
