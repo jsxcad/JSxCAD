@@ -8,6 +8,7 @@
  */
 
 import './add';
+import './faces';
 import './colors';
 import './cut';
 import './to';
@@ -100,6 +101,7 @@ import { numbers } from './numbers';
 import { offset } from './offset';
 import { orient } from './orient';
 import { outline } from './outline';
+import { pack } from './pack';
 import { readDst } from './readDst';
 import { readDxf } from './readDxf';
 import { readFont } from './readFont';
@@ -252,6 +254,7 @@ export {
   minkowski,
   Nail,
   numbers,
+  pack,
   Plan,
   Path,
   Point,
