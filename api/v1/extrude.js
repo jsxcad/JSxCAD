@@ -37,6 +37,9 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  **/
 
 export const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) => {
+  if (height < depth) {
+    [height, depth] = [depth, height];
+  }
   const twistRadians = twist * Math.PI / 180;
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
