@@ -92,7 +92,7 @@ export const dropConnector = (shape, connector) =>
   Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
 
 // Connect two shapes at the specified connector.
-export const connect = (aConnector, bConnector, { doAssemble = true, label } = {}) => {
+export const connect = (bConnector, aConnector, { doAssemble = true, label } = {}) => {
   const [aOrigin, aX, aY, aZ] = moveToOrigin(aConnector);
   const [bOrigin, bX, bY, bZ] = moveToOrigin(bConnector.flip());
   // TODO: use a symbol.
