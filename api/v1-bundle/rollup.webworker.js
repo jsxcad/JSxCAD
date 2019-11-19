@@ -42,7 +42,13 @@ export default {
         '@babel/plugin-proposal-class-properties'
       ]
     }),
-    commonjs(),
+    commonjs({
+      namedExports: {
+        '../../node_modules/binpackingjs/dist/BinPacking.min.js': [
+          'BP2D'
+        ]
+      }
+    }),
     globals(),
     json(),
     nodeResolve({ jsnext: true, preferBuiltins: true })
