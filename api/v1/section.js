@@ -37,7 +37,7 @@ import { union } from './union';
  *
  **/
 
-export const section = (solidShape, surfaceShape = Z()) => {
+export const section = (solidShape, surfaceShape = Z(0)) => {
   const sections = [];
   for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
     const anySurface = surface || z0Surface;

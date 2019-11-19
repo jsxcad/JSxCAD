@@ -1,19 +1,21 @@
-import { assert, assertNumber, assertPoints } from './assert';
-import { buildPolygonFromPoints, buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+import {
+  buildPolygonFromPoints,
+  buildRegularPolygon,
+  regularPolygonEdgeLengthToRadius,
+  toRadiusFromApothem
+} from '@jsxcad/algorithm-shape';
 
-import { Shape } from './Shape';
-import { dispatch } from './dispatch';
+import Shape from './Shape';
 
 const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
-const toRadiusFromApothem = (apothem, sides = 16) => apothem / Math.cos(Math.PI / sides);
-const toRadiusFromEdge = (edge, sides = 16) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-export const ofEdge = (edge, sides = 16) => unitPolygon(sides).scale(toRadiusFromEdge(edge, sides));
-export const ofApothem = (apothem, sides = 16) => unitPolygon(sides).scale(toRadiusFromApothem(apothem, sides));
-export const ofRadius = (radius, sides = 16) => unitPolygon(sides).scale(radius);
-export const ofDiameter = (diameter, sides = 16) => unitPolygon(sides).scale(diameter / 2);
+export const ofRadius = (radius, { sides = 16 } = {}) => unitPolygon(sides).scale(radius);
+export const ofEdge = (edge, { sides = 16 }) => ofRadius(toRadiusFromEdge(edge, sides), { sides });
+export const ofApothem = (apothem, { sides = 16 }) => ofRadius(toRadiusFromApothem(apothem, sides), { sides });
+export const ofDiameter = (diameter, ...args) => ofRadius(diameter / 2, ...args);
 export const ofPoints = (points) => Shape.fromGeometry(buildPolygonFromPoints(points));
 
 /**
@@ -55,49 +57,12 @@ export const ofPoints = (points) => Shape.fromGeometry(buildPolygonFromPoints(po
  *
  **/
 
-export const Polygon = dispatch(
-  'Polygon',
-  // polygon([0, 0], [3, 0], [3, 3])
-  (...points) => {
-    assertPoints(points);
-    assert(points, 'Not at least three points', points.length >= 3);
-    return () => ofPoints(points);
-  },
-  // polygon({ points: [[0, 0], [3, 0], [3, 3]] })
-  ({ points }) => {
-    assertPoints(points);
-    assert(points, 'Not at least three points', points.length >= 3);
-    return () => ofPoints(points);
-  },
-  // polygon({ edge: 10, sides: 4 })
-  ({ edge, sides }) => {
-    assertNumber(edge);
-    assertNumber(sides);
-    return () => ofEdge(edge, sides);
-  },
-  // polygon({ apothem: 10, sides: 27 })
-  ({ apothem, sides }) => {
-    assertNumber(apothem);
-    assertNumber(sides);
-    return () => ofApothem(apothem, sides);
-  },
-  // polygon({ radius: 10, sides: 8 })
-  ({ radius, sides }) => {
-    assertNumber(radius);
-    assertNumber(sides);
-    return () => ofRadius(radius, sides);
-  },
-  // polygon({ diameter: 10, sides: 7 })
-  ({ diameter, sides }) => {
-    assertNumber(diameter);
-    assertNumber(sides);
-    return () => ofDiameter(diameter, sides);
-  });
-
-export default Polygon;
+export const Polygon = (...args) => ofRadius(...args);
 
 Polygon.ofEdge = ofEdge;
 Polygon.ofApothem = ofApothem;
 Polygon.ofRadius = ofRadius;
 Polygon.ofDiameter = ofDiameter;
 Polygon.ofPoints = ofPoints;
+
+export default Polygon;

@@ -1,5 +1,13 @@
-import { toRgb } from './color';
+import {
+  toRgb,
+  toTagFromName,
+  toTagFromRgbInt,
+  toTagsFromName
+} from './color';
 
 export {
-  toRgb
+  toRgb,
+  toTagFromName,
+  toTagFromRgbInt,
+  toTagsFromName
 };

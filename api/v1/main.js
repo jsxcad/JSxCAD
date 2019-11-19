@@ -8,7 +8,10 @@
  */
 
 import './add';
+import './faces';
+import './colors';
 import './cut';
+import './to';
 import './with';
 
 import * as vec from '@jsxcad/math-vec3';
@@ -17,15 +20,17 @@ import { Label, Plan } from './Plan';
 
 import Armature from './Armature';
 import Circle from './Circle';
+import Cone from './Cone';
 import Connector from './Connector';
 import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
-import { Fastener } from './Fastener';
+// import { Fastener } from './Fastener';
 import { Gear } from './Gear';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
+import { Line } from './Line';
 import { MicroGearMotor } from './MicroGearMotor';
 import { Nail } from './Nail';
 import { Path } from './Path';
@@ -69,8 +74,7 @@ import difference from './difference';
 import drop from './drop';
 import ease from './ease';
 import expand from './expand';
-import { extrude } from './extrude';
-import { fillet } from './fillet';
+import extrude from './extrude';
 import { flat } from './flat';
 import { front } from './front';
 import { getPathsets } from './getPathsets';
@@ -97,7 +101,9 @@ import { numbers } from './numbers';
 import { offset } from './offset';
 import { orient } from './orient';
 import { outline } from './outline';
+import { pack } from './pack';
 import { readDst } from './readDst';
+import { readDxf } from './readDxf';
 import { readFont } from './readFont';
 import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
@@ -116,6 +122,7 @@ import { scale } from './scale';
 import { section } from './section';
 import { shell } from './shell';
 import { sin } from './sin';
+import { solids } from './solids';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
@@ -126,6 +133,10 @@ import { toBillOfMaterial } from './toBillOfMaterial';
 import { toItems } from './toItems';
 import { toolpath } from './toolpath';
 import { translate } from './translate';
+import { turn } from './turn';
+import { turnX } from './turnX';
+import { turnY } from './turnY';
+import { turnZ } from './turnZ';
 import { union } from './union';
 import { voxels } from './voxels';
 import { wireframe } from './wireframe';
@@ -154,7 +165,6 @@ const methods = [
   ease,
   expand,
   extrude,
-  fillet,
   front,
   getPathsets,
   flat,
@@ -180,6 +190,7 @@ const methods = [
   scale,
   section,
   shell,
+  solids,
   specify,
   sweep,
   tags,
@@ -187,6 +198,10 @@ const methods = [
   toBillOfMaterial,
   toItems,
   translate,
+  turn,
+  turnX,
+  turnY,
+  turnZ,
   keep,
   voxels,
   wireframe,
@@ -212,6 +227,7 @@ export {
   assemble,
   chainHull,
   Circle,
+  Cone,
   Connector,
   coordinates,
   cos,
@@ -221,7 +237,7 @@ export {
   difference,
   ease,
   flat,
-  Fastener,
+  // Fastener,
   Gear,
   Hexagon,
   hull,
@@ -231,12 +247,14 @@ export {
   lathe,
   Label,
   Lego,
+  Line,
   log,
   max,
   MicroGearMotor,
   minkowski,
   Nail,
   numbers,
+  pack,
   Plan,
   Path,
   Point,
@@ -245,6 +263,7 @@ export {
   Polyhedron,
   Prism,
   readDst,
+  readDxf,
   readFont,
   readJscad,
   readLDraw,

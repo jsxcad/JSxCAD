@@ -27,6 +27,6 @@ export const Path = dispatch(
     return () => fromPoints(points);
   });
 
-export default Path;
-
 Path.fromPoints = fromPoints;
+
+export default Path;

@@ -14,11 +14,11 @@ import shell from './shell';
  * :::
  **/
 
-export const expand = (shape, radius = 1, resolution = 16) =>
-  (radius >= 0) ? shape.union(shell(shape, radius, resolution))
-    : shape.cut(shell(shape, -radius, resolution));
+export const expand = (shape, amount = 1, { resolution = 16 }) =>
+  (amount >= 0) ? shape.union(shell(shape, amount, resolution))
+    : shape.cut(shell(shape, -amount, resolution));
 
-const method = function (radius, resolution) { return expand(this, radius, resolution); };
+const method = function (...args) { return expand(this, ...args); };
 Shape.prototype.expand = method;
 
 export default expand;

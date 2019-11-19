@@ -9,6 +9,7 @@ import {
   toDisjointGeometry,
   toKeptGeometry as toKeptTaggedGeometry,
   toPoints,
+  toTransformedGeometry as toTransformedTaggedGeometry,
   transform
 } from '@jsxcad/geometry-tagged';
 
@@ -52,10 +53,6 @@ export class Shape {
     return fromGeometry(flip(toKeptGeometry(this)), this.context);
   }
 
-  getTags () {
-    return toGeometry(this).tags;
-  }
-
   op (op, ...args) {
     return op(this, ...args);
   }
@@ -78,6 +75,10 @@ export class Shape {
 
   toGeometry () {
     return this.geometry;
+  }
+
+  toTransformedGeometry () {
+    return toTransformedTaggedGeometry(this.toGeometry());
   }
 
   toPoints (options = {}) {
