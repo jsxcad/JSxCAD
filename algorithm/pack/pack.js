@@ -22,6 +22,9 @@ const measureOrigin = (geometry) => {
 };
 
 export const pack = ({ size = [210, 297], margin = 5 }, ...geometries) => {
+  // Center the output to match pages.
+  const xOffset = size[X] / -2;
+  const yOffset = size[Y] / -2;
   const bin = new Bin(...size);
   const packer = new Packer([bin]);
   const boxes = [];
@@ -44,7 +47,7 @@ export const pack = ({ size = [210, 297], margin = 5 }, ...geometries) => {
       geometry = rotateZ(90, geometry);
     }
     const [x, y] = measureOrigin(geometry);
-    geometry = toTransformedGeometry(translate([box.x - x + margin, box.y - y + margin, 0], geometry));
+    geometry = toTransformedGeometry(translate([box.x - x + margin + xOffset, box.y - y + margin + yOffset, 0], geometry));
     packedGeometries.push(geometry);
   }
   const unpackedGeometries = geometries.filter(geometry => !isPackedGeometry.has(geometry));

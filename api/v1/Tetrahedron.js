@@ -33,7 +33,7 @@ import { dispatch } from './dispatch';
  *
  **/
 
-const unitTetrahedron = () => Shape.fromPolygonsToSolid(buildRegularTetrahedron({}));
+const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
 
 export const fromValue = (value) => unitTetrahedron().scale(value);
 

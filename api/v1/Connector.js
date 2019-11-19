@@ -24,7 +24,7 @@ export const shapeToConnect = Symbol('shapeToConnect');
 
 const isNan = (v) => typeof v === 'number' && isNaN(v);
 
-export const Connector = (connector, { a = [0, 0, 0], b = [100, 0, 0], c = [0, 100, 0], shape } = {}) => {
+export const Connector = (connector, { a = [0, 0, 0], b = [1, 0, 0], c = [0, 1, 0], shape } = {}) => {
   if (isNan(a) || isNan(b) || isNan(c)) {
     throw Error('die');
   }
