@@ -1,40 +1,32 @@
-import Plan from './Plan';
 import Shape from './Shape';
+import connectors from './connectors';
 
 /**
  *
- * # Connector
+ * # connector
  *
- * Returns a connector plan.
+ * Returns a connector from an assembly.
  * See connect().
  *
  * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
  * ```
- * Cube(10).with(Connector('top').move(5))
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).Connector('top').moveZ(5).connect(Sphere(5).Connector('bottom').flip().moveZ(-5))
+ * Prism(10, 10).with(Connector('top').moveZ(5))
+ *              .connector('top')
+ *              .connect(Cube(10).with(Connector('bottom').flip().moveZ(-5))
+ *                               .connector('bottom'));
  * ```
  * :::
  **/
 
-export const shapeToConnect = Symbol('shapeToConnect');
-
-const isNan = (v) => typeof v === 'number' && isNaN(v);
-
-export const Connector = (connector, { a = [0, 0, 0], b = [1, 0, 0], c = [0, 1, 0], shape } = {}) => {
-  if (isNan(a) || isNan(b) || isNan(c)) {
-    throw Error('die');
+const connector = (shape, id) => {
+  for (const connector of connectors(shape)) {
+    if (connector.toGeometry().plan.connector === id) {
+      return connector;
+    }
   }
-  return Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] },
-              { [shapeToConnect]: shape });
 };
 
-Plan.Connector = Connector;
+const connectorMethod = function (id) { return connector(this, id); };
+Shape.prototype.connector = connectorMethod;
 
-const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, shape: this }); };
-Shape.prototype.Connector = ConnectorMethod;
-
-export default Connector;
+export default connector;
