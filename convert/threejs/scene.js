@@ -33,7 +33,7 @@ export const buildScene = ({ width, height, view }) => {
     scene.add(grid);
   }
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
   scene.add(ambientLight);
 
   const light = new THREE.DirectionalLight(0xffffff, 0.5);
