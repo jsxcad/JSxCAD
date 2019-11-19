@@ -26,7 +26,7 @@ export const stretch = (shape, length, planeShape = Z()) => {
       const profile = section(solid, planeSurface);
       const top = cutOpen(solid, flip(planeSurface));
       const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
-      const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 1, 0, false);
+      const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, 1, 0, false);
       const middle = transformSolid(fromZ0, z0SolidGeometry);
       const topMoved = transformSolid(fromTranslation(scale(length, toPlane(profile))), top);
       stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
