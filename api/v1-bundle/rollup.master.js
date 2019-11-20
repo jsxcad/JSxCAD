@@ -27,6 +27,7 @@ export default {
     hypothetical(
       {
         allowFallthrough: true,
+        allowRealFiles: true,
         files: {
           'fast-png': 'export const encode = {}; export const decode = {};',
           'fs': 'export const promises = {};',
