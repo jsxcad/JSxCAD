@@ -12,7 +12,7 @@ const paths = [
   'Intro.js',
   'above.js', 'acos.js', 'Armature.js', 'as.js', 'ask.js', 'assemble.js',
   'back.js', 'below.js',
-  'center.js', 'chainHull.js', 'chop.js', 'Circle.js', 'color.js', 'connect.js', 'Connector.js', 'connector.js',
+  'center.js', 'chainHull.js', 'chop.js', 'Circle.js', 'color.js', 'connect.js', 'Connector.js',
   'connectors.js', 'contract.js', 'coordinates.js', 'cos.js', 'Cube.js', 'Cursor.js', 'cut.js', 'Cylinder.js',
   'drop.js',
   'ease.js', 'expand.js', 'extrude.js',
