@@ -30,7 +30,7 @@ export const flip = (geometry) => {
              end
       ] = geometry.marks;
       flipped.marks = [end,
-                       add(subtract(origin, subtract(origin, origin)), subtract(end, origin)),
+                       add(subtract(origin, subtract(origin, orientation)), subtract(end, origin)),
                        add(subtract(origin, subtract(origin, axis)), subtract(end, origin)),
                        origin];
     } else {

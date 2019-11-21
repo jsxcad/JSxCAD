@@ -1,5 +1,5 @@
-import { add, scale, subtract } from '@jsxcad/math-vec3';
 import { addTags, allTags, getSolids } from '@jsxcad/geometry-tagged';
+import { normalize, subtract } from '@jsxcad/math-vec3';
 
 import Connector from './Connector';
 import Polygon from './Polygon';

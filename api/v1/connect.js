@@ -70,7 +70,6 @@ export const connect = (aConnectorShape, bConnectorShape, { doAssemble = true } 
   const aMoved = aFlatBShape.transform(bFrom);
 
   if (doAssemble) {
-    return assemble(aMoved, bShape);
     return assemble(dropConnector(aMoved, aConnector.plan.connector),
                     dropConnector(bShape, bConnector.plan.connector));
   } else {
