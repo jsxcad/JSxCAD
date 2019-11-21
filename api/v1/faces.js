@@ -19,7 +19,7 @@ export const faces = (shape, op = (_ => _)) => {
     } else {
       return pointId;
     }
-  }
+  };
   const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     const alignedSolid = alignVertices(solid);
@@ -38,7 +38,7 @@ export const faces = (shape, op = (_ => _)) => {
           lastPoint = nextPoint;
         }
         faces.push(Shape.fromGeometry(addTags(tags, faceShape.op(op).toGeometry()))
-                        .with(...connectors));
+            .with(...connectors));
       }
     }
   }

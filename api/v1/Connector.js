@@ -40,7 +40,6 @@ Shape.prototype.Connector = ConnectorMethod;
 
 export default Connector;
 
-
 /**
  *
  * # connector
