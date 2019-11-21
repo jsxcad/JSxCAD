@@ -32,16 +32,14 @@ export const faces = (shape, op = (_ => _)) => {
         tags.push(`face/id:${nextFaceId++}`);
         let lastPoint = face[face.length - 1];
         for (const nextPoint of face) {
-          const edgeId = `face/edge:${ensurePointId(lastPoint)}:${ensurePointId(nextPoint)}`;
+          const edgeId = `face/edge:${ensurePointId(nextPoint)}:${ensurePointId(lastPoint)}`;
           tags.push(edgeId);
           // Make sure axis extends beyond end.
-          const axis = add(lastPoint, scale(2, subtract(lastPoint, nextPoint)));
-          connectors.push(Connector(edgeId, {
-            origin: lastPoint,
-            axis,
-            orientation: add(lastPoint, plane),
-            end: nextPoint
-          }));
+          const origin = nextPoint;
+          const axis = subtract(nextPoint, normalize(subtract(nextPoint, lastPoint)));
+          const orientation = subtract(nextPoint, normalize(plane));
+          const end = lastPoint;
+          connectors.push(Connector(edgeId, { origin, axis, orientation, end }));
           lastPoint = nextPoint;
         }
         faces.push(Shape.fromGeometry(addTags(tags, faceShape.op(op).toGeometry()))
