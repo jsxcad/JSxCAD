@@ -1,9 +1,9 @@
+import { add, scale, subtract } from '@jsxcad/math-vec3';
 import { addTags, allTags, getSolids } from '@jsxcad/geometry-tagged';
 
 import Connector from './Connector';
 import Polygon from './Polygon';
 import Shape from './Shape';
-import { add } from '@jsxcad/math-vec3';
 import { alignVertices } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
 
@@ -34,7 +34,14 @@ export const faces = (shape, op = (_ => _)) => {
         for (const nextPoint of face) {
           const edgeId = `face/edge:${ensurePointId(lastPoint)}:${ensurePointId(nextPoint)}`;
           tags.push(edgeId);
-          connectors.push(Connector(edgeId, { origin: lastPoint, angle: add(lastPoint, plane), end: nextPoint }));
+          // Make sure axis extends beyond end.
+          const axis = add(lastPoint, scale(2, subtract(lastPoint, nextPoint)));
+          connectors.push(Connector(edgeId, {
+            origin: lastPoint,
+            axis,
+            orientation: add(lastPoint, plane),
+            end: nextPoint
+          }));
           lastPoint = nextPoint;
         }
         faces.push(Shape.fromGeometry(addTags(tags, faceShape.op(op).toGeometry()))

@@ -23,13 +23,16 @@ import connectors from './connectors';
 
 export const shapeToConnect = Symbol('shapeToConnect');
 
-const isNan = (v) => typeof v === 'number' && isNaN(v);
+// A connector expresses a joint-of-connection extending from origin along axis to end.
+// The orientation expresses the direction of facing orthogonal to that axis.
+// The joint may have a zero length (origin and end are equal), but axis must not equal origin.
+// Note: axis must be further than end from origin.
 
-export const Connector = (connector, { origin = [0, 0, 0], end = [1, 0, 0], angle = [0, 1, 0], shape } = {}) => {
-  if (isNan(origin) || isNan(angle) || isNan(end)) {
-    throw Error('die');
+export const Connector = (connector, { origin = [0, 0, 0], axis = [1, 0, 0], orientation = [0, 1, 0], end, shape } = {}) => {
+  if (end === undefined) {
+    end = origin;
   }
-  return Plan({ plan: { connector }, marks: [origin, angle, end], tags: [`connector/${connector}`] },
+  return Plan({ plan: { connector }, marks: [origin, axis, orientation, end], tags: [`connector/${connector}`] },
               { [shapeToConnect]: shape });
 };
 

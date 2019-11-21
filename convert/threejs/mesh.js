@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { add, normalize, scale, subtract } from '@jsxcad/math-vec2';
+// import { add, normalize, scale, subtract } from '@jsxcad/math-vec2';
 
 import { buildMeshMaterial } from './material';
 import { setColor } from './color';
@@ -282,25 +282,30 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
         ctx.shadowColor = '#FFFFFF';
         ctx.shadowBlur = 7;
 
-        const [aX, aY] = project(threejsMarks[0]);
-        const [bX, bY] = project(threejsMarks[1]);
-        const [cX, cY] = project(threejsMarks[2]);
+        const ORIGIN = 0;
+        // const AXIS = 1;
+        const ORIENTATION = 2;
+        const END = 3;
 
-        const normalizedLine = (origin, point, length) =>
-          add(origin, scale(length, normalize(subtract(point, origin))));
+        const [originX, originY] = project(threejsMarks[ORIGIN]);
+        const [endX, endY] = project(threejsMarks[END]);
+        const [orientationX, orientationY] = project(threejsMarks[ORIENTATION]);
 
-        const [bXN, bYN] = normalizedLine([aX, aY], [bX, bY], 25 / 2);
-        const [cXN, cYN] = normalizedLine([aX, aY], [cX, cY], 100 / 2);
+        // const normalizedLine = (origin, point, length) =>
+        //  add(origin, scale(length, normalize(subtract(point, origin))));
+
+        // const [endXN, endYN] = normalizedLine([originX, originY], [endX, endY], 25 / 2);
+        // const [orientationXN, orientationYN] = normalizedLine([originX, originY], [orientationX, orientationY], 100 / 2);
 
         ctx.beginPath();
         ctx.lineWidth = 1;
-        ctx.moveTo(bXN, bYN);
-        ctx.lineTo(aX, aY);
-        ctx.lineTo(cXN, cYN);
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(originX, originY);
+        ctx.lineTo(orientationX, orientationY);
         ctx.closePath();
         ctx.stroke();
 
-        drawLabel(threejsPlan.connector, aX, aY);
+        drawLabel(threejsPlan.connector, originX, originY);
       }
     }
   };
