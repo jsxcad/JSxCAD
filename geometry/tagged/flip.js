@@ -1,3 +1,5 @@
+import { add, subtract } from '@jsxcad/math-vec3';
+
 import { flip as flipPaths } from '@jsxcad/geometry-paths';
 import { flip as flipPoints } from '@jsxcad/geometry-points';
 import { flip as flipSolid } from '@jsxcad/geometry-solid';
@@ -22,8 +24,15 @@ export const flip = (geometry) => {
   } else if (geometry.plan) {
     if (geometry.plan.connector) {
       flipped.plan = geometry.plan;
-      const [A, B, C] = geometry.marks;
-      flipped.marks = [A, C, B];
+      const [origin,
+             axis,
+             orientation,
+             end
+      ] = geometry.marks;
+      flipped.marks = [end,
+                       add(subtract(origin, axis), end),
+                       add(subtract(origin, orientation), end),
+                       origin];
     } else {
       // Leave other plans be.
       flipped.plan = geometry.plan;
