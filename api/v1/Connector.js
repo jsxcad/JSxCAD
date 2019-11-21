@@ -1,5 +1,6 @@
 import Plan from './Plan';
 import Shape from './Shape';
+import connectors from './connectors';
 
 /**
  *
@@ -24,11 +25,11 @@ export const shapeToConnect = Symbol('shapeToConnect');
 
 const isNan = (v) => typeof v === 'number' && isNaN(v);
 
-export const Connector = (connector, { a = [0, 0, 0], b = [1, 0, 0], c = [0, 1, 0], shape } = {}) => {
-  if (isNan(a) || isNan(b) || isNan(c)) {
+export const Connector = (connector, { origin = [0, 0, 0], end = [1, 0, 0], angle = [0, 1, 0], shape } = {}) => {
+  if (isNan(origin) || isNan(angle) || isNan(end)) {
     throw Error('die');
   }
-  return Plan({ plan: { connector }, marks: [a, b, c], tags: [`connector/${connector}`] },
+  return Plan({ plan: { connector }, marks: [origin, angle, end], tags: [`connector/${connector}`] },
               { [shapeToConnect]: shape });
 };
 
@@ -38,3 +39,32 @@ const ConnectorMethod = function (connector, options) { return Connector(connect
 Shape.prototype.Connector = ConnectorMethod;
 
 export default Connector;
+
+
+/**
+ *
+ * # connector
+ *
+ * Returns a connector from an assembly.
+ * See connect().
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Prism(10, 10).with(Connector('top').moveZ(5))
+ *              .connector('top')
+ *              .connect(Cube(10).with(Connector('bottom').flip().moveZ(-5))
+ *                               .connector('bottom'));
+ * ```
+ * :::
+ **/
+
+export const connector = (shape, id) => {
+  for (const connector of connectors(shape)) {
+    if (connector.toGeometry().plan.connector === id) {
+      return connector;
+    }
+  }
+};
+
+const connectorMethod = function (id) { return connector(this, id); };
+Shape.prototype.connector = connectorMethod;

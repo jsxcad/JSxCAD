@@ -16,12 +16,12 @@ import './with';
 
 import * as vec from '@jsxcad/math-vec3';
 
+import { Connector, connector } from './Connector';
 import { Label, Plan } from './Plan';
 
 import Armature from './Armature';
 import Circle from './Circle';
 import Cone from './Cone';
-import Connector from './Connector';
 import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
@@ -65,7 +65,6 @@ import chainHull from './chainHull';
 import chop from './chop';
 import color from './color';
 import connect from './connect';
-import connector from './connector';
 import connectors from './connectors';
 import contract from './contract';
 import coordinates from './coordinates';

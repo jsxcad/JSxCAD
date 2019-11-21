@@ -1,51 +1,67 @@
-import Shape from './Shape';
-import { alignVertices } from '@jsxcad/geometry-solid';
-import { getSolids } from '@jsxcad/geometry-tagged';
+import { addTags, allTags, getSolids } from '@jsxcad/geometry-tagged';
 
-export const faces = (shape, xform = (_ => _)) => {
+import Connector from './Connector';
+import Polygon from './Polygon';
+import Shape from './Shape';
+import { add } from '@jsxcad/math-vec3';
+import { alignVertices } from '@jsxcad/geometry-solid';
+import { toPlane } from '@jsxcad/math-poly3';
+
+export const faces = (shape, op = (_ => _)) => {
   let nextFaceId = 0;
-  const faces = new Set();
-  const vertexFaces = new Map();
-  const rememberFace = (vertex, face) => {
-    if (!faces.has(face)) {
-      faces.add(face);
-      face.faceId = nextFaceId++;
-      face.faceNeighbors = new Set();
+  let nextPointId = 0;
+  const pointIds = new Map();
+  const ensurePointId = (point) => {
+    const pointId = pointIds.get(point);
+    if (pointId === undefined) {
+      pointIds.set(point, nextPointId);
+      return nextPointId++;
+    } else {
+      return pointId;
     }
-    if (!vertexFaces.has(vertex)) {
-      vertexFaces.set(vertex, []);
-    }
-    vertexFaces.get(vertex).push(face);
-  };
+  }
+  const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     const alignedSolid = alignVertices(solid);
     for (const surface of alignedSolid) {
       for (const face of surface) {
-        for (const vertex of face) {
-          rememberFace(vertex, face);
+        const plane = toPlane(face);
+        const faceShape = Polygon.ofPoints(face);
+        const connectors = [];
+        const tags = [];
+        tags.push(`face/id:${nextFaceId++}`);
+        let lastPoint = face[face.length - 1];
+        for (const nextPoint of face) {
+          const edgeId = `face/edge:${ensurePointId(lastPoint)}:${ensurePointId(nextPoint)}`;
+          tags.push(edgeId);
+          connectors.push(Connector(edgeId, { origin: lastPoint, angle: add(lastPoint, plane), end: nextPoint }));
+          lastPoint = nextPoint;
         }
+        faces.push(Shape.fromGeometry(addTags(tags, faceShape.op(op).toGeometry()))
+                        .with(...connectors));
       }
     }
   }
-  for (const face of faces) {
-    for (const vertex of face) {
-      for (const neighbor of vertexFaces.get(vertex)) {
-        if (neighbor !== face) {
-          for (const neighborVertex of neighbor) {
-            if (vertex !== neighborVertex) {
-              if (vertexFaces.get(neighborVertex).includes(face)) {
-                face.faceNeighbors.add(neighbor);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return [...faces].map(xform);
+  return faces;
 };
 
 const facesMethod = function (...args) { return faces(this, ...args); };
 Shape.prototype.faces = facesMethod;
 
 export default faces;
+
+export const faceId = (shape) =>
+  [...allTags(shape.toGeometry())]
+      .filter(tag => tag.startsWith('face/id:'))
+      .map(tag => tag.substring(8));
+
+const faceIdMethod = function () { return faceId(this); };
+Shape.prototype.faceId = faceIdMethod;
+
+export const faceEdges = (shape) =>
+  [...allTags(shape.toGeometry())]
+      .filter(tag => tag.startsWith('face/edge:'))
+      .map(tag => tag.substring(10));
+
+const faceEdgesMethod = function () { return faceEdges(this); };
+Shape.prototype.faceEdges = faceEdgesMethod;
