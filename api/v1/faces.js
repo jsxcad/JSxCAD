@@ -1,4 +1,4 @@
-import { add, normalize, scale, subtract } from '@jsxcad/math-vec3';
+import { add, scale } from '@jsxcad/math-vec3';
 import { addTags, allTags, getSolids } from '@jsxcad/geometry-tagged';
 
 import Connector from './Connector';
@@ -26,7 +26,6 @@ export const faces = (shape, op = (_ => _)) => {
     for (const surface of alignedSolid) {
       for (const face of surface) {
         const plane = toPlane(face);
-        const faceShape = Polygon.ofPoints(face);
         const connectors = [];
         const tags = [];
         tags.push(`face/id:${nextFaceId++}`);
@@ -34,12 +33,12 @@ export const faces = (shape, op = (_ => _)) => {
         for (const nextPoint of face) {
           const edgeId = `face/edge:${ensurePointId(nextPoint)}:${ensurePointId(lastPoint)}`;
           tags.push(edgeId);
-          // Make sure axis extends beyond end.
           const center = scale(0.5, add(nextPoint, lastPoint));
-          const right = subtract(center, normalize(subtract(center, nextPoint)));
+          const right = add(plane, center);
+          const up = add(plane, nextPoint);
           connectors.push(Connector(edgeId,
                                     {
-                                      plane,
+                                      plane: toPlane([up, nextPoint, lastPoint]),
                                       center,
                                       right,
                                       start: lastPoint,
@@ -47,7 +46,7 @@ export const faces = (shape, op = (_ => _)) => {
                                     }));
           lastPoint = nextPoint;
         }
-        faces.push(Shape.fromGeometry(addTags(tags, faceShape.op(op).toGeometry()))
+        faces.push(Shape.fromGeometry(addTags(tags, Polygon.ofPoints(face).op(op).toGeometry()))
             .with(...connectors));
       }
     }
