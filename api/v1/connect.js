@@ -1,10 +1,10 @@
-import { dot, length, negate, subtract } from '@jsxcad/math-vec3';
 import { drop, toTransformedGeometry } from '@jsxcad/geometry-tagged';
-import { fromPoints, toXYPlaneTransforms } from '@jsxcad/math-plane';
+import { negate, subtract } from '@jsxcad/math-vec3';
 
 import Shape from './Shape';
 import assemble from './assemble';
 import { shapeToConnect } from './Connector';
+import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 /**
  *
@@ -23,38 +23,44 @@ import { shapeToConnect } from './Connector';
 export const dropConnector = (shape, connector) =>
   Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
 
-const ORIGIN = 0;
-const ANGLE = 1;
+const CENTER = 0;
+const RIGHT = 1;
+
+/*
+FIX: Move this to math
+const measureAngle = ([aX, aY], [bX, bY]) => {
+  const a2 = Math.atan2(aX, aY);
+  const a1 = Math.atan2(bX, bY);
+  const sign = a1 > a2 ? 1 : -1;
+  const angle = a1 - a2;
+  const K = -sign * Math.PI * 2;
+  const absoluteAngle = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
+  return absoluteAngle * 180 / Math.PI;
+};
+*/
 
 // Connect two shapes at the specified connector.
 export const connect = (aConnectorShape, bConnectorShape, { doAssemble = true } = {}) => {
   const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
   const aShape = aConnectorShape.getContext(shapeToConnect);
-  const [aTo] = toXYPlaneTransforms(fromPoints(...aConnector.marks));
+  const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
 
   const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
   const bShape = bConnectorShape.getContext(shapeToConnect);
-  const [bTo, bFrom] = toXYPlaneTransforms(fromPoints(...bConnector.marks));
+  const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
 
   // Flatten a.
   const aFlatShape = aShape.transform(aTo);
   const aFlatConnector = toTransformedGeometry(aConnectorShape.transform(aTo).toGeometry());
   const aMarks = aFlatConnector.marks;
-  const aFlatOriginShape = aFlatShape.move(...negate(aMarks[ORIGIN]));
+  const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
   const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
   const bMarks = bFlatConnector.marks;
 
-  // Rotate into alignment
-  const aOrientation = subtract(aMarks[ANGLE], aMarks[ORIGIN]);
-  const bOrientation = subtract(bMarks[ANGLE], bMarks[ORIGIN]);
-  const radians = Math.acos(dot(aOrientation, bOrientation) / (length(aOrientation) * length(bOrientation)));
-  const angle = radians * 180 / Math.PI;
-  const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(angle);
-
   // Move a to the flat position of b.
-  const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[ORIGIN]);
+  const aFlatBShape = aFlatOriginShape.move(...bMarks[CENTER]);
   // Move a to the oriented position of b.
   const aMoved = aFlatBShape.transform(bFrom);
 

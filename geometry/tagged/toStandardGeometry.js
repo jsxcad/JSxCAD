@@ -7,7 +7,7 @@ export const toStandardGeometry = (geometry) => {
     } else if (item.paths) {
       return { paths: item.paths, tags: item.tags };
     } else if (item.plan) {
-      return { plan: item.plan, marks: item.marks, tags: item.tags };
+      return { plan: item.plan, marks: item.marks, planes: item.planes, tags: item.tags };
     } else if (item.item) {
       return { item: item.item, tags: item.tags };
     } else if (item.solid) {

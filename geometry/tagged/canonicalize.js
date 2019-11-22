@@ -1,4 +1,5 @@
 import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
+import { canonicalize as canonicalizePlane } from '@jsxcad/math-plane';
 import { canonicalize as canonicalizePoints } from '@jsxcad/geometry-points';
 import { canonicalize as canonicalizeSolid } from '@jsxcad/geometry-solid';
 import { canonicalize as canonicalizeSurface } from '@jsxcad/geometry-surface';
@@ -14,6 +15,7 @@ export const canonicalize = (rawGeometry) => {
   } else if (geometry.plan !== undefined) {
     canonicalized.plan = geometry.plan;
     canonicalized.marks = canonicalizePoints(geometry.marks);
+    canonicalized.planes = geometry.planes.map(canonicalizePlane);
   } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalizeSurface(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {
