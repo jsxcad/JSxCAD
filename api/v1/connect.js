@@ -26,8 +26,6 @@ export const dropConnector = (shape, connector) =>
 const CENTER = 0;
 const RIGHT = 1;
 
-/*
-FIX: Move this to math
 const measureAngle = ([aX, aY], [bX, bY]) => {
   const a2 = Math.atan2(aX, aY);
   const a1 = Math.atan2(bX, bY);
@@ -37,7 +35,6 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
   const absoluteAngle = (Math.abs(K + angle) < Math.abs(angle)) ? K + angle : angle;
   return absoluteAngle * 180 / Math.PI;
 };
-*/
 
 // Connect two shapes at the specified connector.
 export const connect = (aConnectorShape, bConnectorShape, { doAssemble = true } = {}) => {
@@ -59,8 +56,14 @@ export const connect = (aConnectorShape, bConnectorShape, { doAssemble = true } 
   const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
   const bMarks = bFlatConnector.marks;
 
+  // Rotate into alignment.
+  const aOrientation = subtract(aMarks[RIGHT], aMarks[CENTER]);
+  const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
+  const angle = measureAngle(aOrientation, bOrientation);
+  const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
+
   // Move a to the flat position of b.
-  const aFlatBShape = aFlatOriginShape.move(...bMarks[CENTER]);
+  const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
   // Move a to the oriented position of b.
   const aMoved = aFlatBShape.transform(bFrom);
 

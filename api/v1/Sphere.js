@@ -31,19 +31,20 @@ import { Shape } from './Shape';
  *
  **/
 
-const unitSphere = ({ resolution = 16 } = {}) => {
+const unitSphere = (resolution = 16) => {
   const shape = Shape.fromGeometry(buildRingSphere(resolution));
   // Make convex.
   shape.toGeometry().solid.isConvex = true;
   return shape;
 };
 
-export const ofApothem = (apothem = 1, resolution = 16) => ofRadius(toRadiusFromApothem(apothem), resolution);
-export const ofRadius = (radius = 1, resolution = 16) => unitSphere({ resolution }).scale(radius);
-export const ofDiameter = (diameter = 1, resolution = 16) => unitSphere({ resolution }).scale(diameter / 2);
+export const ofRadius = (radius = 1, { resolution = 16 } = {}) => unitSphere(resolution).scale(radius);
+export const ofApothem = (apothem = 1, { resolution = 16 } = {}) => ofRadius(toRadiusFromApothem(apothem), { resolution });
+export const ofDiameter = (diameter = 1, { resolution = 16 } = {}) => ofRadius(diameter / 2, { resolution });
 
 export const Sphere = (...args) => ofRadius(...args);
 
+Sphere.ofApothem = ofApothem;
 Sphere.ofRadius = ofRadius;
 Sphere.ofDiameter = ofDiameter;
 
