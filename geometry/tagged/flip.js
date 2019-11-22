@@ -1,6 +1,5 @@
-import { add, subtract } from '@jsxcad/math-vec3';
-
 import { flip as flipPaths } from '@jsxcad/geometry-paths';
+import { flip as flipPlane } from '@jsxcad/math-plane';
 import { flip as flipPoints } from '@jsxcad/geometry-points';
 import { flip as flipSolid } from '@jsxcad/geometry-solid';
 import { flip as flipSurface } from '@jsxcad/geometry-surface';
@@ -24,19 +23,13 @@ export const flip = (geometry) => {
   } else if (geometry.plan) {
     if (geometry.plan.connector) {
       flipped.plan = geometry.plan;
-      const [origin,
-             axis,
-             orientation,
-             end
-      ] = geometry.marks;
-      flipped.marks = [end,
-                       add(subtract(origin, subtract(origin, orientation)), subtract(end, origin)),
-                       add(subtract(origin, subtract(origin, axis)), subtract(end, origin)),
-                       origin];
+      flipped.marks = geometry.marks;
+      flipped.planes = geometry.planes.map(flipPlane);
     } else {
-      // Leave other plans be.
+      // Leave other plans be for now.
       flipped.plan = geometry.plan;
       flipped.marks = geometry.marks;
+      flipped.planes = geometry.planes;
     }
   } else if (geometry.item) {
     // FIX: How should items deal with flip?

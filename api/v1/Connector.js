@@ -28,12 +28,19 @@ export const shapeToConnect = Symbol('shapeToConnect');
 // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
 // Note: axis must be further than end from origin.
 
-export const Connector = (connector, { origin = [0, 0, 0], axis = [1, 0, 0], orientation = [0, 1, 0], end, shape } = {}) => {
-  if (end === undefined) {
-    end = origin;
-  }
-  return Plan({ plan: { connector }, marks: [origin, axis, orientation, end], tags: [`connector/${connector}`] },
-              { [shapeToConnect]: shape });
+export const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0], right = [1, 0, 0], start = [0, 0, 0], end = [0, 0, 0], shape } = {}) => {
+  const plan = Plan(// Geometry
+    {
+      plan: { connector },
+      marks: [center, right, start, end],
+      planes: [plane],
+      tags: [`connector/${connector}`]
+    },
+    // Context
+    {
+      [shapeToConnect]: shape
+    });
+  return plan;
 };
 
 Plan.Connector = Connector;
