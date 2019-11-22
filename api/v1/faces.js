@@ -1,5 +1,5 @@
+import { add, normalize, scale, subtract } from '@jsxcad/math-vec3';
 import { addTags, allTags, getSolids } from '@jsxcad/geometry-tagged';
-import { normalize, subtract } from '@jsxcad/math-vec3';
 
 import Connector from './Connector';
 import Polygon from './Polygon';
@@ -35,11 +35,16 @@ export const faces = (shape, op = (_ => _)) => {
           const edgeId = `face/edge:${ensurePointId(nextPoint)}:${ensurePointId(lastPoint)}`;
           tags.push(edgeId);
           // Make sure axis extends beyond end.
-          const origin = nextPoint;
-          const axis = subtract(nextPoint, normalize(subtract(nextPoint, lastPoint)));
-          const orientation = subtract(nextPoint, normalize(plane));
-          const end = lastPoint;
-          connectors.push(Connector(edgeId, { origin, axis, orientation, end }));
+          const center = scale(0.5, add(nextPoint, lastPoint));
+          const right = subtract(center, normalize(subtract(center, nextPoint)));
+          connectors.push(Connector(edgeId,
+                                    {
+                                      plane,
+                                      center,
+                                      right,
+                                      start: lastPoint,
+                                      end: nextPoint
+                                    }));
           lastPoint = nextPoint;
         }
         faces.push(Shape.fromGeometry(addTags(tags, faceShape.op(op).toGeometry()))

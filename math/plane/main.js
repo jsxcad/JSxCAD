@@ -1,3 +1,4 @@
+import { canonicalize } from './canonicalize';
 import { equals } from './equals';
 import { flip } from './flip';
 import { fromNormalAndPoint } from './fromNormalAndPoint';
@@ -10,6 +11,7 @@ import { toXYPlaneTransforms } from './toXYPlaneTransforms';
 import { transform } from './transform';
 
 export {
+  canonicalize,
   equals,
   flip,
   fromNormalAndPoint,

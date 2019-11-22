@@ -10,10 +10,9 @@ import { getPlans } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const Plan = (options = {}, context) => {
-  const { plan, marks, tags } = options;
-  // FIX: Add validation.
-  return Shape.fromGeometry({ plan, marks, tags }, context);
+export const Plan = ({ plan, marks, planes, tags }, context) => {
+  const shape = Shape.fromGeometry({ plan, marks, planes, tags }, context);
+  return shape;
 };
 
 // Radius

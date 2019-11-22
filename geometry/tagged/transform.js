@@ -1,5 +1,6 @@
 import { cacheTransform } from '@jsxcad/cache';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
+import { transform as transformPlane } from '@jsxcad/math-plane';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
 import { transform as transformSolid } from '@jsxcad/geometry-solid';
 import { transform as transformSurface } from '@jsxcad/geometry-surface';
@@ -17,12 +18,7 @@ export const transformItem = (matrix, item) => {
   } else if (item.plan) {
     transformed.plan = item.plan;
     transformed.marks = transformPoints(matrix, item.marks);
-    if (item.plan.connector === 'Flat Top') {
-      console.log('RRR');
-    }
-    if (item.marks.some(value => typeof value === 'number' && isNaN(value))) {
-      throw Error('die');
-    }
+    transformed.planes = item.planes.map(plane => transformPlane(matrix, plane));
   } else if (item.points) {
     transformed.points = transformPoints(matrix, item.points);
   } else if (item.solid) {
