@@ -11,7 +11,11 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  *
  * # Extrude
  *
- * Generates a solid from a surface.
+ * Generates a solid from a surface by linear extrusion.
+ *
+ * ```
+ * shape.extrude(height, depth, { twist = 0, steps = 1 })
+ * ```
  *
  * ::: illustration
  * ```
@@ -23,9 +27,10 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  * Circle(10).cut(Circle(8)).extrude(10)
  * ```
  * :::
+ *
  * ::: illustration { "view": { "position": [40, 40, 60] } }
  * ```
- * Triangle(10).extrude(5, 5)
+ * Triangle(10).extrude(5, -2)
  * ```
  * :::
  * ::: illustration { "view": { "position": [40, 40, 60] } }
