@@ -8,6 +8,7 @@
  */
 
 import './add';
+import './edges';
 import './faces';
 import './colors';
 import './cut';
