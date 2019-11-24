@@ -22,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
     "passport": "^0.4.0",
     "passport-github2": "^0.1.11"
   },
