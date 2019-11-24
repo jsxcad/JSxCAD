@@ -59,7 +59,8 @@ passport.use(new GitHubStrategy({
 
 app.get('/auth/gist',
         function (req, res, next) {
-          req.session.redirectTo = req.headers.referer;
+	  console.log(`QQ/headers: ${JSON.stringify(req.headers)}`);
+          req.session.gistCallback = req.query.gistCallback;
           return next();
         },
         passport.authenticate('github', { scope: ['gist'] }));
@@ -67,9 +68,11 @@ app.get('/auth/gist',
 app.get('/auth/gist/callback',
         passport.authenticate('github', { failureRedirect: '/error' }),
         function (req, res) {
-          console.log(`Referrer: ${req.session.redirectTo}`);
-          const url = req.session.redirectTo;
-          if (url.startsWith('http://127.0.0.1:5000/')) {
+          const url = req.session.gistCallback;
+          console.log(`gistCallback: ${url}`);
+	  if (url === undefined) {
+	    // How does this happen?
+	  } else if (url.startsWith('http://127.0.0.1:5000/')) {
             console.log(`Redirecting gist to local auth.html`);
             res.redirect(`http://127.0.0.1:5000/auth.html?gist=${req.user.accessToken}`);
           } else if (url.startsWith('https://jsxcad.js.org/preAlpha3/')) {
