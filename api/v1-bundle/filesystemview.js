@@ -600,7 +600,7 @@ class ProjectUI extends React.PureComponent {
       const name = document.getElementById('project/exportToGist/name').value;
       const token = await readFile({ project: '.system', useCache: false }, 'auth/gist/accessToken');
       console.log(`QQ/token: ${token}`);
-      if (token !== oldToken) {
+      if (token === undefined || token !== oldToken) {
         oldToken = token;
         const scriptJsx = await readFile({}, 'file/script.jsx');
         const scriptJsxcad = await readFile({}, 'file/script.jsxcad');
@@ -622,6 +622,7 @@ class ProjectUI extends React.PureComponent {
         console.log(`QQ/response/status: ${response.status}`);
         console.log(`QQ/response/body: ${JSON.stringify(await response.json())}`);
         if (response.status === CREATED) {
+          await log({ op: 'text', text: `Gist created`, level: 'serious' });
           return;
         } else {
           await log({ op: 'text', text: `Gist export failed: ${response.status}`, level: 'serious' });
