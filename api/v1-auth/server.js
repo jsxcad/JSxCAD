@@ -48,35 +48,33 @@ const GITHUB_CLIENT_ID = process.env.CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 passport.use(new GitHubStrategy({
-  clientID: GITHUB_CLIENT_ID,
-  clientSecret: GITHUB_CLIENT_SECRET,
-  callbackURL: '/auth/github/callback'
-},
+                                  clientID: GITHUB_CLIENT_ID,
+                                  clientSecret: GITHUB_CLIENT_SECRET,
+                                  callbackURL: '/auth/gist/callback',
+                                },
                                 function (accessToken, refreshToken, profile, done) {
                                   const user = { accessToken, refreshToken, profile };
                                   return done(undefined, user);
-                                }
-));
+                                }));
 
-app.get('/auth/github',
+app.get('/auth/gist',
         function (req, res, next) {
-          console.log(`QQ/headers: ${JSON.stringify(req.headers)}`);
           req.session.redirectTo = req.headers.referer;
           return next();
         },
-        passport.authenticate('github'));
+        passport.authenticate('github', { scope: ['gist'] }));
 
-app.get('/auth/github/callback',
+app.get('/auth/gist/callback',
         passport.authenticate('github', { failureRedirect: '/error' }),
         function (req, res) {
           console.log(`Referrer: ${req.session.redirectTo}`);
           const url = req.session.redirectTo;
           if (url.startsWith('http://127.0.0.1:5000/')) {
-            console.log(`Redirecting to local auth.html`);
-            res.redirect(`http://127.0.0.1:5000/auth.html?github=${req.user.accessToken}`);
+            console.log(`Redirecting gist to local auth.html`);
+            res.redirect(`http://127.0.0.1:5000/auth.html?gist=${req.user.accessToken}`);
           } else if (url.startsWith('https://jsxcad.js.org/preAlpha3/')) {
-            console.log(`Redirecting to preAlpha3 auth.html`);
-            res.redirect(`https://jsxcad.js.org/preAlpha3/auth.html?github=${req.user.accessToken}`);
+            console.log(`Redirecting gist preAlpha3 auth.html`);
+            res.redirect(`https://jsxcad.js.org/preAlpha3/auth.html?gist=${req.user.accessToken}`);
           }
         });
 
