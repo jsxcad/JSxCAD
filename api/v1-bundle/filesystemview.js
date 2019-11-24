@@ -627,7 +627,7 @@ class ProjectUI extends React.PureComponent {
         } else {
           await log({ op: 'text', text: `Gist export failed: ${response.status}`, level: 'serious' });
           await log({ op: 'text', text: `Re-Authenticating`, level: 'serious' });
-          window.open("http://167.99.163.104:3000/auth/gist");
+          window.open(`http://167.99.163.104:3000/auth/gist?gistCallback=${window.location.href}`);
         }
       }
       // Wait for the token to update.
