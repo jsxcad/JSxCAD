@@ -94,7 +94,7 @@ export const readFile = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
-  const { sources = [], project = getFilesystem(), useCache=true } = options;
+  const { sources = [], project = getFilesystem(), useCache = true } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
     log({ op: 'text', text: `Read ${path} of ${project}` });
