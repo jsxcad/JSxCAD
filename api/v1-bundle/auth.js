@@ -1,4 +1,4 @@
-/* global postMessage, onmessage:writable, self */
+/* globals location */
 
 import { writeFile } from '@jsxcad/sys';
 
