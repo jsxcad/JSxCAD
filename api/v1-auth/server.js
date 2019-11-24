@@ -48,10 +48,10 @@ const GITHUB_CLIENT_ID = process.env.CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 passport.use(new GitHubStrategy({
-                                  clientID: GITHUB_CLIENT_ID,
-                                  clientSecret: GITHUB_CLIENT_SECRET,
-                                  callbackURL: '/auth/gist/callback',
-                                },
+  clientID: GITHUB_CLIENT_ID,
+  clientSecret: GITHUB_CLIENT_SECRET,
+  callbackURL: '/auth/gist/callback'
+},
                                 function (accessToken, refreshToken, profile, done) {
                                   const user = { accessToken, refreshToken, profile };
                                   return done(undefined, user);
