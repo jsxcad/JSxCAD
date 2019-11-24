@@ -6,10 +6,9 @@ Error.stackTraceLimit = Infinity;
 
 window.bootstrap = async () => {
   const { search } = location;
-  // We expect something like: '?github=xxx'
-  if (search.startsWith('?github=')) {
-    const accessToken = search.substring(8);
-    await writeFile({ project: '.system' }, 'auth/github/accessToken', accessToken);
+  if (search.startsWith('?gist=')) {
+    const accessToken = search.substring(6);
+    await writeFile({ project: '.system' }, 'auth/gist/accessToken', accessToken);
   }
   window.close();
 };

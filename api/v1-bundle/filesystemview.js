@@ -1,6 +1,8 @@
-/* global Blob, FileReader, ResizeObserver */
+/* global Blob, FileReader, ResizeObserver, window */
 
 Error.stackTraceLimit = Infinity;
+
+// import Octokit from '@octokit/rest';
 
 import { deepEqual } from 'fast-equals';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
@@ -171,7 +173,7 @@ class UI extends React.PureComponent {
     if (project.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
-      await writeFile({}, 'file/script.jsx', defaultScript);
+      await writeFile({}, 'file/script.jsxcad', defaultScript);
       await this.selectProject(project);
     }
   };
@@ -254,10 +256,10 @@ class UI extends React.PureComponent {
       if (file.startsWith('geometry/')) {
         views.push({ view: 'geometry', file, title: `View ${file.substring(9)}` });
       }
-      if (file.startsWith('file/') && file.endsWith('.jsx')) {
+      if (file.startsWith('file/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
         views.push({ view: 'editScript', file, title: `Edit ${file.substring(5)}` });
       }
-      if (file.startsWith('file/') && file.endsWith('.svp')) {
+      if (file.startsWith('file/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
         views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(5)}` });
       }
     }
@@ -550,6 +552,8 @@ class ParametersUI extends React.PureComponent {
   }
 }
 
+const sleep = (duration) => new Promise((resolve, reject) => setTimeout(resolve, duration));
+
 class ProjectUI extends React.PureComponent {
   constructor (props) {
     super(props);
@@ -562,6 +566,7 @@ class ProjectUI extends React.PureComponent {
     this.copyProject = this.copyProject.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.exportProject = this.exportProject.bind(this);
+    this.exportProjectToGist = this.exportProjectToGist.bind(this);
     this.hideDeleteProject = this.hideDeleteProject.bind(this);
     this.importProject = this.importProject.bind(this);
     this.showDeleteProject = this.showDeleteProject.bind(this);
@@ -584,6 +589,51 @@ class ProjectUI extends React.PureComponent {
     const zip = await toZipFromFilesystem();
     const blob = new Blob([zip.buffer], { type: 'application/zip' });
     saveAs(blob, getFilesystem());
+  };
+
+  async exportProjectToGist () {
+    const CREATED = 201;
+
+    let oldToken;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      console.log(`QQ/attempt: ${attempt}`);
+      const name = document.getElementById('project/exportToGist/name').value;
+      const token = await readFile({ project: '.system', useCache: false }, 'auth/gist/accessToken');
+      console.log(`QQ/token: ${token}`);
+      if (token !== oldToken) {
+        oldToken = token;
+        const scriptJsx = await readFile({}, 'file/script.jsx');
+        const scriptJsxcad = await readFile({}, 'file/script.jsxcad');
+        const fetch = {
+                        method: 'POST',
+                        headers: {
+                                   'Accept': 'application/vnd.github.v3+json',
+                                   'Content-Type': 'application/json',
+                                   'User-Agent': 'JSxCAD v0.0.79',
+                                   'Authorization': `token ${token}`,
+                                 },
+                        body: JSON.stringify({
+                                               description: name || getFilesystem(),
+                                               public: true,
+                                               files: { 'script.jsxcad': { content: scriptJsxcad || scriptJsx } },
+                                             })
+                      };
+        const response = await window.fetch('https://api.github.com/gists', fetch);
+        console.log(`QQ/response/status: ${response.status}`);
+        console.log(`QQ/response/body: ${JSON.stringify(await response.json())}`);
+        if (response.status === CREATED) {
+          return;
+        } else {
+          await log({ op: 'text', text: `Gist export failed: ${response.status}`, level: 'serious' });
+          await log({ op: 'text', text: `Re-Authenticating`, level: 'serious' });
+          window.open("http://167.99.163.104:3000/auth/gist");
+        }
+      }
+      // Wait for the token to update.
+      await sleep(1000);
+    }
+    // Give up after a minute.
+    await log({ op: 'text', text: `Gave up on Gist export`, level: 'serious' });
   };
 
   async importProject (e) {
@@ -631,6 +681,12 @@ class ProjectUI extends React.PureComponent {
               <FormControl id="project/export/name" placeholder="Zip Name" />
               <InputGroup.Append>
                 <Button onClick={this.exportProject} variant='outline-primary'>Export</Button>
+              </InputGroup.Append>
+            </InputGroup>
+            <InputGroup>
+              <FormControl id="project/exportToGist/name" placeholder="Gist Name" />
+              <InputGroup.Append>
+                <Button onClick={this.exportProjectToGist} variant='outline-primary'>Export</Button>
               </InputGroup.Append>
             </InputGroup>
             <InputGroup>
@@ -1207,7 +1263,7 @@ const addFilesystem = () => {
   if (filesystem.length > 0) {
     // FIX: Prevent this from overwriting existing filesystems.
     setupFilesystem({ fileBase: filesystem });
-    writeFile({}, 'file/script.jsx', defaultScript)
+    writeFile({}, 'file/script.jsxcad', defaultScript)
         .then(_ => switchFilesystemview(filesystem))
         .catch(_ => _);
   }
