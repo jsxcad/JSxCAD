@@ -32,9 +32,9 @@ const getFileLister = async () => {
     };
   } else if (isBrowser) {
     return async () => {
-console.log(`QQ/scan/start`);
+      console.log(`QQ/scan/start`);
       const qualifiedPaths = new Set(await localForage.keys());
-console.log(`QQ/scan/end`);
+      console.log(`QQ/scan/end`);
       return qualifiedPaths;
     };
   } else {
