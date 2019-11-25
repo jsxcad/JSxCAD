@@ -4,6 +4,8 @@ Error.stackTraceLimit = Infinity;
 
 // import Octokit from '@octokit/rest';
 
+import * as THREE from 'three';
+
 import { deepEqual } from 'fast-equals';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
@@ -38,6 +40,9 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
+import Nav from 'react-bootstrap/Nav';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Navbar from 'react-bootstrap/Navbar';
 import Row from 'react-bootstrap/Row';
 import SplitButton from 'react-bootstrap/SplitButton';
 import Spinner from 'react-bootstrap/Spinner';
@@ -380,7 +385,7 @@ class UI extends React.PureComponent {
     }
 
     const switchViewModal = () => {
-      const { switchView } = this.state;
+      const { project, switchView } = this.state;
 
       if (switchView === undefined) {
         return;
@@ -419,27 +424,39 @@ class UI extends React.PureComponent {
     };
 
     return (
-      <div>
+      <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
         {switchViewModal()}
         {toastDiv}
-        <Drawer key={`drawer/${project}`} width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
-          <InputGroup>
-            <FormControl id="project/add/name" placeholder="Project Name" />
-            <InputGroup.Append>
-              <Button onClick={this.addProject} variant='outline-primary'>Add Project</Button>
-            </InputGroup.Append>
-          </InputGroup>
-          <br/>
-          <ButtonGroup vertical>
-            {this.state
-                 .projects
-                 .map((project, index) =>
-                      <Button key={index} variant="outline-primary" style={{ textAlign: 'left' }} onClick={() => this.selectProject(project)}>
-                        {project}
-                      </Button>)}
-          </ButtonGroup>
-        </Drawer>
+        <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
+          <Navbar.Brand>JSxCAD preAlpha3</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <NavDropdown title={project === '' ? 'Select Project' : `Project ${project}` }>
+                <InputGroup>
+                  <FormControl id="project/add/name" placeholder="Project Name" />
+                  <InputGroup.Append>
+                    <Button onClick={this.addProject} variant='outline-primary'>Add Project</Button>
+                  </InputGroup.Append>
+                </InputGroup>
+                {this.state
+                     .projects
+                     .map((project, index) =>
+                          <NavDropdown.Item key={index} variant="outline-primary" style={{ textAlign: 'left' }} onClick={() => this.selectProject(project)}>
+                            {project}
+                          </NavDropdown.Item>)}
+              </NavDropdown>
+              <NavDropdown title="Import">
+              </NavDropdown>
+              <NavDropdown title="Export">
+              </NavDropdown>
+              <NavDropdown title="Reference">
+              </NavDropdown>
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
         <Mosaic
+          style={{ flex: '1 1 auto', background: '#e6ebf0' }}
           key={`mosaic/${project}`}
           renderTile={(id, path) => (
                        <MosaicWindow
@@ -844,14 +861,26 @@ class ViewUI extends React.PureComponent {
     let threejsGeometry;
     let width = container.offsetWidth;
     let height = container.offsetHeight;
+
     const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
     const { gui } = buildGui({ viewerElement });
     const hudContext = hudCanvas.getContext('2d');
-    const render = () => renderer.render(scene, camera);
+
+    const render = () => {
+      renderer.clear();
+      camera.layers.set(0);
+      renderer.render(scene, camera);
+  
+      renderer.clearDepth();
+      camera.layers.set(1);
+      renderer.render(scene, camera);
+    }
+
     const updateHud = () => {
       hudContext.clearRect(0, 0, width, height);
       drawHud({ camera, datasets, threejsGeometry, hudCanvas });
-      hudContext.fillStyle = '#FF0000';
+      // hudContext.fillStyle = '#FF0000';
+      hudContext.fillStyle = '#00FF00';
     };
 
     container.appendChild(viewerElement);
