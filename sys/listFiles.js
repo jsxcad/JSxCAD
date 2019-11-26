@@ -32,16 +32,9 @@ const getFileLister = async () => {
     };
   } else if (isBrowser) {
     return async () => {
-      // FIX: Remove this once all fs's are migrated.
-      for (const key of await localForage.keys()) {
-        if (key.startsWith('file/')) {
-          const fixed = `jsxcad/${key.substring(5)}`;
-          console.log(`QQ/fix/wet: ${key} -> ${fixed}`);
-          await localForage.setItem(fixed, await localForage.getItem(key));
-          await localForage.removeItem(key);
-        }
-      }
+      console.log(`QQ/scan/start`);
       const qualifiedPaths = new Set(await localForage.keys());
+      console.log(`QQ/scan/end`);
       return qualifiedPaths;
     };
   } else {
