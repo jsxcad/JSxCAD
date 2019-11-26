@@ -1,41 +1,40 @@
 import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
-import { measureBoundingBox, transform as transformSolid, translate as translateSolid } from '@jsxcad/geometry-solid';
-import { toPlane, transform as transformSurface } from '@jsxcad/geometry-surface';
 
 import Shape from './Shape';
+import { toPlane } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 const Z = 2;
 
 export const flat = (shape) => {
-  const assembly = [];
+  let bestDepth = Infinity;
+  let bestFlatShape = shape;
 
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    let bestDepth = Infinity;
-    let bestFlatSolid;
+  const assay = (plane) => {
+    const [to] = toXYPlaneTransforms(plane);
+    const flatShape = shape.transform(to);
+    const [min, max] = flatShape.measureBoundingBox();
+    const depth = max[Z] - min[Z];
+    if (depth < bestDepth) {
+      bestDepth = depth;
+      bestFlatShape = flatShape.moveZ(-min[Z]);
+    }
+  };
+
+  const geometry = shape.toKeptGeometry();
+  for (const { solid } of getSolids(geometry)) {
     for (const surface of solid) {
-      const [to] = toXYPlaneTransforms(toPlane(surface));
-      const flatSolid = transformSolid(to, solid);
-      const [min, max] = measureBoundingBox(flatSolid);
-      const depth = max[Z] - min[Z];
-      if (depth < bestDepth) {
-        bestDepth = depth;
-        bestFlatSolid = translateSolid([0, 0, -min[Z]], flatSolid);
-      }
-    }
-    if (bestFlatSolid) {
-      assembly.push({ solid: bestFlatSolid, tags });
+      assay(toPlane(surface));
     }
   }
-  for (const { surface, tags } of getSurfaces(shape.toKeptGeometry())) {
-    const [to] = toXYPlaneTransforms(toPlane(surface));
-    assembly.push({ z0Surface: transformSurface(to, surface), tags });
+  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+    assay(toPlane(surface));
   }
-  for (const geometry of getZ0Surfaces(shape.toKeptGeometry())) {
-    assembly.push(geometry);
+  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+    assay(toPlane(z0Surface));
   }
 
-  return Shape.fromGeometry({ assembly });
+  return bestFlatShape;
 };
 
 const method = function () { return flat(this); };
