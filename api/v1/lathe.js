@@ -15,19 +15,19 @@ import { lathe as lathePath } from '@jsxcad/algorithm-shape';
  *
  **/
 
-export const lathe = ({ sides = 16, loops = 1, loopOffset = 0 }, shape) => {
+export const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
   const profile = shape.cut(Y(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
     for (const path of geometry.paths) {
-      solids.push(Shape.fromGeometry(lathePath(path, sides, loops, loopOffset)));
+      solids.push(Shape.fromGeometry(lathePath(path, endDegrees * Math.PI / 180, resolution)));
     }
   }
   return assemble(...solids);
 };
 
-const method = function (options) { return lathe(options, this); };
+const method = function (...args) { return lathe(this, ...args); };
 Shape.prototype.lathe = method;
 
 export default lathe;

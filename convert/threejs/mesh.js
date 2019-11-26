@@ -190,6 +190,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
       geometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
     }
     dataset.mesh = new THREE.LineSegments(geometry, material);
+    dataset.mesh.layers.set(0);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
@@ -202,6 +203,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
     applyBoxUV(geometry);
     const material = buildMeshMaterial(tags);
     dataset.mesh = new THREE.Mesh(geometry, material);
+    dataset.mesh.layers.set(0);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
@@ -213,6 +215,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
     geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
     const material = buildMeshMaterial(tags);
     dataset.mesh = new THREE.Mesh(geometry, material);
+    dataset.mesh.layers.set(0);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);

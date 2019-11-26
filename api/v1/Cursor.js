@@ -101,11 +101,11 @@ export class Cursor {
   }
 
   left (angle) {
-    return this.turn(-angle);
+    return this.turn(angle);
   }
 
   right (angle) {
-    return this.turn(angle);
+    return this.turn(-angle);
   }
 
   forward (distance) {

@@ -1,6 +1,10 @@
-/* global Blob, FileReader, ResizeObserver */
+/* global Blob, FileReader, ResizeObserver, window */
 
 Error.stackTraceLimit = Infinity;
+
+// import Octokit from '@octokit/rest';
+
+import * as THREE from 'three';
 
 import { deepEqual } from 'fast-equals';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
@@ -36,6 +40,9 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
+import Nav from 'react-bootstrap/Nav';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Navbar from 'react-bootstrap/Navbar';
 import Row from 'react-bootstrap/Row';
 import SplitButton from 'react-bootstrap/SplitButton';
 import Spinner from 'react-bootstrap/Spinner';
@@ -171,7 +178,7 @@ class UI extends React.PureComponent {
     if (project.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
-      await writeFile({}, 'file/script.jsx', defaultScript);
+      await writeFile({}, 'file/script.jsxcad', defaultScript);
       await this.selectProject(project);
     }
   };
@@ -254,10 +261,10 @@ class UI extends React.PureComponent {
       if (file.startsWith('geometry/')) {
         views.push({ view: 'geometry', file, title: `View ${file.substring(9)}` });
       }
-      if (file.startsWith('file/') && file.endsWith('.jsx')) {
+      if (file.startsWith('file/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
         views.push({ view: 'editScript', file, title: `Edit ${file.substring(5)}` });
       }
-      if (file.startsWith('file/') && file.endsWith('.svp')) {
+      if (file.startsWith('file/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
         views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(5)}` });
       }
     }
@@ -378,7 +385,7 @@ class UI extends React.PureComponent {
     }
 
     const switchViewModal = () => {
-      const { switchView } = this.state;
+      const { project, switchView } = this.state;
 
       if (switchView === undefined) {
         return;
@@ -417,27 +424,39 @@ class UI extends React.PureComponent {
     };
 
     return (
-      <div>
+      <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
         {switchViewModal()}
         {toastDiv}
-        <Drawer key={`drawer/${project}`} width="400px" placement="left" handler={false} open={drawerOpen} defaultOpen={drawerOpen}>
-          <InputGroup>
-            <FormControl id="project/add/name" placeholder="Project Name" />
-            <InputGroup.Append>
-              <Button onClick={this.addProject} variant='outline-primary'>Add Project</Button>
-            </InputGroup.Append>
-          </InputGroup>
-          <br/>
-          <ButtonGroup vertical>
-            {this.state
-                 .projects
-                 .map((project, index) =>
-                      <Button key={index} variant="outline-primary" style={{ textAlign: 'left' }} onClick={() => this.selectProject(project)}>
-                        {project}
-                      </Button>)}
-          </ButtonGroup>
-        </Drawer>
+        <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
+          <Navbar.Brand>JSxCAD preAlpha3</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <NavDropdown title={project === '' ? 'Select Project' : `Project ${project}` }>
+                <InputGroup>
+                  <FormControl id="project/add/name" placeholder="Project Name" />
+                  <InputGroup.Append>
+                    <Button onClick={this.addProject} variant='outline-primary'>Add Project</Button>
+                  </InputGroup.Append>
+                </InputGroup>
+                {this.state
+                     .projects
+                     .map((project, index) =>
+                          <NavDropdown.Item key={index} variant="outline-primary" style={{ textAlign: 'left' }} onClick={() => this.selectProject(project)}>
+                            {project}
+                          </NavDropdown.Item>)}
+              </NavDropdown>
+              <NavDropdown title="Import">
+              </NavDropdown>
+              <NavDropdown title="Export">
+              </NavDropdown>
+              <NavDropdown title="Reference">
+              </NavDropdown>
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
         <Mosaic
+          style={{ flex: '1 1 auto', background: '#e6ebf0' }}
           key={`mosaic/${project}`}
           renderTile={(id, path) => (
                        <MosaicWindow
@@ -550,6 +569,8 @@ class ParametersUI extends React.PureComponent {
   }
 }
 
+const sleep = (duration) => new Promise((resolve, reject) => setTimeout(resolve, duration));
+
 class ProjectUI extends React.PureComponent {
   constructor (props) {
     super(props);
@@ -562,6 +583,7 @@ class ProjectUI extends React.PureComponent {
     this.copyProject = this.copyProject.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.exportProject = this.exportProject.bind(this);
+    this.exportProjectToGist = this.exportProjectToGist.bind(this);
     this.hideDeleteProject = this.hideDeleteProject.bind(this);
     this.importProject = this.importProject.bind(this);
     this.showDeleteProject = this.showDeleteProject.bind(this);
@@ -584,6 +606,52 @@ class ProjectUI extends React.PureComponent {
     const zip = await toZipFromFilesystem();
     const blob = new Blob([zip.buffer], { type: 'application/zip' });
     saveAs(blob, getFilesystem());
+  };
+
+  async exportProjectToGist () {
+    const CREATED = 201;
+
+    let oldToken;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      console.log(`QQ/attempt: ${attempt}`);
+      const name = document.getElementById('project/exportToGist/name').value;
+      const token = await readFile({ project: '.system', useCache: false }, 'auth/gist/accessToken');
+      console.log(`QQ/token: ${token}`);
+      if (token === undefined || token !== oldToken) {
+        oldToken = token;
+        const scriptJsx = await readFile({}, 'file/script.jsx');
+        const scriptJsxcad = await readFile({}, 'file/script.jsxcad');
+        const fetch = {
+                        method: 'POST',
+                        headers: {
+                                   'Accept': 'application/vnd.github.v3+json',
+                                   'Content-Type': 'application/json',
+                                   'User-Agent': 'JSxCAD v0.0.79',
+                                   'Authorization': `token ${token}`,
+                                 },
+                        body: JSON.stringify({
+                                               description: name || getFilesystem(),
+                                               public: true,
+                                               files: { 'script.jsxcad': { content: scriptJsxcad || scriptJsx } },
+                                             })
+                      };
+        const response = await window.fetch('https://api.github.com/gists', fetch);
+        console.log(`QQ/response/status: ${response.status}`);
+        console.log(`QQ/response/body: ${JSON.stringify(await response.json())}`);
+        if (response.status === CREATED) {
+          await log({ op: 'text', text: `Gist created`, level: 'serious' });
+          return;
+        } else {
+          await log({ op: 'text', text: `Gist export failed: ${response.status}`, level: 'serious' });
+          await log({ op: 'text', text: `Re-Authenticating`, level: 'serious' });
+          window.open(`http://167.99.163.104:3000/auth/gist?gistCallback=${window.location.href}`);
+        }
+      }
+      // Wait for the token to update.
+      await sleep(1000);
+    }
+    // Give up after a minute.
+    await log({ op: 'text', text: `Gave up on Gist export`, level: 'serious' });
   };
 
   async importProject (e) {
@@ -631,6 +699,12 @@ class ProjectUI extends React.PureComponent {
               <FormControl id="project/export/name" placeholder="Zip Name" />
               <InputGroup.Append>
                 <Button onClick={this.exportProject} variant='outline-primary'>Export</Button>
+              </InputGroup.Append>
+            </InputGroup>
+            <InputGroup>
+              <FormControl id="project/exportToGist/name" placeholder="Gist Name" />
+              <InputGroup.Append>
+                <Button onClick={this.exportProjectToGist} variant='outline-primary'>Export</Button>
               </InputGroup.Append>
             </InputGroup>
             <InputGroup>
@@ -787,14 +861,26 @@ class ViewUI extends React.PureComponent {
     let threejsGeometry;
     let width = container.offsetWidth;
     let height = container.offsetHeight;
+
     const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
     const { gui } = buildGui({ viewerElement });
     const hudContext = hudCanvas.getContext('2d');
-    const render = () => renderer.render(scene, camera);
+
+    const render = () => {
+      renderer.clear();
+      camera.layers.set(0);
+      renderer.render(scene, camera);
+  
+      renderer.clearDepth();
+      camera.layers.set(1);
+      renderer.render(scene, camera);
+    }
+
     const updateHud = () => {
       hudContext.clearRect(0, 0, width, height);
       drawHud({ camera, datasets, threejsGeometry, hudCanvas });
-      hudContext.fillStyle = '#FF0000';
+      // hudContext.fillStyle = '#FF0000';
+      hudContext.fillStyle = '#00FF00';
     };
 
     container.appendChild(viewerElement);
@@ -1207,7 +1293,7 @@ const addFilesystem = () => {
   if (filesystem.length > 0) {
     // FIX: Prevent this from overwriting existing filesystems.
     setupFilesystem({ fileBase: filesystem });
-    writeFile({}, 'file/script.jsx', defaultScript)
+    writeFile({}, 'file/script.jsxcad', defaultScript)
         .then(_ => switchFilesystemview(filesystem))
         .catch(_ => _);
   }
