@@ -30,9 +30,8 @@ export const flat = (shape) => {
   for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
     assay(toPlane(surface));
   }
-  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
-    assay(toPlane(z0Surface));
-  }
+  // We do not need to consider z0Surface, since it could never improve the
+  // orientation.
 
   return bestFlatShape;
 };
