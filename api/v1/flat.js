@@ -1,4 +1,4 @@
-import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getSolids, getSurfaces } from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape';
 import { toPlane } from '@jsxcad/geometry-surface';
