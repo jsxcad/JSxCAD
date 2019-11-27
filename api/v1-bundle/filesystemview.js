@@ -1099,14 +1099,9 @@ class JSEditorUI extends React.PureComponent {
     }
   }
 
-  /* Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }} onMouseDown={this.stop} onMouseMove={this.stop} onMouseUp={this.stop} onKeyDown={this.preventDefault} onKeyPress={this.preventDefault} */
-
   render () {
     const { id } = this.props;
     const { code } = this.state;
-
-    //  <Container style={{ height: '100%', display: 'flex', flexFlow: 'column', padding: '4px', border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem' }}/>
-    //      <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
 
     return (
       <Container style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
