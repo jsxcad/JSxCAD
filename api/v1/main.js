@@ -13,6 +13,7 @@ import './faces';
 import './colors';
 import './cut';
 import './to';
+import './unfold';
 import './with';
 
 import * as vec from '@jsxcad/math-vec3';
