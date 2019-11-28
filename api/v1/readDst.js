@@ -29,11 +29,9 @@ export const readDst = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  const data = await readFile({
-    as: 'bytes',
-    sources: getSources(`file/${path}`),
-    ...options
-  },
-                              `file/${path}`);
+  let data = await readFile({ as: 'bytes' }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  }
   return Shape.fromGeometry(await fromDst(options, data));
 };

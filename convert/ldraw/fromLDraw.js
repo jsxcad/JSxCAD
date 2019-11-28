@@ -19,7 +19,7 @@ const readPart = async (part) => {
               `${URL_PREFIX}/p/${part}`],
     decode: 'utf8'
   },
-                  `file/ldraw/${part}`);
+                  `cache/ldraw/${part}`);
 };
 
 const loadPart = async (part) => {
