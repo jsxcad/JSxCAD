@@ -14,6 +14,9 @@ export const readSvgPath = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  const data = await readFile({ decode: 'utf8', sources: getSources(`file/${path}`), ...options }, `file/${path}`);
+  let data = await readFile({ decode: 'utf8', ...options }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ decode: 'utf8', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  }
   return Shape.fromGeometry(await fromSvgPath(options, data));
 };

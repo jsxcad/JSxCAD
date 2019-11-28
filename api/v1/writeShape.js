@@ -16,13 +16,19 @@ import { writeFile } from '@jsxcad/sys';
  *
  **/
 
+export const cacheShape = async (options, shape) => {
+  const { path } = options;
+  const geometry = shape.toGeometry();
+  await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+};
+
 export const writeShape = async (options, shape) => {
   if (typeof options === 'string') {
     options = { path: options };
   }
   const { path } = options;
   const geometry = shape.toGeometry();
-  await writeFile({}, `file/${path}`, JSON.stringify(geometry));
+  await writeFile({}, `output/${path}`, JSON.stringify(geometry));
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 

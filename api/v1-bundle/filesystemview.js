@@ -178,7 +178,7 @@ class UI extends React.PureComponent {
     if (project.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
-      await writeFile({}, 'file/script.jsxcad', defaultScript);
+      await writeFile({}, 'source/script.jsxcad', defaultScript);
       await this.selectProject(project);
     }
   };
@@ -261,10 +261,10 @@ class UI extends React.PureComponent {
       if (file.startsWith('geometry/')) {
         views.push({ view: 'geometry', file, title: `View ${file.substring(9)}` });
       }
-      if (file.startsWith('file/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
+      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
         views.push({ view: 'editScript', file, title: `Edit ${file.substring(5)}` });
       }
-      if (file.startsWith('file/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
+      if (file.startsWith('source/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
         views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(5)}` });
       }
     }
@@ -619,8 +619,8 @@ class ProjectUI extends React.PureComponent {
       console.log(`QQ/token: ${token}`);
       if (token === undefined || token !== oldToken) {
         oldToken = token;
-        const scriptJsx = await readFile({}, 'file/script.jsx');
-        const scriptJsxcad = await readFile({}, 'file/script.jsxcad');
+        const scriptJsx = await readFile({}, 'source/script.jsx');
+        const scriptJsxcad = await readFile({}, 'source/script.jsxcad');
         const fetch = {
                         method: 'POST',
                         headers: {
@@ -776,22 +776,22 @@ class FilesUI extends React.PureComponent {
   }
 
   async addFile () {
-    const file = document.getElementById('file/add/name').value;
+    const file = document.getElementById('source/add/name').value;
     if (file.length > 0) {
       // FIX: Prevent this from overwriting existing files.
-      await writeFile({}, `file/${file}`, '');
+      await writeFile({}, `source/${file}`, '');
     }
   };
 
   async importFile (e) {
     const { id } = this.props;
 
-    const file = document.getElementById(`file/${id}/import`).files[0];
-    const name = document.getElementById(`file/${id}/name`).value;
+    const file = document.getElementById(`source/${id}/import`).files[0];
+    const name = document.getElementById(`source/${id}/name`).value;
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
-      writeFile({}, `file/${name}`, new Uint8Array(data));
+      writeFile({}, `source/${name}`, new Uint8Array(data));
     };
     reader.readAsArrayBuffer(file);
   };
@@ -799,7 +799,7 @@ class FilesUI extends React.PureComponent {
   clickImportFile () {
     const { id } = this.props;
 
-    document.getElementById(`file/${id}/import`).click();
+    document.getElementById(`source/${id}/import`).click();
   }
 
   buildFiles () {
@@ -822,14 +822,14 @@ class FilesUI extends React.PureComponent {
         <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
           <Col>
             <InputGroup>
-              <FormControl id="file/add/name" placeholder="File Name" />
+              <FormControl id="source/add/name" placeholder="File Name" />
               <InputGroup.Append>
                 <Button onClick={this.addFile} variant='outline-primary'>Add</Button>
               </InputGroup.Append>
             </InputGroup>
             <InputGroup>
-              <FormControl as="input" type="file" id={`file/${id}/import`} multiple={false} onChange={this.importFile} style={{ display: 'none' }} />
-              <FormControl id={`file/${id}/name`} placeholder="" />
+              <FormControl as="input" type="file" id={`source/${id}/import`} multiple={false} onChange={this.importFile} style={{ display: 'none' }} />
+              <FormControl id={`source/${id}/name`} placeholder="" />
               <InputGroup.Append>
                 <Button onClick={this.clickImportFile} variant="outline-primary">Import</Button>
               </InputGroup.Append>
@@ -968,7 +968,7 @@ class ViewUI extends React.PureComponent {
   render () {
     const { id } = this.props;
     const { file, containerId } = this.state;
-    const filePath = `file/${file.substring(9)}`;
+    const filePath = `source/${file.substring(9)}`;
 
     const buttons = (file === 'geometry/preview')
                     ? []
@@ -1261,7 +1261,7 @@ const addFile = () => {
   const file = document.getElementById('fs/file/add').value;
   if (file.length > 0) {
     // FIX: Prevent this from overwriting existing files.
-    writeFile({}, `file/${file}`, '').then(_ => _).catch(_ => _);
+    writeFile({}, `source/${file}`, '').then(_ => _).catch(_ => _);
   }
 };
 
@@ -1288,7 +1288,7 @@ const addFilesystem = () => {
   if (filesystem.length > 0) {
     // FIX: Prevent this from overwriting existing filesystems.
     setupFilesystem({ fileBase: filesystem });
-    writeFile({}, 'file/script.jsxcad', defaultScript)
+    writeFile({}, 'source/script.jsxcad', defaultScript)
         .then(_ => switchFilesystemview(filesystem))
         .catch(_ => _);
   }
