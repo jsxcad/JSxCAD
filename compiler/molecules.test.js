@@ -5,9 +5,10 @@ import test from 'ava';
 
 test('toFlows', t => {
   const data = JSON.parse(readFileSync('molecule.json'));
-  const observed = toFlows(data);
-  writeFileSync('molecule-observed.flow', JSON.stringify(observed, null, '  '));
-  writeFileSync('molecule-observed.dot', toDotFromFlows(observed));
+  const flows = toFlows(data);
+  writeFileSync('molecule-observed.flow', JSON.stringify(flows, null, '  '));
+  writeFileSync('molecule-observed.dot', toDotFromFlows(flows));
+  const observed = JSON.parse(readFileSync('molecule-observed.flow'));
   const expected = JSON.parse(readFileSync('molecule-expected.flow'));
   t.deepEqual(observed, expected);
 });
