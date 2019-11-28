@@ -1,4 +1,4 @@
-import { clean, difference, intersection, union } from '@jsxcad/algorithm-polybooljs';
+import { clean, difference, intersection, union } from '@jsxcad/algorithm-clipper';
 
 export {
   clean,

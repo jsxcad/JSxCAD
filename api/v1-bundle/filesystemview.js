@@ -262,10 +262,10 @@ class UI extends React.PureComponent {
         views.push({ view: 'geometry', file, title: `View ${file.substring(9)}` });
       }
       if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
-        views.push({ view: 'editScript', file, title: `Edit ${file.substring(5)}` });
+        views.push({ view: 'editScript', file, title: `Edit ${file.substring(7)}` });
       }
       if (file.startsWith('source/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
-        views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(5)}` });
+        views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(7)}` });
       }
     }
 
