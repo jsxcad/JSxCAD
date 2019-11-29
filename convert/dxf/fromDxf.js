@@ -1,6 +1,6 @@
 import { scale, translate } from '@jsxcad/geometry-tagged';
 
-import DxfParser from 'dxf-parser';
+import DxfParser from './dxf-parser/DxfParser';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
 
@@ -9,7 +9,6 @@ export const fromDxf = async (options = {}, data) => {
   const dxf = parser.parseSync(data);
   const assembly = [];
   for (const entity of dxf.entities) {
-    console.log(JSON.stringify(entity));
     const { handle, layer } = entity;
     let tags = [];
     if (handle !== undefined) {

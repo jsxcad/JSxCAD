@@ -16,6 +16,7 @@ export const canonicalize = (rawGeometry) => {
     canonicalized.plan = geometry.plan;
     canonicalized.marks = canonicalizePoints(geometry.marks);
     canonicalized.planes = geometry.planes.map(canonicalizePlane);
+    canonicalized.visualization = canonicalize(geometry.visualization);
   } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalizeSurface(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {

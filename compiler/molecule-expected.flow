@@ -1,0 +1,474 @@
+[
+  {
+    "nodes": [
+      {
+        "op": {
+          "opId": "Molecule",
+          "parameters": {}
+        },
+        "name": "PCB",
+        "nodeId": "node_0",
+        "legacyId": 770369,
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_18",
+              "socketName": "shape",
+              "description": "Geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 63,
+          "y": 44
+        }
+      },
+      {
+        "op": {
+          "opId": "Molecule",
+          "parameters": {}
+        },
+        "name": "ESP32",
+        "nodeId": "node_1",
+        "legacyId": 491176,
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_20",
+              "socketName": "shape",
+              "description": "Geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 66,
+          "y": 98
+        }
+      },
+      {
+        "op": {
+          "opId": "Molecule",
+          "parameters": {}
+        },
+        "name": "Misc Chips",
+        "nodeId": "node_2",
+        "legacyId": 682781,
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_23",
+              "socketName": "shape",
+              "description": "Geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 67,
+          "y": 159
+        }
+      },
+      {
+        "op": {
+          "opId": "Translate",
+          "parameters": {}
+        },
+        "name": "Translate",
+        "nodeId": "node_3",
+        "legacyId": 450577,
+        "input": {
+          "sockets": [
+            {
+              "socketId": "socket_4",
+              "socketName": "x",
+              "description": "xDist"
+            },
+            {
+              "socketId": "socket_5",
+              "socketName": "y",
+              "description": "yDist"
+            },
+            {
+              "socketId": "socket_6",
+              "socketName": "z",
+              "description": "zDist"
+            },
+            {
+              "socketId": "socket_21",
+              "socketName": "shape",
+              "description": "geometry"
+            }
+          ]
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_25",
+              "socketName": "shape",
+              "description": "geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 196,
+          "y": 109
+        }
+      },
+      {
+        "op": {
+          "opId": "Molecule",
+          "parameters": {}
+        },
+        "name": "Motor Driver Sub Assembly",
+        "nodeId": "node_7",
+        "legacyId": 121396,
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_27",
+              "socketName": "shape",
+              "description": "Geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 98,
+          "y": 218
+        }
+      },
+      {
+        "op": {
+          "opId": "Molecule",
+          "parameters": {}
+        },
+        "name": "Power Jack",
+        "nodeId": "node_8",
+        "legacyId": 487182,
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_29",
+              "socketName": "shape",
+              "description": "Geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 273,
+          "y": 244
+        }
+      },
+      {
+        "op": {
+          "opId": "Molecule",
+          "parameters": {}
+        },
+        "name": "Mounting Hardware",
+        "nodeId": "node_9",
+        "legacyId": 515206,
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_31",
+              "socketName": "shape",
+              "description": "Geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 349,
+          "y": 282
+        }
+      },
+      {
+        "op": {
+          "opId": "Assembly",
+          "parameters": {}
+        },
+        "name": "Assembly",
+        "nodeId": "node_10",
+        "legacyId": 963382,
+        "input": {
+          "sockets": [
+            {
+              "socketId": "socket_11",
+              "socketName": "shape",
+              "description": "3D shape 966998"
+            },
+            {
+              "socketId": "socket_12",
+              "socketName": "shape",
+              "description": "3D shape 305054"
+            },
+            {
+              "socketId": "socket_13",
+              "socketName": "shape",
+              "description": "3D shape 628723"
+            },
+            {
+              "socketId": "socket_14",
+              "socketName": "shape",
+              "description": "3D shape 374430"
+            },
+            {
+              "socketId": "socket_15",
+              "socketName": "shape",
+              "description": "3D shape 293672"
+            },
+            {
+              "socketId": "socket_32",
+              "socketName": "shape",
+              "description": "3D shape 416631"
+            }
+          ]
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_34",
+              "socketName": "shape",
+              "description": "geometry"
+            }
+          ]
+        },
+        "metadata": {
+          "x": 620,
+          "y": 103
+        }
+      },
+      {
+        "op": {
+          "opId": "Output",
+          "parameters": {}
+        },
+        "name": "Output",
+        "nodeId": "node_16",
+        "legacyId": "Output",
+        "input": {
+          "sockets": [
+            {
+              "socketId": "socket_35",
+              "socketName": "value",
+              "description": "number or geometry"
+            }
+          ]
+        },
+        "output": {
+          "sockets": []
+        },
+        "metadata": {
+          "x": 1316,
+          "y": 163.5
+        }
+      },
+      {
+        "op": {
+          "opId": "Constant",
+          "parameters": {
+            "value": -11
+          }
+        },
+        "name": -11,
+        "nodeId": "node_36",
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_37",
+              "socketName": "number",
+              "description": -11
+            }
+          ]
+        }
+      },
+      {
+        "op": {
+          "opId": "Constant",
+          "parameters": {
+            "value": 0
+          }
+        },
+        "name": 0,
+        "nodeId": "node_39",
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_40",
+              "socketName": "number",
+              "description": 0
+            }
+          ]
+        }
+      },
+      {
+        "op": {
+          "opId": "Constant",
+          "parameters": {
+            "value": 13
+          }
+        },
+        "name": 13,
+        "nodeId": "node_42",
+        "input": {
+          "sockets": []
+        },
+        "output": {
+          "sockets": [
+            {
+              "socketId": "socket_43",
+              "socketName": "number",
+              "description": 13
+            }
+          ]
+        }
+      }
+    ],
+    "connections": [
+      {
+        "connectionId": "connection_17",
+        "input": {
+          "nodeId": "node_0",
+          "socketId": "socket_18"
+        },
+        "output": {
+          "nodeId": "node_10",
+          "socketId": "socket_13"
+        }
+      },
+      {
+        "connectionId": "connection_19",
+        "input": {
+          "nodeId": "node_1",
+          "socketId": "socket_20"
+        },
+        "output": {
+          "nodeId": "node_3",
+          "socketId": "socket_21"
+        }
+      },
+      {
+        "connectionId": "connection_22",
+        "input": {
+          "nodeId": "node_2",
+          "socketId": "socket_23"
+        },
+        "output": {
+          "nodeId": "node_10",
+          "socketId": "socket_14"
+        }
+      },
+      {
+        "connectionId": "connection_24",
+        "input": {
+          "nodeId": "node_3",
+          "socketId": "socket_25"
+        },
+        "output": {
+          "nodeId": "node_10",
+          "socketId": "socket_11"
+        }
+      },
+      {
+        "connectionId": "connection_26",
+        "input": {
+          "nodeId": "node_7",
+          "socketId": "socket_27"
+        },
+        "output": {
+          "nodeId": "node_10",
+          "socketId": "socket_15"
+        }
+      },
+      {
+        "connectionId": "connection_28",
+        "input": {
+          "nodeId": "node_8",
+          "socketId": "socket_29"
+        },
+        "output": {
+          "nodeId": "node_10",
+          "socketId": "socket_12"
+        }
+      },
+      {
+        "connectionId": "connection_30",
+        "input": {
+          "nodeId": "node_9",
+          "socketId": "socket_31"
+        },
+        "output": {
+          "nodeId": "node_10",
+          "socketId": "socket_32"
+        }
+      },
+      {
+        "connectionId": "connection_33",
+        "input": {
+          "nodeId": "node_10",
+          "socketId": "socket_34"
+        },
+        "output": {
+          "nodeId": "node_16",
+          "socketId": "socket_35"
+        }
+      },
+      {
+        "connectionId": "connection_38",
+        "input": {
+          "nodeId": "node_36",
+          "socketId": "socket_37"
+        },
+        "output": {
+          "nodeId": "node_3",
+          "socketId": "socket_4"
+        }
+      },
+      {
+        "connectionId": "connection_41",
+        "input": {
+          "nodeId": "node_39",
+          "socketId": "socket_40"
+        },
+        "output": {
+          "nodeId": "node_3",
+          "socketId": "socket_5"
+        }
+      },
+      {
+        "connectionId": "connection_44",
+        "input": {
+          "nodeId": "node_42",
+          "socketId": "socket_43"
+        },
+        "output": {
+          "nodeId": "node_3",
+          "socketId": "socket_6"
+        }
+      }
+    ],
+    "flowId": 526866,
+    "flowName": "5 Motor Controller Board"
+  }
+]

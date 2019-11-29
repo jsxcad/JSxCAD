@@ -24,8 +24,8 @@
     "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
-    "dxf-parser": "^1.0.0-alpha.1",
-    "dxf-writer": "^1.2.1"
+    "dxf-writer": "^1.2.1",
+    "loglevel": "^1.6.6"
   },
   "devDependencies": {
     "ava": "^1.4.1",

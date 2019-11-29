@@ -64,5 +64,6 @@ Polygon.ofApothem = ofApothem;
 Polygon.ofRadius = ofRadius;
 Polygon.ofDiameter = ofDiameter;
 Polygon.ofPoints = ofPoints;
+Polygon.toRadiusFromApothem = toRadiusFromApothem;
 
 export default Polygon;

@@ -29,6 +29,8 @@ export const toTransformedGeometry = (geometry) => {
           item: walk(matrix, geometry.item),
           tags: geometry.tags
         };
+      } else if (geometry.visualization) {
+        return { ...geometry, visualization: walk(matrix, geometry.visualization) };
       }
 
       return transformItem(matrix, geometry);

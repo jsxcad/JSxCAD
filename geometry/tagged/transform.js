@@ -19,6 +19,7 @@ export const transformItem = (matrix, item) => {
     transformed.plan = item.plan;
     transformed.marks = transformPoints(matrix, item.marks);
     transformed.planes = item.planes.map(plane => transformPlane(matrix, plane));
+    transformed.visualization = transformItem(matrix, item.visualization);
   } else if (item.points) {
     transformed.points = transformPoints(matrix, item.points);
   } else if (item.solid) {
