@@ -43,7 +43,7 @@ export const Apothem = (apothem = 1, center = [0, 0, 0]) =>
         .add(Hershey(`A${apothem}`).moveY(Circle.toRadiusFromApothem(apothem) / 2))
         .color('red')
   });
-Plan.Radius = Radius;
+Plan.Apothem = Apothem;
 
 // Labels
 
