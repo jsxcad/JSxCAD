@@ -3,7 +3,8 @@
     "nodes": [
       {
         "op": {
-          "opId": "Molecule"
+          "opId": "Molecule",
+          "parameters": {}
         },
         "name": "PCB",
         "nodeId": "node_0",
@@ -15,7 +16,8 @@
           "sockets": [
             {
               "socketId": "socket_18",
-              "name": "Geometry"
+              "socketName": "shape",
+              "description": "Geometry"
             }
           ]
         },
@@ -26,7 +28,8 @@
       },
       {
         "op": {
-          "opId": "Molecule"
+          "opId": "Molecule",
+          "parameters": {}
         },
         "name": "ESP32",
         "nodeId": "node_1",
@@ -38,7 +41,8 @@
           "sockets": [
             {
               "socketId": "socket_20",
-              "name": "Geometry"
+              "socketName": "shape",
+              "description": "Geometry"
             }
           ]
         },
@@ -49,7 +53,8 @@
       },
       {
         "op": {
-          "opId": "Molecule"
+          "opId": "Molecule",
+          "parameters": {}
         },
         "name": "Misc Chips",
         "nodeId": "node_2",
@@ -61,7 +66,8 @@
           "sockets": [
             {
               "socketId": "socket_23",
-              "name": "Geometry"
+              "socketName": "shape",
+              "description": "Geometry"
             }
           ]
         },
@@ -72,7 +78,8 @@
       },
       {
         "op": {
-          "opId": "Translate"
+          "opId": "Translate",
+          "parameters": {}
         },
         "name": "Translate",
         "nodeId": "node_3",
@@ -81,19 +88,23 @@
           "sockets": [
             {
               "socketId": "socket_4",
-              "socketName": "xDist"
+              "socketName": "x",
+              "description": "xDist"
             },
             {
               "socketId": "socket_5",
-              "socketName": "yDist"
+              "socketName": "y",
+              "description": "yDist"
             },
             {
               "socketId": "socket_6",
-              "socketName": "zDist"
+              "socketName": "z",
+              "description": "zDist"
             },
             {
               "socketId": "socket_21",
-              "name": "geometry"
+              "socketName": "shape",
+              "description": "geometry"
             }
           ]
         },
@@ -101,7 +112,8 @@
           "sockets": [
             {
               "socketId": "socket_25",
-              "name": "geometry"
+              "socketName": "shape",
+              "description": "geometry"
             }
           ]
         },
@@ -112,7 +124,8 @@
       },
       {
         "op": {
-          "opId": "Molecule"
+          "opId": "Molecule",
+          "parameters": {}
         },
         "name": "Motor Driver Sub Assembly",
         "nodeId": "node_7",
@@ -124,7 +137,8 @@
           "sockets": [
             {
               "socketId": "socket_27",
-              "name": "Geometry"
+              "socketName": "shape",
+              "description": "Geometry"
             }
           ]
         },
@@ -135,7 +149,8 @@
       },
       {
         "op": {
-          "opId": "Molecule"
+          "opId": "Molecule",
+          "parameters": {}
         },
         "name": "Power Jack",
         "nodeId": "node_8",
@@ -147,7 +162,8 @@
           "sockets": [
             {
               "socketId": "socket_29",
-              "name": "Geometry"
+              "socketName": "shape",
+              "description": "Geometry"
             }
           ]
         },
@@ -158,7 +174,8 @@
       },
       {
         "op": {
-          "opId": "Molecule"
+          "opId": "Molecule",
+          "parameters": {}
         },
         "name": "Mounting Hardware",
         "nodeId": "node_9",
@@ -170,7 +187,8 @@
           "sockets": [
             {
               "socketId": "socket_31",
-              "name": "Geometry"
+              "socketName": "shape",
+              "description": "Geometry"
             }
           ]
         },
@@ -181,7 +199,8 @@
       },
       {
         "op": {
-          "opId": "Assembly"
+          "opId": "Assembly",
+          "parameters": {}
         },
         "name": "Assembly",
         "nodeId": "node_10",
@@ -190,27 +209,33 @@
           "sockets": [
             {
               "socketId": "socket_11",
-              "socketName": "3D shape 966998"
+              "socketName": "shape",
+              "description": "3D shape 966998"
             },
             {
               "socketId": "socket_12",
-              "socketName": "3D shape 305054"
+              "socketName": "shape",
+              "description": "3D shape 305054"
             },
             {
               "socketId": "socket_13",
-              "socketName": "3D shape 628723"
+              "socketName": "shape",
+              "description": "3D shape 628723"
             },
             {
               "socketId": "socket_14",
-              "socketName": "3D shape 374430"
+              "socketName": "shape",
+              "description": "3D shape 374430"
             },
             {
               "socketId": "socket_15",
-              "socketName": "3D shape 293672"
+              "socketName": "shape",
+              "description": "3D shape 293672"
             },
             {
               "socketId": "socket_32",
-              "name": "3D shape 416631"
+              "socketName": "shape",
+              "description": "3D shape 416631"
             }
           ]
         },
@@ -218,7 +243,8 @@
           "sockets": [
             {
               "socketId": "socket_34",
-              "name": "geometry"
+              "socketName": "shape",
+              "description": "geometry"
             }
           ]
         },
@@ -229,7 +255,8 @@
       },
       {
         "op": {
-          "opId": "Output"
+          "opId": "Output",
+          "parameters": {}
         },
         "name": "Output",
         "nodeId": "node_16",
@@ -238,7 +265,8 @@
           "sockets": [
             {
               "socketId": "socket_35",
-              "name": "number or geometry"
+              "socketName": "value",
+              "description": "number or geometry"
             }
           ]
         },
@@ -266,7 +294,8 @@
           "sockets": [
             {
               "socketId": "socket_37",
-              "socketName": "number"
+              "socketName": "number",
+              "description": -11
             }
           ]
         }
@@ -287,7 +316,8 @@
           "sockets": [
             {
               "socketId": "socket_40",
-              "socketName": "number"
+              "socketName": "number",
+              "description": 0
             }
           ]
         }
@@ -308,7 +338,8 @@
           "sockets": [
             {
               "socketId": "socket_43",
-              "socketName": "number"
+              "socketName": "number",
+              "description": 13
             }
           ]
         }

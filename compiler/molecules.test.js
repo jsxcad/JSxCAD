@@ -8,7 +8,7 @@ test('toFlows', t => {
   const flows = toFlows(data);
   writeFileSync('molecule-observed.flow', JSON.stringify(flows, null, '  '));
   writeFileSync('molecule-observed.dot', toDotFromFlows(flows));
-  const observed = JSON.parse(readFileSync('molecule-observed.flow'));
-  const expected = JSON.parse(readFileSync('molecule-expected.flow'));
+  const observed = JSON.parse(readFileSync('molecule-observed.flow', { encoding: 'utf8' }));
+  const expected = JSON.parse(readFileSync('molecule-expected.flow', { encoding: 'utf8' }));
   t.deepEqual(observed, expected);
 });

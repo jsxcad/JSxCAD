@@ -8,6 +8,7 @@
  */
 
 import './add';
+import './bom';
 import './edges';
 import './faces';
 import './colors';
