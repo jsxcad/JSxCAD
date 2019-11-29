@@ -4,6 +4,6 @@ import test from 'ava';
 
 test('Expected pdf', async (t) => {
   await run('outline');
-  isExpected(t, 'outline/file/pdf/sphere.pdf');
-  isExpected(t, 'outline/file/pdf/sphereCube.pdf');
+  isExpected(t, 'outline/output/pdf/sphere.pdf');
+  isExpected(t, 'outline/output/pdf/sphereCube.pdf');
 });

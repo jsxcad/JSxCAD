@@ -20,7 +20,7 @@ export const writePdf = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toKeptGeometry();
   const pdf = await toPdf({ preview: true, ...options }, geometry);
-  await writeFile({}, `file/${path}`, pdf);
+  await writeFile({}, `output/${path}`, pdf);
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 

@@ -94,7 +94,7 @@ export const readFile = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
-  const { sources = [], project = getFilesystem() } = options;
+  const { sources = [], project = getFilesystem(), useCache = true } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
     log({ op: 'text', text: `Read ${path} of ${project}` });
@@ -104,7 +104,7 @@ export const readFile = async (options, path) => {
     log({ op: 'text', text: `Read ${path}` });
   }
   const file = await getFile(options, path);
-  if (file.data === undefined) {
+  if (file.data === undefined || useCache === false) {
     file.data = await fetchPersistent(path);
   }
   if (project !== originalProject) {

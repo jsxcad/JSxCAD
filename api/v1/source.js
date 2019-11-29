@@ -1,3 +1,3 @@
 import { addSource } from '@jsxcad/sys';
 
-export const source = (path, source) => addSource(`file/${path}`, source);
+export const source = (path, source) => addSource(`cache/${path}`, source);

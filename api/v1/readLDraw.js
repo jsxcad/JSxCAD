@@ -19,5 +19,5 @@ export const readLDraw = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  return Shape.fromGeometry(await fromLDraw({ sources: getSources(`file/${path}`), ...options }));
+  return Shape.fromGeometry(await fromLDraw({ sources: getSources(`cache/${path}`), ...options }));
 };

@@ -1,17 +1,36 @@
 /* global ResizeObserver */
 
+import * as THREE from 'three';
+
 import { buildGui, buildGuiControls, buildTrackballControls } from './controls';
 import { buildScene, createResizer } from './scene';
 
 import { buildMeshes } from './mesh';
 
+const GEOMETRY_LAYER = 0;
+const PLAN_LAYER = 1;
+
 export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
-  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
+
+  const geometryLayers = new THREE.Layers();
+  geometryLayers.set(GEOMETRY_LAYER);
+
+  const planLayers = new THREE.Layers();
+  planLayers.set(PLAN_LAYER);
+
+  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view, geometryLayers, planLayers });
+
   const { gui } = buildGui({ viewerElement });
-  const render = () => renderer.render(scene, camera);
+  const render = () => {
+    camera.layers.set(GEOMETRY_LAYER);
+    renderer.render(scene, camera);
+
+    camera.layers.set(PLAN_LAYER);
+    renderer.render(scene, camera);
+  };
   const updateHud = () => {
     const ctx = hudCanvas.getContext('2d');
     ctx.clearRect(0, 0, width, height);

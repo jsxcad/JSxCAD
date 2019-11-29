@@ -20,7 +20,7 @@ export const writeDxf = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toKeptGeometry();
   const dxf = await toDxf({ preview: true, ...options }, geometry);
-  await writeFile({}, `file/${path}`, dxf);
+  await writeFile({}, `output/${path}`, dxf);
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 

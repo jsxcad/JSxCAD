@@ -17,6 +17,7 @@
 .mosaic {
   height: 100%;
   width: 100%;
+  background: #e0e9e9;
 }
 .mosaic,
 .mosaic > * {

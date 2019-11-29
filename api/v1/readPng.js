@@ -13,7 +13,10 @@ export const readPng = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  const data = await readFile({ as: 'bytes', sources: getSources(`file/${path}`), ...options }, `file/${path}`);
+  let data = await readFile({ as: 'bytes', ...options }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  }
   const raster = await fromPng({}, data);
   return raster;
 };

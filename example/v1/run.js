@@ -7,7 +7,7 @@ import { toEcmascript } from '@jsxcad/compiler';
 
 export const run = async (target = process.argv[2], base = 'observed') => {
   setupFilesystem({ fileBase: `${base}/${target}` });
-  addSource(`file/${target}.js`, `./${target}.js`);
+  addSource(`cache/${target}.js`, `./${target}.js`);
   const module = await importModule(`${target}.js`);
   await module.main();
 };
