@@ -7,10 +7,10 @@
       op: { opId },
       nodeId,
       input: {
-        sockets: [{ socketId, socketName }],
+        sockets: [{ socketId, socketName, description }],
       },
       output: {
-        sockets: [{ socketId, socketName }],
+        sockets: [{ socketId, socketName, description }],
       },
     }
   ],
@@ -24,6 +24,33 @@
 }
 
 */
+
+const toSocketNameFromDescription = (description) => {
+  if (description.startsWith('3D')) return 'shape';
+  if (description === 'Equation') return 'equation';
+  if (description === 'Project ID') return 'project';
+  if (description === 'BOM Item') return 'bomItem';
+  if (description === 'Name') return 'name';
+  if (description === 'result') return 'result';
+  if (description === 'number') return 'number';
+  if (description === 'diameter') return 'diameter';
+  if (description === 'x-axis degrees') return 'x';
+  if (description === 'y-axis degrees') return 'y';
+  if (description === 'z-axis degrees') return 'z';
+  if (description === 'height') return 'height';
+  if (description === 'M') return 'm'; // what is this?
+  if (description === 'x length') return 'length';
+  if (description === 'y length') return 'width';
+  if (description === 'z length') return 'height';
+  if (description === 'xDist') return 'x';
+  if (description === 'yDist') return 'y';
+  if (description === 'zDist') return 'z';
+  if (description === 'geometry') return 'shape';
+  if (description === 'Geometry') return 'shape';
+  if (description === 'number or geometry') return 'value';
+
+  throw Error(`QQ/Unknown socket description: [${description}]`);
+};
 
 export const toFlows = (data) => {
   const flows = [];
@@ -72,7 +99,7 @@ export const toFlows = (data) => {
       nodeIdByMoleculeId.set(uniqueID, nodeId);
       const legacyId = uniqueID;
       const node = {
-        op: { opId: atomType },
+        op: { opId: atomType, parameters: {} },
         name,
         nodeId,
         legacyId,
@@ -80,10 +107,45 @@ export const toFlows = (data) => {
         output: { sockets: [] },
         metadata: { projectID, x, y }
       };
+      switch (atom.atomType) {
+        case 'Add BOM Tag': {
+          const ioValue = atom.BOMitem;
+          const description = 'BOM Item';
+          const socketId = getNextId('socket');
+          const socketName = toSocketNameFromDescription(description);
+          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          break;
+        }
+        case 'Color': {
+          const ioValue = ['Powder blue', 'White', 'Red', 'Steel blue', 'Yellow', 'Brown', 'Cyan', 'Green', 'Pink', 'Blue', 'Silver', 'Black', 'Keep Out'][atom.selectedColorIndex];
+          const description = 'Name';
+          const socketId = getNextId('socket');
+          const socketName = toSocketNameFromDescription(description);
+          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          break;
+        }
+        case 'GitHubMolecule': {
+          const ioValue = atom.projectID;
+          const description = 'Project ID';
+          const socketId = getNextId('socket');
+          const socketName = toSocketNameFromDescription(description);
+          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          break;
+        }
+        case 'Equation': {
+          const ioValue = atom.currentEquation;
+          const description = 'Equation';
+          const socketId = getNextId('socket');
+          const socketName = toSocketNameFromDescription(description);
+          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          break;
+        }
+      }
       for (const { name, ioValue } of ioValues) {
+        const description = name;
         const socketId = getNextId('socket');
-        const socketName = name;
-        node.input.sockets.push({ socketId, socketName, pendingIoValue: ioValue });
+        const socketName = toSocketNameFromDescription(description);
+        node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
       }
       nodeById.set(nodeId, node);
       flow.nodes.push(node);
@@ -113,12 +175,16 @@ export const toFlows = (data) => {
       const connectionId = getNextId('connection');
       const [inputNode, outputNode] = [toNode(toNodeId(ap1ID)), toNode(toNodeId(ap2ID))];
       const inputSocketId = getNextId('socket');
-      inputNode.output.sockets.push({ socketId: inputSocketId, name: ap1Name });
+      inputNode.output.sockets.push({
+        socketId: inputSocketId,
+        socketName: toSocketNameFromDescription(ap1Name),
+        description: ap1Name
+      });
 
       let outputSocketId;
       for (const socket of outputNode.input.sockets) {
-        const { socketId, socketName } = socket;
-        if (socketName === ap2Name) {
+        const { socketId, description } = socket;
+        if (description === ap2Name) {
           // Fuse connector by name with existing input, since these are sometimes duplicated.
           outputSocketId = socketId;
           // Remove any pending constant.
@@ -129,7 +195,11 @@ export const toFlows = (data) => {
       if (outputSocketId === undefined) {
         // Didn't fuse; add a new input.
         outputSocketId = getNextId('socket');
-        outputNode.input.sockets.push({ socketId: outputSocketId, name: ap2Name });
+        outputNode.input.sockets.push({
+          socketId: outputSocketId,
+          socketName: toSocketNameFromDescription(ap2Name),
+          description: ap2Name
+        });
       }
       const connection = {
         connectionId,
@@ -161,16 +231,30 @@ export const toFlows = (data) => {
             },
             name: pendingIoValue,
             nodeId: constantNodeId,
-            input: { sockets: [] },
-            output: { sockets: [{ socketId: constantSocketId, socketName: 'number' }] }
+            input: {
+              sockets: []
+            },
+            output: {
+              sockets: [{
+                socketId: constantSocketId,
+                socketName: 'number',
+                description: pendingIoValue
+              }]
+            }
           };
           nodeById.set(constantNodeId, constantNode);
           flow.nodes.push(constantNode);
           const connectionId = getNextId('connection');
           flow.connections.push({
             connectionId,
-            input: { nodeId: constantNodeId, socketId: constantSocketId },
-            output: { nodeId, socketId }
+            input: {
+              nodeId: constantNodeId,
+              socketId: constantSocketId
+            },
+            output: {
+              nodeId,
+              socketId
+            }
           });
         }
       }
