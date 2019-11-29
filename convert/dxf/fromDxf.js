@@ -1,6 +1,6 @@
 import { scale, translate } from '@jsxcad/geometry-tagged';
 
-import DxfParser from './dxf-parser/DxfParser';
+import DxfParser from 'dxf-parser';
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
 
