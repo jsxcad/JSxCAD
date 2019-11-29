@@ -9,10 +9,10 @@
 
 import './add';
 import './bom';
-import './edges';
-import './faces';
 import './colors';
 import './cut';
+import './edges';
+import './faces';
 import './to';
 import './unfold';
 import './with';
@@ -30,6 +30,7 @@ import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
 // import { Fastener } from './Fastener';
 import { Gear } from './Gear';
+import Hershey from './Hershey';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
 import { Lego } from './Lego';
@@ -107,7 +108,7 @@ import { pack } from './pack';
 import { readDst } from './readDst';
 import { readDxf } from './readDxf';
 import { readFont } from './readFont';
-import { readJscad } from './readJscad';
+// import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readPng } from './readPng';
 import { readShape } from './readShape';
@@ -241,6 +242,7 @@ export {
   flat,
   // Fastener,
   Gear,
+  Hershey,
   Hexagon,
   hull,
   Icosahedron,
@@ -267,7 +269,7 @@ export {
   readDst,
   readDxf,
   readFont,
-  readJscad,
+  // readJscad,
   readLDraw,
   readPng,
   readShape,

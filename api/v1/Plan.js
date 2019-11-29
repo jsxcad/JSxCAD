@@ -1,5 +1,8 @@
-import { Shape } from './Shape';
-import { assemble } from './assemble';
+import Circle from './Circle';
+import Hershey from './Hershey';
+import Path from './Path';
+import Shape from './Shape';
+import assemble from './assemble';
 import { getPlans } from '@jsxcad/geometry-tagged';
 
 /**
@@ -10,14 +13,36 @@ import { getPlans } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const Plan = ({ plan, marks, planes, tags }, context) => {
-  const shape = Shape.fromGeometry({ plan, marks, planes, tags }, context);
+export const Plan = ({ plan, marks = [], planes = [], tags = [], visualization }, context) => {
+  let geometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
+  const shape = Shape.fromGeometry({ plan, marks, planes, tags, visualization: geometry }, context);
   return shape;
 };
 
 // Radius
 
-export const Radius = (label, radius = 1, center = [0, 0, 0]) => Plan({ plan: { radius }, marks: [center] });
+export const Radius = (radius = 1, center = [0, 0, 0]) =>
+  Plan({
+    plan: { radius },
+    marks: [center],
+    visualization: Circle.ofRadius(radius)
+        .outline()
+        .add(Path([0, 0, 0], [0, radius, 0]))
+        .add(Hershey(`R${radius}`).moveY(radius / 2))
+        .color('red')
+  });
+Plan.Radius = Radius;
+
+export const Apothem = (apothem = 1, center = [0, 0, 0]) =>
+  Plan({
+    plan: { apothem },
+    marks: [center],
+    visualization: Circle.ofApothem(apothem)
+        .outline()
+        .add(Path([0, 0, 0], [0, Circle.toRadiusFromApothem(apothem), 0]))
+        .add(Hershey(`A${apothem}`).moveY(Circle.toRadiusFromApothem(apothem) / 2))
+        .color('red')
+  });
 Plan.Radius = Radius;
 
 // Labels

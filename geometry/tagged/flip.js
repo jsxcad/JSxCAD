@@ -25,11 +25,14 @@ export const flip = (geometry) => {
       flipped.plan = geometry.plan;
       flipped.marks = geometry.marks;
       flipped.planes = geometry.planes.map(flipPlane);
+      // FIX: Mirror?
+      flipped.visualization = geometry.visualization;
     } else {
       // Leave other plans be for now.
       flipped.plan = geometry.plan;
       flipped.marks = geometry.marks;
       flipped.planes = geometry.planes;
+      flipped.visualization = geometry.visualization;
     }
   } else if (geometry.item) {
     // FIX: How should items deal with flip?
