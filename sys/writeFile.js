@@ -17,6 +17,9 @@ const { promises } = fs;
 
 export const writeFile = async (options, path, data) => {
   data = await data;
+  if (path.endsWith('[object Set]')) {
+    throw Error('die');
+  }
 
   if (isWebWorker) {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });

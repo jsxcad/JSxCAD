@@ -5,6 +5,9 @@ const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
 export const getFile = async (options, unqualifiedPath) => {
+  if (typeof unqualifiedPath !== 'string') {
+    throw Error('die');
+  }
   const path = `${getBase()}${unqualifiedPath}`;
   let file = files.get(path);
   if (file === undefined) {
@@ -28,6 +31,12 @@ export const deleteFile = async (options, unqualifiedPath) => {
   }
   for (const watcher of fileDeletionWatchers) {
     await watcher(options, file);
+  }
+};
+
+export const unwatchFiles = async (thunk) => {
+  for (const file of files.values()) {
+    file.watchers.delete(thunk);
   }
 };
 
