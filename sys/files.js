@@ -6,7 +6,7 @@ const fileDeletionWatchers = new Set();
 
 export const getFile = async (options, unqualifiedPath) => {
   if (typeof unqualifiedPath !== 'string') {
-    throw Error('die');
+    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
   }
   const path = `${getBase()}${unqualifiedPath}`;
   let file = files.get(path);
