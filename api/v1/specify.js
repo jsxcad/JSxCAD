@@ -9,6 +9,7 @@ import { addTags, specify as specifyGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
+// DEPRECATED: See 'Item'.
 export const specify = (specification, ...shapes) => {
   shapes = shapes.filter(shape => shape !== undefined);
   let geometry;
