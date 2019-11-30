@@ -10,7 +10,7 @@ import { deepEqual } from 'fast-equals';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
 import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
-import { ask as askSys, createService, deleteFile, getFilesystem, listFiles, listFilesystems, log, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchLog, watchFile, watchLog, watchFileCreation, watchFileDeletion, writeFile } from '@jsxcad/sys';
+import { ask as askSys, createService, deleteFile, getFilesystem, listFiles, listFilesystems, log, readFile, setHandleAskUser, setupFilesystem, unwatchFiles, unwatchFileCreation, unwatchFileDeletion, unwatchLog, watchFile, watchLog, watchFileCreation, watchFileDeletion, writeFile } from '@jsxcad/sys';
 import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import React from 'react';
@@ -97,18 +97,6 @@ class UI extends React.PureComponent {
     const creationWatcher = await watchFileCreation(fileUpdater);
     const deletionWatcher = await watchFileDeletion(fileUpdater);
 
-    const mouseWatcher = (event) => {
-                           const { atLeft } = this.state;
-                           if (event.pageX <= 5) {
-                             this.setState({ atLeft: true });
-                           } else if (event.pageX > 400 && atLeft) {
-                             this.setState({ atLeft: false });
-                           }
-                         }
-
-    document.addEventListener('mousemove', mouseWatcher, false);
-    document.addEventListener('mouseenter', mouseWatcher, false);
-
     const logUpdater = (entry) => {
       const { op, status } = entry;
       switch (op) {
@@ -116,7 +104,6 @@ class UI extends React.PureComponent {
           this.setState({ log: [] });
           return;
         case 'open':
-          // this.openLog();
           return;
         default: {
           const { log, toast } = this.state;
@@ -129,7 +116,7 @@ class UI extends React.PureComponent {
       }
     }
     const logWatcher = watchLog(logUpdater);
-    this.setState({ creationWatcher, deletionWatcher, mouseWatcher });
+    this.setState({ creationWatcher, deletionWatcher });
     setHandleAskUser(this.askUser);
 
     if (project) {
@@ -138,13 +125,10 @@ class UI extends React.PureComponent {
   }
 
   async componentWillUnmount () {
-    const { creationWatcher, deletionWatcher, mouseWatcher } = this.state;
+    const { creationWatcher, deletionWatcher } = this.state;
 
     await unwatchFileCreation(creationWatcher);
     await unwatchFileDeletion(deletionWatcher);
-
-    document.removeEventListener('mousemove', mouseWatcher);
-    document.removeEventListener('mouseenter', mouseWatcher);
   }
 
   async askUser (identifier, options) {
@@ -179,6 +163,8 @@ class UI extends React.PureComponent {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
       await writeFile({}, 'source/script.jsxcad', defaultScript);
+      await writeFile({}, 'ui/paneLayout', JSON.stringify(defaultPaneLayout));
+      await writeFile({}, 'ui/paneViews', JSON.stringify(defaultPaneViews));
       await this.selectProject(project);
     }
   };
@@ -247,7 +233,6 @@ class UI extends React.PureComponent {
       paneLayout = '0';
     }
     this.setState({ paneLayout });
-    console.log(`QQ/onChange/paneLayout: ${JSON.stringify(paneLayout)}`);
     await writeFile({}, 'ui/paneLayout', JSON.stringify(paneLayout));
   }
 
@@ -290,8 +275,6 @@ class UI extends React.PureComponent {
   }
 
   async setPaneView (queryId, newView) {
-    console.log(`QQ/setPaneView/queryId: ${queryId}`);
-    console.log(`QQ/setPaneView/newView: ${newView}`);
     const { paneViews } = this.state;
     const newPaneViews = []
     let found = false;
@@ -961,7 +944,7 @@ class ViewUI extends React.PureComponent {
     }
 
     if (watcher) {
-      await unwatchFile(watcher);
+      await unwatchFiles(watcher);
     }
   }
 
@@ -1283,16 +1266,39 @@ const importFilesystem = (e) => {
 
 const defaultScript = `// Circle(10);`;
 
-const addFilesystem = () => {
-  const filesystem = document.getElementById('fs/filesystem/add').value;
-  if (filesystem.length > 0) {
-    // FIX: Prevent this from overwriting existing filesystems.
-    setupFilesystem({ fileBase: filesystem });
-    writeFile({}, 'source/script.jsxcad', defaultScript)
-        .then(_ => switchFilesystemview(filesystem))
-        .catch(_ => _);
-  }
-};
+const defaultPaneLayout = 
+  {
+    direction: "row",
+    first: "0",
+    second: {
+              direction: "column",
+              first: "2",
+              second: "3",
+              splitPercentage: 75
+            },
+  };
+
+const defaultPaneViews = [
+    ["0", {
+            view: "editScript",
+            file: "source/script.jsxcad",
+            title: "Edit script.jsxcad"
+          }],
+    ["1", {
+            view: "geometry",
+            file: "geometry/preview", 
+            title: "View preview"
+          }],
+    ["2", {
+            view: "geometry",
+            file: "geometry/preview",
+            title: "View preview"
+          }],
+    ["3", {
+            view: "log",
+            title: "Log"
+          }]
+  ];
 
 const editFile = (file) => {
   displayTextEditor(file).then(_ => _).catch(_ => _);

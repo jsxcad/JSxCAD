@@ -4,7 +4,7 @@ import { getFilesystem, setupFilesystem } from './filesystem';
 import { listFiles, listFilesystems } from './listFiles';
 import { log, unwatchLog, watchLog } from './log';
 import { unwatchFile, watchFile } from './watchFile';
-import { unwatchFileCreation, unwatchFileDeletion, watchFileCreation, watchFileDeletion } from './files';
+import { unwatchFileCreation, unwatchFileDeletion, unwatchFiles, watchFileCreation, watchFileDeletion } from './files';
 
 import { conversation } from './conversation';
 import { createService } from './service';
@@ -27,6 +27,7 @@ export {
   readFile,
   setupFilesystem,
   unwatchFile,
+  unwatchFiles,
   unwatchFileCreation,
   unwatchFileDeletion,
   unwatchLog,
