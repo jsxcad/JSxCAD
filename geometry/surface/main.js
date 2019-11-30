@@ -1,4 +1,4 @@
-import { canonicalize, rotateZ, scale, toPlane, transform, translate } from './ops';
+import { canonicalize, rotateZ, scale, transform, translate } from './ops';
 import { cut, cutSurface } from './cut';
 
 import { assertCoplanar } from './assertCoplanar';
@@ -13,6 +13,7 @@ import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { retessellate } from './retessellate';
 import { toGeneric } from './toGeneric';
+import { toPlane } from './toPlane';
 import { toPolygons } from './toPolygons';
 
 export {
