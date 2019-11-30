@@ -3,6 +3,8 @@ import { getSources, readFile } from '@jsxcad/sys';
 import { Shape } from './Shape';
 import { toFont } from '@jsxcad/algorithm-text';
 
+// TODO: (await readFont(...))({ emSize: 16 })("CA");
+
 /**
  *
  * # Read Font

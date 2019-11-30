@@ -13,6 +13,7 @@ import './colors';
 import './cut';
 import './edges';
 import './faces';
+import './items';
 import './to';
 import './unfold';
 import './with';
@@ -33,6 +34,7 @@ import { Gear } from './Gear';
 import Hershey from './Hershey';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
+import { Item } from './Item';
 import { Lego } from './Lego';
 import { Line } from './Line';
 import { MicroGearMotor } from './MicroGearMotor';
@@ -246,6 +248,7 @@ export {
   Hexagon,
   hull,
   Icosahedron,
+  Item,
   importModule,
   intersection,
   lathe,
