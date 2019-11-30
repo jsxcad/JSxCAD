@@ -1,3 +1,59 @@
+const signatures = {
+  '.bom': { input: { type: 'shape' }, argument: [{ name: 'bomItem', type: 'bomItem' }], output: { type: 'shape' } },
+  'assemble': { rest: { name: 'shape', type: 'shape' } },
+  'Circle': { argument: [{ name: 'radius', type: 'number', value: 1 }], parameter: [{ name: 'sides', type: 'number', value: 32 }] },
+  'Circle.ofDiameter': { argument: [{ name: 'diameter', type: 'number', value: 1 }], parameter: [{ name: 'sides', type: 'number', value: 32 }] },
+  '.color': { input: { type: 'shape' }, argument: [{ name: 'name', type: 'string' }], output: { type: 'shape' } },
+  '.extrude': { input: { type: 'shape' },
+                argument: [{ name: 'height', type: 'number', value: 1 },
+                           { name: 'depth', type: 'number', value: 0 }],
+                parameter: [{ name: 'twist', type: 'number', value: 0 },
+                            { name: 'steps', type: 'number', value: 1 }],
+                output: { type: 'shape' } },
+  'Square': { argument: [{ name: 'length', type: 'number', value: 1 },
+                         { name: 'width', type: 'number', value: 1 }],
+              output: { type: 'shape' } },
+  '.move': { input: { type: 'shape' },
+             argument: [{ name: 'x', type: 'number' },
+                        { name: 'y', type: 'number' },
+                        { name: 'z', type: 'number' }],
+             output: { type: 'shape' } }
+};
+
+const toCall = (op, node, toInRef) => {
+  const { input, argument, parameter, rest } = signatures[op];
+  let prefix = op;
+  if (input) {
+    let inRef = toInRef(node, '');
+    if (inRef === undefined) {
+      // Fall back to 'shape' as being the primary input.
+      inRef = toInRef(node, 'shape');
+    }
+    if (inRef === undefined) {
+      throw Error('die');
+    }
+    prefix = `${inRef}${prefix}`;
+  }
+  const pieces = [];
+  if (argument) {
+    pieces.push(argument.map(({ name, value }) => toInRef(node, name, value)).join(', '));
+  }
+  if (parameter) {
+    pieces.push(`{ ${parameter.map(({ name, value }) => `${name}: ${toInRef(node, name, value)}`).join(', ')} }`);
+  }
+  if (rest) {
+    const { name } = rest;
+    for (let nth = 0; ; nth++) {
+      const ref = toInRef(node, name, undefined, nth);
+      if (ref === undefined) {
+        break;
+      }
+      pieces.push(ref);
+    }
+  }
+  return `${prefix}(${pieces.join(', ')})`;
+};
+
 export const toEcmascript = (flow) => {
   const { connections, flowName, nodes } = flow;
 
@@ -32,16 +88,18 @@ export const toEcmascript = (flow) => {
       const node = toNode(nodeId);
       const { input, name, op } = node;
 
-      const toSocketId = (sockets, socketName) => {
+      const toSocketId = (sockets, socketName, nth = 0) => {
         for (const socket of sockets) {
           if (socket.socketName === socketName) {
-            return socket.socketId;
+            if (nth-- === 0) {
+              return socket.socketId;
+            }
           }
         }
       };
 
-      const toInRef = (node, socketName, otherwise) => {
-        const socketId = toSocketId(node.input.sockets, socketName);
+      const toInRef = (node, socketName, otherwise, nth = 0) => {
+        const socketId = toSocketId(node.input.sockets, socketName, nth);
         if (socketId === undefined) {
           return otherwise;
         } else {
@@ -49,50 +107,40 @@ export const toEcmascript = (flow) => {
         }
       };
 
+      const toStatement = (nodeId, code) => {
+        const ref = nextRef('$');
+        statements.push(`const ${ref} = ${code};`);
+        definitions.set(nodeId, ref);
+        return ref;
+      };
+
       switch (op.opId) {
         case 'Add BOM Tag': {
-          const shape = toInRef(node, 'shape');
-          const bomItem = toInRef(node, 'bomItem');
-          const newRef = nextRef('$');
-          statements.push(`const ${newRef} = ${shape}.bom(${bomItem});`);
-          definitions.set(nodeId, newRef);
-          return newRef;
+          return toStatement(nodeId, toCall('.bom', node, toInRef));
         }
         case 'Assembly': {
-          const inRefs = input.sockets.map(({ socketId }) => toConnectionRef(nodeId, socketId));
-          const newRef = nextRef('$');
-          statements.push(`const ${newRef} = assemble(${inRefs.join(', ')});`);
-          definitions.set(nodeId, newRef);
-          return newRef;
+          return toStatement(nodeId, toCall('assemble', node, toInRef));
         }
         case 'Circle': {
-          const diameter = toInRef(node, 'diameter', 1);
-          return `Circle.ofDiameter(${diameter})`;
+          return toStatement(nodeId, toCall('Circle.ofDiameter', node, toInRef));
+          // const diameter = toInRef(node, 'diameter', 1);
+          // return `Circle.ofDiameter(${diameter})`;
         }
         case 'Color': {
-          const name = toInRef(node, 'name');
-          const shape = toInRef(node, 'shape');
-          const newRef = nextRef('$');
-          statements.push(`const ${newRef} = ${shape}.color(${name});`);
-          definitions.set(nodeId, newRef);
-          return newRef;
+          return toStatement(nodeId, toCall('.color', node, toInRef));
         }
         case 'Constant': {
           return JSON.stringify(op.parameters.value);
         }
         case 'Equation': {
+          // FIX: Equation is not regular under the current schema.
           const equation = toInRef(node, 'equation', 1);
           const inRefs = input.sockets.filter(({ socketName }) => socketName !== 'equation')
               .map(({ socketId }) => toConnectionRef(nodeId, socketId));
           return `Equation(${equation}, ${inRefs.join(', ')})`;
         }
         case 'Extrude': {
-          const height = toInRef(node, 'height');
-          const shape = toInRef(node, 'shape');
-          const newRef = nextRef('$');
-          statements.push(`const ${newRef} = ${shape}.extrude(${height});`);
-          definitions.set(nodeId, newRef);
-          return newRef;
+          return toStatement(nodeId, toCall('.extrude', node, toInRef));
         }
         case 'GitHubMolecule': {
           // const project = toInRef(node, 'project');
@@ -112,13 +160,7 @@ export const toEcmascript = (flow) => {
           return newRef;
         }
         case 'Rectangle': {
-          const length = toInRef(node, 'length', 1);
-          const width = toInRef(node, 'width', 1);
-          return `Square(${length}, ${width})`;
-          // const newRef = nextRef('$');
-          // statements.push(`const ${newRef} = Square(${length}, ${width});`);
-          // definitions.set(nodeId, newRef);
-          // return newRef;
+          return toStatement(nodeId, toCall('Square', node, toInRef));
         }
         case 'Rotate': {
           const shape = toInRef(node, 'shape');
@@ -132,12 +174,7 @@ export const toEcmascript = (flow) => {
           return newRef;
         }
         case 'Translate': {
-          const args = [toInRef(node, 'x', 0), toInRef(node, 'y', '0'), toInRef(node, 'z', '0')];
-          const shape = toInRef(node, 'shape');
-          const newRef = nextRef('$');
-          statements.push(`const ${newRef} = ${shape}.move(${args.join(', ')});`);
-          definitions.set(nodeId, newRef);
-          return newRef;
+          return toStatement(nodeId, toCall('.move', node, toInRef));
         }
         case 'Output': {
           const inRefs = input.sockets.map(({ socketId }) => toConnectionRef(nodeId, socketId));
