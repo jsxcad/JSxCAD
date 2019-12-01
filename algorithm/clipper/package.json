@@ -20,7 +20,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "clipper-lib-fpoint": "^6.4.2",
+    "clipper-lib": "^6.4.2",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",

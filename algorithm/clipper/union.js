@@ -1,6 +1,6 @@
 import { fromSurface, toSurface } from './convert';
 
-import ClipperLib from 'clipper-lib-fpoint';
+import ClipperLib from 'clipper-lib';
 import { doesNotOverlapOrAbut } from './doesNotOverlap';
 
 const { Clipper, ClipType, PolyFillType, PolyType } = ClipperLib;

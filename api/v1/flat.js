@@ -11,13 +11,17 @@ export const flat = (shape) => {
   let bestFlatShape = shape;
 
   const assay = (plane) => {
-    const [to] = toXYPlaneTransforms(plane);
-    const flatShape = shape.transform(to);
-    const [min, max] = flatShape.measureBoundingBox();
-    const depth = max[Z] - min[Z];
-    if (depth < bestDepth) {
-      bestDepth = depth;
-      bestFlatShape = flatShape.moveZ(-min[Z]);
+    if (plane !== undefined) {
+      const [to] = toXYPlaneTransforms(plane);
+      const flatShape = shape.transform(to);
+      const [min, max] = flatShape.measureBoundingBox();
+      const depth = max[Z] - min[Z];
+      if (depth < bestDepth) {
+        bestDepth = depth;
+        bestFlatShape = flatShape.moveZ(-min[Z]);
+      }
+    } else {
+      console.log(`QQ/bad`);
     }
   };
 
@@ -27,7 +31,7 @@ export const flat = (shape) => {
       assay(toPlane(surface));
     }
   }
-  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+  for (const { surface } of getSurfaces(geometry)) {
     assay(toPlane(surface));
   }
   // We do not need to consider z0Surface, since it could never improve the
