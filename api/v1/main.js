@@ -30,6 +30,7 @@ import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
 // import { Fastener } from './Fastener';
+import Font from './Font';
 import { Gear } from './Gear';
 import Hershey from './Hershey';
 import { Hexagon } from './Hexagon';
@@ -243,6 +244,7 @@ export {
   ease,
   flat,
   // Fastener,
+  Font,
   Gear,
   Hershey,
   Hexagon,

@@ -16,41 +16,42 @@ import { toFont } from '@jsxcad/algorithm-text';
  *
  * ::: illustration { "view": { "position": [-50, -50, 50] } }
  * ```
- * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
- * greatVibes({ emSize: 20 }, "M").extrude(5).rotateX(90).above().center()
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(20)("M").extrude(5).rotateX(90).above().center()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 100] } }
  * ```
- * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
- * greatVibes({ emSize: 10 }, "M").center()
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(10)("M").center()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 100] } }
  * ```
- * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
- * greatVibes({ emSize: 20 }, "M").center()
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(20)("M").center()
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, -1, 50] } }
  * ```
- * const greatVibes = await readFont({ path: 'font/great-vibes/GreatVibes-Regular.ttf' });
- * greatVibes({ emSize: 16 }, "CA").center()
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(16)("CA").center()
  * ```
  * :::
  *
  **/
 
-export const readFont = async (options = {}) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { name, path } = options;
-  let data = await readFile({ as: 'bytes', ...options }, `source/${path}`);
+const toEmSizeFromMm = (mm) => mm * 1.5;
+
+export const readFont = async (path, { flip = false } = {}) => {
+  let data = await readFile({ as: 'bytes' }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`) }, `cache/${path}`);
   }
-  const font = toFont({ name }, data);
-  const textToShape = ({ emSize = 10 }, text) => Shape.fromGeometry(font({ emSize }, text));
-  return textToShape;
+  const font = toFont({ path }, data);
+  const xform = flip ? shape => shape.flip() : _ => _;
+  const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text)).op(xform);
+  return fontFactory;
 };
+
+export default readFont;

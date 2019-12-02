@@ -216,6 +216,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
     const geometry = new THREE.BufferGeometry();
     geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    applyBoxUV(geometry);
     const material = buildMeshMaterial(tags);
     dataset.mesh = new THREE.Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
