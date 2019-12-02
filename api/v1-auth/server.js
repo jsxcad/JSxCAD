@@ -40,33 +40,33 @@ passport.deserializeUser(function (obj, cb) {
   cb(null, obj);
 });
 
-/*  GITHUB AUTH  */
+//  GITHUB AUTH
 
 const GitHubStrategy = require('passport-github2').Strategy;
 
-const GITHUB_CLIENT_ID = process.env.CLIENT_ID;
-const GITHUB_CLIENT_SECRET = process.env.CLIENT_SECRET;
+//  GITHUB GIST AUTH
 
-passport.use(new GitHubStrategy({
-  clientID: GITHUB_CLIENT_ID,
-  clientSecret: GITHUB_CLIENT_SECRET,
-  callbackURL: '/auth/gist/callback'
-},
-                                function (accessToken, refreshToken, profile, done) {
-                                  const user = { accessToken, refreshToken, profile };
-                                  return done(undefined, user);
-                                }));
+passport.use(new GitHubStrategy(
+  {
+    clientID: process.env.GIST_CLIENT_ID,
+    clientSecret: process.env.GIST_CLIENT_SECRET,
+    callbackURL: '/auth/gist/callback',
+    name: 'gist'
+  },
+  (accessToken, refreshToken, profile, done) => {
+    const user = { accessToken, refreshToken, profile };
+    return done(undefined, user);
+  }));
 
 app.get('/auth/gist',
         function (req, res, next) {
-          console.log(`QQ/headers: ${JSON.stringify(req.headers)}`);
           req.session.gistCallback = req.query.gistCallback;
           return next();
         },
-        passport.authenticate('github', { scope: ['gist'] }));
+        passport.authenticate('gist', { scope: ['gist'] }));
 
 app.get('/auth/gist/callback',
-        passport.authenticate('github', { failureRedirect: '/error' }),
+        passport.authenticate('gist', { failureRedirect: '/error' }),
         function (req, res) {
           const url = req.session.gistCallback;
           console.log(`gistCallback: ${url}`);
@@ -78,7 +78,45 @@ app.get('/auth/gist/callback',
           } else if (url.startsWith('https://jsxcad.js.org/preAlpha3/')) {
             console.log(`Redirecting gist preAlpha3 auth.html`);
             res.redirect(`https://jsxcad.js.org/preAlpha3/auth.html?gist=${req.user.accessToken}`);
+          } else if (url.startsWith('https://jsxcad.js.org/preAlpha4/')) {
+            console.log(`Redirecting gist preAlpha4 auth.html`);
+            res.redirect(`https://jsxcad.js.org/preAlpha4/auth.html?gist=${req.user.accessToken}`);
           }
         });
 
-// @octokit/rest
+//  GITHUB REPOSITORY AUTH
+
+passport.use(new GitHubStrategy(
+  {
+    clientID: process.env.GITHUB_REPOSITORY_CLIENT_ID,
+    clientSecret: process.env.GITHUB_REPOSITORY_CLIENT_SECRET,
+    callbackURL: '/auth/github_repository/callback',
+    name: 'github_repository'
+  },
+  (accessToken, refreshToken, profile, done) => {
+    const user = { accessToken, refreshToken, profile };
+    return done(undefined, user);
+  }));
+
+app.get('/auth/github_repository',
+        function (req, res, next) {
+          req.session.githubRespositoryCallback = req.query.githubRepositoryCallback;
+          return next();
+        },
+        passport.authenticate('github_repository', { scope: ['gist'] }));
+
+app.get('/auth/github_repository/callback',
+        passport.authenticate('github_repository', { failureRedirect: '/error' }),
+        function (req, res) {
+          const url = req.session.githubRespositoryCallback;
+          console.log(`githubRespositoryCallback: ${url}`);
+          if (url === undefined) {
+            // How does this happen?
+          } else if (url.startsWith('http://127.0.0.1:5000/')) {
+            console.log(`Redirecting gist to local auth.html`);
+            res.redirect(`http://127.0.0.1:5000/auth.html?githubRespository=${req.user.accessToken}`);
+          } else if (url.startsWith('https://jsxcad.js.org/preAlpha4/')) {
+            console.log(`Redirecting gist preAlpha4 auth.html`);
+            res.redirect(`https://jsxcad.js.org/preAlpha4/auth.html?githubRespository=${req.user.accessToken}`);
+          }
+        });
