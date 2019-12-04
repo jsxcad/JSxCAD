@@ -11,7 +11,7 @@ export default {
     dir: 'dist',
     format: 'module'
   },
-  external(id) {
+  external (id) {
     return id.startsWith('@jsxcad/');
   },
   plugins: [

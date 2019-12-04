@@ -79,6 +79,6 @@ export default {
       }
     }),
     globals(),
-    json(),
+    json()
   ]
 };
