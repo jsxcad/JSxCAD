@@ -6,6 +6,7 @@
   "main": "main.js",
   "module": "main.js",
   "scripts": {
+    "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
@@ -20,10 +21,13 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-clipper": "^0.0.79",
-    "@jsxcad/algorithm-polybooljs": "^0.0.79",
-    "@jsxcad/algorithm-polygon-clipping": "^0.0.79",
-    "@jsxcad/algorithm-flatten-boolean": "^0.0.79"
+    "@jsxcad/algorithm-clipper": "^0.0.79"
+  },
+  "devDependencies": {
+    "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"

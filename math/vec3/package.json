@@ -6,6 +6,7 @@
   "main": "main.js",
   "module": "dist/main.js",
   "scripts": {
+    "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup.js",
@@ -53,14 +54,10 @@
   },
   "devDependencies": {
     "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-loadz0r": "^0.7.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"
