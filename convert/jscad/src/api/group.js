@@ -1,4 +1,4 @@
-const {CAG} = require('@jscad/csg')
+// const {CAG} = require('@jscad/csg')
 
 // FIXME : is this used anywhere ?
 function group () { // experimental

@@ -6,6 +6,7 @@
   "main": "main.js",
   "module": "dist/main.js",
   "scripts": {
+    "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup.js",
@@ -42,7 +43,7 @@
   "devDependencies": {
     "@jsxcad/convert-pdf": "^0.0.79",
     "ava": "^1.4.1",
-    "eslint": "^5.15.0",
+    "depcheck": "^0.9.1",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",

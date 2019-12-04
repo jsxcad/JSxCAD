@@ -6,6 +6,7 @@
   "main": "main.js",
   "module": "dist/main.js",
   "scripts": {
+    "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup.js",
@@ -35,10 +36,12 @@
     "@jsxcad/math-vec2": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "adaptive-bezier-curve": "^1.0.3",
-    "bezier": "^0.1.0"
+    "bezier": "^0.1.0",
+    "monotone-convex-hull-2d": "^1.0.1"
   },
   "devDependencies": {
     "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
