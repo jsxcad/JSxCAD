@@ -14,6 +14,8 @@ import { getPlans } from '@jsxcad/geometry-tagged';
  *
  **/
 
+const Text = Hershey(1);
+
 export const Plan = ({ plan, marks = [], planes = [], tags = [], visualization }, context) => {
   let geometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
   const shape = Shape.fromGeometry({ plan, marks, planes, tags, visualization: geometry }, context);
@@ -30,7 +32,7 @@ export const Radius = (radius = 1, center = [0, 0, 0]) =>
       Circle.ofRadius(radius)
           .outline()
           .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Hershey(`R${radius}`).moveY(radius / 2))
+          .add(Text(`R${radius}`).moveY(radius / 2))
           .color('red')
   });
 Plan.Radius = Radius;
@@ -44,7 +46,7 @@ export const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
       Circle.ofRadius(radius)
           .outline()
           .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Hershey(`A${apothem}`).moveY(radius / 2))
+          .add(Text(`A${apothem}`).moveY(radius / 2))
           .color('red')
   });
 };
