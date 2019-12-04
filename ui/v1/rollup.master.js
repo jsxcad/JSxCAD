@@ -63,6 +63,7 @@ export default {
         '@babel/plugin-proposal-class-properties'
       ]
     }),
+    nodeResolve({ preferBuiltins: true }),
     commonjs({
       namedExports: {
         '../../node_modules/react/index.js': [
@@ -79,6 +80,5 @@ export default {
     }),
     globals(),
     json(),
-    nodeResolve({ preferBuiltins: true })
   ]
 };

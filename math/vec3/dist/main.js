@@ -1,7 +1,5 @@
 import { reallyQuantizeForSpace } from '@jsxcad/math-utils';
 
-throw Error('die');
-
 /**
  * Calculates the absolute value of the give vector
  *
