@@ -1,4 +1,4 @@
-import QuickHull from './quickhull3d/dist/QuickHull';
+import QuickHull from 'quickhull3d/dist/QuickHull';
 import { cache } from '@jsxcad/cache';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
