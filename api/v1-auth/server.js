@@ -46,7 +46,6 @@ const GitHubStrategy = require('passport-github2').Strategy;
 
 //  GITHUB GIST AUTH
 
-/*
 passport.use(new GitHubStrategy(
   {
     clientID: process.env.GIST_CLIENT_ID,
@@ -84,7 +83,6 @@ app.get('/auth/gist/callback',
             res.redirect(`https://jsxcad.js.org/preAlpha4/auth.html?gist=${req.user.accessToken}`);
           }
         });
-*/
 
 //  GITHUB REPOSITORY AUTH
 
