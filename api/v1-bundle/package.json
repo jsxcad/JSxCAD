@@ -11,6 +11,7 @@
     "test": "ava",
     "tests": "ava *.test.js",
     "rollup": "rollup -c rollup.master.js && rollup -c rollup.webworker.js && rollup -c rollup.auth.js",
+    "rollup:master": "rollup -c rollup.master.js",
     "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js",
     "didYouRunBootstrapMaslowMasterRollup": "rollup -c rollup.maslowMaster.js"
   },
@@ -32,6 +33,7 @@
     "@jsxcad/convert-zip": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "abs-svg-path": "^0.1.1",
+    "base64-js": "^1.3.0",
     "bootstrap": "^4.3.1",
     "dat.gui": "^0.7.6",
     "fast-equals": "^2.0.0",

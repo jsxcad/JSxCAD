@@ -6,6 +6,7 @@ Error.stackTraceLimit = Infinity;
 
 import * as THREE from 'three';
 
+import { fromByteArray } from 'base64-js';
 import { deepEqual } from 'fast-equals';
 import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
 import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
@@ -54,6 +55,8 @@ import { Mosaic, MosaicWindow, MosaicZeroState, RemoveButton as MosaicRemoveButt
 
 import Drawer from 'rc-drawer';
 
+import { readProject as readProjectFromGithub, writeProject as writeProjectToGithub } from './github';
+
 class UI extends React.PureComponent {
   constructor (props) {
     super(props);
@@ -83,6 +86,8 @@ class UI extends React.PureComponent {
     this.openLog = this.openLog.bind(this);
     this.openParameters = this.openParameters.bind(this);
     this.updateParameters = this.updateParameters.bind(this);
+    this.doGithub = this.doGithub.bind(this);
+    this.doNav = this.doNav.bind(this);
 
     this.switchingProjects = false;
   }
@@ -198,6 +203,24 @@ class UI extends React.PureComponent {
   closeProject () {
     this.setState({ project: '' });
   }
+
+  async doGithub (action, owner, repository, prefix) {
+    switch (action) {
+      case 'export': {
+        const project = getFilesystem();
+        const files = [];
+        for (const file of await listFiles()) {
+          if (file.startsWith('source/')) {
+            files.push([file, await readFile({}, file)]);
+          }
+        }
+        return writeProjectToGithub(owner, repository, prefix, files, { overwrite: false });
+      }
+      case 'import': {
+        return readProjectFromGithub(owner, repository, prefix, { overwrite: false });
+      }
+    }
+  };
 
   createNode () {
     const { paneLayout } = this.state;
@@ -330,6 +353,15 @@ class UI extends React.PureComponent {
     this.setState({ isParametersOpen: true });
   }
 
+  doNav (to) {
+    switch (to) {
+      case 'project/github': {
+        this.setState({ showGithubUi: true });
+        return;
+      }
+    }
+  }
+
   render () {
     const { atLeft, ask, project, files, isLogOpen, isParametersOpen, log, parameters, toast } = this.state;
     const views = this.buildViews(files);
@@ -406,8 +438,19 @@ class UI extends React.PureComponent {
       );
     };
 
+    const { showGithubUi = false } = this.state;
+
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
+        <GithubUI
+            key='GithubUI'
+            show={showGithubUi}
+            storage='github'
+            onSubmit={({ action, owner, repository, prefix }) => {
+                        this.doGithub(action, owner, repository, prefix);
+                      }}
+            onHide={() => this.setState({ showGithubUi: false })}
+        />
         {switchViewModal()}
         {toastDiv}
         <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
@@ -429,10 +472,12 @@ class UI extends React.PureComponent {
                             {project}
                           </NavDropdown.Item>)}
               </NavDropdown>
-              <NavDropdown title="Import">
-              </NavDropdown>
-              <NavDropdown title="Export">
-              </NavDropdown>
+              {
+                (project !== '') &&
+                <NavDropdown title="Project" onSelect={this.doNav}>
+                  <NavDropdown.Item eventKey="project/github">Github</NavDropdown.Item>
+                </NavDropdown>
+              }
               <NavDropdown title="Reference">
               </NavDropdown>
             </Nav>
@@ -463,6 +508,97 @@ class UI extends React.PureComponent {
     );
   }
 };
+
+class SettingsUI extends React.PureComponent {
+  constructor (props) {
+    super(props);
+    this.doHide = this.doHide.bind(this);
+    this.doSubmit = this.doSubmit.bind(this);
+    this.doUpdate = this.doUpdate.bind(this);
+    this.state = {};
+  }
+
+  async componentDidMount () {
+    const { storage } = this.props;
+    const state = await readFile({}, `settings/${storage}`);
+    if (state !== undefined) {
+      this.setState(JSON.parse(state));
+    }
+  }
+
+  doHide (event) {
+    const { onHide } = this.props;
+    if (onHide) {
+      onHide(this.state);
+    }
+  }
+
+  async doSubmit (payload) {
+    this.setState(payload);
+    const { onSubmit, storage } = this.props;
+    if (storage) {
+      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
+    }
+    if (onSubmit) {
+      onSubmit(this.state);
+    }
+    this.doHide();
+    event.preventDefault();
+  }
+
+  doUpdate (event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({ [name]: value });
+  }
+}
+
+class GithubUI extends SettingsUI {
+  constructor (props) {
+    super(props);
+    this.state = {
+      owner: '',
+      repository: '',
+      prefix: `jsxcad/${getFilesystem()}/`,
+    };
+  }
+
+  render () {
+    const { owner, repository, prefix } = this.state;
+    return (
+      <Modal show={this.props.show} onHide={this.doHide}>
+        <Modal.Header closeButton>
+          <Modal.Title>Github Actions</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Owner</Form.Label>
+              <Form.Control name="owner" value={owner} onChange={this.doUpdate}/>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Repository</Form.Label>
+              <Form.Control name="repository" value={repository} onChange={this.doUpdate}/>
+            </Form.Group> 
+            <Form.Group>
+              <Form.Label>Path Prefix</Form.Label>
+              <Form.Control name="prefix" value={prefix} onChange={this.doUpdate}/>
+            </Form.Group> 
+            <ButtonGroup>
+              <Button name="import" variant="outline-primary" onClick={() => this.doSubmit({ action: 'import' })}>
+                Import
+              </Button>
+              <Button name="export" variant="outline-primary" onClick={() => this.doSubmit({ action: 'export' })}>
+                Export
+              </Button>
+            </ButtonGroup>
+          </Form>
+        </Modal.Body>
+      </Modal>
+    );
+  }
+}
 
 class ParametersUI extends React.PureComponent {
   constructor (props) {
@@ -688,6 +824,12 @@ class ProjectUI extends React.PureComponent {
               <FormControl id="project/exportToGist/name" placeholder="Gist Name" />
               <InputGroup.Append>
                 <Button onClick={this.exportProjectToGist} variant='outline-primary'>Export</Button>
+              </InputGroup.Append>
+            </InputGroup>
+            <InputGroup>
+              <FormControl id="project/exportToGithubRepository/name" placeholder="Github Repository Name" />
+              <InputGroup.Append>
+                <Button onClick={this.exportProjectToGithubRepository} variant='outline-primary'>Export</Button>
               </InputGroup.Append>
             </InputGroup>
             <InputGroup>
