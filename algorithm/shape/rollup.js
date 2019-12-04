@@ -11,21 +11,9 @@ export default {
     dir: 'dist',
     format: 'module'
   },
-  external: [
-    '@jsxcad/cache',
-    '@jsxcad/data-shape',
-    '@jsxcad/geometry-path',
-    '@jsxcad/geometry-points',
-    '@jsxcad/geometry-polygons',
-    '@jsxcad/geometry-solid',
-    '@jsxcad/geometry-surface',
-    '@jsxcad/geometry-tagged',
-    '@jsxcad/math-plane',
-    '@jsxcad/math-poly3',
-    '@jsxcad/math-utils',
-    '@jsxcad/math-vec2',
-    '@jsxcad/math-vec3'
-  ],
+  external(id) {
+    return id.startsWith('@jsxcad/');
+  },
   plugins: [
     builtins(),
     commonjs({
