@@ -90,33 +90,35 @@ passport.use(new GitHubStrategy(
   {
     clientID: process.env.GITHUB_REPOSITORY_CLIENT_ID,
     clientSecret: process.env.GITHUB_REPOSITORY_CLIENT_SECRET,
-    callbackURL: '/auth/github_repository/callback',
-    name: 'github_repository'
+    callbackURL: '/auth/githubRepository/callback',
+    name: 'githubRepository'
   },
   (accessToken, refreshToken, profile, done) => {
     const user = { accessToken, refreshToken, profile };
+    console.log(`QQ/user: ${JSON.stringify(user)}`);
     return done(undefined, user);
   }));
 
-app.get('/auth/github_repository',
+app.get('/auth/githubRepository',
         function (req, res, next) {
-          req.session.githubRespositoryCallback = req.query.githubRepositoryCallback;
+          req.session.githubRepositoryCallback = req.query.githubRepositoryCallback;
           return next();
         },
-        passport.authenticate('github_repository', { scope: ['gist'] }));
+        passport.authenticate('githubRepository', { scope: ['public_repo', 'repo', 'user'] }));
 
-app.get('/auth/github_repository/callback',
-        passport.authenticate('github_repository', { failureRedirect: '/error' }),
+app.get('/auth/githubRepository/callback',
+        passport.authenticate('githubRepository', { failureRedirect: '/error' }),
         function (req, res) {
-          const url = req.session.githubRespositoryCallback;
-          console.log(`githubRespositoryCallback: ${url}`);
+          const url = req.session.githubRepositoryCallback;
+          console.log(`githubRepositoryCallback: ${url}`);
+          console.log(`Token: ${req.user.accessToken}`);
           if (url === undefined) {
             // How does this happen?
           } else if (url.startsWith('http://127.0.0.1:5000/')) {
-            console.log(`Redirecting gist to local auth.html`);
-            res.redirect(`http://127.0.0.1:5000/auth.html?githubRespository=${req.user.accessToken}`);
+            console.log(`Redirecting github repository to local auth.html`);
+            res.redirect(`http://127.0.0.1:5000/auth.html?githubRepository=${req.user.accessToken}`);
           } else if (url.startsWith('https://jsxcad.js.org/preAlpha4/')) {
-            console.log(`Redirecting gist preAlpha4 auth.html`);
-            res.redirect(`https://jsxcad.js.org/preAlpha4/auth.html?githubRespository=${req.user.accessToken}`);
+            console.log(`Redirecting github repository preAlpha4 auth.html`);
+            res.redirect(`https://jsxcad.js.org/preAlpha4/auth.html?githubRepository=${req.user.accessToken}`);
           }
         });
