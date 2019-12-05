@@ -9,5 +9,5 @@ export {
   buildTrackballControls,
   buildScene,
   createResizer,
-  drawHud,
+  drawHud
 };
