@@ -1,33 +1,33 @@
-import { close, concatenate, open, getEdges, toSegments, isClosed } from '@jsxcad/geometry-path';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, addTags, getItems, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from '@jsxcad/geometry-tagged';
-import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from '@jsxcad/geometry-solid';
-import * as mathVec3 from '@jsxcad/math-vec3';
-import { scale as scale$1, add, subtract, negate, transform as transform$1, normalize, dot, cross } from '@jsxcad/math-vec3';
-export { mathVec3 as vec };
-import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron, lathe as lathe$1, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildConvexMinkowskiSum } from '@jsxcad/algorithm-shape';
-import { translate as translate$1 } from '@jsxcad/geometry-paths';
-import { toPlane } from '@jsxcad/math-poly3';
-import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { log as log$1, readFile, getSources, ask as ask$1, writeFile, addSource } from '@jsxcad/sys';
-import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from '@jsxcad/algorithm-verlet';
-import { identity, fromZRotation, multiply, fromTranslation, fromRotation, fromXRotation, fromYRotation, fromScaling } from '@jsxcad/math-mat4';
-import { toFont } from '@jsxcad/algorithm-text';
-import { fromSvgPath, fromSvg, toSvg } from '@jsxcad/convert-svg';
-import { cut, section as section$1, cutOpen, fromSolid, containsPoint } from '@jsxcad/algorithm-bsp-surfaces';
-import { cut as cut$1, toPlane as toPlane$1, transform as transform$2, retessellate, flip as flip$1 } from '@jsxcad/geometry-surface';
-import { toTagFromName } from '@jsxcad/algorithm-color';
-import { toEcmascript } from '@jsxcad/compiler';
-import { pack as pack$1 } from '@jsxcad/algorithm-pack';
-import { fromDst } from '@jsxcad/convert-dst';
-import { fromDxf, toDxf } from '@jsxcad/convert-dxf';
-import { fromLDraw } from '@jsxcad/convert-ldraw';
-import { fromPng } from '@jsxcad/convert-png';
-import { fromShapefile } from '@jsxcad/convert-shapefile';
-import { fromStl, toStl } from '@jsxcad/convert-stl';
-import { overcut } from '@jsxcad/algorithm-toolpath';
-import { toGcode } from '@jsxcad/convert-gcode';
-import { toPdf } from '@jsxcad/convert-pdf';
-import { toSvg as toSvg$1, toThreejsPage } from '@jsxcad/convert-threejs';
+import { close, concatenate, open, getEdges, toSegments, isClosed } from './jsxcad-geometry-path.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, addTags, getItems, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
+import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
+import { scale as scale$1, add, subtract, negate, transform as transform$1, normalize, dot, cross } from './jsxcad-math-vec3.js';
+export { jsxcadMathVec3_js as vec };
+import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron, lathe as lathe$1, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { translate as translate$1 } from './jsxcad-geometry-paths.js';
+import { toPlane } from './jsxcad-math-poly3.js';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { log as log$1, readFile, getSources, ask as ask$1, writeFile, addSource } from './jsxcad-sys.js';
+import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from './jsxcad-algorithm-verlet.js';
+import { identity, fromZRotation, multiply, fromTranslation, fromRotation, fromXRotation, fromYRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { toFont } from './jsxcad-algorithm-text.js';
+import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
+import { cut, section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
+import { cut as cut$1, toPlane as toPlane$1, transform as transform$2, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { toTagFromName } from './jsxcad-algorithm-color.js';
+import { toEcmascript } from './jsxcad-compiler.js';
+import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
+import { fromDst } from './jsxcad-convert-dst.js';
+import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
+import { fromLDraw } from './jsxcad-convert-ldraw.js';
+import { fromPng } from './jsxcad-convert-png.js';
+import { fromShapefile } from './jsxcad-convert-shapefile.js';
+import { fromStl, toStl } from './jsxcad-convert-stl.js';
+import { overcut } from './jsxcad-algorithm-toolpath.js';
+import { toGcode } from './jsxcad-convert-gcode.js';
+import { toPdf } from './jsxcad-convert-pdf.js';
+import { toSvg as toSvg$1, toThreejsPage } from './jsxcad-convert-threejs.js';
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
@@ -100,7 +100,7 @@ var api = /*#__PURE__*/Object.freeze({
   get Torus () { return Torus; },
   get Triangle () { return Triangle; },
   get union () { return union; },
-  get vec () { return mathVec3; },
+  get vec () { return jsxcadMathVec3_js; },
   get Wave () { return Wave; },
   get X () { return X; },
   get Y () { return Y; },

@@ -11,18 +11,9 @@ export default {
     dir: 'dist',
     format: 'module'
   },
-  external: [
-    '@jsxcad/algorithm-color',
-    '@jsxcad/algorithm-shape',
-    '@jsxcad/geometry-path',
-    '@jsxcad/geometry-paths',
-    '@jsxcad/geometry-surface',
-    '@jsxcad/geometry-tagged',
-    '@jsxcad/geometry-z0surface',
-    '@jsxcad/math-mat4',
-    '@jsxcad/math-utils',
-    '@jsxcad/math-vec2'
-  ],
+  external (id) {
+    return id.startsWith('./jsxcad-');
+  },
   plugins: [
     builtins(),
     commonjs({
@@ -31,6 +22,7 @@ export default {
       }
     }),
     globals(),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ preferBuiltins: true }),
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
   ]
 };

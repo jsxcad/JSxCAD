@@ -1,5 +1,5 @@
-import { translate, deduplicate } from '@jsxcad/geometry-path';
-import { fromPolygon } from '@jsxcad/math-plane';
+import { translate, deduplicate } from './jsxcad-geometry-path.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
 
 /*!
 * MarchingSquaresJS

@@ -1,4 +1,4 @@
-import { writeFile, getFilesystem, listFiles, readFile } from '@jsxcad/sys';
+import { writeFile, getFilesystem, listFiles, readFile } from './jsxcad-sys.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :

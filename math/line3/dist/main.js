@@ -1,5 +1,5 @@
-import { canonicalize as canonicalize$1, dot, subtract, add, scale, length, equals as equals$1, unit, cross, fromValues, negate, transform as transform$1 } from '@jsxcad/math-vec3';
-import { solve2Linear } from '@jsxcad/math-utils';
+import { canonicalize as canonicalize$1, dot, subtract, add, scale, length, equals as equals$1, unit, cross, fromValues, negate, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { solve2Linear } from './jsxcad-math-utils.js';
 
 /**
  * Produce a canonical version of a ray3.

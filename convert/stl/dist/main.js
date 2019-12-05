@@ -1,9 +1,9 @@
-import { fromPolygons, eachPoint, makeSurfacesConvex } from '@jsxcad/geometry-solid';
-import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
-import { toKeptGeometry, getSolids } from '@jsxcad/geometry-tagged';
-import { deduplicate, assertUnique } from '@jsxcad/geometry-path';
-import { scale, add, subtract, length, equals, distance } from '@jsxcad/math-vec3';
-import { toPlane } from '@jsxcad/math-poly3';
+import { fromPolygons, eachPoint, makeSurfacesConvex } from './jsxcad-geometry-solid.js';
+import { canonicalize, toTriangles } from './jsxcad-geometry-polygons.js';
+import { toKeptGeometry, getSolids } from './jsxcad-geometry-tagged.js';
+import { deduplicate, assertUnique } from './jsxcad-geometry-path.js';
+import { scale, add, subtract, length, equals, distance } from './jsxcad-math-vec3.js';
+import { toPlane } from './jsxcad-math-poly3.js';
 
 function parse(str) {
   if(typeof str !== 'string') {

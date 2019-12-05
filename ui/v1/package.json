@@ -11,7 +11,9 @@
     "lintfix": "eslint --fix *.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "rollup": "rollup -c rollup.master.js && rollup -c rollup.webworker.js && rollup -c rollup.auth.js",
+    "rollup": "rollup -c rollup.master.es6.js && rollup -c rollup.webworker.es6.js && rollup -c rollup.auth.es6.js",
+    "rollup:auth": "rollup -c rollup.auth.js",
+    "rollup:auth:es6": "rollup -c rollup.auth.es6.js",
     "rollup:master": "rollup -c rollup.master.js",
     "rollup:master:es6": "rollup -c rollup.master.es6.js",
     "rollup:webworker": "rollup -c rollup.webworker.js",
@@ -64,7 +66,6 @@
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-rewrite-imports": "^1.0.0",
     "rollup-plugin-sizes": "^0.5.1"
   },
   "ava": {

@@ -30,9 +30,8 @@ import {
   writeFile
 } from '@jsxcad/sys';
 
-import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs';
-import { buildMeshes, drawHud } from '@jsxcad/convert-threejs';
-import { buildScene, createResizer } from '@jsxcad/convert-threejs';
+import { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud, toThreejsGeometry } from '@jsxcad/convert-threejs';
+
 // import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import {
@@ -63,13 +62,10 @@ import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { deepEqual } from 'fast-equals';
 import { prismJSAuxiliary } from './PrismJSAuxiliary';
 import saveAs from 'file-saver';
-import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 if (!aceEditorAuxiliary || !prismJSAuxiliary) {
   throw Error('die');
 }
-
-Error.stackTraceLimit = Infinity;
 
 class UI extends React.PureComponent {
   static get propTypes () {

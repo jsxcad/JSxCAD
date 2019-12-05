@@ -1,8 +1,8 @@
-import { multiply, fromTranslation, fromScaling } from '@jsxcad/math-mat4';
-import { toKeptGeometry, transform, getSurfaces, getZ0Surfaces, getPaths } from '@jsxcad/geometry-tagged';
-import { makeConvex } from '@jsxcad/geometry-surface';
-import { makeConvex as makeConvex$1 } from '@jsxcad/geometry-z0surface';
-import { toRgb } from '@jsxcad/algorithm-color';
+import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
+import { toKeptGeometry, transform, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
+import { makeConvex } from './jsxcad-geometry-surface.js';
+import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
+import { toRgb } from './jsxcad-algorithm-color.js';
 
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
 const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;

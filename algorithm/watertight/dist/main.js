@@ -1,7 +1,7 @@
-import { eachEdge, fromPoints as fromPoints$1, toPlane } from '@jsxcad/math-poly3';
-import { length, subtract, equals, dot, add, multiply, fromScalar, squaredDistance } from '@jsxcad/math-vec3';
-import { fromPoints } from '@jsxcad/math-ray3';
-import { fromPoints as fromPoints$2 } from '@jsxcad/math-plane';
+import { eachEdge, fromPoints as fromPoints$1, toPlane } from './jsxcad-math-poly3.js';
+import { length, subtract, equals, dot, add, multiply, fromScalar, squaredDistance } from './jsxcad-math-vec3.js';
+import { fromPoints } from './jsxcad-math-ray3.js';
+import { fromPoints as fromPoints$2 } from './jsxcad-math-plane.js';
 
 const ensureMapElement = (map, key, ensurer = (_ => [])) => {
   if (!map.has(key)) {

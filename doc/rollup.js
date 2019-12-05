@@ -13,13 +13,14 @@ export default {
     format: 'module'
   },
   external (id) {
-    return id.startsWith('@jsxcad/');
+    return id.startsWith('./jsxcad-');
   },
   plugins: [
     builtins(),
     commonjs(),
     globals(),
     nodeResolve({ preferBuiltins: true }),
-    json()
+    json(),
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
   ]
 };

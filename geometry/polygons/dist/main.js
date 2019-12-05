@@ -1,7 +1,7 @@
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, isConvex, map as map$1, toPlane, transform as transform$1 } from '@jsxcad/math-poly3';
-import { equals, max, min, scale as scale$1, add, distance } from '@jsxcad/math-vec3';
-import { isClosed } from '@jsxcad/geometry-path';
+import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
+import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, isConvex, map as map$1, toPlane, transform as transform$1 } from './jsxcad-math-poly3.js';
+import { equals, max, min, scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
+import { isClosed } from './jsxcad-geometry-path.js';
 
 const isDegenerate = (polygon) => {
   for (let nth = 0; nth < polygon.length; nth++) {

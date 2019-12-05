@@ -1,4 +1,4 @@
-import { max, min } from '@jsxcad/math-vec3';
+import { max, min } from './jsxcad-math-vec3.js';
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;

@@ -6,7 +6,7 @@
   "main": "main.js",
   "module": "dist/main.js",
   "scripts": {
-    "depcheck": "depcheck",
+    "depcheck": "depcheck --ignores webpack-cli",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "npm run webpack && rollup -c rollup.js",

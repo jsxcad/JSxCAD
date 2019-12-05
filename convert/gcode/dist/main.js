@@ -1,5 +1,5 @@
-import { toKeptGeometry, getPaths } from '@jsxcad/geometry-tagged';
-import { getEdges } from '@jsxcad/geometry-path';
+import { toKeptGeometry, getPaths } from './jsxcad-geometry-tagged.js';
+import { getEdges } from './jsxcad-geometry-path.js';
 
 // Runs each axis at maximum velocity until matches, so may make dog-legs.
 const rapidPositioningTo = ([x = 0, y = 0, z = 0]) => `G0 X${x} Y${y} Z${z}`;

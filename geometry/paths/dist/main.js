@@ -1,6 +1,6 @@
-import { fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { canonicalize as canonicalize$1, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon, transform as transform$1 } from '@jsxcad/geometry-path';
-import { fromPoint, min, max } from '@jsxcad/math-vec3';
+import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
+import { canonicalize as canonicalize$1, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon, transform as transform$1 } from './jsxcad-geometry-path.js';
+import { fromPoint, min, max } from './jsxcad-math-vec3.js';
 
 const butLast = (paths) => paths.slice(0, paths.length - 1);
 

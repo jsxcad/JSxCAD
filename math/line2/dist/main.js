@@ -1,5 +1,5 @@
-import { reallyQuantizeForSpace, solve2Linear } from '@jsxcad/math-utils';
-import { negate, normal, scale, fromValues as fromValues$1, dot, equals as equals$1, normalize, subtract, length, add, cross, transform as transform$1 } from '@jsxcad/math-vec2';
+import { reallyQuantizeForSpace, solve2Linear } from './jsxcad-math-utils.js';
+import { negate, normal, scale, fromValues as fromValues$1, dot, equals as equals$1, normalize, subtract, length, add, cross, transform as transform$1 } from './jsxcad-math-vec2.js';
 
 /**
  * Creates a new unbounded 2D line initialized with the given values.

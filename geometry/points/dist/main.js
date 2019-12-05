@@ -1,5 +1,5 @@
-import { fromTranslation } from '@jsxcad/math-mat4';
-import { transform as transform$1, canonicalize as canonicalize$1, max, min } from '@jsxcad/math-vec3';
+import { fromTranslation } from './jsxcad-math-mat4.js';
+import { transform as transform$1, canonicalize as canonicalize$1, max, min } from './jsxcad-math-vec3.js';
 
 const transform = (matrix, points) => points.map(point => transform$1(matrix, point));
 const translate = ([x = 0, y = 0, z = 0], points) => transform(fromTranslation([x, y, z]), points);

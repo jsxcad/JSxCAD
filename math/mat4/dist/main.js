@@ -1,5 +1,5 @@
-import { dot, cross, fromValues as fromValues$2 } from '@jsxcad/math-vec3';
-import { fromValues as fromValues$1 } from '@jsxcad/math-vec2';
+import { dot, cross, fromValues as fromValues$2 } from './jsxcad-math-vec3.js';
+import { fromValues as fromValues$1 } from './jsxcad-math-vec2.js';
 
 /**
  * Adds two mat4's

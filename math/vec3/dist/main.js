@@ -1,4 +1,4 @@
-import { reallyQuantizeForSpace } from '@jsxcad/math-utils';
+import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
 
 /**
  * Calculates the absolute value of the give vector

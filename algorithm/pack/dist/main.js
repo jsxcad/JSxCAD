@@ -1,4 +1,4 @@
-import { rotateZ, toTransformedGeometry, translate, measureBoundingBox } from '@jsxcad/geometry-tagged';
+import { rotateZ, toTransformedGeometry, translate, measureBoundingBox } from './jsxcad-geometry-tagged.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 

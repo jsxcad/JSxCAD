@@ -1,4 +1,4 @@
-import { squaredDistance, add, scale, subtract } from '@jsxcad/math-vec3';
+import { squaredDistance, add, scale, subtract } from './jsxcad-math-vec3.js';
 
 const EPSILON2 = 1e-10;
 

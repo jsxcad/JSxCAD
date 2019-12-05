@@ -1,6 +1,6 @@
-import { canonicalize as canonicalize$1, cross, subtract, dot, fromValues, min, max, scale, add, distance, transform as transform$1 } from '@jsxcad/math-vec3';
-import { fromPolygon, signedDistanceToPoint, equals } from '@jsxcad/math-plane';
-import { isMirroring } from '@jsxcad/math-mat4';
+import { canonicalize as canonicalize$1, cross, subtract, dot, fromValues, min, max, scale, add, distance, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { fromPolygon, signedDistanceToPoint, equals } from './jsxcad-math-plane.js';
+import { isMirroring } from './jsxcad-math-mat4.js';
 
 /**
  * Transforms the vertices of a polygon, producing a new poly3.

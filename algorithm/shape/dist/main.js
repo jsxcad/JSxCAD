@@ -1,14 +1,14 @@
-import { cache as cache$1, cachePoints } from '@jsxcad/cache';
-import { fromPolygons } from '@jsxcad/geometry-solid';
-import { translate } from '@jsxcad/geometry-points';
-import { deduplicate, assertGood, flip, translate as translate$1, rotateZ, scale as scale$2, rotateX } from '@jsxcad/geometry-path';
-import { makeConvex, retessellate, translate as translate$2, rotateZ as rotateZ$1, flip as flip$2 } from '@jsxcad/geometry-surface';
-import { fromPolygon } from '@jsxcad/math-plane';
-import { flip as flip$1 } from '@jsxcad/geometry-polygons';
-import { fromPoints } from '@jsxcad/math-poly3';
-import { scale as scale$1, add as add$1, unit } from '@jsxcad/math-vec3';
-import { fromAngleRadians } from '@jsxcad/math-vec2';
-import { translate as translate$3 } from '@jsxcad/geometry-tagged';
+import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
+import { fromPolygons } from './jsxcad-geometry-solid.js';
+import { translate } from './jsxcad-geometry-points.js';
+import { deduplicate, assertGood, flip, translate as translate$1, rotateZ, scale as scale$2, rotateX } from './jsxcad-geometry-path.js';
+import { makeConvex, retessellate, translate as translate$2, rotateZ as rotateZ$1, flip as flip$2 } from './jsxcad-geometry-surface.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
+import { flip as flip$1 } from './jsxcad-geometry-polygons.js';
+import { fromPoints } from './jsxcad-math-poly3.js';
+import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
+import { fromAngleRadians } from './jsxcad-math-vec2.js';
+import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
 function clone(point) { //TODO: use gl-vec2 for this
     return [point[0], point[1]]

@@ -1,9 +1,9 @@
-import { toRgb } from '@jsxcad/algorithm-color';
-import { toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { makeConvex } from '@jsxcad/geometry-surface';
-import { toPlane } from '@jsxcad/math-poly3';
-import { toSegments } from '@jsxcad/geometry-path';
-import { toTriangles } from '@jsxcad/geometry-polygons';
+import { toRgb } from './jsxcad-algorithm-color.js';
+import { toKeptGeometry } from './jsxcad-geometry-tagged.js';
+import { makeConvex } from './jsxcad-geometry-surface.js';
+import { toPlane } from './jsxcad-math-poly3.js';
+import { toSegments } from './jsxcad-geometry-path.js';
+import { toTriangles } from './jsxcad-geometry-polygons.js';
 
 /**
  * dat-gui JavaScript Controller Library

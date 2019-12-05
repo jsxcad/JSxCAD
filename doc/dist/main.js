@@ -1,5 +1,5 @@
-import { toEcmascript } from '@jsxcad/compiler';
-import { toPng } from '@jsxcad/convert-threejs';
+import { toEcmascript } from './jsxcad-compiler.js';
+import { toPng } from './jsxcad-convert-threejs.js';
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;

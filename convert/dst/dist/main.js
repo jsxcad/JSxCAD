@@ -1,4 +1,4 @@
-import { scale } from '@jsxcad/geometry-paths';
+import { scale } from './jsxcad-geometry-paths.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :

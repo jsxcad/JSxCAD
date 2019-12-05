@@ -1,7 +1,7 @@
-import { translate, scale, toKeptGeometry, getPaths } from '@jsxcad/geometry-tagged';
-import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
-import { getEdges } from '@jsxcad/geometry-path';
+import { translate, scale, toKeptGeometry, getPaths } from './jsxcad-geometry-tagged.js';
+import { buildRegularPolygon } from './jsxcad-algorithm-shape.js';
+import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
+import { getEdges } from './jsxcad-geometry-path.js';
 
 /**
  * DxfArrayScanner

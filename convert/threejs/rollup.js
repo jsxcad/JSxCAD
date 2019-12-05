@@ -20,7 +20,7 @@ export default {
     format: 'module'
   },
   external (id) {
-    return id.startsWith('@jsxcad/');
+    return id.startsWith('./jsxcad-');
   },
   plugins: [
     // watcher,
@@ -29,7 +29,7 @@ export default {
         allowFallthrough: true,
         allowRealFiles: true,
         files: {
-          'gl': 'const dummy = {}; export default dummy;',
+          'gl': 'const dummy = {}; export default dummy;'
         }
       }),
     builtins(),
@@ -39,6 +39,7 @@ export default {
       }
     }),
     globals(),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ preferBuiltins: true }),
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
   ]
 };

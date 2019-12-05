@@ -1,13 +1,13 @@
-import { reallyQuantizeForSpace } from '@jsxcad/math-utils';
-import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from '@jsxcad/math-mat4';
-import { assertGood, isClosed, canonicalize as canonicalize$1, close } from '@jsxcad/geometry-path';
-import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
-import { equals } from '@jsxcad/math-vec2';
-import { transform } from '@jsxcad/geometry-paths';
-import { toTagsFromName } from '@jsxcad/algorithm-color';
-import { transform as transform$1, measureBoundingBox, translate, toKeptGeometry, getSurfaces, getZ0Surfaces, getPaths } from '@jsxcad/geometry-tagged';
-import { makeConvex } from '@jsxcad/geometry-surface';
-import { makeConvex as makeConvex$1 } from '@jsxcad/geometry-z0surface';
+import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
+import { fromScaling, identity, multiply, fromTranslation, fromZRotation } from './jsxcad-math-mat4.js';
+import { assertGood, isClosed, canonicalize as canonicalize$1, close } from './jsxcad-geometry-path.js';
+import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
+import { equals } from './jsxcad-math-vec2.js';
+import { transform } from './jsxcad-geometry-paths.js';
+import { toTagsFromName } from './jsxcad-algorithm-color.js';
+import { transform as transform$1, measureBoundingBox, translate, toKeptGeometry, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
+import { makeConvex } from './jsxcad-geometry-surface.js';
+import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [directive, ...args.map(reallyQuantizeForSpace)];
 

@@ -1,5 +1,5 @@
-import { fromTranslation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from '@jsxcad/math-mat4';
-import { equals, canonicalize as canonicalize$1, transform as transform$1 } from '@jsxcad/math-vec3';
+import { fromTranslation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { equals, canonicalize as canonicalize$1, transform as transform$1 } from './jsxcad-math-vec3.js';
 
 const assertUnique = (path) => {
   let last = null;

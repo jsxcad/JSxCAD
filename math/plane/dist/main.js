@@ -1,6 +1,6 @@
-import { reallyQuantizeForSpace } from '@jsxcad/math-utils';
-import { unit, dot, subtract, cross, length, random, scale, add, multiply, fromScalar, transform as transform$1 } from '@jsxcad/math-vec3';
-import { fromValues, isMirroring } from '@jsxcad/math-mat4';
+import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
+import { unit, dot, subtract, cross, length, random, scale, add, multiply, fromScalar, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { fromValues, isMirroring } from './jsxcad-math-mat4.js';
 
 const canonicalize = ([x = 0, y = 0, z = 0, w = 0]) => [reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(z), reallyQuantizeForSpace(w)];
 

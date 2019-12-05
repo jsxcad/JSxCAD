@@ -1,8 +1,8 @@
-import { isStrictlyCoplanar, flip } from '@jsxcad/math-poly3';
-import { rotateX, scale, fromPolygons } from '@jsxcad/geometry-solid';
-import { fromValues } from '@jsxcad/math-mat4';
-import { readFile } from '@jsxcad/sys';
-import { transform } from '@jsxcad/geometry-polygons';
+import { isStrictlyCoplanar, flip } from './jsxcad-math-poly3.js';
+import { rotateX, scale, fromPolygons } from './jsxcad-geometry-solid.js';
+import { fromValues } from './jsxcad-math-mat4.js';
+import { readFile } from './jsxcad-sys.js';
+import { transform } from './jsxcad-geometry-polygons.js';
 
 const RESOLUTION = 10000;
 

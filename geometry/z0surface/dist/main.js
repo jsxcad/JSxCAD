@@ -1,9 +1,9 @@
-import { canonicalize as canonicalize$1, transform as transform$1, toPlane } from '@jsxcad/math-poly3';
-import { fromZRotation, fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { cache } from '@jsxcad/cache';
-import { fromPoints, direction } from '@jsxcad/math-line2';
-import { distance } from '@jsxcad/math-vec2';
-import '@jsxcad/math-vec3';
+import { canonicalize as canonicalize$1, transform as transform$1, toPlane } from './jsxcad-math-poly3.js';
+import { fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
+import { cache } from './jsxcad-cache.js';
+import { fromPoints, direction } from './jsxcad-math-line2.js';
+import { distance } from './jsxcad-math-vec2.js';
+import './jsxcad-math-vec3.js';
 
 const canonicalize = (surface) => surface.map(canonicalize$1);
 
