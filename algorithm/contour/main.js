@@ -1,4 +1,4 @@
-import { fromRaster } from './fromPng';
+import { fromRaster } from './fromRaster';
 
 export {
   fromRaster

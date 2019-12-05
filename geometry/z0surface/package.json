@@ -4,11 +4,12 @@
   "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
-  "module": "main.js",
+  "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
+    "rollup": "rollup -c rollup.js",
     "test": "ava",
     "tests": "ava *.test.js"
   },
@@ -25,7 +26,12 @@
     "@jsxcad/math-line2": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "@jsxcad/math-vec3": "^0.0.79",
+    "rollup": "^1.11.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "devDependencies": {
     "@jsxcad/math-mat4": "^0.0.79",

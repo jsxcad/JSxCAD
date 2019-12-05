@@ -9,6 +9,7 @@
     "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
     "publish-npm": "lerna publish",
+    "rollup": "lerna run rollup",
     "test": "lerna run tests",
     "tests": "lerna run tests"
   },

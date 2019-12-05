@@ -30,9 +30,8 @@ import {
   writeFile
 } from '@jsxcad/sys';
 
-import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
-import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
-import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
+import { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud } from '@jsxcad/ui-threejs';
+
 // import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import {
@@ -68,8 +67,6 @@ import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 if (!aceEditorAuxiliary || !prismJSAuxiliary) {
   throw Error('die');
 }
-
-Error.stackTraceLimit = Infinity;
 
 class UI extends React.PureComponent {
   static get propTypes () {
@@ -1476,7 +1473,7 @@ const getAsk = async () => {
       }
     };
 
-    ({ ask } = await createService({ webWorker: './webworker.js', agent }));
+    ({ ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' }));
   }
 
   return ask;

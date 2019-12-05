@@ -1,11 +1,11 @@
 import { toSvg, toSvgSync } from './toSvg';
 
-import { toPng } from './toPng';
+// import { toPng } from './toPng'; // Disabled due to IOBuffer import.
 import { toThreejsGeometry } from './toThreejsGeometry';
 import { toThreejsPage } from './toThreejsPage';
 
 export {
-  toPng,
+  // toPng,
   toSvg,
   toSvgSync,
   toThreejsGeometry,

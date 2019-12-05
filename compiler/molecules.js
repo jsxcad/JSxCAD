@@ -155,7 +155,7 @@ export const toFlows = (data) => {
     const connectorFingerprints = new Set();
 
     const emitConnector = (connector) => {
-      let { ap1ID, ap1Name, ap2ID, ap2Name } = connector;
+      let { ap1ID, ap1Name, ap1Primary = true, ap2ID, ap2Name, ap2Primary = false } = connector;
       if (ap2ID === undefined) {
         // Assume this goes to the magical Output node.
         ap2ID = 'Output';
@@ -165,7 +165,7 @@ export const toFlows = (data) => {
       }
 
       // Deduplicate connectors
-      const fingerprint = [ap1ID, ap1Name, ap2ID, ap2Name].join('/');
+      const fingerprint = [ap1ID, ap1Name, ap1Primary, ap2ID, ap2Name, ap2Primary].join('/');
       if (connectorFingerprints.has(fingerprint)) {
         return;
       } else {
@@ -177,7 +177,7 @@ export const toFlows = (data) => {
       const inputSocketId = getNextId('socket');
       inputNode.output.sockets.push({
         socketId: inputSocketId,
-        socketName: toSocketNameFromDescription(ap1Name),
+        socketName: ap1Primary ? '' : toSocketNameFromDescription(ap1Name),
         description: ap1Name
       });
 
@@ -197,7 +197,7 @@ export const toFlows = (data) => {
         outputSocketId = getNextId('socket');
         outputNode.input.sockets.push({
           socketId: outputSocketId,
-          socketName: toSocketNameFromDescription(ap2Name),
+          socketName: ap2Primary ? '' : toSocketNameFromDescription(ap2Name),
           description: ap2Name
         });
       }

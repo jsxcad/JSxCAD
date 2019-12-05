@@ -10,10 +10,13 @@ export default {
     dir: 'dist',
     format: 'module'
   },
-  external: ['@jsxcad/math-utils'],
+  external (id) {
+    return id.startsWith('./jsxcad-');
+  },
   plugins: [
     builtins(),
     globals(),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ preferBuiltins: true }),
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
   ]
 };

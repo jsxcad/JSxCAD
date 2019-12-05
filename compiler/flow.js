@@ -57,7 +57,7 @@ const toCall = (op, node, toInRef) => {
 export const toEcmascript = (flow) => {
   const { connections, flowName, nodes } = flow;
 
-  const toFunctionName = (name) => `build${name.replace(/ /g, '')}`;
+  const toFunctionName = (name) => `$$${name.replace(/ /g, '_')}`;
 
   let nextStatementId = 0;
   const getNextStatementId = (prefix = 'v') => `${prefix}${nextStatementId++}`;

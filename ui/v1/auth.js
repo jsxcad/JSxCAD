@@ -2,8 +2,6 @@
 
 import { writeFile } from '@jsxcad/sys';
 
-Error.stackTraceLimit = Infinity;
-
 window.bootstrap = async () => {
   const { search } = location;
   if (search.startsWith('?gist=')) {

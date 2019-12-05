@@ -11,27 +11,18 @@ export default {
     dir: 'dist',
     format: 'module'
   },
-  external: [
-    '@jsxcad/algorithm-color',
-    '@jsxcad/algorithm-shape',
-    '@jsxcad/geometry-path',
-    '@jsxcad/geometry-paths',
-    '@jsxcad/geometry-surface',
-    '@jsxcad/geometry-tagged',
-    '@jsxcad/geometry-z0surface',
-    '@jsxcad/math-mat4',
-    '@jsxcad/math-utils',
-    '@jsxcad/math-vec2'
-  ],
+  external (id) {
+    return id.startsWith('./jsxcad-');
+  },
   plugins: [
     builtins(),
     commonjs({
       namedExports: {
-        './../node_modules/adaptive-bezier-curve/index.js': ['bezier'],
         '../../node_modules/simplify-path/index.js': ['default']
       }
     }),
     globals(),
-    nodeResolve({ preferBuiltins: true })
+    nodeResolve({ preferBuiltins: true }),
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
   ]
 };
