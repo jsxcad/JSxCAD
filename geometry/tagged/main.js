@@ -1,6 +1,5 @@
 import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 
-import { addTags } from './addTags';
 import { allTags } from './allTags';
 import { assemble } from './assemble';
 import { canonicalize } from './canonicalize';
@@ -29,6 +28,7 @@ import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
 import { nonNegative } from './nonNegative';
 import { outline } from './outline';
+import { rewriteTags } from './rewriteTags';
 import { specify } from './specify';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
@@ -39,7 +39,6 @@ import { transform } from './transform';
 import { union } from './union';
 
 export {
-  addTags,
   allTags,
   assemble,
   canonicalize,
@@ -68,6 +67,7 @@ export {
   measureBoundingBox,
   nonNegative,
   outline,
+  rewriteTags,
   specify,
   toDisjointGeometry,
   toKeptGeometry,
