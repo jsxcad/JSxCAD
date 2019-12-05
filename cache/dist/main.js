@@ -843,11 +843,11 @@ const cacheTransform = (op) => memoize(op, { isMatchingKey: isMatchingTransformK
 
 // Keyed by tag-list and geometry identity.
 
-const isMatchingAddTagsKey = ([aTags, aGeometry, aConditionTags, aConditionSpec],
-                              [bTags, bGeometry, bConditionTags, bConditionSpec]) =>
-  aGeometry === bGeometry && aConditionSpec === bConditionSpec && deepEqual(aConditionTags, bConditionTags) && deepEqual(aTags, bTags);
+const isMatchingRewriteTagsKey = ([aAdd, aRemove, aGeometry, aConditionTags, aConditionSpec],
+                                  [bAdd, bRemove, bGeometry, bConditionTags, bConditionSpec]) =>
+  aGeometry === bGeometry && aConditionSpec === bConditionSpec && deepEqual(aConditionTags, bConditionTags) && deepEqual(aAdd, bAdd) && deepEqual(aRemove, bRemove);
 
-const cacheAddTags = (op) => memoize(op, { isMatchingKey: isMatchingAddTagsKey, maxSize });
+const cacheRewriteTags = (op) => memoize(op, { isMatchingKey: isMatchingRewriteTagsKey, maxSize });
 
 // Keyed by plane structure and geometry identity.
 
@@ -862,4 +862,4 @@ const isMatchingPointsKey = ([aPoints], [bPoints]) => deepEqual(aPoints, bPoints
 
 const cachePoints = (op) => memoize(op, { isMatchingKey: isMatchingPointsKey, maxSize });
 
-export { cache, cacheAddTags, cacheCut, cachePoints, cacheTransform, clearCache };
+export { cache, cacheCut, cachePoints, cacheRewriteTags, cacheTransform, clearCache };

@@ -4,7 +4,7 @@
   "description": "Caching for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
-  "module": "main.js",
+  "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",

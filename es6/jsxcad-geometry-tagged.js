@@ -1,5 +1,5 @@
 import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { cacheAddTags, cache, cacheTransform } from './jsxcad-cache.js';
+import { cache, cacheTransform, cacheRewriteTags } from './jsxcad-cache.js';
 import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
@@ -10,61 +10,6 @@ import { difference as difference$3, intersection as intersection$3, union as un
 import { difference as difference$2, intersection as intersection$2, union as union$3 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
-
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return tags;
-      } else {
-        return [...tags, ...geometryTags];
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-
-  // FIX: Minimize identity churn.
-  const walk = (geometry) => {
-    if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
-    if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
-    if (geometry.item) { return { item: walk(geometry.item), tags: composeTags(geometry.tags) }; }
-    if (geometry.paths) { return { paths: geometry.paths, tags: composeTags(geometry.tags) }; }
-    if (geometry.plan) { return { plan: geometry.plan, marks: geometry.marks, planes: geometry.planes, visualization: geometry.visualization, tags: composeTags(geometry.tags) }; }
-    if (geometry.points) { return { points: geometry.points, tags: composeTags(geometry.tags) }; }
-    if (geometry.solid) { return { solid: geometry.solid, tags: composeTags(geometry.tags) }; }
-    if (geometry.surface) { return { surface: geometry.surface, tags: composeTags(geometry.tags) }; }
-    if (geometry.untransformed) { return { untransformed: walk(geometry.untransformed), matrix: geometry.matrix }; }
-    if (geometry.z0Surface) { return { z0Surface: geometry.z0Surface, tags: composeTags(geometry.tags) }; }
-    throw Error('die');
-  };
-
-  return walk(geometry);
-};
-
-const addTags = cacheAddTags(addTagsImpl);
 
 // FIX: Refactor the geometry walkers.
 
@@ -308,13 +253,68 @@ const getZ0Surfaces = (geometry) => {
   return z0Surfaces;
 };
 
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter(tag => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+
+  // FIX: Minimize identity churn.
+  const walk = (geometry) => {
+    if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
+    if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
+    if (geometry.item) { return { item: walk(geometry.item), tags: composeTags(geometry.tags) }; }
+    if (geometry.paths) { return { paths: geometry.paths, tags: composeTags(geometry.tags) }; }
+    if (geometry.plan) { return { plan: geometry.plan, marks: geometry.marks, planes: geometry.planes, visualization: geometry.visualization, tags: composeTags(geometry.tags) }; }
+    if (geometry.points) { return { points: geometry.points, tags: composeTags(geometry.tags) }; }
+    if (geometry.solid) { return { solid: geometry.solid, tags: composeTags(geometry.tags) }; }
+    if (geometry.surface) { return { surface: geometry.surface, tags: composeTags(geometry.tags) }; }
+    if (geometry.untransformed) { return { untransformed: walk(geometry.untransformed), matrix: geometry.matrix }; }
+    if (geometry.z0Surface) { return { z0Surface: geometry.z0Surface, tags: composeTags(geometry.tags) }; }
+    throw Error('die');
+  };
+
+  return walk(geometry);
+};
+
+const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
+
 // Dropped elements displace as usual, but are not included in positive output.
 
 const isNonNegative = (geometry) => hasMatchingTag(geometry.tags, ['compose/non-negative']);
 
 const isNegative = (geometry) => !isNonNegative(geometry);
 
-const nonNegative = (tags, geometry) => addTags(['compose/non-negative'], geometry, tags, 'has');
+const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
 // PROVE: Is the non-negative behavior here correct for difference in general, or only difference when makeing disjoint?
 
@@ -367,7 +367,7 @@ const difference = cache(differenceImpl);
 
 // Dropped elements displace as usual, but are not included in positive output.
 
-const drop = (tags, geometry) => addTags(['compose/non-positive'], geometry, tags, 'has');
+const drop = (tags, geometry) => rewriteTags(['compose/non-positive'], [], geometry, tags, 'has');
 
 const eachPoint = (options, operation, geometry) => {
   const walk = (geometry) => {
@@ -520,7 +520,7 @@ const intersectionImpl = (baseGeometry, ...geometries) => {
 
 const intersection = cache(intersectionImpl);
 
-const keep = (tags, geometry) => addTags(['compose/non-positive'], geometry, tags, 'has not');
+const keep = (tags, geometry) => rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
 
 const map = (geometry, operation) => {
   const present = item => item !== undefined;
@@ -821,4 +821,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { addTags, allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toStandardGeometry, toTransformedGeometry, transform, translate, union };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toStandardGeometry, toTransformedGeometry, transform, translate, union };

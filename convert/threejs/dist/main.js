@@ -186,21 +186,15 @@ Object.assign( EventDispatcher.prototype, {
 } );
 
 var REVISION = '104';
-var MOUSE = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 var CullFaceNone = 0;
 var CullFaceBack = 1;
 var CullFaceFront = 2;
-var CullFaceFrontBack = 3;
-var FrontFaceDirectionCW = 0;
-var FrontFaceDirectionCCW = 1;
-var BasicShadowMap = 0;
 var PCFShadowMap = 1;
 var PCFSoftShadowMap = 2;
 var FrontSide = 0;
 var BackSide = 1;
 var DoubleSide = 2;
 var FlatShading = 1;
-var SmoothShading = 2;
 var NoColors = 0;
 var FaceColors = 1;
 var VertexColors = 2;
@@ -278,7 +272,6 @@ var RGBFormat = 1022;
 var RGBAFormat = 1023;
 var LuminanceFormat = 1024;
 var LuminanceAlphaFormat = 1025;
-var RGBEFormat = RGBAFormat;
 var DepthFormat = 1026;
 var DepthStencilFormat = 1027;
 var RedFormat = 1028;
@@ -321,7 +314,6 @@ var LinearEncoding = 3000;
 var sRGBEncoding = 3001;
 var GammaEncoding = 3007;
 var RGBEEncoding = 3002;
-var LogLuvEncoding = 3003;
 var RGBM7Encoding = 3004;
 var RGBM16Encoding = 3005;
 var RGBDEncoding = 3006;
@@ -6425,10 +6417,6 @@ function mergeUniforms( uniforms ) {
 	return merged;
 
 }
-
-// Legacy
-
-var UniformsUtils = { clone: cloneUniforms, merge: mergeUniforms };
 
 /**
  * @author mrdoob / http://mrdoob.com/
@@ -39156,123 +39144,6 @@ var TEXTURE_FILTER = {
 };
 
 /**
- * @author thespite / http://clicktorelease.com/
- */
-
-
-function ImageBitmapLoader( manager ) {
-
-	if ( typeof createImageBitmap === 'undefined' ) {
-
-		console.warn( 'THREE.ImageBitmapLoader: createImageBitmap() not supported.' );
-
-	}
-
-	if ( typeof fetch === 'undefined' ) {
-
-		console.warn( 'THREE.ImageBitmapLoader: fetch() not supported.' );
-
-	}
-
-	this.manager = manager !== undefined ? manager : DefaultLoadingManager;
-	this.options = undefined;
-
-}
-
-ImageBitmapLoader.prototype = {
-
-	constructor: ImageBitmapLoader,
-
-	setOptions: function setOptions( options ) {
-
-		this.options = options;
-
-		return this;
-
-	},
-
-	load: function ( url, onLoad, onProgress, onError ) {
-
-		if ( url === undefined ) url = '';
-
-		if ( this.path !== undefined ) url = this.path + url;
-
-		url = this.manager.resolveURL( url );
-
-		var scope = this;
-
-		var cached = Cache.get( url );
-
-		if ( cached !== undefined ) {
-
-			scope.manager.itemStart( url );
-
-			setTimeout( function () {
-
-				if ( onLoad ) onLoad( cached );
-
-				scope.manager.itemEnd( url );
-
-			}, 0 );
-
-			return cached;
-
-		}
-
-		fetch( url ).then( function ( res ) {
-
-			return res.blob();
-
-		} ).then( function ( blob ) {
-
-			if ( scope.options === undefined ) {
-
-				// Workaround for FireFox. It causes an error if you pass options.
-				return createImageBitmap( blob );
-
-			} else {
-
-				return createImageBitmap( blob, scope.options );
-
-			}
-
-		} ).then( function ( imageBitmap ) {
-
-			Cache.add( url, imageBitmap );
-
-			if ( onLoad ) onLoad( imageBitmap );
-
-			scope.manager.itemEnd( url );
-
-		} ).catch( function ( e ) {
-
-			if ( onError ) onError( e );
-
-			scope.manager.itemError( url );
-			scope.manager.itemEnd( url );
-
-		} );
-
-		scope.manager.itemStart( url );
-
-	},
-
-	setCrossOrigin: function ( /* value */ ) {
-
-		return this;
-
-	},
-
-	setPath: function ( value ) {
-
-		this.path = value;
-		return this;
-
-	}
-
-};
-
-/**
  * @author zz85 / http://www.lab4games.net/zz85/blog
  * minimal class for proxing functions to Path. Replaces old "extractSubpaths()"
  **/
@@ -46749,165 +46620,6 @@ function AxesHelper( size ) {
 AxesHelper.prototype = Object.create( LineSegments.prototype );
 AxesHelper.prototype.constructor = AxesHelper;
 
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
-function Face4( a, b, c, d, normal, color, materialIndex ) {
-
-	console.warn( 'THREE.Face4 has been removed. A THREE.Face3 will be created instead.' );
-	return new Face3( a, b, c, normal, color, materialIndex );
-
-}
-
-var LineStrip = 0;
-
-var LinePieces = 1;
-
-function MeshFaceMaterial( materials ) {
-
-	console.warn( 'THREE.MeshFaceMaterial has been removed. Use an Array instead.' );
-	return materials;
-
-}
-
-function MultiMaterial( materials ) {
-
-	if ( materials === undefined ) materials = [];
-
-	console.warn( 'THREE.MultiMaterial has been removed. Use an Array instead.' );
-	materials.isMultiMaterial = true;
-	materials.materials = materials;
-	materials.clone = function () {
-
-		return materials.slice();
-
-	};
-	return materials;
-
-}
-
-function PointCloud( geometry, material ) {
-
-	console.warn( 'THREE.PointCloud has been renamed to THREE.Points.' );
-	return new Points( geometry, material );
-
-}
-
-function Particle( material ) {
-
-	console.warn( 'THREE.Particle has been renamed to THREE.Sprite.' );
-	return new Sprite( material );
-
-}
-
-function ParticleSystem( geometry, material ) {
-
-	console.warn( 'THREE.ParticleSystem has been renamed to THREE.Points.' );
-	return new Points( geometry, material );
-
-}
-
-function PointCloudMaterial( parameters ) {
-
-	console.warn( 'THREE.PointCloudMaterial has been renamed to THREE.PointsMaterial.' );
-	return new PointsMaterial( parameters );
-
-}
-
-function ParticleBasicMaterial( parameters ) {
-
-	console.warn( 'THREE.ParticleBasicMaterial has been renamed to THREE.PointsMaterial.' );
-	return new PointsMaterial( parameters );
-
-}
-
-function ParticleSystemMaterial( parameters ) {
-
-	console.warn( 'THREE.ParticleSystemMaterial has been renamed to THREE.PointsMaterial.' );
-	return new PointsMaterial( parameters );
-
-}
-
-function Vertex( x, y, z ) {
-
-	console.warn( 'THREE.Vertex has been removed. Use THREE.Vector3 instead.' );
-	return new Vector3( x, y, z );
-
-}
-
-//
-
-function DynamicBufferAttribute( array, itemSize ) {
-
-	console.warn( 'THREE.DynamicBufferAttribute has been removed. Use new THREE.BufferAttribute().setDynamic( true ) instead.' );
-	return new BufferAttribute( array, itemSize ).setDynamic( true );
-
-}
-
-function Int8Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Int8Attribute has been removed. Use new THREE.Int8BufferAttribute() instead.' );
-	return new Int8BufferAttribute( array, itemSize );
-
-}
-
-function Uint8Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Uint8Attribute has been removed. Use new THREE.Uint8BufferAttribute() instead.' );
-	return new Uint8BufferAttribute( array, itemSize );
-
-}
-
-function Uint8ClampedAttribute( array, itemSize ) {
-
-	console.warn( 'THREE.Uint8ClampedAttribute has been removed. Use new THREE.Uint8ClampedBufferAttribute() instead.' );
-	return new Uint8ClampedBufferAttribute( array, itemSize );
-
-}
-
-function Int16Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Int16Attribute has been removed. Use new THREE.Int16BufferAttribute() instead.' );
-	return new Int16BufferAttribute( array, itemSize );
-
-}
-
-function Uint16Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Uint16Attribute has been removed. Use new THREE.Uint16BufferAttribute() instead.' );
-	return new Uint16BufferAttribute( array, itemSize );
-
-}
-
-function Int32Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Int32Attribute has been removed. Use new THREE.Int32BufferAttribute() instead.' );
-	return new Int32BufferAttribute( array, itemSize );
-
-}
-
-function Uint32Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Uint32Attribute has been removed. Use new THREE.Uint32BufferAttribute() instead.' );
-	return new Uint32BufferAttribute( array, itemSize );
-
-}
-
-function Float32Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Float32Attribute has been removed. Use new THREE.Float32BufferAttribute() instead.' );
-	return new Float32BufferAttribute( array, itemSize );
-
-}
-
-function Float64Attribute( array, itemSize ) {
-
-	console.warn( 'THREE.Float64Attribute has been removed. Use new THREE.Float64BufferAttribute() instead.' );
-	return new Float64BufferAttribute( array, itemSize );
-
-}
-
 //
 
 Curve.create = function ( construct, getPoint ) {
@@ -46982,33 +46694,6 @@ Object.assign( Path.prototype, {
 
 //
 
-function ClosedSplineCurve3( points ) {
-
-	console.warn( 'THREE.ClosedSplineCurve3 has been deprecated. Use THREE.CatmullRomCurve3 instead.' );
-
-	CatmullRomCurve3.call( this, points );
-	this.type = 'catmullrom';
-	this.closed = true;
-
-}
-
-ClosedSplineCurve3.prototype = Object.create( CatmullRomCurve3.prototype );
-
-//
-
-function SplineCurve3( points ) {
-
-	console.warn( 'THREE.SplineCurve3 has been deprecated. Use THREE.CatmullRomCurve3 instead.' );
-
-	CatmullRomCurve3.call( this, points );
-	this.type = 'catmullrom';
-
-}
-
-SplineCurve3.prototype = Object.create( CatmullRomCurve3.prototype );
-
-//
-
 function Spline( points ) {
 
 	console.warn( 'THREE.Spline has been removed. Use THREE.CatmullRomCurve3 instead.' );
@@ -47040,29 +46725,6 @@ Object.assign( Spline.prototype, {
 
 } );
 
-//
-
-function AxisHelper( size ) {
-
-	console.warn( 'THREE.AxisHelper has been renamed to THREE.AxesHelper.' );
-	return new AxesHelper( size );
-
-}
-
-function BoundingBoxHelper( object, color ) {
-
-	console.warn( 'THREE.BoundingBoxHelper has been deprecated. Creating a THREE.BoxHelper instead.' );
-	return new BoxHelper( object, color );
-
-}
-
-function EdgesHelper( object, hex ) {
-
-	console.warn( 'THREE.EdgesHelper has been removed. Use THREE.EdgesGeometry instead.' );
-	return new LineSegments( new EdgesGeometry( object.geometry ), new LineBasicMaterial( { color: hex !== undefined ? hex : 0xffffff } ) );
-
-}
-
 GridHelper.prototype.setColors = function () {
 
 	console.error( 'THREE.GridHelper: setColors() has been deprecated, pass them in the constructor instead.' );
@@ -47074,13 +46736,6 @@ SkeletonHelper.prototype.update = function () {
 	console.error( 'THREE.SkeletonHelper: update() no longer needs to be called.' );
 
 };
-
-function WireframeHelper( object, hex ) {
-
-	console.warn( 'THREE.WireframeHelper has been removed. Use THREE.WireframeGeometry instead.' );
-	return new LineSegments( new WireframeGeometry( object.geometry ), new LineBasicMaterial( { color: hex !== undefined ? hex : 0xffffff } ) );
-
-}
 
 //
 
@@ -47094,20 +46749,6 @@ Object.assign( Loader.prototype, {
 	}
 
 } );
-
-function XHRLoader( manager ) {
-
-	console.warn( 'THREE.XHRLoader has been renamed to THREE.FileLoader.' );
-	return new FileLoader( manager );
-
-}
-
-function BinaryTextureLoader( manager ) {
-
-	console.warn( 'THREE.BinaryTextureLoader has been renamed to THREE.DataTextureLoader.' );
-	return new DataTextureLoader( manager );
-
-}
 
 Object.assign( ObjectLoader.prototype, {
 
@@ -48482,37 +48123,6 @@ CubeCamera.prototype.updateCubeMap = function ( renderer, scene ) {
 
 };
 
-//
-
-var GeometryUtils = {
-
-	merge: function ( geometry1, geometry2, materialIndexOffset ) {
-
-		console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
-		var matrix;
-
-		if ( geometry2.isMesh ) {
-
-			geometry2.matrixAutoUpdate && geometry2.updateMatrix();
-
-			matrix = geometry2.matrix;
-			geometry2 = geometry2.geometry;
-
-		}
-
-		geometry1.merge( geometry2, matrix, materialIndexOffset );
-
-	},
-
-	center: function ( geometry ) {
-
-		console.warn( 'THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead.' );
-		return geometry.center();
-
-	}
-
-};
-
 ImageUtils.crossOrigin = undefined;
 
 ImageUtils.loadTexture = function ( url, mapping, onLoad, onError ) {
@@ -48556,500 +48166,6 @@ ImageUtils.loadCompressedTextureCube = function () {
 	console.error( 'THREE.ImageUtils.loadCompressedTextureCube has been removed. Use THREE.DDSLoader instead.' );
 
 };
-
-//
-
-function Projector() {
-
-	console.error( 'THREE.Projector has been moved to /examples/js/renderers/Projector.js.' );
-
-	this.projectVector = function ( vector, camera ) {
-
-		console.warn( 'THREE.Projector: .projectVector() is now vector.project().' );
-		vector.project( camera );
-
-	};
-
-	this.unprojectVector = function ( vector, camera ) {
-
-		console.warn( 'THREE.Projector: .unprojectVector() is now vector.unproject().' );
-		vector.unproject( camera );
-
-	};
-
-	this.pickingRay = function () {
-
-		console.error( 'THREE.Projector: .pickingRay() is now raycaster.setFromCamera().' );
-
-	};
-
-}
-
-//
-
-function CanvasRenderer() {
-
-	console.error( 'THREE.CanvasRenderer has been removed' );
-
-}
-
-//
-
-function JSONLoader() {
-
-	console.error( 'THREE.JSONLoader has been removed.' );
-
-}
-
-//
-
-var SceneUtils = {
-
-	createMultiMaterialObject: function ( /* geometry, materials */ ) {
-
-		console.error( 'THREE.SceneUtils has been moved to /examples/js/utils/SceneUtils.js' );
-
-	},
-
-	detach: function ( /* child, parent, scene */ ) {
-
-		console.error( 'THREE.SceneUtils has been moved to /examples/js/utils/SceneUtils.js' );
-
-	},
-
-	attach: function ( /* child, scene, parent */ ) {
-
-		console.error( 'THREE.SceneUtils has been moved to /examples/js/utils/SceneUtils.js' );
-
-	}
-
-};
-
-//
-
-function LensFlare() {
-
-	console.error( 'THREE.LensFlare has been moved to /examples/js/objects/Lensflare.js' );
-
-}
-
-var THREE$1 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	WebGLMultisampleRenderTarget: WebGLMultisampleRenderTarget,
-	WebGLRenderTargetCube: WebGLRenderTargetCube,
-	WebGLRenderTarget: WebGLRenderTarget,
-	WebGLRenderer: WebGLRenderer,
-	ShaderLib: ShaderLib,
-	UniformsLib: UniformsLib,
-	UniformsUtils: UniformsUtils,
-	ShaderChunk: ShaderChunk,
-	FogExp2: FogExp2,
-	Fog: Fog,
-	Scene: Scene,
-	Sprite: Sprite,
-	LOD: LOD,
-	SkinnedMesh: SkinnedMesh,
-	Skeleton: Skeleton,
-	Bone: Bone,
-	Mesh: Mesh,
-	LineSegments: LineSegments,
-	LineLoop: LineLoop,
-	Line: Line,
-	Points: Points,
-	Group: Group,
-	VideoTexture: VideoTexture,
-	DataTexture: DataTexture,
-	DataTexture2DArray: DataTexture2DArray,
-	DataTexture3D: DataTexture3D,
-	CompressedTexture: CompressedTexture,
-	CubeTexture: CubeTexture,
-	CanvasTexture: CanvasTexture,
-	DepthTexture: DepthTexture,
-	Texture: Texture,
-	AnimationLoader: AnimationLoader,
-	CompressedTextureLoader: CompressedTextureLoader,
-	DataTextureLoader: DataTextureLoader,
-	CubeTextureLoader: CubeTextureLoader,
-	TextureLoader: TextureLoader,
-	ObjectLoader: ObjectLoader,
-	MaterialLoader: MaterialLoader,
-	BufferGeometryLoader: BufferGeometryLoader,
-	DefaultLoadingManager: DefaultLoadingManager,
-	LoadingManager: LoadingManager,
-	ImageLoader: ImageLoader,
-	ImageBitmapLoader: ImageBitmapLoader,
-	FontLoader: FontLoader,
-	FileLoader: FileLoader,
-	Loader: Loader,
-	LoaderUtils: LoaderUtils,
-	Cache: Cache,
-	AudioLoader: AudioLoader,
-	SpotLightShadow: SpotLightShadow,
-	SpotLight: SpotLight,
-	PointLight: PointLight,
-	RectAreaLight: RectAreaLight,
-	HemisphereLight: HemisphereLight,
-	HemisphereLightProbe: HemisphereLightProbe,
-	DirectionalLightShadow: DirectionalLightShadow,
-	DirectionalLight: DirectionalLight,
-	AmbientLight: AmbientLight,
-	AmbientLightProbe: AmbientLightProbe,
-	LightShadow: LightShadow,
-	Light: Light,
-	LightProbe: LightProbe,
-	StereoCamera: StereoCamera,
-	PerspectiveCamera: PerspectiveCamera,
-	OrthographicCamera: OrthographicCamera,
-	CubeCamera: CubeCamera,
-	ArrayCamera: ArrayCamera,
-	Camera: Camera,
-	AudioListener: AudioListener,
-	PositionalAudio: PositionalAudio,
-	AudioContext: AudioContext,
-	AudioAnalyser: AudioAnalyser,
-	Audio: Audio,
-	VectorKeyframeTrack: VectorKeyframeTrack,
-	StringKeyframeTrack: StringKeyframeTrack,
-	QuaternionKeyframeTrack: QuaternionKeyframeTrack,
-	NumberKeyframeTrack: NumberKeyframeTrack,
-	ColorKeyframeTrack: ColorKeyframeTrack,
-	BooleanKeyframeTrack: BooleanKeyframeTrack,
-	PropertyMixer: PropertyMixer,
-	PropertyBinding: PropertyBinding,
-	KeyframeTrack: KeyframeTrack,
-	AnimationUtils: AnimationUtils,
-	AnimationObjectGroup: AnimationObjectGroup,
-	AnimationMixer: AnimationMixer,
-	AnimationClip: AnimationClip,
-	Uniform: Uniform,
-	InstancedBufferGeometry: InstancedBufferGeometry,
-	BufferGeometry: BufferGeometry,
-	Geometry: Geometry,
-	InterleavedBufferAttribute: InterleavedBufferAttribute,
-	InstancedInterleavedBuffer: InstancedInterleavedBuffer,
-	InterleavedBuffer: InterleavedBuffer,
-	InstancedBufferAttribute: InstancedBufferAttribute,
-	Face3: Face3,
-	Object3D: Object3D,
-	Raycaster: Raycaster,
-	Layers: Layers,
-	EventDispatcher: EventDispatcher,
-	Clock: Clock,
-	QuaternionLinearInterpolant: QuaternionLinearInterpolant,
-	LinearInterpolant: LinearInterpolant,
-	DiscreteInterpolant: DiscreteInterpolant,
-	CubicInterpolant: CubicInterpolant,
-	Interpolant: Interpolant,
-	Triangle: Triangle,
-	Math: _Math,
-	Spherical: Spherical,
-	Cylindrical: Cylindrical,
-	Plane: Plane,
-	Frustum: Frustum,
-	Sphere: Sphere,
-	Ray: Ray,
-	Matrix4: Matrix4,
-	Matrix3: Matrix3,
-	Box3: Box3,
-	Box2: Box2,
-	Line3: Line3,
-	Euler: Euler,
-	Vector4: Vector4,
-	Vector3: Vector3,
-	Vector2: Vector2,
-	Quaternion: Quaternion,
-	Color: Color,
-	SphericalHarmonics3: SphericalHarmonics3,
-	ImmediateRenderObject: ImmediateRenderObject,
-	VertexNormalsHelper: VertexNormalsHelper,
-	SpotLightHelper: SpotLightHelper,
-	SkeletonHelper: SkeletonHelper,
-	PointLightHelper: PointLightHelper,
-	RectAreaLightHelper: RectAreaLightHelper,
-	HemisphereLightHelper: HemisphereLightHelper,
-	LightProbeHelper: LightProbeHelper,
-	GridHelper: GridHelper,
-	PolarGridHelper: PolarGridHelper,
-	PositionalAudioHelper: PositionalAudioHelper,
-	FaceNormalsHelper: FaceNormalsHelper,
-	DirectionalLightHelper: DirectionalLightHelper,
-	CameraHelper: CameraHelper,
-	BoxHelper: BoxHelper,
-	Box3Helper: Box3Helper,
-	PlaneHelper: PlaneHelper,
-	ArrowHelper: ArrowHelper,
-	AxesHelper: AxesHelper,
-	Shape: Shape,
-	Path: Path,
-	ShapePath: ShapePath,
-	Font: Font,
-	CurvePath: CurvePath,
-	Curve: Curve,
-	ImageUtils: ImageUtils,
-	ShapeUtils: ShapeUtils,
-	WebGLUtils: WebGLUtils,
-	WireframeGeometry: WireframeGeometry,
-	ParametricGeometry: ParametricGeometry,
-	ParametricBufferGeometry: ParametricBufferGeometry,
-	TetrahedronGeometry: TetrahedronGeometry,
-	TetrahedronBufferGeometry: TetrahedronBufferGeometry,
-	OctahedronGeometry: OctahedronGeometry,
-	OctahedronBufferGeometry: OctahedronBufferGeometry,
-	IcosahedronGeometry: IcosahedronGeometry,
-	IcosahedronBufferGeometry: IcosahedronBufferGeometry,
-	DodecahedronGeometry: DodecahedronGeometry,
-	DodecahedronBufferGeometry: DodecahedronBufferGeometry,
-	PolyhedronGeometry: PolyhedronGeometry,
-	PolyhedronBufferGeometry: PolyhedronBufferGeometry,
-	TubeGeometry: TubeGeometry,
-	TubeBufferGeometry: TubeBufferGeometry,
-	TorusKnotGeometry: TorusKnotGeometry,
-	TorusKnotBufferGeometry: TorusKnotBufferGeometry,
-	TorusGeometry: TorusGeometry,
-	TorusBufferGeometry: TorusBufferGeometry,
-	TextGeometry: TextGeometry,
-	TextBufferGeometry: TextBufferGeometry,
-	SphereGeometry: SphereGeometry,
-	SphereBufferGeometry: SphereBufferGeometry,
-	RingGeometry: RingGeometry,
-	RingBufferGeometry: RingBufferGeometry,
-	PlaneGeometry: PlaneGeometry,
-	PlaneBufferGeometry: PlaneBufferGeometry,
-	LatheGeometry: LatheGeometry,
-	LatheBufferGeometry: LatheBufferGeometry,
-	ShapeGeometry: ShapeGeometry,
-	ShapeBufferGeometry: ShapeBufferGeometry,
-	ExtrudeGeometry: ExtrudeGeometry,
-	ExtrudeBufferGeometry: ExtrudeBufferGeometry,
-	EdgesGeometry: EdgesGeometry,
-	ConeGeometry: ConeGeometry,
-	ConeBufferGeometry: ConeBufferGeometry,
-	CylinderGeometry: CylinderGeometry,
-	CylinderBufferGeometry: CylinderBufferGeometry,
-	CircleGeometry: CircleGeometry,
-	CircleBufferGeometry: CircleBufferGeometry,
-	BoxGeometry: BoxGeometry,
-	CubeGeometry: BoxGeometry,
-	BoxBufferGeometry: BoxBufferGeometry,
-	ShadowMaterial: ShadowMaterial,
-	SpriteMaterial: SpriteMaterial,
-	RawShaderMaterial: RawShaderMaterial,
-	ShaderMaterial: ShaderMaterial,
-	PointsMaterial: PointsMaterial,
-	MeshPhysicalMaterial: MeshPhysicalMaterial,
-	MeshStandardMaterial: MeshStandardMaterial,
-	MeshPhongMaterial: MeshPhongMaterial,
-	MeshToonMaterial: MeshToonMaterial,
-	MeshNormalMaterial: MeshNormalMaterial,
-	MeshLambertMaterial: MeshLambertMaterial,
-	MeshDepthMaterial: MeshDepthMaterial,
-	MeshDistanceMaterial: MeshDistanceMaterial,
-	MeshBasicMaterial: MeshBasicMaterial,
-	MeshMatcapMaterial: MeshMatcapMaterial,
-	LineDashedMaterial: LineDashedMaterial,
-	LineBasicMaterial: LineBasicMaterial,
-	Material: Material,
-	Float64BufferAttribute: Float64BufferAttribute,
-	Float32BufferAttribute: Float32BufferAttribute,
-	Uint32BufferAttribute: Uint32BufferAttribute,
-	Int32BufferAttribute: Int32BufferAttribute,
-	Uint16BufferAttribute: Uint16BufferAttribute,
-	Int16BufferAttribute: Int16BufferAttribute,
-	Uint8ClampedBufferAttribute: Uint8ClampedBufferAttribute,
-	Uint8BufferAttribute: Uint8BufferAttribute,
-	Int8BufferAttribute: Int8BufferAttribute,
-	BufferAttribute: BufferAttribute,
-	ArcCurve: ArcCurve,
-	CatmullRomCurve3: CatmullRomCurve3,
-	CubicBezierCurve: CubicBezierCurve,
-	CubicBezierCurve3: CubicBezierCurve3,
-	EllipseCurve: EllipseCurve,
-	LineCurve: LineCurve,
-	LineCurve3: LineCurve3,
-	QuadraticBezierCurve: QuadraticBezierCurve,
-	QuadraticBezierCurve3: QuadraticBezierCurve3,
-	SplineCurve: SplineCurve,
-	REVISION: REVISION,
-	MOUSE: MOUSE,
-	CullFaceNone: CullFaceNone,
-	CullFaceBack: CullFaceBack,
-	CullFaceFront: CullFaceFront,
-	CullFaceFrontBack: CullFaceFrontBack,
-	FrontFaceDirectionCW: FrontFaceDirectionCW,
-	FrontFaceDirectionCCW: FrontFaceDirectionCCW,
-	BasicShadowMap: BasicShadowMap,
-	PCFShadowMap: PCFShadowMap,
-	PCFSoftShadowMap: PCFSoftShadowMap,
-	FrontSide: FrontSide,
-	BackSide: BackSide,
-	DoubleSide: DoubleSide,
-	FlatShading: FlatShading,
-	SmoothShading: SmoothShading,
-	NoColors: NoColors,
-	FaceColors: FaceColors,
-	VertexColors: VertexColors,
-	NoBlending: NoBlending,
-	NormalBlending: NormalBlending,
-	AdditiveBlending: AdditiveBlending,
-	SubtractiveBlending: SubtractiveBlending,
-	MultiplyBlending: MultiplyBlending,
-	CustomBlending: CustomBlending,
-	AddEquation: AddEquation,
-	SubtractEquation: SubtractEquation,
-	ReverseSubtractEquation: ReverseSubtractEquation,
-	MinEquation: MinEquation,
-	MaxEquation: MaxEquation,
-	ZeroFactor: ZeroFactor,
-	OneFactor: OneFactor,
-	SrcColorFactor: SrcColorFactor,
-	OneMinusSrcColorFactor: OneMinusSrcColorFactor,
-	SrcAlphaFactor: SrcAlphaFactor,
-	OneMinusSrcAlphaFactor: OneMinusSrcAlphaFactor,
-	DstAlphaFactor: DstAlphaFactor,
-	OneMinusDstAlphaFactor: OneMinusDstAlphaFactor,
-	DstColorFactor: DstColorFactor,
-	OneMinusDstColorFactor: OneMinusDstColorFactor,
-	SrcAlphaSaturateFactor: SrcAlphaSaturateFactor,
-	NeverDepth: NeverDepth,
-	AlwaysDepth: AlwaysDepth,
-	LessDepth: LessDepth,
-	LessEqualDepth: LessEqualDepth,
-	EqualDepth: EqualDepth,
-	GreaterEqualDepth: GreaterEqualDepth,
-	GreaterDepth: GreaterDepth,
-	NotEqualDepth: NotEqualDepth,
-	MultiplyOperation: MultiplyOperation,
-	MixOperation: MixOperation,
-	AddOperation: AddOperation,
-	NoToneMapping: NoToneMapping,
-	LinearToneMapping: LinearToneMapping,
-	ReinhardToneMapping: ReinhardToneMapping,
-	Uncharted2ToneMapping: Uncharted2ToneMapping,
-	CineonToneMapping: CineonToneMapping,
-	ACESFilmicToneMapping: ACESFilmicToneMapping,
-	UVMapping: UVMapping,
-	CubeReflectionMapping: CubeReflectionMapping,
-	CubeRefractionMapping: CubeRefractionMapping,
-	EquirectangularReflectionMapping: EquirectangularReflectionMapping,
-	EquirectangularRefractionMapping: EquirectangularRefractionMapping,
-	SphericalReflectionMapping: SphericalReflectionMapping,
-	CubeUVReflectionMapping: CubeUVReflectionMapping,
-	CubeUVRefractionMapping: CubeUVRefractionMapping,
-	RepeatWrapping: RepeatWrapping,
-	ClampToEdgeWrapping: ClampToEdgeWrapping,
-	MirroredRepeatWrapping: MirroredRepeatWrapping,
-	NearestFilter: NearestFilter,
-	NearestMipMapNearestFilter: NearestMipMapNearestFilter,
-	NearestMipMapLinearFilter: NearestMipMapLinearFilter,
-	LinearFilter: LinearFilter,
-	LinearMipMapNearestFilter: LinearMipMapNearestFilter,
-	LinearMipMapLinearFilter: LinearMipMapLinearFilter,
-	UnsignedByteType: UnsignedByteType,
-	ByteType: ByteType,
-	ShortType: ShortType,
-	UnsignedShortType: UnsignedShortType,
-	IntType: IntType,
-	UnsignedIntType: UnsignedIntType,
-	FloatType: FloatType,
-	HalfFloatType: HalfFloatType,
-	UnsignedShort4444Type: UnsignedShort4444Type,
-	UnsignedShort5551Type: UnsignedShort5551Type,
-	UnsignedShort565Type: UnsignedShort565Type,
-	UnsignedInt248Type: UnsignedInt248Type,
-	AlphaFormat: AlphaFormat,
-	RGBFormat: RGBFormat,
-	RGBAFormat: RGBAFormat,
-	LuminanceFormat: LuminanceFormat,
-	LuminanceAlphaFormat: LuminanceAlphaFormat,
-	RGBEFormat: RGBEFormat,
-	DepthFormat: DepthFormat,
-	DepthStencilFormat: DepthStencilFormat,
-	RedFormat: RedFormat,
-	RGB_S3TC_DXT1_Format: RGB_S3TC_DXT1_Format,
-	RGBA_S3TC_DXT1_Format: RGBA_S3TC_DXT1_Format,
-	RGBA_S3TC_DXT3_Format: RGBA_S3TC_DXT3_Format,
-	RGBA_S3TC_DXT5_Format: RGBA_S3TC_DXT5_Format,
-	RGB_PVRTC_4BPPV1_Format: RGB_PVRTC_4BPPV1_Format,
-	RGB_PVRTC_2BPPV1_Format: RGB_PVRTC_2BPPV1_Format,
-	RGBA_PVRTC_4BPPV1_Format: RGBA_PVRTC_4BPPV1_Format,
-	RGBA_PVRTC_2BPPV1_Format: RGBA_PVRTC_2BPPV1_Format,
-	RGB_ETC1_Format: RGB_ETC1_Format,
-	RGBA_ASTC_4x4_Format: RGBA_ASTC_4x4_Format,
-	RGBA_ASTC_5x4_Format: RGBA_ASTC_5x4_Format,
-	RGBA_ASTC_5x5_Format: RGBA_ASTC_5x5_Format,
-	RGBA_ASTC_6x5_Format: RGBA_ASTC_6x5_Format,
-	RGBA_ASTC_6x6_Format: RGBA_ASTC_6x6_Format,
-	RGBA_ASTC_8x5_Format: RGBA_ASTC_8x5_Format,
-	RGBA_ASTC_8x6_Format: RGBA_ASTC_8x6_Format,
-	RGBA_ASTC_8x8_Format: RGBA_ASTC_8x8_Format,
-	RGBA_ASTC_10x5_Format: RGBA_ASTC_10x5_Format,
-	RGBA_ASTC_10x6_Format: RGBA_ASTC_10x6_Format,
-	RGBA_ASTC_10x8_Format: RGBA_ASTC_10x8_Format,
-	RGBA_ASTC_10x10_Format: RGBA_ASTC_10x10_Format,
-	RGBA_ASTC_12x10_Format: RGBA_ASTC_12x10_Format,
-	RGBA_ASTC_12x12_Format: RGBA_ASTC_12x12_Format,
-	LoopOnce: LoopOnce,
-	LoopRepeat: LoopRepeat,
-	LoopPingPong: LoopPingPong,
-	InterpolateDiscrete: InterpolateDiscrete,
-	InterpolateLinear: InterpolateLinear,
-	InterpolateSmooth: InterpolateSmooth,
-	ZeroCurvatureEnding: ZeroCurvatureEnding,
-	ZeroSlopeEnding: ZeroSlopeEnding,
-	WrapAroundEnding: WrapAroundEnding,
-	TrianglesDrawMode: TrianglesDrawMode,
-	TriangleStripDrawMode: TriangleStripDrawMode,
-	TriangleFanDrawMode: TriangleFanDrawMode,
-	LinearEncoding: LinearEncoding,
-	sRGBEncoding: sRGBEncoding,
-	GammaEncoding: GammaEncoding,
-	RGBEEncoding: RGBEEncoding,
-	LogLuvEncoding: LogLuvEncoding,
-	RGBM7Encoding: RGBM7Encoding,
-	RGBM16Encoding: RGBM16Encoding,
-	RGBDEncoding: RGBDEncoding,
-	BasicDepthPacking: BasicDepthPacking,
-	RGBADepthPacking: RGBADepthPacking,
-	TangentSpaceNormalMap: TangentSpaceNormalMap,
-	ObjectSpaceNormalMap: ObjectSpaceNormalMap,
-	Face4: Face4,
-	LineStrip: LineStrip,
-	LinePieces: LinePieces,
-	MeshFaceMaterial: MeshFaceMaterial,
-	MultiMaterial: MultiMaterial,
-	PointCloud: PointCloud,
-	Particle: Particle,
-	ParticleSystem: ParticleSystem,
-	PointCloudMaterial: PointCloudMaterial,
-	ParticleBasicMaterial: ParticleBasicMaterial,
-	ParticleSystemMaterial: ParticleSystemMaterial,
-	Vertex: Vertex,
-	DynamicBufferAttribute: DynamicBufferAttribute,
-	Int8Attribute: Int8Attribute,
-	Uint8Attribute: Uint8Attribute,
-	Uint8ClampedAttribute: Uint8ClampedAttribute,
-	Int16Attribute: Int16Attribute,
-	Uint16Attribute: Uint16Attribute,
-	Int32Attribute: Int32Attribute,
-	Uint32Attribute: Uint32Attribute,
-	Float32Attribute: Float32Attribute,
-	Float64Attribute: Float64Attribute,
-	ClosedSplineCurve3: ClosedSplineCurve3,
-	SplineCurve3: SplineCurve3,
-	Spline: Spline,
-	AxisHelper: AxisHelper,
-	BoundingBoxHelper: BoundingBoxHelper,
-	EdgesHelper: EdgesHelper,
-	WireframeHelper: WireframeHelper,
-	XHRLoader: XHRLoader,
-	BinaryTextureLoader: BinaryTextureLoader,
-	GeometryUtils: GeometryUtils,
-	Projector: Projector,
-	CanvasRenderer: CanvasRenderer,
-	JSONLoader: JSONLoader,
-	SceneUtils: SceneUtils,
-	LensFlare: LensFlare
-});
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -51186,7 +50302,7 @@ var domParser_3 = domParser.DOMParser;
  * @author julianwa / https://github.com/julianwa
  */
 
-const installProjector = ({ THREE }) => {
+const installProjector = ({ BackSide, Box3, BufferGeometry, Color, DoubleSide, FaceColors, FrontSide, Frustum, Geometry, Light, Line, LineSegments, Matrix3, Matrix4, Mesh, Points, Sprite, Vector2, Vector3, Vector4, VertexColors }) => {
   const RenderableObject = function () {
   	this.id = 0;
 
@@ -51204,14 +50320,14 @@ const installProjector = ({ THREE }) => {
   	this.v2 = new RenderableVertex();
   	this.v3 = new RenderableVertex();
 
-  	this.normalModel = new THREE.Vector3();
+  	this.normalModel = new Vector3();
 
-  	this.vertexNormalsModel = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+  	this.vertexNormalsModel = [ new Vector3(), new Vector3(), new Vector3() ];
   	this.vertexNormalsLength = 0;
 
-  	this.color = new THREE.Color();
+  	this.color = new Color();
   	this.material = null;
-  	this.uvs = [ new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2() ];
+  	this.uvs = [ new Vector2(), new Vector2(), new Vector2() ];
 
   	this.z = 0;
   	this.renderOrder = 0;
@@ -51220,9 +50336,9 @@ const installProjector = ({ THREE }) => {
   //
 
   const RenderableVertex = function () {
-  	this.position = new THREE.Vector3();
-  	this.positionWorld = new THREE.Vector3();
-  	this.positionScreen = new THREE.Vector4();
+  	this.position = new Vector3();
+  	this.positionWorld = new Vector3();
+  	this.positionScreen = new Vector4();
 
   	this.visible = true;
   };
@@ -51240,7 +50356,7 @@ const installProjector = ({ THREE }) => {
   	this.v1 = new RenderableVertex();
   	this.v2 = new RenderableVertex();
 
-  	this.vertexColors = [ new THREE.Color(), new THREE.Color() ];
+  	this.vertexColors = [ new Color(), new Color() ];
   	this.material = null;
 
   	this.z = 0;
@@ -51259,7 +50375,7 @@ const installProjector = ({ THREE }) => {
   	this.z = 0;
 
   	this.rotation = 0;
-  	this.scale = new THREE.Vector2();
+  	this.scale = new Vector2();
 
   	this.material = null;
   	this.renderOrder = 0;
@@ -51276,25 +50392,25 @@ const installProjector = ({ THREE }) => {
 
   		var _renderData = { objects: [], lights: [], elements: [] };
 
-  		var _vector3 = new THREE.Vector3();
-  		var _vector4 = new THREE.Vector4();
+  		var _vector3 = new Vector3();
+  		var _vector4 = new Vector4();
 
-  		var _clipBox = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1));
-  		var _boundingBox = new THREE.Box3();
+  		var _clipBox = new Box3(new Vector3(-1, -1, -1), new Vector3(1, 1, 1));
+  		var _boundingBox = new Box3();
   		var _points3 = new Array(3);
 
-  		var _viewMatrix = new THREE.Matrix4();
-  		var _viewProjectionMatrix = new THREE.Matrix4();
+  		var _viewMatrix = new Matrix4();
+  		var _viewProjectionMatrix = new Matrix4();
 
   		var _modelMatrix;
-  		var _modelViewProjectionMatrix = new THREE.Matrix4();
+  		var _modelViewProjectionMatrix = new Matrix4();
 
-  		var _normalMatrix = new THREE.Matrix3();
+  		var _normalMatrix = new Matrix3();
 
-  		var _frustum = new THREE.Frustum();
+  		var _frustum = new Frustum();
 
-  		var _clippedVertex1PositionScreen = new THREE.Vector4();
-  		var _clippedVertex2PositionScreen = new THREE.Vector4();
+  		var _clippedVertex1PositionScreen = new Vector4();
+  		var _clippedVertex2PositionScreen = new Vector4();
 
   	//
 
@@ -51322,7 +50438,7 @@ const installProjector = ({ THREE }) => {
   		var object = null;
   		var material = null;
 
-  		var normalMatrix = new THREE.Matrix3();
+  		var normalMatrix = new Matrix3();
 
   		function setObject (value) {
   			object = value;
@@ -51413,7 +50529,7 @@ const installProjector = ({ THREE }) => {
 
   				_line.material = object.material;
 
-  				if (object.material.vertexColors === THREE.VertexColors) {
+  				if (object.material.vertexColors === VertexColors) {
   					_line.vertexColors[ 0 ].fromArray(colors, a * 3);
   					_line.vertexColors[ 1 ].fromArray(colors, b * 3);
   				}
@@ -51429,7 +50545,7 @@ const installProjector = ({ THREE }) => {
 
   			if (checkTriangleVisibility(v1, v2, v3) === false) return;
 
-  			if (material.side === THREE.DoubleSide || checkBackfaceCulling(v1, v2, v3) === true) {
+  			if (material.side === DoubleSide || checkBackfaceCulling(v1, v2, v3) === true) {
   				_face = getNextFaceInPool();
 
   				_face.id = object.id;
@@ -51459,7 +50575,7 @@ const installProjector = ({ THREE }) => {
 
   				_face.material = material;
 
-  				if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
+  				if (material.vertexColors === FaceColors || material.vertexColors === VertexColors) {
   					_face.color.fromArray(colors, a * 3);
   				}
 
@@ -51486,14 +50602,14 @@ const installProjector = ({ THREE }) => {
   	function projectObject (object) {
   		if (object.visible === false) return;
 
-  		if (object instanceof THREE.Light) {
+  		if (object instanceof Light) {
   			_renderData.lights.push(object);
-  		} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
+  		} else if (object instanceof Mesh || object instanceof Line || object instanceof Points) {
   			if (object.material.visible === false) return;
   			if (object.frustumCulled === true && _frustum.intersectsObject(object) === false) return;
 
   			addObject(object);
-  		} else if (object instanceof THREE.Sprite) {
+  		} else if (object instanceof Sprite) {
   			if (object.material.visible === false) return;
   			if (object.frustumCulled === true && _frustum.intersectsSprite(object) === false) return;
 
@@ -51562,8 +50678,8 @@ const installProjector = ({ THREE }) => {
 
   			_vertexCount = 0;
 
-  			if (object instanceof THREE.Mesh) {
-  				if (geometry instanceof THREE.BufferGeometry) {
+  			if (object instanceof Mesh) {
+  				if (geometry instanceof BufferGeometry) {
   					var material = object.material;
 
   					var isMultiMaterial = Array.isArray(material);
@@ -51667,7 +50783,7 @@ const installProjector = ({ THREE }) => {
   							}
   						}
   					}
-  				} else if (geometry instanceof THREE.Geometry) {
+  				} else if (geometry instanceof Geometry) {
   					var vertices = geometry.vertices;
   					var faces = geometry.faces;
   					var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
@@ -51723,9 +50839,9 @@ const installProjector = ({ THREE }) => {
 
   						var visible = renderList.checkBackfaceCulling(v1, v2, v3);
 
-  						if (side !== THREE.DoubleSide) {
-  							if (side === THREE.FrontSide && visible === false) continue;
-  							if (side === THREE.BackSide && visible === true) continue;
+  						if (side !== DoubleSide) {
+  							if (side === FrontSide && visible === false) continue;
+  							if (side === BackSide && visible === true) continue;
   						}
 
   						_face = getNextFaceInPool();
@@ -51737,7 +50853,7 @@ const installProjector = ({ THREE }) => {
 
   						_face.normalModel.copy(face.normal);
 
-  						if (visible === false && (side === THREE.BackSide || side === THREE.DoubleSide)) {
+  						if (visible === false && (side === BackSide || side === DoubleSide)) {
   							_face.normalModel.negate();
   						}
 
@@ -51749,7 +50865,7 @@ const installProjector = ({ THREE }) => {
   							var normalModel = _face.vertexNormalsModel[ n ];
   							normalModel.copy(faceVertexNormals[ n ]);
 
-  							if (visible === false && (side === THREE.BackSide || side === THREE.DoubleSide)) {
+  							if (visible === false && (side === BackSide || side === DoubleSide)) {
   								normalModel.negate();
   							}
 
@@ -51775,10 +50891,10 @@ const installProjector = ({ THREE }) => {
   						_renderData.elements.push(_face);
   					}
   				}
-  			} else if (object instanceof THREE.Line) {
+  			} else if (object instanceof Line) {
   				_modelViewProjectionMatrix.multiplyMatrices(_viewProjectionMatrix, _modelMatrix);
 
-  				if (geometry instanceof THREE.BufferGeometry) {
+  				if (geometry instanceof BufferGeometry) {
   					var attributes = geometry.attributes;
 
   					if (attributes.position !== undefined) {
@@ -51803,14 +50919,14 @@ const installProjector = ({ THREE }) => {
   								renderList.pushLine(indices[ i ], indices[ i + 1 ]);
   							}
   						} else {
-  							var step = object instanceof THREE.LineSegments ? 2 : 1;
+  							var step = object instanceof LineSegments ? 2 : 1;
 
   							for (var i = 0, l = (positions.length / 3) - 1; i < l; i += step) {
   								renderList.pushLine(i, i + 1);
   							}
   						}
   					}
-  				} else if (geometry instanceof THREE.Geometry) {
+  				} else if (geometry instanceof Geometry) {
   					var vertices = object.geometry.vertices;
 
   					if (vertices.length === 0) continue;
@@ -51818,7 +50934,7 @@ const installProjector = ({ THREE }) => {
   					v1 = getNextVertexInPool();
   					v1.positionScreen.copy(vertices[ 0 ]).applyMatrix4(_modelViewProjectionMatrix);
 
-  					var step = object instanceof THREE.LineSegments ? 2 : 1;
+  					var step = object instanceof LineSegments ? 2 : 1;
 
   					for (var v = 1, vl = vertices.length; v < vl; v++) {
   						v1 = getNextVertexInPool();
@@ -51847,7 +50963,7 @@ const installProjector = ({ THREE }) => {
 
   							_line.material = object.material;
 
-  							if (object.material.vertexColors === THREE.VertexColors) {
+  							if (object.material.vertexColors === VertexColors) {
   								_line.vertexColors[ 0 ].copy(object.geometry.colors[ v ]);
   								_line.vertexColors[ 1 ].copy(object.geometry.colors[ v - 1 ]);
   							}
@@ -51856,10 +50972,10 @@ const installProjector = ({ THREE }) => {
   						}
   					}
   				}
-  			} else if (object instanceof THREE.Points) {
+  			} else if (object instanceof Points) {
   				_modelViewProjectionMatrix.multiplyMatrices(_viewProjectionMatrix, _modelMatrix);
 
-  				if (geometry instanceof THREE.Geometry) {
+  				if (geometry instanceof Geometry) {
   					var vertices = object.geometry.vertices;
 
   					for (var v = 0, vl = vertices.length; v < vl; v++) {
@@ -51870,7 +50986,7 @@ const installProjector = ({ THREE }) => {
 
   						pushPoint(_vector4, object, camera);
   					}
-  				} else if (geometry instanceof THREE.BufferGeometry) {
+  				} else if (geometry instanceof BufferGeometry) {
   					var attributes = geometry.attributes;
 
   					if (attributes.position !== undefined) {
@@ -51884,7 +51000,7 @@ const installProjector = ({ THREE }) => {
   						}
   					}
   				}
-  			} else if (object instanceof THREE.Sprite) {
+  			} else if (object instanceof Sprite) {
   				object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
   				_vector4.set(_modelMatrix.elements[ 12 ], _modelMatrix.elements[ 13 ], _modelMatrix.elements[ 14 ], 1);
   				_vector4.applyMatrix4(_viewProjectionMatrix);
@@ -52060,14 +51176,14 @@ const installProjector = ({ THREE }) => {
  * @author mrdoob / http://mrdoob.com/
  */
 
-const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine, RenderableFace, document }) => {
+const installSVGRenderer = ({ Box2, Camera, Color, FaceColors, Object3D, Matrix3, Matrix4, Projector, RenderableSprite, RenderableLine, RenderableFace, Vector3, VertexColors, document }) => {
   const SVGObject = function (node) {
-  	THREE.Object3D.call(this);
+  	Object3D.call(this);
 
   	this.node = node;
   };
 
-  SVGObject.prototype = Object.create(THREE.Object3D.prototype);
+  SVGObject.prototype = Object.create(Object3D.prototype);
   SVGObject.prototype.constructor = SVGObject;
 
   const SVGRenderer = function () {
@@ -52079,24 +51195,24 @@ const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine
 
   		var _v1; var _v2; var _v3;
 
-  		var _clipBox = new THREE.Box2();
-  		var _elemBox = new THREE.Box2();
+  		var _clipBox = new Box2();
+  		var _elemBox = new Box2();
 
-  		var _color = new THREE.Color();
-  		var _diffuseColor = new THREE.Color();
-  		var _ambientLight = new THREE.Color();
-  		var _directionalLights = new THREE.Color();
-  		var _pointLights = new THREE.Color();
-  		var _clearColor = new THREE.Color();
+  		var _color = new Color();
+  		var _diffuseColor = new Color();
+  		var _ambientLight = new Color();
+  		var _directionalLights = new Color();
+  		var _pointLights = new Color();
+  		var _clearColor = new Color();
   		var _clearAlpha = 1;
 
-  		var _vector3 = new THREE.Vector3(); // Needed for PointLight
-  		var _centroid = new THREE.Vector3();
-  		var _normal = new THREE.Vector3();
-  		var _normalViewMatrix = new THREE.Matrix3();
+  		var _vector3 = new Vector3(); // Needed for PointLight
+  		var _centroid = new Vector3();
+  		var _normal = new Vector3();
+  		var _normalViewMatrix = new Matrix3();
 
-  		var _viewMatrix = new THREE.Matrix4();
-  		var _viewProjectionMatrix = new THREE.Matrix4();
+  		var _viewMatrix = new Matrix4();
+  		var _viewProjectionMatrix = new Matrix4();
 
   		var _svgPathPool = [];
   		var _svgNode; var _pathCount = 0;
@@ -52183,7 +51299,7 @@ const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine
   	};
 
   	this.render = function (scene, camera) {
-  		if (camera instanceof THREE.Camera === false) {
+  		if (camera instanceof Camera === false) {
   			console.error('THREE.SVGRenderer.render: camera is not an instance of THREE.Camera.');
   			return;
   		}
@@ -52388,13 +51504,13 @@ const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine
   		if (material.isMeshBasicMaterial) {
   			_color.copy(material.color);
 
-  			if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
+  			if (material.vertexColors === FaceColors || material.vertexColors === VertexColors) {
   				_color.multiply(element.color);
   			}
   		} else if (material.isMeshLambertMaterial || material.isMeshPhongMaterial || material.isMeshStandardMaterial) {
   			_diffuseColor.copy(material.color);
 
-  			if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
+  			if (material.vertexColors === FaceColors || material.vertexColors === VertexColors) {
   				_diffuseColor.multiply(element.color);
   			}
 
@@ -52556,9 +51672,46 @@ const toThreejsGeometry = (geometry, supertags) => {
 };
 
 // Bootstrap start.
-const { Projector: Projector$1, RenderableFace, RenderableLine, RenderableSprite } = installProjector({ THREE: THREE$1 });
+const { Projector, RenderableFace, RenderableLine, RenderableSprite } = installProjector({
+  BackSide,
+  Box3,
+  BufferGeometry,
+  Color,
+  DoubleSide,
+  FaceColors,
+  FrontSide,
+  Frustum,
+  Geometry,
+  Light,
+  Line,
+  LineSegments,
+  Matrix3,
+  Matrix4,
+  Mesh,
+  Points,
+  Sprite,
+  Vector2,
+  Vector3,
+  Vector4,
+  VertexColors
+});
 
-const { SVGRenderer } = installSVGRenderer({ THREE: THREE$1, Projector: Projector$1, RenderableFace, RenderableLine, RenderableSprite, document: new domParser_3().parseFromString('<xml></xml>', 'text/xml') });
+const { SVGRenderer } = installSVGRenderer({
+  Box2,
+  Camera,
+  Color,
+  FaceColors,
+  Object3D,
+  Matrix3,
+  Matrix4,
+  Projector,
+  RenderableSprite,
+  RenderableLine,
+  RenderableFace,
+  Vector3,
+  VertexColors,
+  document: new domParser_3().parseFromString('<xml></xml>', 'text/xml')
+});
 // Bootstrap done.
 
 const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {

@@ -1,5 +1,6 @@
 import { Shape, toGeometry } from './Shape';
-import { addTags } from '@jsxcad/geometry-tagged';
+
+import { rewriteTags } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -9,7 +10,7 @@ import { addTags } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const Item = (shape, id) => Shape.fromGeometry(addTags([`item/${id}`], { item: toGeometry(shape) }));
+export const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: toGeometry(shape) }));
 
 const method = function (id) { return Item(this, id); };
 Shape.prototype.toItem = method;

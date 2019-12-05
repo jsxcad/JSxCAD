@@ -1,4 +1,17 @@
-import * as THREE from 'three';
+import {
+  Box3,
+  BufferGeometry,
+  Color,
+  Float32BufferAttribute,
+  Geometry,
+  LineBasicMaterial,
+  LineSegments,
+  Matrix4,
+  Mesh,
+  Vector2,
+  Vector3,
+  VertexColors
+} from 'three';
 
 // import { add, normalize, scale, subtract } from '@jsxcad/math-vec2';
 
@@ -22,7 +35,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
 
   // geom.removeAttribute('uv');
   if (geom.attributes.uv === undefined) {
-    geom.addAttribute('uv', new THREE.Float32BufferAttribute(coords, 2));
+    geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
   }
 
   // maps 3 verts of 1 face on the better side of the cube
@@ -34,16 +47,16 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
     v2.applyMatrix4(transformMatrix);
 
     // get normal of the face, to know into which cube side it maps better
-    let n = new THREE.Vector3();
+    let n = new Vector3();
     n.crossVectors(v1.clone().sub(v0), v1.clone().sub(v2)).normalize();
 
     n.x = Math.abs(n.x);
     n.y = Math.abs(n.y);
     n.z = Math.abs(n.z);
 
-    let uv0 = new THREE.Vector2();
-    let uv1 = new THREE.Vector2();
-    let uv2 = new THREE.Vector2();
+    let uv0 = new Vector2();
+    let uv1 = new Vector2();
+    let uv2 = new Vector2();
     // xz mapping
     if (n.y > n.x && n.y > n.z) {
       uv0.x = (v0.x - bbox.min.x) / bboxMaxSize;
@@ -97,9 +110,9 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
       const vy2 = geom.attributes.position.array[3 * idx2 + 1];
       const vz2 = geom.attributes.position.array[3 * idx2 + 2];
 
-      const v0 = new THREE.Vector3(vx0, vy0, vz0);
-      const v1 = new THREE.Vector3(vx1, vy1, vz1);
-      const v2 = new THREE.Vector3(vx2, vy2, vz2);
+      const v0 = new Vector3(vx0, vy0, vz0);
+      const v1 = new Vector3(vx1, vy1, vz1);
+      const v2 = new Vector3(vx2, vy2, vz2);
 
       const uvs = makeUVs(v0, v1, v2, coords);
 
@@ -126,9 +139,9 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
       const vy2 = geom.attributes.position.array[vi + 7];
       const vz2 = geom.attributes.position.array[vi + 8];
 
-      const v0 = new THREE.Vector3(vx0, vy0, vz0);
-      const v1 = new THREE.Vector3(vx1, vy1, vz1);
-      const v2 = new THREE.Vector3(vx2, vy2, vz2);
+      const v0 = new Vector3(vx0, vy0, vz0);
+      const v1 = new Vector3(vx1, vy1, vz1);
+      const v2 = new Vector3(vx2, vy2, vz2);
 
       const uvs = makeUVs(v0, v1, v2, coords);
 
@@ -152,7 +165,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
 
 const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   if (transformMatrix === undefined) {
-    transformMatrix = new THREE.Matrix4();
+    transformMatrix = new Matrix4();
   }
 
   if (boxSize === undefined) {
@@ -167,8 +180,8 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
     boxSize = Math.max(bboxSizeX, bboxSizeY, bboxSizeZ);
   }
 
-  const uvBbox = new THREE.Box3(new THREE.Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
-                                new THREE.Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
+  const uvBbox = new Box3(new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
+                          new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
 
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
@@ -185,14 +198,14 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
   } else if (threejsGeometry.threejsSegments) {
     const segments = threejsGeometry.threejsSegments;
     const dataset = {};
-    const geometry = new THREE.Geometry();
-    const material = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: THREE.VertexColors });
-    const color = new THREE.Color(setColor(tags, {}, [0, 0, 0]).color);
+    const geometry = new Geometry();
+    const material = new LineBasicMaterial({ color: 0xffffff, vertexColors: VertexColors });
+    const color = new Color(setColor(tags, {}, [0, 0, 0]).color);
     for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
       geometry.colors.push(color, color);
-      geometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+      geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
     }
-    dataset.mesh = new THREE.LineSegments(geometry, material);
+    dataset.mesh = new LineSegments(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
@@ -200,12 +213,12 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
   } else if (threejsGeometry.threejsSolid) {
     const { positions, normals } = threejsGeometry.threejsSolid;
     const dataset = {};
-    const geometry = new THREE.BufferGeometry();
-    geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    const geometry = new BufferGeometry();
+    geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
     applyBoxUV(geometry);
     const material = buildMeshMaterial(tags);
-    dataset.mesh = new THREE.Mesh(geometry, material);
+    dataset.mesh = new Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
@@ -213,12 +226,12 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
   } else if (threejsGeometry.threejsSurface) {
     const { positions, normals } = threejsGeometry.threejsSurface;
     const dataset = {};
-    const geometry = new THREE.BufferGeometry();
-    geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    const geometry = new BufferGeometry();
+    geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
     applyBoxUV(geometry);
     const material = buildMeshMaterial(tags);
-    dataset.mesh = new THREE.Mesh(geometry, material);
+    dataset.mesh = new Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
@@ -234,7 +247,7 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
   }
 
   const project = (point) => {
-    const vector = new THREE.Vector3();
+    const vector = new Vector3();
     vector.set(...point);
     // map to normalized device coordinate (NDC) space
     vector.project(camera);

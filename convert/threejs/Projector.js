@@ -4,7 +4,7 @@
  * @author julianwa / https://github.com/julianwa
  */
 
-export const installProjector = ({ THREE }) => {
+export const installProjector = ({ BackSide, Box3, BufferGeometry, Color, DoubleSide, FaceColors, FrontSide, Frustum, Geometry, Light, Line, LineSegments, Matrix3, Matrix4, Mesh, Points, Sprite, Vector2, Vector3, Vector4, VertexColors }) => {
   const RenderableObject = function () {
   	this.id = 0;
 
@@ -22,14 +22,14 @@ export const installProjector = ({ THREE }) => {
   	this.v2 = new RenderableVertex();
   	this.v3 = new RenderableVertex();
 
-  	this.normalModel = new THREE.Vector3();
+  	this.normalModel = new Vector3();
 
-  	this.vertexNormalsModel = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+  	this.vertexNormalsModel = [ new Vector3(), new Vector3(), new Vector3() ];
   	this.vertexNormalsLength = 0;
 
-  	this.color = new THREE.Color();
+  	this.color = new Color();
   	this.material = null;
-  	this.uvs = [ new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2() ];
+  	this.uvs = [ new Vector2(), new Vector2(), new Vector2() ];
 
   	this.z = 0;
   	this.renderOrder = 0;
@@ -38,9 +38,9 @@ export const installProjector = ({ THREE }) => {
   //
 
   const RenderableVertex = function () {
-  	this.position = new THREE.Vector3();
-  	this.positionWorld = new THREE.Vector3();
-  	this.positionScreen = new THREE.Vector4();
+  	this.position = new Vector3();
+  	this.positionWorld = new Vector3();
+  	this.positionScreen = new Vector4();
 
   	this.visible = true;
   };
@@ -58,7 +58,7 @@ export const installProjector = ({ THREE }) => {
   	this.v1 = new RenderableVertex();
   	this.v2 = new RenderableVertex();
 
-  	this.vertexColors = [ new THREE.Color(), new THREE.Color() ];
+  	this.vertexColors = [ new Color(), new Color() ];
   	this.material = null;
 
   	this.z = 0;
@@ -77,7 +77,7 @@ export const installProjector = ({ THREE }) => {
   	this.z = 0;
 
   	this.rotation = 0;
-  	this.scale = new THREE.Vector2();
+  	this.scale = new Vector2();
 
   	this.material = null;
   	this.renderOrder = 0;
@@ -94,25 +94,25 @@ export const installProjector = ({ THREE }) => {
 
   		var _renderData = { objects: [], lights: [], elements: [] };
 
-  		var _vector3 = new THREE.Vector3();
-  		var _vector4 = new THREE.Vector4();
+  		var _vector3 = new Vector3();
+  		var _vector4 = new Vector4();
 
-  		var _clipBox = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1));
-  		var _boundingBox = new THREE.Box3();
+  		var _clipBox = new Box3(new Vector3(-1, -1, -1), new Vector3(1, 1, 1));
+  		var _boundingBox = new Box3();
   		var _points3 = new Array(3);
 
-  		var _viewMatrix = new THREE.Matrix4();
-  		var _viewProjectionMatrix = new THREE.Matrix4();
+  		var _viewMatrix = new Matrix4();
+  		var _viewProjectionMatrix = new Matrix4();
 
   		var _modelMatrix;
-  		var _modelViewProjectionMatrix = new THREE.Matrix4();
+  		var _modelViewProjectionMatrix = new Matrix4();
 
-  		var _normalMatrix = new THREE.Matrix3();
+  		var _normalMatrix = new Matrix3();
 
-  		var _frustum = new THREE.Frustum();
+  		var _frustum = new Frustum();
 
-  		var _clippedVertex1PositionScreen = new THREE.Vector4();
-  		var _clippedVertex2PositionScreen = new THREE.Vector4();
+  		var _clippedVertex1PositionScreen = new Vector4();
+  		var _clippedVertex2PositionScreen = new Vector4();
 
   	//
 
@@ -140,7 +140,7 @@ export const installProjector = ({ THREE }) => {
   		var object = null;
   		var material = null;
 
-  		var normalMatrix = new THREE.Matrix3();
+  		var normalMatrix = new Matrix3();
 
   		function setObject (value) {
   			object = value;
@@ -231,7 +231,7 @@ export const installProjector = ({ THREE }) => {
 
   				_line.material = object.material;
 
-  				if (object.material.vertexColors === THREE.VertexColors) {
+  				if (object.material.vertexColors === VertexColors) {
   					_line.vertexColors[ 0 ].fromArray(colors, a * 3);
   					_line.vertexColors[ 1 ].fromArray(colors, b * 3);
   				}
@@ -247,7 +247,7 @@ export const installProjector = ({ THREE }) => {
 
   			if (checkTriangleVisibility(v1, v2, v3) === false) return;
 
-  			if (material.side === THREE.DoubleSide || checkBackfaceCulling(v1, v2, v3) === true) {
+  			if (material.side === DoubleSide || checkBackfaceCulling(v1, v2, v3) === true) {
   				_face = getNextFaceInPool();
 
   				_face.id = object.id;
@@ -277,7 +277,7 @@ export const installProjector = ({ THREE }) => {
 
   				_face.material = material;
 
-  				if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
+  				if (material.vertexColors === FaceColors || material.vertexColors === VertexColors) {
   					_face.color.fromArray(colors, a * 3);
   				}
 
@@ -304,14 +304,14 @@ export const installProjector = ({ THREE }) => {
   	function projectObject (object) {
   		if (object.visible === false) return;
 
-  		if (object instanceof THREE.Light) {
+  		if (object instanceof Light) {
   			_renderData.lights.push(object);
-  		} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
+  		} else if (object instanceof Mesh || object instanceof Line || object instanceof Points) {
   			if (object.material.visible === false) return;
   			if (object.frustumCulled === true && _frustum.intersectsObject(object) === false) return;
 
   			addObject(object);
-  		} else if (object instanceof THREE.Sprite) {
+  		} else if (object instanceof Sprite) {
   			if (object.material.visible === false) return;
   			if (object.frustumCulled === true && _frustum.intersectsSprite(object) === false) return;
 
@@ -380,8 +380,8 @@ export const installProjector = ({ THREE }) => {
 
   			_vertexCount = 0;
 
-  			if (object instanceof THREE.Mesh) {
-  				if (geometry instanceof THREE.BufferGeometry) {
+  			if (object instanceof Mesh) {
+  				if (geometry instanceof BufferGeometry) {
   					var material = object.material;
 
   					var isMultiMaterial = Array.isArray(material);
@@ -485,7 +485,7 @@ export const installProjector = ({ THREE }) => {
   							}
   						}
   					}
-  				} else if (geometry instanceof THREE.Geometry) {
+  				} else if (geometry instanceof Geometry) {
   					var vertices = geometry.vertices;
   					var faces = geometry.faces;
   					var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
@@ -541,9 +541,9 @@ export const installProjector = ({ THREE }) => {
 
   						var visible = renderList.checkBackfaceCulling(v1, v2, v3);
 
-  						if (side !== THREE.DoubleSide) {
-  							if (side === THREE.FrontSide && visible === false) continue;
-  							if (side === THREE.BackSide && visible === true) continue;
+  						if (side !== DoubleSide) {
+  							if (side === FrontSide && visible === false) continue;
+  							if (side === BackSide && visible === true) continue;
   						}
 
   						_face = getNextFaceInPool();
@@ -555,7 +555,7 @@ export const installProjector = ({ THREE }) => {
 
   						_face.normalModel.copy(face.normal);
 
-  						if (visible === false && (side === THREE.BackSide || side === THREE.DoubleSide)) {
+  						if (visible === false && (side === BackSide || side === DoubleSide)) {
   							_face.normalModel.negate();
   						}
 
@@ -567,7 +567,7 @@ export const installProjector = ({ THREE }) => {
   							var normalModel = _face.vertexNormalsModel[ n ];
   							normalModel.copy(faceVertexNormals[ n ]);
 
-  							if (visible === false && (side === THREE.BackSide || side === THREE.DoubleSide)) {
+  							if (visible === false && (side === BackSide || side === DoubleSide)) {
   								normalModel.negate();
   							}
 
@@ -593,10 +593,10 @@ export const installProjector = ({ THREE }) => {
   						_renderData.elements.push(_face);
   					}
   				}
-  			} else if (object instanceof THREE.Line) {
+  			} else if (object instanceof Line) {
   				_modelViewProjectionMatrix.multiplyMatrices(_viewProjectionMatrix, _modelMatrix);
 
-  				if (geometry instanceof THREE.BufferGeometry) {
+  				if (geometry instanceof BufferGeometry) {
   					var attributes = geometry.attributes;
 
   					if (attributes.position !== undefined) {
@@ -621,14 +621,14 @@ export const installProjector = ({ THREE }) => {
   								renderList.pushLine(indices[ i ], indices[ i + 1 ]);
   							}
   						} else {
-  							var step = object instanceof THREE.LineSegments ? 2 : 1;
+  							var step = object instanceof LineSegments ? 2 : 1;
 
   							for (var i = 0, l = (positions.length / 3) - 1; i < l; i += step) {
   								renderList.pushLine(i, i + 1);
   							}
   						}
   					}
-  				} else if (geometry instanceof THREE.Geometry) {
+  				} else if (geometry instanceof Geometry) {
   					var vertices = object.geometry.vertices;
 
   					if (vertices.length === 0) continue;
@@ -636,7 +636,7 @@ export const installProjector = ({ THREE }) => {
   					v1 = getNextVertexInPool();
   					v1.positionScreen.copy(vertices[ 0 ]).applyMatrix4(_modelViewProjectionMatrix);
 
-  					var step = object instanceof THREE.LineSegments ? 2 : 1;
+  					var step = object instanceof LineSegments ? 2 : 1;
 
   					for (var v = 1, vl = vertices.length; v < vl; v++) {
   						v1 = getNextVertexInPool();
@@ -665,7 +665,7 @@ export const installProjector = ({ THREE }) => {
 
   							_line.material = object.material;
 
-  							if (object.material.vertexColors === THREE.VertexColors) {
+  							if (object.material.vertexColors === VertexColors) {
   								_line.vertexColors[ 0 ].copy(object.geometry.colors[ v ]);
   								_line.vertexColors[ 1 ].copy(object.geometry.colors[ v - 1 ]);
   							}
@@ -674,10 +674,10 @@ export const installProjector = ({ THREE }) => {
   						}
   					}
   				}
-  			} else if (object instanceof THREE.Points) {
+  			} else if (object instanceof Points) {
   				_modelViewProjectionMatrix.multiplyMatrices(_viewProjectionMatrix, _modelMatrix);
 
-  				if (geometry instanceof THREE.Geometry) {
+  				if (geometry instanceof Geometry) {
   					var vertices = object.geometry.vertices;
 
   					for (var v = 0, vl = vertices.length; v < vl; v++) {
@@ -688,7 +688,7 @@ export const installProjector = ({ THREE }) => {
 
   						pushPoint(_vector4, object, camera);
   					}
-  				} else if (geometry instanceof THREE.BufferGeometry) {
+  				} else if (geometry instanceof BufferGeometry) {
   					var attributes = geometry.attributes;
 
   					if (attributes.position !== undefined) {
@@ -702,7 +702,7 @@ export const installProjector = ({ THREE }) => {
   						}
   					}
   				}
-  			} else if (object instanceof THREE.Sprite) {
+  			} else if (object instanceof Sprite) {
   				object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
   				_vector4.set(_modelMatrix.elements[ 12 ], _modelMatrix.elements[ 13 ], _modelMatrix.elements[ 14 ], 1);
   				_vector4.applyMatrix4(_viewProjectionMatrix);

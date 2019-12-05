@@ -1,5 +1,6 @@
 import Shape from './Shape';
-import { addTags } from '@jsxcad/geometry-tagged';
+
+import { rewriteTags } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -18,7 +19,7 @@ import { addTags } from '@jsxcad/geometry-tagged';
  **/
 
 export const material = (shape, ...tags) =>
-  Shape.fromGeometry(addTags(tags.map(tag => `material/${tag}`), shape.toGeometry()));
+  Shape.fromGeometry(rewriteTags(tags.map(tag => `material/${tag}`), [], shape.toGeometry()));
 
 const materialMethod = function (...tags) { return material(this, ...tags); };
 Shape.prototype.material = materialMethod;

@@ -2,14 +2,14 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-export const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine, RenderableFace, document }) => {
+export const installSVGRenderer = ({ Box2, Camera, Color, FaceColors, Object3D, Matrix3, Matrix4, Projector, RenderableSprite, RenderableLine, RenderableFace, Vector3, VertexColors, document }) => {
   const SVGObject = function (node) {
-  	THREE.Object3D.call(this);
+  	Object3D.call(this);
 
   	this.node = node;
   };
 
-  SVGObject.prototype = Object.create(THREE.Object3D.prototype);
+  SVGObject.prototype = Object.create(Object3D.prototype);
   SVGObject.prototype.constructor = SVGObject;
 
   const SVGRenderer = function () {
@@ -21,24 +21,24 @@ export const installSVGRenderer = ({ THREE, Projector, RenderableSprite, Rendera
 
   		var _v1; var _v2; var _v3;
 
-  		var _clipBox = new THREE.Box2();
-  		var _elemBox = new THREE.Box2();
+  		var _clipBox = new Box2();
+  		var _elemBox = new Box2();
 
-  		var _color = new THREE.Color();
-  		var _diffuseColor = new THREE.Color();
-  		var _ambientLight = new THREE.Color();
-  		var _directionalLights = new THREE.Color();
-  		var _pointLights = new THREE.Color();
-  		var _clearColor = new THREE.Color();
+  		var _color = new Color();
+  		var _diffuseColor = new Color();
+  		var _ambientLight = new Color();
+  		var _directionalLights = new Color();
+  		var _pointLights = new Color();
+  		var _clearColor = new Color();
   		var _clearAlpha = 1;
 
-  		var _vector3 = new THREE.Vector3(); // Needed for PointLight
-  		var _centroid = new THREE.Vector3();
-  		var _normal = new THREE.Vector3();
-  		var _normalViewMatrix = new THREE.Matrix3();
+  		var _vector3 = new Vector3(); // Needed for PointLight
+  		var _centroid = new Vector3();
+  		var _normal = new Vector3();
+  		var _normalViewMatrix = new Matrix3();
 
-  		var _viewMatrix = new THREE.Matrix4();
-  		var _viewProjectionMatrix = new THREE.Matrix4();
+  		var _viewMatrix = new Matrix4();
+  		var _viewProjectionMatrix = new Matrix4();
 
   		var _svgPathPool = [];
   		var _svgNode; var _pathCount = 0;
@@ -125,7 +125,7 @@ export const installSVGRenderer = ({ THREE, Projector, RenderableSprite, Rendera
   	};
 
   	this.render = function (scene, camera) {
-  		if (camera instanceof THREE.Camera === false) {
+  		if (camera instanceof Camera === false) {
   			console.error('THREE.SVGRenderer.render: camera is not an instance of THREE.Camera.');
   			return;
   		}
@@ -330,13 +330,13 @@ export const installSVGRenderer = ({ THREE, Projector, RenderableSprite, Rendera
   		if (material.isMeshBasicMaterial) {
   			_color.copy(material.color);
 
-  			if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
+  			if (material.vertexColors === FaceColors || material.vertexColors === VertexColors) {
   				_color.multiply(element.color);
   			}
   		} else if (material.isMeshLambertMaterial || material.isMeshPhongMaterial || material.isMeshStandardMaterial) {
   			_diffuseColor.copy(material.color);
 
-  			if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
+  			if (material.vertexColors === FaceColors || material.vertexColors === VertexColors) {
   				_diffuseColor.multiply(element.color);
   			}
 

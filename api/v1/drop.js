@@ -1,5 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { addTags, drop as dropGeometry } from '@jsxcad/geometry-tagged';
+import { drop as dropGeometry, rewriteTags } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -47,7 +47,7 @@ import { addTags, drop as dropGeometry } from '@jsxcad/geometry-tagged';
 
 export const drop = (shape, ...tags) => {
   if (tags.length === 0) {
-    return fromGeometry(addTags(['compose/non-positive'], toGeometry(shape)));
+    return fromGeometry(rewriteTags(['compose/non-positive'], [], toGeometry(shape)));
   } else {
     return fromGeometry(dropGeometry(tags.map(tag => `user/${tag}`), toGeometry(shape)));
   }

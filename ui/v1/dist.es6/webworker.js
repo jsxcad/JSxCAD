@@ -1,9 +1,8 @@
-import * as api from './jsxcad-api-v1';
-import { conversation, log } from './jsxcad-sys';
-import { toEcmascript } from './jsxcad-compiler';
+import * as api from './jsxcad-api-v1.js';
+import { conversation, log } from './jsxcad-sys.js';
+import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
-Error.stackTraceLimit = Infinity;
 
 const say = message => postMessage(message);
 
