@@ -50,5 +50,6 @@ cp geometry/surface/dist/main.js es6/jsxcad-geometry-surface.js
 cp geometry/surface-boolean/dist/main.js es6/jsxcad-geometry-surface-boolean.js
 cp cache/dist/main.js es6/jsxcad-cache.js
 cp compiler/dist/main.js es6/jsxcad-compiler.js
+cp ui/threejs/dist/main.js es6/jsxcad-ui-threejs.js
 
 git add es6/*.js

@@ -1,8 +1,2498 @@
-import { toKeptGeometry } from './jsxcad-geometry-tagged.js';
-import { makeConvex } from './jsxcad-geometry-surface.js';
-import { toPlane } from './jsxcad-math-poly3.js';
-import { toSegments } from './jsxcad-geometry-path.js';
-import { toTriangles } from './jsxcad-geometry-polygons.js';
+import { toRgb } from './jsxcad-algorithm-color.js';
+
+/**
+ * dat-gui JavaScript Controller Library
+ * http://code.google.com/p/dat-gui
+ *
+ * Copyright 2011 Data Arts Team, Google Creative Lab
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+function ___$insertStyle(css) {
+  if (!css) {
+    return;
+  }
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  var style = document.createElement('style');
+
+  style.setAttribute('type', 'text/css');
+  style.innerHTML = css;
+  document.head.appendChild(style);
+
+  return css;
+}
+
+function colorToString (color, forceCSSHex) {
+  var colorFormat = color.__state.conversionName.toString();
+  var r = Math.round(color.r);
+  var g = Math.round(color.g);
+  var b = Math.round(color.b);
+  var a = color.a;
+  var h = Math.round(color.h);
+  var s = color.s.toFixed(1);
+  var v = color.v.toFixed(1);
+  if (forceCSSHex || colorFormat === 'THREE_CHAR_HEX' || colorFormat === 'SIX_CHAR_HEX') {
+    var str = color.hex.toString(16);
+    while (str.length < 6) {
+      str = '0' + str;
+    }
+    return '#' + str;
+  } else if (colorFormat === 'CSS_RGB') {
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  } else if (colorFormat === 'CSS_RGBA') {
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  } else if (colorFormat === 'HEX') {
+    return '0x' + color.hex.toString(16);
+  } else if (colorFormat === 'RGB_ARRAY') {
+    return '[' + r + ',' + g + ',' + b + ']';
+  } else if (colorFormat === 'RGBA_ARRAY') {
+    return '[' + r + ',' + g + ',' + b + ',' + a + ']';
+  } else if (colorFormat === 'RGB_OBJ') {
+    return '{r:' + r + ',g:' + g + ',b:' + b + '}';
+  } else if (colorFormat === 'RGBA_OBJ') {
+    return '{r:' + r + ',g:' + g + ',b:' + b + ',a:' + a + '}';
+  } else if (colorFormat === 'HSV_OBJ') {
+    return '{h:' + h + ',s:' + s + ',v:' + v + '}';
+  } else if (colorFormat === 'HSVA_OBJ') {
+    return '{h:' + h + ',s:' + s + ',v:' + v + ',a:' + a + '}';
+  }
+  return 'unknown format';
+}
+
+var ARR_EACH = Array.prototype.forEach;
+var ARR_SLICE = Array.prototype.slice;
+var Common = {
+  BREAK: {},
+  extend: function extend(target) {
+    this.each(ARR_SLICE.call(arguments, 1), function (obj) {
+      var keys = this.isObject(obj) ? Object.keys(obj) : [];
+      keys.forEach(function (key) {
+        if (!this.isUndefined(obj[key])) {
+          target[key] = obj[key];
+        }
+      }.bind(this));
+    }, this);
+    return target;
+  },
+  defaults: function defaults(target) {
+    this.each(ARR_SLICE.call(arguments, 1), function (obj) {
+      var keys = this.isObject(obj) ? Object.keys(obj) : [];
+      keys.forEach(function (key) {
+        if (this.isUndefined(target[key])) {
+          target[key] = obj[key];
+        }
+      }.bind(this));
+    }, this);
+    return target;
+  },
+  compose: function compose() {
+    var toCall = ARR_SLICE.call(arguments);
+    return function () {
+      var args = ARR_SLICE.call(arguments);
+      for (var i = toCall.length - 1; i >= 0; i--) {
+        args = [toCall[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  },
+  each: function each(obj, itr, scope) {
+    if (!obj) {
+      return;
+    }
+    if (ARR_EACH && obj.forEach && obj.forEach === ARR_EACH) {
+      obj.forEach(itr, scope);
+    } else if (obj.length === obj.length + 0) {
+      var key = void 0;
+      var l = void 0;
+      for (key = 0, l = obj.length; key < l; key++) {
+        if (key in obj && itr.call(scope, obj[key], key) === this.BREAK) {
+          return;
+        }
+      }
+    } else {
+      for (var _key in obj) {
+        if (itr.call(scope, obj[_key], _key) === this.BREAK) {
+          return;
+        }
+      }
+    }
+  },
+  defer: function defer(fnc) {
+    setTimeout(fnc, 0);
+  },
+  debounce: function debounce(func, threshold, callImmediately) {
+    var timeout = void 0;
+    return function () {
+      var obj = this;
+      var args = arguments;
+      function delayed() {
+        timeout = null;
+        if (!callImmediately) func.apply(obj, args);
+      }
+      var callNow = callImmediately || !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(delayed, threshold);
+      if (callNow) {
+        func.apply(obj, args);
+      }
+    };
+  },
+  toArray: function toArray(obj) {
+    if (obj.toArray) return obj.toArray();
+    return ARR_SLICE.call(obj);
+  },
+  isUndefined: function isUndefined(obj) {
+    return obj === undefined;
+  },
+  isNull: function isNull(obj) {
+    return obj === null;
+  },
+  isNaN: function (_isNaN) {
+    function isNaN(_x) {
+      return _isNaN.apply(this, arguments);
+    }
+    isNaN.toString = function () {
+      return _isNaN.toString();
+    };
+    return isNaN;
+  }(function (obj) {
+    return isNaN(obj);
+  }),
+  isArray: Array.isArray || function (obj) {
+    return obj.constructor === Array;
+  },
+  isObject: function isObject(obj) {
+    return obj === Object(obj);
+  },
+  isNumber: function isNumber(obj) {
+    return obj === obj + 0;
+  },
+  isString: function isString(obj) {
+    return obj === obj + '';
+  },
+  isBoolean: function isBoolean(obj) {
+    return obj === false || obj === true;
+  },
+  isFunction: function isFunction(obj) {
+    return Object.prototype.toString.call(obj) === '[object Function]';
+  }
+};
+
+var INTERPRETATIONS = [
+{
+  litmus: Common.isString,
+  conversions: {
+    THREE_CHAR_HEX: {
+      read: function read(original) {
+        var test = original.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'HEX',
+          hex: parseInt('0x' + test[1].toString() + test[1].toString() + test[2].toString() + test[2].toString() + test[3].toString() + test[3].toString(), 0)
+        };
+      },
+      write: colorToString
+    },
+    SIX_CHAR_HEX: {
+      read: function read(original) {
+        var test = original.match(/^#([A-F0-9]{6})$/i);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'HEX',
+          hex: parseInt('0x' + test[1].toString(), 0)
+        };
+      },
+      write: colorToString
+    },
+    CSS_RGB: {
+      read: function read(original) {
+        var test = original.match(/^rgb\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'RGB',
+          r: parseFloat(test[1]),
+          g: parseFloat(test[2]),
+          b: parseFloat(test[3])
+        };
+      },
+      write: colorToString
+    },
+    CSS_RGBA: {
+      read: function read(original) {
+        var test = original.match(/^rgba\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'RGB',
+          r: parseFloat(test[1]),
+          g: parseFloat(test[2]),
+          b: parseFloat(test[3]),
+          a: parseFloat(test[4])
+        };
+      },
+      write: colorToString
+    }
+  }
+},
+{
+  litmus: Common.isNumber,
+  conversions: {
+    HEX: {
+      read: function read(original) {
+        return {
+          space: 'HEX',
+          hex: original,
+          conversionName: 'HEX'
+        };
+      },
+      write: function write(color) {
+        return color.hex;
+      }
+    }
+  }
+},
+{
+  litmus: Common.isArray,
+  conversions: {
+    RGB_ARRAY: {
+      read: function read(original) {
+        if (original.length !== 3) {
+          return false;
+        }
+        return {
+          space: 'RGB',
+          r: original[0],
+          g: original[1],
+          b: original[2]
+        };
+      },
+      write: function write(color) {
+        return [color.r, color.g, color.b];
+      }
+    },
+    RGBA_ARRAY: {
+      read: function read(original) {
+        if (original.length !== 4) return false;
+        return {
+          space: 'RGB',
+          r: original[0],
+          g: original[1],
+          b: original[2],
+          a: original[3]
+        };
+      },
+      write: function write(color) {
+        return [color.r, color.g, color.b, color.a];
+      }
+    }
+  }
+},
+{
+  litmus: Common.isObject,
+  conversions: {
+    RGBA_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.r) && Common.isNumber(original.g) && Common.isNumber(original.b) && Common.isNumber(original.a)) {
+          return {
+            space: 'RGB',
+            r: original.r,
+            g: original.g,
+            b: original.b,
+            a: original.a
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          r: color.r,
+          g: color.g,
+          b: color.b,
+          a: color.a
+        };
+      }
+    },
+    RGB_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.r) && Common.isNumber(original.g) && Common.isNumber(original.b)) {
+          return {
+            space: 'RGB',
+            r: original.r,
+            g: original.g,
+            b: original.b
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          r: color.r,
+          g: color.g,
+          b: color.b
+        };
+      }
+    },
+    HSVA_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.h) && Common.isNumber(original.s) && Common.isNumber(original.v) && Common.isNumber(original.a)) {
+          return {
+            space: 'HSV',
+            h: original.h,
+            s: original.s,
+            v: original.v,
+            a: original.a
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          h: color.h,
+          s: color.s,
+          v: color.v,
+          a: color.a
+        };
+      }
+    },
+    HSV_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.h) && Common.isNumber(original.s) && Common.isNumber(original.v)) {
+          return {
+            space: 'HSV',
+            h: original.h,
+            s: original.s,
+            v: original.v
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          h: color.h,
+          s: color.s,
+          v: color.v
+        };
+      }
+    }
+  }
+}];
+var result = void 0;
+var toReturn = void 0;
+var interpret = function interpret() {
+  toReturn = false;
+  var original = arguments.length > 1 ? Common.toArray(arguments) : arguments[0];
+  Common.each(INTERPRETATIONS, function (family) {
+    if (family.litmus(original)) {
+      Common.each(family.conversions, function (conversion, conversionName) {
+        result = conversion.read(original);
+        if (toReturn === false && result !== false) {
+          toReturn = result;
+          result.conversionName = conversionName;
+          result.conversion = conversion;
+          return Common.BREAK;
+        }
+      });
+      return Common.BREAK;
+    }
+  });
+  return toReturn;
+};
+
+var tmpComponent = void 0;
+var ColorMath = {
+  hsv_to_rgb: function hsv_to_rgb(h, s, v) {
+    var hi = Math.floor(h / 60) % 6;
+    var f = h / 60 - Math.floor(h / 60);
+    var p = v * (1.0 - s);
+    var q = v * (1.0 - f * s);
+    var t = v * (1.0 - (1.0 - f) * s);
+    var c = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][hi];
+    return {
+      r: c[0] * 255,
+      g: c[1] * 255,
+      b: c[2] * 255
+    };
+  },
+  rgb_to_hsv: function rgb_to_hsv(r, g, b) {
+    var min = Math.min(r, g, b);
+    var max = Math.max(r, g, b);
+    var delta = max - min;
+    var h = void 0;
+    var s = void 0;
+    if (max !== 0) {
+      s = delta / max;
+    } else {
+      return {
+        h: NaN,
+        s: 0,
+        v: 0
+      };
+    }
+    if (r === max) {
+      h = (g - b) / delta;
+    } else if (g === max) {
+      h = 2 + (b - r) / delta;
+    } else {
+      h = 4 + (r - g) / delta;
+    }
+    h /= 6;
+    if (h < 0) {
+      h += 1;
+    }
+    return {
+      h: h * 360,
+      s: s,
+      v: max / 255
+    };
+  },
+  rgb_to_hex: function rgb_to_hex(r, g, b) {
+    var hex = this.hex_with_component(0, 2, r);
+    hex = this.hex_with_component(hex, 1, g);
+    hex = this.hex_with_component(hex, 0, b);
+    return hex;
+  },
+  component_from_hex: function component_from_hex(hex, componentIndex) {
+    return hex >> componentIndex * 8 & 0xFF;
+  },
+  hex_with_component: function hex_with_component(hex, componentIndex, value) {
+    return value << (tmpComponent = componentIndex * 8) | hex & ~(0xFF << tmpComponent);
+  }
+};
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+var Color = function () {
+  function Color() {
+    classCallCheck(this, Color);
+    this.__state = interpret.apply(this, arguments);
+    if (this.__state === false) {
+      throw new Error('Failed to interpret color arguments');
+    }
+    this.__state.a = this.__state.a || 1;
+  }
+  createClass(Color, [{
+    key: 'toString',
+    value: function toString() {
+      return colorToString(this);
+    }
+  }, {
+    key: 'toHexString',
+    value: function toHexString() {
+      return colorToString(this, true);
+    }
+  }, {
+    key: 'toOriginal',
+    value: function toOriginal() {
+      return this.__state.conversion.write(this);
+    }
+  }]);
+  return Color;
+}();
+function defineRGBComponent(target, component, componentHexIndex) {
+  Object.defineProperty(target, component, {
+    get: function get$$1() {
+      if (this.__state.space === 'RGB') {
+        return this.__state[component];
+      }
+      Color.recalculateRGB(this, component, componentHexIndex);
+      return this.__state[component];
+    },
+    set: function set$$1(v) {
+      if (this.__state.space !== 'RGB') {
+        Color.recalculateRGB(this, component, componentHexIndex);
+        this.__state.space = 'RGB';
+      }
+      this.__state[component] = v;
+    }
+  });
+}
+function defineHSVComponent(target, component) {
+  Object.defineProperty(target, component, {
+    get: function get$$1() {
+      if (this.__state.space === 'HSV') {
+        return this.__state[component];
+      }
+      Color.recalculateHSV(this);
+      return this.__state[component];
+    },
+    set: function set$$1(v) {
+      if (this.__state.space !== 'HSV') {
+        Color.recalculateHSV(this);
+        this.__state.space = 'HSV';
+      }
+      this.__state[component] = v;
+    }
+  });
+}
+Color.recalculateRGB = function (color, component, componentHexIndex) {
+  if (color.__state.space === 'HEX') {
+    color.__state[component] = ColorMath.component_from_hex(color.__state.hex, componentHexIndex);
+  } else if (color.__state.space === 'HSV') {
+    Common.extend(color.__state, ColorMath.hsv_to_rgb(color.__state.h, color.__state.s, color.__state.v));
+  } else {
+    throw new Error('Corrupted color state');
+  }
+};
+Color.recalculateHSV = function (color) {
+  var result = ColorMath.rgb_to_hsv(color.r, color.g, color.b);
+  Common.extend(color.__state, {
+    s: result.s,
+    v: result.v
+  });
+  if (!Common.isNaN(result.h)) {
+    color.__state.h = result.h;
+  } else if (Common.isUndefined(color.__state.h)) {
+    color.__state.h = 0;
+  }
+};
+Color.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
+defineRGBComponent(Color.prototype, 'r', 2);
+defineRGBComponent(Color.prototype, 'g', 1);
+defineRGBComponent(Color.prototype, 'b', 0);
+defineHSVComponent(Color.prototype, 'h');
+defineHSVComponent(Color.prototype, 's');
+defineHSVComponent(Color.prototype, 'v');
+Object.defineProperty(Color.prototype, 'a', {
+  get: function get$$1() {
+    return this.__state.a;
+  },
+  set: function set$$1(v) {
+    this.__state.a = v;
+  }
+});
+Object.defineProperty(Color.prototype, 'hex', {
+  get: function get$$1() {
+    if (!this.__state.space !== 'HEX') {
+      this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+    }
+    return this.__state.hex;
+  },
+  set: function set$$1(v) {
+    this.__state.space = 'HEX';
+    this.__state.hex = v;
+  }
+});
+
+var Controller = function () {
+  function Controller(object, property) {
+    classCallCheck(this, Controller);
+    this.initialValue = object[property];
+    this.domElement = document.createElement('div');
+    this.object = object;
+    this.property = property;
+    this.__onChange = undefined;
+    this.__onFinishChange = undefined;
+  }
+  createClass(Controller, [{
+    key: 'onChange',
+    value: function onChange(fnc) {
+      this.__onChange = fnc;
+      return this;
+    }
+  }, {
+    key: 'onFinishChange',
+    value: function onFinishChange(fnc) {
+      this.__onFinishChange = fnc;
+      return this;
+    }
+  }, {
+    key: 'setValue',
+    value: function setValue(newValue) {
+      this.object[this.property] = newValue;
+      if (this.__onChange) {
+        this.__onChange.call(this, newValue);
+      }
+      this.updateDisplay();
+      return this;
+    }
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.object[this.property];
+    }
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      return this;
+    }
+  }, {
+    key: 'isModified',
+    value: function isModified() {
+      return this.initialValue !== this.getValue();
+    }
+  }]);
+  return Controller;
+}();
+
+var EVENT_MAP = {
+  HTMLEvents: ['change'],
+  MouseEvents: ['click', 'mousemove', 'mousedown', 'mouseup', 'mouseover'],
+  KeyboardEvents: ['keydown']
+};
+var EVENT_MAP_INV = {};
+Common.each(EVENT_MAP, function (v, k) {
+  Common.each(v, function (e) {
+    EVENT_MAP_INV[e] = k;
+  });
+});
+var CSS_VALUE_PIXELS = /(\d+(\.\d+)?)px/;
+function cssValueToPixels(val) {
+  if (val === '0' || Common.isUndefined(val)) {
+    return 0;
+  }
+  var match = val.match(CSS_VALUE_PIXELS);
+  if (!Common.isNull(match)) {
+    return parseFloat(match[1]);
+  }
+  return 0;
+}
+var dom = {
+  makeSelectable: function makeSelectable(elem, selectable) {
+    if (elem === undefined || elem.style === undefined) return;
+    elem.onselectstart = selectable ? function () {
+      return false;
+    } : function () {};
+    elem.style.MozUserSelect = selectable ? 'auto' : 'none';
+    elem.style.KhtmlUserSelect = selectable ? 'auto' : 'none';
+    elem.unselectable = selectable ? 'on' : 'off';
+  },
+  makeFullscreen: function makeFullscreen(elem, hor, vert) {
+    var vertical = vert;
+    var horizontal = hor;
+    if (Common.isUndefined(horizontal)) {
+      horizontal = true;
+    }
+    if (Common.isUndefined(vertical)) {
+      vertical = true;
+    }
+    elem.style.position = 'absolute';
+    if (horizontal) {
+      elem.style.left = 0;
+      elem.style.right = 0;
+    }
+    if (vertical) {
+      elem.style.top = 0;
+      elem.style.bottom = 0;
+    }
+  },
+  fakeEvent: function fakeEvent(elem, eventType, pars, aux) {
+    var params = pars || {};
+    var className = EVENT_MAP_INV[eventType];
+    if (!className) {
+      throw new Error('Event type ' + eventType + ' not supported.');
+    }
+    var evt = document.createEvent(className);
+    switch (className) {
+      case 'MouseEvents':
+        {
+          var clientX = params.x || params.clientX || 0;
+          var clientY = params.y || params.clientY || 0;
+          evt.initMouseEvent(eventType, params.bubbles || false, params.cancelable || true, window, params.clickCount || 1, 0,
+          0,
+          clientX,
+          clientY,
+          false, false, false, false, 0, null);
+          break;
+        }
+      case 'KeyboardEvents':
+        {
+          var init = evt.initKeyboardEvent || evt.initKeyEvent;
+          Common.defaults(params, {
+            cancelable: true,
+            ctrlKey: false,
+            altKey: false,
+            shiftKey: false,
+            metaKey: false,
+            keyCode: undefined,
+            charCode: undefined
+          });
+          init(eventType, params.bubbles || false, params.cancelable, window, params.ctrlKey, params.altKey, params.shiftKey, params.metaKey, params.keyCode, params.charCode);
+          break;
+        }
+      default:
+        {
+          evt.initEvent(eventType, params.bubbles || false, params.cancelable || true);
+          break;
+        }
+    }
+    Common.defaults(evt, aux);
+    elem.dispatchEvent(evt);
+  },
+  bind: function bind(elem, event, func, newBool) {
+    var bool = newBool || false;
+    if (elem.addEventListener) {
+      elem.addEventListener(event, func, bool);
+    } else if (elem.attachEvent) {
+      elem.attachEvent('on' + event, func);
+    }
+    return dom;
+  },
+  unbind: function unbind(elem, event, func, newBool) {
+    var bool = newBool || false;
+    if (elem.removeEventListener) {
+      elem.removeEventListener(event, func, bool);
+    } else if (elem.detachEvent) {
+      elem.detachEvent('on' + event, func);
+    }
+    return dom;
+  },
+  addClass: function addClass(elem, className) {
+    if (elem.className === undefined) {
+      elem.className = className;
+    } else if (elem.className !== className) {
+      var classes = elem.className.split(/ +/);
+      if (classes.indexOf(className) === -1) {
+        classes.push(className);
+        elem.className = classes.join(' ').replace(/^\s+/, '').replace(/\s+$/, '');
+      }
+    }
+    return dom;
+  },
+  removeClass: function removeClass(elem, className) {
+    if (className) {
+      if (elem.className === className) {
+        elem.removeAttribute('class');
+      } else {
+        var classes = elem.className.split(/ +/);
+        var index = classes.indexOf(className);
+        if (index !== -1) {
+          classes.splice(index, 1);
+          elem.className = classes.join(' ');
+        }
+      }
+    } else {
+      elem.className = undefined;
+    }
+    return dom;
+  },
+  hasClass: function hasClass(elem, className) {
+    return new RegExp('(?:^|\\s+)' + className + '(?:\\s+|$)').test(elem.className) || false;
+  },
+  getWidth: function getWidth(elem) {
+    var style = getComputedStyle(elem);
+    return cssValueToPixels(style['border-left-width']) + cssValueToPixels(style['border-right-width']) + cssValueToPixels(style['padding-left']) + cssValueToPixels(style['padding-right']) + cssValueToPixels(style.width);
+  },
+  getHeight: function getHeight(elem) {
+    var style = getComputedStyle(elem);
+    return cssValueToPixels(style['border-top-width']) + cssValueToPixels(style['border-bottom-width']) + cssValueToPixels(style['padding-top']) + cssValueToPixels(style['padding-bottom']) + cssValueToPixels(style.height);
+  },
+  getOffset: function getOffset(el) {
+    var elem = el;
+    var offset = { left: 0, top: 0 };
+    if (elem.offsetParent) {
+      do {
+        offset.left += elem.offsetLeft;
+        offset.top += elem.offsetTop;
+        elem = elem.offsetParent;
+      } while (elem);
+    }
+    return offset;
+  },
+  isActive: function isActive(elem) {
+    return elem === document.activeElement && (elem.type || elem.href);
+  }
+};
+
+var BooleanController = function (_Controller) {
+  inherits(BooleanController, _Controller);
+  function BooleanController(object, property) {
+    classCallCheck(this, BooleanController);
+    var _this2 = possibleConstructorReturn(this, (BooleanController.__proto__ || Object.getPrototypeOf(BooleanController)).call(this, object, property));
+    var _this = _this2;
+    _this2.__prev = _this2.getValue();
+    _this2.__checkbox = document.createElement('input');
+    _this2.__checkbox.setAttribute('type', 'checkbox');
+    function onChange() {
+      _this.setValue(!_this.__prev);
+    }
+    dom.bind(_this2.__checkbox, 'change', onChange, false);
+    _this2.domElement.appendChild(_this2.__checkbox);
+    _this2.updateDisplay();
+    return _this2;
+  }
+  createClass(BooleanController, [{
+    key: 'setValue',
+    value: function setValue(v) {
+      var toReturn = get(BooleanController.prototype.__proto__ || Object.getPrototypeOf(BooleanController.prototype), 'setValue', this).call(this, v);
+      if (this.__onFinishChange) {
+        this.__onFinishChange.call(this, this.getValue());
+      }
+      this.__prev = this.getValue();
+      return toReturn;
+    }
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      if (this.getValue() === true) {
+        this.__checkbox.setAttribute('checked', 'checked');
+        this.__checkbox.checked = true;
+        this.__prev = true;
+      } else {
+        this.__checkbox.checked = false;
+        this.__prev = false;
+      }
+      return get(BooleanController.prototype.__proto__ || Object.getPrototypeOf(BooleanController.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return BooleanController;
+}(Controller);
+
+var OptionController = function (_Controller) {
+  inherits(OptionController, _Controller);
+  function OptionController(object, property, opts) {
+    classCallCheck(this, OptionController);
+    var _this2 = possibleConstructorReturn(this, (OptionController.__proto__ || Object.getPrototypeOf(OptionController)).call(this, object, property));
+    var options = opts;
+    var _this = _this2;
+    _this2.__select = document.createElement('select');
+    if (Common.isArray(options)) {
+      var map = {};
+      Common.each(options, function (element) {
+        map[element] = element;
+      });
+      options = map;
+    }
+    Common.each(options, function (value, key) {
+      var opt = document.createElement('option');
+      opt.innerHTML = key;
+      opt.setAttribute('value', value);
+      _this.__select.appendChild(opt);
+    });
+    _this2.updateDisplay();
+    dom.bind(_this2.__select, 'change', function () {
+      var desiredValue = this.options[this.selectedIndex].value;
+      _this.setValue(desiredValue);
+    });
+    _this2.domElement.appendChild(_this2.__select);
+    return _this2;
+  }
+  createClass(OptionController, [{
+    key: 'setValue',
+    value: function setValue(v) {
+      var toReturn = get(OptionController.prototype.__proto__ || Object.getPrototypeOf(OptionController.prototype), 'setValue', this).call(this, v);
+      if (this.__onFinishChange) {
+        this.__onFinishChange.call(this, this.getValue());
+      }
+      return toReturn;
+    }
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      if (dom.isActive(this.__select)) return this;
+      this.__select.value = this.getValue();
+      return get(OptionController.prototype.__proto__ || Object.getPrototypeOf(OptionController.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return OptionController;
+}(Controller);
+
+var StringController = function (_Controller) {
+  inherits(StringController, _Controller);
+  function StringController(object, property) {
+    classCallCheck(this, StringController);
+    var _this2 = possibleConstructorReturn(this, (StringController.__proto__ || Object.getPrototypeOf(StringController)).call(this, object, property));
+    var _this = _this2;
+    function onChange() {
+      _this.setValue(_this.__input.value);
+    }
+    function onBlur() {
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    _this2.__input = document.createElement('input');
+    _this2.__input.setAttribute('type', 'text');
+    dom.bind(_this2.__input, 'keyup', onChange);
+    dom.bind(_this2.__input, 'change', onChange);
+    dom.bind(_this2.__input, 'blur', onBlur);
+    dom.bind(_this2.__input, 'keydown', function (e) {
+      if (e.keyCode === 13) {
+        this.blur();
+      }
+    });
+    _this2.updateDisplay();
+    _this2.domElement.appendChild(_this2.__input);
+    return _this2;
+  }
+  createClass(StringController, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      if (!dom.isActive(this.__input)) {
+        this.__input.value = this.getValue();
+      }
+      return get(StringController.prototype.__proto__ || Object.getPrototypeOf(StringController.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return StringController;
+}(Controller);
+
+function numDecimals(x) {
+  var _x = x.toString();
+  if (_x.indexOf('.') > -1) {
+    return _x.length - _x.indexOf('.') - 1;
+  }
+  return 0;
+}
+var NumberController = function (_Controller) {
+  inherits(NumberController, _Controller);
+  function NumberController(object, property, params) {
+    classCallCheck(this, NumberController);
+    var _this = possibleConstructorReturn(this, (NumberController.__proto__ || Object.getPrototypeOf(NumberController)).call(this, object, property));
+    var _params = params || {};
+    _this.__min = _params.min;
+    _this.__max = _params.max;
+    _this.__step = _params.step;
+    if (Common.isUndefined(_this.__step)) {
+      if (_this.initialValue === 0) {
+        _this.__impliedStep = 1;
+      } else {
+        _this.__impliedStep = Math.pow(10, Math.floor(Math.log(Math.abs(_this.initialValue)) / Math.LN10)) / 10;
+      }
+    } else {
+      _this.__impliedStep = _this.__step;
+    }
+    _this.__precision = numDecimals(_this.__impliedStep);
+    return _this;
+  }
+  createClass(NumberController, [{
+    key: 'setValue',
+    value: function setValue(v) {
+      var _v = v;
+      if (this.__min !== undefined && _v < this.__min) {
+        _v = this.__min;
+      } else if (this.__max !== undefined && _v > this.__max) {
+        _v = this.__max;
+      }
+      if (this.__step !== undefined && _v % this.__step !== 0) {
+        _v = Math.round(_v / this.__step) * this.__step;
+      }
+      return get(NumberController.prototype.__proto__ || Object.getPrototypeOf(NumberController.prototype), 'setValue', this).call(this, _v);
+    }
+  }, {
+    key: 'min',
+    value: function min(minValue) {
+      this.__min = minValue;
+      return this;
+    }
+  }, {
+    key: 'max',
+    value: function max(maxValue) {
+      this.__max = maxValue;
+      return this;
+    }
+  }, {
+    key: 'step',
+    value: function step(stepValue) {
+      this.__step = stepValue;
+      this.__impliedStep = stepValue;
+      this.__precision = numDecimals(stepValue);
+      return this;
+    }
+  }]);
+  return NumberController;
+}(Controller);
+
+function roundToDecimal(value, decimals) {
+  var tenTo = Math.pow(10, decimals);
+  return Math.round(value * tenTo) / tenTo;
+}
+var NumberControllerBox = function (_NumberController) {
+  inherits(NumberControllerBox, _NumberController);
+  function NumberControllerBox(object, property, params) {
+    classCallCheck(this, NumberControllerBox);
+    var _this2 = possibleConstructorReturn(this, (NumberControllerBox.__proto__ || Object.getPrototypeOf(NumberControllerBox)).call(this, object, property, params));
+    _this2.__truncationSuspended = false;
+    var _this = _this2;
+    var prevY = void 0;
+    function onChange() {
+      var attempted = parseFloat(_this.__input.value);
+      if (!Common.isNaN(attempted)) {
+        _this.setValue(attempted);
+      }
+    }
+    function onFinish() {
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    function onBlur() {
+      onFinish();
+    }
+    function onMouseDrag(e) {
+      var diff = prevY - e.clientY;
+      _this.setValue(_this.getValue() + diff * _this.__impliedStep);
+      prevY = e.clientY;
+    }
+    function onMouseUp() {
+      dom.unbind(window, 'mousemove', onMouseDrag);
+      dom.unbind(window, 'mouseup', onMouseUp);
+      onFinish();
+    }
+    function onMouseDown(e) {
+      dom.bind(window, 'mousemove', onMouseDrag);
+      dom.bind(window, 'mouseup', onMouseUp);
+      prevY = e.clientY;
+    }
+    _this2.__input = document.createElement('input');
+    _this2.__input.setAttribute('type', 'text');
+    dom.bind(_this2.__input, 'change', onChange);
+    dom.bind(_this2.__input, 'blur', onBlur);
+    dom.bind(_this2.__input, 'mousedown', onMouseDown);
+    dom.bind(_this2.__input, 'keydown', function (e) {
+      if (e.keyCode === 13) {
+        _this.__truncationSuspended = true;
+        this.blur();
+        _this.__truncationSuspended = false;
+        onFinish();
+      }
+    });
+    _this2.updateDisplay();
+    _this2.domElement.appendChild(_this2.__input);
+    return _this2;
+  }
+  createClass(NumberControllerBox, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      this.__input.value = this.__truncationSuspended ? this.getValue() : roundToDecimal(this.getValue(), this.__precision);
+      return get(NumberControllerBox.prototype.__proto__ || Object.getPrototypeOf(NumberControllerBox.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return NumberControllerBox;
+}(NumberController);
+
+function map(v, i1, i2, o1, o2) {
+  return o1 + (o2 - o1) * ((v - i1) / (i2 - i1));
+}
+var NumberControllerSlider = function (_NumberController) {
+  inherits(NumberControllerSlider, _NumberController);
+  function NumberControllerSlider(object, property, min, max, step) {
+    classCallCheck(this, NumberControllerSlider);
+    var _this2 = possibleConstructorReturn(this, (NumberControllerSlider.__proto__ || Object.getPrototypeOf(NumberControllerSlider)).call(this, object, property, { min: min, max: max, step: step }));
+    var _this = _this2;
+    _this2.__background = document.createElement('div');
+    _this2.__foreground = document.createElement('div');
+    dom.bind(_this2.__background, 'mousedown', onMouseDown);
+    dom.bind(_this2.__background, 'touchstart', onTouchStart);
+    dom.addClass(_this2.__background, 'slider');
+    dom.addClass(_this2.__foreground, 'slider-fg');
+    function onMouseDown(e) {
+      document.activeElement.blur();
+      dom.bind(window, 'mousemove', onMouseDrag);
+      dom.bind(window, 'mouseup', onMouseUp);
+      onMouseDrag(e);
+    }
+    function onMouseDrag(e) {
+      e.preventDefault();
+      var bgRect = _this.__background.getBoundingClientRect();
+      _this.setValue(map(e.clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
+      return false;
+    }
+    function onMouseUp() {
+      dom.unbind(window, 'mousemove', onMouseDrag);
+      dom.unbind(window, 'mouseup', onMouseUp);
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    function onTouchStart(e) {
+      if (e.touches.length !== 1) {
+        return;
+      }
+      dom.bind(window, 'touchmove', onTouchMove);
+      dom.bind(window, 'touchend', onTouchEnd);
+      onTouchMove(e);
+    }
+    function onTouchMove(e) {
+      var clientX = e.touches[0].clientX;
+      var bgRect = _this.__background.getBoundingClientRect();
+      _this.setValue(map(clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
+    }
+    function onTouchEnd() {
+      dom.unbind(window, 'touchmove', onTouchMove);
+      dom.unbind(window, 'touchend', onTouchEnd);
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    _this2.updateDisplay();
+    _this2.__background.appendChild(_this2.__foreground);
+    _this2.domElement.appendChild(_this2.__background);
+    return _this2;
+  }
+  createClass(NumberControllerSlider, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      var pct = (this.getValue() - this.__min) / (this.__max - this.__min);
+      this.__foreground.style.width = pct * 100 + '%';
+      return get(NumberControllerSlider.prototype.__proto__ || Object.getPrototypeOf(NumberControllerSlider.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return NumberControllerSlider;
+}(NumberController);
+
+var FunctionController = function (_Controller) {
+  inherits(FunctionController, _Controller);
+  function FunctionController(object, property, text) {
+    classCallCheck(this, FunctionController);
+    var _this2 = possibleConstructorReturn(this, (FunctionController.__proto__ || Object.getPrototypeOf(FunctionController)).call(this, object, property));
+    var _this = _this2;
+    _this2.__button = document.createElement('div');
+    _this2.__button.innerHTML = text === undefined ? 'Fire' : text;
+    dom.bind(_this2.__button, 'click', function (e) {
+      e.preventDefault();
+      _this.fire();
+      return false;
+    });
+    dom.addClass(_this2.__button, 'button');
+    _this2.domElement.appendChild(_this2.__button);
+    return _this2;
+  }
+  createClass(FunctionController, [{
+    key: 'fire',
+    value: function fire() {
+      if (this.__onChange) {
+        this.__onChange.call(this);
+      }
+      this.getValue().call(this.object);
+      if (this.__onFinishChange) {
+        this.__onFinishChange.call(this, this.getValue());
+      }
+    }
+  }]);
+  return FunctionController;
+}(Controller);
+
+var ColorController = function (_Controller) {
+  inherits(ColorController, _Controller);
+  function ColorController(object, property) {
+    classCallCheck(this, ColorController);
+    var _this2 = possibleConstructorReturn(this, (ColorController.__proto__ || Object.getPrototypeOf(ColorController)).call(this, object, property));
+    _this2.__color = new Color(_this2.getValue());
+    _this2.__temp = new Color(0);
+    var _this = _this2;
+    _this2.domElement = document.createElement('div');
+    dom.makeSelectable(_this2.domElement, false);
+    _this2.__selector = document.createElement('div');
+    _this2.__selector.className = 'selector';
+    _this2.__saturation_field = document.createElement('div');
+    _this2.__saturation_field.className = 'saturation-field';
+    _this2.__field_knob = document.createElement('div');
+    _this2.__field_knob.className = 'field-knob';
+    _this2.__field_knob_border = '2px solid ';
+    _this2.__hue_knob = document.createElement('div');
+    _this2.__hue_knob.className = 'hue-knob';
+    _this2.__hue_field = document.createElement('div');
+    _this2.__hue_field.className = 'hue-field';
+    _this2.__input = document.createElement('input');
+    _this2.__input.type = 'text';
+    _this2.__input_textShadow = '0 1px 1px ';
+    dom.bind(_this2.__input, 'keydown', function (e) {
+      if (e.keyCode === 13) {
+        onBlur.call(this);
+      }
+    });
+    dom.bind(_this2.__input, 'blur', onBlur);
+    dom.bind(_this2.__selector, 'mousedown', function ()        {
+      dom.addClass(this, 'drag').bind(window, 'mouseup', function ()        {
+        dom.removeClass(_this.__selector, 'drag');
+      });
+    });
+    dom.bind(_this2.__selector, 'touchstart', function ()        {
+      dom.addClass(this, 'drag').bind(window, 'touchend', function ()        {
+        dom.removeClass(_this.__selector, 'drag');
+      });
+    });
+    var valueField = document.createElement('div');
+    Common.extend(_this2.__selector.style, {
+      width: '122px',
+      height: '102px',
+      padding: '3px',
+      backgroundColor: '#222',
+      boxShadow: '0px 1px 3px rgba(0,0,0,0.3)'
+    });
+    Common.extend(_this2.__field_knob.style, {
+      position: 'absolute',
+      width: '12px',
+      height: '12px',
+      border: _this2.__field_knob_border + (_this2.__color.v < 0.5 ? '#fff' : '#000'),
+      boxShadow: '0px 1px 3px rgba(0,0,0,0.5)',
+      borderRadius: '12px',
+      zIndex: 1
+    });
+    Common.extend(_this2.__hue_knob.style, {
+      position: 'absolute',
+      width: '15px',
+      height: '2px',
+      borderRight: '4px solid #fff',
+      zIndex: 1
+    });
+    Common.extend(_this2.__saturation_field.style, {
+      width: '100px',
+      height: '100px',
+      border: '1px solid #555',
+      marginRight: '3px',
+      display: 'inline-block',
+      cursor: 'pointer'
+    });
+    Common.extend(valueField.style, {
+      width: '100%',
+      height: '100%',
+      background: 'none'
+    });
+    linearGradient(valueField, 'top', 'rgba(0,0,0,0)', '#000');
+    Common.extend(_this2.__hue_field.style, {
+      width: '15px',
+      height: '100px',
+      border: '1px solid #555',
+      cursor: 'ns-resize',
+      position: 'absolute',
+      top: '3px',
+      right: '3px'
+    });
+    hueGradient(_this2.__hue_field);
+    Common.extend(_this2.__input.style, {
+      outline: 'none',
+      textAlign: 'center',
+      color: '#fff',
+      border: 0,
+      fontWeight: 'bold',
+      textShadow: _this2.__input_textShadow + 'rgba(0,0,0,0.7)'
+    });
+    dom.bind(_this2.__saturation_field, 'mousedown', fieldDown);
+    dom.bind(_this2.__saturation_field, 'touchstart', fieldDown);
+    dom.bind(_this2.__field_knob, 'mousedown', fieldDown);
+    dom.bind(_this2.__field_knob, 'touchstart', fieldDown);
+    dom.bind(_this2.__hue_field, 'mousedown', fieldDownH);
+    dom.bind(_this2.__hue_field, 'touchstart', fieldDownH);
+    function fieldDown(e) {
+      setSV(e);
+      dom.bind(window, 'mousemove', setSV);
+      dom.bind(window, 'touchmove', setSV);
+      dom.bind(window, 'mouseup', fieldUpSV);
+      dom.bind(window, 'touchend', fieldUpSV);
+    }
+    function fieldDownH(e) {
+      setH(e);
+      dom.bind(window, 'mousemove', setH);
+      dom.bind(window, 'touchmove', setH);
+      dom.bind(window, 'mouseup', fieldUpH);
+      dom.bind(window, 'touchend', fieldUpH);
+    }
+    function fieldUpSV() {
+      dom.unbind(window, 'mousemove', setSV);
+      dom.unbind(window, 'touchmove', setSV);
+      dom.unbind(window, 'mouseup', fieldUpSV);
+      dom.unbind(window, 'touchend', fieldUpSV);
+      onFinish();
+    }
+    function fieldUpH() {
+      dom.unbind(window, 'mousemove', setH);
+      dom.unbind(window, 'touchmove', setH);
+      dom.unbind(window, 'mouseup', fieldUpH);
+      dom.unbind(window, 'touchend', fieldUpH);
+      onFinish();
+    }
+    function onBlur() {
+      var i = interpret(this.value);
+      if (i !== false) {
+        _this.__color.__state = i;
+        _this.setValue(_this.__color.toOriginal());
+      } else {
+        this.value = _this.__color.toString();
+      }
+    }
+    function onFinish() {
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.__color.toOriginal());
+      }
+    }
+    _this2.__saturation_field.appendChild(valueField);
+    _this2.__selector.appendChild(_this2.__field_knob);
+    _this2.__selector.appendChild(_this2.__saturation_field);
+    _this2.__selector.appendChild(_this2.__hue_field);
+    _this2.__hue_field.appendChild(_this2.__hue_knob);
+    _this2.domElement.appendChild(_this2.__input);
+    _this2.domElement.appendChild(_this2.__selector);
+    _this2.updateDisplay();
+    function setSV(e) {
+      if (e.type.indexOf('touch') === -1) {
+        e.preventDefault();
+      }
+      var fieldRect = _this.__saturation_field.getBoundingClientRect();
+      var _ref = e.touches && e.touches[0] || e,
+          clientX = _ref.clientX,
+          clientY = _ref.clientY;
+      var s = (clientX - fieldRect.left) / (fieldRect.right - fieldRect.left);
+      var v = 1 - (clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
+      if (v > 1) {
+        v = 1;
+      } else if (v < 0) {
+        v = 0;
+      }
+      if (s > 1) {
+        s = 1;
+      } else if (s < 0) {
+        s = 0;
+      }
+      _this.__color.v = v;
+      _this.__color.s = s;
+      _this.setValue(_this.__color.toOriginal());
+      return false;
+    }
+    function setH(e) {
+      if (e.type.indexOf('touch') === -1) {
+        e.preventDefault();
+      }
+      var fieldRect = _this.__hue_field.getBoundingClientRect();
+      var _ref2 = e.touches && e.touches[0] || e,
+          clientY = _ref2.clientY;
+      var h = 1 - (clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
+      if (h > 1) {
+        h = 1;
+      } else if (h < 0) {
+        h = 0;
+      }
+      _this.__color.h = h * 360;
+      _this.setValue(_this.__color.toOriginal());
+      return false;
+    }
+    return _this2;
+  }
+  createClass(ColorController, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      var i = interpret(this.getValue());
+      if (i !== false) {
+        var mismatch = false;
+        Common.each(Color.COMPONENTS, function (component) {
+          if (!Common.isUndefined(i[component]) && !Common.isUndefined(this.__color.__state[component]) && i[component] !== this.__color.__state[component]) {
+            mismatch = true;
+            return {};
+          }
+        }, this);
+        if (mismatch) {
+          Common.extend(this.__color.__state, i);
+        }
+      }
+      Common.extend(this.__temp.__state, this.__color.__state);
+      this.__temp.a = 1;
+      var flip = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
+      var _flip = 255 - flip;
+      Common.extend(this.__field_knob.style, {
+        marginLeft: 100 * this.__color.s - 7 + 'px',
+        marginTop: 100 * (1 - this.__color.v) - 7 + 'px',
+        backgroundColor: this.__temp.toHexString(),
+        border: this.__field_knob_border + 'rgb(' + flip + ',' + flip + ',' + flip + ')'
+      });
+      this.__hue_knob.style.marginTop = (1 - this.__color.h / 360) * 100 + 'px';
+      this.__temp.s = 1;
+      this.__temp.v = 1;
+      linearGradient(this.__saturation_field, 'left', '#fff', this.__temp.toHexString());
+      this.__input.value = this.__color.toString();
+      Common.extend(this.__input.style, {
+        backgroundColor: this.__color.toHexString(),
+        color: 'rgb(' + flip + ',' + flip + ',' + flip + ')',
+        textShadow: this.__input_textShadow + 'rgba(' + _flip + ',' + _flip + ',' + _flip + ',.7)'
+      });
+    }
+  }]);
+  return ColorController;
+}(Controller);
+var vendors = ['-moz-', '-o-', '-webkit-', '-ms-', ''];
+function linearGradient(elem, x, a, b) {
+  elem.style.background = '';
+  Common.each(vendors, function (vendor) {
+    elem.style.cssText += 'background: ' + vendor + 'linear-gradient(' + x + ', ' + a + ' 0%, ' + b + ' 100%); ';
+  });
+}
+function hueGradient(elem) {
+  elem.style.background = '';
+  elem.style.cssText += 'background: -moz-linear-gradient(top,  #ff0000 0%, #ff00ff 17%, #0000ff 34%, #00ffff 50%, #00ff00 67%, #ffff00 84%, #ff0000 100%);';
+  elem.style.cssText += 'background: -webkit-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+  elem.style.cssText += 'background: -o-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+  elem.style.cssText += 'background: -ms-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+  elem.style.cssText += 'background: linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+}
+
+var css = {
+  load: function load(url, indoc) {
+    var doc = indoc || document;
+    var link = doc.createElement('link');
+    link.type = 'text/css';
+    link.rel = 'stylesheet';
+    link.href = url;
+    doc.getElementsByTagName('head')[0].appendChild(link);
+  },
+  inject: function inject(cssContent, indoc) {
+    var doc = indoc || document;
+    var injected = document.createElement('style');
+    injected.type = 'text/css';
+    injected.innerHTML = cssContent;
+    var head = doc.getElementsByTagName('head')[0];
+    try {
+      head.appendChild(injected);
+    } catch (e) {
+    }
+  }
+};
+
+var saveDialogContents = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
+
+var ControllerFactory = function ControllerFactory(object, property) {
+  var initialValue = object[property];
+  if (Common.isArray(arguments[2]) || Common.isObject(arguments[2])) {
+    return new OptionController(object, property, arguments[2]);
+  }
+  if (Common.isNumber(initialValue)) {
+    if (Common.isNumber(arguments[2]) && Common.isNumber(arguments[3])) {
+      if (Common.isNumber(arguments[4])) {
+        return new NumberControllerSlider(object, property, arguments[2], arguments[3], arguments[4]);
+      }
+      return new NumberControllerSlider(object, property, arguments[2], arguments[3]);
+    }
+    if (Common.isNumber(arguments[4])) {
+      return new NumberControllerBox(object, property, { min: arguments[2], max: arguments[3], step: arguments[4] });
+    }
+    return new NumberControllerBox(object, property, { min: arguments[2], max: arguments[3] });
+  }
+  if (Common.isString(initialValue)) {
+    return new StringController(object, property);
+  }
+  if (Common.isFunction(initialValue)) {
+    return new FunctionController(object, property, '');
+  }
+  if (Common.isBoolean(initialValue)) {
+    return new BooleanController(object, property);
+  }
+  return null;
+};
+
+function requestAnimationFrame(callback) {
+  setTimeout(callback, 1000 / 60);
+}
+var requestAnimationFrame$1 = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || requestAnimationFrame;
+
+var CenteredDiv = function () {
+  function CenteredDiv() {
+    classCallCheck(this, CenteredDiv);
+    this.backgroundElement = document.createElement('div');
+    Common.extend(this.backgroundElement.style, {
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      top: 0,
+      left: 0,
+      display: 'none',
+      zIndex: '1000',
+      opacity: 0,
+      WebkitTransition: 'opacity 0.2s linear',
+      transition: 'opacity 0.2s linear'
+    });
+    dom.makeFullscreen(this.backgroundElement);
+    this.backgroundElement.style.position = 'fixed';
+    this.domElement = document.createElement('div');
+    Common.extend(this.domElement.style, {
+      position: 'fixed',
+      display: 'none',
+      zIndex: '1001',
+      opacity: 0,
+      WebkitTransition: '-webkit-transform 0.2s ease-out, opacity 0.2s linear',
+      transition: 'transform 0.2s ease-out, opacity 0.2s linear'
+    });
+    document.body.appendChild(this.backgroundElement);
+    document.body.appendChild(this.domElement);
+    var _this = this;
+    dom.bind(this.backgroundElement, 'click', function () {
+      _this.hide();
+    });
+  }
+  createClass(CenteredDiv, [{
+    key: 'show',
+    value: function show() {
+      var _this = this;
+      this.backgroundElement.style.display = 'block';
+      this.domElement.style.display = 'block';
+      this.domElement.style.opacity = 0;
+      this.domElement.style.webkitTransform = 'scale(1.1)';
+      this.layout();
+      Common.defer(function () {
+        _this.backgroundElement.style.opacity = 1;
+        _this.domElement.style.opacity = 1;
+        _this.domElement.style.webkitTransform = 'scale(1)';
+      });
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      var _this = this;
+      var hide = function hide() {
+        _this.domElement.style.display = 'none';
+        _this.backgroundElement.style.display = 'none';
+        dom.unbind(_this.domElement, 'webkitTransitionEnd', hide);
+        dom.unbind(_this.domElement, 'transitionend', hide);
+        dom.unbind(_this.domElement, 'oTransitionEnd', hide);
+      };
+      dom.bind(this.domElement, 'webkitTransitionEnd', hide);
+      dom.bind(this.domElement, 'transitionend', hide);
+      dom.bind(this.domElement, 'oTransitionEnd', hide);
+      this.backgroundElement.style.opacity = 0;
+      this.domElement.style.opacity = 0;
+      this.domElement.style.webkitTransform = 'scale(1.1)';
+    }
+  }, {
+    key: 'layout',
+    value: function layout() {
+      this.domElement.style.left = window.innerWidth / 2 - dom.getWidth(this.domElement) / 2 + 'px';
+      this.domElement.style.top = window.innerHeight / 2 - dom.getHeight(this.domElement) / 2 + 'px';
+    }
+  }]);
+  return CenteredDiv;
+}();
+
+var styleSheet = ___$insertStyle(".dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear;border:0;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button.close-top{position:relative}.dg.main .close-button.close-bottom{position:absolute}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-y:visible}.dg.a.has-save>ul.close-top{margin-top:0}.dg.a.has-save>ul.close-bottom{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{top:0;z-index:1002}.dg.a .save-row.close-top{position:relative}.dg.a .save-row.close-bottom{position:fixed}.dg li{-webkit-transition:height .1s ease-out;-o-transition:height .1s ease-out;-moz-transition:height .1s ease-out;transition:height .1s ease-out;-webkit-transition:overflow .1s linear;-o-transition:overflow .1s linear;-moz-transition:overflow .1s linear;transition:overflow .1s linear}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px;overflow:hidden}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .c{float:left;width:60%;position:relative}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:7px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .cr.color{overflow:visible}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2FA1D6}.dg .cr.number input[type=text]{color:#2FA1D6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2FA1D6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}\n");
+
+css.inject(styleSheet);
+var CSS_NAMESPACE = 'dg';
+var HIDE_KEY_CODE = 72;
+var CLOSE_BUTTON_HEIGHT = 20;
+var DEFAULT_DEFAULT_PRESET_NAME = 'Default';
+var SUPPORTS_LOCAL_STORAGE = function () {
+  try {
+    return !!window.localStorage;
+  } catch (e) {
+    return false;
+  }
+}();
+var SAVE_DIALOGUE = void 0;
+var autoPlaceVirgin = true;
+var autoPlaceContainer = void 0;
+var hide = false;
+var hideableGuis = [];
+var GUI = function GUI(pars) {
+  var _this = this;
+  var params = pars || {};
+  this.domElement = document.createElement('div');
+  this.__ul = document.createElement('ul');
+  this.domElement.appendChild(this.__ul);
+  dom.addClass(this.domElement, CSS_NAMESPACE);
+  this.__folders = {};
+  this.__controllers = [];
+  this.__rememberedObjects = [];
+  this.__rememberedObjectIndecesToControllers = [];
+  this.__listening = [];
+  params = Common.defaults(params, {
+    closeOnTop: false,
+    autoPlace: true,
+    width: GUI.DEFAULT_WIDTH
+  });
+  params = Common.defaults(params, {
+    resizable: params.autoPlace,
+    hideable: params.autoPlace
+  });
+  if (!Common.isUndefined(params.load)) {
+    if (params.preset) {
+      params.load.preset = params.preset;
+    }
+  } else {
+    params.load = { preset: DEFAULT_DEFAULT_PRESET_NAME };
+  }
+  if (Common.isUndefined(params.parent) && params.hideable) {
+    hideableGuis.push(this);
+  }
+  params.resizable = Common.isUndefined(params.parent) && params.resizable;
+  if (params.autoPlace && Common.isUndefined(params.scrollable)) {
+    params.scrollable = true;
+  }
+  var useLocalStorage = SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(this, 'isLocal')) === 'true';
+  var saveToLocalStorage = void 0;
+  var titleRow = void 0;
+  Object.defineProperties(this,
+  {
+    parent: {
+      get: function get$$1() {
+        return params.parent;
+      }
+    },
+    scrollable: {
+      get: function get$$1() {
+        return params.scrollable;
+      }
+    },
+    autoPlace: {
+      get: function get$$1() {
+        return params.autoPlace;
+      }
+    },
+    closeOnTop: {
+      get: function get$$1() {
+        return params.closeOnTop;
+      }
+    },
+    preset: {
+      get: function get$$1() {
+        if (_this.parent) {
+          return _this.getRoot().preset;
+        }
+        return params.load.preset;
+      },
+      set: function set$$1(v) {
+        if (_this.parent) {
+          _this.getRoot().preset = v;
+        } else {
+          params.load.preset = v;
+        }
+        setPresetSelectIndex(this);
+        _this.revert();
+      }
+    },
+    width: {
+      get: function get$$1() {
+        return params.width;
+      },
+      set: function set$$1(v) {
+        params.width = v;
+        setWidth(_this, v);
+      }
+    },
+    name: {
+      get: function get$$1() {
+        return params.name;
+      },
+      set: function set$$1(v) {
+        params.name = v;
+        if (titleRow) {
+          titleRow.innerHTML = params.name;
+        }
+      }
+    },
+    closed: {
+      get: function get$$1() {
+        return params.closed;
+      },
+      set: function set$$1(v) {
+        params.closed = v;
+        if (params.closed) {
+          dom.addClass(_this.__ul, GUI.CLASS_CLOSED);
+        } else {
+          dom.removeClass(_this.__ul, GUI.CLASS_CLOSED);
+        }
+        this.onResize();
+        if (_this.__closeButton) {
+          _this.__closeButton.innerHTML = v ? GUI.TEXT_OPEN : GUI.TEXT_CLOSED;
+        }
+      }
+    },
+    load: {
+      get: function get$$1() {
+        return params.load;
+      }
+    },
+    useLocalStorage: {
+      get: function get$$1() {
+        return useLocalStorage;
+      },
+      set: function set$$1(bool) {
+        if (SUPPORTS_LOCAL_STORAGE) {
+          useLocalStorage = bool;
+          if (bool) {
+            dom.bind(window, 'unload', saveToLocalStorage);
+          } else {
+            dom.unbind(window, 'unload', saveToLocalStorage);
+          }
+          localStorage.setItem(getLocalStorageHash(_this, 'isLocal'), bool);
+        }
+      }
+    }
+  });
+  if (Common.isUndefined(params.parent)) {
+    this.closed = params.closed || false;
+    dom.addClass(this.domElement, GUI.CLASS_MAIN);
+    dom.makeSelectable(this.domElement, false);
+    if (SUPPORTS_LOCAL_STORAGE) {
+      if (useLocalStorage) {
+        _this.useLocalStorage = true;
+        var savedGui = localStorage.getItem(getLocalStorageHash(this, 'gui'));
+        if (savedGui) {
+          params.load = JSON.parse(savedGui);
+        }
+      }
+    }
+    this.__closeButton = document.createElement('div');
+    this.__closeButton.innerHTML = GUI.TEXT_CLOSED;
+    dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_BUTTON);
+    if (params.closeOnTop) {
+      dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_TOP);
+      this.domElement.insertBefore(this.__closeButton, this.domElement.childNodes[0]);
+    } else {
+      dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_BOTTOM);
+      this.domElement.appendChild(this.__closeButton);
+    }
+    dom.bind(this.__closeButton, 'click', function () {
+      _this.closed = !_this.closed;
+    });
+  } else {
+    if (params.closed === undefined) {
+      params.closed = true;
+    }
+    var titleRowName = document.createTextNode(params.name);
+    dom.addClass(titleRowName, 'controller-name');
+    titleRow = addRow(_this, titleRowName);
+    var onClickTitle = function onClickTitle(e) {
+      e.preventDefault();
+      _this.closed = !_this.closed;
+      return false;
+    };
+    dom.addClass(this.__ul, GUI.CLASS_CLOSED);
+    dom.addClass(titleRow, 'title');
+    dom.bind(titleRow, 'click', onClickTitle);
+    if (!params.closed) {
+      this.closed = false;
+    }
+  }
+  if (params.autoPlace) {
+    if (Common.isUndefined(params.parent)) {
+      if (autoPlaceVirgin) {
+        autoPlaceContainer = document.createElement('div');
+        dom.addClass(autoPlaceContainer, CSS_NAMESPACE);
+        dom.addClass(autoPlaceContainer, GUI.CLASS_AUTO_PLACE_CONTAINER);
+        document.body.appendChild(autoPlaceContainer);
+        autoPlaceVirgin = false;
+      }
+      autoPlaceContainer.appendChild(this.domElement);
+      dom.addClass(this.domElement, GUI.CLASS_AUTO_PLACE);
+    }
+    if (!this.parent) {
+      setWidth(_this, params.width);
+    }
+  }
+  this.__resizeHandler = function () {
+    _this.onResizeDebounced();
+  };
+  dom.bind(window, 'resize', this.__resizeHandler);
+  dom.bind(this.__ul, 'webkitTransitionEnd', this.__resizeHandler);
+  dom.bind(this.__ul, 'transitionend', this.__resizeHandler);
+  dom.bind(this.__ul, 'oTransitionEnd', this.__resizeHandler);
+  this.onResize();
+  if (params.resizable) {
+    addResizeHandle(this);
+  }
+  saveToLocalStorage = function saveToLocalStorage() {
+    if (SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(_this, 'isLocal')) === 'true') {
+      localStorage.setItem(getLocalStorageHash(_this, 'gui'), JSON.stringify(_this.getSaveObject()));
+    }
+  };
+  this.saveToLocalStorageIfPossible = saveToLocalStorage;
+  function resetWidth() {
+    var root = _this.getRoot();
+    root.width += 1;
+    Common.defer(function () {
+      root.width -= 1;
+    });
+  }
+  if (!params.parent) {
+    resetWidth();
+  }
+};
+GUI.toggleHide = function () {
+  hide = !hide;
+  Common.each(hideableGuis, function (gui) {
+    gui.domElement.style.display = hide ? 'none' : '';
+  });
+};
+GUI.CLASS_AUTO_PLACE = 'a';
+GUI.CLASS_AUTO_PLACE_CONTAINER = 'ac';
+GUI.CLASS_MAIN = 'main';
+GUI.CLASS_CONTROLLER_ROW = 'cr';
+GUI.CLASS_TOO_TALL = 'taller-than-window';
+GUI.CLASS_CLOSED = 'closed';
+GUI.CLASS_CLOSE_BUTTON = 'close-button';
+GUI.CLASS_CLOSE_TOP = 'close-top';
+GUI.CLASS_CLOSE_BOTTOM = 'close-bottom';
+GUI.CLASS_DRAG = 'drag';
+GUI.DEFAULT_WIDTH = 245;
+GUI.TEXT_CLOSED = 'Close Controls';
+GUI.TEXT_OPEN = 'Open Controls';
+GUI._keydownHandler = function (e) {
+  if (document.activeElement.type !== 'text' && (e.which === HIDE_KEY_CODE || e.keyCode === HIDE_KEY_CODE)) {
+    GUI.toggleHide();
+  }
+};
+dom.bind(window, 'keydown', GUI._keydownHandler, false);
+Common.extend(GUI.prototype,
+{
+  add: function add(object, property) {
+    return _add(this, object, property, {
+      factoryArgs: Array.prototype.slice.call(arguments, 2)
+    });
+  },
+  addColor: function addColor(object, property) {
+    return _add(this, object, property, {
+      color: true
+    });
+  },
+  remove: function remove(controller) {
+    this.__ul.removeChild(controller.__li);
+    this.__controllers.splice(this.__controllers.indexOf(controller), 1);
+    var _this = this;
+    Common.defer(function () {
+      _this.onResize();
+    });
+  },
+  destroy: function destroy() {
+    if (this.parent) {
+      throw new Error('Only the root GUI should be removed with .destroy(). ' + 'For subfolders, use gui.removeFolder(folder) instead.');
+    }
+    if (this.autoPlace) {
+      autoPlaceContainer.removeChild(this.domElement);
+    }
+    var _this = this;
+    Common.each(this.__folders, function (subfolder) {
+      _this.removeFolder(subfolder);
+    });
+    dom.unbind(window, 'keydown', GUI._keydownHandler, false);
+    removeListeners(this);
+  },
+  addFolder: function addFolder(name) {
+    if (this.__folders[name] !== undefined) {
+      throw new Error('You already have a folder in this GUI by the' + ' name "' + name + '"');
+    }
+    var newGuiParams = { name: name, parent: this };
+    newGuiParams.autoPlace = this.autoPlace;
+    if (this.load &&
+    this.load.folders &&
+    this.load.folders[name]) {
+      newGuiParams.closed = this.load.folders[name].closed;
+      newGuiParams.load = this.load.folders[name];
+    }
+    var gui = new GUI(newGuiParams);
+    this.__folders[name] = gui;
+    var li = addRow(this, gui.domElement);
+    dom.addClass(li, 'folder');
+    return gui;
+  },
+  removeFolder: function removeFolder(folder) {
+    this.__ul.removeChild(folder.domElement.parentElement);
+    delete this.__folders[folder.name];
+    if (this.load &&
+    this.load.folders &&
+    this.load.folders[folder.name]) {
+      delete this.load.folders[folder.name];
+    }
+    removeListeners(folder);
+    var _this = this;
+    Common.each(folder.__folders, function (subfolder) {
+      folder.removeFolder(subfolder);
+    });
+    Common.defer(function () {
+      _this.onResize();
+    });
+  },
+  open: function open() {
+    this.closed = false;
+  },
+  close: function close() {
+    this.closed = true;
+  },
+  hide: function hide() {
+    this.domElement.style.display = 'none';
+  },
+  show: function show() {
+    this.domElement.style.display = '';
+  },
+  onResize: function onResize() {
+    var root = this.getRoot();
+    if (root.scrollable) {
+      var top = dom.getOffset(root.__ul).top;
+      var h = 0;
+      Common.each(root.__ul.childNodes, function (node) {
+        if (!(root.autoPlace && node === root.__save_row)) {
+          h += dom.getHeight(node);
+        }
+      });
+      if (window.innerHeight - top - CLOSE_BUTTON_HEIGHT < h) {
+        dom.addClass(root.domElement, GUI.CLASS_TOO_TALL);
+        root.__ul.style.height = window.innerHeight - top - CLOSE_BUTTON_HEIGHT + 'px';
+      } else {
+        dom.removeClass(root.domElement, GUI.CLASS_TOO_TALL);
+        root.__ul.style.height = 'auto';
+      }
+    }
+    if (root.__resize_handle) {
+      Common.defer(function () {
+        root.__resize_handle.style.height = root.__ul.offsetHeight + 'px';
+      });
+    }
+    if (root.__closeButton) {
+      root.__closeButton.style.width = root.width + 'px';
+    }
+  },
+  onResizeDebounced: Common.debounce(function () {
+    this.onResize();
+  }, 50),
+  remember: function remember() {
+    if (Common.isUndefined(SAVE_DIALOGUE)) {
+      SAVE_DIALOGUE = new CenteredDiv();
+      SAVE_DIALOGUE.domElement.innerHTML = saveDialogContents;
+    }
+    if (this.parent) {
+      throw new Error('You can only call remember on a top level GUI.');
+    }
+    var _this = this;
+    Common.each(Array.prototype.slice.call(arguments), function (object) {
+      if (_this.__rememberedObjects.length === 0) {
+        addSaveMenu(_this);
+      }
+      if (_this.__rememberedObjects.indexOf(object) === -1) {
+        _this.__rememberedObjects.push(object);
+      }
+    });
+    if (this.autoPlace) {
+      setWidth(this, this.width);
+    }
+  },
+  getRoot: function getRoot() {
+    var gui = this;
+    while (gui.parent) {
+      gui = gui.parent;
+    }
+    return gui;
+  },
+  getSaveObject: function getSaveObject() {
+    var toReturn = this.load;
+    toReturn.closed = this.closed;
+    if (this.__rememberedObjects.length > 0) {
+      toReturn.preset = this.preset;
+      if (!toReturn.remembered) {
+        toReturn.remembered = {};
+      }
+      toReturn.remembered[this.preset] = getCurrentPreset(this);
+    }
+    toReturn.folders = {};
+    Common.each(this.__folders, function (element, key) {
+      toReturn.folders[key] = element.getSaveObject();
+    });
+    return toReturn;
+  },
+  save: function save() {
+    if (!this.load.remembered) {
+      this.load.remembered = {};
+    }
+    this.load.remembered[this.preset] = getCurrentPreset(this);
+    markPresetModified(this, false);
+    this.saveToLocalStorageIfPossible();
+  },
+  saveAs: function saveAs(presetName) {
+    if (!this.load.remembered) {
+      this.load.remembered = {};
+      this.load.remembered[DEFAULT_DEFAULT_PRESET_NAME] = getCurrentPreset(this, true);
+    }
+    this.load.remembered[presetName] = getCurrentPreset(this);
+    this.preset = presetName;
+    addPresetOption(this, presetName, true);
+    this.saveToLocalStorageIfPossible();
+  },
+  revert: function revert(gui) {
+    Common.each(this.__controllers, function (controller) {
+      if (!this.getRoot().load.remembered) {
+        controller.setValue(controller.initialValue);
+      } else {
+        recallSavedValue(gui || this.getRoot(), controller);
+      }
+      if (controller.__onFinishChange) {
+        controller.__onFinishChange.call(controller, controller.getValue());
+      }
+    }, this);
+    Common.each(this.__folders, function (folder) {
+      folder.revert(folder);
+    });
+    if (!gui) {
+      markPresetModified(this.getRoot(), false);
+    }
+  },
+  listen: function listen(controller) {
+    var init = this.__listening.length === 0;
+    this.__listening.push(controller);
+    if (init) {
+      updateDisplays(this.__listening);
+    }
+  },
+  updateDisplay: function updateDisplay() {
+    Common.each(this.__controllers, function (controller) {
+      controller.updateDisplay();
+    });
+    Common.each(this.__folders, function (folder) {
+      folder.updateDisplay();
+    });
+  }
+});
+function addRow(gui, newDom, liBefore) {
+  var li = document.createElement('li');
+  if (newDom) {
+    li.appendChild(newDom);
+  }
+  if (liBefore) {
+    gui.__ul.insertBefore(li, liBefore);
+  } else {
+    gui.__ul.appendChild(li);
+  }
+  gui.onResize();
+  return li;
+}
+function removeListeners(gui) {
+  dom.unbind(window, 'resize', gui.__resizeHandler);
+  if (gui.saveToLocalStorageIfPossible) {
+    dom.unbind(window, 'unload', gui.saveToLocalStorageIfPossible);
+  }
+}
+function markPresetModified(gui, modified) {
+  var opt = gui.__preset_select[gui.__preset_select.selectedIndex];
+  if (modified) {
+    opt.innerHTML = opt.value + '*';
+  } else {
+    opt.innerHTML = opt.value;
+  }
+}
+function augmentController(gui, li, controller) {
+  controller.__li = li;
+  controller.__gui = gui;
+  Common.extend(controller,                                   {
+    options: function options(_options) {
+      if (arguments.length > 1) {
+        var nextSibling = controller.__li.nextElementSibling;
+        controller.remove();
+        return _add(gui, controller.object, controller.property, {
+          before: nextSibling,
+          factoryArgs: [Common.toArray(arguments)]
+        });
+      }
+      if (Common.isArray(_options) || Common.isObject(_options)) {
+        var _nextSibling = controller.__li.nextElementSibling;
+        controller.remove();
+        return _add(gui, controller.object, controller.property, {
+          before: _nextSibling,
+          factoryArgs: [_options]
+        });
+      }
+    },
+    name: function name(_name) {
+      controller.__li.firstElementChild.firstElementChild.innerHTML = _name;
+      return controller;
+    },
+    listen: function listen() {
+      controller.__gui.listen(controller);
+      return controller;
+    },
+    remove: function remove() {
+      controller.__gui.remove(controller);
+      return controller;
+    }
+  });
+  if (controller instanceof NumberControllerSlider) {
+    var box = new NumberControllerBox(controller.object, controller.property, { min: controller.__min, max: controller.__max, step: controller.__step });
+    Common.each(['updateDisplay', 'onChange', 'onFinishChange', 'step', 'min', 'max'], function (method) {
+      var pc = controller[method];
+      var pb = box[method];
+      controller[method] = box[method] = function () {
+        var args = Array.prototype.slice.call(arguments);
+        pb.apply(box, args);
+        return pc.apply(controller, args);
+      };
+    });
+    dom.addClass(li, 'has-slider');
+    controller.domElement.insertBefore(box.domElement, controller.domElement.firstElementChild);
+  } else if (controller instanceof NumberControllerBox) {
+    var r = function r(returned) {
+      if (Common.isNumber(controller.__min) && Common.isNumber(controller.__max)) {
+        var oldName = controller.__li.firstElementChild.firstElementChild.innerHTML;
+        var wasListening = controller.__gui.__listening.indexOf(controller) > -1;
+        controller.remove();
+        var newController = _add(gui, controller.object, controller.property, {
+          before: controller.__li.nextElementSibling,
+          factoryArgs: [controller.__min, controller.__max, controller.__step]
+        });
+        newController.name(oldName);
+        if (wasListening) newController.listen();
+        return newController;
+      }
+      return returned;
+    };
+    controller.min = Common.compose(r, controller.min);
+    controller.max = Common.compose(r, controller.max);
+  } else if (controller instanceof BooleanController) {
+    dom.bind(li, 'click', function () {
+      dom.fakeEvent(controller.__checkbox, 'click');
+    });
+    dom.bind(controller.__checkbox, 'click', function (e) {
+      e.stopPropagation();
+    });
+  } else if (controller instanceof FunctionController) {
+    dom.bind(li, 'click', function () {
+      dom.fakeEvent(controller.__button, 'click');
+    });
+    dom.bind(li, 'mouseover', function () {
+      dom.addClass(controller.__button, 'hover');
+    });
+    dom.bind(li, 'mouseout', function () {
+      dom.removeClass(controller.__button, 'hover');
+    });
+  } else if (controller instanceof ColorController) {
+    dom.addClass(li, 'color');
+    controller.updateDisplay = Common.compose(function (val) {
+      li.style.borderLeftColor = controller.__color.toString();
+      return val;
+    }, controller.updateDisplay);
+    controller.updateDisplay();
+  }
+  controller.setValue = Common.compose(function (val) {
+    if (gui.getRoot().__preset_select && controller.isModified()) {
+      markPresetModified(gui.getRoot(), true);
+    }
+    return val;
+  }, controller.setValue);
+}
+function recallSavedValue(gui, controller) {
+  var root = gui.getRoot();
+  var matchedIndex = root.__rememberedObjects.indexOf(controller.object);
+  if (matchedIndex !== -1) {
+    var controllerMap = root.__rememberedObjectIndecesToControllers[matchedIndex];
+    if (controllerMap === undefined) {
+      controllerMap = {};
+      root.__rememberedObjectIndecesToControllers[matchedIndex] = controllerMap;
+    }
+    controllerMap[controller.property] = controller;
+    if (root.load && root.load.remembered) {
+      var presetMap = root.load.remembered;
+      var preset = void 0;
+      if (presetMap[gui.preset]) {
+        preset = presetMap[gui.preset];
+      } else if (presetMap[DEFAULT_DEFAULT_PRESET_NAME]) {
+        preset = presetMap[DEFAULT_DEFAULT_PRESET_NAME];
+      } else {
+        return;
+      }
+      if (preset[matchedIndex] && preset[matchedIndex][controller.property] !== undefined) {
+        var value = preset[matchedIndex][controller.property];
+        controller.initialValue = value;
+        controller.setValue(value);
+      }
+    }
+  }
+}
+function _add(gui, object, property, params) {
+  if (object[property] === undefined) {
+    throw new Error('Object "' + object + '" has no property "' + property + '"');
+  }
+  var controller = void 0;
+  if (params.color) {
+    controller = new ColorController(object, property);
+  } else {
+    var factoryArgs = [object, property].concat(params.factoryArgs);
+    controller = ControllerFactory.apply(gui, factoryArgs);
+  }
+  if (params.before instanceof Controller) {
+    params.before = params.before.__li;
+  }
+  recallSavedValue(gui, controller);
+  dom.addClass(controller.domElement, 'c');
+  var name = document.createElement('span');
+  dom.addClass(name, 'property-name');
+  name.innerHTML = controller.property;
+  var container = document.createElement('div');
+  container.appendChild(name);
+  container.appendChild(controller.domElement);
+  var li = addRow(gui, container, params.before);
+  dom.addClass(li, GUI.CLASS_CONTROLLER_ROW);
+  if (controller instanceof ColorController) {
+    dom.addClass(li, 'color');
+  } else {
+    dom.addClass(li, _typeof(controller.getValue()));
+  }
+  augmentController(gui, li, controller);
+  gui.__controllers.push(controller);
+  return controller;
+}
+function getLocalStorageHash(gui, key) {
+  return document.location.href + '.' + key;
+}
+function addPresetOption(gui, name, setSelected) {
+  var opt = document.createElement('option');
+  opt.innerHTML = name;
+  opt.value = name;
+  gui.__preset_select.appendChild(opt);
+  if (setSelected) {
+    gui.__preset_select.selectedIndex = gui.__preset_select.length - 1;
+  }
+}
+function showHideExplain(gui, explain) {
+  explain.style.display = gui.useLocalStorage ? 'block' : 'none';
+}
+function addSaveMenu(gui) {
+  var div = gui.__save_row = document.createElement('li');
+  dom.addClass(gui.domElement, 'has-save');
+  gui.__ul.insertBefore(div, gui.__ul.firstChild);
+  dom.addClass(div, 'save-row');
+  var gears = document.createElement('span');
+  gears.innerHTML = '&nbsp;';
+  dom.addClass(gears, 'button gears');
+  var button = document.createElement('span');
+  button.innerHTML = 'Save';
+  dom.addClass(button, 'button');
+  dom.addClass(button, 'save');
+  var button2 = document.createElement('span');
+  button2.innerHTML = 'New';
+  dom.addClass(button2, 'button');
+  dom.addClass(button2, 'save-as');
+  var button3 = document.createElement('span');
+  button3.innerHTML = 'Revert';
+  dom.addClass(button3, 'button');
+  dom.addClass(button3, 'revert');
+  var select = gui.__preset_select = document.createElement('select');
+  if (gui.load && gui.load.remembered) {
+    Common.each(gui.load.remembered, function (value, key) {
+      addPresetOption(gui, key, key === gui.preset);
+    });
+  } else {
+    addPresetOption(gui, DEFAULT_DEFAULT_PRESET_NAME, false);
+  }
+  dom.bind(select, 'change', function () {
+    for (var index = 0; index < gui.__preset_select.length; index++) {
+      gui.__preset_select[index].innerHTML = gui.__preset_select[index].value;
+    }
+    gui.preset = this.value;
+  });
+  div.appendChild(select);
+  div.appendChild(gears);
+  div.appendChild(button);
+  div.appendChild(button2);
+  div.appendChild(button3);
+  if (SUPPORTS_LOCAL_STORAGE) {
+    var explain = document.getElementById('dg-local-explain');
+    var localStorageCheckBox = document.getElementById('dg-local-storage');
+    var saveLocally = document.getElementById('dg-save-locally');
+    saveLocally.style.display = 'block';
+    if (localStorage.getItem(getLocalStorageHash(gui, 'isLocal')) === 'true') {
+      localStorageCheckBox.setAttribute('checked', 'checked');
+    }
+    showHideExplain(gui, explain);
+    dom.bind(localStorageCheckBox, 'change', function () {
+      gui.useLocalStorage = !gui.useLocalStorage;
+      showHideExplain(gui, explain);
+    });
+  }
+  var newConstructorTextArea = document.getElementById('dg-new-constructor');
+  dom.bind(newConstructorTextArea, 'keydown', function (e) {
+    if (e.metaKey && (e.which === 67 || e.keyCode === 67)) {
+      SAVE_DIALOGUE.hide();
+    }
+  });
+  dom.bind(gears, 'click', function () {
+    newConstructorTextArea.innerHTML = JSON.stringify(gui.getSaveObject(), undefined, 2);
+    SAVE_DIALOGUE.show();
+    newConstructorTextArea.focus();
+    newConstructorTextArea.select();
+  });
+  dom.bind(button, 'click', function () {
+    gui.save();
+  });
+  dom.bind(button2, 'click', function () {
+    var presetName = prompt('Enter a new preset name.');
+    if (presetName) {
+      gui.saveAs(presetName);
+    }
+  });
+  dom.bind(button3, 'click', function () {
+    gui.revert();
+  });
+}
+function addResizeHandle(gui) {
+  var pmouseX = void 0;
+  gui.__resize_handle = document.createElement('div');
+  Common.extend(gui.__resize_handle.style, {
+    width: '6px',
+    marginLeft: '-3px',
+    height: '200px',
+    cursor: 'ew-resize',
+    position: 'absolute'
+  });
+  function drag(e) {
+    e.preventDefault();
+    gui.width += pmouseX - e.clientX;
+    gui.onResize();
+    pmouseX = e.clientX;
+    return false;
+  }
+  function dragStop() {
+    dom.removeClass(gui.__closeButton, GUI.CLASS_DRAG);
+    dom.unbind(window, 'mousemove', drag);
+    dom.unbind(window, 'mouseup', dragStop);
+  }
+  function dragStart(e) {
+    e.preventDefault();
+    pmouseX = e.clientX;
+    dom.addClass(gui.__closeButton, GUI.CLASS_DRAG);
+    dom.bind(window, 'mousemove', drag);
+    dom.bind(window, 'mouseup', dragStop);
+    return false;
+  }
+  dom.bind(gui.__resize_handle, 'mousedown', dragStart);
+  dom.bind(gui.__closeButton, 'mousedown', dragStart);
+  gui.domElement.insertBefore(gui.__resize_handle, gui.domElement.firstElementChild);
+}
+function setWidth(gui, w) {
+  gui.domElement.style.width = w + 'px';
+  if (gui.__save_row && gui.autoPlace) {
+    gui.__save_row.style.width = w + 'px';
+  }
+  if (gui.__closeButton) {
+    gui.__closeButton.style.width = w + 'px';
+  }
+}
+function getCurrentPreset(gui, useInitialValues) {
+  var toReturn = {};
+  Common.each(gui.__rememberedObjects, function (val, index) {
+    var savedValues = {};
+    var controllerMap = gui.__rememberedObjectIndecesToControllers[index];
+    Common.each(controllerMap, function (controller, property) {
+      savedValues[property] = useInitialValues ? controller.initialValue : controller.getValue();
+    });
+    toReturn[index] = savedValues;
+  });
+  return toReturn;
+}
+function setPresetSelectIndex(gui) {
+  for (var index = 0; index < gui.__preset_select.length; index++) {
+    if (gui.__preset_select[index].value === gui.preset) {
+      gui.__preset_select.selectedIndex = index;
+    }
+  }
+}
+function updateDisplays(controllerArray) {
+  if (controllerArray.length !== 0) {
+    requestAnimationFrame$1.call(window, function () {
+      updateDisplays(controllerArray);
+    });
+  }
+  Common.each(controllerArray, function (c) {
+    c.updateDisplay();
+  });
+}
+var GUI$1 = GUI;
 
 // Polyfills
 
@@ -6459,7 +8949,7 @@ var ColorKeywords = { 'aliceblue': 0xF0F8FF, 'antiquewhite': 0xFAEBD7, 'aqua': 0
 	'springgreen': 0x00FF7F, 'steelblue': 0x4682B4, 'tan': 0xD2B48C, 'teal': 0x008080, 'thistle': 0xD8BFD8, 'tomato': 0xFF6347, 'turquoise': 0x40E0D0,
 	'violet': 0xEE82EE, 'wheat': 0xF5DEB3, 'white': 0xFFFFFF, 'whitesmoke': 0xF5F5F5, 'yellow': 0xFFFF00, 'yellowgreen': 0x9ACD32 };
 
-function Color( r, g, b ) {
+function Color$1( r, g, b ) {
 
 	if ( g === undefined && b === undefined ) {
 
@@ -6472,7 +8962,7 @@ function Color( r, g, b ) {
 
 }
 
-Object.assign( Color.prototype, {
+Object.assign( Color$1.prototype, {
 
 	isColor: true,
 
@@ -7040,7 +9530,7 @@ var UniformsLib = {
 
 	common: {
 
-		diffuse: { value: new Color( 0xeeeeee ) },
+		diffuse: { value: new Color$1( 0xeeeeee ) },
 		opacity: { value: 1.0 },
 
 		map: { value: null },
@@ -7131,7 +9621,7 @@ var UniformsLib = {
 		fogDensity: { value: 0.00025 },
 		fogNear: { value: 1 },
 		fogFar: { value: 2000 },
-		fogColor: { value: new Color( 0xffffff ) }
+		fogColor: { value: new Color$1( 0xffffff ) }
 
 	},
 
@@ -7207,7 +9697,7 @@ var UniformsLib = {
 
 	points: {
 
-		diffuse: { value: new Color( 0xeeeeee ) },
+		diffuse: { value: new Color$1( 0xeeeeee ) },
 		opacity: { value: 1.0 },
 		size: { value: 1.0 },
 		scale: { value: 1.0 },
@@ -7218,7 +9708,7 @@ var UniformsLib = {
 
 	sprite: {
 
-		diffuse: { value: new Color( 0xeeeeee ) },
+		diffuse: { value: new Color$1( 0xeeeeee ) },
 		opacity: { value: 1.0 },
 		center: { value: new Vector2( 0.5, 0.5 ) },
 		rotation: { value: 0.0 },
@@ -7265,7 +9755,7 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color( 0x000000 ) }
+				emissive: { value: new Color$1( 0x000000 ) }
 			}
 		] ),
 
@@ -7290,8 +9780,8 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color( 0x000000 ) },
-				specular: { value: new Color( 0x111111 ) },
+				emissive: { value: new Color$1( 0x000000 ) },
+				specular: { value: new Color$1( 0x111111 ) },
 				shininess: { value: 30 }
 			}
 		] ),
@@ -7317,7 +9807,7 @@ var ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: new Color( 0x000000 ) },
+				emissive: { value: new Color$1( 0x000000 ) },
 				roughness: { value: 0.5 },
 				metalness: { value: 0.5 },
 				envMapIntensity: { value: 1 } // temporary
@@ -7479,7 +9969,7 @@ var ShaderLib = {
 			UniformsLib.lights,
 			UniformsLib.fog,
 			{
-				color: { value: new Color( 0x00000 ) },
+				color: { value: new Color$1( 0x00000 ) },
 				opacity: { value: 1.0 }
 			},
 		] ),
@@ -7728,7 +10218,7 @@ function Face3( a, b, c, normal, color, materialIndex ) {
 	this.normal = ( normal && normal.isVector3 ) ? normal : new Vector3();
 	this.vertexNormals = Array.isArray( normal ) ? normal : [];
 
-	this.color = ( color && color.isColor ) ? color : new Color();
+	this.color = ( color && color.isColor ) ? color : new Color$1();
 	this.vertexColors = Array.isArray( color ) ? color : [];
 
 	this.materialIndex = materialIndex !== undefined ? materialIndex : 0;
@@ -9273,7 +11763,7 @@ Geometry.prototype = Object.assign( Object.create( EventDispatcher.prototype ), 
 
 			if ( colors !== undefined ) {
 
-				scope.colors.push( new Color().fromArray( colors, i ) );
+				scope.colors.push( new Color$1().fromArray( colors, i ) );
 
 			}
 
@@ -10583,7 +13073,7 @@ Object.assign( BufferAttribute.prototype, {
 			if ( color === undefined ) {
 
 				console.warn( 'THREE.BufferAttribute.copyColorsArray(): color is undefined', i );
-				color = new Color();
+				color = new Color$1();
 
 			}
 
@@ -14264,7 +16754,7 @@ function MeshBasicMaterial( parameters ) {
 
 	this.type = 'MeshBasicMaterial';
 
-	this.color = new Color( 0xffffff ); // emissive
+	this.color = new Color$1( 0xffffff ); // emissive
 
 	this.map = null;
 
@@ -14786,7 +17276,7 @@ Mesh.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 function WebGLBackground( renderer, state, objects, premultipliedAlpha ) {
 
-	var clearColor = new Color( 0x000000 );
+	var clearColor = new Color$1( 0x000000 );
 	var clearAlpha = 0;
 
 	var planeMesh;
@@ -18221,7 +20711,7 @@ function UniformsCache() {
 				case 'DirectionalLight':
 					uniforms = {
 						direction: new Vector3(),
-						color: new Color(),
+						color: new Color$1(),
 
 						shadow: false,
 						shadowBias: 0,
@@ -18234,7 +20724,7 @@ function UniformsCache() {
 					uniforms = {
 						position: new Vector3(),
 						direction: new Vector3(),
-						color: new Color(),
+						color: new Color$1(),
 						distance: 0,
 						coneCos: 0,
 						penumbraCos: 0,
@@ -18250,7 +20740,7 @@ function UniformsCache() {
 				case 'PointLight':
 					uniforms = {
 						position: new Vector3(),
-						color: new Color(),
+						color: new Color$1(),
 						distance: 0,
 						decay: 0,
 
@@ -18266,14 +20756,14 @@ function UniformsCache() {
 				case 'HemisphereLight':
 					uniforms = {
 						direction: new Vector3(),
-						skyColor: new Color(),
-						groundColor: new Color()
+						skyColor: new Color$1(),
+						groundColor: new Color$1()
 					};
 					break;
 
 				case 'RectAreaLight':
 					uniforms = {
-						color: new Color(),
+						color: new Color$1(),
 						position: new Vector3(),
 						halfWidth: new Vector3(),
 						halfHeight: new Vector3()
@@ -25239,7 +27729,7 @@ function FogExp2( color, density ) {
 
 	this.name = '';
 
-	this.color = new Color( color );
+	this.color = new Color$1( color );
 	this.density = ( density !== undefined ) ? density : 0.00025;
 
 }
@@ -25275,7 +27765,7 @@ function Fog( color, near, far ) {
 
 	this.name = '';
 
-	this.color = new Color( color );
+	this.color = new Color$1( color );
 
 	this.near = ( near !== undefined ) ? near : 1;
 	this.far = ( far !== undefined ) ? far : 1000;
@@ -25624,7 +28114,7 @@ function SpriteMaterial( parameters ) {
 
 	this.type = 'SpriteMaterial';
 
-	this.color = new Color( 0xffffff );
+	this.color = new Color$1( 0xffffff );
 	this.map = null;
 
 	this.rotation = 0;
@@ -26332,7 +28822,7 @@ function LineBasicMaterial( parameters ) {
 
 	this.type = 'LineBasicMaterial';
 
-	this.color = new Color( 0xffffff );
+	this.color = new Color$1( 0xffffff );
 
 	this.linewidth = 1;
 	this.linecap = 'round';
@@ -26729,7 +29219,7 @@ function PointsMaterial( parameters ) {
 
 	this.type = 'PointsMaterial';
 
-	this.color = new Color( 0xffffff );
+	this.color = new Color$1( 0xffffff );
 
 	this.map = null;
 
@@ -31603,7 +34093,7 @@ function ShadowMaterial( parameters ) {
 
 	this.type = 'ShadowMaterial';
 
-	this.color = new Color( 0x000000 );
+	this.color = new Color$1( 0x000000 );
 	this.transparent = true;
 
 	this.setValues( parameters );
@@ -31702,7 +34192,7 @@ function MeshStandardMaterial( parameters ) {
 
 	this.type = 'MeshStandardMaterial';
 
-	this.color = new Color( 0xffffff ); // diffuse
+	this.color = new Color$1( 0xffffff ); // diffuse
 	this.roughness = 0.5;
 	this.metalness = 0.5;
 
@@ -31714,7 +34204,7 @@ function MeshStandardMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color( 0x000000 );
+	this.emissive = new Color$1( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -31919,8 +34409,8 @@ function MeshPhongMaterial( parameters ) {
 
 	this.type = 'MeshPhongMaterial';
 
-	this.color = new Color( 0xffffff ); // diffuse
-	this.specular = new Color( 0x111111 );
+	this.color = new Color$1( 0xffffff ); // diffuse
+	this.specular = new Color$1( 0x111111 );
 	this.shininess = 30;
 
 	this.map = null;
@@ -31931,7 +34421,7 @@ function MeshPhongMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color( 0x000000 );
+	this.emissive = new Color$1( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -32196,7 +34686,7 @@ function MeshLambertMaterial( parameters ) {
 
 	this.type = 'MeshLambertMaterial';
 
-	this.color = new Color( 0xffffff ); // diffuse
+	this.color = new Color$1( 0xffffff ); // diffuse
 
 	this.map = null;
 
@@ -32206,7 +34696,7 @@ function MeshLambertMaterial( parameters ) {
 	this.aoMap = null;
 	this.aoMapIntensity = 1.0;
 
-	this.emissive = new Color( 0x000000 );
+	this.emissive = new Color$1( 0x000000 );
 	this.emissiveIntensity = 1.0;
 	this.emissiveMap = null;
 
@@ -32315,7 +34805,7 @@ function MeshMatcapMaterial( parameters ) {
 
 	this.type = 'MeshMatcapMaterial';
 
-	this.color = new Color( 0xffffff ); // diffuse
+	this.color = new Color$1( 0xffffff ); // diffuse
 
 	this.matcap = null;
 
@@ -37207,7 +39697,7 @@ function Light( color, intensity ) {
 
 	this.type = 'Light';
 
-	this.color = new Color( color );
+	this.color = new Color$1( color );
 	this.intensity = intensity !== undefined ? intensity : 1;
 
 	this.receiveShadow = undefined;
@@ -37268,7 +39758,7 @@ function HemisphereLight( skyColor, groundColor, intensity ) {
 	this.position.copy( Object3D.DefaultUp );
 	this.updateMatrix();
 
-	this.groundColor = new Color( groundColor );
+	this.groundColor = new Color$1( groundColor );
 
 }
 
@@ -37877,7 +40367,7 @@ Object.assign( MaterialLoader.prototype, {
 						break;
 
 					case 'c':
-						material.uniforms[ name ].value = new Color().setHex( uniform.value );
+						material.uniforms[ name ].value = new Color$1().setHex( uniform.value );
 						break;
 
 					case 'v2':
@@ -38903,7 +41393,7 @@ Object.assign( ObjectLoader.prototype, {
 
 					if ( Number.isInteger( data.background ) ) {
 
-						object.background = new Color( data.background );
+						object.background = new Color$1( data.background );
 
 					}
 
@@ -39281,7 +41771,7 @@ function ShapePath() {
 
 	this.type = 'ShapePath';
 
-	this.color = new Color();
+	this.color = new Color$1();
 
 	this.subPaths = [];
 	this.currentPath = null;
@@ -39823,7 +42313,7 @@ Object.assign( Loader.prototype, {
 			CustomBlending: CustomBlending
 		};
 
-		var color = new Color();
+		var color = new Color$1();
 		var textureLoader = new TextureLoader();
 		var materialLoader = new MaterialLoader();
 
@@ -40427,8 +42917,8 @@ function HemisphereLightProbe( skyColor, groundColor, intensity ) {
 
 	LightProbe.call( this, undefined, intensity );
 
-	var color1 = new Color().set( skyColor );
-	var color2 = new Color().set( groundColor );
+	var color1 = new Color$1().set( skyColor );
+	var color2 = new Color$1().set( groundColor );
 
 	var sky = new Vector3( color1.r, color1.g, color1.b );
 	var ground = new Vector3( color2.r, color2.g, color2.b );
@@ -40476,7 +42966,7 @@ function AmbientLightProbe( color, intensity ) {
 
 	LightProbe.call( this, undefined, intensity );
 
-	var color1 = new Color().set( color );
+	var color1 = new Color$1().set( color );
 
 	// without extra factor of PI in the shader, would be 2 / Math.sqrt( Math.PI );
 	this.sh.coefficients[ 0 ].set( color1.r, color1.g, color1.b ).multiplyScalar( 2 * Math.sqrt( Math.PI ) );
@@ -45249,8 +47739,8 @@ function SkeletonHelper( object ) {
 	var vertices = [];
 	var colors = [];
 
-	var color1 = new Color( 0, 0, 1 );
-	var color2 = new Color( 0, 1, 0 );
+	var color1 = new Color$1( 0, 0, 1 );
+	var color2 = new Color$1( 0, 1, 0 );
 
 	for ( var i = 0; i < bones.length; i ++ ) {
 
@@ -45540,8 +48030,8 @@ HemisphereLightHelper.prototype.update = function () {
 
 	var vector = new Vector3();
 
-	var color1 = new Color();
-	var color2 = new Color();
+	var color1 = new Color$1();
+	var color2 = new Color$1();
 
 	return function update() {
 
@@ -45734,8 +48224,8 @@ function GridHelper( size, divisions, color1, color2 ) {
 
 	size = size || 10;
 	divisions = divisions || 10;
-	color1 = new Color( color1 !== undefined ? color1 : 0x444444 );
-	color2 = new Color( color2 !== undefined ? color2 : 0x888888 );
+	color1 = new Color$1( color1 !== undefined ? color1 : 0x444444 );
+	color2 = new Color$1( color2 !== undefined ? color2 : 0x888888 );
 
 	var center = divisions / 2;
 	var step = size / divisions;
@@ -45802,8 +48292,8 @@ function PolarGridHelper( radius, radials, circles, divisions, color1, color2 ) 
 	radials = radials || 16;
 	circles = circles || 8;
 	divisions = divisions || 64;
-	color1 = new Color( color1 !== undefined ? color1 : 0x444444 );
-	color2 = new Color( color2 !== undefined ? color2 : 0x888888 );
+	color1 = new Color$1( color1 !== undefined ? color1 : 0x444444 );
+	color2 = new Color$1( color2 !== undefined ? color2 : 0x888888 );
 
 	var vertices = [];
 	var colors = [];
@@ -46197,11 +48687,11 @@ function CameraHelper( camera ) {
 
 	// colors
 
-	var colorFrustum = new Color( 0xffaa00 );
-	var colorCone = new Color( 0xff0000 );
-	var colorUp = new Color( 0x00aaff );
-	var colorTarget = new Color( 0xffffff );
-	var colorCross = new Color( 0x333333 );
+	var colorFrustum = new Color$1( 0xffaa00 );
+	var colorCone = new Color$1( 0xff0000 );
+	var colorUp = new Color$1( 0x00aaff );
+	var colorTarget = new Color$1( 0xffffff );
+	var colorCross = new Color$1( 0x333333 );
 
 	// near
 
@@ -47973,7 +50463,7 @@ Object.defineProperties( Material.prototype, {
 		get: function () {
 
 			console.warn( 'THREE.Material: .wrapRGB has been removed.' );
-			return new Color();
+			return new Color$1();
 
 		}
 	},
@@ -48633,4063 +51123,1672 @@ function LensFlare() {
 
 }
 
-var THREE$1 = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	WebGLMultisampleRenderTarget: WebGLMultisampleRenderTarget,
-	WebGLRenderTargetCube: WebGLRenderTargetCube,
-	WebGLRenderTarget: WebGLRenderTarget,
-	WebGLRenderer: WebGLRenderer,
-	ShaderLib: ShaderLib,
-	UniformsLib: UniformsLib,
-	UniformsUtils: UniformsUtils,
-	ShaderChunk: ShaderChunk,
-	FogExp2: FogExp2,
-	Fog: Fog,
-	Scene: Scene,
-	Sprite: Sprite,
-	LOD: LOD,
-	SkinnedMesh: SkinnedMesh,
-	Skeleton: Skeleton,
-	Bone: Bone,
-	Mesh: Mesh,
-	LineSegments: LineSegments,
-	LineLoop: LineLoop,
-	Line: Line,
-	Points: Points,
-	Group: Group,
-	VideoTexture: VideoTexture,
-	DataTexture: DataTexture,
-	DataTexture2DArray: DataTexture2DArray,
-	DataTexture3D: DataTexture3D,
-	CompressedTexture: CompressedTexture,
-	CubeTexture: CubeTexture,
-	CanvasTexture: CanvasTexture,
-	DepthTexture: DepthTexture,
-	Texture: Texture,
-	AnimationLoader: AnimationLoader,
-	CompressedTextureLoader: CompressedTextureLoader,
-	DataTextureLoader: DataTextureLoader,
-	CubeTextureLoader: CubeTextureLoader,
-	TextureLoader: TextureLoader,
-	ObjectLoader: ObjectLoader,
-	MaterialLoader: MaterialLoader,
-	BufferGeometryLoader: BufferGeometryLoader,
-	DefaultLoadingManager: DefaultLoadingManager,
-	LoadingManager: LoadingManager,
-	ImageLoader: ImageLoader,
-	ImageBitmapLoader: ImageBitmapLoader,
-	FontLoader: FontLoader,
-	FileLoader: FileLoader,
-	Loader: Loader,
-	LoaderUtils: LoaderUtils,
-	Cache: Cache,
-	AudioLoader: AudioLoader,
-	SpotLightShadow: SpotLightShadow,
-	SpotLight: SpotLight,
-	PointLight: PointLight,
-	RectAreaLight: RectAreaLight,
-	HemisphereLight: HemisphereLight,
-	HemisphereLightProbe: HemisphereLightProbe,
-	DirectionalLightShadow: DirectionalLightShadow,
-	DirectionalLight: DirectionalLight,
-	AmbientLight: AmbientLight,
-	AmbientLightProbe: AmbientLightProbe,
-	LightShadow: LightShadow,
-	Light: Light,
-	LightProbe: LightProbe,
-	StereoCamera: StereoCamera,
-	PerspectiveCamera: PerspectiveCamera,
-	OrthographicCamera: OrthographicCamera,
-	CubeCamera: CubeCamera,
-	ArrayCamera: ArrayCamera,
-	Camera: Camera,
-	AudioListener: AudioListener,
-	PositionalAudio: PositionalAudio,
-	AudioContext: AudioContext,
-	AudioAnalyser: AudioAnalyser,
-	Audio: Audio,
-	VectorKeyframeTrack: VectorKeyframeTrack,
-	StringKeyframeTrack: StringKeyframeTrack,
-	QuaternionKeyframeTrack: QuaternionKeyframeTrack,
-	NumberKeyframeTrack: NumberKeyframeTrack,
-	ColorKeyframeTrack: ColorKeyframeTrack,
-	BooleanKeyframeTrack: BooleanKeyframeTrack,
-	PropertyMixer: PropertyMixer,
-	PropertyBinding: PropertyBinding,
-	KeyframeTrack: KeyframeTrack,
-	AnimationUtils: AnimationUtils,
-	AnimationObjectGroup: AnimationObjectGroup,
-	AnimationMixer: AnimationMixer,
-	AnimationClip: AnimationClip,
-	Uniform: Uniform,
-	InstancedBufferGeometry: InstancedBufferGeometry,
-	BufferGeometry: BufferGeometry,
-	Geometry: Geometry,
-	InterleavedBufferAttribute: InterleavedBufferAttribute,
-	InstancedInterleavedBuffer: InstancedInterleavedBuffer,
-	InterleavedBuffer: InterleavedBuffer,
-	InstancedBufferAttribute: InstancedBufferAttribute,
-	Face3: Face3,
-	Object3D: Object3D,
-	Raycaster: Raycaster,
-	Layers: Layers,
-	EventDispatcher: EventDispatcher,
-	Clock: Clock,
-	QuaternionLinearInterpolant: QuaternionLinearInterpolant,
-	LinearInterpolant: LinearInterpolant,
-	DiscreteInterpolant: DiscreteInterpolant,
-	CubicInterpolant: CubicInterpolant,
-	Interpolant: Interpolant,
-	Triangle: Triangle,
-	Math: _Math,
-	Spherical: Spherical,
-	Cylindrical: Cylindrical,
-	Plane: Plane,
-	Frustum: Frustum,
-	Sphere: Sphere,
-	Ray: Ray,
-	Matrix4: Matrix4,
-	Matrix3: Matrix3,
-	Box3: Box3,
-	Box2: Box2,
-	Line3: Line3,
-	Euler: Euler,
-	Vector4: Vector4,
-	Vector3: Vector3,
-	Vector2: Vector2,
-	Quaternion: Quaternion,
-	Color: Color,
-	SphericalHarmonics3: SphericalHarmonics3,
-	ImmediateRenderObject: ImmediateRenderObject,
-	VertexNormalsHelper: VertexNormalsHelper,
-	SpotLightHelper: SpotLightHelper,
-	SkeletonHelper: SkeletonHelper,
-	PointLightHelper: PointLightHelper,
-	RectAreaLightHelper: RectAreaLightHelper,
-	HemisphereLightHelper: HemisphereLightHelper,
-	LightProbeHelper: LightProbeHelper,
-	GridHelper: GridHelper,
-	PolarGridHelper: PolarGridHelper,
-	PositionalAudioHelper: PositionalAudioHelper,
-	FaceNormalsHelper: FaceNormalsHelper,
-	DirectionalLightHelper: DirectionalLightHelper,
-	CameraHelper: CameraHelper,
-	BoxHelper: BoxHelper,
-	Box3Helper: Box3Helper,
-	PlaneHelper: PlaneHelper,
-	ArrowHelper: ArrowHelper,
-	AxesHelper: AxesHelper,
-	Shape: Shape,
-	Path: Path,
-	ShapePath: ShapePath,
-	Font: Font,
-	CurvePath: CurvePath,
-	Curve: Curve,
-	ImageUtils: ImageUtils,
-	ShapeUtils: ShapeUtils,
-	WebGLUtils: WebGLUtils,
-	WireframeGeometry: WireframeGeometry,
-	ParametricGeometry: ParametricGeometry,
-	ParametricBufferGeometry: ParametricBufferGeometry,
-	TetrahedronGeometry: TetrahedronGeometry,
-	TetrahedronBufferGeometry: TetrahedronBufferGeometry,
-	OctahedronGeometry: OctahedronGeometry,
-	OctahedronBufferGeometry: OctahedronBufferGeometry,
-	IcosahedronGeometry: IcosahedronGeometry,
-	IcosahedronBufferGeometry: IcosahedronBufferGeometry,
-	DodecahedronGeometry: DodecahedronGeometry,
-	DodecahedronBufferGeometry: DodecahedronBufferGeometry,
-	PolyhedronGeometry: PolyhedronGeometry,
-	PolyhedronBufferGeometry: PolyhedronBufferGeometry,
-	TubeGeometry: TubeGeometry,
-	TubeBufferGeometry: TubeBufferGeometry,
-	TorusKnotGeometry: TorusKnotGeometry,
-	TorusKnotBufferGeometry: TorusKnotBufferGeometry,
-	TorusGeometry: TorusGeometry,
-	TorusBufferGeometry: TorusBufferGeometry,
-	TextGeometry: TextGeometry,
-	TextBufferGeometry: TextBufferGeometry,
-	SphereGeometry: SphereGeometry,
-	SphereBufferGeometry: SphereBufferGeometry,
-	RingGeometry: RingGeometry,
-	RingBufferGeometry: RingBufferGeometry,
-	PlaneGeometry: PlaneGeometry,
-	PlaneBufferGeometry: PlaneBufferGeometry,
-	LatheGeometry: LatheGeometry,
-	LatheBufferGeometry: LatheBufferGeometry,
-	ShapeGeometry: ShapeGeometry,
-	ShapeBufferGeometry: ShapeBufferGeometry,
-	ExtrudeGeometry: ExtrudeGeometry,
-	ExtrudeBufferGeometry: ExtrudeBufferGeometry,
-	EdgesGeometry: EdgesGeometry,
-	ConeGeometry: ConeGeometry,
-	ConeBufferGeometry: ConeBufferGeometry,
-	CylinderGeometry: CylinderGeometry,
-	CylinderBufferGeometry: CylinderBufferGeometry,
-	CircleGeometry: CircleGeometry,
-	CircleBufferGeometry: CircleBufferGeometry,
-	BoxGeometry: BoxGeometry,
-	CubeGeometry: BoxGeometry,
-	BoxBufferGeometry: BoxBufferGeometry,
-	ShadowMaterial: ShadowMaterial,
-	SpriteMaterial: SpriteMaterial,
-	RawShaderMaterial: RawShaderMaterial,
-	ShaderMaterial: ShaderMaterial,
-	PointsMaterial: PointsMaterial,
-	MeshPhysicalMaterial: MeshPhysicalMaterial,
-	MeshStandardMaterial: MeshStandardMaterial,
-	MeshPhongMaterial: MeshPhongMaterial,
-	MeshToonMaterial: MeshToonMaterial,
-	MeshNormalMaterial: MeshNormalMaterial,
-	MeshLambertMaterial: MeshLambertMaterial,
-	MeshDepthMaterial: MeshDepthMaterial,
-	MeshDistanceMaterial: MeshDistanceMaterial,
-	MeshBasicMaterial: MeshBasicMaterial,
-	MeshMatcapMaterial: MeshMatcapMaterial,
-	LineDashedMaterial: LineDashedMaterial,
-	LineBasicMaterial: LineBasicMaterial,
-	Material: Material,
-	Float64BufferAttribute: Float64BufferAttribute,
-	Float32BufferAttribute: Float32BufferAttribute,
-	Uint32BufferAttribute: Uint32BufferAttribute,
-	Int32BufferAttribute: Int32BufferAttribute,
-	Uint16BufferAttribute: Uint16BufferAttribute,
-	Int16BufferAttribute: Int16BufferAttribute,
-	Uint8ClampedBufferAttribute: Uint8ClampedBufferAttribute,
-	Uint8BufferAttribute: Uint8BufferAttribute,
-	Int8BufferAttribute: Int8BufferAttribute,
-	BufferAttribute: BufferAttribute,
-	ArcCurve: ArcCurve,
-	CatmullRomCurve3: CatmullRomCurve3,
-	CubicBezierCurve: CubicBezierCurve,
-	CubicBezierCurve3: CubicBezierCurve3,
-	EllipseCurve: EllipseCurve,
-	LineCurve: LineCurve,
-	LineCurve3: LineCurve3,
-	QuadraticBezierCurve: QuadraticBezierCurve,
-	QuadraticBezierCurve3: QuadraticBezierCurve3,
-	SplineCurve: SplineCurve,
-	REVISION: REVISION,
-	MOUSE: MOUSE,
-	CullFaceNone: CullFaceNone,
-	CullFaceBack: CullFaceBack,
-	CullFaceFront: CullFaceFront,
-	CullFaceFrontBack: CullFaceFrontBack,
-	FrontFaceDirectionCW: FrontFaceDirectionCW,
-	FrontFaceDirectionCCW: FrontFaceDirectionCCW,
-	BasicShadowMap: BasicShadowMap,
-	PCFShadowMap: PCFShadowMap,
-	PCFSoftShadowMap: PCFSoftShadowMap,
-	FrontSide: FrontSide,
-	BackSide: BackSide,
-	DoubleSide: DoubleSide,
-	FlatShading: FlatShading,
-	SmoothShading: SmoothShading,
-	NoColors: NoColors,
-	FaceColors: FaceColors,
-	VertexColors: VertexColors,
-	NoBlending: NoBlending,
-	NormalBlending: NormalBlending,
-	AdditiveBlending: AdditiveBlending,
-	SubtractiveBlending: SubtractiveBlending,
-	MultiplyBlending: MultiplyBlending,
-	CustomBlending: CustomBlending,
-	AddEquation: AddEquation,
-	SubtractEquation: SubtractEquation,
-	ReverseSubtractEquation: ReverseSubtractEquation,
-	MinEquation: MinEquation,
-	MaxEquation: MaxEquation,
-	ZeroFactor: ZeroFactor,
-	OneFactor: OneFactor,
-	SrcColorFactor: SrcColorFactor,
-	OneMinusSrcColorFactor: OneMinusSrcColorFactor,
-	SrcAlphaFactor: SrcAlphaFactor,
-	OneMinusSrcAlphaFactor: OneMinusSrcAlphaFactor,
-	DstAlphaFactor: DstAlphaFactor,
-	OneMinusDstAlphaFactor: OneMinusDstAlphaFactor,
-	DstColorFactor: DstColorFactor,
-	OneMinusDstColorFactor: OneMinusDstColorFactor,
-	SrcAlphaSaturateFactor: SrcAlphaSaturateFactor,
-	NeverDepth: NeverDepth,
-	AlwaysDepth: AlwaysDepth,
-	LessDepth: LessDepth,
-	LessEqualDepth: LessEqualDepth,
-	EqualDepth: EqualDepth,
-	GreaterEqualDepth: GreaterEqualDepth,
-	GreaterDepth: GreaterDepth,
-	NotEqualDepth: NotEqualDepth,
-	MultiplyOperation: MultiplyOperation,
-	MixOperation: MixOperation,
-	AddOperation: AddOperation,
-	NoToneMapping: NoToneMapping,
-	LinearToneMapping: LinearToneMapping,
-	ReinhardToneMapping: ReinhardToneMapping,
-	Uncharted2ToneMapping: Uncharted2ToneMapping,
-	CineonToneMapping: CineonToneMapping,
-	ACESFilmicToneMapping: ACESFilmicToneMapping,
-	UVMapping: UVMapping,
-	CubeReflectionMapping: CubeReflectionMapping,
-	CubeRefractionMapping: CubeRefractionMapping,
-	EquirectangularReflectionMapping: EquirectangularReflectionMapping,
-	EquirectangularRefractionMapping: EquirectangularRefractionMapping,
-	SphericalReflectionMapping: SphericalReflectionMapping,
-	CubeUVReflectionMapping: CubeUVReflectionMapping,
-	CubeUVRefractionMapping: CubeUVRefractionMapping,
-	RepeatWrapping: RepeatWrapping,
-	ClampToEdgeWrapping: ClampToEdgeWrapping,
-	MirroredRepeatWrapping: MirroredRepeatWrapping,
-	NearestFilter: NearestFilter,
-	NearestMipMapNearestFilter: NearestMipMapNearestFilter,
-	NearestMipMapLinearFilter: NearestMipMapLinearFilter,
-	LinearFilter: LinearFilter,
-	LinearMipMapNearestFilter: LinearMipMapNearestFilter,
-	LinearMipMapLinearFilter: LinearMipMapLinearFilter,
-	UnsignedByteType: UnsignedByteType,
-	ByteType: ByteType,
-	ShortType: ShortType,
-	UnsignedShortType: UnsignedShortType,
-	IntType: IntType,
-	UnsignedIntType: UnsignedIntType,
-	FloatType: FloatType,
-	HalfFloatType: HalfFloatType,
-	UnsignedShort4444Type: UnsignedShort4444Type,
-	UnsignedShort5551Type: UnsignedShort5551Type,
-	UnsignedShort565Type: UnsignedShort565Type,
-	UnsignedInt248Type: UnsignedInt248Type,
-	AlphaFormat: AlphaFormat,
-	RGBFormat: RGBFormat,
-	RGBAFormat: RGBAFormat,
-	LuminanceFormat: LuminanceFormat,
-	LuminanceAlphaFormat: LuminanceAlphaFormat,
-	RGBEFormat: RGBEFormat,
-	DepthFormat: DepthFormat,
-	DepthStencilFormat: DepthStencilFormat,
-	RedFormat: RedFormat,
-	RGB_S3TC_DXT1_Format: RGB_S3TC_DXT1_Format,
-	RGBA_S3TC_DXT1_Format: RGBA_S3TC_DXT1_Format,
-	RGBA_S3TC_DXT3_Format: RGBA_S3TC_DXT3_Format,
-	RGBA_S3TC_DXT5_Format: RGBA_S3TC_DXT5_Format,
-	RGB_PVRTC_4BPPV1_Format: RGB_PVRTC_4BPPV1_Format,
-	RGB_PVRTC_2BPPV1_Format: RGB_PVRTC_2BPPV1_Format,
-	RGBA_PVRTC_4BPPV1_Format: RGBA_PVRTC_4BPPV1_Format,
-	RGBA_PVRTC_2BPPV1_Format: RGBA_PVRTC_2BPPV1_Format,
-	RGB_ETC1_Format: RGB_ETC1_Format,
-	RGBA_ASTC_4x4_Format: RGBA_ASTC_4x4_Format,
-	RGBA_ASTC_5x4_Format: RGBA_ASTC_5x4_Format,
-	RGBA_ASTC_5x5_Format: RGBA_ASTC_5x5_Format,
-	RGBA_ASTC_6x5_Format: RGBA_ASTC_6x5_Format,
-	RGBA_ASTC_6x6_Format: RGBA_ASTC_6x6_Format,
-	RGBA_ASTC_8x5_Format: RGBA_ASTC_8x5_Format,
-	RGBA_ASTC_8x6_Format: RGBA_ASTC_8x6_Format,
-	RGBA_ASTC_8x8_Format: RGBA_ASTC_8x8_Format,
-	RGBA_ASTC_10x5_Format: RGBA_ASTC_10x5_Format,
-	RGBA_ASTC_10x6_Format: RGBA_ASTC_10x6_Format,
-	RGBA_ASTC_10x8_Format: RGBA_ASTC_10x8_Format,
-	RGBA_ASTC_10x10_Format: RGBA_ASTC_10x10_Format,
-	RGBA_ASTC_12x10_Format: RGBA_ASTC_12x10_Format,
-	RGBA_ASTC_12x12_Format: RGBA_ASTC_12x12_Format,
-	LoopOnce: LoopOnce,
-	LoopRepeat: LoopRepeat,
-	LoopPingPong: LoopPingPong,
-	InterpolateDiscrete: InterpolateDiscrete,
-	InterpolateLinear: InterpolateLinear,
-	InterpolateSmooth: InterpolateSmooth,
-	ZeroCurvatureEnding: ZeroCurvatureEnding,
-	ZeroSlopeEnding: ZeroSlopeEnding,
-	WrapAroundEnding: WrapAroundEnding,
-	TrianglesDrawMode: TrianglesDrawMode,
-	TriangleStripDrawMode: TriangleStripDrawMode,
-	TriangleFanDrawMode: TriangleFanDrawMode,
-	LinearEncoding: LinearEncoding,
-	sRGBEncoding: sRGBEncoding,
-	GammaEncoding: GammaEncoding,
-	RGBEEncoding: RGBEEncoding,
-	LogLuvEncoding: LogLuvEncoding,
-	RGBM7Encoding: RGBM7Encoding,
-	RGBM16Encoding: RGBM16Encoding,
-	RGBDEncoding: RGBDEncoding,
-	BasicDepthPacking: BasicDepthPacking,
-	RGBADepthPacking: RGBADepthPacking,
-	TangentSpaceNormalMap: TangentSpaceNormalMap,
-	ObjectSpaceNormalMap: ObjectSpaceNormalMap,
-	Face4: Face4,
-	LineStrip: LineStrip,
-	LinePieces: LinePieces,
-	MeshFaceMaterial: MeshFaceMaterial,
-	MultiMaterial: MultiMaterial,
-	PointCloud: PointCloud,
-	Particle: Particle,
-	ParticleSystem: ParticleSystem,
-	PointCloudMaterial: PointCloudMaterial,
-	ParticleBasicMaterial: ParticleBasicMaterial,
-	ParticleSystemMaterial: ParticleSystemMaterial,
-	Vertex: Vertex,
-	DynamicBufferAttribute: DynamicBufferAttribute,
-	Int8Attribute: Int8Attribute,
-	Uint8Attribute: Uint8Attribute,
-	Uint8ClampedAttribute: Uint8ClampedAttribute,
-	Int16Attribute: Int16Attribute,
-	Uint16Attribute: Uint16Attribute,
-	Int32Attribute: Int32Attribute,
-	Uint32Attribute: Uint32Attribute,
-	Float32Attribute: Float32Attribute,
-	Float64Attribute: Float64Attribute,
-	ClosedSplineCurve3: ClosedSplineCurve3,
-	SplineCurve3: SplineCurve3,
-	Spline: Spline,
-	AxisHelper: AxisHelper,
-	BoundingBoxHelper: BoundingBoxHelper,
-	EdgesHelper: EdgesHelper,
-	WireframeHelper: WireframeHelper,
-	XHRLoader: XHRLoader,
-	BinaryTextureLoader: BinaryTextureLoader,
-	GeometryUtils: GeometryUtils,
-	Projector: Projector,
-	CanvasRenderer: CanvasRenderer,
-	JSONLoader: JSONLoader,
-	SceneUtils: SceneUtils,
-	LensFlare: LensFlare
+var three_module = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  WebGLMultisampleRenderTarget: WebGLMultisampleRenderTarget,
+  WebGLRenderTargetCube: WebGLRenderTargetCube,
+  WebGLRenderTarget: WebGLRenderTarget,
+  WebGLRenderer: WebGLRenderer,
+  ShaderLib: ShaderLib,
+  UniformsLib: UniformsLib,
+  UniformsUtils: UniformsUtils,
+  ShaderChunk: ShaderChunk,
+  FogExp2: FogExp2,
+  Fog: Fog,
+  Scene: Scene,
+  Sprite: Sprite,
+  LOD: LOD,
+  SkinnedMesh: SkinnedMesh,
+  Skeleton: Skeleton,
+  Bone: Bone,
+  Mesh: Mesh,
+  LineSegments: LineSegments,
+  LineLoop: LineLoop,
+  Line: Line,
+  Points: Points,
+  Group: Group,
+  VideoTexture: VideoTexture,
+  DataTexture: DataTexture,
+  DataTexture2DArray: DataTexture2DArray,
+  DataTexture3D: DataTexture3D,
+  CompressedTexture: CompressedTexture,
+  CubeTexture: CubeTexture,
+  CanvasTexture: CanvasTexture,
+  DepthTexture: DepthTexture,
+  Texture: Texture,
+  AnimationLoader: AnimationLoader,
+  CompressedTextureLoader: CompressedTextureLoader,
+  DataTextureLoader: DataTextureLoader,
+  CubeTextureLoader: CubeTextureLoader,
+  TextureLoader: TextureLoader,
+  ObjectLoader: ObjectLoader,
+  MaterialLoader: MaterialLoader,
+  BufferGeometryLoader: BufferGeometryLoader,
+  DefaultLoadingManager: DefaultLoadingManager,
+  LoadingManager: LoadingManager,
+  ImageLoader: ImageLoader,
+  ImageBitmapLoader: ImageBitmapLoader,
+  FontLoader: FontLoader,
+  FileLoader: FileLoader,
+  Loader: Loader,
+  LoaderUtils: LoaderUtils,
+  Cache: Cache,
+  AudioLoader: AudioLoader,
+  SpotLightShadow: SpotLightShadow,
+  SpotLight: SpotLight,
+  PointLight: PointLight,
+  RectAreaLight: RectAreaLight,
+  HemisphereLight: HemisphereLight,
+  HemisphereLightProbe: HemisphereLightProbe,
+  DirectionalLightShadow: DirectionalLightShadow,
+  DirectionalLight: DirectionalLight,
+  AmbientLight: AmbientLight,
+  AmbientLightProbe: AmbientLightProbe,
+  LightShadow: LightShadow,
+  Light: Light,
+  LightProbe: LightProbe,
+  StereoCamera: StereoCamera,
+  PerspectiveCamera: PerspectiveCamera,
+  OrthographicCamera: OrthographicCamera,
+  CubeCamera: CubeCamera,
+  ArrayCamera: ArrayCamera,
+  Camera: Camera,
+  AudioListener: AudioListener,
+  PositionalAudio: PositionalAudio,
+  AudioContext: AudioContext,
+  AudioAnalyser: AudioAnalyser,
+  Audio: Audio,
+  VectorKeyframeTrack: VectorKeyframeTrack,
+  StringKeyframeTrack: StringKeyframeTrack,
+  QuaternionKeyframeTrack: QuaternionKeyframeTrack,
+  NumberKeyframeTrack: NumberKeyframeTrack,
+  ColorKeyframeTrack: ColorKeyframeTrack,
+  BooleanKeyframeTrack: BooleanKeyframeTrack,
+  PropertyMixer: PropertyMixer,
+  PropertyBinding: PropertyBinding,
+  KeyframeTrack: KeyframeTrack,
+  AnimationUtils: AnimationUtils,
+  AnimationObjectGroup: AnimationObjectGroup,
+  AnimationMixer: AnimationMixer,
+  AnimationClip: AnimationClip,
+  Uniform: Uniform,
+  InstancedBufferGeometry: InstancedBufferGeometry,
+  BufferGeometry: BufferGeometry,
+  Geometry: Geometry,
+  InterleavedBufferAttribute: InterleavedBufferAttribute,
+  InstancedInterleavedBuffer: InstancedInterleavedBuffer,
+  InterleavedBuffer: InterleavedBuffer,
+  InstancedBufferAttribute: InstancedBufferAttribute,
+  Face3: Face3,
+  Object3D: Object3D,
+  Raycaster: Raycaster,
+  Layers: Layers,
+  EventDispatcher: EventDispatcher,
+  Clock: Clock,
+  QuaternionLinearInterpolant: QuaternionLinearInterpolant,
+  LinearInterpolant: LinearInterpolant,
+  DiscreteInterpolant: DiscreteInterpolant,
+  CubicInterpolant: CubicInterpolant,
+  Interpolant: Interpolant,
+  Triangle: Triangle,
+  Math: _Math,
+  Spherical: Spherical,
+  Cylindrical: Cylindrical,
+  Plane: Plane,
+  Frustum: Frustum,
+  Sphere: Sphere,
+  Ray: Ray,
+  Matrix4: Matrix4,
+  Matrix3: Matrix3,
+  Box3: Box3,
+  Box2: Box2,
+  Line3: Line3,
+  Euler: Euler,
+  Vector4: Vector4,
+  Vector3: Vector3,
+  Vector2: Vector2,
+  Quaternion: Quaternion,
+  Color: Color$1,
+  SphericalHarmonics3: SphericalHarmonics3,
+  ImmediateRenderObject: ImmediateRenderObject,
+  VertexNormalsHelper: VertexNormalsHelper,
+  SpotLightHelper: SpotLightHelper,
+  SkeletonHelper: SkeletonHelper,
+  PointLightHelper: PointLightHelper,
+  RectAreaLightHelper: RectAreaLightHelper,
+  HemisphereLightHelper: HemisphereLightHelper,
+  LightProbeHelper: LightProbeHelper,
+  GridHelper: GridHelper,
+  PolarGridHelper: PolarGridHelper,
+  PositionalAudioHelper: PositionalAudioHelper,
+  FaceNormalsHelper: FaceNormalsHelper,
+  DirectionalLightHelper: DirectionalLightHelper,
+  CameraHelper: CameraHelper,
+  BoxHelper: BoxHelper,
+  Box3Helper: Box3Helper,
+  PlaneHelper: PlaneHelper,
+  ArrowHelper: ArrowHelper,
+  AxesHelper: AxesHelper,
+  Shape: Shape,
+  Path: Path,
+  ShapePath: ShapePath,
+  Font: Font,
+  CurvePath: CurvePath,
+  Curve: Curve,
+  ImageUtils: ImageUtils,
+  ShapeUtils: ShapeUtils,
+  WebGLUtils: WebGLUtils,
+  WireframeGeometry: WireframeGeometry,
+  ParametricGeometry: ParametricGeometry,
+  ParametricBufferGeometry: ParametricBufferGeometry,
+  TetrahedronGeometry: TetrahedronGeometry,
+  TetrahedronBufferGeometry: TetrahedronBufferGeometry,
+  OctahedronGeometry: OctahedronGeometry,
+  OctahedronBufferGeometry: OctahedronBufferGeometry,
+  IcosahedronGeometry: IcosahedronGeometry,
+  IcosahedronBufferGeometry: IcosahedronBufferGeometry,
+  DodecahedronGeometry: DodecahedronGeometry,
+  DodecahedronBufferGeometry: DodecahedronBufferGeometry,
+  PolyhedronGeometry: PolyhedronGeometry,
+  PolyhedronBufferGeometry: PolyhedronBufferGeometry,
+  TubeGeometry: TubeGeometry,
+  TubeBufferGeometry: TubeBufferGeometry,
+  TorusKnotGeometry: TorusKnotGeometry,
+  TorusKnotBufferGeometry: TorusKnotBufferGeometry,
+  TorusGeometry: TorusGeometry,
+  TorusBufferGeometry: TorusBufferGeometry,
+  TextGeometry: TextGeometry,
+  TextBufferGeometry: TextBufferGeometry,
+  SphereGeometry: SphereGeometry,
+  SphereBufferGeometry: SphereBufferGeometry,
+  RingGeometry: RingGeometry,
+  RingBufferGeometry: RingBufferGeometry,
+  PlaneGeometry: PlaneGeometry,
+  PlaneBufferGeometry: PlaneBufferGeometry,
+  LatheGeometry: LatheGeometry,
+  LatheBufferGeometry: LatheBufferGeometry,
+  ShapeGeometry: ShapeGeometry,
+  ShapeBufferGeometry: ShapeBufferGeometry,
+  ExtrudeGeometry: ExtrudeGeometry,
+  ExtrudeBufferGeometry: ExtrudeBufferGeometry,
+  EdgesGeometry: EdgesGeometry,
+  ConeGeometry: ConeGeometry,
+  ConeBufferGeometry: ConeBufferGeometry,
+  CylinderGeometry: CylinderGeometry,
+  CylinderBufferGeometry: CylinderBufferGeometry,
+  CircleGeometry: CircleGeometry,
+  CircleBufferGeometry: CircleBufferGeometry,
+  BoxGeometry: BoxGeometry,
+  CubeGeometry: BoxGeometry,
+  BoxBufferGeometry: BoxBufferGeometry,
+  ShadowMaterial: ShadowMaterial,
+  SpriteMaterial: SpriteMaterial,
+  RawShaderMaterial: RawShaderMaterial,
+  ShaderMaterial: ShaderMaterial,
+  PointsMaterial: PointsMaterial,
+  MeshPhysicalMaterial: MeshPhysicalMaterial,
+  MeshStandardMaterial: MeshStandardMaterial,
+  MeshPhongMaterial: MeshPhongMaterial,
+  MeshToonMaterial: MeshToonMaterial,
+  MeshNormalMaterial: MeshNormalMaterial,
+  MeshLambertMaterial: MeshLambertMaterial,
+  MeshDepthMaterial: MeshDepthMaterial,
+  MeshDistanceMaterial: MeshDistanceMaterial,
+  MeshBasicMaterial: MeshBasicMaterial,
+  MeshMatcapMaterial: MeshMatcapMaterial,
+  LineDashedMaterial: LineDashedMaterial,
+  LineBasicMaterial: LineBasicMaterial,
+  Material: Material,
+  Float64BufferAttribute: Float64BufferAttribute,
+  Float32BufferAttribute: Float32BufferAttribute,
+  Uint32BufferAttribute: Uint32BufferAttribute,
+  Int32BufferAttribute: Int32BufferAttribute,
+  Uint16BufferAttribute: Uint16BufferAttribute,
+  Int16BufferAttribute: Int16BufferAttribute,
+  Uint8ClampedBufferAttribute: Uint8ClampedBufferAttribute,
+  Uint8BufferAttribute: Uint8BufferAttribute,
+  Int8BufferAttribute: Int8BufferAttribute,
+  BufferAttribute: BufferAttribute,
+  ArcCurve: ArcCurve,
+  CatmullRomCurve3: CatmullRomCurve3,
+  CubicBezierCurve: CubicBezierCurve,
+  CubicBezierCurve3: CubicBezierCurve3,
+  EllipseCurve: EllipseCurve,
+  LineCurve: LineCurve,
+  LineCurve3: LineCurve3,
+  QuadraticBezierCurve: QuadraticBezierCurve,
+  QuadraticBezierCurve3: QuadraticBezierCurve3,
+  SplineCurve: SplineCurve,
+  REVISION: REVISION,
+  MOUSE: MOUSE,
+  CullFaceNone: CullFaceNone,
+  CullFaceBack: CullFaceBack,
+  CullFaceFront: CullFaceFront,
+  CullFaceFrontBack: CullFaceFrontBack,
+  FrontFaceDirectionCW: FrontFaceDirectionCW,
+  FrontFaceDirectionCCW: FrontFaceDirectionCCW,
+  BasicShadowMap: BasicShadowMap,
+  PCFShadowMap: PCFShadowMap,
+  PCFSoftShadowMap: PCFSoftShadowMap,
+  FrontSide: FrontSide,
+  BackSide: BackSide,
+  DoubleSide: DoubleSide,
+  FlatShading: FlatShading,
+  SmoothShading: SmoothShading,
+  NoColors: NoColors,
+  FaceColors: FaceColors,
+  VertexColors: VertexColors,
+  NoBlending: NoBlending,
+  NormalBlending: NormalBlending,
+  AdditiveBlending: AdditiveBlending,
+  SubtractiveBlending: SubtractiveBlending,
+  MultiplyBlending: MultiplyBlending,
+  CustomBlending: CustomBlending,
+  AddEquation: AddEquation,
+  SubtractEquation: SubtractEquation,
+  ReverseSubtractEquation: ReverseSubtractEquation,
+  MinEquation: MinEquation,
+  MaxEquation: MaxEquation,
+  ZeroFactor: ZeroFactor,
+  OneFactor: OneFactor,
+  SrcColorFactor: SrcColorFactor,
+  OneMinusSrcColorFactor: OneMinusSrcColorFactor,
+  SrcAlphaFactor: SrcAlphaFactor,
+  OneMinusSrcAlphaFactor: OneMinusSrcAlphaFactor,
+  DstAlphaFactor: DstAlphaFactor,
+  OneMinusDstAlphaFactor: OneMinusDstAlphaFactor,
+  DstColorFactor: DstColorFactor,
+  OneMinusDstColorFactor: OneMinusDstColorFactor,
+  SrcAlphaSaturateFactor: SrcAlphaSaturateFactor,
+  NeverDepth: NeverDepth,
+  AlwaysDepth: AlwaysDepth,
+  LessDepth: LessDepth,
+  LessEqualDepth: LessEqualDepth,
+  EqualDepth: EqualDepth,
+  GreaterEqualDepth: GreaterEqualDepth,
+  GreaterDepth: GreaterDepth,
+  NotEqualDepth: NotEqualDepth,
+  MultiplyOperation: MultiplyOperation,
+  MixOperation: MixOperation,
+  AddOperation: AddOperation,
+  NoToneMapping: NoToneMapping,
+  LinearToneMapping: LinearToneMapping,
+  ReinhardToneMapping: ReinhardToneMapping,
+  Uncharted2ToneMapping: Uncharted2ToneMapping,
+  CineonToneMapping: CineonToneMapping,
+  ACESFilmicToneMapping: ACESFilmicToneMapping,
+  UVMapping: UVMapping,
+  CubeReflectionMapping: CubeReflectionMapping,
+  CubeRefractionMapping: CubeRefractionMapping,
+  EquirectangularReflectionMapping: EquirectangularReflectionMapping,
+  EquirectangularRefractionMapping: EquirectangularRefractionMapping,
+  SphericalReflectionMapping: SphericalReflectionMapping,
+  CubeUVReflectionMapping: CubeUVReflectionMapping,
+  CubeUVRefractionMapping: CubeUVRefractionMapping,
+  RepeatWrapping: RepeatWrapping,
+  ClampToEdgeWrapping: ClampToEdgeWrapping,
+  MirroredRepeatWrapping: MirroredRepeatWrapping,
+  NearestFilter: NearestFilter,
+  NearestMipMapNearestFilter: NearestMipMapNearestFilter,
+  NearestMipMapLinearFilter: NearestMipMapLinearFilter,
+  LinearFilter: LinearFilter,
+  LinearMipMapNearestFilter: LinearMipMapNearestFilter,
+  LinearMipMapLinearFilter: LinearMipMapLinearFilter,
+  UnsignedByteType: UnsignedByteType,
+  ByteType: ByteType,
+  ShortType: ShortType,
+  UnsignedShortType: UnsignedShortType,
+  IntType: IntType,
+  UnsignedIntType: UnsignedIntType,
+  FloatType: FloatType,
+  HalfFloatType: HalfFloatType,
+  UnsignedShort4444Type: UnsignedShort4444Type,
+  UnsignedShort5551Type: UnsignedShort5551Type,
+  UnsignedShort565Type: UnsignedShort565Type,
+  UnsignedInt248Type: UnsignedInt248Type,
+  AlphaFormat: AlphaFormat,
+  RGBFormat: RGBFormat,
+  RGBAFormat: RGBAFormat,
+  LuminanceFormat: LuminanceFormat,
+  LuminanceAlphaFormat: LuminanceAlphaFormat,
+  RGBEFormat: RGBEFormat,
+  DepthFormat: DepthFormat,
+  DepthStencilFormat: DepthStencilFormat,
+  RedFormat: RedFormat,
+  RGB_S3TC_DXT1_Format: RGB_S3TC_DXT1_Format,
+  RGBA_S3TC_DXT1_Format: RGBA_S3TC_DXT1_Format,
+  RGBA_S3TC_DXT3_Format: RGBA_S3TC_DXT3_Format,
+  RGBA_S3TC_DXT5_Format: RGBA_S3TC_DXT5_Format,
+  RGB_PVRTC_4BPPV1_Format: RGB_PVRTC_4BPPV1_Format,
+  RGB_PVRTC_2BPPV1_Format: RGB_PVRTC_2BPPV1_Format,
+  RGBA_PVRTC_4BPPV1_Format: RGBA_PVRTC_4BPPV1_Format,
+  RGBA_PVRTC_2BPPV1_Format: RGBA_PVRTC_2BPPV1_Format,
+  RGB_ETC1_Format: RGB_ETC1_Format,
+  RGBA_ASTC_4x4_Format: RGBA_ASTC_4x4_Format,
+  RGBA_ASTC_5x4_Format: RGBA_ASTC_5x4_Format,
+  RGBA_ASTC_5x5_Format: RGBA_ASTC_5x5_Format,
+  RGBA_ASTC_6x5_Format: RGBA_ASTC_6x5_Format,
+  RGBA_ASTC_6x6_Format: RGBA_ASTC_6x6_Format,
+  RGBA_ASTC_8x5_Format: RGBA_ASTC_8x5_Format,
+  RGBA_ASTC_8x6_Format: RGBA_ASTC_8x6_Format,
+  RGBA_ASTC_8x8_Format: RGBA_ASTC_8x8_Format,
+  RGBA_ASTC_10x5_Format: RGBA_ASTC_10x5_Format,
+  RGBA_ASTC_10x6_Format: RGBA_ASTC_10x6_Format,
+  RGBA_ASTC_10x8_Format: RGBA_ASTC_10x8_Format,
+  RGBA_ASTC_10x10_Format: RGBA_ASTC_10x10_Format,
+  RGBA_ASTC_12x10_Format: RGBA_ASTC_12x10_Format,
+  RGBA_ASTC_12x12_Format: RGBA_ASTC_12x12_Format,
+  LoopOnce: LoopOnce,
+  LoopRepeat: LoopRepeat,
+  LoopPingPong: LoopPingPong,
+  InterpolateDiscrete: InterpolateDiscrete,
+  InterpolateLinear: InterpolateLinear,
+  InterpolateSmooth: InterpolateSmooth,
+  ZeroCurvatureEnding: ZeroCurvatureEnding,
+  ZeroSlopeEnding: ZeroSlopeEnding,
+  WrapAroundEnding: WrapAroundEnding,
+  TrianglesDrawMode: TrianglesDrawMode,
+  TriangleStripDrawMode: TriangleStripDrawMode,
+  TriangleFanDrawMode: TriangleFanDrawMode,
+  LinearEncoding: LinearEncoding,
+  sRGBEncoding: sRGBEncoding,
+  GammaEncoding: GammaEncoding,
+  RGBEEncoding: RGBEEncoding,
+  LogLuvEncoding: LogLuvEncoding,
+  RGBM7Encoding: RGBM7Encoding,
+  RGBM16Encoding: RGBM16Encoding,
+  RGBDEncoding: RGBDEncoding,
+  BasicDepthPacking: BasicDepthPacking,
+  RGBADepthPacking: RGBADepthPacking,
+  TangentSpaceNormalMap: TangentSpaceNormalMap,
+  ObjectSpaceNormalMap: ObjectSpaceNormalMap,
+  Face4: Face4,
+  LineStrip: LineStrip,
+  LinePieces: LinePieces,
+  MeshFaceMaterial: MeshFaceMaterial,
+  MultiMaterial: MultiMaterial,
+  PointCloud: PointCloud,
+  Particle: Particle,
+  ParticleSystem: ParticleSystem,
+  PointCloudMaterial: PointCloudMaterial,
+  ParticleBasicMaterial: ParticleBasicMaterial,
+  ParticleSystemMaterial: ParticleSystemMaterial,
+  Vertex: Vertex,
+  DynamicBufferAttribute: DynamicBufferAttribute,
+  Int8Attribute: Int8Attribute,
+  Uint8Attribute: Uint8Attribute,
+  Uint8ClampedAttribute: Uint8ClampedAttribute,
+  Int16Attribute: Int16Attribute,
+  Uint16Attribute: Uint16Attribute,
+  Int32Attribute: Int32Attribute,
+  Uint32Attribute: Uint32Attribute,
+  Float32Attribute: Float32Attribute,
+  Float64Attribute: Float64Attribute,
+  ClosedSplineCurve3: ClosedSplineCurve3,
+  SplineCurve3: SplineCurve3,
+  Spline: Spline,
+  AxisHelper: AxisHelper,
+  BoundingBoxHelper: BoundingBoxHelper,
+  EdgesHelper: EdgesHelper,
+  WireframeHelper: WireframeHelper,
+  XHRLoader: XHRLoader,
+  BinaryTextureLoader: BinaryTextureLoader,
+  GeometryUtils: GeometryUtils,
+  Projector: Projector,
+  CanvasRenderer: CanvasRenderer,
+  JSONLoader: JSONLoader,
+  SceneUtils: SceneUtils,
+  LensFlare: LensFlare
 });
 
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
+/**
+ * @author Eberhard Graether / http://egraether.com/
+ * @author Mark Lundin 	/ http://mark-lundin.com
+ * @author Simone Manini / http://daron1337.github.io
+ * @author Luca Antiga 	/ http://lantiga.github.io
 
-//[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
-//[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
-//[5]   	Name	   ::=   	NameStartChar (NameChar)*
-var nameStartChar = /[A-Z_a-z\xC0-\xD6\xD8-\xF6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/;//\u10000-\uEFFFF
-var nameChar = new RegExp("[\\-\\.0-9"+nameStartChar.source.slice(1,-1)+"\\u00B7\\u0300-\\u036F\\u203F-\\u2040]");
-var tagNamePattern = new RegExp('^'+nameStartChar.source+nameChar.source+'*(?:\:'+nameStartChar.source+nameChar.source+'*)?$');
-//var tagNamePattern = /^[a-zA-Z_][\w\-\.]*(?:\:[a-zA-Z_][\w\-\.]*)?$/
-//var handlers = 'resolveEntity,getExternalSubset,characters,endDocument,endElement,endPrefixMapping,ignorableWhitespace,processingInstruction,setDocumentLocator,skippedEntity,startDocument,startElement,startPrefixMapping,notationDecl,unparsedEntityDecl,error,fatalError,warning,attributeDecl,elementDecl,externalEntityDecl,internalEntityDecl,comment,endCDATA,endDTD,endEntity,startCDATA,startDTD,startEntity'.split(',')
+ ** three-trackballcontrols module
+ ** @author Jon Lim / http://jonlim.ca
+ */
 
-//S_TAG,	S_ATTR,	S_EQ,	S_ATTR_NOQUOT_VALUE
-//S_ATTR_SPACE,	S_ATTR_END,	S_TAG_SPACE, S_TAG_CLOSE
-var S_TAG = 0;//tag name offerring
-var S_ATTR = 1;//attr name offerring 
-var S_ATTR_SPACE=2;//attr name end and space offer
-var S_EQ = 3;//=space?
-var S_ATTR_NOQUOT_VALUE = 4;//attr value(no quot value only)
-var S_ATTR_END = 5;//attr value end and no space(quot end)
-var S_TAG_SPACE = 6;//(attr value end || tag end ) && (space offer)
-var S_TAG_CLOSE = 7;//closed el<el />
+var THREE$1 = window.THREE || three_module;
 
-function XMLReader(){
-	
-}
+var TrackballControls;
+var threeTrackballcontrols = TrackballControls = function ( object, domElement ) {
 
-XMLReader.prototype = {
-	parse:function(source,defaultNSMap,entityMap){
-		var domBuilder = this.domBuilder;
-		domBuilder.startDocument();
-		_copy(defaultNSMap ,defaultNSMap = {});
-		parse(source,defaultNSMap,entityMap,
-				domBuilder,this.errorHandler);
-		domBuilder.endDocument();
-	}
-};
-function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
-	function fixedFromCharCode(code) {
-		// String.prototype.fromCharCode does not supports
-		// > 2 bytes unicode chars directly
-		if (code > 0xffff) {
-			code -= 0x10000;
-			var surrogate1 = 0xd800 + (code >> 10)
-				, surrogate2 = 0xdc00 + (code & 0x3ff);
+	var _this = this;
+	var STATE = { NONE: - 1, ROTATE: 0, ZOOM: 1, PAN: 2, TOUCH_ROTATE: 3, TOUCH_ZOOM_PAN: 4 };
 
-			return String.fromCharCode(surrogate1, surrogate2);
+	this.object = object;
+	this.domElement = ( domElement !== undefined ) ? domElement : document;
+
+	// API
+
+	this.enabled = true;
+
+	this.screen = { left: 0, top: 0, width: 0, height: 0 };
+
+	this.rotateSpeed = 1.0;
+	this.zoomSpeed = 1.2;
+	this.panSpeed = 0.3;
+
+	this.noRotate = false;
+	this.noZoom = false;
+	this.noPan = false;
+
+	this.staticMoving = false;
+	this.dynamicDampingFactor = 0.2;
+
+	this.minDistance = 0;
+	this.maxDistance = Infinity;
+
+	/**
+	 * `KeyboardEvent.keyCode` values which should trigger the different 
+	 * interaction states. Each element can be a single code or an array
+	 * of codes. All elements are required.
+	 */
+	this.keys = [ 65 /*A*/, 83 /*S*/, 68 /*D*/ ];
+
+	// internals
+
+	this.target = new THREE$1.Vector3();
+
+	var EPS = 0.000001;
+
+	var lastPosition = new THREE$1.Vector3();
+
+	var _state = STATE.NONE,
+	_prevState = STATE.NONE,
+
+	_eye = new THREE$1.Vector3(),
+
+	_movePrev = new THREE$1.Vector2(),
+	_moveCurr = new THREE$1.Vector2(),
+
+	_lastAxis = new THREE$1.Vector3(),
+	_lastAngle = 0,
+
+	_zoomStart = new THREE$1.Vector2(),
+	_zoomEnd = new THREE$1.Vector2(),
+
+	_touchZoomDistanceStart = 0,
+	_touchZoomDistanceEnd = 0,
+
+	_panStart = new THREE$1.Vector2(),
+	_panEnd = new THREE$1.Vector2();
+
+	// for reset
+
+	this.target0 = this.target.clone();
+	this.position0 = this.object.position.clone();
+	this.up0 = this.object.up.clone();
+
+	// events
+
+	var changeEvent = { type: 'change' };
+	var startEvent = { type: 'start' };
+	var endEvent = { type: 'end' };
+
+
+	// methods
+
+	this.handleResize = function () {
+
+		if ( this.domElement === document ) {
+
+			this.screen.left = 0;
+			this.screen.top = 0;
+			this.screen.width = window.innerWidth;
+			this.screen.height = window.innerHeight;
+
 		} else {
-			return String.fromCharCode(code);
-		}
-	}
-	function entityReplacer(a){
-		var k = a.slice(1,-1);
-		if(k in entityMap){
-			return entityMap[k]; 
-		}else if(k.charAt(0) === '#'){
-			return fixedFromCharCode(parseInt(k.substr(1).replace('x','0x')))
-		}else{
-			errorHandler.error('entity not found:'+a);
-			return a;
-		}
-	}
-	function appendText(end){//has some bugs
-		if(end>start){
-			var xt = source.substring(start,end).replace(/&#?\w+;/g,entityReplacer);
-			locator&&position(start);
-			domBuilder.characters(xt,0,end-start);
-			start = end;
-		}
-	}
-	function position(p,m){
-		while(p>=lineEnd && (m = linePattern.exec(source))){
-			lineStart = m.index;
-			lineEnd = lineStart + m[0].length;
-			locator.lineNumber++;
-			//console.log('line++:',locator,startPos,endPos)
-		}
-		locator.columnNumber = p-lineStart+1;
-	}
-	var lineStart = 0;
-	var lineEnd = 0;
-	var linePattern = /.*(?:\r\n?|\n)|.*$/g;
-	var locator = domBuilder.locator;
-	
-	var parseStack = [{currentNSMap:defaultNSMapCopy}];
-	var closeMap = {};
-	var start = 0;
-	while(true){
-		try{
-			var tagStart = source.indexOf('<',start);
-			if(tagStart<0){
-				if(!source.substr(start).match(/^\s*$/)){
-					var doc = domBuilder.doc;
-	    			var text = doc.createTextNode(source.substr(start));
-	    			doc.appendChild(text);
-	    			domBuilder.currentElement = text;
-				}
-				return;
-			}
-			if(tagStart>start){
-				appendText(tagStart);
-			}
-			switch(source.charAt(tagStart+1)){
-			case '/':
-				var end = source.indexOf('>',tagStart+3);
-				var tagName = source.substring(tagStart+2,end);
-				var config = parseStack.pop();
-				if(end<0){
-					
-	        		tagName = source.substring(tagStart+2).replace(/[\s<].*/,'');
-	        		//console.error('#@@@@@@'+tagName)
-	        		errorHandler.error("end tag name: "+tagName+' is not complete:'+config.tagName);
-	        		end = tagStart+1+tagName.length;
-	        	}else if(tagName.match(/\s</)){
-	        		tagName = tagName.replace(/[\s<].*/,'');
-	        		errorHandler.error("end tag name: "+tagName+' maybe not complete');
-	        		end = tagStart+1+tagName.length;
-				}
-				//console.error(parseStack.length,parseStack)
-				//console.error(config);
-				var localNSMap = config.localNSMap;
-				var endMatch = config.tagName == tagName;
-				var endIgnoreCaseMach = endMatch || config.tagName&&config.tagName.toLowerCase() == tagName.toLowerCase();
-		        if(endIgnoreCaseMach){
-		        	domBuilder.endElement(config.uri,config.localName,tagName);
-					if(localNSMap){
-						for(var prefix in localNSMap){
-							domBuilder.endPrefixMapping(prefix) ;
-						}
-					}
-					if(!endMatch){
-		            	errorHandler.fatalError("end tag name: "+tagName+' is not match the current start tagName:'+config.tagName );
-					}
-		        }else{
-		        	parseStack.push(config);
-		        }
-				
-				end++;
-				break;
-				// end elment
-			case '?':// <?...?>
-				locator&&position(tagStart);
-				end = parseInstruction(source,tagStart,domBuilder);
-				break;
-			case '!':// <!doctype,<![CDATA,<!--
-				locator&&position(tagStart);
-				end = parseDCC(source,tagStart,domBuilder,errorHandler);
-				break;
-			default:
-				locator&&position(tagStart);
-				var el = new ElementAttributes();
-				var currentNSMap = parseStack[parseStack.length-1].currentNSMap;
-				//elStartEnd
-				var end = parseElementStartPart(source,tagStart,el,currentNSMap,entityReplacer,errorHandler);
-				var len = el.length;
-				
-				
-				if(!el.closed && fixSelfClosed(source,end,el.tagName,closeMap)){
-					el.closed = true;
-					if(!entityMap.nbsp){
-						errorHandler.warning('unclosed xml attribute');
-					}
-				}
-				if(locator && len){
-					var locator2 = copyLocator(locator,{});
-					//try{//attribute position fixed
-					for(var i = 0;i<len;i++){
-						var a = el[i];
-						position(a.offset);
-						a.locator = copyLocator(locator,{});
-					}
-					//}catch(e){console.error('@@@@@'+e)}
-					domBuilder.locator = locator2;
-					if(appendElement(el,domBuilder,currentNSMap)){
-						parseStack.push(el);
-					}
-					domBuilder.locator = locator;
-				}else{
-					if(appendElement(el,domBuilder,currentNSMap)){
-						parseStack.push(el);
-					}
-				}
-				
-				
-				
-				if(el.uri === 'http://www.w3.org/1999/xhtml' && !el.closed){
-					end = parseHtmlSpecialContent(source,end,el.tagName,entityReplacer,domBuilder);
-				}else{
-					end++;
-				}
-			}
-		}catch(e){
-			errorHandler.error('element parse error: '+e);
-			//errorHandler.error('element parse error: '+e);
-			end = -1;
-			//throw e;
-		}
-		if(end>start){
-			start = end;
-		}else{
-			//TODO: 这里有可能sax回退，有位置错误风险
-			appendText(Math.max(tagStart,start)+1);
-		}
-	}
-}
-function copyLocator(f,t){
-	t.lineNumber = f.lineNumber;
-	t.columnNumber = f.columnNumber;
-	return t;
-}
 
-/**
- * @see #appendElement(source,elStartEnd,el,selfClosed,entityReplacer,domBuilder,parseStack);
- * @return end of the elementStartPart(end of elementEndPart for selfClosed el)
- */
-function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,errorHandler){
-	var attrName;
-	var value;
-	var p = ++start;
-	var s = S_TAG;//status
-	while(true){
-		var c = source.charAt(p);
-		switch(c){
-		case '=':
-			if(s === S_ATTR){//attrName
-				attrName = source.slice(start,p);
-				s = S_EQ;
-			}else if(s === S_ATTR_SPACE){
-				s = S_EQ;
-			}else{
-				//fatalError: equal must after attrName or space after attrName
-				throw new Error('attribute equal must after attrName');
-			}
-			break;
-		case '\'':
-		case '"':
-			if(s === S_EQ || s === S_ATTR //|| s == S_ATTR_SPACE
-				){//equal
-				if(s === S_ATTR){
-					errorHandler.warning('attribute value must after "="');
-					attrName = source.slice(start,p);
-				}
-				start = p+1;
-				p = source.indexOf(c,start);
-				if(p>0){
-					value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
-					el.add(attrName,value,start-1);
-					s = S_ATTR_END;
-				}else{
-					//fatalError: no end quot match
-					throw new Error('attribute value no end \''+c+'\' match');
-				}
-			}else if(s == S_ATTR_NOQUOT_VALUE){
-				value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
-				//console.log(attrName,value,start,p)
-				el.add(attrName,value,start);
-				//console.dir(el)
-				errorHandler.warning('attribute "'+attrName+'" missed start quot('+c+')!!');
-				start = p+1;
-				s = S_ATTR_END;
-			}else{
-				//fatalError: no equal before
-				throw new Error('attribute value must after "="');
-			}
-			break;
-		case '/':
-			switch(s){
-			case S_TAG:
-				el.setTagName(source.slice(start,p));
-			case S_ATTR_END:
-			case S_TAG_SPACE:
-			case S_TAG_CLOSE:
-				s =S_TAG_CLOSE;
-				el.closed = true;
-			case S_ATTR_NOQUOT_VALUE:
-			case S_ATTR:
-			case S_ATTR_SPACE:
-				break;
-			//case S_EQ:
-			default:
-				throw new Error("attribute invalid close char('/')")
-			}
-			break;
-		case ''://end document
-			//throw new Error('unexpected end of input')
-			errorHandler.error('unexpected end of input');
-			if(s == S_TAG){
-				el.setTagName(source.slice(start,p));
-			}
-			return p;
-		case '>':
-			switch(s){
-			case S_TAG:
-				el.setTagName(source.slice(start,p));
-			case S_ATTR_END:
-			case S_TAG_SPACE:
-			case S_TAG_CLOSE:
-				break;//normal
-			case S_ATTR_NOQUOT_VALUE://Compatible state
-			case S_ATTR:
-				value = source.slice(start,p);
-				if(value.slice(-1) === '/'){
-					el.closed  = true;
-					value = value.slice(0,-1);
-				}
-			case S_ATTR_SPACE:
-				if(s === S_ATTR_SPACE){
-					value = attrName;
-				}
-				if(s == S_ATTR_NOQUOT_VALUE){
-					errorHandler.warning('attribute "'+value+'" missed quot(")!!');
-					el.add(attrName,value.replace(/&#?\w+;/g,entityReplacer),start);
-				}else{
-					if(currentNSMap[''] !== 'http://www.w3.org/1999/xhtml' || !value.match(/^(?:disabled|checked|selected)$/i)){
-						errorHandler.warning('attribute "'+value+'" missed value!! "'+value+'" instead!!');
-					}
-					el.add(value,value,start);
-				}
-				break;
-			case S_EQ:
-				throw new Error('attribute value missed!!');
-			}
-//			console.log(tagName,tagNamePattern,tagNamePattern.test(tagName))
-			return p;
-		/*xml space '\x20' | #x9 | #xD | #xA; */
-		case '\u0080':
-			c = ' ';
-		default:
-			if(c<= ' '){//space
-				switch(s){
-				case S_TAG:
-					el.setTagName(source.slice(start,p));//tagName
-					s = S_TAG_SPACE;
-					break;
-				case S_ATTR:
-					attrName = source.slice(start,p);
-					s = S_ATTR_SPACE;
-					break;
-				case S_ATTR_NOQUOT_VALUE:
-					var value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
-					errorHandler.warning('attribute "'+value+'" missed quot(")!!');
-					el.add(attrName,value,start);
-				case S_ATTR_END:
-					s = S_TAG_SPACE;
-					break;
-				//case S_TAG_SPACE:
-				//case S_EQ:
-				//case S_ATTR_SPACE:
-				//	void();break;
-				//case S_TAG_CLOSE:
-					//ignore warning
-				}
-			}else{//not space
-//S_TAG,	S_ATTR,	S_EQ,	S_ATTR_NOQUOT_VALUE
-//S_ATTR_SPACE,	S_ATTR_END,	S_TAG_SPACE, S_TAG_CLOSE
-				switch(s){
-				//case S_TAG:void();break;
-				//case S_ATTR:void();break;
-				//case S_ATTR_NOQUOT_VALUE:void();break;
-				case S_ATTR_SPACE:
-					var tagName =  el.tagName;
-					if(currentNSMap[''] !== 'http://www.w3.org/1999/xhtml' || !attrName.match(/^(?:disabled|checked|selected)$/i)){
-						errorHandler.warning('attribute "'+attrName+'" missed value!! "'+attrName+'" instead2!!');
-					}
-					el.add(attrName,attrName,start);
-					start = p;
-					s = S_ATTR;
-					break;
-				case S_ATTR_END:
-					errorHandler.warning('attribute space is required"'+attrName+'"!!');
-				case S_TAG_SPACE:
-					s = S_ATTR;
-					start = p;
-					break;
-				case S_EQ:
-					s = S_ATTR_NOQUOT_VALUE;
-					start = p;
-					break;
-				case S_TAG_CLOSE:
-					throw new Error("elements closed character '/' and '>' must be connected to");
-				}
-			}
-		}//end outer switch
-		//console.log('p++',p)
-		p++;
-	}
-}
-/**
- * @return true if has new namespace define
- */
-function appendElement(el,domBuilder,currentNSMap){
-	var tagName = el.tagName;
-	var localNSMap = null;
-	//var currentNSMap = parseStack[parseStack.length-1].currentNSMap;
-	var i = el.length;
-	while(i--){
-		var a = el[i];
-		var qName = a.qName;
-		var value = a.value;
-		var nsp = qName.indexOf(':');
-		if(nsp>0){
-			var prefix = a.prefix = qName.slice(0,nsp);
-			var localName = qName.slice(nsp+1);
-			var nsPrefix = prefix === 'xmlns' && localName;
-		}else{
-			localName = qName;
-			prefix = null;
-			nsPrefix = qName === 'xmlns' && '';
-		}
-		//can not set prefix,because prefix !== ''
-		a.localName = localName ;
-		//prefix == null for no ns prefix attribute 
-		if(nsPrefix !== false){//hack!!
-			if(localNSMap == null){
-				localNSMap = {};
-				//console.log(currentNSMap,0)
-				_copy(currentNSMap,currentNSMap={});
-				//console.log(currentNSMap,1)
-			}
-			currentNSMap[nsPrefix] = localNSMap[nsPrefix] = value;
-			a.uri = 'http://www.w3.org/2000/xmlns/';
-			domBuilder.startPrefixMapping(nsPrefix, value); 
-		}
-	}
-	var i = el.length;
-	while(i--){
-		a = el[i];
-		var prefix = a.prefix;
-		if(prefix){//no prefix attribute has no namespace
-			if(prefix === 'xml'){
-				a.uri = 'http://www.w3.org/XML/1998/namespace';
-			}if(prefix !== 'xmlns'){
-				a.uri = currentNSMap[prefix || ''];
-				
-				//{console.log('###'+a.qName,domBuilder.locator.systemId+'',currentNSMap,a.uri)}
-			}
-		}
-	}
-	var nsp = tagName.indexOf(':');
-	if(nsp>0){
-		prefix = el.prefix = tagName.slice(0,nsp);
-		localName = el.localName = tagName.slice(nsp+1);
-	}else{
-		prefix = null;//important!!
-		localName = el.localName = tagName;
-	}
-	//no prefix element has default namespace
-	var ns = el.uri = currentNSMap[prefix || ''];
-	domBuilder.startElement(ns,localName,tagName,el);
-	//endPrefixMapping and startPrefixMapping have not any help for dom builder
-	//localNSMap = null
-	if(el.closed){
-		domBuilder.endElement(ns,localName,tagName);
-		if(localNSMap){
-			for(prefix in localNSMap){
-				domBuilder.endPrefixMapping(prefix); 
-			}
-		}
-	}else{
-		el.currentNSMap = currentNSMap;
-		el.localNSMap = localNSMap;
-		//parseStack.push(el);
-		return true;
-	}
-}
-function parseHtmlSpecialContent(source,elStartEnd,tagName,entityReplacer,domBuilder){
-	if(/^(?:script|textarea)$/i.test(tagName)){
-		var elEndStart =  source.indexOf('</'+tagName+'>',elStartEnd);
-		var text = source.substring(elStartEnd+1,elEndStart);
-		if(/[&<]/.test(text)){
-			if(/^script$/i.test(tagName)){
-				//if(!/\]\]>/.test(text)){
-					//lexHandler.startCDATA();
-					domBuilder.characters(text,0,text.length);
-					//lexHandler.endCDATA();
-					return elEndStart;
-				//}
-			}//}else{//text area
-				text = text.replace(/&#?\w+;/g,entityReplacer);
-				domBuilder.characters(text,0,text.length);
-				return elEndStart;
-			//}
-			
-		}
-	}
-	return elStartEnd+1;
-}
-function fixSelfClosed(source,elStartEnd,tagName,closeMap){
-	//if(tagName in closeMap){
-	var pos = closeMap[tagName];
-	if(pos == null){
-		//console.log(tagName)
-		pos =  source.lastIndexOf('</'+tagName+'>');
-		if(pos<elStartEnd){//忘记闭合
-			pos = source.lastIndexOf('</'+tagName);
-		}
-		closeMap[tagName] =pos;
-	}
-	return pos<elStartEnd;
-	//} 
-}
-function _copy(source,target){
-	for(var n in source){target[n] = source[n];}
-}
-function parseDCC(source,start,domBuilder,errorHandler){//sure start with '<!'
-	var next= source.charAt(start+2);
-	switch(next){
-	case '-':
-		if(source.charAt(start + 3) === '-'){
-			var end = source.indexOf('-->',start+4);
-			//append comment source.substring(4,end)//<!--
-			if(end>start){
-				domBuilder.comment(source,start+4,end-start-4);
-				return end+3;
-			}else{
-				errorHandler.error("Unclosed comment");
-				return -1;
-			}
-		}else{
-			//error
-			return -1;
-		}
-	default:
-		if(source.substr(start+3,6) == 'CDATA['){
-			var end = source.indexOf(']]>',start+9);
-			domBuilder.startCDATA();
-			domBuilder.characters(source,start+9,end-start-9);
-			domBuilder.endCDATA(); 
-			return end+3;
-		}
-		//<!DOCTYPE
-		//startDTD(java.lang.String name, java.lang.String publicId, java.lang.String systemId) 
-		var matchs = split(source,start);
-		var len = matchs.length;
-		if(len>1 && /!doctype/i.test(matchs[0][0])){
-			var name = matchs[1][0];
-			var pubid = len>3 && /^public$/i.test(matchs[2][0]) && matchs[3][0];
-			var sysid = len>4 && matchs[4][0];
-			var lastMatch = matchs[len-1];
-			domBuilder.startDTD(name,pubid && pubid.replace(/^(['"])(.*?)\1$/,'$2'),
-					sysid && sysid.replace(/^(['"])(.*?)\1$/,'$2'));
-			domBuilder.endDTD();
-			
-			return lastMatch.index+lastMatch[0].length
-		}
-	}
-	return -1;
-}
+			var box = this.domElement.getBoundingClientRect();
+			// adjustments come from similar code in the jquery offset() function
+			var d = this.domElement.ownerDocument.documentElement;
+			this.screen.left = box.left + window.pageXOffset - d.clientLeft;
+			this.screen.top = box.top + window.pageYOffset - d.clientTop;
+			this.screen.width = box.width;
+			this.screen.height = box.height;
 
-
-
-function parseInstruction(source,start,domBuilder){
-	var end = source.indexOf('?>',start);
-	if(end){
-		var match = source.substring(start,end).match(/^<\?(\S*)\s*([\s\S]*?)\s*$/);
-		if(match){
-			var len = match[0].length;
-			domBuilder.processingInstruction(match[1], match[2]) ;
-			return end+2;
-		}else{//error
-			return -1;
 		}
-	}
-	return -1;
-}
 
-/**
- * @param source
- */
-function ElementAttributes(source){
-	
-}
-ElementAttributes.prototype = {
-	setTagName:function(tagName){
-		if(!tagNamePattern.test(tagName)){
-			throw new Error('invalid tagName:'+tagName)
-		}
-		this.tagName = tagName;
-	},
-	add:function(qName,value,offset){
-		if(!tagNamePattern.test(qName)){
-			throw new Error('invalid attribute:'+qName)
-		}
-		this[this.length++] = {qName:qName,value:value,offset:offset};
-	},
-	length:0,
-	getLocalName:function(i){return this[i].localName},
-	getLocator:function(i){return this[i].locator},
-	getQName:function(i){return this[i].qName},
-	getURI:function(i){return this[i].uri},
-	getValue:function(i){return this[i].value}
-//	,getIndex:function(uri, localName)){
-//		if(localName){
-//			
-//		}else{
-//			var qName = uri
-//		}
-//	},
-//	getValue:function(){return this.getValue(this.getIndex.apply(this,arguments))},
-//	getType:function(uri,localName){}
-//	getType:function(i){},
-};
-
-
-
-
-function _set_proto_(thiz,parent){
-	thiz.__proto__ = parent;
-	return thiz;
-}
-if(!(_set_proto_({},_set_proto_.prototype) instanceof _set_proto_)){
-	_set_proto_ = function(thiz,parent){
-		function p(){}		p.prototype = parent;
-		p = new p();
-		for(parent in thiz){
-			p[parent] = thiz[parent];
-		}
-		return p;
 	};
-}
 
-function split(source,start){
-	var match;
-	var buf = [];
-	var reg = /'[^']+'|"[^"]+"|[^\s<>\/=]+=?|(\/?\s*>|<)/g;
-	reg.lastIndex = start;
-	reg.exec(source);//skip <
-	while(match = reg.exec(source)){
-		buf.push(match);
-		if(match[1])return buf;
-	}
-}
+	this.handleEvent = function ( event ) {
 
-var XMLReader_1 = XMLReader;
+		if ( typeof this[ event.type ] == 'function' ) {
 
-var sax = {
-	XMLReader: XMLReader_1
-};
+			this[ event.type ]( event );
 
-/*
- * DOM Level 2
- * Object DOMException
- * @see http://www.w3.org/TR/REC-DOM-Level-1/ecma-script-language-binding.html
- * @see http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/ecma-script-binding.html
- */
-
-function copy(src,dest){
-	for(var p in src){
-		dest[p] = src[p];
-	}
-}
-/**
-^\w+\.prototype\.([_\w]+)\s*=\s*((?:.*\{\s*?[\r\n][\s\S]*?^})|\S.*?(?=[;\r\n]));?
-^\w+\.prototype\.([_\w]+)\s*=\s*(\S.*?(?=[;\r\n]));?
- */
-function _extends(Class,Super){
-	var pt = Class.prototype;
-	if(Object.create){
-		var ppt = Object.create(Super.prototype);
-		pt.__proto__ = ppt;
-	}
-	if(!(pt instanceof Super)){
-		function t(){}		t.prototype = Super.prototype;
-		t = new t();
-		copy(pt,t);
-		Class.prototype = pt = t;
-	}
-	if(pt.constructor != Class){
-		if(typeof Class != 'function'){
-			console.error("unknow Class:"+Class);
 		}
-		pt.constructor = Class;
-	}
-}
-var htmlns = 'http://www.w3.org/1999/xhtml' ;
-// Node Types
-var NodeType = {};
-var ELEMENT_NODE                = NodeType.ELEMENT_NODE                = 1;
-var ATTRIBUTE_NODE              = NodeType.ATTRIBUTE_NODE              = 2;
-var TEXT_NODE                   = NodeType.TEXT_NODE                   = 3;
-var CDATA_SECTION_NODE          = NodeType.CDATA_SECTION_NODE          = 4;
-var ENTITY_REFERENCE_NODE       = NodeType.ENTITY_REFERENCE_NODE       = 5;
-var ENTITY_NODE                 = NodeType.ENTITY_NODE                 = 6;
-var PROCESSING_INSTRUCTION_NODE = NodeType.PROCESSING_INSTRUCTION_NODE = 7;
-var COMMENT_NODE                = NodeType.COMMENT_NODE                = 8;
-var DOCUMENT_NODE               = NodeType.DOCUMENT_NODE               = 9;
-var DOCUMENT_TYPE_NODE          = NodeType.DOCUMENT_TYPE_NODE          = 10;
-var DOCUMENT_FRAGMENT_NODE      = NodeType.DOCUMENT_FRAGMENT_NODE      = 11;
-var NOTATION_NODE               = NodeType.NOTATION_NODE               = 12;
 
-// ExceptionCode
-var ExceptionCode = {};
-var ExceptionMessage = {};
-var INDEX_SIZE_ERR              = ExceptionCode.INDEX_SIZE_ERR              = ((ExceptionMessage[1]="Index size error"),1);
-var DOMSTRING_SIZE_ERR          = ExceptionCode.DOMSTRING_SIZE_ERR          = ((ExceptionMessage[2]="DOMString size error"),2);
-var HIERARCHY_REQUEST_ERR       = ExceptionCode.HIERARCHY_REQUEST_ERR       = ((ExceptionMessage[3]="Hierarchy request error"),3);
-var WRONG_DOCUMENT_ERR          = ExceptionCode.WRONG_DOCUMENT_ERR          = ((ExceptionMessage[4]="Wrong document"),4);
-var INVALID_CHARACTER_ERR       = ExceptionCode.INVALID_CHARACTER_ERR       = ((ExceptionMessage[5]="Invalid character"),5);
-var NO_DATA_ALLOWED_ERR         = ExceptionCode.NO_DATA_ALLOWED_ERR         = ((ExceptionMessage[6]="No data allowed"),6);
-var NO_MODIFICATION_ALLOWED_ERR = ExceptionCode.NO_MODIFICATION_ALLOWED_ERR = ((ExceptionMessage[7]="No modification allowed"),7);
-var NOT_FOUND_ERR               = ExceptionCode.NOT_FOUND_ERR               = ((ExceptionMessage[8]="Not found"),8);
-var NOT_SUPPORTED_ERR           = ExceptionCode.NOT_SUPPORTED_ERR           = ((ExceptionMessage[9]="Not supported"),9);
-var INUSE_ATTRIBUTE_ERR         = ExceptionCode.INUSE_ATTRIBUTE_ERR         = ((ExceptionMessage[10]="Attribute in use"),10);
-//level2
-var INVALID_STATE_ERR        	= ExceptionCode.INVALID_STATE_ERR        	= ((ExceptionMessage[11]="Invalid state"),11);
-var SYNTAX_ERR               	= ExceptionCode.SYNTAX_ERR               	= ((ExceptionMessage[12]="Syntax error"),12);
-var INVALID_MODIFICATION_ERR 	= ExceptionCode.INVALID_MODIFICATION_ERR 	= ((ExceptionMessage[13]="Invalid modification"),13);
-var NAMESPACE_ERR            	= ExceptionCode.NAMESPACE_ERR           	= ((ExceptionMessage[14]="Invalid namespace"),14);
-var INVALID_ACCESS_ERR       	= ExceptionCode.INVALID_ACCESS_ERR      	= ((ExceptionMessage[15]="Invalid access"),15);
+	};
 
+	var getMouseOnScreen = ( function () {
 
-function DOMException(code, message) {
-	if(message instanceof Error){
-		var error = message;
-	}else{
-		error = this;
-		Error.call(this, ExceptionMessage[code]);
-		this.message = ExceptionMessage[code];
-		if(Error.captureStackTrace) Error.captureStackTrace(this, DOMException);
-	}
-	error.code = code;
-	if(message) this.message = this.message + ": " + message;
-	return error;
-}DOMException.prototype = Error.prototype;
-copy(ExceptionCode,DOMException);
-/**
- * @see http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/core.html#ID-536297177
- * The NodeList interface provides the abstraction of an ordered collection of nodes, without defining or constraining how this collection is implemented. NodeList objects in the DOM are live.
- * The items in the NodeList are accessible via an integral index, starting from 0.
- */
-function NodeList() {
-}NodeList.prototype = {
-	/**
-	 * The number of nodes in the list. The range of valid child node indices is 0 to length-1 inclusive.
-	 * @standard level1
-	 */
-	length:0, 
-	/**
-	 * Returns the indexth item in the collection. If index is greater than or equal to the number of nodes in the list, this returns null.
-	 * @standard level1
-	 * @param index  unsigned long 
-	 *   Index into the collection.
-	 * @return Node
-	 * 	The node at the indexth position in the NodeList, or null if that is not a valid index. 
-	 */
-	item: function(index) {
-		return this[index] || null;
-	},
-	toString:function(isHTML,nodeFilter){
-		for(var buf = [], i = 0;i<this.length;i++){
-			serializeToString(this[i],buf,isHTML,nodeFilter);
-		}
-		return buf.join('');
-	}
-};
-function LiveNodeList(node,refresh){
-	this._node = node;
-	this._refresh = refresh;
-	_updateLiveList(this);
-}
-function _updateLiveList(list){
-	var inc = list._node._inc || list._node.ownerDocument._inc;
-	if(list._inc != inc){
-		var ls = list._refresh(list._node);
-		//console.log(ls.length)
-		__set__(list,'length',ls.length);
-		copy(ls,list);
-		list._inc = inc;
-	}
-}
-LiveNodeList.prototype.item = function(i){
-	_updateLiveList(this);
-	return this[i];
-};
+		var vector = new THREE$1.Vector2();
 
-_extends(LiveNodeList,NodeList);
-/**
- * 
- * Objects implementing the NamedNodeMap interface are used to represent collections of nodes that can be accessed by name. Note that NamedNodeMap does not inherit from NodeList; NamedNodeMaps are not maintained in any particular order. Objects contained in an object implementing NamedNodeMap may also be accessed by an ordinal index, but this is simply to allow convenient enumeration of the contents of a NamedNodeMap, and does not imply that the DOM specifies an order to these Nodes.
- * NamedNodeMap objects in the DOM are live.
- * used for attributes or DocumentType entities 
- */
-function NamedNodeMap() {
-}
-function _findNodeIndex(list,node){
-	var i = list.length;
-	while(i--){
-		if(list[i] === node){return i}
-	}
-}
+		return function getMouseOnScreen( pageX, pageY ) {
 
-function _addNamedNode(el,list,newAttr,oldAttr){
-	if(oldAttr){
-		list[_findNodeIndex(list,oldAttr)] = newAttr;
-	}else{
-		list[list.length++] = newAttr;
-	}
-	if(el){
-		newAttr.ownerElement = el;
-		var doc = el.ownerDocument;
-		if(doc){
-			oldAttr && _onRemoveAttribute(doc,el,oldAttr);
-			_onAddAttribute(doc,el,newAttr);
-		}
-	}
-}
-function _removeNamedNode(el,list,attr){
-	//console.log('remove attr:'+attr)
-	var i = _findNodeIndex(list,attr);
-	if(i>=0){
-		var lastIndex = list.length-1;
-		while(i<lastIndex){
-			list[i] = list[++i];
-		}
-		list.length = lastIndex;
-		if(el){
-			var doc = el.ownerDocument;
-			if(doc){
-				_onRemoveAttribute(doc,el,attr);
-				attr.ownerElement = null;
-			}
-		}
-	}else{
-		throw DOMException(NOT_FOUND_ERR,new Error(el.tagName+'@'+attr))
-	}
-}
-NamedNodeMap.prototype = {
-	length:0,
-	item:NodeList.prototype.item,
-	getNamedItem: function(key) {
-//		if(key.indexOf(':')>0 || key == 'xmlns'){
-//			return null;
-//		}
-		//console.log()
-		var i = this.length;
-		while(i--){
-			var attr = this[i];
-			//console.log(attr.nodeName,key)
-			if(attr.nodeName == key){
-				return attr;
-			}
-		}
-	},
-	setNamedItem: function(attr) {
-		var el = attr.ownerElement;
-		if(el && el!=this._ownerElement){
-			throw new DOMException(INUSE_ATTRIBUTE_ERR);
-		}
-		var oldAttr = this.getNamedItem(attr.nodeName);
-		_addNamedNode(this._ownerElement,this,attr,oldAttr);
-		return oldAttr;
-	},
-	/* returns Node */
-	setNamedItemNS: function(attr) {// raises: WRONG_DOCUMENT_ERR,NO_MODIFICATION_ALLOWED_ERR,INUSE_ATTRIBUTE_ERR
-		var el = attr.ownerElement, oldAttr;
-		if(el && el!=this._ownerElement){
-			throw new DOMException(INUSE_ATTRIBUTE_ERR);
-		}
-		oldAttr = this.getNamedItemNS(attr.namespaceURI,attr.localName);
-		_addNamedNode(this._ownerElement,this,attr,oldAttr);
-		return oldAttr;
-	},
+			vector.set(
+				( pageX - _this.screen.left ) / _this.screen.width,
+				( pageY - _this.screen.top ) / _this.screen.height
+			);
 
-	/* returns Node */
-	removeNamedItem: function(key) {
-		var attr = this.getNamedItem(key);
-		_removeNamedNode(this._ownerElement,this,attr);
-		return attr;
-		
-		
-	},// raises: NOT_FOUND_ERR,NO_MODIFICATION_ALLOWED_ERR
-	
-	//for level2
-	removeNamedItemNS:function(namespaceURI,localName){
-		var attr = this.getNamedItemNS(namespaceURI,localName);
-		_removeNamedNode(this._ownerElement,this,attr);
-		return attr;
-	},
-	getNamedItemNS: function(namespaceURI, localName) {
-		var i = this.length;
-		while(i--){
-			var node = this[i];
-			if(node.localName == localName && node.namespaceURI == namespaceURI){
-				return node;
-			}
-		}
-		return null;
-	}
-};
-/**
- * @see http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-102161490
- */
-function DOMImplementation(/* Object */ features) {
-	this._features = {};
-	if (features) {
-		for (var feature in features) {
-			 this._features = features[feature];
-		}
-	}
-}
-DOMImplementation.prototype = {
-	hasFeature: function(/* string */ feature, /* string */ version) {
-		var versions = this._features[feature.toLowerCase()];
-		if (versions && (!version || version in versions)) {
-			return true;
-		} else {
-			return false;
-		}
-	},
-	// Introduced in DOM Level 2:
-	createDocument:function(namespaceURI,  qualifiedName, doctype){// raises:INVALID_CHARACTER_ERR,NAMESPACE_ERR,WRONG_DOCUMENT_ERR
-		var doc = new Document();
-		doc.implementation = this;
-		doc.childNodes = new NodeList();
-		doc.doctype = doctype;
-		if(doctype){
-			doc.appendChild(doctype);
-		}
-		if(qualifiedName){
-			var root = doc.createElementNS(namespaceURI,qualifiedName);
-			doc.appendChild(root);
-		}
-		return doc;
-	},
-	// Introduced in DOM Level 2:
-	createDocumentType:function(qualifiedName, publicId, systemId){// raises:INVALID_CHARACTER_ERR,NAMESPACE_ERR
-		var node = new DocumentType();
-		node.name = qualifiedName;
-		node.nodeName = qualifiedName;
-		node.publicId = publicId;
-		node.systemId = systemId;
-		// Introduced in DOM Level 2:
-		//readonly attribute DOMString        internalSubset;
-		
-		//TODO:..
-		//  readonly attribute NamedNodeMap     entities;
-		//  readonly attribute NamedNodeMap     notations;
-		return node;
-	}
-};
+			return vector;
 
-
-/**
- * @see http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/core.html#ID-1950641247
- */
-
-function Node$1() {
-}
-Node$1.prototype = {
-	firstChild : null,
-	lastChild : null,
-	previousSibling : null,
-	nextSibling : null,
-	attributes : null,
-	parentNode : null,
-	childNodes : null,
-	ownerDocument : null,
-	nodeValue : null,
-	namespaceURI : null,
-	prefix : null,
-	localName : null,
-	// Modified in DOM Level 2:
-	insertBefore:function(newChild, refChild){//raises 
-		return _insertBefore(this,newChild,refChild);
-	},
-	replaceChild:function(newChild, oldChild){//raises 
-		this.insertBefore(newChild,oldChild);
-		if(oldChild){
-			this.removeChild(oldChild);
-		}
-	},
-	removeChild:function(oldChild){
-		return _removeChild(this,oldChild);
-	},
-	appendChild:function(newChild){
-		return this.insertBefore(newChild,null);
-	},
-	hasChildNodes:function(){
-		return this.firstChild != null;
-	},
-	cloneNode:function(deep){
-		return cloneNode(this.ownerDocument||this,this,deep);
-	},
-	// Modified in DOM Level 2:
-	normalize:function(){
-		var child = this.firstChild;
-		while(child){
-			var next = child.nextSibling;
-			if(next && next.nodeType == TEXT_NODE && child.nodeType == TEXT_NODE){
-				this.removeChild(next);
-				child.appendData(next.data);
-			}else{
-				child.normalize();
-				child = next;
-			}
-		}
-	},
-  	// Introduced in DOM Level 2:
-	isSupported:function(feature, version){
-		return this.ownerDocument.implementation.hasFeature(feature,version);
-	},
-    // Introduced in DOM Level 2:
-    hasAttributes:function(){
-    	return this.attributes.length>0;
-    },
-    lookupPrefix:function(namespaceURI){
-    	var el = this;
-    	while(el){
-    		var map = el._nsMap;
-    		//console.dir(map)
-    		if(map){
-    			for(var n in map){
-    				if(map[n] == namespaceURI){
-    					return n;
-    				}
-    			}
-    		}
-    		el = el.nodeType == ATTRIBUTE_NODE?el.ownerDocument : el.parentNode;
-    	}
-    	return null;
-    },
-    // Introduced in DOM Level 3:
-    lookupNamespaceURI:function(prefix){
-    	var el = this;
-    	while(el){
-    		var map = el._nsMap;
-    		//console.dir(map)
-    		if(map){
-    			if(prefix in map){
-    				return map[prefix] ;
-    			}
-    		}
-    		el = el.nodeType == ATTRIBUTE_NODE?el.ownerDocument : el.parentNode;
-    	}
-    	return null;
-    },
-    // Introduced in DOM Level 3:
-    isDefaultNamespace:function(namespaceURI){
-    	var prefix = this.lookupPrefix(namespaceURI);
-    	return prefix == null;
-    }
-};
-
-
-function _xmlEncoder(c){
-	return c == '<' && '&lt;' ||
-         c == '>' && '&gt;' ||
-         c == '&' && '&amp;' ||
-         c == '"' && '&quot;' ||
-         '&#'+c.charCodeAt()+';'
-}
-
-
-copy(NodeType,Node$1);
-copy(NodeType,Node$1.prototype);
-
-/**
- * @param callback return true for continue,false for break
- * @return boolean true: break visit;
- */
-function _visitNode(node,callback){
-	if(callback(node)){
-		return true;
-	}
-	if(node = node.firstChild){
-		do{
-			if(_visitNode(node,callback)){return true}
-        }while(node=node.nextSibling)
-    }
-}
-
-
-
-function Document(){
-}
-function _onAddAttribute(doc,el,newAttr){
-	doc && doc._inc++;
-	var ns = newAttr.namespaceURI ;
-	if(ns == 'http://www.w3.org/2000/xmlns/'){
-		//update namespace
-		el._nsMap[newAttr.prefix?newAttr.localName:''] = newAttr.value;
-	}
-}
-function _onRemoveAttribute(doc,el,newAttr,remove){
-	doc && doc._inc++;
-	var ns = newAttr.namespaceURI ;
-	if(ns == 'http://www.w3.org/2000/xmlns/'){
-		//update namespace
-		delete el._nsMap[newAttr.prefix?newAttr.localName:''];
-	}
-}
-function _onUpdateChild(doc,el,newChild){
-	if(doc && doc._inc){
-		doc._inc++;
-		//update childNodes
-		var cs = el.childNodes;
-		if(newChild){
-			cs[cs.length++] = newChild;
-		}else{
-			//console.log(1)
-			var child = el.firstChild;
-			var i = 0;
-			while(child){
-				cs[i++] = child;
-				child =child.nextSibling;
-			}
-			cs.length = i;
-		}
-	}
-}
-
-/**
- * attributes;
- * children;
- * 
- * writeable properties:
- * nodeValue,Attr:value,CharacterData:data
- * prefix
- */
-function _removeChild(parentNode,child){
-	var previous = child.previousSibling;
-	var next = child.nextSibling;
-	if(previous){
-		previous.nextSibling = next;
-	}else{
-		parentNode.firstChild = next;
-	}
-	if(next){
-		next.previousSibling = previous;
-	}else{
-		parentNode.lastChild = previous;
-	}
-	_onUpdateChild(parentNode.ownerDocument,parentNode);
-	return child;
-}
-/**
- * preformance key(refChild == null)
- */
-function _insertBefore(parentNode,newChild,nextChild){
-	var cp = newChild.parentNode;
-	if(cp){
-		cp.removeChild(newChild);//remove and update
-	}
-	if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE){
-		var newFirst = newChild.firstChild;
-		if (newFirst == null) {
-			return newChild;
-		}
-		var newLast = newChild.lastChild;
-	}else{
-		newFirst = newLast = newChild;
-	}
-	var pre = nextChild ? nextChild.previousSibling : parentNode.lastChild;
-
-	newFirst.previousSibling = pre;
-	newLast.nextSibling = nextChild;
-	
-	
-	if(pre){
-		pre.nextSibling = newFirst;
-	}else{
-		parentNode.firstChild = newFirst;
-	}
-	if(nextChild == null){
-		parentNode.lastChild = newLast;
-	}else{
-		nextChild.previousSibling = newLast;
-	}
-	do{
-		newFirst.parentNode = parentNode;
-	}while(newFirst !== newLast && (newFirst= newFirst.nextSibling))
-	_onUpdateChild(parentNode.ownerDocument||parentNode,parentNode);
-	//console.log(parentNode.lastChild.nextSibling == null)
-	if (newChild.nodeType == DOCUMENT_FRAGMENT_NODE) {
-		newChild.firstChild = newChild.lastChild = null;
-	}
-	return newChild;
-}
-function _appendSingleChild(parentNode,newChild){
-	var cp = newChild.parentNode;
-	if(cp){
-		var pre = parentNode.lastChild;
-		cp.removeChild(newChild);//remove and update
-		var pre = parentNode.lastChild;
-	}
-	var pre = parentNode.lastChild;
-	newChild.parentNode = parentNode;
-	newChild.previousSibling = pre;
-	newChild.nextSibling = null;
-	if(pre){
-		pre.nextSibling = newChild;
-	}else{
-		parentNode.firstChild = newChild;
-	}
-	parentNode.lastChild = newChild;
-	_onUpdateChild(parentNode.ownerDocument,parentNode,newChild);
-	return newChild;
-	//console.log("__aa",parentNode.lastChild.nextSibling == null)
-}
-Document.prototype = {
-	//implementation : null,
-	nodeName :  '#document',
-	nodeType :  DOCUMENT_NODE,
-	doctype :  null,
-	documentElement :  null,
-	_inc : 1,
-	
-	insertBefore :  function(newChild, refChild){//raises 
-		if(newChild.nodeType == DOCUMENT_FRAGMENT_NODE){
-			var child = newChild.firstChild;
-			while(child){
-				var next = child.nextSibling;
-				this.insertBefore(child,refChild);
-				child = next;
-			}
-			return newChild;
-		}
-		if(this.documentElement == null && newChild.nodeType == ELEMENT_NODE){
-			this.documentElement = newChild;
-		}
-		
-		return _insertBefore(this,newChild,refChild),(newChild.ownerDocument = this),newChild;
-	},
-	removeChild :  function(oldChild){
-		if(this.documentElement == oldChild){
-			this.documentElement = null;
-		}
-		return _removeChild(this,oldChild);
-	},
-	// Introduced in DOM Level 2:
-	importNode : function(importedNode,deep){
-		return importNode(this,importedNode,deep);
-	},
-	// Introduced in DOM Level 2:
-	getElementById :	function(id){
-		var rtv = null;
-		_visitNode(this.documentElement,function(node){
-			if(node.nodeType == ELEMENT_NODE){
-				if(node.getAttribute('id') == id){
-					rtv = node;
-					return true;
-				}
-			}
-		});
-		return rtv;
-	},
-	
-	//document factory method:
-	createElement :	function(tagName){
-		var node = new Element();
-		node.ownerDocument = this;
-		node.nodeName = tagName;
-		node.tagName = tagName;
-		node.childNodes = new NodeList();
-		var attrs	= node.attributes = new NamedNodeMap();
-		attrs._ownerElement = node;
-		return node;
-	},
-	createDocumentFragment :	function(){
-		var node = new DocumentFragment();
-		node.ownerDocument = this;
-		node.childNodes = new NodeList();
-		return node;
-	},
-	createTextNode :	function(data){
-		var node = new Text();
-		node.ownerDocument = this;
-		node.appendData(data);
-		return node;
-	},
-	createComment :	function(data){
-		var node = new Comment();
-		node.ownerDocument = this;
-		node.appendData(data);
-		return node;
-	},
-	createCDATASection :	function(data){
-		var node = new CDATASection();
-		node.ownerDocument = this;
-		node.appendData(data);
-		return node;
-	},
-	createProcessingInstruction :	function(target,data){
-		var node = new ProcessingInstruction();
-		node.ownerDocument = this;
-		node.tagName = node.target = target;
-		node.nodeValue= node.data = data;
-		return node;
-	},
-	createAttribute :	function(name){
-		var node = new Attr();
-		node.ownerDocument	= this;
-		node.name = name;
-		node.nodeName	= name;
-		node.localName = name;
-		node.specified = true;
-		return node;
-	},
-	createEntityReference :	function(name){
-		var node = new EntityReference();
-		node.ownerDocument	= this;
-		node.nodeName	= name;
-		return node;
-	},
-	// Introduced in DOM Level 2:
-	createElementNS :	function(namespaceURI,qualifiedName){
-		var node = new Element();
-		var pl = qualifiedName.split(':');
-		var attrs	= node.attributes = new NamedNodeMap();
-		node.childNodes = new NodeList();
-		node.ownerDocument = this;
-		node.nodeName = qualifiedName;
-		node.tagName = qualifiedName;
-		node.namespaceURI = namespaceURI;
-		if(pl.length == 2){
-			node.prefix = pl[0];
-			node.localName = pl[1];
-		}else{
-			//el.prefix = null;
-			node.localName = qualifiedName;
-		}
-		attrs._ownerElement = node;
-		return node;
-	},
-	// Introduced in DOM Level 2:
-	createAttributeNS :	function(namespaceURI,qualifiedName){
-		var node = new Attr();
-		var pl = qualifiedName.split(':');
-		node.ownerDocument = this;
-		node.nodeName = qualifiedName;
-		node.name = qualifiedName;
-		node.namespaceURI = namespaceURI;
-		node.specified = true;
-		if(pl.length == 2){
-			node.prefix = pl[0];
-			node.localName = pl[1];
-		}else{
-			//el.prefix = null;
-			node.localName = qualifiedName;
-		}
-		return node;
-	}
-};
-_extends(Document,Node$1);
-
-
-function Element() {
-	this._nsMap = {};
-}Element.prototype = {
-	nodeType : ELEMENT_NODE,
-	hasAttribute : function(name){
-		return this.getAttributeNode(name)!=null;
-	},
-	getAttribute : function(name){
-		var attr = this.getAttributeNode(name);
-		return attr && attr.value || '';
-	},
-	getAttributeNode : function(name){
-		return this.attributes.getNamedItem(name);
-	},
-	setAttribute : function(name, value){
-		var attr = this.ownerDocument.createAttribute(name);
-		attr.value = attr.nodeValue = "" + value;
-		this.setAttributeNode(attr);
-	},
-	removeAttribute : function(name){
-		var attr = this.getAttributeNode(name);
-		attr && this.removeAttributeNode(attr);
-	},
-	
-	//four real opeartion method
-	appendChild:function(newChild){
-		if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE){
-			return this.insertBefore(newChild,null);
-		}else{
-			return _appendSingleChild(this,newChild);
-		}
-	},
-	setAttributeNode : function(newAttr){
-		return this.attributes.setNamedItem(newAttr);
-	},
-	setAttributeNodeNS : function(newAttr){
-		return this.attributes.setNamedItemNS(newAttr);
-	},
-	removeAttributeNode : function(oldAttr){
-		//console.log(this == oldAttr.ownerElement)
-		return this.attributes.removeNamedItem(oldAttr.nodeName);
-	},
-	//get real attribute name,and remove it by removeAttributeNode
-	removeAttributeNS : function(namespaceURI, localName){
-		var old = this.getAttributeNodeNS(namespaceURI, localName);
-		old && this.removeAttributeNode(old);
-	},
-	
-	hasAttributeNS : function(namespaceURI, localName){
-		return this.getAttributeNodeNS(namespaceURI, localName)!=null;
-	},
-	getAttributeNS : function(namespaceURI, localName){
-		var attr = this.getAttributeNodeNS(namespaceURI, localName);
-		return attr && attr.value || '';
-	},
-	setAttributeNS : function(namespaceURI, qualifiedName, value){
-		var attr = this.ownerDocument.createAttributeNS(namespaceURI, qualifiedName);
-		attr.value = attr.nodeValue = "" + value;
-		this.setAttributeNode(attr);
-	},
-	getAttributeNodeNS : function(namespaceURI, localName){
-		return this.attributes.getNamedItemNS(namespaceURI, localName);
-	},
-	
-	getElementsByTagName : function(tagName){
-		return new LiveNodeList(this,function(base){
-			var ls = [];
-			_visitNode(base,function(node){
-				if(node !== base && node.nodeType == ELEMENT_NODE && (tagName === '*' || node.tagName == tagName)){
-					ls.push(node);
-				}
-			});
-			return ls;
-		});
-	},
-	getElementsByTagNameNS : function(namespaceURI, localName){
-		return new LiveNodeList(this,function(base){
-			var ls = [];
-			_visitNode(base,function(node){
-				if(node !== base && node.nodeType === ELEMENT_NODE && (namespaceURI === '*' || node.namespaceURI === namespaceURI) && (localName === '*' || node.localName == localName)){
-					ls.push(node);
-				}
-			});
-			return ls;
-			
-		});
-	}
-};
-Document.prototype.getElementsByTagName = Element.prototype.getElementsByTagName;
-Document.prototype.getElementsByTagNameNS = Element.prototype.getElementsByTagNameNS;
-
-
-_extends(Element,Node$1);
-function Attr() {
-}Attr.prototype.nodeType = ATTRIBUTE_NODE;
-_extends(Attr,Node$1);
-
-
-function CharacterData() {
-}CharacterData.prototype = {
-	data : '',
-	substringData : function(offset, count) {
-		return this.data.substring(offset, offset+count);
-	},
-	appendData: function(text) {
-		text = this.data+text;
-		this.nodeValue = this.data = text;
-		this.length = text.length;
-	},
-	insertData: function(offset,text) {
-		this.replaceData(offset,0,text);
-	
-	},
-	appendChild:function(newChild){
-		throw new Error(ExceptionMessage[HIERARCHY_REQUEST_ERR])
-	},
-	deleteData: function(offset, count) {
-		this.replaceData(offset,count,"");
-	},
-	replaceData: function(offset, count, text) {
-		var start = this.data.substring(0,offset);
-		var end = this.data.substring(offset+count);
-		text = start + text + end;
-		this.nodeValue = this.data = text;
-		this.length = text.length;
-	}
-};
-_extends(CharacterData,Node$1);
-function Text() {
-}Text.prototype = {
-	nodeName : "#text",
-	nodeType : TEXT_NODE,
-	splitText : function(offset) {
-		var text = this.data;
-		var newText = text.substring(offset);
-		text = text.substring(0, offset);
-		this.data = this.nodeValue = text;
-		this.length = text.length;
-		var newNode = this.ownerDocument.createTextNode(newText);
-		if(this.parentNode){
-			this.parentNode.insertBefore(newNode, this.nextSibling);
-		}
-		return newNode;
-	}
-};
-_extends(Text,CharacterData);
-function Comment() {
-}Comment.prototype = {
-	nodeName : "#comment",
-	nodeType : COMMENT_NODE
-};
-_extends(Comment,CharacterData);
-
-function CDATASection() {
-}CDATASection.prototype = {
-	nodeName : "#cdata-section",
-	nodeType : CDATA_SECTION_NODE
-};
-_extends(CDATASection,CharacterData);
-
-
-function DocumentType() {
-}DocumentType.prototype.nodeType = DOCUMENT_TYPE_NODE;
-_extends(DocumentType,Node$1);
-
-function Notation() {
-}Notation.prototype.nodeType = NOTATION_NODE;
-_extends(Notation,Node$1);
-
-function Entity() {
-}Entity.prototype.nodeType = ENTITY_NODE;
-_extends(Entity,Node$1);
-
-function EntityReference() {
-}EntityReference.prototype.nodeType = ENTITY_REFERENCE_NODE;
-_extends(EntityReference,Node$1);
-
-function DocumentFragment() {
-}DocumentFragment.prototype.nodeName =	"#document-fragment";
-DocumentFragment.prototype.nodeType =	DOCUMENT_FRAGMENT_NODE;
-_extends(DocumentFragment,Node$1);
-
-
-function ProcessingInstruction() {
-}
-ProcessingInstruction.prototype.nodeType = PROCESSING_INSTRUCTION_NODE;
-_extends(ProcessingInstruction,Node$1);
-function XMLSerializer(){}
-XMLSerializer.prototype.serializeToString = function(node,isHtml,nodeFilter){
-	return nodeSerializeToString.call(node,isHtml,nodeFilter);
-};
-Node$1.prototype.toString = nodeSerializeToString;
-function nodeSerializeToString(isHtml,nodeFilter){
-	var buf = [];
-	var refNode = this.nodeType == 9?this.documentElement:this;
-	var prefix = refNode.prefix;
-	var uri = refNode.namespaceURI;
-	
-	if(uri && prefix == null){
-		//console.log(prefix)
-		var prefix = refNode.lookupPrefix(uri);
-		if(prefix == null){
-			//isHTML = true;
-			var visibleNamespaces=[
-			{namespace:uri,prefix:null}
-			//{namespace:uri,prefix:''}
-			];
-		}
-	}
-	serializeToString(this,buf,isHtml,nodeFilter,visibleNamespaces);
-	//console.log('###',this.nodeType,uri,prefix,buf.join(''))
-	return buf.join('');
-}
-function needNamespaceDefine(node,isHTML, visibleNamespaces) {
-	var prefix = node.prefix||'';
-	var uri = node.namespaceURI;
-	if (!prefix && !uri){
-		return false;
-	}
-	if (prefix === "xml" && uri === "http://www.w3.org/XML/1998/namespace" 
-		|| uri == 'http://www.w3.org/2000/xmlns/'){
-		return false;
-	}
-	
-	var i = visibleNamespaces.length; 
-	//console.log('@@@@',node.tagName,prefix,uri,visibleNamespaces)
-	while (i--) {
-		var ns = visibleNamespaces[i];
-		// get namespace prefix
-		//console.log(node.nodeType,node.tagName,ns.prefix,prefix)
-		if (ns.prefix == prefix){
-			return ns.namespace != uri;
-		}
-	}
-	//console.log(isHTML,uri,prefix=='')
-	//if(isHTML && prefix ==null && uri == 'http://www.w3.org/1999/xhtml'){
-	//	return false;
-	//}
-	//node.flag = '11111'
-	//console.error(3,true,node.flag,node.prefix,node.namespaceURI)
-	return true;
-}
-function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
-	if(nodeFilter){
-		node = nodeFilter(node);
-		if(node){
-			if(typeof node == 'string'){
-				buf.push(node);
-				return;
-			}
-		}else{
-			return;
-		}
-		//buf.sort.apply(attrs, attributeSorter);
-	}
-	switch(node.nodeType){
-	case ELEMENT_NODE:
-		if (!visibleNamespaces) visibleNamespaces = [];
-		var startVisibleNamespaces = visibleNamespaces.length;
-		var attrs = node.attributes;
-		var len = attrs.length;
-		var child = node.firstChild;
-		var nodeName = node.tagName;
-		
-		isHTML =  (htmlns === node.namespaceURI) ||isHTML; 
-		buf.push('<',nodeName);
-		
-		
-		
-		for(var i=0;i<len;i++){
-			// add namespaces for attributes
-			var attr = attrs.item(i);
-			if (attr.prefix == 'xmlns') {
-				visibleNamespaces.push({ prefix: attr.localName, namespace: attr.value });
-			}else if(attr.nodeName == 'xmlns'){
-				visibleNamespaces.push({ prefix: '', namespace: attr.value });
-			}
-		}
-		for(var i=0;i<len;i++){
-			var attr = attrs.item(i);
-			if (needNamespaceDefine(attr,isHTML, visibleNamespaces)) {
-				var prefix = attr.prefix||'';
-				var uri = attr.namespaceURI;
-				var ns = prefix ? ' xmlns:' + prefix : " xmlns";
-				buf.push(ns, '="' , uri , '"');
-				visibleNamespaces.push({ prefix: prefix, namespace:uri });
-			}
-			serializeToString(attr,buf,isHTML,nodeFilter,visibleNamespaces);
-		}
-		// add namespace for current node		
-		if (needNamespaceDefine(node,isHTML, visibleNamespaces)) {
-			var prefix = node.prefix||'';
-			var uri = node.namespaceURI;
-			var ns = prefix ? ' xmlns:' + prefix : " xmlns";
-			buf.push(ns, '="' , uri , '"');
-			visibleNamespaces.push({ prefix: prefix, namespace:uri });
-		}
-		
-		if(child || isHTML && !/^(?:meta|link|img|br|hr|input)$/i.test(nodeName)){
-			buf.push('>');
-			//if is cdata child node
-			if(isHTML && /^script$/i.test(nodeName)){
-				while(child){
-					if(child.data){
-						buf.push(child.data);
-					}else{
-						serializeToString(child,buf,isHTML,nodeFilter,visibleNamespaces);
-					}
-					child = child.nextSibling;
-				}
-			}else
-			{
-				while(child){
-					serializeToString(child,buf,isHTML,nodeFilter,visibleNamespaces);
-					child = child.nextSibling;
-				}
-			}
-			buf.push('</',nodeName,'>');
-		}else{
-			buf.push('/>');
-		}
-		// remove added visible namespaces
-		//visibleNamespaces.length = startVisibleNamespaces;
-		return;
-	case DOCUMENT_NODE:
-	case DOCUMENT_FRAGMENT_NODE:
-		var child = node.firstChild;
-		while(child){
-			serializeToString(child,buf,isHTML,nodeFilter,visibleNamespaces);
-			child = child.nextSibling;
-		}
-		return;
-	case ATTRIBUTE_NODE:
-		return buf.push(' ',node.name,'="',node.value.replace(/[<&"]/g,_xmlEncoder),'"');
-	case TEXT_NODE:
-		return buf.push(node.data.replace(/[<&]/g,_xmlEncoder));
-	case CDATA_SECTION_NODE:
-		return buf.push( '<![CDATA[',node.data,']]>');
-	case COMMENT_NODE:
-		return buf.push( "<!--",node.data,"-->");
-	case DOCUMENT_TYPE_NODE:
-		var pubid = node.publicId;
-		var sysid = node.systemId;
-		buf.push('<!DOCTYPE ',node.name);
-		if(pubid){
-			buf.push(' PUBLIC "',pubid);
-			if (sysid && sysid!='.') {
-				buf.push( '" "',sysid);
-			}
-			buf.push('">');
-		}else if(sysid && sysid!='.'){
-			buf.push(' SYSTEM "',sysid,'">');
-		}else{
-			var sub = node.internalSubset;
-			if(sub){
-				buf.push(" [",sub,"]");
-			}
-			buf.push(">");
-		}
-		return;
-	case PROCESSING_INSTRUCTION_NODE:
-		return buf.push( "<?",node.target," ",node.data,"?>");
-	case ENTITY_REFERENCE_NODE:
-		return buf.push( '&',node.nodeName,';');
-	//case ENTITY_NODE:
-	//case NOTATION_NODE:
-	default:
-		buf.push('??',node.nodeName);
-	}
-}
-function importNode(doc,node,deep){
-	var node2;
-	switch (node.nodeType) {
-	case ELEMENT_NODE:
-		node2 = node.cloneNode(false);
-		node2.ownerDocument = doc;
-		//var attrs = node2.attributes;
-		//var len = attrs.length;
-		//for(var i=0;i<len;i++){
-			//node2.setAttributeNodeNS(importNode(doc,attrs.item(i),deep));
-		//}
-	case DOCUMENT_FRAGMENT_NODE:
-		break;
-	case ATTRIBUTE_NODE:
-		deep = true;
-		break;
-	//case ENTITY_REFERENCE_NODE:
-	//case PROCESSING_INSTRUCTION_NODE:
-	////case TEXT_NODE:
-	//case CDATA_SECTION_NODE:
-	//case COMMENT_NODE:
-	//	deep = false;
-	//	break;
-	//case DOCUMENT_NODE:
-	//case DOCUMENT_TYPE_NODE:
-	//cannot be imported.
-	//case ENTITY_NODE:
-	//case NOTATION_NODE：
-	//can not hit in level3
-	//default:throw e;
-	}
-	if(!node2){
-		node2 = node.cloneNode(false);//false
-	}
-	node2.ownerDocument = doc;
-	node2.parentNode = null;
-	if(deep){
-		var child = node.firstChild;
-		while(child){
-			node2.appendChild(importNode(doc,child,deep));
-			child = child.nextSibling;
-		}
-	}
-	return node2;
-}
-//
-//var _relationMap = {firstChild:1,lastChild:1,previousSibling:1,nextSibling:1,
-//					attributes:1,childNodes:1,parentNode:1,documentElement:1,doctype,};
-function cloneNode(doc,node,deep){
-	var node2 = new node.constructor();
-	for(var n in node){
-		var v = node[n];
-		if(typeof v != 'object' ){
-			if(v != node2[n]){
-				node2[n] = v;
-			}
-		}
-	}
-	if(node.childNodes){
-		node2.childNodes = new NodeList();
-	}
-	node2.ownerDocument = doc;
-	switch (node2.nodeType) {
-	case ELEMENT_NODE:
-		var attrs	= node.attributes;
-		var attrs2	= node2.attributes = new NamedNodeMap();
-		var len = attrs.length;
-		attrs2._ownerElement = node2;
-		for(var i=0;i<len;i++){
-			node2.setAttributeNode(cloneNode(doc,attrs.item(i),true));
-		}
-		break;	case ATTRIBUTE_NODE:
-		deep = true;
-	}
-	if(deep){
-		var child = node.firstChild;
-		while(child){
-			node2.appendChild(cloneNode(doc,child,deep));
-			child = child.nextSibling;
-		}
-	}
-	return node2;
-}
-
-function __set__(object,key,value){
-	object[key] = value;
-}
-//do dynamic
-try{
-	if(Object.defineProperty){
-		Object.defineProperty(LiveNodeList.prototype,'length',{
-			get:function(){
-				_updateLiveList(this);
-				return this.$$length;
-			}
-		});
-		Object.defineProperty(Node$1.prototype,'textContent',{
-			get:function(){
-				return getTextContent(this);
-			},
-			set:function(data){
-				switch(this.nodeType){
-				case ELEMENT_NODE:
-				case DOCUMENT_FRAGMENT_NODE:
-					while(this.firstChild){
-						this.removeChild(this.firstChild);
-					}
-					if(data || String(data)){
-						this.appendChild(this.ownerDocument.createTextNode(data));
-					}
-					break;
-				default:
-					//TODO:
-					this.data = data;
-					this.value = data;
-					this.nodeValue = data;
-				}
-			}
-		});
-		
-		function getTextContent(node){
-			switch(node.nodeType){
-			case ELEMENT_NODE:
-			case DOCUMENT_FRAGMENT_NODE:
-				var buf = [];
-				node = node.firstChild;
-				while(node){
-					if(node.nodeType!==7 && node.nodeType !==8){
-						buf.push(getTextContent(node));
-					}
-					node = node.nextSibling;
-				}
-				return buf.join('');
-			default:
-				return node.nodeValue;
-			}
-		}
-		__set__ = function(object,key,value){
-			//console.log(value)
-			object['$$'+key] = value;
 		};
-	}
-}catch(e){//ie8
-}
 
-//if(typeof require == 'function'){
-	var DOMImplementation_1 = DOMImplementation;
-	var XMLSerializer_1 = XMLSerializer;
-//}
+	}() );
 
-var dom = {
-	DOMImplementation: DOMImplementation_1,
-	XMLSerializer: XMLSerializer_1
-};
+	var getMouseOnCircle = ( function () {
 
-var domParser = createCommonjsModule(function (module, exports) {
-function DOMParser(options){
-	this.options = options ||{locator:{}};
-	
-}
-DOMParser.prototype.parseFromString = function(source,mimeType){
-	var options = this.options;
-	var sax =  new XMLReader();
-	var domBuilder = options.domBuilder || new DOMHandler();//contentHandler and LexicalHandler
-	var errorHandler = options.errorHandler;
-	var locator = options.locator;
-	var defaultNSMap = options.xmlns||{};
-	var entityMap = {'lt':'<','gt':'>','amp':'&','quot':'"','apos':"'"};
-	if(locator){
-		domBuilder.setDocumentLocator(locator);
-	}
-	
-	sax.errorHandler = buildErrorHandler(errorHandler,domBuilder,locator);
-	sax.domBuilder = options.domBuilder || domBuilder;
-	if(/\/x?html?$/.test(mimeType)){
-		entityMap.nbsp = '\xa0';
-		entityMap.copy = '\xa9';
-		defaultNSMap['']= 'http://www.w3.org/1999/xhtml';
-	}
-	defaultNSMap.xml = defaultNSMap.xml || 'http://www.w3.org/XML/1998/namespace';
-	if(source){
-		sax.parse(source,defaultNSMap,entityMap);
-	}else{
-		sax.errorHandler.error("invalid doc source");
-	}
-	return domBuilder.doc;
-};
-function buildErrorHandler(errorImpl,domBuilder,locator){
-	if(!errorImpl){
-		if(domBuilder instanceof DOMHandler){
-			return domBuilder;
-		}
-		errorImpl = domBuilder ;
-	}
-	var errorHandler = {};
-	var isCallback = errorImpl instanceof Function;
-	locator = locator||{};
-	function build(key){
-		var fn = errorImpl[key];
-		if(!fn && isCallback){
-			fn = errorImpl.length == 2?function(msg){errorImpl(key,msg);}:errorImpl;
-		}
-		errorHandler[key] = fn && function(msg){
-			fn('[xmldom '+key+']\t'+msg+_locator(locator));
-		}||function(){};
-	}
-	build('warning');
-	build('error');
-	build('fatalError');
-	return errorHandler;
-}
+		var vector = new THREE$1.Vector2();
 
-//console.log('#\n\n\n\n\n\n\n####')
-/**
- * +ContentHandler+ErrorHandler
- * +LexicalHandler+EntityResolver2
- * -DeclHandler-DTDHandler 
- * 
- * DefaultHandler:EntityResolver, DTDHandler, ContentHandler, ErrorHandler
- * DefaultHandler2:DefaultHandler,LexicalHandler, DeclHandler, EntityResolver2
- * @link http://www.saxproject.org/apidoc/org/xml/sax/helpers/DefaultHandler.html
- */
-function DOMHandler() {
-    this.cdata = false;
-}
-function position(locator,node){
-	node.lineNumber = locator.lineNumber;
-	node.columnNumber = locator.columnNumber;
-}
-/**
- * @see org.xml.sax.ContentHandler#startDocument
- * @link http://www.saxproject.org/apidoc/org/xml/sax/ContentHandler.html
- */ 
-DOMHandler.prototype = {
-	startDocument : function() {
-    	this.doc = new DOMImplementation().createDocument(null, null, null);
-    	if (this.locator) {
-        	this.doc.documentURI = this.locator.systemId;
-    	}
-	},
-	startElement:function(namespaceURI, localName, qName, attrs) {
-		var doc = this.doc;
-	    var el = doc.createElementNS(namespaceURI, qName||localName);
-	    var len = attrs.length;
-	    appendElement(this, el);
-	    this.currentElement = el;
-	    
-		this.locator && position(this.locator,el);
-	    for (var i = 0 ; i < len; i++) {
-	        var namespaceURI = attrs.getURI(i);
-	        var value = attrs.getValue(i);
-	        var qName = attrs.getQName(i);
-			var attr = doc.createAttributeNS(namespaceURI, qName);
-			this.locator &&position(attrs.getLocator(i),attr);
-			attr.value = attr.nodeValue = value;
-			el.setAttributeNode(attr);
-	    }
-	},
-	endElement:function(namespaceURI, localName, qName) {
-		var current = this.currentElement;
-		var tagName = current.tagName;
-		this.currentElement = current.parentNode;
-	},
-	startPrefixMapping:function(prefix, uri) {
-	},
-	endPrefixMapping:function(prefix) {
-	},
-	processingInstruction:function(target, data) {
-	    var ins = this.doc.createProcessingInstruction(target, data);
-	    this.locator && position(this.locator,ins);
-	    appendElement(this, ins);
-	},
-	ignorableWhitespace:function(ch, start, length) {
-	},
-	characters:function(chars, start, length) {
-		chars = _toString.apply(this,arguments);
-		//console.log(chars)
-		if(chars){
-			if (this.cdata) {
-				var charNode = this.doc.createCDATASection(chars);
+		return function getMouseOnCircle( pageX, pageY ) {
+
+			vector.set(
+				( ( pageX - _this.screen.width * 0.5 - _this.screen.left ) / ( _this.screen.width * 0.5 ) ),
+				( ( _this.screen.height + 2 * ( _this.screen.top - pageY ) ) / _this.screen.width ) // screen.width intentional
+			);
+
+			return vector;
+
+		};
+
+	}() );
+
+	this.rotateCamera = ( function() {
+
+		var axis = new THREE$1.Vector3(),
+			quaternion = new THREE$1.Quaternion(),
+			eyeDirection = new THREE$1.Vector3(),
+			objectUpDirection = new THREE$1.Vector3(),
+			objectSidewaysDirection = new THREE$1.Vector3(),
+			moveDirection = new THREE$1.Vector3(),
+			angle;
+
+		return function rotateCamera() {
+
+			moveDirection.set( _moveCurr.x - _movePrev.x, _moveCurr.y - _movePrev.y, 0 );
+			angle = moveDirection.length();
+
+			if ( angle ) {
+
+				_eye.copy( _this.object.position ).sub( _this.target );
+
+				eyeDirection.copy( _eye ).normalize();
+				objectUpDirection.copy( _this.object.up ).normalize();
+				objectSidewaysDirection.crossVectors( objectUpDirection, eyeDirection ).normalize();
+
+				objectUpDirection.setLength( _moveCurr.y - _movePrev.y );
+				objectSidewaysDirection.setLength( _moveCurr.x - _movePrev.x );
+
+				moveDirection.copy( objectUpDirection.add( objectSidewaysDirection ) );
+
+				axis.crossVectors( moveDirection, _eye ).normalize();
+
+				angle *= _this.rotateSpeed;
+				quaternion.setFromAxisAngle( axis, angle );
+
+				_eye.applyQuaternion( quaternion );
+				_this.object.up.applyQuaternion( quaternion );
+
+				_lastAxis.copy( axis );
+				_lastAngle = angle;
+
+			} else if ( ! _this.staticMoving && _lastAngle ) {
+
+				_lastAngle *= Math.sqrt( 1.0 - _this.dynamicDampingFactor );
+				_eye.copy( _this.object.position ).sub( _this.target );
+				quaternion.setFromAxisAngle( _lastAxis, _lastAngle );
+				_eye.applyQuaternion( quaternion );
+				_this.object.up.applyQuaternion( quaternion );
+
+			}
+
+			_movePrev.copy( _moveCurr );
+
+		};
+
+	}() );
+
+
+	this.zoomCamera = function () {
+
+		var factor;
+
+		if ( _state === STATE.TOUCH_ZOOM_PAN ) {
+
+			factor = _touchZoomDistanceStart / _touchZoomDistanceEnd;
+			_touchZoomDistanceStart = _touchZoomDistanceEnd;
+			_eye.multiplyScalar( factor );
+
+		} else {
+
+			factor = 1.0 + ( _zoomEnd.y - _zoomStart.y ) * _this.zoomSpeed;
+
+			if ( factor !== 1.0 && factor > 0.0 ) {
+
+				_eye.multiplyScalar( factor );
+
+			}
+
+			if ( _this.staticMoving ) {
+
+				_zoomStart.copy( _zoomEnd );
+
 			} else {
-				var charNode = this.doc.createTextNode(chars);
+
+				_zoomStart.y += ( _zoomEnd.y - _zoomStart.y ) * this.dynamicDampingFactor;
+
 			}
-			if(this.currentElement){
-				this.currentElement.appendChild(charNode);
-			}else if(/^\s*$/.test(chars)){
-				this.doc.appendChild(charNode);
-				//process xml
-			}
-			this.locator && position(this.locator,charNode);
+
 		}
-	},
-	skippedEntity:function(name) {
-	},
-	endDocument:function() {
-		this.doc.normalize();
-	},
-	setDocumentLocator:function (locator) {
-	    if(this.locator = locator){// && !('lineNumber' in locator)){
-	    	locator.lineNumber = 0;
-	    }
-	},
-	//LexicalHandler
-	comment:function(chars, start, length) {
-		chars = _toString.apply(this,arguments);
-	    var comm = this.doc.createComment(chars);
-	    this.locator && position(this.locator,comm);
-	    appendElement(this, comm);
-	},
-	
-	startCDATA:function() {
-	    //used in characters() methods
-	    this.cdata = true;
-	},
-	endCDATA:function() {
-	    this.cdata = false;
-	},
-	
-	startDTD:function(name, publicId, systemId) {
-		var impl = this.doc.implementation;
-	    if (impl && impl.createDocumentType) {
-	        var dt = impl.createDocumentType(name, publicId, systemId);
-	        this.locator && position(this.locator,dt);
-	        appendElement(this, dt);
-	    }
-	},
+
+	};
+
+	this.panCamera = ( function() {
+
+		var mouseChange = new THREE$1.Vector2(),
+			objectUp = new THREE$1.Vector3(),
+			pan = new THREE$1.Vector3();
+
+		return function panCamera() {
+
+			mouseChange.copy( _panEnd ).sub( _panStart );
+
+			if ( mouseChange.lengthSq() ) {
+
+				mouseChange.multiplyScalar( _eye.length() * _this.panSpeed );
+
+				pan.copy( _eye ).cross( _this.object.up ).setLength( mouseChange.x );
+				pan.add( objectUp.copy( _this.object.up ).setLength( mouseChange.y ) );
+
+				_this.object.position.add( pan );
+				_this.target.add( pan );
+
+				if ( _this.staticMoving ) {
+
+					_panStart.copy( _panEnd );
+
+				} else {
+
+					_panStart.add( mouseChange.subVectors( _panEnd, _panStart ).multiplyScalar( _this.dynamicDampingFactor ) );
+
+				}
+
+			}
+
+		};
+
+	}() );
+
+	this.checkDistances = function () {
+
+		if ( ! _this.noZoom || ! _this.noPan ) {
+
+			if ( _eye.lengthSq() > _this.maxDistance * _this.maxDistance ) {
+
+				_this.object.position.addVectors( _this.target, _eye.setLength( _this.maxDistance ) );
+				_zoomStart.copy( _zoomEnd );
+
+			}
+
+			if ( _eye.lengthSq() < _this.minDistance * _this.minDistance ) {
+
+				_this.object.position.addVectors( _this.target, _eye.setLength( _this.minDistance ) );
+				_zoomStart.copy( _zoomEnd );
+
+			}
+
+		}
+
+	};
+
+	this.update = function () {
+
+		_eye.subVectors( _this.object.position, _this.target );
+
+		if ( ! _this.noRotate ) {
+
+			_this.rotateCamera();
+
+		}
+
+		if ( ! _this.noZoom ) {
+
+			_this.zoomCamera();
+
+		}
+
+		if ( ! _this.noPan ) {
+
+			_this.panCamera();
+
+		}
+
+		_this.object.position.addVectors( _this.target, _eye );
+
+		_this.checkDistances();
+
+		_this.object.lookAt( _this.target );
+
+		if ( lastPosition.distanceToSquared( _this.object.position ) > EPS ) {
+
+			_this.dispatchEvent( changeEvent );
+
+			lastPosition.copy( _this.object.position );
+
+		}
+
+	};
+
+	this.reset = function () {
+
+		_state = STATE.NONE;
+		_prevState = STATE.NONE;
+
+		_this.target.copy( _this.target0 );
+		_this.object.position.copy( _this.position0 );
+		_this.object.up.copy( _this.up0 );
+
+		_eye.subVectors( _this.object.position, _this.target );
+
+		_this.object.lookAt( _this.target );
+
+		_this.dispatchEvent( changeEvent );
+
+		lastPosition.copy( _this.object.position );
+
+	};
+
+	// helpers
+
 	/**
-	 * @see org.xml.sax.ErrorHandler
-	 * @link http://www.saxproject.org/apidoc/org/xml/sax/ErrorHandler.html
+	 * Checks if the pressed key is any of the configured modifier keys for
+	 * a specified behavior.
+	 * 
+	 * @param {number | number[]} keys 
+	 * @param {number} key 
+	 * 
+	 * @returns {boolean} `true` if `keys` contains or equals `key`
 	 */
-	warning:function(error) {
-		console.warn('[xmldom warning]\t'+error,_locator(this.locator));
-	},
-	error:function(error) {
-		console.error('[xmldom error]\t'+error,_locator(this.locator));
-	},
-	fatalError:function(error) {
-		console.error('[xmldom fatalError]\t'+error,_locator(this.locator));
-	    throw error;
-	}
-};
-function _locator(l){
-	if(l){
-		return '\n@'+(l.systemId ||'')+'#[line:'+l.lineNumber+',col:'+l.columnNumber+']'
-	}
-}
-function _toString(chars,start,length){
-	if(typeof chars == 'string'){
-		return chars.substr(start,length)
-	}else{//java sax connect width xmldom on rhino(what about: "? && !(chars instanceof String)")
-		if(chars.length >= start+length || start){
-			return new java.lang.String(chars,start,length)+'';
+	function containsKey(keys, key) {
+		if (Array.isArray(keys)) {
+			return keys.indexOf(key) !== -1;
+		} else {
+			return keys === key;
 		}
-		return chars;
 	}
-}
 
-/*
- * @link http://www.saxproject.org/apidoc/org/xml/sax/ext/LexicalHandler.html
- * used method of org.xml.sax.ext.LexicalHandler:
- *  #comment(chars, start, length)
- *  #startCDATA()
- *  #endCDATA()
- *  #startDTD(name, publicId, systemId)
- *
- *
- * IGNORED method of org.xml.sax.ext.LexicalHandler:
- *  #endDTD()
- *  #startEntity(name)
- *  #endEntity(name)
- *
- *
- * @link http://www.saxproject.org/apidoc/org/xml/sax/ext/DeclHandler.html
- * IGNORED method of org.xml.sax.ext.DeclHandler
- * 	#attributeDecl(eName, aName, type, mode, value)
- *  #elementDecl(name, model)
- *  #externalEntityDecl(name, publicId, systemId)
- *  #internalEntityDecl(name, value)
- * @link http://www.saxproject.org/apidoc/org/xml/sax/ext/EntityResolver2.html
- * IGNORED method of org.xml.sax.EntityResolver2
- *  #resolveEntity(String name,String publicId,String baseURI,String systemId)
- *  #resolveEntity(publicId, systemId)
- *  #getExternalSubset(name, baseURI)
- * @link http://www.saxproject.org/apidoc/org/xml/sax/DTDHandler.html
- * IGNORED method of org.xml.sax.DTDHandler
- *  #notationDecl(name, publicId, systemId) {};
- *  #unparsedEntityDecl(name, publicId, systemId, notationName) {};
- */
-"endDTD,startEntity,endEntity,attributeDecl,elementDecl,externalEntityDecl,internalEntityDecl,resolveEntity,getExternalSubset,notationDecl,unparsedEntityDecl".replace(/\w+/g,function(key){
-	DOMHandler.prototype[key] = function(){return null};
-});
+	// listeners
 
-/* Private static helpers treated below as private instance methods, so don't need to add these to the public API; we might use a Relator to also get rid of non-standard public properties */
-function appendElement (hander,node) {
-    if (!hander.currentElement) {
-        hander.doc.appendChild(node);
+	function keydown( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		window.removeEventListener( 'keydown', keydown );
+
+		_prevState = _state;
+
+		if ( _state !== STATE.NONE ) {
+
+			return;
+
+		} else if ( containsKey( _this.keys[ STATE.ROTATE ], event.keyCode ) && ! _this.noRotate ) {
+
+			_state = STATE.ROTATE;
+
+		} else if ( containsKey( _this.keys[ STATE.ZOOM ], event.keyCode ) && ! _this.noZoom ) {
+
+			_state = STATE.ZOOM;
+
+		} else if ( containsKey( _this.keys[ STATE.PAN ], event.keyCode ) && ! _this.noPan ) {
+
+			_state = STATE.PAN;
+
+		}
+
+	}
+
+	function keyup( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		_state = _prevState;
+
+		window.addEventListener( 'keydown', keydown, false );
+
+	}
+
+	function mousedown( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		if ( _state === STATE.NONE ) {
+
+			_state = event.button;
+
+		}
+
+		if ( _state === STATE.ROTATE && ! _this.noRotate ) {
+
+			_moveCurr.copy( getMouseOnCircle( event.pageX, event.pageY ) );
+			_movePrev.copy( _moveCurr );
+
+		} else if ( _state === STATE.ZOOM && ! _this.noZoom ) {
+
+			_zoomStart.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+			_zoomEnd.copy( _zoomStart );
+
+		} else if ( _state === STATE.PAN && ! _this.noPan ) {
+
+			_panStart.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+			_panEnd.copy( _panStart );
+
+		}
+
+		document.addEventListener( 'mousemove', mousemove, false );
+		document.addEventListener( 'mouseup', mouseup, false );
+
+		_this.dispatchEvent( startEvent );
+
+	}
+
+	function mousemove( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		if ( _state === STATE.ROTATE && ! _this.noRotate ) {
+
+			_movePrev.copy( _moveCurr );
+			_moveCurr.copy( getMouseOnCircle( event.pageX, event.pageY ) );
+
+		} else if ( _state === STATE.ZOOM && ! _this.noZoom ) {
+
+			_zoomEnd.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+
+		} else if ( _state === STATE.PAN && ! _this.noPan ) {
+
+			_panEnd.copy( getMouseOnScreen( event.pageX, event.pageY ) );
+
+		}
+
+	}
+
+	function mouseup( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		_state = STATE.NONE;
+
+		document.removeEventListener( 'mousemove', mousemove );
+		document.removeEventListener( 'mouseup', mouseup );
+		_this.dispatchEvent( endEvent );
+
+	}
+
+	function mousewheel( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		switch ( event.deltaMode ) {
+
+			case 2:
+				// Zoom in pages
+				_zoomStart.y -= event.deltaY * 0.025;
+				break;
+
+			case 1:
+				// Zoom in lines
+				_zoomStart.y -= event.deltaY * 0.01;
+				break;
+
+			default:
+				// undefined, 0, assume pixels
+				_zoomStart.y -= event.deltaY * 0.00025;
+				break;
+
+		}
+
+		_this.dispatchEvent( startEvent );
+		_this.dispatchEvent( endEvent );
+
+	}
+
+	function touchstart( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		switch ( event.touches.length ) {
+
+			case 1:
+				_state = STATE.TOUCH_ROTATE;
+				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+				_movePrev.copy( _moveCurr );
+				break;
+
+			default: // 2 or more
+				_state = STATE.TOUCH_ZOOM_PAN;
+				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+				_touchZoomDistanceEnd = _touchZoomDistanceStart = Math.sqrt( dx * dx + dy * dy );
+
+				var x = ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX ) / 2;
+				var y = ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY ) / 2;
+				_panStart.copy( getMouseOnScreen( x, y ) );
+				_panEnd.copy( _panStart );
+				break;
+
+		}
+
+		_this.dispatchEvent( startEvent );
+
+	}
+
+	function touchmove( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		switch ( event.touches.length ) {
+
+			case 1:
+				_movePrev.copy( _moveCurr );
+				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+				break;
+
+			default: // 2 or more
+				var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+				var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+				_touchZoomDistanceEnd = Math.sqrt( dx * dx + dy * dy );
+
+				var x = ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX ) / 2;
+				var y = ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY ) / 2;
+				_panEnd.copy( getMouseOnScreen( x, y ) );
+				break;
+
+		}
+
+	}
+
+	function touchend( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		switch ( event.touches.length ) {
+
+			case 0:
+				_state = STATE.NONE;
+				break;
+
+			case 1:
+				_state = STATE.TOUCH_ROTATE;
+				_moveCurr.copy( getMouseOnCircle( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY ) );
+				_movePrev.copy( _moveCurr );
+				break;
+
+		}
+
+		_this.dispatchEvent( endEvent );
+
+	}
+
+	function contextmenu( event ) {
+
+		if ( _this.enabled === false ) return;
+
+		event.preventDefault();
+
+	}
+
+	this.dispose = function() {
+
+		this.domElement.removeEventListener( 'contextmenu', contextmenu, false );
+		this.domElement.removeEventListener( 'mousedown', mousedown, false );
+		this.domElement.removeEventListener( 'wheel', mousewheel, false );
+
+		this.domElement.removeEventListener( 'touchstart', touchstart, false );
+		this.domElement.removeEventListener( 'touchend', touchend, false );
+		this.domElement.removeEventListener( 'touchmove', touchmove, false );
+
+		document.removeEventListener( 'mousemove', mousemove, false );
+		document.removeEventListener( 'mouseup', mouseup, false );
+
+		window.removeEventListener( 'keydown', keydown, false );
+		window.removeEventListener( 'keyup', keyup, false );
+
+	};
+
+	this.domElement.addEventListener( 'contextmenu', contextmenu, false );
+	this.domElement.addEventListener( 'mousedown', mousedown, false );
+	this.domElement.addEventListener( 'wheel', mousewheel, false );
+
+	this.domElement.addEventListener( 'touchstart', touchstart, false );
+	this.domElement.addEventListener( 'touchend', touchend, false );
+	this.domElement.addEventListener( 'touchmove', touchmove, false );
+
+	window.addEventListener( 'keydown', keydown, false );
+	window.addEventListener( 'keyup', keyup, false );
+
+	this.handleResize();
+
+	// force an update at start
+	this.update();
+
+};
+
+TrackballControls.prototype = Object.create( THREE$1.EventDispatcher.prototype );
+
+const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
+  const { target = [0, 0, 0] } = view;
+  const trackball = new threeTrackballcontrols(camera, viewerElement);
+  trackball.rotateSpeed = 4.0;
+  trackball.zoomSpeed = 4.0;
+  trackball.panSpeed = 2.0;
+  trackball.noZoom = false;
+  trackball.noPan = false;
+  trackball.staticMoving = true;
+  trackball.dynamicDampingFactor = 0.1;
+  trackball.keys = [65, 83, 68];
+  trackball.addEventListener('change', render);
+  trackball.target.set(...target);
+  return { trackball };
+};
+
+const buildGui = ({ viewerElement }) => {
+  const gui = new GUI$1({ autoPlace: false, closed: true });
+  gui.domElement.style = 'padding: 5px; z-index: 3';
+  viewerElement.appendChild(gui.domElement);
+
+  return { gui };
+};
+
+const buildGuiControls = ({ datasets, gui }) => {
+  let count = 0;
+  const controllers = {};
+  for (const dataset of datasets) {
+    if (dataset.name === undefined) { continue; }
+    let controller = controllers[dataset.name];
+    if (controller === undefined) {
+      const ui = gui.add({ visible: true }, 'visible').name(`${dataset.name}`);
+      count += 1;
+      controller = { ui, datasets: [] };
+      controllers[dataset.name] = controller;
+      controller.ui.listen()
+          .onChange((value) =>
+            controller.datasets.forEach(dataset => {
+              dataset.mesh.visible = value;
+            }));
+    }
+    controller.datasets.push(dataset);
+    dataset.controller = controller;
+  }
+
+  return count;
+};
+
+const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
+  let rgb = toRgb(tags, null);
+  if (rgb === null) {
+    rgb = otherwise;
+  }
+  if (rgb === null) {
+    return;
+  }
+  const [r, g, b] = rgb;
+  const color = ((r << 16) | (g << 8) | b) >>> 0;
+  parameters.color = color;
+  return parameters;
+};
+
+const loader = new TextureLoader();
+
+// FIX: Make this lazy.
+const loadTexture = (url) => {
+  const texture = loader.load(url);
+  texture.wrapS = texture.wrapT = RepeatWrapping;
+  texture.offset.set(0, 0);
+  texture.repeat.set(1, 1);
+  return texture;
+};
+
+const materialProperties = {
+  paper: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/paper.png'
+  },
+  wood: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/wood.png'
+  },
+  plastic: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5
+  },
+  leaves: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/leaves.png'
+  },
+  water: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/water.png'
+  },
+  grass: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/grass.png'
+  },
+  brick: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/brick.png'
+  },
+  circuit: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/circuit.png'
+  },
+  rock: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/rock.png'
+  },
+  'steel': {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
+  },
+  copper: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/copper.png'
+  },
+  glass: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    opacity: 0.5,
+    transparent: true
+  },
+  'wet-glass': {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    opacity: 0.5,
+    transparent: true,
+    map: 'https://jsxcad.js.org/texture/wet-glass.png'
+  }
+};
+
+const merge = (properties, parameters) => {
+  for (const key of Object.keys(properties)) {
+    if (key === 'map') {
+      parameters[key] = loadTexture(properties[key]);
     } else {
-        hander.currentElement.appendChild(node);
-    }
-}//appendChild and setAttributeNS are preformance key
-
-//if(typeof require == 'function'){
-	var XMLReader = sax.XMLReader;
-	var DOMImplementation = exports.DOMImplementation = dom.DOMImplementation;
-	exports.XMLSerializer = dom.XMLSerializer ;
-	exports.DOMParser = DOMParser;
-//}
-});
-var domParser_1 = domParser.DOMImplementation;
-var domParser_2 = domParser.XMLSerializer;
-var domParser_3 = domParser.DOMParser;
-
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author supereggbert / http://www.paulbrunt.co.uk/
- * @author julianwa / https://github.com/julianwa
- */
-
-const installProjector = ({ THREE }) => {
-  const RenderableObject = function () {
-  	this.id = 0;
-
-  	this.object = null;
-  	this.z = 0;
-  	this.renderOrder = 0;
-  };
-
-  //
-
-  const RenderableFace = function () {
-  	this.id = 0;
-
-  	this.v1 = new RenderableVertex();
-  	this.v2 = new RenderableVertex();
-  	this.v3 = new RenderableVertex();
-
-  	this.normalModel = new THREE.Vector3();
-
-  	this.vertexNormalsModel = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
-  	this.vertexNormalsLength = 0;
-
-  	this.color = new THREE.Color();
-  	this.material = null;
-  	this.uvs = [ new THREE.Vector2(), new THREE.Vector2(), new THREE.Vector2() ];
-
-  	this.z = 0;
-  	this.renderOrder = 0;
-  };
-
-  //
-
-  const RenderableVertex = function () {
-  	this.position = new THREE.Vector3();
-  	this.positionWorld = new THREE.Vector3();
-  	this.positionScreen = new THREE.Vector4();
-
-  	this.visible = true;
-  };
-
-  RenderableVertex.prototype.copy = function (vertex) {
-  	this.positionWorld.copy(vertex.positionWorld);
-  	this.positionScreen.copy(vertex.positionScreen);
-  };
-
-  //
-
-  const RenderableLine = function () {
-  	this.id = 0;
-
-  	this.v1 = new RenderableVertex();
-  	this.v2 = new RenderableVertex();
-
-  	this.vertexColors = [ new THREE.Color(), new THREE.Color() ];
-  	this.material = null;
-
-  	this.z = 0;
-  	this.renderOrder = 0;
-  };
-
-  //
-
-  const RenderableSprite = function () {
-  	this.id = 0;
-
-  	this.object = null;
-
-  	this.x = 0;
-  	this.y = 0;
-  	this.z = 0;
-
-  	this.rotation = 0;
-  	this.scale = new THREE.Vector2();
-
-  	this.material = null;
-  	this.renderOrder = 0;
-  };
-
-  //
-
-  const Projector = function () {
-  	var _object; var _objectCount; var _objectPool = []; var _objectPoolLength = 0;
-  		var _vertex; var _vertexCount; var _vertexPool = []; var _vertexPoolLength = 0;
-  		var _face; var _faceCount; var _facePool = []; var _facePoolLength = 0;
-  		var _line; var _lineCount; var _linePool = []; var _linePoolLength = 0;
-  		var _sprite; var _spriteCount; var _spritePool = []; var _spritePoolLength = 0;
-
-  		var _renderData = { objects: [], lights: [], elements: [] };
-
-  		var _vector3 = new THREE.Vector3();
-  		var _vector4 = new THREE.Vector4();
-
-  		var _clipBox = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1));
-  		var _boundingBox = new THREE.Box3();
-  		var _points3 = new Array(3);
-
-  		var _viewMatrix = new THREE.Matrix4();
-  		var _viewProjectionMatrix = new THREE.Matrix4();
-
-  		var _modelMatrix;
-  		var _modelViewProjectionMatrix = new THREE.Matrix4();
-
-  		var _normalMatrix = new THREE.Matrix3();
-
-  		var _frustum = new THREE.Frustum();
-
-  		var _clippedVertex1PositionScreen = new THREE.Vector4();
-  		var _clippedVertex2PositionScreen = new THREE.Vector4();
-
-  	//
-
-  	this.projectVector = function (vector, camera) {
-  		console.warn('THREE.Projector: .projectVector() is now vector.project().');
-  		vector.project(camera);
-  	};
-
-  	this.unprojectVector = function (vector, camera) {
-  		console.warn('THREE.Projector: .unprojectVector() is now vector.unproject().');
-  		vector.unproject(camera);
-  	};
-
-  	this.pickingRay = function () {
-  		console.error('THREE.Projector: .pickingRay() is now raycaster.setFromCamera().');
-  	};
-
-  	//
-
-  	var RenderList = function () {
-  		var normals = [];
-  		var colors = [];
-  		var uvs = [];
-
-  		var object = null;
-  		var material = null;
-
-  		var normalMatrix = new THREE.Matrix3();
-
-  		function setObject (value) {
-  			object = value;
-  			material = object.material;
-
-  			normalMatrix.getNormalMatrix(object.matrixWorld);
-
-  			normals.length = 0;
-  			colors.length = 0;
-  			uvs.length = 0;
-  		}
-
-  		function projectVertex (vertex) {
-  			var position = vertex.position;
-  			var positionWorld = vertex.positionWorld;
-  			var positionScreen = vertex.positionScreen;
-
-  			positionWorld.copy(position).applyMatrix4(_modelMatrix);
-  			positionScreen.copy(positionWorld).applyMatrix4(_viewProjectionMatrix);
-
-  			var invW = 1 / positionScreen.w;
-
-  			positionScreen.x *= invW;
-  			positionScreen.y *= invW;
-  			positionScreen.z *= invW;
-
-  			vertex.visible = positionScreen.x >= -1 && positionScreen.x <= 1 &&
-  					 positionScreen.y >= -1 && positionScreen.y <= 1 &&
-  					 positionScreen.z >= -1 && positionScreen.z <= 1;
-  		}
-
-  		function pushVertex (x, y, z) {
-  			_vertex = getNextVertexInPool();
-  			_vertex.position.set(x, y, z);
-
-  			projectVertex(_vertex);
-  		}
-
-  		function pushNormal (x, y, z) {
-  			normals.push(x, y, z);
-  		}
-
-  		function pushColor (r, g, b) {
-  			colors.push(r, g, b);
-  		}
-
-  		function pushUv (x, y) {
-  			uvs.push(x, y);
-  		}
-
-  		function checkTriangleVisibility (v1, v2, v3) {
-  			if (v1.visible === true || v2.visible === true || v3.visible === true) return true;
-
-  			_points3[ 0 ] = v1.positionScreen;
-  			_points3[ 1 ] = v2.positionScreen;
-  			_points3[ 2 ] = v3.positionScreen;
-
-  			return _clipBox.intersectsBox(_boundingBox.setFromPoints(_points3));
-  		}
-
-  		function checkBackfaceCulling (v1, v2, v3) {
-  			return ((v3.positionScreen.x - v1.positionScreen.x) *
-  				    (v2.positionScreen.y - v1.positionScreen.y) -
-  				    (v3.positionScreen.y - v1.positionScreen.y) *
-  				    (v2.positionScreen.x - v1.positionScreen.x)) < 0;
-  		}
-
-  		function pushLine (a, b) {
-  			var v1 = _vertexPool[ a ];
-  			var v2 = _vertexPool[ b ];
-
-  			// Clip
-
-  			v1.positionScreen.copy(v1.position).applyMatrix4(_modelViewProjectionMatrix);
-  			v2.positionScreen.copy(v2.position).applyMatrix4(_modelViewProjectionMatrix);
-
-  			if (clipLine(v1.positionScreen, v2.positionScreen) === true) {
-  				// Perform the perspective divide
-  				v1.positionScreen.multiplyScalar(1 / v1.positionScreen.w);
-  				v2.positionScreen.multiplyScalar(1 / v2.positionScreen.w);
-
-  				_line = getNextLineInPool();
-  				_line.id = object.id;
-  				_line.v1.copy(v1);
-  				_line.v2.copy(v2);
-  				_line.z = Math.max(v1.positionScreen.z, v2.positionScreen.z);
-  				_line.renderOrder = object.renderOrder;
-
-  				_line.material = object.material;
-
-  				if (object.material.vertexColors === THREE.VertexColors) {
-  					_line.vertexColors[ 0 ].fromArray(colors, a * 3);
-  					_line.vertexColors[ 1 ].fromArray(colors, b * 3);
-  				}
-
-  				_renderData.elements.push(_line);
-  			}
-  		}
-
-  		function pushTriangle (a, b, c, material) {
-  			var v1 = _vertexPool[ a ];
-  			var v2 = _vertexPool[ b ];
-  			var v3 = _vertexPool[ c ];
-
-  			if (checkTriangleVisibility(v1, v2, v3) === false) return;
-
-  			if (material.side === THREE.DoubleSide || checkBackfaceCulling(v1, v2, v3) === true) {
-  				_face = getNextFaceInPool();
-
-  				_face.id = object.id;
-  				_face.v1.copy(v1);
-  				_face.v2.copy(v2);
-  				_face.v3.copy(v3);
-  				_face.z = (v1.positionScreen.z + v2.positionScreen.z + v3.positionScreen.z) / 3;
-  				_face.renderOrder = object.renderOrder;
-
-  				// face normal
-  				_vector3.subVectors(v3.position, v2.position);
-  				_vector4.subVectors(v1.position, v2.position);
-  				_vector3.cross(_vector4);
-  				_face.normalModel.copy(_vector3);
-  				_face.normalModel.applyMatrix3(normalMatrix).normalize();
-
-  				for (var i = 0; i < 3; i++) {
-  					var normal = _face.vertexNormalsModel[ i ];
-  					normal.fromArray(normals, arguments[ i ] * 3);
-  					normal.applyMatrix3(normalMatrix).normalize();
-
-  					var uv = _face.uvs[ i ];
-  					uv.fromArray(uvs, arguments[ i ] * 2);
-  				}
-
-  				_face.vertexNormalsLength = 3;
-
-  				_face.material = material;
-
-  				if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
-  					_face.color.fromArray(colors, a * 3);
-  				}
-
-  				_renderData.elements.push(_face);
-  			}
-  		}
-
-  		return {
-  			setObject: setObject,
-  			projectVertex: projectVertex,
-  			checkTriangleVisibility: checkTriangleVisibility,
-  			checkBackfaceCulling: checkBackfaceCulling,
-  			pushVertex: pushVertex,
-  			pushNormal: pushNormal,
-  			pushColor: pushColor,
-  			pushUv: pushUv,
-  			pushLine: pushLine,
-  			pushTriangle: pushTriangle
-  		};
-  	};
-
-  	var renderList = new RenderList();
-
-  	function projectObject (object) {
-  		if (object.visible === false) return;
-
-  		if (object instanceof THREE.Light) {
-  			_renderData.lights.push(object);
-  		} else if (object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Points) {
-  			if (object.material.visible === false) return;
-  			if (object.frustumCulled === true && _frustum.intersectsObject(object) === false) return;
-
-  			addObject(object);
-  		} else if (object instanceof THREE.Sprite) {
-  			if (object.material.visible === false) return;
-  			if (object.frustumCulled === true && _frustum.intersectsSprite(object) === false) return;
-
-  			addObject(object);
-  		}
-
-  		var children = object.children;
-
-  		for (var i = 0, l = children.length; i < l; i++) {
-  			projectObject(children[ i ]);
-  		}
-  	}
-
-  	function addObject (object) {
-  		_object = getNextObjectInPool();
-  		_object.id = object.id;
-  		_object.object = object;
-
-  		_vector3.setFromMatrixPosition(object.matrixWorld);
-  		_vector3.applyMatrix4(_viewProjectionMatrix);
-  		_object.z = _vector3.z;
-  		_object.renderOrder = object.renderOrder;
-
-  		_renderData.objects.push(_object);
-  	}
-
-  	this.projectScene = function (scene, camera, sortObjects, sortElements) {
-  		_faceCount = 0;
-  		_lineCount = 0;
-  		_spriteCount = 0;
-
-  		_renderData.elements.length = 0;
-
-  		if (scene.autoUpdate === true) scene.updateMatrixWorld();
-  		if (camera.parent === null) camera.updateMatrixWorld();
-
-  		_viewMatrix.copy(camera.matrixWorldInverse);
-  		_viewProjectionMatrix.multiplyMatrices(camera.projectionMatrix, _viewMatrix);
-
-  		_frustum.setFromMatrix(_viewProjectionMatrix);
-
-  		//
-
-  		_objectCount = 0;
-
-  		_renderData.objects.length = 0;
-  		_renderData.lights.length = 0;
-
-  		projectObject(scene);
-
-  		if (sortObjects === true) {
-  			_renderData.objects.sort(painterSort);
-  		}
-
-  		//
-
-  		var objects = _renderData.objects;
-
-  		for (var o = 0, ol = objects.length; o < ol; o++) {
-  			var object = objects[ o ].object;
-  			var geometry = object.geometry;
-
-  			renderList.setObject(object);
-
-  			_modelMatrix = object.matrixWorld;
-
-  			_vertexCount = 0;
-
-  			if (object instanceof THREE.Mesh) {
-  				if (geometry instanceof THREE.BufferGeometry) {
-  					var material = object.material;
-
-  					var isMultiMaterial = Array.isArray(material);
-
-  					var attributes = geometry.attributes;
-  					var groups = geometry.groups;
-
-  					if (attributes.position === undefined) continue;
-
-  					var positions = attributes.position.array;
-
-  					for (var i = 0, l = positions.length; i < l; i += 3) {
-  						var x = positions[ i ];
-  						var y = positions[ i + 1 ];
-  						var z = positions[ i + 2 ];
-
-  						if (material.morphTargets === true) {
-  							var morphTargets = geometry.morphAttributes.position;
-  							var morphInfluences = object.morphTargetInfluences;
-
-  							for (var t = 0, tl = morphTargets.length; t < tl; t++) {
-  								var influence = morphInfluences[ t ];
-
-  								if (influence === 0) continue;
-
-  								var target = morphTargets[ t ];
-
-  								x += (target.getX(i / 3) - positions[ i ]) * influence;
-  								y += (target.getY(i / 3) - positions[ i + 1 ]) * influence;
-  								z += (target.getZ(i / 3) - positions[ i + 2 ]) * influence;
-  							}
-  						}
-
-  						renderList.pushVertex(x, y, z);
-  					}
-
-  					if (attributes.normal !== undefined) {
-  						var normals = attributes.normal.array;
-
-  						for (var i = 0, l = normals.length; i < l; i += 3) {
-  							renderList.pushNormal(normals[ i ], normals[ i + 1 ], normals[ i + 2 ]);
-  						}
-  					}
-
-  					if (attributes.color !== undefined) {
-  						var colors = attributes.color.array;
-
-  						for (var i = 0, l = colors.length; i < l; i += 3) {
-  							renderList.pushColor(colors[ i ], colors[ i + 1 ], colors[ i + 2 ]);
-  						}
-  					}
-
-  					if (attributes.uv !== undefined) {
-  						var uvs = attributes.uv.array;
-
-  						for (var i = 0, l = uvs.length; i < l; i += 2) {
-  							renderList.pushUv(uvs[ i ], uvs[ i + 1 ]);
-  						}
-  					}
-
-  					if (geometry.index !== null) {
-  						var indices = geometry.index.array;
-
-  						if (groups.length > 0) {
-  							for (var g = 0; g < groups.length; g++) {
-  								var group = groups[ g ];
-
-  								material = isMultiMaterial === true
-  									 ? object.material[ group.materialIndex ]
-  									 : object.material;
-
-  								if (material === undefined) continue;
-
-  								for (var i = group.start, l = group.start + group.count; i < l; i += 3) {
-  									renderList.pushTriangle(indices[ i ], indices[ i + 1 ], indices[ i + 2 ], material);
-  								}
-  							}
-  						} else {
-  							for (var i = 0, l = indices.length; i < l; i += 3) {
-  								renderList.pushTriangle(indices[ i ], indices[ i + 1 ], indices[ i + 2 ], material);
-  							}
-  						}
-  					} else {
-  						if (groups.length > 0) {
-  							for (var g = 0; g < groups.length; g++) {
-  								var group = groups[ g ];
-
-  								material = isMultiMaterial === true
-  									 ? object.material[ group.materialIndex ]
-  									 : object.material;
-
-  								if (material === undefined) continue;
-
-  								for (var i = group.start, l = group.start + group.count; i < l; i += 3) {
-  									renderList.pushTriangle(i, i + 1, i + 2, material);
-  								}
-  							}
-  						} else {
-  							for (var i = 0, l = positions.length / 3; i < l; i += 3) {
-  								renderList.pushTriangle(i, i + 1, i + 2, material);
-  							}
-  						}
-  					}
-  				} else if (geometry instanceof THREE.Geometry) {
-  					var vertices = geometry.vertices;
-  					var faces = geometry.faces;
-  					var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
-
-  					_normalMatrix.getNormalMatrix(_modelMatrix);
-
-  					var material = object.material;
-
-  					var isMultiMaterial = Array.isArray(material);
-
-  					for (var v = 0, vl = vertices.length; v < vl; v++) {
-  						var vertex = vertices[ v ];
-
-  						_vector3.copy(vertex);
-
-  						if (material.morphTargets === true) {
-  							var morphTargets = geometry.morphTargets;
-  							var morphInfluences = object.morphTargetInfluences;
-
-  							for (var t = 0, tl = morphTargets.length; t < tl; t++) {
-  								var influence = morphInfluences[ t ];
-
-  								if (influence === 0) continue;
-
-  								var target = morphTargets[ t ];
-  								var targetVertex = target.vertices[ v ];
-
-  								_vector3.x += (targetVertex.x - vertex.x) * influence;
-  								_vector3.y += (targetVertex.y - vertex.y) * influence;
-  								_vector3.z += (targetVertex.z - vertex.z) * influence;
-  							}
-  						}
-
-  						renderList.pushVertex(_vector3.x, _vector3.y, _vector3.z);
-  					}
-
-  					for (var f = 0, fl = faces.length; f < fl; f++) {
-  						var face = faces[ f ];
-
-  						material = isMultiMaterial === true
-  							 ? object.material[ face.materialIndex ]
-  							 : object.material;
-
-  						if (material === undefined) continue;
-
-  						var side = material.side;
-
-  						var v1 = _vertexPool[ face.a ];
-  						var v2 = _vertexPool[ face.b ];
-  						var v3 = _vertexPool[ face.c ];
-
-  						if (renderList.checkTriangleVisibility(v1, v2, v3) === false) continue;
-
-  						var visible = renderList.checkBackfaceCulling(v1, v2, v3);
-
-  						if (side !== THREE.DoubleSide) {
-  							if (side === THREE.FrontSide && visible === false) continue;
-  							if (side === THREE.BackSide && visible === true) continue;
-  						}
-
-  						_face = getNextFaceInPool();
-
-  						_face.id = object.id;
-  						_face.v1.copy(v1);
-  						_face.v2.copy(v2);
-  						_face.v3.copy(v3);
-
-  						_face.normalModel.copy(face.normal);
-
-  						if (visible === false && (side === THREE.BackSide || side === THREE.DoubleSide)) {
-  							_face.normalModel.negate();
-  						}
-
-  						_face.normalModel.applyMatrix3(_normalMatrix).normalize();
-
-  						var faceVertexNormals = face.vertexNormals;
-
-  						for (var n = 0, nl = Math.min(faceVertexNormals.length, 3); n < nl; n++) {
-  							var normalModel = _face.vertexNormalsModel[ n ];
-  							normalModel.copy(faceVertexNormals[ n ]);
-
-  							if (visible === false && (side === THREE.BackSide || side === THREE.DoubleSide)) {
-  								normalModel.negate();
-  							}
-
-  							normalModel.applyMatrix3(_normalMatrix).normalize();
-  						}
-
-  						_face.vertexNormalsLength = faceVertexNormals.length;
-
-  						var vertexUvs = faceVertexUvs[ f ];
-
-  						if (vertexUvs !== undefined) {
-  							for (var u = 0; u < 3; u++) {
-  								_face.uvs[ u ].copy(vertexUvs[ u ]);
-  							}
-  						}
-
-  						_face.color = face.color;
-  						_face.material = material;
-
-  						_face.z = (v1.positionScreen.z + v2.positionScreen.z + v3.positionScreen.z) / 3;
-  						_face.renderOrder = object.renderOrder;
-
-  						_renderData.elements.push(_face);
-  					}
-  				}
-  			} else if (object instanceof THREE.Line) {
-  				_modelViewProjectionMatrix.multiplyMatrices(_viewProjectionMatrix, _modelMatrix);
-
-  				if (geometry instanceof THREE.BufferGeometry) {
-  					var attributes = geometry.attributes;
-
-  					if (attributes.position !== undefined) {
-  						var positions = attributes.position.array;
-
-  						for (var i = 0, l = positions.length; i < l; i += 3) {
-  							renderList.pushVertex(positions[ i ], positions[ i + 1 ], positions[ i + 2 ]);
-  						}
-
-  						if (attributes.color !== undefined) {
-  							var colors = attributes.color.array;
-
-  							for (var i = 0, l = colors.length; i < l; i += 3) {
-  								renderList.pushColor(colors[ i ], colors[ i + 1 ], colors[ i + 2 ]);
-  							}
-  						}
-
-  						if (geometry.index !== null) {
-  							var indices = geometry.index.array;
-
-  							for (var i = 0, l = indices.length; i < l; i += 2) {
-  								renderList.pushLine(indices[ i ], indices[ i + 1 ]);
-  							}
-  						} else {
-  							var step = object instanceof THREE.LineSegments ? 2 : 1;
-
-  							for (var i = 0, l = (positions.length / 3) - 1; i < l; i += step) {
-  								renderList.pushLine(i, i + 1);
-  							}
-  						}
-  					}
-  				} else if (geometry instanceof THREE.Geometry) {
-  					var vertices = object.geometry.vertices;
-
-  					if (vertices.length === 0) continue;
-
-  					v1 = getNextVertexInPool();
-  					v1.positionScreen.copy(vertices[ 0 ]).applyMatrix4(_modelViewProjectionMatrix);
-
-  					var step = object instanceof THREE.LineSegments ? 2 : 1;
-
-  					for (var v = 1, vl = vertices.length; v < vl; v++) {
-  						v1 = getNextVertexInPool();
-  						v1.positionScreen.copy(vertices[ v ]).applyMatrix4(_modelViewProjectionMatrix);
-
-  						if ((v + 1) % step > 0) continue;
-
-  						v2 = _vertexPool[ _vertexCount - 2 ];
-
-  						_clippedVertex1PositionScreen.copy(v1.positionScreen);
-  						_clippedVertex2PositionScreen.copy(v2.positionScreen);
-
-  						if (clipLine(_clippedVertex1PositionScreen, _clippedVertex2PositionScreen) === true) {
-  							// Perform the perspective divide
-  							_clippedVertex1PositionScreen.multiplyScalar(1 / _clippedVertex1PositionScreen.w);
-  							_clippedVertex2PositionScreen.multiplyScalar(1 / _clippedVertex2PositionScreen.w);
-
-  							_line = getNextLineInPool();
-
-  							_line.id = object.id;
-  							_line.v1.positionScreen.copy(_clippedVertex1PositionScreen);
-  							_line.v2.positionScreen.copy(_clippedVertex2PositionScreen);
-
-  							_line.z = Math.max(_clippedVertex1PositionScreen.z, _clippedVertex2PositionScreen.z);
-  							_line.renderOrder = object.renderOrder;
-
-  							_line.material = object.material;
-
-  							if (object.material.vertexColors === THREE.VertexColors) {
-  								_line.vertexColors[ 0 ].copy(object.geometry.colors[ v ]);
-  								_line.vertexColors[ 1 ].copy(object.geometry.colors[ v - 1 ]);
-  							}
-
-  							_renderData.elements.push(_line);
-  						}
-  					}
-  				}
-  			} else if (object instanceof THREE.Points) {
-  				_modelViewProjectionMatrix.multiplyMatrices(_viewProjectionMatrix, _modelMatrix);
-
-  				if (geometry instanceof THREE.Geometry) {
-  					var vertices = object.geometry.vertices;
-
-  					for (var v = 0, vl = vertices.length; v < vl; v++) {
-  						var vertex = vertices[ v ];
-
-  						_vector4.set(vertex.x, vertex.y, vertex.z, 1);
-  						_vector4.applyMatrix4(_modelViewProjectionMatrix);
-
-  						pushPoint(_vector4, object, camera);
-  					}
-  				} else if (geometry instanceof THREE.BufferGeometry) {
-  					var attributes = geometry.attributes;
-
-  					if (attributes.position !== undefined) {
-  						var positions = attributes.position.array;
-
-  						for (var i = 0, l = positions.length; i < l; i += 3) {
-  							_vector4.set(positions[ i ], positions[ i + 1 ], positions[ i + 2 ], 1);
-  							_vector4.applyMatrix4(_modelViewProjectionMatrix);
-
-  							pushPoint(_vector4, object, camera);
-  						}
-  					}
-  				}
-  			} else if (object instanceof THREE.Sprite) {
-  				object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
-  				_vector4.set(_modelMatrix.elements[ 12 ], _modelMatrix.elements[ 13 ], _modelMatrix.elements[ 14 ], 1);
-  				_vector4.applyMatrix4(_viewProjectionMatrix);
-
-  				pushPoint(_vector4, object, camera);
-  			}
-  		}
-
-  		if (sortElements === true) {
-  			_renderData.elements.sort(painterSort);
-  		}
-
-  		return _renderData;
-  	};
-
-  	function pushPoint (_vector4, object, camera) {
-  		var invW = 1 / _vector4.w;
-
-  		_vector4.z *= invW;
-
-  		if (_vector4.z >= -1 && _vector4.z <= 1) {
-  			_sprite = getNextSpriteInPool();
-  			_sprite.id = object.id;
-  			_sprite.x = _vector4.x * invW;
-  			_sprite.y = _vector4.y * invW;
-  			_sprite.z = _vector4.z;
-  			_sprite.renderOrder = object.renderOrder;
-  			_sprite.object = object;
-
-  			_sprite.rotation = object.rotation;
-
-  			_sprite.scale.x = object.scale.x * Math.abs(_sprite.x - (_vector4.x + camera.projectionMatrix.elements[ 0 ]) / (_vector4.w + camera.projectionMatrix.elements[ 12 ]));
-  			_sprite.scale.y = object.scale.y * Math.abs(_sprite.y - (_vector4.y + camera.projectionMatrix.elements[ 5 ]) / (_vector4.w + camera.projectionMatrix.elements[ 13 ]));
-
-  			_sprite.material = object.material;
-
-  			_renderData.elements.push(_sprite);
-  		}
-  	}
-
-  	// Pools
-
-  	function getNextObjectInPool () {
-  		if (_objectCount === _objectPoolLength) {
-  			var object = new RenderableObject();
-  			_objectPool.push(object);
-  			_objectPoolLength++;
-  			_objectCount++;
-  			return object;
-  		}
-
-  		return _objectPool[ _objectCount++ ];
-  	}
-
-  	function getNextVertexInPool () {
-  		if (_vertexCount === _vertexPoolLength) {
-  			var vertex = new RenderableVertex();
-  			_vertexPool.push(vertex);
-  			_vertexPoolLength++;
-  			_vertexCount++;
-  			return vertex;
-  		}
-
-  		return _vertexPool[ _vertexCount++ ];
-  	}
-
-  	function getNextFaceInPool () {
-  		if (_faceCount === _facePoolLength) {
-  			var face = new RenderableFace();
-  			_facePool.push(face);
-  			_facePoolLength++;
-  			_faceCount++;
-  			return face;
-  		}
-
-  		return _facePool[ _faceCount++ ];
-  	}
-
-  	function getNextLineInPool () {
-  		if (_lineCount === _linePoolLength) {
-  			var line = new RenderableLine();
-  			_linePool.push(line);
-  			_linePoolLength++;
-  			_lineCount++;
-  			return line;
-  		}
-
-  		return _linePool[ _lineCount++ ];
-  	}
-
-  	function getNextSpriteInPool () {
-  		if (_spriteCount === _spritePoolLength) {
-  			var sprite = new RenderableSprite();
-  			_spritePool.push(sprite);
-  			_spritePoolLength++;
-  			_spriteCount++;
-  			return sprite;
-  		}
-
-  		return _spritePool[ _spriteCount++ ];
-  	}
-
-  	//
-
-  	function painterSort (a, b) {
-  		if (a.renderOrder !== b.renderOrder) {
-  			return a.renderOrder - b.renderOrder;
-  		} else if (a.z !== b.z) {
-  			return b.z - a.z;
-  		} else if (a.id !== b.id) {
-  			return a.id - b.id;
-  		} else {
-  			return 0;
-  		}
-  	}
-
-  	function clipLine (s1, s2) {
-  		var alpha1 = 0; var alpha2 = 1;
-
-  			// Calculate the boundary coordinate of each vertex for the near and far clip planes,
-  			// Z = -1 and Z = +1, respectively.
-
-  			var bc1near = s1.z + s1.w;
-  			var bc2near = s2.z + s2.w;
-  			var bc1far = -s1.z + s1.w;
-  			var bc2far = -s2.z + s2.w;
-
-  		if (bc1near >= 0 && bc2near >= 0 && bc1far >= 0 && bc2far >= 0) {
-  			// Both vertices lie entirely within all clip planes.
-  			return true;
-  		} else if ((bc1near < 0 && bc2near < 0) || (bc1far < 0 && bc2far < 0)) {
-  			// Both vertices lie entirely outside one of the clip planes.
-  			return false;
-  		} else {
-  			// The line segment spans at least one clip plane.
-
-  			if (bc1near < 0) {
-  				// v1 lies outside the near plane, v2 inside
-  				alpha1 = Math.max(alpha1, bc1near / (bc1near - bc2near));
-  			} else if (bc2near < 0) {
-  				// v2 lies outside the near plane, v1 inside
-  				alpha2 = Math.min(alpha2, bc1near / (bc1near - bc2near));
-  			}
-
-  			if (bc1far < 0) {
-  				// v1 lies outside the far plane, v2 inside
-  				alpha1 = Math.max(alpha1, bc1far / (bc1far - bc2far));
-  			} else if (bc2far < 0) {
-  				// v2 lies outside the far plane, v2 inside
-  				alpha2 = Math.min(alpha2, bc1far / (bc1far - bc2far));
-  			}
-
-  			if (alpha2 < alpha1) {
-  				// The line segment spans two boundaries, but is outside both of them.
-  				// (This can't happen when we're only clipping against just near/far but good
-  				//  to leave the check here for future usage if other clip planes are added.)
-  				return false;
-  			} else {
-  				// Update the s1 and s2 vertices to match the clipped line segment.
-  				s1.lerp(s2, alpha1);
-  				s2.lerp(s1, 1 - alpha2);
-
-  				return true;
-  			}
-  		}
-  	}
-  };
-
-  return { Projector, RenderableObject, RenderableFace, RenderableVertex, RenderableLine, RenderableSprite };
-};
-
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
-const installSVGRenderer = ({ THREE, Projector, RenderableSprite, RenderableLine, RenderableFace, document }) => {
-  const SVGObject = function (node) {
-  	THREE.Object3D.call(this);
-
-  	this.node = node;
-  };
-
-  SVGObject.prototype = Object.create(THREE.Object3D.prototype);
-  SVGObject.prototype.constructor = SVGObject;
-
-  const SVGRenderer = function () {
-  	var _this = this;
-  		var _renderData; var _elements; var _lights;
-  		var _projector = new Projector();
-  		var _svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  		var _svgWidth; var _svgHeight; var _svgWidthHalf; var _svgHeightHalf;
-
-  		var _v1; var _v2; var _v3;
-
-  		var _clipBox = new THREE.Box2();
-  		var _elemBox = new THREE.Box2();
-
-  		var _color = new THREE.Color();
-  		var _diffuseColor = new THREE.Color();
-  		var _ambientLight = new THREE.Color();
-  		var _directionalLights = new THREE.Color();
-  		var _pointLights = new THREE.Color();
-  		var _clearColor = new THREE.Color();
-  		var _clearAlpha = 1;
-
-  		var _vector3 = new THREE.Vector3(); // Needed for PointLight
-  		var _centroid = new THREE.Vector3();
-  		var _normal = new THREE.Vector3();
-  		var _normalViewMatrix = new THREE.Matrix3();
-
-  		var _viewMatrix = new THREE.Matrix4();
-  		var _viewProjectionMatrix = new THREE.Matrix4();
-
-  		var _svgPathPool = [];
-  		var _svgNode; var _pathCount = 0;
-
-  		var _currentPath; var _currentStyle;
-
-  		var _quality = 1; var _precision = null;
-
-    if (_svg.style === undefined) {
-      // FIX: Is this correct?
-      _svg.style = {};
-    }
-
-  	this.domElement = _svg;
-
-  	this.autoClear = true;
-  	this.sortObjects = true;
-  	this.sortElements = true;
-
-  	this.info = {
-
-  		render: {
-
-  			vertices: 0,
-  			faces: 0
-
-  		}
-
-  	};
-
-  	this.setQuality = function (quality) {
-  		switch (quality) {
-  			case 'high': _quality = 1; break;
-  			case 'low': _quality = 0; break;
-  		}
-  	};
-
-  	this.setClearColor = function (color, alpha) {
-  		_clearColor.set(color);
-  		_clearAlpha = alpha !== undefined ? alpha : 1;
-  	};
-
-  	this.setPixelRatio = function () {};
-
-  	this.setSize = function (width, height) {
-  		_svgWidth = width; _svgHeight = height;
-  		_svgWidthHalf = _svgWidth / 2; _svgHeightHalf = _svgHeight / 2;
-
-  		_svg.setAttribute('viewBox', (-_svgWidthHalf) + ' ' + (-_svgHeightHalf) + ' ' + _svgWidth + ' ' + _svgHeight);
-  		_svg.setAttribute('width', _svgWidth);
-  		_svg.setAttribute('height', _svgHeight);
-
-  		_clipBox.min.set(-_svgWidthHalf, -_svgHeightHalf);
-  		_clipBox.max.set(_svgWidthHalf, _svgHeightHalf);
-  	};
-
-  	this.setPrecision = function (precision) {
-  		_precision = precision;
-  	};
-
-  	function removeChildNodes () {
-  		_pathCount = 0;
-
-  		while (_svg.childNodes.length > 0) {
-  			_svg.removeChild(_svg.childNodes[ 0 ]);
-  		}
-  	}
-
-  	function getSvgColor (color, opacity) {
-  		var arg = Math.floor(color.r * 255) + ',' + Math.floor(color.g * 255) + ',' + Math.floor(color.b * 255);
-
-  		if (opacity === undefined || opacity === 1) return 'rgb(' + arg + ')';
-
-  		return 'rgb(' + arg + '); fill-opacity: ' + opacity;
-  	}
-
-  	function convert (c) {
-  		return _precision !== null ? c.toFixed(_precision) : c;
-  	}
-
-  	this.clear = function () {
-  		removeChildNodes();
-  		_svg.style.backgroundColor = getSvgColor(_clearColor, _clearAlpha);
-  	};
-
-  	this.render = function (scene, camera) {
-  		if (camera instanceof THREE.Camera === false) {
-  			console.error('THREE.SVGRenderer.render: camera is not an instance of THREE.Camera.');
-  			return;
-  		}
-
-  		var background = scene.background;
-
-  		if (background && background.isColor) {
-  			removeChildNodes();
-  			_svg.style.backgroundColor = getSvgColor(background);
-  		} else if (this.autoClear === true) {
-  			this.clear();
-  		}
-
-  		_this.info.render.vertices = 0;
-  		_this.info.render.faces = 0;
-
-  		_viewMatrix.copy(camera.matrixWorldInverse);
-  		_viewProjectionMatrix.multiplyMatrices(camera.projectionMatrix, _viewMatrix);
-
-  		_renderData = _projector.projectScene(scene, camera, this.sortObjects, this.sortElements);
-  		_elements = _renderData.elements;
-  		_lights = _renderData.lights;
-
-  		_normalViewMatrix.getNormalMatrix(camera.matrixWorldInverse);
-
-  		calculateLights(_lights);
-
-  		 // reset accumulated path
-
-  		_currentPath = '';
-  		_currentStyle = '';
-
-  		for (var e = 0, el = _elements.length; e < el; e++) {
-  			var element = _elements[ e ];
-  			var material = element.material;
-
-  			if (material === undefined || material.opacity === 0) continue;
-
-  			_elemBox.makeEmpty();
-
-  			if (element instanceof RenderableSprite) {
-  				_v1 = element;
-  				_v1.x *= _svgWidthHalf; _v1.y *= -_svgHeightHalf;
-
-  				renderSprite(_v1, element, material);
-  			} else if (element instanceof RenderableLine) {
-  				_v1 = element.v1; _v2 = element.v2;
-
-  				_v1.positionScreen.x *= _svgWidthHalf; _v1.positionScreen.y *= -_svgHeightHalf;
-  				_v2.positionScreen.x *= _svgWidthHalf; _v2.positionScreen.y *= -_svgHeightHalf;
-
-  				_elemBox.setFromPoints([ _v1.positionScreen, _v2.positionScreen ]);
-
-  				if (_clipBox.intersectsBox(_elemBox) === true) {
-  					renderLine(_v1, _v2, element, material);
-  				}
-  			} else if (element instanceof RenderableFace) {
-  				_v1 = element.v1; _v2 = element.v2; _v3 = element.v3;
-
-  				if (_v1.positionScreen.z < -1 || _v1.positionScreen.z > 1) continue;
-  				if (_v2.positionScreen.z < -1 || _v2.positionScreen.z > 1) continue;
-  				if (_v3.positionScreen.z < -1 || _v3.positionScreen.z > 1) continue;
-
-  				_v1.positionScreen.x *= _svgWidthHalf; _v1.positionScreen.y *= -_svgHeightHalf;
-  				_v2.positionScreen.x *= _svgWidthHalf; _v2.positionScreen.y *= -_svgHeightHalf;
-  				_v3.positionScreen.x *= _svgWidthHalf; _v3.positionScreen.y *= -_svgHeightHalf;
-
-  				_elemBox.setFromPoints([
-  					_v1.positionScreen,
-  					_v2.positionScreen,
-  					_v3.positionScreen
-  				]);
-
-  				if (_clipBox.intersectsBox(_elemBox) === true) {
-  					renderFace3(_v1, _v2, _v3, element, material);
-  				}
-  			}
-  		}
-
-  		flushPath(); // just to flush last svg:path
-
-  		scene.traverseVisible(function (object) {
-  			 if (object instanceof SVGObject) {
-  				_vector3.setFromMatrixPosition(object.matrixWorld);
-  				_vector3.applyMatrix4(_viewProjectionMatrix);
-
-  				if (_vector3.z < -1 || _vector3.z > 1) return;
-
-  				var x = _vector3.x * _svgWidthHalf;
-  				var y = -_vector3.y * _svgHeightHalf;
-
-  				var node = object.node;
-  				node.setAttribute('transform', 'translate(' + x + ',' + y + ')');
-
-  				_svg.appendChild(node);
-  			}
-  		});
-  	};
-
-  	function calculateLights (lights) {
-  		_ambientLight.setRGB(0, 0, 0);
-  		_directionalLights.setRGB(0, 0, 0);
-  		_pointLights.setRGB(0, 0, 0);
-
-  		for (var l = 0, ll = lights.length; l < ll; l++) {
-  			var light = lights[ l ];
-  			var lightColor = light.color;
-
-  			if (light.isAmbientLight) {
-  				_ambientLight.r += lightColor.r;
-  				_ambientLight.g += lightColor.g;
-  				_ambientLight.b += lightColor.b;
-  			} else if (light.isDirectionalLight) {
-  				_directionalLights.r += lightColor.r;
-  				_directionalLights.g += lightColor.g;
-  				_directionalLights.b += lightColor.b;
-  			} else if (light.isPointLight) {
-  				_pointLights.r += lightColor.r;
-  				_pointLights.g += lightColor.g;
-  				_pointLights.b += lightColor.b;
-  			}
-  		}
-  	}
-
-  	function calculateLight (lights, position, normal, color) {
-  		for (var l = 0, ll = lights.length; l < ll; l++) {
-  			var light = lights[ l ];
-  			var lightColor = light.color;
-
-  			if (light.isDirectionalLight) {
-  				var lightPosition = _vector3.setFromMatrixPosition(light.matrixWorld).normalize();
-
-  				var amount = normal.dot(lightPosition);
-
-  				if (amount <= 0) continue;
-
-  				amount *= light.intensity;
-
-  				color.r += lightColor.r * amount;
-  				color.g += lightColor.g * amount;
-  				color.b += lightColor.b * amount;
-  			} else if (light.isPointLight) {
-  				var lightPosition = _vector3.setFromMatrixPosition(light.matrixWorld);
-
-  				var amount = normal.dot(_vector3.subVectors(lightPosition, position).normalize());
-
-  				if (amount <= 0) continue;
-
-  				amount *= light.distance == 0 ? 1 : 1 - Math.min(position.distanceTo(lightPosition) / light.distance, 1);
-
-  				if (amount == 0) continue;
-
-  				amount *= light.intensity;
-
-  				color.r += lightColor.r * amount;
-  				color.g += lightColor.g * amount;
-  				color.b += lightColor.b * amount;
-  			}
-  		}
-  	}
-
-  	function renderSprite (v1, element, material) {
-  		var scaleX = element.scale.x * _svgWidthHalf;
-  		var scaleY = element.scale.y * _svgHeightHalf;
-
-  		if (material.isPointsMaterial) {
-  			scaleX *= material.size;
-  			scaleY *= material.size;
-  		}
-
-  		var path = 'M' + convert(v1.x - scaleX * 0.5) + ',' + convert(v1.y - scaleY * 0.5) + 'h' + convert(scaleX) + 'v' + convert(scaleY) + 'h' + convert(-scaleX) + 'z';
-  		var style = '';
-
-  		if (material.isSpriteMaterial || material.isPointsMaterial) {
-  			style = 'fill:' + getSvgColor(material.color, material.opacity);
-  		}
-
-  		addPath(style, path);
-  	}
-
-  	function renderLine (v1, v2, element, material) {
-  		var path = 'M' + convert(v1.positionScreen.x) + ',' + convert(v1.positionScreen.y) + 'L' + convert(v2.positionScreen.x) + ',' + convert(v2.positionScreen.y);
-
-  		if (material.isLineBasicMaterial) {
-  			var style = 'fill:none;stroke:' + getSvgColor(material.color, material.opacity) + ';stroke-width:' + material.linewidth + ';stroke-linecap:' + material.linecap;
-
-  			if (material.isLineDashedMaterial) {
-  				style = style + ';stroke-dasharray:' + material.dashSize + ',' + material.gapSize;
-  			}
-
-  			addPath(style, path);
-  		}
-  	}
-
-  	function renderFace3 (v1, v2, v3, element, material) {
-  		_this.info.render.vertices += 3;
-  		_this.info.render.faces++;
-
-  		var path = 'M' + convert(v1.positionScreen.x) + ',' + convert(v1.positionScreen.y) + 'L' + convert(v2.positionScreen.x) + ',' + convert(v2.positionScreen.y) + 'L' + convert(v3.positionScreen.x) + ',' + convert(v3.positionScreen.y) + 'z';
-  		var style = '';
-
-  		if (material.isMeshBasicMaterial) {
-  			_color.copy(material.color);
-
-  			if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
-  				_color.multiply(element.color);
-  			}
-  		} else if (material.isMeshLambertMaterial || material.isMeshPhongMaterial || material.isMeshStandardMaterial) {
-  			_diffuseColor.copy(material.color);
-
-  			if (material.vertexColors === THREE.FaceColors || material.vertexColors === THREE.VertexColors) {
-  				_diffuseColor.multiply(element.color);
-  			}
-
-  			_color.copy(_ambientLight);
-
-  			_centroid.copy(v1.positionWorld).add(v2.positionWorld).add(v3.positionWorld).divideScalar(3);
-
-  			calculateLight(_lights, _centroid, element.normalModel, _color);
-
-  			_color.multiply(_diffuseColor).add(material.emissive);
-  		} else if (material.isMeshNormalMaterial) {
-  			_normal.copy(element.normalModel).applyMatrix3(_normalViewMatrix);
-
-  			_color.setRGB(_normal.x, _normal.y, _normal.z).multiplyScalar(0.5).addScalar(0.5);
-  		}
-
-  		if (material.wireframe) {
-  			style = 'fill:none;stroke:' + getSvgColor(_color, material.opacity) + ';stroke-width:' + material.wireframeLinewidth + ';stroke-linecap:' + material.wireframeLinecap + ';stroke-linejoin:' + material.wireframeLinejoin;
-  		} else {
-  			style = 'fill:' + getSvgColor(_color, material.opacity);
-  		}
-
-  		addPath(style, path);
-  	}
-
-  	function addPath (style, path) {
-  		if (_currentStyle === style) {
-  			_currentPath += path;
-  		} else {
-  			flushPath();
-
-  			_currentStyle = style;
-  			_currentPath = path;
-  		}
-  	}
-
-  	function flushPath () {
-  		if (_currentPath) {
-  			_svgNode = getPathNode(_pathCount++);
-  			_svgNode.setAttribute('d', _currentPath);
-  			_svgNode.setAttribute('style', _currentStyle);
-  			_svg.appendChild(_svgNode);
-  		}
-
-  		_currentPath = '';
-  		_currentStyle = '';
-  	}
-
-  	function getPathNode (id) {
-  		if (_svgPathPool[ id ] == null) {
-  			_svgPathPool[ id ] = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
-  			if (_quality == 0) {
-  				_svgPathPool[ id ].setAttribute('shape-rendering', 'crispEdges'); // optimizeSpeed
-  			}
-
-  			return _svgPathPool[ id ];
-  		}
-
-  		return _svgPathPool[ id ];
-  	}
-  };
-
-  return { SVGRenderer };
-};
-
-const pointsToThreejsPoints = (geometry) => {
-  return geometry.points;
-};
-
-const pathsToThreejsSegments = (geometry) => {
-  const segments = [];
-  for (const path of geometry) {
-    for (const [start, end] of toSegments({}, path)) {
-      segments.push([start, end]);
+      parameters[key] = properties[key];
     }
   }
-  return segments;
 };
 
-const solidToThreejsSolid = (solid) => {
-  const normals = [];
-  const positions = [];
-  for (const surface of solid) {
-    // These should already be convex.
-    for (const triangle of toTriangles({}, surface)) {
-      for (const point of triangle) {
-        const [x, y, z] = toPlane(triangle);
-        normals.push(x, y, z);
-        positions.push(...point);
+const setMaterial = (tags, parameters) => {
+  for (const tag of tags) {
+    if (tag.startsWith('material/')) {
+      const material = tag.substring(9);
+      const properties = materialProperties[material];
+      if (properties !== undefined) {
+        merge(properties, parameters);
       }
     }
   }
-  return { normals, positions };
 };
 
-const surfaceToThreejsSurface = (surface) => {
-  const normals = [];
-  const positions = [];
-  for (const triangle of toTriangles({}, makeConvex({}, surface))) {
-    for (const point of triangle) {
-      const [x, y, z, w] = toPlane(triangle);
-      normals.push(x, y, z);
-      if (isNaN(x)) {
-        console.log(`QQ/triangle: ${triangle}`);
-        console.log(`QQ/normal: ${x} ${y} ${z} ${w}`);
+const buildMeshMaterial = (tags) => {
+  if (tags !== undefined) {
+    const parameters = {};
+    setColor(tags, parameters, null);
+    setMaterial(tags, parameters);
+    if (Object.keys(parameters).length > 0) {
+      return new MeshPhysicalMaterial(parameters);
+    }
+  }
+
+  // Else, default to normal material.
+  return new MeshNormalMaterial();
+};
+
+const toName = (threejsGeometry) => {
+  if (threejsGeometry.tags !== undefined && threejsGeometry.tags.length >= 1) {
+    for (const tag of threejsGeometry.tags) {
+      if (tag.startsWith('user/')) {
+        return tag.substring(5);
       }
-      positions.push(...point);
     }
-  }
-  return { normals, positions };
-};
-
-const toThreejsGeometry = (geometry, supertags) => {
-  const tags = [...(supertags || []), ...(geometry.tags || [])];
-  if (geometry.isThreejsGeometry) {
-    return geometry;
-  } else if (geometry.assembly) {
-    return {
-      assembly: geometry.assembly.map(item => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true
-    };
-  } else if (geometry.disjointAssembly) {
-    const items = geometry.disjointAssembly;
-    if (geometry.nonNegative) {
-      items.push(...geometry.nonNegative);
-    }
-    return {
-      assembly: items.map(item => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true
-    };
-  } else if (geometry.item) {
-    return {
-      item: toThreejsGeometry(geometry.item, tags),
-      tags,
-      isThreejsGeometry: true
-    };
-  } else if (geometry.paths) {
-    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags, isThreejsGeometry: true };
-  } else if (geometry.plan) {
-    return {
-      threejsPlan: geometry.plan,
-      threejsMarks: geometry.marks,
-      threejsVisualization: toThreejsGeometry(geometry.visualization),
-      tags,
-      isThreejsGeometry: true
-    };
-  } else if (geometry.points) {
-    return { threejsSegments: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
-  } else if (geometry.solid) {
-    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags, isThreejsGeometry: true };
-  } else if (geometry.surface) {
-    return { threejsSurface: surfaceToThreejsSurface(geometry.surface), tags, isThreejsGeometry: true };
-  } else if (geometry.z0Surface) {
-    return { threejsSurface: surfaceToThreejsSurface(geometry.z0Surface), tags, isThreejsGeometry: true };
   }
 };
 
-// Bootstrap start.
-const { Projector: Projector$1, RenderableFace, RenderableLine, RenderableSprite } = installProjector({ THREE: THREE$1 });
+// FIX: Found it somewhere -- attribute.
+const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
+  const coords = [];
+  coords.length = 2 * geom.attributes.position.array.length / 3;
 
-const { SVGRenderer } = installSVGRenderer({ THREE: THREE$1, Projector: Projector$1, RenderableFace, RenderableLine, RenderableSprite, document: new domParser_3().parseFromString('<xml></xml>', 'text/xml') });
-// Bootstrap done.
+  // geom.removeAttribute('uv');
+  if (geom.attributes.uv === undefined) {
+    geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
+  }
 
-const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
-  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1], near = 1, far = 3500 } = view;
-  const [pageWidth, pageHeight] = pageSize;
-  const camera = new PerspectiveCamera(27, pageWidth / pageHeight, near, far);
+  // maps 3 verts of 1 face on the better side of the cube
+  // side of the cube can be XY, XZ or YZ
+  const makeUVs = (v0, v1, v2) => {
+    // pre-rotate the model so that cube sides match world axis
+    v0.applyMatrix4(transformMatrix);
+    v1.applyMatrix4(transformMatrix);
+    v2.applyMatrix4(transformMatrix);
+
+    // get normal of the face, to know into which cube side it maps better
+    let n = new Vector3();
+    n.crossVectors(v1.clone().sub(v0), v1.clone().sub(v2)).normalize();
+
+    n.x = Math.abs(n.x);
+    n.y = Math.abs(n.y);
+    n.z = Math.abs(n.z);
+
+    let uv0 = new Vector2();
+    let uv1 = new Vector2();
+    let uv2 = new Vector2();
+    // xz mapping
+    if (n.y > n.x && n.y > n.z) {
+      uv0.x = (v0.x - bbox.min.x) / bboxMaxSize;
+      uv0.y = (bbox.max.z - v0.z) / bboxMaxSize;
+
+      uv1.x = (v1.x - bbox.min.x) / bboxMaxSize;
+      uv1.y = (bbox.max.z - v1.z) / bboxMaxSize;
+
+      uv2.x = (v2.x - bbox.min.x) / bboxMaxSize;
+      uv2.y = (bbox.max.z - v2.z) / bboxMaxSize;
+    } else
+    if (n.x > n.y && n.x > n.z) {
+      uv0.x = (v0.z - bbox.min.z) / bboxMaxSize;
+      uv0.y = (v0.y - bbox.min.y) / bboxMaxSize;
+
+      uv1.x = (v1.z - bbox.min.z) / bboxMaxSize;
+      uv1.y = (v1.y - bbox.min.y) / bboxMaxSize;
+
+      uv2.x = (v2.z - bbox.min.z) / bboxMaxSize;
+      uv2.y = (v2.y - bbox.min.y) / bboxMaxSize;
+    } else
+    if (n.z > n.y && n.z > n.x) {
+      uv0.x = (v0.x - bbox.min.x) / bboxMaxSize;
+      uv0.y = (v0.y - bbox.min.y) / bboxMaxSize;
+
+      uv1.x = (v1.x - bbox.min.x) / bboxMaxSize;
+      uv1.y = (v1.y - bbox.min.y) / bboxMaxSize;
+
+      uv2.x = (v2.x - bbox.min.x) / bboxMaxSize;
+      uv2.y = (v2.y - bbox.min.y) / bboxMaxSize;
+    }
+
+    return { uv0, uv1, uv2 };
+  };
+
+  if (geom.index) { // is it indexed buffer geometry?
+    for (let vi = 0; vi < geom.index.array.length; vi += 3) {
+      const idx0 = geom.index.array[vi];
+      const idx1 = geom.index.array[vi + 1];
+      const idx2 = geom.index.array[vi + 2];
+
+      const vx0 = geom.attributes.position.array[3 * idx0];
+      const vy0 = geom.attributes.position.array[3 * idx0 + 1];
+      const vz0 = geom.attributes.position.array[3 * idx0 + 2];
+
+      const vx1 = geom.attributes.position.array[3 * idx1];
+      const vy1 = geom.attributes.position.array[3 * idx1 + 1];
+      const vz1 = geom.attributes.position.array[3 * idx1 + 2];
+
+      const vx2 = geom.attributes.position.array[3 * idx2];
+      const vy2 = geom.attributes.position.array[3 * idx2 + 1];
+      const vz2 = geom.attributes.position.array[3 * idx2 + 2];
+
+      const v0 = new Vector3(vx0, vy0, vz0);
+      const v1 = new Vector3(vx1, vy1, vz1);
+      const v2 = new Vector3(vx2, vy2, vz2);
+
+      const uvs = makeUVs(v0, v1, v2);
+
+      coords[2 * idx0] = uvs.uv0.x;
+      coords[2 * idx0 + 1] = uvs.uv0.y;
+
+      coords[2 * idx1] = uvs.uv1.x;
+      coords[2 * idx1 + 1] = uvs.uv1.y;
+
+      coords[2 * idx2] = uvs.uv2.x;
+      coords[2 * idx2 + 1] = uvs.uv2.y;
+    }
+  } else {
+    for (let vi = 0; vi < geom.attributes.position.array.length; vi += 9) {
+      const vx0 = geom.attributes.position.array[vi];
+      const vy0 = geom.attributes.position.array[vi + 1];
+      const vz0 = geom.attributes.position.array[vi + 2];
+
+      const vx1 = geom.attributes.position.array[vi + 3];
+      const vy1 = geom.attributes.position.array[vi + 4];
+      const vz1 = geom.attributes.position.array[vi + 5];
+
+      const vx2 = geom.attributes.position.array[vi + 6];
+      const vy2 = geom.attributes.position.array[vi + 7];
+      const vz2 = geom.attributes.position.array[vi + 8];
+
+      const v0 = new Vector3(vx0, vy0, vz0);
+      const v1 = new Vector3(vx1, vy1, vz1);
+      const v2 = new Vector3(vx2, vy2, vz2);
+
+      const uvs = makeUVs(v0, v1, v2);
+
+      const idx0 = vi / 3;
+      const idx1 = idx0 + 1;
+      const idx2 = idx0 + 2;
+
+      coords[2 * idx0] = uvs.uv0.x;
+      coords[2 * idx0 + 1] = uvs.uv0.y;
+
+      coords[2 * idx1] = uvs.uv1.x;
+      coords[2 * idx1 + 1] = uvs.uv1.y;
+
+      coords[2 * idx2] = uvs.uv2.x;
+      coords[2 * idx2 + 1] = uvs.uv2.y;
+    }
+  }
+
+  geom.attributes.uv.array = new Float32Array(coords);
+};
+
+const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
+  if (transformMatrix === undefined) {
+    transformMatrix = new Matrix4();
+  }
+
+  if (boxSize === undefined) {
+    const geom = bufferGeometry;
+    geom.computeBoundingBox();
+    const bbox = geom.boundingBox;
+
+    const bboxSizeX = bbox.max.x - bbox.min.x;
+    const bboxSizeY = bbox.max.y - bbox.min.y;
+    const bboxSizeZ = bbox.max.z - bbox.min.z;
+
+    boxSize = Math.max(bboxSizeX, bboxSizeY, bboxSizeZ);
+  }
+
+  const uvBbox = new Box3(new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
+                                new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
+
+  applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
+};
+
+const GEOMETRY_LAYER = 0;
+const PLAN_LAYER = 1;
+
+const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+  const { tags } = threejsGeometry;
+  if (threejsGeometry.assembly) {
+    threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene, layer }));
+  } else if (threejsGeometry.item) {
+    buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
+  } else if (threejsGeometry.threejsSegments) {
+    const segments = threejsGeometry.threejsSegments;
+    const dataset = {};
+    const geometry = new Geometry();
+    const material = new LineBasicMaterial({ color: 0xffffff, vertexColors: VertexColors });
+    const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
+    for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+      geometry.colors.push(color, color);
+      geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
+    }
+    dataset.mesh = new LineSegments(geometry, material);
+    dataset.mesh.layers.set(layer);
+    dataset.name = toName(threejsGeometry);
+    scene.add(dataset.mesh);
+    datasets.push(dataset);
+  } else if (threejsGeometry.threejsSolid) {
+    const { positions, normals } = threejsGeometry.threejsSolid;
+    const dataset = {};
+    const geometry = new BufferGeometry();
+    geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+    applyBoxUV(geometry);
+    const material = buildMeshMaterial(tags);
+    dataset.mesh = new Mesh(geometry, material);
+    dataset.mesh.layers.set(layer);
+    dataset.name = toName(threejsGeometry);
+    scene.add(dataset.mesh);
+    datasets.push(dataset);
+  } else if (threejsGeometry.threejsSurface) {
+    const { positions, normals } = threejsGeometry.threejsSurface;
+    const dataset = {};
+    const geometry = new BufferGeometry();
+    geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+    applyBoxUV(geometry);
+    const material = buildMeshMaterial(tags);
+    dataset.mesh = new Mesh(geometry, material);
+    dataset.mesh.layers.set(layer);
+    dataset.name = toName(threejsGeometry);
+    scene.add(dataset.mesh);
+    datasets.push(dataset);
+  } else if (threejsGeometry.threejsPlan) {
+    return buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
+  }
+};
+
+const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
+  if (threejsGeometry === undefined) {
+    return;
+  }
+
+  const project = (point) => {
+    const vector = new Vector3();
+    vector.set(...point);
+    // map to normalized device coordinate (NDC) space
+    vector.project(camera);
+    // map to 2D screen space
+    const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
+    const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
+    return [x, y];
+  };
+
+  const ctx = hudCanvas.getContext('2d');
+  ctx.fillStyle = '#000000';
+  ctx.strokeStyle = '#000000';
+  // ctx.font = '16px "Arial Black", Gadget, sans-serif';
+  ctx.font = '16px "Courier", Gadget, sans-serif';
+  const margin = 10;
+
+  const drawLabel = (label, x, y) => {
+    ctx.shadowBlur = 7;
+    ctx.setLineDash([3, 3]);
+
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.moveTo(x, y);
+    ctx.lineTo(margin + ctx.measureText(label).width + margin, y);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+    ctx.strokeText(label, margin, y);
+    ctx.fillText(label, margin, y);
+
+    ctx.shadowBlur = 0;
+  };
+
+  const walk = (threejsGeometry) => {
+    if (threejsGeometry.assembly) {
+      threejsGeometry.assembly.forEach(walk);
+    } else if (threejsGeometry.threejsPlan) {
+      const { threejsPlan, threejsMarks, threejsVisualization } = threejsGeometry;
+      if (threejsPlan.label) {
+        ctx.strokeStyle = '#000000';
+        ctx.fillStyle = '#000000';
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 7;
+
+        const [dX, dY] = project(threejsMarks[0]);
+        ctx.beginPath();
+        ctx.arc(dX, dY, 4, 0, Math.PI * 2);
+        ctx.stroke();
+        drawLabel(threejsPlan.label, dX, dY);
+      } else if (threejsPlan.connector) {
+        ctx.strokeStyle = '#000000';
+        ctx.fillStyle = '#000000';
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 7;
+
+        const ORIGIN = 0;
+        // const AXIS = 1;
+        const ORIENTATION = 2;
+        const END = 3;
+
+        const [originX, originY] = project(threejsMarks[ORIGIN]);
+        const [endX, endY] = project(threejsMarks[END]);
+        const [orientationX, orientationY] = project(threejsMarks[ORIENTATION]);
+
+        // const normalizedLine = (origin, point, length) =>
+        //  add(origin, scale(length, normalize(subtract(point, origin))));
+
+        // const [endXN, endYN] = normalizedLine([originX, originY], [endX, endY], 25 / 2);
+        // const [orientationXN, orientationYN] = normalizedLine([originX, originY], [orientationX, orientationY], 100 / 2);
+
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(originX, originY);
+        ctx.lineTo(orientationX, orientationY);
+        ctx.closePath();
+        ctx.stroke();
+
+        drawLabel(threejsPlan.connector, originX, originY);
+      }
+      if (threejsVisualization) {
+        walk(threejsVisualization);
+      }
+    }
+  };
+  walk(threejsGeometry);
+};
+
+const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
+  const resize = () => {
+    const width = viewerElement.clientWidth - 10;
+    const height = viewerElement.clientHeight - 5;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    trackball.handleResize();
+    renderer.setSize(width, height);
+    return { width, height };
+  };
+
+  return { resize };
+};
+
+const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) => {
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+
+  const camera = new PerspectiveCamera(27, width / height, 1, 3500);
+  camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
-  camera.up = new Vector3(...up);
   camera.lookAt(...target);
+  camera.up.set(...up);
+
   const scene = new Scene();
-  scene.background = new Color(0xffffff);
+  // scene.background = new THREE.Color(0xffffff, 0);
   scene.add(camera);
-  if (grid) {
-    const grid = new GridHelper(100, 10, 'green', 'blue');
-    grid.material = new LineBasicMaterial({ color: 0x000000 });
+
+  if (withAxes) {
+    const axes = new AxesHelper(5);
+    axes.layers.set(1);
+    scene.add(axes);
+  }
+
+  if (withGrid) {
+    const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
     grid.rotation.x = -Math.PI / 2;
-    grid.position.x = 0;
-    grid.position.y = 0;
-    grid.position.z = 0;
+    // grid.material.opacity = 0.5;
+    // grid.material.transparent = true;
+    grid.layers.set(1);
     scene.add(grid);
   }
-  //
-  var ambientLight = new AmbientLight(0x222222);
+
+  const ambientLight = new AmbientLight(0xffffff, 0.75);
+  ambientLight.layers.set(0);
   scene.add(ambientLight);
-  var light = new DirectionalLight(0xffffff, 1);
+
+  const light = new DirectionalLight(0xffffff, 0.5);
   light.position.set(1, 1, 1);
+  light.layers.set(0);
   camera.add(light);
 
-  const walk = (geometry) => {
-    if (geometry.assembly) {
-      geometry.assembly.forEach(walk);
-    } else if (geometry.disjointAssembly) {
-      geometry.disjointAssembly.forEach(walk);
-    } else if (geometry.threejsPoints) {
-      const points = geometry.threejsPoints;
-      const threejsGeometry = new Geometry();
-      const material = new PointsMaterial({ color: 0x0000ff });
-      for (const [x, y, z] of points) {
-        threejsGeometry.vertices.push(new Vector3(x, y, z));
-      }
-      scene.add(new Points(threejsGeometry, material));
-    } else if (geometry.threejsSegments) {
-      const segments = geometry.threejsSegments;
-      const threejsGeometry = new Geometry();
-      const material = new LineBasicMaterial({ color: 0xff0000 });
-      for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
-        threejsGeometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
-      }
-      scene.add(new LineSegments(threejsGeometry, material));
-    } else if (geometry.threejsSolid) {
-      const { positions, normals } = geometry.threejsSolid;
-      const threejsGeometry = new BufferGeometry();
-      threejsGeometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
-      threejsGeometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
-      const material = new MeshNormalMaterial();
-      scene.add(new Mesh(threejsGeometry, material));
-    } else if (geometry.threejsSurface) {
-      const { positions, normals } = geometry.threejsSurface;
-      const threejsGeometry = new BufferGeometry();
-      threejsGeometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
-      threejsGeometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
-      const material = new MeshNormalMaterial();
-      scene.add(new Mesh(threejsGeometry, material));
-    }
-  };
-  const threejsGeometry = toThreejsGeometry(geometry);
-  walk(toThreejsGeometry(threejsGeometry));
+  const viewerElement = document.createElement('div');
+  viewerElement.id = 'viewer';
+  viewerElement.style.height = '100%';
 
-  return [scene, camera];
+  const renderer = new WebGLRenderer({ antialias: true });
+  renderer.autoClear = false;
+  renderer.setSize(width, height);
+  renderer.setClearColor(0xFFFFFF);
+  renderer.antiAlias = false;
+  renderer.inputGamma = true;
+  renderer.outputGamma = true;
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  viewerElement.appendChild(renderer.domElement);
+
+  const hudCanvas = document.createElement('canvas');
+  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
+  hudCanvas.id = 'hudCanvas';
+  hudCanvas.width = width;
+  hudCanvas.height = height;
+  viewerElement.appendChild(hudCanvas);
+
+  return { camera, hudCanvas, renderer, scene, viewerElement };
 };
 
-const toSvg = async (options = {}, geometry) => toSvgSync(options, geometry);
-
-const header =
-`<?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated by jsxcad -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
-`;
-
-const toSvgSync = (options = {}, geometry) => {
-  const keptGeometry = toKeptGeometry(geometry);
-  const [scene, camera] = build(options, keptGeometry);
-  const { includeXmlHeader = true, pageSize = [500, 500] } = options;
-  const [pageWidth, pageHeight] = pageSize;
-
-  const renderer = new SVGRenderer({});
-  renderer.setSize(pageWidth, pageHeight);
-  renderer.render(scene, camera);
-
-  const serializer = new domParser_2();
-  let svg = serializer.serializeToString(renderer.domElement) + '\n';
-  if (includeXmlHeader) {
-    svg = header + svg;
-  }
-  return svg;
-};
-
-const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry) => {
-  const keptGeometry = toKeptGeometry(geometry);
-  const threejsGeometry = toThreejsGeometry(keptGeometry);
-  const html = `
-<html>
- <head>
-  <title>${title}</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <style>
-    .dg { position: absolute; top: 2px; left: 2px; background: #ffffff; color: #000000 }
-    .dg.main.taller-than-window .close-button { border-top: 1px solid #ddd; }
-    .dg.main .close-button { background-color: #ccc; } 
-    .dg.main .close-button:hover { background-color: #ddd; }
-    .dg { color: #555; text-shadow: none !important; } 
-    .dg.main::-webkit-scrollbar { background: #fafafa; } 
-    .dg.main::-webkit-scrollbar-thumb { background: #bbb; } 
-    .dg li:not(.folder) { background: #fafafa; border-bottom: 1px solid #ddd; } 
-    .dg li.save-row .button { text-shadow: none !important; } 
-    .dg li.title { background: #e8e8e8 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat; }
-    .dg .cr.function:hover,.dg .cr.boolean:hover { background: #fff; } 
-    .dg .c input[type=text] { background: #e9e9e9; } 
-    .dg .c input[type=text]:hover { background: #eee; } 
-    .dg .c input[type=text]:focus { background: #eee; color: #555; } 
-    .dg .c .slider { background: #e9e9e9; } 
-    .dg .c .slider:hover { background: #eee; }
-  </style>
- </head>
- <body>
-  <script type="text/javascript" src="https://unpkg.com/@jsxcad/convert-threejs/dist/display.js"></script>
-  <script type="text/javascript">JSxCAD = ${JSON.stringify({ threejsGeometry, view })};</script>
- </body>
-</html>`;
-  return html;
-};
-
-export { toSvg, toSvgSync, toThreejsGeometry, toThreejsPage };
+export { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud };

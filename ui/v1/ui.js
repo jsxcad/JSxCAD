@@ -30,7 +30,8 @@ import {
   writeFile
 } from '@jsxcad/sys';
 
-import { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud, toThreejsGeometry } from '@jsxcad/convert-threejs';
+import { toThreejsGeometry } from '@jsxcad/convert-threejs';
+import { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud } from '@jsxcad/ui-threejs';
 
 // import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
