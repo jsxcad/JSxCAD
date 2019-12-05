@@ -30,7 +30,6 @@ import {
   writeFile
 } from '@jsxcad/sys';
 
-import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 import { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud } from '@jsxcad/ui-threejs';
 
 // import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
@@ -63,6 +62,7 @@ import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { deepEqual } from 'fast-equals';
 import { prismJSAuxiliary } from './PrismJSAuxiliary';
 import saveAs from 'file-saver';
+import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 if (!aceEditorAuxiliary || !prismJSAuxiliary) {
   throw Error('die');
