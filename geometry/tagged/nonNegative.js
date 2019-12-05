@@ -1,5 +1,5 @@
-import { rewriteTags } from './rewriteTags';
 import { hasMatchingTag } from './hasMatchingTag';
+import { rewriteTags } from './rewriteTags';
 
 // Dropped elements displace as usual, but are not included in positive output.
 
