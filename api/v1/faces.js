@@ -1,5 +1,5 @@
 import { add, scale } from '@jsxcad/math-vec3';
-import { addTags, allTags, getSolids } from '@jsxcad/geometry-tagged';
+import { allTags, getSolids, rewriteTags } from '@jsxcad/geometry-tagged';
 
 import Connector from './Connector';
 import Polygon from './Polygon';
@@ -45,7 +45,7 @@ export const faces = (shape, op = (_ => _)) => {
                                       end: nextPoint
                                     }));
         }
-        faces.push(Shape.fromGeometry(addTags(tags, Polygon.ofPoints(face).op(op).toGeometry()))
+        faces.push(Shape.fromGeometry(rewriteTags(tags, [], Polygon.ofPoints(face).op(op).toGeometry()))
             .with(...connectors));
       }
     }

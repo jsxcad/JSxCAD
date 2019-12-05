@@ -1,4 +1,39 @@
-import * as THREE from 'three';
+import {
+  AmbientLight,
+  BackSide,
+  Box2,
+  Box3,
+  BufferGeometry,
+  Camera,
+  Color,
+  DirectionalLight,
+  DoubleSide,
+  FaceColors,
+  Float32BufferAttribute,
+  FrontSide,
+  Frustum,
+  Geometry,
+  GridHelper,
+  Object3D,
+  Light,
+  Line,
+  LineBasicMaterial,
+  LineSegments,
+  Matrix3,
+  Matrix4,
+  Mesh,
+  MeshNormalMaterial,
+  PerspectiveCamera,
+  Points,
+  PointsMaterial,
+  Scene,
+  Sprite,
+  Vector2,
+  Vector3,
+  Vector4,
+  VertexColors
+} from 'three';
+
 import { DOMParser, XMLSerializer } from 'xmldom';
 import { installProjector } from './Projector';
 import { installSVGRenderer } from './SVGRenderer';
@@ -6,24 +41,30 @@ import { toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { toThreejsGeometry } from './toThreejsGeometry';
 
 // Bootstrap start.
-const { Projector, RenderableFace, RenderableLine, RenderableSprite } = installProjector({ THREE });
+const { Projector, RenderableFace, RenderableLine, RenderableSprite } =
+    installProjector({ BackSide, Box3, BufferGeometry, Color, DoubleSide, FaceColors, FrontSide, Frustum, Geometry,
+                       Light, Line, LineSegments, Matrix3, Matrix4, Mesh, Points, Sprite, Vector2, Vector3, Vector4,
+                       VertexColors });
 
-const { SVGRenderer } = installSVGRenderer({ THREE, Projector, RenderableFace, RenderableLine, RenderableSprite, document: new DOMParser().parseFromString('<xml></xml>', 'text/xml') });
+const { SVGRenderer } =
+    installSVGRenderer({ Box2, Camera, Color, FaceColors, Object3D, Matrix3, Matrix4, Projector, RenderableSprite,
+                         RenderableLine, RenderableFace, Vector3, VertexColors,
+                         document: new DOMParser().parseFromString('<xml></xml>', 'text/xml') });
 // Bootstrap done.
 
 const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1], near = 1, far = 3500 } = view;
   const [pageWidth, pageHeight] = pageSize;
-  const camera = new THREE.PerspectiveCamera(27, pageWidth / pageHeight, near, far);
+  const camera = new PerspectiveCamera(27, pageWidth / pageHeight, near, far);
   [camera.position.x, camera.position.y, camera.position.z] = position;
-  camera.up = new THREE.Vector3(...up);
+  camera.up = new Vector3(...up);
   camera.lookAt(...target);
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
+  const scene = new Scene();
+  scene.background = new Color(0xffffff);
   scene.add(camera);
   if (grid) {
-    const grid = new THREE.GridHelper(100, 10, 'green', 'blue');
-    grid.material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const grid = new GridHelper(100, 10, 'green', 'blue');
+    grid.material = new LineBasicMaterial({ color: 0x000000 });
     grid.rotation.x = -Math.PI / 2;
     grid.position.x = 0;
     grid.position.y = 0;
@@ -31,9 +72,9 @@ const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => 
     scene.add(grid);
   }
   //
-  var ambientLight = new THREE.AmbientLight(0x222222);
+  var ambientLight = new AmbientLight(0x222222);
   scene.add(ambientLight);
-  var light = new THREE.DirectionalLight(0xffffff, 1);
+  var light = new DirectionalLight(0xffffff, 1);
   light.position.set(1, 1, 1);
   camera.add(light);
 
@@ -44,34 +85,34 @@ const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => 
       geometry.disjointAssembly.forEach(walk);
     } else if (geometry.threejsPoints) {
       const points = geometry.threejsPoints;
-      const threejsGeometry = new THREE.Geometry();
-      const material = new THREE.PointsMaterial({ color: 0x0000ff });
+      const threejsGeometry = new Geometry();
+      const material = new PointsMaterial({ color: 0x0000ff });
       for (const [x, y, z] of points) {
-        threejsGeometry.vertices.push(new THREE.Vector3(x, y, z));
+        threejsGeometry.vertices.push(new Vector3(x, y, z));
       }
-      scene.add(new THREE.Points(threejsGeometry, material));
+      scene.add(new Points(threejsGeometry, material));
     } else if (geometry.threejsSegments) {
       const segments = geometry.threejsSegments;
-      const threejsGeometry = new THREE.Geometry();
-      const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+      const threejsGeometry = new Geometry();
+      const material = new LineBasicMaterial({ color: 0xff0000 });
       for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
-        threejsGeometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
+        threejsGeometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
       }
-      scene.add(new THREE.LineSegments(threejsGeometry, material));
+      scene.add(new LineSegments(threejsGeometry, material));
     } else if (geometry.threejsSolid) {
       const { positions, normals } = geometry.threejsSolid;
-      const threejsGeometry = new THREE.BufferGeometry();
-      threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-      const material = new THREE.MeshNormalMaterial();
-      scene.add(new THREE.Mesh(threejsGeometry, material));
+      const threejsGeometry = new BufferGeometry();
+      threejsGeometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
+      threejsGeometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      const material = new MeshNormalMaterial();
+      scene.add(new Mesh(threejsGeometry, material));
     } else if (geometry.threejsSurface) {
       const { positions, normals } = geometry.threejsSurface;
-      const threejsGeometry = new THREE.BufferGeometry();
-      threejsGeometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      threejsGeometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-      const material = new THREE.MeshNormalMaterial();
-      scene.add(new THREE.Mesh(threejsGeometry, material));
+      const threejsGeometry = new BufferGeometry();
+      threejsGeometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
+      threejsGeometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      const material = new MeshNormalMaterial();
+      scene.add(new Mesh(threejsGeometry, material));
     }
   };
   const threejsGeometry = toThreejsGeometry(geometry);

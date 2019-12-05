@@ -18,7 +18,7 @@ Error.stackTraceLimit = Infinity;
 export default {
   input: 'webworker.js',
   output: {
-    dir: 'dist',
+    file: 'dist.es6/webworker.amd.js',
     format: 'amd'
   },
   external: [],
@@ -50,14 +50,48 @@ export default {
     }),
     commonjs({
       namedExports: {
-        '../../node_modules/binpackingjs/dist/BinPacking.min.js': [
-          'BP2D'
-        ]
+        '../../node_modules/binpackingjs/dist/BinPacking.min.js': ['BP2D'],
+        '../../node_modules/opentype.js/dist/opentype.js': ['parse'],
+        '../../node_modules/three/build/three.js': [
+          'AmbientLight',
+          'BackSide',
+          'Box2',
+          'Box3',
+          'BufferGeometry',
+          'Camera',
+          'Color',
+          'DirectionalLight',
+          'DoubleSide',
+          'FaceColors',
+          'Float32BufferAttribute',
+          'FrontSide',
+          'Frustum',
+          'Geometry',
+          'GridHelper',
+          'Object3D',
+          'Light',
+          'Line',
+          'LineBasicMaterial',
+          'LineSegments',
+          'Matrix3',
+          'Matrix4',
+          'Mesh',
+          'MeshNormalMaterial',
+          'PerspectiveCamera',
+          'Points',
+          'PointsMaterial',
+          'Scene',
+          'Sprite',
+          'Vector2',
+          'Vector3',
+          'Vector4',
+          'VertexColors',
+        ],
       }
     }),
     globals(),
     json(),
-    nodeResolve({ jsnext: true, preferBuiltins: true }),
+    nodeResolve({ mainFields: ['main'], preferBuiltins: true }),
     sizes()
   ]
 };

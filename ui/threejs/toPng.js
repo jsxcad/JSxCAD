@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { GridHelper, LineBasicMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
 
 import GL from 'gl';
 import { buildMeshes } from './mesh';
@@ -10,17 +10,17 @@ export const toPng = async ({ view = {}, pageSize = [256, 256], grid = false }, 
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1], near = 1, far = 3500 } = view;
   const [width, height] = pageSize;
 
-  const scene = new THREE.Scene();
+  const scene = new Scene();
 
-  const camera = new THREE.PerspectiveCamera(27, width / height, near, far);
+  const camera = new PerspectiveCamera(27, width / height, near, far);
   [camera.position.x, camera.position.y, camera.position.z] = position;
-  camera.up = new THREE.Vector3(...up);
+  camera.up = new Vector3(...up);
   camera.lookAt(...target);
   scene.add(camera);
 
   if (grid) {
-    const grid = new THREE.GridHelper(100, 10, 'green', 'blue');
-    grid.material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const grid = new GridHelper(100, 10, 'green', 'blue');
+    grid.material = new LineBasicMaterial({ color: 0x000000 });
     grid.rotation.x = -Math.PI / 2;
     grid.position.x = 0;
     grid.position.y = 0;
@@ -31,7 +31,7 @@ export const toPng = async ({ view = {}, pageSize = [256, 256], grid = false }, 
   const canvas = {};
   canvas.addEventListener = () => undefined;
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, width, height, canvas, context: GL(width, height) });
+  const renderer = new WebGLRenderer({ antialias: true, width, height, canvas, context: GL(width, height) });
 
   const threejsGeometry = toThreejsGeometry(toKeptGeometry(geometry));
   const datasets = [];

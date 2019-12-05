@@ -1,10 +1,9 @@
 /* global ResizeObserver */
 
-import * as THREE from 'three';
-
 import { buildGui, buildGuiControls, buildTrackballControls } from './controls';
 import { buildScene, createResizer } from './scene';
 
+import { Layers } from 'three';
 import { buildMeshes } from './mesh';
 
 const GEOMETRY_LAYER = 0;
@@ -15,10 +14,10 @@ export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
-  const geometryLayers = new THREE.Layers();
+  const geometryLayers = new Layers();
   geometryLayers.set(GEOMETRY_LAYER);
 
-  const planLayers = new THREE.Layers();
+  const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
   const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view, geometryLayers, planLayers });

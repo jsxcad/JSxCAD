@@ -1,6 +1,6 @@
 import { writeFile, readFile, log, watchFileCreation, watchFileDeletion, watchLog, setHandleAskUser, unwatchFileCreation, unwatchFileDeletion, unwatchLog, setupFilesystem, listFiles, getFilesystem, deleteFile, watchFile, unwatchFiles, listFilesystems, createService, ask as ask$1 } from './jsxcad-sys.js';
-import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls, drawHud } from './jsxcad-ui-threejs.js';
+import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -83513,9 +83513,8 @@ const getAsk = async () => {
     ({
       ask
     } = await createService({
-      webWorker: './webworker.js',
-      agent,
-      workerType: 'module'
+      webWorker: './webworker.amd.js',
+      agent
     }));
   }
 

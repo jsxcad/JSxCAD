@@ -1473,7 +1473,7 @@ const getAsk = async () => {
       }
     };
 
-    ({ ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' }));
+    ({ ask } = await createService({ webWorker: './webworker.amd.js', agent }));
   }
 
   return ask;

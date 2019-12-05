@@ -1,5 +1,5 @@
 import { Shape, toGeometry } from './Shape';
-import { addTags, specify as specifyGeometry } from '@jsxcad/geometry-tagged';
+import { rewriteTags, specify as specifyGeometry } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -27,7 +27,7 @@ export const specify = (specification, ...shapes) => {
       break;
     }
   }
-  return Shape.fromGeometry(addTags([`item/${JSON.stringify(specification)}`], geometry));
+  return Shape.fromGeometry(rewriteTags([`item/${JSON.stringify(specification)}`], [], geometry));
 };
 
 const method = function (specification) { return specify(specification, this); };

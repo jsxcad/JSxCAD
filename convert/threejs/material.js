@@ -1,13 +1,13 @@
-import * as THREE from 'three';
+import { MeshNormalMaterial, MeshPhysicalMaterial, RepeatWrapping, TextureLoader } from 'three';
 
 import { setColor } from './color';
 
-const loader = new THREE.TextureLoader();
+const loader = new TextureLoader();
 
 // FIX: Make this lazy.
 const loadTexture = (url) => {
   const texture = loader.load(url);
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.wrapS = texture.wrapT = RepeatWrapping;
   texture.offset.set(0, 0);
   texture.repeat.set(1, 1);
   return texture;
@@ -132,10 +132,10 @@ export const buildMeshMaterial = (tags) => {
     setColor(tags, parameters, null);
     setMaterial(tags, parameters);
     if (Object.keys(parameters).length > 0) {
-      return new THREE.MeshPhysicalMaterial(parameters);
+      return new MeshPhysicalMaterial(parameters);
     }
   }
 
   // Else, default to normal material.
-  return new THREE.MeshNormalMaterial();
+  return new MeshNormalMaterial();
 };

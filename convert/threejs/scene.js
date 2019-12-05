@@ -1,4 +1,13 @@
-import * as THREE from 'three';
+import {
+  AmbientLight,
+  AxesHelper,
+  Color,
+  DirectionalLight,
+  GridHelper,
+  PerspectiveCamera,
+  Scene,
+  WebGLRenderer
+} from 'three';
 
 export const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
   const resize = () => {
@@ -17,24 +26,24 @@ export const createResizer = ({ camera, renderer, trackball, viewerElement }) =>
 export const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
-  const camera = new THREE.PerspectiveCamera(27, width / height, 1, 3500);
+  const camera = new PerspectiveCamera(27, width / height, 1, 3500);
   camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.lookAt(...target);
   camera.up.set(...up);
 
-  const scene = new THREE.Scene();
-  // scene.background = new THREE.Color(0xffffff, 0);
+  const scene = new Scene();
+  // scene.background = new Color(0xffffff, 0);
   scene.add(camera);
 
   if (withAxes) {
-    const axes = new THREE.AxesHelper(5);
+    const axes = new AxesHelper(5);
     axes.layers.set(1);
     scene.add(axes);
   }
 
   if (withGrid) {
-    const grid = new THREE.GridHelper(1000, 100, 0x000080, 0xc0c0c0);
+    const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
     grid.rotation.x = -Math.PI / 2;
     // grid.material.opacity = 0.5;
     // grid.material.transparent = true;
@@ -42,11 +51,11 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     scene.add(grid);
   }
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+  const ambientLight = new AmbientLight(0xffffff, 0.75);
   ambientLight.layers.set(0);
   scene.add(ambientLight);
 
-  const light = new THREE.DirectionalLight(0xffffff, 0.5);
+  const light = new DirectionalLight(0xffffff, 0.5);
   light.position.set(1, 1, 1);
   light.layers.set(0);
   camera.add(light);
@@ -55,7 +64,7 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   viewerElement.id = 'viewer';
   viewerElement.style.height = '100%';
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  const renderer = new WebGLRenderer({ antialias: true });
   renderer.autoClear = false;
   renderer.setSize(width, height);
   renderer.setClearColor(0xFFFFFF);

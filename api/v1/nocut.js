@@ -1,5 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { addTags, nonNegative } from '@jsxcad/geometry-tagged';
+import { nonNegative, rewriteTags } from '@jsxcad/geometry-tagged';
 import { assertEmpty, assertShape, assertStrings } from './assert';
 
 import { dispatch } from './dispatch';
@@ -18,7 +18,7 @@ export const nocut = dispatch(
     // assemble(circle(), circle().nocut())
     assertEmpty(tags);
     assertShape(shape);
-    return () => fromGeometry(addTags(['compose/non-negative'], toGeometry(shape)));
+    return () => fromGeometry(rewriteTags(['compose/non-negative'], [], toGeometry(shape)));
   },
   (tags, shape) => {
     assertStrings(tags);
