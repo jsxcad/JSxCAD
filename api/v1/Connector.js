@@ -35,7 +35,7 @@ export const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0],
       marks: [center, right, start, end],
       planes: [plane],
       tags: [`connector/${connector}`],
-      visualization,
+      visualization
     },
     // Context
     {
