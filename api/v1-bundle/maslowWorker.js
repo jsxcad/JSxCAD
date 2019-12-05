@@ -46,38 +46,12 @@ const agent = async ({ ask, question }) => {
       case 'getLayoutSvgs':
         // Extract shapes
         let items = api.Shape.fromGeometry(values[0]).toItems();
-        let shiftedItems = [];
-        const spacing = values[1];
         const sheetX = values[2];
         const sheetY = values[3];
-        let lengths =[];
-        let widths =[];
-        let flattenedItems =[];
-
-        items.forEach(item => { 
-          let flatItem = item.flat()
-          flattenedItems.push(flatItem)
-          let length = flatItem.measureBoundingBox()[1][1] - flatItem.measureBoundingBox()[0][1];
-          let width = flatItem.measureBoundingBox()[1][0] - flatItem.measureBoundingBox()[0][0];     
-          lengths.push(length);
-          widths.push(width);
-        });
-        const maxFlatLength = Math.max(...lengths); 
-        const maxFlatWidth = Math.max(...widths);
-        let translatedDistanceY = maxFlatLength/2 + spacing;
-        let translatedDistanceX = maxFlatWidth;
-
-        flattenedItems.forEach(flatItem => {
-          const centeredItem = flatItem.center()
-          const flatWidth = (centeredItem.measureBoundingBox()[1][0] - centeredItem.measureBoundingBox()[0][0])
-          if ((translatedDistanceX + flatWidth) >= sheetX){
-            translatedDistanceX = maxFlatWidth;
-            translatedDistanceY += maxFlatLength + spacing; 
-          }
-          shiftedItems.push(centeredItem.translate([translatedDistanceX, translatedDistanceY, 0]));
-          translatedDistanceX += flatWidth + spacing;
-        });
-        return api.assemble(...shiftedItems).toDisjointGeometry();
+        const [packed, unpacked] = api.pack({ size: [sheetX, sheetY], margin: 4 }, ...items.map(
+            x => x.flat())
+        );
+        return api.assemble(...packed).toDisjointGeometry();
       case 'difference':
         return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'extractTag':
@@ -121,7 +95,7 @@ const agent = async ({ ask, question }) => {
       case 'specify':
         return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
       case 'translate':
-        return api.Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).translate(values[1], values[2], values[3]).toDisjointGeometry();
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
       case 'union':
