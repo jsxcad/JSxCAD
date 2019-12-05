@@ -51672,15 +51672,46 @@ const toThreejsGeometry = (geometry, supertags) => {
 };
 
 // Bootstrap start.
-const { Projector, RenderableFace, RenderableLine, RenderableSprite } =
-    installProjector({ BackSide, Box3, BufferGeometry, Color, DoubleSide, FaceColors, FrontSide, Frustum, Geometry,
-                       Light, Line, LineSegments, Matrix3, Matrix4, Mesh, Points, Sprite, Vector2, Vector3, Vector4,
-                       VertexColors });
+const { Projector, RenderableFace, RenderableLine, RenderableSprite } = installProjector({
+  BackSide,
+  Box3,
+  BufferGeometry,
+  Color,
+  DoubleSide,
+  FaceColors,
+  FrontSide,
+  Frustum,
+  Geometry,
+  Light,
+  Line,
+  LineSegments,
+  Matrix3,
+  Matrix4,
+  Mesh,
+  Points,
+  Sprite,
+  Vector2,
+  Vector3,
+  Vector4,
+  VertexColors
+});
 
-const { SVGRenderer } =
-    installSVGRenderer({ Box2, Camera, Color, FaceColors, Object3D, Matrix3, Matrix4, Projector, RenderableSprite,
-                         RenderableLine, RenderableFace, Vector3, VertexColors,
-                         document: new domParser_3().parseFromString('<xml></xml>', 'text/xml') });
+const { SVGRenderer } = installSVGRenderer({
+  Box2,
+  Camera,
+  Color,
+  FaceColors,
+  Object3D,
+  Matrix3,
+  Matrix4,
+  Projector,
+  RenderableSprite,
+  RenderableLine,
+  RenderableFace,
+  Vector3,
+  VertexColors,
+  document: new domParser_3().parseFromString('<xml></xml>', 'text/xml')
+});
 // Bootstrap done.
 
 const build = ({ view = {}, pageSize = [100, 100], grid = false }, geometry) => {

@@ -83513,8 +83513,9 @@ const getAsk = async () => {
     ({
       ask
     } = await createService({
-      webWorker: './webworker.amd.js',
-      agent
+      webWorker: './webworker.js',
+      agent,
+      workerType: 'module'
     }));
   }
 

@@ -17,7 +17,7 @@ Error.stackTraceLimit = Infinity;
 export default {
   input: 'webworker.js',
   output: {
-    dir: 'dist.es6',
+    file: 'dist.es6/webworker.js',
     format: 'module'
   },
   external (id) { return id.startsWith('./jsxcad-'); },
@@ -57,6 +57,6 @@ export default {
     json(),
     nodeResolve({ jsnext: true, preferBuiltins: true }),
     sizes(),
-    { transform (code, id) { return code.replace(/'@jsxcad\//g, "'./jsxcad-"); } }
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } },
   ]
 };

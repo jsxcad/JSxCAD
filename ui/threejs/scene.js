@@ -1,7 +1,6 @@
 import {
   AmbientLight,
   AxesHelper,
-  Color,
   DirectionalLight,
   GridHelper,
   PerspectiveCamera,

@@ -1,5 +1,5 @@
 import { close, concatenate, open, getEdges, toSegments, isClosed } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, addTags, getItems, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, getItems, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
 import { scale as scale$1, add, subtract, negate, transform as transform$1, normalize, dot, cross } from './jsxcad-math-vec3.js';
@@ -318,6 +318,32 @@ Shape.prototype.union = method;
 
 const method$1 = function (...shapes) { return union(this, ...shapes); };
 Shape.prototype.add = method$1;
+
+/**
+ *
+ * # As
+ *
+ * Produces a version of a shape with user defined tags.
+ *
+ * ::: illustration
+ * ```
+ * Circle(10).as('A')
+ * ```
+ * :::
+ *
+ **/
+
+const as = (shape, tags) =>
+  Shape.fromGeometry(rewriteTags(tags.map(tag => `user/${tag}`), [], shape.toGeometry()));
+
+const notAs = (shape, tags) =>
+  Shape.fromGeometry(rewriteTags([], tags.map(tag => `user/${tag}`), shape.toGeometry()));
+
+const asMethod = function (...tags) { return as(this, tags); };
+const notAsMethod = function (...tags) { return notAs(this, tags); };
+
+Shape.prototype.as = asMethod;
+Shape.prototype.notAs = notAsMethod;
 
 /**
  *
@@ -935,7 +961,7 @@ const faces = (shape, op = (_ => _)) => {
                                       end: nextPoint
                                     }));
         }
-        faces.push(Shape.fromGeometry(addTags(tags, Polygon.ofPoints(face).op(op).toGeometry()))
+        faces.push(Shape.fromGeometry(rewriteTags(tags, [], Polygon.ofPoints(face).op(op).toGeometry()))
             .with(...connectors));
       }
     }
@@ -1843,7 +1869,7 @@ Icosahedron.fromDiameter = fromDiameter;
  *
  **/
 
-const Item = (shape, id) => Shape.fromGeometry(addTags([`item/${id}`], { item: toGeometry(shape) }));
+const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: toGeometry(shape) }));
 
 const method$5 = function (id) { return Item(this, id); };
 Shape.prototype.toItem = method$5;
@@ -2919,26 +2945,6 @@ Shape.prototype.above = aboveMethod;
 
 /**
  *
- * # As
- *
- * Produces a version of a shape with user defined tags.
- *
- * ::: illustration
- * ```
- * Circle(10).as('A')
- * ```
- * :::
- *
- **/
-
-const as = (tags, shape) =>
-  Shape.fromGeometry(addTags(tags.map(tag => `user/${tag}`), shape.toGeometry()));
-
-const method$c = function (...tags) { return as(tags, this); };
-Shape.prototype.as = method$c;
-
-/**
- *
  * # Ask
  *
  * Queries a parameter, asking the user if not already provided.
@@ -2990,8 +2996,8 @@ ask.forBool = askForBool;
 
 const moveY = (shape, y) => move(shape, 0, y);
 
-const method$d = function (y) { return moveY(this, y); };
-Shape.prototype.moveY = method$d;
+const method$c = function (y) { return moveY(this, y); };
+Shape.prototype.moveY = method$c;
 
 /**
  *
@@ -3168,7 +3174,7 @@ Shape.prototype.chop = chopMethod;
  **/
 
 const fromName = (shape, name) =>
-  Shape.fromGeometry(addTags([toTagFromName(name)], shape.toGeometry()));
+  Shape.fromGeometry(rewriteTags([toTagFromName(name)], [], shape.toGeometry()));
 
 const color = (...args) => fromName(...args);
 
@@ -3221,9 +3227,9 @@ const hull = (...shapes) => {
   }
 };
 
-const method$e = function (...shapes) { return hull(this, ...shapes); };
+const method$d = function (...shapes) { return hull(this, ...shapes); };
 
-Shape.prototype.hull = method$e;
+Shape.prototype.hull = method$d;
 
 /**
  *
@@ -3265,8 +3271,8 @@ const shell = (shape, radius = 1, resolution = 8) => {
   return union(...shells);
 };
 
-const method$f = function (radius, resolution) { return shell(this, radius, resolution); };
-Shape.prototype.shell = method$f;
+const method$e = function (radius, resolution) { return shell(this, radius, resolution); };
+Shape.prototype.shell = method$e;
 
 /**
  *
@@ -3286,8 +3292,8 @@ const expand = (shape, amount = 1, { resolution = 16 }) =>
     ? shape.union(shell(shape, amount, resolution))
     : shape.cut(shell(shape, -amount, resolution));
 
-const method$g = function (...args) { return expand(this, ...args); };
-Shape.prototype.expand = method$g;
+const method$f = function (...args) { return expand(this, ...args); };
+Shape.prototype.expand = method$f;
 
 /**
  *
@@ -3308,8 +3314,8 @@ const contract = (...args) => byRadius(...args);
 
 contract.byRadius = byRadius;
 
-const method$h = function (radius, resolution) { return contract(this, radius, resolution); };
-Shape.prototype.contract = method$h;
+const method$g = function (radius, resolution) { return contract(this, radius, resolution); };
+Shape.prototype.contract = method$g;
 
 /**
  *
@@ -3374,14 +3380,14 @@ const coordinates = (xSpec, ySpec, zSpec, thunk) => {
 
 const drop = (shape, ...tags) => {
   if (tags.length === 0) {
-    return fromGeometry(addTags(['compose/non-positive'], toGeometry(shape)));
+    return fromGeometry(rewriteTags(['compose/non-positive'], [], toGeometry(shape)));
   } else {
     return fromGeometry(drop$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
   }
 };
 
-const method$i = function (...tags) { return drop(this, ...tags); };
-Shape.prototype.drop = method$i;
+const method$h = function (...tags) { return drop(this, ...tags); };
+Shape.prototype.drop = method$h;
 
 /**
  *
@@ -3481,8 +3487,8 @@ const flat = (shape) => {
   return bestFlatShape;
 };
 
-const method$j = function () { return flat(this); };
-Shape.prototype.flat = method$j;
+const method$i = function () { return flat(this); };
+Shape.prototype.flat = method$i;
 
 /**
  *
@@ -3531,9 +3537,9 @@ const front = dispatch(
     return () => fromReference(shape, reference);
   });
 
-const method$k = function (...params) { return front(this, ...params); };
+const method$j = function (...params) { return front(this, ...params); };
 
-Shape.prototype.front = method$k;
+Shape.prototype.front = method$j;
 
 /**
  *
@@ -3545,9 +3551,9 @@ Shape.prototype.front = method$k;
 
 const getPathsets = (shape) => getPaths(shape.toKeptGeometry()).map(({ paths }) => paths);
 
-const method$l = function () { return getPathsets(this); };
+const method$k = function () { return getPathsets(this); };
 
-Shape.prototype.getPathsets = method$l;
+Shape.prototype.getPathsets = method$k;
 
 const importModule = async (name) => {
   let script;
@@ -3603,9 +3609,9 @@ const interior = (options = {}, shape) => {
   return assemble(...surfaces);
 };
 
-const method$m = function (options) { return interior(options, this); };
+const method$l = function (options) { return interior(options, this); };
 
-Shape.prototype.interior = method$m;
+Shape.prototype.interior = method$l;
 
 /**
  *
@@ -3656,9 +3662,9 @@ const keep = dispatch(
 
 keep.fromValues = fromValue$3;
 
-const method$n = function (...tags) { return keep(tags, this); };
+const method$m = function (...tags) { return keep(tags, this); };
 
-Shape.prototype.keep = method$n;
+Shape.prototype.keep = method$m;
 
 /**
  *
@@ -3670,9 +3676,9 @@ Shape.prototype.keep = method$n;
 
 const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
 
-const method$o = function () { return kept(this); };
+const method$n = function () { return kept(this); };
 
-Shape.prototype.kept = method$o;
+Shape.prototype.kept = method$n;
 
 /**
  *
@@ -3684,8 +3690,8 @@ Shape.prototype.kept = method$o;
 
 const moveX = (shape, x) => move(shape, x);
 
-const method$p = function (x) { return moveX(this, x); };
-Shape.prototype.moveX = method$p;
+const method$o = function (x) { return moveX(this, x); };
+Shape.prototype.moveX = method$o;
 
 /**
  *
@@ -3734,9 +3740,9 @@ const left = dispatch(
     return () => fromReference$1(shape, reference);
   });
 
-const method$q = function (...params) { return left(this, ...params); };
+const method$p = function (...params) { return left(this, ...params); };
 
-Shape.prototype.left = method$q;
+Shape.prototype.left = method$p;
 
 /**
  *
@@ -3755,7 +3761,7 @@ Shape.prototype.left = method$q;
  **/
 
 const material = (shape, ...tags) =>
-  Shape.fromGeometry(addTags(tags.map(tag => `material/${tag}`), shape.toGeometry()));
+  Shape.fromGeometry(rewriteTags(tags.map(tag => `material/${tag}`), [], shape.toGeometry()));
 
 const materialMethod = function (...tags) { return material(this, ...tags); };
 Shape.prototype.material = materialMethod;
@@ -3784,9 +3790,9 @@ const measureCenter = (shape) => {
   return scale$1(0.5, add(high, low));
 };
 
-const method$r = function () { return measureCenter(this); };
+const method$q = function () { return measureCenter(this); };
 
-Shape.prototype.measureCenter = method$r;
+Shape.prototype.measureCenter = method$q;
 
 /**
  *
@@ -3826,7 +3832,7 @@ const nocut = dispatch(
     // assemble(circle(), circle().nocut())
     assertEmpty(tags);
     assertShape(shape);
-    return () => fromGeometry(addTags(['compose/non-negative'], toGeometry(shape)));
+    return () => fromGeometry(rewriteTags(['compose/non-negative'], [], toGeometry(shape)));
   },
   (tags, shape) => {
     assertStrings(tags);
@@ -3837,9 +3843,9 @@ const nocut = dispatch(
 
 nocut.fromValues = fromValue$4;
 
-const method$s = function (...tags) { return nocut(tags, this); };
+const method$r = function (...tags) { return nocut(tags, this); };
 
-Shape.prototype.nocut = method$s;
+Shape.prototype.nocut = method$r;
 
 /**
  *
@@ -3868,15 +3874,15 @@ Shape.prototype.nocut = method$s;
 const outline = (shape) =>
   assemble(...outline$1(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
 
-const method$t = function (options) { return outline(this); };
+const method$s = function (options) { return outline(this); };
 
-Shape.prototype.outline = method$t;
+Shape.prototype.outline = method$s;
 Shape.prototype.withOutline = function (options) { return assemble(this, outline(this)); };
 
 const offset = (shape, radius = 1, resolution = 16) => outline(expand(shape, radius, resolution));
 
-const method$u = function (radius, resolution) { return offset(this, radius, resolution); };
-Shape.prototype.offset = method$u;
+const method$t = function (radius, resolution) { return offset(this, radius, resolution); };
+Shape.prototype.offset = method$t;
 
 /**
  *
@@ -3909,9 +3915,9 @@ const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from =
       .move(from);
 };
 
-const method$v = function (options = {}) { return orient(options, this); };
+const method$u = function (options = {}) { return orient(options, this); };
 
-Shape.prototype.orient = method$v;
+Shape.prototype.orient = method$u;
 
 const pack = (options = {}, ...shapes) => {
   const [packed, unpacked] = pack$1(options, ...shapes.map(shape => shape.toKeptGeometry()));
@@ -4034,9 +4040,9 @@ const writeShape = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$w = function (options = {}) { return writeShape(options, this); };
+const method$v = function (options = {}) { return writeShape(options, this); };
 
-Shape.prototype.writeShape = method$w;
+Shape.prototype.writeShape = method$v;
 
 /**
  *
@@ -4243,9 +4249,9 @@ const right = dispatch(
     return () => fromReference$2(shape, reference);
   });
 
-const method$x = function (...params) { return right(this, ...params); };
+const method$w = function (...params) { return right(this, ...params); };
 
-Shape.prototype.right = method$x;
+Shape.prototype.right = method$w;
 
 /**
  *
@@ -4272,9 +4278,9 @@ Shape.prototype.right = method$x;
 
 const rotate = (shape, axis, angle) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
 
-const method$y = function (angle, axis) { return rotate(this, axis, angle); };
+const method$x = function (angle, axis) { return rotate(this, axis, angle); };
 
-Shape.prototype.rotate = method$y;
+Shape.prototype.rotate = method$x;
 
 /**
  *
@@ -4296,9 +4302,9 @@ Shape.prototype.rotate = method$y;
 
 const rotateX = (shape, angle) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-const method$z = function (angle) { return rotateX(this, angle); };
+const method$y = function (angle) { return rotateX(this, angle); };
 
-Shape.prototype.rotateX = method$z;
+Shape.prototype.rotateX = method$y;
 
 /**
  *
@@ -4320,9 +4326,9 @@ Shape.prototype.rotateX = method$z;
 
 const rotateY = (shape, angle) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-const method$A = function (angle) { return rotateY(this, angle); };
+const method$z = function (angle) { return rotateY(this, angle); };
 
-Shape.prototype.rotateY = method$A;
+Shape.prototype.rotateY = method$z;
 
 /**
  *
@@ -4344,9 +4350,9 @@ Shape.prototype.rotateY = method$A;
 
 const rotateZ = (shape, angle) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-const method$B = function (angle) { return rotateZ(this, angle); };
+const method$A = function (angle) { return rotateZ(this, angle); };
 
-Shape.prototype.rotateZ = method$B;
+Shape.prototype.rotateZ = method$A;
 
 /**
  *
@@ -4380,9 +4386,9 @@ const scale = (factor, shape) => {
   }
 };
 
-const method$C = function (factor) { return scale(factor, this); };
+const method$B = function (factor) { return scale(factor, this); };
 
-Shape.prototype.scale = method$C;
+Shape.prototype.scale = method$B;
 
 /**
  *
@@ -4430,9 +4436,9 @@ const section = (solidShape, surfaceShape = Z(0)) => {
   return assemble(...sections);
 };
 
-const method$D = function (surface) { return section(this, surface); };
+const method$C = function (surface) { return section(this, surface); };
 
-Shape.prototype.section = method$D;
+Shape.prototype.section = method$C;
 
 const solids = (shape, xform = (_ => _)) => {
   const solids = [];
@@ -4473,11 +4479,11 @@ const specify = (specification, ...shapes) => {
       break;
     }
   }
-  return Shape.fromGeometry(addTags([`item/${JSON.stringify(specification)}`], geometry));
+  return Shape.fromGeometry(rewriteTags([`item/${JSON.stringify(specification)}`], [], geometry));
 };
 
-const method$E = function (specification) { return specify(specification, this); };
-Shape.prototype.specify = method$E;
+const method$D = function (specification) { return specify(specification, this); };
+Shape.prototype.specify = method$D;
 
 /**
  *
@@ -4504,9 +4510,9 @@ const stretch = (shape, length, planeShape = Z()) => {
   return assemble(...stretches);
 };
 
-const method$F = function (...args) { return stretch(this, ...args); };
+const method$E = function (...args) { return stretch(this, ...args); };
 
-Shape.prototype.stretch = method$F;
+Shape.prototype.stretch = method$E;
 
 /**
  *
@@ -4527,9 +4533,9 @@ const sweep = (toolpath, tool) => {
   return union(...chains);
 };
 
-const method$G = function (tool) { return sweep(this, tool); };
+const method$F = function (tool) { return sweep(this, tool); };
 
-Shape.prototype.sweep = method$G;
+Shape.prototype.sweep = method$F;
 Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, tool)); };
 
 const tags = (shape) =>
@@ -4537,9 +4543,9 @@ const tags = (shape) =>
       .filter(tag => tag.startsWith('user/'))
       .map(tag => tag.substring(5));
 
-const method$H = function () { return tags(this); };
+const method$G = function () { return tags(this); };
 
-Shape.prototype.tags = method$H;
+Shape.prototype.tags = method$G;
 
 const toBillOfMaterial = (shape) => {
   const specifications = [];
@@ -4554,24 +4560,24 @@ const toBillOfMaterial = (shape) => {
   return specifications;
 };
 
-const method$I = function (options = {}) { return toBillOfMaterial(this); };
+const method$H = function (options = {}) { return toBillOfMaterial(this); };
 
-Shape.prototype.toBillOfMaterial = method$I;
+Shape.prototype.toBillOfMaterial = method$H;
 
 // DEPRECATED: See 'Shape.items'
 const toItems = (shape) => getItems(shape.toKeptGeometry()).map(fromGeometry);
 
-const method$J = function (options = {}) { return toItems(this); };
+const method$I = function (options = {}) { return toItems(this); };
 
-Shape.prototype.toItems = method$J;
+Shape.prototype.toItems = method$I;
 
 // Return an assembly of paths so that each toolpath can have its own tag.
 const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
   Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
 
-const method$K = function (...options) { return toolpath(this, ...options); };
+const method$J = function (...options) { return toolpath(this, ...options); };
 
-Shape.prototype.toolpath = method$K;
+Shape.prototype.toolpath = method$J;
 Shape.prototype.withToolpath = function (...args) { return assemble(this, toolpath(this, ...args)); };
 
 /**
@@ -4681,9 +4687,9 @@ const voxels = ({ resolution = 1 }, shape) => {
   return assemble(...voxels);
 };
 
-const method$L = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
+const method$K = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
 
-Shape.prototype.voxels = method$L;
+Shape.prototype.voxels = method$K;
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];
@@ -4730,9 +4736,9 @@ const wireframe = (options = {}, shape) => {
   return assemble(...pieces);
 };
 
-const method$M = function (options) { return wireframe(options, this); };
+const method$L = function (options) { return wireframe(options, this); };
 
-Shape.prototype.wireframe = method$M;
+Shape.prototype.wireframe = method$L;
 Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
 
 /**
@@ -4757,9 +4763,9 @@ const writeDxf = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$N = function (options = {}) { return writeDxf(options, this); };
+const method$M = function (options = {}) { return writeDxf(options, this); };
 
-Shape.prototype.writeDxf = method$N;
+Shape.prototype.writeDxf = method$M;
 
 /**
  *
@@ -4783,9 +4789,9 @@ const writeGcode = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$O = function (options = {}) { return writeGcode(options, this); };
+const method$N = function (options = {}) { return writeGcode(options, this); };
 
-Shape.prototype.writeGcode = method$O;
+Shape.prototype.writeGcode = method$N;
 
 /**
  *
@@ -4809,9 +4815,9 @@ const writePdf = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$P = function (options = {}) { return writePdf(options, this); };
+const method$O = function (options = {}) { return writePdf(options, this); };
 
-Shape.prototype.writePdf = method$P;
+Shape.prototype.writePdf = method$O;
 
 /**
  *
@@ -4836,9 +4842,9 @@ const writeStl = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$Q = function (options = {}) { return writeStl(options, this); };
+const method$P = function (options = {}) { return writeStl(options, this); };
 
-Shape.prototype.writeStl = method$Q;
+Shape.prototype.writeStl = method$P;
 
 /**
  *
@@ -4863,9 +4869,9 @@ const writeSvg = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$R = function (options = {}) { return writeSvg(options, this); };
+const method$Q = function (options = {}) { return writeSvg(options, this); };
 
-Shape.prototype.writeSvg = method$R;
+Shape.prototype.writeSvg = method$Q;
 
 /**
  *
@@ -4895,9 +4901,9 @@ const writeSvgPhoto = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$S = function (options = {}) { return writeSvgPhoto(options, this); };
+const method$R = function (options = {}) { return writeSvgPhoto(options, this); };
 
-Shape.prototype.writeSvgPhoto = method$S;
+Shape.prototype.writeSvgPhoto = method$R;
 
 const writeThreejsPage = async (options, shape) => {
   if (typeof options === 'string') {
@@ -4909,9 +4915,9 @@ const writeThreejsPage = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$T = function (options = {}) { return writeThreejsPage(options, this); };
+const method$S = function (options = {}) { return writeThreejsPage(options, this); };
 
-Shape.prototype.writeThreejsPage = method$T;
+Shape.prototype.writeThreejsPage = method$S;
 
 /**
  *
@@ -4924,7 +4930,6 @@ Shape.prototype.writeThreejsPage = method$T;
 
 const methods = [
   above,
-  as,
   back,
   below,
   center,

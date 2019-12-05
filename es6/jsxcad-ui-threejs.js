@@ -52559,7 +52559,7 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   }
 
   const uvBbox = new Box3(new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
-                                new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
+                          new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
 
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
@@ -52739,7 +52739,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   camera.up.set(...up);
 
   const scene = new Scene();
-  // scene.background = new THREE.Color(0xffffff, 0);
+  // scene.background = new Color(0xffffff, 0);
   scene.add(camera);
 
   if (withAxes) {

@@ -1,7 +1,6 @@
 import {
   AmbientLight,
   AxesHelper,
-  Color,
   DirectionalLight,
   GridHelper,
   PerspectiveCamera,
@@ -33,7 +32,6 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   camera.up.set(...up);
 
   const scene = new Scene();
-  // scene.background = new Color(0xffffff, 0);
   scene.add(camera);
 
   if (withAxes) {

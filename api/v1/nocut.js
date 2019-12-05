@@ -1,6 +1,6 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { nonNegative, rewriteTags } from '@jsxcad/geometry-tagged';
 import { assertEmpty, assertShape, assertStrings } from './assert';
+import { nonNegative, rewriteTags } from '@jsxcad/geometry-tagged';
 
 import { dispatch } from './dispatch';
 
