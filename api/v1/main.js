@@ -8,6 +8,7 @@
  */
 
 import './add';
+import './as';
 import './bom';
 import './colors';
 import './cut';
@@ -62,7 +63,6 @@ import { Z } from './Z';
 
 import above from './above';
 import acos from './acos';
-import as from './as';
 import ask from './ask';
 import assemble from './assemble';
 import back from './back';
@@ -156,7 +156,6 @@ import { writeThreejsPage } from './writeThreejs';
 
 const methods = [
   above,
-  as,
   back,
   below,
   center,

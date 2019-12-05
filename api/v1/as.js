@@ -1,5 +1,5 @@
 import Shape from './Shape';
-import { addTags } from '@jsxcad/geometry-tagged';
+import { rewriteTags } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -15,10 +15,14 @@ import { addTags } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const as = (tags, shape) =>
-  Shape.fromGeometry(addTags(tags.map(tag => `user/${tag}`), shape.toGeometry()));
+export const as = (shape, tags) =>
+  Shape.fromGeometry(rewriteTags(tags.map(tag => `user/${tag}`), [], shape.toGeometry()));
 
-const method = function (...tags) { return as(tags, this); };
-Shape.prototype.as = method;
+export const notAs = (shape, tags) =>
+  Shape.fromGeometry(rewriteTags([], tags.map(tag => `user/${tag}`), shape.toGeometry()));
 
-export default as;
+const asMethod = function (...tags) { return as(this, tags); };
+const notAsMethod = function (...tags) { return notAs(this, tags); };
+
+Shape.prototype.as = asMethod;
+Shape.prototype.notAs = notAsMethod;

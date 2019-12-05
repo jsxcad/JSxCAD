@@ -1,4 +1,4 @@
-import { cacheAddTags } from '@jsxcad/cache';
+import { cacheRewriteTags } from '@jsxcad/cache';
 import { hasMatchingTag } from './hasMatchingTag';
 
 const buildCondition = (conditionTags, conditionSpec) => {
@@ -12,14 +12,14 @@ const buildCondition = (conditionTags, conditionSpec) => {
   }
 };
 
-const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
+const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
   const condition = buildCondition(conditionTags, conditionSpec);
   const composeTags = (geometryTags) => {
     if (condition === undefined || condition(geometryTags)) {
       if (geometryTags === undefined) {
-        return tags;
+        return add.filter(tag => !remove.includes(tag));
       } else {
-        return [...tags, ...geometryTags];
+        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
       }
     } else {
       return geometryTags;
@@ -44,4 +44,4 @@ const addTagsImpl = (tags, geometry, conditionTags, conditionSpec) => {
   return walk(geometry);
 };
 
-export const addTags = cacheAddTags(addTagsImpl);
+export const rewriteTags = cacheRewriteTags(rewriteTagsImpl);

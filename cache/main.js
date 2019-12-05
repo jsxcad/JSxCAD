@@ -1,10 +1,10 @@
-import { cache, cacheAddTags, cacheCut, cachePoints, cacheTransform, clearCache } from './cache';
+import { cache, cacheCut, cachePoints, cacheRewriteTags, cacheTransform, clearCache } from './cache';
 
 export {
   cache,
   cacheCut,
   cachePoints,
+  cacheRewriteTags,
   cacheTransform,
-  cacheAddTags,
   clearCache
 };
