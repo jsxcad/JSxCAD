@@ -8,16 +8,19 @@
  */
 
 import './add';
-import './edges';
-import './faces';
+import './bom';
 import './colors';
 import './cut';
+import './edges';
+import './faces';
+import './items';
 import './to';
+import './unfold';
 import './with';
 
 import * as vec from '@jsxcad/math-vec3';
 
-import { Connector, connector } from './Connector';
+import { Connector, connector, connectors } from './Connector';
 import { Label, Plan } from './Plan';
 
 import Armature from './Armature';
@@ -27,9 +30,12 @@ import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
 // import { Fastener } from './Fastener';
+import Font from './Font';
 import { Gear } from './Gear';
+import Hershey from './Hershey';
 import { Hexagon } from './Hexagon';
 import { Icosahedron } from './Icosahedron';
+import { Item } from './Item';
 import { Lego } from './Lego';
 import { Line } from './Line';
 import { MicroGearMotor } from './MicroGearMotor';
@@ -66,7 +72,6 @@ import chainHull from './chainHull';
 import chop from './chop';
 import color from './color';
 import connect from './connect';
-import connectors from './connectors';
 import contract from './contract';
 import coordinates from './coordinates';
 import cos from './cos';
@@ -105,7 +110,7 @@ import { pack } from './pack';
 import { readDst } from './readDst';
 import { readDxf } from './readDxf';
 import { readFont } from './readFont';
-import { readJscad } from './readJscad';
+// import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
 import { readPng } from './readPng';
 import { readShape } from './readShape';
@@ -238,10 +243,13 @@ export {
   ease,
   flat,
   // Fastener,
+  Font,
   Gear,
+  Hershey,
   Hexagon,
   hull,
   Icosahedron,
+  Item,
   importModule,
   intersection,
   lathe,
@@ -265,7 +273,7 @@ export {
   readDst,
   readDxf,
   readFont,
-  readJscad,
+  // readJscad,
   readLDraw,
   readPng,
   readShape,

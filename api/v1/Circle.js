@@ -59,5 +59,6 @@ Circle.ofEdge = ofEdge;
 Circle.ofApothem = ofApothem;
 Circle.ofRadius = ofRadius;
 Circle.ofDiameter = ofDiameter;
+Circle.toRadiusFromApothem = (radius = 1, sides = 32) => Polygon.toRadiusFromApothem(radius, sides);
 
 export default Circle;

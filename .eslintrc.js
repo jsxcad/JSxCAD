@@ -1,5 +1,5 @@
 module.exports = {
-    "extends": "standard",
+    "extends": ["standard", "plugin:react/recommended"],
     "parser": "babel-eslint",
     "rules": {
         "max-len": [1, 120, 2],

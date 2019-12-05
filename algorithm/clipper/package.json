@@ -1,0 +1,43 @@
+{
+  "name": "@jsxcad/algorithm-clipper",
+  "version": "0.0.79",
+  "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "module": "main.js",
+  "scripts": {
+    "depcheck": "depcheck",
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "clipper-lib": "^6.4.2",
+    "@jsxcad/math-vec3": "^0.0.79"
+  },
+  "devDependencies": {
+    "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-utils": "^0.0.79",
+    "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "esm": "^3.2.10"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
+}

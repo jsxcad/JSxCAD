@@ -57,17 +57,17 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.autoClear = false;
-  // renderer.setSize(width, height);
+  renderer.setSize(width, height);
   renderer.setClearColor(0xFFFFFF);
-  // renderer.antiAlias = false;
-  // renderer.inputGamma = true;
-  // renderer.outputGamma = true;
-  // renderer.setPixelRatio(window.devicePixelRatio);
-  // renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  renderer.antiAlias = false;
+  renderer.inputGamma = true;
+  renderer.outputGamma = true;
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
-  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 3';
+  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
   hudCanvas.id = 'hudCanvas';
   hudCanvas.width = width;
   hudCanvas.height = height;

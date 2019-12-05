@@ -15,22 +15,27 @@ export const toTransformedGeometry = (geometry) => {
       }
 
       if (geometry.assembly) {
+        // CHECK: Why at this level?
         return {
           assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
           tags: geometry.tags
         };
       } else if (geometry.disjointAssembly) {
+        // CHECK: Why at this level?
         return {
           disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
           tags: geometry.tags
         };
       } else if (geometry.item) {
+        // CHECK: Why at this level?
         return {
           item: walk(matrix, geometry.item),
           tags: geometry.tags
         };
       }
-
+      // else if (geometry.visualization) {
+      //   return { ...geometry, visualization: walk(matrix, geometry.visualization) };
+      // }
       return transformItem(matrix, geometry);
     };
 

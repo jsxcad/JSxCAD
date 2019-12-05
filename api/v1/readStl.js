@@ -32,11 +32,9 @@ export const readStl = async (options) => {
   }
   const { path, format = 'ascii' } = options;
   const as = formatToAs(format);
-  const data = await readFile({
-    as,
-    sources: getSources(`file/${path}`),
-    ...options
-  },
-                              `file/${path}`);
+  let data = await readFile({ as, ...options }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ as, sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  }
   return Shape.fromGeometry(await fromStl(options, data));
 };

@@ -8,7 +8,6 @@ test('Wrap and return.', t => {
                                      let a = 10;
                                      return circle(foo(a));
                                    }`);
-  console.log(ecmascript);
   t.is(ecmascript,
        `return async () => {
     const foo = (x) => x + 1;

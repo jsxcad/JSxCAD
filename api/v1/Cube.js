@@ -65,7 +65,7 @@ export const ofRadius = (radius) => Shape.fromGeometry(buildRegularPrism(4))
     .rotateZ(45)
     .scale([radius, radius, radius / edgeScale]);
 
-export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));
+export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem, 4));
 
 export const ofDiameter = (diameter) => ofRadius(diameter / 2);
 

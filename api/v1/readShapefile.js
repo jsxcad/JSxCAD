@@ -18,17 +18,13 @@ import { fromShapefile } from '@jsxcad/convert-shapefile';
 
 export const readShapefile = async (options) => {
   const { shpPath, dbfPath } = options;
-  const shpData = await readFile({
-    as: 'bytes',
-    sources: getSources(`file/${shpPath}`),
-    ...options
-  },
-                                 `file/${shpPath}`);
-  const dbfData = await readFile({
-    as: 'bytes',
-    sources: getSources(`file/${dbfPath}`),
-    ...options
-  },
-                                 `file/${dbfPath}`);
+  let shpData = await readFile({ as: 'bytes', ...options }, `source/${shpPath}`);
+  if (shpData === undefined) {
+    shpData = await readFile({ as: 'bytes', sources: getSources(`cache/${shpPath}`), ...options }, `cache/${shpPath}`);
+  }
+  let dbfData = await readFile({ as: 'bytes', ...options }, `source/${dbfPath}`);
+  if (dbfData === undefined) {
+    dbfData = await readFile({ as: 'bytes', sources: getSources(`cache/${dbfPath}`), ...options }, `cache/${dbfPath}`);
+  }
   return Shape.fromGeometry(await fromShapefile(options, shpData, dbfData));
 };

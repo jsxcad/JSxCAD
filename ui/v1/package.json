@@ -1,0 +1,73 @@
+{
+  "name": "@jsxcad/ui-v1",
+  "version": "0.0.79",
+  "description": "v1 UI for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "dist/bundle.js",
+  "module": "dist/bundle.js",
+  "scripts": {
+    "depcheck": "depcheck --ignores=debug,import-local,lodash",
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "test": "ava",
+    "tests": "ava *.test.js",
+    "rollup": "rollup -c rollup.master.js && rollup -c rollup.webworker.js && rollup -c rollup.auth.js",
+    "rollup:master": "rollup -c rollup.master.js",
+    "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js",
+    "didYouRunBootstrapMaslowMasterRollup": "rollup -c rollup.maslowMaster.js"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/api-v1": "^0.0.79",
+    "@jsxcad/compiler": "^0.0.79",
+    "@jsxcad/convert-stl": "^0.0.79",
+    "@jsxcad/convert-svg": "^0.0.79",
+    "@jsxcad/convert-threejs": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79",
+    "abs-svg-path": "^0.1.1",
+    "ace-builds": "^1.4.7",
+    "fast-equals": "^2.0.0",
+    "file-saver": "^2.0.2",
+    "parse-svg-path": "^0.1.2",
+    "prismjs": "^1.17.1",
+    "prop-types": "^15.7.2",
+    "react": ">=16.8.2",
+    "react-ace": "^8.0.0",
+    "react-bootstrap": "^1.0.0-beta.14",
+    "react-dom": ">=16.8.2",
+    "react-mosaic-component": "^3.2.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-transform-react-jsx": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-react": "^7.7.4",
+    "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "rollup": "^1.11.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-loadz0r": "^0.7.1",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-sizes": "^0.5.1"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
+}

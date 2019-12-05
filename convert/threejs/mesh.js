@@ -173,10 +173,13 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
-export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
+const GEOMETRY_LAYER = 0;
+const PLAN_LAYER = 1;
+
+export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
-    threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene }));
+    threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene, layer }));
   } else if (threejsGeometry.item) {
     buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
   } else if (threejsGeometry.threejsSegments) {
@@ -190,7 +193,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
       geometry.vertices.push(new THREE.Vector3(aX, aY, aZ), new THREE.Vector3(bX, bY, bZ));
     }
     dataset.mesh = new THREE.LineSegments(geometry, material);
-    dataset.mesh.layers.set(0);
+    dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
@@ -203,7 +206,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
     applyBoxUV(geometry);
     const material = buildMeshMaterial(tags);
     dataset.mesh = new THREE.Mesh(geometry, material);
-    dataset.mesh.layers.set(0);
+    dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
@@ -213,12 +216,15 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene }) => {
     const geometry = new THREE.BufferGeometry();
     geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.addAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    applyBoxUV(geometry);
     const material = buildMeshMaterial(tags);
     dataset.mesh = new THREE.Mesh(geometry, material);
-    dataset.mesh.layers.set(0);
+    dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
+  } else if (threejsGeometry.threejsPlan) {
+    return buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
   }
 };
 
@@ -267,7 +273,7 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
     if (threejsGeometry.assembly) {
       threejsGeometry.assembly.forEach(walk);
     } else if (threejsGeometry.threejsPlan) {
-      const { threejsPlan, threejsMarks } = threejsGeometry;
+      const { threejsPlan, threejsMarks, threejsVisualization } = threejsGeometry;
       if (threejsPlan.label) {
         ctx.strokeStyle = '#000000';
         ctx.fillStyle = '#000000';
@@ -309,6 +315,9 @@ export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
         ctx.stroke();
 
         drawLabel(threejsPlan.connector, originX, originY);
+      }
+      if (threejsVisualization) {
+        walk(threejsVisualization);
       }
     }
   };

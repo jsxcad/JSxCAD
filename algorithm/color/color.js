@@ -65,7 +65,7 @@ export const toRgb = (tags = [], defaultRgb = [0, 0, 0]) => {
     if (tag.startsWith('color/')) {
       let entry = toRgbFromName(tag.substring(6));
       if (entry !== undefined) {
-        rgb = entry;
+        return entry;
       }
     }
   }

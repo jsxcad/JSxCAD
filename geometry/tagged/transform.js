@@ -8,10 +8,13 @@ import { transform as transformSurface } from '@jsxcad/geometry-surface';
 export const transformItem = (matrix, item) => {
   const transformed = {};
   if (item.assembly) {
+    // CHECK
     transformed.assembly = item.assembly;
   } else if (item.disjointAssembly) {
+    // CHECK
     transformed.disjointAssembly = item.disjointAssembly;
   } else if (item.item) {
+    // CHECK
     transformed.item = item.item;
   } else if (item.paths) {
     transformed.paths = transformPaths(matrix, item.paths);
@@ -19,6 +22,7 @@ export const transformItem = (matrix, item) => {
     transformed.plan = item.plan;
     transformed.marks = transformPoints(matrix, item.marks);
     transformed.planes = item.planes.map(plane => transformPlane(matrix, plane));
+    transformed.visualization = transformItem(matrix, item.visualization);
   } else if (item.points) {
     transformed.points = transformPoints(matrix, item.points);
   } else if (item.solid) {

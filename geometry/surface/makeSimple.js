@@ -1,5 +1,6 @@
-import { toPlane, transform } from './ops';
+import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
+import { transform } from './ops';
 import { union } from '@jsxcad/geometry-z0surface-boolean';
 
 export const makeSimple = (options = {}, surface) => {

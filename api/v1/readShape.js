@@ -1,7 +1,7 @@
 import { getSources, readFile } from '@jsxcad/sys';
 
 import { Shape } from './Shape';
-import { writeShape } from './writeShape';
+import { cacheShape } from './writeShape';
 
 /**
  *
@@ -37,12 +37,15 @@ export const readShape = async (options, build) => {
   }
   const { ephemeral, path } = options;
 
-  const data = await readFile({ as: 'utf8', sources: getSources(`file/${path}`), ...options }, `file/${path}`);
+  let data = await readFile({ as: 'utf8', ...options }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ as: 'utf8', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  }
 
   if (data === undefined && build !== undefined) {
     const shape = await build();
     if (!ephemeral) {
-      await writeShape(options, shape);
+      await cacheShape(options, shape);
     }
     return shape;
   }
