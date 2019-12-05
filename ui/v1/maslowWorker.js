@@ -3,6 +3,7 @@
 import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
+import { clearCache } from '@jsxcad/cache';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -10,6 +11,7 @@ const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
   try {
     var { key, values } = question;
+    clearCache();
     switch (key) {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
@@ -21,7 +23,7 @@ const agent = async ({ ask, question }) => {
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
-        return api.Circle({ radius: values[0] / 2, center: true, sides: values[1] }).toDisjointGeometry();
+        return api.Circle.ofDiameter( values[0] , values[1]).toDisjointGeometry();// {center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
         if (values[1] === 'Keep Out') {
           return api.Shape.fromGeometry(values[0]).color('Red').material('keepout').toDisjointGeometry();
@@ -43,23 +45,19 @@ const agent = async ({ ask, question }) => {
         return returnVal.toDisjointGeometry();
       case 'getLayoutSvgs':
         // Extract shapes
-        var items = api.Shape.fromGeometry(values[0]).toItems();
-
-        // Center each one and grab a .svg of it
-        var svgArray = [];
-        var item;
-        for (item in items) {
-          const svgString = await toSvg({}, items[item].center().section().outline().toKeptGeometry());
-          svgArray.push(svgString);
-        }
-
-        return svgArray;
+        let items = api.Shape.fromGeometry(values[0]).toItems();
+        const sheetX = values[2];
+        const sheetY = values[3];
+        const [packed, unpacked] = api.pack({ size: [sheetX, sheetY], margin: 4 }, ...items.map(
+            x => x.flat())
+        );
+        return api.assemble(...packed).toDisjointGeometry();
       case 'difference':
         return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'extractTag':
         return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
       case 'extrude':
-        return api.Shape.fromGeometry(values[0]).extrude({ height: values[1] }).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
       case 'hull':
         values = values.map(api.Shape.fromGeometry);
         return api.hull(...values).toDisjointGeometry();
@@ -97,7 +95,7 @@ const agent = async ({ ask, question }) => {
       case 'specify':
         return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
       case 'translate':
-        return api.Shape.fromGeometry(values[0]).translate([values[1], values[2], values[3]]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).translate(values[1], values[2], values[3]).toDisjointGeometry();
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
       case 'union':
