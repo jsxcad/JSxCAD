@@ -1,4 +1,5 @@
 import builtins from 'rollup-plugin-node-builtins';
+import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
@@ -10,9 +11,12 @@ export default {
     dir: 'dist',
     format: 'module'
   },
-  external: ['@jsxcad/math-utils'],
+  external (id) {
+    return id.startsWith('@jsxcad/');
+  },
   plugins: [
     builtins(),
+    commonjs(),
     globals(),
     nodeResolve({ preferBuiltins: true })
   ]

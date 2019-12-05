@@ -4,14 +4,14 @@
   "description": "System support for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
-  "module": "main.js",
+  "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "rollup": "rollup -c rollup.config.js"
+    "rollup": "rollup -c rollup.js"
   },
   "contributors": [
     {

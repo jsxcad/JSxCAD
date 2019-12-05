@@ -65,7 +65,7 @@ export default {
                 ['@babel/env', { 'targets': { 'browsers': 'last 1 chrome versions' } }]],
       plugins: [
         '@babel/transform-react-jsx',
-        '@babel/plugin-proposal-class-properties'
+        '@babel/plugin-proposal-class-properties',
       ]
     }),
     nodeResolve({ preferBuiltins: true }),

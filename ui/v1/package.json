@@ -3,7 +3,7 @@
   "version": "0.0.79",
   "description": "v1 UI for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
-  "main": "dist/bundle.js",
+  "main": "master.js",
   "module": "dist/bundle.js",
   "scripts": {
     "depcheck": "depcheck --ignores=debug,import-local,lodash",
@@ -13,6 +13,9 @@
     "tests": "ava *.test.js",
     "rollup": "rollup -c rollup.master.js && rollup -c rollup.webworker.js && rollup -c rollup.auth.js",
     "rollup:master": "rollup -c rollup.master.js",
+    "rollup:master:es6": "rollup -c rollup.master.es6.js",
+    "rollup:webworker": "rollup -c rollup.webworker.js",
+    "rollup:webworker:es6": "rollup -c rollup.webworker.es6.js",
     "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js",
     "didYouRunBootstrapMaslowMasterRollup": "rollup -c rollup.maslowMaster.js"
   },
@@ -61,6 +64,7 @@
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-rewrite-imports": "^1.0.0",
     "rollup-plugin-sizes": "^0.5.1"
   },
   "ava": {

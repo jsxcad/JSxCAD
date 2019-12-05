@@ -30,9 +30,9 @@ import {
   writeFile
 } from '@jsxcad/sys';
 
-import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs/controls';
-import { buildMeshes, drawHud } from '@jsxcad/convert-threejs/mesh';
-import { buildScene, createResizer } from '@jsxcad/convert-threejs/scene';
+import { buildGui, buildGuiControls, buildTrackballControls } from '@jsxcad/convert-threejs';
+import { buildMeshes, drawHud } from '@jsxcad/convert-threejs';
+import { buildScene, createResizer } from '@jsxcad/convert-threejs';
 // import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import {
@@ -1476,7 +1476,7 @@ const getAsk = async () => {
       }
     };
 
-    ({ ask } = await createService({ webWorker: './webworker.js', agent }));
+    ({ ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' }));
   }
 
   return ask;
