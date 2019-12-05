@@ -6,7 +6,7 @@
   "main": "index.js",
   "module": "index.js",
   "scripts": {
-    "depcheck": "depcheck",
+    "depcheck": "depcheck --ignores=esm",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "example": "node -r esm run",
