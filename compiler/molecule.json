@@ -2,71 +2,79 @@
     "molecules": [
         {
             "atomType": "Molecule",
-            "name": "5 Motor Controller Board",
+            "name": "Test1",
             "x": 0,
             "y": 0,
-            "uniqueID": 526866,
+            "uniqueID": 442906,
             "ioValues": [],
             "topLevel": true,
             "allAtoms": [
                 {
-                    "atomType": "Molecule",
-                    "name": "PCB",
-                    "x": 63,
-                    "y": 44,
-                    "uniqueID": 770369,
-                    "ioValues": []
+                    "atomType": "Circle",
+                    "name": "Circle",
+                    "x": 283,
+                    "y": 72,
+                    "uniqueID": 179468,
+                    "ioValues": [
+                        {
+                            "name": "diameter",
+                            "ioValue": 10
+                        }
+                    ]
                 },
                 {
-                    "atomType": "Molecule",
-                    "name": "PCB",
-                    "x": 63,
-                    "y": 44,
-                    "uniqueID": 770369,
-                    "ioValues": []
+                    "atomType": "Rectangle",
+                    "name": "Rectangle",
+                    "x": 257,
+                    "y": 205,
+                    "uniqueID": 686190,
+                    "ioValues": [
+                        {
+                            "name": "x length",
+                            "ioValue": 10
+                        },
+                        {
+                            "name": "y length",
+                            "ioValue": 10
+                        }
+                    ]
                 },
                 {
-                    "atomType": "Molecule",
-                    "name": "ESP32",
-                    "x": 66,
-                    "y": 98,
-                    "uniqueID": 491176,
-                    "ioValues": []
+                    "atomType": "Extrude",
+                    "name": "Extrude",
+                    "x": 512,
+                    "y": 92,
+                    "uniqueID": 481010,
+                    "ioValues": [
+                        {
+                            "name": "height",
+                            "ioValue": 10
+                        }
+                    ]
                 },
                 {
-                    "atomType": "Molecule",
-                    "name": "ESP32",
-                    "x": 66,
-                    "y": 98,
-                    "uniqueID": 491176,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Misc Chips",
-                    "x": 67,
-                    "y": 159,
-                    "uniqueID": 682781,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Misc Chips",
-                    "x": 67,
-                    "y": 159,
-                    "uniqueID": 682781,
-                    "ioValues": []
+                    "atomType": "Extrude",
+                    "name": "Extrude",
+                    "x": 495,
+                    "y": 214,
+                    "uniqueID": 734243,
+                    "ioValues": [
+                        {
+                            "name": "height",
+                            "ioValue": 10
+                        }
+                    ]
                 },
                 {
                     "atomType": "Translate",
                     "name": "Translate",
-                    "x": 196,
-                    "y": 109,
-                    "uniqueID": 450577,
+                    "x": 659,
+                    "y": 68,
+                    "uniqueID": 693199,
                     "ioValues": [
                         {
                             "name": "xDist",
-                            "ioValue": -11
+                            "ioValue": 0
                         },
                         {
                             "name": "yDist",
@@ -74,138 +82,44 @@
                         },
                         {
                             "name": "zDist",
-                            "ioValue": 13
+                            "ioValue": -4
                         }
                     ]
                 },
                 {
                     "atomType": "Translate",
                     "name": "Translate",
-                    "x": 196,
-                    "y": 109,
-                    "uniqueID": 450577,
+                    "x": 707,
+                    "y": 204,
+                    "uniqueID": 199648,
                     "ioValues": [
                         {
                             "name": "xDist",
-                            "ioValue": -11
-                        },
-                        {
-                            "name": "yDist",
                             "ioValue": 0
                         },
                         {
+                            "name": "yDist",
+                            "ioValue": 10
+                        },
+                        {
                             "name": "zDist",
-                            "ioValue": 13
+                            "ioValue": 0
                         }
                     ]
                 },
                 {
-                    "atomType": "Molecule",
-                    "name": "Motor Driver Sub Assembly",
-                    "x": 98,
-                    "y": 218,
-                    "uniqueID": 121396,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Motor Driver Sub Assembly",
-                    "x": 98,
-                    "y": 218,
-                    "uniqueID": 121396,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Power Jack",
-                    "x": 273,
-                    "y": 244,
-                    "uniqueID": 487182,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Power Jack",
-                    "x": 273,
-                    "y": 244,
-                    "uniqueID": 487182,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Mounting Hardware",
-                    "x": 349,
-                    "y": 282,
-                    "uniqueID": 515206,
-                    "ioValues": []
-                },
-                {
-                    "atomType": "Molecule",
-                    "name": "Mounting Hardware",
-                    "x": 349,
-                    "y": 282,
-                    "uniqueID": 515206,
-                    "ioValues": []
-                },
-                {
                     "atomType": "Assembly",
                     "name": "Assembly",
-                    "x": 620,
-                    "y": 103,
-                    "uniqueID": 963382,
+                    "x": 896,
+                    "y": 157,
+                    "uniqueID": 426341,
                     "ioValues": [
                         {
-                            "name": "3D shape 966998",
+                            "name": "3D shape 928937",
                             "ioValue": 10
                         },
                         {
-                            "name": "3D shape 305054",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 628723",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 374430",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 293672",
-                            "ioValue": 10
-                        }
-                    ],
-                    "removeCutawayGeometry": true
-                },
-                {
-                    "atomType": "Assembly",
-                    "name": "Assembly",
-                    "x": 620,
-                    "y": 103,
-                    "uniqueID": 963382,
-                    "ioValues": [
-                        {
-                            "name": "3D shape 416631",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 966998",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 305054",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 628723",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 374430",
-                            "ioValue": 10
-                        },
-                        {
-                            "name": "3D shape 293672",
+                            "name": "3D shape 683333",
                             "ioValue": 10
                         }
                     ],
@@ -221,91 +135,56 @@
             ],
             "allConnectors": [
                 {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 628723",
-                    "ap1ID": 770369,
-                    "ap2ID": 963382
-                },
-                {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 628723",
-                    "ap1ID": 770369,
-                    "ap2ID": 963382
-                },
-                {
-                    "ap1Name": "Geometry",
+                    "ap1Name": "geometry",
                     "ap2Name": "geometry",
-                    "ap1ID": 491176,
-                    "ap2ID": 450577
-                },
-                {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "geometry",
-                    "ap1ID": 491176,
-                    "ap2ID": 450577
-                },
-                {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 374430",
-                    "ap1ID": 682781,
-                    "ap2ID": 963382
-                },
-                {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 374430",
-                    "ap1ID": 682781,
-                    "ap2ID": 963382
+                    "ap2Primary": true,
+                    "ap1ID": 179468,
+                    "ap2ID": 481010
                 },
                 {
                     "ap1Name": "geometry",
-                    "ap2Name": "3D shape 966998",
-                    "ap1ID": 450577,
-                    "ap2ID": 963382
+                    "ap2Name": "geometry",
+                    "ap2Primary": true,
+                    "ap1ID": 686190,
+                    "ap2ID": 734243
                 },
                 {
                     "ap1Name": "geometry",
-                    "ap2Name": "3D shape 966998",
-                    "ap1ID": 450577,
-                    "ap2ID": 963382
+                    "ap2Name": "geometry",
+                    "ap2Primary": true,
+                    "ap1ID": 481010,
+                    "ap2ID": 693199
                 },
                 {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 293672",
-                    "ap1ID": 121396,
-                    "ap2ID": 963382
+                    "ap1Name": "geometry",
+                    "ap2Name": "geometry",
+                    "ap2Primary": true,
+                    "ap1ID": 734243,
+                    "ap2ID": 199648
                 },
                 {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 293672",
-                    "ap1ID": 121396,
-                    "ap2ID": 963382
+                    "ap1Name": "geometry",
+                    "ap2Name": "3D shape 683333",
+                    "ap2Primary": false,
+                    "ap1ID": 693199,
+                    "ap2ID": 426341
                 },
                 {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 305054",
-                    "ap1ID": 487182,
-                    "ap2ID": 963382
-                },
-                {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 305054",
-                    "ap1ID": 487182,
-                    "ap2ID": 963382
-                },
-                {
-                    "ap1Name": "Geometry",
-                    "ap2Name": "3D shape 416631",
-                    "ap1ID": 515206,
-                    "ap2ID": 963382
+                    "ap1Name": "geometry",
+                    "ap2Name": "3D shape 928937",
+                    "ap2Primary": false,
+                    "ap1ID": 199648,
+                    "ap2ID": 426341
                 },
                 {
                     "ap1Name": "geometry",
                     "ap2Name": "number or geometry",
-                    "ap1ID": 963382
+                    "ap2Primary": false,
+                    "ap1ID": 426341
                 }
             ],
             "fileTypeVersion": 1
         }
     ],
-    "circleSegmentSize": "0.4"
+    "circleSegmentSize": 2
 }
