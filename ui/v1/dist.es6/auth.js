@@ -1,4 +1,4 @@
-import { writeFile } from './jsxcad-sys';
+import { writeFile } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-sys.js';
 
 /* globals location */
 

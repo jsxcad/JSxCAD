@@ -1344,6 +1344,7 @@ class JSEditorUI extends React.PureComponent {
             <AceEditor
               commands={[this.runShortcut(), this.saveShortcut()]}
               editorProps={{ $blockScrolling: true }}
+              setOptions={{ useWorker: false }}
               height='100%'
               highlightActiveLine={true}
               key={id}

@@ -35,7 +35,8 @@
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3"
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-sizes": "^0.5.1"
   },
   "ava": {
     "require": "esm"

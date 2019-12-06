@@ -1,6 +1,6 @@
-import * as api from './jsxcad-api-v1.js';
-import { conversation, log } from './jsxcad-sys.js';
-import { toEcmascript } from './jsxcad-compiler.js';
+import * as api from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-api-v1.js';
+import { conversation, log } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-sys.js';
+import { toEcmascript } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
 

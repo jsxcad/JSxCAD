@@ -2688,7 +2688,7 @@ const Y = (y = 0) => {
  **/
 
 const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
-  const profile = shape.cut(Y(0));
+  const profile = shape.chop(Y(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
