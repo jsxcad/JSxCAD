@@ -1,4 +1,4 @@
-import { installUi } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui.js';
+import { installUi } from 'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-ui-v1.js';
 
 /* global location */
 

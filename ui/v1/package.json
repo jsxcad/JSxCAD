@@ -6,7 +6,7 @@
   "main": "master.js",
   "module": "dist/bundle.js",
   "scripts": {
-    "depcheck": "depcheck --ignores=debug,import-local,lodash --ignore-dirs=dist,dist.es6",
+    "depcheck": "depcheck --ignores=debug,import-local,lodash,@jsxcad/ui-v1 --ignore-dirs=dist,dist.es6",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "test": "ava",
