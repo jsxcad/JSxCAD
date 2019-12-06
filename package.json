@@ -5,6 +5,7 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
+    "build:es6": "npm run rollup",
     "depcheck": "lerna run depcheck",
     "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
