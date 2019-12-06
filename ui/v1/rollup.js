@@ -23,9 +23,9 @@ export const watcher = {
 };
 
 export default {
-  input: 'master.js',
+  input: 'ui.js',
   output: {
-    dir: 'dist.es6',
+    file: 'dist/main.js',
     format: 'module'
   },
   external (id) { return id.startsWith('./jsxcad-'); },
@@ -85,6 +85,6 @@ export default {
     nodeResolve({ preferBuiltins: true }),
     json(),
     sizes(),
-    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-$1.js'"); } }
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
   ]
 };

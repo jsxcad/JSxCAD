@@ -1,6 +1,6 @@
 /* global location */
 
-import { installUi } from './ui';
+import { installUi } from '@jsxcad/ui-v1';
 
 document.onreadystatechange = () => {
   if (document.readyState === 'complete') {

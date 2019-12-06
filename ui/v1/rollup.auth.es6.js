@@ -57,6 +57,6 @@ export default {
     json(),
     nodeResolve({ jsnext: true, preferBuiltins: true }),
     sizes(),
-    { transform (code, id) { return code.replace(/'@jsxcad\//g, "'./jsxcad-"); } }
+    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-$1.js'"); } }
   ]
 };
