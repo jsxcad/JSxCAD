@@ -1,7 +1,6 @@
 export const stud =
-    ({
-       diameter = 5,
-       height = 1.8,
+    (diameter = 5, height = 1.8,
+     {
        play = 0.1,
        top = 0.5,
        expansion = 0.2
@@ -9,13 +8,11 @@ export const stud =
   Cylinder.ofDiameter(diameter - play - expansion, height)
     .moveZ(height / 2)
     .with(Cylinder.ofDiameter(diameter - play, top)
-            .moveZ(height - top / 2);
+            .moveZ(height - top / 2));
 
 export const studSheet =
-    ({
-       width = 32,
-       length = 32,
-       height = 1.8,
+    (width = 32, length = 32, height = 1.8,
+     {
        studDiameter = 5,
        studHeight = 1.8,
        studFaces = 32,
@@ -37,13 +34,12 @@ export const studSheet =
 };
 
 export const socket =
-    ({
-       diameter = 5.1,
-       height = 1.8,
+    (diameter = 5.1, height = 1.8,
+     {
        gripRingHeight = 0.4,
        gripRingContraction = 0.1,
        play = 0.0
-    } = {}) => {
+     } = {}) => {
   // A stud is theoretically 1.7 mm tall.
   // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
   const bottom = 0.5;
@@ -61,22 +57,22 @@ export const socket =
 };
 
 export const socketSheet =
-    ({
-       width = 32,
-       length = 32,
-       height = 1.8,
+    (width = 32, length = 32, height = 1.8,
+     {
        play = 0.1,
        studMarginX = 0,
        studMarginY = 0,
-       stud = {}
-    } = {}) => {
+     } = {}) => {
   const sockets = [];
+  // We use a clipping box to give play on the perimeter.
+  const box = Cube(width - play * 2, length - play * 2, height);
   for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
     for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
       sockets.push(
-          Cube(8 - play * 2, 8 - play * 2, height)
+          Cube(8, 8, height)
+            .clip(box)
             .above()
-            .with(socket(stud).drop())
+            .with(socket().drop())
             .move(x - width / 2, y - length / 2, height / -2));
     }
   }
@@ -101,3 +97,5 @@ export const axleProfile = () =>
      [0.80, -0.80, 0.00],
      [2.24, -0.80, 0.00],
      [2.4, 0.00, 0.00]]);
+
+export const main = () => socketSheet();

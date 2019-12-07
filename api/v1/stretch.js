@@ -17,7 +17,7 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  *
  **/
 
-export const stretch = (shape, length, planeShape = Z()) => {
+export const stretch = (shape, length, planeShape = Z(0)) => {
   const stretches = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
