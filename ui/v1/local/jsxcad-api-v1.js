@@ -4491,7 +4491,7 @@ Shape.prototype.specify = method$D;
  *
  **/
 
-const stretch = (shape, length, planeShape = Z()) => {
+const stretch = (shape, length, planeShape = Z(0)) => {
   const stretches = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;

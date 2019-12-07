@@ -32,25 +32,6 @@ const getFileLister = async () => {
     };
   } else if (isBrowser) {
     return async () => {
-      console.log(`QQ/scan/start`);
-      // FIX: Remove 'file' -> 'source' migration.
-      const keys = new Set(await localForage.keys());
-      for (const key of keys) {
-        const [domain, project, partition, ...pieces] = key.split('/');
-        console.log(`QQ/considering: ${key}`);
-        if (partition === 'file') {
-          const newKey = `${domain}/${project}/source/${pieces.join('/')}`;
-          console.log(`QQ/Considering: ${key}`);
-          if (keys.has(newKey)) {
-            console.log(`QQ/remove: ${key}`);
-            await localForage.removeItem(key);
-          } else {
-            console.log(`QQ/fix: ${key} -> ${newKey}`);
-            await localForage.setItem(newKey, await localForage.getItem(key));
-          }
-        }
-      }
-      console.log(`QQ/scan/end`);
       const qualifiedPaths = new Set(await localForage.keys());
       return qualifiedPaths;
     };

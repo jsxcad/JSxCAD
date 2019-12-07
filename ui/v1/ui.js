@@ -43,6 +43,7 @@ import AceEditor from 'react-ace';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
@@ -50,25 +51,27 @@ import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
 import Toast from 'react-bootstrap/Toast';
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { deepEqual } from 'fast-equals';
 import { prismJSAuxiliary } from './PrismJSAuxiliary';
 import saveAs from 'file-saver';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
+import { writeProject as writeProjectToGist } from './gist';
 
 if (!aceEditorAuxiliary || !prismJSAuxiliary) {
   throw Error('die');
 }
 
-class UI extends React.PureComponent {
+class Ui extends React.PureComponent {
   static get propTypes () {
     return {
       project: PropTypes.string,
@@ -104,6 +107,7 @@ class UI extends React.PureComponent {
     this.openParameters = this.openParameters.bind(this);
     this.updateParameters = this.updateParameters.bind(this);
     this.doGithub = this.doGithub.bind(this);
+    this.doSelectProject = this.doSelectProject.bind(this);
     this.doNav = this.doNav.bind(this);
 
     this.switchingProjects = false;
@@ -221,22 +225,38 @@ class UI extends React.PureComponent {
     this.setState({ project: '' });
   }
 
-  async doGithub (action, owner, repository, prefix) {
+  async doGithub (options = {}) {
+    const { action } = options;
     switch (action) {
-      case 'export': {
+      case 'gistExport': {
+        const { gistIsPublic = true } = options;
+        const project = getFilesystem();
+        const url = await writeProjectToGist(project, { gistIsPublic });
+        log({ op: 'text', text: `Created gist at ${url}`, level: 'serious' });
+        return;
+      }
+      case 'githubRepositoryExport': {
+        const { githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix } = options;
         const files = [];
         for (const file of await listFiles()) {
           if (file.startsWith('source/')) {
             files.push([file, await readFile({}, file)]);
           }
         }
-        return writeProjectToGithub(owner, repository, prefix, files, { overwrite: false });
+        return writeProjectToGithub(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, files,
+                                    { overwrite: false });
       }
-      case 'import': {
-        return readProjectFromGithub(owner, repository, prefix, { overwrite: false });
+      case 'githubRepositoryImport': {
+        const { githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix } = options;
+        return readProjectFromGithub(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix,
+                                     { overwrite: false });
       }
     }
   };
+
+  async doSelectProject ({ project }) {
+    return this.selectProject(project);
+  }
 
   createNode () {
     const { paneLayout } = this.state;
@@ -296,7 +316,6 @@ class UI extends React.PureComponent {
     views.push({ view: 'files', title: 'Files' });
     views.push({ view: 'log', title: 'Log' });
     views.push({ view: 'parameters', title: 'Parameters' });
-    // views.push({ view: 'project', title: 'Project' });
 
     return views;
   }
@@ -341,20 +360,20 @@ class UI extends React.PureComponent {
 
     switch (view) {
       case 'geometry':
-        return <ViewUI key={`${id}/geometry/${file}`} id={id} file={file}/>;
+        return <ViewUi key={`${id}/geometry/${file}`} id={id} file={file}/>;
       case 'editScript':
-        return <JSEditorUI key={`${id}/editScript/${file}`} id={id} file={file}/>;
+        return <JSEditorUi key={`${id}/editScript/${file}`} id={id} file={file}/>;
       case 'files':
-        return <FilesUI key={id} id={id}/>;
+        return <FilesUi key={id} id={id}/>;
       case 'parameters': {
         const { parameters } = this.state;
-        return <ParametersUI key={id} id={id} parameters={parameters} onChange={this.updateParameters}/>;
+        return <ParametersUi key={id} id={id} parameters={parameters} onChange={this.updateParameters}/>;
       }
       // case 'project':
-      //  return <ProjectUI key={id} id={id} ui={this}/>;
+      //  return <ProjectUi key={id} id={id} ui={this}/>;
       case 'log': {
         const { log } = this.state;
-        return <LogUI key={id} id={id} log={log}/>;
+        return <LogUi key={id} id={id} log={log}/>;
       }
       default:
         return <div/>;
@@ -371,8 +390,17 @@ class UI extends React.PureComponent {
 
   doNav (to) {
     switch (to) {
-      case 'project/github': {
-        this.setState({ showGithubUi: true });
+      case 'io': {
+        this.setState({ showIoUi: true });
+        break;
+      }
+      case 'reference': {
+        window.open(`https://github.com/jsxcad/JSxCAD/wiki/Reference`);
+        break;
+      }
+      case 'selectProject': {
+        this.setState({ showSelectProjectUi: true });
+        break;
       }
     }
   }
@@ -381,16 +409,17 @@ class UI extends React.PureComponent {
     const { project, files, toast } = this.state;
     const views = this.buildViews(files);
 
-    const toasts = toast.map((entry, index) =>
-      <Toast key={`toast/${index}`}
+    const toasts = toast.map((entry, index) => {
+      const { text, duration = 1000 } = entry;
+      return <Toast key={`toast/${index}`}
         variant="info"
-        delay={1000}
+        delay={duration}
         show={true}
         autohide
         onClose={() => this.setState({ toast: toast.filter(item => item !== entry) })}>
-        {entry.text}
-      </Toast>
-    );
+        {text}
+      </Toast>;
+    });
 
     const toastDiv = toasts.length > 0
       ? <Alert key="toasts"
@@ -450,53 +479,36 @@ class UI extends React.PureComponent {
       );
     };
 
-    const { showGithubUi = false } = this.state;
+    const { showIoUi = false, showSelectProjectUi = false } = this.state;
+    const { projects = [] } = this.state;
 
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
-        <GithubUI
-          key='GithubUI'
-          show={showGithubUi}
-          storage='github'
-          onSubmit={({ action, owner, repository, prefix }) => {
-            this.doGithub(action, owner, repository, prefix);
-          }}
-          onHide={() => this.setState({ showGithubUi: false })}
+        <IoUi
+          key='ioUi'
+          show={showIoUi}
+          storage='io'
+          onSubmit={this.doGithub}
+          onHide={() => this.setState({ showIoUi: false })}
+        />
+        <SelectProjectUi
+          key='selectProjectUi'
+          show={showSelectProjectUi}
+          projects={projects}
+          storage='selectProject'
+          onSubmit={this.doSelectProject}
+          onHide={() => this.setState({ showSelectProjectUi: false })}
         />
         {switchViewModal()}
         {toastDiv}
         <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
-          <Navbar.Brand>JSxCAD preAlpha3</Navbar.Brand>
+          <Navbar.Brand>JSxCAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="mr-auto">
-              <NavDropdown title={project === '' ? 'Select Project' : `Project ${project}` }>
-                <InputGroup>
-                  <FormControl id="project/add/name" placeholder="Project Name" />
-                  <InputGroup.Append>
-                    <Button onClick={this.addProject} variant='outline-primary'>Add Project</Button>
-                  </InputGroup.Append>
-                </InputGroup>
-                {this.state
-                    .projects
-                    .map((project, index) =>
-                      <NavDropdown.Item
-                        key={index}
-                        variant="outline-primary"
-                        style={{ textAlign: 'left' }}
-                        onClick={() => this.selectProject(project)}
-                      >
-                        {project}
-                      </NavDropdown.Item>)}
-              </NavDropdown>
-              {
-                (project !== '') &&
-                <NavDropdown title="Project" onSelect={this.doNav}>
-                  <NavDropdown.Item eventKey="project/github">Github</NavDropdown.Item>
-                </NavDropdown>
-              }
-              <NavDropdown title="Reference">
-              </NavDropdown>
+            <Nav className="mr-auto" onSelect={this.doNav}>
+              <Nav.Item><Nav.Link eventKey='selectProject'>{project === '' ? 'Select' : project}</Nav.Link></Nav.Item>
+              {(project !== '') && <Nav.Item><Nav.Link eventKey='io'>I/O</Nav.Link></Nav.Item>}
+              <Nav.Item><Nav.Link eventKey='reference'>Reference</Nav.Link></Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
@@ -526,7 +538,7 @@ class UI extends React.PureComponent {
   }
 };
 
-class SettingsUI extends React.PureComponent {
+class SettingsUi extends React.PureComponent {
   static get propTypes () {
     return {
       onHide: PropTypes.func,
@@ -579,53 +591,117 @@ class SettingsUI extends React.PureComponent {
   }
 }
 
-class GithubUI extends SettingsUI {
+class IoUi extends SettingsUi {
   constructor (props) {
     super(props);
     this.state = {
-      owner: '',
-      repository: '',
-      prefix: `jsxcad/${getFilesystem()}/`
+      gistIsPublic: true,
+      gistUrl: '',
+      githubRepositoryOwner: '',
+      githubRepositoryRepository: '',
+      githubRepositoryPrefix: `jsxcad/${getFilesystem()}/`
     };
   }
 
   render () {
-    const { owner, repository, prefix } = this.state;
+    const { githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix } = this.state;
+    const { gistIsPublic = true, gistUrl } = this.state;
     return (
       <Modal show={this.props.show} onHide={this.doHide}>
         <Modal.Header closeButton>
-          <Modal.Title>Github Actions</Modal.Title>
+          <Modal.Title>I/O</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Owner</Form.Label>
-              <Form.Control name="owner" value={owner} onChange={this.doUpdate}/>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Repository</Form.Label>
-              <Form.Control name="repository" value={repository} onChange={this.doUpdate}/>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Path Prefix</Form.Label>
-              <Form.Control name="prefix" value={prefix} onChange={this.doUpdate}/>
-            </Form.Group>
-            <ButtonGroup>
-              <Button name="import" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'import' })}>
-                Import
-              </Button>
-              <Button name="export" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'export' })}>
-                Export
-              </Button>
-            </ButtonGroup>
-          </Form>
+          <Tabs defaultActiveKey="repository">
+            <Tab eventKey="repository" title="Github">
+              <Form>
+                <Form.Group>
+                  <Form.Label>Owner</Form.Label>
+                  <Form.Control name="githubRepositoryOwner" value={githubRepositoryOwner} onChange={this.doUpdate}/>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Repository</Form.Label>
+                  <Form.Control name="githubRepositoryRepository" value={githubRepositoryRepository} onChange={this.doUpdate}/>
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Path Prefix</Form.Label>
+                  <Form.Control name="githubRepositoryPrefix" value={githubRepositoryPrefix} onChange={this.doUpdate}/>
+                </Form.Group>
+                <ButtonGroup>
+                  <Button name="import" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'githubRepositoryImport' })}>
+                    Import
+                  </Button>
+                  <Button name="export" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'githubRepositoryExport' })}>
+                    Export
+                  </Button>
+                </ButtonGroup>
+              </Form>
+            </Tab>
+            <Tab eventKey="gist" title="Gist">
+              <Form>
+                <Form.Group>
+                  <Form.Label>Gist Url</Form.Label>
+                  <Form.Control name="gistUrl" value={gistUrl} onChange={this.doUpdate}/>
+                  <Form.Label>Gist is public?</Form.Label>
+                  <Form.Check checked={gistIsPublic} onChange={this.doUpdate}/>
+                </Form.Group>
+                <ButtonGroup>
+                  <Button name="import" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'gistImport' })}>
+                    Import
+                  </Button>
+                  <Button name="export" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'gistExport' })}>
+                    Export
+                  </Button>
+                </ButtonGroup>
+              </Form>
+            </Tab>
+          </Tabs>
         </Modal.Body>
       </Modal>
     );
   }
 }
 
-class ParametersUI extends React.PureComponent {
+class SelectProjectUi extends SettingsUi {
+  constructor (props) {
+    super(props);
+    this.state = {};
+  }
+
+  // <Card.Img variant="top" src="holder.js/100px160" />
+  render () {
+    const { projects } = this.props;
+    const rows = [];
+    for (let i = 0; i < projects.length; i += 5) {
+      rows.push(projects.slice(i, i + 5));
+    }
+    return (
+      <Modal show={this.props.show} onHide={this.doHide} size="xl" scrollable>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Tabs defaultActiveKey="projects" style={{ display: 'flex' }}>
+            <Tab eventKey="projects" title="CardGroup">
+              <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+                {projects.map((project, index) =>
+                  <Card tag="a"
+                    key={index} style={{ width: '196px', height: '128' }}
+                    onClick={(e) => this.doSubmit(e, { action: 'selectProject', project })}>
+                    <Card.Body>
+                      <Card.Title>{project}</Card.Title>
+                    </Card.Body>
+                  </Card>)}
+              </div>
+            </Tab>
+          </Tabs>
+        </Modal.Body>
+      </Modal>
+    );
+  }
+}
+
+class ParametersUi extends React.PureComponent {
   static get propTypes () {
     return {
       id: PropTypes.string,
@@ -733,7 +809,7 @@ class ParametersUI extends React.PureComponent {
 }
 
 /*
-class ProjectUI extends React.PureComponent {
+class ProjectUi extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -944,7 +1020,7 @@ class ProjectUI extends React.PureComponent {
 };
 */
 
-class FilesUI extends React.PureComponent {
+class FilesUi extends React.PureComponent {
   static get propTypes () {
     return {
       id: PropTypes.string
@@ -1062,7 +1138,7 @@ class FilesUI extends React.PureComponent {
   }
 };
 
-class ViewUI extends React.PureComponent {
+class ViewUi extends React.PureComponent {
   static get propTypes () {
     return {
       file: PropTypes.string,
@@ -1225,7 +1301,7 @@ class ViewUI extends React.PureComponent {
   }
 }
 
-class JSEditorUI extends React.PureComponent {
+class JSEditorUi extends React.PureComponent {
   static get propTypes () {
     return {
       file: PropTypes.string,
@@ -1382,7 +1458,7 @@ class JSEditorUI extends React.PureComponent {
   }
 };
 
-class LogUI extends React.PureComponent {
+class LogUi extends React.PureComponent {
   static get propTypes () {
     return {
       id: PropTypes.string,
@@ -1434,7 +1510,7 @@ const setupUi = async () => {
   const [encodedProject] = hash.split('@');
   const project = decodeURIComponent(encodedProject);
   ReactDOM.render(
-    <UI projects={[...filesystems]}
+    <Ui projects={[...filesystems]}
       project={project}
       width="100%"
       height="100%"

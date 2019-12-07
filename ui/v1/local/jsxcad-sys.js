@@ -3205,8 +3205,9 @@ const getFileLister = async () => {
   } else if (isBrowser) {
     return async () => {
       console.log(`QQ/scan/start`);
+/*
       // FIX: Remove 'file' -> 'source' migration.
-      const keys = new Set(await localforage.keys());
+      const keys = new Set(await localForage.keys());
       for (const key of keys) {
         const [domain, project, partition, ...pieces] = key.split('/');
         console.log(`QQ/considering: ${key}`);
@@ -3215,14 +3216,15 @@ const getFileLister = async () => {
           console.log(`QQ/Considering: ${key}`);
           if (keys.has(newKey)) {
             console.log(`QQ/remove: ${key}`);
-            await localforage.removeItem(key);
+            await localForage.removeItem(key);
           } else {
             console.log(`QQ/fix: ${key} -> ${newKey}`);
-            await localforage.setItem(newKey, await localforage.getItem(key));
+            await localForage.setItem(newKey, await localForage.getItem(key));
           }
         }
       }
       console.log(`QQ/scan/end`);
+*/
       const qualifiedPaths = new Set(await localforage.keys());
       return qualifiedPaths;
     };
@@ -3357,7 +3359,13 @@ const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
     worker.on('message', hear);
     return { ask, stop };
   } else if (isBrowser) {
-    const worker = new Worker(webWorker, { type: workerType });
+    let worker;
+    try {
+      worker = new Worker(webWorker, { type: workerType });
+    } catch (e) {
+      log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+      throw Error('die');
+    }
     const say = (message) => worker.postMessage(message);
     const { ask, hear } = conversation({ agent, say });
     worker.onmessage = ({ data }) => hear(data);
