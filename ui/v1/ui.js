@@ -506,8 +506,8 @@ class Ui extends React.PureComponent {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto" onSelect={this.doNav}>
-              <Nav.Item><Nav.Link eventKey='selectProject'>{project === '' ? 'Select' : project}</Nav.Link></Nav.Item>
-              {(project !== '') && <Nav.Item><Nav.Link eventKey='io'>I/O</Nav.Link></Nav.Item>}
+              <Nav.Item><Nav.Link eventKey='selectProject'>Project{project === '' ? '' : ` (${project})`}</Nav.Link></Nav.Item>
+              {(project !== '') && <Nav.Item><Nav.Link eventKey='io'>Share</Nav.Link></Nav.Item>}
               <Nav.Item><Nav.Link eventKey='reference'>Reference</Nav.Link></Nav.Item>
             </Nav>
           </Navbar.Collapse>
@@ -609,7 +609,7 @@ class IoUi extends SettingsUi {
     return (
       <Modal show={this.props.show} onHide={this.doHide}>
         <Modal.Header closeButton>
-          <Modal.Title>I/O</Modal.Title>
+          <Modal.Title>Share</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Tabs defaultActiveKey="repository">

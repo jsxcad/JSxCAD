@@ -12,9 +12,7 @@ export const toTransformedGeometry = (geometry) => {
         // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
         return walk(multiply(matrix, geometry.matrix),
                     geometry.untransformed);
-      }
-
-      if (geometry.assembly) {
+      } else if (geometry.assembly) {
         // CHECK: Why at this level?
         return {
           assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
