@@ -1,7 +1,8 @@
 /* global Worker */
 
-import { isBrowser, isNode } from './browserOrNode.js';
-import { conversation } from './conversation.js';
+import { isBrowser, isNode } from './browserOrNode';
+import { conversation } from './conversation';
+import { log } from './log';
 
 // Sets up a worker with conversational interface.
 export const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
@@ -25,7 +26,13 @@ export const createService = async ({ nodeWorker, webWorker, agent, workerType }
     worker.on('message', hear);
     return { ask, stop };
   } else if (isBrowser) {
-    const worker = new Worker(webWorker, { type: workerType });
+    let worker;
+    try {
+      worker = new Worker(webWorker, { type: workerType });
+    } catch (e) {
+      log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+      throw Error('die');
+    }
     const say = (message) => worker.postMessage(message);
     const { ask, hear } = conversation({ agent, say });
     worker.onmessage = ({ data }) => hear(data);

@@ -55,15 +55,8 @@ export const rootRadius = (mmPerTooth = Math.PI, numberOfTeeth = 16, clearance =
   return p - (c - p) - clearance;
 }
 
-export const profile =
-    ({
-      mmPerTooth = Math.PI,
-      numberOfTeeth = 16,
-      teethToHide = 0,
-      pressureAngle = 20,
-      clearance = 0,
-      backlash = 0
-    } = {}) => {
+export const profile = (numberOfTeeth = 16,
+                        { mmPerTooth = Math.PI, teethToHide = 0, pressureAngle = 20, clearance = 0, backlash = 0 } = {}) => {
       const pi = Math.PI;
       // const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
       const p = pitchRadius(mmPerTooth, numberOfTeeth);
@@ -82,6 +75,16 @@ export const profile =
       }
       return profile.close();
     };
+
+export Gear = (numberOfTeeth, thickness = 1, options) =>
+  profile(numberOfTeeth, options)
+    .interior()
+    .extrude(thickness);
+
+export RoundedGear = (numberOfTeeth, thickness = 1, options) =>
+  profile(numberOfTeeth, options)
+    .interior()
+    .op(profile => easedExtrude(profile, round, thickness));
 
 export const main = () =>
   profile()

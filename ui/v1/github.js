@@ -1,80 +1,15 @@
-/* global window, setTimeout */
+import { CONFLICT, CREATED, OK, eq, request as githubRequest } from './githubRequest';
 
-import { log, readFile, writeFile } from '@jsxcad/sys';
+import { writeFile } from '@jsxcad/sys';
 
 const FILE = '100644';
 
-const OK = 200;
-const CREATED = 201;
-const CONFLICT = 409;
+const request = (isOk, path, method, body, options) =>
+  githubRequest(isOk, path, method, body, { ...options, service: 'githubRepository' });
 
-const eq = (...values) => (match) => values.includes(match);
-
-const sleep = (duration) => new Promise((resolve, reject) => setTimeout(resolve, duration));
-
-const getAccessToken = async (service) =>
-  readFile({ project: '.system', useCache: false }, `auth/${service}/accessToken`);
-
-const getNewAccessToken = async (service, oldToken = undefined, attempts = 10) => {
-  await log({ op: 'text', text: `Re-Authenticating ${service}`, level: 'serious' });
-  window.open(`http://167.99.163.104:3000/auth/${service}?${service}Callback=${window.location.href}`);
-  while (--attempts > 0) {
-    const token = await readFile({ project: '.system', useCache: false }, `auth/${service}/accessToken`);
-    if (token === undefined || token === oldToken) {
-      await sleep(1000);
-    }
-    if (token !== oldToken) {
-      return token;
-    }
-  }
-};
-
-export const get = async (isOk, path, options) => request(isOk, path, 'GET', undefined, options);
-export const post = async (isOk, path, body, options) => request(isOk, path, 'POST', body, options);
-export const patch = async (isOk, path, body, options) => request(isOk, path, 'PATCH', body, options);
-
-export const request = async (isOk, path, method, body, { attempts = 2, format = 'json' } = {}) => {
-  let token = await getAccessToken('githubRepository');
-  const headers = {
-    'Accept': 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json',
-    'User-Agent': 'JSxCAD v0.0.79',
-    'Authorization': `token ${token}`
-  };
-  if (body !== undefined) {
-    body = JSON.stringify(body);
-  }
-  const request = { method, headers, body };
-  while (--attempts > 0) {
-    if (token === undefined) {
-      token = await getNewAccessToken('githubRepository', token);
-      if (token === undefined) {
-        return;
-      }
-    }
-    const response = await window.fetch(`https://api.github.com/${path}`, request);
-    console.log(`QQ/request/path: ${path}`);
-    console.log(`QQ/request/status: ${response.status}`);
-    console.log(`QQ/request/req: ${JSON.stringify(body)}`);
-    if (isOk(response.status)) {
-      switch (format) {
-        case 'json': {
-          const body = await response.json();
-          console.log(`QQ/request/body: ${JSON.stringify(body)}`);
-          return body;
-        }
-        case 'bytes': {
-          const body = await response.arrayBuffer();
-          return body;
-        }
-        default: {
-          return;
-        }
-      }
-    }
-    token = undefined;
-  }
-};
+const get = async (isOk, path, options) => request(isOk, path, 'GET', undefined, options);
+const post = async (isOk, path, body, options) => request(isOk, path, 'POST', body, options);
+const patch = async (isOk, path, body, options) => request(isOk, path, 'PATCH', body, options);
 
 export const findRepository = async (repositoryName) => {
   const repositories = await get(eq(200), 'user/repos');
