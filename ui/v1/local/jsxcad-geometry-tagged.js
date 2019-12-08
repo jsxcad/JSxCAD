@@ -171,7 +171,7 @@ const eachItem = (geometry, operation) => {
   walk(geometry);
 };
 
-const getConnections$1 = (geometry) => {
+const getConnections = (geometry) => {
   const connections = [];
   eachItem(geometry,
            item => {
@@ -182,7 +182,7 @@ const getConnections$1 = (geometry) => {
   return connections;
 };
 
-const getItems$1 = (geometry) => {
+const getItems = (geometry) => {
   const items = [];
   eachItem(geometry,
            item => {
@@ -204,7 +204,7 @@ const getPaths = (geometry) => {
   return pathsets;
 };
 
-const getPlans$1 = (geometry) => {
+const getPlans = (geometry) => {
   const plans = [];
   eachItem(geometry,
            item => {
@@ -215,7 +215,7 @@ const getPlans$1 = (geometry) => {
   return plans;
 };
 
-const getPoints$1 = (geometry) => {
+const getPoints = (geometry) => {
   const pointsets = [];
   eachItem(geometry,
            item => {
@@ -355,19 +355,19 @@ const differenceImpl = (baseGeometry, ...geometries) => {
     result.disjointAssembly.push({ paths: difference$4(paths, ...pathsets), tags });
   }
   // Plans
-  for (const plan of getPlans$1(baseGeometry)) {
+  for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
   }
   // Connections
-  for (const connection of getConnections$1(baseGeometry)) {
+  for (const connection of getConnections(baseGeometry)) {
     result.disjointAssembly.push(connection);
   }
   // Items
-  for (const item of getItems$1(baseGeometry)) {
+  for (const item of getItems(baseGeometry)) {
     result.disjointAssembly.push(item);
   }
   // Points
-  for (const points of getPoints$1(baseGeometry)) {
+  for (const points of getPoints(baseGeometry)) {
     // FIX: Actually subtract points.
     result.disjointAssembly.push(points);
   }
@@ -633,11 +633,19 @@ const toKeptGeometry = (geometry) => {
         if (geometry.disjointAssembly) {
           const kept = geometry.disjointAssembly.map(walk).filter(item => item !== undefined);
           if (kept.length > 0) {
-            const kept = { ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined) };
+            const kept = {
+              ...geometry,
+              disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined)
+            };
             geometry[keptGeometry] = kept;
             return kept;
           } else {
             return undefined;
+          }
+        } else if (geometry.connection) {
+          return {
+            ...geometry,
+            geometries: geometry.geometries.map(toKeptGeometry)
           }
         } else {
           return geometry;
@@ -887,4 +895,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems$1 as getItems, getPaths, getPlans$1 as getPlans, getPoints$1 as getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toStandardGeometry, toTransformedGeometry, transform, translate, union };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toStandardGeometry, toTransformedGeometry, transform, translate, union };

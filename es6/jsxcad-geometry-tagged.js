@@ -633,11 +633,19 @@ const toKeptGeometry = (geometry) => {
         if (geometry.disjointAssembly) {
           const kept = geometry.disjointAssembly.map(walk).filter(item => item !== undefined);
           if (kept.length > 0) {
-            const kept = { ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined) };
+            const kept = {
+              ...geometry,
+              disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined)
+            };
             geometry[keptGeometry] = kept;
             return kept;
           } else {
             return undefined;
+          }
+        } else if (geometry.connection) {
+          return {
+            ...geometry,
+            geometries: geometry.geometries.map(toKeptGeometry)
           }
         } else {
           return geometry;
