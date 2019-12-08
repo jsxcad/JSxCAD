@@ -1,5 +1,5 @@
 import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { cache, cacheTransform, cacheRewriteTags } from './jsxcad-cache.js';
+import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
 import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
@@ -39,91 +39,75 @@ const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
 
 const assemble = cache(assembleImpl);
 
-const transformItem = (matrix, item) => {
-  const transformed = {};
-  if (item.assembly) {
-    // CHECK
-    transformed.assembly = item.assembly;
-  } else if (item.disjointAssembly) {
-    // CHECK
-    transformed.disjointAssembly = item.disjointAssembly;
-  } else if (item.item) {
-    // CHECK
-    transformed.item = item.item;
-  } else if (item.paths) {
-    transformed.paths = transform$1(matrix, item.paths);
-  } else if (item.plan) {
-    transformed.plan = item.plan;
-    transformed.marks = transform$2(matrix, item.marks);
-    transformed.planes = item.planes.map(plane => transform$3(matrix, plane));
-    transformed.visualization = transformItem(matrix, item.visualization);
-  } else if (item.points) {
-    transformed.points = transform$2(matrix, item.points);
-  } else if (item.solid) {
-    transformed.solid = transform$4(matrix, item.solid);
-  } else if (item.surface) {
-    transformed.surface = transform$5(matrix, item.surface);
-  } else if (item.z0Surface) {
-    // FIX: Consider transforms that preserve z0.
-    transformed.surface = transform$5(matrix, item.z0Surface);
-  } else if (item.empty) {
-    transformed.empty = true;
-  } else {
-    throw Error(`die: ${JSON.stringify(item)}`);
-  }
-  transformed.tags = item.tags;
-  return transformed;
-};
-
-const transformImpl = (matrix, untransformed) => {
-  if (matrix.some(value => typeof value !== 'number' || isNaN(value))) {
-    throw Error('die');
-  }
-  return { matrix, untransformed, tags: untransformed.tags };
-};
-
-const transform = cacheTransform(transformImpl);
+const transformedGeometry = Symbol('transformedGeometry');
 
 // Apply the accumulated matrix transformations and produce a geometry without them.
 
 const toTransformedGeometry = (geometry) => {
-  if (geometry.transformedGeometry === undefined) {
+  if (geometry[transformedGeometry] === undefined) {
     const walk = (matrix, geometry) => {
+      const { tags } = geometry;
       if (geometry.matrix) {
         // Preserve any tags applied to the untransformed geometry.
         // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
         return walk(multiply(matrix, geometry.matrix),
                     geometry.untransformed);
-      }
-
-      if (geometry.assembly) {
-        // CHECK: Why at this level?
+      } else if (geometry.assembly) {
         return {
           assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
-          tags: geometry.tags
+          tags
         };
       } else if (geometry.disjointAssembly) {
-        // CHECK: Why at this level?
         return {
           disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
-          tags: geometry.tags
+          tags
         };
       } else if (geometry.item) {
-        // CHECK: Why at this level?
         return {
           item: walk(matrix, geometry.item),
-          tags: geometry.tags
+          tags
         };
+      } else if (geometry.paths) {
+        return {
+          paths: transform$1(matrix, geometry.paths),
+          tags
+        };
+      } else if (geometry.plan) {
+        return {
+          plan: geometry.plan,
+          marks: transform$2(matrix, geometry.marks),
+          planes: geometry.planes.map(plane => transform$3(matrix, plane)),
+          visualization: walk(matrix, geometry.visualization),
+          tags
+        };
+      } else if (geometry.points) {
+        return {
+          points: transform$2(matrix, geometry.points),
+          tags
+        };
+      } else if (geometry.solid) {
+        return {
+          solid: transform$4(matrix, geometry.solid),
+          tags
+        };
+      } else if (geometry.surface) {
+        return {
+          surface: transform$5(matrix, geometry.surface),
+          tags
+        };
+      } else if (geometry.z0Surface) {
+        // FIX: Consider transforms that preserve z0.
+        return {
+          surface: transform$5(matrix, geometry.z0Surface),
+          tags
+        };
+      } else {
+        throw Error(`die: ${JSON.stringify(geometry)}`);
       }
-      // else if (geometry.visualization) {
-      //   return { ...geometry, visualization: walk(matrix, geometry.visualization) };
-      // }
-      return transformItem(matrix, geometry);
     };
-
-    geometry.transformed = walk(identity(), geometry);
+    geometry[transformedGeometry] = walk(identity(), geometry);
   }
-  return geometry.transformed;
+  return geometry[transformedGeometry];
 };
 
 const canonicalize = (rawGeometry) => {
@@ -779,6 +763,15 @@ const toStandardGeometry = (geometry) => {
 
   return walk(geometry);
 };
+
+const transformImpl = (matrix, untransformed) => {
+  if (matrix.some(value => typeof value !== 'number' || isNaN(value))) {
+    throw Error('die');
+  }
+  return { matrix, untransformed, tags: untransformed.tags };
+};
+
+const transform = cacheTransform(transformImpl);
 
 const unionImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
