@@ -1,4 +1,5 @@
 import { cache } from '@jsxcad/cache';
+import { getConnections } from './getConnections';
 import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
@@ -46,6 +47,10 @@ const differenceImpl = (baseGeometry, ...geometries) => {
   // Plans
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  // Connections
+  for (const connection of getConnections(baseGeometry)) {
+    result.disjointAssembly.push(connection);
   }
   // Items
   for (const item of getItems(baseGeometry)) {

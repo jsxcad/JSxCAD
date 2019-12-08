@@ -10,6 +10,8 @@ export const toStandardGeometry = (geometry) => {
       return { plan: item.plan, marks: item.marks, planes: item.planes, visualization: item.visualization, tags: item.tags };
     } else if (item.item) {
       return { item: item.item, tags: item.tags };
+    } else if (item.connection) {
+      return { connection: item.connection.map(walk), geometries: item.geometries.map(walk), connectors: item.connectors.map(walk), tags: item.tags };
     } else if (item.solid) {
       return { solid: item.solid, tags: item.tags };
     } else if (item.surface) {

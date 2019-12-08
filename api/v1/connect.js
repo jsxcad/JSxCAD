@@ -2,7 +2,6 @@ import { drop, toTransformedGeometry } from '@jsxcad/geometry-tagged';
 import { negate, subtract } from '@jsxcad/math-vec3';
 
 import Shape from './Shape';
-import assemble from './assemble';
 import { shapeToConnect } from './Connector';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
@@ -37,7 +36,7 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 };
 
 // Connect two shapes at the specified connector.
-export const connect = (aConnectorShape, bConnectorShape, { doAssemble = true } = {}) => {
+export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) => {
   const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
   const aShape = aConnectorShape.getContext(shapeToConnect);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
@@ -67,9 +66,14 @@ export const connect = (aConnectorShape, bConnectorShape, { doAssemble = true } 
   // Move a to the oriented position of b.
   const aMoved = aFlatBShape.transform(bFrom);
 
-  if (doAssemble) {
-    return assemble(dropConnector(aMoved, aConnector.plan.connector),
-                    dropConnector(bShape, bConnector.plan.connector));
+  if (doConnect) {
+    return Shape.fromGeometry(
+      {
+        connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
+        connectors: [aConnector, bConnector],
+        geometries: [dropConnector(aMoved, aConnector.plan.connector).toGeometry(),
+                     dropConnector(bShape, bConnector.plan.connector).toGeometry()]
+      });
   } else {
     return aMoved;
   }

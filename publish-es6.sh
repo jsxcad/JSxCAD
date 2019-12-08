@@ -1,7 +1,5 @@
 #!/bin/bash
 
-npm run rollup
-
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp math/line2/dist/main.js es6/jsxcad-math-line2.js
 cp math/mat4/dist/main.js es6/jsxcad-math-mat4.js

@@ -30,6 +30,7 @@ const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) =>
   const walk = (geometry) => {
     if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
     if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
+    if (geometry.connection) { return { connection: geometry.connection, geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk), tags: composeTags(geometry.tags) }; }
     if (geometry.item) { return { item: walk(geometry.item), tags: composeTags(geometry.tags) }; }
     if (geometry.paths) { return { paths: geometry.paths, tags: composeTags(geometry.tags) }; }
     if (geometry.plan) { return { plan: geometry.plan, marks: geometry.marks, planes: geometry.planes, visualization: geometry.visualization, tags: composeTags(geometry.tags) }; }

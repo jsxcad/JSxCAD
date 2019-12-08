@@ -1,8 +1,13 @@
 import { cache } from '@jsxcad/cache';
+import { getConnections } from './getConnections';
+import { getItems } from './getItems';
 import { getPaths } from './getPaths';
+import { getPlans } from './getPlans';
+import { getPoints } from './getPoints';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
+import { isNegative } from './nonNegative';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
 import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolean';
 import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface-boolean';
@@ -33,9 +38,26 @@ const intersectionImpl = (baseGeometry, ...geometries) => {
     result.assembly.push({ surface: surfaceIntersection(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
-  const pathsets = geometries.flatMap(geometry => getPaths(geometry).map(item => item.paths));
+  const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
   for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.assembly.push({ paths: pathsIntersection(paths, ...pathsets), tags });
+    result.disjointAssembly.push({ paths: pathsIntersection(paths, ...pathsets), tags });
+  }
+  // Plans
+  for (const plan of getPlans(baseGeometry)) {
+    result.disjointAssembly.push(plan);
+  }
+  // Connections
+  for (const connection of getConnections(baseGeometry)) {
+    result.disjointAssembly.push(connection);
+  }
+  // Items
+  for (const item of getItems(baseGeometry)) {
+    result.disjointAssembly.push(item);
+  }
+  // Points
+  for (const points of getPoints(baseGeometry)) {
+    // FIX: Actually subtract points.
+    result.disjointAssembly.push(points);
   }
   // FIX: Surfaces, Paths, etc.
   return result;

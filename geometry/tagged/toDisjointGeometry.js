@@ -9,6 +9,12 @@ const toDisjointAssembly = (geometry) => {
     return geometry.disjoint;
   } else if (geometry.item !== undefined) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
+  } else if (geometry.connection !== undefined) {
+    return {
+      ...geometry,
+      connectors: geometry.connectors.map(toDisjointGeometry),
+      geometries: geometry.geometries.map(toDisjointGeometry)
+    };
   } else if (geometry.assembly !== undefined) {
     if (geometry.assembly.length === 0) {
       return { disjointAssembly: [] };

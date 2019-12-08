@@ -17,6 +17,10 @@ export const canonicalize = (rawGeometry) => {
     canonicalized.marks = canonicalizePoints(geometry.marks);
     canonicalized.planes = geometry.planes.map(canonicalizePlane);
     canonicalized.visualization = canonicalize(geometry.visualization);
+  } else if (geometry.connection) {
+    canonicalized.connection = geometry.connection;
+    canonicalized.geometries = geometry.geometries.map(canonicalize); ;
+    canonicalized.connectors = geometry.connectors.map(canonicalize); ;
   } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalizeSurface(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {
