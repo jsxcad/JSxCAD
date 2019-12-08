@@ -34,6 +34,10 @@ export const flip = (geometry) => {
       flipped.planes = geometry.planes;
       flipped.visualization = geometry.visualization;
     }
+  } else if (geometry.connection) {
+    flipped.connection = geometry.connection;
+    flipped.geometries = geometry.geometries.map(flip);
+    flipped.connectors = geometry.connectors.map(flip);
   } else if (geometry.item) {
     // FIX: How should items deal with flip?
     flipped.item = geometry.item;

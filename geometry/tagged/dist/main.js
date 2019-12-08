@@ -67,6 +67,15 @@ const toTransformedGeometry = (geometry) => {
           item: walk(matrix, geometry.item),
           tags
         };
+      } else if (geometry.connection) {
+        return {
+          // A connection is a list of geometry with connections (connectors that have been connected)
+          // The join can be released, to yield the geometry with the disconnected connections reconnected.
+          connection: geometry.connection,
+          geometries: geometry.geometries.map(geometry => walk(matrix, geometry)),
+          connectors: geometry.connectors.map(connector => walk(matrix, connector)),
+          tags
+        };
       } else if (geometry.paths) {
         return {
           paths: transform$1(matrix, geometry.paths),
@@ -122,7 +131,9 @@ const canonicalize = (rawGeometry) => {
     canonicalized.marks = canonicalize$1(geometry.marks);
     canonicalized.planes = geometry.planes.map(canonicalize$3);
     canonicalized.visualization = canonicalize(geometry.visualization);
-  } else if (geometry.surface !== undefined) {
+  } else if (geometry.connection) {
+    canonicalized.connection = geometry.connection;
+    canonicalized.geometries = geometry.geometries.map(canonicalize);    canonicalized.connectors = geometry.connectors.map(canonicalize);  } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalize$4(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {
     canonicalized.z0Surface = canonicalize$4(geometry.z0Surface);
@@ -158,6 +169,17 @@ const eachItem = (geometry, operation) => {
     operation(geometry);
   };
   walk(geometry);
+};
+
+const getConnections = (geometry) => {
+  const connections = [];
+  eachItem(geometry,
+           item => {
+             if (item.connection) {
+               connections.push(item);
+             }
+           });
+  return connections;
 };
 
 const getItems = (geometry) => {
@@ -276,6 +298,7 @@ const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) =>
   const walk = (geometry) => {
     if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
     if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
+    if (geometry.connection) { return { connection: geometry.connection, geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk), tags: composeTags(geometry.tags) }; }
     if (geometry.item) { return { item: walk(geometry.item), tags: composeTags(geometry.tags) }; }
     if (geometry.paths) { return { paths: geometry.paths, tags: composeTags(geometry.tags) }; }
     if (geometry.plan) { return { plan: geometry.plan, marks: geometry.marks, planes: geometry.planes, visualization: geometry.visualization, tags: composeTags(geometry.tags) }; }
@@ -334,6 +357,10 @@ const differenceImpl = (baseGeometry, ...geometries) => {
   // Plans
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  // Connections
+  for (const connection of getConnections(baseGeometry)) {
+    result.disjointAssembly.push(connection);
   }
   // Items
   for (const item of getItems(baseGeometry)) {
@@ -407,6 +434,10 @@ const flip = (geometry) => {
       flipped.planes = geometry.planes;
       flipped.visualization = geometry.visualization;
     }
+  } else if (geometry.connection) {
+    flipped.connection = geometry.connection;
+    flipped.geometries = geometry.geometries.map(flip);
+    flipped.connectors = geometry.connectors.map(flip);
   } else if (geometry.item) {
     // FIX: How should items deal with flip?
     flipped.item = geometry.item;
@@ -494,9 +525,26 @@ const intersectionImpl = (baseGeometry, ...geometries) => {
     result.assembly.push({ surface: intersection$3(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
-  const pathsets = geometries.flatMap(geometry => getPaths(geometry).map(item => item.paths));
+  const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
   for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.assembly.push({ paths: intersection$4(paths, ...pathsets), tags });
+    result.disjointAssembly.push({ paths: intersection$4(paths, ...pathsets), tags });
+  }
+  // Plans
+  for (const plan of getPlans(baseGeometry)) {
+    result.disjointAssembly.push(plan);
+  }
+  // Connections
+  for (const connection of getConnections(baseGeometry)) {
+    result.disjointAssembly.push(connection);
+  }
+  // Items
+  for (const item of getItems(baseGeometry)) {
+    result.disjointAssembly.push(item);
+  }
+  // Points
+  for (const points of getPoints(baseGeometry)) {
+    // FIX: Actually subtract points.
+    result.disjointAssembly.push(points);
   }
   // FIX: Surfaces, Paths, etc.
   return result;
@@ -531,6 +579,12 @@ const toDisjointAssembly = (geometry) => {
     return geometry.disjoint;
   } else if (geometry.item !== undefined) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
+  } else if (geometry.connection !== undefined) {
+    return {
+      ...geometry,
+      connectors: geometry.connectors.map(toDisjointGeometry),
+      geometries: geometry.geometries.map(toDisjointGeometry)
+    };
   } else if (geometry.assembly !== undefined) {
     if (geometry.assembly.length === 0) {
       return { disjointAssembly: [] };
@@ -579,11 +633,19 @@ const toKeptGeometry = (geometry) => {
         if (geometry.disjointAssembly) {
           const kept = geometry.disjointAssembly.map(walk).filter(item => item !== undefined);
           if (kept.length > 0) {
-            const kept = { ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined) };
+            const kept = {
+              ...geometry,
+              disjointAssembly: geometry.disjointAssembly.map(walk).filter(item => item !== undefined)
+            };
             geometry[keptGeometry] = kept;
             return kept;
           } else {
             return undefined;
+          }
+        } else if (geometry.connection) {
+          return {
+            ...geometry,
+            geometries: geometry.geometries.map(toKeptGeometry)
           }
         } else {
           return geometry;
@@ -750,6 +812,8 @@ const toStandardGeometry = (geometry) => {
       return { plan: item.plan, marks: item.marks, planes: item.planes, visualization: item.visualization, tags: item.tags };
     } else if (item.item) {
       return { item: item.item, tags: item.tags };
+    } else if (item.connection) {
+      return { connection: item.connection.map(walk), geometries: item.geometries.map(walk), connectors: item.connectors.map(walk), tags: item.tags };
     } else if (item.solid) {
       return { solid: item.solid, tags: item.tags };
     } else if (item.surface) {
@@ -798,9 +862,26 @@ const unionImpl = (baseGeometry, ...geometries) => {
     result.assembly.push({ surface: union$1(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
-  const pathsets = geometries.flatMap(geometry => getPaths(geometry).map(item => item.paths));
+  const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
   for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.assembly.push({ paths: union$4(paths, ...pathsets), tags });
+    result.disjointAssembly.push({ paths: union$4(paths, ...pathsets), tags });
+  }
+  // Plans
+  for (const plan of getPlans(baseGeometry)) {
+    result.disjointAssembly.push(plan);
+  }
+  // Connections
+  for (const connection of getConnections(baseGeometry)) {
+    result.disjointAssembly.push(connection);
+  }
+  // Items
+  for (const item of getItems(baseGeometry)) {
+    result.disjointAssembly.push(item);
+  }
+  // Points
+  for (const points of getPoints(baseGeometry)) {
+    // FIX: Actually subtract points.
+    result.disjointAssembly.push(points);
   }
   // FIX: Surfaces, Paths, etc.
   return result;

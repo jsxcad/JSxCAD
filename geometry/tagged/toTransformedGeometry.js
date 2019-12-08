@@ -34,6 +34,15 @@ export const toTransformedGeometry = (geometry) => {
           item: walk(matrix, geometry.item),
           tags
         };
+      } else if (geometry.connection) {
+        return {
+          // A connection is a list of geometry with connections (connectors that have been connected)
+          // The join can be released, to yield the geometry with the disconnected connections reconnected.
+          connection: geometry.connection,
+          geometries: geometry.geometries.map(geometry => walk(matrix, geometry)),
+          connectors: geometry.connectors.map(connector => walk(matrix, connector)),
+          tags
+        };
       } else if (geometry.paths) {
         return {
           paths: transformPaths(matrix, geometry.paths),

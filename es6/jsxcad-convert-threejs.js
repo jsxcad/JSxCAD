@@ -51636,9 +51636,6 @@ const toThreejsGeometry = (geometry, supertags) => {
     };
   } else if (geometry.disjointAssembly) {
     const items = geometry.disjointAssembly;
-    if (geometry.nonNegative) {
-      items.push(...geometry.nonNegative);
-    }
     return {
       assembly: items.map(item => toThreejsGeometry(item, tags)),
       tags,
@@ -51647,6 +51644,12 @@ const toThreejsGeometry = (geometry, supertags) => {
   } else if (geometry.item) {
     return {
       item: toThreejsGeometry(geometry.item, tags),
+      tags,
+      isThreejsGeometry: true
+    };
+  } else if (geometry.connection) {
+    return {
+      assembly: geometry.geometries.map(item => toThreejsGeometry(item, tags)),
       tags,
       isThreejsGeometry: true
     };
