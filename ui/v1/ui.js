@@ -1,4 +1,4 @@
-/* global Blob, FileReader, ResizeObserver, history, location, window */
+/* global history, location, window */
 
 import {
   Mosaic,
@@ -21,18 +21,12 @@ import {
   setupFilesystem,
   unwatchFileCreation,
   unwatchFileDeletion,
-  unwatchFiles,
   unwatchLog,
-  watchFile,
   watchFileCreation,
   watchFileDeletion,
   watchLog,
   writeFile
 } from '@jsxcad/sys';
-
-import { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud } from '@jsxcad/ui-threejs';
-
-// import { fromZipToFilesystem, toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 import {
   readProject as readProjectFromGithub,
@@ -43,28 +37,25 @@ import AceEditor from 'react-ace';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
-import InputGroup from 'react-bootstrap/InputGroup';
+import FilesUi from './FilesUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import ParametersUi from './ParametersUi';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
+import SelectProjectUi from './SelectProjectUi';
+import ShareUi from './ShareUi';
 import Toast from 'react-bootstrap/Toast';
+import ViewUi from './ViewUi';
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { deepEqual } from 'fast-equals';
 import { prismJSAuxiliary } from './PrismJSAuxiliary';
-import saveAs from 'file-saver';
-import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 import { writeProject as writeProjectToGist } from './gist';
 
 if (!aceEditorAuxiliary || !prismJSAuxiliary) {
@@ -358,6 +349,8 @@ class Ui extends React.PureComponent {
   renderView (id) {
     const { view, file } = this.getPaneView(id);
 
+    id = `${id}`;
+
     switch (view) {
       case 'geometry':
         return <ViewUi key={`${id}/geometry/${file}`} id={id} file={file}/>;
@@ -391,7 +384,7 @@ class Ui extends React.PureComponent {
   doNav (to) {
     switch (to) {
       case 'io': {
-        this.setState({ showIoUi: true });
+        this.setState({ showShareUi: true });
         break;
       }
       case 'reference': {
@@ -479,17 +472,17 @@ class Ui extends React.PureComponent {
       );
     };
 
-    const { showIoUi = false, showSelectProjectUi = false } = this.state;
+    const { showShareUi = false, showSelectProjectUi = false } = this.state;
     const { projects = [] } = this.state;
 
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
-        <IoUi
-          key='ioUi'
-          show={showIoUi}
-          storage='io'
+        <ShareUi
+          key='shareUi'
+          show={showShareUi}
+          storage='share'
           onSubmit={this.doGithub}
-          onHide={() => this.setState({ showIoUi: false })}
+          onHide={() => this.setState({ showShareUi: false })}
         />
         <SelectProjectUi
           key='selectProjectUi'
@@ -506,7 +499,11 @@ class Ui extends React.PureComponent {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto" onSelect={this.doNav}>
-              <Nav.Item><Nav.Link eventKey='selectProject'>Project{project === '' ? '' : ` (${project})`}</Nav.Link></Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey='selectProject'>
+                  Project{project === '' ? '' : ` (${project})`}
+                </Nav.Link>
+              </Nav.Item>
               {(project !== '') && <Nav.Item><Nav.Link eventKey='io'>Share</Nav.Link></Nav.Item>}
               <Nav.Item><Nav.Link eventKey='reference'>Reference</Nav.Link></Nav.Item>
             </Nav>
@@ -537,276 +534,6 @@ class Ui extends React.PureComponent {
     );
   }
 };
-
-class SettingsUi extends React.PureComponent {
-  static get propTypes () {
-    return {
-      onHide: PropTypes.func,
-      onSubmit: PropTypes.func,
-      storage: PropTypes.string
-    };
-  }
-
-  constructor (props) {
-    super(props);
-    this.doHide = this.doHide.bind(this);
-    this.doSubmit = this.doSubmit.bind(this);
-    this.doUpdate = this.doUpdate.bind(this);
-    this.state = {};
-  }
-
-  async componentDidMount () {
-    const { storage } = this.props;
-    const state = await readFile({}, `settings/${storage}`);
-    if (state !== undefined) {
-      this.setState(JSON.parse(state));
-    }
-  }
-
-  doHide (event) {
-    const { onHide } = this.props;
-    if (onHide) {
-      onHide(this.state);
-    }
-  }
-
-  async doSubmit (event, payload) {
-    this.setState(payload);
-    const { onSubmit, storage } = this.props;
-    if (storage) {
-      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
-    }
-    if (onSubmit) {
-      onSubmit(this.state);
-    }
-    this.doHide();
-    event.preventDefault();
-  }
-
-  doUpdate (event) {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-    this.setState({ [name]: value });
-  }
-}
-
-class IoUi extends SettingsUi {
-  constructor (props) {
-    super(props);
-    this.state = {
-      gistIsPublic: true,
-      gistUrl: '',
-      githubRepositoryOwner: '',
-      githubRepositoryRepository: '',
-      githubRepositoryPrefix: `jsxcad/${getFilesystem()}/`
-    };
-  }
-
-  render () {
-    const { githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix } = this.state;
-    const { gistIsPublic = true, gistUrl } = this.state;
-    return (
-      <Modal show={this.props.show} onHide={this.doHide}>
-        <Modal.Header closeButton>
-          <Modal.Title>Share</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Tabs defaultActiveKey="repository">
-            <Tab eventKey="repository" title="Github">
-              <Form>
-                <Form.Group>
-                  <Form.Label>Owner</Form.Label>
-                  <Form.Control name="githubRepositoryOwner" value={githubRepositoryOwner} onChange={this.doUpdate}/>
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Repository</Form.Label>
-                  <Form.Control name="githubRepositoryRepository" value={githubRepositoryRepository} onChange={this.doUpdate}/>
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Path Prefix</Form.Label>
-                  <Form.Control name="githubRepositoryPrefix" value={githubRepositoryPrefix} onChange={this.doUpdate}/>
-                </Form.Group>
-                <ButtonGroup>
-                  <Button name="import" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'githubRepositoryImport' })}>
-                    Import
-                  </Button>
-                  <Button name="export" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'githubRepositoryExport' })}>
-                    Export
-                  </Button>
-                </ButtonGroup>
-              </Form>
-            </Tab>
-            <Tab eventKey="gist" title="Gist">
-              <Form>
-                <Form.Group>
-                  <Form.Label>Gist Url</Form.Label>
-                  <Form.Control name="gistUrl" value={gistUrl} onChange={this.doUpdate}/>
-                  <Form.Label>Gist is public?</Form.Label>
-                  <Form.Check checked={gistIsPublic} onChange={this.doUpdate}/>
-                </Form.Group>
-                <ButtonGroup>
-                  <Button name="import" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'gistImport' })}>
-                    Import
-                  </Button>
-                  <Button name="export" variant="outline-primary" onClick={(e) => this.doSubmit(e, { action: 'gistExport' })}>
-                    Export
-                  </Button>
-                </ButtonGroup>
-              </Form>
-            </Tab>
-          </Tabs>
-        </Modal.Body>
-      </Modal>
-    );
-  }
-}
-
-class SelectProjectUi extends SettingsUi {
-  constructor (props) {
-    super(props);
-    this.state = {};
-  }
-
-  // <Card.Img variant="top" src="holder.js/100px160" />
-  render () {
-    const { projects } = this.props;
-    const rows = [];
-    for (let i = 0; i < projects.length; i += 5) {
-      rows.push(projects.slice(i, i + 5));
-    }
-    return (
-      <Modal show={this.props.show} onHide={this.doHide} size="xl" scrollable>
-        <Modal.Header closeButton>
-          <Modal.Title>Select Project</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Tabs defaultActiveKey="projects" style={{ display: 'flex' }}>
-            <Tab eventKey="projects" title="CardGroup">
-              <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-                {projects.map((project, index) =>
-                  <Card tag="a"
-                    key={index} style={{ width: '196px', height: '128' }}
-                    onClick={(e) => this.doSubmit(e, { action: 'selectProject', project })}>
-                    <Card.Body>
-                      <Card.Title>{project}</Card.Title>
-                    </Card.Body>
-                  </Card>)}
-              </div>
-            </Tab>
-          </Tabs>
-        </Modal.Body>
-      </Modal>
-    );
-  }
-}
-
-class ParametersUi extends React.PureComponent {
-  static get propTypes () {
-    return {
-      id: PropTypes.string,
-      onChange: PropTypes.func,
-      parameters: PropTypes.array,
-      project: PropTypes.string
-    };
-  }
-
-  constructor (props) {
-    super(props);
-
-    this.state = {};
-
-    this.renderParameter = this.renderParameter.bind(this);
-    this.updateParameterValue = this.updateParameterValue.bind(this);
-  }
-
-  updateParameterValue (newParameter, event) {
-    const { onChange, parameters } = this.props;
-    const value = (event.target.checked === undefined)
-      ? event.target.value
-      : event.target.checked;
-
-    const updated = [];
-
-    for (const oldParameter of parameters) {
-      if (oldParameter.identifier === newParameter.identifier) {
-        updated.push({ ...oldParameter, value });
-      } else {
-        updated.push(oldParameter);
-      }
-    }
-
-    if (onChange) {
-      onChange(updated);
-    }
-  }
-
-  renderParameter (parameter) {
-    const { identifier, prompt, value = '', options = {} } = parameter;
-    const { choices } = options;
-    const { project } = this.props;
-    const label = (prompt || identifier);
-    const id = `parameter/${project}/${identifier}`;
-
-    const onChange = (event) => this.updateParameterValue(parameter, event);
-
-    if (choices !== undefined) {
-      if (choices.every(choice => [true, false].includes(choice))) {
-        return (
-          <InputGroup key={id}>
-            <Form.Check type="checkbox" key={id} label={label} onChange={onChange}/>
-          </InputGroup>
-        );
-      } else {
-        return (
-          <InputGroup key={id}>
-            <InputGroup.Prepend>
-              <InputGroup.Text>{label}</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl key={id} as="select" defaultValue={choices[0]} onChange={onChange}>
-              {choices.map((choice, index) => <option key={index}>{choice}</option>)}
-            </FormControl>
-          </InputGroup>
-        );
-      }
-    } else {
-      return (
-        <InputGroup key={id}>
-          <InputGroup.Prepend>
-            <InputGroup.Text>{label}</InputGroup.Text>
-          </InputGroup.Prepend>
-          <FormControl key={id} id={id} defaultValue={value} onChange={onChange}/>
-        </InputGroup>
-      );
-    }
-  }
-
-  render () {
-    const { id, parameters } = this.props;
-
-    return (
-      <Container
-        key={id}
-        style={{
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column',
-          padding: '4px',
-          border: '1px solid rgba(0,0,0,.125)',
-          borderRadius: '.25rem'
-        }}
-      >
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col>
-            <InputGroup>
-              {parameters.map(this.renderParameter)}
-            </InputGroup>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-}
 
 /*
 class ProjectUi extends React.PureComponent {
@@ -1019,287 +746,6 @@ class ProjectUi extends React.PureComponent {
   }
 };
 */
-
-class FilesUi extends React.PureComponent {
-  static get propTypes () {
-    return {
-      id: PropTypes.string
-    };
-  }
-
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      files: []
-    };
-
-    this.addFile = this.addFile.bind(this);
-    this.clickImportFile = this.clickImportFile.bind(this);
-    this.importFile = this.importFile.bind(this);
-  }
-
-  async componentDidMount () {
-    const files = await listFiles();
-    const fileUpdater = async () => this.setState({ files: await listFiles() });
-    const creationWatcher = await watchFileCreation(fileUpdater);
-    const deletionWatcher = await watchFileDeletion(fileUpdater);
-    this.setState({ files, creationWatcher, deletionWatcher });
-  }
-
-  async componentWillUnmount () {
-    const { creationWatcher, deletionWatcher } = this.state;
-
-    await unwatchFileCreation(creationWatcher);
-    await unwatchFileDeletion(deletionWatcher);
-  }
-
-  async addFile () {
-    const file = document.getElementById('source/add/name').value;
-    if (file.length > 0) {
-      // FIX: Prevent this from overwriting existing files.
-      await writeFile({}, `source/${file}`, '');
-    }
-  };
-
-  async importFile (e) {
-    const { id } = this.props;
-
-    const file = document.getElementById(`source/${id}/import`).files[0];
-    const name = document.getElementById(`source/${id}/name`).value;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = e.target.result;
-      writeFile({}, `source/${name}`, new Uint8Array(data));
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  clickImportFile () {
-    const { id } = this.props;
-
-    document.getElementById(`source/${id}/import`).click();
-  }
-
-  buildFiles () {
-    const { files } = this.state;
-    return files.map(file =>
-      <InputGroup key={file}>
-        <FormControl disabled placeholder={file} />
-        <InputGroup.Append>
-          <Button onClick={() => deleteFile({}, file)} variant="outline-primary">Delete</Button>
-        </InputGroup.Append>
-      </InputGroup>
-    );
-  }
-
-  render () {
-    const { id } = this.props;
-
-    return (
-      <Container
-        key={id}
-        style={{
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column',
-          padding: '4px',
-          border: '1px solid rgba(0,0,0,.125)',
-          borderRadius: '.25rem'
-        }}
-      >
-        <Row style={{ flex: '1 1 auto', overflow: 'auto' }}>
-          <Col>
-            <InputGroup>
-              <FormControl id="source/add/name" placeholder="File Name" />
-              <InputGroup.Append>
-                <Button onClick={this.addFile} variant='outline-primary'>Add</Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <InputGroup>
-              <FormControl
-                as="input"
-                type="file"
-                id={`source/${id}/import`}
-                multiple={false}
-                onChange={this.importFile}
-                style={{ display: 'none' }}
-              />
-              <FormControl id={`source/${id}/name`} placeholder="" />
-              <InputGroup.Append>
-                <Button onClick={this.clickImportFile} variant="outline-primary">Import</Button>
-              </InputGroup.Append>
-            </InputGroup>
-            {this.buildFiles()}
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-};
-
-class ViewUi extends React.PureComponent {
-  static get propTypes () {
-    return {
-      file: PropTypes.string,
-      id: PropTypes.string
-    };
-  }
-
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      file: props.file,
-      containerId: `${props.id}/container/${props.file}`
-    };
-  }
-
-  async componentDidMount () {
-    const { containerId, file } = this.state;
-    const container = document.getElementById(containerId);
-
-    const view = { target: [0, 0, 0], position: [0, 0, 200], up: [0, 1, 0] };
-    let datasets = [];
-    let threejsGeometry;
-    let width = container.offsetWidth;
-    let height = container.offsetHeight;
-
-    const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
-    const { gui } = buildGui({ viewerElement });
-    const hudContext = hudCanvas.getContext('2d');
-
-    const render = () => {
-      renderer.clear();
-      camera.layers.set(0);
-      renderer.render(scene, camera);
-
-      renderer.clearDepth();
-      camera.layers.set(1);
-      renderer.render(scene, camera);
-    };
-
-    const updateHud = () => {
-      hudContext.clearRect(0, 0, width, height);
-      drawHud({ camera, datasets, threejsGeometry, hudCanvas });
-      // hudContext.fillStyle = '#FF0000';
-      hudContext.fillStyle = '#00FF00';
-    };
-
-    container.appendChild(viewerElement);
-
-    const animate = () => {
-      updateHud();
-      render();
-    };
-
-    const { trackball } = buildTrackballControls({ camera, render: animate, view, viewerElement });
-
-    const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
-
-    resize();
-    new ResizeObserver(() => {
-      ({ width, height } = resize());
-      hudCanvas.width = width;
-      hudCanvas.height = height;
-    })
-        .observe(container);
-
-    const track = () => {
-      animate();
-      trackball.update();
-      window.requestAnimationFrame(track);
-    };
-
-    track();
-
-    const geometryPath = file;
-
-    const updateGeometry = (geometry) => {
-      if (geometry !== undefined) {
-        // Delete any previous dataset in the window.
-        const controllers = new Set();
-        for (const { controller, mesh } of datasets) {
-          if (controller) {
-            controllers.add(controller);
-          }
-          scene.remove(mesh);
-        }
-        for (const controller of controllers) {
-          gui.remove(controller.ui);
-        }
-
-        threejsGeometry = toThreejsGeometry(geometry);
-
-        // Build new datasets from the written data, and display them.
-        datasets = [];
-
-        buildMeshes({ datasets, threejsGeometry, scene });
-        buildGuiControls({ datasets, gui });
-      }
-    };
-
-    const json = await readFile({}, geometryPath);
-    if (json !== undefined) {
-      updateGeometry(JSON.parse(json));
-    }
-
-    const watcher = await watchFile(geometryPath,
-                                    async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
-
-    this.setState({ watcher });
-  }
-
-  async componentWillUnmount () {
-    const { containerId, watcher } = this.state;
-    const container = document.getElementById(containerId);
-
-    while (true) {
-      const child = container.firstElementChild;
-      if (child) {
-        container.removeChild(child);
-        continue;
-      }
-      break;
-    }
-
-    if (watcher) {
-      await unwatchFiles(watcher);
-    }
-  }
-
-  render () {
-    const { id } = this.props;
-    const { file, containerId } = this.state;
-    const filePath = `source/${file.substring(9)}`;
-
-    const buttons = (file === 'geometry/preview')
-      ? []
-      : <Row style={{ flex: '0 0 auto' }}>
-        <Col>
-          <br/>
-          <ButtonGroup>
-            <Button size='sm'
-              onClick={() => downloadFile(filePath)}
-              variant='outline-primary'>
-                              Download
-            </Button>
-          </ButtonGroup>
-        </Col>
-      </Row>;
-
-    return (
-      <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }}>
-            <div id={containerId}></div>
-          </Col>
-        </Row>
-        {buttons}
-      </Container>
-    );
-  }
-}
 
 class JSEditorUi extends React.PureComponent {
   static get propTypes () {
@@ -1519,12 +965,6 @@ const setupUi = async () => {
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
     />,
     document.getElementById('top'));
-};
-
-const downloadFile = async (path) => {
-  const data = await readFile({ as: 'bytes' }, path);
-  const blob = new Blob([data.buffer], { type: 'application/octet-stream' });
-  saveAs(blob, path.split('/').pop());
 };
 
 let ask;
