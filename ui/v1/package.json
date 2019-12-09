@@ -11,7 +11,7 @@
     "lintfix": "eslint --fix *.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "rollup": "rollup -c rollup.js",
+    "rollup": "rollup -c rollup_main.js",
     "didYouRunBootstrapMaslowRollup": "rollup -c rollup.maslowWorker.js",
     "didYouRunBootstrapMaslowMasterRollup": "rollup -c rollup.maslowMaster.js"
   },
