@@ -10,58 +10,78 @@ const shallowEq = (a, b) => {
   return true;
 };
 
+// Remove any symbols (which refer to cached values).
+const clean = (geometry) => {
+  const cleaned = {};
+  for (const key of Object.keys(geometry)) {
+    if (typeof key !== 'symbol') {
+      cleaned[key] = geometry[key];
+    }
+  }
+  return cleaned;
+};
+
+// Rewrite on the way back up the call-path.
 export const rewriteUp = (geometry, op) => {
   // FIX: Minimize identity churn.
   const walk = (geometry) => {
+    const q = (postopGeometry) => {
+      if (postopGeometry === geometry) {
+        return geometry;
+      } else {
+        return clean(postopGeometry);
+      }
+    };
+
     if (geometry.assembly) {
       const assembly = geometry.assembly.map(walk);
-      if (shallowEq(assembly, geometry.assembly)) {
-        return op(geometry);
+      if (true && shallowEq(assembly, geometry.assembly)) {
+        return q(op(geometry));
       } else {
-        return op({ ...geometry, assembly });
+        return q(op({ ...geometry, assembly }));
       }
     } else if (geometry.disjointAssembly) {
       const disjointAssembly = geometry.disjointAssembly.map(walk);
       if (shallowEq(disjointAssembly, geometry.disjointAssembly)) {
-        return op(geometry);
+        return q(op(geometry));
       } else {
-        return op({ ...geometry, disjointAssembly });
+        return q(op({ ...geometry, disjointAssembly }));
       }
     } else if (geometry.connection) {
       const geometries = geometry.geometries.map(walk);
       const connectors = geometry.connectors.map(walk);
       if (shallowEq(geometries, geometry.geometries) &&
           shallowEq(connectors, geometry.connectors)) {
-        return op(geometry);
+        return q(op(geometry));
       } else {
-        return op({ ...geometry, geometries, connectors });
+        return q(op({ ...geometry, geometries, connectors }));
       }
     } else if (geometry.item) {
       const item = walk(geometry.item);
       if (item === geometry.item) {
-        return op(geometry);
+        return q(op(geometry));
       } else {
-        return op({ ...geometry, item });
+        return q(op({ ...geometry, item }));
       };
     } else if (geometry.paths) {
-      return op(geometry);
+      return q(op(geometry));
     } else if (geometry.plan) {
-      return op(geometry);
+      return q(op(geometry));
     } else if (geometry.points) {
-      return op(geometry);
+      return q(op(geometry));
     } else if (geometry.solid) {
-      return op(geometry);
+      return q(op(geometry));
     } else if (geometry.surface) {
-      return op(geometry);
+      return q(op(geometry));
     } else if (geometry.untransformed) {
       const untransformed = walk(geometry.untransformed);
       if (untransformed === geometry.untransformed) {
-        return geometry;
+        return q(op(geometry));
       } else {
-        return op({ ...geometry, untransformed });
+        return q(op({ ...geometry, untransformed }));
       }
     } else if (geometry.z0Surface) {
-      return op(geometry);
+      return q(op(geometry));
     } else {
       throw Error('die: Unknown geometry');
     }
