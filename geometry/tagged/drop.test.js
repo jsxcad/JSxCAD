@@ -10,7 +10,7 @@ test('Deep drop', t => {
   const dropped = drop(['void'], assembly);
   t.deepEqual(dropped,
               { 'assembly': [{ 'solid': [], 'tags': ['plate'] },
-                             { 'assembly': [{ 'solid': [], tags: undefined },
+                             { 'assembly': [{ 'solid': [] },
                                             { 'assembly': [{ 'solid': [], 'tags': ['compose/non-positive', 'void'] },
                                                            { 'solid': [], 'tags': ['compose/non-positive', 'void'] },
                                                            { 'solid': [], 'tags': ['compose/non-positive', 'void'] }] }] }] });
