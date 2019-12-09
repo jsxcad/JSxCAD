@@ -12,6 +12,8 @@ import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
 const shallowEq = (a, b) => {
+  if (a === undefined) throw Error('die');
+  if (b === undefined) throw Error('die');
   if (a.length !== b.length) {
     return false;
   }
@@ -50,7 +52,7 @@ const rewriteUp = (geometry, op) => {
 
     if (geometry.assembly) {
       const assembly = geometry.assembly.map(walk);
-      if ( shallowEq(assembly, geometry.assembly)) {
+      if (shallowEq(assembly, geometry.assembly)) {
         return q(op(geometry));
       } else {
         return q(op({ ...geometry, assembly }));
@@ -124,8 +126,6 @@ const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
 const assemble = cache(assembleImpl);
 
 const transformedGeometry = Symbol('transformedGeometry');
-
-// Apply the accumulated matrix transformations and produce a geometry without them.
 
 const toTransformedGeometry = (geometry) => {
   if (geometry[transformedGeometry] === undefined) {
@@ -922,34 +922,6 @@ const toPoints = (options = {}, geometry) => {
   return { points: [...points] };
 };
 
-// Produce a standard geometry representation without caches, etc.
-
-const toStandardGeometry = (geometry) => {
-  const walk = (item) => {
-    if (item.assembly) {
-      return { assembly: item.assembly.map(walk), tags: item.tags };
-    } else if (item.paths) {
-      return { paths: item.paths, tags: item.tags };
-    } else if (item.plan) {
-      return { plan: item.plan, marks: item.marks, planes: item.planes, visualization: item.visualization, tags: item.tags };
-    } else if (item.item) {
-      return { item: item.item, tags: item.tags };
-    } else if (item.connection) {
-      return { connection: item.connection.map(walk), geometries: item.geometries.map(walk), connectors: item.connectors.map(walk), tags: item.tags };
-    } else if (item.solid) {
-      return { solid: item.solid, tags: item.tags };
-    } else if (item.surface) {
-      return { surface: item.surface, tags: item.tags };
-    } else if (item.z0Surface) {
-      return { z0Surface: item.z0Surface, tags: item.tags };
-    } else {
-      throw Error('die');
-    }
-  };
-
-  return walk(geometry);
-};
-
 const transformImpl = (matrix, untransformed) => {
   if (matrix.some(value => typeof value !== 'number' || isNaN(value))) {
     throw Error('die');
@@ -1017,4 +989,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toStandardGeometry, toTransformedGeometry, transform, translate, union };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union };
