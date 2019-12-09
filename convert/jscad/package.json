@@ -9,7 +9,7 @@
     "depcheck": "depcheck --ignores webpack-cli",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
-    "rollup": "npm run webpack && rollup -c rollup.js",
+    "rollup": "npm run webpack && rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js",
     "webpack": "webpack -d --config webpack.config.js"

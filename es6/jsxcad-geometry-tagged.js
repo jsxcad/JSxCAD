@@ -165,6 +165,8 @@ const eachItem = (geometry, operation) => {
       walk(geometry.item);
     } else if (geometry.disjointAssembly) {
       geometry.disjointAssembly.forEach(walk);
+    } else if (geometry.connection) {
+      geometry.geometries.forEach(walk);
     }
     operation(geometry);
   };
@@ -646,7 +648,7 @@ const toKeptGeometry = (geometry) => {
           return {
             ...geometry,
             geometries: geometry.geometries.map(toKeptGeometry)
-          }
+          };
         } else {
           return geometry;
         }
