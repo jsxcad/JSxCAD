@@ -484,17 +484,57 @@ const eachPoint = (options, operation, geometry) => {
 };
 
 const flip = (geometry) => {
+  const op = (geometry) => {
+    if (geometry.points) {
+      return { ...geometry, points: flip$1(geometry.points) };
+    } else if (geometry.paths) {
+      return { ...geometry, paths: flip$2(geometry.paths) };
+    } else if (geometry.surface) {
+      return { ...geometry, surface: flip$3(geometry.surface) };
+    } else if (geometry.z0Surface) {
+      return { ...geometry, surface: flip$3(geometry.z0Surface) };
+    } else if (geometry.solid) {
+      return { ...geometry, solid: flip$4(geometry.solid) };
+    } else if (geometry.assembly) {
+      return geometry;
+    } else if (geometry.disjointAssembly) {
+      return geometry;
+    } else if (geometry.plan) {
+      if (geometry.plan.connector) {
+        // FIX: Mirror visualization?
+        return { ...geometry, planes: geometry.planes.map(flip$5) };
+      } else {
+        return geometry;
+      }
+    } else if (geometry.connection) {
+      return {
+        ...geometry,
+        geometries: geometry.geometries.map(flip),
+        connectors: geometry.connectors.map(flip)
+      };
+    } else if (geometry.item) {
+      // FIX: How should items deal with flip?
+      return geometry;
+    } else {
+      throw Error(`die: ${JSON.stringify(geometry)}`);
+    }
+  };
+  return rewriteUp(geometry, op);
+};
+
+/*
+export const flip = (geometry) => {
   const flipped = {};
   if (geometry.points) {
-    flipped.points = flip$1(geometry.points);
+    flipped.points = flipPoints(geometry.points);
   } else if (geometry.paths) {
-    flipped.paths = flip$2(geometry.paths);
+    flipped.paths = flipPaths(geometry.paths);
   } else if (geometry.surface) {
-    flipped.surface = flip$3(geometry.surface);
+    flipped.surface = flipSurface(geometry.surface);
   } else if (geometry.z0Surface) {
-    flipped.z0Surface = flip$3(geometry.z0Surface);
+    flipped.z0Surface = flipSurface(geometry.z0Surface);
   } else if (geometry.solid) {
-    flipped.solid = flip$4(geometry.solid);
+    flipped.solid = flipSolid(geometry.solid);
   } else if (geometry.assembly) {
     flipped.assembly = geometry.assembly.map(flip);
   } else if (geometry.disjointAssembly) {
@@ -503,7 +543,7 @@ const flip = (geometry) => {
     if (geometry.plan.connector) {
       flipped.plan = geometry.plan;
       flipped.marks = geometry.marks;
-      flipped.planes = geometry.planes.map(flip$5);
+      flipped.planes = geometry.planes.map(flipPlane);
       // FIX: Mirror?
       flipped.visualization = geometry.visualization;
     } else {
@@ -526,6 +566,7 @@ const flip = (geometry) => {
   flipped.tags = geometry.tags;
   return flipped;
 };
+*/
 
 const fromPathToSurfaceImpl = (path) => {
   return { surface: [path] };
