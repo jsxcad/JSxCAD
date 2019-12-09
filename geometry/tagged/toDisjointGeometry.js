@@ -4,20 +4,20 @@ import { toTransformedGeometry } from './toTransformedGeometry';
 const disjoint = Symbol('disjoint');
 
 const toDisjointAssembly = (geometry) => {
-  if (geometry.matrix !== undefined) {
+  if (geometry.matrix) {
     // Transforming is identity-producing, so disjoint before transforming.
     return toTransformedGeometry({ ...geometry, untransformed: toDisjointGeometry(geometry.untransformed) });
-  } else if (geometry[disjoint] !== undefined) {
+  } else if (geometry[disjoint]) {
     return geometry[disjoint];
-  } else if (geometry.item !== undefined) {
+  } else if (geometry.item) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
-  } else if (geometry.connection !== undefined) {
+  } else if (geometry.connection) {
     return {
       ...geometry,
       connectors: geometry.connectors.map(toDisjointGeometry),
       geometries: geometry.geometries.map(toDisjointGeometry)
     };
-  } else if (geometry.assembly !== undefined) {
+  } else if (geometry.assembly) {
     if (geometry.assembly.length === 0) {
       return { disjointAssembly: [] };
     }

@@ -1,0 +1,59 @@
+import { readFile, writeFile } from '@jsxcad/sys';
+
+import PropTypes from 'prop-types';
+import React from 'react';
+
+export class SettingsUi extends React.PureComponent {
+  static get propTypes () {
+    return {
+      onHide: PropTypes.func,
+      onSubmit: PropTypes.func,
+      storage: PropTypes.string
+    };
+  }
+
+  constructor (props) {
+    super(props);
+    this.doHide = this.doHide.bind(this);
+    this.doSubmit = this.doSubmit.bind(this);
+    this.doUpdate = this.doUpdate.bind(this);
+    this.state = {};
+  }
+
+  async componentDidMount () {
+    const { storage } = this.props;
+    const state = await readFile({}, `settings/${storage}`);
+    if (state !== undefined) {
+      this.setState(JSON.parse(state));
+    }
+  }
+
+  doHide (event) {
+    const { onHide } = this.props;
+    if (onHide) {
+      onHide(this.state);
+    }
+  }
+
+  async doSubmit (event, payload) {
+    this.setState(payload);
+    const { onSubmit, storage } = this.props;
+    if (storage) {
+      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
+    }
+    if (onSubmit) {
+      onSubmit(this.state);
+    }
+    this.doHide();
+    // event.preventDefault();
+  }
+
+  doUpdate (event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({ [name]: value });
+  }
+}
+
+export default SettingsUi;

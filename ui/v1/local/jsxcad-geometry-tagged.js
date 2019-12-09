@@ -11,28 +11,114 @@ import { difference as difference$2, intersection as intersection$2, union as un
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
+const shallowEq = (a, b) => {
+  if (a === undefined) throw Error('die');
+  if (b === undefined) throw Error('die');
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+// Remove any symbols (which refer to cached values).
+const clean = (geometry) => {
+  const cleaned = {};
+  for (const key of Object.keys(geometry)) {
+    if (typeof key !== 'symbol') {
+      cleaned[key] = geometry[key];
+    }
+  }
+  return cleaned;
+};
+
+// Rewrite on the way back up the call-path.
+const rewriteUp = (geometry, op) => {
+  // FIX: Minimize identity churn.
+  const walk = (geometry) => {
+    const q = (postopGeometry) => {
+      if (postopGeometry === undefined) {
+        return geometry;
+      } else if (postopGeometry === geometry) {
+        return geometry;
+      } else {
+        return clean(postopGeometry);
+      }
+    };
+
+    if (geometry.assembly) {
+      const assembly = geometry.assembly.map(walk);
+      if (shallowEq(assembly, geometry.assembly)) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, assembly }));
+      }
+    } else if (geometry.disjointAssembly) {
+      const disjointAssembly = geometry.disjointAssembly.map(walk);
+      if (shallowEq(disjointAssembly, geometry.disjointAssembly)) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, disjointAssembly }));
+      }
+    } else if (geometry.connection) {
+      const geometries = geometry.geometries.map(walk);
+      const connectors = geometry.connectors.map(walk);
+      if (shallowEq(geometries, geometry.geometries) &&
+          shallowEq(connectors, geometry.connectors)) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, geometries, connectors }));
+      }
+    } else if (geometry.item) {
+      const item = walk(geometry.item);
+      if (item === geometry.item) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, item }));
+      }    } else if (geometry.paths) {
+      return q(op(geometry));
+    } else if (geometry.plan) {
+      return q(op(geometry));
+    } else if (geometry.points) {
+      return q(op(geometry));
+    } else if (geometry.solid) {
+      return q(op(geometry));
+    } else if (geometry.surface) {
+      return q(op(geometry));
+    } else if (geometry.untransformed) {
+      const untransformed = walk(geometry.untransformed);
+      if (untransformed === geometry.untransformed) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, untransformed }));
+      }
+    } else if (geometry.z0Surface) {
+      return q(op(geometry));
+    } else {
+      throw Error('die: Unknown geometry');
+    }
+  };
+
+  return walk(geometry);
+};
+
 // FIX: Refactor the geometry walkers.
 
 const allTags = (geometry) => {
-  const tags = new Set();
-  const walk = (item) => {
-    if (item.tags) {
-      for (const tag of item.tags) {
-        tags.add(tag);
+  const collectedTags = new Set();
+  const op = ({ tags }) => {
+    if (tags !== undefined) {
+      for (const tag of tags) {
+        collectedTags.add(tag);
       }
     }
-    if (item.assembly) {
-      item.assembly.forEach(walk);
-    } else if (item.disjointAssembly) {
-      item.disjointAssembly.forEach(walk);
-    } else if (item.untransformed) {
-      walk(item.untransformed);
-    } else if (item.item) {
-      walk(item.item);
-    }
   };
-  walk(geometry);
-  return tags;
+  rewriteUp(geometry, op);
+  return collectedTags;
 };
 
 const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
@@ -40,8 +126,6 @@ const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
 const assemble = cache(assembleImpl);
 
 const transformedGeometry = Symbol('transformedGeometry');
-
-// Apply the accumulated matrix transformations and produce a geometry without them.
 
 const toTransformedGeometry = (geometry) => {
   if (geometry[transformedGeometry] === undefined) {
@@ -157,18 +241,12 @@ const canonicalize = (rawGeometry) => {
   return canonicalized;
 };
 
-const eachItem = (geometry, operation) => {
-  const walk = (geometry) => {
-    if (geometry.assembly) {
-      geometry.assembly.forEach(walk);
-    } else if (geometry.item) {
-      walk(geometry.item);
-    } else if (geometry.disjointAssembly) {
-      geometry.disjointAssembly.forEach(walk);
-    }
-    operation(geometry);
+const eachItem = (geometry, op) => {
+  const read = (geometry) => {
+    op(geometry);
+    return geometry;
   };
-  walk(geometry);
+  rewriteUp(geometry, read);
 };
 
 const getConnections = (geometry) => {
@@ -294,23 +372,24 @@ const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) =>
     }
   };
 
-  // FIX: Minimize identity churn.
-  const walk = (geometry) => {
-    if (geometry.assembly) { return { assembly: geometry.assembly.map(walk) }; }
-    if (geometry.disjointAssembly) { return { disjointAssembly: geometry.disjointAssembly.map(walk) }; }
-    if (geometry.connection) { return { connection: geometry.connection, geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk), tags: composeTags(geometry.tags) }; }
-    if (geometry.item) { return { item: walk(geometry.item), tags: composeTags(geometry.tags) }; }
-    if (geometry.paths) { return { paths: geometry.paths, tags: composeTags(geometry.tags) }; }
-    if (geometry.plan) { return { plan: geometry.plan, marks: geometry.marks, planes: geometry.planes, visualization: geometry.visualization, tags: composeTags(geometry.tags) }; }
-    if (geometry.points) { return { points: geometry.points, tags: composeTags(geometry.tags) }; }
-    if (geometry.solid) { return { solid: geometry.solid, tags: composeTags(geometry.tags) }; }
-    if (geometry.surface) { return { surface: geometry.surface, tags: composeTags(geometry.tags) }; }
-    if (geometry.untransformed) { return { untransformed: walk(geometry.untransformed), matrix: geometry.matrix }; }
-    if (geometry.z0Surface) { return { z0Surface: geometry.z0Surface, tags: composeTags(geometry.tags) }; }
-    throw Error('die');
+  const op = (geometry) => {
+    if (geometry.assembly || geometry.disjointAssembly) {
+      // These structural geometries don't take tags.
+      return geometry;
+    }
+    const composedTags = composeTags(geometry.tags);
+    if (composedTags === undefined) {
+      const copy = { ...geometry };
+      delete copy.tags;
+      return copy;
+    } if (composedTags === geometry.tags) {
+      return geometry;
+    } else {
+      return { ...geometry, tags: composedTags };
+    }
   };
 
-  return walk(geometry);
+  return rewriteUp(geometry, op);
 };
 
 const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
@@ -405,17 +484,57 @@ const eachPoint = (options, operation, geometry) => {
 };
 
 const flip = (geometry) => {
+  const op = (geometry) => {
+    if (geometry.points) {
+      return { ...geometry, points: flip$1(geometry.points) };
+    } else if (geometry.paths) {
+      return { ...geometry, paths: flip$2(geometry.paths) };
+    } else if (geometry.surface) {
+      return { ...geometry, surface: flip$3(geometry.surface) };
+    } else if (geometry.z0Surface) {
+      return { ...geometry, surface: flip$3(geometry.z0Surface) };
+    } else if (geometry.solid) {
+      return { ...geometry, solid: flip$4(geometry.solid) };
+    } else if (geometry.assembly) {
+      return geometry;
+    } else if (geometry.disjointAssembly) {
+      return geometry;
+    } else if (geometry.plan) {
+      if (geometry.plan.connector) {
+        // FIX: Mirror visualization?
+        return { ...geometry, planes: geometry.planes.map(flip$5) };
+      } else {
+        return geometry;
+      }
+    } else if (geometry.connection) {
+      return {
+        ...geometry,
+        geometries: geometry.geometries.map(flip),
+        connectors: geometry.connectors.map(flip)
+      };
+    } else if (geometry.item) {
+      // FIX: How should items deal with flip?
+      return geometry;
+    } else {
+      throw Error(`die: ${JSON.stringify(geometry)}`);
+    }
+  };
+  return rewriteUp(geometry, op);
+};
+
+/*
+export const flip = (geometry) => {
   const flipped = {};
   if (geometry.points) {
-    flipped.points = flip$1(geometry.points);
+    flipped.points = flipPoints(geometry.points);
   } else if (geometry.paths) {
-    flipped.paths = flip$2(geometry.paths);
+    flipped.paths = flipPaths(geometry.paths);
   } else if (geometry.surface) {
-    flipped.surface = flip$3(geometry.surface);
+    flipped.surface = flipSurface(geometry.surface);
   } else if (geometry.z0Surface) {
-    flipped.z0Surface = flip$3(geometry.z0Surface);
+    flipped.z0Surface = flipSurface(geometry.z0Surface);
   } else if (geometry.solid) {
-    flipped.solid = flip$4(geometry.solid);
+    flipped.solid = flipSolid(geometry.solid);
   } else if (geometry.assembly) {
     flipped.assembly = geometry.assembly.map(flip);
   } else if (geometry.disjointAssembly) {
@@ -424,7 +543,7 @@ const flip = (geometry) => {
     if (geometry.plan.connector) {
       flipped.plan = geometry.plan;
       flipped.marks = geometry.marks;
-      flipped.planes = geometry.planes.map(flip$5);
+      flipped.planes = geometry.planes.map(flipPlane);
       // FIX: Mirror?
       flipped.visualization = geometry.visualization;
     } else {
@@ -447,6 +566,7 @@ const flip = (geometry) => {
   flipped.tags = geometry.tags;
   return flipped;
 };
+*/
 
 const fromPathToSurfaceImpl = (path) => {
   return { surface: [path] };
@@ -571,12 +691,14 @@ const map = (geometry, operation) => {
   return walk(geometry);
 };
 
+const disjoint = Symbol('disjoint');
+
 const toDisjointAssembly = (geometry) => {
   if (geometry.matrix !== undefined) {
     // Transforming is identity-producing, so disjoint before transforming.
     return toTransformedGeometry({ ...geometry, untransformed: toDisjointGeometry(geometry.untransformed) });
-  } else if (geometry.disjoint !== undefined) {
-    return geometry.disjoint;
+  } else if (geometry[disjoint] !== undefined) {
+    return geometry[disjoint];
   } else if (geometry.item !== undefined) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
   } else if (geometry.connection !== undefined) {
@@ -603,7 +725,7 @@ const toDisjointAssembly = (geometry) => {
       return;
     }
     const disjointAssembly = { disjointAssembly: disjoint };
-    geometry.disjoint = disjointAssembly;
+    geometry[disjoint] = disjointAssembly;
     return disjointAssembly;
   } else {
     return geometry;
@@ -613,7 +735,7 @@ const toDisjointAssembly = (geometry) => {
 const toDisjointGeometry = (inputGeometry) => {
   const disjointAssembly = toDisjointAssembly(inputGeometry);
   if (disjointAssembly === undefined) {
-    return { disjointAssembly };
+    return { disjointAssembly: [] };
   } else {
     return disjointAssembly;
   }
@@ -646,7 +768,7 @@ const toKeptGeometry = (geometry) => {
           return {
             ...geometry,
             geometries: geometry.geometries.map(toKeptGeometry)
-          }
+          };
         } else {
           return geometry;
         }
@@ -800,34 +922,6 @@ const toPoints = (options = {}, geometry) => {
   return { points: [...points] };
 };
 
-// Produce a standard geometry representation without caches, etc.
-
-const toStandardGeometry = (geometry) => {
-  const walk = (item) => {
-    if (item.assembly) {
-      return { assembly: item.assembly.map(walk), tags: item.tags };
-    } else if (item.paths) {
-      return { paths: item.paths, tags: item.tags };
-    } else if (item.plan) {
-      return { plan: item.plan, marks: item.marks, planes: item.planes, visualization: item.visualization, tags: item.tags };
-    } else if (item.item) {
-      return { item: item.item, tags: item.tags };
-    } else if (item.connection) {
-      return { connection: item.connection.map(walk), geometries: item.geometries.map(walk), connectors: item.connectors.map(walk), tags: item.tags };
-    } else if (item.solid) {
-      return { solid: item.solid, tags: item.tags };
-    } else if (item.surface) {
-      return { surface: item.surface, tags: item.tags };
-    } else if (item.z0Surface) {
-      return { z0Surface: item.z0Surface, tags: item.tags };
-    } else {
-      throw Error('die');
-    }
-  };
-
-  return walk(geometry);
-};
-
 const transformImpl = (matrix, untransformed) => {
   if (matrix.some(value => typeof value !== 'number' || isNaN(value))) {
     throw Error('die');
@@ -895,4 +989,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toStandardGeometry, toTransformedGeometry, transform, translate, union };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union };

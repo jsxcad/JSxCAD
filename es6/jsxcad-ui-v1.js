@@ -1,4 +1,4 @@
-import { readFile, log, writeFile, watchFileCreation, watchFileDeletion, watchLog, setHandleAskUser, unwatchFileCreation, unwatchFileDeletion, unwatchLog, setupFilesystem, listFiles, getFilesystem, deleteFile, watchFile, unwatchFiles, listFilesystems, createService, ask as ask$1 } from './jsxcad-sys.js';
+import { readFile, log, writeFile, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, getFilesystem, watchFile, unwatchFiles, watchLog, setHandleAskUser, unwatchLog, setupFilesystem, listFilesystems, createService, ask as ask$1 } from './jsxcad-sys.js';
 import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls, drawHud } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 
@@ -73608,81 +73608,6 @@ var ButtonGroup = react.forwardRef(function (props, ref) {
 ButtonGroup.displayName = 'ButtonGroup';
 ButtonGroup.defaultProps = defaultProps$4;
 
-var CardContext = react.createContext(null);
-
-var defaultProps$5 = {
-  variant: null
-};
-var CardImg = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      variant = _ref.variant,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'img' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "variant", "as"]);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return react.createElement(Component, _extends({
-    ref: ref,
-    className: classnames(variant ? prefix + "-" + variant : prefix, className)
-  }, props));
-});
-CardImg.displayName = 'CardImg';
-CardImg.defaultProps = defaultProps$5;
-
-var DivStyledAsH5 = divWithClassName('h5');
-var DivStyledAsH6 = divWithClassName('h6');
-var CardBody = createWithBsPrefix('card-body');
-var defaultProps$6 = {
-  body: false
-};
-var Card = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      bg = _ref.bg,
-      text = _ref.text,
-      border = _ref.border,
-      body = _ref.body,
-      children = _ref.children,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"]);
-
-  var prefix = useBootstrapPrefix(bsPrefix, 'card');
-  var cardContext = react_11(function () {
-    return {
-      cardHeaderBsPrefix: prefix + "-header"
-    };
-  }, [prefix]);
-  return react.createElement(CardContext.Provider, {
-    value: cardContext
-  }, react.createElement(Component, _extends({
-    ref: ref
-  }, props, {
-    className: classnames(className, prefix, bg && "bg-" + bg, text && "text-" + text, border && "border-" + border)
-  }), body ? react.createElement(CardBody, null, children) : children));
-});
-Card.displayName = 'Card';
-Card.defaultProps = defaultProps$6;
-Card.Img = CardImg;
-Card.Title = createWithBsPrefix('card-title', {
-  Component: DivStyledAsH5
-});
-Card.Subtitle = createWithBsPrefix('card-subtitle', {
-  Component: DivStyledAsH6
-});
-Card.Body = CardBody;
-Card.Link = createWithBsPrefix('card-link', {
-  Component: 'a'
-});
-Card.Text = createWithBsPrefix('card-text', {
-  Component: 'p'
-});
-Card.Header = createWithBsPrefix('card-header');
-Card.Footer = createWithBsPrefix('card-footer');
-Card.ImgOverlay = createWithBsPrefix('card-img-overlay');
-
 var DEVICE_SIZES = ['xl', 'lg', 'md', 'sm', 'xs'];
 var Col = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
 function (_ref, ref) {
@@ -73726,7 +73651,7 @@ function (_ref, ref) {
 });
 Col.displayName = 'Col';
 
-var defaultProps$7 = {
+var defaultProps$5 = {
   fluid: false
 };
 var Container = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
@@ -73746,248 +73671,7 @@ function (_ref, ref) {
   }));
 });
 Container.displayName = 'Container';
-Container.defaultProps = defaultProps$7;
-
-var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = createChainableTypeChecker;
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-// Mostly taken from ReactPropTypes.
-
-function createChainableTypeChecker(validate) {
-  function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    var componentNameSafe = componentName || '<<anonymous>>';
-    var propFullNameSafe = propFullName || propName;
-
-    if (props[propName] == null) {
-      if (isRequired) {
-        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
-      }
-
-      return null;
-    }
-
-    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
-      args[_key - 6] = arguments[_key];
-    }
-
-    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
-  }
-
-  var chainedCheckType = checkType.bind(null, false);
-  chainedCheckType.isRequired = checkType.bind(null, true);
-
-  return chainedCheckType;
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(createChainableTypeChecker_1);
-
-var all_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = all;
-
-
-
-var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function all() {
-  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
-    validators[_key] = arguments[_key];
-  }
-
-  function allPropTypes() {
-    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    var error = null;
-
-    validators.forEach(function (validator) {
-      if (error != null) {
-        return;
-      }
-
-      var result = validator.apply(undefined, args);
-      if (result != null) {
-        error = result;
-      }
-    });
-
-    return error;
-  }
-
-  return (0, _createChainableTypeChecker2.default)(allPropTypes);
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(all_1);
-
-var propTypes$2 = {
-  /**
-   * Specify whether the feedback is for valid or invalid fields
-   *
-   * @type {('valid'|'invalid')}
-   */
-  type: propTypes.string.isRequired,
-  as: propTypes.elementType
-};
-var defaultProps$8 = {
-  type: 'valid'
-};
-var Feedback = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      className = _ref.className,
-      type = _ref.type,
-      props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type"]);
-
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, type && type + "-feedback")
-  }));
-});
-Feedback.displayName = 'Feedback';
-Feedback.propTypes = propTypes$2;
-Feedback.defaultProps = defaultProps$8;
-
-var FormContext = react.createContext({
-  controlId: undefined
-});
-
-var defaultProps$9 = {
-  type: 'checkbox'
-};
-var FormCheckInput = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      isStatic = _ref.isStatic,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
-
-  var _useContext = react_12(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-input') : useBootstrapPrefix(bsPrefix, 'form-check-input');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    id: id || controlId,
-    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
-  }));
-});
-FormCheckInput.displayName = 'FormCheckInput';
-FormCheckInput.defaultProps = defaultProps$9;
-
-var FormCheckLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
-
-  var _useContext = react_12(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-label') : useBootstrapPrefix(bsPrefix, 'form-check-label');
-  return react.createElement("label", _extends({}, props, {
-    ref: ref,
-    htmlFor: htmlFor || controlId,
-    className: classnames(className, bsPrefix)
-  }));
-});
-FormCheckLabel.displayName = 'FormCheckLabel';
-
-var defaultProps$a = {
-  type: 'checkbox',
-  inline: false,
-  disabled: false,
-  isValid: false,
-  isInvalid: false,
-  title: ''
-};
-var FormCheck = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      inline = _ref.inline,
-      disabled = _ref.disabled,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      feedback = _ref.feedback,
-      className = _ref.className,
-      style = _ref.style,
-      title = _ref.title,
-      type = _ref.type,
-      label = _ref.label,
-      children = _ref.children,
-      propCustom = _ref.custom,
-      _ref$as = _ref.as,
-      as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
-
-  var custom = type === 'switch' ? true : propCustom;
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
-
-  var _useContext = react_12(FormContext),
-      controlId = _useContext.controlId;
-
-  var innerFormContext = react_11(function () {
-    return {
-      controlId: id || controlId,
-      custom: custom
-    };
-  }, [controlId, custom, id]);
-  var hasLabel = label != null && label !== false && !children;
-  var input = react.createElement(FormCheckInput, _extends({}, props, {
-    type: type === 'switch' ? 'checkbox' : type,
-    ref: ref,
-    isValid: isValid,
-    isInvalid: isInvalid,
-    isStatic: !hasLabel,
-    disabled: disabled,
-    as: as
-  }));
-  return react.createElement(FormContext.Provider, {
-    value: innerFormContext
-  }, react.createElement("div", {
-    style: style,
-    className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
-  }, children || react.createElement(react.Fragment, null, input, hasLabel && react.createElement(FormCheckLabel, {
-    title: title
-  }, label), (isValid || isInvalid) && react.createElement(Feedback, {
-    type: isValid ? 'valid' : 'invalid'
-  }, feedback))));
-});
-FormCheck.displayName = 'FormCheck';
-FormCheck.defaultProps = defaultProps$a;
-FormCheck.Input = FormCheckInput;
-FormCheck.Label = FormCheckLabel;
+Container.defaultProps = defaultProps$5;
 
 var warning$1 = function() {};
 
@@ -74034,6 +73718,39 @@ var warning$1 = function() {};
 
 var warning_1 = warning$1;
 
+var propTypes$2 = {
+  /**
+   * Specify whether the feedback is for valid or invalid fields
+   *
+   * @type {('valid'|'invalid')}
+   */
+  type: propTypes.string.isRequired,
+  as: propTypes.elementType
+};
+var defaultProps$6 = {
+  type: 'valid'
+};
+var Feedback = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+function (_ref, ref) {
+  var _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      className = _ref.className,
+      type = _ref.type,
+      props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type"]);
+
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, type && type + "-feedback")
+  }));
+});
+Feedback.displayName = 'Feedback';
+Feedback.propTypes = propTypes$2;
+Feedback.defaultProps = defaultProps$6;
+
+var FormContext = react.createContext({
+  controlId: undefined
+});
+
 var FormControl = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
       type = _ref.type,
@@ -74079,120 +73796,6 @@ var FormControl = react.forwardRef(function (_ref, ref) {
 });
 FormControl.displayName = 'FormControl';
 FormControl.Feedback = Feedback;
-
-var FormGroup = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      children = _ref.children,
-      controlId = _ref.controlId,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
-  var context = react_11(function () {
-    return {
-      controlId: controlId
-    };
-  }, [controlId]);
-  return react.createElement(FormContext.Provider, {
-    value: context
-  }, react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, bsPrefix)
-  }), children));
-});
-FormGroup.displayName = 'FormGroup';
-
-var defaultProps$b = {
-  column: false,
-  srOnly: false
-};
-var FormLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      column = _ref.column,
-      srOnly = _ref.srOnly,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
-
-  var _useContext = react_12(FormContext),
-      controlId = _useContext.controlId;
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
-  var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && 'col-form-label');
-   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
-  htmlFor = htmlFor || controlId;
-  if (column) return react.createElement(Col, _extends({
-    as: "label",
-    className: classes,
-    htmlFor: htmlFor
-  }, props));
-  return (// eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    react.createElement("label", _extends({
-      ref: ref,
-      className: classes,
-      htmlFor: htmlFor
-    }, props))
-  );
-});
-FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$b;
-
-var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'small' : _ref$as,
-      muted = _ref.muted,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, bsPrefix, muted && 'text-muted')
-  }));
-});
-FormText.displayName = 'FormText';
-
-var Switch = react.forwardRef(function (props, ref) {
-  return react.createElement(FormCheck, _extends({}, props, {
-    ref: ref,
-    type: "switch"
-  }));
-});
-Switch.displayName = 'Switch';
-Switch.Input = FormCheck.Input;
-Switch.Label = FormCheck.Label;
-
-var defaultProps$c = {
-  inline: false
-};
-var Form = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      inline = _ref.inline,
-      className = _ref.className,
-      validated = _ref.validated,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'form' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
-  }));
-});
-Form.displayName = 'Form';
-Form.defaultProps = defaultProps$c;
-Form.Row = createWithBsPrefix('form-row');
-Form.Group = FormGroup;
-Form.Control = FormControl;
-Form.Check = FormCheck;
-Form.Switch = Switch;
-Form.Label = FormLabel;
-Form.Text = FormText;
 
 /**
  *
@@ -74241,6 +73844,161 @@ InputGroup.Radio = InputGroupRadio;
 InputGroup.Checkbox = InputGroupCheckbox;
 InputGroup.Append = InputGroupAppend;
 InputGroup.Prepend = InputGroupPrepend;
+
+var defaultProps$7 = {
+  noGutters: false
+};
+var Row = react.forwardRef(function (props, ref) {
+  var bsPrefix = props.bsPrefix,
+      noGutters = props.noGutters,
+      _props$as = props.as,
+      Component = _props$as === void 0 ? 'div' : _props$as,
+      className = props.className,
+      otherProps = _objectWithoutPropertiesLoose(props, ["bsPrefix", "noGutters", "as", "className"]);
+
+  var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
+  return react.createElement(Component, _extends({
+    ref: ref
+  }, otherProps, {
+    className: classnames(className, decoratedBsPrefix, noGutters && 'no-gutters')
+  }));
+});
+Row.defaultProps = defaultProps$7;
+
+/* global FileReader */
+class FilesUi extends react.PureComponent {
+  static get propTypes() {
+    return {
+      id: propTypes.string
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      files: []
+    };
+    this.addFile = this.addFile.bind(this);
+    this.clickImportFile = this.clickImportFile.bind(this);
+    this.importFile = this.importFile.bind(this);
+  }
+
+  async componentDidMount() {
+    const files = await listFiles();
+
+    const fileUpdater = async () => this.setState({
+      files: await listFiles()
+    });
+
+    const creationWatcher = await watchFileCreation(fileUpdater);
+    const deletionWatcher = await watchFileDeletion(fileUpdater);
+    this.setState({
+      files,
+      creationWatcher,
+      deletionWatcher
+    });
+  }
+
+  async componentWillUnmount() {
+    const {
+      creationWatcher,
+      deletionWatcher
+    } = this.state;
+    await unwatchFileCreation(creationWatcher);
+    await unwatchFileDeletion(deletionWatcher);
+  }
+
+  async addFile() {
+    const file = document.getElementById('source/add/name').value;
+
+    if (file.length > 0) {
+      // FIX: Prevent this from overwriting existing files.
+      await writeFile({}, `source/${file}`, '');
+    }
+  }
+
+  async importFile(e) {
+    const {
+      id
+    } = this.props;
+    const file = document.getElementById(`source/${id}/import`).files[0];
+    const name = document.getElementById(`source/${id}/name`).value;
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      const data = e.target.result;
+      writeFile({}, `source/${name}`, new Uint8Array(data));
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+  clickImportFile() {
+    const {
+      id
+    } = this.props;
+    document.getElementById(`source/${id}/import`).click();
+  }
+
+  buildFiles() {
+    const {
+      files
+    } = this.state;
+    return files.map(file => react.createElement(InputGroup, {
+      key: file
+    }, react.createElement(FormControl, {
+      disabled: true,
+      placeholder: file
+    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
+      onClick: () => deleteFile({}, file),
+      variant: "outline-primary"
+    }, "Delete"))));
+  }
+
+  render() {
+    const {
+      id
+    } = this.props;
+    return react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column',
+        padding: '4px',
+        border: '1px solid rgba(0,0,0,.125)',
+        borderRadius: '.25rem'
+      }
+    }, react.createElement(Row, {
+      style: {
+        flex: '1 1 auto',
+        overflow: 'auto'
+      }
+    }, react.createElement(Col, null, react.createElement(InputGroup, null, react.createElement(FormControl, {
+      id: "source/add/name",
+      placeholder: "File Name"
+    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
+      onClick: this.addFile,
+      variant: "outline-primary"
+    }, "Add"))), react.createElement(InputGroup, null, react.createElement(FormControl, {
+      as: "input",
+      type: "file",
+      id: `source/${id}/import`,
+      multiple: false,
+      onChange: this.importFile,
+      style: {
+        display: 'none'
+      }
+    }), react.createElement(FormControl, {
+      id: `source/${id}/name`,
+      placeholder: ""
+    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
+      onClick: this.clickImportFile,
+      variant: "outline-primary"
+    }, "Import"))), this.buildFiles())));
+  }
+
+}
 
 var size;
 function scrollbarSize(recalc) {
@@ -75193,7 +74951,7 @@ ModalDialog.displayName = 'ModalDialog';
 
 var Footer = createWithBsPrefix('modal-footer');
 
-var defaultProps$d = {
+var defaultProps$8 = {
   closeLabel: 'Close',
   closeButton: false
 };
@@ -75222,14 +74980,14 @@ var ModalHeader = react.forwardRef(function (_ref, ref) {
   }));
 });
 ModalHeader.displayName = 'ModalHeader';
-ModalHeader.defaultProps = defaultProps$d;
+ModalHeader.defaultProps = defaultProps$8;
 
 var DivStyledAsH4$1 = divWithClassName('h4');
 var Title = createWithBsPrefix('modal-title', {
   Component: DivStyledAsH4$1
 });
 
-var defaultProps$e = {
+var defaultProps$9 = {
   show: false,
   backdrop: true,
   keyboard: true,
@@ -75452,7 +75210,7 @@ function (_React$Component) {
   return Modal;
 }(react.Component);
 
-Modal$1.defaultProps = defaultProps$e;
+Modal$1.defaultProps = defaultProps$9;
 var DecoratedModal = createBootstrapComponent(Modal$1, 'modal');
 DecoratedModal.Body = Body;
 DecoratedModal.Header = ModalHeader;
@@ -75462,7 +75220,102 @@ DecoratedModal.Dialog = ModalDialog;
 DecoratedModal.TRANSITION_DURATION = 300;
 DecoratedModal.BACKDROP_TRANSITION_DURATION = 150;
 
+var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createChainableTypeChecker;
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+// Mostly taken from ReactPropTypes.
+
+function createChainableTypeChecker(validate) {
+  function checkType(isRequired, props, propName, componentName, location, propFullName) {
+    var componentNameSafe = componentName || '<<anonymous>>';
+    var propFullNameSafe = propFullName || propName;
+
+    if (props[propName] == null) {
+      if (isRequired) {
+        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
+      }
+
+      return null;
+    }
+
+    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
+      args[_key - 6] = arguments[_key];
+    }
+
+    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
+  }
+
+  var chainedCheckType = checkType.bind(null, false);
+  chainedCheckType.isRequired = checkType.bind(null, true);
+
+  return chainedCheckType;
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(createChainableTypeChecker_1);
+
+var all_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = all;
+
+
+
+var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function all() {
+  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
+    validators[_key] = arguments[_key];
+  }
+
+  function allPropTypes() {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    var error = null;
+
+    validators.forEach(function (validator) {
+      if (error != null) {
+        return;
+      }
+
+      var result = validator.apply(undefined, args);
+      if (result != null) {
+        error = result;
+      }
+    });
+
+    return error;
+  }
+
+  return (0, _createChainableTypeChecker2.default)(allPropTypes);
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(all_1);
+
 var NavbarContext = react.createContext(null);
+
+var CardContext = react.createContext(null);
 
 /**
  * Returns a function that triggers a component update. the hook equivalent to
@@ -75653,7 +75506,7 @@ function (_ref, ref) {
 });
 NavItem.displayName = 'NavItem';
 
-var defaultProps$f = {
+var defaultProps$a = {
   disabled: false
 };
 var AbstractNavItem = react.forwardRef(function (_ref, ref) {
@@ -75696,9 +75549,9 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
     className: classnames(className, isActive && 'active')
   }));
 });
-AbstractNavItem.defaultProps = defaultProps$f;
+AbstractNavItem.defaultProps = defaultProps$a;
 
-var defaultProps$g = {
+var defaultProps$b = {
   disabled: false,
   as: SafeAnchor
 };
@@ -75724,9 +75577,9 @@ var NavLink = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavLink.displayName = 'NavLink';
-NavLink.defaultProps = defaultProps$g;
+NavLink.defaultProps = defaultProps$b;
 
-var defaultProps$h = {
+var defaultProps$c = {
   justify: false,
   fill: false
 };
@@ -75768,7 +75621,7 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
   }, props), children);
 });
 Nav.displayName = 'Nav';
-Nav.defaultProps = defaultProps$h;
+Nav.defaultProps = defaultProps$c;
 Nav.Item = NavItem;
 Nav.Link = NavLink;
 
@@ -75801,7 +75654,7 @@ function getDimensionValue(dimension, elem) {
 }
 
 var collapseStyles = (_collapseStyles = {}, _collapseStyles[EXITED] = 'collapse', _collapseStyles[EXITING] = 'collapsing', _collapseStyles[ENTERING] = 'collapsing', _collapseStyles[ENTERED] = 'collapse show', _collapseStyles);
-var defaultProps$i = {
+var defaultProps$d = {
   in: false,
   timeout: 300,
   mountOnEnter: false,
@@ -75906,7 +75759,7 @@ function (_React$Component) {
   return Collapse;
 }(react.Component);
 
-Collapse.defaultProps = defaultProps$i;
+Collapse.defaultProps = defaultProps$d;
 
 var NavbarCollapse = react.forwardRef(function (_ref, ref) {
   var children = _ref.children,
@@ -75925,7 +75778,7 @@ var NavbarCollapse = react.forwardRef(function (_ref, ref) {
 });
 NavbarCollapse.displayName = 'NavbarCollapse';
 
-var defaultProps$j = {
+var defaultProps$e = {
   label: 'Toggle navigation'
 };
 var NavbarToggle = react.forwardRef(function (_ref, ref) {
@@ -75963,9 +75816,9 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavbarToggle.displayName = 'NavbarToggle';
-NavbarToggle.defaultProps = defaultProps$j;
+NavbarToggle.defaultProps = defaultProps$e;
 
-var defaultProps$k = {
+var defaultProps$f = {
   expand: true,
   variant: 'light',
   collapseOnSelect: false
@@ -76026,7 +75879,7 @@ var Navbar = react.forwardRef(function (props, ref) {
     className: classnames(className, bsPrefix, expand && expandClass, variant && bsPrefix + "-" + variant, bg && "bg-" + bg, sticky && "sticky-" + sticky, fixed && "fixed-" + fixed)
   }), children)));
 });
-Navbar.defaultProps = defaultProps$k;
+Navbar.defaultProps = defaultProps$f;
 Navbar.displayName = 'Navbar';
 Navbar.Brand = NavbarBrand;
 Navbar.Toggle = NavbarToggle;
@@ -76034,6 +75887,353 @@ Navbar.Collapse = NavbarCollapse;
 Navbar.Text = createWithBsPrefix('navbar-text', {
   Component: 'span'
 });
+
+var defaultProps$g = {
+  type: 'checkbox'
+};
+var FormCheckInput = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      isStatic = _ref.isStatic,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
+
+  var _useContext = react_12(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-input') : useBootstrapPrefix(bsPrefix, 'form-check-input');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    id: id || controlId,
+    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
+  }));
+});
+FormCheckInput.displayName = 'FormCheckInput';
+FormCheckInput.defaultProps = defaultProps$g;
+
+var FormCheckLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
+
+  var _useContext = react_12(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-label') : useBootstrapPrefix(bsPrefix, 'form-check-label');
+  return react.createElement("label", _extends({}, props, {
+    ref: ref,
+    htmlFor: htmlFor || controlId,
+    className: classnames(className, bsPrefix)
+  }));
+});
+FormCheckLabel.displayName = 'FormCheckLabel';
+
+var defaultProps$h = {
+  type: 'checkbox',
+  inline: false,
+  disabled: false,
+  isValid: false,
+  isInvalid: false,
+  title: ''
+};
+var FormCheck = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      inline = _ref.inline,
+      disabled = _ref.disabled,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      feedback = _ref.feedback,
+      className = _ref.className,
+      style = _ref.style,
+      title = _ref.title,
+      type = _ref.type,
+      label = _ref.label,
+      children = _ref.children,
+      propCustom = _ref.custom,
+      _ref$as = _ref.as,
+      as = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
+
+  var custom = type === 'switch' ? true : propCustom;
+  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
+
+  var _useContext = react_12(FormContext),
+      controlId = _useContext.controlId;
+
+  var innerFormContext = react_11(function () {
+    return {
+      controlId: id || controlId,
+      custom: custom
+    };
+  }, [controlId, custom, id]);
+  var hasLabel = label != null && label !== false && !children;
+  var input = react.createElement(FormCheckInput, _extends({}, props, {
+    type: type === 'switch' ? 'checkbox' : type,
+    ref: ref,
+    isValid: isValid,
+    isInvalid: isInvalid,
+    isStatic: !hasLabel,
+    disabled: disabled,
+    as: as
+  }));
+  return react.createElement(FormContext.Provider, {
+    value: innerFormContext
+  }, react.createElement("div", {
+    style: style,
+    className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
+  }, children || react.createElement(react.Fragment, null, input, hasLabel && react.createElement(FormCheckLabel, {
+    title: title
+  }, label), (isValid || isInvalid) && react.createElement(Feedback, {
+    type: isValid ? 'valid' : 'invalid'
+  }, feedback))));
+});
+FormCheck.displayName = 'FormCheck';
+FormCheck.defaultProps = defaultProps$h;
+FormCheck.Input = FormCheckInput;
+FormCheck.Label = FormCheckLabel;
+
+var FormGroup = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      children = _ref.children,
+      controlId = _ref.controlId,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
+  var context = react_11(function () {
+    return {
+      controlId: controlId
+    };
+  }, [controlId]);
+  return react.createElement(FormContext.Provider, {
+    value: context
+  }, react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix)
+  }), children));
+});
+FormGroup.displayName = 'FormGroup';
+
+var defaultProps$i = {
+  column: false,
+  srOnly: false
+};
+var FormLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      column = _ref.column,
+      srOnly = _ref.srOnly,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
+
+  var _useContext = react_12(FormContext),
+      controlId = _useContext.controlId;
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
+  var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && 'col-form-label');
+   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
+  htmlFor = htmlFor || controlId;
+  if (column) return react.createElement(Col, _extends({
+    as: "label",
+    className: classes,
+    htmlFor: htmlFor
+  }, props));
+  return (// eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
+    react.createElement("label", _extends({
+      ref: ref,
+      className: classes,
+      htmlFor: htmlFor
+    }, props))
+  );
+});
+FormLabel.displayName = 'FormLabel';
+FormLabel.defaultProps = defaultProps$i;
+
+var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'small' : _ref$as,
+      muted = _ref.muted,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix, muted && 'text-muted')
+  }));
+});
+FormText.displayName = 'FormText';
+
+var Switch = react.forwardRef(function (props, ref) {
+  return react.createElement(FormCheck, _extends({}, props, {
+    ref: ref,
+    type: "switch"
+  }));
+});
+Switch.displayName = 'Switch';
+Switch.Input = FormCheck.Input;
+Switch.Label = FormCheck.Label;
+
+var defaultProps$j = {
+  inline: false
+};
+var Form = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      inline = _ref.inline,
+      className = _ref.className,
+      validated = _ref.validated,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'form' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
+  }));
+});
+Form.displayName = 'Form';
+Form.defaultProps = defaultProps$j;
+Form.Row = createWithBsPrefix('form-row');
+Form.Group = FormGroup;
+Form.Control = FormControl;
+Form.Check = FormCheck;
+Form.Switch = Switch;
+Form.Label = FormLabel;
+Form.Text = FormText;
+
+class ParametersUi extends react.PureComponent {
+  static get propTypes() {
+    return {
+      id: propTypes.string,
+      onChange: propTypes.func,
+      parameters: propTypes.array,
+      project: propTypes.string
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.renderParameter = this.renderParameter.bind(this);
+    this.updateParameterValue = this.updateParameterValue.bind(this);
+  }
+
+  updateParameterValue(newParameter, event) {
+    const {
+      onChange,
+      parameters
+    } = this.props;
+    const value = event.target.checked === undefined ? event.target.value : event.target.checked;
+    const updated = [];
+
+    for (const oldParameter of parameters) {
+      if (oldParameter.identifier === newParameter.identifier) {
+        updated.push({ ...oldParameter,
+          value
+        });
+      } else {
+        updated.push(oldParameter);
+      }
+    }
+
+    if (onChange) {
+      onChange(updated);
+    }
+  }
+
+  renderParameter(parameter) {
+    const {
+      identifier,
+      prompt,
+      value = '',
+      options = {}
+    } = parameter;
+    const {
+      choices
+    } = options;
+    const {
+      project
+    } = this.props;
+    const label = prompt || identifier;
+    const id = `parameter/${project}/${identifier}`;
+
+    const onChange = event => this.updateParameterValue(parameter, event);
+
+    if (choices !== undefined) {
+      if (choices.every(choice => [true, false].includes(choice))) {
+        return react.createElement(InputGroup, {
+          key: id
+        }, react.createElement(Form.Check, {
+          type: "checkbox",
+          key: id,
+          label: label,
+          onChange: onChange
+        }));
+      } else {
+        return react.createElement(InputGroup, {
+          key: id
+        }, react.createElement(InputGroup.Prepend, null, react.createElement(InputGroup.Text, null, label)), react.createElement(FormControl, {
+          key: id,
+          as: "select",
+          defaultValue: choices[0],
+          onChange: onChange
+        }, choices.map((choice, index) => react.createElement("option", {
+          key: index
+        }, choice))));
+      }
+    } else {
+      return react.createElement(InputGroup, {
+        key: id
+      }, react.createElement(InputGroup.Prepend, null, react.createElement(InputGroup.Text, null, label)), react.createElement(FormControl, {
+        key: id,
+        id: id,
+        defaultValue: value,
+        onChange: onChange
+      }));
+    }
+  }
+
+  render() {
+    const {
+      id,
+      parameters
+    } = this.props;
+    return react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column',
+        padding: '4px',
+        border: '1px solid rgba(0,0,0,.125)',
+        borderRadius: '.25rem'
+      }
+    }, react.createElement(Row, {
+      style: {
+        width: '100%',
+        height: '100%',
+        flex: '1 1 auto'
+      }
+    }, react.createElement(Col, null, react.createElement(InputGroup, null, parameters.map(this.renderParameter)))));
+  }
+
+}
 
 var prismCore = createCommonjsModule(function (module) {
 var _self = (typeof window !== 'undefined')
@@ -76589,25 +76789,145 @@ if (typeof commonjsGlobal !== 'undefined') {
 }
 });
 
-var defaultProps$l = {
-  noGutters: false
+var defaultProps$k = {
+  variant: null
 };
-var Row = react.forwardRef(function (props, ref) {
-  var bsPrefix = props.bsPrefix,
-      noGutters = props.noGutters,
-      _props$as = props.as,
-      Component = _props$as === void 0 ? 'div' : _props$as,
-      className = props.className,
-      otherProps = _objectWithoutPropertiesLoose(props, ["bsPrefix", "noGutters", "as", "className"]);
+var CardImg = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      variant = _ref.variant,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'img' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "variant", "as"]);
 
-  var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
+  var prefix = useBootstrapPrefix(bsPrefix, 'card-img');
   return react.createElement(Component, _extends({
-    ref: ref
-  }, otherProps, {
-    className: classnames(className, decoratedBsPrefix, noGutters && 'no-gutters')
-  }));
+    ref: ref,
+    className: classnames(variant ? prefix + "-" + variant : prefix, className)
+  }, props));
 });
-Row.defaultProps = defaultProps$l;
+CardImg.displayName = 'CardImg';
+CardImg.defaultProps = defaultProps$k;
+
+var DivStyledAsH5 = divWithClassName('h5');
+var DivStyledAsH6 = divWithClassName('h6');
+var CardBody = createWithBsPrefix('card-body');
+var defaultProps$l = {
+  body: false
+};
+var Card = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      bg = _ref.bg,
+      text = _ref.text,
+      border = _ref.border,
+      body = _ref.body,
+      children = _ref.children,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"]);
+
+  var prefix = useBootstrapPrefix(bsPrefix, 'card');
+  var cardContext = react_11(function () {
+    return {
+      cardHeaderBsPrefix: prefix + "-header"
+    };
+  }, [prefix]);
+  return react.createElement(CardContext.Provider, {
+    value: cardContext
+  }, react.createElement(Component, _extends({
+    ref: ref
+  }, props, {
+    className: classnames(className, prefix, bg && "bg-" + bg, text && "text-" + text, border && "border-" + border)
+  }), body ? react.createElement(CardBody, null, children) : children));
+});
+Card.displayName = 'Card';
+Card.defaultProps = defaultProps$l;
+Card.Img = CardImg;
+Card.Title = createWithBsPrefix('card-title', {
+  Component: DivStyledAsH5
+});
+Card.Subtitle = createWithBsPrefix('card-subtitle', {
+  Component: DivStyledAsH6
+});
+Card.Body = CardBody;
+Card.Link = createWithBsPrefix('card-link', {
+  Component: 'a'
+});
+Card.Text = createWithBsPrefix('card-text', {
+  Component: 'p'
+});
+Card.Header = createWithBsPrefix('card-header');
+Card.Footer = createWithBsPrefix('card-footer');
+Card.ImgOverlay = createWithBsPrefix('card-img-overlay');
+
+class SettingsUi extends react.PureComponent {
+  static get propTypes() {
+    return {
+      onHide: propTypes.func,
+      onSubmit: propTypes.func,
+      storage: propTypes.string
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.doHide = this.doHide.bind(this);
+    this.doSubmit = this.doSubmit.bind(this);
+    this.doUpdate = this.doUpdate.bind(this);
+    this.state = {};
+  }
+
+  async componentDidMount() {
+    const {
+      storage
+    } = this.props;
+    const state = await readFile({}, `settings/${storage}`);
+
+    if (state !== undefined) {
+      this.setState(JSON.parse(state));
+    }
+  }
+
+  doHide(event) {
+    const {
+      onHide
+    } = this.props;
+
+    if (onHide) {
+      onHide(this.state);
+    }
+  }
+
+  async doSubmit(event, payload) {
+    this.setState(payload);
+    const {
+      onSubmit,
+      storage
+    } = this.props;
+
+    if (storage) {
+      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
+    }
+
+    if (onSubmit) {
+      onSubmit(this.state);
+    }
+
+    this.doHide(); // event.preventDefault();
+  }
+
+  doUpdate(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({
+      [name]: value
+    });
+  }
+
+}
 
 /* eslint-disable react/no-unused-prop-types */
 
@@ -76890,6 +77210,149 @@ var Tabs = react.forwardRef(function (props, ref) {
 Tabs.defaultProps = defaultProps$m;
 Tabs.displayName = 'Tabs';
 
+class SelectProjectUi extends SettingsUi {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  } // <Card.Img variant="top" src="holder.js/100px160" />
+
+
+  render() {
+    const {
+      projects
+    } = this.props;
+    const rows = [];
+
+    for (let i = 0; i < projects.length; i += 5) {
+      rows.push(projects.slice(i, i + 5));
+    }
+
+    return react.createElement(DecoratedModal, {
+      show: this.props.show,
+      onHide: this.doHide,
+      size: "xl",
+      scrollable: true
+    }, react.createElement(DecoratedModal.Header, {
+      closeButton: true
+    }, react.createElement(DecoratedModal.Title, null, "Select Project")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
+      defaultActiveKey: "local",
+      style: {
+        display: 'flex'
+      }
+    }, react.createElement(Tab, {
+      eventKey: "local",
+      title: "Local"
+    }, react.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap'
+      }
+    }, projects.map((project, index) => react.createElement(Card, {
+      tag: "a",
+      key: index,
+      style: {
+        width: '196px',
+        height: '128'
+      },
+      onClick: e => this.doSubmit(e, {
+        action: 'selectProject',
+        project
+      })
+    }, react.createElement(Card.Body, null, react.createElement(Card.Title, null, project)))))), react.createElement(Tab, {
+      eventKey: "githubRepository",
+      title: "Github"
+    }), react.createElement(Tab, {
+      eventKey: "newProject",
+      title: "New Project"
+    }))));
+  }
+
+}
+
+class ShareUi extends SettingsUi {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gistIsPublic: true,
+      gistUrl: '',
+      githubRepositoryOwner: '',
+      githubRepositoryRepository: '',
+      githubRepositoryPrefix: `jsxcad/${getFilesystem()}/`
+    };
+  }
+
+  render() {
+    const {
+      githubRepositoryOwner,
+      githubRepositoryRepository,
+      githubRepositoryPrefix
+    } = this.state;
+    const {
+      gistIsPublic = true,
+      gistUrl
+    } = this.state;
+    return react.createElement(DecoratedModal, {
+      show: this.props.show,
+      onHide: this.doHide
+    }, react.createElement(DecoratedModal.Header, {
+      closeButton: true
+    }, react.createElement(DecoratedModal.Title, null, "Share")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
+      defaultActiveKey: "repository"
+    }, react.createElement(Tab, {
+      eventKey: "repository",
+      title: "Github"
+    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Owner"), react.createElement(Form.Control, {
+      name: "githubRepositoryOwner",
+      value: githubRepositoryOwner,
+      onChange: this.doUpdate
+    })), react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Repository"), react.createElement(Form.Control, {
+      name: "githubRepositoryRepository",
+      value: githubRepositoryRepository,
+      onChange: this.doUpdate
+    })), react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Path Prefix"), react.createElement(Form.Control, {
+      name: "githubRepositoryPrefix",
+      value: githubRepositoryPrefix,
+      onChange: this.doUpdate
+    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
+      name: "import",
+      variant: "outline-primary",
+      onClick: e => this.doSubmit(e, {
+        action: 'githubRepositoryImport'
+      })
+    }, "Import"), react.createElement(Button, {
+      name: "export",
+      variant: "outline-primary",
+      onClick: e => this.doSubmit(e, {
+        action: 'githubRepositoryExport'
+      })
+    }, "Export")))), react.createElement(Tab, {
+      eventKey: "gist",
+      title: "Gist"
+    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Gist Url"), react.createElement(Form.Control, {
+      name: "gistUrl",
+      value: gistUrl,
+      onChange: this.doUpdate
+    }), react.createElement(Form.Label, null, "Gist is public?"), react.createElement(Form.Check, {
+      checked: gistIsPublic,
+      onChange: this.doUpdate
+    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
+      name: "import",
+      variant: "outline-primary",
+      onClick: e => this.doSubmit(e, {
+        action: 'gistImport'
+      })
+    }, "Import"), react.createElement(Button, {
+      name: "export",
+      variant: "outline-primary",
+      onClick: e => this.doSubmit(e, {
+        action: 'gistExport'
+      })
+    }, "Export")))))));
+  }
+
+}
+
 /**
  * Returns a ref that is immediately updated with the new value
  *
@@ -77074,6 +77537,250 @@ Toast.defaultProps = defaultProps$o;
 Toast.displayName = 'Toast';
 Toast.Body = Body$1;
 Toast.Header = ToastHeader;
+
+var FileSaver_min = createCommonjsModule(function (module, exports) {
+(function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(b,c,d){var e=new XMLHttpRequest;e.open("GET",b),e.responseType="blob",e.onload=function(){a(e.response,c,d);},e.onerror=function(){console.error("could not download file");},e.send();}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send();}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(a,b,d,e){if(e=e||open("","_blank"),e&&(e.document.title=e.document.body.innerText="downloading..."),"string"==typeof a)return c(a,b,d);var g="application/octet-stream"===a.type,h=/constructor/i.test(f.HTMLElement)||f.safari,i=/CriOS\/[\d]+/.test(navigator.userAgent);if((i||g&&h)&&"object"==typeof FileReader){var j=new FileReader;j.onloadend=function(){var a=j.result;a=i?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),e?e.location.href=a:location=a,e=null;},j.readAsDataURL(a);}else{var k=f.URL||f.webkitURL,l=k.createObjectURL(a);e?e.location=l:location.href=l,e=null,setTimeout(function(){k.revokeObjectURL(l);},4E4);}});f.saveAs=a.saveAs=a,(module.exports=a);});
+
+
+});
+
+/* global Blob, ResizeObserver, window */
+
+const downloadFile = async path => {
+  const data = await readFile({
+    as: 'bytes'
+  }, path);
+  const blob = new Blob([data.buffer], {
+    type: 'application/octet-stream'
+  });
+  FileSaver_min(blob, path.split('/').pop());
+};
+
+class ViewUi extends react.PureComponent {
+  static get propTypes() {
+    return {
+      file: propTypes.string,
+      id: propTypes.string
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      file: props.file,
+      containerId: `${props.id}/container/${props.file}`
+    };
+  }
+
+  async componentDidMount() {
+    const {
+      containerId,
+      file
+    } = this.state;
+    const container = document.getElementById(containerId);
+    const view = {
+      target: [0, 0, 0],
+      position: [0, 0, 200],
+      up: [0, 1, 0]
+    };
+    let datasets = [];
+    let threejsGeometry;
+    let width = container.offsetWidth;
+    let height = container.offsetHeight;
+    const {
+      camera,
+      hudCanvas,
+      renderer,
+      scene,
+      viewerElement
+    } = buildScene({
+      width,
+      height,
+      view
+    });
+    const {
+      gui
+    } = buildGui({
+      viewerElement
+    });
+    const hudContext = hudCanvas.getContext('2d');
+
+    const render = () => {
+      renderer.clear();
+      camera.layers.set(0);
+      renderer.render(scene, camera);
+      renderer.clearDepth();
+      camera.layers.set(1);
+      renderer.render(scene, camera);
+    };
+
+    const updateHud = () => {
+      hudContext.clearRect(0, 0, width, height);
+      drawHud({
+        camera,
+        datasets,
+        threejsGeometry,
+        hudCanvas
+      }); // hudContext.fillStyle = '#FF0000';
+
+      hudContext.fillStyle = '#00FF00';
+    };
+
+    container.appendChild(viewerElement);
+
+    const animate = () => {
+      updateHud();
+      render();
+    };
+
+    const {
+      trackball
+    } = buildTrackballControls({
+      camera,
+      render: animate,
+      view,
+      viewerElement
+    });
+    const {
+      resize
+    } = createResizer({
+      camera,
+      trackball,
+      renderer,
+      viewerElement
+    });
+    resize();
+    new ResizeObserver(() => {
+      ({
+        width,
+        height
+      } = resize());
+      hudCanvas.width = width;
+      hudCanvas.height = height;
+    }).observe(container);
+
+    const track = () => {
+      animate();
+      trackball.update();
+      window.requestAnimationFrame(track);
+    };
+
+    track();
+    const geometryPath = file;
+
+    const updateGeometry = geometry => {
+      if (geometry !== undefined) {
+        // Delete any previous dataset in the window.
+        const controllers = new Set();
+
+        for (const {
+          controller,
+          mesh
+        } of datasets) {
+          if (controller) {
+            controllers.add(controller);
+          }
+
+          scene.remove(mesh);
+        }
+
+        for (const controller of controllers) {
+          gui.remove(controller.ui);
+        }
+
+        threejsGeometry = toThreejsGeometry(geometry); // Build new datasets from the written data, and display them.
+
+        datasets = [];
+        buildMeshes({
+          datasets,
+          threejsGeometry,
+          scene
+        });
+        buildGuiControls({
+          datasets,
+          gui
+        });
+      }
+    };
+
+    const json = await readFile({}, geometryPath);
+
+    if (json !== undefined) {
+      updateGeometry(JSON.parse(json));
+    }
+
+    const watcher = await watchFile(geometryPath, async () => updateGeometry(JSON.parse((await readFile({}, geometryPath)))));
+    this.setState({
+      watcher
+    });
+  }
+
+  async componentWillUnmount() {
+    const {
+      containerId,
+      watcher
+    } = this.state;
+    const container = document.getElementById(containerId);
+
+    while (true) {
+      const child = container.firstElementChild;
+
+      if (child) {
+        container.removeChild(child);
+        continue;
+      }
+
+      break;
+    }
+
+    if (watcher) {
+      await unwatchFiles(watcher);
+    }
+  }
+
+  render() {
+    const {
+      id
+    } = this.props;
+    const {
+      file,
+      containerId
+    } = this.state;
+    const filePath = `source/${file.substring(9)}`;
+    const buttons = file === 'geometry/preview' ? [] : react.createElement(Row, {
+      style: {
+        flex: '0 0 auto'
+      }
+    }, react.createElement(Col, null, react.createElement("br", null), react.createElement(ButtonGroup, null, react.createElement(Button, {
+      size: "sm",
+      onClick: () => downloadFile(filePath),
+      variant: "outline-primary"
+    }, "Download"))));
+    return react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column'
+      }
+    }, react.createElement(Row, {
+      style: {
+        width: '100%',
+        height: '100%',
+        flex: '1 1 auto'
+      }
+    }, react.createElement(Col, {
+      style: {
+        width: '100%',
+        height: '100%',
+        overflow: 'auto'
+      }
+    }, react.createElement("div", {
+      id: containerId
+    }))), buttons);
+  }
+
+}
 
 var modeJavascript = createCommonjsModule(function (module, exports) {
 ace.define("ace/mode/doc_comment_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module) {
@@ -78520,12 +79227,6 @@ if (Prism.languages.markup) {
 
 Prism.languages.js = Prism.languages.javascript;
 
-var FileSaver_min = createCommonjsModule(function (module, exports) {
-(function(a,b){b();})(commonjsGlobal,function(){function b(a,b){return "undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(b,c,d){var e=new XMLHttpRequest;e.open("GET",b),e.responseType="blob",e.onload=function(){a(e.response,c,d);},e.onerror=function(){console.error("could not download file");},e.send();}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send();}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"));}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b);}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof commonjsGlobal&&commonjsGlobal.global===commonjsGlobal?commonjsGlobal:void 0,a=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href);},4E4),setTimeout(function(){e(j);},0));}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i);});}}:function(a,b,d,e){if(e=e||open("","_blank"),e&&(e.document.title=e.document.body.innerText="downloading..."),"string"==typeof a)return c(a,b,d);var g="application/octet-stream"===a.type,h=/constructor/i.test(f.HTMLElement)||f.safari,i=/CriOS\/[\d]+/.test(navigator.userAgent);if((i||g&&h)&&"object"==typeof FileReader){var j=new FileReader;j.onloadend=function(){var a=j.result;a=i?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),e?e.location.href=a:location=a,e=null;},j.readAsDataURL(a);}else{var k=f.URL||f.webkitURL,l=k.createObjectURL(a);e?e.location=l:location.href=l,e=null,setTimeout(function(){k.revokeObjectURL(l);},4E4);}});f.saveAs=a.saveAs=a,(module.exports=a);});
-
-
-});
-
 const request$2 = (isOk, path, method, body, options) => request(isOk, path, method, body, { ...options,
   service: 'gist'
 });
@@ -78552,7 +79253,7 @@ const writeProject$1 = async (project, {
   return gist.url;
 };
 
-/* global Blob, FileReader, ResizeObserver, history, location, window */
+/* global history, location, window */
 
 class Ui$1 extends react.PureComponent {
   static get propTypes() {
@@ -78948,6 +79649,7 @@ class Ui$1 extends react.PureComponent {
       view,
       file
     } = this.getPaneView(id);
+    id = `${id}`;
 
     switch (view) {
       case 'geometry':
@@ -79019,7 +79721,7 @@ class Ui$1 extends react.PureComponent {
       case 'io':
         {
           this.setState({
-            showIoUi: true
+            showShareUi: true
           });
           break;
         }
@@ -79118,7 +79820,7 @@ class Ui$1 extends react.PureComponent {
     };
 
     const {
-      showIoUi = false,
+      showShareUi = false,
       showSelectProjectUi = false
     } = this.state;
     const {
@@ -79131,13 +79833,13 @@ class Ui$1 extends react.PureComponent {
         display: 'flex',
         flexFlow: 'column'
       }
-    }, react.createElement(IoUi, {
-      key: "ioUi",
-      show: showIoUi,
-      storage: "io",
+    }, react.createElement(ShareUi, {
+      key: "shareUi",
+      show: showShareUi,
+      storage: "share",
       onSubmit: this.doGithub,
       onHide: () => this.setState({
-        showIoUi: false
+        showShareUi: false
       })
     }), react.createElement(SelectProjectUi, {
       key: "selectProjectUi",
@@ -79194,329 +79896,6 @@ class Ui$1 extends react.PureComponent {
       onRelease: this.onRelease,
       className: ''
     }));
-  }
-
-}
-
-class SettingsUi extends react.PureComponent {
-  static get propTypes() {
-    return {
-      onHide: propTypes.func,
-      onSubmit: propTypes.func,
-      storage: propTypes.string
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.doHide = this.doHide.bind(this);
-    this.doSubmit = this.doSubmit.bind(this);
-    this.doUpdate = this.doUpdate.bind(this);
-    this.state = {};
-  }
-
-  async componentDidMount() {
-    const {
-      storage
-    } = this.props;
-    const state = await readFile({}, `settings/${storage}`);
-
-    if (state !== undefined) {
-      this.setState(JSON.parse(state));
-    }
-  }
-
-  doHide(event) {
-    const {
-      onHide
-    } = this.props;
-
-    if (onHide) {
-      onHide(this.state);
-    }
-  }
-
-  async doSubmit(event, payload) {
-    this.setState(payload);
-    const {
-      onSubmit,
-      storage
-    } = this.props;
-
-    if (storage) {
-      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
-    }
-
-    if (onSubmit) {
-      onSubmit(this.state);
-    }
-
-    this.doHide();
-    event.preventDefault();
-  }
-
-  doUpdate(event) {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-    this.setState({
-      [name]: value
-    });
-  }
-
-}
-
-class IoUi extends SettingsUi {
-  constructor(props) {
-    super(props);
-    this.state = {
-      gistIsPublic: true,
-      gistUrl: '',
-      githubRepositoryOwner: '',
-      githubRepositoryRepository: '',
-      githubRepositoryPrefix: `jsxcad/${getFilesystem()}/`
-    };
-  }
-
-  render() {
-    const {
-      githubRepositoryOwner,
-      githubRepositoryRepository,
-      githubRepositoryPrefix
-    } = this.state;
-    const {
-      gistIsPublic = true,
-      gistUrl
-    } = this.state;
-    return react.createElement(DecoratedModal, {
-      show: this.props.show,
-      onHide: this.doHide
-    }, react.createElement(DecoratedModal.Header, {
-      closeButton: true
-    }, react.createElement(DecoratedModal.Title, null, "Share")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
-      defaultActiveKey: "repository"
-    }, react.createElement(Tab, {
-      eventKey: "repository",
-      title: "Github"
-    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Owner"), react.createElement(Form.Control, {
-      name: "githubRepositoryOwner",
-      value: githubRepositoryOwner,
-      onChange: this.doUpdate
-    })), react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Repository"), react.createElement(Form.Control, {
-      name: "githubRepositoryRepository",
-      value: githubRepositoryRepository,
-      onChange: this.doUpdate
-    })), react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Path Prefix"), react.createElement(Form.Control, {
-      name: "githubRepositoryPrefix",
-      value: githubRepositoryPrefix,
-      onChange: this.doUpdate
-    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      name: "import",
-      variant: "outline-primary",
-      onClick: e => this.doSubmit(e, {
-        action: 'githubRepositoryImport'
-      })
-    }, "Import"), react.createElement(Button, {
-      name: "export",
-      variant: "outline-primary",
-      onClick: e => this.doSubmit(e, {
-        action: 'githubRepositoryExport'
-      })
-    }, "Export")))), react.createElement(Tab, {
-      eventKey: "gist",
-      title: "Gist"
-    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Gist Url"), react.createElement(Form.Control, {
-      name: "gistUrl",
-      value: gistUrl,
-      onChange: this.doUpdate
-    }), react.createElement(Form.Label, null, "Gist is public?"), react.createElement(Form.Check, {
-      checked: gistIsPublic,
-      onChange: this.doUpdate
-    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      name: "import",
-      variant: "outline-primary",
-      onClick: e => this.doSubmit(e, {
-        action: 'gistImport'
-      })
-    }, "Import"), react.createElement(Button, {
-      name: "export",
-      variant: "outline-primary",
-      onClick: e => this.doSubmit(e, {
-        action: 'gistExport'
-      })
-    }, "Export")))))));
-  }
-
-}
-
-class SelectProjectUi extends SettingsUi {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  } // <Card.Img variant="top" src="holder.js/100px160" />
-
-
-  render() {
-    const {
-      projects
-    } = this.props;
-    const rows = [];
-
-    for (let i = 0; i < projects.length; i += 5) {
-      rows.push(projects.slice(i, i + 5));
-    }
-
-    return react.createElement(DecoratedModal, {
-      show: this.props.show,
-      onHide: this.doHide,
-      size: "xl",
-      scrollable: true
-    }, react.createElement(DecoratedModal.Header, {
-      closeButton: true
-    }, react.createElement(DecoratedModal.Title, null, "Select Project")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
-      defaultActiveKey: "projects",
-      style: {
-        display: 'flex'
-      }
-    }, react.createElement(Tab, {
-      eventKey: "projects",
-      title: "CardGroup"
-    }, react.createElement("div", {
-      style: {
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap'
-      }
-    }, projects.map((project, index) => react.createElement(Card, {
-      tag: "a",
-      key: index,
-      style: {
-        width: '196px',
-        height: '128'
-      },
-      onClick: e => this.doSubmit(e, {
-        action: 'selectProject',
-        project
-      })
-    }, react.createElement(Card.Body, null, react.createElement(Card.Title, null, project)))))))));
-  }
-
-}
-
-class ParametersUi extends react.PureComponent {
-  static get propTypes() {
-    return {
-      id: propTypes.string,
-      onChange: propTypes.func,
-      parameters: propTypes.array,
-      project: propTypes.string
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.renderParameter = this.renderParameter.bind(this);
-    this.updateParameterValue = this.updateParameterValue.bind(this);
-  }
-
-  updateParameterValue(newParameter, event) {
-    const {
-      onChange,
-      parameters
-    } = this.props;
-    const value = event.target.checked === undefined ? event.target.value : event.target.checked;
-    const updated = [];
-
-    for (const oldParameter of parameters) {
-      if (oldParameter.identifier === newParameter.identifier) {
-        updated.push({ ...oldParameter,
-          value
-        });
-      } else {
-        updated.push(oldParameter);
-      }
-    }
-
-    if (onChange) {
-      onChange(updated);
-    }
-  }
-
-  renderParameter(parameter) {
-    const {
-      identifier,
-      prompt,
-      value = '',
-      options = {}
-    } = parameter;
-    const {
-      choices
-    } = options;
-    const {
-      project
-    } = this.props;
-    const label = prompt || identifier;
-    const id = `parameter/${project}/${identifier}`;
-
-    const onChange = event => this.updateParameterValue(parameter, event);
-
-    if (choices !== undefined) {
-      if (choices.every(choice => [true, false].includes(choice))) {
-        return react.createElement(InputGroup, {
-          key: id
-        }, react.createElement(Form.Check, {
-          type: "checkbox",
-          key: id,
-          label: label,
-          onChange: onChange
-        }));
-      } else {
-        return react.createElement(InputGroup, {
-          key: id
-        }, react.createElement(InputGroup.Prepend, null, react.createElement(InputGroup.Text, null, label)), react.createElement(FormControl, {
-          key: id,
-          as: "select",
-          defaultValue: choices[0],
-          onChange: onChange
-        }, choices.map((choice, index) => react.createElement("option", {
-          key: index
-        }, choice))));
-      }
-    } else {
-      return react.createElement(InputGroup, {
-        key: id
-      }, react.createElement(InputGroup.Prepend, null, react.createElement(InputGroup.Text, null, label)), react.createElement(FormControl, {
-        key: id,
-        id: id,
-        defaultValue: value,
-        onChange: onChange
-      }));
-    }
-  }
-
-  render() {
-    const {
-      id,
-      parameters
-    } = this.props;
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column',
-        padding: '4px',
-        border: '1px solid rgba(0,0,0,.125)',
-        borderRadius: '.25rem'
-      }
-    }, react.createElement(Row, {
-      style: {
-        width: '100%',
-        height: '100%',
-        flex: '1 1 auto'
-      }
-    }, react.createElement(Col, null, react.createElement(InputGroup, null, parameters.map(this.renderParameter)))));
   }
 
 }
@@ -79731,367 +80110,6 @@ class ProjectUi extends React.PureComponent {
   }
 };
 */
-
-
-class FilesUi extends react.PureComponent {
-  static get propTypes() {
-    return {
-      id: propTypes.string
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      files: []
-    };
-    this.addFile = this.addFile.bind(this);
-    this.clickImportFile = this.clickImportFile.bind(this);
-    this.importFile = this.importFile.bind(this);
-  }
-
-  async componentDidMount() {
-    const files = await listFiles();
-
-    const fileUpdater = async () => this.setState({
-      files: await listFiles()
-    });
-
-    const creationWatcher = await watchFileCreation(fileUpdater);
-    const deletionWatcher = await watchFileDeletion(fileUpdater);
-    this.setState({
-      files,
-      creationWatcher,
-      deletionWatcher
-    });
-  }
-
-  async componentWillUnmount() {
-    const {
-      creationWatcher,
-      deletionWatcher
-    } = this.state;
-    await unwatchFileCreation(creationWatcher);
-    await unwatchFileDeletion(deletionWatcher);
-  }
-
-  async addFile() {
-    const file = document.getElementById('source/add/name').value;
-
-    if (file.length > 0) {
-      // FIX: Prevent this from overwriting existing files.
-      await writeFile({}, `source/${file}`, '');
-    }
-  }
-
-  async importFile(e) {
-    const {
-      id
-    } = this.props;
-    const file = document.getElementById(`source/${id}/import`).files[0];
-    const name = document.getElementById(`source/${id}/name`).value;
-    const reader = new FileReader();
-
-    reader.onload = e => {
-      const data = e.target.result;
-      writeFile({}, `source/${name}`, new Uint8Array(data));
-    };
-
-    reader.readAsArrayBuffer(file);
-  }
-
-  clickImportFile() {
-    const {
-      id
-    } = this.props;
-    document.getElementById(`source/${id}/import`).click();
-  }
-
-  buildFiles() {
-    const {
-      files
-    } = this.state;
-    return files.map(file => react.createElement(InputGroup, {
-      key: file
-    }, react.createElement(FormControl, {
-      disabled: true,
-      placeholder: file
-    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
-      onClick: () => deleteFile({}, file),
-      variant: "outline-primary"
-    }, "Delete"))));
-  }
-
-  render() {
-    const {
-      id
-    } = this.props;
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column',
-        padding: '4px',
-        border: '1px solid rgba(0,0,0,.125)',
-        borderRadius: '.25rem'
-      }
-    }, react.createElement(Row, {
-      style: {
-        flex: '1 1 auto',
-        overflow: 'auto'
-      }
-    }, react.createElement(Col, null, react.createElement(InputGroup, null, react.createElement(FormControl, {
-      id: "source/add/name",
-      placeholder: "File Name"
-    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
-      onClick: this.addFile,
-      variant: "outline-primary"
-    }, "Add"))), react.createElement(InputGroup, null, react.createElement(FormControl, {
-      as: "input",
-      type: "file",
-      id: `source/${id}/import`,
-      multiple: false,
-      onChange: this.importFile,
-      style: {
-        display: 'none'
-      }
-    }), react.createElement(FormControl, {
-      id: `source/${id}/name`,
-      placeholder: ""
-    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
-      onClick: this.clickImportFile,
-      variant: "outline-primary"
-    }, "Import"))), this.buildFiles())));
-  }
-
-}
-
-class ViewUi extends react.PureComponent {
-  static get propTypes() {
-    return {
-      file: propTypes.string,
-      id: propTypes.string
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      file: props.file,
-      containerId: `${props.id}/container/${props.file}`
-    };
-  }
-
-  async componentDidMount() {
-    const {
-      containerId,
-      file
-    } = this.state;
-    const container = document.getElementById(containerId);
-    const view = {
-      target: [0, 0, 0],
-      position: [0, 0, 200],
-      up: [0, 1, 0]
-    };
-    let datasets = [];
-    let threejsGeometry;
-    let width = container.offsetWidth;
-    let height = container.offsetHeight;
-    const {
-      camera,
-      hudCanvas,
-      renderer,
-      scene,
-      viewerElement
-    } = buildScene({
-      width,
-      height,
-      view
-    });
-    const {
-      gui
-    } = buildGui({
-      viewerElement
-    });
-    const hudContext = hudCanvas.getContext('2d');
-
-    const render = () => {
-      renderer.clear();
-      camera.layers.set(0);
-      renderer.render(scene, camera);
-      renderer.clearDepth();
-      camera.layers.set(1);
-      renderer.render(scene, camera);
-    };
-
-    const updateHud = () => {
-      hudContext.clearRect(0, 0, width, height);
-      drawHud({
-        camera,
-        datasets,
-        threejsGeometry,
-        hudCanvas
-      }); // hudContext.fillStyle = '#FF0000';
-
-      hudContext.fillStyle = '#00FF00';
-    };
-
-    container.appendChild(viewerElement);
-
-    const animate = () => {
-      updateHud();
-      render();
-    };
-
-    const {
-      trackball
-    } = buildTrackballControls({
-      camera,
-      render: animate,
-      view,
-      viewerElement
-    });
-    const {
-      resize
-    } = createResizer({
-      camera,
-      trackball,
-      renderer,
-      viewerElement
-    });
-    resize();
-    new ResizeObserver(() => {
-      ({
-        width,
-        height
-      } = resize());
-      hudCanvas.width = width;
-      hudCanvas.height = height;
-    }).observe(container);
-
-    const track = () => {
-      animate();
-      trackball.update();
-      window.requestAnimationFrame(track);
-    };
-
-    track();
-    const geometryPath = file;
-
-    const updateGeometry = geometry => {
-      if (geometry !== undefined) {
-        // Delete any previous dataset in the window.
-        const controllers = new Set();
-
-        for (const {
-          controller,
-          mesh
-        } of datasets) {
-          if (controller) {
-            controllers.add(controller);
-          }
-
-          scene.remove(mesh);
-        }
-
-        for (const controller of controllers) {
-          gui.remove(controller.ui);
-        }
-
-        threejsGeometry = toThreejsGeometry(geometry); // Build new datasets from the written data, and display them.
-
-        datasets = [];
-        buildMeshes({
-          datasets,
-          threejsGeometry,
-          scene
-        });
-        buildGuiControls({
-          datasets,
-          gui
-        });
-      }
-    };
-
-    const json = await readFile({}, geometryPath);
-
-    if (json !== undefined) {
-      updateGeometry(JSON.parse(json));
-    }
-
-    const watcher = await watchFile(geometryPath, async () => updateGeometry(JSON.parse((await readFile({}, geometryPath)))));
-    this.setState({
-      watcher
-    });
-  }
-
-  async componentWillUnmount() {
-    const {
-      containerId,
-      watcher
-    } = this.state;
-    const container = document.getElementById(containerId);
-
-    while (true) {
-      const child = container.firstElementChild;
-
-      if (child) {
-        container.removeChild(child);
-        continue;
-      }
-
-      break;
-    }
-
-    if (watcher) {
-      await unwatchFiles(watcher);
-    }
-  }
-
-  render() {
-    const {
-      id
-    } = this.props;
-    const {
-      file,
-      containerId
-    } = this.state;
-    const filePath = `source/${file.substring(9)}`;
-    const buttons = file === 'geometry/preview' ? [] : react.createElement(Row, {
-      style: {
-        flex: '0 0 auto'
-      }
-    }, react.createElement(Col, null, react.createElement("br", null), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      size: "sm",
-      onClick: () => downloadFile(filePath),
-      variant: "outline-primary"
-    }, "Download"))));
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column'
-      }
-    }, react.createElement(Row, {
-      style: {
-        width: '100%',
-        height: '100%',
-        flex: '1 1 auto'
-      }
-    }, react.createElement(Col, {
-      style: {
-        width: '100%',
-        height: '100%',
-        overflow: 'auto'
-      }
-    }, react.createElement("div", {
-      id: containerId
-    }))), buttons);
-  }
-
-}
 
 class JSEditorUi extends react.PureComponent {
   static get propTypes() {
@@ -80347,16 +80365,6 @@ const setupUi = async () => {
       xxs: 0
     }
   }), document.getElementById('top'));
-};
-
-const downloadFile = async path => {
-  const data = await readFile({
-    as: 'bytes'
-  }, path);
-  const blob = new Blob([data.buffer], {
-    type: 'application/octet-stream'
-  });
-  FileSaver_min(blob, path.split('/').pop());
 };
 
 let ask;
