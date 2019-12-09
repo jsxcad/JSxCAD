@@ -76,12 +76,12 @@ export const profile = (numberOfTeeth = 16,
       return profile.close();
     };
 
-export Gear = (numberOfTeeth, thickness = 1, options) =>
+export const Gear = (numberOfTeeth, thickness = 1, options) =>
   profile(numberOfTeeth, options)
     .interior()
     .extrude(thickness);
 
-export RoundedGear = (numberOfTeeth, thickness = 1, options) =>
+export const RoundedGear = (numberOfTeeth, thickness = 1, options) =>
   profile(numberOfTeeth, options)
     .interior()
     .op(profile => easedExtrude(profile, round, thickness));
