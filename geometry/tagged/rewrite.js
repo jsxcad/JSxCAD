@@ -1,27 +1,48 @@
+const shallowEq = (a, b) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const rewriteUp = (geometry, op) => {
   // FIX: Minimize identity churn.
   const walk = (geometry) => {
     if (geometry.assembly) {
-      return op({
-        ...geometry,
-        assembly: geometry.assembly.map(walk)
-      });
+      const assembly = geometry.assembly.map(walk);
+      if (shallowEq(assembly, geometry.assembly)) {
+        return op(geometry);
+      } else {
+        return op({ ...geometry, assembly });
+      }
     } else if (geometry.disjointAssembly) {
-      return op({
-        ...geometry,
-        disjointAssembly: geometry.disjointAssembly.map(walk)
-      });
+      const disjointAssembly = geometry.disjointAssembly.map(walk);
+      if (shallowEq(disjointAssembly, geometry.disjointAssembly)) {
+        return op(geometry);
+      } else {
+        return op({ ...geometry, disjointAssembly });
+      }
     } else if (geometry.connection) {
-      return op({
-        ...geometry,
-        geometries: geometry.geometries.map(walk),
-        connectors: geometry.connectors.map(walk)
-      });
+      const geometries = geometry.geometries.map(walk);
+      const connectors = geometry.connectors.map(walk);
+      if (shallowEq(geometries, geometry.geometries) &&
+          shallowEq(connectors, geometry.connectors)) {
+        return op(geometry);
+      } else {
+        return op({ ...geometry, geometries, connectors });
+      }
     } else if (geometry.item) {
-      return op({
-        ...geometry,
-        item: walk(geometry.item)
-      });
+      const item = walk(geometry.item);
+      if (item === geometry.item) {
+        return op(geometry);
+      } else {
+        return op({ ...geometry, item });
+      };
     } else if (geometry.paths) {
       return op(geometry);
     } else if (geometry.plan) {
@@ -33,10 +54,12 @@ export const rewriteUp = (geometry, op) => {
     } else if (geometry.surface) {
       return op(geometry);
     } else if (geometry.untransformed) {
-      return op({
-        ...geometry,
-        untransformed: walk(geometry.untransformed)
-      });
+      const untransformed = walk(geometry.untransformed);
+      if (untransformed === geometry.untransformed) {
+        return geometry;
+      } else {
+        return op({ ...geometry, untransformed });
+      }
     } else if (geometry.z0Surface) {
       return op(geometry);
     } else {

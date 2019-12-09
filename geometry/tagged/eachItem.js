@@ -1,3 +1,5 @@
+import { rewriteUp } from './rewrite';
+
 export const eachItem = (geometry, operation) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
@@ -12,4 +14,12 @@ export const eachItem = (geometry, operation) => {
     operation(geometry);
   };
   walk(geometry);
+};
+
+export const eachItemAlt = (geometry, op) => {
+  const read = (geometry) => {
+    op(geometry);
+    return geometry;
+  };
+  rewriteUp(geometry, read);
 };
