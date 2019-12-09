@@ -33,7 +33,6 @@ import { specify } from './specify';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
 import { toPoints } from './toPoints';
-import { toStandardGeometry } from './toStandardGeometry';
 import { toTransformedGeometry } from './toTransformedGeometry';
 import { transform } from './transform';
 import { union } from './union';
@@ -72,7 +71,6 @@ export {
   toDisjointGeometry,
   toKeptGeometry,
   toPoints,
-  toStandardGeometry,
   toTransformedGeometry,
   transform,
   union

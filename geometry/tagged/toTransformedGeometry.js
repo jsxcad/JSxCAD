@@ -8,8 +8,6 @@ import { transform as transformSurface } from '@jsxcad/geometry-surface';
 
 const transformedGeometry = Symbol('transformedGeometry');
 
-// Apply the accumulated matrix transformations and produce a geometry without them.
-
 export const toTransformedGeometry = (geometry) => {
   if (geometry[transformedGeometry] === undefined) {
     const walk = (matrix, geometry) => {

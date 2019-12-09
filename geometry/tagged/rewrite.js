@@ -1,4 +1,6 @@
 const shallowEq = (a, b) => {
+  if (a === undefined) throw Error('die');
+  if (b === undefined) throw Error('die');
   if (a.length !== b.length) {
     return false;
   }
@@ -37,7 +39,7 @@ export const rewriteUp = (geometry, op) => {
 
     if (geometry.assembly) {
       const assembly = geometry.assembly.map(walk);
-      if (true && shallowEq(assembly, geometry.assembly)) {
+      if (shallowEq(assembly, geometry.assembly)) {
         return q(op(geometry));
       } else {
         return q(op({ ...geometry, assembly }));
