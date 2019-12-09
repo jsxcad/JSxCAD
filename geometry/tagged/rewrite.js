@@ -26,7 +26,9 @@ export const rewriteUp = (geometry, op) => {
   // FIX: Minimize identity churn.
   const walk = (geometry) => {
     const q = (postopGeometry) => {
-      if (postopGeometry === geometry) {
+      if (postopGeometry === undefined) {
+        return geometry;
+      } else if (postopGeometry === geometry) {
         return geometry;
       } else {
         return clean(postopGeometry);

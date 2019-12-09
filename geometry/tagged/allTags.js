@@ -1,23 +1,16 @@
 // FIX: Refactor the geometry walkers.
 
+import { rewriteUp } from './rewrite';
+
 export const allTags = (geometry) => {
-  const tags = new Set();
-  const walk = (item) => {
-    if (item.tags) {
-      for (const tag of item.tags) {
-        tags.add(tag);
+  const collectedTags = new Set();
+  const op = ({ tags }) => {
+    if (tags !== undefined) {
+      for (const tag of tags) {
+        collectedTags.add(tag);
       }
     }
-    if (item.assembly) {
-      item.assembly.forEach(walk);
-    } else if (item.disjointAssembly) {
-      item.disjointAssembly.forEach(walk);
-    } else if (item.untransformed) {
-      walk(item.untransformed);
-    } else if (item.item) {
-      walk(item.item);
-    }
   };
-  walk(geometry);
-  return tags;
+  rewriteUp(geometry, op);
+  return collectedTags;
 };
