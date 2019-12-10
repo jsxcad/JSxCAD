@@ -78184,7 +78184,7 @@ class SettingsUi extends react.PureComponent {
       onSubmit
     } = this.props;
     this.setState(payload);
-    await this.doSave();
+    await this.save();
 
     if (onSubmit) {
       onSubmit(this.state);
@@ -80389,7 +80389,7 @@ class Ui$1 extends react.PureComponent {
       })
     }), react.createElement(SelectProjectUi, {
       key: "selectProjectUi",
-      show: showSelectProjectUi,
+      show: showSelectProjectUi || project === '',
       projects: projects,
       storage: "selectProject",
       onSubmit: this.doSelectProject,
