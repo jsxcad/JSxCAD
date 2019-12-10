@@ -38,7 +38,7 @@ export class SettingsUi extends React.PureComponent {
   async doSubmit (event, payload = {}) {
     const { onSubmit } = this.props;
     this.setState(payload);
-    await this.doSave();
+    await this.save();
     if (onSubmit) {
       onSubmit(this.state);
     }

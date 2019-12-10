@@ -20,6 +20,10 @@ export class ShareGistUi extends SettingsUi {
     const { isPublic = true } = this.state;
     const project = getFilesystem();
     const url = await writeProject({ project, isPublic });
+    if (url === undefined) {
+      log({ op: 'text', text: `Failed to create gist`, level: 'serious', duration: 1000 });
+      return;
+    }
     log({ op: 'text', text: `Created gist at ${url}`, level: 'serious', duration: 1000 });
     this.setState({ url });
     this.save();

@@ -502,7 +502,7 @@ class Ui extends React.PureComponent {
         />
         <SelectProjectUi
           key='selectProjectUi'
-          show={showSelectProjectUi}
+          show={showSelectProjectUi || project === ''}
           projects={projects}
           storage='selectProject'
           onSubmit={this.doSelectProject}

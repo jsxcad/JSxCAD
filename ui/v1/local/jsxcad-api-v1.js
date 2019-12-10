@@ -57,6 +57,7 @@ var api = /*#__PURE__*/Object.freeze({
   get Item () { return Item; },
   get importModule () { return importModule; },
   get intersection () { return intersection; },
+  get join () { return join; },
   get lathe () { return lathe; },
   get Label () { return Label; },
   get Lego () { return Lego; },
@@ -1071,6 +1072,18 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   } else {
     return aMoved;
   }
+};
+
+const join = (a, aJoin, bJoin, b) => {
+  const aConnection = connect(a, aJoin).toGeometry();
+  const bConnection = connect(b, bJoin).toGeometry();
+  return Shape.fromGeometry(
+    {
+      connection: `${aConnection.connection}:${bConnection.connection}`,
+      connectors: [...aConnection.connectors, ...bConnection.connectors],
+      geometries: [...aConnection.geometries, ...bConnection.geometries],
+      tags: ['join']
+    });
 };
 
 const toMethod = function (...args) { return connect(this, ...args); };
@@ -5002,4 +5015,4 @@ if (methods.includes(undefined)) {
   throw Error('die');
 }
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, hull, importModule, intersection, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, shell, sin, source, specify, sqrt, stretch, union };

@@ -23,6 +23,7 @@ import * as vec from '@jsxcad/math-vec3';
 
 import { Connector, connector, connectors } from './Connector';
 import { Label, Plan } from './Plan';
+import { connect, join } from './connect';
 
 import Armature from './Armature';
 import Circle from './Circle';
@@ -71,7 +72,6 @@ import center from './center';
 import chainHull from './chainHull';
 import chop from './chop';
 import color from './color';
-import connect from './connect';
 import contract from './contract';
 import coordinates from './coordinates';
 import cos from './cos';
@@ -251,6 +251,7 @@ export {
   Item,
   importModule,
   intersection,
+  join,
   lathe,
   Label,
   Lego,

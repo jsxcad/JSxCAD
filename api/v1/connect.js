@@ -79,4 +79,16 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   }
 };
 
+export const join = (a, aJoin, bJoin, b) => {
+  const aConnection = connect(a, aJoin).toGeometry();
+  const bConnection = connect(b, bJoin).toGeometry();
+  return Shape.fromGeometry(
+    {
+      connection: `${aConnection.connection}:${bConnection.connection}`,
+      connectors: [...aConnection.connectors, ...bConnection.connectors],
+      geometries: [...aConnection.geometries, ...bConnection.geometries],
+      tags: ['join']
+    });
+};
+
 export default connect;

@@ -78184,7 +78184,7 @@ class SettingsUi extends react.PureComponent {
       onSubmit
     } = this.props;
     this.setState(payload);
-    await this.doSave();
+    await this.save();
 
     if (onSubmit) {
       onSubmit(this.state);
@@ -78671,13 +78671,13 @@ const writeProject$1 = async ({
   isPublic = true
 }) => {
   const files = {};
-  const prefix = `${project}/source/`;
+  const prefix = `source/`;
 
   for (const path of await listFiles({
     project
   })) {
     if (path.startsWith(prefix)) {
-      const name = path.substring(7);
+      const name = path.substring(prefix.length);
       files[name] = {
         content: await readFile({
           project
@@ -78713,6 +78713,17 @@ class ShareGistUi extends SettingsUi {
       project,
       isPublic
     });
+
+    if (url === undefined) {
+      log({
+        op: 'text',
+        text: `Failed to create gist`,
+        level: 'serious',
+        duration: 1000
+      });
+      return;
+    }
+
     log({
       op: 'text',
       text: `Created gist at ${url}`,
@@ -80389,7 +80400,7 @@ class Ui$1 extends react.PureComponent {
       })
     }), react.createElement(SelectProjectUi, {
       key: "selectProjectUi",
-      show: showSelectProjectUi,
+      show: showSelectProjectUi || project === '',
       projects: projects,
       storage: "selectProject",
       onSubmit: this.doSelectProject,
