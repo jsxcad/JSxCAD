@@ -35,17 +35,14 @@ export class SettingsUi extends React.PureComponent {
     }
   }
 
-  async doSubmit (event, payload) {
+  async doSubmit (event, payload = {}) {
+    const { onSubmit } = this.props;
     this.setState(payload);
-    const { onSubmit, storage } = this.props;
-    if (storage) {
-      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
-    }
+    await this.doSave();
     if (onSubmit) {
       onSubmit(this.state);
     }
     this.doHide();
-    // event.preventDefault();
   }
 
   doUpdate (event) {
@@ -53,6 +50,13 @@ export class SettingsUi extends React.PureComponent {
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
     this.setState({ [name]: value });
+  }
+
+  async save () {
+    const { storage } = this.props;
+    if (storage) {
+      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
+    }
   }
 }
 

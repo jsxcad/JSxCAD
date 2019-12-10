@@ -59,6 +59,7 @@ export const readProject = async (owner, repository, prefix, { overwrite = false
   for (const { relativePath, data } of queue) {
     await writeFile({ as: 'bytes' }, relativePath, data);
   }
+  return true;
 };
 
 export const writeProject = async (owner, repository, prefix, files, { overwrite = false }) => {
@@ -80,4 +81,5 @@ export const writeProject = async (owner, repository, prefix, files, { overwrite
                             { message: 'Test', tree: tree.sha, parents });
   if (commit === undefined) return;
   await patch(eq(200), `repos/${owner}/${repository}/git/refs/heads/master`, { sha: commit.sha, force: true });
+  return true;
 };

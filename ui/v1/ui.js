@@ -33,18 +33,18 @@ import {
   writeProject as writeProjectToGithub
 } from './github';
 
-import AceEditor from 'react-ace';
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import FilesUi from './FilesUi';
+import JsEditorUi from './JsEditorUi';
+import LogUi from './LogUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import ParametersUi from './ParametersUi';
-import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -53,14 +53,8 @@ import SelectProjectUi from './SelectProjectUi';
 import ShareUi from './ShareUi';
 import Toast from 'react-bootstrap/Toast';
 import ViewUi from './ViewUi';
-import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { deepEqual } from 'fast-equals';
-import { prismJSAuxiliary } from './PrismJSAuxiliary';
 import { writeProject as writeProjectToGist } from './gist';
-
-if (!aceEditorAuxiliary || !prismJSAuxiliary) {
-  throw Error('die');
-}
 
 class Ui extends React.PureComponent {
   static get propTypes () {
@@ -132,7 +126,28 @@ class Ui extends React.PureComponent {
       }
     };
     const logWatcher = watchLog(logUpdater);
-    this.setState({ creationWatcher, deletionWatcher, logWatcher });
+
+    const agent = async ({ ask, question }) => {
+      if (question.ask) {
+        const { identifier, options } = question.ask;
+        return askSys(identifier, options);
+      } else if (question.readFile) {
+        const { options, path } = question.readFile;
+        return readFile(options, path);
+      } else if (question.writeFile) {
+        const { options, path, data } = question.writeFile;
+        return writeFile(options, path, data);
+      } else if (question.deleteFile) {
+        const { options, path } = question.deleteFile;
+        return deleteFile(options, path);
+      } else if (question.log) {
+        const { entry } = question.log;
+        return log(entry);
+      }
+    };
+
+    const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
+    this.setState({ ask, creationWatcher, deletionWatcher, logWatcher });
     setHandleAskUser(this.askUser);
 
     if (project) {
@@ -347,6 +362,7 @@ class Ui extends React.PureComponent {
   }
 
   renderView (id) {
+    const { ask } = this.state;
     const { view, file } = this.getPaneView(id);
 
     id = `${id}`;
@@ -355,7 +371,7 @@ class Ui extends React.PureComponent {
       case 'geometry':
         return <ViewUi key={`${id}/geometry/${file}`} id={id} file={file}/>;
       case 'editScript':
-        return <JSEditorUi key={`${id}/editScript/${file}`} id={id} file={file}/>;
+        return <JsEditorUi key={`${id}/editScript/${file}`} id={id} file={file} ask={ask}/>;
       case 'files':
         return <FilesUi key={id} id={id}/>;
       case 'parameters': {
@@ -747,209 +763,6 @@ class ProjectUi extends React.PureComponent {
 };
 */
 
-class JSEditorUi extends React.PureComponent {
-  static get propTypes () {
-    return {
-      file: PropTypes.string,
-      id: PropTypes.string
-    };
-  }
-
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      code: ''
-    };
-
-    this.onKeyDown = this.onKeyDown.bind(this);
-    this.onValueChange = this.onValueChange.bind(this);
-    this.run = this.run.bind(this);
-    this.save = this.save.bind(this);
-  }
-
-  saveShortcut () {
-    return {
-      name: 'save',
-      bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-      exec: () => this.save()
-    };
-  }
-
-  runShortcut () {
-    return {
-      name: 'run',
-      bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
-      exec: () => this.run()
-    };
-  }
-
-  async run () {
-    const { file } = this.props;
-
-    await this.save();
-    await runScript(file);
-  }
-
-  async save () {
-    const { code } = this.state;
-    await writeFile({}, this.props.file, code);
-  }
-
-  async componentDidMount () {
-    const code = await readFile({}, this.props.file);
-    this.setState({ code });
-  }
-
-  onValueChange (code) {
-    this.setState({ code });
-  }
-
-  highlight (code) {
-    return PrismJS.highlight(code, PrismJS.languages.js);
-  }
-
-  stop (e) {
-    e.stopPropagation();
-  }
-
-  preventDefault (e) {
-    e.preventDefault();
-    return false;
-  }
-
-  onKeyDown (e) {
-    const ENTER = 13;
-    const S = 83;
-    const SHIFT = 16;
-    const CONTROL = 17;
-
-    const key = e.which || e.keyCode || 0;
-
-    switch (key) {
-      case CONTROL:
-      case SHIFT:
-        return true;
-    }
-
-    const { ctrlKey, shiftKey } = e;
-    switch (key) {
-      case ENTER: {
-        if (shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          this.run();
-          return false;
-        }
-        break;
-      }
-      case S: {
-        if (ctrlKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          this.save();
-          return false;
-        }
-        break;
-      }
-    }
-  }
-
-  render () {
-    const { id } = this.props;
-    const { code } = this.state;
-
-    return (
-      <Container style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
-        <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
-            <AceEditor
-              commands={[this.runShortcut(), this.saveShortcut()]}
-              editorProps={{ $blockScrolling: true }}
-              setOptions={{ useWorker: false }}
-              height='100%'
-              highlightActiveLine={true}
-              key={id}
-              mode="javascript"
-              name={id}
-              onChange={this.onValueChange}
-              showGutter={true}
-              showPrintMargin={true}
-              theme="github"
-              value={code}
-              width='100%'
-            >
-            </AceEditor>
-          </Col>
-        </Row>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <br/>
-            <ButtonGroup>
-              <Button size='sm'
-                onClick={this.run}
-                variant='outline-primary'>
-                Run
-              </Button>
-              <Button size='sm'
-                onClick={this.save}
-                variant='outline-primary'>
-                Save
-              </Button>
-            </ButtonGroup>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-};
-
-class LogUi extends React.PureComponent {
-  static get propTypes () {
-    return {
-      id: PropTypes.string,
-      log: PropTypes.array
-    };
-  }
-
-  constructor (props) {
-    super(props);
-
-    this.state = {};
-  }
-
-  render () {
-    const { id } = this.props;
-    return (
-      <Container key={id}
-        style={{ height: '100%',
-                 display: 'flex',
-                 flexFlow: 'column',
-                 padding: '4px',
-                 border: '1px solid rgba(0,0,0,.125)',
-                 borderRadius: '.25rem' }}>
-        <Row style={{ flex: '1 1 auto', height: '100%', overflow: 'auto' }}>
-          <Col>
-            {this.props.log.filter(entry => entry.op === 'text')
-                .map((entry, index) =>
-                  <div
-                    key={index}
-                    style={{
-                      padding: '4px',
-                      border: '1px solid rgba(0,0,0,.125)',
-                      borderRadius: '.25rem'
-                    }}
-                  >
-                    {entry.text}
-                  </div>
-                )}
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-}
-
 const setupUi = async () => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
@@ -965,45 +778,6 @@ const setupUi = async () => {
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
     />,
     document.getElementById('top'));
-};
-
-let ask;
-
-const getAsk = async () => {
-  if (ask === undefined) {
-    const agent = async ({ ask, question }) => {
-      if (question.ask) {
-        const { identifier, options } = question.ask;
-        return askSys(identifier, options);
-      } else if (question.readFile) {
-        const { options, path } = question.readFile;
-        return readFile(options, path);
-      } else if (question.writeFile) {
-        const { options, path, data } = question.writeFile;
-        return writeFile(options, path, data);
-      } else if (question.deleteFile) {
-        const { options, path } = question.deleteFile;
-        return deleteFile(options, path);
-      } else if (question.log) {
-        const { entry } = question.log;
-        return log(entry);
-      }
-    };
-
-    ({ ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' }));
-  }
-
-  return ask;
-};
-
-const runScript = async (path) => {
-  log({ op: 'open' });
-  const ask = await getAsk();
-  const script = await readFile({}, path);
-  const geometry = await ask({ evaluate: script });
-  if (geometry) {
-    await writeFile({}, 'geometry/preview', JSON.stringify(geometry));
-  }
 };
 
 const defaultScript = `// Circle(10);`;
