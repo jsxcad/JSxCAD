@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { isBrowser, isNode } from './browserOrNode';
 import { watchFileCreation, watchFileDeletion } from './files';
 
-import { getBase } from './filesystem';
+import { getFilesystem } from './filesystem';
 import localForage from 'localforage';
 
 const { promises } = fs;
@@ -67,19 +67,19 @@ export const listFilesystems = async () => {
   return [...filesystems];
 };
 
-export const listFiles = async (base) => {
-  if (base === undefined) {
-    base = getBase();
+export const listFiles = async ({ project } = {}) => {
+  if (project === undefined) {
+    project = getFilesystem();
   }
-  if (base === undefined) {
+  if (project === undefined) {
     return [];
   }
-  const filesystem = `jsxcad/${base}`;
+  const prefix = `jsxcad/${project}/`;
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {
-    if (key.startsWith(filesystem)) {
-      files.push(key.substring(filesystem.length));
+    if (key.startsWith(prefix)) {
+      files.push(key.substring(prefix.length));
     }
   }
   return files;

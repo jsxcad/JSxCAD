@@ -3239,19 +3239,19 @@ const listFilesystems = async () => {
   return [...filesystems];
 };
 
-const listFiles = async (base) => {
-  if (base === undefined) {
-    base = getBase();
+const listFiles = async ({ project } = {}) => {
+  if (project === undefined) {
+    project = getFilesystem();
   }
-  if (base === undefined) {
+  if (project === undefined) {
     return [];
   }
-  const filesystem = `jsxcad/${base}`;
+  const prefix = `jsxcad/${project}/`;
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {
-    if (key.startsWith(filesystem)) {
-      files.push(key.substring(filesystem.length));
+    if (key.startsWith(prefix)) {
+      files.push(key.substring(prefix.length));
     }
   }
   return files;

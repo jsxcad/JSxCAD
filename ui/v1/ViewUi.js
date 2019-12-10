@@ -9,11 +9,8 @@ import {
   createResizer,
   drawHud
 } from '@jsxcad/ui-threejs';
-import {
-  readFile,
-  unwatchFiles,
-  watchFile
-} from '@jsxcad/sys';
+
+import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
