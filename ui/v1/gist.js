@@ -24,10 +24,10 @@ export const readProject = async (gistId, { project }) => {
 
 export const writeProject = async ({ project, isPublic = true }) => {
   const files = {};
-  const prefix = `${project}/source/`;
+  const prefix = `source/`;
   for (const path of await listFiles({ project })) {
     if (path.startsWith(prefix)) {
-      const name = path.substring(7);
+      const name = path.substring(prefix.length);
       files[name] = { content: await readFile({ project }, path) };
     }
   }

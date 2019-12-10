@@ -1082,7 +1082,7 @@ const join = (a, aJoin, bJoin, b) => {
       connection: `${aConnection.connection}:${bConnection.connection}`,
       connectors: [...aConnection.connectors, ...bConnection.connectors],
       geometries: [...aConnection.geometries, ...bConnection.geometries],
-      tags: ['join'],
+      tags: ['join']
     });
 };
 
