@@ -33,7 +33,7 @@ export class ShareUi extends SettingsUi {
             </Tab>
           </Tabs>
         </Modal.Body>
-        {toast}
+        {[toast]}
       </Modal>
     );
   }

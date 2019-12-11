@@ -495,25 +495,25 @@ class Ui extends React.PureComponent {
       if (showShareUi) {
         return <ShareUi
           key='shareUi'
-          show={showShareUi}
+          show={true}
           storage='share'
           toast={toast}
           onSubmit={this.doGithub}
           onHide={() => this.setState({ showShareUi: false })}
         />;
-      }
-      if (showSelectProjectUi) {
+      } else if (showSelectProjectUi || project === '') {
         return <SelectProjectUi
           key='selectProjectUi'
-          show={showSelectProjectUi || project === ''}
+          show={true}
           projects={projects}
           storage='selectProject'
           toast={toastDiv}
           onSubmit={this.doSelectProject}
           onHide={() => this.setState({ showSelectProjectUi: false })}
         />;
+      } else {
+        return switchViewModal();
       }
-      return switchViewModal();
     };
 
     const modal = buildModal();

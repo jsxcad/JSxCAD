@@ -691,14 +691,14 @@ const map = (geometry, operation) => {
   return walk(geometry);
 };
 
-const disjoint = Symbol('disjoint');
+const disjointAssembly = Symbol('disjointAssembly');
 
 const toDisjointAssembly = (geometry) => {
   if (geometry.matrix) {
     // Transforming is identity-producing, so disjoint before transforming.
     return toTransformedGeometry({ ...geometry, untransformed: toDisjointGeometry(geometry.untransformed) });
-  } else if (geometry[disjoint]) {
-    return geometry[disjoint];
+  } else if (geometry[disjointAssembly]) {
+    return geometry[disjointAssembly];
   } else if (geometry.item) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
   } else if (geometry.connection) {
@@ -724,9 +724,9 @@ const toDisjointAssembly = (geometry) => {
     if (disjoint.length === 0) {
       return;
     }
-    const disjointAssembly = { disjointAssembly: disjoint };
-    geometry[disjoint] = disjointAssembly;
-    return disjointAssembly;
+    const result = { disjointAssembly: disjoint };
+    geometry[disjointAssembly] = result;
+    return result;
   } else {
     return geometry;
   }
@@ -871,6 +871,9 @@ const outline = cache(outlineImpl);
 
 const specify = (geometry) => ({ item: geometry });
 
+const splice = (geometry, find, replace) =>
+  rewriteUp(geometry, geometry => geometry.connection === find.connection ? replace : geometry);
+
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
@@ -989,4 +992,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union };

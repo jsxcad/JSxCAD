@@ -23,7 +23,7 @@ import * as vec from '@jsxcad/math-vec3';
 
 import { Connector, connector, connectors } from './Connector';
 import { Label, Plan } from './Plan';
-import { connect, join } from './connect';
+import { connect, join, rejoin } from './connect';
 
 import Armature from './Armature';
 import Circle from './Circle';
@@ -281,6 +281,7 @@ export {
   readStl,
   readSvg,
   readSvgPath,
+  rejoin,
   shell,
   sin,
   source,

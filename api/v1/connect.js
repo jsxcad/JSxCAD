@@ -1,4 +1,4 @@
-import { drop, toTransformedGeometry } from '@jsxcad/geometry-tagged';
+import { drop, splice, toTransformedGeometry } from '@jsxcad/geometry-tagged';
 import { negate, subtract } from '@jsxcad/math-vec3';
 
 import Shape from './Shape';
@@ -47,9 +47,10 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
 
   // Flatten a.
   const aFlatShape = aShape.transform(aTo);
-  const aFlatConnector = toTransformedGeometry(aConnectorShape.transform(aTo).toGeometry());
-  const aMarks = aFlatConnector.marks;
+  const aFlatConnector = aConnectorShape.transform(aTo);
+  const aMarks = aFlatConnector.toKeptGeometry().marks;
   const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
+  const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
   const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
@@ -60,35 +61,49 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
   const angle = measureAngle(aOrientation, bOrientation);
   const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
+  const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
 
   // Move a to the flat position of b.
   const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
+  const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
   // Move a to the oriented position of b.
-  const aMoved = aFlatBShape.transform(bFrom);
+  const aMovedShape = aFlatBShape.transform(bFrom);
+  const aMovedConnector = aFlatBConnector.transform(bFrom);
 
   if (doConnect) {
     return Shape.fromGeometry(
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-        connectors: [aConnector, bConnector],
-        geometries: [dropConnector(aMoved, aConnector.plan.connector).toGeometry(),
+        connectors: [aMovedConnector.toKeptGeometry(), bConnector],
+        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry(),
                      dropConnector(bShape, bConnector.plan.connector).toGeometry()]
       });
   } else {
-    return aMoved;
+    return aMovedShape;
   }
 };
 
 export const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
   const bConnection = connect(b, bJoin).toGeometry();
-  return Shape.fromGeometry(
+  const result = Shape.fromGeometry(
     {
       connection: `${aConnection.connection}:${bConnection.connection}`,
       connectors: [...aConnection.connectors, ...bConnection.connectors],
       geometries: [...aConnection.geometries, ...bConnection.geometries],
       tags: ['join']
     });
+  return result;
+};
+
+export const rejoin = (shape, connectionShape, aJoin, bJoin) => {
+  const connection = connectionShape.toKeptGeometry();
+  const { connectors, geometries } = connection;
+  const rejoined = join(Shape.fromGeometry(geometries[0]).toConnector(Shape.fromGeometry(connectors[0])),
+                        aJoin,
+                        bJoin,
+                        Shape.fromGeometry(geometries[2]).toConnector(Shape.fromGeometry(connectors[2])));
+  return Shape.fromGeometry(splice(shape.toKeptGeometry(), connection, rejoined.toGeometry()));
 };
 
 export default connect;

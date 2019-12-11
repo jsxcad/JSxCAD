@@ -1,6 +1,7 @@
+import { getConnections, getPlans } from '@jsxcad/geometry-tagged';
+
 import Plan from './Plan';
 import Shape from './Shape';
-import { getPlans } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -46,10 +47,14 @@ export const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0],
 
 Plan.Connector = Connector;
 
-const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, shape: this }); };
+const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, [shapeToConnect]: this }); };
 Shape.prototype.Connector = ConnectorMethod;
 
 export default Connector;
+
+// Associates an existing connector with a shape.
+const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
+Shape.prototype.toConnector = toConnectorMethod;
 
 /**
  *
@@ -108,3 +113,16 @@ export const connector = (shape, id) => {
 
 const connectorMethod = function (id) { return connector(this, id); };
 Shape.prototype.connector = connectorMethod;
+
+export const connection = (shape, id) => {
+  const shapeGeometry = shape.toKeptGeometry();
+  const connections = getConnections(shapeGeometry);
+  for (const geometry of connections) {
+    if (geometry.connection === id) {
+      return Shape.fromGeometry(geometry);
+    }
+  }
+};
+
+const connectionMethod = function (id) { return connection(this, id); };
+Shape.prototype.connection = connectionMethod;
