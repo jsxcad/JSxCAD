@@ -491,25 +491,37 @@ class Ui extends React.PureComponent {
     const { showShareUi = false, showSelectProjectUi = false } = this.state;
     const { projects = [] } = this.state;
 
-    return (
-      <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
-        <ShareUi
+    const buildModal = () => {
+      if (showShareUi) {
+        return <ShareUi
           key='shareUi'
           show={showShareUi}
           storage='share'
+          toast={toast}
           onSubmit={this.doGithub}
           onHide={() => this.setState({ showShareUi: false })}
-        />
-        <SelectProjectUi
+        />;
+      }
+      if (showSelectProjectUi) {
+        return <SelectProjectUi
           key='selectProjectUi'
           show={showSelectProjectUi || project === ''}
           projects={projects}
           storage='selectProject'
+          toast={toastDiv}
           onSubmit={this.doSelectProject}
           onHide={() => this.setState({ showSelectProjectUi: false })}
-        />
-        {switchViewModal()}
-        {toastDiv}
+        />;
+      }
+      return switchViewModal();
+    };
+
+    const modal = buildModal();
+
+    return (
+      <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
+        {modal}
+        {modal === undefined && toastDiv}
         <Navbar bg="light" expand="lg" style={{ flex: '0 0 auto' }}>
           <Navbar.Brand>JSxCAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
