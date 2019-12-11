@@ -79021,7 +79021,7 @@ class ShareUi extends SettingsUi {
       title: "File"
     }, react.createElement(ShareFileUi, {
       storage: "share/file"
-    })))), [toast]);
+    })))), toast);
   }
 
 }
@@ -80490,7 +80490,7 @@ class Ui$1 extends react.PureComponent {
           key: "shareUi",
           show: true,
           storage: "share",
-          toast: toast,
+          toast: toastDiv,
           onSubmit: this.doGithub,
           onHide: () => this.setState({
             showShareUi: false

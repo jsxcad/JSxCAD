@@ -497,7 +497,7 @@ class Ui extends React.PureComponent {
           key='shareUi'
           show={true}
           storage='share'
-          toast={toast}
+          toast={toastDiv}
           onSubmit={this.doGithub}
           onHide={() => this.setState({ showShareUi: false })}
         />;

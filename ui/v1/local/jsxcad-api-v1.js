@@ -1092,7 +1092,7 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
                      dropConnector(bShape, bConnector.plan.connector).toGeometry()]
       });
   } else {
-    return aMoved;
+    return aMovedShape;
   }
 };
 
