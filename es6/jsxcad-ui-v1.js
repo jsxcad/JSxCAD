@@ -78872,6 +78872,7 @@ class ShareGistUi extends SettingsUi {
     })), react.createElement(ButtonGroup, null, react.createElement(Button, {
       name: "import",
       variant: "outline-primary",
+      disabled: url === '',
       onClick: () => this.import()
     }, "Import"), react.createElement(Button, {
       name: "export",
@@ -79020,7 +79021,7 @@ class ShareUi extends SettingsUi {
       title: "File"
     }, react.createElement(ShareFileUi, {
       storage: "share/file"
-    })))), toast);
+    })))), [toast]);
   }
 
 }
@@ -80487,7 +80488,7 @@ class Ui$1 extends react.PureComponent {
       if (showShareUi) {
         return react.createElement(ShareUi, {
           key: "shareUi",
-          show: showShareUi,
+          show: true,
           storage: "share",
           toast: toast,
           onSubmit: this.doGithub,
@@ -80495,12 +80496,10 @@ class Ui$1 extends react.PureComponent {
             showShareUi: false
           })
         });
-      }
-
-      if (showSelectProjectUi) {
+      } else if (showSelectProjectUi || project === '') {
         return react.createElement(SelectProjectUi, {
           key: "selectProjectUi",
-          show: showSelectProjectUi || project === '',
+          show: true,
           projects: projects,
           storage: "selectProject",
           toast: toastDiv,
@@ -80509,9 +80508,9 @@ class Ui$1 extends react.PureComponent {
             showSelectProjectUi: false
           })
         });
+      } else {
+        return switchViewModal();
       }
-
-      return switchViewModal();
     };
 
     const modal = buildModal();

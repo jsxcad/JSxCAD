@@ -53,7 +53,7 @@ export class ShareGistUi extends SettingsUi {
           <Form.Check name="isPublic" checked={isPublic} onChange={this.doUpdate}/>
         </Form.Group>
         <ButtonGroup>
-          <Button name="import" variant="outline-primary" onClick={() => this.import()}>
+          <Button name="import" variant="outline-primary" disabled={url === ''} onClick={() => this.import()}>
             Import
           </Button>
           <Button name="export" variant="outline-primary" onClick={() => this.export()}>

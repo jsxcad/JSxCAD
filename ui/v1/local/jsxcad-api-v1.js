@@ -1,5 +1,5 @@
 import { close, concatenate, open, getEdges, toSegments, isClosed } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, getItems, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, getConnections, getItems, splice, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
 import { scale as scale$1, add, subtract, negate, transform as transform$1, normalize, dot, cross } from './jsxcad-math-vec3.js';
@@ -86,6 +86,7 @@ var api = /*#__PURE__*/Object.freeze({
   get readStl () { return readStl; },
   get readSvg () { return readSvg; },
   get readSvgPath () { return readSvgPath; },
+  get rejoin () { return rejoin; },
   get shell () { return shell; },
   get sin () { return sin; },
   get source () { return source; },
@@ -864,8 +865,12 @@ const Connector = (connector, { plane = [0, 0, 1, 0], center = [0, 0, 0], right 
 
 Plan.Connector = Connector;
 
-const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, shape: this }); };
+const ConnectorMethod = function (connector, options) { return Connector(connector, { ...options, [shapeToConnect]: this }); };
 Shape.prototype.Connector = ConnectorMethod;
+
+// Associates an existing connector with a shape.
+const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
+Shape.prototype.toConnector = toConnectorMethod;
 
 /**
  *
@@ -924,6 +929,19 @@ const connector = (shape, id) => {
 
 const connectorMethod = function (id) { return connector(this, id); };
 Shape.prototype.connector = connectorMethod;
+
+const connection = (shape, id) => {
+  const shapeGeometry = shape.toKeptGeometry();
+  const connections = getConnections(shapeGeometry);
+  for (const geometry of connections) {
+    if (geometry.connection === id) {
+      return Shape.fromGeometry(geometry);
+    }
+  }
+};
+
+const connectionMethod = function (id) { return connection(this, id); };
+Shape.prototype.connection = connectionMethod;
 
 const faces = (shape, op = (_ => _)) => {
   let nextFaceId = 0;
@@ -1042,9 +1060,10 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
 
   // Flatten a.
   const aFlatShape = aShape.transform(aTo);
-  const aFlatConnector = toTransformedGeometry(aConnectorShape.transform(aTo).toGeometry());
-  const aMarks = aFlatConnector.marks;
+  const aFlatConnector = aConnectorShape.transform(aTo);
+  const aMarks = aFlatConnector.toKeptGeometry().marks;
   const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
+  const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
   const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
@@ -1055,18 +1074,21 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
   const angle = measureAngle(aOrientation, bOrientation);
   const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
+  const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
 
   // Move a to the flat position of b.
   const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
+  const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
   // Move a to the oriented position of b.
-  const aMoved = aFlatBShape.transform(bFrom);
+  const aMovedShape = aFlatBShape.transform(bFrom);
+  const aMovedConnector = aFlatBConnector.transform(bFrom);
 
   if (doConnect) {
     return Shape.fromGeometry(
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-        connectors: [aConnector, bConnector],
-        geometries: [dropConnector(aMoved, aConnector.plan.connector).toGeometry(),
+        connectors: [aMovedConnector.toKeptGeometry(), bConnector],
+        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry(),
                      dropConnector(bShape, bConnector.plan.connector).toGeometry()]
       });
   } else {
@@ -1077,13 +1099,24 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
 const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
   const bConnection = connect(b, bJoin).toGeometry();
-  return Shape.fromGeometry(
+  const result = Shape.fromGeometry(
     {
       connection: `${aConnection.connection}:${bConnection.connection}`,
       connectors: [...aConnection.connectors, ...bConnection.connectors],
       geometries: [...aConnection.geometries, ...bConnection.geometries],
       tags: ['join']
     });
+  return result;
+};
+
+const rejoin = (shape, connectionShape, aJoin, bJoin) => {
+  const connection = connectionShape.toKeptGeometry();
+  const { connectors, geometries } = connection;
+  const rejoined = join(Shape.fromGeometry(geometries[0]).toConnector(Shape.fromGeometry(connectors[0])),
+                        aJoin,
+                        bJoin,
+                        Shape.fromGeometry(geometries[2]).toConnector(Shape.fromGeometry(connectors[2])));
+  return Shape.fromGeometry(splice(shape.toKeptGeometry(), connection, rejoined.toGeometry()));
 };
 
 const toMethod = function (...args) { return connect(this, ...args); };
@@ -5015,4 +5048,4 @@ if (methods.includes(undefined)) {
   throw Error('die');
 }
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

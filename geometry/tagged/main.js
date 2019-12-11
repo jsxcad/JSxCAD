@@ -14,6 +14,7 @@ import { fromPathsToSurface } from './fromPathsToSurface';
 import { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
 import { fromSurfaceToPaths } from './fromSurfaceToPaths';
 import { getAnySurfaces } from './getAnySurfaces';
+import { getConnections } from './getConnections';
 import { getItems } from './getItems';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
@@ -30,6 +31,7 @@ import { nonNegative } from './nonNegative';
 import { outline } from './outline';
 import { rewriteTags } from './rewriteTags';
 import { specify } from './specify';
+import { splice } from './splice';
 import { toDisjointGeometry } from './toDisjointGeometry';
 import { toKeptGeometry } from './toKeptGeometry';
 import { toPoints } from './toPoints';
@@ -52,6 +54,7 @@ export {
   fromPathsToZ0Surface,
   fromSurfaceToPaths,
   getAnySurfaces,
+  getConnections,
   getPoints,
   getItems,
   getPaths,
@@ -68,6 +71,7 @@ export {
   outline,
   rewriteTags,
   specify,
+  splice,
   toDisjointGeometry,
   toKeptGeometry,
   toPoints,
