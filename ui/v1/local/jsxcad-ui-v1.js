@@ -1,4 +1,4 @@
-import { readFile, log, writeFile, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, getFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, setupFilesystem, listFilesystems, ask } from './jsxcad-sys.js';
+import { readFile, log, writeFile, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, getFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, ask } from './jsxcad-sys.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
 import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls, drawHud } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
@@ -78495,17 +78495,105 @@ var Tabs = react.forwardRef(function (props, ref) {
 Tabs.defaultProps = defaultProps$m;
 Tabs.displayName = 'Tabs';
 
+const defaultPaneLayout = {
+  direction: 'row',
+  first: '0',
+  second: {
+    direction: 'column',
+    first: '2',
+    second: '3',
+    splitPercentage: 75
+  }
+};
+const defaultPaneViews = [['0', {
+  view: 'editScript',
+  file: 'source/script.jsxcad',
+  title: 'Edit script.jsxcad'
+}], ['1', {
+  view: 'geometry',
+  file: 'geometry/preview',
+  title: 'View preview'
+}], ['2', {
+  view: 'geometry',
+  file: 'geometry/preview',
+  title: 'View preview'
+}], ['3', {
+  view: 'log',
+  title: 'Log'
+}]];
+const defaultScript = `// Circle(10);`;
 class SelectProjectUi extends SettingsUi {
   constructor(props) {
     super(props);
     this.state = {};
-  } // <Card.Img variant="top" src="holder.js/100px160" />
+  }
 
+  async create() {
+    const {
+      onSubmit
+    } = this.props;
+    const {
+      project
+    } = this.state;
+
+    if (project.length === 0) {
+      await log({
+        op: 'text',
+        text: `Project name is empty`,
+        level: 'serious'
+      });
+      return;
+    }
+
+    const projects = await listFilesystems();
+
+    if (projects.includes(project)) {
+      await log({
+        op: 'text',
+        text: `Project ${project} already exists`,
+        level: 'serious'
+      });
+      return;
+    }
+
+    if (project.length > 0) {
+      // FIX: Prevent this from overwriting existing filesystems.
+      setupFilesystem({
+        fileBase: project
+      });
+      await writeFile({
+        project
+      }, 'source/script.jsxcad', defaultScript);
+      await writeFile({
+        project
+      }, 'ui/paneLayout', JSON.stringify(defaultPaneLayout));
+      await writeFile({
+        project
+      }, 'ui/paneViews', JSON.stringify(defaultPaneViews));
+      await log({
+        op: 'text',
+        text: `Project ${project} created`,
+        level: 'serious'
+      });
+
+      if (onSubmit) {
+        onSubmit({
+          project
+        });
+      }
+
+      this.doHide();
+    }
+  }
 
   render() {
     const {
-      projects
+      projects,
+      toast
     } = this.props;
+    const {
+      project = ''
+    } = this.state;
     const rows = [];
 
     for (let i = 0; i < projects.length; i += 5) {
@@ -78519,7 +78607,7 @@ class SelectProjectUi extends SettingsUi {
       scrollable: true
     }, react.createElement(DecoratedModal.Header, {
       closeButton: true
-    }, react.createElement(DecoratedModal.Title, null, "Select Project")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
+    }, react.createElement(DecoratedModal.Title, null, "Project")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
       defaultActiveKey: "local",
       style: {
         display: 'flex'
@@ -78545,12 +78633,20 @@ class SelectProjectUi extends SettingsUi {
         project
       })
     }, react.createElement(Card.Body, null, react.createElement(Card.Title, null, project)))))), react.createElement(Tab, {
-      eventKey: "githubRepository",
-      title: "Github"
+      eventKey: "search",
+      title: "Search"
     }), react.createElement(Tab, {
-      eventKey: "newProject",
-      title: "New Project"
-    }))));
+      eventKey: "create",
+      title: "Create"
+    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Project Name"), react.createElement(Form.Control, {
+      name: "project",
+      value: project,
+      onChange: this.doUpdate
+    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
+      name: "create",
+      variant: "outline-primary",
+      onClick: () => this.create()
+    }, "Create Project"))))), toast));
   }
 
 }
@@ -78899,6 +78995,9 @@ class ShareUi extends SettingsUi {
   }
 
   render() {
+    const {
+      toast
+    } = this.props;
     return react.createElement(DecoratedModal, {
       show: this.props.show,
       onHide: this.doHide
@@ -78921,7 +79020,7 @@ class ShareUi extends SettingsUi {
       title: "File"
     }, react.createElement(ShareFileUi, {
       storage: "share/file"
-    })))));
+    })))), toast);
   }
 
 }
@@ -79962,9 +80061,9 @@ class Ui$1 extends react.PureComponent {
       setupFilesystem({
         fileBase: project
       });
-      await writeFile({}, 'source/script.jsxcad', defaultScript);
-      await writeFile({}, 'ui/paneLayout', JSON.stringify(defaultPaneLayout));
-      await writeFile({}, 'ui/paneViews', JSON.stringify(defaultPaneViews));
+      await writeFile({}, 'source/script.jsxcad', defaultScript$1);
+      await writeFile({}, 'ui/paneLayout', JSON.stringify(defaultPaneLayout$1));
+      await writeFile({}, 'ui/paneViews', JSON.stringify(defaultPaneViews$1));
       await this.selectProject(project);
     }
   }
@@ -80383,6 +80482,39 @@ class Ui$1 extends react.PureComponent {
     const {
       projects = []
     } = this.state;
+
+    const buildModal = () => {
+      if (showShareUi) {
+        return react.createElement(ShareUi, {
+          key: "shareUi",
+          show: showShareUi,
+          storage: "share",
+          toast: toast,
+          onSubmit: this.doGithub,
+          onHide: () => this.setState({
+            showShareUi: false
+          })
+        });
+      }
+
+      if (showSelectProjectUi) {
+        return react.createElement(SelectProjectUi, {
+          key: "selectProjectUi",
+          show: showSelectProjectUi || project === '',
+          projects: projects,
+          storage: "selectProject",
+          toast: toastDiv,
+          onSubmit: this.doSelectProject,
+          onHide: () => this.setState({
+            showSelectProjectUi: false
+          })
+        });
+      }
+
+      return switchViewModal();
+    };
+
+    const modal = buildModal();
     return react.createElement("div", {
       style: {
         height: '100%',
@@ -80390,24 +80522,7 @@ class Ui$1 extends react.PureComponent {
         display: 'flex',
         flexFlow: 'column'
       }
-    }, react.createElement(ShareUi, {
-      key: "shareUi",
-      show: showShareUi,
-      storage: "share",
-      onSubmit: this.doGithub,
-      onHide: () => this.setState({
-        showShareUi: false
-      })
-    }), react.createElement(SelectProjectUi, {
-      key: "selectProjectUi",
-      show: showSelectProjectUi || project === '',
-      projects: projects,
-      storage: "selectProject",
-      onSubmit: this.doSelectProject,
-      onHide: () => this.setState({
-        showSelectProjectUi: false
-      })
-    }), switchViewModal(), toastDiv, react.createElement(Navbar, {
+    }, modal, modal === undefined && toastDiv, react.createElement(Navbar, {
       bg: "light",
       expand: "lg",
       style: {
@@ -80690,8 +80805,8 @@ const setupUi = async () => {
   }), document.getElementById('top'));
 };
 
-const defaultScript = `// Circle(10);`;
-const defaultPaneLayout = {
+const defaultScript$1 = `// Circle(10);`;
+const defaultPaneLayout$1 = {
   direction: 'row',
   first: '0',
   second: {
@@ -80701,7 +80816,7 @@ const defaultPaneLayout = {
     splitPercentage: 75
   }
 };
-const defaultPaneViews = [['0', {
+const defaultPaneViews$1 = [['0', {
   view: 'editScript',
   file: 'source/script.jsxcad',
   title: 'Edit script.jsxcad'
