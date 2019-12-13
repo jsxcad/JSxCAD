@@ -11,4 +11,4 @@ import './display';
 
 import * as api from '@jsxcad/api-v1';
 
-export default api;
+export { api };
