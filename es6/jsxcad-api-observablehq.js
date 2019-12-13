@@ -1,6 +1,5 @@
 import { Shape } from './jsxcad-api-v1.js';
-import * as jsxcadApiV1_js from './jsxcad-api-v1.js';
-export { jsxcadApiV1_js as api };
+export * from './jsxcad-api-v1.js';
 import { staticDisplay } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 

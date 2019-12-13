@@ -9,6 +9,4 @@
 
 import './display';
 
-import * as api from '@jsxcad/api-v1';
-
-export { api };
+export * from '@jsxcad/api-v1';
