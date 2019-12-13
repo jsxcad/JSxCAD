@@ -1,12 +1,6 @@
 /* global history, location, window */
 
-import {
-  Mosaic,
-  RemoveButton as MosaicRemoveButton,
-  SplitButton as MosaicSplitButton,
-  MosaicWindow,
-  MosaicZeroState
-} from 'react-mosaic-component';
+import { Mosaic, MosaicContext, MosaicWindow, MosaicWindowContext, MosaicZeroState } from 'react-mosaic-component';
 
 import {
   ask as askSys,
@@ -43,6 +37,7 @@ import JsEditorUi from './JsEditorUi';
 import LogUi from './LogUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
 import ParametersUi from './ParametersUi';
 import PropTypes from 'prop-types';
@@ -309,19 +304,19 @@ class Ui extends React.PureComponent {
 
     for (const file of files) {
       if (file.startsWith('geometry/')) {
-        views.push({ view: 'geometry', file, title: `View ${file.substring(9)}` });
+        views.push({ view: 'geometry', viewTitle: 'View', file, fileTitle: `${file.substring(9)}` });
       }
       if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
-        views.push({ view: 'editScript', file, title: `Edit ${file.substring(7)}` });
+        views.push({ view: 'editScript', viewTitle: 'Edit Script', file, fileTitle: `${file.substring(7)}` });
       }
       if (file.startsWith('source/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
-        views.push({ view: 'editSvgPath', file, title: `Edit ${file.substring(7)}` });
+        views.push({ view: 'editSvgPath', viewTitle: 'Edit SVG Path', file, fileTitle: `${file.substring(7)}` });
       }
     }
 
-    views.push({ view: 'files', title: 'Files' });
-    views.push({ view: 'log', title: 'Log' });
-    views.push({ view: 'parameters', title: 'Parameters' });
+    views.push({ view: 'files', viewTitle: 'Files' });
+    views.push({ view: 'log', viewTitle: 'Log' });
+    views.push({ view: 'parameters', viewTitle: 'Parameters' });
 
     return views;
   }
@@ -369,23 +364,27 @@ class Ui extends React.PureComponent {
 
     switch (view) {
       case 'geometry':
-        return <ViewUi key={`${id}/geometry/${file}`} id={id} file={file}/>;
+        if (file === undefined) return { view, viewTitle: 'View', pane: <div/> };
+        return { view, viewTitle: 'View', file, fileTitle: file.substring('geometry/'.length), pane: <ViewUi key={`${id}/geometry/${file}`} id={id} file={file}/> };
       case 'editScript':
-        return <JsEditorUi key={`${id}/editScript/${file}`} id={id} file={file} ask={ask}/>;
+        if (file === undefined) return { view, viewTitle: 'Edit Script', pane: <div/> };
+        return { view, viewTitle: 'Edit Script', file, fileTitle: file.substring('source/'.length), pane: <JsEditorUi key={`${id}/editScript/${file}`} id={id} file={file} ask={ask}/> };
       case 'files':
-        return <FilesUi key={id} id={id}/>;
+        return { view, viewTitle: 'Files', pane: <FilesUi key={id} id={id}/> };
       case 'parameters': {
         const { parameters } = this.state;
-        return <ParametersUi key={id} id={id} parameters={parameters} onChange={this.updateParameters}/>;
+        if (parameters === undefined) return { view, viewTitle: 'Parameters', pane: <div/> };
+        return { view, viewTitle: 'Parameters', pane: <ParametersUi key={id} id={id} parameters={parameters} onChange={this.updateParameters}/> };
       }
       // case 'project':
       //  return <ProjectUi key={id} id={id} ui={this}/>;
       case 'log': {
         const { log } = this.state;
-        return <LogUi key={id} id={id} log={log}/>;
+        if (log === undefined) return { view, viewTitle: 'Log', pane: <div/> };
+        return { view, viewTitle: 'Log', pane: <LogUi key={id} id={id} log={log}/> };
       }
       default:
-        return <div/>;
+        return { view: 'nothing', viewTitle: 'Nothing', pane: <div/> };
     }
   }
 
@@ -437,17 +436,6 @@ class Ui extends React.PureComponent {
         {toasts}
       </Alert>
       : [];
-
-    const buildButtons = (id) => {
-      return (
-        <Button key="actions"
-          size="sm"
-          variant="outline-info"
-          onClick={() => this.setState({ switchView: id })}>
-          Switch
-        </Button>
-      );
-    };
 
     const switchViewModal = () => {
       const { switchView } = this.state;
@@ -518,6 +506,9 @@ class Ui extends React.PureComponent {
 
     const modal = buildModal();
 
+    const selectFile = async (id, file) => this.setPaneView(id, { ...this.getPaneView(id), file });
+    const selectView = async (id, view) => this.setPaneView(id, { ...this.getPaneView(id), view, file: undefined });
+
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
         {modal}
@@ -540,18 +531,80 @@ class Ui extends React.PureComponent {
         <Mosaic
           style={{ flex: '1 1 auto', background: '#e6ebf0' }}
           key={`mosaic/${project}`}
-          renderTile={(id, path) => (
-            <MosaicWindow
+          renderTile={(id, path) => {
+            const { view, viewTitle, file, fileTitle, pane } = this.renderView(id);
+            const fileChoices = views.filter(entry => entry.view === view && entry.file !== file);
+            const seenViewChoices = new Set();
+            const viewChoices = [];
+            for (const entry of views.filter(entry => entry.view !== view)) {
+              if (!seenViewChoices.has(entry.view)) {
+                seenViewChoices.add(entry.view);
+                viewChoices.push(entry);
+              }
+            }
+            return (<MosaicWindow
               key={`window/${project}/${id}`}
               createNode={this.createNode}
-              title={this.getPaneView(id).title}
-              toolbarControls={[<ButtonGroup key="switch">{ buildButtons(id) }</ButtonGroup>,
-                                <MosaicSplitButton key="split" />,
-                                <MosaicRemoveButton key="remove"/>]}
+              renderToolbar={() =>
+                <div style={{ width: '100%' }}>
+                  <Navbar key="navbar" bg="light" expand="sm" style={{ flex: '0 0 auto', height: '30px' }}>
+                    <Nav key="select" className="mr-auto" onSelect={this.doNav}>
+                      {viewChoices.length > 0
+                        ? <NavDropdown title={view === undefined ? 'Select' : viewTitle}>
+                          {viewChoices.map(({ view, viewTitle }, index) =>
+                            <NavDropdown.Item key={index} onClick={() => selectView(id, view)}>
+                              {viewTitle}
+                            </NavDropdown.Item>
+                          )}
+                        </NavDropdown>
+                        : view === undefined
+                          ? viewTitle
+                          : <Nav.Item><Nav.Link>{viewTitle}</Nav.Link></Nav.Item>}
+                      {fileChoices.length > 0
+                        ? <NavDropdown title={file === undefined ? 'Select' : fileTitle}>
+                          {fileChoices.map(({ file, fileTitle }, index) =>
+                            <NavDropdown.Item key={index} onClick={() => selectFile(id, file)}>
+                              {fileTitle}
+                            </NavDropdown.Item>
+                          )}
+                        </NavDropdown>
+                        : file === undefined
+                          ? fileTitle
+                          : <Nav.Item><Nav.Link>{fileTitle}</Nav.Link></Nav.Item>}
+                    </Nav>
+                    <Nav key="tools">
+                      <MosaicWindowContext.Consumer key={`${id}/toolbar`}>
+                        {
+                          ({ mosaicWindowActions }) =>
+                            <Nav.Item>
+                              <Nav.Link onClick={() => mosaicWindowActions.split()}>
+                                                   Split
+                              </Nav.Link>
+                            </Nav.Item>
+                        }
+                      </MosaicWindowContext.Consumer>
+                      <MosaicContext.Consumer>
+                        {
+                          ({ mosaicActions }) =>
+                            <MosaicWindowContext.Consumer>
+                              {
+                                ({ mosaicWindowActions }) =>
+                                  <Nav.Item>
+                                    <Nav.Link onClick={() => mosaicActions.remove(mosaicWindowActions.getPath())}>
+                                                       Close
+                                    </Nav.Link>
+                                  </Nav.Item>
+                              }
+                            </MosaicWindowContext.Consumer>
+                        }
+                      </MosaicContext.Consumer>
+                    </Nav>
+                  </Navbar>
+                </div>}
               path={path}>
-              {this.renderView(id)}
-            </MosaicWindow>
-          )}
+              {pane}
+            </MosaicWindow>);
+          }}
           zeroStateView={<MosaicZeroState createNode={this.createNode}/>}
           value={this.state.paneLayout}
           onChange={this.onChange}
@@ -562,218 +615,6 @@ class Ui extends React.PureComponent {
     );
   }
 };
-
-/*
-class ProjectUi extends React.PureComponent {
-  constructor (props) {
-    super(props);
-
-    this.state = {
-      doShowDeleteProject: false,
-      project: ''
-    };
-
-    this.copyProject = this.copyProject.bind(this);
-    this.deleteProject = this.deleteProject.bind(this);
-    this.exportProject = this.exportProject.bind(this);
-    this.exportProjectToGist = this.exportProjectToGist.bind(this);
-    this.hideDeleteProject = this.hideDeleteProject.bind(this);
-    this.importProject = this.importProject.bind(this);
-    this.showDeleteProject = this.showDeleteProject.bind(this);
-  }
-
-  async componentDidMount () {
-    const project = getFilesystem();
-    this.setState({ project });
-  }
-
-  stop (e) {
-    e.stopPropagation();
-  }
-
-  clickImportProject () {
-    document.getElementById('project/import').click();
-  }
-
-  async exportProject () {
-    const zip = await toZipFromFilesystem();
-    const blob = new Blob([zip.buffer], { type: 'application/zip' });
-    saveAs(blob, getFilesystem());
-  };
-
-  async exportProjectToGist () {
-    const CREATED = 201;
-
-    let oldToken;
-    for (let attempt = 0; attempt < 60; attempt++) {
-      console.log(`QQ/attempt: ${attempt}`);
-      const name = document.getElementById('project/exportToGist/name').value;
-      const token = await readFile({ project: '.system', useCache: false }, 'auth/gist/accessToken');
-      console.log(`QQ/token: ${token}`);
-      if (token === undefined || token !== oldToken) {
-        oldToken = token;
-        const scriptJsx = await readFile({}, 'source/script.jsx');
-        const scriptJsxcad = await readFile({}, 'source/script.jsxcad');
-        const fetch = {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'User-Agent': 'JSxCAD v0.0.79',
-            'Authorization': `token ${token}`
-          },
-          body: JSON.stringify({
-            description: name || getFilesystem(),
-            public: true,
-            files: { 'script.jsxcad': { content: scriptJsxcad || scriptJsx } }
-          })
-        };
-        const response = await window.fetch('https://api.github.com/gists', fetch);
-        console.log(`QQ/response/status: ${response.status}`);
-        console.log(`QQ/response/body: ${JSON.stringify(await response.json())}`);
-        if (response.status === CREATED) {
-          await log({ op: 'text', text: `Gist created`, level: 'serious' });
-          return;
-        } else {
-          await log({ op: 'text', text: `Gist export failed: ${response.status}`, level: 'serious' });
-          await log({ op: 'text', text: `Re-Authenticating`, level: 'serious' });
-          window.open(`http://167.99.163.104:3000/auth/gist?gistCallback=${window.location.href}`);
-        }
-      }
-      // Wait for the token to update.
-      await sleep(1000);
-    }
-    // Give up after a minute.
-    await log({ op: 'text', text: `Gave up on Gist export`, level: 'serious' });
-  };
-
-  async importProject (e) {
-    const file = document.getElementById('fs/filesystem/import').files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const zip = e.target.result;
-      fromZipToFilesystem({}, zip).then(_ => _);
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  async hideDeleteProject () {
-    this.setState({ doShowDeleteProject: false });
-  }
-
-  async showDeleteProject () {
-    this.setState({ doShowDeleteProject: true });
-  }
-
-  async deleteProject () {
-    for (const file of await listFiles()) {
-      await deleteFile({}, file);
-    }
-    this.props.ui.closeProject();
-  }
-
-  async copyProject () {
-    const newProject = document.getElementById('project/copy/name').value;
-    for (const file of await listFiles()) {
-      const data = await readFile({ as: 'bytes' }, file);
-      await writeFile({ as: 'bytes', project: newProject }, file, data);
-    }
-  }
-
-  render () {
-    const { id } = this.props;
-    const { doShowDeleteProject, project } = this.state;
-
-    return (
-      <Container
-          key={id}
-          style={{
-                   height: '100%',
-                   display: 'flex',
-                   flexFlow: 'column',
-                   padding: '4px',
-                   border: '1px solid rgba(0,0,0,.125)', borderRadius: '.25rem'
-                }}
-          >
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <InputGroup>
-              <FormControl id="project/export/name" placeholder="Zip Name" />
-              <InputGroup.Append>
-                <Button onClick={this.exportProject} variant='outline-primary'>Export</Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <InputGroup>
-              <FormControl id="project/exportToGist/name" placeholder="Gist Name" />
-              <InputGroup.Append>
-                <Button onClick={this.exportProjectToGist} variant='outline-primary'>Export</Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <InputGroup>
-              <FormControl id="project/exportToGithubRepository/name" placeholder="Github Repository Name" />
-              <InputGroup.Append>
-                <Button onClick={this.exportProjectToGithubRepository} variant='outline-primary'>Export</Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <InputGroup>
-              <FormControl
-                  as="input"
-                  type="file"
-                  multiple={false}
-                  id="project/import"
-                  onChange={this.importProject}
-                  style={{ display: 'none' }}
-              />
-              <FormControl disabled placeholder="" />
-              <InputGroup.Append>
-                <Button
-                    onClick={this.clickImportProject}
-                    id="project/import/button"
-                    variant="outline-primary"
-                    >
-                  Import
-                </Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <InputGroup>
-              <FormControl id="project/copy/name" placeholder="New Project" />
-              <InputGroup.Append>
-                <Button onClick={this.copyProject} variant='outline-primary'>Copy</Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <InputGroup>
-              <FormControl disabled placeholder="" />
-              <InputGroup.Append>
-                <Button
-                    onClick={this.showDeleteProject}
-                    id="project/delete/button"
-                    variant="outline-primary"
-                    >
-                  Delete
-                </Button>
-              </InputGroup.Append>
-            </InputGroup>
-            <Modal show={doShowDeleteProject} onHide={this.hideDeleteProject}>
-              <Modal.Header closeButton>
-                <Modal.Title>Confirm</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>Delete the {project} project?</Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={this.deleteProject}>
-                  Delete
-                </Button>
-                <Button variant="primary" onClick={this.hideDeleteProject}>
-                  Cancel
-                </Button>
-              </Modal.Footer>
-            </Modal>
-          </Col>
-        </Row>
-      </Container>
-    );
-  }
-};
-*/
 
 const setupUi = async () => {
   const filesystems = await listFilesystems();
