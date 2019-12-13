@@ -32,6 +32,13 @@ export const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry)
  <body>
   <script type="text/javascript" src="https://unpkg.com/@jsxcad/convert-threejs/dist/display.js"></script>
   <script type="text/javascript">JSxCAD = ${JSON.stringify({ threejsGeometry, view })};</script>
+  <script>
+   document.onreadystatechange = () => {
+     if (document.readyState === 'complete') {
+       display(window.JSxCAD, document.body);
+     }
+   };
+  </script>
  </body>
 </html>`;
   return html;

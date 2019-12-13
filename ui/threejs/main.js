@@ -1,6 +1,7 @@
 import { buildGui, buildGuiControls, buildTrackballControls } from './controls';
 import { buildMeshes, drawHud } from './mesh';
 import { buildScene, createResizer } from './scene';
+import { staticDisplay } from './staticDisplay';
 
 export {
   buildGui,
@@ -9,5 +10,6 @@ export {
   buildTrackballControls,
   buildScene,
   createResizer,
-  drawHud
+  drawHud,
+  staticDisplay
 };

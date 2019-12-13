@@ -57,10 +57,6 @@ export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   };
 
   animate();
-};
 
-document.onreadystatechange = () => {
-  if (document.readyState === 'complete') {
-    display(window.JSxCAD, document.body);
-  }
+  return { canvas: viewerElement, hudCanvas };
 };
