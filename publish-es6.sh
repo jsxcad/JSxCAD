@@ -34,6 +34,7 @@ cp algorithm/shape/dist/main.js es6/jsxcad-algorithm-shape.js
 cp algorithm/watertight/dist/main.js es6/jsxcad-algorithm-watertight.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
 cp api/v1/dist/main.js es6/jsxcad-api-v1.js
+cp api/observablehq/dist/main.js es6/jsxcad-api-observablehq.js
 cp sys/dist/main.js es6/jsxcad-sys.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js
 cp geometry/z0surface-boolean/dist/main.js es6/jsxcad-geometry-z0surface-boolean.js
