@@ -5,7 +5,7 @@ import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 
 const display = (shape, { view, page = {} } = {}) => {
   const { width = 1024, height = 512 } = page;
-  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry);
+  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { canvas } = staticDisplay({ view, threejsGeometry },
                                    { offsetWidth: width, offsetHeight: height });
   return canvas;
