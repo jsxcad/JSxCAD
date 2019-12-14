@@ -7,27 +7,82 @@
  * the api uses.
  */
 
+import './above';
 import './add';
 import './as';
+import './back';
+import './below';
 import './bom';
+import './center';
+import './chop';
+import './color';
 import './colors';
+import './contract';
 import './cut';
+import './drop';
 import './edges';
+import './expand';
+import './extrude';
 import './faces';
+import './front';
+import './getPathsets';
+import './interior';
 import './items';
+import './keep';
+import './kept';
+import './left';
+import './material';
+import './measureBoundingBox';
+import './measureCenter';
+import './move';
+import './moveX';
+import './moveY';
+import './moveZ';
+import './nocut';
+import './offset';
+import './orient';
+import './outline';
+import './right';
+import './rotate';
+import './rotateX';
+import './rotateY';
+import './rotateZ';
+import './scale';
+import './section';
+import './solids';
+import './sweep';
+import './tags';
 import './to';
+import './toBillOfMaterial';
+import './toItems';
+import './toolpath';
+import './translate';
+import './turn';
+import './turnX';
+import './turnY';
+import './turnZ';
 import './unfold';
 import './with';
+import './voxels';
+import './wireframe';
+import './writeDxf';
+import './writeGcode';
+import './writePdf';
+import './writeShape';
+import './writeStl';
+import './writeSvg';
+import './writeSvgPhoto';
+import './writeThreejs';
 
 import * as vec from '@jsxcad/math-vec3';
 
-import { Connector, connector, connectors } from './Connector';
 import { Label, Plan } from './Plan';
-import { connect, join, rejoin } from './connect';
+import { join, rejoin } from './connect';
 
 import Armature from './Armature';
 import Circle from './Circle';
 import Cone from './Cone';
+import { Connector } from './Connector';
 import Cube from './Cube';
 import Cursor from './Cursor';
 import { Cylinder } from './Cylinder';
@@ -62,50 +117,23 @@ import { X } from './X';
 import { Y } from './Y';
 import { Z } from './Z';
 
-import above from './above';
 import acos from './acos';
 import ask from './ask';
 import assemble from './assemble';
-import back from './back';
-import below from './below';
-import center from './center';
 import chainHull from './chainHull';
-import chop from './chop';
-import color from './color';
-import contract from './contract';
 import coordinates from './coordinates';
 import cos from './cos';
 import difference from './difference';
-import drop from './drop';
 import ease from './ease';
-import expand from './expand';
-import extrude from './extrude';
 import { flat } from './flat';
-import { front } from './front';
-import { getPathsets } from './getPathsets';
 import { hull } from './hull';
 import { importModule } from './importModule';
-import { interior } from './interior';
 import { intersection } from './intersection';
-import { keep } from './keep';
-import { kept } from './kept';
 import { lathe } from './lathe';
-import { left } from './left';
 import { log } from './log';
-import { material } from './material';
 import { max } from './max';
-import { measureBoundingBox } from './measureBoundingBox';
-import { measureCenter } from './measureCenter';
 import { minkowski } from './minkowski';
-import { move } from './move';
-import { moveX } from './moveX';
-import { moveY } from './moveY';
-import { moveZ } from './moveZ';
-import { nocut } from './nocut';
 import { numbers } from './numbers';
-import { offset } from './offset';
-import { orient } from './orient';
-import { outline } from './outline';
 import { pack } from './pack';
 import { readDst } from './readDst';
 import { readDxf } from './readDxf';
@@ -118,110 +146,159 @@ import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
 import { readSvg } from './readSvg';
 import { readSvgPath } from './readSvgPath';
-import { right } from './right';
-import { rotate } from './rotate';
-import { rotateX } from './rotateX';
-import { rotateY } from './rotateY';
-import { rotateZ } from './rotateZ';
-import { scale } from './scale';
-import { section } from './section';
 import { shell } from './shell';
 import { sin } from './sin';
-import { solids } from './solids';
 import { source } from './source';
 import { specify } from './specify';
 import { sqrt } from './sqrt';
 import { stretch } from './stretch';
-import { sweep } from './sweep';
-import { tags } from './tags';
-import { toBillOfMaterial } from './toBillOfMaterial';
-import { toItems } from './toItems';
-import { toolpath } from './toolpath';
-import { translate } from './translate';
-import { turn } from './turn';
-import { turnX } from './turnX';
-import { turnY } from './turnY';
-import { turnZ } from './turnZ';
 import { union } from './union';
-import { voxels } from './voxels';
-import { wireframe } from './wireframe';
-import { writeDxf } from './writeDxf';
-import { writeGcode } from './writeGcode';
-import { writePdf } from './writePdf';
-import { writeShape } from './writeShape';
-import { writeStl } from './writeStl';
-import { writeSvg } from './writeSvg';
-import { writeSvgPhoto } from './writeSvgPhoto';
-import { writeThreejsPage } from './writeThreejs';
 
-const methods = [
-  above,
-  back,
-  below,
-  center,
-  chop,
-  color,
-  connect,
-  connector,
-  connectors,
-  contract,
-  drop,
-  ease,
-  expand,
-  extrude,
-  front,
-  getPathsets,
-  flat,
-  interior,
-  kept,
-  left,
-  material,
-  measureBoundingBox,
-  measureCenter,
-  move,
-  moveX,
-  moveY,
-  moveZ,
-  nocut,
-  offset,
-  orient,
-  outline,
-  right,
-  rotate,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  section,
-  shell,
-  solids,
-  specify,
-  sweep,
-  tags,
-  toolpath,
-  toBillOfMaterial,
-  toItems,
-  translate,
-  turn,
-  turnX,
-  turnY,
-  turnZ,
-  keep,
-  voxels,
-  wireframe,
-  writeDxf,
-  writeGcode,
-  writePdf,
-  writeShape,
-  writeStl,
-  writeSvg,
-  writeSvgPhoto,
-  writeThreejsPage
+const constructors = [
+  'Shape',
+  'Armature',
+  'Circle',
+  'Cone',
+  'Connector',
+  'Cube',
+  'Cursor',
+  'Cylinder',
+  'Font',
+  'Gear',
+  'Hershey',
+  'Hexagon',
+  'Icosahedron',
+  'Item',
+  'Label',
+  'Lego',
+  'Line',
+  'log',
+  'MicroGearMotor',
+  'Nail',
+  'Plan',
+  'Path',
+  'Point',
+  'Points',
+  'Polygon',
+  'Polyhedron',
+  'Prism',
+  'Sphere',
+  'Spiral',
+  'Square',
+  'SvgPath',
+  'Tetrahedron',
+  'ThreadedRod',
+  'Torus',
+  'Triangle',
+  'Wave',
+  'X',
+  'Y',
+  'Z'
 ];
 
-if (methods.includes(undefined)) {
-  throw Error('die');
-}
+const shapeMethods = [
+  'above',
+  'back',
+  'below',
+  'center',
+  'chop',
+  'color',
+  'connect',
+  'connector',
+  'connectors',
+  'contract',
+  'drop',
+  'ease',
+  'expand',
+  'extrude',
+  'front',
+  'getPathsets',
+  'flat',
+  'interior',
+  'kept',
+  'left',
+  'material',
+  'measureBoundingBox',
+  'measureCenter',
+  'move',
+  'moveX',
+  'moveY',
+  'moveZ',
+  'nocut',
+  'offset',
+  'orient',
+  'outline',
+  'right',
+  'rotate',
+  'rotateX',
+  'rotateY',
+  'rotateZ',
+  'scale',
+  'section',
+  'shell',
+  'solids',
+  'specify',
+  'sweep',
+  'tags',
+  'toolpath',
+  'toBillOfMaterial',
+  'toItems',
+  'translate',
+  'turn',
+  'turnX',
+  'turnY',
+  'turnZ',
+  'keep',
+  'voxels',
+  'wireframe',
+  'writeDxf',
+  'writeGcode',
+  'writePdf',
+  'writeShape',
+  'writeStl',
+  'writeSvg',
+  'writeSvgPhoto',
+  'writeThreejsPage'
+];
+
+const operators = [
+  'acos',
+  'ask',
+  'assemble',
+  'coordinates',
+  'cos',
+  'difference',
+  'ease',
+  'flat',
+  'hull',
+  'intersection',
+  'join',
+  'lathe',
+  'log',
+  'max',
+  'minkowski',
+  'numbers',
+  'pack',
+  'readDst',
+  'readDxf',
+  'readFont',
+  'readLDraw',
+  'readPng',
+  'readShape',
+  'readShapefile',
+  'readStl',
+  'readSvg',
+  'readSvgPath',
+  'rejoin',
+  'shell',
+  'sin',
+  'source',
+  'specify',
+  'sqrt',
+  'stretch',
+  'union',
+  'vec'
+];
 
 export {
   Shape,
@@ -302,4 +379,37 @@ export {
   X,
   Y,
   Z
+};
+
+const buildCompletions = () => {
+  const completions = [];
+  for (const constructor of constructors) {
+    completions.push({ completion: constructor });
+  }
+  for (const operator of operators) {
+    completions.push({ completion: operator });
+  }
+  return completions;
+};
+
+const buildShapeMethodCompletions = () => {
+  const completions = [];
+  for (const shapeMethod of shapeMethods) {
+    completions.push({ completion: shapeMethod });
+  }
+  return completions;
+};
+
+const completions = buildCompletions();
+const shapeMethodCompletions = buildShapeMethodCompletions();
+
+export const getCompletions = (prefix, { isMethod = false }) => {
+  const selectedEntries = [];
+  const entries = isMethod ? shapeMethodCompletions : completions;
+  for (const entry of entries) {
+    if (entry.completion.startsWith(prefix)) {
+      selectedEntries.push(entry);
+    }
+  }
+  return selectedEntries;
 };

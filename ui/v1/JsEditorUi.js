@@ -11,10 +11,117 @@ import React from 'react';
 import Row from 'react-bootstrap/Row';
 
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
+import { aceEditorCompleter } from './AceEditorCompleter';
+import { aceEditorSnippetManager } from './AceEditorSnippetManager';
+
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
 
 if (!aceEditorAuxiliary) throw Error('die');
 if (!prismJsAuxiliary) throw Error('die');
+
+const snippetCompleter = {
+  getCompletions: function (editor, session, position, prefix, callback) {
+    const { row, column } = position;
+    var scopes = ['JSxCAD'];
+    var token = session.getTokenAt(row, column);
+    var snippetMap = aceEditorSnippetManager.snippetMap;
+    var completions = [];
+    let isMethod = false;
+    {
+      const { start } = token;
+      const previous = session.getTokenAt(row, start);
+      if (previous !== null && previous.value === '.') {
+        isMethod = true;
+      }
+    }
+    scopes.forEach(function (scope) {
+      var snippets = snippetMap[scope] || [];
+      for (var i = snippets.length; i--;) {
+        var s = snippets[i];
+        if (s.isMethod) {
+          if (!isMethod) {
+            continue;
+          }
+        }
+        var caption = s.name;
+        if (!caption) { continue; }
+        completions.push({
+          caption: caption,
+          snippet: s.content,
+          meta: s.meta,
+          docHTML: s.docHTML,
+          type: s.type
+        });
+      }
+    }, this);
+    callback(null, completions);
+  }
+/*
+  getDocTooltip: function (item) {
+    if (item.type === 'snippet' && item.docHTML === undefined) {
+      item.docHTML = '';
+    }
+  }
+*/
+};
+
+/*
+const scriptCompleter = {
+  getCompletions: (editor, session, position, prefix, callback) => {
+    const { row, column } = position;
+    let isMethod = false;
+    {
+      const token = session.getTokenAt(row, column);
+      const { type, value, index, start } = token;
+      const previous = session.getTokenAt(row, start);
+      if (previous.value === '.') {
+        isMethod = true;
+      }
+    }
+    if (prefix.length === 0) {
+      callback(null, []);
+    } else {
+      callback(
+        null,
+        getCompletions(prefix, { isMethod })
+            .map(({ completion, source }) =>
+              ({
+                name: `${completion}(`,
+                value: `${completion}(`,
+                score: 1,
+                meta: source
+              })));
+    }
+  }
+};
+*/
+
+/*
+  {
+    guard,
+    trigger,
+    endTrigger,
+    endGuard,
+    tabTrigger,
+    name
+  }
+*/
+
+// aceEditorCompleter.setCompleters([scriptCompleter]);
+aceEditorCompleter.setCompleters([snippetCompleter]);
+aceEditorSnippetManager.register(
+  [
+    {
+      name: '.color',
+      trigger: '.color',
+      isMethod: true,
+      content: "color('$" + "{1:name}')",
+      meta: 'Shape Method',
+      type: 'snippet',
+      docHTML: "Shape:color(name)<br><br>Gives the shape the named color.<br><br><i>Circle().color('red')</i>"
+    }
+  ],
+  'JSxCAD');
 
 export class JsEditorUi extends React.PureComponent {
   static get propTypes () {
@@ -140,7 +247,12 @@ export class JsEditorUi extends React.PureComponent {
             <AceEditor
               commands={[this.runShortcut(), this.saveShortcut()]}
               editorProps={{ $blockScrolling: true }}
-              setOptions={{ useWorker: false }}
+              setOptions={{
+                // enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true,
+                enableSnippets: true,
+                useWorker: false
+              }}
               height='100%'
               highlightActiveLine={true}
               key={id}
