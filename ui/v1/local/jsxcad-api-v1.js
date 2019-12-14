@@ -106,7 +106,8 @@ var api = /*#__PURE__*/Object.freeze({
   get Wave () { return Wave; },
   get X () { return X; },
   get Y () { return Y; },
-  get Z () { return Z; }
+  get Z () { return Z; },
+  get getCompletions () { return getCompletions; }
 });
 
 class Shape {
@@ -4979,73 +4980,183 @@ Shape.prototype.writeThreejsPage = method$S;
  * the api uses.
  */
 
-const methods = [
-  above,
-  back,
-  below,
-  center,
-  chop,
-  color,
-  connect,
-  connector,
-  connectors,
-  contract,
-  drop,
-  ease,
-  expand,
-  extrude,
-  front,
-  getPathsets,
-  flat,
-  interior,
-  kept,
-  left,
-  material,
-  measureBoundingBox,
-  measureCenter,
-  move,
-  moveX,
-  moveY,
-  moveZ,
-  nocut,
-  offset,
-  orient,
-  outline,
-  right,
-  rotate,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  section,
-  shell,
-  solids,
-  specify,
-  sweep,
-  tags,
-  toolpath,
-  toBillOfMaterial,
-  toItems,
-  translate,
-  turn,
-  turnX,
-  turnY,
-  turnZ,
-  keep,
-  voxels,
-  wireframe,
-  writeDxf,
-  writeGcode,
-  writePdf,
-  writeShape,
-  writeStl,
-  writeSvg,
-  writeSvgPhoto,
-  writeThreejsPage
+const constructors = [
+  'Shape',
+  'Armature',
+  'Circle',
+  'Cone',
+  'Connector',
+  'Cube',
+  'Cursor',
+  'Cylinder',
+  'Font',
+  'Gear',
+  'Hershey',
+  'Hexagon',
+  'Icosahedron',
+  'Item',
+  'Label',
+  'Lego',
+  'Line',
+  'log',
+  'MicroGearMotor',
+  'Nail',
+  'Plan',
+  'Path',
+  'Point',
+  'Points',
+  'Polygon',
+  'Polyhedron',
+  'Prism',
+  'Sphere',
+  'Spiral',
+  'Square',
+  'SvgPath',
+  'Tetrahedron',
+  'ThreadedRod',
+  'Torus',
+  'Triangle',
+  'Wave',
+  'X',
+  'Y',
+  'Z'
 ];
 
-if (methods.includes(undefined)) {
-  throw Error('die');
-}
+const shapeMethods = [
+  'above',
+  'back',
+  'below',
+  'center',
+  'chop',
+  'color',
+  'connect',
+  'connector',
+  'connectors',
+  'contract',
+  'drop',
+  'ease',
+  'expand',
+  'extrude',
+  'front',
+  'getPathsets',
+  'flat',
+  'interior',
+  'kept',
+  'left',
+  'material',
+  'measureBoundingBox',
+  'measureCenter',
+  'move',
+  'moveX',
+  'moveY',
+  'moveZ',
+  'nocut',
+  'offset',
+  'orient',
+  'outline',
+  'right',
+  'rotate',
+  'rotateX',
+  'rotateY',
+  'rotateZ',
+  'scale',
+  'section',
+  'shell',
+  'solids',
+  'specify',
+  'sweep',
+  'tags',
+  'toolpath',
+  'toBillOfMaterial',
+  'toItems',
+  'translate',
+  'turn',
+  'turnX',
+  'turnY',
+  'turnZ',
+  'keep',
+  'voxels',
+  'wireframe',
+  'writeDxf',
+  'writeGcode',
+  'writePdf',
+  'writeShape',
+  'writeStl',
+  'writeSvg',
+  'writeSvgPhoto',
+  'writeThreejsPage',
+];
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+const operators = [
+  'acos',
+  'ask',
+  'assemble',
+  'coordinates',
+  'cos',
+  'difference',
+  'ease',
+  'flat',
+  'hull',
+  'intersection',
+  'join',
+  'lathe',
+  'log',
+  'max',
+  'minkowski',
+  'numbers',
+  'pack',
+  'readDst',
+  'readDxf',
+  'readFont',
+  'readLDraw',
+  'readPng',
+  'readShape',
+  'readShapefile',
+  'readStl',
+  'readSvg',
+  'readSvgPath',
+  'rejoin',
+  'shell',
+  'sin',
+  'source',
+  'specify',
+  'sqrt',
+  'stretch',
+  'union',
+  'vec',
+];
+
+const buildCompletions = () => {
+  const completions = [];
+  for (const constructor of constructors) {
+    completions.push({ completion: constructor });
+  }
+  for (const operator of operators) {
+    completions.push({ completion: operator });
+  }
+  return completions;
+};
+
+const buildShapeMethodCompletions = () => {
+  const completions = [];
+  for (const shapeMethod of shapeMethods) {
+    completions.push({ completion: shapeMethod });
+  }
+  return completions;
+};
+
+const completions = buildCompletions();
+const shapeMethodCompletions = buildShapeMethodCompletions();
+
+const getCompletions = (prefix, { isMethod = false }) => {
+  const selectedEntries = [];
+  const entries = isMethod ? shapeMethodCompletions : completions;
+  for (const entry of entries) {
+    if (entry.completion.startsWith(prefix)) {
+      selectedEntries.push(entry);
+    }
+  }
+  return selectedEntries;
+};
+
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

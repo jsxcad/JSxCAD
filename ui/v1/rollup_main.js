@@ -52,6 +52,9 @@ export default {
         '../../node_modules/react-recollect/index.js': [
           'collect'
         ]
+        // '../../node_modules/ace-builds/src-noconflict/ext-language_tools': [
+        //   'addCompleter', 'setCompleters', 'snippetManager',
+        // ]
       }
     }),
     globals(),

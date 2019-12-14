@@ -1,33 +1,33 @@
-import { close, concatenate, open, getEdges, toSegments, isClosed } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, allTags, difference as difference$1, getSolids, assemble as assemble$1, getPlans, getConnections, getItems, splice, drop as drop$1, getAnySurfaces, getPaths, intersection as intersection$1, measureBoundingBox as measureBoundingBox$1, outline as outline$1, getZ0Surfaces, getSurfaces, keep as keep$1, nonNegative, specify as specify$1 } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
+import { close, concatenate, open, toSegments, getEdges, isClosed } from './jsxcad-geometry-path.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, measureBoundingBox as measureBoundingBox$1, union as union$1, rewriteTags, assemble as assemble$1, getAnySurfaces, getSolids, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPlans, getConnections, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, alignVertices, transform as transform$2, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
+import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling, identity, multiply } from './jsxcad-math-mat4.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-import { scale as scale$1, add, subtract, negate, transform as transform$1, normalize, dot, cross } from './jsxcad-math-vec3.js';
+import { scale as scale$1, add, negate, normalize, subtract, dot, cross, transform as transform$3 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
-import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron, lathe as lathe$1, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { translate as translate$1 } from './jsxcad-geometry-paths.js';
-import { toPlane } from './jsxcad-math-poly3.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { log as log$1, readFile, getSources, ask as ask$1, writeFile, addSource } from './jsxcad-sys.js';
-import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from './jsxcad-algorithm-verlet.js';
-import { identity, fromZRotation, multiply, fromTranslation, fromRotation, fromXRotation, fromYRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { toFont } from './jsxcad-algorithm-text.js';
-import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
-import { cut, section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
-import { cut as cut$1, toPlane as toPlane$1, transform as transform$2, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { cut, section as section$1, fromSolid, containsPoint, cutOpen } from './jsxcad-algorithm-bsp-surfaces.js';
+import { cut as cut$1, toPlane, transform as transform$1, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
+import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { translate as translate$1 } from './jsxcad-geometry-paths.js';
+import { toPlane as toPlane$1 } from './jsxcad-math-poly3.js';
+import { overcut } from './jsxcad-algorithm-toolpath.js';
+import { log as log$1, writeFile, readFile, getSources, ask as ask$1, addSource } from './jsxcad-sys.js';
+import { toDxf, fromDxf } from './jsxcad-convert-dxf.js';
+import { toGcode } from './jsxcad-convert-gcode.js';
+import { toPdf } from './jsxcad-convert-pdf.js';
+import { toStl, fromStl } from './jsxcad-convert-stl.js';
+import { toSvg, fromSvgPath, fromSvg } from './jsxcad-convert-svg.js';
+import { toSvg as toSvg$1, toThreejsPage } from './jsxcad-convert-threejs.js';
+import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from './jsxcad-algorithm-verlet.js';
+import { toFont } from './jsxcad-algorithm-text.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { fromDst } from './jsxcad-convert-dst.js';
-import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
 import { fromLDraw } from './jsxcad-convert-ldraw.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromShapefile } from './jsxcad-convert-shapefile.js';
-import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { overcut } from './jsxcad-algorithm-toolpath.js';
-import { toGcode } from './jsxcad-convert-gcode.js';
-import { toPdf } from './jsxcad-convert-pdf.js';
-import { toSvg as toSvg$1, toThreejsPage } from './jsxcad-convert-threejs.js';
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
@@ -104,9 +104,10 @@ var api = /*#__PURE__*/Object.freeze({
   get union () { return union; },
   get vec () { return jsxcadMathVec3_js; },
   get Wave () { return Wave; },
-  get X () { return X; },
-  get Y () { return Y; },
-  get Z () { return Z; }
+  get X () { return X$3; },
+  get Y () { return Y$3; },
+  get Z () { return Z$2; },
+  get getCompletions () { return getCompletions; }
 });
 
 class Shape {
@@ -208,6 +209,120 @@ const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
 const toKeptGeometry = (shape) => shape.toKeptGeometry();
 
+/**
+ *
+ * # Measure Bounding Box
+ *
+ * Provides the corners of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * const [corner1, corner2] = Sphere(7).measureBoundingBox();
+ * Cube.fromCorners(corner1, corner2)
+ * ```
+ * :::
+ **/
+
+const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
+
+const method = function () { return measureBoundingBox(this); };
+Shape.prototype.measureBoundingBox = method;
+
+/**
+ *
+ * # Translate
+ *
+ * Translation moves a shape.
+ *
+ * ::: illustration { "view": { "position": [10, 0, 10] } }
+ * ```
+ * assemble(Circle(),
+ *          Sphere().above())
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [10, 0, 10] } }
+ * ```
+ * assemble(Circle(),
+ *          Sphere().above()
+ *                  .translate(0, 0, 1))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [10, 0, 10] } }
+ * ```
+ * assemble(Circle(),
+ *          Sphere().above()
+ *                  .translate(0, 1, 0))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [10, 0, 10] } }
+ * ```
+ * assemble(Circle(),
+ *          Sphere().above()
+ *                  .translate([-1, -1, 1]))
+ * ```
+ * :::
+ *
+ **/
+
+const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
+
+const method$1 = function (...args) { return translate(this, ...args); };
+Shape.prototype.translate = method$1;
+
+/**
+ *
+ * # Move
+ *
+ * A shorter way to write translate.
+ *
+ */
+
+const move = translate;
+
+const method$2 = function (...params) { return translate(this, ...params); };
+Shape.prototype.move = method$2;
+
+/**
+ *
+ * # MoveZ
+ *
+ * Move along the Z axis.
+ *
+ */
+
+const moveZ = (shape, z) => move(shape, 0, 0, z);
+
+const method$3 = function (z) { return moveZ(this, z); };
+Shape.prototype.moveZ = method$3;
+
+/**
+ *
+ * # Above
+ *
+ * Moves the shape so that its lowest point is at z = 0.
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Circle(20).with(Cube(10).above())
+ * ```
+ * :::
+ **/
+
+const MIN = 0;
+const Z = 2;
+
+const above = (shape, reference) => {
+  return moveZ(shape, -measureBoundingBox(shape)[MIN][Z]);
+};
+
+const aboveMethod = function (...params) { return above(this); };
+Shape.prototype.above = aboveMethod;
+
 const dispatch = (name, ...dispatches) => {
   const op = (...params) => {
     for (const dispatch of dispatches) {
@@ -298,9 +413,9 @@ const union = dispatch(
     return () => unionOfShapes(...shapes);
   });
 
-const method = function (...shapes) { return union(this, ...shapes); };
+const method$4 = function (...shapes) { return union(this, ...shapes); };
 
-Shape.prototype.union = method;
+Shape.prototype.union = method$4;
 
 /**
  *
@@ -318,8 +433,8 @@ Shape.prototype.union = method;
  *
  **/
 
-const method$1 = function (...shapes) { return union(this, ...shapes); };
-Shape.prototype.add = method$1;
+const method$5 = function (...shapes) { return union(this, ...shapes); };
+Shape.prototype.add = method$5;
 
 /**
  *
@@ -349,6 +464,66 @@ Shape.prototype.notAs = notAsMethod;
 
 /**
  *
+ * # MoveY
+ *
+ * Move along the Y axis.
+ *
+ */
+
+const moveY = (shape, y) => move(shape, 0, y);
+
+const method$6 = function (y) { return moveY(this, y); };
+Shape.prototype.moveY = method$6;
+
+/**
+ *
+ * # Back
+ *
+ * Moves the shape so that it is just behind the origin.
+ *
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Cylinder(2, 15)
+ *   .with(Cube(10).back())
+ * ```
+ * :::
+ **/
+
+const MIN$1 = 0;
+const Y = 1;
+
+const back = (shape, reference) => {
+  return moveY(shape, -measureBoundingBox(shape)[MIN$1][Y]);
+};
+
+const backMethod = function (...params) { return back(this); };
+Shape.prototype.back = backMethod;
+
+/**
+ *
+ * # Below
+ *
+ * Moves the shape so that its highest point is at z = 0.
+ *
+ * ::: illustration { "view": { "position": [60, -60, -60], "target": [0, 0, 0] } }
+ * ```
+ * Circle(20).flip().with(Cube(10).below())
+ * ```
+ * :::
+ **/
+
+const MAX = 1;
+const Z$1 = 2;
+
+const below = (shape, reference) => {
+  return moveZ(shape, -measureBoundingBox(shape)[MAX][Z$1]);
+};
+
+const belowMethod = function (...params) { return below(this); };
+Shape.prototype.below = belowMethod;
+
+/**
+ *
  * # Bill Of Materials
  *
  **/
@@ -358,6 +533,179 @@ const bom = (shape, ...args) => shape;
 const bomMethod = function (...args) { return bom(this, ...args); };
 Shape.prototype.bom = bomMethod;
 
+/**
+ *
+ * # Center
+ *
+ * Moves the shape so that its bounding box is centered on the origin.
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Circle(20).with(Cube(10).center())
+ * ```
+ * :::
+ **/
+
+const center = (shape) => {
+  const [minPoint, maxPoint] = measureBoundingBox(shape);
+  let center = scale$1(0.5, add(minPoint, maxPoint));
+  const moved = shape.move(...negate(center));
+  return moved;
+};
+
+const centerMethod = function (...params) { return center(this); };
+Shape.prototype.center = centerMethod;
+
+// Ideally this would be a plane of infinite extent.
+// Unfortunately this makes things like interpolation tricky,
+// so we approximate it with a very large polygon instead.
+
+const Z$2 = (z = 0) => {
+  const size = 1e5;
+  const min = -size;
+  const max = size;
+  return Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
+};
+
+/**
+ *
+ * # Assemble
+ *
+ * Produces an assembly of shapes that can be manipulated as a single shape.
+ * assemble(a, b) is equivalent to a.with(b).
+ *
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * assemble(Circle(20).moveZ(-12),
+ *          Square(40).moveZ(16).outline(),
+ *          Cylinder(10, 20));
+ * ```
+ * :::
+ *
+ * Components of the assembly can be extracted by tag filtering.
+ *
+ * Components later in the assembly project holes into components earlier in the
+ * assembly so that the geometries are disjoint.
+ *
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          Cylinder(10, 40).above().as('cylinder'))
+ *   .keep('cube')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40),
+ *                   Circle(50).outline()).as('circles'))
+ *   .keep('circles')
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [100, 100, 100] } }
+ * ```
+ * assemble(Cube(30).above().as('cube'),
+ *          assemble(Circle(40).as('circle'),
+ *                   Circle(50).outline().as('outline')))
+ *   .drop('outline')
+ * ```
+ * :::
+ *
+ **/
+
+const assemble = (...shapes) => {
+  shapes = shapes.filter(shape => shape !== undefined);
+  switch (shapes.length) {
+    case 0: {
+      return Shape.fromGeometry({ assembly: [] });
+    }
+    case 1: {
+      return shapes[0];
+    }
+    default: {
+      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
+    }
+  }
+};
+
+/**
+ *
+ * # Chop
+ *
+ * Remove the parts of a shape above surface, defaulting to Z(0).
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
+ * ```
+ * :::
+ *
+ **/
+
+const chop = (shape, planeShape = Z$2()) => {
+  const cuts = [];
+  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
+    const planeSurface = surface || z0Surface;
+    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      const cutResult = cut(solid, planeSurface);
+      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+    }
+  }
+
+  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
+    const planeSurface = surface || z0Surface;
+    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+      const cutSurface = surface || z0Surface;
+      const cutResult = cut$1(planeSurface, cutSurface);
+      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
+    }
+  }
+
+  return assemble(...cuts);
+};
+
+const chopMethod = function (surface) { return chop(this, surface); };
+Shape.prototype.chop = chopMethod;
+
+/**
+ *
+ * # Color
+ *
+ * Produces a version of a shape the given color.
+ * FIX: Support color in convert/threejs/toSvg.
+ *
+ * ::: illustration
+ * ```
+ * Circle(10).color('blue')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * Triangle(10).color('chartreuse')
+ * ```
+ * :::
+ *
+ **/
+
+const fromName = (shape, name) =>
+  Shape.fromGeometry(rewriteTags([toTagFromName(name)], [], shape.toGeometry()));
+
+const color = (...args) => fromName(...args);
+
+const colorMethod = function (...args) { return color(this, ...args); };
+Shape.prototype.color = colorMethod;
+
 const colors = (shape) =>
   [...allTags(shape.toGeometry())]
       .filter(tag => tag.startsWith('color/'))
@@ -365,89 +713,6 @@ const colors = (shape) =>
 
 const colorsMethod = function () { return colors(this); };
 Shape.prototype.colors = colorsMethod;
-
-/**
- *
- * # Difference
- *
- * Difference produces a version of the first shape with the remaining shapes removed, where applicable.
- * Different kinds of shapes do not interact. e.g., you cannot subtract a surface from a solid.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * difference(Cube(10).below(),
- *            Cube(5).below())
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2.5))
- * ```
- * :::
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * difference(assemble(Cube().below(),
- *                     Cube().above()),
- *            Cube().right())
- * ```
- * :::
- *
- **/
-
-const difference = (...shapes) => {
-  switch (shapes.length) {
-    case 0: {
-      return fromGeometry({ assembly: [] });
-    }
-    case 1: {
-      // We still want to produce a simple shape.
-      return fromGeometry(toKeptGeometry(shapes[0]));
-    }
-    default: {
-      return fromGeometry(difference$1(...shapes.map(toKeptGeometry)));
-    }
-  }
-};
-
-/**
- *
- * # shape.cut(...shapes)
- *
- * Produces a version of shape with the regions overlapped by shapes removed.
- *
- * shape.cut(...shapes) is equivalent to difference(shape, ...shapes).
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Cube(10).below().cut(Cube(5).below())
- * ```
- * :::
- *
- **/
-
-const method$2 = function (...shapes) { return difference(this, ...shapes); };
-Shape.prototype.cut = method$2;
-
-const edges = (shape, op = (_ => _)) => {
-  const edgeId = (from, to) => `${JSON.stringify(from)}->${JSON.stringify(to)}`;
-  const edges = new Map();
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    const alignedSolid = alignVertices(solid);
-    for (const surface of alignedSolid) {
-      for (const face of surface) {
-        for (const [lastPoint, nextPoint] of getEdges(face)) {
-          const [a, b] = [lastPoint, nextPoint].sort();
-          edges.set(edgeId(a, b), [a, b]);
-        }
-      }
-    }
-  }
-  return [...edges.values()];
-};
-
-const edgesMethod = function (...args) { return edges(this, ...args); };
-Shape.prototype.edges = edgesMethod;
 
 const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
@@ -569,6 +834,388 @@ Circle.ofRadius = ofRadius$1;
 Circle.ofDiameter = ofDiameter$1;
 Circle.toRadiusFromApothem = (radius = 1, sides = 32) => Polygon.toRadiusFromApothem(radius, sides);
 
+/**
+ *
+ * # Sphere
+ *
+ * Generates spheres.
+ *
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * Sphere()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [60, 60, 60] } }
+ * ```
+ * Sphere(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere({ radius: 8, resolution: 5 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere({ diameter: 16, resolution: 64 })
+ * ```
+ * :::
+ *
+ **/
+
+const unitSphere = (resolution = 16) => {
+  const shape = Shape.fromGeometry(buildRingSphere(resolution));
+  // Make convex.
+  shape.toGeometry().solid.isConvex = true;
+  return shape;
+};
+
+const ofRadius$2 = (radius = 1, { resolution = 16 } = {}) => unitSphere(resolution).scale(radius);
+const ofApothem$2 = (apothem = 1, { resolution = 16 } = {}) => ofRadius$2(toRadiusFromApothem$1(apothem), { resolution });
+const ofDiameter$2 = (diameter = 1, { resolution = 16 } = {}) => ofRadius$2(diameter / 2, { resolution });
+
+const Sphere = (...args) => ofRadius$2(...args);
+
+Sphere.ofApothem = ofApothem$2;
+Sphere.ofRadius = ofRadius$2;
+Sphere.ofDiameter = ofDiameter$2;
+
+/**
+ *
+ * # Hull
+ *
+ * Builds the convex hull of a set of shapes.
+ *
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * hull(Point([0, 0, 10]),
+ *      Circle(10))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * assemble(Point([0, 0, 10]),
+ *          Circle(10))
+ *   .hull()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * Point([0, 0, 10]).hull(Circle(10))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * hull(Circle(4),
+ *      Circle(2).move(8));
+ * ```
+ * :::
+ *
+ **/
+
+const Z$3 = 2;
+
+const hull = (...shapes) => {
+  const points = [];
+  shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
+  // FIX: Detect planar hulls properly.
+  if (points.every(point => point[Z$3] === 0)) {
+    return Shape.fromGeometry(buildConvexSurfaceHull(points));
+  } else {
+    return Shape.fromGeometry(buildConvexHull(points));
+  }
+};
+
+const method$7 = function (...shapes) { return hull(this, ...shapes); };
+
+Shape.prototype.hull = method$7;
+
+/**
+ *
+ * # Shell
+ *
+ * Converts a solid into a hollow shell of a given thickness.
+ *
+ * ::: illustration
+ * ```
+ * Cube(10).shell(1);
+ * ```
+ * :::
+ *
+ **/
+
+const shell = (shape, radius = 1, resolution = 8) => {
+  resolution = Math.max(resolution, 3);
+  const keptGeometry = shape.toKeptGeometry();
+  const shells = [];
+  for (const { solid, tags = [] } of getSolids(keptGeometry)) {
+    const pieces = [];
+    for (const surface of solid) {
+      for (const polygon of surface) {
+        pieces.push(hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
+      }
+    }
+    shells.push(union(...pieces).as(...tags));
+  }
+  for (const { paths, tags = [] } of outline$1(keptGeometry)) {
+    const pieces = [];
+    for (const path of paths) {
+      for (const segment of toSegments({}, path)) {
+        // FIX: Handle non-z0-surfaces properly.
+        pieces.push(hull(...segment.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+      }
+    }
+    shells.push(union(...pieces).as(...tags));
+  }
+  return union(...shells);
+};
+
+const method$8 = function (radius, resolution) { return shell(this, radius, resolution); };
+Shape.prototype.shell = method$8;
+
+/**
+ *
+ * # expand
+ *
+ * Moves the edges of the shape inward by the specified amount.
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Cube(10).with(Cube(10).moveX(10).expand(2))
+ * ```
+ * :::
+ **/
+
+const expand = (shape, amount = 1, { resolution = 16 }) =>
+  (amount >= 0)
+    ? shape.union(shell(shape, amount, resolution))
+    : shape.cut(shell(shape, -amount, resolution));
+
+const method$9 = function (...args) { return expand(this, ...args); };
+Shape.prototype.expand = method$9;
+
+/**
+ *
+ * # contract
+ *
+ * Moves the edges of the shape inward by the specified amount.
+ *
+ * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
+ * ```
+ * Cube(10).wireframe().with(Cube(10).contract(2))
+ * ```
+ * :::
+ **/
+
+const byRadius = (shape, amount = 1, { resolution = 16 } = {}) => expand(shape, -amount, resolution);
+
+const contract = (...args) => byRadius(...args);
+
+contract.byRadius = byRadius;
+
+const method$a = function (radius, resolution) { return contract(this, radius, resolution); };
+Shape.prototype.contract = method$a;
+
+/**
+ *
+ * # Difference
+ *
+ * Difference produces a version of the first shape with the remaining shapes removed, where applicable.
+ * Different kinds of shapes do not interact. e.g., you cannot subtract a surface from a solid.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * difference(Cube(10).below(),
+ *            Cube(5).below())
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * difference(Circle(10),
+ *            Circle(2.5))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * difference(assemble(Cube().below(),
+ *                     Cube().above()),
+ *            Cube().right())
+ * ```
+ * :::
+ *
+ **/
+
+const difference = (...shapes) => {
+  switch (shapes.length) {
+    case 0: {
+      return fromGeometry({ assembly: [] });
+    }
+    case 1: {
+      // We still want to produce a simple shape.
+      return fromGeometry(toKeptGeometry(shapes[0]));
+    }
+    default: {
+      return fromGeometry(difference$1(...shapes.map(toKeptGeometry)));
+    }
+  }
+};
+
+/**
+ *
+ * # shape.cut(...shapes)
+ *
+ * Produces a version of shape with the regions overlapped by shapes removed.
+ *
+ * shape.cut(...shapes) is equivalent to difference(shape, ...shapes).
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Cube(10).below().cut(Cube(5).below())
+ * ```
+ * :::
+ *
+ **/
+
+const method$b = function (...shapes) { return difference(this, ...shapes); };
+Shape.prototype.cut = method$b;
+
+/**
+ *
+ * # Drop from assembly
+ *
+ * Generates an assembly from components in an assembly without a tag.
+ *
+ * If no tag is supplied, the whole shape is dropped.
+ *
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .drop('A')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .drop('B')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .drop('A', 'B')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Cube(10).below(),
+ *          Cube(8).below().drop())
+ * ```
+ * :::
+ *
+ **/
+
+const drop = (shape, ...tags) => {
+  if (tags.length === 0) {
+    return fromGeometry(rewriteTags(['compose/non-positive'], [], toGeometry(shape)));
+  } else {
+    return fromGeometry(drop$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+  }
+};
+
+const method$c = function (...tags) { return drop(this, ...tags); };
+Shape.prototype.drop = method$c;
+
+const edges = (shape, op = (_ => _)) => {
+  const edgeId = (from, to) => `${JSON.stringify(from)}->${JSON.stringify(to)}`;
+  const edges = new Map();
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    const alignedSolid = alignVertices(solid);
+    for (const surface of alignedSolid) {
+      for (const face of surface) {
+        for (const [lastPoint, nextPoint] of getEdges(face)) {
+          const [a, b] = [lastPoint, nextPoint].sort();
+          edges.set(edgeId(a, b), [a, b]);
+        }
+      }
+    }
+  }
+  return [...edges.values()];
+};
+
+const edgesMethod = function (...args) { return edges(this, ...args); };
+Shape.prototype.edges = edgesMethod;
+
+/**
+ *
+ * # Extrude
+ *
+ * Generates a solid from a surface by linear extrusion.
+ *
+ * ```
+ * shape.extrude(height, depth, { twist = 0, steps = 1 })
+ * ```
+ *
+ * ::: illustration
+ * ```
+ * Circle(10).cut(Circle(8))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * Circle(10).cut(Circle(8)).extrude(10)
+ * ```
+ * :::
+ *
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * Triangle(10).extrude(5, -2)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
+ * ```
+ * :::
+ *
+ **/
+
+const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) => {
+  if (height < depth) {
+    [height, depth] = [depth, height];
+  }
+  const twistRadians = twist * Math.PI / 180;
+  // FIX: Handle extrusion along a vector properly.
+  const solids = [];
+  const keptGeometry = shape.toKeptGeometry();
+  for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
+    if (z0Surface.length > 0) {
+      const solid = extrude$1(z0Surface, height, depth, steps, twistRadians);
+      solids.push(Shape.fromGeometry({ solid, tags }));
+    }
+  }
+  for (const { surface, tags } of getSurfaces(keptGeometry)) {
+    if (surface.length > 0) {
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
+      const z0SolidGeometry = extrude$1(transform$1(toZ0, surface), height, depth, steps, twistRadians);
+      const solid = transform$2(fromZ0, z0SolidGeometry);
+      solids.push(Shape.fromGeometry({ solid, tags }));
+    }
+  }
+  return assemble(...solids);
+};
+
+const extrudeMethod = function (...args) { return extrude(this, ...args); };
+Shape.prototype.extrude = extrudeMethod;
+
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
 
@@ -685,73 +1332,6 @@ const Path = dispatch(
   });
 
 Path.fromPoints = fromPoints;
-
-/**
- *
- * # Assemble
- *
- * Produces an assembly of shapes that can be manipulated as a single shape.
- * assemble(a, b) is equivalent to a.with(b).
- *
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * assemble(Circle(20).moveZ(-12),
- *          Square(40).moveZ(16).outline(),
- *          Cylinder(10, 20));
- * ```
- * :::
- *
- * Components of the assembly can be extracted by tag filtering.
- *
- * Components later in the assembly project holes into components earlier in the
- * assembly so that the geometries are disjoint.
- *
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          Cylinder(10, 40).above().as('cylinder'))
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          Cylinder(10, 40).above().as('cylinder'))
- *   .keep('cube')
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          assemble(Circle(40),
- *                   Circle(50).outline()).as('circles'))
- *   .keep('circles')
- * ```
- * :::
- * ::: illustration { "view": { "position": [100, 100, 100] } }
- * ```
- * assemble(Cube(30).above().as('cube'),
- *          assemble(Circle(40).as('circle'),
- *                   Circle(50).outline().as('outline')))
- *   .drop('outline')
- * ```
- * :::
- *
- **/
-
-const assemble = (...shapes) => {
-  shapes = shapes.filter(shape => shape !== undefined);
-  switch (shapes.length) {
-    case 0: {
-      return Shape.fromGeometry({ assembly: [] });
-    }
-    case 1: {
-      return shapes[0];
-    }
-    default: {
-      return fromGeometry(assemble$1(...shapes.map(toGeometry)));
-    }
-  }
-};
 
 /**
  *
@@ -961,7 +1541,7 @@ const faces = (shape, op = (_ => _)) => {
     const alignedSolid = alignVertices(solid);
     for (const surface of alignedSolid) {
       for (const face of surface) {
-        const plane = toPlane(face);
+        const plane = toPlane$1(face);
         const connectors = [];
         const tags = [];
         tags.push(`face/id:${nextFaceId++}`);
@@ -973,7 +1553,7 @@ const faces = (shape, op = (_ => _)) => {
           const up = add(plane, nextPoint);
           connectors.push(Connector(edgeId,
                                     {
-                                      plane: toPlane([up, nextPoint, lastPoint]),
+                                      plane: toPlane$1([up, nextPoint, lastPoint]),
                                       center,
                                       right,
                                       start: lastPoint,
@@ -1007,6 +1587,111 @@ const faceEdges = (shape) =>
 const faceEdgesMethod = function () { return faceEdges(this); };
 Shape.prototype.faceEdges = faceEdgesMethod;
 
+/**
+ *
+ * # Front
+ *
+ * Moves the shape so that it is just before the origin.
+ *
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * assemble(Cylinder(2, 15).translate([0, 0, 2.5]),
+ *          Cube(10).front())
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Cube(10).front(Sphere(5))
+ * ```
+ * :::
+ **/
+
+const Y$1 = 1;
+
+const fromOrigin = (shape) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  return moveY(shape, -maxPoint[Y$1]);
+};
+
+const fromReference = (shape, reference) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  const [minRefPoint] = measureBoundingBox(reference);
+  return assemble(reference, moveY(shape, minRefPoint[Y$1] - maxPoint[Y$1]));
+};
+
+const front = dispatch(
+  'front',
+  // front(cube())
+  (shape, ...rest) => {
+    assertShape(shape);
+    assertEmpty(rest);
+    return () => fromOrigin(shape);
+  },
+  // front(cube(), sphere())
+  (shape, reference) => {
+    assertShape(shape);
+    assertShape(reference);
+    return () => fromReference(shape, reference);
+  });
+
+const method$d = function (...params) { return front(this, ...params); };
+
+Shape.prototype.front = method$d;
+
+/**
+ *
+ * # Get Pathsets
+ *
+ * Extracts the paths of a geometry grouped by surface.
+ *
+ **/
+
+const getPathsets = (shape) => getPaths(shape.toKeptGeometry()).map(({ paths }) => paths);
+
+const method$e = function () { return getPathsets(this); };
+
+Shape.prototype.getPathsets = method$e;
+
+/**
+ *
+ * # Interior
+ *
+ * Generates a surface from the interior of a simple closed path.
+ *
+ * ::: illustration
+ * ```
+ * Circle(10)
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * Circle(10)
+ *   .outline()
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * Circle(10)
+ *   .outline()
+ *   .interior()
+ * ```
+ * :::
+ *
+ **/
+
+const interior = (options = {}, shape) => {
+  const surfaces = [];
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    // FIX: Check paths for coplanarity.
+    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed)));
+  }
+  return assemble(...surfaces);
+};
+
+const method$f = function (options) { return interior(options, this); };
+
+Shape.prototype.interior = method$f;
+
 const items = (shape, xform = (_ => _)) => {
   const items = [];
   for (const solid of getItems(shape.toKeptGeometry())) {
@@ -1017,6 +1702,610 @@ const items = (shape, xform = (_ => _)) => {
 
 const itemsMethod = function (...args) { return items(this, ...args); };
 Shape.prototype.items = itemsMethod;
+
+/**
+ *
+ * # Keep in assembly
+ *
+ * Generates an assembly from components in an assembly with a tag.
+ *
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .keep('A')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .keep('B')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .keep('A', 'B')
+ * ```
+ * :::
+ *
+ **/
+
+const fromValue = (tags, shape) => fromGeometry(keep$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+
+const keep = dispatch(
+  'keep',
+  (tags, shape) => {
+    assertStrings(tags);
+    assertShape(shape);
+    return () => fromValue(tags, shape);
+  }
+);
+
+keep.fromValues = fromValue;
+
+const method$g = function (...tags) { return keep(tags, this); };
+
+Shape.prototype.keep = method$g;
+
+/**
+ *
+ * # Kept
+ *
+ * Kept produces a geometry without dropped elements.
+ *
+ **/
+
+const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
+
+const method$h = function () { return kept(this); };
+
+Shape.prototype.kept = method$h;
+
+/**
+ *
+ * # MoveX
+ *
+ * Move along the X axis.
+ *
+ */
+
+const moveX = (shape, x) => move(shape, x);
+
+const method$i = function (x) { return moveX(this, x); };
+Shape.prototype.moveX = method$i;
+
+/**
+ *
+ * # Left
+ *
+ * Moves the shape so that it is just to the left of the origin.
+ *
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * assemble(Cube(10).left(),
+ *          Cylinder(2, 15))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Cube(10).left(Sphere(5))
+ * ```
+ * :::
+ **/
+
+const X = 0;
+
+const fromOrigin$1 = (shape) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  return moveX(shape, -maxPoint[X]);
+};
+
+const fromReference$1 = (shape, reference) => {
+  const [, maxPoint] = measureBoundingBox(shape);
+  const [minRefPoint] = measureBoundingBox(reference);
+  return assemble(reference, moveX(shape, minRefPoint[X] - maxPoint[X]));
+};
+
+const left = dispatch(
+  'left',
+  // front(cube())
+  (shape, ...rest) => {
+    assertShape(shape);
+    assertEmpty(rest);
+    return () => fromOrigin$1(shape);
+  },
+  // front(cube(), sphere())
+  (shape, reference) => {
+    assertShape(shape);
+    assertShape(reference);
+    return () => fromReference$1(shape, reference);
+  });
+
+const method$j = function (...params) { return left(this, ...params); };
+
+Shape.prototype.left = method$j;
+
+/**
+ *
+ * # Material
+ *
+ * Produces a version of a shape with a given material.
+ *
+ * Materials supported include 'paper', 'metal', 'glass', etc.
+ *
+ * ::: illustration
+ * ```
+ * Cylinder(5, 10).material('copper')
+ * ```
+ * :::
+ *
+ **/
+
+const material = (shape, ...tags) =>
+  Shape.fromGeometry(rewriteTags(tags.map(tag => `material/${tag}`), [], shape.toGeometry()));
+
+const materialMethod = function (...tags) { return material(this, ...tags); };
+Shape.prototype.material = materialMethod;
+
+/**
+ *
+ * # Measure Center
+ *
+ * Provides the center of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ **/
+
+const measureCenter = (shape) => {
+  // FIX: Produce a clearer definition of center.
+  const geometry = shape.toKeptGeometry();
+  if (geometry.plan && geometry.plan.connector) {
+    // Return the center of the connector.
+    return geometry.marks[0];
+  }
+  const [high, low] = measureBoundingBox(shape);
+  return scale$1(0.5, add(high, low));
+};
+
+const method$k = function () { return measureCenter(this); };
+
+Shape.prototype.measureCenter = method$k;
+
+/**
+ *
+ * # Mark an object as not to cut holes.
+ *
+ **/
+
+const fromValue$1 = (tags, shape) => fromGeometry(nonNegative(tags, toGeometry(shape)));
+
+const nocut = dispatch(
+  'nocut',
+  (tags, shape) => {
+    // assemble(circle(), circle().nocut())
+    assertEmpty(tags);
+    assertShape(shape);
+    return () => fromGeometry(rewriteTags(['compose/non-negative'], [], toGeometry(shape)));
+  },
+  (tags, shape) => {
+    assertStrings(tags);
+    assertShape(shape);
+    return () => fromValue$1(tags.map(tag => `user/${tag}`), shape);
+  }
+);
+
+nocut.fromValues = fromValue$1;
+
+const method$l = function (...tags) { return nocut(tags, this); };
+
+Shape.prototype.nocut = method$l;
+
+/**
+ *
+ * # Outline
+ *
+ * Generates the outline of a surface.
+ *
+ * ::: illustration
+ * ```
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * difference(Circle(10),
+ *            Circle(2).move([-4]),
+ *            Circle(2).move([4]))
+ *   .outline()
+ * ```
+ * :::
+ *
+ **/
+
+const outline = (shape) =>
+  assemble(...outline$1(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
+
+const method$m = function (options) { return outline(this); };
+
+Shape.prototype.outline = method$m;
+Shape.prototype.withOutline = function (options) { return assemble(this, outline(this)); };
+
+const offset = (shape, radius = 1, resolution = 16) => outline(expand(shape, radius, resolution));
+
+const method$n = function (radius, resolution) { return offset(this, radius, resolution); };
+Shape.prototype.offset = method$n;
+
+/**
+ *
+ * # Orient
+ *
+ * Orients a shape so that it moves from 'center' to 'from' and faces toward 'at', rather than 'facing'.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10).orient({ from: [3, 3, 3], at: [1, 1, 1] });
+ * ```
+ * :::
+ **/
+
+const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }, shape) => {
+  const normalizedFacing = normalize(facing);
+  const normalizedAt = normalize(subtract(at, from));
+
+  const angle = Math.acos(dot(normalizedFacing, normalizedAt)) * 180 / Math.PI;
+  const axis = normalize(cross(normalizedFacing, normalizedAt));
+
+  return shape
+      .move(negate(center))
+      .rotate(angle, axis)
+      .move(from);
+};
+
+const method$o = function (options = {}) { return orient(options, this); };
+
+Shape.prototype.orient = method$o;
+
+/**
+ *
+ * # Right
+ *
+ * Moves the shape so that it is just to the right of the origin.
+ *
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * assemble(Cube(10).right(),
+ *          Cylinder(2, 15))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Cube(10).right(Sphere(5))
+ * ```
+ * :::
+ **/
+
+const X$1 = 0;
+
+const fromOrigin$2 = (shape) => {
+  const [minPoint] = measureBoundingBox(shape);
+  return moveX(shape, -minPoint[X$1]);
+};
+
+const fromReference$2 = (shape, reference) => {
+  const [minPoint] = measureBoundingBox(shape);
+  const [, maxRefPoint] = measureBoundingBox(reference);
+  return assemble(reference, moveX(shape, maxRefPoint[X$1] - minPoint[X$1]));
+};
+
+const right = dispatch(
+  'right',
+  // right(Cube())
+  (shape, ...rest) => {
+    assertShape(shape);
+    assertEmpty(rest);
+    return () => fromOrigin$2(shape);
+  },
+  // right(Cube(), Sphere())
+  (shape, reference) => {
+    assertShape(shape);
+    assertShape(reference);
+    return () => fromReference$2(shape, reference);
+  });
+
+const method$p = function (...params) { return right(this, ...params); };
+
+Shape.prototype.right = method$p;
+
+/**
+ *
+ * # Rotate
+ *
+ * ```
+ * rotate(shape, axis, angle)
+ * shape.rotate(axis, angle)
+ * ```
+ *
+ * Rotates the shape around the provided axis.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10).rotate([1, 1, 1], 90)
+ * ```
+ * :::
+ **/
+
+const rotate = (shape, axis, angle) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
+
+const method$q = function (angle, axis) { return rotate(this, axis, angle); };
+
+Shape.prototype.rotate = method$q;
+
+/**
+ *
+ * # Rotate X
+ *
+ * Rotates the shape around the X axis.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10).rotateX(90)
+ * ```
+ * :::
+ **/
+
+const rotateX = (shape, angle) => shape.transform(fromXRotation(angle * 0.017453292519943295));
+
+const method$r = function (angle) { return rotateX(this, angle); };
+
+Shape.prototype.rotateX = method$r;
+
+/**
+ *
+ * # Rotate Y
+ *
+ * Rotates the shape around the Y axis.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10).rotateY(90)
+ * ```
+ * :::
+ **/
+
+const rotateY = (shape, angle) => shape.transform(fromYRotation(angle * 0.017453292519943295));
+
+const method$s = function (angle) { return rotateY(this, angle); };
+
+Shape.prototype.rotateY = method$s;
+
+/**
+ *
+ * # Rotate Z
+ *
+ * Rotates the shape around the Z axis.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10).rotateZ(45)
+ * ```
+ * :::
+ **/
+
+const rotateZ = (shape, angle) => shape.transform(fromZRotation(angle * 0.017453292519943295));
+
+const method$t = function (angle) { return rotateZ(this, angle); };
+
+Shape.prototype.rotateZ = method$t;
+
+/**
+ *
+ * # Scale
+ *
+ * Scales an object uniformly or per axis.
+ *
+ * ::: illustration { "view": { "position": [10, 10, 10] } }
+ * ```
+ * Cube()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [10, 10, 10] } }
+ * ```
+ * Cube().scale(2)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [10, 10, 10] } }
+ * ```
+ * Cube().scale([1, 2, 3])
+ * ```
+ * :::
+ **/
+
+const scale = (factor, shape) => {
+  if (factor.length) {
+    const [x = 1, y = 1, z = 1] = factor;
+    return shape.transform(fromScaling([x, y, z]));
+  } else {
+    return shape.transform(fromScaling([factor, factor, factor]));
+  }
+};
+
+const method$u = function (factor) { return scale(factor, this); };
+
+Shape.prototype.scale = method$u;
+
+/**
+ *
+ * # Section
+ *
+ * Produces a cross-section of a solid as a surface.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 60] } }
+ * ```
+ * difference(Cylinder(10, 10),
+ *            Cylinder(8, 10))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * difference(Sphere(10),
+ *            Sphere(8))
+ *   .section()
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * difference(Sphere(10),
+ *            Sphere(8))
+ *   .section()
+ *   .outline()
+ * ```
+ * :::
+ *
+ **/
+
+const section = (solidShape, surfaceShape = Z$2(0)) => {
+  const sections = [];
+  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
+    const anySurface = surface || z0Surface;
+    const shapes = [];
+    const plane = toPlane(anySurface);
+    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+      const surface = retessellate(section$1(solid, anySurface));
+      surface.plane = plane;
+      shapes.push(Shape.fromGeometry({ surface }));
+    }
+    sections.push(union(...shapes));
+  }
+  return assemble(...sections);
+};
+
+const method$v = function (surface) { return section(this, surface); };
+
+Shape.prototype.section = method$v;
+
+const solids = (shape, xform = (_ => _)) => {
+  const solids = [];
+  for (const solid of getSolids(shape.toKeptGeometry())) {
+    solids.push(xform(Shape.fromGeometry(solid)));
+  }
+  return solids;
+};
+
+const solidsMethod = function (...args) { return solids(this, ...args); };
+Shape.prototype.solids = solidsMethod;
+
+/**
+ *
+ * # Chain Hull
+ *
+ * Builds a convex hull between adjacent pairs in a sequence of shapes.
+ *
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * chainHull(Cube(3).move(-5, 5),
+ *           Sphere(3).move(5, -5),
+ *           Cylinder(3, 10).move(-10, -10))
+ *   .move(10, 10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [80, 80, 0] } }
+ * ```
+ * chainHull(Circle(20).moveZ(-10),
+ *           Circle(10),
+ *           Circle(20).moveZ(10))
+ * ```
+ * :::
+ *
+ **/
+
+const Z$4 = 2;
+
+const chainHull = (...shapes) => {
+  const pointsets = shapes.map(shape => shape.toPoints());
+  const chain = [];
+  for (let nth = 1; nth < pointsets.length; nth++) {
+    const points = [...pointsets[nth - 1], ...pointsets[nth]];
+    if (points.every(point => point[Z$4] === 0)) {
+      chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
+    } else {
+      chain.push(Shape.fromGeometry(buildConvexHull(points)));
+    }
+  }
+  return union(...chain);
+};
+
+/**
+ *
+ * # Sweep
+ *
+ * Sweep a tool profile along a path, to produce a surface.
+ *
+ **/
+
+// FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
+const sweep = (toolpath, tool) => {
+  const chains = [];
+  for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
+    for (const path of paths) {
+      chains.push(chainHull(...path.map(point => tool.move(...point))));
+    }
+  }
+  return union(...chains);
+};
+
+const method$w = function (tool) { return sweep(this, tool); };
+
+Shape.prototype.sweep = method$w;
+Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, tool)); };
+
+const tags = (shape) =>
+  [...allTags(shape.toGeometry())]
+      .filter(tag => tag.startsWith('user/'))
+      .map(tag => tag.substring(5));
+
+const method$x = function () { return tags(this); };
+
+Shape.prototype.tags = method$x;
 
 /**
  *
@@ -1122,6 +2411,102 @@ const rejoin = (shape, connectionShape, aJoin, bJoin) => {
 const toMethod = function (...args) { return connect(this, ...args); };
 Shape.prototype.to = toMethod;
 
+const toBillOfMaterial = (shape) => {
+  const specifications = [];
+  for (const { tags } of getItems(shape.toKeptGeometry())) {
+    for (const tag of tags) {
+      if (tag.startsWith('item/')) {
+        const specification = tag.substring(5);
+        specifications.push(specification);
+      }
+    }
+  }
+  return specifications;
+};
+
+const method$y = function (options = {}) { return toBillOfMaterial(this); };
+
+Shape.prototype.toBillOfMaterial = method$y;
+
+// DEPRECATED: See 'Shape.items'
+const toItems = (shape) => getItems(shape.toKeptGeometry()).map(fromGeometry);
+
+const method$z = function (options = {}) { return toItems(this); };
+
+Shape.prototype.toItems = method$z;
+
+// Return an assembly of paths so that each toolpath can have its own tag.
+const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
+  Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
+
+const method$A = function (...options) { return toolpath(this, ...options); };
+
+Shape.prototype.toolpath = method$A;
+Shape.prototype.withToolpath = function (...args) { return assemble(this, toolpath(this, ...args)); };
+
+/**
+ *
+ * # Turn
+ *
+ * ```
+ * turn(shape, axis, angle)
+ * shape.turn(axis, angle)
+ * ```
+ *
+ * Rotates the shape around its own axis.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Square(10).turn([1, 1, 1], 90)
+ * ```
+ * :::
+ **/
+
+const turn = (shape, axis, angle) => {
+  const center = shape.measureCenter();
+  return shape.move(...negate(center))
+      .rotate(axis, angle)
+      .move(...center);
+};
+
+const turnMethod = function (angle, axis) { return turn(this, axis, angle); };
+Shape.prototype.turn = turnMethod;
+
+const turnX = (shape, angle) => {
+  const center = shape.measureCenter();
+  return shape.move(...negate(center))
+      .rotateX(angle)
+      .move(...center);
+};
+
+const turnXMethod = function (angle) { return turnX(this, angle); };
+Shape.prototype.turnX = turnXMethod;
+
+const turnY = (shape, angle) => {
+  const center = shape.measureCenter();
+  return shape.move(...negate(center))
+      .rotateY(angle)
+      .move(...center);
+};
+
+const turnYMethod = function (angle) { return turnY(this, angle); };
+Shape.prototype.turnY = turnYMethod;
+
+const turnZ = (shape, angle) => {
+  const center = shape.measureCenter();
+  return shape.move(...negate(center))
+      .rotateZ(angle)
+      .move(...center);
+};
+
+const turnZMethod = function (angle) { return turnZ(this, angle); };
+Shape.prototype.turnZ = turnZMethod;
+
 /**
  *
  * # Log
@@ -1201,8 +2586,8 @@ const unfold = (shape) => {
   return root;
 };
 
-const method$3 = function (...args) { return unfold(this); };
-Shape.prototype.unfold = method$3;
+const method$B = function (...args) { return unfold(this); };
+Shape.prototype.unfold = method$B;
 
 /**
  *
@@ -1223,8 +2608,319 @@ Shape.prototype.unfold = method$3;
  *
  **/
 
-const method$4 = function (...shapes) { return assemble(this, ...shapes); };
-Shape.prototype.with = method$4;
+const method$C = function (...shapes) { return assemble(this, ...shapes); };
+Shape.prototype.with = method$C;
+
+const X$2 = 0;
+const Y$2 = 1;
+const Z$5 = 2;
+
+const voxels = ({ resolution = 1 }, shape) => {
+  const offset = resolution / 2;
+  const voxels = [];
+  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+    const [min, max] = measureBoundingBox$2(solid);
+    const bsp = fromSolid(solid);
+    const polygons = [];
+    for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
+      for (let y = min[Y$2] - offset; y <= max[Y$2] + offset; y += resolution) {
+        for (let z = min[Z$5] - offset; z <= max[Z$5] + offset; z += resolution) {
+          const state = containsPoint(bsp, [x, y, z]);
+          if (state !== containsPoint(bsp, [x + resolution, y, z])) {
+            const face = [[x + offset, y - offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x + offset, y - offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
+          }
+          if (state !== containsPoint(bsp, [x, y + resolution, z])) {
+            const face = [[x - offset, y + offset, z - offset],
+                          [x + offset, y + offset, z - offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face.reverse() : face);
+          }
+          if (state !== containsPoint(bsp, [x, y, z + resolution])) {
+            const face = [[x - offset, y - offset, z + offset],
+                          [x + offset, y - offset, z + offset],
+                          [x + offset, y + offset, z + offset],
+                          [x - offset, y + offset, z + offset]];
+            polygons.push(state ? face : face.reverse());
+          }
+        }
+      }
+    }
+    voxels.push(Shape.fromGeometry({ solid: fromPolygons({}, polygons), tags }));
+  }
+  return assemble(...voxels);
+};
+
+const method$D = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
+
+Shape.prototype.voxels = method$D;
+
+const toWireframeFromSolid = (solid) => {
+  const paths = [];
+  for (const surface of solid) {
+    paths.push(...surface);
+  }
+  return Shape.fromPaths(paths);
+};
+
+const toWireframeFromSurface = (surface) => {
+  return Shape.fromPaths(surface);
+};
+
+/**
+ *
+ * # Wireframe
+ *
+ * Generates a set of paths outlining a solid.
+ *
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Cube(10).wireframe()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Sphere(10).wireframe()
+ * ```
+ * :::
+ *
+ **/
+
+const wireframe = (options = {}, shape) => {
+  const pieces = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSolid(solid));
+  }
+  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(surface));
+  }
+  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(z0Surface));
+  }
+  return assemble(...pieces);
+};
+
+const method$E = function (options) { return wireframe(options, this); };
+
+Shape.prototype.wireframe = method$E;
+Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
+
+/**
+ *
+ * # Write DXF
+ *
+ * ```
+ * Cube().section().writeDxf('cube.dxf');
+ * ```
+ *
+ **/
+
+const writeDxf = async (options, shape) => {
+  if (typeof options === 'string') {
+    // Support writeDxf('foo', bar);
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  const dxf = await toDxf({ preview: true, ...options }, geometry);
+  await writeFile({}, `output/${path}`, dxf);
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$F = function (options = {}) { return writeDxf(options, this); };
+
+Shape.prototype.writeDxf = method$F;
+
+/**
+ *
+ * # Write G-Code
+ *
+ * ```
+ * Square().toolpath(0.5).writeGcode('cube.pdf');
+ * ```
+ *
+ **/
+
+const writeGcode = async (options, shape) => {
+  if (typeof options === 'string') {
+    // Support writeGcode('foo', bar);
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  const gcode = await toGcode({ preview: true, ...options }, geometry);
+  await writeFile({}, `output/${path}`, gcode);
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$G = function (options = {}) { return writeGcode(options, this); };
+
+Shape.prototype.writeGcode = method$G;
+
+/**
+ *
+ * # Write PDF
+ *
+ * ```
+ * Cube().section().writePdf('cube.pdf');
+ * ```
+ *
+ **/
+
+const writePdf = async (options, shape) => {
+  if (typeof options === 'string') {
+    // Support writePdf('foo', bar);
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  const pdf = await toPdf({ preview: true, ...options }, geometry);
+  await writeFile({}, `output/${path}`, pdf);
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$H = function (options = {}) { return writePdf(options, this); };
+
+Shape.prototype.writePdf = method$H;
+
+/**
+ *
+ * # Write Shape Geometry
+ *
+ * This writes a shape as a tagged geometry in json format.
+ *
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * await Cube().writeShape('cube.shape');
+ * await readShape({ path: 'cube.shape' })
+ * ```
+ * :::
+ *
+ **/
+
+const cacheShape = async (options, shape) => {
+  const { path } = options;
+  const geometry = shape.toGeometry();
+  await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+};
+
+const writeShape = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toGeometry();
+  await writeFile({}, `output/${path}`, JSON.stringify(geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$I = function (options = {}) { return writeShape(options, this); };
+
+Shape.prototype.writeShape = method$I;
+
+/**
+ *
+ * # Write STL
+ *
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * await Cube().writeStl('cube.stl');
+ * await readStl({ path: 'cube.stl' });
+ * ```
+ * :::
+ *
+ **/
+
+const writeStl = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  await writeFile({}, `output/${path}`, toStl(options, geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$J = function (options = {}) { return writeStl(options, this); };
+
+Shape.prototype.writeStl = method$J;
+
+/**
+ *
+ * # Write SVG
+ *
+ * ::: illustration
+ * ```
+ * await Cube().section().writeSvg('svg/cube1.svg');
+ * await readSvg({ path: 'svg/cube1.svg' })
+ * ```
+ * :::
+ *
+ **/
+
+const writeSvg = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  await writeFile({}, `output/${path}`, toSvg(options, geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$K = function (options = {}) { return writeSvg(options, this); };
+
+Shape.prototype.writeSvg = method$K;
+
+/**
+ *
+ * # Write SVG Photo
+ *
+ * This takes a scene and a camera position and generates a two-dimensional SVG representation
+ * as a svg tag.
+ *
+ * Note: Illustrations broken due to scaling issue affecting readSvg.
+ *
+ * ::: illustration { "view": { "position": [0, -1, 2500] } }
+ * ```
+ * await Cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
+ * await readSvg({ path: 'svg/cube3.svg' })
+ * ```
+ * :::
+ *
+ **/
+
+const writeSvgPhoto = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  await writeFile({}, `output/${path}`, toSvg$1(options, geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$L = function (options = {}) { return writeSvgPhoto(options, this); };
+
+Shape.prototype.writeSvgPhoto = method$L;
+
+const writeThreejsPage = async (options, shape) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  const geometry = shape.toKeptGeometry();
+  await writeFile({}, `output/${path}`, toThreejsPage(options, geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const method$M = function (options = {}) { return writeThreejsPage(options, this); };
+
+Shape.prototype.writeThreejsPage = method$M;
 
 /**
  *
@@ -1287,8 +2983,8 @@ const buildPrism = (radius = 1, height = 1, sides = 32) =>
  *
  **/
 
-const ofRadius$2 = (radius = 1, height = 1, { sides = 3 } = {}) => buildPrism(radius, height, sides);
-const ofDiameter$2 = (diameter = 1, ...args) => ofRadius$2(diameter / 2, ...args);
+const ofRadius$3 = (radius = 1, height = 1, { sides = 3 } = {}) => buildPrism(radius, height, sides);
+const ofDiameter$3 = (diameter = 1, ...args) => ofRadius$3(diameter / 2, ...args);
 
 const toPathFromSurface = (shape) => {
   for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
@@ -1306,10 +3002,10 @@ const ofFunction = (op, { resolution, cap = true, context } = {}) =>
 const ofSlices = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(buildFromSlices(t => toPathFromSurface(op(t)), slices, cap));
 
-const Prism = (...args) => ofRadius$2(...args);
+const Prism = (...args) => ofRadius$3(...args);
 
-Prism.ofRadius = ofRadius$2;
-Prism.ofDiameter = ofDiameter$2;
+Prism.ofRadius = ofRadius$3;
+Prism.ofDiameter = ofDiameter$3;
 Prism.ofFunction = ofFunction;
 Prism.ofSlices = ofSlices;
 
@@ -1341,19 +3037,19 @@ const ease = (start = 0.00, end = 1.00, op = t => 1) => {
 const linear = (start, end) => t => start + t * (end - start);
 ease.linear = linear;
 
-const ofRadius$3 = (radius = 1, height = 1, { sides = 32 } = {}) => {
+const ofRadius$4 = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(0, radius);
   return Prism.ofSlices(t => Circle(fn(t) * radius, { sides }).moveZ(t * height));
 };
 
-const ofDiameter$3 = (diameter, ...args) => ofRadius$3(diameter / 2, ...args);
-const ofApothem$2 = (apothem, ...args) => ofRadius$3(toRadiusFromApothem$1(apothem), ...args);
+const ofDiameter$4 = (diameter, ...args) => ofRadius$4(diameter / 2, ...args);
+const ofApothem$3 = (apothem, ...args) => ofRadius$4(toRadiusFromApothem$1(apothem), ...args);
 
-const Cone = (...args) => ofRadius$3(...args);
+const Cone = (...args) => ofRadius$4(...args);
 
-Cone.ofRadius = ofRadius$3;
-Cone.ofDiameter = ofDiameter$3;
-Cone.ofApothem = ofApothem$2;
+Cone.ofRadius = ofRadius$4;
+Cone.ofDiameter = ofDiameter$4;
+Cone.ofApothem = ofApothem$3;
 
 /**
  *
@@ -1414,13 +3110,13 @@ const ofSize$1 = (width = 1, length, height) =>
                     length === undefined ? width : length,
                     height === undefined ? width : height]);
 
-const ofRadius$4 = (radius) => Shape.fromGeometry(buildRegularPrism(4))
+const ofRadius$5 = (radius) => Shape.fromGeometry(buildRegularPrism(4))
     .rotateZ(45)
     .scale([radius, radius, radius / edgeScale]);
 
-const ofApothem$3 = (apothem) => ofRadius$4(toRadiusFromApothem$1(apothem, 4));
+const ofApothem$4 = (apothem) => ofRadius$5(toRadiusFromApothem$1(apothem, 4));
 
-const ofDiameter$4 = (diameter) => ofRadius$4(diameter / 2);
+const ofDiameter$5 = (diameter) => ofRadius$5(diameter / 2);
 
 const fromCorners = (corner1, corner2) => {
   const [c1x, c1y, c1z] = corner1;
@@ -1435,9 +3131,9 @@ const fromCorners = (corner1, corner2) => {
 const Cube = (...args) => ofSize$1(...args);
 
 Cube.ofSize = ofSize$1;
-Cube.ofRadius = ofRadius$4;
-Cube.ofApothem = ofApothem$3;
-Cube.ofDiameter = ofDiameter$4;
+Cube.ofRadius = ofRadius$5;
+Cube.ofApothem = ofApothem$4;
+Cube.ofDiameter = ofDiameter$5;
 Cube.fromCorners = fromCorners;
 
 // Normalize (1, 2, 3) and ([1, 2, 3]).
@@ -1528,7 +3224,7 @@ class Cursor {
   translate (...params) {
     const [x, y, z] = normalizeVector(params);
     const path = this.path.slice();
-    path.push(add(this.toPoint(), transform$1(this.matrix, [x, y, z])));
+    path.push(add(this.toPoint(), transform$3(this.matrix, [x, y, z])));
     return new Cursor({ matrix: this.matrix, path });
   }
 
@@ -1549,8 +3245,8 @@ class Cursor {
   }
 }
 
-const fromOrigin = () => new Cursor();
-Cursor.fromOrigin = fromOrigin;
+const fromOrigin$3 = () => new Cursor();
+Cursor.fromOrigin = fromOrigin$3;
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
@@ -1589,10 +3285,10 @@ const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
  *
  **/
 
-const ofRadius$5 = (radius = 1, height = 1, { sides = 32 } = {}) => buildPrism$1(radius, height, sides);
+const ofRadius$6 = (radius = 1, height = 1, { sides = 32 } = {}) => buildPrism$1(radius, height, sides);
 
-const ofApothem$4 = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius$5(toRadiusFromApothem$1(apothem, sides), { sides });
-const ofDiameter$5 = (diameter = 1, ...args) => ofRadius$5(diameter / 2, ...args);
+const ofApothem$5 = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius$6(toRadiusFromApothem$1(apothem, sides), { sides });
+const ofDiameter$6 = (diameter = 1, ...args) => ofRadius$6(diameter / 2, ...args);
 
 const toPathFromShape = (shape) => {
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
@@ -1609,11 +3305,11 @@ const ofFunction$1 = (op, { resolution, cap = true, context } = {}) =>
 const ofSlices$1 = (op, { slices = 2, cap = true } = {}) =>
   Shape.fromGeometry(buildFromSlices(slice => toPathFromShape(op(slice)), slices, cap));
 
-const Cylinder = (...args) => ofRadius$5(...args);
+const Cylinder = (...args) => ofRadius$6(...args);
 
-Cylinder.ofRadius = ofRadius$5;
-Cylinder.ofApothem = ofApothem$4;
-Cylinder.ofDiameter = ofDiameter$5;
+Cylinder.ofRadius = ofRadius$6;
+Cylinder.ofApothem = ofApothem$5;
+Cylinder.ofDiameter = ofDiameter$6;
 Cylinder.ofFunction = ofFunction$1;
 Cylinder.ofSlices = ofSlices$1;
 
@@ -1836,17 +3532,17 @@ const Gear = {
  **/
 
 const ofEdge$2 = (edge) => Polygon.ofEdge(edge, 6);
-const ofApothem$5 = (apothem) => Polygon.ofApothem(apothem, 6);
-const ofRadius$6 = (radius) => Polygon.ofRadius(radius, 6);
-const ofDiameter$6 = (diameter) => Polygon.ofDiameter(diameter, 6);
+const ofApothem$6 = (apothem) => Polygon.ofApothem(apothem, 6);
+const ofRadius$7 = (radius) => Polygon.ofRadius(radius, 6);
+const ofDiameter$7 = (diameter) => Polygon.ofDiameter(diameter, 6);
 
-const Hexagon = (...args) => ofRadius$6(...args);
+const Hexagon = (...args) => ofRadius$7(...args);
 
-Hexagon.ofRadius = ofRadius$6;
+Hexagon.ofRadius = ofRadius$7;
 Hexagon.ofEdge = ofEdge$2;
-Hexagon.ofApothem = ofApothem$5;
-Hexagon.ofRadius = ofRadius$6;
-Hexagon.ofDiameter = ofDiameter$6;
+Hexagon.ofApothem = ofApothem$6;
+Hexagon.ofRadius = ofRadius$7;
+Hexagon.ofDiameter = ofDiameter$7;
 
 /**
  *
@@ -1879,7 +3575,7 @@ Hexagon.ofDiameter = ofDiameter$6;
 
 const unitIcosahedron = () => Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
 
-const fromValue = (value) => unitIcosahedron().scale(value);
+const fromValue$2 = (value) => unitIcosahedron().scale(value);
 
 const fromRadius = ({ radius }) => unitIcosahedron().scale(radius);
 
@@ -1890,12 +3586,12 @@ const Icosahedron = dispatch(
   // Icosahedron()
   (...rest) => {
     assertEmpty(rest);
-    return () => fromValue(1);
+    return () => fromValue$2(1);
   },
   // Icosahedron(2)
   (value) => {
     assertNumber(value);
-    return () => fromValue(value);
+    return () => fromValue$2(value);
   },
   // Icosahedron({ radius: 2 })
   ({ radius }) => {
@@ -1908,7 +3604,7 @@ const Icosahedron = dispatch(
     return () => fromDiameter({ diameter });
   });
 
-Icosahedron.fromValue = fromValue;
+Icosahedron.fromValue = fromValue$2;
 Icosahedron.fromRadius = fromRadius;
 Icosahedron.fromDiameter = fromDiameter;
 
@@ -1922,8 +3618,8 @@ Icosahedron.fromDiameter = fromDiameter;
 
 const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: toGeometry(shape) }));
 
-const method$5 = function (id) { return Item(this, id); };
-Shape.prototype.toItem = method$5;
+const method$N = function (id) { return Item(this, id); };
+Shape.prototype.toItem = method$N;
 
 /**
  *
@@ -2136,10 +3832,10 @@ const intersection = dispatch(
     return () => intersectionOfShapes(...shapes);
   });
 
-const method$6 = function (...shapes) { return intersection(this, ...shapes); };
+const method$O = function (...shapes) { return intersection(this, ...shapes); };
 
-Shape.prototype.clip = method$6;
-Shape.prototype.intersection = method$6;
+Shape.prototype.clip = method$O;
+Shape.prototype.intersection = method$O;
 
 /**
  *
@@ -2197,7 +3893,7 @@ const Nail = dispatch(
         .move(0, 0, height / -2);
   });
 
-const fromValue$1 = (point) => Shape.fromPoint(point);
+const fromValue$3 = (point) => Shape.fromPoint(point);
 
 /**
  *
@@ -2258,17 +3954,17 @@ const Point = dispatch(
     assertNumber(y);
     assertNumber(z);
     assertEmpty(rest);
-    return () => fromValue$1([x, y, z]);
+    return () => fromValue$3([x, y, z]);
   },
   // Point([1, 2, 3])
   ([x = 0, y = 0, z = 0]) => {
     assertNumber(x);
     assertNumber(y);
     assertNumber(z);
-    return () => fromValue$1([x, y, z]);
+    return () => fromValue$3([x, y, z]);
   });
 
-Point.fromValue = fromValue$1;
+Point.fromValue = fromValue$3;
 
 const fromPoints$1 = (points) => Shape.fromPoints(points);
 
@@ -2346,52 +4042,6 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 /**
  *
- * # Sphere
- *
- * Generates spheres.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * Sphere()
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, 60, 60] } }
- * ```
- * Sphere(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere({ radius: 8, resolution: 5 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere({ diameter: 16, resolution: 64 })
- * ```
- * :::
- *
- **/
-
-const unitSphere = (resolution = 16) => {
-  const shape = Shape.fromGeometry(buildRingSphere(resolution));
-  // Make convex.
-  shape.toGeometry().solid.isConvex = true;
-  return shape;
-};
-
-const ofRadius$7 = (radius = 1, { resolution = 16 } = {}) => unitSphere(resolution).scale(radius);
-const ofApothem$6 = (apothem = 1, { resolution = 16 } = {}) => ofRadius$7(toRadiusFromApothem$1(apothem), { resolution });
-const ofDiameter$7 = (diameter = 1, { resolution = 16 } = {}) => ofRadius$7(diameter / 2, { resolution });
-
-const Sphere = (...args) => ofRadius$7(...args);
-
-Sphere.ofApothem = ofApothem$6;
-Sphere.ofRadius = ofRadius$7;
-Sphere.ofDiameter = ofDiameter$7;
-
-/**
- *
  * # Numbers
  *
  * ```
@@ -2459,7 +4109,7 @@ const Spiral = ({ from = 0, to = 360, by = 1 } = {}, toRadiusFromAngle = (angle)
   const path = [null];
   for (const angle of numbers({ from, to, by })) {
     const radius = toRadiusFromAngle(angle);
-    path.push(transform$1(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
+    path.push(transform$3(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
   }
   return Shape.fromPath(path);
 };
@@ -2629,7 +4279,7 @@ const SvgPath = (options = {}, svgPath) =>
 
 const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
 
-const fromValue$2 = (value) => unitTetrahedron().scale(value);
+const fromValue$4 = (value) => unitTetrahedron().scale(value);
 
 const fromRadius$1 = ({ radius }) => unitTetrahedron().scale(radius);
 
@@ -2640,12 +4290,12 @@ const Tetrahedron = dispatch(
   // Tetrahedron()
   (...rest) => {
     assertEmpty(rest);
-    return () => fromValue$2(1);
+    return () => fromValue$4(1);
   },
   // Tetrahedron(2)
   (value) => {
     assertNumber(value);
-    return () => fromValue$2(value);
+    return () => fromValue$4(value);
   },
   // Tetrahedron({ radius: 2 })
   ({ radius }) => {
@@ -2658,7 +4308,7 @@ const Tetrahedron = dispatch(
     return () => fromDiameter$1({ diameter });
   });
 
-Tetrahedron.fromValue = fromValue$2;
+Tetrahedron.fromValue = fromValue$4;
 Tetrahedron.fromRadius = fromRadius$1;
 Tetrahedron.fromDiameter = fromDiameter$1;
 
@@ -2720,7 +4370,7 @@ Triangle.ofDiameter = ofDiameter$9;
 // Unfortunately this makes things like interpolation tricky,
 // so we approximate it with a very large polygon instead.
 
-const Y = (y = 0) => {
+const Y$3 = (y = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
@@ -2739,7 +4389,7 @@ const Y = (y = 0) => {
  **/
 
 const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
-  const profile = shape.chop(Y(0));
+  const profile = shape.chop(Y$3(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
@@ -2750,8 +4400,8 @@ const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
   return assemble(...solids);
 };
 
-const method$7 = function (...args) { return lathe(this, ...args); };
-Shape.prototype.lathe = method$7;
+const method$P = function (...args) { return lathe(this, ...args); };
+Shape.prototype.lathe = method$P;
 
 /**
  *
@@ -2862,137 +4512,12 @@ const Wave = ({ from = 0, to = 360, by = 1 } = {}, toYDistanceFromXDistance = (x
 // Unfortunately this makes things like interpolation tricky,
 // so we approximate it with a very large polygon instead.
 
-const X = (x = 0) => {
+const X$3 = (x = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
   return Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
 };
-
-// Ideally this would be a plane of infinite extent.
-// Unfortunately this makes things like interpolation tricky,
-// so we approximate it with a very large polygon instead.
-
-const Z = (z = 0) => {
-  const size = 1e5;
-  const min = -size;
-  const max = size;
-  return Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
-};
-
-/**
- *
- * # Measure Bounding Box
- *
- * Provides the corners of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * const [corner1, corner2] = Sphere(7).measureBoundingBox();
- * Cube.fromCorners(corner1, corner2)
- * ```
- * :::
- **/
-
-const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
-
-const method$8 = function () { return measureBoundingBox(this); };
-Shape.prototype.measureBoundingBox = method$8;
-
-/**
- *
- * # Translate
- *
- * Translation moves a shape.
- *
- * ::: illustration { "view": { "position": [10, 0, 10] } }
- * ```
- * assemble(Circle(),
- *          Sphere().above())
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 0, 10] } }
- * ```
- * assemble(Circle(),
- *          Sphere().above()
- *                  .translate(0, 0, 1))
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 0, 10] } }
- * ```
- * assemble(Circle(),
- *          Sphere().above()
- *                  .translate(0, 1, 0))
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 0, 10] } }
- * ```
- * assemble(Circle(),
- *          Sphere().above()
- *                  .translate([-1, -1, 1]))
- * ```
- * :::
- *
- **/
-
-const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
-
-const method$9 = function (...args) { return translate(this, ...args); };
-Shape.prototype.translate = method$9;
-
-/**
- *
- * # Move
- *
- * A shorter way to write translate.
- *
- */
-
-const move = translate;
-
-const method$a = function (...params) { return translate(this, ...params); };
-Shape.prototype.move = method$a;
-
-/**
- *
- * # MoveZ
- *
- * Move along the Z axis.
- *
- */
-
-const moveZ = (shape, z) => move(shape, 0, 0, z);
-
-const method$b = function (z) { return moveZ(this, z); };
-Shape.prototype.moveZ = method$b;
-
-/**
- *
- * # Above
- *
- * Moves the shape so that its lowest point is at z = 0.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Circle(20).with(Cube(10).above())
- * ```
- * :::
- **/
-
-const MIN = 0;
-const Z$1 = 2;
-
-const above = (shape, reference) => {
-  return moveZ(shape, -measureBoundingBox(shape)[MIN][Z$1]);
-};
-
-const aboveMethod = function (...params) { return above(this); };
-Shape.prototype.above = aboveMethod;
 
 /**
  *
@@ -3039,337 +4564,6 @@ ask.forBool = askForBool;
 
 /**
  *
- * # MoveY
- *
- * Move along the Y axis.
- *
- */
-
-const moveY = (shape, y) => move(shape, 0, y);
-
-const method$c = function (y) { return moveY(this, y); };
-Shape.prototype.moveY = method$c;
-
-/**
- *
- * # Back
- *
- * Moves the shape so that it is just behind the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cylinder(2, 15)
- *   .with(Cube(10).back())
- * ```
- * :::
- **/
-
-const MIN$1 = 0;
-const Y$1 = 1;
-
-const back = (shape, reference) => {
-  return moveY(shape, -measureBoundingBox(shape)[MIN$1][Y$1]);
-};
-
-const backMethod = function (...params) { return back(this); };
-Shape.prototype.back = backMethod;
-
-/**
- *
- * # Below
- *
- * Moves the shape so that its highest point is at z = 0.
- *
- * ::: illustration { "view": { "position": [60, -60, -60], "target": [0, 0, 0] } }
- * ```
- * Circle(20).flip().with(Cube(10).below())
- * ```
- * :::
- **/
-
-const MAX = 1;
-const Z$2 = 2;
-
-const below = (shape, reference) => {
-  return moveZ(shape, -measureBoundingBox(shape)[MAX][Z$2]);
-};
-
-const belowMethod = function (...params) { return below(this); };
-Shape.prototype.below = belowMethod;
-
-/**
- *
- * # Center
- *
- * Moves the shape so that its bounding box is centered on the origin.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Circle(20).with(Cube(10).center())
- * ```
- * :::
- **/
-
-const center = (shape) => {
-  const [minPoint, maxPoint] = measureBoundingBox(shape);
-  let center = scale$1(0.5, add(minPoint, maxPoint));
-  const moved = shape.move(...negate(center));
-  return moved;
-};
-
-const centerMethod = function (...params) { return center(this); };
-Shape.prototype.center = centerMethod;
-
-/**
- *
- * # Chain Hull
- *
- * Builds a convex hull between adjacent pairs in a sequence of shapes.
- *
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * chainHull(Cube(3).move(-5, 5),
- *           Sphere(3).move(5, -5),
- *           Cylinder(3, 10).move(-10, -10))
- *   .move(10, 10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [80, 80, 0] } }
- * ```
- * chainHull(Circle(20).moveZ(-10),
- *           Circle(10),
- *           Circle(20).moveZ(10))
- * ```
- * :::
- *
- **/
-
-const Z$3 = 2;
-
-const chainHull = (...shapes) => {
-  const pointsets = shapes.map(shape => shape.toPoints());
-  const chain = [];
-  for (let nth = 1; nth < pointsets.length; nth++) {
-    const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    if (points.every(point => point[Z$3] === 0)) {
-      chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
-    } else {
-      chain.push(Shape.fromGeometry(buildConvexHull(points)));
-    }
-  }
-  return union(...chain);
-};
-
-/**
- *
- * # Chop
- *
- * Remove the parts of a shape above surface, defaulting to Z(0).
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).chop(Z(0)));
- * ```
- * :::
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).chop(Z(0).flip()));
- * ```
- * :::
- *
- **/
-
-const chop = (shape, planeShape = Z()) => {
-  const cuts = [];
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const cutResult = cut(solid, planeSurface);
-      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
-    }
-  }
-
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
-      const cutSurface = surface || z0Surface;
-      const cutResult = cut$1(planeSurface, cutSurface);
-      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
-    }
-  }
-
-  return assemble(...cuts);
-};
-
-const chopMethod = function (surface) { return chop(this, surface); };
-Shape.prototype.chop = chopMethod;
-
-/**
- *
- * # Color
- *
- * Produces a version of a shape the given color.
- * FIX: Support color in convert/threejs/toSvg.
- *
- * ::: illustration
- * ```
- * Circle(10).color('blue')
- * ```
- * :::
- * ::: illustration
- * ```
- * Triangle(10).color('chartreuse')
- * ```
- * :::
- *
- **/
-
-const fromName = (shape, name) =>
-  Shape.fromGeometry(rewriteTags([toTagFromName(name)], [], shape.toGeometry()));
-
-const color = (...args) => fromName(...args);
-
-const colorMethod = function (...args) { return color(this, ...args); };
-Shape.prototype.color = colorMethod;
-
-/**
- *
- * # Hull
- *
- * Builds the convex hull of a set of shapes.
- *
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * hull(Point([0, 0, 10]),
- *      Circle(10))
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * assemble(Point([0, 0, 10]),
- *          Circle(10))
- *   .hull()
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * Point([0, 0, 10]).hull(Circle(10))
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * hull(Circle(4),
- *      Circle(2).move(8));
- * ```
- * :::
- *
- **/
-
-const Z$4 = 2;
-
-const hull = (...shapes) => {
-  const points = [];
-  shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
-  // FIX: Detect planar hulls properly.
-  if (points.every(point => point[Z$4] === 0)) {
-    return Shape.fromGeometry(buildConvexSurfaceHull(points));
-  } else {
-    return Shape.fromGeometry(buildConvexHull(points));
-  }
-};
-
-const method$d = function (...shapes) { return hull(this, ...shapes); };
-
-Shape.prototype.hull = method$d;
-
-/**
- *
- * # Shell
- *
- * Converts a solid into a hollow shell of a given thickness.
- *
- * ::: illustration
- * ```
- * Cube(10).shell(1);
- * ```
- * :::
- *
- **/
-
-const shell = (shape, radius = 1, resolution = 8) => {
-  resolution = Math.max(resolution, 3);
-  const keptGeometry = shape.toKeptGeometry();
-  const shells = [];
-  for (const { solid, tags = [] } of getSolids(keptGeometry)) {
-    const pieces = [];
-    for (const surface of solid) {
-      for (const polygon of surface) {
-        pieces.push(hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
-      }
-    }
-    shells.push(union(...pieces).as(...tags));
-  }
-  for (const { paths, tags = [] } of outline$1(keptGeometry)) {
-    const pieces = [];
-    for (const path of paths) {
-      for (const segment of toSegments({}, path)) {
-        // FIX: Handle non-z0-surfaces properly.
-        pieces.push(hull(...segment.map(([x, y]) => Circle(radius, resolution).move(x, y))));
-      }
-    }
-    shells.push(union(...pieces).as(...tags));
-  }
-  return union(...shells);
-};
-
-const method$e = function (radius, resolution) { return shell(this, radius, resolution); };
-Shape.prototype.shell = method$e;
-
-/**
- *
- * # expand
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).with(Cube(10).moveX(10).expand(2))
- * ```
- * :::
- **/
-
-const expand = (shape, amount = 1, { resolution = 16 }) =>
-  (amount >= 0)
-    ? shape.union(shell(shape, amount, resolution))
-    : shape.cut(shell(shape, -amount, resolution));
-
-const method$f = function (...args) { return expand(this, ...args); };
-Shape.prototype.expand = method$f;
-
-/**
- *
- * # contract
- *
- * Moves the edges of the shape inward by the specified amount.
- *
- * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
- * ```
- * Cube(10).wireframe().with(Cube(10).contract(2))
- * ```
- * :::
- **/
-
-const byRadius = (shape, amount = 1, { resolution = 16 } = {}) => expand(shape, -amount, resolution);
-
-const contract = (...args) => byRadius(...args);
-
-contract.byRadius = byRadius;
-
-const method$g = function (radius, resolution) { return contract(this, radius, resolution); };
-Shape.prototype.contract = method$g;
-
-/**
- *
  * # Coordinates
  *
  * ```
@@ -3385,124 +4579,7 @@ const coordinates = (xSpec, ySpec, zSpec, thunk) => {
   return coordinates;
 };
 
-/**
- *
- * # Drop from assembly
- *
- * Generates an assembly from components in an assembly without a tag.
- *
- * If no tag is supplied, the whole shape is dropped.
- *
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .drop('A')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .drop('B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .drop('A', 'B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Cube(10).below(),
- *          Cube(8).below().drop())
- * ```
- * :::
- *
- **/
-
-const drop = (shape, ...tags) => {
-  if (tags.length === 0) {
-    return fromGeometry(rewriteTags(['compose/non-positive'], [], toGeometry(shape)));
-  } else {
-    return fromGeometry(drop$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
-  }
-};
-
-const method$h = function (...tags) { return drop(this, ...tags); };
-Shape.prototype.drop = method$h;
-
-/**
- *
- * # Extrude
- *
- * Generates a solid from a surface by linear extrusion.
- *
- * ```
- * shape.extrude(height, depth, { twist = 0, steps = 1 })
- * ```
- *
- * ::: illustration
- * ```
- * Circle(10).cut(Circle(8))
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Circle(10).cut(Circle(8)).extrude(10)
- * ```
- * :::
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(5, -2)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * Triangle(10).extrude(10, 0, { twist: 90, steps: 10 })
- * ```
- * :::
- *
- **/
-
-const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) => {
-  if (height < depth) {
-    [height, depth] = [depth, height];
-  }
-  const twistRadians = twist * Math.PI / 180;
-  // FIX: Handle extrusion along a vector properly.
-  const solids = [];
-  const keptGeometry = shape.toKeptGeometry();
-  for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
-    if (z0Surface.length > 0) {
-      const solid = extrude$1(z0Surface, height, depth, steps, twistRadians);
-      solids.push(Shape.fromGeometry({ solid, tags }));
-    }
-  }
-  for (const { surface, tags } of getSurfaces(keptGeometry)) {
-    if (surface.length > 0) {
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-      const z0SolidGeometry = extrude$1(transform$2(toZ0, surface), height, depth, steps, twistRadians);
-      const solid = transform$3(fromZ0, z0SolidGeometry);
-      solids.push(Shape.fromGeometry({ solid, tags }));
-    }
-  }
-  return assemble(...solids);
-};
-
-const extrudeMethod = function (...args) { return extrude(this, ...args); };
-Shape.prototype.extrude = extrudeMethod;
-
-const Z$5 = 2;
+const Z$6 = 2;
 
 const flat = (shape) => {
   let bestDepth = Infinity;
@@ -3513,10 +4590,10 @@ const flat = (shape) => {
       const [to] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
       const [min, max] = flatShape.measureBoundingBox();
-      const depth = max[Z$5] - min[Z$5];
+      const depth = max[Z$6] - min[Z$6];
       if (depth < bestDepth) {
         bestDepth = depth;
-        bestFlatShape = flatShape.moveZ(-min[Z$5]);
+        bestFlatShape = flatShape.moveZ(-min[Z$6]);
       }
     } else {
       console.log(`QQ/bad`);
@@ -3526,11 +4603,11 @@ const flat = (shape) => {
   const geometry = shape.toKeptGeometry();
   for (const { solid } of getSolids(geometry)) {
     for (const surface of solid) {
-      assay(toPlane$1(surface));
+      assay(toPlane(surface));
     }
   }
   for (const { surface } of getSurfaces(geometry)) {
-    assay(toPlane$1(surface));
+    assay(toPlane(surface));
   }
   // We do not need to consider z0Surface, since it could never improve the
   // orientation.
@@ -3538,73 +4615,8 @@ const flat = (shape) => {
   return bestFlatShape;
 };
 
-const method$i = function () { return flat(this); };
-Shape.prototype.flat = method$i;
-
-/**
- *
- * # Front
- *
- * Moves the shape so that it is just before the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cylinder(2, 15).translate([0, 0, 2.5]),
- *          Cube(10).front())
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).front(Sphere(5))
- * ```
- * :::
- **/
-
-const Y$2 = 1;
-
-const fromOrigin$1 = (shape) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  return moveY(shape, -maxPoint[Y$2]);
-};
-
-const fromReference = (shape, reference) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  const [minRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveY(shape, minRefPoint[Y$2] - maxPoint[Y$2]));
-};
-
-const front = dispatch(
-  'front',
-  // front(cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin$1(shape);
-  },
-  // front(cube(), sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference(shape, reference);
-  });
-
-const method$j = function (...params) { return front(this, ...params); };
-
-Shape.prototype.front = method$j;
-
-/**
- *
- * # Get Pathsets
- *
- * Extracts the paths of a geometry grouped by surface.
- *
- **/
-
-const getPathsets = (shape) => getPaths(shape.toKeptGeometry()).map(({ paths }) => paths);
-
-const method$k = function () { return getPathsets(this); };
-
-Shape.prototype.getPathsets = method$k;
+const method$Q = function () { return flat(this); };
+Shape.prototype.flat = method$Q;
 
 const importModule = async (name) => {
   let script;
@@ -3623,227 +4635,6 @@ const importModule = async (name) => {
   const module = await constructor();
   return module;
 };
-
-/**
- *
- * # Interior
- *
- * Generates a surface from the interior of a simple closed path.
- *
- * ::: illustration
- * ```
- * Circle(10)
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- * ```
- * :::
- * ::: illustration
- * ```
- * Circle(10)
- *   .outline()
- *   .interior()
- * ```
- * :::
- *
- **/
-
-const interior = (options = {}, shape) => {
-  const surfaces = [];
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    // FIX: Check paths for coplanarity.
-    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed)));
-  }
-  return assemble(...surfaces);
-};
-
-const method$l = function (options) { return interior(options, this); };
-
-Shape.prototype.interior = method$l;
-
-/**
- *
- * # Keep in assembly
- *
- * Generates an assembly from components in an assembly with a tag.
- *
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('A')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('A', 'B')
- * ```
- * :::
- *
- **/
-
-const fromValue$3 = (tags, shape) => fromGeometry(keep$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
-
-const keep = dispatch(
-  'keep',
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue$3(tags, shape);
-  }
-);
-
-keep.fromValues = fromValue$3;
-
-const method$m = function (...tags) { return keep(tags, this); };
-
-Shape.prototype.keep = method$m;
-
-/**
- *
- * # Kept
- *
- * Kept produces a geometry without dropped elements.
- *
- **/
-
-const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
-
-const method$n = function () { return kept(this); };
-
-Shape.prototype.kept = method$n;
-
-/**
- *
- * # MoveX
- *
- * Move along the X axis.
- *
- */
-
-const moveX = (shape, x) => move(shape, x);
-
-const method$o = function (x) { return moveX(this, x); };
-Shape.prototype.moveX = method$o;
-
-/**
- *
- * # Left
- *
- * Moves the shape so that it is just to the left of the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cube(10).left(),
- *          Cylinder(2, 15))
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).left(Sphere(5))
- * ```
- * :::
- **/
-
-const X$1 = 0;
-
-const fromOrigin$2 = (shape) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  return moveX(shape, -maxPoint[X$1]);
-};
-
-const fromReference$1 = (shape, reference) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  const [minRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveX(shape, minRefPoint[X$1] - maxPoint[X$1]));
-};
-
-const left = dispatch(
-  'left',
-  // front(cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin$2(shape);
-  },
-  // front(cube(), sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference$1(shape, reference);
-  });
-
-const method$p = function (...params) { return left(this, ...params); };
-
-Shape.prototype.left = method$p;
-
-/**
- *
- * # Material
- *
- * Produces a version of a shape with a given material.
- *
- * Materials supported include 'paper', 'metal', 'glass', etc.
- *
- * ::: illustration
- * ```
- * Cylinder(5, 10).material('copper')
- * ```
- * :::
- *
- **/
-
-const material = (shape, ...tags) =>
-  Shape.fromGeometry(rewriteTags(tags.map(tag => `material/${tag}`), [], shape.toGeometry()));
-
-const materialMethod = function (...tags) { return material(this, ...tags); };
-Shape.prototype.material = materialMethod;
-
-/**
- *
- * # Measure Center
- *
- * Provides the center of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- **/
-
-const measureCenter = (shape) => {
-  // FIX: Produce a clearer definition of center.
-  const geometry = shape.toKeptGeometry();
-  if (geometry.plan && geometry.plan.connector) {
-    // Return the center of the connector.
-    return geometry.marks[0];
-  }
-  const [high, low] = measureBoundingBox(shape);
-  return scale$1(0.5, add(high, low));
-};
-
-const method$q = function () { return measureCenter(this); };
-
-Shape.prototype.measureCenter = method$q;
 
 /**
  *
@@ -3868,107 +4659,6 @@ const minkowski = (a, b) => {
   b.eachPoint({}, point => bPoints.push(point));
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
-
-/**
- *
- * # Mark an object as not to cut holes.
- *
- **/
-
-const fromValue$4 = (tags, shape) => fromGeometry(nonNegative(tags, toGeometry(shape)));
-
-const nocut = dispatch(
-  'nocut',
-  (tags, shape) => {
-    // assemble(circle(), circle().nocut())
-    assertEmpty(tags);
-    assertShape(shape);
-    return () => fromGeometry(rewriteTags(['compose/non-negative'], [], toGeometry(shape)));
-  },
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue$4(tags.map(tag => `user/${tag}`), shape);
-  }
-);
-
-nocut.fromValues = fromValue$4;
-
-const method$r = function (...tags) { return nocut(tags, this); };
-
-Shape.prototype.nocut = method$r;
-
-/**
- *
- * # Outline
- *
- * Generates the outline of a surface.
- *
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Circle(10),
- *            Circle(2).move([-4]),
- *            Circle(2).move([4]))
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const outline = (shape) =>
-  assemble(...outline$1(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
-
-const method$s = function (options) { return outline(this); };
-
-Shape.prototype.outline = method$s;
-Shape.prototype.withOutline = function (options) { return assemble(this, outline(this)); };
-
-const offset = (shape, radius = 1, resolution = 16) => outline(expand(shape, radius, resolution));
-
-const method$t = function (radius, resolution) { return offset(this, radius, resolution); };
-Shape.prototype.offset = method$t;
-
-/**
- *
- * # Orient
- *
- * Orients a shape so that it moves from 'center' to 'from' and faces toward 'at', rather than 'facing'.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).orient({ from: [3, 3, 3], at: [1, 1, 1] });
- * ```
- * :::
- **/
-
-const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }, shape) => {
-  const normalizedFacing = normalize(facing);
-  const normalizedAt = normalize(subtract(at, from));
-
-  const angle = Math.acos(dot(normalizedFacing, normalizedAt)) * 180 / Math.PI;
-  const axis = normalize(cross(normalizedFacing, normalizedAt));
-
-  return shape
-      .move(negate(center))
-      .rotate(angle, axis)
-      .move(from);
-};
-
-const method$u = function (options = {}) { return orient(options, this); };
-
-Shape.prototype.orient = method$u;
 
 const pack = (options = {}, ...shapes) => {
   const [packed, unpacked] = pack$1(options, ...shapes.map(shape => shape.toKeptGeometry()));
@@ -4059,41 +4749,6 @@ const readPng = async (options) => {
   const raster = await fromPng({}, data);
   return raster;
 };
-
-/**
- *
- * # Write Shape Geometry
- *
- * This writes a shape as a tagged geometry in json format.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeShape('cube.shape');
- * await readShape({ path: 'cube.shape' })
- * ```
- * :::
- *
- **/
-
-const cacheShape = async (options, shape) => {
-  const { path } = options;
-  const geometry = shape.toGeometry();
-  await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
-};
-
-const writeShape = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toGeometry();
-  await writeFile({}, `output/${path}`, JSON.stringify(geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$v = function (options = {}) { return writeShape(options, this); };
-
-Shape.prototype.writeShape = method$v;
 
 /**
  *
@@ -4253,255 +4908,6 @@ const readSvgPath = async (options) => {
   return Shape.fromGeometry(await fromSvgPath(options, data));
 };
 
-/**
- *
- * # Right
- *
- * Moves the shape so that it is just to the right of the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cube(10).right(),
- *          Cylinder(2, 15))
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).right(Sphere(5))
- * ```
- * :::
- **/
-
-const X$2 = 0;
-
-const fromOrigin$3 = (shape) => {
-  const [minPoint] = measureBoundingBox(shape);
-  return moveX(shape, -minPoint[X$2]);
-};
-
-const fromReference$2 = (shape, reference) => {
-  const [minPoint] = measureBoundingBox(shape);
-  const [, maxRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveX(shape, maxRefPoint[X$2] - minPoint[X$2]));
-};
-
-const right = dispatch(
-  'right',
-  // right(Cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin$3(shape);
-  },
-  // right(Cube(), Sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference$2(shape, reference);
-  });
-
-const method$w = function (...params) { return right(this, ...params); };
-
-Shape.prototype.right = method$w;
-
-/**
- *
- * # Rotate
- *
- * ```
- * rotate(shape, axis, angle)
- * shape.rotate(axis, angle)
- * ```
- *
- * Rotates the shape around the provided axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotate([1, 1, 1], 90)
- * ```
- * :::
- **/
-
-const rotate = (shape, axis, angle) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
-
-const method$x = function (angle, axis) { return rotate(this, axis, angle); };
-
-Shape.prototype.rotate = method$x;
-
-/**
- *
- * # Rotate X
- *
- * Rotates the shape around the X axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateX(90)
- * ```
- * :::
- **/
-
-const rotateX = (shape, angle) => shape.transform(fromXRotation(angle * 0.017453292519943295));
-
-const method$y = function (angle) { return rotateX(this, angle); };
-
-Shape.prototype.rotateX = method$y;
-
-/**
- *
- * # Rotate Y
- *
- * Rotates the shape around the Y axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateY(90)
- * ```
- * :::
- **/
-
-const rotateY = (shape, angle) => shape.transform(fromYRotation(angle * 0.017453292519943295));
-
-const method$z = function (angle) { return rotateY(this, angle); };
-
-Shape.prototype.rotateY = method$z;
-
-/**
- *
- * # Rotate Z
- *
- * Rotates the shape around the Z axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).rotateZ(45)
- * ```
- * :::
- **/
-
-const rotateZ = (shape, angle) => shape.transform(fromZRotation(angle * 0.017453292519943295));
-
-const method$A = function (angle) { return rotateZ(this, angle); };
-
-Shape.prototype.rotateZ = method$A;
-
-/**
- *
- * # Scale
- *
- * Scales an object uniformly or per axis.
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube()
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube().scale(2)
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Cube().scale([1, 2, 3])
- * ```
- * :::
- **/
-
-const scale = (factor, shape) => {
-  if (factor.length) {
-    const [x = 1, y = 1, z = 1] = factor;
-    return shape.transform(fromScaling([x, y, z]));
-  } else {
-    return shape.transform(fromScaling([factor, factor, factor]));
-  }
-};
-
-const method$B = function (factor) { return scale(factor, this); };
-
-Shape.prototype.scale = method$B;
-
-/**
- *
- * # Section
- *
- * Produces a cross-section of a solid as a surface.
- *
- * ::: illustration { "view": { "position": [40, 40, 60] } }
- * ```
- * difference(Cylinder(10, 10),
- *            Cylinder(8, 10))
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Sphere(10),
- *            Sphere(8))
- *   .section()
- * ```
- * :::
- * ::: illustration
- * ```
- * difference(Sphere(10),
- *            Sphere(8))
- *   .section()
- *   .outline()
- * ```
- * :::
- *
- **/
-
-const section = (solidShape, surfaceShape = Z(0)) => {
-  const sections = [];
-  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
-    const anySurface = surface || z0Surface;
-    const shapes = [];
-    const plane = toPlane$1(anySurface);
-    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const surface = retessellate(section$1(solid, anySurface));
-      surface.plane = plane;
-      shapes.push(Shape.fromGeometry({ surface }));
-    }
-    sections.push(union(...shapes));
-  }
-  return assemble(...sections);
-};
-
-const method$C = function (surface) { return section(this, surface); };
-
-Shape.prototype.section = method$C;
-
-const solids = (shape, xform = (_ => _)) => {
-  const solids = [];
-  for (const solid of getSolids(shape.toKeptGeometry())) {
-    solids.push(xform(Shape.fromGeometry(solid)));
-  }
-  return solids;
-};
-
-const solidsMethod = function (...args) { return solids(this, ...args); };
-Shape.prototype.solids = solidsMethod;
-
 const source = (path, source) => addSource(`cache/${path}`, source);
 
 /**
@@ -4533,8 +4939,8 @@ const specify = (specification, ...shapes) => {
   return Shape.fromGeometry(rewriteTags([`item/${JSON.stringify(specification)}`], [], geometry));
 };
 
-const method$D = function (specification) { return specify(specification, this); };
-Shape.prototype.specify = method$D;
+const method$R = function (specification) { return specify(specification, this); };
+Shape.prototype.specify = method$R;
 
 /**
  *
@@ -4542,7 +4948,7 @@ Shape.prototype.specify = method$D;
  *
  **/
 
-const stretch = (shape, length, planeShape = Z(0)) => {
+const stretch = (shape, length, planeShape = Z$2(0)) => {
   const stretches = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
@@ -4550,10 +4956,10 @@ const stretch = (shape, length, planeShape = Z(0)) => {
       const bottom = cutOpen(solid, planeSurface);
       const profile = section$1(solid, planeSurface);
       const top = cutOpen(solid, flip$1(planeSurface));
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-      const z0SolidGeometry = extrude$1(transform$2(toZ0, profile), length, 0, 1, 0, false);
-      const middle = transform$3(fromZ0, z0SolidGeometry);
-      const topMoved = transform$3(fromTranslation(scale$1(length, toPlane$1(profile))), top);
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
+      const z0SolidGeometry = extrude$1(transform$1(toZ0, profile), length, 0, 1, 0, false);
+      const middle = transform$2(fromZ0, z0SolidGeometry);
+      const topMoved = transform$2(fromTranslation(scale$1(length, toPlane(profile))), top);
       stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
     }
   }
@@ -4561,414 +4967,9 @@ const stretch = (shape, length, planeShape = Z(0)) => {
   return assemble(...stretches);
 };
 
-const method$E = function (...args) { return stretch(this, ...args); };
+const method$S = function (...args) { return stretch(this, ...args); };
 
-Shape.prototype.stretch = method$E;
-
-/**
- *
- * # Sweep
- *
- * Sweep a tool profile along a path, to produce a surface.
- *
- **/
-
-// FIX: This is a weak approximation assuming a 1d profile -- it will need to be redesigned.
-const sweep = (toolpath, tool) => {
-  const chains = [];
-  for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
-    for (const path of paths) {
-      chains.push(chainHull(...path.map(point => tool.move(...point))));
-    }
-  }
-  return union(...chains);
-};
-
-const method$F = function (tool) { return sweep(this, tool); };
-
-Shape.prototype.sweep = method$F;
-Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, tool)); };
-
-const tags = (shape) =>
-  [...allTags(shape.toGeometry())]
-      .filter(tag => tag.startsWith('user/'))
-      .map(tag => tag.substring(5));
-
-const method$G = function () { return tags(this); };
-
-Shape.prototype.tags = method$G;
-
-const toBillOfMaterial = (shape) => {
-  const specifications = [];
-  for (const { tags } of getItems(shape.toKeptGeometry())) {
-    for (const tag of tags) {
-      if (tag.startsWith('item/')) {
-        const specification = tag.substring(5);
-        specifications.push(specification);
-      }
-    }
-  }
-  return specifications;
-};
-
-const method$H = function (options = {}) { return toBillOfMaterial(this); };
-
-Shape.prototype.toBillOfMaterial = method$H;
-
-// DEPRECATED: See 'Shape.items'
-const toItems = (shape) => getItems(shape.toKeptGeometry()).map(fromGeometry);
-
-const method$I = function (options = {}) { return toItems(this); };
-
-Shape.prototype.toItems = method$I;
-
-// Return an assembly of paths so that each toolpath can have its own tag.
-const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
-  Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
-
-const method$J = function (...options) { return toolpath(this, ...options); };
-
-Shape.prototype.toolpath = method$J;
-Shape.prototype.withToolpath = function (...args) { return assemble(this, toolpath(this, ...args)); };
-
-/**
- *
- * # Turn
- *
- * ```
- * turn(shape, axis, angle)
- * shape.turn(axis, angle)
- * ```
- *
- * Rotates the shape around its own axis.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Square(10).turn([1, 1, 1], 90)
- * ```
- * :::
- **/
-
-const turn = (shape, axis, angle) => {
-  const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotate(axis, angle)
-      .move(...center);
-};
-
-const turnMethod = function (angle, axis) { return turn(this, axis, angle); };
-Shape.prototype.turn = turnMethod;
-
-const turnX = (shape, angle) => {
-  const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotateX(angle)
-      .move(...center);
-};
-
-const turnXMethod = function (angle) { return turnX(this, angle); };
-Shape.prototype.turnX = turnXMethod;
-
-const turnY = (shape, angle) => {
-  const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotateY(angle)
-      .move(...center);
-};
-
-const turnYMethod = function (angle) { return turnY(this, angle); };
-Shape.prototype.turnY = turnYMethod;
-
-const turnZ = (shape, angle) => {
-  const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotateZ(angle)
-      .move(...center);
-};
-
-const turnZMethod = function (angle) { return turnZ(this, angle); };
-Shape.prototype.turnZ = turnZMethod;
-
-const X$3 = 0;
-const Y$3 = 1;
-const Z$6 = 2;
-
-const voxels = ({ resolution = 1 }, shape) => {
-  const offset = resolution / 2;
-  const voxels = [];
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    const [min, max] = measureBoundingBox$2(solid);
-    const bsp = fromSolid(solid);
-    const polygons = [];
-    for (let x = min[X$3] - offset; x <= max[X$3] + offset; x += resolution) {
-      for (let y = min[Y$3] - offset; y <= max[Y$3] + offset; y += resolution) {
-        for (let z = min[Z$6] - offset; z <= max[Z$6] + offset; z += resolution) {
-          const state = containsPoint(bsp, [x, y, z]);
-          if (state !== containsPoint(bsp, [x + resolution, y, z])) {
-            const face = [[x + offset, y - offset, z - offset],
-                          [x + offset, y + offset, z - offset],
-                          [x + offset, y + offset, z + offset],
-                          [x + offset, y - offset, z + offset]];
-            polygons.push(state ? face : face.reverse());
-          }
-          if (state !== containsPoint(bsp, [x, y + resolution, z])) {
-            const face = [[x - offset, y + offset, z - offset],
-                          [x + offset, y + offset, z - offset],
-                          [x + offset, y + offset, z + offset],
-                          [x - offset, y + offset, z + offset]];
-            polygons.push(state ? face.reverse() : face);
-          }
-          if (state !== containsPoint(bsp, [x, y, z + resolution])) {
-            const face = [[x - offset, y - offset, z + offset],
-                          [x + offset, y - offset, z + offset],
-                          [x + offset, y + offset, z + offset],
-                          [x - offset, y + offset, z + offset]];
-            polygons.push(state ? face : face.reverse());
-          }
-        }
-      }
-    }
-    voxels.push(Shape.fromGeometry({ solid: fromPolygons({}, polygons), tags }));
-  }
-  return assemble(...voxels);
-};
-
-const method$K = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
-
-Shape.prototype.voxels = method$K;
-
-const toWireframeFromSolid = (solid) => {
-  const paths = [];
-  for (const surface of solid) {
-    paths.push(...surface);
-  }
-  return Shape.fromPaths(paths);
-};
-
-const toWireframeFromSurface = (surface) => {
-  return Shape.fromPaths(surface);
-};
-
-/**
- *
- * # Wireframe
- *
- * Generates a set of paths outlining a solid.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).wireframe()
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Sphere(10).wireframe()
- * ```
- * :::
- *
- **/
-
-const wireframe = (options = {}, shape) => {
-  const pieces = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSolid(solid));
-  }
-  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSurface(surface));
-  }
-  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
-    pieces.push(toWireframeFromSurface(z0Surface));
-  }
-  return assemble(...pieces);
-};
-
-const method$L = function (options) { return wireframe(options, this); };
-
-Shape.prototype.wireframe = method$L;
-Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
-
-/**
- *
- * # Write DXF
- *
- * ```
- * Cube().section().writeDxf('cube.dxf');
- * ```
- *
- **/
-
-const writeDxf = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writeDxf('foo', bar);
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const dxf = await toDxf({ preview: true, ...options }, geometry);
-  await writeFile({}, `output/${path}`, dxf);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$M = function (options = {}) { return writeDxf(options, this); };
-
-Shape.prototype.writeDxf = method$M;
-
-/**
- *
- * # Write G-Code
- *
- * ```
- * Square().toolpath(0.5).writeGcode('cube.pdf');
- * ```
- *
- **/
-
-const writeGcode = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writeGcode('foo', bar);
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const gcode = await toGcode({ preview: true, ...options }, geometry);
-  await writeFile({}, `output/${path}`, gcode);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$N = function (options = {}) { return writeGcode(options, this); };
-
-Shape.prototype.writeGcode = method$N;
-
-/**
- *
- * # Write PDF
- *
- * ```
- * Cube().section().writePdf('cube.pdf');
- * ```
- *
- **/
-
-const writePdf = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writePdf('foo', bar);
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const pdf = await toPdf({ preview: true, ...options }, geometry);
-  await writeFile({}, `output/${path}`, pdf);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$O = function (options = {}) { return writePdf(options, this); };
-
-Shape.prototype.writePdf = method$O;
-
-/**
- *
- * # Write STL
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeStl('cube.stl');
- * await readStl({ path: 'cube.stl' });
- * ```
- * :::
- *
- **/
-
-const writeStl = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toStl(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$P = function (options = {}) { return writeStl(options, this); };
-
-Shape.prototype.writeStl = method$P;
-
-/**
- *
- * # Write SVG
- *
- * ::: illustration
- * ```
- * await Cube().section().writeSvg('svg/cube1.svg');
- * await readSvg({ path: 'svg/cube1.svg' })
- * ```
- * :::
- *
- **/
-
-const writeSvg = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toSvg(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$Q = function (options = {}) { return writeSvg(options, this); };
-
-Shape.prototype.writeSvg = method$Q;
-
-/**
- *
- * # Write SVG Photo
- *
- * This takes a scene and a camera position and generates a two-dimensional SVG representation
- * as a svg tag.
- *
- * Note: Illustrations broken due to scaling issue affecting readSvg.
- *
- * ::: illustration { "view": { "position": [0, -1, 2500] } }
- * ```
- * await Cube().writeSvgPhoto({ path: 'svg/cube3.svg', view: { position: [10, 10, 10], target: [0, 0, 0] } });
- * await readSvg({ path: 'svg/cube3.svg' })
- * ```
- * :::
- *
- **/
-
-const writeSvgPhoto = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toSvg$1(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$R = function (options = {}) { return writeSvgPhoto(options, this); };
-
-Shape.prototype.writeSvgPhoto = method$R;
-
-const writeThreejsPage = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toThreejsPage(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const method$S = function (options = {}) { return writeThreejsPage(options, this); };
-
-Shape.prototype.writeThreejsPage = method$S;
+Shape.prototype.stretch = method$S;
 
 /**
  *
@@ -4979,73 +4980,183 @@ Shape.prototype.writeThreejsPage = method$S;
  * the api uses.
  */
 
-const methods = [
-  above,
-  back,
-  below,
-  center,
-  chop,
-  color,
-  connect,
-  connector,
-  connectors,
-  contract,
-  drop,
-  ease,
-  expand,
-  extrude,
-  front,
-  getPathsets,
-  flat,
-  interior,
-  kept,
-  left,
-  material,
-  measureBoundingBox,
-  measureCenter,
-  move,
-  moveX,
-  moveY,
-  moveZ,
-  nocut,
-  offset,
-  orient,
-  outline,
-  right,
-  rotate,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  section,
-  shell,
-  solids,
-  specify,
-  sweep,
-  tags,
-  toolpath,
-  toBillOfMaterial,
-  toItems,
-  translate,
-  turn,
-  turnX,
-  turnY,
-  turnZ,
-  keep,
-  voxels,
-  wireframe,
-  writeDxf,
-  writeGcode,
-  writePdf,
-  writeShape,
-  writeStl,
-  writeSvg,
-  writeSvgPhoto,
-  writeThreejsPage
+const constructors = [
+  'Shape',
+  'Armature',
+  'Circle',
+  'Cone',
+  'Connector',
+  'Cube',
+  'Cursor',
+  'Cylinder',
+  'Font',
+  'Gear',
+  'Hershey',
+  'Hexagon',
+  'Icosahedron',
+  'Item',
+  'Label',
+  'Lego',
+  'Line',
+  'log',
+  'MicroGearMotor',
+  'Nail',
+  'Plan',
+  'Path',
+  'Point',
+  'Points',
+  'Polygon',
+  'Polyhedron',
+  'Prism',
+  'Sphere',
+  'Spiral',
+  'Square',
+  'SvgPath',
+  'Tetrahedron',
+  'ThreadedRod',
+  'Torus',
+  'Triangle',
+  'Wave',
+  'X',
+  'Y',
+  'Z'
 ];
 
-if (methods.includes(undefined)) {
-  throw Error('die');
-}
+const shapeMethods = [
+  'above',
+  'back',
+  'below',
+  'center',
+  'chop',
+  'color',
+  'connect',
+  'connector',
+  'connectors',
+  'contract',
+  'drop',
+  'ease',
+  'expand',
+  'extrude',
+  'front',
+  'getPathsets',
+  'flat',
+  'interior',
+  'kept',
+  'left',
+  'material',
+  'measureBoundingBox',
+  'measureCenter',
+  'move',
+  'moveX',
+  'moveY',
+  'moveZ',
+  'nocut',
+  'offset',
+  'orient',
+  'outline',
+  'right',
+  'rotate',
+  'rotateX',
+  'rotateY',
+  'rotateZ',
+  'scale',
+  'section',
+  'shell',
+  'solids',
+  'specify',
+  'sweep',
+  'tags',
+  'toolpath',
+  'toBillOfMaterial',
+  'toItems',
+  'translate',
+  'turn',
+  'turnX',
+  'turnY',
+  'turnZ',
+  'keep',
+  'voxels',
+  'wireframe',
+  'writeDxf',
+  'writeGcode',
+  'writePdf',
+  'writeShape',
+  'writeStl',
+  'writeSvg',
+  'writeSvgPhoto',
+  'writeThreejsPage'
+];
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X, Y, Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+const operators = [
+  'acos',
+  'ask',
+  'assemble',
+  'coordinates',
+  'cos',
+  'difference',
+  'ease',
+  'flat',
+  'hull',
+  'intersection',
+  'join',
+  'lathe',
+  'log',
+  'max',
+  'minkowski',
+  'numbers',
+  'pack',
+  'readDst',
+  'readDxf',
+  'readFont',
+  'readLDraw',
+  'readPng',
+  'readShape',
+  'readShapefile',
+  'readStl',
+  'readSvg',
+  'readSvgPath',
+  'rejoin',
+  'shell',
+  'sin',
+  'source',
+  'specify',
+  'sqrt',
+  'stretch',
+  'union',
+  'vec'
+];
+
+const buildCompletions = () => {
+  const completions = [];
+  for (const constructor of constructors) {
+    completions.push({ completion: constructor });
+  }
+  for (const operator of operators) {
+    completions.push({ completion: operator });
+  }
+  return completions;
+};
+
+const buildShapeMethodCompletions = () => {
+  const completions = [];
+  for (const shapeMethod of shapeMethods) {
+    completions.push({ completion: shapeMethod });
+  }
+  return completions;
+};
+
+const completions = buildCompletions();
+const shapeMethodCompletions = buildShapeMethodCompletions();
+
+const getCompletions = (prefix, { isMethod = false }) => {
+  const selectedEntries = [];
+  const entries = isMethod ? shapeMethodCompletions : completions;
+  for (const entry of entries) {
+    if (entry.completion.startsWith(prefix)) {
+      selectedEntries.push(entry);
+    }
+  }
+  return selectedEntries;
+};
+
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$3 as X, Y$3 as Y, Z$2 as Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
