@@ -22,7 +22,7 @@ if (!prismJsAuxiliary) throw Error('die');
 const snippetCompleter = {
   getCompletions: function (editor, session, position, prefix, callback) {
     const { row, column } = position;
-    var scopes = ['javascript'];
+    var scopes = ['JSxCAD'];
     var token = session.getTokenAt(row, column);
     var snippetMap = aceEditorSnippetManager.snippetMap;
     var completions = [];
@@ -43,24 +43,26 @@ const snippetCompleter = {
             continue;
           }
         }
-        var caption = s.name || s.tabTrigger;
+        var caption = s.name;
         if (!caption) { continue; }
         completions.push({
           caption: caption,
           snippet: s.content,
-          meta: s.tabTrigger && !s.name ? s.tabTrigger + '\u21E5 ' : 'snippet',
+          meta: s.meta,
           docHTML: s.docHTML,
-          type: 'snippet'
+          type: s.type
         });
       }
     }, this);
     callback(null, completions);
-  },
+  }
+/*
   getDocTooltip: function (item) {
     if (item.type === 'snippet' && item.docHTML === undefined) {
       item.docHTML = '';
     }
   }
+*/
 };
 
 /*
@@ -113,11 +115,13 @@ aceEditorSnippetManager.register(
       name: '.color',
       trigger: '.color',
       isMethod: true,
-      content: ".color('$" + "{1:name}')",
+      content: "color('$" + "{1:name}')",
+      meta: 'Shape Method',
+      type: 'snippet',
       docHTML: "Shape:color(name)<br><br>Gives the shape the named color.<br><br><i>Circle().color('red')</i>"
     }
   ],
-  'javascript');
+  'JSxCAD');
 
 export class JsEditorUi extends React.PureComponent {
   static get propTypes () {
