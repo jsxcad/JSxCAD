@@ -706,6 +706,8 @@ const color = (...args) => fromName(...args);
 const colorMethod = function (...args) { return color(this, ...args); };
 Shape.prototype.color = colorMethod;
 
+color.signature = 'Shape -> color(color:string) -> Shape';
+
 const colors = (shape) =>
   [...allTags(shape.toGeometry())]
       .filter(tag => tag.startsWith('color/'))
@@ -822,8 +824,11 @@ Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
  **/
 
 const ofEdge$1 = (edge = 1, { sides = 32 } = {}) => Polygon.ofEdge(edge, { sides });
+
 const ofRadius$1 = (radius = 1, { sides = 32 } = {}) => Polygon.ofRadius(radius, { sides });
+
 const ofApothem$1 = (apothem = 1, { sides = 32 } = {}) => Polygon.ofApothem(apothem, { sides });
+
 const ofDiameter$1 = (diameter = 1, { sides = 32 } = {}) => Polygon.ofDiameter(diameter, { sides });
 
 const Circle = (...args) => ofRadius$1(...args);
@@ -833,6 +838,12 @@ Circle.ofApothem = ofApothem$1;
 Circle.ofRadius = ofRadius$1;
 Circle.ofDiameter = ofDiameter$1;
 Circle.toRadiusFromApothem = (radius = 1, sides = 32) => Polygon.toRadiusFromApothem(radius, sides);
+
+Circle.signature = 'Circle(radius:number = 1, { sides:number = 32 }) -> Shape';
+ofEdge$1.signature = 'Circle.ofEdge(edge:number = 1, { sides:number = 32 }) -> Shape';
+ofRadius$1.signature = 'Circle.ofRadius(radius:number = 1, { sides:number = 32 }) -> Shape';
+ofApothem$1.signature = 'Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape';
+ofDiameter$1.signature = 'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
 
 /**
  *
