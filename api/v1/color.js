@@ -30,4 +30,6 @@ export const color = (...args) => fromName(...args);
 const colorMethod = function (...args) { return color(this, ...args); };
 Shape.prototype.color = colorMethod;
 
+color.signature = 'Shape -> color(color:string) -> Shape';
+
 export default color;

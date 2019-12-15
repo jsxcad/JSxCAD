@@ -49,8 +49,11 @@ import Polygon from './Polygon';
  **/
 
 export const ofEdge = (edge = 1, { sides = 32 } = {}) => Polygon.ofEdge(edge, { sides });
+
 export const ofRadius = (radius = 1, { sides = 32 } = {}) => Polygon.ofRadius(radius, { sides });
+
 export const ofApothem = (apothem = 1, { sides = 32 } = {}) => Polygon.ofApothem(apothem, { sides });
+
 export const ofDiameter = (diameter = 1, { sides = 32 } = {}) => Polygon.ofDiameter(diameter, { sides });
 
 export const Circle = (...args) => ofRadius(...args);
@@ -60,5 +63,11 @@ Circle.ofApothem = ofApothem;
 Circle.ofRadius = ofRadius;
 Circle.ofDiameter = ofDiameter;
 Circle.toRadiusFromApothem = (radius = 1, sides = 32) => Polygon.toRadiusFromApothem(radius, sides);
+
+Circle.signature = 'Circle(radius:number = 1, { sides:number = 32 }) -> Shape';
+ofEdge.signature = 'Circle.ofEdge(edge:number = 1, { sides:number = 32 }) -> Shape';
+ofRadius.signature = 'Circle.ofRadius(radius:number = 1, { sides:number = 32 }) -> Shape';
+ofApothem.signature = 'Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape';
+ofDiameter.signature = 'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
 
 export default Circle;

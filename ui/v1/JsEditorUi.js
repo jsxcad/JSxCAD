@@ -1,3 +1,5 @@
+import * as api from '@jsxcad/api-v1';
+
 import { log, readFile, writeFile } from '@jsxcad/sys';
 
 import AceEditor from 'react-ace';
@@ -13,6 +15,8 @@ import Row from 'react-bootstrap/Row';
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
+
+import { decode as decodeSignature } from './signature';
 
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
 
@@ -56,13 +60,6 @@ const snippetCompleter = {
     }, this);
     callback(null, completions);
   }
-/*
-  getDocTooltip: function (item) {
-    if (item.type === 'snippet' && item.docHTML === undefined) {
-      item.docHTML = '';
-    }
-  }
-*/
 };
 
 /*
@@ -106,6 +103,39 @@ const scriptCompleter = {
     name
   }
 */
+
+const getSignatures = (api) => {
+  const signatures = [];
+  for (const name of Object.keys(api)) {
+    const value = api[name];
+    const signature = value.signature;
+    if (signature !== undefined) {
+      signatures.push(signature);
+    }
+    for (const name of Object.keys(value)) {
+      const property = value[name];
+      const signature = property.signature;
+      if (signature !== undefined) {
+        signatures.push(signature);
+      }
+    }
+    if (value.constructor !== undefined && value.constructor.prototype !== undefined) {
+      for (const name of Object.keys(value.constructor.prototype)) {
+        const property = value.constructor.prototype[name];
+        const signature = property.signature;
+        if (signature !== undefined) {
+          signatures.push(decodeSignature(signature));
+        }
+      }
+    }
+  }
+  return signatures;
+};
+
+const toSnippetFromSignature = (signature) => {
+};
+
+getSignatures(api).map(toSnippetFromSignature);
 
 // aceEditorCompleter.setCompleters([scriptCompleter]);
 aceEditorCompleter.setCompleters([snippetCompleter]);

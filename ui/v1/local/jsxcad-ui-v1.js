@@ -1,4 +1,5 @@
 import { readFile, log, writeFile, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, getFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, ask } from './jsxcad-sys.js';
+import * as api from './jsxcad-api-v1.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
 import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls, drawHud } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
@@ -77786,14 +77787,6 @@ const snippetCompleter = {
     }, this);
     callback(null, completions);
   }
-  /*
-    getDocTooltip: function (item) {
-      if (item.type === 'snippet' && item.docHTML === undefined) {
-        item.docHTML = '';
-      }
-    }
-  */
-
 };
 /*
 const scriptCompleter = {
@@ -77836,7 +77829,60 @@ const scriptCompleter = {
     name
   }
 */
-// aceEditorCompleter.setCompleters([scriptCompleter]);
+
+const getSignatures = api => {
+  const signatures = [];
+
+  for (const name of Object.keys(api)) {
+    const value = api[name];
+    const signature = value.signature;
+
+    if (signature !== undefined) {
+      signatures.push(signature);
+    }
+
+    for (const name of Object.keys(value)) {
+      const property = value[name];
+      const signature = property.signature;
+
+      if (signature !== undefined) {
+        signatures.push(signature);
+      }
+    }
+
+    if (value.constructor !== undefined && value.constructor.prototype !== undefined) {
+      for (const name of Object.keys(value.constructor.prototype)) {
+        const property = value.constructor.prototype[name];
+        const signature = property.signature;
+
+        if (signature !== undefined) {
+          signatures.push(signature);
+        }
+      }
+    }
+  }
+
+  return signatures;
+};
+
+const toSnippetFromSignature = signature => {
+  // "Shape -> Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape"
+  const [, prefix, body, suffix] = signature.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
+  const [, input, inputOp] = prefix.match(/([^ ]*) -> ([^ ]*)/) || [];
+  const operation = inputOp || prefix;
+  const [, restArgs, options, rest] = body.match(/([^{]*)[{]([^}]*)[}](.*)/) || [];
+  const args = restArgs || body;
+  const [,, output] = suffix.match(/([^ ]*) -> ([^ ]*)/) || [];
+  console.log(`QQ/input: ${input}`);
+  console.log(`QQ/operation: ${operation}`);
+  console.log(`QQ/args: ${args}`);
+  console.log(`QQ/options: ${options}`);
+  console.log(`QQ/rest: ${rest}`);
+  console.log(`QQ/output: ${output}`);
+  return {};
+};
+
+getSignatures(api).map(toSnippetFromSignature); // aceEditorCompleter.setCompleters([scriptCompleter]);
 
 aceEditorCompleter.setCompleters([snippetCompleter]);
 aceEditorSnippetManager.register([{
