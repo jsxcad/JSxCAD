@@ -27,7 +27,10 @@ export const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
   return assemble(...solids);
 };
 
-const method = function (...args) { return lathe(this, ...args); };
-Shape.prototype.lathe = method;
+const latheMethod = function (...args) { return lathe(this, ...args); };
+Shape.prototype.lathe = latheMethod;
 
 export default lathe;
+
+lathe.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
+latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';

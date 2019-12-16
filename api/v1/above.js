@@ -18,11 +18,14 @@ import moveZ from './moveZ';
 const MIN = 0;
 const Z = 2;
 
-export const above = (shape, reference) => {
+export const above = (shape) => {
   return moveZ(shape, -measureBoundingBox(shape)[MIN][Z]);
 };
 
 const aboveMethod = function (...params) { return above(this, ...params); };
 Shape.prototype.above = aboveMethod;
+
+above.signature = 'above(shape:Shape) -> Shape';
+aboveMethod.signature = 'Shape -> above() -> Shape';
 
 export default above;

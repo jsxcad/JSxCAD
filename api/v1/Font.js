@@ -10,3 +10,7 @@ Font.ofSize = ofSize;
 Font.read = async (path, { flip = false } = {}) => readFont(path, { flip });
 
 export default Font;
+
+Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
+Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
+Font.read.signature = 'Font.read(path:string, { flip:boolean = false }) -> Font';

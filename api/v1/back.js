@@ -19,7 +19,7 @@ import moveY from './moveY';
 const MIN = 0;
 const Y = 1;
 
-export const back = (shape, reference) => {
+export const back = (shape) => {
   return moveY(shape, -measureBoundingBox(shape)[MIN][Y]);
 };
 
@@ -27,3 +27,6 @@ const backMethod = function (...params) { return back(this, ...params); };
 Shape.prototype.back = backMethod;
 
 export default back;
+
+back.signature = 'back(shape:Shape) -> Shape';
+backMethod.signature = 'Shape -> back() -> Shape';

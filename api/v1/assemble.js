@@ -70,3 +70,5 @@ export const assemble = (...shapes) => {
 };
 
 export default assemble;
+
+assemble.signature = 'assemble(...shapes:Shape) -> Shape';

@@ -18,3 +18,8 @@ Cone.ofDiameter = ofDiameter;
 Cone.ofApothem = ofApothem;
 
 export default Cone;
+
+Cone.signature = 'Cone(radius:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofRadius.signature = 'Cone.ofRadius(radius:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofDiameter.signature = 'Cone.ofDiameter(diameter:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofApothem.signature = 'Cone.ofApothem(apothem:number, height:number, { sides:number = 32 }) -> Shape';

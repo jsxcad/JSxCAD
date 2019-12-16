@@ -70,3 +70,6 @@ const extrudeMethod = function (...args) { return extrude(this, ...args); };
 Shape.prototype.extrude = extrudeMethod;
 
 export default extrude;
+
+extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
+extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';

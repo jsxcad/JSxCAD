@@ -17,5 +17,7 @@ import union from './union';
  *
  **/
 
-const method = function (...shapes) { return union(this, ...shapes); };
-Shape.prototype.add = method;
+const addMethod = function (...shapes) { return union(this, ...shapes); };
+Shape.prototype.add = addMethod;
+
+addMethod.signature = 'Shape -> (...Shapes) -> Shape';

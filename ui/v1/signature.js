@@ -1,7 +1,8 @@
-export const decode = (signature) => {
+// FIX: Consider using a proper grammar.
+export const toSignature = (string) => {
   // "Shape -> Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape"
 
-  const [, prefix, body, suffix] = signature.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
+  const [, prefix, body, suffix] = string.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
   const [, inputType, inputOp] = prefix.match(/([^ ]*) -> ([^ ]*)/) || [];
   const operation = inputOp || prefix;
   const [, restArgs, options, rest] = body.match(/([^{]*)[{]([^}]*)[}][, ]*(.*)/) || [];
@@ -79,5 +80,52 @@ export const decode = (signature) => {
   if (optionSpecs && optionSpecs.length > 0) spec.options = optionSpecs;
   if (restSpec) spec.rest = restSpec;
   if (outputType) spec.outputType = outputType;
+  spec.string = string;
   return spec;
+};
+
+const startsWithUpperCase = (string) => {
+  const first = string[0];
+  if (first === undefined) {
+    // ""
+    return false;
+  }
+  if (first === first.toLowerCase()) {
+    // 'i', '5'
+    return false;
+  }
+  if (first !== first.toUpperCase()) {
+    return false;
+  }
+  return true;
+};
+
+export const toSnippet = ({ inputType, operation, args, options, rest, outputType, string }) => {
+  const { name, namespace } = operation;
+  const snippet = {};
+  if (inputType) {
+    snippet.meta = `${inputType} method`;
+    snippet.isMethod = true;
+    snippet.name = `.${name}`;
+    snippet.trigger = `${name}`;
+    snippet.content = `${name}(${'$'}${1})`;
+  } else if (namespace) {
+    snippet.meta = `${namespace} constructor`;
+    snippet.name = `${namespace}.${name}`;
+    snippet.trigger = `${namespace}.${name}`;
+    snippet.content = `${namespace}.${name}(${'$'}{1})`;
+  } else if (startsWithUpperCase(name)) {
+    snippet.meta = `constructor`;
+    snippet.name = name;
+    snippet.trigger = name;
+    snippet.content = `${name}(${'$'}{1})`;
+  } else {
+    snippet.meta = `function`;
+    snippet.name = name;
+    snippet.trigger = name;
+    snippet.content = `${name}(${'$'}{1})`;
+  }
+  snippet.type = 'snippet';
+  snippet.docHTML = string;
+  return snippet;
 };

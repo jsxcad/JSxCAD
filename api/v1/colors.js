@@ -10,3 +10,6 @@ const colorsMethod = function () { return colors(this); };
 Shape.prototype.colors = colorsMethod;
 
 export default colors;
+
+colors.signature = 'colors(shape:Shape) -> strings';
+colorsMethod.signature = 'Shape -> colors() -> strings';

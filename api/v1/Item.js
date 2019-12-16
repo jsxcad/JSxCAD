@@ -12,7 +12,10 @@ import { rewriteTags } from '@jsxcad/geometry-tagged';
 
 export const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: toGeometry(shape) }));
 
-const method = function (id) { return Item(this, id); };
-Shape.prototype.toItem = method;
+const toItemMethod = function (id) { return Item(this, id); };
+Shape.prototype.toItem = toItemMethod;
 
 export default Item;
+
+Item.signature = 'Item(shape:Shape, id:string) -> Shape';
+toItemMethod.signature = 'Shape -> toItem(id:string) -> Shape';

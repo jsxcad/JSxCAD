@@ -10,6 +10,8 @@ import { Shape, toKeptGeometry } from './Shape';
 
 export const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
 
-const method = function () { return kept(this); };
+const keptMethod = function () { return kept(this); };
+Shape.prototype.kept = keptMethod;
 
-Shape.prototype.kept = method;
+kept.signature = 'kept(shape:Shape) -> Shape';
+keptMethod.signature = 'Shape -> kept() -> Shape';

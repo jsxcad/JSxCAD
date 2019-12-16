@@ -20,7 +20,10 @@ export const contract = (...args) => byRadius(...args);
 
 contract.byRadius = byRadius;
 
-const method = function (radius, resolution) { return contract(this, radius, resolution); };
-Shape.prototype.contract = method;
+const contractMethod = function (radius, resolution) { return contract(this, radius, resolution); };
+Shape.prototype.contract = contractMethod;
 
 export default contract;
+
+contract.signature = 'contract(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+contractMethod.signature = 'Shape -> contract(amount:number = 1, { resolution:number = 16 }) -> Shape';

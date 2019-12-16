@@ -51,3 +51,6 @@ const chopMethod = function (surface) { return chop(this, surface); };
 Shape.prototype.chop = chopMethod;
 
 export default chop;
+
+chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
+chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';

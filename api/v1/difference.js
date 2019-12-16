@@ -47,3 +47,5 @@ export const difference = (...shapes) => {
 };
 
 export default difference;
+
+difference.signature = 'difference(shape:Shape, ...shapes:Shape) -> Shape';

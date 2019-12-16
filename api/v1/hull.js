@@ -48,6 +48,8 @@ export const hull = (...shapes) => {
   }
 };
 
-const method = function (...shapes) { return hull(this, ...shapes); };
+const hullMethod = function (...shapes) { return hull(this, ...shapes); };
+Shape.prototype.hull = hullMethod;
 
-Shape.prototype.hull = method;
+hull.signature = 'hull(shape:Shape, ...shapes:Shape) -> Shape';
+hullMethod.signature = 'Shape -> hull(...shapes:Shape) -> Shape';

@@ -27,3 +27,6 @@ const centerMethod = function (...params) { return center(this, ...params); };
 Shape.prototype.center = centerMethod;
 
 export default center;
+
+center.signature = 'center(shape:Shape) -> Shape';
+centerMethod.signature = 'Shape -> center() -> Shape';

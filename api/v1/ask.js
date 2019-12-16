@@ -44,3 +44,8 @@ ask.forString = askForString;
 ask.forBool = askForBool;
 
 export default ask;
+
+ask.signature = 'ask(parameter:string) -> number';
+ask.forNumber.signature = 'ask(parameter:string, value:number = 0) -> number';
+ask.forString.signature = 'ask(parameter:string, value) -> string';
+ask.forBool.signature = 'ask(parameter:string, value:boolean = false) -> boolean';

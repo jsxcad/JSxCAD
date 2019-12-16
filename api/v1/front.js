@@ -54,6 +54,7 @@ export const front = dispatch(
     return () => fromReference(shape, reference);
   });
 
-const method = function (...params) { return front(this, ...params); };
+const frontMethod = function (...params) { return front(this, ...params); };
+Shape.prototype.front = frontMethod;
 
-Shape.prototype.front = method;
+frontMethod.signature = 'Shape -> front() -> Shape';

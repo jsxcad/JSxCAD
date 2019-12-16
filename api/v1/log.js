@@ -13,5 +13,6 @@ import { log as sysLog } from '@jsxcad/sys';
  **/
 
 export const log = (text) => sysLog({ op: 'text', text: String(text) });
-
 export default log;
+
+log.signature = 'log(text:string)';

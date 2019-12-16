@@ -25,3 +25,6 @@ const materialMethod = function (...tags) { return material(this, ...tags); };
 Shape.prototype.material = materialMethod;
 
 export default material;
+
+material.signature = 'material(shape:Shape) -> Shape';
+materialMethod.signature = 'Shape -> material() -> Shape';
