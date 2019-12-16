@@ -44,3 +44,5 @@ export const chainHull = (...shapes) => {
 };
 
 export default chainHull;
+
+chainHull.signature = 'chainHull(...shapes:Shape) -> Shape';

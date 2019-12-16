@@ -22,7 +22,10 @@ import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geom
 
 export const measureBoundingBox = (shape) => measureBoundingBoxOfGeometry(shape.toGeometry());
 
-const method = function () { return measureBoundingBox(this); };
-Shape.prototype.measureBoundingBox = method;
+const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
+Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
 
 export default measureBoundingBox;
+
+measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
+measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';

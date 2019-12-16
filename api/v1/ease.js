@@ -27,3 +27,6 @@ export const linear = (start, end) => t => start + t * (end - start);
 ease.linear = linear;
 
 export default ease;
+
+ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
+linear.signature = 'linear(start:number = 0, end:number = 1) -> function';

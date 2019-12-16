@@ -53,7 +53,10 @@ export const drop = (shape, ...tags) => {
   }
 };
 
-const method = function (...tags) { return drop(this, ...tags); };
-Shape.prototype.drop = method;
+const dropMethod = function (...tags) { return drop(this, ...tags); };
+Shape.prototype.drop = dropMethod;
 
 export default drop;
+
+drop.signature = '(shape:Shape ...tags:string) -> Shape';
+dropMethod.signature = 'Shape -> drop(...tags:string) -> Shape';

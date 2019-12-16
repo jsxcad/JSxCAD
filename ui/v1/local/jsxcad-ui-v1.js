@@ -46047,6 +46047,166 @@ class FilesUi extends react.PureComponent {
 
 }
 
+// FIX: Consider using a proper grammar.
+const toSignature = string => {
+  // "Shape -> Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape"
+  const [, prefix, body, suffix] = string.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
+  const [, inputType, inputOp] = prefix.match(/([^ ]*) -> ([^ ]*)/) || [];
+  const operation = inputOp || prefix;
+  const [, restArgs, options, rest] = body.match(/([^{]*)[{]([^}]*)[}][, ]*(.*)/) || [];
+  const args = restArgs === undefined ? body : restArgs;
+  const [,, outputType] = suffix.match(/([^ ]*) -> ([^ ]*)/) || [];
+  let restSpec;
+  const argSpecs = [];
+
+  for (const arg of args.split(',')) {
+    const [, initializedDeclaration, value] = arg.match(/ *([^=]*) *= *([^ ]*)/) || [];
+    const declaration = initializedDeclaration || arg;
+    const [, typedDeclaration, type] = declaration.match(/ *([^:]*):([^ ]*)/) || [];
+    const name = typedDeclaration || declaration;
+
+    if (name.match(/^ *$/) === null) {
+      const argSpec = {};
+      if (type) argSpec.type = type;
+      if (value) argSpec.value = value;
+
+      if (name) {
+        if (name.startsWith('...')) {
+          argSpec.name = name.substring(3);
+          restSpec = argSpec;
+        } else {
+          argSpec.name = name;
+          argSpecs.push(argSpec);
+        }
+      }
+    }
+  }
+
+  const optionSpecs = [];
+
+  if (options !== undefined) {
+    for (const option of options.split(',')) {
+      const [, initializedDeclaration, value] = option.match(/ *([^=]*) *= *([^ ]*)/) || [];
+      const declaration = initializedDeclaration || option;
+      const [, typedDeclaration, type] = declaration.match(/ *([^:]*):([^ ]*)/) || [];
+      const name = typedDeclaration || declaration;
+
+      if (name.match(/^ *$/) === null) {
+        const optionSpec = {};
+        if (name) optionSpec.name = name;
+        if (type) optionSpec.type = type;
+        if (value) optionSpec.value = value;
+        optionSpecs.push(optionSpec);
+      }
+    }
+  }
+
+  if (rest) {
+    const [, name, type] = rest.match(/ *([^:]*):([^ ]*)/) || [];
+
+    if (name.match(/^ *$/) === null && name.startsWith('...')) {
+      restSpec = {
+        name: name.substring(3),
+        type
+      };
+    }
+  } // Decode the operation
+
+
+  let operationSpec;
+  {
+    const [, namespace, name] = operation.match(/([^.]*)(.*)/) || [];
+
+    if (namespace && name) {
+      operationSpec = {
+        namespace,
+        name: name.substring(1)
+      };
+    } else if (!namespace && name.startsWith('.')) {
+      operationSpec = {
+        name: name.substring(1),
+        isMethod: true
+      };
+    } else if (namespace) {
+      operationSpec = {
+        name: namespace
+      };
+    }
+  }
+  const spec = {};
+  if (inputType) spec.inputType = inputType;
+  if (operationSpec) spec.operation = operationSpec;
+  if (argSpecs && argSpecs.length > 0) spec.args = argSpecs;
+  if (optionSpecs && optionSpecs.length > 0) spec.options = optionSpecs;
+  if (restSpec) spec.rest = restSpec;
+  if (outputType) spec.outputType = outputType;
+  spec.string = string;
+  return spec;
+};
+
+const startsWithUpperCase = string => {
+  const first = string[0];
+
+  if (first === undefined) {
+    // ""
+    return false;
+  }
+
+  if (first === first.toLowerCase()) {
+    // 'i', '5'
+    return false;
+  }
+
+  if (first !== first.toUpperCase()) {
+    return false;
+  }
+
+  return true;
+};
+
+const toSnippet = ({
+  inputType,
+  operation,
+  args,
+  options,
+  rest,
+  outputType,
+  string
+}) => {
+  const {
+    name,
+    namespace
+  } = operation;
+  const snippet = {};
+
+  if (inputType) {
+    snippet.meta = `${inputType} method`;
+    snippet.isMethod = true;
+    snippet.name = `.${name}`;
+    snippet.trigger = `${name}`;
+    snippet.content = `${name}(${'$'}${1})`;
+  } else if (namespace) {
+    snippet.meta = `${namespace} constructor`;
+    snippet.name = `${namespace}.${name}`;
+    snippet.trigger = `${namespace}.${name}`;
+    snippet.content = `${namespace}.${name}(${'$'}{1})`;
+  } else if (startsWithUpperCase(name)) {
+    snippet.meta = `constructor`;
+    snippet.name = name;
+    snippet.trigger = name;
+    snippet.content = `${name}(${'$'}{1})`;
+  } else {
+    snippet.meta = `function`;
+    snippet.name = name;
+    snippet.trigger = name;
+    snippet.content = `${name}(${'$'}{1})`;
+  }
+
+  snippet.type = 'snippet';
+  snippet.docHTML = string;
+  return snippet;
+};
+
 var lodash_isequal = createCommonjsModule(function (module, exports) {
 /**
  * Lodash (Custom Build) <https://lodash.com/>
@@ -77835,28 +77995,28 @@ const getSignatures = api => {
 
   for (const name of Object.keys(api)) {
     const value = api[name];
-    const signature = value.signature;
+    const string = value.signature;
 
-    if (signature !== undefined) {
-      signatures.push(signature);
+    if (string !== undefined) {
+      signatures.push(toSignature(string));
     }
 
     for (const name of Object.keys(value)) {
       const property = value[name];
-      const signature = property.signature;
+      const string = property.signature;
 
-      if (signature !== undefined) {
-        signatures.push(signature);
+      if (string !== undefined) {
+        signatures.push(toSignature(string));
       }
     }
 
-    if (value.constructor !== undefined && value.constructor.prototype !== undefined) {
-      for (const name of Object.keys(value.constructor.prototype)) {
-        const property = value.constructor.prototype[name];
-        const signature = property.signature;
+    if (value.prototype !== undefined) {
+      for (const name of Object.keys(value.prototype)) {
+        const property = value.prototype[name];
+        const string = property.signature;
 
-        if (signature !== undefined) {
-          signatures.push(signature);
+        if (string !== undefined) {
+          signatures.push(toSignature(string));
         }
       }
     }
@@ -77865,27 +78025,12 @@ const getSignatures = api => {
   return signatures;
 };
 
-const toSnippetFromSignature = signature => {
-  // "Shape -> Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape"
-  const [, prefix, body, suffix] = signature.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
-  const [, input, inputOp] = prefix.match(/([^ ]*) -> ([^ ]*)/) || [];
-  const operation = inputOp || prefix;
-  const [, restArgs, options, rest] = body.match(/([^{]*)[{]([^}]*)[}](.*)/) || [];
-  const args = restArgs || body;
-  const [,, output] = suffix.match(/([^ ]*) -> ([^ ]*)/) || [];
-  console.log(`QQ/input: ${input}`);
-  console.log(`QQ/operation: ${operation}`);
-  console.log(`QQ/args: ${args}`);
-  console.log(`QQ/options: ${options}`);
-  console.log(`QQ/rest: ${rest}`);
-  console.log(`QQ/output: ${output}`);
-  return {};
-};
-
-getSignatures(api).map(toSnippetFromSignature); // aceEditorCompleter.setCompleters([scriptCompleter]);
+const snippets = getSignatures(api).map(toSnippet); // aceEditorCompleter.setCompleters([scriptCompleter]);
 
 aceEditorCompleter.setCompleters([snippetCompleter]);
-aceEditorSnippetManager.register([{
+aceEditorSnippetManager.register([...snippets
+/*
+{
   name: '.color',
   trigger: '.color',
   isMethod: true,
@@ -77893,7 +78038,9 @@ aceEditorSnippetManager.register([{
   meta: 'Shape Method',
   type: 'snippet',
   docHTML: "Shape:color(name)<br><br>Gives the shape the named color.<br><br><i>Circle().color('red')</i>"
-}], 'JSxCAD');
+}
+*/
+], 'JSxCAD');
 class JsEditorUi extends react.PureComponent {
   static get propTypes() {
     return {

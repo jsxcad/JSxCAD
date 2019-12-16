@@ -1,7 +1,5 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { assertShape, assertStrings } from './assert';
 
-import { dispatch } from './dispatch';
 import { keep as keepGeometry } from '@jsxcad/geometry-tagged';
 
 /**
@@ -40,19 +38,10 @@ import { keep as keepGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const fromValue = (tags, shape) => fromGeometry(keepGeometry(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+export const keep = (shape, tags) => fromGeometry(keepGeometry(tags.map(tag => `user/${tag}`), toGeometry(shape)));
 
-export const keep = dispatch(
-  'keep',
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue(tags, shape);
-  }
-);
+const keepMethod = function (...tags) { return keep(this, tags); };
+Shape.prototype.keep = keepMethod;
 
-keep.fromValues = fromValue;
-
-const method = function (...tags) { return keep(tags, this); };
-
-Shape.prototype.keep = method;
+keep.signature = 'keep(shape:Shape, tags:strings) -> Shape';
+keepMethod.signature = 'Shape -> keep(tags:strings) -> Shape';

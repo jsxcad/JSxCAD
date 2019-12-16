@@ -88,3 +88,10 @@ Cube.ofDiameter = ofDiameter;
 Cube.fromCorners = fromCorners;
 
 export default Cube;
+
+Cube.signature = 'Cube(size:number = 1) -> Shape';
+Cube.ofSize.signature = 'Cube.ofSize(width:number = 1, length:number = 1, height:number = 1) -> Shape';
+Cube.ofRadius.signature = 'Cube.ofRadius(radius:number = 1) -> Shape';
+Cube.ofApothem.signature = 'Cube.ofApothem(apothem:number = 1) -> Shape';
+Cube.ofDiameter.signature = 'Cube.ofDiameter(diameter:number = 1) -> Shape';
+Cube.fromCorners.signature = 'Cube.fromCorners(corner1:point, corner2:point) -> Shape';

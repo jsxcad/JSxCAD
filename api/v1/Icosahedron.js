@@ -1,8 +1,5 @@
-import { assertEmpty, assertNumber } from './assert';
-
 import { Shape } from './Shape';
 import { buildRegularIcosahedron } from '@jsxcad/algorithm-shape';
-import { dispatch } from './dispatch';
 
 /**
  *
@@ -35,37 +32,15 @@ import { dispatch } from './dispatch';
 
 const unitIcosahedron = () => Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
 
-export const fromValue = (value) => unitIcosahedron().scale(value);
+export const ofRadius = (radius = 1) => unitIcosahedron().scale(radius);
+export const ofDiameter = (diameter = 1) => unitIcosahedron().scale(diameter / 2);
+export const Icosahedron = (...args) => ofRadius(...args);
 
-export const fromRadius = ({ radius }) => unitIcosahedron().scale(radius);
-
-export const fromDiameter = ({ diameter }) => unitIcosahedron().scale(diameter / 2);
-
-export const Icosahedron = dispatch(
-  'Icosahedron',
-  // Icosahedron()
-  (...rest) => {
-    assertEmpty(rest);
-    return () => fromValue(1);
-  },
-  // Icosahedron(2)
-  (value) => {
-    assertNumber(value);
-    return () => fromValue(value);
-  },
-  // Icosahedron({ radius: 2 })
-  ({ radius }) => {
-    assertNumber(radius);
-    return () => fromRadius({ radius });
-  },
-  // Icosahedron({ diameter: 2 })
-  ({ diameter }) => {
-    assertNumber(diameter);
-    return () => fromDiameter({ diameter });
-  });
-
-Icosahedron.fromValue = fromValue;
-Icosahedron.fromRadius = fromRadius;
-Icosahedron.fromDiameter = fromDiameter;
+Icosahedron.ofRadius = ofRadius;
+Icosahedron.ofDiameter = ofDiameter;
 
 export default Icosahedron;
+
+Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
+Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
+Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';

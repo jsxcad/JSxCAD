@@ -230,8 +230,11 @@ const toKeptGeometry = (shape) => shape.toKeptGeometry();
 
 const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
 
-const method = function () { return measureBoundingBox(this); };
-Shape.prototype.measureBoundingBox = method;
+const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
+Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
+
+measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
+measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
 
 /**
  *
@@ -271,8 +274,8 @@ Shape.prototype.measureBoundingBox = method;
 
 const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
 
-const method$1 = function (...args) { return translate(this, ...args); };
-Shape.prototype.translate = method$1;
+const method = function (...args) { return translate(this, ...args); };
+Shape.prototype.translate = method;
 
 /**
  *
@@ -282,10 +285,13 @@ Shape.prototype.translate = method$1;
  *
  */
 
-const move = translate;
+const move = (...args) => translate(...args);
 
-const method$2 = function (...params) { return translate(this, ...params); };
-Shape.prototype.move = method$2;
+const moveMethod = function (...params) { return translate(this, ...params); };
+Shape.prototype.move = moveMethod;
+
+move.signature = 'move(shape:Shape, x:number = 0, y:number = 0, z:number = 0) -> Shape';
+moveMethod.signature = 'Shape -> move(x:number = 0, y:number = 0, z:number = 0) -> Shape';
 
 /**
  *
@@ -295,10 +301,13 @@ Shape.prototype.move = method$2;
  *
  */
 
-const moveZ = (shape, z) => move(shape, 0, 0, z);
+const moveZ = (shape, z = 0) => move(shape, 0, 0, z);
 
-const method$3 = function (z) { return moveZ(this, z); };
-Shape.prototype.moveZ = method$3;
+const moveZMethod = function (z) { return moveZ(this, z); };
+Shape.prototype.moveZ = moveZMethod;
+
+moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
+moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
 
 /**
  *
@@ -316,12 +325,15 @@ Shape.prototype.moveZ = method$3;
 const MIN = 0;
 const Z = 2;
 
-const above = (shape, reference) => {
+const above = (shape) => {
   return moveZ(shape, -measureBoundingBox(shape)[MIN][Z]);
 };
 
 const aboveMethod = function (...params) { return above(this); };
 Shape.prototype.above = aboveMethod;
+
+above.signature = 'above(shape:Shape) -> Shape';
+aboveMethod.signature = 'Shape -> above() -> Shape';
 
 const dispatch = (name, ...dispatches) => {
   const op = (...params) => {
@@ -413,9 +425,9 @@ const union = dispatch(
     return () => unionOfShapes(...shapes);
   });
 
-const method$4 = function (...shapes) { return union(this, ...shapes); };
+const method$1 = function (...shapes) { return union(this, ...shapes); };
 
-Shape.prototype.union = method$4;
+Shape.prototype.union = method$1;
 
 /**
  *
@@ -433,8 +445,10 @@ Shape.prototype.union = method$4;
  *
  **/
 
-const method$5 = function (...shapes) { return union(this, ...shapes); };
-Shape.prototype.add = method$5;
+const addMethod = function (...shapes) { return union(this, ...shapes); };
+Shape.prototype.add = addMethod;
+
+addMethod.signature = 'Shape -> (...Shapes) -> Shape';
 
 /**
  *
@@ -462,6 +476,9 @@ const notAsMethod = function (...tags) { return notAs(this, tags); };
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;
 
+asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
+notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
+
 /**
  *
  * # MoveY
@@ -470,10 +487,13 @@ Shape.prototype.notAs = notAsMethod;
  *
  */
 
-const moveY = (shape, y) => move(shape, 0, y);
+const moveY = (shape, y = 0) => move(shape, 0, y);
 
-const method$6 = function (y) { return moveY(this, y); };
-Shape.prototype.moveY = method$6;
+const moveYMethod = function (y) { return moveY(this, y); };
+Shape.prototype.moveY = moveYMethod;
+
+moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
+moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
 
 /**
  *
@@ -492,12 +512,15 @@ Shape.prototype.moveY = method$6;
 const MIN$1 = 0;
 const Y = 1;
 
-const back = (shape, reference) => {
+const back = (shape) => {
   return moveY(shape, -measureBoundingBox(shape)[MIN$1][Y]);
 };
 
 const backMethod = function (...params) { return back(this); };
 Shape.prototype.back = backMethod;
+
+back.signature = 'back(shape:Shape) -> Shape';
+backMethod.signature = 'Shape -> back() -> Shape';
 
 /**
  *
@@ -522,16 +545,21 @@ const below = (shape, reference) => {
 const belowMethod = function (...params) { return below(this); };
 Shape.prototype.below = belowMethod;
 
+below.signature = 'below(shape:Shape) -> Shape';
+belowMethod.signature = 'Shape -> below() -> Shape';
+
 /**
  *
  * # Bill Of Materials
  *
  **/
 
-const bom = (shape, ...args) => shape;
+const bom = (shape, ...args) => '';
 
 const bomMethod = function (...args) { return bom(this, ...args); };
 Shape.prototype.bom = bomMethod;
+
+bomMethod.signature = 'Shape -> bom() -> string';
 
 /**
  *
@@ -555,6 +583,9 @@ const center = (shape) => {
 
 const centerMethod = function (...params) { return center(this); };
 Shape.prototype.center = centerMethod;
+
+center.signature = 'center(shape:Shape) -> Shape';
+centerMethod.signature = 'Shape -> center() -> Shape';
 
 // Ideally this would be a plane of infinite extent.
 // Unfortunately this makes things like interpolation tricky,
@@ -634,6 +665,8 @@ const assemble = (...shapes) => {
   }
 };
 
+assemble.signature = 'assemble(...shapes:Shape) -> Shape';
+
 /**
  *
  * # Chop
@@ -678,6 +711,9 @@ const chop = (shape, planeShape = Z$2()) => {
 const chopMethod = function (surface) { return chop(this, surface); };
 Shape.prototype.chop = chopMethod;
 
+chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
+chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
+
 /**
  *
  * # Color
@@ -706,7 +742,8 @@ const color = (...args) => fromName(...args);
 const colorMethod = function (...args) { return color(this, ...args); };
 Shape.prototype.color = colorMethod;
 
-color.signature = 'Shape -> color(color:string) -> Shape';
+color.signature = 'color(shape:Shape, color:string) -> Shape';
+colorMethod.signature = 'Shape -> color(color:string) -> Shape';
 
 const colors = (shape) =>
   [...allTags(shape.toGeometry())]
@@ -715,6 +752,9 @@ const colors = (shape) =>
 
 const colorsMethod = function () { return colors(this); };
 Shape.prototype.colors = colorsMethod;
+
+colors.signature = 'colors(shape:Shape) -> strings';
+colorsMethod.signature = 'Shape -> colors() -> strings';
 
 const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
@@ -937,9 +977,11 @@ const hull = (...shapes) => {
   }
 };
 
-const method$7 = function (...shapes) { return hull(this, ...shapes); };
+const hullMethod = function (...shapes) { return hull(this, ...shapes); };
+Shape.prototype.hull = hullMethod;
 
-Shape.prototype.hull = method$7;
+hull.signature = 'hull(shape:Shape, ...shapes:Shape) -> Shape';
+hullMethod.signature = 'Shape -> hull(...shapes:Shape) -> Shape';
 
 /**
  *
@@ -981,8 +1023,8 @@ const shell = (shape, radius = 1, resolution = 8) => {
   return union(...shells);
 };
 
-const method$8 = function (radius, resolution) { return shell(this, radius, resolution); };
-Shape.prototype.shell = method$8;
+const method$2 = function (radius, resolution) { return shell(this, radius, resolution); };
+Shape.prototype.shell = method$2;
 
 /**
  *
@@ -1002,8 +1044,11 @@ const expand = (shape, amount = 1, { resolution = 16 }) =>
     ? shape.union(shell(shape, amount, resolution))
     : shape.cut(shell(shape, -amount, resolution));
 
-const method$9 = function (...args) { return expand(this, ...args); };
-Shape.prototype.expand = method$9;
+const expandMethod = function (...args) { return expand(this, ...args); };
+Shape.prototype.expand = expandMethod;
+
+expand.signature = 'expand(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+expandMethod.signature = 'Shape -> expand(amount:number = 1, { resolution:number = 16 }) -> Shape';
 
 /**
  *
@@ -1024,8 +1069,11 @@ const contract = (...args) => byRadius(...args);
 
 contract.byRadius = byRadius;
 
-const method$a = function (radius, resolution) { return contract(this, radius, resolution); };
-Shape.prototype.contract = method$a;
+const contractMethod = function (radius, resolution) { return contract(this, radius, resolution); };
+Shape.prototype.contract = contractMethod;
+
+contract.signature = 'contract(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+contractMethod.signature = 'Shape -> contract(amount:number = 1, { resolution:number = 16 }) -> Shape';
 
 /**
  *
@@ -1071,6 +1119,8 @@ const difference = (...shapes) => {
   }
 };
 
+difference.signature = 'difference(shape:Shape, ...shapes:Shape) -> Shape';
+
 /**
  *
  * # shape.cut(...shapes)
@@ -1087,8 +1137,10 @@ const difference = (...shapes) => {
  *
  **/
 
-const method$b = function (...shapes) { return difference(this, ...shapes); };
-Shape.prototype.cut = method$b;
+const cutMethod = function (...shapes) { return difference(this, ...shapes); };
+Shape.prototype.cut = cutMethod;
+
+cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';
 
 /**
  *
@@ -1142,8 +1194,11 @@ const drop = (shape, ...tags) => {
   }
 };
 
-const method$c = function (...tags) { return drop(this, ...tags); };
-Shape.prototype.drop = method$c;
+const dropMethod = function (...tags) { return drop(this, ...tags); };
+Shape.prototype.drop = dropMethod;
+
+drop.signature = '(shape:Shape ...tags:string) -> Shape';
+dropMethod.signature = 'Shape -> drop(...tags:string) -> Shape';
 
 const edges = (shape, op = (_ => _)) => {
   const edgeId = (from, to) => `${JSON.stringify(from)}->${JSON.stringify(to)}`;
@@ -1226,6 +1281,9 @@ const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) =>
 
 const extrudeMethod = function (...args) { return extrude(this, ...args); };
 Shape.prototype.extrude = extrudeMethod;
+
+extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
+extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
 
 // Hershey simplex one line font.
 // See: http://paulbourke.net/dataformats/hershey/
@@ -1645,9 +1703,10 @@ const front = dispatch(
     return () => fromReference(shape, reference);
   });
 
-const method$d = function (...params) { return front(this, ...params); };
+const frontMethod = function (...params) { return front(this, ...params); };
+Shape.prototype.front = frontMethod;
 
-Shape.prototype.front = method$d;
+frontMethod.signature = 'Shape -> front() -> Shape';
 
 /**
  *
@@ -1659,9 +1718,9 @@ Shape.prototype.front = method$d;
 
 const getPathsets = (shape) => getPaths(shape.toKeptGeometry()).map(({ paths }) => paths);
 
-const method$e = function () { return getPathsets(this); };
+const method$3 = function () { return getPathsets(this); };
 
-Shape.prototype.getPathsets = method$e;
+Shape.prototype.getPathsets = method$3;
 
 /**
  *
@@ -1690,7 +1749,7 @@ Shape.prototype.getPathsets = method$e;
  *
  **/
 
-const interior = (options = {}, shape) => {
+const interior = (shape) => {
   const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
     // FIX: Check paths for coplanarity.
@@ -1699,20 +1758,25 @@ const interior = (options = {}, shape) => {
   return assemble(...surfaces);
 };
 
-const method$f = function (options) { return interior(options, this); };
+const interiorMethod = function (...args) { return interior(this); };
+Shape.prototype.interior = interiorMethod;
 
-Shape.prototype.interior = method$f;
+interior.signature = 'interior(shape:Shape) -> Shape';
+interiorMethod.signature = 'Shape -> interior() -> Shape';
 
-const items = (shape, xform = (_ => _)) => {
+const items = (shape, op = (_ => _)) => {
   const items = [];
   for (const solid of getItems(shape.toKeptGeometry())) {
-    items.push(xform(Shape.fromGeometry(solid)));
+    items.push(op(Shape.fromGeometry(solid)));
   }
   return items;
 };
 
 const itemsMethod = function (...args) { return items(this, ...args); };
 Shape.prototype.items = itemsMethod;
+
+items.signature = 'items(shape:Shape, op:function) -> Shapes';
+itemsMethod.signature = 'Shape -> items(op:function) -> Shapes';
 
 /**
  *
@@ -1750,22 +1814,13 @@ Shape.prototype.items = itemsMethod;
  *
  **/
 
-const fromValue = (tags, shape) => fromGeometry(keep$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+const keep = (shape, tags) => fromGeometry(keep$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
 
-const keep = dispatch(
-  'keep',
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue(tags, shape);
-  }
-);
+const keepMethod = function (...tags) { return keep(this, tags); };
+Shape.prototype.keep = keepMethod;
 
-keep.fromValues = fromValue;
-
-const method$g = function (...tags) { return keep(tags, this); };
-
-Shape.prototype.keep = method$g;
+keep.signature = 'keep(shape:Shape, tags:strings) -> Shape';
+keepMethod.signature = 'Shape -> keep(tags:strings) -> Shape';
 
 /**
  *
@@ -1777,9 +1832,11 @@ Shape.prototype.keep = method$g;
 
 const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
 
-const method$h = function () { return kept(this); };
+const keptMethod = function () { return kept(this); };
+Shape.prototype.kept = keptMethod;
 
-Shape.prototype.kept = method$h;
+kept.signature = 'kept(shape:Shape) -> Shape';
+keptMethod.signature = 'Shape -> kept() -> Shape';
 
 /**
  *
@@ -1789,10 +1846,13 @@ Shape.prototype.kept = method$h;
  *
  */
 
-const moveX = (shape, x) => move(shape, x);
+const moveX = (shape, x = 0) => move(shape, x);
 
-const method$i = function (x) { return moveX(this, x); };
-Shape.prototype.moveX = method$i;
+const moveXMethod = function (x) { return moveX(this, x); };
+Shape.prototype.moveX = moveXMethod;
+
+moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
+moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';
 
 /**
  *
@@ -1815,35 +1875,16 @@ Shape.prototype.moveX = method$i;
 
 const X = 0;
 
-const fromOrigin$1 = (shape) => {
+const left = (shape) => {
   const [, maxPoint] = measureBoundingBox(shape);
   return moveX(shape, -maxPoint[X]);
 };
 
-const fromReference$1 = (shape, reference) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  const [minRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveX(shape, minRefPoint[X] - maxPoint[X]));
-};
+const leftMethod = function (...args) { return left(this); };
+Shape.prototype.left = leftMethod;
 
-const left = dispatch(
-  'left',
-  // front(cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin$1(shape);
-  },
-  // front(cube(), sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference$1(shape, reference);
-  });
-
-const method$j = function (...params) { return left(this, ...params); };
-
-Shape.prototype.left = method$j;
+left.signature = 'left(shape:Shape) -> Shape';
+leftMethod.signature = 'Shape -> left() -> Shape';
 
 /**
  *
@@ -1866,6 +1907,9 @@ const material = (shape, ...tags) =>
 
 const materialMethod = function (...tags) { return material(this, ...tags); };
 Shape.prototype.material = materialMethod;
+
+material.signature = 'material(shape:Shape) -> Shape';
+materialMethod.signature = 'Shape -> material() -> Shape';
 
 /**
  *
@@ -1891,9 +1935,11 @@ const measureCenter = (shape) => {
   return scale$1(0.5, add(high, low));
 };
 
-const method$k = function () { return measureCenter(this); };
+const measureCenterMethod = function () { return measureCenter(this); };
+Shape.prototype.measureCenter = measureCenterMethod;
 
-Shape.prototype.measureCenter = method$k;
+measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
+measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
 /**
  *
@@ -1901,7 +1947,7 @@ Shape.prototype.measureCenter = method$k;
  *
  **/
 
-const fromValue$1 = (tags, shape) => fromGeometry(nonNegative(tags, toGeometry(shape)));
+const fromValue = (tags, shape) => fromGeometry(nonNegative(tags, toGeometry(shape)));
 
 const nocut = dispatch(
   'nocut',
@@ -1914,15 +1960,15 @@ const nocut = dispatch(
   (tags, shape) => {
     assertStrings(tags);
     assertShape(shape);
-    return () => fromValue$1(tags.map(tag => `user/${tag}`), shape);
+    return () => fromValue(tags.map(tag => `user/${tag}`), shape);
   }
 );
 
-nocut.fromValues = fromValue$1;
+nocut.fromValues = fromValue;
 
-const method$l = function (...tags) { return nocut(tags, this); };
+const method$4 = function (...tags) { return nocut(tags, this); };
 
-Shape.prototype.nocut = method$l;
+Shape.prototype.nocut = method$4;
 
 /**
  *
@@ -1951,15 +1997,15 @@ Shape.prototype.nocut = method$l;
 const outline = (shape) =>
   assemble(...outline$1(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
 
-const method$m = function (options) { return outline(this); };
+const method$5 = function (options) { return outline(this); };
 
-Shape.prototype.outline = method$m;
+Shape.prototype.outline = method$5;
 Shape.prototype.withOutline = function (options) { return assemble(this, outline(this)); };
 
 const offset = (shape, radius = 1, resolution = 16) => outline(expand(shape, radius, resolution));
 
-const method$n = function (radius, resolution) { return offset(this, radius, resolution); };
-Shape.prototype.offset = method$n;
+const method$6 = function (radius, resolution) { return offset(this, radius, resolution); };
+Shape.prototype.offset = method$6;
 
 /**
  *
@@ -1992,9 +2038,9 @@ const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from =
       .move(from);
 };
 
-const method$o = function (options = {}) { return orient(options, this); };
+const method$7 = function (options = {}) { return orient(options, this); };
 
-Shape.prototype.orient = method$o;
+Shape.prototype.orient = method$7;
 
 /**
  *
@@ -2017,12 +2063,12 @@ Shape.prototype.orient = method$o;
 
 const X$1 = 0;
 
-const fromOrigin$2 = (shape) => {
+const fromOrigin$1 = (shape) => {
   const [minPoint] = measureBoundingBox(shape);
   return moveX(shape, -minPoint[X$1]);
 };
 
-const fromReference$2 = (shape, reference) => {
+const fromReference$1 = (shape, reference) => {
   const [minPoint] = measureBoundingBox(shape);
   const [, maxRefPoint] = measureBoundingBox(reference);
   return assemble(reference, moveX(shape, maxRefPoint[X$1] - minPoint[X$1]));
@@ -2034,18 +2080,18 @@ const right = dispatch(
   (shape, ...rest) => {
     assertShape(shape);
     assertEmpty(rest);
-    return () => fromOrigin$2(shape);
+    return () => fromOrigin$1(shape);
   },
   // right(Cube(), Sphere())
   (shape, reference) => {
     assertShape(shape);
     assertShape(reference);
-    return () => fromReference$2(shape, reference);
+    return () => fromReference$1(shape, reference);
   });
 
-const method$p = function (...params) { return right(this, ...params); };
+const method$8 = function (...params) { return right(this, ...params); };
 
-Shape.prototype.right = method$p;
+Shape.prototype.right = method$8;
 
 /**
  *
@@ -2072,9 +2118,9 @@ Shape.prototype.right = method$p;
 
 const rotate = (shape, axis, angle) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
 
-const method$q = function (angle, axis) { return rotate(this, axis, angle); };
+const method$9 = function (angle, axis) { return rotate(this, axis, angle); };
 
-Shape.prototype.rotate = method$q;
+Shape.prototype.rotate = method$9;
 
 /**
  *
@@ -2096,9 +2142,9 @@ Shape.prototype.rotate = method$q;
 
 const rotateX = (shape, angle) => shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-const method$r = function (angle) { return rotateX(this, angle); };
+const method$a = function (angle) { return rotateX(this, angle); };
 
-Shape.prototype.rotateX = method$r;
+Shape.prototype.rotateX = method$a;
 
 /**
  *
@@ -2120,9 +2166,9 @@ Shape.prototype.rotateX = method$r;
 
 const rotateY = (shape, angle) => shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-const method$s = function (angle) { return rotateY(this, angle); };
+const method$b = function (angle) { return rotateY(this, angle); };
 
-Shape.prototype.rotateY = method$s;
+Shape.prototype.rotateY = method$b;
 
 /**
  *
@@ -2144,9 +2190,9 @@ Shape.prototype.rotateY = method$s;
 
 const rotateZ = (shape, angle) => shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-const method$t = function (angle) { return rotateZ(this, angle); };
+const method$c = function (angle) { return rotateZ(this, angle); };
 
-Shape.prototype.rotateZ = method$t;
+Shape.prototype.rotateZ = method$c;
 
 /**
  *
@@ -2180,9 +2226,9 @@ const scale = (factor, shape) => {
   }
 };
 
-const method$u = function (factor) { return scale(factor, this); };
+const method$d = function (factor) { return scale(factor, this); };
 
-Shape.prototype.scale = method$u;
+Shape.prototype.scale = method$d;
 
 /**
  *
@@ -2230,9 +2276,9 @@ const section = (solidShape, surfaceShape = Z$2(0)) => {
   return assemble(...sections);
 };
 
-const method$v = function (surface) { return section(this, surface); };
+const method$e = function (surface) { return section(this, surface); };
 
-Shape.prototype.section = method$v;
+Shape.prototype.section = method$e;
 
 const solids = (shape, xform = (_ => _)) => {
   const solids = [];
@@ -2285,6 +2331,8 @@ const chainHull = (...shapes) => {
   return union(...chain);
 };
 
+chainHull.signature = 'chainHull(...shapes:Shape) -> Shape';
+
 /**
  *
  * # Sweep
@@ -2304,9 +2352,9 @@ const sweep = (toolpath, tool) => {
   return union(...chains);
 };
 
-const method$w = function (tool) { return sweep(this, tool); };
+const method$f = function (tool) { return sweep(this, tool); };
 
-Shape.prototype.sweep = method$w;
+Shape.prototype.sweep = method$f;
 Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, tool)); };
 
 const tags = (shape) =>
@@ -2314,9 +2362,9 @@ const tags = (shape) =>
       .filter(tag => tag.startsWith('user/'))
       .map(tag => tag.substring(5));
 
-const method$x = function () { return tags(this); };
+const method$g = function () { return tags(this); };
 
-Shape.prototype.tags = method$x;
+Shape.prototype.tags = method$g;
 
 /**
  *
@@ -2435,24 +2483,24 @@ const toBillOfMaterial = (shape) => {
   return specifications;
 };
 
-const method$y = function (options = {}) { return toBillOfMaterial(this); };
+const method$h = function (options = {}) { return toBillOfMaterial(this); };
 
-Shape.prototype.toBillOfMaterial = method$y;
+Shape.prototype.toBillOfMaterial = method$h;
 
 // DEPRECATED: See 'Shape.items'
 const toItems = (shape) => getItems(shape.toKeptGeometry()).map(fromGeometry);
 
-const method$z = function (options = {}) { return toItems(this); };
+const method$i = function (options = {}) { return toItems(this); };
 
-Shape.prototype.toItems = method$z;
+Shape.prototype.toItems = method$i;
 
 // Return an assembly of paths so that each toolpath can have its own tag.
 const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
   Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
 
-const method$A = function (...options) { return toolpath(this, ...options); };
+const method$j = function (...options) { return toolpath(this, ...options); };
 
-Shape.prototype.toolpath = method$A;
+Shape.prototype.toolpath = method$j;
 Shape.prototype.withToolpath = function (...args) { return assemble(this, toolpath(this, ...args)); };
 
 /**
@@ -2532,6 +2580,8 @@ Shape.prototype.turnZ = turnZMethod;
 
 const log = (text) => log$1({ op: 'text', text: String(text) });
 
+log.signature = 'log(text:string)';
+
 /**
  *
  * # Unfold
@@ -2597,8 +2647,8 @@ const unfold = (shape) => {
   return root;
 };
 
-const method$B = function (...args) { return unfold(this); };
-Shape.prototype.unfold = method$B;
+const method$k = function (...args) { return unfold(this); };
+Shape.prototype.unfold = method$k;
 
 /**
  *
@@ -2619,8 +2669,8 @@ Shape.prototype.unfold = method$B;
  *
  **/
 
-const method$C = function (...shapes) { return assemble(this, ...shapes); };
-Shape.prototype.with = method$C;
+const method$l = function (...shapes) { return assemble(this, ...shapes); };
+Shape.prototype.with = method$l;
 
 const X$2 = 0;
 const Y$2 = 1;
@@ -2666,9 +2716,9 @@ const voxels = ({ resolution = 1 }, shape) => {
   return assemble(...voxels);
 };
 
-const method$D = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
+const method$m = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
 
-Shape.prototype.voxels = method$D;
+Shape.prototype.voxels = method$m;
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];
@@ -2715,9 +2765,9 @@ const wireframe = (options = {}, shape) => {
   return assemble(...pieces);
 };
 
-const method$E = function (options) { return wireframe(options, this); };
+const method$n = function (options) { return wireframe(options, this); };
 
-Shape.prototype.wireframe = method$E;
+Shape.prototype.wireframe = method$n;
 Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
 
 /**
@@ -2742,9 +2792,9 @@ const writeDxf = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$F = function (options = {}) { return writeDxf(options, this); };
+const method$o = function (options = {}) { return writeDxf(options, this); };
 
-Shape.prototype.writeDxf = method$F;
+Shape.prototype.writeDxf = method$o;
 
 /**
  *
@@ -2768,9 +2818,9 @@ const writeGcode = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$G = function (options = {}) { return writeGcode(options, this); };
+const method$p = function (options = {}) { return writeGcode(options, this); };
 
-Shape.prototype.writeGcode = method$G;
+Shape.prototype.writeGcode = method$p;
 
 /**
  *
@@ -2794,9 +2844,9 @@ const writePdf = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$H = function (options = {}) { return writePdf(options, this); };
+const method$q = function (options = {}) { return writePdf(options, this); };
 
-Shape.prototype.writePdf = method$H;
+Shape.prototype.writePdf = method$q;
 
 /**
  *
@@ -2829,9 +2879,9 @@ const writeShape = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$I = function (options = {}) { return writeShape(options, this); };
+const method$r = function (options = {}) { return writeShape(options, this); };
 
-Shape.prototype.writeShape = method$I;
+Shape.prototype.writeShape = method$r;
 
 /**
  *
@@ -2856,9 +2906,9 @@ const writeStl = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$J = function (options = {}) { return writeStl(options, this); };
+const method$s = function (options = {}) { return writeStl(options, this); };
 
-Shape.prototype.writeStl = method$J;
+Shape.prototype.writeStl = method$s;
 
 /**
  *
@@ -2883,9 +2933,9 @@ const writeSvg = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$K = function (options = {}) { return writeSvg(options, this); };
+const method$t = function (options = {}) { return writeSvg(options, this); };
 
-Shape.prototype.writeSvg = method$K;
+Shape.prototype.writeSvg = method$t;
 
 /**
  *
@@ -2915,9 +2965,9 @@ const writeSvgPhoto = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$L = function (options = {}) { return writeSvgPhoto(options, this); };
+const method$u = function (options = {}) { return writeSvgPhoto(options, this); };
 
-Shape.prototype.writeSvgPhoto = method$L;
+Shape.prototype.writeSvgPhoto = method$u;
 
 const writeThreejsPage = async (options, shape) => {
   if (typeof options === 'string') {
@@ -2929,9 +2979,9 @@ const writeThreejsPage = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method$M = function (options = {}) { return writeThreejsPage(options, this); };
+const method$v = function (options = {}) { return writeThreejsPage(options, this); };
 
-Shape.prototype.writeThreejsPage = method$M;
+Shape.prototype.writeThreejsPage = method$v;
 
 /**
  *
@@ -3048,6 +3098,9 @@ const ease = (start = 0.00, end = 1.00, op = t => 1) => {
 const linear = (start, end) => t => start + t * (end - start);
 ease.linear = linear;
 
+ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
+linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
+
 const ofRadius$4 = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(0, radius);
   return Prism.ofSlices(t => Circle(fn(t) * radius, { sides }).moveZ(t * height));
@@ -3061,6 +3114,11 @@ const Cone = (...args) => ofRadius$4(...args);
 Cone.ofRadius = ofRadius$4;
 Cone.ofDiameter = ofDiameter$4;
 Cone.ofApothem = ofApothem$3;
+
+Cone.signature = 'Cone(radius:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofRadius.signature = 'Cone.ofRadius(radius:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofDiameter.signature = 'Cone.ofDiameter(diameter:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofApothem.signature = 'Cone.ofApothem(apothem:number, height:number, { sides:number = 32 }) -> Shape';
 
 /**
  *
@@ -3146,6 +3204,13 @@ Cube.ofRadius = ofRadius$5;
 Cube.ofApothem = ofApothem$4;
 Cube.ofDiameter = ofDiameter$5;
 Cube.fromCorners = fromCorners;
+
+Cube.signature = 'Cube(size:number = 1) -> Shape';
+Cube.ofSize.signature = 'Cube.ofSize(width:number = 1, length:number = 1, height:number = 1) -> Shape';
+Cube.ofRadius.signature = 'Cube.ofRadius(radius:number = 1) -> Shape';
+Cube.ofApothem.signature = 'Cube.ofApothem(apothem:number = 1) -> Shape';
+Cube.ofDiameter.signature = 'Cube.ofDiameter(diameter:number = 1) -> Shape';
+Cube.fromCorners.signature = 'Cube.fromCorners(corner1:point, corner2:point) -> Shape';
 
 // Normalize (1, 2, 3) and ([1, 2, 3]).
 const normalizeVector = (...params) => {
@@ -3256,8 +3321,8 @@ class Cursor {
   }
 }
 
-const fromOrigin$3 = () => new Cursor();
-Cursor.fromOrigin = fromOrigin$3;
+const fromOrigin$2 = () => new Cursor();
+Cursor.fromOrigin = fromOrigin$2;
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
@@ -3324,6 +3389,13 @@ Cylinder.ofDiameter = ofDiameter$6;
 Cylinder.ofFunction = ofFunction$1;
 Cylinder.ofSlices = ofSlices$1;
 
+Cylinder.signature = 'Cylinder(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofRadius.signature = 'Cylinder.ofRadius(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofDiameter.signature = 'Cylinder.ofDiameter(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
+Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
+
 // TODO: (await readFont(...))({ emSize: 16 })("CA");
 
 /**
@@ -3383,6 +3455,10 @@ Font.Hershey = Hershey;
 Font.ofSize = ofSize$2;
 Font.read = async (path, { flip = false } = {}) => readFont(path, { flip });
 
+Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
+Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
+Font.read.signature = 'Font.read(path:string, { flip:boolean = false }) -> Font';
+
 /**
  *
  * # Arc Cosine
@@ -3399,6 +3475,7 @@ Font.read = async (path, { flip = false } = {}) => readFont(path, { flip });
  **/
 
 const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+acos.signature = 'acos(angle:number) -> number';
 
 /**
  *
@@ -3417,6 +3494,8 @@ const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
 
 const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
 
+cos.signature = 'cos(angle:number) -> number';
+
 /**
  *
  * # Max
@@ -3430,6 +3509,8 @@ const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
  **/
 
 const max = Math.max;
+
+max.signature = 'max(...values:number) -> number';
 
 /**
  *
@@ -3542,10 +3623,10 @@ const Gear = {
  * :::
  **/
 
-const ofEdge$2 = (edge) => Polygon.ofEdge(edge, 6);
-const ofApothem$6 = (apothem) => Polygon.ofApothem(apothem, 6);
-const ofRadius$7 = (radius) => Polygon.ofRadius(radius, 6);
-const ofDiameter$7 = (diameter) => Polygon.ofDiameter(diameter, 6);
+const ofEdge$2 = (edge = 1) => Polygon.ofEdge(edge, { sides: 6 });
+const ofApothem$6 = (apothem = 1) => Polygon.ofApothem(apothem, { sides: 6 });
+const ofRadius$7 = (radius = 1) => Polygon.ofRadius(radius, { sides: 6 });
+const ofDiameter$7 = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 6 });
 
 const Hexagon = (...args) => ofRadius$7(...args);
 
@@ -3554,6 +3635,12 @@ Hexagon.ofEdge = ofEdge$2;
 Hexagon.ofApothem = ofApothem$6;
 Hexagon.ofRadius = ofRadius$7;
 Hexagon.ofDiameter = ofDiameter$7;
+
+Hexagon.signature = 'Hexagon(radius:number = 1) -> Shape';
+Hexagon.ofRadius.signature = 'Hexagon.ofRadius(radius:number = 1) -> Shape';
+Hexagon.ofDiameter.signature = 'Hexagon.ofDiameter(diameter:number = 1) -> Shape';
+Hexagon.ofApothem.signature = 'Hexagon.ofApothem(apothem:number = 1) -> Shape';
+Hexagon.ofEdge.signature = 'Hexagon.ofEdge(edge:number = 1) -> Shape';
 
 /**
  *
@@ -3586,38 +3673,16 @@ Hexagon.ofDiameter = ofDiameter$7;
 
 const unitIcosahedron = () => Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
 
-const fromValue$2 = (value) => unitIcosahedron().scale(value);
+const ofRadius$8 = (radius = 1) => unitIcosahedron().scale(radius);
+const ofDiameter$8 = (diameter = 1) => unitIcosahedron().scale(diameter / 2);
+const Icosahedron = (...args) => ofRadius$8(...args);
 
-const fromRadius = ({ radius }) => unitIcosahedron().scale(radius);
+Icosahedron.ofRadius = ofRadius$8;
+Icosahedron.ofDiameter = ofDiameter$8;
 
-const fromDiameter = ({ diameter }) => unitIcosahedron().scale(diameter / 2);
-
-const Icosahedron = dispatch(
-  'Icosahedron',
-  // Icosahedron()
-  (...rest) => {
-    assertEmpty(rest);
-    return () => fromValue$2(1);
-  },
-  // Icosahedron(2)
-  (value) => {
-    assertNumber(value);
-    return () => fromValue$2(value);
-  },
-  // Icosahedron({ radius: 2 })
-  ({ radius }) => {
-    assertNumber(radius);
-    return () => fromRadius({ radius });
-  },
-  // Icosahedron({ diameter: 2 })
-  ({ diameter }) => {
-    assertNumber(diameter);
-    return () => fromDiameter({ diameter });
-  });
-
-Icosahedron.fromValue = fromValue$2;
-Icosahedron.fromRadius = fromRadius;
-Icosahedron.fromDiameter = fromDiameter;
+Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
+Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
+Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
 
 /**
  *
@@ -3629,8 +3694,11 @@ Icosahedron.fromDiameter = fromDiameter;
 
 const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: toGeometry(shape) }));
 
-const method$N = function (id) { return Item(this, id); };
-Shape.prototype.toItem = method$N;
+const toItemMethod = function (id) { return Item(this, id); };
+Shape.prototype.toItem = toItemMethod;
+
+Item.signature = 'Item(shape:Shape, id:string) -> Shape';
+toItemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
 
 /**
  *
@@ -3773,6 +3841,8 @@ const Lego = {
 
 const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
 
+Line.signature = 'Line(length:number) -> Shape';
+
 /**
  *
  * # Intersection
@@ -3843,10 +3913,10 @@ const intersection = dispatch(
     return () => intersectionOfShapes(...shapes);
   });
 
-const method$O = function (...shapes) { return intersection(this, ...shapes); };
+const method$w = function (...shapes) { return intersection(this, ...shapes); };
 
-Shape.prototype.clip = method$O;
-Shape.prototype.intersection = method$O;
+Shape.prototype.clip = method$w;
+Shape.prototype.intersection = method$w;
 
 /**
  *
@@ -3904,7 +3974,7 @@ const Nail = dispatch(
         .move(0, 0, height / -2);
   });
 
-const fromValue$3 = (point) => Shape.fromPoint(point);
+const fromValue$1 = (point) => Shape.fromPoint(point);
 
 /**
  *
@@ -3965,17 +4035,17 @@ const Point = dispatch(
     assertNumber(y);
     assertNumber(z);
     assertEmpty(rest);
-    return () => fromValue$3([x, y, z]);
+    return () => fromValue$1([x, y, z]);
   },
   // Point([1, 2, 3])
   ([x = 0, y = 0, z = 0]) => {
     assertNumber(x);
     assertNumber(y);
     assertNumber(z);
-    return () => fromValue$3([x, y, z]);
+    return () => fromValue$1([x, y, z]);
   });
 
-Point.fromValue = fromValue$3;
+Point.fromValue = fromValue$1;
 
 const fromPoints$1 = (points) => Shape.fromPoints(points);
 
@@ -4178,9 +4248,9 @@ const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).
 
 const ofEdge$3 = (size) => unitSquare().scale(size);
 const ofEdges = (width, length) => unitSquare().scale([width, length, 1]);
-const ofRadius$8 = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
-const ofApothem$7 = (apothem) => ofRadius$8(toRadiusFromApothem(apothem));
-const ofDiameter$8 = (diameter) => ofRadius$8(diameter / 2);
+const ofRadius$9 = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
+const ofApothem$7 = (apothem) => ofRadius$9(toRadiusFromApothem(apothem));
+const ofDiameter$9 = (diameter) => ofRadius$9(diameter / 2);
 
 const fromCorners$1 = (corner1, corner2) => {
   const [c1x, c1y] = corner1;
@@ -4224,19 +4294,19 @@ const Square = dispatch(
   // Polygon({ radius: 10})
   ({ radius }) => {
     assertNumber(radius);
-    return () => ofRadius$8(radius);
+    return () => ofRadius$9(radius);
   },
   // Polygon({ diameter: 10})
   ({ diameter }) => {
     assertNumber(diameter);
-    return () => ofDiameter$8(diameter);
+    return () => ofDiameter$9(diameter);
   });
 
 Square.ofEdge = ofEdge$3;
 Square.ofEdges = ofEdges;
-Square.ofRadius = ofRadius$8;
+Square.ofRadius = ofRadius$9;
 Square.ofApothem = ofApothem$7;
-Square.ofDiameter = ofDiameter$8;
+Square.ofDiameter = ofDiameter$9;
 Square.fromCorners = fromCorners$1;
 
 /**
@@ -4290,38 +4360,38 @@ const SvgPath = (options = {}, svgPath) =>
 
 const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
 
-const fromValue$4 = (value) => unitTetrahedron().scale(value);
+const fromValue$2 = (value) => unitTetrahedron().scale(value);
 
-const fromRadius$1 = ({ radius }) => unitTetrahedron().scale(radius);
+const fromRadius = ({ radius }) => unitTetrahedron().scale(radius);
 
-const fromDiameter$1 = ({ diameter }) => unitTetrahedron().scale(diameter / 2);
+const fromDiameter = ({ diameter }) => unitTetrahedron().scale(diameter / 2);
 
 const Tetrahedron = dispatch(
   'Tetrahedron',
   // Tetrahedron()
   (...rest) => {
     assertEmpty(rest);
-    return () => fromValue$4(1);
+    return () => fromValue$2(1);
   },
   // Tetrahedron(2)
   (value) => {
     assertNumber(value);
-    return () => fromValue$4(value);
+    return () => fromValue$2(value);
   },
   // Tetrahedron({ radius: 2 })
   ({ radius }) => {
     assertNumber(radius);
-    return () => fromRadius$1({ radius });
+    return () => fromRadius({ radius });
   },
   // Tetrahedron({ diameter: 2 })
   ({ diameter }) => {
     assertNumber(diameter);
-    return () => fromDiameter$1({ diameter });
+    return () => fromDiameter({ diameter });
   });
 
-Tetrahedron.fromValue = fromValue$4;
-Tetrahedron.fromRadius = fromRadius$1;
-Tetrahedron.fromDiameter = fromDiameter$1;
+Tetrahedron.fromValue = fromValue$2;
+Tetrahedron.fromRadius = fromRadius;
+Tetrahedron.fromDiameter = fromDiameter;
 
 /**
  *
@@ -4367,15 +4437,15 @@ Tetrahedron.fromDiameter = fromDiameter$1;
 
 const ofEdge$4 = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
 const ofApothem$8 = (apothem = 1) => Polygon.ofApothem(apothem, { sides: 3 });
-const ofRadius$9 = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
-const ofDiameter$9 = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 3 });
+const ofRadius$a = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
+const ofDiameter$a = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 3 });
 
 const Triangle = (...args) => ofEdge$4(...args);
 
 Triangle.ofEdge = ofEdge$4;
 Triangle.ofApothem = ofApothem$8;
-Triangle.ofRadius = ofRadius$9;
-Triangle.ofDiameter = ofDiameter$9;
+Triangle.ofRadius = ofRadius$a;
+Triangle.ofDiameter = ofDiameter$a;
 
 // Ideally this would be a plane of infinite extent.
 // Unfortunately this makes things like interpolation tricky,
@@ -4411,8 +4481,11 @@ const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
   return assemble(...solids);
 };
 
-const method$P = function (...args) { return lathe(this, ...args); };
-Shape.prototype.lathe = method$P;
+const latheMethod = function (...args) { return lathe(this, ...args); };
+Shape.prototype.lathe = latheMethod;
+
+lathe.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
+latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';
 
 /**
  *
@@ -4436,7 +4509,7 @@ const buildThread = ({ radius = 1, height = 1, pitch = 1, sides = 16 }) => {
 const buildRod = ({ radius = 1, height = 1, sides = 16 }) =>
   Cylinder({ radius, height, sides });
 
-const fromRadius$2 = ({ radius = 1, height = 1, pitch = 1, sides = 16, play = 0, bore }) => {
+const fromRadius$1 = ({ radius = 1, height = 1, pitch = 1, sides = 16, play = 0, bore }) => {
   const rod = assemble(
     buildThread({ radius: radius - play, height, pitch, sides }),
     buildRod({ radius: radius - play, height, sides }));
@@ -4456,7 +4529,7 @@ const ThreadedRod = dispatch(
     assertNumber(radius);
     assertNumber(height);
     assertNumber(sides);
-    return () => fromRadius$2({ radius, height, sides, bore });
+    return () => fromRadius$1({ radius, height, sides, bore });
   });
 
 ThreadedRod.ofRadius = (radius, height, sides) => ThreadedRod(radius, height, sides);
@@ -4573,6 +4646,11 @@ ask.forNumber = askForNumber;
 ask.forString = askForString;
 ask.forBool = askForBool;
 
+ask.signature = 'ask(parameter:string) -> number';
+ask.forNumber.signature = 'ask(parameter:string, value:number = 0) -> number';
+ask.forString.signature = 'ask(parameter:string, value) -> string';
+ask.forBool.signature = 'ask(parameter:string, value:boolean = false) -> boolean';
+
 /**
  *
  * # Coordinates
@@ -4626,8 +4704,11 @@ const flat = (shape) => {
   return bestFlatShape;
 };
 
-const method$Q = function () { return flat(this); };
-Shape.prototype.flat = method$Q;
+const flatMethod = function () { return flat(this); };
+Shape.prototype.flat = flatMethod;
+
+flat.signature = 'flat(shape:Shape) -> Shape';
+flatMethod.signature = 'Shape -> flat() -> Shape';
 
 const importModule = async (name) => {
   let script;
@@ -4670,6 +4751,8 @@ const minkowski = (a, b) => {
   b.eachPoint({}, point => bPoints.push(point));
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
+
+minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
 
 const pack = (options = {}, ...shapes) => {
   const [packed, unpacked] = pack$1(options, ...shapes.map(shape => shape.toKeptGeometry()));
@@ -4950,8 +5033,8 @@ const specify = (specification, ...shapes) => {
   return Shape.fromGeometry(rewriteTags([`item/${JSON.stringify(specification)}`], [], geometry));
 };
 
-const method$R = function (specification) { return specify(specification, this); };
-Shape.prototype.specify = method$R;
+const method$x = function (specification) { return specify(specification, this); };
+Shape.prototype.specify = method$x;
 
 /**
  *
@@ -4978,9 +5061,9 @@ const stretch = (shape, length, planeShape = Z$2(0)) => {
   return assemble(...stretches);
 };
 
-const method$S = function (...args) { return stretch(this, ...args); };
+const method$y = function (...args) { return stretch(this, ...args); };
 
-Shape.prototype.stretch = method$S;
+Shape.prototype.stretch = method$y;
 
 /**
  *

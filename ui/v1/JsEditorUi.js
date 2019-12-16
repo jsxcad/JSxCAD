@@ -1,6 +1,7 @@
 import * as api from '@jsxcad/api-v1';
 
 import { log, readFile, writeFile } from '@jsxcad/sys';
+import { toSignature, toSnippet } from './signature';
 
 import AceEditor from 'react-ace';
 import Button from 'react-bootstrap/Button';
@@ -15,8 +16,6 @@ import Row from 'react-bootstrap/Row';
 import { aceEditorAuxiliary } from './AceEditorAuxiliary';
 import { aceEditorCompleter } from './AceEditorCompleter';
 import { aceEditorSnippetManager } from './AceEditorSnippetManager';
-
-import { decode as decodeSignature } from './signature';
 
 import { prismJsAuxiliary } from './PrismJSAuxiliary';
 
@@ -108,23 +107,23 @@ const getSignatures = (api) => {
   const signatures = [];
   for (const name of Object.keys(api)) {
     const value = api[name];
-    const signature = value.signature;
-    if (signature !== undefined) {
-      signatures.push(signature);
+    const string = value.signature;
+    if (string !== undefined) {
+      signatures.push(toSignature(string));
     }
     for (const name of Object.keys(value)) {
       const property = value[name];
-      const signature = property.signature;
-      if (signature !== undefined) {
-        signatures.push(signature);
+      const string = property.signature;
+      if (string !== undefined) {
+        signatures.push(toSignature(string));
       }
     }
-    if (value.constructor !== undefined && value.constructor.prototype !== undefined) {
-      for (const name of Object.keys(value.constructor.prototype)) {
-        const property = value.constructor.prototype[name];
-        const signature = property.signature;
-        if (signature !== undefined) {
-          signatures.push(decodeSignature(signature));
+    if (value.prototype !== undefined) {
+      for (const name of Object.keys(value.prototype)) {
+        const property = value.prototype[name];
+        const string = property.signature;
+        if (string !== undefined) {
+          signatures.push(toSignature(string));
         }
       }
     }
@@ -132,15 +131,14 @@ const getSignatures = (api) => {
   return signatures;
 };
 
-const toSnippetFromSignature = (signature) => {
-};
-
-getSignatures(api).map(toSnippetFromSignature);
+const snippets = getSignatures(api).map(toSnippet);
 
 // aceEditorCompleter.setCompleters([scriptCompleter]);
 aceEditorCompleter.setCompleters([snippetCompleter]);
 aceEditorSnippetManager.register(
   [
+    ...snippets
+    /*
     {
       name: '.color',
       trigger: '.color',
@@ -150,6 +148,7 @@ aceEditorSnippetManager.register(
       type: 'snippet',
       docHTML: "Shape:color(name)<br><br>Gives the shape the named color.<br><br><i>Circle().color('red')</i>"
     }
+*/
   ],
   'JSxCAD');
 

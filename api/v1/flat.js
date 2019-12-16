@@ -40,5 +40,8 @@ export const flat = (shape) => {
   return bestFlatShape;
 };
 
-const method = function () { return flat(this); };
-Shape.prototype.flat = method;
+const flatMethod = function () { return flat(this); };
+Shape.prototype.flat = flatMethod;
+
+flat.signature = 'flat(shape:Shape) -> Shape';
+flatMethod.signature = 'Shape -> flat() -> Shape';

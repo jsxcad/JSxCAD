@@ -9,9 +9,12 @@ import move from './move';
  *
  */
 
-export const moveX = (shape, x) => move(shape, x);
+export const moveX = (shape, x = 0) => move(shape, x);
 
-const method = function (x) { return moveX(this, x); };
-Shape.prototype.moveX = method;
+const moveXMethod = function (x) { return moveX(this, x); };
+Shape.prototype.moveX = moveXMethod;
 
 export default moveX;
+
+moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
+moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';

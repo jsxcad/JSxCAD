@@ -26,3 +26,6 @@ const belowMethod = function (...params) { return below(this, ...params); };
 Shape.prototype.below = belowMethod;
 
 export default below;
+
+below.signature = 'below(shape:Shape) -> Shape';
+belowMethod.signature = 'Shape -> below() -> Shape';

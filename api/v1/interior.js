@@ -30,7 +30,7 @@ import { isClosed } from '@jsxcad/geometry-path';
  *
  **/
 
-export const interior = (options = {}, shape) => {
+export const interior = (shape) => {
   const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
     // FIX: Check paths for coplanarity.
@@ -39,6 +39,8 @@ export const interior = (options = {}, shape) => {
   return assemble(...surfaces);
 };
 
-const method = function (options) { return interior(options, this); };
+const interiorMethod = function (...args) { return interior(this, ...args); };
+Shape.prototype.interior = interiorMethod;
 
-Shape.prototype.interior = method;
+interior.signature = 'interior(shape:Shape) -> Shape';
+interiorMethod.signature = 'Shape -> interior() -> Shape';

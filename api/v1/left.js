@@ -1,8 +1,4 @@
-import { assertEmpty, assertShape } from './assert';
-
 import { Shape } from './Shape';
-import { assemble } from './assemble';
-import { dispatch } from './dispatch';
 import { measureBoundingBox } from './measureBoundingBox';
 import { moveX } from './moveX';
 
@@ -27,32 +23,13 @@ import { moveX } from './moveX';
 
 const X = 0;
 
-export const fromOrigin = (shape) => {
+export const left = (shape) => {
   const [, maxPoint] = measureBoundingBox(shape);
   return moveX(shape, -maxPoint[X]);
 };
 
-export const fromReference = (shape, reference) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  const [minRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveX(shape, minRefPoint[X] - maxPoint[X]));
-};
+const leftMethod = function (...args) { return left(this, ...args); };
+Shape.prototype.left = leftMethod;
 
-export const left = dispatch(
-  'left',
-  // front(cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin(shape);
-  },
-  // front(cube(), sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference(shape, reference);
-  });
-
-const method = function (...params) { return left(this, ...params); };
-
-Shape.prototype.left = method;
+left.signature = 'left(shape:Shape) -> Shape';
+leftMethod.signature = 'Shape -> left() -> Shape';
