@@ -1,11 +1,6 @@
-
-import { assertEmpty, assertShape } from './assert';
-
-import { Shape } from './Shape';
-import { assemble } from './assemble';
-import { dispatch } from './dispatch';
-import { measureBoundingBox } from './measureBoundingBox';
-import { moveY } from './moveY';
+import Shape from './Shape';
+import measureBoundingBox from './measureBoundingBox';
+import moveY from './moveY';
 
 /**
  *
@@ -28,33 +23,12 @@ import { moveY } from './moveY';
 
 const Y = 1;
 
-export const fromOrigin = (shape) => {
+export const front = (shape) => {
   const [, maxPoint] = measureBoundingBox(shape);
   return moveY(shape, -maxPoint[Y]);
 };
 
-export const fromReference = (shape, reference) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  const [minRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveY(shape, minRefPoint[Y] - maxPoint[Y]));
-};
-
-export const front = dispatch(
-  'front',
-  // front(cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin(shape);
-  },
-  // front(cube(), sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference(shape, reference);
-  });
-
-const frontMethod = function (...params) { return front(this, ...params); };
+const frontMethod = function (...args) { return front(this, ...args); };
 Shape.prototype.front = frontMethod;
 
 frontMethod.signature = 'Shape -> front() -> Shape';

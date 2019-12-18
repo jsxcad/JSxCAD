@@ -53,3 +53,5 @@ export const Armature = () => {
 };
 
 export default Armature;
+
+Armature.signature = 'Armature() -> armature';

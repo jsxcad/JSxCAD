@@ -117,3 +117,5 @@ export const fromOrigin = () => new Cursor();
 Cursor.fromOrigin = fromOrigin;
 
 export default Cursor;
+
+Cursor.signature = 'Cursor.fromOrigin() -> Cursor';

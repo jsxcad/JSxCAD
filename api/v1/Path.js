@@ -1,8 +1,6 @@
-import { Shape } from './Shape';
-import { assertPoints } from './assert';
-import { dispatch } from './dispatch';
+import Shape from './Shape';
 
-export const fromPoints = (points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+export const fromPoints = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
  *
@@ -19,14 +17,9 @@ export const fromPoints = (points) => Shape.fromOpenPath(points.map(([x = 0, y =
  *
  **/
 
-export const Path = dispatch(
-  'Path',
-  // Path([0, 0], [3, 0], [3, 3])
-  (...points) => {
-    assertPoints(points);
-    return () => fromPoints(points);
-  });
-
+export const Path = (...points) => fromPoints(...points);
 Path.fromPoints = fromPoints;
 
 export default Path;
+Path.signature = 'Path(...points:Point) -> Shape';
+Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';

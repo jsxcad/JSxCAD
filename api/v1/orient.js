@@ -20,7 +20,7 @@ import { Shape } from './Shape';
  * :::
  **/
 
-export const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }, shape) => {
+export const orient = (shape, { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }) => {
   const normalizedFacing = normalize(facing);
   const normalizedAt = normalize(subtract(at, from));
 
@@ -33,6 +33,8 @@ export const orient = ({ center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0],
       .move(from);
 };
 
-const method = function (options = {}) { return orient(options, this); };
+const orientMethod = function (...args) { return orient(this, ...args); };
+Shape.prototype.orient = orientMethod;
 
-Shape.prototype.orient = method;
+orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
+orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';

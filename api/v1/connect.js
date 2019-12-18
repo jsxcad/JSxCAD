@@ -94,6 +94,9 @@ Shape.prototype.connectTo = connectToMethod;
 
 export default connect;
 
+connect.signature = 'connect(from:Connector, to:Connector) -> Shape';
+connectToMethod.signature = 'Shape -> connectTo(to:Connector) -> Shape';
+
 export const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
   const bConnection = connect(b, bJoin).toGeometry();

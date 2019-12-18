@@ -21,3 +21,5 @@ export const importModule = async (name) => {
   const module = await constructor();
   return module;
 };
+
+importModule.signature = 'async importModule(name:string) -> module';

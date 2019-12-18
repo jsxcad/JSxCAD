@@ -1,10 +1,6 @@
-import { assertEmpty, assertShape } from './assert';
-
-import { Shape } from './Shape';
-import { assemble } from './assemble';
-import { dispatch } from './dispatch';
-import { measureBoundingBox } from './measureBoundingBox';
-import { moveX } from './moveX';
+import Shape from './Shape';
+import measureBoundingBox from './measureBoundingBox';
+import moveX from './moveX';
 
 /**
  *
@@ -27,32 +23,13 @@ import { moveX } from './moveX';
 
 const X = 0;
 
-export const fromOrigin = (shape) => {
+export const right = (shape) => {
   const [minPoint] = measureBoundingBox(shape);
   return moveX(shape, -minPoint[X]);
 };
 
-export const fromReference = (shape, reference) => {
-  const [minPoint] = measureBoundingBox(shape);
-  const [, maxRefPoint] = measureBoundingBox(reference);
-  return assemble(reference, moveX(shape, maxRefPoint[X] - minPoint[X]));
-};
+const rightMethod = function (...args) { return right(this, ...args); };
+Shape.prototype.right = rightMethod;
 
-export const right = dispatch(
-  'right',
-  // right(Cube())
-  (shape, ...rest) => {
-    assertShape(shape);
-    assertEmpty(rest);
-    return () => fromOrigin(shape);
-  },
-  // right(Cube(), Sphere())
-  (shape, reference) => {
-    assertShape(shape);
-    assertShape(reference);
-    return () => fromReference(shape, reference);
-  });
-
-const method = function (...params) { return right(this, ...params); };
-
-Shape.prototype.right = method;
+right.signature = 'right(shape:Shape) -> Shape';
+rightMethod.signature = 'Shape -> right() -> Shape';

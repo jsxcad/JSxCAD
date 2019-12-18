@@ -1,8 +1,6 @@
 import { Shape, fromGeometry, toGeometry } from './Shape';
-import { assertEmpty, assertShape, assertStrings } from './assert';
-import { nonNegative, rewriteTags } from '@jsxcad/geometry-tagged';
 
-import { dispatch } from './dispatch';
+import { nonNegative } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -10,25 +8,12 @@ import { dispatch } from './dispatch';
  *
  **/
 
-export const fromValue = (tags, shape) => fromGeometry(nonNegative(tags, toGeometry(shape)));
+export const nocut = (shape, ...tags) => fromGeometry(nonNegative(tags.map(tag => `user/${tag}`), toGeometry(shape)));
 
-export const nocut = dispatch(
-  'nocut',
-  (tags, shape) => {
-    // assemble(circle(), circle().nocut())
-    assertEmpty(tags);
-    assertShape(shape);
-    return () => fromGeometry(rewriteTags(['compose/non-negative'], [], toGeometry(shape)));
-  },
-  (tags, shape) => {
-    assertStrings(tags);
-    assertShape(shape);
-    return () => fromValue(tags.map(tag => `user/${tag}`), shape);
-  }
-);
+const nocutMethod = function (...tags) { return nocut(this, tags); };
+Shape.prototype.nocut = nocutMethod;
 
-nocut.fromValues = fromValue;
+export default nocut;
 
-const method = function (...tags) { return nocut(tags, this); };
-
-Shape.prototype.nocut = method;
+nocut.signature = 'nocut(shape:Shape, ...tag:string) -> Shape';
+nocutMethod.signature = 'Shape -> nocut(...tag:string) -> Shape';

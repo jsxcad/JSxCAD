@@ -29,7 +29,12 @@ import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
 export const outline = (shape) =>
   assemble(...outlineGeometry(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
 
-const method = function (options) { return outline(this); };
+const outlineMethod = function (options) { return outline(this); };
+const withOutlineMethod = function (options) { return assemble(this, outline(this)); };
 
-Shape.prototype.outline = method;
-Shape.prototype.withOutline = function (options) { return assemble(this, outline(this)); };
+Shape.prototype.outline = outlineMethod;
+Shape.prototype.withOutline = withOutlineMethod;
+
+outline.signature = 'outline(shape:Surface) -> Shape';
+outlineMethod.signature = 'Shape -> outline() -> Shape';
+withOutlineMethod.signature = 'Shape -> outline() -> Shape';

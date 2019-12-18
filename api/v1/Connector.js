@@ -52,6 +52,8 @@ Shape.prototype.Connector = ConnectorMethod;
 
 export default Connector;
 
+Connector.signature = 'Connector(id:string, { plane:Plane, center:Point, right:Point, start:Point, end:Point, shape:Shape, visualization:Shape }) -> Shape';
+
 // Associates an existing connector with a shape.
 const toConnectorMethod = function (connector, options) { return Shape.fromGeometry(connector.toKeptGeometry(), { ...options, [shapeToConnect]: this }); };
 Shape.prototype.toConnector = toConnectorMethod;

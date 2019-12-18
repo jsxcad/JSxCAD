@@ -24,3 +24,6 @@ const edgesMethod = function (...args) { return edges(this, ...args); };
 Shape.prototype.edges = edgesMethod;
 
 export default edges;
+
+edges.signature = 'edges(shape:Shape, op:function) -> edges';
+edgesMethod.signature = 'edges(shape:Shape, op:function) -> edges';

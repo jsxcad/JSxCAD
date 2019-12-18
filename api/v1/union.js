@@ -1,6 +1,5 @@
 import { Shape, fromGeometry, toKeptGeometry } from './Shape';
 
-import { dispatch } from './dispatch';
 import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 
 /**
@@ -54,7 +53,7 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 // NOTE: Perhaps we should make union(a, b, c) equivalent to emptyGeometry.union(a, b, c);
 // This would restore commutation.
 
-const unionOfShapes = (...shapes) => {
+export const union = (...shapes) => {
   switch (shapes.length) {
     case 0: {
       return fromGeometry({ assembly: [] });
@@ -68,14 +67,10 @@ const unionOfShapes = (...shapes) => {
   }
 };
 
-export const union = dispatch(
-  'union',
-  (...shapes) => {
-    return () => unionOfShapes(...shapes);
-  });
-
-const method = function (...shapes) { return union(this, ...shapes); };
-
-Shape.prototype.union = method;
+const unionMethod = function (...shapes) { return union(this, ...shapes); };
+Shape.prototype.union = unionMethod;
 
 export default union;
+
+union.signature = 'union(shape:Shape, ...shapes:Shape) -> Shape';
+unionMethod.signature = 'Shape -> union(...shapes:Shape) -> Shape';

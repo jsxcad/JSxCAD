@@ -9,8 +9,11 @@ import { getPaths as getPathsetsFromGeometry } from '@jsxcad/geometry-tagged';
  *
  **/
 
+// CHECK: Do we need this?
 export const getPathsets = (shape) => getPathsetsFromGeometry(shape.toKeptGeometry()).map(({ paths }) => paths);
 
-const method = function () { return getPathsets(this); };
+const getPathsetsMethod = function () { return getPathsets(this); };
+Shape.prototype.getPathsets = getPathsetsMethod;
 
-Shape.prototype.getPathsets = method;
+getPathsets.signature = 'getPathsets(shape:Shape) -> pathsets';
+getPathsetsMethod.signature = 'Shape -> getPathsets(shape:Shape) -> pathsets';
