@@ -58,6 +58,7 @@ var api = /*#__PURE__*/Object.freeze({
   get importModule () { return importModule; },
   get intersection () { return intersection; },
   get join () { return join; },
+  get joinLeft () { return joinLeft; },
   get lathe () { return lathe; },
   get Label () { return Label; },
   get Lego () { return Lego; },
@@ -2380,8 +2381,13 @@ Shape.prototype.tags = method$g;
  * :::
  **/
 
-const dropConnector = (shape, connector) =>
-  Shape.fromGeometry(drop$1([`connector/${connector}`], shape.toGeometry()));
+const toShape = (connector) => connector.getContext(shapeToConnect);
+
+const dropConnector = (shape, ...connectors) =>
+  Shape.fromGeometry(drop$1(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+
+const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
+Shape.prototype.dropConnector = dropConnectorMethod;
 
 const CENTER = 0;
 const RIGHT = 1;
@@ -2396,14 +2402,15 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
   return absoluteAngle * 180 / Math.PI;
 };
 
+// FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
 const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) => {
   const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
-  const aShape = aConnectorShape.getContext(shapeToConnect);
+  const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
 
   const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
-  const bShape = bConnectorShape.getContext(shapeToConnect);
+  const bShape = toShape(bConnectorShape);
   const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
 
   // Flatten a.
@@ -2440,9 +2447,12 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
                      dropConnector(bShape, bConnector.plan.connector).toGeometry()]
       });
   } else {
-    return aMovedShape;
+    return [aMovedShape, aMovedConnector];
   }
 };
+
+const connectToMethod = function (...args) { return connect(this, ...args); };
+Shape.prototype.connectTo = connectToMethod;
 
 const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
@@ -2466,6 +2476,31 @@ const rejoin = (shape, connectionShape, aJoin, bJoin) => {
                         Shape.fromGeometry(geometries[2]).toConnector(Shape.fromGeometry(connectors[2])));
   return Shape.fromGeometry(splice(shape.toKeptGeometry(), connection, rejoined.toGeometry()));
 };
+
+// FIX: The toKeptGeometry is almost certainly wrong.
+const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, joint, leftJointConnectorId, rightArmConnectorId, rightArm) => {
+  // leftArm will remain stationary.
+  const leftArmConnector = leftArm.connector(leftArmConnectorId);
+  const rightJointConnector = joint.connector(rightJointConnectorId);
+  const [joinedJointShape, joinedJointConnector] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
+  const rightArmConnector = rightArm.connector(rightArmConnectorId, { doConnect: false });
+  const [joinedRightShape, joinedRightConnector] = rightArmConnector.connectTo(joinedJointShape.connector(leftJointConnectorId), { doConnect: false });
+  const result = Shape.fromGeometry(
+    {
+      connection: joinId,
+      connectors: [leftArmConnector.toKeptGeometry(),
+                   joinedJointConnector.toKeptGeometry(),
+                   joinedRightConnector.toKeptGeometry()],
+      geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
+                   joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
+                   joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
+      tags: [`joinLeft/${joinId}`]
+    });
+  return result;
+};
+
+const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
+Shape.prototype.joinLeft = joinLeftMethod;
 
 const toMethod = function (...args) { return connect(this, ...args); };
 Shape.prototype.to = toMethod;
@@ -5253,4 +5288,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$3 as X, Y$3 as Y, Z$2 as Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$3 as X, Y$3 as Y, Z$2 as Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

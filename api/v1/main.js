@@ -77,7 +77,7 @@ import './writeThreejs';
 import * as vec from '@jsxcad/math-vec3';
 
 import { Label, Plan } from './Plan';
-import { join, rejoin } from './connect';
+import { join, joinLeft, rejoin } from './connect';
 
 import Armature from './Armature';
 import Circle from './Circle';
@@ -329,6 +329,7 @@ export {
   importModule,
   intersection,
   join,
+  joinLeft,
   lathe,
   Label,
   Lego,
