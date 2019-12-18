@@ -69,6 +69,7 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   renderer.outputGamma = true;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  const canvas = renderer.domElement;
   // viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
@@ -78,5 +79,5 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   hudCanvas.height = height;
   // viewerElement.appendChild(hudCanvas);
 
-  return { camera, hudCanvas, renderer, scene };
+  return { camera, canvas, hudCanvas, renderer, scene };
 };
