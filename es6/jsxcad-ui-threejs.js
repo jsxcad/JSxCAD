@@ -52739,7 +52739,6 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   camera.up.set(...up);
 
   const scene = new Scene();
-  scene.background = new Color$1(0xffffff, 0);
   scene.add(camera);
 
   if (withAxes) {
@@ -52751,8 +52750,6 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   if (withGrid) {
     const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
     grid.rotation.x = -Math.PI / 2;
-    // grid.material.opacity = 0.5;
-    // grid.material.transparent = true;
     grid.layers.set(1);
     scene.add(grid);
   }
@@ -52766,9 +52763,9 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   light.layers.set(0);
   camera.add(light);
 
-  const viewerElement = document.createElement('div');
-  viewerElement.id = 'viewer';
-  viewerElement.style.height = '100%';
+  // const viewerElement = document.createElement('div');
+  // viewerElement.id = 'viewer';
+  // viewerElement.style.height = '100%';
 
   const renderer = new WebGLRenderer({ antialias: true });
   renderer.autoClear = false;
@@ -52779,16 +52776,16 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   renderer.outputGamma = true;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
-  viewerElement.appendChild(renderer.domElement);
+  // viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
   hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
   hudCanvas.id = 'hudCanvas';
   hudCanvas.width = width;
   hudCanvas.height = height;
-  viewerElement.appendChild(hudCanvas);
+  // viewerElement.appendChild(hudCanvas);
 
-  return { camera, hudCanvas, renderer, scene, viewerElement };
+  return { camera, hudCanvas, renderer, scene };
 };
 
 const GEOMETRY_LAYER$1 = 0;

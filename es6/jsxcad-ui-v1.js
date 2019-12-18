@@ -85324,13 +85324,17 @@ class ViewUi extends react.PureComponent {
       camera,
       hudCanvas,
       renderer,
-      scene,
-      viewerElement
+      scene
     } = buildScene({
       width,
       height,
       view
     });
+    const viewerElement = document.createElement('div');
+    viewerElement.id = 'viewer';
+    viewerElement.style.height = '100%';
+    viewerElement.appendChild(renderer.domElement);
+    viewerElement.appendChild(hudCanvas);
     const {
       gui
     } = buildGui({
