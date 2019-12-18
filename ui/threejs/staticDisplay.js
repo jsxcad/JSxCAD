@@ -16,7 +16,7 @@ export const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
 
   const render = () => {
     camera.layers.set(GEOMETRY_LAYER);
@@ -30,5 +30,5 @@ export const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
 
   render();
 
-  return { canvas: viewerElement, hudCanvas };
+  return { canvas, hudCanvas };
 };
