@@ -2,7 +2,7 @@ import { Shape } from '@jsxcad/api-v1';
 import { staticDisplay } from '@jsxcad/ui-threejs';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
-export const show = (shape, { view, width = 1024, height = 512 } = {}) => {
+export const show = (shape, { view = { position: [0, 0, 100] }, width = 1024, height = 512 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { canvas } = staticDisplay({ view, threejsGeometry },
                                    { offsetWidth: width, offsetHeight: height });
