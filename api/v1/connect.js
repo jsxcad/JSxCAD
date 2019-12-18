@@ -19,8 +19,13 @@ import { toXYPlaneTransforms } from '@jsxcad/math-plane';
  * :::
  **/
 
-export const dropConnector = (shape, connector) =>
-  Shape.fromGeometry(drop([`connector/${connector}`], shape.toGeometry()));
+const toShape = (connector) => connector.getContext(shapeToConnect);
+
+export const dropConnector = (shape, ...connectors) =>
+  Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+
+const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
+Shape.prototype.dropConnector = dropConnectorMethod;
 
 const CENTER = 0;
 const RIGHT = 1;
@@ -35,14 +40,15 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
   return absoluteAngle * 180 / Math.PI;
 };
 
+// FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
 export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) => {
   const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
-  const aShape = aConnectorShape.getContext(shapeToConnect);
+  const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
 
   const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
-  const bShape = bConnectorShape.getContext(shapeToConnect);
+  const bShape = toShape(bConnectorShape);
   const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
 
   // Flatten a.
@@ -79,9 +85,14 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
                      dropConnector(bShape, bConnector.plan.connector).toGeometry()]
       });
   } else {
-    return aMovedShape;
+    return [aMovedShape, aMovedConnector];
   }
 };
+
+const connectToMethod = function (...args) { return connect(this, ...args); };
+Shape.prototype.connectTo = connectToMethod;
+
+export default connect;
 
 export const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
@@ -106,4 +117,29 @@ export const rejoin = (shape, connectionShape, aJoin, bJoin) => {
   return Shape.fromGeometry(splice(shape.toKeptGeometry(), connection, rejoined.toGeometry()));
 };
 
-export default connect;
+// FIX: The toKeptGeometry is almost certainly wrong.
+export const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, joint, leftJointConnectorId, rightArmConnectorId, rightArm) => {
+  // leftArm will remain stationary.
+  const leftArmConnector = leftArm.connector(leftArmConnectorId);
+  const rightJointConnector = joint.connector(rightJointConnectorId);
+  const [joinedJointShape, joinedJointConnector] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
+  const rightArmConnector = rightArm.connector(rightArmConnectorId, { doConnect: false });
+  const [joinedRightShape, joinedRightConnector] = rightArmConnector.connectTo(joinedJointShape.connector(leftJointConnectorId), { doConnect: false });
+  const result = Shape.fromGeometry(
+    {
+      connection: joinId,
+      connectors: [leftArmConnector.toKeptGeometry(),
+                   joinedJointConnector.toKeptGeometry(),
+                   joinedRightConnector.toKeptGeometry()],
+      geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
+                   joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
+                   joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
+      tags: [`joinLeft/${joinId}`]
+    });
+  return result;
+};
+
+const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
+Shape.prototype.joinLeft = joinLeftMethod;
+
+export const rejoinLeft = (...joints) => undefined;
