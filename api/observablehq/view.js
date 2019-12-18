@@ -2,7 +2,7 @@ import { Shape } from '@jsxcad/api-v1';
 import { staticDisplay } from '@jsxcad/ui-threejs';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
-export const show = (shape, { view = { position: [0, 0, 100] }, width = 1024, height = 512 } = {}) => {
+export const view = (shape, { view, width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { canvas } = staticDisplay({ view, threejsGeometry },
                                    { offsetWidth: width, offsetHeight: height });
@@ -10,8 +10,10 @@ export const show = (shape, { view = { position: [0, 0, 100] }, width = 1024, he
   return canvas;
 };
 
-const showMethod = function (...args) { return show(this, ...args); };
+const viewMethod = function () { return view(this, { view: { position: [100, -100, 100] } }); };
+const topViewMethod = function (...args) { return view(this, { view: { position: [0, 0, 100] } }); };
 
-Shape.prototype.show = showMethod;
+Shape.prototype.view = viewMethod;
+Shape.prototype.topView = topViewMethod;
 
-export default show;
+export default view;
