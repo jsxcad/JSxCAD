@@ -26,16 +26,8 @@ export const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
     renderer.render(scene, camera);
   };
 
-  const updateHud = () => {
-    const ctx = hudCanvas.getContext('2d');
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = '#FF0000';
-    ctx.fillText('HUD', 50, 50);
-  };
-
   buildMeshes({ datasets, threejsGeometry, scene });
 
-  updateHud();
   render();
 
   return { canvas: viewerElement, hudCanvas };
