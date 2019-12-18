@@ -7,6 +7,6 @@
  * the api uses.
  */
 
-import './display';
+import './show';
 
 export * from '@jsxcad/api-v1';
