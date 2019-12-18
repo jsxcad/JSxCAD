@@ -55,7 +55,12 @@ export class ViewUi extends React.PureComponent {
     let width = container.offsetWidth;
     let height = container.offsetHeight;
 
-    const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view });
+    const { camera, hudCanvas, renderer, scene } = buildScene({ width, height, view });
+    const viewerElement = document.createElement('div');
+    viewerElement.id = 'viewer';
+    viewerElement.style.height = '100%';
+    viewerElement.appendChild(renderer.domElement);
+    viewerElement.appendChild(hudCanvas);
     const { gui } = buildGui({ viewerElement });
     const hudContext = hudCanvas.getContext('2d');
 
