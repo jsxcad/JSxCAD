@@ -42,3 +42,5 @@ export const numbers = ({ from = 0, to, upto, by, resolution }, thunk = (n => n)
 };
 
 export default numbers;
+
+numbers.signature = 'numbers(spec) -> numbers';

@@ -1,6 +1,5 @@
 import { Shape, fromGeometry, toKeptGeometry } from './Shape';
 
-import { dispatch } from './dispatch';
 import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
 
 /**
@@ -52,7 +51,7 @@ import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
  * :::
  **/
 
-const intersectionOfShapes = (...shapes) => {
+export const intersection = (...shapes) => {
   switch (shapes.length) {
     case 0: {
       return fromGeometry({ assembly: [] });
@@ -67,15 +66,11 @@ const intersectionOfShapes = (...shapes) => {
   }
 };
 
-export const intersection = dispatch(
-  'intersection',
-  (...shapes) => {
-    return () => intersectionOfShapes(...shapes);
-  });
+const clipMethod = function (...shapes) { return intersection(this, ...shapes); };
 
-const method = function (...shapes) { return intersection(this, ...shapes); };
-
-Shape.prototype.clip = method;
-Shape.prototype.intersection = method;
+Shape.prototype.clip = clipMethod;
 
 export default intersection;
+
+intersection.signature = 'intersection(shape:Shape, ...to:Shape) -> Shape';
+clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
