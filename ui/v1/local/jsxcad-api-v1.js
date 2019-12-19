@@ -3274,8 +3274,7 @@ const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
  **/
 
 const ofRadius$6 = (radius = 1, height = 1, { sides = 32 } = {}) => buildPrism$1(radius, height, sides);
-
-const ofApothem$5 = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius$6(toRadiusFromApothem$1(apothem, sides), { sides });
+const ofApothem$5 = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius$6(toRadiusFromApothem$1(apothem, sides), height, { sides });
 const ofDiameter$6 = (diameter = 1, ...args) => ofRadius$6(diameter / 2, ...args);
 
 const toPathFromShape = (shape) => {
@@ -4946,6 +4945,9 @@ const stretch = (shape, length, planeShape = Z$2(0)) => {
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
     for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+      if (solid.length === 0) {
+        continue;
+      }
       const bottom = cutOpen(solid, planeSurface);
       const profile = section$1(solid, planeSurface);
       const top = cutOpen(solid, flip$1(planeSurface));

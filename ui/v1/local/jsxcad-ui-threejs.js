@@ -52739,7 +52739,6 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   camera.up.set(...up);
 
   const scene = new Scene();
-  // scene.background = new Color(0xffffff, 0);
   scene.add(camera);
 
   if (withAxes) {
@@ -52777,6 +52776,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   renderer.outputGamma = true;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  const canvas = renderer.domElement;
   // viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
@@ -52786,7 +52786,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   hudCanvas.height = height;
   // viewerElement.appendChild(hudCanvas);
 
-  return { camera, hudCanvas, renderer, scene };
+  return { camera, canvas, hudCanvas, renderer, scene };
 };
 
 const GEOMETRY_LAYER$1 = 0;
@@ -52803,9 +52803,10 @@ const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
 
   const render = () => {
+    renderer.clear();
     camera.layers.set(GEOMETRY_LAYER$1);
     renderer.render(scene, camera);
 
@@ -52817,7 +52818,7 @@ const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
 
   render();
 
-  return { canvas: viewerElement, hudCanvas };
+  return { canvas, hudCanvas };
 };
 
 export { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud, staticDisplay };
