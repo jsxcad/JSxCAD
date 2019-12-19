@@ -1,7 +1,7 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { squaredDistance } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toPolygons, fromPolygons as fromPolygons$1, doesNotOverlap, flip } from './jsxcad-geometry-solid.js';
+import { toPolygons, fromPolygons as fromPolygons$1, doesNotOverlap, flip, alignVertices } from './jsxcad-geometry-solid.js';
 
 const EPSILON = 1e-5;
 const EPSILON2 = 1e-10;
@@ -489,7 +489,7 @@ const intersection = (...solids) => {
 };
 
 const section = (solid, surface) => {
-  const bsp = fromSolid(solid);
+  const bsp = fromSolid(alignVertices(solid));
   return removeExteriorPolygons(bsp, surface);
 };
 

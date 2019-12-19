@@ -625,24 +625,24 @@ const intersectionImpl = (baseGeometry, ...geometries) => {
     return { ...baseGeometry, item: intersection(baseGeometry.item, ...geometries) };
   }
 
-  const result = { assembly: [] };
+  const result = { disjointAssembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
   for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.assembly.push({ solid: intersection$1(solid, ...solids), tags });
+    result.disjointAssembly.push({ solid: intersection$1(solid, ...solids), tags });
   }
   // Surfaces -- generalize to surface unless specializable upon z0surface.
   const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
   const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
   for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
     if (surfaces.length === 0) {
-      result.assembly.push({ z0Surface: intersection$2(z0Surface, ...z0Surfaces), tags });
+      result.disjointAssembly.push({ z0Surface: intersection$2(z0Surface, ...z0Surfaces), tags });
     } else {
-      result.assembly.push({ surface: intersection$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      result.disjointAssembly.push({ surface: intersection$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
     }
   }
   for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.assembly.push({ surface: intersection$3(surface, ...surfaces, ...z0Surfaces), tags });
+    result.disjointAssembly.push({ surface: intersection$3(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
@@ -939,24 +939,24 @@ const unionImpl = (baseGeometry, ...geometries) => {
     return { ...baseGeometry, item: union(baseGeometry.item, ...geometries) };
   }
 
-  const result = { assembly: [] };
+  const result = { disjointAssembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
   for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.assembly.push({ solid: union$2(solid, ...solids), tags });
+    result.disjointAssembly.push({ solid: union$2(solid, ...solids), tags });
   }
   // Surfaces -- generalize to surface unless specializable upon z0surface.
   const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
   const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
   for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
     if (surfaces.length === 0) {
-      result.assembly.push({ z0Surface: union$3(z0Surface, ...z0Surfaces), tags });
+      result.disjointAssembly.push({ z0Surface: union$3(z0Surface, ...z0Surfaces), tags });
     } else {
-      result.assembly.push({ surface: union$1(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      result.disjointAssembly.push({ surface: union$1(z0Surface, ...z0Surfaces, ...surfaces), tags });
     }
   }
   for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.assembly.push({ surface: union$1(surface, ...surfaces, ...z0Surfaces), tags });
+    result.disjointAssembly.push({ surface: union$1(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
