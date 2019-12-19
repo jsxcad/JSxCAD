@@ -41,8 +41,7 @@ const buildPrism = (radius = 1, height = 1, sides = 32) =>
  **/
 
 export const ofRadius = (radius = 1, height = 1, { sides = 32 } = {}) => buildPrism(radius, height, sides);
-
-export const ofApothem = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius(toRadiusFromApothem(apothem, sides), { sides });
+export const ofApothem = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius(toRadiusFromApothem(apothem, sides), height, { sides });
 export const ofDiameter = (diameter = 1, ...args) => ofRadius(diameter / 2, ...args);
 
 const toPathFromShape = (shape) => {
