@@ -44,7 +44,8 @@ export const section = (solidShape, surfaceShape = Z(0)) => {
     const shapes = [];
     const plane = toPlane(anySurface);
     for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const surface = retessellate(bspSection(solid, anySurface));
+      const section = bspSection(solid, anySurface);
+      const surface = retessellate(section);
       surface.plane = plane;
       shapes.push(Shape.fromGeometry({ surface }));
     }

@@ -2138,7 +2138,8 @@ const section = (solidShape, surfaceShape = Z$2(0)) => {
     const shapes = [];
     const plane = toPlane(anySurface);
     for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const surface = retessellate(section$1(solid, anySurface));
+      const section = section$1(solid, anySurface);
+      const surface = retessellate(section);
       surface.plane = plane;
       shapes.push(Shape.fromGeometry({ surface }));
     }

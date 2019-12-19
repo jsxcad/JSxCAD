@@ -79873,7 +79873,7 @@ var defaultProps$c = {
   justify: false,
   fill: false
 };
-var Nav = react.forwardRef(function (uncontrolledProps, ref) {
+var Nav$1 = react.forwardRef(function (uncontrolledProps, ref) {
   var _classNames;
 
   var _useUncontrolled = useUncontrolled(uncontrolledProps, {
@@ -79910,10 +79910,10 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
     className: classnames(className, (_classNames = {}, _classNames[bsPrefix] = !navbar, _classNames[navbarBsPrefix + "-nav"] = navbar, _classNames[cardHeaderBsPrefix + "-" + variant] = !!cardHeaderBsPrefix, _classNames[bsPrefix + "-" + variant] = !!variant, _classNames[bsPrefix + "-fill"] = fill, _classNames[bsPrefix + "-justified"] = justify, _classNames))
   }, props), children);
 });
-Nav.displayName = 'Nav';
-Nav.defaultProps = defaultProps$c;
-Nav.Item = NavItem;
-Nav.Link = NavLink;
+Nav$1.displayName = 'Nav';
+Nav$1.defaultProps = defaultProps$c;
+Nav$1.Item = NavItem;
+Nav$1.Link = NavLink;
 
 var matchesImpl;
 function matches(node, selector) {
@@ -84305,6 +84305,10 @@ class SettingsUi extends react.PureComponent {
     }
   }
 
+  renderActions() {
+    return [];
+  }
+
 }
 
 /* eslint-disable react/no-unused-prop-types */
@@ -84546,7 +84550,7 @@ var Tabs = react.forwardRef(function (props, ref) {
     transition: transition,
     mountOnEnter: mountOnEnter,
     unmountOnExit: unmountOnExit
-  }, react.createElement(Nav, _extends({}, controlledProps, {
+  }, react.createElement(Nav$1, _extends({}, controlledProps, {
     role: "tablist",
     as: "nav"
   }), map(children, renderTab)), react.createElement(TabContent, null, map(children, function (child) {
@@ -85473,6 +85477,16 @@ class ViewUi extends react.PureComponent {
     if (watcher) {
       await unwatchFiles(watcher);
     }
+  }
+
+  renderActions() {
+    const {
+      file
+    } = this.state;
+    const filePath = `source/${file.substring(9)}`;
+    return react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+      onClick: () => downloadFile(filePath)
+    }, "Download"));
   }
 
   render() {
@@ -86651,14 +86665,14 @@ class Ui$1 extends react.PureComponent {
       "aria-controls": "basic-navbar-nav"
     }), react.createElement(Navbar.Collapse, {
       id: "basic-navbar-nav"
-    }, react.createElement(Nav, {
+    }, react.createElement(Nav$1, {
       className: "mr-auto",
       onSelect: this.doNav
-    }, react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+    }, react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, {
       eventKey: "selectProject"
-    }, "Project", project === '' ? '' : ` (${project})`)), project !== '' && react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+    }, "Project", project === '' ? '' : ` (${project})`)), project !== '' && react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, {
       eventKey: "io"
-    }, "Share")), react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+    }, "Share")), react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, {
       eventKey: "reference"
     }, "Reference"))))), react.createElement(lib_1, {
       style: {
@@ -86700,7 +86714,7 @@ class Ui$1 extends react.PureComponent {
               flex: '0 0 auto',
               height: '30px'
             }
-          }, react.createElement(Nav, {
+          }, react.createElement(Nav$1, {
             key: "select",
             className: "mr-auto",
             onSelect: this.doNav
@@ -86712,7 +86726,7 @@ class Ui$1 extends react.PureComponent {
           }, index) => react.createElement(NavDropdown.Item, {
             key: index,
             onClick: () => selectView(id, view)
-          }, viewTitle))) : view === undefined ? viewTitle : react.createElement(Nav.Item, null, react.createElement(Nav.Link, null, viewTitle)), fileChoices.length > 0 ? react.createElement(NavDropdown, {
+          }, viewTitle))) : view === undefined ? viewTitle : react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, null, viewTitle)), fileChoices.length > 0 ? react.createElement(NavDropdown, {
             title: file === undefined ? 'Select' : fileTitle
           }, fileChoices.map(({
             file,
@@ -86720,19 +86734,19 @@ class Ui$1 extends react.PureComponent {
           }, index) => react.createElement(NavDropdown.Item, {
             key: index,
             onClick: () => selectFile(id, file)
-          }, fileTitle))) : file === undefined ? fileTitle : react.createElement(Nav.Item, null, react.createElement(Nav.Link, null, fileTitle))), react.createElement(Nav, {
+          }, fileTitle))) : file === undefined ? fileTitle : react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, null, fileTitle))), react.createElement(Nav$1, {
             key: "tools"
           }, react.createElement(lib_5.Consumer, {
             key: `${id}/toolbar`
           }, ({
             mosaicWindowActions
-          }) => react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+          }) => react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, {
             onClick: () => mosaicWindowActions.split()
           }, "Split"))), react.createElement(lib_4.Consumer, null, ({
             mosaicActions
           }) => react.createElement(lib_5.Consumer, null, ({
             mosaicWindowActions
-          }) => react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+          }) => react.createElement(Nav$1.Item, null, react.createElement(Nav$1.Link, {
             onClick: () => mosaicActions.remove(mosaicWindowActions.getPath())
           }, "Close"))))))),
           path: path
