@@ -11,10 +11,12 @@ const view = (shape, { view, width = 256, height = 128 } = {}) => {
   return canvas;
 };
 
-const bigViewMethod = function ({ width = 512, height = 256 }) { return view(this, { width, height, view: { position: [100, -100, 100] } }); };
+const bigViewMethod = function ({ width = 512, height = 256 } = {}) { return view(this, { width, height, view: { position: [100, -100, 100] } }); };
 const viewMethod = function ({ width = 256, height = 128 } = {}) { return view(this, { width, height, view: { position: [100, -100, 100] } }); };
 const topViewMethod = function ({ width = 256, height = 128 } = {}) { return view(this, { width, height, view: { position: [0, 0, 100] } }); };
+const frontViewMethod = function ({ width = 256, height = 128 } = {}) { return view(this, { width, height, view: { position: [0, -100, 0] } }); };
 
 Shape.prototype.view = viewMethod;
 Shape.prototype.bigView = bigViewMethod;
 Shape.prototype.topView = topViewMethod;
+Shape.prototype.frontView = frontViewMethod;
