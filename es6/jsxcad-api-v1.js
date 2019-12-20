@@ -1321,7 +1321,9 @@ Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';
  *
  **/
 
-const Text = Hershey(1);
+const dp2 = (number) => Math.round(number * 100) / 100;
+
+const Text = Hershey;
 
 const Plan = ({ plan, marks = [], planes = [], tags = [], visualization }, context) => {
   let geometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
@@ -1339,7 +1341,7 @@ const Radius = (radius = 1, center = [0, 0, 0]) =>
       Circle.ofRadius(radius)
           .outline()
           .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Text(`R${radius}`).moveY(radius / 2))
+          .add(Text(radius / 10)(`R${dp2(radius)}`).moveY(radius / 2))
           .color('red')
   });
 Plan.Radius = Radius;
@@ -1353,11 +1355,30 @@ const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
       Circle.ofRadius(radius)
           .outline()
           .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Text(`A${apothem}`).moveY(radius / 2))
+          .add(Text(radius / 10)(`A${dp2(apothem)}`).moveY(radius / 2))
           .color('red')
   });
 };
 Plan.Apothem = Apothem;
+
+const Length = (length) => {
+  return Plan({
+    plan: { length },
+    visualization: Path([0, 0, 0], [0, length, 0])
+        .add(Text(length / 10)(`L${dp2(length)}`).moveY(length / 2))
+        .color('red')
+  });
+};
+Plan.Length = Length;
+
+// FIX: Support outline for solids and use that for sketches.
+const Sketch = (shape) => {
+  return Plan({
+    plan: { sketch: 'shape' },
+    visualization: shape.color('red')
+  });
+};
+Plan.Sketch = Sketch;
 
 // Labels
 
@@ -4139,8 +4160,7 @@ const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale$1);
 
-const ofEdge$3 = (size) => unitSquare().scale(size);
-const ofEdges = (width, length) => unitSquare().scale([width, length, 1]);
+const ofSize$3 = (width = 1, length) => unitSquare().scale([width, length === undefined ? width : length, 1]);
 const ofRadius$9 = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
 const ofApothem$7 = (apothem) => ofRadius$9(toRadiusFromApothem(apothem));
 const ofDiameter$9 = (diameter) => ofRadius$9(diameter / 2);
@@ -4154,53 +4174,20 @@ const fromCorners$1 = (corner1, corner2) => {
   return unitSquare().scale([length, width]).translate(center);
 };
 
-const Square = dispatch(
-  'Square',
-  // square()
-  (...args) => {
-    assertEmpty(args);
-    return () => ofEdge$3(1);
-  },
-  // square(4)
-  (size, ...rest) => {
-    assertNumber(size);
-    assertEmpty(rest);
-    return () => ofEdge$3(size);
-  },
-  // square(4, 6)
-  (width, length, ...rest) => {
-    assertNumber(width);
-    assertNumber(length);
-    assertEmpty(rest);
-    return () => ofEdges(width, length);
-  },
-  // square({ edge: 10 })
-  ({ edge }) => {
-    assertNumber(edge);
-    return () => ofEdge$3(edge);
-  },
-  // Polygon({ apothem: 10 })
-  ({ apothem }) => {
-    assertNumber(apothem);
-    return () => ofApothem$7(apothem);
-  },
-  // Polygon({ radius: 10})
-  ({ radius }) => {
-    assertNumber(radius);
-    return () => ofRadius$9(radius);
-  },
-  // Polygon({ diameter: 10})
-  ({ diameter }) => {
-    assertNumber(diameter);
-    return () => ofDiameter$9(diameter);
-  });
+const Square = (...args) => ofSize$3(...args);
 
-Square.ofEdge = ofEdge$3;
-Square.ofEdges = ofEdges;
+Square.ofSize = ofSize$3;
 Square.ofRadius = ofRadius$9;
 Square.ofApothem = ofApothem$7;
 Square.ofDiameter = ofDiameter$9;
 Square.fromCorners = fromCorners$1;
+
+Square.signature = 'Square(edge:number) -> Surface';
+Square.ofApothem.signature = 'Square(apothem:number) -> Surface';
+Square.ofDiameter.signature = 'Square(diameter:number) -> Surface';
+Square.ofRadius.signature = 'Square(radius:number) -> Surface';
+Square.ofSize.signature = 'Square(edge:number) -> Surface';
+Square.fromCorners.signature = 'Square(corner1:Point, corner2:Point) -> Surface';
 
 /**
  *
@@ -4328,14 +4315,14 @@ Tetrahedron.fromDiameter = fromDiameter;
  * :::
  **/
 
-const ofEdge$4 = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
+const ofEdge$3 = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
 const ofApothem$8 = (apothem = 1) => Polygon.ofApothem(apothem, { sides: 3 });
 const ofRadius$a = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
 const ofDiameter$a = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 3 });
 
-const Triangle = (...args) => ofEdge$4(...args);
+const Triangle = (...args) => ofEdge$3(...args);
 
-Triangle.ofEdge = ofEdge$4;
+Triangle.ofEdge = ofEdge$3;
 Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$a;
 Triangle.ofDiameter = ofDiameter$a;

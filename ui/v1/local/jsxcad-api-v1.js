@@ -1321,7 +1321,9 @@ Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';
  *
  **/
 
-const Text = Hershey(1);
+const dp2 = (number) => Math.round(number * 100) / 100;
+
+const Text = Hershey;
 
 const Plan = ({ plan, marks = [], planes = [], tags = [], visualization }, context) => {
   let geometry = visualization === undefined ? { assembly: [] } : visualization.toKeptGeometry();
@@ -1339,7 +1341,7 @@ const Radius = (radius = 1, center = [0, 0, 0]) =>
       Circle.ofRadius(radius)
           .outline()
           .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Text(`R${radius}`).moveY(radius / 2))
+          .add(Text(radius / 10)(`R${dp2(radius)}`).moveY(radius / 2))
           .color('red')
   });
 Plan.Radius = Radius;
@@ -1353,11 +1355,30 @@ const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
       Circle.ofRadius(radius)
           .outline()
           .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Text(`A${apothem}`).moveY(radius / 2))
+          .add(Text(radius / 10)(`A${dp2(apothem)}`).moveY(radius / 2))
           .color('red')
   });
 };
 Plan.Apothem = Apothem;
+
+const Length = (length) => {
+  return Plan({
+    plan: { length },
+    visualization: Path([0, 0, 0], [0, length, 0])
+        .add(Text(length / 10)(`L${dp2(length)}`).moveY(length / 2))
+        .color('red')
+  });
+};
+Plan.Length = Length;
+
+// FIX: Support outline for solids and use that for sketches.
+const Sketch = (shape) => {
+  return Plan({
+    plan: { sketch: 'shape' },
+    visualization: shape.color('red')
+  });
+};
+Plan.Sketch = Sketch;
 
 // Labels
 
