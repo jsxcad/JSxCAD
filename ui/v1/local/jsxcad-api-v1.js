@@ -6,7 +6,7 @@ import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, transform as transform$3 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
 import { cut, section as section$1, fromSolid, containsPoint, cutOpen } from './jsxcad-algorithm-bsp-surfaces.js';
-import { cut as cut$1, toPlane, transform as transform$1, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { cut as cut$1, toPlane, transform as transform$1, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -2139,7 +2139,9 @@ const section = (solidShape, surfaceShape = Z$2(0)) => {
     const plane = toPlane(anySurface);
     for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
       const section = section$1(solid, anySurface);
-      return Shape.fromGeometry({ surface: section });
+      const surface = retessellate(section);
+      surface.plane = plane;
+      shapes.push(Shape.fromGeometry({ surface }));
     }
     sections.push(union(...shapes));
   }
