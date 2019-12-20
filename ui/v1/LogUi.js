@@ -1,10 +1,11 @@
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import Pane from './Pane';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Row from 'react-bootstrap/Row';
 
-export class LogUi extends React.PureComponent {
+export class LogUi extends Pane {
   static get propTypes () {
     return {
       id: PropTypes.string,
@@ -12,13 +13,7 @@ export class LogUi extends React.PureComponent {
     };
   }
 
-  constructor (props) {
-    super(props);
-
-    this.state = {};
-  }
-
-  render () {
+  renderPane () {
     const { id } = this.props;
     return (
       <Container key={id}

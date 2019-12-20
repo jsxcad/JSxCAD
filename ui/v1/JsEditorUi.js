@@ -4,10 +4,10 @@ import { log, readFile, writeFile } from '@jsxcad/sys';
 import { toSignature, toSnippet } from './signature';
 
 import AceEditor from 'react-ace';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Pane from './Pane';
 import PrismJS from 'prismjs/components/prism-core';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -61,48 +61,6 @@ const snippetCompleter = {
   }
 };
 
-/*
-const scriptCompleter = {
-  getCompletions: (editor, session, position, prefix, callback) => {
-    const { row, column } = position;
-    let isMethod = false;
-    {
-      const token = session.getTokenAt(row, column);
-      const { type, value, index, start } = token;
-      const previous = session.getTokenAt(row, start);
-      if (previous.value === '.') {
-        isMethod = true;
-      }
-    }
-    if (prefix.length === 0) {
-      callback(null, []);
-    } else {
-      callback(
-        null,
-        getCompletions(prefix, { isMethod })
-            .map(({ completion, source }) =>
-              ({
-                name: `${completion}(`,
-                value: `${completion}(`,
-                score: 1,
-                meta: source
-              })));
-    }
-  }
-};
-*/
-
-/*
-  {
-    guard,
-    trigger,
-    endTrigger,
-    endGuard,
-    tabTrigger,
-    name
-  }
-*/
-
 const getSignatures = (api) => {
   const signatures = [];
   for (const name of Object.keys(api)) {
@@ -133,26 +91,10 @@ const getSignatures = (api) => {
 
 const snippets = getSignatures(api).map(toSnippet);
 
-// aceEditorCompleter.setCompleters([scriptCompleter]);
 aceEditorCompleter.setCompleters([snippetCompleter]);
-aceEditorSnippetManager.register(
-  [
-    ...snippets
-    /*
-    {
-      name: '.color',
-      trigger: '.color',
-      isMethod: true,
-      content: "color('$" + "{1:name}')",
-      meta: 'Shape Method',
-      type: 'snippet',
-      docHTML: "Shape:color(name)<br><br>Gives the shape the named color.<br><br><i>Circle().color('red')</i>"
-    }
-*/
-  ],
-  'JSxCAD');
+aceEditorSnippetManager.register(snippets, 'JSxCAD');
 
-export class JsEditorUi extends React.PureComponent {
+export class JsEditorUi extends Pane {
   static get propTypes () {
     return {
       ask: PropTypes.func,
@@ -163,10 +105,6 @@ export class JsEditorUi extends React.PureComponent {
 
   constructor (props) {
     super(props);
-
-    this.state = {
-      code: ''
-    };
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
@@ -193,7 +131,8 @@ export class JsEditorUi extends React.PureComponent {
   async run () {
     const { ask, file } = this.props;
     await this.save();
-    log({ op: 'open' });
+    await log({ op: 'open' });
+    await log({ op: 'text', text: 'Running', level: 'serious' });
     const script = await readFile({}, file);
     const geometry = await ask({ evaluate: script });
     if (geometry) {
@@ -202,8 +141,9 @@ export class JsEditorUi extends React.PureComponent {
   }
 
   async save () {
-    const { code } = this.state;
+    const { code = '' } = this.state;
     await writeFile({}, this.props.file, code);
+    await log({ op: 'text', text: 'Saved', level: 'serious' });
   }
 
   async componentDidMount () {
@@ -265,9 +205,24 @@ export class JsEditorUi extends React.PureComponent {
     }
   }
 
-  render () {
+  renderToolbar () {
+    return super.renderToolbar([
+      <Nav.Item key="JsEditor/run">
+        <Nav.Link onClick={this.run} style={{ color: 'blue' }}>
+          Run
+        </Nav.Link>
+      </Nav.Item>,
+      <Nav.Item key="JsEditor/save">
+        <Nav.Link onClick={this.save} style={{ color: 'blue' }}>
+          Save
+        </Nav.Link>
+      </Nav.Item>
+    ]);
+  }
+
+  renderPane () {
     const { id } = this.props;
-    const { code } = this.state;
+    const { code = '' } = this.state;
 
     return (
       <Container style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
@@ -295,23 +250,6 @@ export class JsEditorUi extends React.PureComponent {
               width='100%'
             >
             </AceEditor>
-          </Col>
-        </Row>
-        <Row style={{ flex: '0 0 auto' }}>
-          <Col>
-            <br/>
-            <ButtonGroup>
-              <Button size='sm'
-                onClick={this.run}
-                variant='outline-primary'>
-                Run
-              </Button>
-              <Button size='sm'
-                onClick={this.save}
-                variant='outline-primary'>
-                Save
-              </Button>
-            </ButtonGroup>
           </Col>
         </Row>
       </Container>

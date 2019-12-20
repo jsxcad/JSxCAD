@@ -15,11 +15,12 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import FormControl from 'react-bootstrap/FormControl';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Pane from './Pane';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Row from 'react-bootstrap/Row';
 
-export class FilesUi extends React.PureComponent {
+export class FilesUi extends Pane {
   static get propTypes () {
     return {
       id: PropTypes.string
@@ -28,11 +29,6 @@ export class FilesUi extends React.PureComponent {
 
   constructor (props) {
     super(props);
-
-    this.state = {
-      files: []
-    };
-
     this.addFile = this.addFile.bind(this);
     this.clickImportFile = this.clickImportFile.bind(this);
     this.importFile = this.importFile.bind(this);
@@ -81,7 +77,7 @@ export class FilesUi extends React.PureComponent {
   }
 
   buildFiles () {
-    const { files } = this.state;
+    const { files = [] } = this.state;
     return files.map(file =>
       <InputGroup key={file}>
         <FormControl disabled placeholder={file} />
@@ -92,7 +88,7 @@ export class FilesUi extends React.PureComponent {
     );
   }
 
-  render () {
+  renderPane () {
     const { id } = this.props;
 
     return (

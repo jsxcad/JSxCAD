@@ -1,6 +1,6 @@
 /* global history, location, window */
 
-import { Mosaic, MosaicContext, MosaicWindow, MosaicWindowContext, MosaicZeroState } from 'react-mosaic-component';
+import { Mosaic, MosaicZeroState } from 'react-mosaic-component';
 
 import {
   ask as askSys,
@@ -37,8 +37,8 @@ import JsEditorUi from './JsEditorUi';
 import LogUi from './LogUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
+import NothingUi from './NothingUi';
 import ParametersUi from './ParametersUi';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -356,36 +356,113 @@ class Ui extends React.PureComponent {
     await writeFile({}, 'ui/paneViews', JSON.stringify(newPaneViews));
   }
 
-  renderView (id) {
-    const { ask } = this.state;
+  renderPane (views, id, path, createNode, onSelectView, onSelectFile) {
     const { view, file } = this.getPaneView(id);
-
-    id = `${id}`;
+    const fileChoices = views.filter(entry => entry.view === view && entry.file !== file);
+    const seenViewChoices = new Set();
+    const viewChoices = [];
+    for (const entry of views.filter(entry => entry.view !== view)) {
+      if (!seenViewChoices.has(entry.view)) {
+        seenViewChoices.add(entry.view);
+        viewChoices.push(entry);
+      }
+    }
+    const { ask } = this.state;
 
     switch (view) {
-      case 'geometry':
-        if (file === undefined) return { view, viewTitle: 'View', pane: <div/> };
-        return { view, viewTitle: 'View', file, fileTitle: file.substring('geometry/'.length), pane: <ViewUi key={`${id}/geometry/${file}`} id={id} file={file}/> };
-      case 'editScript':
-        if (file === undefined) return { view, viewTitle: 'Edit Script', pane: <div/> };
-        return { view, viewTitle: 'Edit Script', file, fileTitle: file.substring('source/'.length), pane: <JsEditorUi key={`${id}/editScript/${file}`} id={id} file={file} ask={ask}/> };
+      case 'geometry': {
+        const fileTitle = file === undefined ? '' : file.substring('geometry/'.length);
+        return (
+          <ViewUi
+            key={`${id}/geometry/${file}`}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'View'}
+            onSelectView={onSelectView}
+            file={file}
+            fileChoices={fileChoices}
+            fileTitle={fileTitle}
+            onSelectFile={onSelectFile}
+          />);
+      }
+      case 'editScript': {
+        const fileTitle = file === undefined ? '' : file.substring('source/'.length);
+        return (
+          <JsEditorUi
+            key={`${id}/editScript/${file}`}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'Edit Script'}
+            onSelectView={onSelectView}
+            file={file}
+            fileChoices={fileChoices}
+            fileTitle={fileTitle}
+            onSelectFile={onSelectFile}
+            ask={ask}
+          />);
+      }
       case 'files':
-        return { view, viewTitle: 'Files', pane: <FilesUi key={id} id={id}/> };
+        return (
+          <FilesUi
+            key={id}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'Files'}
+            onSelectView={onSelectView}
+          />);
       case 'parameters': {
         const { parameters } = this.state;
-        if (parameters === undefined) return { view, viewTitle: 'Parameters', pane: <div/> };
-        return { view, viewTitle: 'Parameters', pane: <ParametersUi key={id} id={id} parameters={parameters} onChange={this.updateParameters}/> };
+        return (
+          <ParametersUi
+            key={id}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'Parameters'}
+            onSelectView={onSelectView}
+            parameters={parameters}
+            onChange={this.updateParameters}
+          />);
       }
-      // case 'project':
-      //  return <ProjectUi key={id} id={id} ui={this}/>;
       case 'log': {
         const { log } = this.state;
-        if (log === undefined) return { view, viewTitle: 'Log', pane: <div/> };
-        return { view, viewTitle: 'Log', pane: <LogUi key={id} id={id} log={log}/> };
+        if (log !== undefined) {
+          return (
+            <LogUi
+              key={id}
+              id={id}
+              path={path}
+              createNode={createNode}
+              view={view}
+              viewChoices={viewChoices}
+              viewTitle={'Log'}
+              onSelectView={onSelectView}
+              log={log}
+            />);
+        }
       }
-      default:
-        return { view: 'nothing', viewTitle: 'Nothing', pane: <div/> };
     }
+    return (
+      <NothingUi
+        id={id}
+        path={path}
+        createNode={createNode}
+        view={'nothing'}
+        viewChoices={viewChoices}
+        viewTitle={'Nothing'}
+        onSelectView={onSelectView}
+      />);
   }
 
   openLog () {
@@ -532,78 +609,8 @@ class Ui extends React.PureComponent {
           style={{ flex: '1 1 auto', background: '#e6ebf0' }}
           key={`mosaic/${project}`}
           renderTile={(id, path) => {
-            const { view, viewTitle, file, fileTitle, pane } = this.renderView(id);
-            const fileChoices = views.filter(entry => entry.view === view && entry.file !== file);
-            const seenViewChoices = new Set();
-            const viewChoices = [];
-            for (const entry of views.filter(entry => entry.view !== view)) {
-              if (!seenViewChoices.has(entry.view)) {
-                seenViewChoices.add(entry.view);
-                viewChoices.push(entry);
-              }
-            }
-            return (<MosaicWindow
-              key={`window/${project}/${id}`}
-              createNode={this.createNode}
-              renderToolbar={() =>
-                <div style={{ width: '100%' }}>
-                  <Navbar key="navbar" bg="light" expand="sm" style={{ flex: '0 0 auto', height: '30px' }}>
-                    <Nav key="select" className="mr-auto" onSelect={this.doNav}>
-                      {viewChoices.length > 0
-                        ? <NavDropdown title={view === undefined ? 'Select' : viewTitle}>
-                          {viewChoices.map(({ view, viewTitle }, index) =>
-                            <NavDropdown.Item key={index} onClick={() => selectView(id, view)}>
-                              {viewTitle}
-                            </NavDropdown.Item>
-                          )}
-                        </NavDropdown>
-                        : view === undefined
-                          ? viewTitle
-                          : <Nav.Item><Nav.Link>{viewTitle}</Nav.Link></Nav.Item>}
-                      {fileChoices.length > 0
-                        ? <NavDropdown title={file === undefined ? 'Select' : fileTitle}>
-                          {fileChoices.map(({ file, fileTitle }, index) =>
-                            <NavDropdown.Item key={index} onClick={() => selectFile(id, file)}>
-                              {fileTitle}
-                            </NavDropdown.Item>
-                          )}
-                        </NavDropdown>
-                        : file === undefined
-                          ? fileTitle
-                          : <Nav.Item><Nav.Link>{fileTitle}</Nav.Link></Nav.Item>}
-                    </Nav>
-                    <Nav key="tools">
-                      <MosaicWindowContext.Consumer key={`${id}/toolbar`}>
-                        {
-                          ({ mosaicWindowActions }) =>
-                            <Nav.Item>
-                              <Nav.Link onClick={() => mosaicWindowActions.split()}>
-                                                   Split
-                              </Nav.Link>
-                            </Nav.Item>
-                        }
-                      </MosaicWindowContext.Consumer>
-                      <MosaicContext.Consumer>
-                        {
-                          ({ mosaicActions }) =>
-                            <MosaicWindowContext.Consumer>
-                              {
-                                ({ mosaicWindowActions }) =>
-                                  <Nav.Item>
-                                    <Nav.Link onClick={() => mosaicActions.remove(mosaicWindowActions.getPath())}>
-                                                       Close
-                                    </Nav.Link>
-                                  </Nav.Item>
-                              }
-                            </MosaicWindowContext.Consumer>
-                        }
-                      </MosaicContext.Consumer>
-                    </Nav>
-                  </Navbar>
-                </div>}
-              path={path}>
-              {pane}
-            </MosaicWindow>);
+            const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
+            return pane;
           }}
           zeroStateView={<MosaicZeroState createNode={this.createNode}/>}
           value={this.state.paneLayout}
