@@ -89,13 +89,17 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   }
 };
 
-const connectMethod = function (connector) { return connect(connector, this); };
-Shape.prototype.connect = connectMethod;
+const takeMethod = function (connector) { return connect(connector, this); };
+Shape.prototype.take = takeMethod;
+takeMethod.signature = 'Connector -> take(from:Connector) -> Shape';
+
+const meetMethod = function (connector) { return connect(this, connector); };
+Shape.prototype.meet = meetMethod;
+meetMethod.signature = 'Connector -> meet(to:Connector) -> Shape';
 
 export default connect;
 
 connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
-connectMethod.signature = 'Shape -> connect(from:Connector) -> Shape';
 
 export const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
