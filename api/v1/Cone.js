@@ -4,7 +4,7 @@ import { linear } from './ease';
 import { toRadiusFromApothem } from '@jsxcad/algorithm-shape';
 
 export const ofRadius = (radius = 1, height = 1, { sides = 32 } = {}) => {
-  const fn = linear(0, radius);
+  const fn = linear(radius, 0);
   return Prism.ofSlices(t => Circle(fn(t) * radius, { sides }).moveZ(t * height));
 };
 
