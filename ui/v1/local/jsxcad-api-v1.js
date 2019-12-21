@@ -3,7 +3,7 @@ import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1
 import { fromPolygons, alignVertices, transform as transform$2, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling, identity, multiply } from './jsxcad-math-mat4.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-import { add, dot, scale as scale$1, negate, normalize, subtract, cross, transform as transform$3 } from './jsxcad-math-vec3.js';
+import { add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$3 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { translate as translate$1 } from './jsxcad-geometry-paths.js';
@@ -107,7 +107,7 @@ var api = /*#__PURE__*/Object.freeze({
   get Wave () { return Wave; },
   get X () { return X$3; },
   get Y () { return Y$3; },
-  get Z () { return Z$2; },
+  get Z () { return Z$3; },
   get getCompletions () { return getCompletions; }
 });
 
@@ -456,88 +456,6 @@ Shape.prototype.notAs = notAsMethod;
 
 asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-
-/**
- *
- * # MoveY
- *
- * Move along the Y axis.
- *
- */
-
-const moveY = (shape, y = 0) => move(shape, 0, y);
-
-const moveYMethod = function (y) { return moveY(this, y); };
-Shape.prototype.moveY = moveYMethod;
-
-moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
-moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
-
-/**
- *
- * # Back
- *
- * Moves the shape so that it is just behind the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cylinder(2, 15)
- *   .with(Cube(10).back())
- * ```
- * :::
- **/
-
-const MIN$1 = 0;
-const Y = 1;
-
-const back = (shape) => {
-  return moveY(shape, -measureBoundingBox(shape)[MIN$1][Y]);
-};
-
-const backMethod = function (...params) { return back(this); };
-Shape.prototype.back = backMethod;
-
-back.signature = 'back(shape:Shape) -> Shape';
-backMethod.signature = 'Shape -> back() -> Shape';
-
-/**
- *
- * # Below
- *
- * Moves the shape so that its highest point is at z = 0.
- *
- * ::: illustration { "view": { "position": [60, -60, -60], "target": [0, 0, 0] } }
- * ```
- * Circle(20).flip().with(Cube(10).below())
- * ```
- * :::
- **/
-
-const MAX = 1;
-const Z$1 = 2;
-
-const below = (shape, reference) => {
-  return moveZ(shape, -measureBoundingBox(shape)[MAX][Z$1]);
-};
-
-const belowMethod = function (...params) { return below(this); };
-Shape.prototype.below = belowMethod;
-
-below.signature = 'below(shape:Shape) -> Shape';
-belowMethod.signature = 'Shape -> below() -> Shape';
-
-/**
- *
- * # Bill Of Materials
- *
- **/
-
-const bom = (shape, ...args) => '';
-
-const bomMethod = function (...args) { return bom(this, ...args); };
-Shape.prototype.bom = bomMethod;
-
-bomMethod.signature = 'Shape -> bom() -> string';
 
 const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
@@ -997,37 +915,108 @@ const connection = (shape, id) => {
 const connectionMethod = function (id) { return connection(this, id); };
 Shape.prototype.connection = connectionMethod;
 
-const bottom = (shape) => {
-  const targetPlane = [0, 0, -1, 0];
-  let bestSurface;
-  let bestAlignment = -Infinity;
-
-  const geometry = shape.toKeptGeometry();
-  for (const { solid } of getSolids(geometry)) {
-    for (const surface of solid) {
-      const alignment = dot(toPlane(surface), targetPlane);
-      if (alignment > bestAlignment) {
-        bestAlignment = alignment;
-        bestSurface = surface;
-      }
-    }
-  }
-
-  // FIX:
-  // This will produce the average position, but that's probably not what we
-  // want, since it will include interior points produced by breaking up
-  // convexity.
+// FIX:
+// This will produce the average position, but that's probably not what we
+// want, since it will include interior points produced by breaking up
+// convexity.
+const toPosition = (surface) => {
   let sum = [0, 0, 0];
   let count = 0;
-  for (const path of bestSurface) {
+  for (const path of surface) {
     for (const point of path) {
       sum = add(sum, point);
       count += 1;
     }
   }
-  const center = scale$1(1 / count, sum);
-  return shape.toConnector(Connector('bottom', { plane: toPlane(bestSurface), center, right: add(center, [0, 1, 0]) }));
+  const position = scale$1(1 / count, sum);
+  return position;
 };
+
+const faceConnector = (shape, scoreOrientation, scorePosition) => {
+  let bestSurface;
+  let bestPosition;
+  let bestOrientationScore = -Infinity;
+  let bestPositionScore = -Infinity;
+
+  // FIX: This may be sensitive to noise.
+  const geometry = shape.toKeptGeometry();
+  for (const { solid } of getSolids(geometry)) {
+    for (const surface of solid) {
+      const orientationScore = scoreOrientation(surface);
+      if (orientationScore > bestOrientationScore) {
+        bestSurface = surface;
+        bestOrientationScore = orientationScore;
+        bestPosition = toPosition(surface);
+        bestPositionScore = scorePosition(bestPosition);
+      } else if (orientationScore === bestOrientationScore) {
+        const position = toPosition(surface);
+        const positionScore = scorePosition(position);
+        if (positionScore > bestPositionScore) {
+          bestSurface = surface;
+          bestPosition = position;
+          bestPositionScore = positionScore;
+        }
+      }
+    }
+  }
+
+  return shape.toConnector(Connector('bottom', { plane: toPlane(bestSurface), center: bestPosition, right: add(bestPosition, [0, 1, 0]) }));
+};
+
+const Y = 1;
+
+const back = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 1, 0, 0]), (point) => point[Y]);
+
+const backMethod = function () { return back(this); };
+Shape.prototype.back = backMethod;
+
+back.signature = 'back(shape:Shape) -> Shape';
+backMethod.signature = 'Shape -> back() -> Shape';
+
+/**
+ *
+ * # Below
+ *
+ * Moves the shape so that its highest point is at z = 0.
+ *
+ * ::: illustration { "view": { "position": [60, -60, -60], "target": [0, 0, 0] } }
+ * ```
+ * Circle(20).flip().with(Cube(10).below())
+ * ```
+ * :::
+ **/
+
+const MAX = 1;
+const Z$1 = 2;
+
+const below = (shape, reference) => {
+  return moveZ(shape, -measureBoundingBox(shape)[MAX][Z$1]);
+};
+
+const belowMethod = function (...params) { return below(this); };
+Shape.prototype.below = belowMethod;
+
+below.signature = 'below(shape:Shape) -> Shape';
+belowMethod.signature = 'Shape -> below() -> Shape';
+
+/**
+ *
+ * # Bill Of Materials
+ *
+ **/
+
+const bom = (shape, ...args) => '';
+
+const bomMethod = function (...args) { return bom(this, ...args); };
+Shape.prototype.bom = bomMethod;
+
+bomMethod.signature = 'Shape -> bom() -> string';
+
+const Z$2 = 2;
+
+const bottom = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 0, -1, 0]), (point) => -point[Z$2]);
 
 const bottomMethod = function () { return bottom(this); };
 Shape.prototype.bottom = bottomMethod;
@@ -1065,7 +1054,7 @@ centerMethod.signature = 'Shape -> center() -> Shape';
 // Unfortunately this makes things like interpolation tricky,
 // so we approximate it with a very large polygon instead.
 
-const Z$2 = (z = 0) => {
+const Z$3 = (z = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
@@ -1091,7 +1080,7 @@ const Z$2 = (z = 0) => {
  *
  **/
 
-const chop = (shape, planeShape = Z$2()) => {
+const chop = (shape, planeShape = Z$3()) => {
   const cuts = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
@@ -1240,13 +1229,13 @@ Sphere.ofDiameter = ofDiameter$2;
  *
  **/
 
-const Z$3 = 2;
+const Z$4 = 2;
 
 const hull = (...shapes) => {
   const points = [];
   shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
   // FIX: Detect planar hulls properly.
-  if (points.every(point => point[Z$3] === 0)) {
+  if (points.every(point => point[Z$4] === 0)) {
     return Shape.fromGeometry(buildConvexSurfaceHull(points));
   } else {
     return Shape.fromGeometry(buildConvexHull(points));
@@ -1628,35 +1617,15 @@ const faceEdges = (shape) =>
 const faceEdgesMethod = function () { return faceEdges(this); };
 Shape.prototype.faceEdges = faceEdgesMethod;
 
-/**
- *
- * # Front
- *
- * Moves the shape so that it is just before the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cylinder(2, 15).translate([0, 0, 2.5]),
- *          Cube(10).front())
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).front(Sphere(5))
- * ```
- * :::
- **/
-
 const Y$1 = 1;
 
-const front = (shape) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  return moveY(shape, -maxPoint[Y$1]);
-};
+const front = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [0, -1, 0, 0]), (point) => -point[Y$1]);
 
-const frontMethod = function (...args) { return front(this); };
+const frontMethod = function () { return front(this); };
 Shape.prototype.front = frontMethod;
 
+front.signature = 'front(shape:Shape) -> Shape';
 frontMethod.signature = 'Shape -> front() -> Shape';
 
 /**
@@ -1792,49 +1761,12 @@ Shape.prototype.kept = keptMethod;
 kept.signature = 'kept(shape:Shape) -> Shape';
 keptMethod.signature = 'Shape -> kept() -> Shape';
 
-/**
- *
- * # MoveX
- *
- * Move along the X axis.
- *
- */
-
-const moveX = (shape, x = 0) => move(shape, x);
-
-const moveXMethod = function (x) { return moveX(this, x); };
-Shape.prototype.moveX = moveXMethod;
-
-moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
-moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';
-
-/**
- *
- * # Left
- *
- * Moves the shape so that it is just to the left of the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cube(10).left(),
- *          Cylinder(2, 15))
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).left(Sphere(5))
- * ```
- * :::
- **/
-
 const X = 0;
 
-const left = (shape) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  return moveX(shape, -maxPoint[X]);
-};
+const left = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [-1, 0, 0, 0]), (point) => -point[X]);
 
-const leftMethod = function (...args) { return left(this); };
+const leftMethod = function () { return left(this); };
 Shape.prototype.left = leftMethod;
 
 left.signature = 'left(shape:Shape) -> Shape';
@@ -1894,6 +1826,38 @@ Shape.prototype.measureCenter = measureCenterMethod;
 
 measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
 measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
+
+/**
+ *
+ * # MoveX
+ *
+ * Move along the X axis.
+ *
+ */
+
+const moveX = (shape, x = 0) => move(shape, x);
+
+const moveXMethod = function (x) { return moveX(this, x); };
+Shape.prototype.moveX = moveXMethod;
+
+moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
+moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';
+
+/**
+ *
+ * # MoveY
+ *
+ * Move along the Y axis.
+ *
+ */
+
+const moveY = (shape, y = 0) => move(shape, 0, y);
+
+const moveYMethod = function (y) { return moveY(this, y); };
+Shape.prototype.moveY = moveYMethod;
+
+moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
+moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
 
 /**
  *
@@ -1991,33 +1955,12 @@ Shape.prototype.orient = orientMethod;
 orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
 orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
 
-/**
- *
- * # Right
- *
- * Moves the shape so that it is just to the right of the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cube(10).right(),
- *          Cylinder(2, 15))
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).right(Sphere(5))
- * ```
- * :::
- **/
-
 const X$1 = 0;
 
-const right = (shape) => {
-  const [minPoint] = measureBoundingBox(shape);
-  return moveX(shape, -minPoint[X$1]);
-};
+const right = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [1, 0, 0, 0]), (point) => point[X$1]);
 
-const rightMethod = function (...args) { return right(this); };
+const rightMethod = function () { return right(this); };
 Shape.prototype.right = rightMethod;
 
 right.signature = 'right(shape:Shape) -> Shape';
@@ -2190,7 +2133,7 @@ Shape.prototype.scale = method$6;
  *
  **/
 
-const section = (solidShape, surfaceShape = Z$2(0)) => {
+const section = (solidShape, surfaceShape = Z$3(0)) => {
   const sections = [];
   for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
     const anySurface = surface || z0Surface;
@@ -2246,14 +2189,14 @@ Shape.prototype.solids = solidsMethod;
  *
  **/
 
-const Z$4 = 2;
+const Z$5 = 2;
 
 const chainHull = (...shapes) => {
   const pointsets = shapes.map(shape => shape.toPoints());
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    if (points.every(point => point[Z$4] === 0)) {
+    if (points.every(point => point[Z$5] === 0)) {
       chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
     } else {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -2381,11 +2324,11 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   }
 };
 
-const connectToMethod = function (...args) { return connect(this, ...args); };
-Shape.prototype.connectTo = connectToMethod;
+const connectMethod = function (connector) { return connect(connector, this); };
+Shape.prototype.connect = connectMethod;
 
-connect.signature = 'connect(from:Connector, to:Connector) -> Shape';
-connectToMethod.signature = 'Shape -> connectTo(to:Connector) -> Shape';
+connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
+connectMethod.signature = 'Shape -> connect(from:Connector) -> Shape';
 
 const join = (a, aJoin, bJoin, b) => {
   const aConnection = connect(a, aJoin).toGeometry();
@@ -2438,37 +2381,10 @@ Shape.prototype.joinLeft = joinLeftMethod;
 const toMethod = function (...args) { return connect(this, ...args); };
 Shape.prototype.to = toMethod;
 
-const top = (shape) => {
-  const targetPlane = [0, 0, 1, 0];
-  let bestSurface;
-  let bestAlignment = -Infinity;
+const Z$6 = 2;
 
-  const geometry = shape.toKeptGeometry();
-  for (const { solid } of getSolids(geometry)) {
-    for (const surface of solid) {
-      const alignment = dot(toPlane(surface), targetPlane);
-      if (alignment > bestAlignment) {
-        bestAlignment = alignment;
-        bestSurface = surface;
-      }
-    }
-  }
-
-  // FIX:
-  // This will produce the average position, but that's probably not what we
-  // want, since it will include interior points produced by breaking up
-  // convexity.
-  let sum = [0, 0, 0];
-  let count = 0;
-  for (const path of bestSurface) {
-    for (const point of path) {
-      sum = add(sum, point);
-      count += 1;
-    }
-  }
-  const center = scale$1(1 / count, sum);
-  return shape.toConnector(Connector('top', { plane: toPlane(bestSurface), center, right: add(center, [0, 1, 0]) }));
-};
+const top = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 0, 1, 0]), (point) => point[Z$6]);
 
 const topMethod = function () { return top(this); };
 Shape.prototype.top = topMethod;
@@ -2680,7 +2596,7 @@ Shape.prototype.with = method$e;
 
 const X$2 = 0;
 const Y$2 = 1;
-const Z$5 = 2;
+const Z$7 = 2;
 
 const voxels = ({ resolution = 1 }, shape) => {
   const offset = resolution / 2;
@@ -2691,7 +2607,7 @@ const voxels = ({ resolution = 1 }, shape) => {
     const polygons = [];
     for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
       for (let y = min[Y$2] - offset; y <= max[Y$2] + offset; y += resolution) {
-        for (let z = min[Z$5] - offset; z <= max[Z$5] + offset; z += resolution) {
+        for (let z = min[Z$7] - offset; z <= max[Z$7] + offset; z += resolution) {
           const state = containsPoint(bsp, [x, y, z]);
           if (state !== containsPoint(bsp, [x + resolution, y, z])) {
             const face = [[x + offset, y - offset, z - offset],
@@ -4626,7 +4542,7 @@ const coordinates = (xSpec, ySpec, zSpec, op) => {
 
 coordinates.signature = 'coordinates(xSpec, ySpec, zSpec, op) -> coordinates';
 
-const Z$6 = 2;
+const Z$8 = 2;
 
 const flat = (shape) => {
   let bestDepth = Infinity;
@@ -4637,10 +4553,10 @@ const flat = (shape) => {
       const [to] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
       const [min, max] = flatShape.measureBoundingBox();
-      const depth = max[Z$6] - min[Z$6];
+      const depth = max[Z$8] - min[Z$8];
       if (depth < bestDepth) {
         bestDepth = depth;
-        bestFlatShape = flatShape.moveZ(-min[Z$6]);
+        bestFlatShape = flatShape.moveZ(-min[Z$8]);
       }
     } else {
       console.log(`QQ/bad`);
@@ -5004,7 +4920,7 @@ Shape.prototype.specify = method$p;
  *
  **/
 
-const stretch = (shape, length, planeShape = Z$2(0)) => {
+const stretch = (shape, length, planeShape = Z$3(0)) => {
   const stretches = [];
   for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
     const planeSurface = surface || z0Surface;
@@ -5218,4 +5134,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$3 as X, Y$3 as Y, Z$2 as Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$3 as X, Y$3 as Y, Z$3 as Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

@@ -7,11 +7,9 @@
  * the api uses.
  */
 
-import './above';
 import './add';
 import './as';
 import './back';
-import './below';
 import './bom';
 import './bottom';
 import './center';

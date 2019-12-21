@@ -1,34 +1,14 @@
-import { Shape } from './Shape';
-import { measureBoundingBox } from './measureBoundingBox';
-import { moveX } from './moveX';
-
-/**
- *
- * # Left
- *
- * Moves the shape so that it is just to the left of the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cube(10).left(),
- *          Cylinder(2, 15))
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).left(Sphere(5))
- * ```
- * :::
- **/
+import Shape from './Shape';
+import { dot } from '@jsxcad/math-vec3';
+import faceConnector from './faceConnector';
+import { toPlane } from '@jsxcad/geometry-surface';
 
 const X = 0;
 
-export const left = (shape) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  return moveX(shape, -maxPoint[X]);
-};
+export const left = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [-1, 0, 0, 0]), (point) => -point[X]);
 
-const leftMethod = function (...args) { return left(this, ...args); };
+const leftMethod = function () { return left(this); };
 Shape.prototype.left = leftMethod;
 
 left.signature = 'left(shape:Shape) -> Shape';

@@ -1,34 +1,15 @@
 import Shape from './Shape';
-import measureBoundingBox from './measureBoundingBox';
-import moveY from './moveY';
-
-/**
- *
- * # Front
- *
- * Moves the shape so that it is just before the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cylinder(2, 15).translate([0, 0, 2.5]),
- *          Cube(10).front())
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).front(Sphere(5))
- * ```
- * :::
- **/
+import { dot } from '@jsxcad/math-vec3';
+import faceConnector from './faceConnector';
+import { toPlane } from '@jsxcad/geometry-surface';
 
 const Y = 1;
 
-export const front = (shape) => {
-  const [, maxPoint] = measureBoundingBox(shape);
-  return moveY(shape, -maxPoint[Y]);
-};
+export const front = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [0, -1, 0, 0]), (point) => -point[Y]);
 
-const frontMethod = function (...args) { return front(this, ...args); };
+const frontMethod = function () { return front(this); };
 Shape.prototype.front = frontMethod;
 
+front.signature = 'front(shape:Shape) -> Shape';
 frontMethod.signature = 'Shape -> front() -> Shape';
