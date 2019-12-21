@@ -1,34 +1,14 @@
 import Shape from './Shape';
-import measureBoundingBox from './measureBoundingBox';
-import moveX from './moveX';
-
-/**
- *
- * # Right
- *
- * Moves the shape so that it is just to the right of the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * assemble(Cube(10).right(),
- *          Cylinder(2, 15))
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).right(Sphere(5))
- * ```
- * :::
- **/
+import { dot } from '@jsxcad/math-vec3';
+import faceConnector from './faceConnector';
+import { toPlane } from '@jsxcad/geometry-surface';
 
 const X = 0;
 
-export const right = (shape) => {
-  const [minPoint] = measureBoundingBox(shape);
-  return moveX(shape, -minPoint[X]);
-};
+export const right = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [1, 0, 0, 0]), (point) => point[X]);
 
-const rightMethod = function (...args) { return right(this, ...args); };
+const rightMethod = function () { return right(this); };
 Shape.prototype.right = rightMethod;
 
 right.signature = 'right(shape:Shape) -> Shape';

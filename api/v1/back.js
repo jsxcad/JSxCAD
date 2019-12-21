@@ -1,32 +1,15 @@
 import Shape from './Shape';
-import measureBoundingBox from './measureBoundingBox';
-import moveY from './moveY';
+import { dot } from '@jsxcad/math-vec3';
+import faceConnector from './faceConnector';
+import { toPlane } from '@jsxcad/geometry-surface';
 
-/**
- *
- * # Back
- *
- * Moves the shape so that it is just behind the origin.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cylinder(2, 15)
- *   .with(Cube(10).back())
- * ```
- * :::
- **/
-
-const MIN = 0;
 const Y = 1;
 
-export const back = (shape) => {
-  return moveY(shape, -measureBoundingBox(shape)[MIN][Y]);
-};
+export const back = (shape) =>
+  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 1, 0, 0]), (point) => point[Y]);
 
-const backMethod = function (...params) { return back(this, ...params); };
+const backMethod = function () { return back(this); };
 Shape.prototype.back = backMethod;
-
-export default back;
 
 back.signature = 'back(shape:Shape) -> Shape';
 backMethod.signature = 'Shape -> back() -> Shape';
