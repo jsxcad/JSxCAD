@@ -29,6 +29,18 @@ const outLeaf = {
 outLeaf.back = outLeaf;
 outLeaf.front = outLeaf;
 
+export const fromPlane = (plane) => {
+  const bsp = {
+    back: inLeaf,
+    front: outLeaf,
+    kind: BRANCH,
+    plane,
+    same: []
+  };
+
+  return bsp;
+};
+
 const fromPolygons = (polygons) => {
   if (polygons.length === 0) {
     // Everything is outside of an empty geometry.

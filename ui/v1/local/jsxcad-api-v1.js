@@ -1,16 +1,16 @@
-import { close, concatenate, open, toSegments, getEdges, isClosed } from './jsxcad-geometry-path.js';
+import { close, concatenate, open, transform as transform$1, toSegments, getEdges, isClosed } from './jsxcad-geometry-path.js';
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, getPlans, getConnections, getSolids, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, alignVertices, transform as transform$2, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
+import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-import { add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$3 } from './jsxcad-math-vec3.js';
+import { add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$4 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { translate as translate$1 } from './jsxcad-geometry-paths.js';
-import { toPlane, cut as cut$1, transform as transform$1, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { toPlane as toPlane$2, cut as cut$1, transform as transform$2, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { cut, section as section$1, fromSolid, containsPoint, cutOpen } from './jsxcad-algorithm-bsp-surfaces.js';
-import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { toPlane as toPlane$1 } from './jsxcad-math-poly3.js';
+import { toTagFromName } from './jsxcad-algorithm-color.js';
+import { toPlane as toPlane$3 } from './jsxcad-math-poly3.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling, identity, multiply } from './jsxcad-math-mat4.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
 import { log as log$1, writeFile, readFile, getSources, ask as ask$1, addSource } from './jsxcad-sys.js';
@@ -806,7 +806,7 @@ const toPosition = (surface) => {
   return position;
 };
 
-const faceConnector = (shape, scoreOrientation, scorePosition) => {
+const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
   let bestSurface;
   let bestPosition;
   let bestOrientationScore = -Infinity;
@@ -834,13 +834,24 @@ const faceConnector = (shape, scoreOrientation, scorePosition) => {
     }
   }
 
-  return shape.toConnector(Connector('bottom', { plane: toPlane(bestSurface), center: bestPosition, right: add(bestPosition, [0, 1, 0]) }));
+  // FIX: Adding y + 1 is not always correct.
+  return shape.toConnector(Connector(id, { plane: toPlane$2(bestSurface), center: bestPosition, right: add(bestPosition, [0, 1, 0]) }));
+};
+
+const toConnector = (shape, surface, id) => {
+  const center = toPosition(surface);
+  // FIX: Adding y + 1 is not always correct.
+  return Connector(id, { plane: toPlane$2(surface), center, right: add(center, [0, 1, 0]) });
+};
+
+const withConnector = (shape, surface, id) => {
+  return shape.toConnector(toConnector(shape, surface, id));
 };
 
 const Y = 1;
 
 const back = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 1, 0, 0]), (point) => point[Y]);
+  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, 1, 0, 0]), (point) => point[Y]);
 
 const backMethod = function () { return back(this); };
 Shape.prototype.back = backMethod;
@@ -864,7 +875,7 @@ bomMethod.signature = 'Shape -> bom() -> string';
 const Z = 2;
 
 const bottom = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 0, -1, 0]), (point) => -point[Z]);
+  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, 0, -1, 0]), (point) => -point[Z]);
 
 const bottomMethod = function () { return bottom(this); };
 Shape.prototype.bottom = bottomMethod;
@@ -933,7 +944,9 @@ const Z$1 = (z = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  return Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
+  // FIX: Why aren't we createing the connector directly?
+  const sheet = Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
+  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
 };
 
 /**
@@ -955,23 +968,34 @@ const Z$1 = (z = 0) => {
  *
  **/
 
-const chop = (shape, planeShape = Z$1()) => {
-  const cuts = [];
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const cutResult = cut(solid, planeSurface);
-      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+const toPlane = (connector) => {
+  for (const entry of getPlans(connector.toKeptGeometry())) {
+    if (entry.plan && entry.plan.connector) {
+      return entry.planes[0];
     }
   }
+};
 
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
-      const cutSurface = surface || z0Surface;
-      const cutResult = cut$1(planeSurface, cutSurface);
-      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
-    }
+const toSurface = (plane) => {
+  const max = +1e5;
+  const min = -1e5;
+  const [, from] = toXYPlaneTransforms(plane);
+  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const polygon = transform$1(from, path);
+  return [polygon];
+};
+
+const chop = (shape, connector = Z$1()) => {
+  const cuts = [];
+  const planeSurface = toSurface(toPlane(connector));
+  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+    const cutResult = cut(solid, planeSurface);
+    cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+  }
+  for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+    const cutSurface = surface || z0Surface;
+    const cutResult = cut$1(planeSurface, cutSurface);
+    cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
   }
 
   return assemble(...cuts);
@@ -1413,9 +1437,9 @@ const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) =>
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
-      const z0SolidGeometry = extrude$1(transform$1(toZ0, surface), height, depth, steps, twistRadians);
-      const solid = transform$2(fromZ0, z0SolidGeometry);
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(surface));
+      const z0SolidGeometry = extrude$1(transform$2(toZ0, surface), height, depth, steps, twistRadians);
+      const solid = transform$3(fromZ0, z0SolidGeometry);
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
@@ -1446,7 +1470,7 @@ const faces = (shape, op = (_ => _)) => {
     const alignedSolid = alignVertices(solid);
     for (const surface of alignedSolid) {
       for (const face of surface) {
-        const plane = toPlane$1(face);
+        const plane = toPlane$3(face);
         const connectors = [];
         const tags = [];
         tags.push(`face/id:${nextFaceId++}`);
@@ -1458,7 +1482,7 @@ const faces = (shape, op = (_ => _)) => {
           const up = add(plane, nextPoint);
           connectors.push(Connector(edgeId,
                                     {
-                                      plane: toPlane$1([up, nextPoint, lastPoint]),
+                                      plane: toPlane$3([up, nextPoint, lastPoint]),
                                       center,
                                       right,
                                       start: lastPoint,
@@ -1495,7 +1519,7 @@ Shape.prototype.faceEdges = faceEdgesMethod;
 const Y$1 = 1;
 
 const front = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [0, -1, 0, 0]), (point) => -point[Y$1]);
+  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, -1, 0, 0]), (point) => -point[Y$1]);
 
 const frontMethod = function () { return front(this); };
 Shape.prototype.front = frontMethod;
@@ -1639,7 +1663,7 @@ keptMethod.signature = 'Shape -> kept() -> Shape';
 const X = 0;
 
 const left = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [-1, 0, 0, 0]), (point) => -point[X]);
+  faceConnector(shape, (surface) => dot(toPlane$2(surface), [-1, 0, 0, 0]), (point) => -point[X]);
 
 const leftMethod = function () { return left(this); };
 Shape.prototype.left = leftMethod;
@@ -1906,7 +1930,7 @@ orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Poin
 const X$1 = 0;
 
 const right = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [1, 0, 0, 0]), (point) => point[X$1]);
+  faceConnector(shape, (surface) => dot(toPlane$2(surface), [1, 0, 0, 0]), (point) => point[X$1]);
 
 const rightMethod = function () { return right(this); };
 Shape.prototype.right = rightMethod;
@@ -2081,21 +2105,34 @@ Shape.prototype.scale = method$6;
  *
  **/
 
-const section = (solidShape, surfaceShape = Z$1(0)) => {
-  const sections = [];
-  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
-    const anySurface = surface || z0Surface;
-    const shapes = [];
-    const plane = toPlane(anySurface);
-    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const section = section$1(solid, anySurface);
-      const surface = retessellate(section);
-      surface.plane = plane;
-      shapes.push(Shape.fromGeometry({ surface }));
+const toPlane$1 = (connector) => {
+  for (const entry of getPlans(connector.toKeptGeometry())) {
+    if (entry.plan && entry.plan.connector) {
+      return entry.planes[0];
     }
-    sections.push(union(...shapes));
   }
-  return assemble(...sections);
+};
+
+const toSurface$1 = (plane) => {
+  const max = +1e5;
+  const min = -1e5;
+  const [, from] = toXYPlaneTransforms(plane);
+  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const polygon = transform$1(from, path);
+  return [polygon];
+};
+
+const section = (solidShape, connector = Z$1(0)) => {
+  const plane = toPlane$1(connector);
+  const planeSurface = toSurface$1(plane);
+  const shapes = [];
+  for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+    const section = section$1(solid, planeSurface);
+    const surface = retessellate(section);
+    surface.plane = plane;
+    shapes.push(Shape.fromGeometry({ surface }));
+  }
+  return union(...shapes);
 };
 
 const method$7 = function (surface) { return section(this, surface); };
@@ -2264,8 +2301,10 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
         connectors: [aMovedConnector.toKeptGeometry(), bConnector],
-        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry(),
-                     dropConnector(bShape, bConnector.plan.connector).toGeometry()]
+        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
+            .concat(bShape === undefined
+              ? []
+              : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
       });
   } else {
     return [aMovedShape, aMovedConnector];
@@ -2336,7 +2375,7 @@ Shape.prototype.to = toMethod;
 const Z$4 = 2;
 
 const top = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [0, 0, 1, 0]), (point) => point[Z$4]);
+  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, 0, 1, 0]), (point) => point[Z$4]);
 
 const topMethod = function () { return top(this); };
 Shape.prototype.top = topMethod;
@@ -3176,7 +3215,7 @@ class Cursor {
   translate (...params) {
     const [x, y, z] = normalizeVector(params);
     const path = this.path.slice();
-    path.push(add(this.toPoint(), transform$3(this.matrix, [x, y, z])));
+    path.push(add(this.toPoint(), transform$4(this.matrix, [x, y, z])));
     return new Cursor({ matrix: this.matrix, path });
   }
 
@@ -4048,7 +4087,7 @@ const Spiral = ({ from = 0, to = 360, by = 1 } = {}, toRadiusFromAngle = (angle)
   const path = [null];
   for (const angle of numbers({ from, to, by })) {
     const radius = toRadiusFromAngle(angle);
-    path.push(transform$3(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
+    path.push(transform$4(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
   }
   return Shape.fromPath(path);
 };
@@ -4279,7 +4318,8 @@ const Y$3 = (y = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  return Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
+  const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
+  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
 };
 
 /**
@@ -4424,7 +4464,8 @@ const X$3 = (x = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
-  return Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
+  const sheet = Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
+  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
 };
 
 /**
@@ -4498,9 +4539,10 @@ const Z$6 = 2;
 
 const flat = (shape) => {
   let bestDepth = Infinity;
-  let bestFlatShape = shape;
+  let bestSurface;
 
-  const assay = (plane) => {
+  const assay = (surface) => {
+    const plane = toPlane$2(surface);
     if (plane !== undefined) {
       const [to] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
@@ -4508,33 +4550,32 @@ const flat = (shape) => {
       const depth = max[Z$6] - min[Z$6];
       if (depth < bestDepth) {
         bestDepth = depth;
-        bestFlatShape = flatShape.moveZ(-min[Z$6]);
+        bestSurface = surface;
       }
-    } else {
-      console.log(`QQ/bad`);
     }
   };
 
   const geometry = shape.toKeptGeometry();
   for (const { solid } of getSolids(geometry)) {
     for (const surface of solid) {
-      assay(toPlane(surface));
+      assay(surface);
     }
   }
   for (const { surface } of getSurfaces(geometry)) {
-    assay(toPlane(surface));
+    assay(surface);
   }
-  // We do not need to consider z0Surface, since it could never improve the
-  // orientation.
+  for (const { z0Surface } of getZ0Surfaces(geometry)) {
+    assay(z0Surface);
+  }
 
-  return bestFlatShape;
+  return withConnector(shape, bestSurface, 'flat');
 };
 
 const flatMethod = function () { return flat(this); };
 Shape.prototype.flat = flatMethod;
 
-flat.signature = 'flat(shape:Shape) -> Shape';
-flatMethod.signature = 'Shape -> flat() -> Shape';
+flat.signature = 'flat(shape:Shape) -> Connector';
+flatMethod.signature = 'Shape -> flat() -> Connector';
 
 const importModule = async (name) => {
   let script;
@@ -4883,10 +4924,10 @@ const stretch = (shape, length, planeShape = Z$1(0)) => {
       const bottom = cutOpen(solid, planeSurface);
       const profile = section$1(solid, planeSurface);
       const top = cutOpen(solid, flip$1(planeSurface));
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
-      const z0SolidGeometry = extrude$1(transform$1(toZ0, profile), length, 0, 1, 0, false);
-      const middle = transform$2(fromZ0, z0SolidGeometry);
-      const topMoved = transform$2(fromTranslation(scale$1(length, toPlane(profile))), top);
+      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(profile));
+      const z0SolidGeometry = extrude$1(transform$2(toZ0, profile), length, 0, 1, 0, false);
+      const middle = transform$3(fromZ0, z0SolidGeometry);
+      const topMoved = transform$3(fromTranslation(scale$1(length, toPlane$2(profile))), top);
       stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
     }
   }

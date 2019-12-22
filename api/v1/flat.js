@@ -1,16 +1,18 @@
-import { getSolids, getSurfaces } from '@jsxcad/geometry-tagged';
+import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape';
 import { toPlane } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
+import { withConnector } from './faceConnector';
 
 const Z = 2;
 
 export const flat = (shape) => {
   let bestDepth = Infinity;
-  let bestFlatShape = shape;
+  let bestSurface;
 
-  const assay = (plane) => {
+  const assay = (surface) => {
+    const plane = toPlane(surface);
     if (plane !== undefined) {
       const [to] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
@@ -18,30 +20,29 @@ export const flat = (shape) => {
       const depth = max[Z] - min[Z];
       if (depth < bestDepth) {
         bestDepth = depth;
-        bestFlatShape = flatShape.moveZ(-min[Z]);
+        bestSurface = surface;
       }
-    } else {
-      console.log(`QQ/bad`);
     }
   };
 
   const geometry = shape.toKeptGeometry();
   for (const { solid } of getSolids(geometry)) {
     for (const surface of solid) {
-      assay(toPlane(surface));
+      assay(surface);
     }
   }
   for (const { surface } of getSurfaces(geometry)) {
-    assay(toPlane(surface));
+    assay(surface);
   }
-  // We do not need to consider z0Surface, since it could never improve the
-  // orientation.
+  for (const { z0Surface } of getZ0Surfaces(geometry)) {
+    assay(z0Surface);
+  }
 
-  return bestFlatShape;
+  return withConnector(shape, bestSurface, 'flat');
 };
 
 const flatMethod = function () { return flat(this); };
 Shape.prototype.flat = flatMethod;
 
-flat.signature = 'flat(shape:Shape) -> Shape';
-flatMethod.signature = 'Shape -> flat() -> Shape';
+flat.signature = 'flat(shape:Shape) -> Connector';
+flatMethod.signature = 'Shape -> flat() -> Connector';
