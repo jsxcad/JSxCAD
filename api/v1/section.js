@@ -1,10 +1,11 @@
-import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
-import { retessellate, toPlane } from '@jsxcad/geometry-surface';
+import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { Z } from './Z';
-import { assemble } from './assemble';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
+import { retessellate } from '@jsxcad/geometry-surface';
+import { toXYPlaneTransforms } from '@jsxcad/math-plane';
+import { transform } from '@jsxcad/geometry-path';
 import { union } from './union';
 
 /**
@@ -37,21 +38,34 @@ import { union } from './union';
  *
  **/
 
-export const section = (solidShape, surfaceShape = Z(0)) => {
-  const sections = [];
-  for (const { surface, z0Surface } of getAnySurfaces(surfaceShape.toKeptGeometry())) {
-    const anySurface = surface || z0Surface;
-    const shapes = [];
-    const plane = toPlane(anySurface);
-    for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-      const section = bspSection(solid, anySurface);
-      const surface = retessellate(section);
-      surface.plane = plane;
-      shapes.push(Shape.fromGeometry({ surface }));
+const toPlane = (connector) => {
+  for (const entry of getPlans(connector.toKeptGeometry())) {
+    if (entry.plan && entry.plan.connector) {
+      return entry.planes[0];
     }
-    sections.push(union(...shapes));
   }
-  return assemble(...sections);
+};
+
+const toSurface = (plane) => {
+  const max = +1e5;
+  const min = -1e5;
+  const [, from] = toXYPlaneTransforms(plane);
+  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const polygon = transform(from, path);
+  return [polygon];
+};
+
+export const section = (solidShape, connector = Z(0)) => {
+  const plane = toPlane(connector);
+  const planeSurface = toSurface(plane);
+  const shapes = [];
+  for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+    const section = bspSection(solid, planeSurface);
+    const surface = retessellate(section);
+    surface.plane = plane;
+    shapes.push(Shape.fromGeometry({ surface }));
+  }
+  return union(...shapes);
 };
 
 const method = function (surface) { return section(this, surface); };

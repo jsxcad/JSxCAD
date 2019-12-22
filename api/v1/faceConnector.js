@@ -21,7 +21,7 @@ const toPosition = (surface) => {
   return position;
 };
 
-export const faceConnector = (shape, scoreOrientation, scorePosition) => {
+export const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
   let bestSurface;
   let bestPosition;
   let bestOrientationScore = -Infinity;
@@ -49,7 +49,18 @@ export const faceConnector = (shape, scoreOrientation, scorePosition) => {
     }
   }
 
-  return shape.toConnector(Connector('bottom', { plane: toPlane(bestSurface), center: bestPosition, right: add(bestPosition, [0, 1, 0]) }));
+  // FIX: Adding y + 1 is not always correct.
+  return shape.toConnector(Connector(id, { plane: toPlane(bestSurface), center: bestPosition, right: add(bestPosition, [0, 1, 0]) }));
+};
+
+export const toConnector = (shape, surface, id) => {
+  const center = toPosition(surface);
+  // FIX: Adding y + 1 is not always correct.
+  return Connector(id, { plane: toPlane(surface), center, right: add(center, [0, 1, 0]) });
+};
+
+export const withConnector = (shape, surface, id) => {
+  return shape.toConnector(toConnector(shape, surface, id));
 };
 
 export default faceConnector;

@@ -1,10 +1,12 @@
-import { getAnySurfaces, getSolids } from '@jsxcad/geometry-tagged';
+import { getAnySurfaces, getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import Shape from './Shape';
 import Z from './Z';
 import assemble from './assemble';
 import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
 import { cut as surfaceCut } from '@jsxcad/geometry-surface';
+import { toXYPlaneTransforms } from '@jsxcad/math-plane';
+import { transform } from '@jsxcad/geometry-path';
 
 /**
  *
@@ -25,23 +27,34 @@ import { cut as surfaceCut } from '@jsxcad/geometry-surface';
  *
  **/
 
-export const chop = (shape, planeShape = Z()) => {
-  const cuts = [];
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      const cutResult = bspCut(solid, planeSurface);
-      cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+const toPlane = (connector) => {
+  for (const entry of getPlans(connector.toKeptGeometry())) {
+    if (entry.plan && entry.plan.connector) {
+      return entry.planes[0];
     }
   }
+};
 
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
-      const cutSurface = surface || z0Surface;
-      const cutResult = surfaceCut(planeSurface, cutSurface);
-      cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
-    }
+const toSurface = (plane) => {
+  const max = +1e5;
+  const min = -1e5;
+  const [, from] = toXYPlaneTransforms(plane);
+  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const polygon = transform(from, path);
+  return [polygon];
+};
+
+export const chop = (shape, connector = Z()) => {
+  const cuts = [];
+  const planeSurface = toSurface(toPlane(connector));
+  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+    const cutResult = bspCut(solid, planeSurface);
+    cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+  }
+  for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+    const cutSurface = surface || z0Surface;
+    const cutResult = surfaceCut(planeSurface, cutSurface);
+    cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
   }
 
   return assemble(...cuts);

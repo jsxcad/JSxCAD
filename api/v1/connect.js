@@ -81,8 +81,10 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
         connectors: [aMovedConnector.toKeptGeometry(), bConnector],
-        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry(),
-                     dropConnector(bShape, bConnector.plan.connector).toGeometry()]
+        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
+            .concat(bShape === undefined
+              ? []
+              : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
       });
   } else {
     return [aMovedShape, aMovedConnector];
