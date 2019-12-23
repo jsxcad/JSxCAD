@@ -7629,11 +7629,50 @@ var clipper = createCommonjsModule(function (module) {
 
 const { IntPoint } = clipper;
 
-const toInt = (float) => Math.round(float * 1e5);
+const toInt = (integer) => integer * 1e5;
 const toFloat = (integer) => integer / 1e5;
 
-const fromSurface = (surface) => surface.map(path => path.map(([X, Y]) => (new IntPoint(toInt(X), toInt(Y)))));
-const toSurface = (paths) => paths.map(path => path.map(({ X, Y }) => [toFloat(X), toFloat(Y), 0]));
+const fromSurface = (surface, normalize) => surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
+const toSurface = (paths, normalize) => paths.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
+
+const X = 0;
+const Y = 1;
+
+// The resolution is 1 / multiplier.
+const createNormalize2 = (multiplier = 1e5) => {
+  const map = new Map();
+  const update = (key, value) => {
+    if (!map.has(key)) {
+      map.set(key, value);
+    }
+  };
+  const normalize2 = (coordinate) => {
+    // Apply a spatial quantization to the 2 dimensional coordinate.
+    const nx = Math.floor(coordinate[X] * multiplier - 0.5);
+    const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
+    // Look for an existing inhabitant.
+    const value = map.get(`${nx}/${ny}`);
+    if (value !== undefined) {
+      return value;
+    }
+    // One of the ~0 or ~1 values will match the rounded values above.
+    // The other will match the adjacent cell.
+    const nx0 = nx;
+    const ny0 = ny;
+    const nx1 = nx + 1;
+    const ny1 = ny + 1;
+    // Populate the space of the quantized coordinate and its adjacencies.
+    const normalized = coordinate;
+    // const normalized = [Math.round(coordinate[X] * multiplier), Math.round(coordinate[Y] * multiplier)];
+    update(`${nx0}/${ny0}`, normalized);
+    update(`${nx0}/${ny1}`, normalized);
+    update(`${nx1}/${ny0}`, normalized);
+    update(`${nx1}/${ny1}`, normalized);
+    // This is now the normalized coordinate for this region.
+    return normalized;
+  };
+  return normalize2;
+};
 
 const eachPoint = (options = {}, thunk, surface) => {
   for (const polygon of surface) {
@@ -7660,8 +7699,8 @@ const measureBoundingBox = (surface) => {
 };
 
 const iota = 1e-5;
-const X = 0;
-const Y = 1;
+const X$1 = 0;
+const Y$1 = 1;
 
 // No overlap tolerance.
 const doesNotOverlapOrAbut = (a, b) => {
@@ -7670,10 +7709,10 @@ const doesNotOverlapOrAbut = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] < minB[X] - iota) { return true; }
-  if (maxA[Y] < minB[Y] - iota) { return true; }
-  if (maxB[X] < minA[X] - iota) { return true; }
-  if (maxB[Y] < minA[Y] - iota) { return true; }
+  if (maxA[X$1] < minB[X$1] - iota) { return true; }
+  if (maxA[Y$1] < minB[Y$1] - iota) { return true; }
+  if (maxB[X$1] < minA[X$1] - iota) { return true; }
+  if (maxB[Y$1] < minA[Y$1] - iota) { return true; }
   return false;
 };
 
@@ -7683,6 +7722,7 @@ const difference = (a, ...z0Surfaces) => {
   if (a === undefined || a.length === 0) {
     return [];
   }
+  const normalize = createNormalize2();
   while (z0Surfaces.length >= 1) {
     const b = z0Surfaces.shift();
     if (b.length === 0) {
@@ -7691,11 +7731,11 @@ const difference = (a, ...z0Surfaces) => {
       continue;
     } else {
       const clipper = new Clipper();
-      clipper.AddPaths(fromSurface(a), PolyType.ptSubject, true);
-      clipper.AddPaths(fromSurface(b), PolyType.ptClip, true);
+      clipper.AddPaths(fromSurface(a, normalize), PolyType.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
       const result = [];
       clipper.Execute(ClipType.ctDifference, result, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
-      a = toSurface(result);
+      a = toSurface(result, normalize);
     }
   }
   return a;
@@ -7714,17 +7754,18 @@ const intersection = (a, ...z0Surfaces) => {
   if (a === undefined || a.length === 0) {
     return [];
   }
+  const normalize = createNormalize2();
   while (z0Surfaces.length >= 1) {
     const b = z0Surfaces.shift();
     if (doesNotOverlapOrAbut(a, b)) {
       return [];
     } else {
       const clipper = new Clipper$1();
-      clipper.AddPaths(fromSurface(a), PolyType$1.ptSubject, true);
-      clipper.AddPaths(fromSurface(b), PolyType$1.ptClip, true);
+      clipper.AddPaths(fromSurface(a, normalize), PolyType$1.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$1.ptClip, true);
       const result = [];
       clipper.Execute(ClipType$1.ctIntersection, result, PolyFillType$1.pftNonZero, PolyFillType$1.pftNonZero);
-      a = toSurface(result);
+      a = toSurface(result, normalize);
     }
   }
   return a;
@@ -7743,6 +7784,7 @@ const union = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }
+  const normalize = createNormalize2();
   while (z0Surfaces.length >= 2) {
     const a = z0Surfaces.shift();
     const b = z0Surfaces.shift();
@@ -7750,11 +7792,11 @@ const union = (...z0Surfaces) => {
       z0Surfaces.push([].concat(a, b));
     } else {
       const clipper = new Clipper$2();
-      clipper.AddPaths(fromSurface(a), PolyType$2.ptSubject, true);
-      clipper.AddPaths(fromSurface(b), PolyType$2.ptClip, true);
+      clipper.AddPaths(fromSurface(a, normalize), PolyType$2.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$2.ptClip, true);
       const result = [];
       clipper.Execute(ClipType$2.ctUnion, result, PolyFillType$2.pftNonZero, PolyFillType$2.pftNonZero);
-      z0Surfaces.push(toSurface(result));
+      z0Surfaces.push(toSurface(result, normalize));
     }
   }
   return z0Surfaces[0];
