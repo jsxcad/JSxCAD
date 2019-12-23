@@ -1,3 +1,4 @@
+import Shape from './Shape';
 import { log as sysLog } from '@jsxcad/sys';
 
 /**
@@ -14,5 +15,8 @@ import { log as sysLog } from '@jsxcad/sys';
 
 export const log = (text) => sysLog({ op: 'text', text: String(text) });
 export default log;
+
+const logMethod = function () { log(JSON.stringify(this.toKeptGeometry())); return this; };
+Shape.prototype.log = logMethod;
 
 log.signature = 'log(text:string)';
