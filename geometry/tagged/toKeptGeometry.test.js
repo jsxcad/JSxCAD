@@ -20,11 +20,8 @@ test('With Keep', t => {
       assembly: [{ solid: [], tags: ['user/cube'] },
                  { solid: [], tags: ['user/cylinder'] }]
     };
-  console.log(`QQ/1: ${JSON.stringify(geometry)}`);
   const selectedGeometry = keep(['user/cylinder'], geometry);
-  console.log(`QQ/2: ${JSON.stringify(selectedGeometry)}`);
   const keptGeometry = toKeptGeometry(selectedGeometry);
-  console.log(`QQ/3: ${JSON.stringify(keptGeometry)}`);
   t.deepEqual(keptGeometry,
               { 'disjointAssembly': [{ 'disjointAssembly': [{ 'solid': [], 'tags': ['user/cylinder'] }] }] });
 });

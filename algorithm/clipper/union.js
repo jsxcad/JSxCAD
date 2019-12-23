@@ -1,6 +1,7 @@
 import { fromSurface, toSurface } from './convert';
 
 import ClipperLib from 'clipper-lib';
+import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlapOrAbut } from './doesNotOverlap';
 
 const { Clipper, ClipType, PolyFillType, PolyType } = ClipperLib;
@@ -16,6 +17,7 @@ export const union = (...z0Surfaces) => {
   if (z0Surfaces.length === 0) {
     return [];
   }
+  const normalize = createNormalize2();
   while (z0Surfaces.length >= 2) {
     const a = z0Surfaces.shift();
     const b = z0Surfaces.shift();
@@ -23,11 +25,11 @@ export const union = (...z0Surfaces) => {
       z0Surfaces.push([].concat(a, b));
     } else {
       const clipper = new Clipper();
-      clipper.AddPaths(fromSurface(a), PolyType.ptSubject, true);
-      clipper.AddPaths(fromSurface(b), PolyType.ptClip, true);
+      clipper.AddPaths(fromSurface(a, normalize), PolyType.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
       const result = [];
       clipper.Execute(ClipType.ctUnion, result, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
-      z0Surfaces.push(toSurface(result));
+      z0Surfaces.push(toSurface(result, normalize));
     }
   }
   return z0Surfaces[0];
