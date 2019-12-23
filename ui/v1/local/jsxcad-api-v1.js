@@ -2493,6 +2493,9 @@ Shape.prototype.turnZ = turnZMethod;
 
 const log = (text) => log$1({ op: 'text', text: String(text) });
 
+const logMethod = function () { log(JSON.stringify(this.toKeptGeometry())); return this; };
+Shape.prototype.log = logMethod;
+
 log.signature = 'log(text:string)';
 
 /**
