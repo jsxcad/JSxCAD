@@ -12,6 +12,7 @@ import './as';
 import './back';
 import './bom';
 import './bottom';
+import './canonicalize';
 import './center';
 import './chop';
 import './color';
