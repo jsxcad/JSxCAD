@@ -1,5 +1,5 @@
 import { close, concatenate, open, transform as transform$1, toSegments, getEdges, isClosed } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, getPlans, getConnections, getSolids, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, getPlans, getConnections, getSolids, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
 import { add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$4 } from './jsxcad-math-vec3.js';
@@ -882,6 +882,11 @@ Shape.prototype.bottom = bottomMethod;
 
 bottom.signature = 'bottom(shape:Shape) -> Shape';
 bottomMethod.signature = 'Shape -> bottom() -> Shape';
+
+const canonicalize = (shape) => Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
+
+const canonicalizeMethod = function () { return canonicalize(this); };
+Shape.prototype.canonicalize = canonicalizeMethod;
 
 /**
  *
