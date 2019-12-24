@@ -4114,7 +4114,7 @@ numbers.signature = 'numbers(spec) -> numbers';
 
 const Spiral = (toRadiusFromAngle = (angle) => angle, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
-  for (const angle of numbers({ from, to, by })) {
+  for (const angle of numbers(angle => angle, { from, to, by })) {
     const radius = toRadiusFromAngle(angle);
     path.push(transform$4(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
   }
@@ -4478,7 +4478,7 @@ const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation 
 
 const Wave = (toYDistanceFromXDistance = (xDistance) => 0, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
-  for (const xDistance of numbers({ from, to, by })) {
+  for (const xDistance of numbers(distance => distance, { from, to, by })) {
     const yDistance = toYDistanceFromXDistance(xDistance);
     path.push([xDistance, yDistance, 0]);
   }

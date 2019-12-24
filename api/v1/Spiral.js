@@ -27,7 +27,7 @@ import { transform } from '@jsxcad/math-vec3';
 
 export const Spiral = (toRadiusFromAngle = (angle) => angle, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
-  for (const angle of numbers({ from, to, by })) {
+  for (const angle of numbers(angle => angle, { from, to, by })) {
     const radius = toRadiusFromAngle(angle);
     path.push(transform(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
   }

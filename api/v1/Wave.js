@@ -17,7 +17,7 @@ import { numbers } from './numbers';
 
 export const Wave = (toYDistanceFromXDistance = (xDistance) => 0, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
-  for (const xDistance of numbers({ from, to, by })) {
+  for (const xDistance of numbers(distance => distance, { from, to, by })) {
     const yDistance = toYDistanceFromXDistance(xDistance);
     path.push([xDistance, yDistance, 0]);
   }
