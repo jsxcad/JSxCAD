@@ -2342,9 +2342,14 @@ const takeMethod = function (connector) { return connect(connector, this); };
 Shape.prototype.take = takeMethod;
 takeMethod.signature = 'Connector -> take(from:Connector) -> Shape';
 
-const meetMethod = function (connector) { return connect(this, connector); };
-Shape.prototype.meet = meetMethod;
-meetMethod.signature = 'Connector -> meet(to:Connector) -> Shape';
+const toMethod = function (connector) { return connect(connector, this); };
+Shape.prototype.to = toMethod;
+toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
+Shape.prototype.from = toMethod;
+
+const fixToMethod = function (connector) { return connect(this, connector); };
+Shape.prototype.fixTo = fixToMethod;
+fixToMethod.signature = 'Connector -> fixTo(to:Connector) -> Shape';
 
 connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
 
@@ -2396,8 +2401,8 @@ const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, jo
 const joinLeftMethod = function (a, ...rest) { return joinLeft(this, a, ...rest); };
 Shape.prototype.joinLeft = joinLeftMethod;
 
-const toMethod = function (...args) { return connect(this, ...args); };
-Shape.prototype.to = toMethod;
+const toMethod$1 = function (...args) { return connect(this, ...args); };
+Shape.prototype.to = toMethod$1;
 
 const Z$5 = 2;
 

@@ -91,13 +91,13 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   }
 };
 
-const takeMethod = function (connector) { return connect(connector, this); };
-Shape.prototype.take = takeMethod;
-takeMethod.signature = 'Connector -> take(from:Connector) -> Shape';
+const toMethod = function (connector) { return connect(connector, this); };
+Shape.prototype.to = toMethod;
+toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
-const meetMethod = function (connector) { return connect(this, connector); };
-Shape.prototype.meet = meetMethod;
-meetMethod.signature = 'Connector -> meet(to:Connector) -> Shape';
+const fromMethod = function (connector) { return connect(this, connector); };
+Shape.prototype.from = toMethod;
+fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
 
 export default connect;
 
