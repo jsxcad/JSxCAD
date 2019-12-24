@@ -13,7 +13,7 @@
 
 const EPSILON = 1e-5;
 
-export const numbers = ({ from = 0, to, upto, by, resolution }, thunk = (n => n)) => {
+export const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution }) => {
   const numbers = [];
   if (by === undefined) {
     if (resolution !== undefined) {

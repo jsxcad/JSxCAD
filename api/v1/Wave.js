@@ -9,13 +9,13 @@ import { numbers } from './numbers';
  *
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
- * Wave({ to: 360 },
- *      angle => sin(angle) * 100);
+ * Wave(angle => sin(angle) * 100,
+ *      { to: 360 });
  * ```
  * :::
  **/
 
-export const Wave = ({ from = 0, to = 360, by = 1 } = {}, toYDistanceFromXDistance = (xDistance) => 0) => {
+export const Wave = (toYDistanceFromXDistance = (xDistance) => 0, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
   for (const xDistance of numbers({ from, to, by })) {
     const yDistance = toYDistanceFromXDistance(xDistance);

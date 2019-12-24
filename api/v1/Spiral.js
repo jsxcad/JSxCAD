@@ -11,8 +11,8 @@ import { transform } from '@jsxcad/math-vec3';
  *
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
- * Spiral({ to: 360 * 5 },
- *        angle => angle);
+ * Spiral(angle => angle,
+ *        { to: 360 * 5 });
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, 0, 10] } }
@@ -25,7 +25,7 @@ import { transform } from '@jsxcad/math-vec3';
  * :::
  **/
 
-export const Spiral = ({ from = 0, to = 360, by = 1 } = {}, toRadiusFromAngle = (angle) => angle) => {
+export const Spiral = (toRadiusFromAngle = (angle) => angle, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
   for (const angle of numbers({ from, to, by })) {
     const radius = toRadiusFromAngle(angle);

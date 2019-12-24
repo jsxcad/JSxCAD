@@ -2,7 +2,7 @@ import { close, concatenate, open, transform as transform$1, toSegments, getEdge
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, getPlans, getConnections, getSolids, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$4 } from './jsxcad-math-vec3.js';
+import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross, distance, transform as transform$4 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { translate as translate$1 } from './jsxcad-geometry-paths.js';
@@ -40,7 +40,6 @@ var api = /*#__PURE__*/Object.freeze({
   get Circle () { return Circle; },
   get Cone () { return Cone; },
   get Connector () { return Connector; },
-  get coordinates () { return coordinates; },
   get cos () { return cos; },
   get Cube () { return Cube; },
   get Cursor () { return Cursor; },
@@ -105,8 +104,8 @@ var api = /*#__PURE__*/Object.freeze({
   get union () { return union; },
   get vec () { return jsxcadMathVec3_js; },
   get Wave () { return Wave; },
-  get X () { return X$3; },
-  get Y () { return Y$3; },
+  get X () { return X$4; },
+  get Y () { return Y$4; },
   get Z () { return Z$1; },
   get getCompletions () { return getCompletions; }
 });
@@ -2146,6 +2145,26 @@ const method$7 = function (surface) { return section(this, surface); };
 
 Shape.prototype.section = method$7;
 
+const X$2 = 0;
+const Y$2 = 1;
+const Z$3 = 2;
+
+const size = (shape) => {
+  const [min, max] = measureBoundingBox(shape);
+  const length = max[X$2] - min[X$2];
+  const width = max[Y$2] - min[Y$2];
+  const height = max[Z$3] - min[Z$3];
+  const center = scale$1(0.5, add(min, max));
+  const radius = distance(center, max);
+  return { length, width, height, max, min, center, radius };
+};
+
+const sizeMethod = function () { return size(this); };
+Shape.prototype.size = sizeMethod;
+
+size.signature = 'size(shape:Shape) -> Size';
+sizeMethod.signature = 'Shape -> size() -> Size';
+
 const solids = (shape, xform = (_ => _)) => {
   const solids = [];
   for (const solid of getSolids(shape.toKeptGeometry())) {
@@ -2181,14 +2200,14 @@ Shape.prototype.solids = solidsMethod;
  *
  **/
 
-const Z$3 = 2;
+const Z$4 = 2;
 
 const chainHull = (...shapes) => {
   const pointsets = shapes.map(shape => shape.toPoints());
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    if (points.every(point => point[Z$3] === 0)) {
+    if (points.every(point => point[Z$4] === 0)) {
       chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
     } else {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -2379,10 +2398,10 @@ Shape.prototype.joinLeft = joinLeftMethod;
 const toMethod = function (...args) { return connect(this, ...args); };
 Shape.prototype.to = toMethod;
 
-const Z$4 = 2;
+const Z$5 = 2;
 
 const top = (shape) =>
-  faceConnector(shape, 'top', (surface) => dot(toPlane$2(surface), [0, 0, 1, 0]), (point) => point[Z$4]);
+  faceConnector(shape, 'top', (surface) => dot(toPlane$2(surface), [0, 0, 1, 0]), (point) => point[Z$5]);
 
 const topMethod = function () { return top(this); };
 Shape.prototype.top = topMethod;
@@ -2595,9 +2614,9 @@ Shape.prototype.unfold = method$d;
 const method$e = function (...shapes) { return assemble(this, ...shapes); };
 Shape.prototype.with = method$e;
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$5 = 2;
+const X$3 = 0;
+const Y$3 = 1;
+const Z$6 = 2;
 
 const voxels = ({ resolution = 1 }, shape) => {
   const offset = resolution / 2;
@@ -2606,9 +2625,9 @@ const voxels = ({ resolution = 1 }, shape) => {
     const [min, max] = measureBoundingBox$2(solid);
     const bsp = fromSolid(solid);
     const polygons = [];
-    for (let x = min[X$2] - offset; x <= max[X$2] + offset; x += resolution) {
-      for (let y = min[Y$2] - offset; y <= max[Y$2] + offset; y += resolution) {
-        for (let z = min[Z$5] - offset; z <= max[Z$5] + offset; z += resolution) {
+    for (let x = min[X$3] - offset; x <= max[X$3] + offset; x += resolution) {
+      for (let y = min[Y$3] - offset; y <= max[Y$3] + offset; y += resolution) {
+        for (let z = min[Z$6] - offset; z <= max[Z$6] + offset; z += resolution) {
           const state = containsPoint(bsp, [x, y, z]);
           if (state !== containsPoint(bsp, [x + resolution, y, z])) {
             const face = [[x + offset, y - offset, z - offset],
@@ -4041,7 +4060,7 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 const EPSILON = 1e-5;
 
-const numbers = ({ from = 0, to, upto, by, resolution }, thunk = (n => n)) => {
+const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution }) => {
   const numbers = [];
   if (by === undefined) {
     if (resolution !== undefined) {
@@ -4079,8 +4098,8 @@ numbers.signature = 'numbers(spec) -> numbers';
  *
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
- * Spiral({ to: 360 * 5 },
- *        angle => angle);
+ * Spiral(angle => angle,
+ *        { to: 360 * 5 });
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, 0, 10] } }
@@ -4093,7 +4112,7 @@ numbers.signature = 'numbers(spec) -> numbers';
  * :::
  **/
 
-const Spiral = ({ from = 0, to = 360, by = 1 } = {}, toRadiusFromAngle = (angle) => angle) => {
+const Spiral = (toRadiusFromAngle = (angle) => angle, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
   for (const angle of numbers({ from, to, by })) {
     const radius = toRadiusFromAngle(angle);
@@ -4324,7 +4343,7 @@ Triangle.ofDiameter = ofDiameter$a;
 // Unfortunately this makes things like interpolation tricky,
 // so we approximate it with a very large polygon instead.
 
-const Y$3 = (y = 0) => {
+const Y$4 = (y = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
@@ -4344,7 +4363,7 @@ const Y$3 = (y = 0) => {
  **/
 
 const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
-  const profile = shape.chop(Y$3(0));
+  const profile = shape.chop(Y$4(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
@@ -4451,13 +4470,13 @@ const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation 
  *
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
- * Wave({ to: 360 },
- *      angle => sin(angle) * 100);
+ * Wave(angle => sin(angle) * 100,
+ *      { to: 360 });
  * ```
  * :::
  **/
 
-const Wave = ({ from = 0, to = 360, by = 1 } = {}, toYDistanceFromXDistance = (xDistance) => 0) => {
+const Wave = (toYDistanceFromXDistance = (xDistance) => 0, { from = 0, to = 360, by = 1 } = {}) => {
   const path = [null];
   for (const xDistance of numbers({ from, to, by })) {
     const yDistance = toYDistanceFromXDistance(xDistance);
@@ -4470,7 +4489,7 @@ const Wave = ({ from = 0, to = 360, by = 1 } = {}, toYDistanceFromXDistance = (x
 // Unfortunately this makes things like interpolation tricky,
 // so we approximate it with a very large polygon instead.
 
-const X$3 = (x = 0) => {
+const X$4 = (x = 0) => {
   const size = 1e5;
   const min = -size;
   const max = size;
@@ -4526,26 +4545,7 @@ ask.forNumber.signature = 'ask(parameter:string, value:number = 0) -> number';
 ask.forString.signature = 'ask(parameter:string, value) -> string';
 ask.forBool.signature = 'ask(parameter:string, value:boolean = false) -> boolean';
 
-/**
- *
- * # Coordinates
- *
- * ```
- * coordinates({ to: 3 }) is [[0], [1], [2]].
- * ```
- *
- **/
-
-// FIX: Consider other cardinalities.
-const coordinates = (xSpec, ySpec, zSpec, op) => {
-  const coordinates = [];
-  numbers(xSpec, x => numbers(ySpec, y => numbers(zSpec, z => coordinates.push(op(x, y, z)))));
-  return coordinates;
-};
-
-coordinates.signature = 'coordinates(xSpec, ySpec, zSpec, op) -> coordinates';
-
-const Z$6 = 2;
+const Z$7 = 2;
 
 const flat = (shape) => {
   let bestDepth = Infinity;
@@ -4557,7 +4557,7 @@ const flat = (shape) => {
       const [to] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
       const [min, max] = flatShape.measureBoundingBox();
-      const depth = max[Z$6] - min[Z$6];
+      const depth = max[Z$7] - min[Z$7];
       if (depth < bestDepth) {
         bestDepth = depth;
         bestSurface = surface;
@@ -4923,23 +4923,38 @@ Shape.prototype.specify = method$p;
  *
  **/
 
-const stretch = (shape, length, planeShape = Z$1(0)) => {
-  const stretches = [];
-  for (const { surface, z0Surface } of getAnySurfaces(planeShape.toKeptGeometry())) {
-    const planeSurface = surface || z0Surface;
-    for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-      if (solid.length === 0) {
-        continue;
-      }
-      const bottom = cutOpen(solid, planeSurface);
-      const profile = section$1(solid, planeSurface);
-      const top = cutOpen(solid, flip$1(planeSurface));
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(profile));
-      const z0SolidGeometry = extrude$1(transform$2(toZ0, profile), length, 0, 1, 0, false);
-      const middle = transform$3(fromZ0, z0SolidGeometry);
-      const topMoved = transform$3(fromTranslation(scale$1(length, toPlane$2(profile))), top);
-      stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
+const toPlaneFromConnector = (connector) => {
+  for (const entry of getPlans(connector.toKeptGeometry())) {
+    if (entry.plan && entry.plan.connector) {
+      return entry.planes[0];
     }
+  }
+};
+
+const toSurface$2 = (plane) => {
+  const max = +1e5;
+  const min = -1e5;
+  const [, from] = toXYPlaneTransforms(plane);
+  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const polygon = transform$1(from, path);
+  return [polygon];
+};
+
+const stretch = (shape, length, connector = Z$1()) => {
+  const stretches = [];
+  const planeSurface = toSurface$2(toPlaneFromConnector(connector));
+  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+    if (solid.length === 0) {
+      continue;
+    }
+    const bottom = cutOpen(solid, planeSurface);
+    const profile = section$1(solid, planeSurface);
+    const top = cutOpen(solid, flip$1(planeSurface));
+    const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$2(profile));
+    const z0SolidGeometry = extrude$1(transform$2(toZ0, profile), length, 0, 1, 0, false);
+    const middle = transform$3(fromZ0, z0SolidGeometry);
+    const topMoved = transform$3(fromTranslation(scale$1(length, toPlane$2(profile))), top);
+    stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
   }
 
   return assemble(...stretches);
@@ -5069,7 +5084,6 @@ const operators = [
   'acos',
   'ask',
   'assemble',
-  'coordinates',
   'cos',
   'difference',
   'ease',
@@ -5137,4 +5151,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$3 as X, Y$3 as Y, Z$1 as Z, acos, ask, assemble, chainHull, coordinates, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

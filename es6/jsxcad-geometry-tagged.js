@@ -817,6 +817,8 @@ const measureBoundingBox = (rawGeometry) => {
       for (const subitem of item.assembly) {
         walk(subitem);
       }
+    } else if (item.connection) {
+      item.geometries.map(walk);
     } else if (item.disjointAssembly) {
       // Should we cache at the disjointAssembly level?
       for (const subitem of item.disjointAssembly) {
