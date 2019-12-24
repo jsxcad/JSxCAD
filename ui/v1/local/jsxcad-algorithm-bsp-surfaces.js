@@ -1,7 +1,7 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { squaredDistance } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toPolygons, fromPolygons as fromPolygons$1, doesNotOverlap, flip, alignVertices } from './jsxcad-geometry-solid.js';
+import { toPolygons, fromPolygons as fromPolygons$1, createNormalize3, alignVertices, doesNotOverlap, flip } from './jsxcad-geometry-solid.js';
 
 const EPSILON = 1e-5;
 const EPSILON2 = 1e-10;
@@ -374,46 +374,11 @@ const containsPoint = (bsp, point) => {
   }
 };
 
-/*
-const mayOverlap = (a, b) => !doesNotOverlap(a, b);
-
-export const differenceNway = (aSolid, ...bSolids) => {
-  if (aSolid === undefined) {
-    return [];
-  }
-  bSolids = bSolids.filter(bSolid => mayOverlap(aSolid, bSolid));
-  if (bSolids.length === 0) {
-    return aSolid;
-  }
-  let aPolygons = toPolygonsFromSolid({}, aSolid);
-  const bBsp = [];
-  for (let i = 0; i < bSolids.length; i++) {
-    const bSolid = bSolids[i];
-    bBsp[i] = toBspFromSolid(bSolid);
-    aPolygons = removeInteriorPolygonsKeepingSkin(bBsp[i], aPolygons);
-  }
-  const aBsp = toBspFromSolid(aSolid);
-  const polygons = [];
-  for (let i = 0; i < bSolids.length; i++) {
-    const bSolid = bSolids[i];
-    let bPolygons = toPolygonsFromSolid({}, flip(bSolid));
-    bPolygons = removeExteriorPolygons(aBsp, bPolygons);
-    for (let j = 0; j < bSolids.length; j++) {
-      if (j !== i) {
-        bPolygons = removeInteriorPolygonsKeepingSkin(bBsp[j], bPolygons);
-      }
-    }
-    polygons.push(...bPolygons);
-  }
-  polygons.push(...aPolygons);
-  return toSolidFromPolygons({}, polygons);
-};
-*/
-
 const difference = (aSolid, ...bSolids) => {
+  const normalize = createNormalize3();
   while (bSolids.length > 0) {
-    const a = aSolid;
-    const b = bSolids.shift();
+    const a = alignVertices(aSolid, normalize);
+    const b = alignVertices(bSolids.shift(), normalize);
 
     if (doesNotOverlap(a, b)) {
       continue;
@@ -430,45 +395,18 @@ const difference = (aSolid, ...bSolids) => {
 
     aSolid = fromPolygons$1({}, [...aTrimmed, ...bTrimmed]);
   }
-  return aSolid;
+  return alignVertices(aSolid, normalize);
 };
-
-/*
-export const intersectionNway = (...solids) => {
-  if (solids.length === 0) {
-    return [];
-  }
-  if (solids.length === 1) {
-    return solids[0];
-  }
-  for (let start = 0; start + 1 < solids.length; start++) {
-    for (let end = start + 1; end < solids.length; end++) {
-      if (doesNotOverlap(solids[start], solids[end])) {
-        return [];
-      }
-    }
-  }
-  const bsps = solids.map(solid => toBspFromSolid(solid));
-  const polygons = solids.map(solid => toPolygonsFromSolid({}, solid));
-  for (let nth = 0; nth < solids.length; nth++) {
-    for (const bsp of bsps) {
-      // Polygons which fall OUT are removed.
-      // Coplanars must fall IN-ward.
-      polygons[nth] = removeExteriorPolygons(bsp, polygons[nth]);
-    }
-  }
-  return toSolidFromPolygons({}, [].concat(...polygons));
-};
-*/
 
 // An asymmetric binary merge.
 const intersection = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
+  const normalize = createNormalize3();
   while (solids.length > 1) {
-    const a = solids.shift();
-    const b = solids.shift();
+    const a = alignVertices(solids.shift(), normalize);
+    const b = alignVertices(solids.shift(), normalize);
 
     if (doesNotOverlap(a, b)) {
       return [];
@@ -485,7 +423,7 @@ const intersection = (...solids) => {
 
     solids.push(fromPolygons$1({}, [...aTrimmed, ...bTrimmed]));
   }
-  return solids[0];
+  return alignVertices(solids[0], normalize);
 };
 
 const section = (solid, surface) => {
@@ -498,12 +436,13 @@ const union = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
+  const normalize = createNormalize3();
   while (solids.length > 1) {
-    const a = solids.shift();
+    const a = alignVertices(solids.shift(), normalize);
     const aPolygons = toPolygons({}, a);
     const aBsp = fromSolid(a);
 
-    const b = solids.shift();
+    const b = alignVertices(solids.shift(), normalize);
     const bPolygons = toPolygons({}, b);
     const bBsp = fromSolid(b);
 
@@ -512,7 +451,7 @@ const union = (...solids) => {
 
     solids.push(fromPolygons$1({}, [...aTrimmed, ...bTrimmed]));
   }
-  return solids[0];
+  return alignVertices(solids[0], normalize);
 };
 
 export { containsPoint, cut, cutOpen, difference, fromSolid, intersection, section, union };

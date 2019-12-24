@@ -211,18 +211,18 @@ endloop
 endfacet
 facet normal 0 0 -1
 outer loop
+vertex 7.07107 7.07107 -10
+vertex -5.5557 8.3147 -10
 vertex 5.5557 8.3147 -10
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 7.07107 7.07107 -10
 vertex -7.07107 7.07107 -10
 vertex -5.5557 8.3147 -10
 endloop
 endfacet
-facet normal 0 0 -1
-outer loop
-vertex 7.07107 7.07107 -10
-vertex -7.07107 7.07107 -10
-vertex 5.5557 8.3147 -10
-endloop
-endfacet
 facet normal 0 0 -0.9999999999999999
 outer loop
 vertex 8.3147 5.5557 -10
@@ -239,142 +239,142 @@ endloop
 endfacet
 facet normal 0 0 -1
 outer loop
+vertex 9.2388 3.82683 -10
+vertex -8.3147 5.5557 -10
 vertex 8.3147 5.5557 -10
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 9.2388 3.82683 -10
 vertex -9.2388 3.82683 -10
 vertex -8.3147 5.5557 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 9.2388 3.82683 -10
+vertex 9.80785 1.9509 -10
 vertex -9.2388 3.82683 -10
-vertex 8.3147 5.5557 -10
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
 vertex 9.2388 3.82683 -10
-vertex -9.80785 1.9509 -10
-vertex -9.2388 3.82683 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 9.80785 1.9509 -10
 vertex -9.80785 1.9509 -10
-vertex 9.2388 3.82683 -10
+vertex -9.2388 3.82683 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 9.80785 1.9509 -10
-vertex -10 0 -10
+vertex 10 0 -10
 vertex -9.80785 1.9509 -10
+vertex 9.80785 1.9509 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 10 0 -10
 vertex -10 0 -10
-vertex 9.80785 1.9509 -10
+vertex -9.80785 1.9509 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 10 0 -10
-vertex -9.80785 -1.9509 -10
+vertex 9.80785 -1.9509 -10
 vertex -10 0 -10
+vertex 10 0 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 9.80785 -1.9509 -10
 vertex -9.80785 -1.9509 -10
-vertex 10 0 -10
+vertex -10 0 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 9.80785 -1.9509 -10
-vertex -9.2388 -3.82683 -10
+vertex 9.2388 -3.82683 -10
 vertex -9.80785 -1.9509 -10
+vertex 9.80785 -1.9509 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 9.2388 -3.82683 -10
 vertex -9.2388 -3.82683 -10
-vertex 9.80785 -1.9509 -10
+vertex -9.80785 -1.9509 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 9.2388 -3.82683 -10
-vertex -8.3147 -5.5557 -10
+vertex 8.3147 -5.5557 -10
 vertex -9.2388 -3.82683 -10
+vertex 9.2388 -3.82683 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 8.3147 -5.5557 -10
 vertex -8.3147 -5.5557 -10
-vertex 9.2388 -3.82683 -10
+vertex -9.2388 -3.82683 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 8.3147 -5.5557 -10
-vertex -7.07107 -7.07107 -10
+vertex 7.07107 -7.07107 -10
 vertex -8.3147 -5.5557 -10
+vertex 8.3147 -5.5557 -10
 endloop
 endfacet
 facet normal 0 0 -0.9999999999999999
 outer loop
 vertex 7.07107 -7.07107 -10
 vertex -7.07107 -7.07107 -10
-vertex 8.3147 -5.5557 -10
+vertex -8.3147 -5.5557 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
+vertex 5.5557 -8.3147 -10
+vertex -7.07107 -7.07107 -10
 vertex 7.07107 -7.07107 -10
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 5.5557 -8.3147 -10
 vertex -5.5557 -8.3147 -10
 vertex -7.07107 -7.07107 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 5.5557 -8.3147 -10
+vertex 3.82683 -9.2388 -10
 vertex -5.5557 -8.3147 -10
-vertex 7.07107 -7.07107 -10
-endloop
-endfacet
-facet normal 0 0 -0.9999999999999999
-outer loop
 vertex 5.5557 -8.3147 -10
-vertex -3.82683 -9.2388 -10
-vertex -5.5557 -8.3147 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 3.82683 -9.2388 -10
 vertex -3.82683 -9.2388 -10
-vertex 5.5557 -8.3147 -10
+vertex -5.5557 -8.3147 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 3.82683 -9.2388 -10
-vertex -1.9509 -9.80785 -10
+vertex 1.9509 -9.80785 -10
 vertex -3.82683 -9.2388 -10
+vertex 3.82683 -9.2388 -10
 endloop
 endfacet
 facet normal 0 0 -1
 outer loop
 vertex 1.9509 -9.80785 -10
 vertex -1.9509 -9.80785 -10
-vertex 3.82683 -9.2388 -10
+vertex -3.82683 -9.2388 -10
 endloop
 endfacet
 facet normal 0 0 -1
