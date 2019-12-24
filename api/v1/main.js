@@ -49,6 +49,7 @@ import './rotateY';
 import './rotateZ';
 import './scale';
 import './section';
+import './size';
 import './solids';
 import './sweep';
 import './tags';
@@ -122,7 +123,6 @@ import acos from './acos';
 import ask from './ask';
 import assemble from './assemble';
 import chainHull from './chainHull';
-import coordinates from './coordinates';
 import cos from './cos';
 import difference from './difference';
 import ease from './ease';
@@ -266,7 +266,6 @@ const operators = [
   'acos',
   'ask',
   'assemble',
-  'coordinates',
   'cos',
   'difference',
   'ease',
@@ -311,7 +310,6 @@ export {
   Circle,
   Cone,
   Connector,
-  coordinates,
   cos,
   Cube,
   Cursor,
