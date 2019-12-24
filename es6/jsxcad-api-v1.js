@@ -64,6 +64,7 @@ var api = /*#__PURE__*/Object.freeze({
   get Line () { return Line; },
   get log () { return log; },
   get max () { return max; },
+  get min () { return min; },
   get MicroGearMotor () { return MicroGearMotor; },
   get minkowski () { return minkowski; },
   get Nail () { return Nail; },
@@ -4609,6 +4610,22 @@ importModule.signature = 'async importModule(name:string) -> module';
 
 /**
  *
+ * # Min
+ *
+ * Produces the minimum of a series of numbers.
+ *
+ * ```
+ * min(1, 2, 3, 4) == 1
+ * ```
+ *
+ **/
+
+const min = Math.min;
+
+min.signature = 'min(...values:number) -> number';
+
+/**
+ *
  * # Minkowski (convex)
  *
  * Generates the minkowski sum of a two convex shapes.
@@ -5094,6 +5111,7 @@ const operators = [
   'lathe',
   'log',
   'max',
+  'min',
   'minkowski',
   'numbers',
   'pack',
@@ -5151,4 +5169,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, min, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

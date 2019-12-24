@@ -133,6 +133,7 @@ import { intersection } from './intersection';
 import { lathe } from './lathe';
 import { log } from './log';
 import { max } from './max';
+import { min } from './min';
 import { minkowski } from './minkowski';
 import { numbers } from './numbers';
 import { pack } from './pack';
@@ -276,6 +277,7 @@ const operators = [
   'lathe',
   'log',
   'max',
+  'min',
   'minkowski',
   'numbers',
   'pack',
@@ -335,6 +337,7 @@ export {
   Line,
   log,
   max,
+  min,
   MicroGearMotor,
   minkowski,
   Nail,
