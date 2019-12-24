@@ -851,7 +851,7 @@ const withConnector = (shape, surface, id) => {
 const Y = 1;
 
 const back = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, 1, 0, 0]), (point) => point[Y]);
+  faceConnector(shape, 'back', (surface) => dot(toPlane$2(surface), [0, 1, 0, 0]), (point) => point[Y]);
 
 const backMethod = function () { return back(this); };
 Shape.prototype.back = backMethod;
@@ -875,7 +875,7 @@ bomMethod.signature = 'Shape -> bom() -> string';
 const Z = 2;
 
 const bottom = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, 0, -1, 0]), (point) => -point[Z]);
+  faceConnector(shape, 'bottom', (surface) => dot(toPlane$2(surface), [0, 0, -1, 0]), (point) => -point[Z]);
 
 const bottomMethod = function () { return bottom(this); };
 Shape.prototype.bottom = bottomMethod;
@@ -1524,7 +1524,7 @@ Shape.prototype.faceEdges = faceEdgesMethod;
 const Y$1 = 1;
 
 const front = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, -1, 0, 0]), (point) => -point[Y$1]);
+  faceConnector(shape, 'front', (surface) => dot(toPlane$2(surface), [0, -1, 0, 0]), (point) => -point[Y$1]);
 
 const frontMethod = function () { return front(this); };
 Shape.prototype.front = frontMethod;
@@ -1668,7 +1668,7 @@ keptMethod.signature = 'Shape -> kept() -> Shape';
 const X = 0;
 
 const left = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane$2(surface), [-1, 0, 0, 0]), (point) => -point[X]);
+  faceConnector(shape, 'left', (surface) => dot(toPlane$2(surface), [-1, 0, 0, 0]), (point) => -point[X]);
 
 const leftMethod = function () { return left(this); };
 Shape.prototype.left = leftMethod;
@@ -1935,7 +1935,7 @@ orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Poin
 const X$1 = 0;
 
 const right = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane$2(surface), [1, 0, 0, 0]), (point) => point[X$1]);
+  faceConnector(shape, 'right', (surface) => dot(toPlane$2(surface), [1, 0, 0, 0]), (point) => point[X$1]);
 
 const rightMethod = function () { return right(this); };
 Shape.prototype.right = rightMethod;
@@ -2380,7 +2380,7 @@ Shape.prototype.to = toMethod;
 const Z$4 = 2;
 
 const top = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane$2(surface), [0, 0, 1, 0]), (point) => point[Z$4]);
+  faceConnector(shape, 'top', (surface) => dot(toPlane$2(surface), [0, 0, 1, 0]), (point) => point[Z$4]);
 
 const topMethod = function () { return top(this); };
 Shape.prototype.top = topMethod;
