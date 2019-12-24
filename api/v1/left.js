@@ -6,7 +6,7 @@ import { toPlane } from '@jsxcad/geometry-surface';
 const X = 0;
 
 export const left = (shape) =>
-  faceConnector(shape, (surface) => dot(toPlane(surface), [-1, 0, 0, 0]), (point) => -point[X]);
+  faceConnector(shape, 'left', (surface) => dot(toPlane(surface), [-1, 0, 0, 0]), (point) => -point[X]);
 
 const leftMethod = function () { return left(this); };
 Shape.prototype.left = leftMethod;
