@@ -13,13 +13,12 @@ const scale = (vector, solid) => transform(fromScaling(vector), solid);
 const translate = (vector, solid) => transform(fromTranslation(vector), solid);
 
 // The resolution is 1 / multiplier.
-const multiplier = 1e5;
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-const createNormalize3 = () => {
+const createNormalize3 = (multiplier = 1e7) => {
   const map = new Map();
   const normalize3 = (coordinate) => {
     // Apply a spatial quantization to the 3 dimensional coordinate.
@@ -40,8 +39,8 @@ const createNormalize3 = () => {
     const ny1 = ny0 + 1;
     const nz1 = nz0 + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
-    const normalized = coordinate;
+    const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
+    // const normalized = coordinate;
     map.set(`${nx0}/${ny0}/${nz0}`, normalized);
     map.set(`${nx0}/${ny0}/${nz1}`, normalized);
     map.set(`${nx0}/${ny1}/${nz0}`, normalized);
@@ -56,8 +55,7 @@ const createNormalize3 = () => {
   return normalize3;
 };
 
-const alignVertices = (solid) => {
-  const normalize3 = createNormalize3();
+const alignVertices = (solid, normalize3 = createNormalize3()) => {
   const aligned = solid.map(surface =>
     surface.map(polygon => deduplicate(polygon.map(normalize3)))
         .filter(polygon => polygon.length >= 3)
@@ -122,7 +120,7 @@ const eachPoint = (options = {}, thunk, solid) => {
 const flip = (solid) => solid.map(surface => flip$1(surface));
 
 // The resolution is 1 / multiplier.
-const multiplier$1 = 1e5;
+const multiplier = 1e5;
 
 const X$2 = 0;
 const Y$2 = 1;
@@ -133,10 +131,10 @@ const createNormalize4 = () => {
   const map = new Map();
   const normalize4 = (coordinate) => {
     // Apply a spatial quantization to the 4 dimensional coordinate.
-    const nx = Math.floor(coordinate[X$2] * multiplier$1 - 0.5);
-    const ny = Math.floor(coordinate[Y$2] * multiplier$1 - 0.5);
-    const nz = Math.floor(coordinate[Z$2] * multiplier$1 - 0.5);
-    const nw = Math.floor(coordinate[W] * multiplier$1 - 0.5);
+    const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
+    const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
+    const nz = Math.floor(coordinate[Z$2] * multiplier - 0.5);
+    const nw = Math.floor(coordinate[W] * multiplier - 0.5);
     // Look for an existing inhabitant.
     const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
     if (value !== undefined) {
@@ -264,4 +262,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, createNormalize3, doesNotOverlap, eachPoint, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };

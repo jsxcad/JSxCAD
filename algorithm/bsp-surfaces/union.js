@@ -1,5 +1,15 @@
-import { doesNotOverlap, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { removeInteriorPolygonsKeepingSkin, fromSolid as toBspFromSolid } from './bsp';
+import {
+  alignVertices,
+  createNormalize3,
+  doesNotOverlap,
+  toPolygons as toPolygonsFromSolid,
+  fromPolygons as toSolidFromPolygons
+} from '@jsxcad/geometry-solid';
+
+import {
+  removeInteriorPolygonsKeepingSkin,
+  fromSolid as toBspFromSolid
+} from './bsp';
 
 // An n-way merge, potentially producing duplicate coplanars.
 export const unionNway = (...solids) => {
@@ -36,12 +46,13 @@ export const union = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
+  const normalize = createNormalize3();
   while (solids.length > 1) {
-    const a = solids.shift();
+    const a = alignVertices(solids.shift(), normalize);
     const aPolygons = toPolygonsFromSolid({}, a);
     const aBsp = toBspFromSolid(a);
 
-    const b = solids.shift();
+    const b = alignVertices(solids.shift(), normalize);
     const bPolygons = toPolygonsFromSolid({}, b);
     const bBsp = toBspFromSolid(b);
 
@@ -50,5 +61,5 @@ export const union = (...solids) => {
 
     solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]));
   }
-  return solids[0];
+  return alignVertices(solids[0], normalize);
 };

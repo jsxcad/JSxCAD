@@ -1,46 +1,23 @@
-import { doesNotOverlap, flip, toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
-import { removeExteriorPolygons2, removeInteriorPolygonsKeepingSkin2, fromSolid as toBspFromSolid } from './bsp';
+import {
+  alignVertices,
+  createNormalize3,
+  doesNotOverlap,
+  flip,
+  toPolygons as toPolygonsFromSolid,
+  fromPolygons as toSolidFromPolygons
+} from '@jsxcad/geometry-solid';
 
-/*
-const mayOverlap = (a, b) => !doesNotOverlap(a, b);
-
-export const differenceNway = (aSolid, ...bSolids) => {
-  if (aSolid === undefined) {
-    return [];
-  }
-  bSolids = bSolids.filter(bSolid => mayOverlap(aSolid, bSolid));
-  if (bSolids.length === 0) {
-    return aSolid;
-  }
-  let aPolygons = toPolygonsFromSolid({}, aSolid);
-  const bBsp = [];
-  for (let i = 0; i < bSolids.length; i++) {
-    const bSolid = bSolids[i];
-    bBsp[i] = toBspFromSolid(bSolid);
-    aPolygons = removeInteriorPolygonsKeepingSkin(bBsp[i], aPolygons);
-  }
-  const aBsp = toBspFromSolid(aSolid);
-  const polygons = [];
-  for (let i = 0; i < bSolids.length; i++) {
-    const bSolid = bSolids[i];
-    let bPolygons = toPolygonsFromSolid({}, flip(bSolid));
-    bPolygons = removeExteriorPolygons(aBsp, bPolygons);
-    for (let j = 0; j < bSolids.length; j++) {
-      if (j !== i) {
-        bPolygons = removeInteriorPolygonsKeepingSkin(bBsp[j], bPolygons);
-      }
-    }
-    polygons.push(...bPolygons);
-  }
-  polygons.push(...aPolygons);
-  return toSolidFromPolygons({}, polygons);
-};
-*/
+import {
+  removeExteriorPolygons2,
+  removeInteriorPolygonsKeepingSkin2,
+  fromSolid as toBspFromSolid
+} from './bsp';
 
 export const difference = (aSolid, ...bSolids) => {
+  const normalize = createNormalize3();
   while (bSolids.length > 0) {
-    const a = aSolid;
-    const b = bSolids.shift();
+    const a = alignVertices(aSolid, normalize);
+    const b = alignVertices(bSolids.shift(), normalize);
 
     if (doesNotOverlap(a, b)) {
       continue;
@@ -57,5 +34,5 @@ export const difference = (aSolid, ...bSolids) => {
 
     aSolid = toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]);
   }
-  return aSolid;
+  return alignVertices(aSolid, normalize);
 };
