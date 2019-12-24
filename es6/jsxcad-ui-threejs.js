@@ -52818,7 +52818,7 @@ const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
 
   render();
 
-  return { canvas, hudCanvas };
+  return { canvas, hudCanvas, renderer };
 };
 
 export { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud, staticDisplay };

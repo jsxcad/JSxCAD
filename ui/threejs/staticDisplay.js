@@ -31,5 +31,5 @@ export const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
 
   render();
 
-  return { canvas, hudCanvas };
+  return { canvas, hudCanvas, renderer };
 };
