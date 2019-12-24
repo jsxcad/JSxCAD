@@ -2,7 +2,7 @@ import { close, concatenate, open, transform as transform$1, toSegments, getEdge
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, getPlans, getConnections, getSolids, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-import { add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$4 } from './jsxcad-math-vec3.js';
+import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross, transform as transform$4 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { translate as translate$1 } from './jsxcad-geometry-paths.js';
@@ -834,14 +834,16 @@ const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
     }
   }
 
-  // FIX: Adding y + 1 is not always correct.
-  return shape.toConnector(Connector(id, { plane: toPlane$2(bestSurface), center: bestPosition, right: add(bestPosition, [0, 1, 0]) }));
+  // FIX: We should have a consistent rule for deciding the rotational position of the connector.
+  const plane = toPlane$2(bestSurface);
+  return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
 };
 
 const toConnector = (shape, surface, id) => {
   const center = toPosition(surface);
   // FIX: Adding y + 1 is not always correct.
-  return Connector(id, { plane: toPlane$2(surface), center, right: add(center, [0, 1, 0]) });
+  const plane = toPlane$2(surface);
+  return Connector(id, { plane, center, right: random(plane) });
 };
 
 const withConnector = (shape, surface, id) => {
