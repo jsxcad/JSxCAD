@@ -46,6 +46,7 @@ import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
 import SelectProjectUi from './SelectProjectUi';
 import ShareUi from './ShareUi';
+import SvgPathEditor from './SvgPathEditor';
 import Toast from 'react-bootstrap/Toast';
 import ViewUi from './ViewUi';
 import { deepEqual } from 'fast-equals';
@@ -405,6 +406,24 @@ class Ui extends React.PureComponent {
             fileTitle={fileTitle}
             onSelectFile={onSelectFile}
             ask={ask}
+          />);
+      }
+      case 'editSvgPath': {
+        const fileTitle = file === undefined ? '' : file.substring('source/'.length);
+        return (
+          <SvgPathEditor
+            key={`${id}/editSvgPath/${file}`}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'Edit SvgPath'}
+            onSelectView={onSelectView}
+            file={file}
+            fileChoices={fileChoices}
+            fileTitle={fileTitle}
+            onSelectFile={onSelectFile}
           />);
       }
       case 'files':

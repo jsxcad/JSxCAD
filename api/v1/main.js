@@ -54,7 +54,6 @@ import './size';
 import './solids';
 import './sweep';
 import './tags';
-import './to';
 import './top';
 import './toBillOfMaterial';
 import './toItems';
