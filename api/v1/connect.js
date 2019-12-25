@@ -87,7 +87,7 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
               : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
       });
   } else {
-    return [aMovedShape, aMovedConnector];
+    return aMovedShape;
   }
 };
 
@@ -96,8 +96,12 @@ Shape.prototype.to = toMethod;
 toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
 const fromMethod = function (connector) { return connect(this, connector); };
-Shape.prototype.from = toMethod;
+Shape.prototype.from = fromMethod;
 fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
+
+const atMethod = function (connector) { return connect(this, connector, { doConnect: false }); };
+Shape.prototype.at = atMethod;
+atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
 
 export default connect;
 

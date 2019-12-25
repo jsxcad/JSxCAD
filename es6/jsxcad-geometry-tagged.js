@@ -465,6 +465,8 @@ const eachPoint = (options, operation, geometry) => {
       geometry.assembly.forEach(walk);
     } else if (geometry.disjointAssembly) {
       geometry.disjointAssembly.forEach(walk);
+    } else if (geometry.connection) {
+      geometry.geometries.forEach(walk);
     } else if (geometry.item) {
       walk(geometry.item);
     } else if (geometry.points) {
