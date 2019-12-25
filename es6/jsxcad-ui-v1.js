@@ -85156,6 +85156,1218 @@ class ShareUi extends SettingsUi {
 
 }
 
+function _defineProperty$2(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function _extends$2() {
+  _extends$2 = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends$2.apply(this, arguments);
+}
+
+var absSvgPath = absolutize;
+
+/**
+ * redefine `path` with absolute coordinates
+ *
+ * @param {Array} path
+ * @return {Array}
+ */
+
+function absolutize(path){
+	var startX = 0;
+	var startY = 0;
+	var x = 0;
+	var y = 0;
+
+	return path.map(function(seg){
+		seg = seg.slice();
+		var type = seg[0];
+		var command = type.toUpperCase();
+
+		// is relative
+		if (type != command) {
+			seg[0] = command;
+			switch (type) {
+				case 'a':
+					seg[6] += x;
+					seg[7] += y;
+					break
+				case 'v':
+					seg[1] += y;
+					break
+				case 'h':
+					seg[1] += x;
+					break
+				default:
+					for (var i = 1; i < seg.length;) {
+						seg[i++] += x;
+						seg[i++] += y;
+					}
+			}
+		}
+
+		// update cursor state
+		switch (command) {
+			case 'Z':
+				x = startX;
+				y = startY;
+				break
+			case 'H':
+				x = seg[1];
+				break
+			case 'V':
+				y = seg[1];
+				break
+			case 'M':
+				x = startX = seg[1];
+				y = startY = seg[2];
+				break
+			default:
+				x = seg[seg.length - 2];
+				y = seg[seg.length - 1];
+		}
+
+		return seg
+	})
+}
+
+var parseSvgPath = parse;
+
+/**
+ * expected argument lengths
+ * @type {Object}
+ */
+
+var length = {a: 7, c: 6, h: 1, l: 2, m: 2, q: 4, s: 4, t: 2, v: 1, z: 0};
+
+/**
+ * segment pattern
+ * @type {RegExp}
+ */
+
+var segment = /([astvzqmhlc])([^astvzqmhlc]*)/ig;
+
+/**
+ * parse an svg path data string. Generates an Array
+ * of commands where each command is an Array of the
+ * form `[command, arg1, arg2, ...]`
+ *
+ * @param {String} path
+ * @return {Array}
+ */
+
+function parse(path) {
+	var data = [];
+	path.replace(segment, function(_, command, args){
+		var type = command.toLowerCase();
+		args = parseValues(args);
+
+		// overloaded moveTo
+		if (type == 'm' && args.length > 2) {
+			data.push([command].concat(args.splice(0, 2)));
+			type = 'l';
+			command = command == 'm' ? 'l' : 'L';
+		}
+
+		while (true) {
+			if (args.length == length[type]) {
+				args.unshift(command);
+				return data.push(args)
+			}
+			if (args.length < length[type]) throw new Error('malformed path data')
+			data.push([command].concat(args.splice(0, length[type])));
+		}
+	});
+	return data
+}
+
+var number = /-?[0-9]*\.?[0-9]+(?:e[-+]?\d+)?/ig;
+
+function parseValues(args) {
+	var numbers = args.match(number);
+	return numbers ? numbers.map(Number) : []
+}
+
+const Component = react.Component;
+
+class SvgPathEditor extends Pane {
+  constructor(props) {
+    super(props);
+
+    _defineProperty$2(this, "setWidth", e => {
+      let v = this.positiveNumber(e.target.value);
+      let min = 1;
+      if (v < min) v = min;
+      this.setState({
+        w: v
+      });
+    });
+
+    _defineProperty$2(this, "setHeight", e => {
+      let v = this.positiveNumber(e.target.value);
+      let min = 1;
+      if (v < min) v = min;
+      this.setState({
+        h: v
+      });
+    });
+
+    _defineProperty$2(this, "setGridSize", e => {
+      let grid = this.state.grid;
+      let v = this.positiveNumber(e.target.value);
+      let min = 1;
+      let max = Math.min(this.state.w, this.state.h);
+      if (v < min) v = min;
+      if (v >= max) v = max / 2;
+      grid.size = v;
+      this.setState({
+        grid
+      });
+    });
+
+    _defineProperty$2(this, "setGridSnap", e => {
+      let grid = this.state.grid;
+      grid.snap = e.target.checked;
+      this.setState({
+        grid
+      });
+    });
+
+    _defineProperty$2(this, "setGridShow", e => {
+      let grid = this.state.grid;
+      grid.show = e.target.checked;
+      this.setState({
+        grid
+      });
+    });
+
+    _defineProperty$2(this, "setClosePath", e => {
+      this.setState({
+        closePath: e.target.checked
+      });
+    });
+
+    _defineProperty$2(this, "saveSvgpath", e => {
+      const path = this.generatePath();
+
+      if (this.props.onsave !== null) {
+        this.props.onsave(path);
+      }
+    });
+
+    _defineProperty$2(this, "getMouseCoords", e => {
+      const rect = reactDom.findDOMNode(this.refs.svg).getBoundingClientRect();
+      let x = Math.round(e.pageX - rect.left);
+      let y = Math.round(e.pageY - rect.top);
+
+      if (this.state.grid.snap) {
+        x = this.state.grid.size * Math.round(x / this.state.grid.size);
+        y = this.state.grid.size * Math.round(y / this.state.grid.size);
+      }
+
+      return {
+        x,
+        y
+      };
+    });
+
+    _defineProperty$2(this, "setPointType", e => {
+      const points = this.state.points;
+      const active = this.state.activePoint; // not the first point
+
+      if (active !== 0) {
+        let v = e.target.value;
+
+        switch (v) {
+          case 'l':
+            points[active] = {
+              x: points[active].x,
+              y: points[active].y
+            };
+            break;
+
+          case 'q':
+            points[active] = {
+              x: points[active].x,
+              y: points[active].y,
+              q: {
+                x: (points[active].x + points[active - 1].x) / 2,
+                y: (points[active].y + points[active - 1].y) / 2
+              }
+            };
+            break;
+
+          case 'c':
+            points[active] = {
+              x: points[active].x,
+              y: points[active].y,
+              c: [{
+                x: (points[active].x + points[active - 1].x - 50) / 2,
+                y: (points[active].y + points[active - 1].y) / 2
+              }, {
+                x: (points[active].x + points[active - 1].x + 50) / 2,
+                y: (points[active].y + points[active - 1].y) / 2
+              }]
+            };
+            break;
+
+          case 'a':
+            points[active] = {
+              x: points[active].x,
+              y: points[active].y,
+              a: {
+                rx: 50,
+                ry: 50,
+                rot: 0,
+                laf: 1,
+                sf: 1
+              }
+            };
+            break;
+        }
+
+        this.setState({
+          iteration: this.state.iteration + 1,
+          points
+        });
+      }
+    });
+
+    _defineProperty$2(this, "setPointPosition", (coord, e) => {
+      let coords = this.state.points[this.state.activePoint];
+      let v = this.positiveNumber(e.target.value);
+      if (coord === 'x' && v > this.state.w) v = this.state.w;
+      if (coord === 'y' && v > this.state.h) v = this.state.h;
+      coords[coord] = v;
+      this.setPointCoords(coords);
+    });
+
+    _defineProperty$2(this, "setQuadraticPosition", (coord, e) => {
+      let coords = this.state.points[this.state.activePoint].q;
+      let v = this.positiveNumber(e.target.value);
+      if (coord === 'x' && v > this.state.w) v = this.state.w;
+      if (coord === 'y' && v > this.state.h) v = this.state.h;
+      coords[coord] = v;
+      this.setQuadraticCoords(coords);
+    });
+
+    _defineProperty$2(this, "setCubicPosition", (coord, anchor, e) => {
+      let coords = this.state.points[this.state.activePoint].c[anchor];
+      let v = this.positiveNumber(e.target.value);
+      if (coord === 'x' && v > this.state.w) v = this.state.w;
+      if (coord === 'y' && v > this.state.h) v = this.state.h;
+      coords[coord] = v;
+      this.setCubicCoords(coords, anchor);
+    });
+
+    _defineProperty$2(this, "setPointCoords", coords => {
+      const points = this.state.points;
+      const active = this.state.activePoint;
+      points[active].x = coords.x;
+      points[active].y = coords.y;
+      this.setState({
+        points,
+        iteration: this.state.iteration + 1
+      });
+    });
+
+    _defineProperty$2(this, "setQuadraticCoords", coords => {
+      const points = this.state.points;
+      const active = this.state.activePoint;
+      points[active].q.x = coords.x;
+      points[active].q.y = coords.y;
+      this.setState({
+        points,
+        iteration: this.state.iteration + 1
+      });
+    });
+
+    _defineProperty$2(this, "setArcParam", (param, e) => {
+      const points = this.state.points;
+      const active = this.state.activePoint;
+      let v;
+
+      if (['laf', 'sf'].indexOf(param) > -1) {
+        v = e.target.checked ? 1 : 0;
+      } else {
+        v = this.positiveNumber(e.target.value);
+      }
+
+      points[active].a[param] = v;
+      this.setState({
+        points,
+        iteration: this.state.iteration + 1
+      });
+    });
+
+    _defineProperty$2(this, "setCubicCoords", (coords, anchor) => {
+      const points = this.state.points;
+      const active = this.state.activePoint;
+      points[active].c[anchor].x = coords.x;
+      points[active].c[anchor].y = coords.y;
+      this.setState({
+        points,
+        iteration: this.state.iteration + 1
+      });
+    });
+
+    _defineProperty$2(this, "setDraggedPoint", index => {
+      if (!this.state.ctrl) {
+        this.setState({
+          activePoint: index,
+          draggedPoint: true,
+          iteration: this.state.iteration + 1
+        });
+      }
+    });
+
+    _defineProperty$2(this, "setDraggedQuadratic", index => {
+      if (!this.state.ctrl) {
+        this.setState({
+          iteration: this.state.iteration + 1,
+          activePoint: index,
+          draggedQuadratic: true
+        });
+      }
+    });
+
+    _defineProperty$2(this, "setDraggedCubic", (index, anchor) => {
+      if (!this.state.ctrl) {
+        this.setState({
+          iteration: this.state.iteration + 1,
+          activePoint: index,
+          draggedCubic: anchor
+        });
+      }
+    });
+
+    _defineProperty$2(this, "cancelDragging", e => {
+      this.setState({
+        iteration: this.state.iteration + 1,
+        draggedPoint: false,
+        draggedQuadratic: false,
+        draggedCubic: false
+      });
+    });
+
+    _defineProperty$2(this, "addPoint", e => {
+      if (this.state.ctrl) {
+        let coords = this.getMouseCoords(e);
+        let points = this.state.points;
+        points.push(coords);
+        this.setState({
+          iteration: this.state.iteration + 1,
+          points,
+          activePoint: points.length - 1
+        });
+      }
+
+      e.stopPropagation();
+    });
+
+    _defineProperty$2(this, "removeActivePoint", e => {
+      let points = this.state.points;
+      let active = this.state.activePoint;
+
+      if (points.length > 1 && active !== 0) {
+        points.splice(active, 1);
+        this.setState({
+          iteration: this.state.iteration + 1,
+          points,
+          activePoint: points.length - 1
+        });
+      }
+    });
+
+    _defineProperty$2(this, "handleMouseMove", e => {
+      if (!this.state.ctrl) {
+        if (this.state.draggedPoint) {
+          this.setPointCoords(this.getMouseCoords(e));
+        } else if (this.state.draggedQuadratic) {
+          this.setQuadraticCoords(this.getMouseCoords(e));
+        } else if (this.state.draggedCubic !== false) {
+          this.setCubicCoords(this.getMouseCoords(e), this.state.draggedCubic);
+        }
+      }
+
+      e.stopPropagation();
+    });
+
+    _defineProperty$2(this, "handleKeyDown", e => {
+      if (e.ctrlKey) this.setState({
+        ctrl: true
+      });
+    });
+
+    _defineProperty$2(this, "handleKeyUp", e => {
+      if (!e.ctrlKey) this.setState({
+        ctrl: false
+      });
+    });
+
+    _defineProperty$2(this, "reset", e => {
+      let w = this.state.w;
+      let h = this.state.h;
+      this.setState({
+        iteration: this.state.iteration + 1,
+        points: [{
+          x: w / 2,
+          y: h / 2
+        }],
+        activePoint: 0
+      });
+    });
+
+    const _points = [];
+    let closePath = false;
+    {
+      const absolutePath = absSvgPath(parseSvgPath(props.svgPath || 'M 100 300 Q 0 100 200 100'));
+
+      for (const element of absolutePath) {
+        const [type, a, b, c, d, e, f, g] = element;
+
+        switch (type) {
+          case 'M':
+            _points.push({
+              x: a,
+              y: b
+            });
+
+            break;
+
+          case 'L':
+            _points.push({
+              x: a,
+              y: b
+            });
+
+            break;
+
+          case 'Q':
+            _points.push({
+              x: c,
+              y: d,
+              q: {
+                x: a,
+                y: b
+              }
+            });
+
+            break;
+
+          case 'C':
+            _points.push({
+              x: e,
+              y: f,
+              c: [{
+                x: a,
+                y: b
+              }, {
+                x: c,
+                y: d
+              }]
+            });
+
+            break;
+
+          case 'A':
+            _points.push({
+              x: f,
+              y: g,
+              a: {
+                rx: a,
+                ry: b,
+                rot: c,
+                laf: d,
+                sf: e
+              }
+            });
+
+            break;
+
+          case 'Z':
+            closePath = true;
+            break;
+        }
+      }
+    }
+    this.state = {
+      w: 800,
+      h: 600,
+      grid: {
+        show: true,
+        snap: true,
+        size: 5
+      },
+      ctrl: false,
+      points: _points,
+      activePoint: _points.length - 1,
+      draggedPoint: false,
+      draggedQuadratic: false,
+      draggedCubic: false,
+      closePath,
+      iteration: 0
+    };
+  }
+
+  componentWillMount() {
+    document.addEventListener('keydown', this.handleKeyDown, false);
+    document.addEventListener('keyup', this.handleKeyUp, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown');
+    document.removeEventListener('keyup');
+  }
+
+  positiveNumber(n) {
+    n = parseInt(n);
+    if (isNaN(n) || n < 0) n = 0;
+    return n;
+  }
+
+  generatePath() {
+    let {
+      points,
+      closePath
+    } = this.state;
+    let d = '';
+    points.forEach((p, i) => {
+      if (i === 0) {
+        // first point
+        d += 'M ';
+      } else if (p.q) {
+        // quadratic
+        d += `Q ${p.q.x} ${p.q.y} `;
+      } else if (p.c) {
+        // cubic
+        d += `C ${p.c[0].x} ${p.c[0].y} ${p.c[1].x} ${p.c[1].y} `;
+      } else if (p.a) {
+        // arc
+        d += `A ${p.a.rx} ${p.a.ry} ${p.a.rot} ${p.a.laf} ${p.a.sf} `;
+      } else {
+        d += 'L ';
+      }
+
+      d += `${p.x} ${p.y} `;
+    });
+    if (closePath) d += 'Z';
+    return d;
+  }
+
+  renderPane() {
+    return react.createElement("div", {
+      className: "ad-SvgPathEditor",
+      onMouseUp: this.cancelDragging
+    }, react.createElement("div", {
+      className: "ad-SvgPathEditor-main"
+    }, react.createElement("div", {
+      className: "ad-SvgPathEditor-svg"
+    }, react.createElement(SVG, _extends$2({
+      ref: "svg",
+      svgPath: this.generatePath()
+    }, this.state, {
+      addPoint: this.addPoint,
+      setDraggedPoint: this.setDraggedPoint,
+      setDraggedQuadratic: this.setDraggedQuadratic,
+      setDraggedCubic: this.setDraggedCubic,
+      handleMouseMove: this.handleMouseMove
+    })))), react.createElement("div", {
+      className: "ad-SvgPathEditor-controls"
+    }, react.createElement(Controls, _extends$2({}, this.state, {
+      reset: this.reset,
+      removeActivePoint: this.removeActivePoint,
+      setPointPosition: this.setPointPosition,
+      setQuadraticPosition: this.setQuadraticPosition,
+      setCubicPosition: this.setCubicPosition,
+      setArcParam: this.setArcParam,
+      setPointType: this.setPointType,
+      setWidth: this.setWidth,
+      setHeight: this.setHeight,
+      setGridSize: this.setGridSize,
+      setGridSnap: this.setGridSnap,
+      setGridShow: this.setGridShow,
+      setClosePath: this.setClosePath,
+      saveSvgpath: this.saveSvgpath
+    }))));
+  }
+
+}
+/**
+ * SVG rendering
+ */
+
+
+class SVG extends Component {
+  render() {
+    const {
+      svgPath,
+      w,
+      h,
+      grid,
+      points,
+      activePoint,
+      addPoint,
+      handleMouseMove,
+      setDraggedPoint,
+      setDraggedQuadratic,
+      setDraggedCubic
+    } = this.props;
+    let circles = points.map((p, i, a) => {
+      let anchors = [];
+
+      if (p.q) {
+        anchors.push(react.createElement(Quadratic, {
+          key: anchors.length,
+          index: i,
+          p1x: a[i - 1].x,
+          p1y: a[i - 1].y,
+          p2x: p.x,
+          p2y: p.y,
+          x: p.q.x,
+          y: p.q.y,
+          setDraggedQuadratic: setDraggedQuadratic
+        }));
+      } else if (p.c) {
+        anchors.push(react.createElement(Cubic, {
+          key: anchors.length,
+          index: i,
+          p1x: a[i - 1].x,
+          p1y: a[i - 1].y,
+          p2x: p.x,
+          p2y: p.y,
+          x1: p.c[0].x,
+          y1: p.c[0].y,
+          x2: p.c[1].x,
+          y2: p.c[1].y,
+          setDraggedCubic: setDraggedCubic
+        }));
+      }
+
+      return react.createElement("g", {
+        key: i,
+        className: 'ad-PointGroup' + (i === 0 ? '  ad-PointGroup--first' : '') + (activePoint === i ? '  is-active' : '')
+      }, react.createElement(Point, {
+        key: "p",
+        index: i,
+        x: p.x,
+        y: p.y,
+        setDraggedPoint: setDraggedPoint
+      }), anchors);
+    });
+    return react.createElement("svg", {
+      className: "ad-SVG",
+      width: w,
+      height: h,
+      onClickCapture: e => addPoint(e),
+      onMouseMoveCapture: e => handleMouseMove(e)
+    }, react.createElement(Grid, {
+      w: w,
+      h: h,
+      grid: grid
+    }), react.createElement("path", {
+      className: "ad-Path",
+      d: svgPath
+    }), react.createElement("g", {
+      className: "ad-Points"
+    }, circles));
+  }
+
+}
+
+function Cubic(props) {
+  return react.createElement("g", {
+    className: "ad-Anchor"
+  }, react.createElement("line", {
+    className: "ad-Anchor-line",
+    x1: props.p1x,
+    y1: props.p1y,
+    x2: props.x1,
+    y2: props.y1
+  }), react.createElement("line", {
+    className: "ad-Anchor-line",
+    x1: props.p2x,
+    y1: props.p2y,
+    x2: props.x2,
+    y2: props.y2
+  }), react.createElement("circle", {
+    className: "ad-Anchor-point",
+    onMouseDown: e => props.setDraggedCubic(props.index, 0),
+    cx: props.x1,
+    cy: props.y1,
+    r: 6
+  }), react.createElement("circle", {
+    className: "ad-Anchor-point",
+    onMouseDown: e => props.setDraggedCubic(props.index, 1),
+    cx: props.x2,
+    cy: props.y2,
+    r: 6
+  }));
+}
+
+function Quadratic(props) {
+  return react.createElement("g", {
+    className: "ad-Anchor"
+  }, react.createElement("line", {
+    key: "q1",
+    className: "ad-Anchor-line",
+    x1: props.p1x,
+    y1: props.p1y,
+    x2: props.x,
+    y2: props.y
+  }), react.createElement("line", {
+    key: "q2",
+    className: "ad-Anchor-line",
+    x1: props.x,
+    y1: props.y,
+    x2: props.p2x,
+    y2: props.p2y
+  }), react.createElement("circle", {
+    key: "q3",
+    className: "ad-Anchor-point",
+    onMouseDown: e => props.setDraggedQuadratic(props.index),
+    cx: props.x,
+    cy: props.y,
+    r: 6
+  }));
+}
+
+function Point(props) {
+  return react.createElement("circle", {
+    className: "ad-Point",
+    onMouseDown: e => props.setDraggedPoint(props.index),
+    cx: props.x,
+    cy: props.y,
+    r: 8
+  });
+}
+
+function Grid(props) {
+  const {
+    show,
+    snap,
+    size
+  } = props.grid;
+  let grid = [];
+
+  for (let i = 1; i < props.w / size; i++) {
+    grid.push(react.createElement("line", {
+      key: `Gx${i}`,
+      x1: i * size,
+      y1: 0,
+      x2: i * size,
+      y2: props.h
+    }));
+  }
+
+  for (let i = 1; i < props.h / size; i++) {
+    grid.push(react.createElement("line", {
+      key: `Gy${i}`,
+      x1: 0,
+      y1: i * size,
+      x2: props.w,
+      y2: i * size
+    }));
+  }
+
+  return react.createElement("g", {
+    className: 'ad-Grid' + (!show ? '  is-hidden' : '')
+  }, grid);
+}
+/**
+ * Controls
+ */
+
+
+function Controls(props) {
+  const active = props.points[props.activePoint];
+  const step = props.grid.snap ? props.grid.size : 1;
+  let params = [];
+
+  if (active.q) {
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Control point X position",
+      type: "range",
+      min: 0,
+      max: props.w,
+      step: step,
+      value: active.q.x,
+      onChange: e => props.setQuadraticPosition('x', e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Control point Y position",
+      type: "range",
+      min: 0,
+      max: props.h,
+      step: step,
+      value: active.q.y,
+      onChange: e => props.setQuadraticPosition('y', e)
+    })));
+  } else if (active.c) {
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "First control point X position",
+      type: "range",
+      min: 0,
+      max: props.w,
+      step: step,
+      value: active.c[0].x,
+      onChange: e => props.setCubicPosition('x', 0, e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "First control point Y position",
+      type: "range",
+      min: 0,
+      max: props.h,
+      step: step,
+      value: active.c[0].y,
+      onChange: e => props.setCubicPosition('y', 0, e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Second control point X position",
+      type: "range",
+      min: 0,
+      max: props.w,
+      step: step,
+      value: active.c[1].x,
+      onChange: e => props.setCubicPosition('x', 1, e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Second control point Y position",
+      type: "range",
+      min: 0,
+      max: props.h,
+      step: step,
+      value: active.c[1].y,
+      onChange: e => props.setCubicPosition('y', 1, e)
+    })));
+  } else if (active.a) {
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "X Radius",
+      type: "range",
+      min: 0,
+      max: props.w,
+      step: step,
+      value: active.a.rx,
+      onChange: e => props.setArcParam('rx', e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Y Radius",
+      type: "range",
+      min: 0,
+      max: props.h,
+      step: step,
+      value: active.a.ry,
+      onChange: e => props.setArcParam('ry', e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Rotation",
+      type: "range",
+      min: 0,
+      max: 360,
+      step: 1,
+      value: active.a.rot,
+      onChange: e => props.setArcParam('rot', e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Large arc sweep flag",
+      type: "checkbox",
+      checked: active.a.laf,
+      onChange: e => props.setArcParam('laf', e)
+    })));
+    params.push(react.createElement("div", {
+      key: params.length,
+      className: "ad-Controls-container"
+    }, react.createElement(Control, {
+      name: "Sweep flag",
+      type: "checkbox",
+      checked: active.a.sf,
+      onChange: e => props.setArcParam('sf', e)
+    })));
+  }
+
+  return react.createElement("div", {
+    className: "ad-Controls"
+  }, react.createElement("h3", {
+    className: "ad-Controls-title"
+  }, "Parameters"), react.createElement("div", {
+    key: "c1",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    name: "Width",
+    type: "text",
+    value: props.w,
+    onChange: e => props.setWidth(e)
+  }), react.createElement(Control, {
+    name: "Height",
+    type: "text",
+    value: props.h,
+    onChange: e => props.setHeight(e)
+  }), react.createElement(Control, {
+    name: "Close path",
+    type: "checkbox",
+    value: props.closePath,
+    onChange: e => props.setClosePath(e)
+  })), react.createElement("div", {
+    key: "c2",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    name: "Grid size",
+    type: "text",
+    value: props.grid.size,
+    onChange: e => props.setGridSize(e)
+  }), react.createElement(Control, {
+    name: "Snap grid",
+    type: "checkbox",
+    checked: props.grid.snap,
+    onChange: e => props.setGridSnap(e)
+  }), react.createElement(Control, {
+    name: "Show grid",
+    type: "checkbox",
+    checked: props.grid.show,
+    onChange: e => props.setGridShow(e)
+  })), react.createElement("div", {
+    key: "c3",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    type: "button",
+    action: "reset",
+    value: "Reset path",
+    onClick: e => props.reset(e)
+  })), react.createElement("h3", {
+    className: "ad-Controls-title"
+  }, "Selected point"), props.activePoint !== 0 && react.createElement("div", {
+    key: "c4",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    name: "Point type",
+    type: "choices",
+    id: "pointType",
+    choices: [{
+      name: 'L',
+      value: 'l',
+      checked: !active.q && !active.c && !active.a
+    }, {
+      name: 'Q',
+      value: 'q',
+      checked: !!active.q
+    }, {
+      name: 'C',
+      value: 'c',
+      checked: !!active.c
+    }, {
+      name: 'A',
+      value: 'a',
+      checked: !!active.a
+    }],
+    onChange: e => props.setPointType(e)
+  })), react.createElement("div", {
+    key: "c5",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    name: "Point X position",
+    type: "range",
+    min: 0,
+    max: props.w,
+    step: step,
+    value: active.x,
+    onChange: e => props.setPointPosition('x', e)
+  })), react.createElement("div", {
+    key: "c6",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    name: "Point Y position",
+    type: "range",
+    min: 0,
+    max: props.h,
+    step: step,
+    value: active.y,
+    onChange: e => props.setPointPosition('y', e)
+  })), params, props.activePoint !== 0 && react.createElement("div", {
+    key: "c7",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    type: "button",
+    action: "delete",
+    value: "Remove this point",
+    onClick: e => props.removeActivePoint(e)
+  })), react.createElement("div", {
+    key: "c8",
+    className: "ad-Controls-container"
+  }, react.createElement(Control, {
+    type: "button",
+    action: "save",
+    value: "Save",
+    onClick: e => props.saveSvgpath(e)
+  })));
+}
+
+function Control(props) {
+  const {
+    name,
+    type,
+    ..._props
+  } = props;
+  let control = '';
+  let label = '';
+
+  switch (type) {
+    case 'range':
+      control = react.createElement(Range, _props);
+      break;
+
+    case 'text':
+      control = react.createElement(Text, _props);
+      break;
+
+    case 'checkbox':
+      control = react.createElement(Checkbox, _props);
+      break;
+
+    case 'button':
+      control = react.createElement(Button$1, _props);
+      break;
+
+    case 'choices':
+      control = react.createElement(Choices, _props);
+      break;
+  }
+
+  if (name) {
+    label = react.createElement("label", {
+      className: "ad-Control-label"
+    }, name);
+  }
+
+  return react.createElement("div", {
+    className: "ad-Control"
+  }, label, control);
+}
+
+function Choices(props) {
+  let choices = props.choices.map((c, i) => {
+    return react.createElement("label", {
+      key: i,
+      className: "ad-Choice"
+    }, react.createElement("input", {
+      className: "ad-Choice-input",
+      type: "radio",
+      value: c.value,
+      checked: c.checked,
+      name: props.id,
+      onChange: props.onChange
+    }), react.createElement("div", {
+      className: "ad-Choice-fake"
+    }, c.name));
+  });
+  return react.createElement("div", {
+    className: "ad-Choices"
+  }, choices);
+}
+
+function Button$1(props) {
+  return react.createElement("button", {
+    className: 'ad-Button' + (props.action ? '  ad-Button--' + props.action : ''),
+    type: "button",
+    onClick: props.onClick
+  }, props.value);
+}
+
+function Checkbox(props) {
+  return react.createElement("label", {
+    className: "ad-Checkbox"
+  }, react.createElement("input", {
+    className: "ad-Checkbox-input",
+    type: "checkbox",
+    onChange: props.onChange,
+    checked: props.checked
+  }), react.createElement("div", {
+    className: "ad-Checkbox-fake"
+  }));
+}
+
+function Text(props) {
+  return react.createElement("input", {
+    className: "ad-Text",
+    type: "text",
+    value: props.value,
+    onChange: props.onChange
+  });
+}
+
+function Range(props) {
+  return react.createElement("div", {
+    className: "ad-Range"
+  }, react.createElement("input", {
+    className: "ad-Range-input",
+    type: "range",
+    min: props.min,
+    max: props.max,
+    step: props.step,
+    value: props.value,
+    onChange: props.onChange
+  }), react.createElement("input", {
+    className: "ad-Range-text  ad-Text",
+    type: "text",
+    value: props.value,
+    onChange: props.onChange
+  }));
+}
+
 /**
  * Returns a ref that is immediately updated with the new value
  *
@@ -86508,6 +87720,25 @@ class Ui$1 extends react.PureComponent {
             fileTitle: fileTitle,
             onSelectFile: onSelectFile,
             ask: ask
+          });
+        }
+
+      case 'editSvgPath':
+        {
+          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
+          return react.createElement(SvgPathEditor, {
+            key: `${id}/editSvgPath/${file}`,
+            id: id,
+            path: path,
+            createNode: createNode,
+            view: view,
+            viewChoices: viewChoices,
+            viewTitle: 'Edit SvgPath',
+            onSelectView: onSelectView,
+            file: file,
+            fileChoices: fileChoices,
+            fileTitle: fileTitle,
+            onSelectFile: onSelectFile
           });
         }
 

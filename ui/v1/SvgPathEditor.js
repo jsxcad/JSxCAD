@@ -1,20 +1,22 @@
+/* global document */
 // Originally from https://codepen.io/anthonydugois/pen/mewdyZ by Anthony Dugois.
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Pane from './Pane';
 import absolutifySvgPath from 'abs-svg-path';
 import parseSvgPath from 'parse-svg-path';
 
 const Component = React.Component;
 
-class SvgPathEditor extends Component {
+class SvgPathEditor extends Pane {
   constructor (props) {
     super(props);
 
     const points = [];
     let closePath = false;
     {
-      const absolutePath = absolutifySvgPath(parseSvgPath(props.path || 'M 100 300 Q 0 100 200 100'));
+      const absolutePath = absolutifySvgPath(parseSvgPath(props.svgPath || 'M 100 300 Q 0 100 200 100'));
 
       for (const element of absolutePath) {
         const [type, a, b, c, d, e, f, g] = element;
@@ -35,7 +37,7 @@ class SvgPathEditor extends Component {
       grid: {
         show: true,
         snap: true,
-        size: 50
+        size: 5
       },
       ctrl: false,
       points,
@@ -43,18 +45,19 @@ class SvgPathEditor extends Component {
       draggedPoint: false,
       draggedQuadratic: false,
       draggedCubic: false,
-      closePath
+      closePath,
+      iteration: 0,
     };
   }
 
   componentWillMount () {
-    // document.addEventListener('keydown', this.handleKeyDown, false);
-    // document.addEventListener('keyup', this.handleKeyUp, false);
+    document.addEventListener('keydown', this.handleKeyDown, false);
+    document.addEventListener('keyup', this.handleKeyUp, false);
   }
 
   componentWillUnmount () {
-    // document.removeEventListener('keydown');
-    // document.removeEventListener('keyup');
+    document.removeEventListener('keydown');
+    document.removeEventListener('keyup');
   }
 
   positiveNumber (n) {
@@ -186,7 +189,7 @@ class SvgPathEditor extends Component {
             break;
         }
 
-        this.setState({ points });
+        this.setState({ iteration: this.state.iteration + 1, points });
       }
     };
 
@@ -233,7 +236,7 @@ class SvgPathEditor extends Component {
       points[active].x = coords.x;
       points[active].y = coords.y;
 
-      this.setState({ points });
+      this.setState({ points, iteration: this.state.iteration + 1 });
     };
 
     setQuadraticCoords = (coords) => {
@@ -243,7 +246,7 @@ class SvgPathEditor extends Component {
       points[active].q.x = coords.x;
       points[active].q.y = coords.y;
 
-      this.setState({ points });
+      this.setState({ points, iteration: this.state.iteration + 1 });
     };
 
     setArcParam = (param, e) => {
@@ -259,7 +262,7 @@ class SvgPathEditor extends Component {
 
       points[active].a[param] = v;
 
-      this.setState({ points });
+      this.setState({ points, iteration: this.state.iteration + 1 });
     };
 
     setCubicCoords = (coords, anchor) => {
@@ -269,14 +272,15 @@ class SvgPathEditor extends Component {
       points[active].c[anchor].x = coords.x;
       points[active].c[anchor].y = coords.y;
 
-      this.setState({ points });
+      this.setState({ points, iteration: this.state.iteration + 1 });
     };
 
     setDraggedPoint = (index) => {
       if (!this.state.ctrl) {
         this.setState({
           activePoint: index,
-          draggedPoint: true
+          draggedPoint: true,
+          iteration: this.state.iteration + 1,
         });
       }
     };
@@ -284,6 +288,7 @@ class SvgPathEditor extends Component {
     setDraggedQuadratic = (index) => {
       if (!this.state.ctrl) {
         this.setState({
+          iteration: this.state.iteration + 1,
           activePoint: index,
           draggedQuadratic: true
         });
@@ -293,6 +298,7 @@ class SvgPathEditor extends Component {
     setDraggedCubic = (index, anchor) => {
       if (!this.state.ctrl) {
         this.setState({
+          iteration: this.state.iteration + 1,
           activePoint: index,
           draggedCubic: anchor
         });
@@ -301,6 +307,7 @@ class SvgPathEditor extends Component {
 
     cancelDragging = (e) => {
       this.setState({
+        iteration: this.state.iteration + 1,
         draggedPoint: false,
         draggedQuadratic: false,
         draggedCubic: false
@@ -315,6 +322,7 @@ class SvgPathEditor extends Component {
         points.push(coords);
 
         this.setState({
+          iteration: this.state.iteration + 1,
           points,
           activePoint: points.length - 1
         });
@@ -330,6 +338,7 @@ class SvgPathEditor extends Component {
         points.splice(active, 1);
 
         this.setState({
+          iteration: this.state.iteration + 1,
           points,
           activePoint: points.length - 1
         });
@@ -390,12 +399,13 @@ class SvgPathEditor extends Component {
       let w = this.state.w; let h = this.state.h;
 
       this.setState({
+        iteration: this.state.iteration + 1,
         points: [{ x: w / 2, y: h / 2 }],
         activePoint: 0
       });
     };
 
-    render () {
+    renderPane () {
       return (
         <div
           className="ad-SvgPathEditor"
@@ -404,7 +414,7 @@ class SvgPathEditor extends Component {
             <div className="ad-SvgPathEditor-svg">
               <SVG
                 ref="svg"
-                path={ this.generatePath() }
+                svgPath={ this.generatePath() }
                 { ...this.state }
                 addPoint={ this.addPoint }
                 setDraggedPoint={ this.setDraggedPoint }
@@ -412,7 +422,6 @@ class SvgPathEditor extends Component {
                 setDraggedCubic={ this.setDraggedCubic }
                 handleMouseMove={ this.handleMouseMove } />
             </div>
-            <Foot />
           </div>
 
           <div className="ad-SvgPathEditor-controls">
@@ -432,41 +441,10 @@ class SvgPathEditor extends Component {
               setGridShow={ this.setGridShow }
               setClosePath={ this.setClosePath }
               saveSvgpath={ this.saveSvgpath } />
-            <Result path={ this.generatePath() } />
           </div>
         </div>
       );
     }
-}
-
-function Foot (props) {
-  return (
-    <div className="ad-Foot">
-      <ul className="ad-Foot-list">
-        <li className="ad-Foot-item">
-          <span className="ad-Foot-highlight">Click</span> to select a point
-        </li>
-        <li className="ad-Foot-item">
-          <span className="ad-Foot-highlight">Ctrl + Click</span> to add a point
-        </li>
-      </ul>
-      <div className="ad-Foot-meta">
-        <a href="https://twitter.com/a_dugois">Follow me on Twitter</a><br />
-                or <a href="http://anthonydugois.com/svg-path-builder/">check the online version</a>
-      </div>
-    </div>
-  );
-}
-
-function Result (props) {
-  return (
-    <div className="ad-Result">
-      <textarea
-        className="ad-Result-textarea"
-        value={ props.path }
-        onFocus={ (e) => e.target.select() } />
-    </div>
-  );
 }
 
 /**
@@ -476,7 +454,7 @@ function Result (props) {
 class SVG extends Component {
   render () {
     const {
-      path,
+      svgPath,
       w,
       h,
       grid,
@@ -495,6 +473,7 @@ class SVG extends Component {
       if (p.q) {
         anchors.push(
           <Quadratic
+            key={anchors.length}
             index={ i }
             p1x={ a[i - 1].x }
             p1y={ a[i - 1].y }
@@ -507,6 +486,7 @@ class SVG extends Component {
       } else if (p.c) {
         anchors.push(
           <Cubic
+            key={anchors.length}
             index={ i }
             p1x={ a[i - 1].x }
             p1y={ a[i - 1].y }
@@ -521,12 +501,14 @@ class SVG extends Component {
       }
 
       return (
-        <g className={
+        <g key={i}
+          className={
           'ad-PointGroup' +
                     (i === 0 ? '  ad-PointGroup--first' : '') +
                     (activePoint === i ? '  is-active' : '')
         }>
           <Point
+            key="p"
             index={ i }
             x={ p.x }
             y={ p.y }
@@ -549,7 +531,7 @@ class SVG extends Component {
           grid={ grid } />
         <path
           className="ad-Path"
-          d={ path } />
+          d={ svgPath } />
         <g className="ad-Points">
           { circles }
         </g>
@@ -593,18 +575,21 @@ function Quadratic (props) {
   return (
     <g className="ad-Anchor">
       <line
+        key="q1"
         className="ad-Anchor-line"
         x1={ props.p1x }
         y1={ props.p1y }
         x2={ props.x }
         y2={ props.y } />
       <line
+        key="q2"
         className="ad-Anchor-line"
         x1={ props.x }
         y1={ props.y }
         x2={ props.p2x }
         y2={ props.p2y } />
       <circle
+        key="q3"
         className="ad-Anchor-point"
         onMouseDown={ (e) => props.setDraggedQuadratic(props.index) }
         cx={ props.x }
@@ -633,6 +618,7 @@ function Grid (props) {
   for (let i = 1; i < (props.w / size); i++) {
     grid.push(
       <line
+        key={`Gx${i}`}
         x1={ i * size }
         y1={ 0 }
         x2={ i * size }
@@ -643,6 +629,7 @@ function Grid (props) {
   for (let i = 1; i < (props.h / size); i++) {
     grid.push(
       <line
+        key={`Gy${i}`}
         x1={ 0 }
         y1={ i * size }
         x2={ props.w }
@@ -672,7 +659,7 @@ function Controls (props) {
 
   if (active.q) {
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Control point X position"
           type="range"
@@ -684,7 +671,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Control point Y position"
           type="range"
@@ -697,7 +684,7 @@ function Controls (props) {
     );
   } else if (active.c) {
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="First control point X position"
           type="range"
@@ -709,7 +696,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="First control point Y position"
           type="range"
@@ -721,7 +708,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Second control point X position"
           type="range"
@@ -733,7 +720,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Second control point Y position"
           type="range"
@@ -746,7 +733,7 @@ function Controls (props) {
     );
   } else if (active.a) {
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="X Radius"
           type="range"
@@ -758,7 +745,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Y Radius"
           type="range"
@@ -770,7 +757,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Rotation"
           type="range"
@@ -782,7 +769,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Large arc sweep flag"
           type="checkbox"
@@ -791,7 +778,7 @@ function Controls (props) {
       </div>
     );
     params.push(
-      <div className="ad-Controls-container">
+      <div key={params.length} className="ad-Controls-container">
         <Control
           name="Sweep flag"
           type="checkbox"
@@ -807,7 +794,7 @@ function Controls (props) {
                 Parameters
       </h3>
 
-      <div className="ad-Controls-container">
+      <div key="c1" className="ad-Controls-container">
         <Control
           name="Width"
           type="text"
@@ -824,7 +811,7 @@ function Controls (props) {
           value={ props.closePath }
           onChange={ (e) => props.setClosePath(e) } />
       </div>
-      <div className="ad-Controls-container">
+      <div key="c2" className="ad-Controls-container">
         <Control
           name="Grid size"
           type="text"
@@ -841,7 +828,7 @@ function Controls (props) {
           checked={ props.grid.show }
           onChange={ (e) => props.setGridShow(e) } />
       </div>
-      <div className="ad-Controls-container">
+      <div key="c3" className="ad-Controls-container">
         <Control
           type="button"
           action="reset"
@@ -854,7 +841,7 @@ function Controls (props) {
       </h3>
 
       { props.activePoint !== 0 && (
-        <div className="ad-Controls-container">
+        <div key="c4" className="ad-Controls-container">
           <Control
             name="Point type"
             type="choices"
@@ -868,7 +855,7 @@ function Controls (props) {
             onChange={ (e) => props.setPointType(e) } />
         </div>
       )}
-      <div className="ad-Controls-container">
+      <div key="c5" className="ad-Controls-container">
         <Control
           name="Point X position"
           type="range"
@@ -878,7 +865,7 @@ function Controls (props) {
           value={ active.x }
           onChange={ (e) => props.setPointPosition('x', e) } />
       </div>
-      <div className="ad-Controls-container">
+      <div key="c6" className="ad-Controls-container">
         <Control
           name="Point Y position"
           type="range"
@@ -892,7 +879,7 @@ function Controls (props) {
       { params }
 
       { props.activePoint !== 0 && (
-        <div className="ad-Controls-container">
+        <div key="c7" className="ad-Controls-container">
           <Control
             type="button"
             action="delete"
@@ -901,7 +888,7 @@ function Controls (props) {
         </div>
       )}
 
-      <div className="ad-Controls-container">
+      <div key="c8" className="ad-Controls-container">
         <Control
           type="button"
           action="save"
@@ -953,7 +940,7 @@ function Control (props) {
 function Choices (props) {
   let choices = props.choices.map((c, i) => {
     return (
-      <label className="ad-Choice">
+      <label key={i} className="ad-Choice">
         <input
           className="ad-Choice-input"
           type="radio"

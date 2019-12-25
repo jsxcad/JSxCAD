@@ -91,11 +91,11 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   }
 };
 
-const toMethod = function (connector) { return connect(connector, this); };
+const toMethod = function (connector) { return connect(this, connector); };
 Shape.prototype.to = toMethod;
 toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
-const fromMethod = function (connector) { return connect(this, connector); };
+const fromMethod = function (connector) { return connect(connector, this); };
 Shape.prototype.from = fromMethod;
 fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
 
