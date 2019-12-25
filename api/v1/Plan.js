@@ -39,6 +39,21 @@ export const Radius = (radius = 1, center = [0, 0, 0]) =>
   });
 Plan.Radius = Radius;
 
+export const Diameter = (diameter = 1, center = [0, 0, 0]) => {
+  const radius = diameter / 2;
+  return Plan({
+    plan: { diameter },
+    marks: [center],
+    visualization:
+      Circle.ofDiameter(diameter)
+          .outline()
+          .add(Path([0, -radius, 0], [0, +radius, 0]))
+          .add(Text(radius / 10)(`D${dp2(diameter)}`))
+          .color('red')
+  });
+};
+Plan.Diameter = Diameter;
+
 export const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
   const radius = Polygon.toRadiusFromApothem(apothem, sides);
   return Plan({

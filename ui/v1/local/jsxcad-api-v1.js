@@ -609,6 +609,21 @@ const Radius = (radius = 1, center = [0, 0, 0]) =>
   });
 Plan.Radius = Radius;
 
+const Diameter = (diameter = 1, center = [0, 0, 0]) => {
+  const radius = diameter / 2;
+  return Plan({
+    plan: { diameter },
+    marks: [center],
+    visualization:
+      Circle.ofDiameter(diameter)
+          .outline()
+          .add(Path([0, -radius, 0], [0, +radius, 0]))
+          .add(Text(radius / 10)(`D${dp2(diameter)}`))
+          .color('red')
+  });
+};
+Plan.Diameter = Diameter;
+
 const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
   const radius = Polygon.toRadiusFromApothem(apothem, sides);
   return Plan({
@@ -1852,6 +1867,11 @@ Shape.prototype.nocut = nocutMethod;
 nocut.signature = 'nocut(shape:Shape, ...tag:string) -> Shape';
 nocutMethod.signature = 'Shape -> nocut(...tag:string) -> Shape';
 
+const on = (above, below, op = _ => _) => above.bottom().from(below.top().op(op));
+const onMethod = function (below, op) { return on(this, below, op); };
+
+Shape.prototype.on = onMethod;
+
 /**
  *
  * # Outline
@@ -2334,22 +2354,21 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
               : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
       });
   } else {
-    return [aMovedShape, aMovedConnector];
+    return aMovedShape;
   }
 };
-
-const takeMethod = function (connector) { return connect(connector, this); };
-Shape.prototype.take = takeMethod;
-takeMethod.signature = 'Connector -> take(from:Connector) -> Shape';
 
 const toMethod = function (connector) { return connect(connector, this); };
 Shape.prototype.to = toMethod;
 toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
-Shape.prototype.from = toMethod;
 
-const fixToMethod = function (connector) { return connect(this, connector); };
-Shape.prototype.fixTo = fixToMethod;
-fixToMethod.signature = 'Connector -> fixTo(to:Connector) -> Shape';
+const fromMethod = function (connector) { return connect(this, connector); };
+Shape.prototype.from = fromMethod;
+fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
+
+const atMethod = function (connector) { return connect(this, connector, { doConnect: false }); };
+Shape.prototype.at = atMethod;
+atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
 
 connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
 
@@ -2600,25 +2619,14 @@ Shape.prototype.unfold = method$d;
 
 /**
  *
- * # With
- *
- * Assembles the current shape with those provided.
- *
- * The below example is equivalent to
- * ```
- * assemble(Circle(20), Square(40).moveX(10))
- * ```
- *
- * ::: illustration { "view": { "position": [80, 80, 80] } }
- * ```
- * Circle(20).with(Square(40).moveX(10))
- * ```
- * :::
+ * # shape.void(...shapes)
  *
  **/
 
-const method$e = function (...shapes) { return assemble(this, ...shapes); };
-Shape.prototype.with = method$e;
+const voidMethod = function (...shapes) { return assemble(this, ...shapes.map(drop)); };
+Shape.prototype.void = voidMethod;
+
+voidMethod.signature = 'Shape -> void(...shapes:Shape) -> Shape';
 
 const X$3 = 0;
 const Y$3 = 1;
@@ -2664,9 +2672,9 @@ const voxels = ({ resolution = 1 }, shape) => {
   return assemble(...voxels);
 };
 
-const method$f = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
+const method$e = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
 
-Shape.prototype.voxels = method$f;
+Shape.prototype.voxels = method$e;
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];
@@ -2713,10 +2721,32 @@ const wireframe = (options = {}, shape) => {
   return assemble(...pieces);
 };
 
-const method$g = function (options) { return wireframe(options, this); };
+const method$f = function (options) { return wireframe(options, this); };
 
-Shape.prototype.wireframe = method$g;
+Shape.prototype.wireframe = method$f;
 Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
+
+/**
+ *
+ * # With
+ *
+ * Assembles the current shape with those provided.
+ *
+ * The below example is equivalent to
+ * ```
+ * assemble(Circle(20), Square(40).moveX(10))
+ * ```
+ *
+ * ::: illustration { "view": { "position": [80, 80, 80] } }
+ * ```
+ * Circle(20).with(Square(40).moveX(10))
+ * ```
+ * :::
+ *
+ **/
+
+const method$g = function (...shapes) { return assemble(this, ...shapes); };
+Shape.prototype.with = method$g;
 
 /**
  *
