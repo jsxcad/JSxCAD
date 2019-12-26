@@ -4,7 +4,7 @@ import ClipperLib from 'clipper-lib';
 import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlapOrAbut } from './doesNotOverlap';
 
-const { Clipper, ClipType, PolyFillType, PolyType } = ClipperLib;
+const { Clipper, ClipType, PolyType } = ClipperLib;
 
 /**
  * Produces a surface that is the intersection of all provided surfaces.
@@ -26,9 +26,7 @@ export const intersection = (a, ...z0Surfaces) => {
       const clipper = new Clipper();
       clipper.AddPaths(fromSurface(a, normalize), PolyType.ptSubject, true);
       clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
-      const result = [];
-      clipper.Execute(ClipType.ctIntersection, result, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
-      a = toSurface(result, normalize);
+      a = toSurface(clipper, ClipType.ctIntersection, normalize);
     }
   }
   return a;

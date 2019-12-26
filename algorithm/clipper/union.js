@@ -4,7 +4,7 @@ import ClipperLib from 'clipper-lib';
 import { createNormalize2 } from './createNormalize2';
 import { doesNotOverlapOrAbut } from './doesNotOverlap';
 
-const { Clipper, ClipType, PolyFillType, PolyType } = ClipperLib;
+const { Clipper, ClipType, PolyType } = ClipperLib;
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -27,9 +27,7 @@ export const union = (...z0Surfaces) => {
       const clipper = new Clipper();
       clipper.AddPaths(fromSurface(a, normalize), PolyType.ptSubject, true);
       clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
-      const result = [];
-      clipper.Execute(ClipType.ctUnion, result, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
-      z0Surfaces.push(toSurface(result, normalize));
+      z0Surfaces.push(toSurface(clipper, ClipType.ctUnion, normalize));
     }
   }
   return z0Surfaces[0];
