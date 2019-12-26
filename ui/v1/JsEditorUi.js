@@ -141,13 +141,15 @@ export class JsEditorUi extends Pane {
   }
 
   async save () {
+    const { file } = this.props;
     const { code = '' } = this.state;
-    await writeFile({}, this.props.file, code);
+    await writeFile({}, file, code);
     await log({ op: 'text', text: 'Saved', level: 'serious' });
   }
 
   async componentDidMount () {
-    const code = await readFile({}, this.props.file);
+    const { file } = this.props;
+    const code = await readFile({}, file);
     this.setState({ code });
   }
 
