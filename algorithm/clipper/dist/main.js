@@ -1,4 +1,3 @@
-import './jsxcad-geometry-path.js';
 import { max, min } from './jsxcad-math-vec3.js';
 
 function createCommonjsModule(fn, module) {

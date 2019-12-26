@@ -1,6 +1,5 @@
 import ClipperLib from 'clipper-lib';
 
-import { assertGood, measureArea } from '@jsxcad/geometry-path';
 const { IntPoint } = ClipperLib;
 
 const toInt = (integer) => integer * 1e7;
