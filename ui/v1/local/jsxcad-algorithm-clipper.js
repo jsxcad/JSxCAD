@@ -7627,13 +7627,23 @@ var clipper = createCommonjsModule(function (module) {
 })();
 });
 
-const { IntPoint } = clipper;
+const { Clipper, ClipType, IntPoint, PolyFillType, PolyTree, PolyType } = clipper;
 
-const toInt = (integer) => integer * 1e6;
-const toFloat = (integer) => integer / 1e6;
+const toInt = (integer) => Math.round(integer * 1e7);
+const toFloat = (integer) => integer / 1e7;
 
-const fromSurface = (surface, normalize) => surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
-const toSurface = (paths, normalize) => paths.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
+const fillType = PolyFillType.pftNonZero;
+
+const fromSurface = (surface, normalize) =>
+  surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
+
+const toSurface = (clipper, op, normalize) => {
+  // const result = new PolyTree();
+  const result = [];
+  clipper.Execute(op, result, fillType, fillType);
+  const cleaned = Clipper.CleanPolygons(result, 1);
+  return cleaned.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
+};
 
 const X = 0;
 const Y = 1;
@@ -7716,7 +7726,7 @@ const doesNotOverlapOrAbut = (a, b) => {
   return false;
 };
 
-const { Clipper, ClipType, PolyFillType, PolyType } = clipper;
+const { Clipper: Clipper$1, ClipType: ClipType$1, PolyFillType: PolyFillType$1, PolyType: PolyType$1 } = clipper;
 
 const difference = (a, ...z0Surfaces) => {
   if (a === undefined || a.length === 0) {
@@ -7730,18 +7740,16 @@ const difference = (a, ...z0Surfaces) => {
     } else if (doesNotOverlapOrAbut(a, b)) {
       continue;
     } else {
-      const clipper = new Clipper();
-      clipper.AddPaths(fromSurface(a, normalize), PolyType.ptSubject, true);
-      clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
-      const result = [];
-      clipper.Execute(ClipType.ctDifference, result, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
-      a = toSurface(result, normalize);
+      const clipper = new Clipper$1();
+      clipper.AddPaths(fromSurface(a, normalize), PolyType$1.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$1.ptClip, true);
+      a = toSurface(clipper, ClipType$1.ctDifference, normalize);
     }
   }
   return a;
 };
 
-const { Clipper: Clipper$1, ClipType: ClipType$1, PolyFillType: PolyFillType$1, PolyType: PolyType$1 } = clipper;
+const { Clipper: Clipper$2, ClipType: ClipType$2, PolyFillType: PolyFillType$2, PolyType: PolyType$2 } = clipper;
 
 /**
  * Produces a surface that is the intersection of all provided surfaces.
@@ -7760,18 +7768,16 @@ const intersection = (a, ...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       return [];
     } else {
-      const clipper = new Clipper$1();
-      clipper.AddPaths(fromSurface(a, normalize), PolyType$1.ptSubject, true);
-      clipper.AddPaths(fromSurface(b, normalize), PolyType$1.ptClip, true);
-      const result = [];
-      clipper.Execute(ClipType$1.ctIntersection, result, PolyFillType$1.pftNonZero, PolyFillType$1.pftNonZero);
-      a = toSurface(result, normalize);
+      const clipper = new Clipper$2();
+      clipper.AddPaths(fromSurface(a, normalize), PolyType$2.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$2.ptClip, true);
+      a = toSurface(clipper, ClipType$2.ctIntersection, normalize);
     }
   }
   return a;
 };
 
-const { Clipper: Clipper$2, ClipType: ClipType$2, PolyFillType: PolyFillType$2, PolyType: PolyType$2 } = clipper;
+const { Clipper: Clipper$3, ClipType: ClipType$3, PolyFillType: PolyFillType$3, PolyType: PolyType$3 } = clipper;
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -7791,12 +7797,10 @@ const union = (...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
-      const clipper = new Clipper$2();
-      clipper.AddPaths(fromSurface(a, normalize), PolyType$2.ptSubject, true);
-      clipper.AddPaths(fromSurface(b, normalize), PolyType$2.ptClip, true);
-      const result = [];
-      clipper.Execute(ClipType$2.ctUnion, result, PolyFillType$2.pftNonZero, PolyFillType$2.pftNonZero);
-      z0Surfaces.push(toSurface(result, normalize));
+      const clipper = new Clipper$3();
+      clipper.AddPaths(fromSurface(a, normalize), PolyType$3.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$3.ptClip, true);
+      z0Surfaces.push(toSurface(clipper, ClipType$3.ctUnion, normalize));
     }
   }
   return z0Surfaces[0];
