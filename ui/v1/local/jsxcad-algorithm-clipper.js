@@ -7630,8 +7630,8 @@ var clipper = createCommonjsModule(function (module) {
 
 const { IntPoint } = clipper;
 
-const toInt = (integer) => integer * 1e7;
-const toFloat = (integer) => integer / 1e7;
+const toInt = (integer) => integer * 1e9;
+const toFloat = (integer) => integer / 1e9;
 
 const fromSurface = (surface, normalize) => surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
 const toSurface = (paths, normalize) => {
