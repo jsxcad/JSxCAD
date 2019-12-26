@@ -1,6 +1,8 @@
 /* global document */
 // Originally from https://codepen.io/anthonydugois/pen/mewdyZ by Anthony Dugois.
 
+import { log, readFile, writeFile } from '@jsxcad/sys';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Pane from './Pane';
@@ -9,27 +11,29 @@ import parseSvgPath from 'parse-svg-path';
 
 const Component = React.Component;
 
+const toPoints = (svgPath) => {
+  const absolutePath = absolutifySvgPath(parseSvgPath(svgPath));
+  const points = [];
+  let closePath = false;
+  for (const element of absolutePath) {
+    const [type, a, b, c, d, e, f, g] = element;
+    switch (type) {
+      case 'M': points.push({ x: a, y: b }); break;
+      case 'L': points.push({ x: a, y: b }); break;
+      case 'Q': points.push({ x: c, y: d, q: { x: a, y: b } }); break;
+      case 'C': points.push({ x: e, y: f, c: [{ x: a, y: b }, { x: c, y: d }] }); break;
+      case 'A': points.push({ x: f, y: g, a: { rx: a, ry: b, rot: c, laf: d, sf: e } }); break;
+      case 'Z': closePath = true; break;
+    }
+  }
+  return { points, closePath };
+}
+
 class SvgPathEditor extends Pane {
   constructor (props) {
     super(props);
 
-    const points = [];
-    let closePath = false;
-    {
-      const absolutePath = absolutifySvgPath(parseSvgPath(props.svgPath || 'M 100 300 Q 0 100 200 100'));
-
-      for (const element of absolutePath) {
-        const [type, a, b, c, d, e, f, g] = element;
-        switch (type) {
-          case 'M': points.push({ x: a, y: b }); break;
-          case 'L': points.push({ x: a, y: b }); break;
-          case 'Q': points.push({ x: c, y: d, q: { x: a, y: b } }); break;
-          case 'C': points.push({ x: e, y: f, c: [{ x: a, y: b }, { x: c, y: d }] }); break;
-          case 'A': points.push({ x: f, y: g, a: { rx: a, ry: b, rot: c, laf: d, sf: e } }); break;
-          case 'Z': closePath = true; break;
-        }
-      }
-    }
+    const { points, closePath } = toPoints(props.svgPath || 'M 100 300 Q 0 100 200 100');
 
     this.state = {
       w: 800,
@@ -55,9 +59,16 @@ class SvgPathEditor extends Pane {
     document.addEventListener('keyup', this.handleKeyUp, false);
   }
 
+  async componentDidMount () {
+    const { file } = this.props;
+    const svgPath = await readFile({}, file);
+    const { points, closePath } = toPoints(svgPath);
+    this.setState({ closePath, points });
+  }
+
   componentWillUnmount () {
-    document.removeEventListener('keydown');
-    document.removeEventListener('keyup');
+    document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('keyup', this.handleKeyUp);
   }
 
   positiveNumber (n) {
@@ -113,11 +124,12 @@ class SvgPathEditor extends Pane {
       this.setState({ closePath: e.target.checked });
     };
 
-    saveSvgpath = (e) => {
+    // FIX: Separate policy and mechanism?
+    save = async (e) => {
+      const { file } = this.props;
       const path = this.generatePath();
-      if (this.props.onsave !== null) {
-        this.props.onsave(path);
-      }
+      await writeFile({}, file, path);
+      await log({ op: 'text', text: 'Saved', level: 'serious' });
     };
 
     getMouseCoords = (e) => {
@@ -440,7 +452,7 @@ class SvgPathEditor extends Pane {
               setGridSnap={ this.setGridSnap }
               setGridShow={ this.setGridShow }
               setClosePath={ this.setClosePath }
-              saveSvgpath={ this.saveSvgpath } />
+              save={ this.save } />
           </div>
         </div>
       );
@@ -893,7 +905,7 @@ function Controls (props) {
           type="button"
           action="save"
           value="Save"
-          onClick={ (e) => props.saveSvgpath(e) } />
+          onClick={ (e) => props.save(e) } />
       </div>
     </div>
   );
