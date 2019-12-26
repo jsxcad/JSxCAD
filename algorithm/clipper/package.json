@@ -26,6 +26,7 @@
     "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
+    "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-utils": "^0.0.79",

@@ -1,3 +1,4 @@
+import { measureArea } from './jsxcad-geometry-path.js';
 import { max, min } from './jsxcad-math-vec3.js';
 
 function createCommonjsModule(fn, module) {
@@ -7629,11 +7630,18 @@ var clipper = createCommonjsModule(function (module) {
 
 const { IntPoint } = clipper;
 
-const toInt = (integer) => integer * 1e6;
-const toFloat = (integer) => integer / 1e6;
+const toInt = (integer) => integer * 1e7;
+const toFloat = (integer) => integer / 1e7;
 
 const fromSurface = (surface, normalize) => surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
-const toSurface = (paths, normalize) => paths.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
+const toSurface = (paths, normalize) => {
+  const result = paths.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
+  for (const path of result) {
+    const area = measureArea(path);
+    // assertGood(path);
+  }
+  return result;
+};
 
 const X = 0;
 const Y = 1;
