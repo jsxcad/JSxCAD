@@ -39,8 +39,8 @@ const createNormalize3 = (multiplier = 1e7) => {
     const ny1 = ny0 + 1;
     const nz1 = nz0 + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
-    // const normalized = coordinate;
+    // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
+    const normalized = coordinate;
     map.set(`${nx0}/${ny0}/${nz0}`, normalized);
     map.set(`${nx0}/${ny0}/${nz1}`, normalized);
     map.set(`${nx0}/${ny1}/${nz0}`, normalized);
