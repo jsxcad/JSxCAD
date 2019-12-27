@@ -327,32 +327,29 @@ class SvgPathEditor extends Pane {
     };
 
     addPoint = (e) => {
-      if (this.state.ctrl) {
+      const { activePoint, ctrl, points } = this.state;
+      if (ctrl) {
         let coords = this.getMouseCoords(e);
-        let points = this.state.points;
-
-        points.push(coords);
-
+        points.splice(activePoint, 0, coords);
         this.setState({
           iteration: this.state.iteration + 1,
           points,
-          activePoint: points.length - 1
+          activePoint: activePoint + 1,
         });
       }
       e.stopPropagation();
     };
 
     removeActivePoint = (e) => {
-      let points = this.state.points;
-      let active = this.state.activePoint;
+      const { points, activePoint } = this.state;
 
-      if (points.length > 1 && active !== 0) {
-        points.splice(active, 1);
+      if (points.length > 1 && activePoint !== 0) {
+        points.splice(activePoint, 1);
 
         this.setState({
           iteration: this.state.iteration + 1,
           points,
-          activePoint: points.length - 1
+          activePoint: Math.min(points.length - 1, activePoint)
         });
       }
     };
@@ -372,6 +369,9 @@ class SvgPathEditor extends Pane {
 
     handleKeyDown = (e) => {
       if (e.ctrlKey) this.setState({ ctrl: true });
+      if (e.key === 'Delete' && props.removeActivePoint) {
+        props.removeActivePoint(e);
+      }
     };
 
     handleKeyUp = (e) => {

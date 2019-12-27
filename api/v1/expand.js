@@ -14,7 +14,7 @@ import shell from './shell';
  * :::
  **/
 
-export const expand = (shape, amount = 1, { resolution = 16 }) =>
+export const expand = (shape, amount = 1, { resolution = 16 } = {}) =>
   (amount >= 0)
     ? shape.union(shell(shape, amount, resolution))
     : shape.cut(shell(shape, -amount, resolution));
