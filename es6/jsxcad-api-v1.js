@@ -1225,7 +1225,7 @@ Shape.prototype.shell = method;
  * :::
  **/
 
-const expand = (shape, amount = 1, { resolution = 16 }) =>
+const expand = (shape, amount = 1, { resolution = 16 } = {}) =>
   (amount >= 0)
     ? shape.union(shell(shape, amount, resolution))
     : shape.cut(shell(shape, -amount, resolution));

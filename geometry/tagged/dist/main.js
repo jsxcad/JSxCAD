@@ -4,10 +4,10 @@ import { transform as transform$1, canonicalize as canonicalize$2, difference as
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-solid.js';
-import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, measureBoundingBox as measureBoundingBox$2, makeConvex, toPlane } from './jsxcad-geometry-surface.js';
-import { difference as difference$1, intersection as intersection$1, union as union$2 } from './jsxcad-geometry-solid-boolean.js';
-import { difference as difference$3, intersection as intersection$3, union as union$1 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$2, intersection as intersection$2, union as union$3 } from './jsxcad-geometry-z0surface-boolean.js';
+import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
+import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
+import { difference as difference$3, intersection as intersection$3, clean as clean$1, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
+import { difference as difference$2, intersection as intersection$2, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
@@ -848,17 +848,7 @@ const measureBoundingBox = (rawGeometry) => {
   }
 };
 
-const toOutlineFromSurface = (surface) => {
-  const convexSurface = makeConvex({}, surface);
-  const pathSurfaces = [];
-  for (const path of convexSurface) {
-    const pathSurface = [path];
-    pathSurface.plane = toPlane(convexSurface);
-    pathSurfaces.push(pathSurface);
-  }
-  const simplified = union$1(...pathSurfaces);
-  return simplified;
-};
+const toOutlineFromSurface = (surface) => clean$1(surface);
 
 const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
@@ -947,20 +937,20 @@ const unionImpl = (baseGeometry, ...geometries) => {
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
   for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.disjointAssembly.push({ solid: union$2(solid, ...solids), tags });
+    result.disjointAssembly.push({ solid: union$1(solid, ...solids), tags });
   }
   // Surfaces -- generalize to surface unless specializable upon z0surface.
   const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
   const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
   for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
     if (surfaces.length === 0) {
-      result.disjointAssembly.push({ z0Surface: union$3(z0Surface, ...z0Surfaces), tags });
+      result.disjointAssembly.push({ z0Surface: union$2(z0Surface, ...z0Surfaces), tags });
     } else {
-      result.disjointAssembly.push({ surface: union$1(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      result.disjointAssembly.push({ surface: union$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
     }
   }
   for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.disjointAssembly.push({ surface: union$1(surface, ...surfaces, ...z0Surfaces), tags });
+    result.disjointAssembly.push({ surface: union$3(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);

@@ -7629,8 +7629,8 @@ var clipper = createCommonjsModule(function (module) {
 
 const { Clipper, IntPoint, PolyFillType } = clipper;
 
-const toInt = (integer) => Math.round(integer * 1e7);
-const toFloat = (integer) => integer / 1e7;
+const toInt = (integer) => Math.round(integer * 1e5);
+const toFloat = (integer) => integer / 1e5;
 
 const fillType = PolyFillType.pftNonZero;
 
@@ -7641,7 +7641,7 @@ const toSurface = (clipper, op, normalize) => {
   // const result = new PolyTree();
   const result = [];
   clipper.Execute(op, result, fillType, fillType);
-  const cleaned = Clipper.CleanPolygons(result, 1);
+  const cleaned = Clipper.CleanPolygons(result, 10);
   return cleaned.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
 };
 
@@ -7806,6 +7806,6 @@ const union = (...z0Surfaces) => {
   return z0Surfaces[0];
 };
 
-const clean = (polygons) => union(...polygons.map(polygon => [polygon]));
+const clean = (surface) => intersection(surface, surface);
 
 export { clean, difference, intersection, union };
