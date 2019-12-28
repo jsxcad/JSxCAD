@@ -1,7 +1,7 @@
 import { assertGood, deduplicate } from '@jsxcad/geometry-path';
 
-import { flip as flipSurface } from '@jsxcad/geometry-surface';
-import { makeConvex } from '@jsxcad/geometry-surface';
+import { flip as flipSurface, makeConvex } from '@jsxcad/geometry-surface';
+
 import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 

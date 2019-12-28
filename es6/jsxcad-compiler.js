@@ -330,6 +330,13 @@ var estree = (superClass => class extends superClass {
     return node;
   }
 
+  estreeParseBigIntLiteral(value) {
+    const bigInt = typeof BigInt !== "undefined" ? BigInt(value) : null;
+    const node = this.estreeParseLiteral(bigInt);
+    node.bigint = String(node.value || value);
+    return node;
+  }
+
   estreeParseLiteral(value) {
     return this.parseLiteral(value, "Literal");
   }
@@ -453,12 +460,15 @@ var estree = (superClass => class extends superClass {
 
   parseExprAtom(refShorthandDefaultPos) {
     switch (this.state.type) {
-      case types.regexp:
-        return this.estreeParseRegExpLiteral(this.state.value);
-
       case types.num:
       case types.string:
         return this.estreeParseLiteral(this.state.value);
+
+      case types.regexp:
+        return this.estreeParseRegExpLiteral(this.state.value);
+
+      case types.bigint:
+        return this.estreeParseBigIntLiteral(this.state.value);
 
       case types._null:
         return this.estreeParseLiteral(null);
@@ -537,6 +547,27 @@ var estree = (superClass => class extends superClass {
     } else {
       super.toAssignableObjectExpressionProp(prop, isBinding, isLast);
     }
+  }
+
+  finishCallExpression(node, optional) {
+    super.finishCallExpression(node, optional);
+
+    if (node.callee.type === "Import") {
+      node.type = "ImportExpression";
+      node.source = node.arguments[0];
+      delete node.arguments;
+      delete node.callee;
+    }
+
+    return node;
+  }
+
+  toReferencedListDeep(exprList, isParenthesizedExpr) {
+    if (!exprList) {
+      return;
+    }
+
+    super.toReferencedListDeep(exprList, isParenthesizedExpr);
   }
 
 });
@@ -1475,8 +1506,6 @@ var flow = (superClass => class extends superClass {
 
         nodeStart.callProperties.push(this.flowParseObjectTypeCallProperty(node, isStatic));
       } else {
-        var _allowInexact;
-
         let kind = "init";
 
         if (this.isContextual("get") || this.isContextual("set")) {
@@ -1488,7 +1517,7 @@ var flow = (superClass => class extends superClass {
           }
         }
 
-        const propOrInexact = this.flowParseObjectTypeProperty(node, isStatic, protoStart, variance, kind, allowSpread, (_allowInexact = allowInexact) != null ? _allowInexact : !exact);
+        const propOrInexact = this.flowParseObjectTypeProperty(node, isStatic, protoStart, variance, kind, allowSpread, allowInexact != null ? allowInexact : !exact);
 
         if (propOrInexact === null) {
           inexact = true;
@@ -4200,6 +4229,10 @@ class ScopeHandler {
     return (this.currentThisScope().flags & SCOPE_DIRECT_SUPER) > 0;
   }
 
+  get inClass() {
+    return (this.currentThisScope().flags & SCOPE_CLASS) > 0;
+  }
+
   get inNonArrowFunction() {
     return (this.currentThisScope().flags & SCOPE_FUNCTION) > 0;
   }
@@ -4883,7 +4916,11 @@ var typescript = (superClass => class extends superClass {
       const restNode = this.startNode();
       this.next();
       restNode.typeAnnotation = this.tsParseType();
-      this.checkCommaAfterRest(93);
+
+      if (this.match(types.comma) && this.lookaheadCharCode() !== 93) {
+        this.raiseRestNotLast(this.state.start);
+      }
+
       return this.finishNode(restNode, "TSRestType");
     }
 
@@ -8557,11 +8594,25 @@ class NodeUtils extends UtilParser {
 
 }
 
+const unwrapParenthesizedExpression = node => {
+  return node.type === "ParenthesizedExpression" ? unwrapParenthesizedExpression(node.expression) : node;
+};
+
 class LValParser extends NodeUtils {
   toAssignable(node, isBinding, contextDescription) {
-    var _node$extra2;
+    var _node$extra3;
 
     if (node) {
+      var _node$extra;
+
+      if (this.options.createParenthesizedExpressions && node.type === "ParenthesizedExpression" || ((_node$extra = node.extra) == null ? void 0 : _node$extra.parenthesized)) {
+        const parenthesized = unwrapParenthesizedExpression(node);
+
+        if (parenthesized.type !== "Identifier" && parenthesized.type !== "MemberExpression") {
+          this.raise(node.start, "Invalid parenthesized assignment pattern");
+        }
+      }
+
       switch (node.type) {
         case "Identifier":
         case "ObjectPattern":
@@ -8573,13 +8624,13 @@ class LValParser extends NodeUtils {
           node.type = "ObjectPattern";
 
           for (let i = 0, length = node.properties.length, last = length - 1; i < length; i++) {
-            var _node$extra;
+            var _node$extra2;
 
             const prop = node.properties[i];
             const isLast = i === last;
             this.toAssignableObjectExpressionProp(prop, isBinding, isLast);
 
-            if (isLast && prop.type === "RestElement" && ((_node$extra = node.extra) == null ? void 0 : _node$extra.trailingComma)) {
+            if (isLast && prop.type === "RestElement" && ((_node$extra2 = node.extra) == null ? void 0 : _node$extra2.trailingComma)) {
               this.raiseRestNotLast(node.extra.trailingComma);
             }
           }
@@ -8601,7 +8652,7 @@ class LValParser extends NodeUtils {
 
         case "ArrayExpression":
           node.type = "ArrayPattern";
-          this.toAssignableList(node.elements, isBinding, contextDescription, (_node$extra2 = node.extra) == null ? void 0 : _node$extra2.trailingComma);
+          this.toAssignableList(node.elements, isBinding, contextDescription, (_node$extra3 = node.extra) == null ? void 0 : _node$extra3.trailingComma);
           break;
 
         case "AssignmentExpression":
@@ -8688,8 +8739,6 @@ class LValParser extends NodeUtils {
         this.toReferencedListDeep(expr.elements);
       }
     }
-
-    return exprList;
   }
 
   parseSpread(refShorthandDefaultPos, refNeedsArrowPos) {
@@ -8888,10 +8937,6 @@ class LValParser extends NodeUtils {
 
 }
 
-const unwrapParenthesizedExpression = node => {
-  return node.type === "ParenthesizedExpression" ? unwrapParenthesizedExpression(node.expression) : node;
-};
-
 class ExpressionParser extends LValParser {
   checkDuplicatedProto(prop, protoRef) {
     if (prop.type === "SpreadElement" || prop.computed || prop.kind || prop.shorthand) {
@@ -9004,19 +9049,6 @@ class ExpressionParser extends LValParser {
       }
 
       this.checkLVal(left, undefined, undefined, "assignment expression");
-      const maybePattern = unwrapParenthesizedExpression(left);
-      let patternErrorMsg;
-
-      if (maybePattern.type === "ObjectPattern") {
-        patternErrorMsg = "`({a}) = 0` use `({a} = 0)`";
-      } else if (maybePattern.type === "ArrayPattern") {
-        patternErrorMsg = "`([a]) = 0` use `([a] = 0)`";
-      }
-
-      if (patternErrorMsg && (left.extra && left.extra.parenthesized || left.type === "ParenthesizedExpression")) {
-        this.raise(maybePattern.start, `You're trying to assign to a parenthesized expression, eg. instead of ${patternErrorMsg}`);
-      }
-
       this.next();
       node.right = this.parseMaybeAssign(noIn);
       return this.finishNode(node, "AssignmentExpression");
@@ -9492,6 +9524,13 @@ class ExpressionParser extends LValParser {
           const id = this.parseIdentifier();
 
           if (!containsEsc && id.name === "async" && this.match(types._function) && !this.canInsertSemicolon()) {
+            const last = this.state.context.length - 1;
+
+            if (this.state.context[last] !== types$1.functionStatement) {
+              throw new Error("Internal error");
+            }
+
+            this.state.context[last] = types$1.functionExpression;
             this.next();
             return this.parseFunction(node, undefined, true);
           } else if (canBeArrow && !containsEsc && id.name === "async" && this.match(types.name) && !this.canInsertSemicolon()) {
@@ -10359,7 +10398,7 @@ class ExpressionParser extends LValParser {
       }
     }
 
-    if (this.state.inClassProperty && word === "arguments") {
+    if (this.scope.inClass && !this.scope.inNonArrowFunction && word === "arguments") {
       this.raise(startLoc, "'arguments' is not allowed in class field initializer");
       return;
     }
@@ -12198,6 +12237,7 @@ function getParserClass(pluginsFromOptions) {
 exports.parse = parse;
 exports.parseExpression = parseExpression;
 exports.tokTypes = types;
+
 });
 
 unwrapExports(lib);

@@ -3,7 +3,7 @@ import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 import { Shape } from './Shape';
 import { Z } from './Z';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
-import { retessellate } from '@jsxcad/geometry-surface';
+import { makeConvex } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from '@jsxcad/geometry-path';
 import { union } from './union';
@@ -61,7 +61,8 @@ export const section = (solidShape, connector = Z(0)) => {
   const shapes = [];
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
     const section = bspSection(solid, planeSurface);
-    const surface = retessellate(section);
+    // CHECK: Do we need to do this?
+    const surface = makeConvex(section);
     surface.plane = plane;
     shapes.push(Shape.fromGeometry({ surface }));
   }

@@ -476,9 +476,9 @@ const eachPoint = (options, operation, geometry) => {
     } else if (geometry.solid) {
       eachPoint$3(options, operation, geometry.solid);
     } else if (geometry.surface) {
-      eachPoint$4(options, operation, geometry.surface);
+      eachPoint$4(operation, geometry.surface);
     } else if (geometry.z0Surface) {
-      eachPoint$4(options, operation, geometry.z0Surface);
+      eachPoint$4(operation, geometry.z0Surface);
     }
   };
 

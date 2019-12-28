@@ -17,12 +17,14 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
 
   const convexSurface = [];
 
+  // eslint-disable-next-line camelcase
   const walkContour = ({ m_polygon, m_Childs }) => {
     const contour = [];
     const holes = [];
     for (const { X, Y } of Clipper.CleanPolygon(m_polygon, 1)) {
       contour.push(X, Y);
     }
+    // eslint-disable-next-line camelcase
     for (const child of m_Childs) {
       walkHole(child, contour, holes);
     }
@@ -39,8 +41,9 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
       }
       convexSurface.push(triangle);
     }
-  }
+  };
 
+  // eslint-disable-next-line camelcase
   const walkHole = ({ m_polygon, m_Childs }, contour, holes) => {
     const start = contour.length;
     for (const { X, Y } of Clipper.CleanPolygon(m_polygon, 1)) {
@@ -49,10 +52,11 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
     if (contour.length > start) {
       holes.push(start >>> 1);
     }
+    // eslint-disable-next-line camelcase
     for (const child of m_Childs) {
       walkContour(child);
     }
-  }
+  };
 
   for (const child of result.m_Childs) {
     walkContour(child);

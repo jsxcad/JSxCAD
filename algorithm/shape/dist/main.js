@@ -2,9 +2,8 @@ import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
 import { fromPolygons } from './jsxcad-geometry-solid.js';
 import { translate } from './jsxcad-geometry-points.js';
 import { deduplicate, assertGood, flip, translate as translate$1, rotateZ, scale as scale$2, rotateX } from './jsxcad-geometry-path.js';
-import { makeConvex, translate as translate$2, rotateZ as rotateZ$1, flip as flip$2 } from './jsxcad-geometry-surface.js';
+import { makeConvex, flip as flip$1, translate as translate$2, rotateZ as rotateZ$1 } from './jsxcad-geometry-surface.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
-import { flip as flip$1 } from './jsxcad-geometry-polygons.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
@@ -948,7 +947,7 @@ var ms = function(val, options) {
   var type = typeof val;
   if (type === 'string' && val.length > 0) {
     return parse(val);
-  } else if (type === 'number' && isNaN(val) === false) {
+  } else if (type === 'number' && isFinite(val)) {
     return options.long ? fmtLong(val) : fmtShort(val);
   }
   throw new Error(
@@ -970,7 +969,7 @@ function parse(str) {
   if (str.length > 100) {
     return;
   }
-  var match = /^((?:\d+)?\-?\d?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
     str
   );
   if (!match) {
@@ -6679,7 +6678,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians =
     const roof = translate$2([0, 0, height], rotateZ$1(twistRadians * steps, surface));
 
     // floor faces down.
-    const floor = translate$2([0, 0, depth], flip$2(surface));
+    const floor = translate$2([0, 0, depth], flip$1(surface));
 
     polygons.push(...roof);
     polygons.push(...floor);

@@ -2,7 +2,6 @@ import { canonicalize as canonicalize$1, transform as transform$1 } from './jsxc
 import { fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { cache } from './jsxcad-cache.js';
 export { makeConvex } from './jsxcad-geometry-z0surface-boolean.js';
-import { makeConvex } from './jsxcad-algorithm-clipper.js';
 
 const canonicalize = (surface) => surface.map(canonicalize$1);
 
@@ -54,11 +53,4 @@ const fromPathImpl = (path) => [path];
 
 const fromPath = cache(fromPathImpl);
 
-const retessellate = (surface) => {
-  if (surface.length < 2) {
-    return surface;
-  }
-  return makeConvex(surface);
-};
-
-export { canonicalize, doesNotOverlap, fromPath, measureBoundingBox, retessellate, rotateZ, scale, transform, translate };
+export { canonicalize, doesNotOverlap, fromPath, measureBoundingBox, rotateZ, scale, transform, translate };

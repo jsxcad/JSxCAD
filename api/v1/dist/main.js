@@ -6,7 +6,7 @@ import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross,
 export { jsxcadMathVec3_js as vec };
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { translate as translate$1 } from './jsxcad-geometry-paths.js';
-import { toPlane as toPlane$2, cut as cut$1, transform as transform$2, retessellate, flip as flip$1 } from './jsxcad-geometry-surface.js';
+import { toPlane as toPlane$2, cut as cut$1, transform as transform$2, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { cut, section as section$1, fromSolid, containsPoint, cutOpen } from './jsxcad-algorithm-bsp-surfaces.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -2155,7 +2155,8 @@ const section = (solidShape, connector = Z$1(0)) => {
   const shapes = [];
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
     const section = section$1(solid, planeSurface);
-    const surface = retessellate(section);
+    // CHECK: Do we need to do this?
+    const surface = makeConvex(section);
     surface.plane = plane;
     shapes.push(Shape.fromGeometry({ surface }));
   }

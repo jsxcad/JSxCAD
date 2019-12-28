@@ -3388,13 +3388,13 @@ const toSvg = async ({ padding = 0 }, baseGeometry) => {
 
   for (const { surface, tags } of getSurfaces(geometry)) {
     const color = toColorFromTags(tags);
-    for (const polygon of makeConvex({}, surface)) {
+    for (const polygon of makeConvex(surface)) {
       svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
     }
   }
   for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
     const color = toColorFromTags(tags);
-    for (const polygon of makeConvex$1({}, z0Surface)) {
+    for (const polygon of makeConvex$1(z0Surface)) {
       svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
     }
   }
