@@ -2,12 +2,13 @@ import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
 import { fromPolygons } from './jsxcad-geometry-solid.js';
 import { translate } from './jsxcad-geometry-points.js';
 import { deduplicate, assertGood, flip, translate as translate$1, rotateZ, scale as scale$2, rotateX } from './jsxcad-geometry-path.js';
-import { makeConvex, retessellate, translate as translate$2, rotateZ as rotateZ$1, flip as flip$2 } from './jsxcad-geometry-surface.js';
+import { makeConvex, translate as translate$2, rotateZ as rotateZ$1, flip as flip$2 } from './jsxcad-geometry-surface.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 import { flip as flip$1 } from './jsxcad-geometry-polygons.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
+import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
 function clone(point) { //TODO: use gl-vec2 for this
@@ -6640,13 +6641,14 @@ const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians = 0, cap = true) => {
+  const normalize = createNormalize2();
   const surface = z0Surface;
   const polygons = [];
   const stepHeight = (height - depth) / steps;
 
   // Build the walls.
   for (const polygon of surface) {
-    const wall = flip(polygon.map(([x = 0, y = 0]) => [x, y, 0]));
+    const wall = flip(polygon.map(normalize));
     for (let step = 0; step < steps; step++) {
       const floor = translate$1([0, 0, depth + stepHeight * (step + 0)],
                                   rotateZ(twistRadians * (step + 0), wall));
@@ -6669,7 +6671,9 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians =
   }
 
   if (cap) {
-    const surface = retessellate(makeConvex({}, z0Surface));
+    // FIX: This is already Z0.
+    // FIX: This is bringing the vertices out of alignment?
+    const surface = makeConvex(z0Surface, normalize);
 
     // Roof goes up.
     const roof = translate$2([0, 0, height], rotateZ$1(twistRadians * steps, surface));

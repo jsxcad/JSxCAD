@@ -2,7 +2,7 @@ const X = 0;
 const Y = 1;
 
 // The resolution is 1 / multiplier.
-export const createNormalize2 = (multiplier = 1e5) => {
+const createNormalize2 = (multiplier = 1e5) => {
   const map = new Map();
   const update = (key, value) => {
     if (!map.has(key)) {
@@ -25,7 +25,6 @@ export const createNormalize2 = (multiplier = 1e5) => {
     const nx1 = nx + 1;
     const ny1 = ny + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    // const normalized = coordinate;
     const normalized = [nx1 / multiplier, ny1 / multiplier, 0];
     update(`${nx0}/${ny0}`, normalized);
     update(`${nx0}/${ny1}`, normalized);
@@ -36,3 +35,5 @@ export const createNormalize2 = (multiplier = 1e5) => {
   };
   return normalize2;
 };
+
+export { createNormalize2 };

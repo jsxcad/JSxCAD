@@ -25,7 +25,7 @@
     "@jsxcad/math-poly3": "^0.0.79"
   },
   "devDependencies": {
-    "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-utils": "^0.0.79",
     "ava": "^1.4.1",

@@ -1,1 +1,1 @@
-export { clean, difference, intersection, union } from './jsxcad-algorithm-clipper.js';
+export { clean, difference, intersection, makeConvex, union } from './jsxcad-algorithm-clipper.js';

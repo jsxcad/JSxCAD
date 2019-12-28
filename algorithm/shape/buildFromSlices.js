@@ -1,6 +1,6 @@
 import { assertGood, deduplicate } from '@jsxcad/geometry-path';
 
-import { flip as flipPolygons } from '@jsxcad/geometry-polygons';
+import { flip as flipSurface } from '@jsxcad/geometry-surface';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
@@ -48,9 +48,9 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
   if (cap) {
     const deduplicatedPath = deduplicate(lastPath);
     if (deduplicatedPath.length > 0) {
-      polygons.push(...flipPolygons(makeConvex({}, [deduplicatedPath])));
+      polygons.push(...flipSurface(makeConvex({}, [deduplicatedPath])));
     }
   }
 
-  return { solid: toSolidFromPolygons({}, flipPolygons(polygons)) };
+  return { solid: toSolidFromPolygons({}, flipSurface(polygons)) };
 };

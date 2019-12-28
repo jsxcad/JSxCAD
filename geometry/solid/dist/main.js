@@ -219,11 +219,14 @@ const fromPolygons = (options = {}, polygons) => {
   return alignedSolid;
 };
 
-const makeSurfacesConvex = (options = {}, rawSolid) => {
+const makeSurfacesConvex = (rawSolid) => {
+  if (rawSolid.length === undefined) {
+    throw Error('die');
+  }
   if (rawSolid.convexSurfaces === undefined) {
     const solid = alignVertices(rawSolid);
     assertGood(solid);
-    const convex = solid.map(surface => makeConvex(options, surface));
+    const convex = solid.map(surface => makeConvex(surface));
     rawSolid.convexSurfaces = alignVertices(convex);
   }
   return rawSolid.convexSurfaces;

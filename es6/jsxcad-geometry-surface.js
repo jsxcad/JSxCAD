@@ -4,7 +4,7 @@ import { subtract, scale as scale$1, dot, add, distance } from './jsxcad-math-ve
 import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
-import { retessellate as retessellate$1, makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
+import { makeConvex as makeConvex$1, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
 import { union } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
@@ -277,9 +277,32 @@ const map = (original, transform) => {
 
 const flip = (surface) => map(surface, flip$1);
 
-const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
+const makeConvex = (surface) => {
+  if (surface.length === undefined) {
+    throw Error('die');
+  }
+  if (surface.length === 0) {
+    // An empty surface is not non-convex.
+    return surface;
+  }
+  const plane = toPlane(surface);
+  const [to, from] = toXYPlaneTransforms(plane);
+  const convexZ0Surface = makeConvex$1(transform(to, surface));
+  const convexSurface = transform(from, convexZ0Surface);
+  // FIX: Is this plane enforecement necessary?
+  // for (const path of convexSurface) {
+  //   path.plane = plane;
+  // }
+  return convexSurface;
+};
 
-const transform$1 = cacheTransform(transformImpl);
+/*
+import { makeConvex, retessellate } from './jsxcad-geometry-z0surface.js';
+
+import { toPlane } from './toPlane';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { transform } from './transform';
+import { union } from './jsxcad-geometry-z0surface-boolean.js';
 
 // retessellate can reduce overlapping polygons.
 // Clean them up here.
@@ -290,7 +313,7 @@ const clean = (surface) => {
   return union(...surface.map(polygon => [polygon]));
 };
 
-const fromPolygons = ({ plane }, polygons) => {
+export const fromPolygons = ({ plane }, polygons) => {
   if (polygons.length === 0) {
     return [];
   }
@@ -298,47 +321,33 @@ const fromPolygons = ({ plane }, polygons) => {
     plane = toPlane(polygons);
   }
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Polygons = transform$1(toZ0, polygons);
+  const z0Polygons = transform(toZ0, polygons);
 
   switch ('cleaned') {
     case 'uncleaned': {
       // const z0Surface = clean(retessellate(z0Polygons));
-      const z0Surface = retessellate$1(z0Polygons);
-      const surface = transform$1(fromZ0, z0Surface);
+      const z0Surface = retessellate(z0Polygons);
+      const surface = transform(fromZ0, z0Surface);
       surface.plane = plane;
       return surface;
     }
     case 'cleaned': {
-      let retessellation = retessellate$1(z0Polygons);
+      let retessellation = retessellate(z0Polygons);
       if (retessellation.length >= 2) {
         // Sometimes overlapping into to retessellation results in overlapping output.
         // Clean these up and retessellate again.
         // FIX: Eliminate overlapping output in retessellate.
-        retessellation = retessellate$1(makeConvex$1({}, clean(retessellation)));
+        retessellation = retessellate(makeConvex({}, clean(retessellation)));
       }
-      const surface = transform$1(fromZ0, retessellation);
+      const surface = transform(fromZ0, retessellation);
       surface.plane = plane;
       return surface;
     }
   }
 };
+*/
 
-const makeConvex = (options = {}, surface) => {
-  if (surface.length === 0) {
-    // An empty surface is not non-convex.
-    return surface;
-  }
-  assertGood(surface);
-  const plane = toPlane(surface);
-  const [to, from] = toXYPlaneTransforms(plane);
-  const retessellatedZ0Surface = makeConvex$1({}, transform(to, surface));
-  const retessellatedSurface = transform(from, retessellatedZ0Surface);
-  // FIX: Is this plane enforecement necessary.
-  for (const retessellatedPolygon of retessellatedSurface) {
-    retessellatedPolygon.plane = plane;
-  }
-  return retessellatedSurface;
-};
+const fromPolygons = ({ plane }, polygons) => makeConvex(polygons);
 
 const makeSimple = (options = {}, surface) => {
   const [to, from] = toXYPlaneTransforms(toPlane(surface));
@@ -384,6 +393,10 @@ const measureBoundingSphere = (surface) => {
   }
   return surface.measureBoundingSphere;
 };
+
+const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
+
+const transform$1 = cacheTransform(transformImpl);
 
 const retessellate = (surface) => {
   if (surface.length < 2) {

@@ -1,4 +1,4 @@
-import { clean as cleanZ0Surface } from '@jsxcad/geometry-z0surface';
+import { clean as cleanZ0Surface } from '@jsxcad/geometry-z0surface-boolean';
 
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';

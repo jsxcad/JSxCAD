@@ -1,5 +1,4 @@
-// import { Polygon, point } from '@flatten-js/core';
-import { canonicalize, transform } from '@jsxcad/geometry-polygons';
+import { canonicalize, transform } from '@jsxcad/geometry-surface';
 
 import { degToRad } from '@jsxcad/math-utils';
 import { fromZRotation } from '@jsxcad/math-mat4';
