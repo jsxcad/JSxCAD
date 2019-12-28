@@ -1,19 +1,21 @@
 import { flip as flipPath, rotateZ as rotateZPath, translate as translatePath } from '@jsxcad/geometry-path';
-import { flip as flipSurface, makeConvex, retessellate, rotateZ as rotateZSurface, translate as translateSurface } from '@jsxcad/geometry-surface';
+import { flip as flipSurface, makeConvex, rotateZ as rotateZSurface, translate as translateSurface } from '@jsxcad/geometry-surface';
 
 import { cache } from '@jsxcad/cache';
+import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians = 0, cap = true) => {
+  const normalize = createNormalize2();
   const surface = z0Surface;
   const polygons = [];
   const stepHeight = (height - depth) / steps;
 
   // Build the walls.
   for (const polygon of surface) {
-    const wall = flipPath(polygon.map(([x = 0, y = 0]) => [x, y, 0]));
+    const wall = flipPath(polygon.map(normalize));
     for (let step = 0; step < steps; step++) {
       const floor = translatePath([0, 0, depth + stepHeight * (step + 0)],
                                   rotateZPath(twistRadians * (step + 0), wall));
@@ -36,7 +38,9 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians =
   }
 
   if (cap) {
-    const surface = retessellate(makeConvex({}, z0Surface));
+    // FIX: This is already Z0.
+    // FIX: This is bringing the vertices out of alignment?
+    const surface = makeConvex(z0Surface, normalize);
 
     // Roof goes up.
     const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));

@@ -1,4 +1,4 @@
-import { canonicalize, transform } from '@jsxcad/geometry-polygons';
+import { canonicalize, transform } from '@jsxcad/geometry-surface';
 
 import { degToRad } from '@jsxcad/math-utils';
 import { difference } from './difference';

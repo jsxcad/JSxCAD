@@ -1,3 +1,4 @@
+/*
 import { makeConvex, retessellate } from '@jsxcad/geometry-z0surface';
 
 import { toPlane } from './toPlane';
@@ -46,3 +47,8 @@ export const fromPolygons = ({ plane }, polygons) => {
     }
   }
 };
+*/
+
+import { makeConvex } from './makeConvex';
+
+export const fromPolygons = ({ plane }, polygons) => makeConvex(polygons);

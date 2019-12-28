@@ -14,6 +14,13 @@ export const toSurface = (clipper, op, normalize) => {
   // const result = new PolyTree();
   const result = [];
   clipper.Execute(op, result, fillType, fillType);
-  const cleaned = Clipper.CleanPolygons(result, 10);
-  return cleaned.map(path => path.map(({ X, Y }) => { return normalize([toFloat(X), toFloat(Y)]); }));
+  const cleaned = Clipper.CleanPolygons(result, 1);
+  // CHECK: Do we need to renormalize here?
+  const surface = [];
+  for (const path of cleaned) {
+    if (path.length > 0) {
+      surface.push(path.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)])));
+    }
+  }
+  return surface;
 };

@@ -58,7 +58,7 @@ const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096,
   for (const { tags, surface } of getSurfaces(keptGeometry)) {
     lines.push(toFillColor(toRgb(tags)));
     lines.push(toStrokeColor(toRgb(tags)));
-    for (const path of makeConvex({}, surface)) {
+    for (const path of makeConvex(surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
@@ -74,7 +74,7 @@ const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096,
     lines.push(toFillColor(toRgb(tags)));
     lines.push(toStrokeColor(toRgb(tags)));
     // FIX: Avoid making the surface convex.
-    for (const path of makeConvex$1({}, z0Surface)) {
+    for (const path of makeConvex$1(z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.

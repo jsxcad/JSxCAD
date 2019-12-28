@@ -14,6 +14,7 @@ import { measureBoundingSphere } from './measureBoundingSphere';
 import { retessellate } from './retessellate';
 import { toGeneric } from './toGeneric';
 import { toPlane } from './toPlane';
+import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
 
 export {
@@ -34,6 +35,7 @@ export {
   rotateZ,
   toGeneric,
   toPlane,
+  toPoints,
   toPolygons,
   transform,
   translate,

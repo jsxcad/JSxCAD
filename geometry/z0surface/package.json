@@ -22,23 +22,25 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/algorithm-clipper": "^0.0.79",
     "@jsxcad/cache": "^0.0.79",
+    "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
     "@jsxcad/math-line2": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79",
-    "rollup": "^1.11.0",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3"
+    "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
     "@jsxcad/math-mat4": "^0.0.79",
     "ava": "^1.4.1",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "esm": "^3.2.10"
+    "esm": "^3.2.10",
+    "rollup": "^1.11.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"

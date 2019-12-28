@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-polygons",
+  "name": "@jsxcad/algorithm-quantize",
   "version": "0.0.79",
-  "description": "Operations on polygon arrays for JSxCAD",
+  "description": "Value quantization for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -21,24 +21,16 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {
-    "@jsxcad/data-shape": "^0.0.79",
-    "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79",
-    "tess2": "^1.0.0",
+  "devDependencies": {
+    "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"
-  },
-  "devDependencies": {
-    "ava": "^1.4.1",
-    "depcheck": "^0.9.1",
-    "eslint": "^5.15.0",
-    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"
