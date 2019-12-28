@@ -20,9 +20,9 @@ export const eachPoint = (options, operation, geometry) => {
     } else if (geometry.solid) {
       eachPointOfSolid(options, operation, geometry.solid);
     } else if (geometry.surface) {
-      eachPointOfSurface(options, operation, geometry.surface);
+      eachPointOfSurface(operation, geometry.surface);
     } else if (geometry.z0Surface) {
-      eachPointOfSurface(options, operation, geometry.z0Surface);
+      eachPointOfSurface(operation, geometry.z0Surface);
     }
   };
 
