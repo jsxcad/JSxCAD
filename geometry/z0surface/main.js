@@ -4,7 +4,7 @@ import { doesNotOverlap } from './doesNotOverlap';
 import { fromPath } from './fromPath';
 import { makeConvex } from '@jsxcad/geometry-z0surface-boolean';
 import { measureBoundingBox } from './measureBoundingBox';
-import { retessellate } from './retessellate2';
+// import { retessellate } from './retessellate2';
 
 export {
   canonicalize,
@@ -12,7 +12,7 @@ export {
   fromPath,
   makeConvex,
   measureBoundingBox,
-  retessellate,
+//  retessellate,
   rotateZ,
   scale,
   transform,
