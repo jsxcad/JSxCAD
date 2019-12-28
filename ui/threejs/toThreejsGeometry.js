@@ -36,7 +36,7 @@ const solidToThreejsSolid = (solid) => {
 const surfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
-  for (const triangle of toTriangles({}, makeConvex({}, surface))) {
+  for (const triangle of toTriangles({}, makeConvex(surface))) {
     for (const point of triangle) {
       const [x, y, z, w] = toPlane(triangle);
       normals.push(x, y, z);

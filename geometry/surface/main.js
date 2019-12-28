@@ -11,7 +11,6 @@ import { makeSimple } from './makeSimple';
 import { measureArea } from './measureArea';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
-// import { retessellate } from './retessellate';
 import { toGeneric } from './toGeneric';
 import { toPlane } from './toPlane';
 import { toPoints } from './toPoints';
@@ -31,7 +30,6 @@ export {
   measureArea,
   measureBoundingBox,
   measureBoundingSphere,
-  // retessellate,
   rotateZ,
   toGeneric,
   toPlane,

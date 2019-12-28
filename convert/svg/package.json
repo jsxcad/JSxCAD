@@ -44,6 +44,7 @@
     "@jsxcad/convert-pdf": "^0.0.79",
     "ava": "^1.4.1",
     "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",

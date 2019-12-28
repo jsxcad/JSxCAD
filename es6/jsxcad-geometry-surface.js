@@ -1,17 +1,17 @@
-import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
+import { canonicalize as canonicalize$1, transform as transform$1, toPlane as toPlane$1, flip as flip$1, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
 import { fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { subtract, scale as scale$1, dot, add, distance } from './jsxcad-math-vec3.js';
 import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { cacheCut, cacheTransform } from './jsxcad-cache.js';
+import { cacheCut } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
-import { makeConvex as makeConvex$1, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
+import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
 import { union } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
 const canonicalize = (surface) => surface.map(canonicalize$1);
 
 // Transforms
-const transform = (matrix, surface) => surface.map(polygon => transform$2(matrix, polygon));
+const transform = (matrix, surface) => surface.map(polygon => transform$1(matrix, polygon));
 const translate = (vector, surface) => transform(fromTranslation(vector), surface);
 const rotateZ = (angle, surface) => transform(fromZRotation(angle), surface);
 const scale = (vector, surface) => transform(fromScaling(vector), surface);
@@ -250,7 +250,7 @@ const assertGood = (surface) => {
   }
 };
 
-const eachPoint = (options = {}, thunk, surface) => {
+const eachPoint = (thunk, surface) => {
   for (const polygon of surface) {
     for (const [x = 0, y = 0, z = 0] of polygon) {
       thunk([x, y, z]);
@@ -295,57 +295,6 @@ const makeConvex = (surface) => {
   // }
   return convexSurface;
 };
-
-/*
-import { makeConvex, retessellate } from './jsxcad-geometry-z0surface.js';
-
-import { toPlane } from './toPlane';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { transform } from './transform';
-import { union } from './jsxcad-geometry-z0surface-boolean.js';
-
-// retessellate can reduce overlapping polygons.
-// Clean them up here.
-const clean = (surface) => {
-  if (surface.length < 2) {
-    return surface;
-  }
-  return union(...surface.map(polygon => [polygon]));
-};
-
-export const fromPolygons = ({ plane }, polygons) => {
-  if (polygons.length === 0) {
-    return [];
-  }
-  if (plane === undefined) {
-    plane = toPlane(polygons);
-  }
-  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Polygons = transform(toZ0, polygons);
-
-  switch ('cleaned') {
-    case 'uncleaned': {
-      // const z0Surface = clean(retessellate(z0Polygons));
-      const z0Surface = retessellate(z0Polygons);
-      const surface = transform(fromZ0, z0Surface);
-      surface.plane = plane;
-      return surface;
-    }
-    case 'cleaned': {
-      let retessellation = retessellate(z0Polygons);
-      if (retessellation.length >= 2) {
-        // Sometimes overlapping into to retessellation results in overlapping output.
-        // Clean these up and retessellate again.
-        // FIX: Eliminate overlapping output in retessellate.
-        retessellation = retessellate(makeConvex({}, clean(retessellation)));
-      }
-      const surface = transform(fromZ0, retessellation);
-      surface.plane = plane;
-      return surface;
-    }
-  }
-};
-*/
 
 const fromPolygons = ({ plane }, polygons) => makeConvex(polygons);
 
@@ -394,22 +343,14 @@ const measureBoundingSphere = (surface) => {
   return surface.measureBoundingSphere;
 };
 
-const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
-
-const transform$1 = cacheTransform(transformImpl);
-
-const retessellate = (surface) => {
-  if (surface.length < 2) {
-    return surface;
-  }
-  const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
-  const z0Surface = transform$1(toZ0, surface);
-  const retessellated = retessellate$1(z0Surface);
-  return transform$1(fromZ0, retessellated);
-};
-
 const toGeneric = (surface) => surface.map(path => path.map(point => [...point]));
+
+const toPoints = (surface) => {
+  const points = [];
+  eachPoint(point => points.push(point), surface);
+  return points;
+};
 
 const toPolygons = (options = {}, surface) => surface;
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, retessellate, rotateZ, scale, toGeneric, toPlane, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

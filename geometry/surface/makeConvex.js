@@ -1,5 +1,3 @@
-import { assertCoplanar } from './assertCoplanar';
-import { assertGood } from './assertGood';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';

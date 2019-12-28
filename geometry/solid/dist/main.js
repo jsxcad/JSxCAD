@@ -113,7 +113,7 @@ const doesNotOverlap = (a, b) => {
 
 const eachPoint = (options = {}, thunk, solid) => {
   for (const surface of solid) {
-    eachPoint$1(options, thunk, surface);
+    eachPoint$1(thunk, surface);
   }
 };
 
