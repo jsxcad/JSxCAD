@@ -45,8 +45,8 @@ export class Shape {
     this.context = context;
   }
 
-  eachPoint (options = {}, operation) {
-    eachPoint(options, operation, this.toKeptGeometry());
+  eachPoint (operation) {
+    eachPoint(operation, this.toKeptGeometry());
   }
 
   flip () {
@@ -81,8 +81,8 @@ export class Shape {
     return toTransformedTaggedGeometry(this.toGeometry());
   }
 
-  toPoints (options = {}) {
-    return toPoints(options, this.toKeptGeometry()).points;
+  toPoints () {
+    return toPoints(this.toKeptGeometry()).points;
   }
 
   transform (matrix) {

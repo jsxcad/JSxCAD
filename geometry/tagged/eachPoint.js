@@ -3,7 +3,7 @@ import { eachPoint as eachPointOfPoints } from '@jsxcad/geometry-points';
 import { eachPoint as eachPointOfSolid } from '@jsxcad/geometry-solid';
 import { eachPoint as eachPointOfSurface } from '@jsxcad/geometry-surface';
 
-export const eachPoint = (options, operation, geometry) => {
+export const eachPoint = (operation, geometry) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
@@ -14,11 +14,11 @@ export const eachPoint = (options, operation, geometry) => {
     } else if (geometry.item) {
       walk(geometry.item);
     } else if (geometry.points) {
-      eachPointOfPoints(options, operation, geometry.points);
+      eachPointOfPoints(operation, geometry.points);
     } else if (geometry.paths) {
-      eachPointOfPaths(options, operation, geometry.paths);
+      eachPointOfPaths(operation, geometry.paths);
     } else if (geometry.solid) {
-      eachPointOfSolid(options, operation, geometry.solid);
+      eachPointOfSolid(operation, geometry.solid);
     } else if (geometry.surface) {
       eachPointOfSurface(operation, geometry.surface);
     } else if (geometry.z0Surface) {

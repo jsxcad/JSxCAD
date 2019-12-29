@@ -36,7 +36,7 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
       if (cap) {
         const deduplicatedPath = deduplicate(path);
         if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex({}, [deduplicatedPath]));
+          polygons.push(...makeConvex([deduplicatedPath]));
         }
       }
     }
@@ -48,7 +48,7 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
   if (cap) {
     const deduplicatedPath = deduplicate(lastPath);
     if (deduplicatedPath.length > 0) {
-      polygons.push(...flipSurface(makeConvex({}, [deduplicatedPath])));
+      polygons.push(...flipSurface(makeConvex([deduplicatedPath])));
     }
   }
 

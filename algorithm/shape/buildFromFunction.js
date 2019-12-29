@@ -47,7 +47,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       if (cap) {
         const deduplicatedPath = deduplicate(path);
         if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex({}, [deduplicatedPath]));
+          polygons.push(...makeConvex([deduplicatedPath]));
         }
       }
     }
@@ -59,7 +59,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
   if (cap) {
     const deduplicatedPath = deduplicate(flipPath(lastPath));
     if (deduplicatedPath.length > 0) {
-      polygons.push(...makeConvex({}, [deduplicatedPath]));
+      polygons.push(...makeConvex([deduplicatedPath]));
     }
   }
   const solid = { solid: toSolidFromPolygons({}, polygons) };

@@ -6,11 +6,10 @@ import { eachPoint } from './eachPoint';
 export const measureBoundingBox = (points) => {
   let max = points[0];
   let min = points[0];
-  eachPoint({},
-            point => {
-              max = maxOfVec3(max, point);
-              min = minOfVec3(min, point);
-            },
+  eachPoint(point => {
+    max = maxOfVec3(max, point);
+    min = minOfVec3(min, point);
+  },
             points);
   return [min, max];
 };
