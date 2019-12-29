@@ -5,6 +5,10 @@ export const measureBoundingBox = (surface) => {
     const min = [Infinity, Infinity, 0];
     for (const polygon of surface) {
       for (const point of polygon) {
+        if (point === null) {
+          // Support open paths.
+          continue;
+        }
         if (point[0] < min[0]) min[0] = point[0];
         if (point[1] < min[1]) min[1] = point[1];
         if (point[0] > max[0]) max[0] = point[0];

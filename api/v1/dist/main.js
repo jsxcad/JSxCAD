@@ -2,15 +2,16 @@ import { close, concatenate, open, transform as transform$1, toSegments, getEdge
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, union as union$1, rewriteTags, assemble as assemble$1, getPlans, getConnections, getSolids, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, allTags, outline as outline$1, difference as difference$1, drop as drop$1, getZ0Surfaces, getSurfaces, getPaths, getItems, keep as keep$1, nonNegative, splice, intersection as intersection$1, specify as specify$1 } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, alignVertices, transform as transform$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-solid.js';
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
-import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross, distance, transform as transform$4 } from './jsxcad-math-vec3.js';
+import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross, distance, transform as transform$5 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { translate as translate$1 } from './jsxcad-geometry-paths.js';
+import { translate as translate$1, transform as transform$4 } from './jsxcad-geometry-paths.js';
 import { toPlane as toPlane$2, cut as cut$1, transform as transform$2, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { cut, section as section$1, fromSolid, containsPoint, cutOpen } from './jsxcad-algorithm-bsp-surfaces.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { toPlane as toPlane$3 } from './jsxcad-math-poly3.js';
+import { intersectionOfPathsBySurfaces } from './jsxcad-algorithm-clipper.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling, identity, multiply } from './jsxcad-math-mat4.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
 import { log as log$1, writeFile, readFile, getSources, ask as ask$1, addSource } from './jsxcad-sys.js';
@@ -1540,6 +1541,33 @@ const faceEdges = (shape) =>
 
 const faceEdgesMethod = function () { return faceEdges(this); };
 Shape.prototype.faceEdges = faceEdgesMethod;
+
+const fill = (shape, pathsShape) => {
+  const fills = [];
+  for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+    const anySurface = surface || z0Surface;
+    const plane = toPlane$2(anySurface);
+    const [to, from] = toXYPlaneTransforms(plane);
+    const flatSurface = transform$2(to, anySurface);
+    for (const { paths } of getPaths(pathsShape.toKeptGeometry())) {
+      const flatPaths = transform$4(to, paths);
+      const flatFill = intersectionOfPathsBySurfaces(flatPaths, flatSurface);
+      const fill = transform$4(from, flatFill);
+      fills.push(...fill);
+    }
+  }
+  return Shape.fromGeometry({ paths: fills });
+};
+
+const fillMethod = function (...args) { return fill(this, ...args); };
+Shape.prototype.fill = fillMethod;
+
+const withFillMethod = function (...args) { return assemble(this, fill(this, ...args)); };
+Shape.prototype.withFill = withFillMethod;
+
+fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
+fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
+withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
 
 const Y$1 = 1;
 
@@ -3281,7 +3309,7 @@ class Cursor {
   translate (...params) {
     const [x, y, z] = normalizeVector(params);
     const path = this.path.slice();
-    path.push(add(this.toPoint(), transform$4(this.matrix, [x, y, z])));
+    path.push(add(this.toPoint(), transform$5(this.matrix, [x, y, z])));
     return new Cursor({ matrix: this.matrix, path });
   }
 
@@ -4153,7 +4181,7 @@ const Spiral = (toRadiusFromAngle = (angle) => angle, { from = 0, to = 360, by =
   const path = [null];
   for (const angle of numbers(angle => angle, { from, to, by })) {
     const radius = toRadiusFromAngle(angle);
-    path.push(transform$4(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
+    path.push(transform$5(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
   }
   return Shape.fromPath(path);
 };

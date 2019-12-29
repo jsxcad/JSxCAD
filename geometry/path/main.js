@@ -19,6 +19,8 @@ import { toSegments } from './toSegments';
 import { toZ0Polygon } from './toZ0Polygon';
 import { transform } from './transform';
 
+const isOpen = (path) => !isClosed(path);
+
 export {
   assertGood,
   assertUnique,
@@ -31,6 +33,7 @@ export {
   isClockwise,
   isClosed,
   isCounterClockwise,
+  isOpen,
   measureArea,
   open,
   toGeneric,

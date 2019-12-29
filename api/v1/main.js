@@ -24,6 +24,7 @@ import './edges';
 import './expand';
 import './extrude';
 import './faces';
+import './fill';
 import './front';
 import './getPathsets';
 import './interior';
