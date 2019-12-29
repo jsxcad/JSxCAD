@@ -17,7 +17,7 @@ const canonicalize = (paths) => {
 
 const difference = (pathset, ...pathsets) => pathset;
 
-const eachPoint = (options = {}, thunk, paths) => {
+const eachPoint = (thunk, paths) => {
   for (const path of paths) {
     for (const point of path) {
       if (point !== null) {
@@ -37,11 +37,10 @@ const last = (paths) => paths.length >= 1 ? paths[paths.length - 1] : [null];
 const measureBoundingBox = (paths) => {
   let minPoint;
   let maxPoint;
-  eachPoint({},
-            point => {
-              minPoint = (minPoint === undefined) ? fromPoint(point) : min(minPoint, fromPoint(point));
-              maxPoint = (maxPoint === undefined) ? fromPoint(point) : max(maxPoint, fromPoint(point));
-            },
+  eachPoint(point => {
+    minPoint = (minPoint === undefined) ? fromPoint(point) : min(minPoint, fromPoint(point));
+    maxPoint = (maxPoint === undefined) ? fromPoint(point) : max(maxPoint, fromPoint(point));
+  },
             paths);
   return [minPoint, maxPoint];
 };
@@ -66,9 +65,9 @@ const map = (original, transform) => {
 
 const toGeneric = (paths) => map(paths, toGeneric$1);
 
-const toPoints = (options = {}, paths) => {
+const toPoints = (paths) => {
   const points = [];
-  eachPoint(options, point => points.push(point), paths);
+  eachPoint(point => points.push(point), paths);
   return points;
 };
 

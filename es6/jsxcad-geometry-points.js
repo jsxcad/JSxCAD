@@ -6,7 +6,7 @@ const translate = ([x = 0, y = 0, z = 0], points) => transform(fromTranslation([
 
 const canonicalize = (points) => points.map(canonicalize$1);
 
-const eachPoint = (options = {}, thunk, points) => {
+const eachPoint = (thunk, points) => {
   for (const point of points) {
     thunk(point);
   }
@@ -26,11 +26,10 @@ const fromPolygons = (options = {}, polygons) => {
 const measureBoundingBox = (points) => {
   let max$1 = points[0];
   let min$1 = points[0];
-  eachPoint({},
-            point => {
-              max$1 = max(max$1, point);
-              min$1 = min(min$1, point);
-            },
+  eachPoint(point => {
+    max$1 = max(max$1, point);
+    min$1 = min(min$1, point);
+  },
             points);
   return [min$1, max$1];
 };
