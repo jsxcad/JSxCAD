@@ -42,9 +42,14 @@ const intersectionImpl = (baseGeometry, ...geometries) => {
   for (const { paths, tags } of getPaths(baseGeometry)) {
     result.disjointAssembly.push({ paths: pathsIntersection(paths, ...pathsets), tags });
   }
-  // Plans
+  // Plans are preserved across intersection.
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  for (const geometry of geometries) {
+    for (const plan of getPlans(geometry)) {
+      result.disjointAssembly.push(plan);
+    }
   }
   // Connections
   for (const connection of getConnections(baseGeometry)) {
