@@ -83,10 +83,13 @@ Plan.Length = Length;
 export const Sketch = (shape) => {
   return Plan({
     plan: { sketch: 'shape' },
-    visualization: shape.color('red')
+    visualization: shape.outline().color('red')
   });
 };
 Plan.Sketch = Sketch;
+
+Shape.prototype.sketch = function (...args) { return Sketch(this); };
+Shape.prototype.withSketch = function (...args) { return assemble(this, Sketch(this)); };
 
 // Labels
 

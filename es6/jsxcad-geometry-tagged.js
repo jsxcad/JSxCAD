@@ -433,9 +433,14 @@ const differenceImpl = (baseGeometry, ...geometries) => {
   for (const { paths, tags } of getPaths(baseGeometry)) {
     result.disjointAssembly.push({ paths: difference$4(paths, ...pathsets), tags });
   }
-  // Plans
+  // Plans are preserved over difference.
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  for (const geometry of geometries) {
+    for (const plan of getPlans(geometry)) {
+      result.disjointAssembly.push(plan);
+    }
   }
   // Connections
   for (const connection of getConnections(baseGeometry)) {
@@ -651,9 +656,14 @@ const intersectionImpl = (baseGeometry, ...geometries) => {
   for (const { paths, tags } of getPaths(baseGeometry)) {
     result.disjointAssembly.push({ paths: intersection$4(paths, ...pathsets), tags });
   }
-  // Plans
+  // Plans are preserved across intersection.
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  for (const geometry of geometries) {
+    for (const plan of getPlans(geometry)) {
+      result.disjointAssembly.push(plan);
+    }
   }
   // Connections
   for (const connection of getConnections(baseGeometry)) {
@@ -961,9 +971,14 @@ const unionImpl = (baseGeometry, ...geometries) => {
   for (const { paths, tags } of getPaths(baseGeometry)) {
     result.disjointAssembly.push({ paths: union$4(paths, ...pathsets), tags });
   }
-  // Plans
+  // Plans are preserved across union.
   for (const plan of getPlans(baseGeometry)) {
     result.disjointAssembly.push(plan);
+  }
+  for (const geometry of geometries) {
+    for (const plan of getPlans(geometry)) {
+      result.disjointAssembly.push(plan);
+    }
   }
   // Connections
   for (const connection of getConnections(baseGeometry)) {
