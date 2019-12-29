@@ -146,10 +146,12 @@ const toZ0Polygon = (path) => {
 const transform = (matrix, path) =>
   path.map((point, index) => (point === null) ? null : transform$1(matrix, point));
 
+const isOpen = (path) => !isClosed(path);
+
 const translate = (vector, path) => transform(fromTranslation(vector), path);
 const rotateX = (radians, path) => transform(fromXRotation(radians), path);
 const rotateY = (radians, path) => transform(fromYRotation(radians), path);
 const rotateZ = (radians, path) => transform(fromZRotation(radians), path);
 const scale = (vector, path) => transform(fromScaling(vector), path);
 
-export { assertGood, assertUnique, canonicalize, close, concatenate, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, measureArea, open, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };
+export { assertGood, assertUnique, canonicalize, close, concatenate, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, isOpen, measureArea, open, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };

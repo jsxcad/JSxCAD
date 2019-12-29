@@ -1,5 +1,5 @@
+import { isOpen, isClosed, isClockwise } from './jsxcad-geometry-path.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
-import { isClockwise } from './jsxcad-geometry-path.js';
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -7207,7 +7207,7 @@ var clipper = createCommonjsModule(function (module) {
 		}
 		catch (err)
 		{
-			alert(err.message);
+			console.log(err.message);
 		}
 	};
 
@@ -7628,7 +7628,7 @@ var clipper = createCommonjsModule(function (module) {
 })();
 });
 
-const { Clipper, IntPoint, PolyFillType } = clipper;
+const { Clipper, IntPoint, PolyFillType, PolyTree } = clipper;
 
 // CHECK: Should this be sqrt(2)?
 const CLEAN_DISTANCE = 1;
@@ -7641,8 +7641,37 @@ const fillType = PolyFillType.pftNonZero;
 const fromSurface = (surface, normalize) =>
   surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
 
+const fromOpenPaths = (paths, normalize) => {
+  const openPaths = [];
+  for (const path of paths) {
+    if (isOpen(path)) {
+      const openPath = [];
+      for (let i = 1; i < path.length; i++) {
+        const [X, Y] = normalize(path[i]);
+        openPath.push(new IntPoint(toInt(X), toInt(Y)));
+      }
+      openPaths.push(openPath);
+    }
+  }
+  return openPaths;
+};
+
+const fromClosedPaths = (paths, normalize) => {
+  const closedPaths = [];
+  for (const path of paths) {
+    if (isClosed(path)) {
+      const closedPath = [];
+      for (let i = 0; i < path.length; i++) {
+        const [X, Y] = normalize(path[i]);
+        closedPath.push(new IntPoint(toInt(X), toInt(Y)));
+      }
+      closedPaths.push(closedPath);
+    }
+  }
+  return closedPaths;
+};
+
 const toSurface = (clipper, op, normalize) => {
-  // const result = new PolyTree();
   const result = [];
   clipper.Execute(op, result, fillType, fillType);
   const cleaned = Clipper.CleanPolygons(result, CLEAN_DISTANCE);
@@ -7656,6 +7685,23 @@ const toSurface = (clipper, op, normalize) => {
   return surface;
 };
 
+const toPaths = (clipper, op, normalize) => {
+  const result = new PolyTree();
+  clipper.Execute(op, result, fillType, fillType);
+  // CHECK: Do we need to renormalize here?
+  const paths = [];
+  for (const entry of result.m_AllPolys) {
+    if (entry.m_polygon.length > 0) {
+      if (entry.IsOpen) {
+        paths.push([null, ...entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)]))]);
+      } else {
+        paths.push(entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)])));
+      }
+    }
+  }
+  return paths;
+};
+
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 const measureBoundingBox = (surface) => {
   if (surface.measureBoundingBox === undefined) {
@@ -7663,6 +7709,10 @@ const measureBoundingBox = (surface) => {
     const min = [Infinity, Infinity, 0];
     for (const polygon of surface) {
       for (const point of polygon) {
+        if (point === null) {
+          // Support open paths.
+          continue;
+        }
         if (point[0] < min[0]) min[0] = point[0];
         if (point[1] < min[1]) min[1] = point[1];
         if (point[0] > max[0]) max[0] = point[0];
@@ -7738,6 +7788,42 @@ const intersection = (a, ...z0Surfaces) => {
       clipper.AddPaths(fromSurface(a, normalize), PolyType$1.ptSubject, true);
       clipper.AddPaths(fromSurface(b, normalize), PolyType$1.ptClip, true);
       a = toSurface(clipper, ClipType$1.ctIntersection, normalize);
+    }
+  }
+  return a;
+};
+
+const { Clipper: Clipper$3, ClipType: ClipType$2, PolyType: PolyType$2 } = clipper;
+
+/**
+ * Produces a surface that is the intersection of all provided surfaces.
+ * The union of no surfaces is the empty surface.
+ * The union of one surface is that surface.
+ * @param {Array<Z0Surface>} surfaces - the z0 surfaces to union.
+ * @returns {Z0Surface} the resulting z0 surface.
+ */
+const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
+  if (a === undefined || a.length === 0) {
+    return [];
+  }
+  const normalize = createNormalize2();
+  while (z0Surfaces.length >= 1) {
+    const b = z0Surfaces.shift();
+    if (doesNotOverlapOrAbut(a, b)) {
+      return [];
+    } else {
+      const clipper = new Clipper$3();
+      const openPaths = fromOpenPaths(a, normalize);
+      if (openPaths.length > 0) {
+        clipper.AddPaths(openPaths, PolyType$2.ptSubject, false);
+      }
+      const closedPaths = fromClosedPaths(a, normalize);
+      if (closedPaths.length > 0) {
+        clipper.AddPaths(closedPaths, PolyType$2.ptSubject, true);
+      }
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$2.ptClip, true);
+      // How do we tell which are open or closed?
+      a = toPaths(clipper, ClipType$2.ctIntersection, normalize);
     }
   }
   return a;
@@ -8419,15 +8505,15 @@ earcut.flatten = function (data) {
 };
 earcut_1.default = default_1;
 
-const { Clipper: Clipper$3, ClipType: ClipType$2, PolyTree, PolyType: PolyType$2 } = clipper;
+const { Clipper: Clipper$4, ClipType: ClipType$3, PolyTree: PolyTree$1, PolyType: PolyType$3 } = clipper;
 
 const magnitude = 1e5;
 
 const makeConvex = (surface, normalize = createNormalize2()) => {
-  const clipper = new Clipper$3();
-  clipper.AddPaths(fromSurface(surface, normalize), PolyType$2.ptSubject, true);
-  const result = new PolyTree();
-  clipper.Execute(ClipType$2.ctUnion, result, fillType, fillType);
+  const clipper = new Clipper$4();
+  clipper.AddPaths(fromSurface(surface, normalize), PolyType$3.ptSubject, true);
+  const result = new PolyTree$1();
+  clipper.Execute(ClipType$3.ctUnion, result, fillType, fillType);
 
   const convexSurface = [];
 
@@ -8435,7 +8521,7 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   const walkContour = ({ m_polygon, m_Childs }) => {
     const contour = [];
     const holes = [];
-    for (const { X, Y } of Clipper$3.CleanPolygon(m_polygon, 1)) {
+    for (const { X, Y } of Clipper$4.CleanPolygon(m_polygon, 1)) {
       contour.push(X, Y);
     }
     // eslint-disable-next-line camelcase
@@ -8460,7 +8546,7 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   // eslint-disable-next-line camelcase
   const walkHole = ({ m_polygon, m_Childs }, contour, holes) => {
     const start = contour.length;
-    for (const { X, Y } of Clipper$3.CleanPolygon(m_polygon, 1)) {
+    for (const { X, Y } of Clipper$4.CleanPolygon(m_polygon, 1)) {
       contour.push(X, Y);
     }
     if (contour.length > start) {
@@ -8479,7 +8565,7 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return convexSurface;
 };
 
-const { Clipper: Clipper$4, ClipType: ClipType$3, PolyType: PolyType$3 } = clipper;
+const { Clipper: Clipper$5, ClipType: ClipType$4, PolyType: PolyType$4 } = clipper;
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -8499,10 +8585,10 @@ const union = (...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
-      const clipper = new Clipper$4();
-      clipper.AddPaths(fromSurface(a, normalize), PolyType$3.ptSubject, true);
-      clipper.AddPaths(fromSurface(b, normalize), PolyType$3.ptClip, true);
-      z0Surfaces.push(toSurface(clipper, ClipType$3.ctUnion, normalize));
+      const clipper = new Clipper$5();
+      clipper.AddPaths(fromSurface(a, normalize), PolyType$4.ptSubject, true);
+      clipper.AddPaths(fromSurface(b, normalize), PolyType$4.ptClip, true);
+      z0Surfaces.push(toSurface(clipper, ClipType$4.ctUnion, normalize));
     }
   }
   return z0Surfaces[0];
@@ -8510,4 +8596,4 @@ const union = (...z0Surfaces) => {
 
 const clean = (surface) => union(surface, surface);
 
-export { clean, difference, intersection, makeConvex, union };
+export { clean, difference, intersection, intersectionOfPathsBySurfaces, makeConvex, union };
