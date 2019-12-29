@@ -12,15 +12,16 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians =
   const surface = z0Surface;
   const polygons = [];
   const stepHeight = (height - depth) / steps;
+  const twistPerStep = twistRadians * (height - depth) / steps;
 
   // Build the walls.
   for (const polygon of surface) {
     const wall = flipPath(polygon.map(normalize));
     for (let step = 0; step < steps; step++) {
       const floor = translatePath([0, 0, depth + stepHeight * (step + 0)],
-                                  rotateZPath(twistRadians * (step + 0), wall));
+                                  rotateZPath(twistPerStep * (step + 0), wall));
       const roof = translatePath([0, 0, depth + stepHeight * (step + 1)],
-                                 rotateZPath(twistRadians * (step + 1), wall));
+                                 rotateZPath(twistPerStep * (step + 1), wall));
       // Walk around the floor to build the walls.
       for (let i = 0; i < floor.length; i++) {
         const floorStart = floor[i];
@@ -43,7 +44,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians =
     const surface = makeConvex(z0Surface, normalize);
 
     // Roof goes up.
-    const roof = translateSurface([0, 0, height], rotateZSurface(twistRadians * steps, surface));
+    const roof = translateSurface([0, 0, height], rotateZSurface(twistPerStep * steps, surface));
 
     // floor faces down.
     const floor = translateSurface([0, 0, depth], flipSurface(surface));
