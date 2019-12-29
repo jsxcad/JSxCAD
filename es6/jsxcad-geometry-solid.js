@@ -111,7 +111,7 @@ const doesNotOverlap = (a, b) => {
   return false;
 };
 
-const eachPoint = (options = {}, thunk, solid) => {
+const eachPoint = (thunk, solid) => {
   for (const surface of solid) {
     eachPoint$1(thunk, surface);
   }
@@ -250,9 +250,9 @@ const measureBoundingSphere = (solid) => {
 
 const toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));
 
-const toPoints = (options = {}, solid) => {
+const toPoints = (solid) => {
   const points = [];
-  eachPoint({}, point => points.push(point), solid);
+  eachPoint(point => points.push(point), solid);
   return points;
 };
 

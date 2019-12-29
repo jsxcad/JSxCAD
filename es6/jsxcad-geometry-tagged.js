@@ -459,7 +459,7 @@ const difference = cache(differenceImpl);
 
 const drop = (tags, geometry) => rewriteTags(['compose/non-positive'], [], geometry, tags, 'has');
 
-const eachPoint = (options, operation, geometry) => {
+const eachPoint = (operation, geometry) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
@@ -470,11 +470,11 @@ const eachPoint = (options, operation, geometry) => {
     } else if (geometry.item) {
       walk(geometry.item);
     } else if (geometry.points) {
-      eachPoint$1(options, operation, geometry.points);
+      eachPoint$1(operation, geometry.points);
     } else if (geometry.paths) {
-      eachPoint$2(options, operation, geometry.paths);
+      eachPoint$2(operation, geometry.paths);
     } else if (geometry.solid) {
-      eachPoint$3(options, operation, geometry.solid);
+      eachPoint$3(operation, geometry.solid);
     } else if (geometry.surface) {
       eachPoint$4(operation, geometry.surface);
     } else if (geometry.z0Surface) {
@@ -786,12 +786,11 @@ const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
   let empty = true;
-  eachPoint({},
-            (point) => {
-              minPoint = min(minPoint, point);
-              maxPoint = max(maxPoint, point);
-              empty = false;
-            },
+  eachPoint(point => {
+    minPoint = min(minPoint, point);
+    maxPoint = max(maxPoint, point);
+    empty = false;
+  },
             geometry);
   if (empty) {
     return [[0, 0, 0], [0, 0, 0]];
@@ -912,10 +911,10 @@ const createPointNormalizer = () => {
   return normalize;
 };
 
-const toPoints = (options = {}, geometry) => {
+const toPoints = (geometry) => {
   const normalize = createPointNormalizer();
   const points = new Set();
-  eachPoint(options, point => points.add(normalize(point)), geometry);
+  eachPoint(point => points.add(normalize(point)), geometry);
   return { points: [...points] };
 };
 

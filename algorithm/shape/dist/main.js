@@ -6455,7 +6455,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       if (cap) {
         const deduplicatedPath = deduplicate(path);
         if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex({}, [deduplicatedPath]));
+          polygons.push(...makeConvex([deduplicatedPath]));
         }
       }
     }
@@ -6467,7 +6467,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
   if (cap) {
     const deduplicatedPath = deduplicate(flip(lastPath));
     if (deduplicatedPath.length > 0) {
-      polygons.push(...makeConvex({}, [deduplicatedPath]));
+      polygons.push(...makeConvex([deduplicatedPath]));
     }
   }
   const solid = { solid: fromPolygons({}, polygons) };
@@ -6507,7 +6507,7 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
       if (cap) {
         const deduplicatedPath = deduplicate(path);
         if (deduplicatedPath.length > 0) {
-          polygons.push(...makeConvex({}, [deduplicatedPath]));
+          polygons.push(...makeConvex([deduplicatedPath]));
         }
       }
     }
@@ -6519,7 +6519,7 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
   if (cap) {
     const deduplicatedPath = deduplicate(lastPath);
     if (deduplicatedPath.length > 0) {
-      polygons.push(...flip$1(makeConvex({}, [deduplicatedPath])));
+      polygons.push(...flip$1(makeConvex([deduplicatedPath])));
     }
   }
 

@@ -141,8 +141,8 @@ class Shape {
     this.context = context;
   }
 
-  eachPoint (options = {}, operation) {
-    eachPoint(options, operation, this.toKeptGeometry());
+  eachPoint (operation) {
+    eachPoint(operation, this.toKeptGeometry());
   }
 
   flip () {
@@ -177,8 +177,8 @@ class Shape {
     return toTransformedGeometry(this.toGeometry());
   }
 
-  toPoints (options = {}) {
-    return toPoints(options, this.toKeptGeometry()).points;
+  toPoints () {
+    return toPoints(this.toKeptGeometry()).points;
   }
 
   transform (matrix) {
@@ -1154,7 +1154,7 @@ const Z$2 = 2;
 
 const hull = (...shapes) => {
   const points = [];
-  shapes.forEach(shape => shape.eachPoint({}, point => points.push(point)));
+  shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
   // FIX: Detect planar hulls properly.
   if (points.every(point => point[Z$2] === 0)) {
     return Shape.fromGeometry(buildConvexSurfaceHull(points));
@@ -4676,8 +4676,8 @@ min.signature = 'min(...values:number) -> number';
 const minkowski = (a, b) => {
   const aPoints = [];
   const bPoints = [];
-  a.eachPoint({}, point => aPoints.push(point));
-  b.eachPoint({}, point => bPoints.push(point));
+  a.eachPoint(point => aPoints.push(point));
+  b.eachPoint(point => bPoints.push(point));
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
 

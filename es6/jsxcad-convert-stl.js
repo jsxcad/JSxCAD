@@ -558,7 +558,7 @@ const fixTJunctions = (solids) => {
   const tree = yaot();
   const points = [];
   for (const { solid } of solids) {
-    eachPoint({}, point => points.push(...point), solid);
+    eachPoint(point => points.push(...point), solid);
   }
   tree.init(points);
 
