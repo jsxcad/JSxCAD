@@ -3,7 +3,7 @@ import { intersection } from './intersection';
 import { makeConvex } from './makeConvex';
 import { union } from './union';
 
-const clean = (surface) => intersection(surface, surface);
+const clean = (surface) => union(surface, surface);
 
 export {
   clean,
