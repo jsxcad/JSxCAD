@@ -7,11 +7,10 @@ export const measureBoundingBox = (surface) => {
   if (surface.measureBoundingBox === undefined) {
     let max = surface[0][0];
     let min = surface[0][0];
-    eachPoint({},
-              point => {
-                max = maxOfVec3(max, point);
-                min = minOfVec3(min, point);
-              },
+    eachPoint(point => {
+      max = maxOfVec3(max, point);
+      min = minOfVec3(min, point);
+    },
               surface);
     surface.measureBoundingBox = [min, max];
   }

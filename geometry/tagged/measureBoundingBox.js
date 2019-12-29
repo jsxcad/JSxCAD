@@ -10,12 +10,11 @@ const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
   let empty = true;
-  eachPoint({},
-            (point) => {
-              minPoint = min(minPoint, point);
-              maxPoint = max(maxPoint, point);
-              empty = false;
-            },
+  eachPoint(point => {
+    minPoint = min(minPoint, point);
+    maxPoint = max(maxPoint, point);
+    empty = false;
+  },
             geometry);
   if (empty) {
     return [[0, 0, 0], [0, 0, 0]];

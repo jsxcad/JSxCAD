@@ -13,7 +13,7 @@ export const fixTJunctions = (solids) => {
   const tree = createTree();
   const points = [];
   for (const { solid } of solids) {
-    eachPoint({}, point => points.push(...point), solid);
+    eachPoint(point => points.push(...point), solid);
   }
   tree.init(points);
 

@@ -20,8 +20,8 @@ import { buildConvexMinkowskiSum } from '@jsxcad/algorithm-shape';
 export const minkowski = (a, b) => {
   const aPoints = [];
   const bPoints = [];
-  a.eachPoint({}, point => aPoints.push(point));
-  b.eachPoint({}, point => bPoints.push(point));
+  a.eachPoint(point => aPoints.push(point));
+  b.eachPoint(point => bPoints.push(point));
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
 
