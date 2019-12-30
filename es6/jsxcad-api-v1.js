@@ -3007,7 +3007,7 @@ Shape.prototype.joinLeft = joinLeftMethod;
 
 const EPSILON = 1e-5;
 
-const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution }) => {
+const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
   const numbers = [];
   if (by === undefined) {
     if (resolution !== undefined) {
@@ -3056,7 +3056,7 @@ const readPng = async (options) => {
   return raster;
 };
 
-const readPngAsContours = async (options, { by = 10, tolerance = 5 }) => {
+const readPngAsContours = async (options, { by = 10, tolerance = 5 } = {}) => {
   const { width, height, pixels } = await readPng(options);
   // FIX: This uses the red channel for the value.
   const getPixel = (x, y) => pixels[(y * width + x) << 2];

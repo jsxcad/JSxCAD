@@ -25,7 +25,7 @@ export const readPng = async (options) => {
   return raster;
 };
 
-export const readPngAsContours = async (options, { by = 10, tolerance = 5 }) => {
+export const readPngAsContours = async (options, { by = 10, tolerance = 5 } = {}) => {
   const { width, height, pixels } = await readPng(options);
   // FIX: This uses the red channel for the value.
   const getPixel = (x, y) => pixels[(y * width + x) << 2];
