@@ -17833,6 +17833,92 @@ const request = async (isOk, path, method, body, {
   }
 };
 
+var toByteArray_1 = toByteArray;
+
+var lookup = [];
+var revLookup = [];
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+for (var i$1 = 0, len = code.length; i$1 < len; ++i$1) {
+  lookup[i$1] = code[i$1];
+  revLookup[code.charCodeAt(i$1)] = i$1;
+}
+
+// Support decoding URL-safe base64 strings, as Node.js does.
+// See: https://en.wikipedia.org/wiki/Base64#URL_applications
+revLookup['-'.charCodeAt(0)] = 62;
+revLookup['_'.charCodeAt(0)] = 63;
+
+function getLens (b64) {
+  var len = b64.length;
+
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
+  }
+
+  // Trim off extra bytes after placeholder bytes are found
+  // See: https://github.com/beatgammit/base64-js/issues/42
+  var validLen = b64.indexOf('=');
+  if (validLen === -1) validLen = len;
+
+  var placeHoldersLen = validLen === len
+    ? 0
+    : 4 - (validLen % 4);
+
+  return [validLen, placeHoldersLen]
+}
+
+function _byteLength (b64, validLen, placeHoldersLen) {
+  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
+}
+
+function toByteArray (b64) {
+  var tmp;
+  var lens = getLens(b64);
+  var validLen = lens[0];
+  var placeHoldersLen = lens[1];
+
+  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+
+  var curByte = 0;
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  var len = placeHoldersLen > 0
+    ? validLen - 4
+    : validLen;
+
+  var i;
+  for (i = 0; i < len; i += 4) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 18) |
+      (revLookup[b64.charCodeAt(i + 1)] << 12) |
+      (revLookup[b64.charCodeAt(i + 2)] << 6) |
+      revLookup[b64.charCodeAt(i + 3)];
+    arr[curByte++] = (tmp >> 16) & 0xFF;
+    arr[curByte++] = (tmp >> 8) & 0xFF;
+    arr[curByte++] = tmp & 0xFF;
+  }
+
+  if (placeHoldersLen === 2) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 2) |
+      (revLookup[b64.charCodeAt(i + 1)] >> 4);
+    arr[curByte++] = tmp & 0xFF;
+  }
+
+  if (placeHoldersLen === 1) {
+    tmp =
+      (revLookup[b64.charCodeAt(i)] << 10) |
+      (revLookup[b64.charCodeAt(i + 1)] << 4) |
+      (revLookup[b64.charCodeAt(i + 2)] >> 2);
+    arr[curByte++] = (tmp >> 8) & 0xFF;
+    arr[curByte++] = tmp & 0xFF;
+  }
+
+  return arr
+}
+
 const FILE = '100644';
 
 const request$1 = (isOk, path, method, body, options) => request(isOk, path, method, body, { ...options,
@@ -17905,18 +17991,19 @@ const readProject = async (owner, repository, prefix, {
   } of oldTree.tree) {
     if (type === 'blob' && path.startsWith(prefix)) {
       const relativePath = path.substring(prefix.length);
-      const data = await get$1(eq$1(OK), `repos/${owner}/${repository}/git/blobs/${sha}`, 'GET');
+      const entry = await get$1(eq$1(OK), `repos/${owner}/${repository}/git/blobs/${sha}`, 'GET');
       queue.push({
         relativePath,
-        data
+        entry
       });
     }
   }
 
   for (const {
     relativePath,
-    data
+    entry
   } of queue) {
+    const data = toByteArray_1(entry.content.replace(/\n/gm, ''));
     await writeFile({
       as: 'bytes'
     }, relativePath, data);
@@ -82495,10 +82582,13 @@ class JsEditorUi extends Pane {
     const {
       file
     } = this.props;
-    const code = await readFile({}, file);
-    this.setState({
-      code
-    });
+
+    if (file !== undefined) {
+      const code = await readFile({}, file);
+      this.setState({
+        code
+      });
+    }
   }
 
   onValueChange(code) {

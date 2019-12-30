@@ -149,8 +149,10 @@ export class JsEditorUi extends Pane {
 
   async componentDidMount () {
     const { file } = this.props;
-    const code = await readFile({}, file);
-    this.setState({ code });
+    if (file !== undefined) {
+      const code = await readFile({}, file);
+      this.setState({ code });
+    }
   }
 
   onValueChange (code) {

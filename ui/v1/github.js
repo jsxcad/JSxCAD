@@ -1,5 +1,6 @@
 import { CONFLICT, CREATED, OK, eq, request as githubRequest } from './githubRequest';
 
+import { toByteArray as toByteArrayFromBase64 } from 'base64-js';
 import { writeFile } from '@jsxcad/sys';
 
 const FILE = '100644';
@@ -52,11 +53,12 @@ export const readProject = async (owner, repository, prefix, { overwrite = false
   for (const { path, sha, type } of oldTree.tree) {
     if (type === 'blob' && path.startsWith(prefix)) {
       const relativePath = path.substring(prefix.length);
-      const data = await get(eq(OK), `repos/${owner}/${repository}/git/blobs/${sha}`, 'GET', { format: 'bytes' });
-      queue.push({ relativePath, data });
+      const entry = await get(eq(OK), `repos/${owner}/${repository}/git/blobs/${sha}`, 'GET', { format: 'bytes' });
+      queue.push({ relativePath, entry });
     }
   }
-  for (const { relativePath, data } of queue) {
+  for (const { relativePath, entry } of queue) {
+    const data = toByteArrayFromBase64(entry.content.replace(/\n/gm, ''));
     await writeFile({ as: 'bytes' }, relativePath, data);
   }
   return true;
