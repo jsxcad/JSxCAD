@@ -4,7 +4,7 @@ import { fromPolygons, alignVertices, transform as transform$3, measureBoundingB
 import * as jsxcadMathVec3_js from './jsxcad-math-vec3.js';
 import { random, add, scale as scale$1, dot, negate, normalize, subtract, cross, distance, transform as transform$5 } from './jsxcad-math-vec3.js';
 export { jsxcadMathVec3_js as vec };
-import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRingSphere, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, simplifyPath, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRegularTetrahedron, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { translate as translate$1, transform as transform$4 } from './jsxcad-geometry-paths.js';
 import { toPlane as toPlane$2, cut as cut$1, transform as transform$2, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { cut, section as section$1, fromSolid, containsPoint, cutOpen } from './jsxcad-algorithm-bsp-surfaces.js';
@@ -21,13 +21,14 @@ import { toPdf } from './jsxcad-convert-pdf.js';
 import { toStl, fromStl } from './jsxcad-convert-stl.js';
 import { toSvg, fromSvgPath, fromSvg } from './jsxcad-convert-svg.js';
 import { toSvg as toSvg$1, toThreejsPage } from './jsxcad-convert-threejs.js';
+import { fromPng } from './jsxcad-convert-png.js';
+import { fromRaster } from './jsxcad-algorithm-contour.js';
 import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from './jsxcad-algorithm-verlet.js';
 import { toFont } from './jsxcad-algorithm-text.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { fromDst } from './jsxcad-convert-dst.js';
 import { fromLDraw } from './jsxcad-convert-ldraw.js';
-import { fromPng } from './jsxcad-convert-png.js';
 import { fromShapefile } from './jsxcad-convert-shapefile.js';
 
 var api = /*#__PURE__*/Object.freeze({
@@ -83,6 +84,7 @@ var api = /*#__PURE__*/Object.freeze({
   get readFont () { return readFont; },
   get readLDraw () { return readLDraw; },
   get readPng () { return readPng; },
+  get readPngAsContours () { return readPngAsContours; },
   get readShape () { return readShape; },
   get readShapefile () { return readShapefile; },
   get readStl () { return readStl; },
@@ -1628,7 +1630,7 @@ const interior = (shape) => {
   const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
     // FIX: Check paths for coplanarity.
-    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed)));
+    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
   }
   return assemble(...surfaces);
 };
@@ -2992,6 +2994,91 @@ Shape.prototype.joinLeft = joinLeftMethod;
 
 /**
  *
+ * # Numbers
+ *
+ * ```
+ * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
+ * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
+ * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
+ * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
+ * ```
+ *
+ **/
+
+const EPSILON = 1e-5;
+
+const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution }) => {
+  const numbers = [];
+  if (by === undefined) {
+    if (resolution !== undefined) {
+      by = to / resolution;
+    } else {
+      by = 1;
+    }
+  }
+
+  if (to === undefined && upto === undefined) {
+    upto = 1;
+  }
+
+  if (upto !== undefined) {
+    // Exclusive
+    for (let number = from; number < to - EPSILON; number += by) {
+      numbers.push(thunk(number));
+    }
+  } else if (to !== undefined) {
+    // Inclusive
+    for (let number = from; number <= to + EPSILON; number += by) {
+      numbers.push(thunk(number));
+    }
+  }
+  return numbers;
+};
+
+numbers.signature = 'numbers(spec) -> numbers';
+
+/**
+ *
+ * # Read PNG
+ *
+ **/
+
+const readPng = async (options) => {
+  if (typeof options === 'string') {
+    options = { path: options };
+  }
+  const { path } = options;
+  let data = await readFile({ as: 'bytes', ...options }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  }
+  const raster = await fromPng({}, data);
+  return raster;
+};
+
+const readPngAsContours = async (options, { by = 10, tolerance = 5 }) => {
+  const { width, height, pixels } = await readPng(options);
+  // FIX: This uses the red channel for the value.
+  const getPixel = (x, y) => pixels[(y * width + x) << 2];
+  const data = Array(height);
+  for (let y = 0; y < height; y++) {
+    data[y] = Array(width);
+    for (let x = 0; x < width; x++) {
+      data[y][x] = getPixel(x, y);
+    }
+  }
+  const bands = numbers(a => a, { to: 256, by });
+  const contours = await fromRaster(data, bands);
+  const geometry = { assembly: [] };
+  for (const contour of contours) {
+    const simplifiedContour = contour.map(path => simplifyPath(path, tolerance));
+    geometry.assembly.push({ paths: simplifiedContour });
+  }
+  return Shape.fromGeometry(geometry);
+};
+
+/**
+ *
  * # Armature
  *
  * Armature builds a set of points based on constraints.
@@ -4112,51 +4199,6 @@ Polyhedron.ofPointPaths = ofPointPaths;
 
 /**
  *
- * # Numbers
- *
- * ```
- * numbers({ to: 10 }) is [0, 1, 2, 3, 4, 5, 6, 9].
- * numbers({ from: 3, to: 6 }) is [3, 4, 5, 6].
- * numbers({ from: 2, to: 8, by: 2 }) is [2, 4, 6].
- * numbers({ to: 2 }, { to: 3 }) is [[0, 0], [0, 1], [0, 2], [1, 0], ...];
- * ```
- *
- **/
-
-const EPSILON = 1e-5;
-
-const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution }) => {
-  const numbers = [];
-  if (by === undefined) {
-    if (resolution !== undefined) {
-      by = to / resolution;
-    } else {
-      by = 1;
-    }
-  }
-
-  if (to === undefined && upto === undefined) {
-    upto = 1;
-  }
-
-  if (upto !== undefined) {
-    // Exclusive
-    for (let number = from; number < to - EPSILON; number += by) {
-      numbers.push(thunk(number));
-    }
-  } else if (to !== undefined) {
-    // Inclusive
-    for (let number = from; number <= to + EPSILON; number += by) {
-      numbers.push(thunk(number));
-    }
-  }
-  return numbers;
-};
-
-numbers.signature = 'numbers(spec) -> numbers';
-
-/**
- *
  * # Spiral
  *
  * These take a function mapping angle to radius.
@@ -4789,25 +4831,6 @@ const readLDraw = async (options) => {
 
 /**
  *
- * # Read PNG
- *
- **/
-
-const readPng = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  let data = await readFile({ as: 'bytes', ...options }, `source/${path}`);
-  if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
-  }
-  const raster = await fromPng({}, data);
-  return raster;
-};
-
-/**
- *
  * # Read Shape Geometry
  *
  * This reads tagged geometry in json format and produces a shape.
@@ -5233,4 +5256,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, min, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, min, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readPngAsContours, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };

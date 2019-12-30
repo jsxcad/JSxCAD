@@ -38,7 +38,8 @@
     "adaptive-bezier-curve": "^1.0.3",
     "bezier": "^0.1.0",
     "quickhull3d": "^2.0.4",
-    "monotone-convex-hull-2d": "^1.0.1"
+    "monotone-convex-hull-2d": "^1.0.1",
+    "simplify-path": "^1.1.0"
   },
   "devDependencies": {
     "ava": "^1.4.1",

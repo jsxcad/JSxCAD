@@ -6,7 +6,7 @@ import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 export const fromRaster = async (raster, bands) => {
   const preprocessedData = new QuadTree(raster);
 
-  const geometry = { assembly: [] };
+  const result = [];
   for (let nth = 0; nth < bands.length - 1; nth++) {
     const low = bands[nth];
     const high = bands[nth + 1];
@@ -18,8 +18,8 @@ export const fromRaster = async (raster, bands) => {
       }
     }
     if (paths.length > 0) {
-      geometry.assembly.push({ paths });
+      result.push(paths);
     }
   }
-  return geometry;
+  return result;
 };
