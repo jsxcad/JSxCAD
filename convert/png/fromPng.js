@@ -1,6 +1,6 @@
 import UPNG from 'upng-js';
 
-export const fromPng = async ({ zScale = 1 }, data) => {
+export const fromPng = async (options = {}, data) => {
   const img = UPNG.decode(data);
   const { width, height } = img;
   const rgba = UPNG.toRGBA8(img)[0];

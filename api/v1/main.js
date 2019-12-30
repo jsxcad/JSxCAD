@@ -82,6 +82,7 @@ import * as vec from '@jsxcad/math-vec3';
 
 import { Label, Plan } from './Plan';
 import { join, joinLeft, rejoin } from './connect';
+import { readPng, readPngAsContours } from './readPng';
 
 import Armature from './Armature';
 import Circle from './Circle';
@@ -144,7 +145,6 @@ import { readDxf } from './readDxf';
 import { readFont } from './readFont';
 // import { readJscad } from './readJscad';
 import { readLDraw } from './readLDraw';
-import { readPng } from './readPng';
 import { readShape } from './readShape';
 import { readShapefile } from './readShapefile';
 import { readStl } from './readStl';
@@ -358,6 +358,7 @@ export {
   // readJscad,
   readLDraw,
   readPng,
+  readPngAsContours,
   readShape,
   readShapefile,
   readStl,

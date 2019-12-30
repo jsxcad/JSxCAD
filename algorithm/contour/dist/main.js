@@ -1,4 +1,4 @@
-import { translate, deduplicate } from './jsxcad-geometry-path.js';
+import { translate, deduplicate, isClockwise } from './jsxcad-geometry-path.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 
 /*!
@@ -2506,7 +2506,7 @@ function prepareCell$1(grid, x, y, opt) {
 const fromRaster = async (raster, bands) => {
   const preprocessedData = new QuadTree(raster);
 
-  const geometry = { assembly: [] };
+  const result = [];
   for (let nth = 0; nth < bands.length - 1; nth++) {
     const low = bands[nth];
     const high = bands[nth + 1];
@@ -2514,14 +2514,19 @@ const fromRaster = async (raster, bands) => {
     for (const band of isoBands(preprocessedData, low, high)) {
       const deduplicated = translate([0, 0, low], deduplicate(band));
       if (deduplicated.length >= 3 && fromPolygon(deduplicated)) {
-        paths.push(deduplicated);
+        if (isClockwise(deduplicated)) {
+          // Ensure path is counter-clockwise.
+          paths.push([...deduplicated].reverse());
+        } else {
+          paths.push(deduplicated);
+        }
       }
     }
     if (paths.length > 0) {
-      geometry.assembly.push({ paths });
+      result.push(paths);
     }
   }
-  return geometry;
+  return result;
 };
 
 export { fromRaster };

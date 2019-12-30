@@ -55,6 +55,7 @@
     "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
     "@jsxcad/algorithm-clipper": "^0.0.79",
     "@jsxcad/algorithm-color": "^0.0.79",
+    "@jsxcad/algorithm-contour": "^0.0.79",
     "@jsxcad/algorithm-pack": "^0.0.79",
     "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/algorithm-text": "^0.0.79",

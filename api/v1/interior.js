@@ -34,7 +34,7 @@ export const interior = (shape) => {
   const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
     // FIX: Check paths for coplanarity.
-    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed)));
+    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
   }
   return assemble(...surfaces);
 };

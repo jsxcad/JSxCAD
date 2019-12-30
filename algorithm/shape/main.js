@@ -15,6 +15,7 @@ import { buildUniformCubicBezierCurve } from './buildUniformCubicBezierCurve';
 import { extrude } from './extrude';
 import { lathe } from './lathe';
 import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius';
+import { simplifyPath } from './simplifyPath';
 import { subdivideTriangle } from './subdivideTriangle';
 import { subdivideTriangularMesh } from './subdivideTriangularMesh';
 
@@ -39,6 +40,7 @@ export {
   extrude,
   lathe,
   regularPolygonEdgeLengthToRadius,
+  simplifyPath,
   subdivideTriangle,
   subdivideTriangularMesh
 };

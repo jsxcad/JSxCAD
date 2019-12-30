@@ -18,7 +18,8 @@ export default {
     builtins(),
     commonjs({
       namedExports: {
-        './../node_modules/adaptive-bezier-curve/index.js': ['bezier']
+        '../../node_modules/adaptive-bezier-curve/index.js': ['bezier'],
+        '../../node_modules/simplify-path/index.js': ['default']
       }
     }),
     globals(),
