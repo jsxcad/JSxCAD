@@ -4644,6 +4644,15 @@ const method$q = function (...args) { return stretch(this, ...args); };
 
 Shape.prototype.stretch = method$q;
 
+const foot = 30.48;
+const inch = 25.4;
+const mm = 1;
+const mil = 0.0254;
+const cm = 10;
+const m = 100;
+const thou = 0.0254;
+const yard = 91.44;
+
 /**
  *
  * Defines the interface used by the api to access the rest of the system on
@@ -4724,7 +4733,15 @@ var api = /*#__PURE__*/Object.freeze({
   Wave: Wave,
   X: X$4,
   Y: Y$4,
-  Z: Z$1
+  Z: Z$1,
+  foot: foot,
+  inch: inch,
+  mm: mm,
+  mil: mil,
+  cm: cm,
+  m: m,
+  thou: thou,
+  yard: yard
 });
 
 const INTERNAL_MODULES = new Map();
@@ -4951,4 +4968,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Hexagon, Icosahedron, Item, Label, Line, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, min, minkowski, numbers, pack, readDst, readDxf, readFont, readPng, readPngAsContours, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Hexagon, Icosahedron, Item, Label, Line, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cm, cos, difference, ease, flat, foot, getCompletions, hull, importModule, inch, intersection, join, joinLeft, lathe, log, m, max, mil, min, minkowski, mm, numbers, pack, readDst, readDxf, readFont, readPng, readPngAsContours, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, thou, union, yard };
