@@ -24,95 +24,11 @@ import { toSvg as toSvg$1, toThreejsPage } from './jsxcad-convert-threejs.js';
 import { fromPng } from './jsxcad-convert-png.js';
 import { fromRaster } from './jsxcad-algorithm-contour.js';
 import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from './jsxcad-algorithm-verlet.js';
-import { toFont } from './jsxcad-algorithm-text.js';
-import { toEcmascript } from './jsxcad-compiler.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 import { fromDst } from './jsxcad-convert-dst.js';
-import { fromLDraw } from './jsxcad-convert-ldraw.js';
+import { toFont } from './jsxcad-algorithm-text.js';
 import { fromShapefile } from './jsxcad-convert-shapefile.js';
-
-var api = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  get Shape () { return Shape; },
-  get acos () { return acos; },
-  get ask () { return ask; },
-  get Armature () { return Armature; },
-  get assemble () { return assemble; },
-  get chainHull () { return chainHull; },
-  get Circle () { return Circle; },
-  get Cone () { return Cone; },
-  get Connector () { return Connector; },
-  get cos () { return cos; },
-  get Cube () { return Cube; },
-  get Cursor () { return Cursor; },
-  get Cylinder () { return Cylinder; },
-  get difference () { return difference; },
-  get ease () { return ease; },
-  get flat () { return flat; },
-  get Font () { return Font; },
-  get Gear () { return Gear; },
-  get Hershey () { return Hershey; },
-  get Hexagon () { return Hexagon; },
-  get hull () { return hull; },
-  get Icosahedron () { return Icosahedron; },
-  get Item () { return Item; },
-  get importModule () { return importModule; },
-  get intersection () { return intersection; },
-  get join () { return join; },
-  get joinLeft () { return joinLeft; },
-  get lathe () { return lathe; },
-  get Label () { return Label; },
-  get Lego () { return Lego; },
-  get Line () { return Line; },
-  get log () { return log; },
-  get max () { return max; },
-  get min () { return min; },
-  get MicroGearMotor () { return MicroGearMotor; },
-  get minkowski () { return minkowski; },
-  get Nail () { return Nail; },
-  get numbers () { return numbers; },
-  get pack () { return pack; },
-  get Plan () { return Plan; },
-  get Path () { return Path; },
-  get Point () { return Point; },
-  get Points () { return Points; },
-  get Polygon () { return Polygon; },
-  get Polyhedron () { return Polyhedron; },
-  get Prism () { return Prism; },
-  get readDst () { return readDst; },
-  get readDxf () { return readDxf; },
-  get readFont () { return readFont; },
-  get readLDraw () { return readLDraw; },
-  get readPng () { return readPng; },
-  get readPngAsContours () { return readPngAsContours; },
-  get readShape () { return readShape; },
-  get readShapefile () { return readShapefile; },
-  get readStl () { return readStl; },
-  get readSvg () { return readSvg; },
-  get readSvgPath () { return readSvgPath; },
-  get rejoin () { return rejoin; },
-  get shell () { return shell; },
-  get sin () { return sin; },
-  get source () { return source; },
-  get specify () { return specify; },
-  get Sphere () { return Sphere; },
-  get sqrt () { return sqrt; },
-  get stretch () { return stretch; },
-  get Spiral () { return Spiral; },
-  get Square () { return Square; },
-  get SvgPath () { return SvgPath; },
-  get Tetrahedron () { return Tetrahedron; },
-  get ThreadedRod () { return ThreadedRod; },
-  get Torus () { return Torus; },
-  get Triangle () { return Triangle; },
-  get union () { return union; },
-  get vec () { return jsxcadMathVec3_js; },
-  get Wave () { return Wave; },
-  get X () { return X$4; },
-  get Y () { return Y$4; },
-  get Z () { return Z$1; },
-  get getCompletions () { return getCompletions; }
-});
+import { toEcmascript } from './jsxcad-compiler.js';
 
 class Shape {
   close () {
@@ -3493,217 +3409,6 @@ Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:num
 Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
 Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-// TODO: (await readFont(...))({ emSize: 16 })("CA");
-
-/**
- *
- * # Read Font
- *
- * readFont reads in a font and produces a function that renders text as a surface with that font.
- *
- * The rendering function takes an option defaulting to { emSize = 10 } and a string of text.
- * This means that one M is 10 mm in height.
- *
- * ::: illustration { "view": { "position": [-50, -50, 50] } }
- * ```
- * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
- * greatVibes(20)("M").extrude(5).rotateX(90).above().center()
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 100] } }
- * ```
- * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
- * greatVibes(10)("M").center()
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 100] } }
- * ```
- * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
- * greatVibes(20)("M").center()
- * ```
- * :::
- * ::: illustration { "view": { "position": [0, -1, 50] } }
- * ```
- * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
- * greatVibes(16)("CA").center()
- * ```
- * :::
- *
- **/
-
-const toEmSizeFromMm = (mm) => mm * 1.5;
-
-const readFont = async (path, { flip = false } = {}) => {
-  let data = await readFile({ as: 'bytes' }, `source/${path}`);
-  if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`) }, `cache/${path}`);
-  }
-  const font = toFont({ path }, data);
-  const xform = flip ? shape => shape.flip() : _ => _;
-  const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text)).op(xform);
-  return fontFactory;
-};
-
-const ofSize$2 = (size) => Hershey.ofSize(size);
-
-const Font = (size) => ofSize$2(size);
-
-Font.Hershey = Hershey;
-Font.ofSize = ofSize$2;
-Font.read = async (path, { flip = false } = {}) => readFont(path, { flip });
-
-Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
-Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
-Font.read.signature = 'Font.read(path:string, { flip:boolean = false }) -> Font';
-
-/**
- *
- * # Arc Cosine
- *
- * Gives the arc cosine converted to degrees.
- * ```
- * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
- *
- * acos(0) = 90
- * acos(0.5) = 60
- * acos(1) = 0
- * ```
- *
- **/
-
-const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
-acos.signature = 'acos(angle:number) -> number';
-
-/**
- *
- * # Cosine
- *
- * Gives the cosine in degrees.
- * ```
- * cos(a) => Math.cos(a / 360 * Math.PI * 2);
- *
- * cos(0) = 1
- * cos(45) = 0.707
- * cos(90) = 0
- * ```
- *
- **/
-
-const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
-
-cos.signature = 'cos(angle:number) -> number';
-
-/**
- *
- * # Max
- *
- * Produces the maximum of a series of numbers.
- *
- * ```
- * max(1, 2, 3, 4) == 4
- * ```
- *
- **/
-
-const max = Math.max;
-
-max.signature = 'max(...values:number) -> number';
-
-/**
- *
- * # Sine
- *
- * Gives the sine in degrees.
- * ```
- * sin(a) => Math.sin(a / 360 * Math.PI * 2);
- *
- * sin(0) = 0
- * sin(45) = 0.707
- * sin(90) = 1
- * ```
- *
- **/
-
-const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
-
-/**
- *
- * # Square Root
- *
- * Gives the the square root of a number.
- * ```
- * sqrt(a) => Math.sqrt(a);
- *
- * sqrt(0) = 0
- * sqrt(4) = 2
- * sqrt(16) = 4
- * ```
- *
- **/
-
-const sqrt = Math.sqrt;
-
-// Probably derived from https://github.com/sadr0b0t/pd-gears/blob/master/pd-gears.scad
-// Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)
-// version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
-
-// convert polar to cartesian coordinates
-const polar = (r, theta) => [r * sin(theta), r * cos(theta)];
-
-// point at radius d on the involute curve
-const q6 = (b, s, t, d) => polar(d, s * (iang(b, d) + t));
-
-// radius a fraction f up the curved side of the tooth
-const q7 = (f, r, b, r2, t, s) => q6(b, s, t, (1 - f) * max(b, r) + f * r2);
-
-// unwind a string this many degrees to go from radius r1 to radius r2
-const iang = (r1, r2) => sqrt((r2 / r1) * (r2 / r1) - 1) / Math.PI * 180 - acos(r1 / r2);
-
-const buildTooth = ({ r, b, c, k, numberOfTeeth }) =>
-  Shape.fromOpenPath([polar(r, r < b ? -k : 180 / numberOfTeeth),
-                      q7(0 / 5, r, b, c, k, -1),
-                      q7(1 / 5, r, b, c, k, -1),
-                      q7(2 / 5, r, b, c, k, -1),
-                      q7(3 / 5, r, b, c, k, -1),
-                      q7(4 / 5, r, b, c, k, -1),
-                      q7(5 / 5, r, b, c, k, -1),
-                      q7(5 / 5, r, b, c, k, 1),
-                      q7(4 / 5, r, b, c, k, 1),
-                      q7(3 / 5, r, b, c, k, 1),
-                      q7(2 / 5, r, b, c, k, 1),
-                      q7(1 / 5, r, b, c, k, 1),
-                      q7(0 / 5, r, b, c, k, 1),
-                      polar(r, r < b ? k : -180 / numberOfTeeth),
-                      polar(r, -181 / numberOfTeeth)]);
-
-const profile =
-    ({
-      mmPerTooth = Math.PI,
-      numberOfTeeth = 16,
-      teethToHide = 0,
-      pressureAngle = 20,
-      clearance = 0,
-      backlash = 0
-    } = {}) => {
-      const pi = Math.PI;
-      const p = mmPerTooth * numberOfTeeth / pi / 2; // radius of pitch circle
-      const c = p + mmPerTooth / pi - clearance; // radius of outer circle
-      const b = p * cos(pressureAngle); // radius of base circle
-      const r = p - (c - p) - clearance; // radius of the root circle
-      const t = mmPerTooth / 2 - backlash / 2; // tooth thickness at pitch circle
-      const k = -iang(b, p) - t / 2 / p / pi * 180; // angle to where involute meets base circle on each side of tooth
-      const tooth = buildTooth({ r, b, c, k, numberOfTeeth });
-      let profile = Shape.fromOpenPath([]);
-      for (let i = 0; i < numberOfTeeth - teethToHide; i++) {
-        profile = profile.concat(tooth.rotateZ(i * 360 / numberOfTeeth));
-      }
-      return profile.close();
-    };
-
-const Gear = {
-  profile
-};
-
 /**
  *
  * # Hexagon
@@ -3797,260 +3502,9 @@ Shape.prototype.toItem = toItemMethod;
 Item.signature = 'Item(shape:Shape, id:string) -> Shape';
 toItemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
 
-/**
- *
- * # Lego
- *
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Lego.stud()
- * ```
- * :::
- * ::: illustration { "view": { "position": [10, 10, 10] } }
- * ```
- * Lego.socket()
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Lego.studSheet()
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, -20] } }
- * ```
- * Lego.socketSheet()
- * ```
- * :::
- * FIX: Does not drop deep 'void'.
- * ::: illustration { "view": { "position": [20, 20, -30] } }
- * ```
- * assemble(Cube(8, 8, 3.2).above().as('plate'),
- *          Lego.socket().above().as('socket'))
- * ```
- * :::
- *
- **/
-
-const stud = ({ diameter = 5, height = 1.8, play = 0.1, faces = 32 } = {}) => {
-  const top = 0.5;
-  const expansion = 0.2;
-  return assemble(Cylinder.ofDiameter(diameter - play - expansion, height)
-      .moveZ(height / 2),
-                  Cylinder.ofDiameter(diameter - play, top)
-                      .moveZ(height - top / 2)
-  );
-};
-
-const studSheet =
-    ({
-      width = 32,
-      length = 32,
-      height = 1.8,
-      studDiameter = 5,
-      studHeight = 1.8,
-      studFaces = 32,
-      studMarginX = 0,
-      studMarginY = 0,
-      play = 0.1
-    } = {}) => {
-      const studs = [];
-      for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
-        for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-          studs.push(stud().move(x - width / 2, y - length / 2, height / 2));
-        }
-      }
-      return assemble(Cube(width - play * 2, length - play * 2, height), ...studs);
-    };
-
-const socket =
-    ({
-      diameter = 5.1,
-      height = 1.8,
-      gripRingHeight = 0.4,
-      gripRingContraction = 0.1,
-      faces = 32,
-      play = 0.0
-    } = {}) => {
-      // A stud is theoretically 1.7 mm tall.
-      // We introduce a grip-ring from 0.5 to 1.2 mm (0.7 mm in height)
-      const bottom = 0.5;
-      const topHeight = height - gripRingHeight - bottom;
-      return assemble(
-        // flaired top
-        Cylinder.ofDiameter(diameter + play, topHeight)
-            .moveZ(topHeight / 2 + bottom + gripRingHeight),
-        // grip ring
-        Cylinder.ofDiameter(diameter + play - gripRingContraction, gripRingHeight)
-            .moveZ(gripRingHeight / 2 + bottom),
-        // flaired base
-        Cylinder.ofDiameter(diameter + play, bottom)
-            .moveZ(bottom / 2));
-    };
-
-const socketSheet =
-    ({
-      width = 32,
-      length = 32,
-      height = 1.8,
-      play = 0.1,
-      studMarginX = 0,
-      studMarginY = 0,
-      stud = {}
-    } = {}) => {
-      const sockets = [];
-      for (let x = 4 + studMarginX; x < width - studMarginX; x += 8) {
-        for (let y = 4 + studMarginY; y < length - studMarginY; y += 8) {
-          sockets.push(assemble(
-            Cube(8 - play * 2, 8 - play * 2, height).above(),
-            socket(stud).drop())
-              .move(x - width / 2, y - length / 2, height / -2));
-        }
-      }
-      return assemble(...sockets);
-    };
-
-const axleProfile = () =>
-  Shape.fromPathToSurface(
-    [[2.24, 0.80, 0.00],
-     [0.80, 0.80, 0.00],
-     [0.80, 2.24, 0.00],
-     [0.00, 2.4, 0.00],
-     [-0.80, 2.24, 0.00],
-     [-0.80, 0.80, 0.00],
-     [-2.24, 0.80, 0.00],
-     [-2.4, 0.00, 0.00],
-     [-2.24, -0.80, 0.00],
-     [-0.80, -0.80, 0.00],
-     [-0.80, -2.24, 0.00],
-     [0.00, -2.40, 0.00],
-     [0.80, -2.24, 0.00],
-     [0.80, -0.80, 0.00],
-     [2.24, -0.80, 0.00],
-     [2.4, 0.00, 0.00]]);
-
-const Lego = {
-  stud,
-  socket,
-  studSheet,
-  socketSheet,
-  axleProfile
-};
-
 const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
 
 Line.signature = 'Line(length:number) -> Shape';
-
-/**
- *
- * # Intersection
- *
- * Intersection produces a version of the first shape retaining only the parts included in the remaining shapes.
- *
- * Different kinds of shapes do not interact. e.g., you cannot intersect a surface and a solid.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * intersection(Cube(12),
- *              Sphere(8))
- * ```
- * :::
- * ::: illustration
- * ```
- * intersection(Circle(10).move(-5),
- *              Circle(10).move(5))
- * ```
- * :::
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * intersection(assemble(Cube().below(),
- *                       Cube().above()),
- *              Sphere(1))
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(difference(Square(10),
- *                     Square(7))
- *            .translate(-2, -2),
- *          difference(Square(10),
- *                     Square(7))
- *            .move(2, 2));
- * ```
- * :::
- * ::: illustration
- * ```
- * intersection(difference(Square(10),
- *                         Square(7))
- *                .translate(-2, -2),
- *              difference(Square(10),
- *                         Square(7))
- *                .move(2, 2));
- * ```
- * :::
- **/
-
-const intersection = (...shapes) => {
-  switch (shapes.length) {
-    case 0: {
-      return fromGeometry({ assembly: [] });
-    }
-    case 1: {
-      // We still want to produce a simple shape.
-      return fromGeometry(toKeptGeometry(shapes[0]));
-    }
-    default: {
-      return fromGeometry(intersection$1(...shapes.map(toKeptGeometry)));
-    }
-  }
-};
-
-const clipMethod = function (...shapes) { return intersection(this, ...shapes); };
-
-Shape.prototype.clip = clipMethod;
-
-intersection.signature = 'intersection(shape:Shape, ...to:Shape) -> Shape';
-clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
-
-/**
- *
- * # Micro Gear Motor
- *
- * ::: illustration { "view": { "position": [40, 40, 80], "target": [-15, -15, 0] } }
- * ```
- * MicroGearMotor()
- * ```
- * :::
- *
- **/
-
-const FlatShaft = ({ diameter, length, flatLength, flatOffset, play }) =>
-  difference(
-    Cylinder({ diameter: diameter + play,
-               height: length + play * 2 }),
-    Cube(diameter + play * 2, diameter + play * 2, flatLength)
-        .move(diameter - 0.5, 0, (length - flatLength) / -2 + flatOffset));
-
-const Motor = ({ play, motorWidth }) =>
-  intersection(Cylinder({ diameter: 12 + play, height: 15 + play }),
-               Cube(10 + play * 2, motorWidth + play * 2, 15));
-
-const Terminal = () => Cube(5, 12, 2);
-
-const Gearbox = ({ play, motorWidth }) => Cube(10 + play * 2, motorWidth + play * 2, 10).moveZ((15 + 10) / 2);
-
-const MicroGearMotor = ({ play = 0.2, shaftDiameter = 3.2, shaftPlay = 0, motorWidth = 12 } = {}) =>
-  union(Motor({ play, motorWidth }),
-        Gearbox({ play, motorWidth }),
-        FlatShaft({
-          diameter: shaftDiameter,
-          length: 10 + play * 2,
-          flatLength: 7,
-          flatOffset: 3,
-          play: shaftPlay
-        })
-            .moveZ((15 + 10) / 2 + 10),
-        Terminal()
-            .moveZ((15 + 2) / -2));
 
 const assertEmpty = (value) => {
   if (value.length === undefined) {
@@ -4279,7 +3733,7 @@ const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
 const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale$1);
 
-const ofSize$3 = (width = 1, length) => unitSquare().scale([width, length === undefined ? width : length, 1]);
+const ofSize$2 = (width = 1, length) => unitSquare().scale([width, length === undefined ? width : length, 1]);
 const ofRadius$9 = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
 const ofApothem$7 = (apothem) => ofRadius$9(toRadiusFromApothem(apothem));
 const ofDiameter$9 = (diameter) => ofRadius$9(diameter / 2);
@@ -4293,9 +3747,9 @@ const fromCorners$1 = (corner1, corner2) => {
   return unitSquare().scale([length, width]).translate(center);
 };
 
-const Square = (...args) => ofSize$3(...args);
+const Square = (...args) => ofSize$2(...args);
 
-Square.ofSize = ofSize$3;
+Square.ofSize = ofSize$2;
 Square.ofRadius = ofRadius$9;
 Square.ofApothem = ofApothem$7;
 Square.ofDiameter = ofDiameter$9;
@@ -4392,6 +3846,82 @@ Tetrahedron.fromValue = fromValue;
 Tetrahedron.fromRadius = fromRadius;
 Tetrahedron.fromDiameter = fromDiameter;
 
+// Ideally this would be a plane of infinite extent.
+// Unfortunately this makes things like interpolation tricky,
+// so we approximate it with a very large polygon instead.
+
+const Y$4 = (y = 0) => {
+  const size = 1e5;
+  const min = -size;
+  const max = size;
+  const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
+  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
+};
+
+/**
+ *
+ * # Lathe
+ *
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * ```
+ * :::
+ *
+ **/
+
+const lathe = (shape, endDegrees = 360, { resolution = 5 } = {}) => {
+  const profile = shape.chop(Y$4(0));
+  const outline = profile.outline();
+  const solids = [];
+  for (const geometry of getPaths(outline.toKeptGeometry())) {
+    for (const path of geometry.paths) {
+      solids.push(Shape.fromGeometry(lathe$1(path, endDegrees * Math.PI / 180, resolution)));
+    }
+  }
+  return assemble(...solids);
+};
+
+const latheMethod = function (...args) { return lathe(this, ...args); };
+Shape.prototype.lathe = latheMethod;
+
+lathe.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
+latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';
+
+/**
+ *
+ * # Torus
+ *
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * Torus({ thickness: 5,
+ *         radius: 20 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * Torus({ thickness: 5,
+ *         radius: 20,
+ *         sides: 4 })
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * Torus({ thickness: 5,
+ *         radius: 20,
+ *         sides: 4,
+ *         rotation: 45 })
+ * ```
+ * :::
+ *
+ **/
+
+const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) =>
+  lathe({ sides: segments },
+        Circle({ sides, radius: thickness })
+            .rotateZ(rotation)
+            .move(0, radius))
+      .rotateY(90);
+
 /**
  *
  * # Triangle
@@ -4446,129 +3976,6 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$a;
 Triangle.ofDiameter = ofDiameter$a;
 
-// Ideally this would be a plane of infinite extent.
-// Unfortunately this makes things like interpolation tricky,
-// so we approximate it with a very large polygon instead.
-
-const Y$4 = (y = 0) => {
-  const size = 1e5;
-  const min = -size;
-  const max = size;
-  const sheet = Shape.fromPathToZ0Surface([[max, y, min], [max, y, max], [min, y, max], [min, y, min]]);
-  return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
-};
-
-/**
- *
- * # Lathe
- *
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * ```
- * :::
- *
- **/
-
-const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
-  const profile = shape.chop(Y$4(0));
-  const outline = profile.outline();
-  const solids = [];
-  for (const geometry of getPaths(outline.toKeptGeometry())) {
-    for (const path of geometry.paths) {
-      solids.push(Shape.fromGeometry(lathe$1(path, endDegrees * Math.PI / 180, resolution)));
-    }
-  }
-  return assemble(...solids);
-};
-
-const latheMethod = function (...args) { return lathe(this, ...args); };
-Shape.prototype.lathe = latheMethod;
-
-lathe.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
-latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';
-
-/**
- *
- * # Threaded Rod
- *
- **/
-
-const buildThread = ({ radius = 1, height = 1, pitch = 1, sides = 16 }) => {
-  const thread = lathe({ loops: (height / pitch) + 2, loopOffset: pitch, sides },
-                       Triangle()
-                           .scale(pitch)
-                           .rotateZ(90)
-                           .move(0, radius));
-  return intersection(Cube.fromCorners([0, -(radius + pitch), -(radius + pitch)],
-                                       [height, radius + pitch, radius + pitch]),
-                      thread.move(-pitch, 0, 0))
-      .rotateY(-90)
-      .center();
-};
-
-const buildRod = ({ radius = 1, height = 1, sides = 16 }) =>
-  Cylinder({ radius, height, sides });
-
-const fromRadius$1 = ({ radius = 1, height = 1, pitch = 1, sides = 16, play = 0, bore }) => {
-  const rod = assemble(
-    buildThread({ radius: radius - play, height, pitch, sides }),
-    buildRod({ radius: radius - play, height, sides }));
-  if (bore) {
-    return assemble(
-      bore().drop(),
-      rod.nocut());
-  } else {
-    return rod;
-  }
-};
-
-const ThreadedRod = dispatch(
-  'ThreadedRod',
-  // cube()
-  (radius, height = 1, sides = 16, bore) => {
-    assertNumber(radius);
-    assertNumber(height);
-    assertNumber(sides);
-    return () => fromRadius$1({ radius, height, sides, bore });
-  });
-
-ThreadedRod.ofRadius = (radius, height, sides) => ThreadedRod(radius, height, sides);
-
-/**
- *
- * # Torus
- *
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20,
- *         sides: 4 })
- * ```
- * :::
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * Torus({ thickness: 5,
- *         radius: 20,
- *         sides: 4,
- *         rotation: 45 })
- * ```
- * :::
- *
- **/
-
-const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) =>
-  lathe({ sides: segments },
-        Circle({ sides, radius: thickness })
-            .rotateZ(rotation)
-            .move(0, radius))
-      .rotateY(90);
-
 /**
  *
  * # Wave
@@ -4603,6 +4010,24 @@ const X$4 = (x = 0) => {
   const sheet = Shape.fromPathToZ0Surface([[x, max, min], [x, max, max], [x, min, max], [x, min, min]]);
   return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
 };
+
+/**
+ *
+ * # Arc Cosine
+ *
+ * Gives the arc cosine converted to degrees.
+ * ```
+ * acos(a) => Math.acos(a) / (Math.PI * 2) * 360;
+ *
+ * acos(0) = 90
+ * acos(0.5) = 60
+ * acos(1) = 0
+ * ```
+ *
+ **/
+
+const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+acos.signature = 'acos(angle:number) -> number';
 
 /**
  *
@@ -4652,6 +4077,25 @@ ask.forNumber.signature = 'ask(parameter:string, value:number = 0) -> number';
 ask.forString.signature = 'ask(parameter:string, value) -> string';
 ask.forBool.signature = 'ask(parameter:string, value:boolean = false) -> boolean';
 
+/**
+ *
+ * # Cosine
+ *
+ * Gives the cosine in degrees.
+ * ```
+ * cos(a) => Math.cos(a / 360 * Math.PI * 2);
+ *
+ * cos(0) = 1
+ * cos(45) = 0.707
+ * cos(90) = 0
+ * ```
+ *
+ **/
+
+const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
+
+cos.signature = 'cos(angle:number) -> number';
+
 const Z$7 = 2;
 
 const flat = (shape) => {
@@ -4694,25 +4138,92 @@ Shape.prototype.flat = flatMethod;
 flat.signature = 'flat(shape:Shape) -> Connector';
 flatMethod.signature = 'Shape -> flat() -> Connector';
 
-const importModule = async (name) => {
-  let script;
-  if (script === undefined) {
-    const path = `source/${name}`;
-    script = await readFile({ path, as: 'utf8' }, path);
+/**
+ *
+ * # Intersection
+ *
+ * Intersection produces a version of the first shape retaining only the parts included in the remaining shapes.
+ *
+ * Different kinds of shapes do not interact. e.g., you cannot intersect a surface and a solid.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * intersection(Cube(12),
+ *              Sphere(8))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * intersection(Circle(10).move(-5),
+ *              Circle(10).move(5))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * intersection(assemble(Cube().below(),
+ *                       Cube().above()),
+ *              Sphere(1))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(difference(Square(10),
+ *                     Square(7))
+ *            .translate(-2, -2),
+ *          difference(Square(10),
+ *                     Square(7))
+ *            .move(2, 2));
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * intersection(difference(Square(10),
+ *                         Square(7))
+ *                .translate(-2, -2),
+ *              difference(Square(10),
+ *                         Square(7))
+ *                .move(2, 2));
+ * ```
+ * :::
+ **/
+
+const intersection = (...shapes) => {
+  switch (shapes.length) {
+    case 0: {
+      return fromGeometry({ assembly: [] });
+    }
+    case 1: {
+      // We still want to produce a simple shape.
+      return fromGeometry(toKeptGeometry(shapes[0]));
+    }
+    default: {
+      return fromGeometry(intersection$1(...shapes.map(toKeptGeometry)));
+    }
   }
-  if (script === undefined) {
-    const path = `cache/${name}`;
-    const sources = getSources(path);
-    script = await readFile({ path, as: 'utf8', sources }, path);
-  }
-  const ecmascript = toEcmascript({}, script);
-  const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-  const constructor = await builder(api);
-  const module = await constructor();
-  return module;
 };
 
-importModule.signature = 'async importModule(name:string) -> module';
+const clipMethod = function (...shapes) { return intersection(this, ...shapes); };
+
+Shape.prototype.clip = clipMethod;
+
+intersection.signature = 'intersection(shape:Shape, ...to:Shape) -> Shape';
+clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
+
+/**
+ *
+ * # Max
+ *
+ * Produces the maximum of a series of numbers.
+ *
+ * ```
+ * max(1, 2, 3, 4) == 4
+ * ```
+ *
+ **/
+
+const max = Math.max;
+
+max.signature = 'max(...values:number) -> number';
 
 /**
  *
@@ -4809,24 +4320,55 @@ const readDxf = async (options) => {
   return Shape.fromGeometry(await fromDxf(options, data));
 };
 
+// TODO: (await readFont(...))({ emSize: 16 })("CA");
+
 /**
  *
- * # Read LDraw Parts
+ * # Read Font
  *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * readFont reads in a font and produces a function that renders text as a surface with that font.
+ *
+ * The rendering function takes an option defaulting to { emSize = 10 } and a string of text.
+ * This means that one M is 10 mm in height.
+ *
+ * ::: illustration { "view": { "position": [-50, -50, 50] } }
  * ```
- * await readLDraw({ part: '3004.dat' })
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(20)("M").extrude(5).rotateX(90).above().center()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [0, -1, 100] } }
+ * ```
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(10)("M").center()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [0, -1, 100] } }
+ * ```
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(20)("M").center()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [0, -1, 50] } }
+ * ```
+ * const greatVibes = await readFont('font/great-vibes/GreatVibes-Regular.ttf');
+ * greatVibes(16)("CA").center()
  * ```
  * :::
  *
  **/
 
-const readLDraw = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
+const toEmSizeFromMm = (mm) => mm * 1.5;
+
+const readFont = async (path, { flip = false } = {}) => {
+  let data = await readFile({ as: 'bytes' }, `source/${path}`);
+  if (data === undefined) {
+    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`) }, `cache/${path}`);
   }
-  const { path } = options;
-  return Shape.fromGeometry(await fromLDraw({ sources: getSources(`cache/${path}`), ...options }));
+  const font = toFont({ path }, data);
+  const xform = flip ? shape => shape.flip() : _ => _;
+  const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text)).op(xform);
+  return fontFactory;
 };
 
 /**
@@ -4987,6 +4529,23 @@ const readSvgPath = async (options) => {
   return Shape.fromGeometry(await fromSvgPath(options, data));
 };
 
+/**
+ *
+ * # Sine
+ *
+ * Gives the sine in degrees.
+ * ```
+ * sin(a) => Math.sin(a / 360 * Math.PI * 2);
+ *
+ * sin(0) = 0
+ * sin(45) = 0.707
+ * sin(90) = 1
+ * ```
+ *
+ **/
+
+const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+
 const source = (path, source) => addSource(`cache/${path}`, source);
 
 /**
@@ -5020,6 +4579,23 @@ const specify = (specification, ...shapes) => {
 
 const method$p = function (specification) { return specify(specification, this); };
 Shape.prototype.specify = method$p;
+
+/**
+ *
+ * # Square Root
+ *
+ * Gives the the square root of a number.
+ * ```
+ * sqrt(a) => Math.sqrt(a);
+ *
+ * sqrt(0) = 0
+ * sqrt(4) = 2
+ * sqrt(16) = 4
+ * ```
+ *
+ **/
+
+const sqrt = Math.sqrt;
 
 /**
  *
@@ -5076,6 +4652,125 @@ Shape.prototype.stretch = method$q;
  * A user can destructively update this mapping in their code to change what
  * the api uses.
  */
+
+var api = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  Shape: Shape,
+  acos: acos,
+  ask: ask,
+  Armature: Armature,
+  assemble: assemble,
+  chainHull: chainHull,
+  Circle: Circle,
+  Cone: Cone,
+  Connector: Connector,
+  cos: cos,
+  Cube: Cube,
+  Cursor: Cursor,
+  Cylinder: Cylinder,
+  difference: difference,
+  ease: ease,
+  flat: flat,
+  Hexagon: Hexagon,
+  hull: hull,
+  Icosahedron: Icosahedron,
+  Item: Item,
+  intersection: intersection,
+  join: join,
+  joinLeft: joinLeft,
+  lathe: lathe,
+  Label: Label,
+  Line: Line,
+  log: log,
+  max: max,
+  min: min,
+  minkowski: minkowski,
+  Nail: Nail,
+  numbers: numbers,
+  pack: pack,
+  Plan: Plan,
+  Path: Path,
+  Point: Point,
+  Points: Points,
+  Polygon: Polygon,
+  Polyhedron: Polyhedron,
+  Prism: Prism,
+  readDst: readDst,
+  readDxf: readDxf,
+  readFont: readFont,
+  readPng: readPng,
+  readPngAsContours: readPngAsContours,
+  readShape: readShape,
+  readShapefile: readShapefile,
+  readStl: readStl,
+  readSvg: readSvg,
+  readSvgPath: readSvgPath,
+  rejoin: rejoin,
+  shell: shell,
+  sin: sin,
+  source: source,
+  specify: specify,
+  Sphere: Sphere,
+  sqrt: sqrt,
+  stretch: stretch,
+  Spiral: Spiral,
+  Square: Square,
+  SvgPath: SvgPath,
+  Tetrahedron: Tetrahedron,
+  Torus: Torus,
+  Triangle: Triangle,
+  union: union,
+  vec: jsxcadMathVec3_js,
+  Wave: Wave,
+  X: X$4,
+  Y: Y$4,
+  Z: Z$1
+});
+
+const INTERNAL_MODULES = new Map();
+
+const registerInternalModule = (bare, path) => INTERNAL_MODULES.set(bare, path);
+
+const buildImportModule = (api) =>
+  async (name) => {
+    const internalLibrary = INTERNAL_MODULES.get(name);
+    if (internalLibrary !== undefined) {
+      return import(internalLibrary);
+    }
+    let script;
+    if (script === undefined) {
+      const path = `source/${name}`;
+      script = await readFile({ path, as: 'utf8' }, path);
+    }
+    if (script === undefined) {
+      const path = `cache/${name}`;
+      const sources = getSources(path);
+      script = await readFile({ path, as: 'utf8', sources }, path);
+    }
+    const ecmascript = toEcmascript({}, script);
+    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+    const constructor = await builder(api);
+    const module = await constructor();
+    return module;
+  };
+
+// Bootstrap importModule.
+
+const extendedApi = { ...api };
+
+const importModule = buildImportModule(extendedApi);
+
+extendedApi.importModule = importModule;
+
+// Register Internal libraries.
+
+registerInternalModule('v1/Font', './jsxcad-api-v1-font.js');
+registerInternalModule('v1/Gear', './jsxcad-api-v1-gear.js');
+registerInternalModule('v1/Motor', './jsxcad-api-v1-motor.js');
+registerInternalModule('v1/Lego', './jsxcad-api-v1-lego.js');
+registerInternalModule('v1/Thread', './jsxcad-api-v1-thread.js');
+
+// Introspection
 
 const constructors = [
   'Shape',
@@ -5256,4 +4951,4 @@ const getCompletions = (prefix, { isMethod = false }) => {
   return selectedEntries;
 };
 
-export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Font, Gear, Hershey, Hexagon, Icosahedron, Item, Label, Lego, Line, MicroGearMotor, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, ThreadedRod, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, min, minkowski, numbers, pack, readDst, readDxf, readFont, readLDraw, readPng, readPngAsContours, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
+export { Armature, Circle, Cone, Connector, Cube, Cursor, Cylinder, Hexagon, Icosahedron, Item, Label, Line, Nail, Path, Plan, Point, Points, Polygon, Polyhedron, Prism, Shape, Sphere, Spiral, Square, SvgPath, Tetrahedron, Torus, Triangle, Wave, X$4 as X, Y$4 as Y, Z$1 as Z, acos, ask, assemble, chainHull, cos, difference, ease, flat, getCompletions, hull, importModule, intersection, join, joinLeft, lathe, log, max, min, minkowski, numbers, pack, readDst, readDxf, readFont, readPng, readPngAsContours, readShape, readShapefile, readStl, readSvg, readSvgPath, rejoin, shell, sin, source, specify, sqrt, stretch, union };
