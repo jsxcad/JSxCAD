@@ -4,6 +4,8 @@ import { Shape, acos, cos, max, sin, sqrt } from '@jsxcad/api-v1';
 // Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)
 // version 1.1 by Leemon Baird, 2011, Leemon@Leemon.com
 
+// See: http://www.cartertools.com/involute.html for future research.
+
 // convert polar to cartesian coordinates
 const polar = (r, theta) => [r * sin(theta), r * cos(theta)];
 

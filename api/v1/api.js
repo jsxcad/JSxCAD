@@ -149,6 +149,8 @@ import { sqrt } from './sqrt';
 import { stretch } from './stretch';
 import { union } from './union';
 
+export * from './units';
+
 export {
   Shape,
   acos,

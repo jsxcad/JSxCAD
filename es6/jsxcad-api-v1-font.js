@@ -92,4 +92,4 @@ Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
 Font.read.signature = 'Font.read(path:string, { flip:boolean = false }) -> Font';
 
 export default Font;
-export { Font };
+export { Font, Hershey };
