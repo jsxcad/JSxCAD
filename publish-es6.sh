@@ -13,6 +13,11 @@ cp algorithm/verlet/dist/main.js es6/jsxcad-algorithm-verlet.js
 cp algorithm/watertight/dist/main.js es6/jsxcad-algorithm-watertight.js
 cp api/observablehq/dist/main.js es6/jsxcad-api-observablehq.js
 cp api/v1/dist/main.js es6/jsxcad-api-v1.js
+cp api/v1-font/dist/main.js es6/jsxcad-api-v1-font.js
+cp api/v1-gear/dist/main.js es6/jsxcad-api-v1-gear.js
+cp api/v1-lego/dist/main.js es6/jsxcad-api-v1-lego.js
+cp api/v1-motor/dist/main.js es6/jsxcad-api-v1-motor.js
+cp api/v1-thread/dist/main.js es6/jsxcad-api-v1-thread.js
 cp cache/dist/main.js es6/jsxcad-cache.js
 cp compiler/dist/main.js es6/jsxcad-compiler.js
 cp convert/dst/dist/main.js es6/jsxcad-convert-dst.js

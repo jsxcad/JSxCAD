@@ -34853,37 +34853,69 @@ const toEcmascript = (options, script) => {
       const entry = body[nth];
       // Rewrite
       //   import { foo } from 'bar';
+      //   import Foo from 'bar';
       // to
-      //   const { foo } = readScript('bar');
+      //   const { foo } = importModule('bar');
+      //   const Foo = importModule('bar');
       //
       // FIX: Handle other variations.
       const { specifiers, source } = entry;
 
       const declarations = [];
-      for (const { imported } of specifiers) {
-        declarations.push({
-          type: 'VariableDeclarator',
-          kind: 'const',
-          id: {
-            type: 'ObjectPattern',
-            properties: [{
-              type: 'ObjectProperty',
-              key: { type: 'Identifier', name: imported.name },
-              value: { type: 'Identifier', name: imported.name }
-            }]
-          },
-          init: {
-            type: 'AwaitExpression',
-            argument: {
-              type: 'CallExpression',
-              callee: {
+      for (const { imported, local, type } of specifiers) {
+        switch (type) {
+          case 'ImportDefaultSpecifier':
+            declarations.push({
+              type: 'VariableDeclarator',
+              kind: 'const',
+              id: {
                 type: 'Identifier',
-                name: 'importModule'
+                name: local.name
               },
-              arguments: [source]
-            }
-          }
-        });
+              init: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ParenthesizedExpression',
+                  expression: {
+                    type: 'AwaitExpression',
+                    argument: {
+                      type: 'CallExpression',
+                      callee: { type: 'Identifier', name: 'importModule' },
+                      arguments: [source]
+                    }
+                  }
+                },
+                property: { type: 'Identifier', name: 'default' },
+                computed: false
+              }
+            });
+            break;
+          case 'ImportSpecifier':
+            declarations.push({
+              type: 'VariableDeclarator',
+              kind: 'const',
+              id: {
+                type: 'ObjectPattern',
+                properties: [{
+                  type: 'ObjectProperty',
+                  key: { type: 'Identifier', name: imported.name },
+                  value: { type: 'Identifier', name: imported.name }
+                }]
+              },
+              init: {
+                type: 'AwaitExpression',
+                argument: {
+                  type: 'CallExpression',
+                  callee: {
+                    type: 'Identifier',
+                    name: 'importModule'
+                  },
+                  arguments: [source]
+                }
+              }
+            });
+            break;
+        }
       }
       out.push({ type: 'VariableDeclaration', kind: 'const', declarations });
     } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {

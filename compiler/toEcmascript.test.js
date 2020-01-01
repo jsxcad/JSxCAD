@@ -101,6 +101,18 @@ test('Import', t => {
 };`);
 });
 
+test('Default Import', t => {
+  const ecmascript = toEcmascript({}, 'import Foo from "bar";');
+  t.is(ecmascript, `return async () => {
+    const Foo = (await importModule("bar")).default;
+    const main = async () => {};
+
+    return {
+        main: main
+    };
+};`);
+});
+
 test('Source stays at top level to support import', t => {
   const ecmascript = toEcmascript({}, `source('a', 'b'); foo();`);
   t.is(ecmascript, `return async () => {

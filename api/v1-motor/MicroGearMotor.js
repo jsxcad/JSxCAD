@@ -1,8 +1,4 @@
-import { Cube } from './Cube';
-import { Cylinder } from './Cylinder';
-import { difference } from './difference';
-import { intersection } from './intersection';
-import { union } from './union';
+import { Cube, Cylinder, difference, intersection, union } from '@jsxcad/api-v1';
 
 /**
  *
@@ -44,3 +40,5 @@ export const MicroGearMotor = ({ play = 0.2, shaftDiameter = 3.2, shaftPlay = 0,
             .moveZ((15 + 10) / 2 + 10),
         Terminal()
             .moveZ((15 + 2) / -2));
+
+export default MicroGearMotor;

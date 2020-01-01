@@ -15,7 +15,7 @@ import { lathe as lathePath } from '@jsxcad/algorithm-shape';
  *
  **/
 
-export const lathe = (shape, endDegrees = 360, { resolution = 5 }) => {
+export const lathe = (shape, endDegrees = 360, { resolution = 5 } = {}) => {
   const profile = shape.chop(Y(0));
   const outline = profile.outline();
   const solids = [];
