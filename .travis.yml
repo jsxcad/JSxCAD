@@ -8,6 +8,7 @@ addons:
     - libxi-dev
     - libxxf86vm-dev
     - x11proto-xf86vidmode-dev
+    - mesa-common-dev
     - mesa-utils
     - xvfb
     - libgl1-mesa-dri
