@@ -3,7 +3,11 @@
 import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
+
+import { assemble, difference, intersection, union } from '@jsxcad/api-v1-shape';
 import { clearCache } from '@jsxcad/cache';
+import { hull } from '@jsxcad/api-v1-extrude';
+import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -16,9 +20,9 @@ const agent = async ({ ask, question }) => {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
         if (values[1]) {
-          return api.assemble(...inputs).drop('cutAway').toKeptGeometry();
+          return assemble(...inputs).drop('cutAway').toKeptGeometry();
         } else {
-          return api.assemble(...inputs).toDisjointGeometry();
+          return assemble(...inputs).toDisjointGeometry();
         }
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
@@ -48,22 +52,22 @@ const agent = async ({ ask, question }) => {
         let items = api.Shape.fromGeometry(values[0]).toItems();
         const sheetX = values[2];
         const sheetY = values[3];
-        const [packed, unpacked] = api.pack({ size: [sheetX, sheetY], margin: 4 }, ...items.map(
+        const [packed, unpacked] = pack({ size: [sheetX, sheetY], margin: 4 }, ...items.map(
           x => x.flat())
         );
         console.log(unpacked);
-        return api.assemble(...packed).toDisjointGeometry();
+        return assemble(...packed).toDisjointGeometry();
       case 'difference':
-        return api.difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'extractTag':
         return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
       case 'extrude':
         return api.Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
       case 'hull':
         values = values.map(api.Shape.fromGeometry);
-        return api.hull(...values).toDisjointGeometry();
+        return hull(...values).toDisjointGeometry();
       case 'intersection':
-        return api.intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'Overcut Inside Corners':
@@ -100,7 +104,7 @@ const agent = async ({ ask, question }) => {
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
       case 'union':
-        return api.union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       default:
         return -1;
     }
