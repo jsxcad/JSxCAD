@@ -2,15 +2,16 @@ import { getSources, readFile } from '@jsxcad/sys';
 
 import { toEcmascript } from '@jsxcad/compiler';
 
-const INTERNAL_MODULES = new Map();
+const DYNAMIC_MODULES = new Map();
 
-export const registerInternalModule = (bare, path) => INTERNAL_MODULES.set(bare, path);
+export const registerDynamicModule = (bare, path) => DYNAMIC_MODULES.set(bare, path);
 
 export const buildImportModule = (api) =>
   async (name) => {
-    const internalLibrary = INTERNAL_MODULES.get(name);
-    if (internalLibrary !== undefined) {
-      return import(internalLibrary);
+    const internalModule = DYNAMIC_MODULES.get(name);
+    if (internalModule !== undefined) {
+      const module = await import(internalModule);
+      return module;
     }
     let script;
     if (script === undefined) {

@@ -86,6 +86,21 @@ await bar({ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 };`);
 });
 
+test('Source stays at top level to support import', t => {
+  const ecmascript = toEcmascript({}, `source('a', 'b'); foo();`);
+  t.is(ecmascript, `return async () => {
+    source('a', 'b');
+
+    const main = async () => {
+        return foo();
+    };
+
+    return {
+        main: main
+    };
+};`);
+});
+
 test('Import', t => {
   const ecmascript = toEcmascript({}, 'import { foo } from "bar";');
   t.is(ecmascript, `return async () => {
@@ -113,14 +128,11 @@ test('Default Import', t => {
 };`);
 });
 
-test('Source stays at top level to support import', t => {
-  const ecmascript = toEcmascript({}, `source('a', 'b'); foo();`);
+test('Unassigned Import', t => {
+  const ecmascript = toEcmascript({}, 'import "bar";');
   t.is(ecmascript, `return async () => {
-    source('a', 'b');
-
-    const main = async () => {
-        return foo();
-    };
+    await importModule("bar");
+    const main = async () => {};
 
     return {
         main: main

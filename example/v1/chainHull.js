@@ -1,4 +1,7 @@
-await chainHull(Circle(10).move(0, 0, -10),
-                Square(5),
-                Circle(10).translate(0, 0, 10))
+import '@jsxcad/api-v1-stl';
+
+await Circle(10).moveZ(-10)
+        .chainHull(
+            Square(5),
+            Circle(10).moveZ(10))
         .writeStl('stl/chainHull.stl');

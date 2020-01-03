@@ -34861,63 +34861,77 @@ const toEcmascript = (options, script) => {
       // FIX: Handle other variations.
       const { specifiers, source } = entry;
 
-      const declarations = [];
-      for (const { imported, local, type } of specifiers) {
-        switch (type) {
-          case 'ImportDefaultSpecifier':
-            declarations.push({
-              type: 'VariableDeclarator',
-              kind: 'const',
-              id: {
-                type: 'Identifier',
-                name: local.name
-              },
-              init: {
-                type: 'MemberExpression',
-                object: {
-                  type: 'ParenthesizedExpression',
-                  expression: {
-                    type: 'AwaitExpression',
-                    argument: {
-                      type: 'CallExpression',
-                      callee: { type: 'Identifier', name: 'importModule' },
-                      arguments: [source]
-                    }
-                  }
+      if (specifiers.length === 0) {
+        out.push({
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'AwaitExpression',
+            argument: {
+              type: 'CallExpression',
+              callee: { type: 'Identifier', name: 'importModule' },
+              arguments: [source]
+            }
+          }
+        });
+      } else {
+        const declarations = [];
+        for (const { imported, local, type } of specifiers) {
+          switch (type) {
+            case 'ImportDefaultSpecifier':
+              declarations.push({
+                type: 'VariableDeclarator',
+                kind: 'const',
+                id: {
+                  type: 'Identifier',
+                  name: local.name
                 },
-                property: { type: 'Identifier', name: 'default' },
-                computed: false
-              }
-            });
-            break;
-          case 'ImportSpecifier':
-            declarations.push({
-              type: 'VariableDeclarator',
-              kind: 'const',
-              id: {
-                type: 'ObjectPattern',
-                properties: [{
-                  type: 'ObjectProperty',
-                  key: { type: 'Identifier', name: imported.name },
-                  value: { type: 'Identifier', name: imported.name }
-                }]
-              },
-              init: {
-                type: 'AwaitExpression',
-                argument: {
-                  type: 'CallExpression',
-                  callee: {
-                    type: 'Identifier',
-                    name: 'importModule'
+                init: {
+                  type: 'MemberExpression',
+                  object: {
+                    type: 'ParenthesizedExpression',
+                    expression: {
+                      type: 'AwaitExpression',
+                      argument: {
+                        type: 'CallExpression',
+                        callee: { type: 'Identifier', name: 'importModule' },
+                        arguments: [source]
+                      }
+                    }
                   },
-                  arguments: [source]
+                  property: { type: 'Identifier', name: 'default' },
+                  computed: false
                 }
-              }
-            });
-            break;
+              });
+              break;
+            case 'ImportSpecifier':
+              declarations.push({
+                type: 'VariableDeclarator',
+                kind: 'const',
+                id: {
+                  type: 'ObjectPattern',
+                  properties: [{
+                    type: 'ObjectProperty',
+                    key: { type: 'Identifier', name: imported.name },
+                    value: { type: 'Identifier', name: imported.name }
+                  }]
+                },
+                init: {
+                  type: 'AwaitExpression',
+                  argument: {
+                    type: 'CallExpression',
+                    callee: {
+                      type: 'Identifier',
+                      name: 'importModule'
+                    },
+                    arguments: [source]
+                  }
+                }
+              });
+              break;
+          }
         }
+        out.push({ type: 'VariableDeclaration', kind: 'const', declarations });
       }
-      out.push({ type: 'VariableDeclaration', kind: 'const', declarations });
     } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
       Object.assign(annotations, fromObjectExpression(entry.expression));
     } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'CallExpression' && entry.expression.callee.name === 'source') {

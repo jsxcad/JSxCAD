@@ -1,4 +1,6 @@
-await difference(Sphere(30),
-                 Sphere(15))
+import '@jsxcad/api-v1-svg';
+
+await Sphere(30)
+        .cut(Sphere(15))
         .section()
         .writeSvg('cutSpheres.svg');

@@ -1,5 +1,10 @@
-const assembly = assemble(Cube(30).as('cube'),
-                          Cylinder(5, 30).as('cylinder'));
+import '@jsxcad/api-v1-stl';
+import '@jsxcad/api-v1-threejs';
+
+const assembly = Cube(30)
+                   .as('cube')
+                   .with(Cylinder(5, 30)
+                           .as('cylinder'));
 
 await assembly.keep('cube').writeStl('stl/cube.stl');
 

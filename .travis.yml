@@ -1,6 +1,19 @@
 language: node_js
 node_js:
-  - 12.2
+  - 13.5.0
+addons:
+  apt:
+    packages:
+    - xutils-dev
+    - libxi-dev
+    - libxxf86vm-dev
+    - x11proto-xf86vidmode-dev
+    - mesa-common-dev
+    - mesa-utils
+    - xvfb
+    - libgl1-mesa-dri
+    - libglapi-mesa
+    - libosmesa6
 script:
   - npm run bootstrap
   - npm run depcheck

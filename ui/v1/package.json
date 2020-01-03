@@ -25,6 +25,9 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-v1": "^0.0.79",
+    "@jsxcad/api-v1-extrude": "^0.0.79",
+    "@jsxcad/api-v1-layout": "^0.0.79",
+    "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/cache": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/convert-stl": "^0.0.79",

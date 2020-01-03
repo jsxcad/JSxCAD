@@ -1,4 +1,5 @@
-import { union, intersection, Cylinder, Cube, difference } from './jsxcad-api-v1.js';
+import { Cylinder, Cube } from './jsxcad-api-v1-shapes.js';
+import { union, intersection, difference } from './jsxcad-api-v1-shape.js';
 
 /**
  *

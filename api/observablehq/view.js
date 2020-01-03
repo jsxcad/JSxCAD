@@ -1,6 +1,6 @@
 /* global document */
 
-import { Shape } from '@jsxcad/api-v1';
+import Shape from '@jsxcad/api-v1-shape';
 import { staticDisplay } from '@jsxcad/ui-threejs';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 

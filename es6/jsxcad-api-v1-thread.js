@@ -1,4 +1,6 @@
-import { assemble, intersection, Cube, Cylinder, lathe, Triangle } from './jsxcad-api-v1.js';
+import { Cube, Cylinder, Triangle } from './jsxcad-api-v1-shapes.js';
+import { assemble, intersection } from './jsxcad-api-v1-shape.js';
+import { lathe } from './jsxcad-api-v1-extrude.js';
 
 /**
  *
