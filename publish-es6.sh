@@ -30,9 +30,12 @@ cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
 cp api/v1-motor/dist/main.js es6/jsxcad-api-v1-motor.js
 cp api/v1-pdf/dist/main.js es6/jsxcad-api-v1-pdf.js
 cp api/v1-plan/dist/main.js es6/jsxcad-api-v1-plan.js
+cp api/v1-plans/dist/main.js es6/jsxcad-api-v1-plans.js
 cp api/v1-png/dist/main.js es6/jsxcad-api-v1-png.js
 cp api/v1-shape/dist/main.js es6/jsxcad-api-v1-shape.js
+cp api/v1-shapefile/dist/main.js es6/jsxcad-api-v1-shapefile.js
 cp api/v1-shapes/dist/main.js es6/jsxcad-api-v1-shapes.js
+cp api/v1-shell/dist/main.js es6/jsxcad-api-v1-shapes.js
 cp api/v1-stl/dist/main.js es6/jsxcad-api-v1-stl.js
 cp api/v1-svg/dist/main.js es6/jsxcad-api-v1-svg.js
 cp api/v1-thread/dist/main.js es6/jsxcad-api-v1-thread.js
