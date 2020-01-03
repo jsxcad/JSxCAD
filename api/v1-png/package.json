@@ -1,0 +1,50 @@
+{
+  "name": "@jsxcad/api-v1-png",
+  "version": "0.0.79",
+  "description": "PNG api for JSxCAD",
+  "repository": "https://github.com/jsxcad/JSxCAD",
+  "main": "main.js",
+  "module": "dist/main.js",
+  "scripts": {
+    "depcheck": "depcheck",
+    "lint": "eslint *.js",
+    "lintfix": "eslint --fix *.js",
+    "rollup": "rollup -c rollup_main.js",
+    "test": "ava",
+    "tests": "echo ok"
+  },
+  "contributors": [
+    {
+      "name": "Brian Spilsbury",
+      "url": "http://github.com/pentacular/"
+    }
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@jsxcad/algorithm-contour": "^0.0.79",
+    "@jsxcad/algorithm-shape": "^0.0.79",
+    "@jsxcad/api-v1-math": "^0.0.79",
+    "@jsxcad/api-v1-shape": "^0.0.79",
+    "@jsxcad/convert-png": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79"
+  },
+  "devDependencies": {
+    "ava": "^1.4.1",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "esm": "^3.2.10",
+    "rollup": "^1.11.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3"
+  },
+  "ava": {
+    "require": "esm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
+}

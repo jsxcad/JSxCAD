@@ -1,7 +1,7 @@
-import { Shape } from './jsxcad-api-v1.js';
-export * from './jsxcad-api-v1.js';
+import Shape from './jsxcad-api-v1-shape.js';
 import { staticDisplay } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
+export * from './jsxcad-api-v1.js';
 
 /* global document */
 

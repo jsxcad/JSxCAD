@@ -1,4 +1,5 @@
-import { cos, sqrt, acos, Shape, sin, max } from './jsxcad-api-v1.js';
+import { cos, sqrt, acos, sin, max } from './jsxcad-api-v1-math.js';
+import Shape from './jsxcad-api-v1-shape.js';
 
 // Probably derived from https://github.com/sadr0b0t/pd-gears/blob/master/pd-gears.scad
 // Public Domain Parametric Involute Spur Gear (and involute helical gear and involute rack)

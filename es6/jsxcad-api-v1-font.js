@@ -1,4 +1,4 @@
-import { Shape } from './jsxcad-api-v1.js';
+import Shape from './jsxcad-api-v1-shape.js';
 import { translate } from './jsxcad-geometry-paths.js';
 import { readFile, getSources } from './jsxcad-sys.js';
 import { toFont } from './jsxcad-algorithm-text.js';
@@ -92,4 +92,4 @@ Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
 Font.read.signature = 'Font.read(path:string, { flip:boolean = false }) -> Font';
 
 export default Font;
-export { Font, Hershey };
+export { Font, Hershey, readFont };

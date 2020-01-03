@@ -1,4 +1,4 @@
-import { Shape } from '@jsxcad/api-v1';
+import Shape from '@jsxcad/api-v1-shape';
 import { fromLDraw } from '@jsxcad/convert-ldraw';
 import { getSources } from '@jsxcad/sys';
 

@@ -1,4 +1,5 @@
-import { Cube, Cylinder, Shape, assemble } from '@jsxcad/api-v1';
+import { Cube, Cylinder } from '@jsxcad/api-v1-shapes';
+import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
 export const Stud =
     (diameter = 5, height = 1.8,

@@ -1,3 +1,7 @@
+import { readFont } from '@jsxcad/api-v1-font';
+import '@jsxcad/api-v1-pdf';
+import '@jsxcad/api-v1-stl';
+
 source('ttf/GreatVibes.ttf', './great-vibes/GreatVibes-Regular.ttf');
 
 const string = 'JSxCAD';
