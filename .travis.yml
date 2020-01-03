@@ -1,6 +1,10 @@
 language: node_js
 node_js:
   - 13.5.0
+addons:
+  apt:
+    packages:
+    - libxi-dev
 script:
   - npm run bootstrap
   - npm run depcheck
