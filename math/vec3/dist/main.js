@@ -210,65 +210,20 @@ const random = (vec) => {
   }
 };
 
-/**
- * Subtracts vector b from vector a
- *
- * @param {vec3} a the first operand
- * @param {vec3} b the second operand
- * @returns {vec3} out
- */
-const subtract = ([ax, ay, az], [bx, by, bz]) => [(ax - bx), (ay - by), (az - bz)];
+const rotateX = ([x, y, z], angle) =>
+  [x,
+   y * Math.cos(angle) - z * Math.sin(angle),
+   y * Math.sin(angle) + z * Math.cos(angle)];
 
-/**
- * Rotate vector 3D vector around the x-axis
- * @param {Number} angle The angle of rotation
- * @param {vec3} origin The origin of the rotation
- * @param {vec3} vector The vec3 point to rotate
- * @returns {vec3} out
- */
-const rotateX = (angle, origin, vector) => {
-  const p = subtract(vector, origin);
-  // rotate
-  const r = [p[0],
-             p[1] * Math.cos(angle) - p[2] * Math.sin(angle),
-             p[1] * Math.sin(angle) + p[2] * Math.cos(angle)];
-  // translate
-  return add(r, origin);
-};
+const rotateY = ([x, y, z], angle) =>
+  [z * Math.sin(angle) + x * Math.cos(angle),
+   y,
+   z * Math.cos(angle) - x * Math.sin(angle)];
 
-/**
- * Rotate vector 3D vector around the y-axis
- * @param {Number} angle The angle of rotation
- * @param {vec3} origin The origin of the rotation
- * @param {vec3} vector The vec3 point to rotate
- * @returns {vec3} out
- */
-const rotateY = (angle, origin, vector) => {
-  const p = subtract(vector, origin);
-  // rotate
-  const r = [p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
-             p[1],
-             p[2] * Math.cos(angle) - p[0] * Math.sin(angle)];
-  // translate
-  return add(r, origin);
-};
-
-/**
- * Rotate vector 3D vector around the z-axis
- * @param {Number} angle The angle of rotation in radians
- * @param {vec3} origin The origin of the rotation
- * @param {vec3} vector The vec3 point to rotate
- * @returns {vec3} out
- */
-const rotateZ = (angle, origin, vector) => {
-  const p = subtract(vector, origin);
-  // rotate
-  const r = [p[0] * Math.cos(angle) - p[1] * Math.sin(angle),
-             p[0] * Math.sin(angle) + p[1] * Math.cos(angle),
-             p[2]];
-  // translate
-  return add(r, origin);
-};
+const rotateZ = ([x, y, z], angle) =>
+  [x * Math.cos(angle) - y * Math.sin(angle),
+   x * Math.sin(angle) + y * Math.cos(angle),
+   z];
 
 /**
  * Calculates the squared euclidian distance between two vec3's
@@ -293,6 +248,15 @@ const squaredDistance = ([ax, ay, az], [bx, by, bz]) => {
 const squaredLength = ([x, y, z]) => (x * x) + (y * y) + (z * z);
 
 /**
+ * Subtracts vector b from vector a
+ *
+ * @param {vec3} a the first operand
+ * @param {vec3} b the second operand
+ * @returns {vec3} out
+ */
+const subtract = ([ax, ay, az], [bx, by, bz]) => [(ax - bx), (ay - by), (az - bz)];
+
+/**
  * Transforms the vec3 with a mat4.
  * 4th vector component is implicitly '1'
  * @param {[[<vec3>], <mat4> , <vec3>]} params
@@ -309,6 +273,57 @@ const transform = (matrix, [x = 0, y = 0, z = 0]) => {
 };
 
 /**
+ * Rotate vector 3D vector around the x-axis
+ * @param {Number} angle The angle of rotation
+ * @param {vec3} origin The origin of the rotation
+ * @param {vec3} vector The vec3 point to rotate
+ * @returns {vec3} out
+ */
+const turnX = (angle, origin, vector) => {
+  const p = subtract(vector, origin);
+  // rotate
+  const r = [p[0],
+             p[1] * Math.cos(angle) - p[2] * Math.sin(angle),
+             p[1] * Math.sin(angle) + p[2] * Math.cos(angle)];
+  // translate
+  return add(r, origin);
+};
+
+/**
+ * Rotate vector 3D vector around the y-axis
+ * @param {Number} angle The angle of rotation
+ * @param {vec3} origin The origin of the rotation
+ * @param {vec3} vector The vec3 point to turn
+ * @returns {vec3} out
+ */
+const turnY = (angle, origin, vector) => {
+  const p = subtract(vector, origin);
+  // turn
+  const r = [p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
+             p[1],
+             p[2] * Math.cos(angle) - p[0] * Math.sin(angle)];
+  // translate
+  return add(r, origin);
+};
+
+/**
+ * Rotate vector 3D vector around the z-axis
+ * @param {Number} angle The angle of rotation in radians
+ * @param {vec3} origin The origin of the rotation
+ * @param {vec3} vector The vec3 point to turn
+ * @returns {vec3} out
+ */
+const turnZ = (angle, origin, vector) => {
+  const p = subtract(vector, origin);
+  // turn
+  const r = [p[0] * Math.cos(angle) - p[1] * Math.sin(angle),
+             p[0] * Math.sin(angle) + p[1] * Math.cos(angle),
+             p[2]];
+  // translate
+  return add(r, origin);
+};
+
+/**
  * Calculates the unit vector of the given vector
  *
  * @param {vec3} vector - the base vector for calculations
@@ -322,4 +337,4 @@ const unit = (vector) => {
           z / magnitude];
 };
 
-export { abs, add, angle, canonicalize, cross, distance, divide, dot, equals, fromPoint, fromScalar, fromValues, fromVec2, length, lerp, max, min, multiply, negate, normalize, random, rotateX, rotateY, rotateZ, scale, squaredDistance, squaredLength, subtract, transform, unit };
+export { abs, add, angle, canonicalize, cross, distance, divide, dot, equals, fromPoint, fromScalar, fromValues, fromVec2, length, lerp, max, min, multiply, negate, normalize, random, rotateX, rotateY, rotateZ, scale, squaredDistance, squaredLength, subtract, transform, turnX, turnY, turnZ, unit };

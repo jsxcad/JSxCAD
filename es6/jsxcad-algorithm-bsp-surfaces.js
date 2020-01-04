@@ -327,6 +327,35 @@ const removeExteriorPolygonsKeepingSkin = (bsp, polygons) => {
   }
 };
 
+const dividePolygons = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return polygons;
+  } else if (bsp === outLeaf) {
+    return polygons;
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */back,
+                   /* front= */front);
+    }
+    const trimmedFront = dividePolygons(bsp.front, front);
+    const trimmedBack = dividePolygons(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 const cut = (solid, surface) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface);
@@ -372,6 +401,32 @@ const containsPoint = (bsp, point) => {
       }
     }
   }
+};
+
+const deform = (solid, transform, heights) => {
+  let bsp = inLeaf;
+
+  // FIX: Build a balanced bsp.
+  for (const height of heights) {
+    // Build a classifier from heights.
+    bsp = {
+      back: bsp,
+      front: outLeaf,
+      kind: BRANCH,
+      plane: [0, 0, 1, height],
+      same: []
+    };
+  }
+
+  const solidPolygons = toPolygons({}, solid);
+
+  // Classify the solid with it.
+  const dividedPolygons = dividePolygons(bsp, solidPolygons);
+
+  // Now the solid should have vertexes at the given heights, and we can apply the transform.
+  const transformedPolygons = dividedPolygons.map(path => path.map(transform));
+
+  return fromPolygons$1({}, transformedPolygons);
 };
 
 const difference = (aSolid, ...bSolids) => {
@@ -454,4 +509,4 @@ const union = (...solids) => {
   return alignVertices(solids[0], normalize);
 };
 
-export { containsPoint, cut, cutOpen, difference, fromSolid, intersection, section, union };
+export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, section, union };

@@ -2,15 +2,17 @@ import * as vec from '@jsxcad/math-vec3';
 
 import { ease, linear } from './ease.js';
 
-import acos from './acos.js';
-import cos from './cos.js';
-import max from './max.js';
-import min from './min.js';
-import numbers from './numbers.js';
-import sin from './sin.js';
-import sqrt from './sqrt.js';
+import Random from './Random';
+import acos from './acos';
+import cos from './cos';
+import max from './max';
+import min from './min';
+import numbers from './numbers';
+import sin from './sin';
+import sqrt from './sqrt';
 
 const api = {
+  Random,
   acos,
   cos,
   ease,
@@ -24,6 +26,7 @@ const api = {
 };
 
 export {
+  Random,
   acos,
   cos,
   ease,

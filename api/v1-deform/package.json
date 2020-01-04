@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/api-v1-math",
+  "name": "@jsxcad/api-v1-deform",
   "version": "0.0.79",
-  "description": "Math api for JSxCAD",
+  "description": "Deformation api for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -11,7 +11,7 @@
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "ava *.test.js"
+    "tests": "echo ok"
   },
   "contributors": [
     {
@@ -22,8 +22,11 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-vec3": "^0.0.79",
-    "prando": "^5.1.2"
+    "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
+    "@jsxcad/api-v1-shape": "^0.0.79",
+    "@jsxcad/geometry-solid": "^0.0.79",
+    "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^1.4.1",
