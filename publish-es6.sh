@@ -16,6 +16,7 @@ cp api/v1/dist/main.js es6/jsxcad-api-v1.js
 cp api/v1-armature/dist/main.js es6/jsxcad-api-v1-armature.js
 cp api/v1-connector/dist/main.js es6/jsxcad-api-v1-connector.js
 cp api/v1-cursor/dist/main.js es6/jsxcad-api-v1-cursor.js
+cp api/v1-deform/dist/main.js es6/jsxcad-api-v1-deform.js
 cp api/v1-dst/dist/main.js es6/jsxcad-api-v1-dst.js
 cp api/v1-dxf/dist/main.js es6/jsxcad-api-v1-dxf.js
 cp api/v1-extrude/dist/main.js es6/jsxcad-api-v1-extrude.js
@@ -35,7 +36,7 @@ cp api/v1-png/dist/main.js es6/jsxcad-api-v1-png.js
 cp api/v1-shape/dist/main.js es6/jsxcad-api-v1-shape.js
 cp api/v1-shapefile/dist/main.js es6/jsxcad-api-v1-shapefile.js
 cp api/v1-shapes/dist/main.js es6/jsxcad-api-v1-shapes.js
-cp api/v1-shell/dist/main.js es6/jsxcad-api-v1-shapes.js
+cp api/v1-shell/dist/main.js es6/jsxcad-api-v1-shell.js
 cp api/v1-stl/dist/main.js es6/jsxcad-api-v1-stl.js
 cp api/v1-svg/dist/main.js es6/jsxcad-api-v1-svg.js
 cp api/v1-thread/dist/main.js es6/jsxcad-api-v1-thread.js

@@ -1,19 +1,4 @@
-import { add } from './add';
-import { subtract } from './subtract';
-
-/**
- * Rotate vector 3D vector around the y-axis
- * @param {Number} angle The angle of rotation
- * @param {vec3} origin The origin of the rotation
- * @param {vec3} vector The vec3 point to rotate
- * @returns {vec3} out
- */
-export const rotateY = (angle, origin, vector) => {
-  const p = subtract(vector, origin);
-  // rotate
-  const r = [p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
-             p[1],
-             p[2] * Math.cos(angle) - p[0] * Math.sin(angle)];
-  // translate
-  return add(r, origin);
-};
+export const rotateY = ([x, y, z], angle) =>
+  [z * Math.sin(angle) + x * Math.cos(angle),
+   y,
+   z * Math.cos(angle) - x * Math.sin(angle)];

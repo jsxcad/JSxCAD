@@ -345,6 +345,35 @@ const removeExteriorPolygonsKeepingSkin = (bsp, polygons) => {
   }
 };
 
+const dividePolygons = (bsp, polygons) => {
+  if (bsp === inLeaf) {
+    return polygons;
+  } else if (bsp === outLeaf) {
+    return polygons;
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */back,
+                   /* front= */front);
+    }
+    const trimmedFront = dividePolygons(bsp.front, front);
+    const trimmedBack = dividePolygons(bsp.back, back);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return [].concat(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 export {
   BACK,
   BRANCH,
@@ -353,6 +382,7 @@ export {
   FRONT,
   IN_LEAF,
   OUT_LEAF,
+  dividePolygons,
   fromPolygons,
   fromSolid,
   inLeaf,

@@ -27,6 +27,9 @@ import { squaredDistance } from './squaredDistance';
 import { squaredLength } from './squaredLength';
 import { subtract } from './subtract';
 import { transform } from './transform';
+import { turnX } from './turnX';
+import { turnY } from './turnY';
+import { turnZ } from './turnZ';
 import { unit } from './unit';
 
 export {
@@ -59,5 +62,8 @@ export {
   squaredLength,
   subtract,
   transform,
+  turnX,
+  turnY,
+  turnZ,
   unit
 };

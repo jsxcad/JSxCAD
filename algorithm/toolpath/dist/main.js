@@ -24,7 +24,7 @@ const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
   for (const [start, end] of getEdges(path)) {
     const direction = normalize(subtract(start, end));
     const angleRadians = Math.PI / 2;
-    const offsetDirection = rotateZ(angleRadians, [0, 0, 0], direction);
+    const offsetDirection = rotateZ(direction, angleRadians);
     const offset = scale(radius, offsetDirection);
     const frontcut = scale(-overcut, direction);
     const backcut = scale(overcut, direction);

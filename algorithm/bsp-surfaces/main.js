@@ -1,6 +1,7 @@
 import { cut, cutOpen } from './cut';
 
 import { containsPoint } from './containsPoint';
+import { deform } from './deform';
 import { difference } from './difference';
 import { fromSolid } from './bsp';
 import { intersection } from './intersection';
@@ -11,6 +12,7 @@ export {
   containsPoint,
   cut,
   cutOpen,
+  deform,
   difference,
   fromSolid,
   intersection,
