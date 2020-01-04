@@ -1,4 +1,4 @@
-import { canonicalize, transform } from '@jsxcad/geometry-surface';
+import { canonicalize, transform } from '@jsxcad/geometry-paths';
 
 import { degToRad } from '@jsxcad/math-utils';
 import { fromZRotation } from '@jsxcad/math-mat4';

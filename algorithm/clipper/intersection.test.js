@@ -1,4 +1,4 @@
-import { canonicalize, transform } from '@jsxcad/geometry-surface';
+import { canonicalize, transform } from '@jsxcad/geometry-paths';
 
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { intersection } from './intersection';
