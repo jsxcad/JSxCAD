@@ -9,9 +9,9 @@
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
+    "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "ava *.test.js",
-    "rollup": "rollup -c rollup_main.js"
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {

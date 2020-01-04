@@ -11,7 +11,7 @@
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "echo ok"
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
@@ -22,7 +22,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/math-vec3": "^0.0.79"
+    "@jsxcad/math-vec3": "^0.0.79",
+    "prando": "^5.1.2"
   },
   "devDependencies": {
     "ava": "^1.4.1",
