@@ -8510,7 +8510,6 @@ const { Clipper: Clipper$4, ClipType: ClipType$3, PolyTree: PolyTree$1, PolyType
 const magnitude = 1e5;
 
 const makeConvex = (surface, normalize = createNormalize2()) => {
-  console.log(`QQ/makeConvex/surface: ${JSON.stringify(surface)}`);
   const clipper = new Clipper$4();
   clipper.AddPaths(fromSurface(surface, normalize), PolyType$3.ptSubject, true);
   const result = new PolyTree$1();
@@ -8527,7 +8526,7 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
     }
     // eslint-disable-next-line camelcase
     for (const child of m_Childs) {
-      // walkHole(child, contour, holes);
+      walkHole(child, contour, holes);
     }
     const triangles = earcut_1(contour, holes);
     for (let i = 0; i < triangles.length; i += 3) {
@@ -8544,11 +8543,25 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
     }
   };
 
+  // eslint-disable-next-line camelcase
+  const walkHole = ({ m_polygon, m_Childs }, contour, holes) => {
+    const start = contour.length;
+    for (const { X, Y } of Clipper$4.CleanPolygon(m_polygon, 1)) {
+      contour.push(X, Y);
+    }
+    if (contour.length > start) {
+      holes.push(start >>> 1);
+    }
+    // eslint-disable-next-line camelcase
+    for (const child of m_Childs) {
+      walkContour(child);
+    }
+  };
+
   for (const child of result.m_Childs) {
     walkContour(child);
   }
 
-  console.log(`QQ/makeConvex/convex: ${JSON.stringify(convexSurface)}`);
   return convexSurface;
 };
 

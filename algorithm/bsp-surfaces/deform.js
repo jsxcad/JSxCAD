@@ -5,13 +5,13 @@ import {
 } from './bsp';
 
 import {
-  makeSurfacesConvex,
+  alignVertices,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
 
 import {
-  makeConvex,
+  makeConvex
 } from '@jsxcad/geometry-surface';
 
 const X = 0;
@@ -61,7 +61,7 @@ const walkZ = (min, max, resolution) => {
 };
 
 export const deform = (solid, transform, min, max, resolution) => {
-  const solidPolygons = toPolygonsFromSolid({}, solid);
+  const solidPolygons = toPolygonsFromSolid({}, alignVertices(solid));
 
   const bsp = walkX(min, max, resolution);
 
@@ -78,8 +78,20 @@ export const deform = (solid, transform, min, max, resolution) => {
     }
   }
 
+  const realignedPolygons = alignVertices([dividedPolygons])[0];
+
+  const vertices = new Map();
+
+  for (const path of realignedPolygons) {
+    for (const point of path) {
+      if (!vertices.has(point)) {
+        vertices.set(point, transform(point));
+      }
+    }
+  }
+
   // Now the solid should have vertexes at the given heights, and we can apply the transform.
-  const transformedPolygons = dividedPolygons.map(path => path.map(transform));
+  const transformedPolygons = realignedPolygons.map(path => path.map(point => vertices.get(point)));
 
   return toSolidFromPolygons({}, transformedPolygons);
 };

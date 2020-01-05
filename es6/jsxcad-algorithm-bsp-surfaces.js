@@ -1,7 +1,7 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { squaredDistance } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toPolygons, fromPolygons as fromPolygons$1, createNormalize3, alignVertices, doesNotOverlap, flip } from './jsxcad-geometry-solid.js';
+import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3, doesNotOverlap, flip } from './jsxcad-geometry-solid.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 
 const EPSILON = 1e-5;
@@ -451,7 +451,7 @@ const walkZ = (min, max, resolution) => {
 };
 
 const deform = (solid, transform, min, max, resolution) => {
-  const solidPolygons = toPolygons({}, solid);
+  const solidPolygons = toPolygons({}, alignVertices(solid));
 
   const bsp = walkX(min, max, resolution);
 
@@ -468,8 +468,20 @@ const deform = (solid, transform, min, max, resolution) => {
     }
   }
 
+  const realignedPolygons = alignVertices([dividedPolygons])[0];
+
+  const vertices = new Map();
+
+  for (const path of realignedPolygons) {
+    for (const point of path) {
+      if (!vertices.has(point)) {
+        vertices.set(point, transform(point));
+      }
+    }
+  }
+
   // Now the solid should have vertexes at the given heights, and we can apply the transform.
-  const transformedPolygons = dividedPolygons.map(path => path.map(transform));
+  const transformedPolygons = realignedPolygons.map(path => path.map(point => vertices.get(point)));
 
   return fromPolygons$1({}, transformedPolygons);
 };

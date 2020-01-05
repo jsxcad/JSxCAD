@@ -2,7 +2,7 @@ import { alignVertices } from './alignVertices';
 import { assertGood } from './assertGood';
 import { makeConvex } from '@jsxcad/geometry-surface';
 
-const convexSurfaces = Symbol('convexSurfaces';
+const convexSurfaces = Symbol('convexSurfaces');
 
 export const makeSurfacesConvex = (rawSolid) => {
   if (rawSolid.length === undefined) {
