@@ -1,28 +1,97 @@
-import { BRANCH, dividePolygons, inLeaf, outLeaf } from './bsp';
-import { toPolygons as toPolygonsFromSolid, fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import {
+  BRANCH,
+  dividePolygons,
+  inLeaf
+} from './bsp';
 
-export const deform = (solid, transform, heights) => {
-  let bsp = inLeaf;
+import {
+  alignVertices,
+  toPolygons as toPolygonsFromSolid,
+  fromPolygons as toSolidFromPolygons
+} from '@jsxcad/geometry-solid';
 
-  // FIX: Build a balanced bsp.
-  for (const height of heights) {
-    // Build a classifier from heights.
-    bsp = {
-      back: bsp,
-      front: outLeaf,
-      kind: BRANCH,
-      plane: [0, 0, 1, height],
-      same: []
-    };
+import {
+  makeConvex
+} from '@jsxcad/geometry-surface';
+
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const walkX = (min, max, resolution) => {
+  if (min[X] + resolution > max[X]) {
+    return inLeaf;
   }
+  const midX = (min[X] + max[X]) / 2;
+  return {
+    back: walkY(min, [midX, max[Y], max[Z]], resolution),
+    front: walkY([midX, min[Y], min[Z]], max, resolution),
+    kind: BRANCH,
+    plane: [1, 0, 0, midX],
+    same: []
+  };
+};
 
-  const solidPolygons = toPolygonsFromSolid({}, solid);
+const walkY = (min, max, resolution) => {
+  if (min[Y] + resolution > max[Y]) {
+    return inLeaf;
+  }
+  const midY = (min[Y] + max[Y]) / 2;
+  return {
+    back: walkZ(min, [max[X], midY, max[Z]], resolution),
+    front: walkZ([min[X], midY, min[Z]], max, resolution),
+    kind: BRANCH,
+    plane: [0, 1, 0, midY],
+    same: []
+  };
+};
+
+const walkZ = (min, max, resolution) => {
+  if (min[Z] + resolution > max[Z]) {
+    return inLeaf;
+  }
+  const midZ = (min[Z] + max[Z]) / 2;
+  return {
+    back: walkX(min, [max[X], max[Y], midZ], resolution),
+    front: walkX([min[X], min[Y], midZ], max, resolution),
+    kind: BRANCH,
+    plane: [0, 0, 1, midZ],
+    same: []
+  };
+};
+
+export const deform = (solid, transform, min, max, resolution) => {
+  const solidPolygons = toPolygonsFromSolid({}, alignVertices(solid));
+
+  const bsp = walkX(min, max, resolution);
 
   // Classify the solid with it.
-  const dividedPolygons = dividePolygons(bsp, solidPolygons);
+  const dividedPolygons = [];
+
+  for (const polygon of dividePolygons(bsp, solidPolygons)) {
+    if (polygon.length > 3) {
+      for (const triangle of makeConvex([polygon])) {
+        dividedPolygons.push(triangle);
+      }
+    } else if (polygon.length === 3) {
+      dividedPolygons.push(polygon);
+    }
+  }
+
+  const realignedPolygons = alignVertices([dividedPolygons])[0];
+
+  const vertices = new Map();
+
+  for (const path of realignedPolygons) {
+    for (const point of path) {
+      if (!vertices.has(point)) {
+        vertices.set(point, transform(point));
+      }
+    }
+  }
 
   // Now the solid should have vertexes at the given heights, and we can apply the transform.
-  const transformedPolygons = dividedPolygons.map(path => path.map(transform));
+  const transformedPolygons = realignedPolygons.map(path => path.map(point => vertices.get(point)));
 
   return toSolidFromPolygons({}, transformedPolygons);
 };
