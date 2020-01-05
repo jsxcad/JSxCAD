@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, drop as drop$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, drop as drop$1, getSolids, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
 import { fromPolygons } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -502,6 +502,56 @@ Shape.prototype.void = voidMethod;
 
 voidMethod.signature = 'Shape -> void(...shapes:Shape) -> Shape';
 
+const toWireframeFromSolid = (solid) => {
+  const paths = [];
+  for (const surface of solid) {
+    paths.push(...surface);
+  }
+  return Shape.fromPaths(paths);
+};
+
+const toWireframeFromSurface = (surface) => {
+  return Shape.fromPaths(surface);
+};
+
+/**
+ *
+ * # Wireframe
+ *
+ * Generates a set of paths outlining a solid.
+ *
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Cube(10).wireframe()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [-40, -40, 40] } }
+ * ```
+ * Sphere(10).wireframe()
+ * ```
+ * :::
+ *
+ **/
+
+const wireframe = (options = {}, shape) => {
+  const pieces = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSolid(solid));
+  }
+  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(surface));
+  }
+  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+    pieces.push(toWireframeFromSurface(z0Surface));
+  }
+  return assemble(...pieces);
+};
+
+const method = function (options) { return wireframe(options, this); };
+
+Shape.prototype.wireframe = method;
+Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
+
 /**
  *
  * # With
@@ -766,8 +816,8 @@ materialMethod.signature = 'Shape -> material() -> Shape';
 
 const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
 
-const method = function (...args) { return translate(this, ...args); };
-Shape.prototype.translate = method;
+const method$1 = function (...args) { return translate(this, ...args); };
+Shape.prototype.translate = method$1;
 
 /**
  *

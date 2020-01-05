@@ -3,6 +3,7 @@ import './add';
 import './clip';
 import './cut';
 import './void';
+import './wireframe';
 import './with';
 
 import Shape from './Shape';

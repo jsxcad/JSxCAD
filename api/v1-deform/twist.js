@@ -17,7 +17,7 @@ export const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     for (let z = min[Z] + resolution; z < max[Z] - resolution; z += resolution) {
       heights.push(z);
     }
-    assembly.push({ solid: deform(solid, rotate, heights), tags });
+    assembly.push({ solid: deform(solid, rotate, min, max, resolution), tags });
   }
 
   return Shape.fromGeometry({ assembly });

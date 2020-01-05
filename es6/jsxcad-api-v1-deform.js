@@ -12,12 +12,10 @@ const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
   const assembly = [];
 
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    const heights = [];
     const [min, max] = measureBoundingBox(solid);
     for (let z = min[Z] + resolution; z < max[Z] - resolution; z += resolution) {
-      heights.push(z);
     }
-    assembly.push({ solid: deform(solid, rotate, heights), tags });
+    assembly.push({ solid: deform(solid, rotate, min, max, resolution), tags });
   }
 
   return Shape.fromGeometry({ assembly });

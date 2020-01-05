@@ -10,6 +10,7 @@ const { Clipper, ClipType, PolyTree, PolyType } = ClipperLib;
 const magnitude = 1e5;
 
 export const makeConvex = (surface, normalize = createNormalize2()) => {
+  console.log(`QQ/makeConvex/surface: ${JSON.stringify(surface)}`);
   const clipper = new Clipper();
   clipper.AddPaths(fromSurface(surface, normalize), PolyType.ptSubject, true);
   const result = new PolyTree();
@@ -26,7 +27,7 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
     }
     // eslint-disable-next-line camelcase
     for (const child of m_Childs) {
-      walkHole(child, contour, holes);
+      // walkHole(child, contour, holes);
     }
     const triangles = earcut(contour, holes);
     for (let i = 0; i < triangles.length; i += 3) {
@@ -62,5 +63,6 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
     walkContour(child);
   }
 
+  console.log(`QQ/makeConvex/convex: ${JSON.stringify(convexSurface)}`);
   return convexSurface;
 };
