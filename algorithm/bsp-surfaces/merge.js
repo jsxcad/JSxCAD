@@ -44,7 +44,7 @@ export const merge = (aPaths, bPaths) => {
       repairedPaths.push(repairedPath);
     }
     return repairedPaths;
-  }
+  };
 
   return [...repair(aPaths, aVertices, bVertices), ...repair(bPaths, bVertices, aVertices)];
-}
+};

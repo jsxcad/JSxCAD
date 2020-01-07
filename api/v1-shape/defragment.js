@@ -8,7 +8,7 @@ export const defragment = (shape) => {
     assembly.push({ solid: makeSurfacesConvex(solid) });
   }
   return Shape.fromGeometry({ assembly });
-}
+};
 
 const defragmentMethod = function () { return defragment(this); };
 Shape.prototype.defragment = defragmentMethod;
