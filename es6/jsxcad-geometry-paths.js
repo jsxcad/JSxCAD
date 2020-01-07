@@ -1,5 +1,5 @@
 import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { canonicalize as canonicalize$1, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon, transform as transform$1 } from './jsxcad-geometry-path.js';
+import { canonicalize as canonicalize$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon, transform as transform$1 } from './jsxcad-geometry-path.js';
 import { fromPoint, min, max } from './jsxcad-math-vec3.js';
 
 const butLast = (paths) => paths.slice(0, paths.length - 1);
@@ -25,6 +25,32 @@ const eachPoint = (thunk, paths) => {
       }
     }
   }
+};
+
+// Expects aligned vertices.
+
+const findOpenEdges = (paths, isOpen) => {
+  const test = (closed) => isOpen ? !closed : closed;
+
+  const edges = new Set();
+
+  for (const path of paths) {
+    for (const edge of getEdges(path)) {
+      // FIX: serialization should be unnecessary.
+      edges.add(JSON.stringify(edge));
+    }
+  }
+
+  const openEdges = [];
+  for (const path of paths) {
+    for (const [start, end] of getEdges(path)) {
+      if (test(edges.has(JSON.stringify([end, start])))) {
+        openEdges.push([start, end]);
+      }
+    }
+  }
+
+  return openEdges;
 };
 
 const flip = (paths) => paths.map(flip$1);
@@ -96,4 +122,4 @@ const union = (...pathsets) => [].concat(...pathsets);
 const scale = ([x = 1, y = 1, z = 1], paths) => transform(fromScaling([x, y, z]), paths);
 const translate = ([x = 0, y = 0, z = 0], paths) => transform(fromTranslation([x, y, z]), paths);
 
-export { butLast, canonicalize, difference, eachPoint, flip, intersection, last, measureBoundingBox, scale, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
+export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
