@@ -1,9 +1,11 @@
 import { Circle, Sphere } from '@jsxcad/api-v1-shapes';
-import { Shape, union } from '@jsxcad/api-v1-shape';
-import { getSolids, outline } from '@jsxcad/geometry-tagged';
+import { Shape, assemble, union } from '@jsxcad/api-v1-shape';
+import { getAnySurfaces, getSolids, outline, transform } from '@jsxcad/geometry-tagged';
 
+import { getEdges } from '@jsxcad/geometry-path';
 import { hull } from '@jsxcad/api-v1-extrude';
-import { toSegments } from '@jsxcad/geometry-path';
+import { toPlane } from '@jsxcad/geometry-surface';
+import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 /**
  *
@@ -22,6 +24,9 @@ import { toSegments } from '@jsxcad/geometry-path';
 export const shell = (shape, radius = 1, resolution = 8) => {
   resolution = Math.max(resolution, 3);
   const keptGeometry = shape.toKeptGeometry();
+  const assembly = [];
+
+  // Handle solid aspects.
   const shells = [];
   for (const { solid, tags = [] } of getSolids(keptGeometry)) {
     const pieces = [];
@@ -32,17 +37,25 @@ export const shell = (shape, radius = 1, resolution = 8) => {
     }
     shells.push(union(...pieces).as(...tags));
   }
-  for (const { paths, tags = [] } of outline(keptGeometry)) {
+  assembly.push(union(...shells));
+
+  // Handle surface aspects.
+  for (const geometry of getAnySurfaces(keptGeometry)) {
+    const plane = toPlane(geometry.surface || geometry.z0Surface);
+    const [to, from] = toXYPlaneTransforms(plane);
     const pieces = [];
-    for (const path of paths) {
-      for (const segment of toSegments({}, path)) {
-        // FIX: Handle non-z0-surfaces properly.
-        pieces.push(hull(...segment.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+    for (const { paths } of outline(transform(to, geometry))) {
+      for (const path of paths) {
+        for (const edge of getEdges(path)) {
+          // FIX: Handle non-z0-surfaces properly.
+          pieces.push(hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+        }
       }
     }
-    shells.push(union(...pieces).as(...tags));
+    assembly.push(assemble(...pieces.map(piece => piece.transform(from))).as(...(geometry.tags || [])));
   }
-  return union(...shells);
+
+  return assemble(...assembly);
 };
 
 const method = function (radius, resolution) { return shell(this, radius, resolution); };

@@ -4,7 +4,7 @@ import { deform } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { measureBoundingBox } from '@jsxcad/geometry-solid';
 
-export const crumple = (shape, amount = 1, { resolution = 1, rng = Random() } = {}) => {
+export const crumple = (shape, amount = 0.1, { resolution = 1, rng = Random() } = {}) => {
   const offset = v => v + (rng() - 0.5) * amount * 2;
   const perturb = ([x, y, z]) => [offset(x), offset(y), offset(z)];
 

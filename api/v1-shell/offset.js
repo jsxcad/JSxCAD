@@ -1,8 +1,8 @@
 import { Shape } from '@jsxcad/api-v1-shape';
-import { expand } from './expand';
+import { grow } from './grow';
 import { outline } from '@jsxcad/api-v1-extrude';
 
-export const offset = (shape, radius = 1, resolution = 16) => outline(expand(shape, radius, resolution));
+export const offset = (shape, radius = 1, resolution = 16) => outline(grow(shape, radius, resolution));
 
 const offsetMethod = function (radius, resolution) { return offset(this, radius, resolution); };
 Shape.prototype.offset = offsetMethod;

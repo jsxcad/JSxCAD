@@ -6,7 +6,7 @@ import { measureBoundingBox } from './jsxcad-geometry-solid.js';
 import { scale } from './jsxcad-math-vec2.js';
 import { rotateZ } from './jsxcad-math-vec3.js';
 
-const crumple = (shape, amount = 1, { resolution = 1, rng = Random() } = {}) => {
+const crumple = (shape, amount = 0.1, { resolution = 1, rng = Random() } = {}) => {
   const offset = v => v + (rng() - 0.5) * amount * 2;
   const perturb = ([x, y, z]) => [offset(x), offset(y), offset(z)];
 
