@@ -4,7 +4,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const createNormalize3 = (multiplier = 1e5) => {
+export const createNormalize3 = (multiplier = 1e7) => {
   const map = new Map();
   const normalize3 = (coordinate) => {
     // Apply a spatial quantization to the 3 dimensional coordinate.
