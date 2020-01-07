@@ -3,8 +3,8 @@ import { equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-pla
 import { squaredDistance } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 
-const EPSILON = 1e-5;
-const EPSILON2 = 1e-10;
+const EPSILON = 1e-7;
+const EPSILON2 = 1e-14;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;

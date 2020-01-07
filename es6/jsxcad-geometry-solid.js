@@ -1,5 +1,6 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, fromPolygons as fromPolygons$1, makeConvex, makeSimple, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { createNormalize3 as createNormalize3$1 } from './jsxcad-algorithm-quantize.js';
 import { deduplicate, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
@@ -12,13 +13,29 @@ const rotateZ = (radians, solid) => transform(fromZRotation(radians), solid);
 const scale = (vector, solid) => transform(fromScaling(vector), solid);
 const translate = (vector, solid) => transform(fromTranslation(vector), solid);
 
+const alignVertices = (solid, normalize3 = createNormalize3$1(1e5)) => {
+  const aligned = solid.map(surface =>
+    surface.map(polygon => deduplicate(polygon.map(normalize3)))
+        .filter(polygon => polygon.length >= 3)
+        .filter(polygon => toPlane(polygon) !== undefined));
+  return aligned;
+};
+
+const assertGood = (solid) => {
+  for (const surface of solid) {
+    assertGood$1(surface);
+  }
+};
+
+const canonicalize = (solid) => solid.map(canonicalize$1);
+
 // The resolution is 1 / multiplier.
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-const createNormalize3 = (multiplier = 1e7) => {
+const createNormalize3 = (multiplier = 1e5) => {
   const map = new Map();
   const normalize3 = (coordinate) => {
     // Apply a spatial quantization to the 3 dimensional coordinate.
@@ -54,22 +71,6 @@ const createNormalize3 = (multiplier = 1e7) => {
   };
   return normalize3;
 };
-
-const alignVertices = (solid, normalize3 = createNormalize3()) => {
-  const aligned = solid.map(surface =>
-    surface.map(polygon => deduplicate(polygon.map(normalize3)))
-        .filter(polygon => polygon.length >= 3)
-        .filter(polygon => toPlane(polygon) !== undefined));
-  return aligned;
-};
-
-const assertGood = (solid) => {
-  for (const surface of solid) {
-    assertGood$1(surface);
-  }
-};
-
-const canonicalize = (solid) => solid.map(canonicalize$1);
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 const measureBoundingBox = (solid) => {
@@ -144,79 +145,47 @@ const findOpenEdges = (solid, isOpen) => {
 
 const flip = (solid) => solid.map(surface => flip$1(surface));
 
-// The resolution is 1 / multiplier.
-const multiplier = 1e5;
-
 const X$2 = 0;
 const Y$2 = 1;
 const Z$2 = 2;
-const W = 3;
 
-const createNormalize4 = () => {
-  const map = new Map();
-  const normalize4 = (coordinate) => {
-    // Apply a spatial quantization to the 4 dimensional coordinate.
-    const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
-    const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
-    const nz = Math.floor(coordinate[Z$2] * multiplier - 0.5);
-    const nw = Math.floor(coordinate[W] * multiplier - 0.5);
-    // Look for an existing inhabitant.
-    const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
-    if (value !== undefined) {
-      return value;
-    }
-    // One of the ~0 or ~1 values will match the rounded values above.
-    // The other will match the adjacent cell.
-    const nx0 = nx;
-    const ny0 = ny;
-    const nz0 = nz;
-    const nw0 = nw;
-    const nx1 = nx0 + 1;
-    const ny1 = ny0 + 1;
-    const nz1 = nz0 + 1;
-    const nw1 = nw0 + 1;
-    // Populate the space of the quantized value and its adjacencies.
-    // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier, nw1 / multiplier];
-    // FIX: Rename the function to reflect that it seems that we cannot quantize planes,
-    // but we can form a consensus among nearby planes.
-    const normalized = coordinate;
-    map.set(`${nx0}/${ny0}/${nz0}/${nw0}`, normalized);
-    map.set(`${nx0}/${ny0}/${nz0}/${nw1}`, normalized);
-    map.set(`${nx0}/${ny0}/${nz1}/${nw0}`, normalized);
-    map.set(`${nx0}/${ny0}/${nz1}/${nw1}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz0}/${nw0}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz0}/${nw1}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz1}/${nw0}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz1}/${nw1}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz0}/${nw0}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz0}/${nw1}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz1}/${nw0}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz1}/${nw1}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz0}/${nw0}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz0}/${nw1}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz1}/${nw0}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz1}/${nw1}`, normalized);
-    // This is now the normalized value for this region.
-    return normalized;
-  };
-  return normalize4;
-};
-
-const fromPolygons = (options = {}, polygons) => {
-  const normalize4 = createNormalize4();
+const fromPolygons = (options = {}, rawPolygons) => {
+  const normalize3 = createNormalize3$1();
   const coplanarGroups = new Map();
 
-  for (const polygon of polygons) {
+  const polygons = [];
+
+  for (const polygon of rawPolygons) {
     if (polygon.length < 3) {
-      // Polygon became degenerate.
       continue;
+    } else if (polygon.length === 3) {
+      polygons.push(polygon.map(normalize3));
+    } else {
+      // The polygon is convex.
+      // Triangulate with the center to accommodate plane popping.
+      const center = [0, 0, 0];
+      for (const point of polygon) {
+        center[X$2] += point[X$2];
+        center[Y$2] += point[Y$2];
+        center[Z$2] += point[Z$2];
+      }
+      center[X$2] /= polygon.length;
+      center[Y$2] /= polygon.length;
+      center[Z$2] /= polygon.length;
+      for (const [start, end] of getEdges(polygon)) {
+        polygons.push([start, end, center].map(normalize3));
+      }
     }
+  }
+
+  for (const polygon of polygons) {
     const plane = toPlane(polygon);
     if (plane === undefined) {
       console.log(`QQ/fromPolygons/degenerate`);
       continue;
     }
-    const key = normalize4(toPlane(polygon));
+    // const key = normalize4(toPlane(polygon));
+    const key = JSON.stringify(toPlane(polygon));
     const groups = coplanarGroups.get(key);
     if (groups === undefined) {
       const group = [polygon];
@@ -240,7 +209,7 @@ const fromPolygons = (options = {}, polygons) => {
     }
   }
 
-  const alignedSolid = alignVertices(solid);
+  const alignedSolid = alignVertices(solid, normalize3);
   return alignedSolid;
 };
 

@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, getSolids, assemble as assemble$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, makeSurfacesConvex, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { log as log$1, writeFile, readFile, getSources } from './jsxcad-sys.js';
@@ -363,6 +363,17 @@ const cutMethod = function (...shapes) { return difference(this, ...shapes); };
 Shape.prototype.cut = cutMethod;
 
 cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';
+
+const defragment = (shape) => {
+  const assembly = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    assembly.push({ solid: makeSurfacesConvex(solid) });
+  }
+  return Shape.fromGeometry({ assembly });
+};
+
+const defragmentMethod = function () { return defragment(this); };
+Shape.prototype.defragment = defragmentMethod;
 
 /**
  *

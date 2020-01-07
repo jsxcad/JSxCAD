@@ -4,6 +4,7 @@ import { butLast } from './butLast';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
 import { eachPoint } from './eachPoint';
+import { findOpenEdges } from './findOpenEdges';
 import { flip } from './flip';
 import { intersection } from './intersection';
 import { last } from './last';
@@ -20,6 +21,7 @@ export {
   canonicalize,
   difference,
   eachPoint,
+  findOpenEdges,
   flip,
   intersection,
   last,

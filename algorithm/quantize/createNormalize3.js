@@ -1,13 +1,17 @@
-// The resolution is 1 / multiplier.
-
 const X = 0;
 const Y = 1;
 const Z = 2;
 
+// The resolution is 1 / multiplier.
 export const createNormalize3 = (multiplier = 1e5) => {
   const map = new Map();
+  const update = (key, value) => {
+    if (!map.has(key)) {
+      map.set(key, value);
+    }
+  };
   const normalize3 = (coordinate) => {
-    // Apply a spatial quantization to the 3 dimensional coordinate.
+    // Apply a spatial quantization to the 2 dimensional coordinate.
     const nx = Math.floor(coordinate[X] * multiplier - 0.5);
     const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
     const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
@@ -21,20 +25,19 @@ export const createNormalize3 = (multiplier = 1e5) => {
     const nx0 = nx;
     const ny0 = ny;
     const nz0 = nz;
-    const nx1 = nx0 + 1;
-    const ny1 = ny0 + 1;
-    const nz1 = nz0 + 1;
+    const nx1 = nx + 1;
+    const ny1 = ny + 1;
+    const nz1 = nz + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
-    const normalized = coordinate;
-    map.set(`${nx0}/${ny0}/${nz0}`, normalized);
-    map.set(`${nx0}/${ny0}/${nz1}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz0}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz1}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz0}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz1}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz0}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz1}`, normalized);
+    const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
+    update(`${nx0}/${ny0}/${nz0}`, normalized);
+    update(`${nx0}/${ny0}/${nz1}`, normalized);
+    update(`${nx0}/${ny1}/${nz0}`, normalized);
+    update(`${nx0}/${ny1}/${nz1}`, normalized);
+    update(`${nx1}/${ny0}/${nz0}`, normalized);
+    update(`${nx1}/${ny0}/${nz1}`, normalized);
+    update(`${nx1}/${ny1}/${nz0}`, normalized);
+    update(`${nx1}/${ny1}/${nz1}`, normalized);
     // This is now the normalized coordinate for this region.
     return normalized;
   };

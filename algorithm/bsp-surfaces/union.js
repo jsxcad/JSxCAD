@@ -11,37 +11,8 @@ import {
   fromSolid as toBspFromSolid
 } from './bsp';
 
-// An n-way merge, potentially producing duplicate coplanars.
-export const unionNway = (...solids) => {
-  if (solids.length === 0) {
-    return [];
-  }
-  const bsps = [];
-  const polygonSets = [];
-  for (let a = 0; a < solids.length; a++) {
-    for (let b = 0; b < solids.length; b++) {
-      if (a === b) {
-        // No self-interaction.
-        continue;
-      }
-      if (polygonSets[a] === undefined) {
-        polygonSets[a] = toPolygonsFromSolid({}, solids[a]);
-      }
-      if (doesNotOverlap(solids[a], solids[b])) {
-        // No overlap.
-        continue;
-      }
-      // Remove polygons interior to other shapes.
-      if (bsps[b] === undefined) {
-        bsps[b] = toBspFromSolid(solids[b]);
-      }
-      polygonSets[a] = removeInteriorPolygonsKeepingSkin(bsps[b], polygonSets[a]);
-    }
-  }
-  return toSolidFromPolygons({}, [].concat(...polygonSets));
-};
+import { merge } from './merge';
 
-// An asymmetric binary merge.
 export const union = (...solids) => {
   if (solids.length === 0) {
     return [];
@@ -59,7 +30,7 @@ export const union = (...solids) => {
     const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons);
     const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons);
 
-    solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]));
+    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed)));
   }
   return alignVertices(solids[0], normalize);
 };

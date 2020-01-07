@@ -13,6 +13,8 @@ import {
   fromSolid as toBspFromSolid
 } from './bsp';
 
+import { merge } from './merge';
+
 export const difference = (aSolid, ...bSolids) => {
   const normalize = createNormalize3();
   while (bSolids.length > 0) {
@@ -32,7 +34,7 @@ export const difference = (aSolid, ...bSolids) => {
     const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aPolygons);
     const bTrimmed = removeExteriorPolygons2(aBsp, bPolygons);
 
-    aSolid = toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]);
+    aSolid = toSolidFromPolygons({}, merge(aTrimmed, bTrimmed));
   }
   return alignVertices(aSolid, normalize);
 };
