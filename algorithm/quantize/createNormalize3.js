@@ -29,7 +29,8 @@ export const createNormalize3 = (multiplier = 1e5) => {
     const ny1 = ny + 1;
     const nz1 = nz + 1;
     // Populate the space of the quantized coordinate and its adjacencies.
-    const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
+    // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
+    normalized = coordinate;
     update(`${nx0}/${ny0}/${nz0}`, normalized);
     update(`${nx0}/${ny0}/${nz1}`, normalized);
     update(`${nx0}/${ny1}/${nz0}`, normalized);
