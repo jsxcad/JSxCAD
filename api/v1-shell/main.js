@@ -1,20 +1,20 @@
-import contract from './contract';
-import expand from './expand';
+import grow from './grow';
 import offset from './offset';
 import shell from './shell';
+import shrink from './shrink';
 
 const api = {
-  contract,
-  expand,
+  grow,
   offset,
-  shell
+  shell,
+  shrink
 };
 
 export {
-  contract,
-  expand,
+  grow,
   offset,
-  shell
+  shell,
+  shrink
 };
 
 export default api;

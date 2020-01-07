@@ -1,8 +1,10 @@
-import Shape$1, { union, Shape } from './jsxcad-api-v1-shape.js';
+import Shape$1, { union, assemble, Shape } from './jsxcad-api-v1-shape.js';
 import { Sphere, Circle } from './jsxcad-api-v1-shapes.js';
-import { getSolids, outline } from './jsxcad-geometry-tagged.js';
+import { getSolids, getAnySurfaces, outline, transform } from './jsxcad-geometry-tagged.js';
 import { hull, outline as outline$1 } from './jsxcad-api-v1-extrude.js';
-import { toSegments } from './jsxcad-geometry-path.js';
+import { getEdges } from './jsxcad-geometry-path.js';
+import { toPlane } from './jsxcad-geometry-surface.js';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 
 /**
  *
@@ -21,27 +23,39 @@ import { toSegments } from './jsxcad-geometry-path.js';
 const shell = (shape, radius = 1, resolution = 8) => {
   resolution = Math.max(resolution, 3);
   const keptGeometry = shape.toKeptGeometry();
-  const shells = [];
-  for (const { solid, tags = [] } of getSolids(keptGeometry)) {
-    const pieces = [];
-    for (const surface of solid) {
-      for (const polygon of surface) {
-        pieces.push(hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
+  const assembly = [];
+  {
+    // Handle solid aspects.
+    const shells = [];
+    for (const { solid, tags = [] } of getSolids(keptGeometry)) {
+      const pieces = [];
+      for (const surface of solid) {
+        for (const polygon of surface) {
+          pieces.push(hull(...polygon.map(point => Sphere(radius, resolution).move(...point))));
+        }
       }
+      shells.push(union(...pieces).as(...tags));
     }
-    shells.push(union(...pieces).as(...tags));
+    assembly.push(union(...shells));
   }
-  for (const { paths, tags = [] } of outline(keptGeometry)) {
-    const pieces = [];
-    for (const path of paths) {
-      for (const segment of toSegments({}, path)) {
-        // FIX: Handle non-z0-surfaces properly.
-        pieces.push(hull(...segment.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+  {
+    // Handle surface aspects.
+    for (const geometry of getAnySurfaces(keptGeometry)) {
+      const plane = toPlane(geometry.surface || geometry.z0Surface);
+      const [to, from] = toXYPlaneTransforms(plane);
+      const pieces = [];
+      for (const { paths } of outline(transform(to, geometry))) {
+        for (const path of paths) {
+          for (const edge of getEdges(path)) {
+            // FIX: Handle non-z0-surfaces properly.
+            pieces.push(hull(...edge.map(([x, y]) => Circle(radius, resolution).move(x, y))));
+          }
+        }
       }
+      assembly.push(assemble(...pieces.map(piece => piece.transform(from))).as(...(geometry.tags || [])));
     }
-    shells.push(union(...pieces).as(...tags));
   }
-  return union(...shells);
+  return assemble(...assembly);
 };
 
 const method = function (radius, resolution) { return shell(this, radius, resolution); };

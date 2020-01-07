@@ -2,6 +2,8 @@ import './as';
 import './add';
 import './clip';
 import './cut';
+import './faces';
+import './openEdges';
 import './void';
 import './wireframe';
 import './with';

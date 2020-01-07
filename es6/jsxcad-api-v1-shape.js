@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, drop as drop$1, getSolids, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
-import { fromPolygons } from './jsxcad-geometry-solid.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { log as log$1, writeFile, readFile, getSources } from './jsxcad-sys.js';
@@ -432,6 +432,31 @@ const assemble = (...shapes) => {
 };
 
 assemble.signature = 'assemble(...shapes:Shape) -> Shape';
+
+const faces = (shape, op = (x => x)) => {
+  const faces = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    for (const surface of solid) {
+      const face = Shape.fromGeometry({ surface });
+      faces.push(op(face));
+    }
+  }
+  return assemble(...faces);
+};
+
+const facesMethod = function (...args) { return faces(this, ...args); };
+Shape.prototype.faces = facesMethod;
+
+const openEdges = (shape, { isOpen = true } = {}) => {
+  const paths = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    paths.push(...findOpenEdges(alignVertices(solid), isOpen));
+  }
+  return Shape.fromGeometry({ paths });
+};
+
+const openEdgesMethod = function (...args) { return openEdges(this, ...args); };
+Shape.prototype.openEdges = openEdgesMethod;
 
 /**
  *

@@ -1,6 +1,6 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, fromPolygons as fromPolygons$1, makeConvex, makeSimple, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
-import { deduplicate } from './jsxcad-geometry-path.js';
+import { deduplicate, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
 
@@ -115,6 +115,31 @@ const eachPoint = (thunk, solid) => {
   for (const surface of solid) {
     eachPoint$1(thunk, surface);
   }
+};
+
+// Expects aligned vertices.
+
+const findOpenEdges = (solid, isOpen) => {
+  const test = (closed) => isOpen ? !closed : closed;
+  const edges = new Set();
+  for (const surface of solid) {
+    for (const face of surface) {
+      for (const edge of getEdges(face)) {
+        edges.add(JSON.stringify(edge));
+      }
+    }
+  }
+  const openEdges = [];
+  for (const surface of solid) {
+    for (const face of surface) {
+      for (const [start, end] of getEdges(face)) {
+        if (test(edges.has(JSON.stringify([end, start])))) {
+          openEdges.push([start, end]);
+        }
+      }
+    }
+  }
+  return openEdges;
 };
 
 const flip = (solid) => solid.map(surface => flip$1(surface));
@@ -267,4 +292,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, createNormalize3, doesNotOverlap, eachPoint, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, createNormalize3, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };

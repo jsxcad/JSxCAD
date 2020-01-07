@@ -474,14 +474,15 @@ const deform = (solid, transform, min, max, resolution) => {
 
   for (const path of realignedPolygons) {
     for (const point of path) {
-      if (!vertices.has(point)) {
-        vertices.set(point, transform(point));
+      const tag = JSON.stringify(point);
+      if (!vertices.has(tag)) {
+        vertices.set(tag, transform(point));
       }
     }
   }
 
   // Now the solid should have vertexes at the given heights, and we can apply the transform.
-  const transformedPolygons = realignedPolygons.map(path => path.map(point => vertices.get(point)));
+  const transformedPolygons = realignedPolygons.map(path => path.map(point => vertices.get(JSON.stringify(point))));
 
   return fromPolygons$1({}, transformedPolygons);
 };

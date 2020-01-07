@@ -54,7 +54,7 @@ export const faces = (shape, op = (_ => _)) => {
 };
 
 const facesMethod = function (...args) { return faces(this, ...args); };
-Shape.prototype.faces = facesMethod;
+Shape.prototype.connectedFaces = facesMethod;
 
 export default faces;
 
