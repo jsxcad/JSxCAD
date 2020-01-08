@@ -4,6 +4,7 @@ import { splitPolygon } from './splitPolygon';
 
 // Remove from surfaces those parts that are inside the solid delineated by bsp.
 export const mergePolygons = (bsp, polygons) => {
+  throw Error('deprecated');
   switch (bsp.kind) {
     case IN_LEAF:
     case OUT_LEAF:

@@ -4,6 +4,7 @@ import { removeExteriorPolygons } from './removeExteriorPolygons';
 
 // Produce a version of b with all parts outside a removed.
 export const removeExteriorBsp = (a, b, removeSurfacePolygons = false) => {
+  throw Error('deprecated');
   switch (b.kind) {
     case BRANCH: {
       const clipped = {

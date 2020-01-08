@@ -1,10 +1,13 @@
+export { createNormalize3 } from '@jsxcad/algorithm-quantize';
+
+/*
 // The resolution is 1 / multiplier.
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const createNormalize3 = (multiplier = 1e7) => {
+export const createNormalize3 = (multiplier = 1e2) => {
   const map = new Map();
   const normalize3 = (coordinate) => {
     // Apply a spatial quantization to the 3 dimensional coordinate.
@@ -40,3 +43,4 @@ export const createNormalize3 = (multiplier = 1e7) => {
   };
   return normalize3;
 };
+*/

@@ -7633,8 +7633,8 @@ const { Clipper, IntPoint, PolyFillType, PolyTree } = clipper;
 // CHECK: Should this be sqrt(2)?
 const CLEAN_DISTANCE = 1;
 
-const toInt = (integer) => Math.round(integer * 1e5);
-const toFloat = (integer) => integer / 1e5;
+const toInt = (integer) => Math.round(integer * 1e6);
+const toFloat = (integer) => integer / 1e6;
 
 const fillType = PolyFillType.pftNonZero;
 

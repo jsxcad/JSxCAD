@@ -4,6 +4,7 @@ import { splitPolygon } from './splitPolygon';
 
 // Remove from surfaces those parts that are inside the solid delineated by bsp.
 export const removeExteriorPolygons = (bsp, polygons, removeSurfacePolygons = false) => {
+  throw Error('deprecated');
   if (bsp === inLeaf) {
     return polygons;
   } else if (bsp === outLeaf) {

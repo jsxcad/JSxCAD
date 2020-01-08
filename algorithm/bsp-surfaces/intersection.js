@@ -11,6 +11,8 @@ import {
   fromSolid as toBspFromSolid
 } from './bsp';
 
+import { merge } from './merge';
+
 // An asymmetric binary merge.
 export const intersection = (...solids) => {
   if (solids.length === 0) {
@@ -26,15 +28,15 @@ export const intersection = (...solids) => {
     }
 
     const aPolygons = toPolygonsFromSolid({}, a);
-    const aBsp = toBspFromSolid(a);
+    const aBsp = toBspFromSolid(a, normalize);
 
     const bPolygons = toPolygonsFromSolid({}, b);
-    const bBsp = toBspFromSolid(b);
+    const bBsp = toBspFromSolid(b, normalize);
 
-    const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aPolygons);
-    const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bPolygons);
+    const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
+    const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
 
-    solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed]));
+    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed, normalize)));
   }
   return alignVertices(solids[0], normalize);
 };

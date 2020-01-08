@@ -4,7 +4,12 @@ import { getEdges } from '@jsxcad/geometry-path';
 
 // a and b are expected to have reconciled coordinates.
 
-export const merge = (aPaths, bPaths) => {
+const alignVertices = (paths, normalize) => paths.map(path => path.map(normalize));
+
+export const merge = (aPaths, bPaths, normalize) => {
+  // aPaths = alignVertices(aPaths, normalize);
+  // bPaths = alignVertices(bPaths, normalize);
+
   const aOpenEdges = findOpenEdges(aPaths);
   const aVertices = new Set();
   for (const [start, end] of aOpenEdges) {

@@ -34,7 +34,10 @@ export const planeDistance = (plane, point) =>
 
 const pointType = [];
 
-const splitPolygon = (plane, polygon, back, coplanarBack, coplanarFront, front) => {
+const splitPolygon = (normalize, plane, polygon, back, coplanarBack, coplanarFront, front) => {
+  if (normalize === undefined) {
+    throw Error('die: no normalize');
+  }
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.

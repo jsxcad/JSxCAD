@@ -1,4 +1,4 @@
-import { createNormalize3 } from './createNormalize3';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { deduplicate } from '@jsxcad/geometry-path';
 import { toPlane } from '@jsxcad/math-poly3';
 
