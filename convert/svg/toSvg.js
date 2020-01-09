@@ -1,6 +1,20 @@
-import { getPaths, getSurfaces, getZ0Surfaces, measureBoundingBox, toKeptGeometry, translate } from '@jsxcad/geometry-tagged';
-import { makeConvex as makeConvexSurface } from '@jsxcad/geometry-surface';
-import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
+import {
+  canonicalize,
+  getPaths,
+  getSurfaces,
+  getZ0Surfaces,
+  measureBoundingBox,
+  toKeptGeometry,
+  translate
+} from '@jsxcad/geometry-tagged';
+
+import {
+  makeConvex as makeConvexSurface
+} from '@jsxcad/geometry-surface';
+
+import {
+  makeConvex as makeConvexZ0Surface
+} from '@jsxcad/geometry-z0surface';
 
 const X = 0;
 const Y = 1;
@@ -21,7 +35,7 @@ export const toSvg = async ({ padding = 0 }, baseGeometry) => {
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const translated = translate([width / 2, height / 2, 0], baseGeometry);
-  const geometry = toKeptGeometry(translated);
+  const geometry = canonicalize(toKeptGeometry(translated));
 
   const svg = [
     `<?xml version="1.0" encoding="UTF-8"?>`,

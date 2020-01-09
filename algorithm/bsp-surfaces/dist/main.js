@@ -1,11 +1,9 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
-import { squaredDistance, distance } from './jsxcad-math-vec3.js';
+import { squaredDistance } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, doesNotOverlap, flip, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
-import { findOpenEdges } from './jsxcad-geometry-paths.js';
-import { getEdges } from './jsxcad-geometry-path.js';
 
 const EPSILON = 1e-5;
 const EPSILON2 = 1e-10;
@@ -50,6 +48,10 @@ const splitPolygon = (normalize, plane, polygon, back, coplanarBack, coplanarFro
   */
   let polygonType = COPLANAR;
   const polygonPlane = toPlane(polygon);
+  if (polygonPlane === undefined) {
+    // Degenerate polygon
+    return;
+  }
   if (!equals(polygonPlane, plane)) {
     for (let nth = 0; nth < polygon.length; nth++) {
       // const type = toType(plane, polygon[nth]);
@@ -506,52 +508,8 @@ const deform = (solid, transform, min, max, resolution) => {
   return fromPolygons$1({}, transformedPolygons);
 };
 
-const merge = (aPaths, bPaths, normalize) => {
-  // aPaths = alignVertices(aPaths, normalize);
-  // bPaths = alignVertices(bPaths, normalize);
-
-  const aOpenEdges = findOpenEdges(aPaths);
-  const aVertices = new Set();
-  for (const [start, end] of aOpenEdges) {
-    aVertices.add(start);
-    aVertices.add(end);
-  }
-
-  const bOpenEdges = findOpenEdges(bPaths);
-  const bVertices = new Set();
-  for (const [start, end] of bOpenEdges) {
-    bVertices.add(start);
-    bVertices.add(end);
-  }
-
-  const repair = (paths, ownVertices, otherVertices) => {
-    const repairedPaths = [];
-    for (const path of paths) {
-      const repairedPath = [];
-      for (const [start, end] of getEdges(path)) {
-        repairedPath.push(start);
-        if (ownVertices.has(start) && ownVertices.has(end)) {
-          // This is an open edge in a.
-          const span = distance(start, end);
-          const colinear = [];
-          for (const vertex of otherVertices) {
-            if (distance(start, vertex) + distance(vertex, end) === span) {
-              // Vertex is on the open edge.
-              colinear.push(vertex);
-            }
-          }
-          // Arrange by distance from start.
-          colinear.sort((a, b) => distance(start, a) - distance(start, b));
-          // Insert into the path.
-          repairedPath.push(...colinear);
-        }
-      }
-      repairedPaths.push(repairedPath);
-    }
-    return repairedPaths;
-  };
-
-  return [...repair(aPaths, aVertices, bVertices), ...repair(bPaths, bVertices, aVertices)];
+const merge = (aPaths, bPaths) => {
+  return [...aPaths, ...bPaths];
 };
 
 const difference = (aSolid, ...bSolids) => {
@@ -573,7 +531,7 @@ const difference = (aSolid, ...bSolids) => {
     const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aPolygons, normalize);
     const bTrimmed = removeExteriorPolygons2(aBsp, bPolygons, normalize);
 
-    aSolid = fromPolygons$1({}, merge(aTrimmed, bTrimmed));
+    aSolid = fromPolygons$1({}, merge(aTrimmed, bTrimmed), normalize);
   }
   return alignVertices(aSolid, normalize);
 };
@@ -601,7 +559,7 @@ const intersection = (...solids) => {
     const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
     const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
 
-    solids.push(fromPolygons$1({}, merge(aTrimmed, bTrimmed)));
+    solids.push(fromPolygons$1({}, merge(aTrimmed, bTrimmed), normalize));
   }
   return alignVertices(solids[0], normalize);
 };
@@ -620,17 +578,23 @@ const union = (...solids) => {
   const normalize = createNormalize3$1();
   while (solids.length > 1) {
     const a = alignVertices(solids.shift(), normalize);
+    const b = alignVertices(solids.shift(), normalize);
+
+    if (doesNotOverlap(a, b)) {
+      solids.push([...a, ...b]);
+      continue;
+    }
+
     const aPolygons = toPolygons({}, a);
     const aBsp = fromSolid(a, normalize);
 
-    const b = alignVertices(solids.shift(), normalize);
     const bPolygons = toPolygons({}, b);
     const bBsp = fromSolid(b, normalize);
 
     const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
     const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
 
-    solids.push(fromPolygons$1({}, merge(aTrimmed, bTrimmed)));
+    solids.push(fromPolygons$1({}, merge(aTrimmed, bTrimmed), normalize));
   }
   return alignVertices(solids[0], normalize);
 };

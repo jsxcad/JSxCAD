@@ -35,7 +35,7 @@ export const difference = (aSolid, ...bSolids) => {
     const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aPolygons, normalize);
     const bTrimmed = removeExteriorPolygons2(aBsp, bPolygons, normalize);
 
-    aSolid = toSolidFromPolygons({}, merge(aTrimmed, bTrimmed, normalize));
+    aSolid = toSolidFromPolygons({}, merge(aTrimmed, bTrimmed), normalize);
   }
   return alignVertices(aSolid, normalize);
 };

@@ -7633,8 +7633,10 @@ const { Clipper, IntPoint, PolyFillType, PolyTree } = clipper;
 // CHECK: Should this be sqrt(2)?
 const CLEAN_DISTANCE = 1;
 
-const toInt = (integer) => Math.round(integer * 1e6);
-const toFloat = (integer) => integer / 1e6;
+const RESOLUTION = 1e7;
+
+const toInt = (integer) => Math.round(integer * RESOLUTION);
+const toFloat = (integer) => integer / RESOLUTION;
 
 const fillType = PolyFillType.pftNonZero;
 
@@ -8507,9 +8509,7 @@ earcut_1.default = default_1;
 
 const { Clipper: Clipper$4, ClipType: ClipType$3, PolyTree: PolyTree$1, PolyType: PolyType$3 } = clipper;
 
-const magnitude = 1e5;
-
-const makeConvex = (surface, normalize = createNormalize2()) => {
+const makeConvex = (surface, normalize = p => p) => {
   const clipper = new Clipper$4();
   clipper.AddPaths(fromSurface(surface, normalize), PolyType$3.ptSubject, true);
   const result = new PolyTree$1();
@@ -8533,9 +8533,9 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[contour[a * 2 + 0] / magnitude, contour[a * 2 + 1] / magnitude, 0],
-                        [contour[b * 2 + 0] / magnitude, contour[b * 2 + 1] / magnitude, 0],
-                        [contour[c * 2 + 0] / magnitude, contour[c * 2 + 1] / magnitude, 0]];
+      const triangle = [[contour[a * 2 + 0] / RESOLUTION, contour[a * 2 + 1] / RESOLUTION, 0],
+                        [contour[b * 2 + 0] / RESOLUTION, contour[b * 2 + 1] / RESOLUTION, 0],
+                        [contour[c * 2 + 0] / RESOLUTION, contour[c * 2 + 1] / RESOLUTION, 0]];
       if (isClockwise(triangle)) {
         triangle.reverse();
       }

@@ -36,7 +36,7 @@ export const intersection = (...solids) => {
     const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
     const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
 
-    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed, normalize)));
+    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed), normalize));
   }
   return alignVertices(solids[0], normalize);
 };

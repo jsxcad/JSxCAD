@@ -21,17 +21,23 @@ export const union = (...solids) => {
   const normalize = createNormalize3();
   while (solids.length > 1) {
     const a = alignVertices(solids.shift(), normalize);
+    const b = alignVertices(solids.shift(), normalize);
+
+    if (doesNotOverlap(a, b)) {
+      solids.push([...a, ...b]);
+      continue;
+    }
+
     const aPolygons = toPolygonsFromSolid({}, a);
     const aBsp = toBspFromSolid(a, normalize);
 
-    const b = alignVertices(solids.shift(), normalize);
     const bPolygons = toPolygonsFromSolid({}, b);
     const bBsp = toBspFromSolid(b, normalize);
 
     const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
     const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
 
-    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed, normalize)));
+    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed), normalize));
   }
   return alignVertices(solids[0], normalize);
 };

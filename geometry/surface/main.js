@@ -3,6 +3,7 @@ import { cut, cutSurface } from './cut';
 
 import { assertCoplanar } from './assertCoplanar';
 import { assertGood } from './assertGood';
+import { clean } from './clean';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
@@ -20,6 +21,7 @@ export {
   assertCoplanar,
   assertGood,
   canonicalize,
+  clean,
   cut,
   cutSurface,
   eachPoint,

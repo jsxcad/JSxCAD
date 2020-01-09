@@ -53,6 +53,10 @@ const splitPolygon = (normalize, plane, polygon, back, coplanarBack, coplanarFro
   */
   let polygonType = COPLANAR;
   const polygonPlane = toPlane(polygon);
+  if (polygonPlane === undefined) {
+    // Degenerate polygon
+    return;
+  }
   if (!planeEquals(polygonPlane, plane)) {
     for (let nth = 0; nth < polygon.length; nth++) {
       // const type = toType(plane, polygon[nth]);

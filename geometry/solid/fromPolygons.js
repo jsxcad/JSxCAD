@@ -1,9 +1,10 @@
-import { alignVertices } from './alignVertices';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-import { fromPolygons as fromPolygonsToSurface } from '@jsxcad/geometry-surface';
+import { fix } from './fix';
+import { makeConvex } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
-export const fromPolygons = (options = {}, polygons) => {
+export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
@@ -14,7 +15,8 @@ export const fromPolygons = (options = {}, polygons) => {
     }
     const plane = toPlane(polygon);
     if (plane === undefined) {
-      console.log(`QQ/fromPolygons/degenerate`);
+      // Polygon is degenerate -- probably on a line.
+      // console.log(`QQ/fromPolygons/degenerate`);
       continue;
     }
     const key = normalize4(toPlane(polygon));
@@ -29,18 +31,15 @@ export const fromPolygons = (options = {}, polygons) => {
   }
 
   // The solid is a list of surfaces, which are lists of coplanar polygons.
-  const solid = [];
+  const defragmented = [];
 
+  // Erase substructure and make convex.
   for (const [plane, polygons] of coplanarGroups) {
-    if (polygons.length === 1) {
-      // A single polygon forms a valid surface.
-      solid.push(polygons);
-    } else {
-      const surface = fromPolygonsToSurface({ plane }, polygons);
-      solid.push(surface);
-    }
+    const surface = makeConvex(polygons, normalize3, plane);
+    defragmented.push(surface);
   }
 
-  const alignedSolid = alignVertices(solid);
-  return alignedSolid;
+  // Rebuild with additional substructure to support adjacent faces.
+  const fixed = fix(defragmented, normalize3);
+  return fixed;
 };
