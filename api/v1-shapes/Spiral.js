@@ -25,8 +25,8 @@ import { numbers } from '@jsxcad/api-v1-math';
  * :::
  **/
 
-export const Spiral = (toPathFromAngle = (angle => [angle]), { from = 0, to = 360, by, resolution } = {}) => {
-  if (resolution === undefined) {
+export const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by, resolution } = {}) => {
+  if (by === undefined && resolution === undefined) {
     by = 1;
   }
   let path = [null];

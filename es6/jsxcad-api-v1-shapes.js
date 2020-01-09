@@ -3,7 +3,6 @@ import Shape from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 import { getAnySurfaces, getPaths } from './jsxcad-geometry-tagged.js';
-import { lathe } from './jsxcad-api-v1-extrude.js';
 
 /**
  *
@@ -27,8 +26,8 @@ import { lathe } from './jsxcad-api-v1-extrude.js';
  * :::
  **/
 
-const Spiral = (toPathFromAngle = (angle => [angle]), { from = 0, to = 360, by, resolution } = {}) => {
-  if (resolution === undefined) {
+const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by, resolution } = {}) => {
+  if (by === undefined && resolution === undefined) {
     by = 1;
   }
   let path = [null];
@@ -729,7 +728,7 @@ Square.fromCorners.signature = 'Square(corner1:Point, corner2:Point) -> Surface'
  *
  **/
 
-const unitTetrahedron = () => Shape.ofGeometry(buildRegularTetrahedron({}));
+const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
 
 const ofRadius$b = (radius = 1) => unitTetrahedron().scale(radius);
 const ofDiameter$a = (diameter = 1) => unitTetrahedron().scale(diameter / 2);
@@ -767,11 +766,11 @@ Tetrahedron.ofDiameter = ofDiameter$a;
  *
  **/
 
-const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) =>
-  lathe({ sides: segments },
-        Circle({ sides, radius: thickness })
-            .rotateZ(rotation)
-            .move(0, radius))
+const Torus = (radius = 1, height = 1, { segments = 32, sides = 32, rotation = 0 } = {}) =>
+  Circle(height / 2, { sides })
+      .rotateZ(rotation)
+      .moveY(radius)
+      .lathe(360, { sides: segments })
       .rotateY(90);
 
 /**
@@ -842,7 +841,10 @@ Triangle.ofDiameter = ofDiameter$b;
  * :::
  **/
 
-const Wave = (toPathFromXDistance = (xDistance) => [0], { from = 0, to = 360, by = 1 } = {}) => {
+const Wave = (toPathFromXDistance = (xDistance) => [[0]], { from = 0, to = 360, by, resolution } = {}) => {
+  if (by === undefined && resolution === undefined) {
+    by = 1;
+  }
   let path = [null];
   for (const xDistance of numbers(distance => distance, { from, to, by })) {
     const subpath = toPathFromXDistance(xDistance);
