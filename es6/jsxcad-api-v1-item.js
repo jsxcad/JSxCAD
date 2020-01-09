@@ -1,4 +1,4 @@
-import Shape$1, { Shape, toGeometry } from './jsxcad-api-v1-shape.js';
+import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { rewriteTags, getItems } from './jsxcad-geometry-tagged.js';
 
 /**
@@ -9,7 +9,7 @@ import { rewriteTags, getItems } from './jsxcad-geometry-tagged.js';
  *
  **/
 
-const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: toGeometry(shape) }));
+const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: shape.toGeometry() }));
 
 const toItemMethod = function (id) { return Item(this, id); };
 Shape.prototype.toItem = toItemMethod;
@@ -26,20 +26,20 @@ toItemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
 const bom = (shape, ...args) => '';
 
 const bomMethod = function (...args) { return bom(this, ...args); };
-Shape$1.prototype.bom = bomMethod;
+Shape.prototype.bom = bomMethod;
 
 bomMethod.signature = 'Shape -> bom() -> string';
 
 const items = (shape, op = (_ => _)) => {
   const items = [];
   for (const solid of getItems(shape.toKeptGeometry())) {
-    items.push(op(Shape$1.fromGeometry(solid)));
+    items.push(op(Shape.fromGeometry(solid)));
   }
   return items;
 };
 
 const itemsMethod = function (...args) { return items(this, ...args); };
-Shape$1.prototype.items = itemsMethod;
+Shape.prototype.items = itemsMethod;
 
 items.signature = 'items(shape:Shape, op:function) -> Shapes';
 itemsMethod.signature = 'Shape -> items(op:function) -> Shapes';
@@ -59,7 +59,7 @@ const toBillOfMaterial = (shape) => {
 
 const toBillOfMaterialMethod = function (options = {}) { return toBillOfMaterial(this); };
 
-Shape.prototype.toBillOfMaterial = toBillOfMaterialMethod;
+Shape$1.prototype.toBillOfMaterial = toBillOfMaterialMethod;
 
 const api = { Item, bom, items, toBillOfMaterial: toBillOfMaterialMethod };
 
