@@ -1,3 +1,5 @@
+import { concatenate, translate } from '@jsxcad/geometry-path';
+
 import Shape from '@jsxcad/api-v1-shape';
 import { numbers } from '@jsxcad/api-v1-math';
 
@@ -9,17 +11,17 @@ import { numbers } from '@jsxcad/api-v1-math';
  *
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
- * Wave(angle => sin(angle) * 100,
+ * Wave(angle => [[sin(angle) * 100]],
  *      { to: 360 });
  * ```
  * :::
  **/
 
-export const Wave = (toYDistanceFromXDistance = (xDistance) => 0, { from = 0, to = 360, by = 1 } = {}) => {
-  const path = [null];
+export const Wave = (toPathFromXDistance = (xDistance) => [0], { from = 0, to = 360, by = 1 } = {}) => {
+  let path = [null];
   for (const xDistance of numbers(distance => distance, { from, to, by })) {
-    const yDistance = toYDistanceFromXDistance(xDistance);
-    path.push([xDistance, yDistance, 0]);
+    const subpath = toPathFromXDistance(xDistance);
+    path = concatenate(path, translate([xDistance, 0, 0], subpath));
   }
   return Shape.fromPath(path);
 };

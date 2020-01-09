@@ -29,13 +29,13 @@ export const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution }
 
   if (upto !== undefined) {
     // Exclusive
-    for (let number = from; number < to - EPSILON; number += by) {
-      numbers.push(thunk(number));
+    for (let number = from, nth = 0; number < to - EPSILON; number += by, nth++) {
+      numbers.push(thunk(number, nth));
     }
   } else if (to !== undefined) {
     // Inclusive
-    for (let number = from; number <= to + EPSILON; number += by) {
-      numbers.push(thunk(number));
+    for (let number = from, nth = 0; number <= to + EPSILON; number += by, nth++) {
+      numbers.push(thunk(number, nth));
     }
   }
   return numbers;

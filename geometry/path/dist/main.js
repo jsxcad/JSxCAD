@@ -34,10 +34,7 @@ const isClosed = (path) => (path.length === 0) || (path[0] !== null);
 const close = (path) => isClosed(path) ? path : path.slice(1);
 
 const concatenate = (...paths) => {
-  if (!paths.every(path => !isClosed(path))) {
-    throw Error('Cannot concatenate closed paths.');
-  }
-  const result = [null, ...[].concat(...paths.map(path => path.slice(1)))];
+  const result = [null, ...[].concat(...paths.map(close))];
   return result;
 };
 

@@ -1,3 +1,4 @@
+import Arc from './Arc';
 import Circle from './Circle';
 import Cone from './Cone';
 import Cube from './Cube.js';
@@ -20,6 +21,7 @@ import Triangle from './Triangle.js';
 import Wave from './Wave.js';
 
 const api = {
+  Arc,
   Circle,
   Cone,
   Cube,
@@ -43,6 +45,7 @@ const api = {
 };
 
 export {
+  Arc,
   Circle,
   Cone,
   Cube,
