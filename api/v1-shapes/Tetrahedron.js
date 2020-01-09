@@ -30,7 +30,7 @@ import { buildRegularTetrahedron } from '@jsxcad/algorithm-shape';
  *
  **/
 
-const unitTetrahedron = () => Shape.ofGeometry(buildRegularTetrahedron({}));
+const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
 
 export const ofRadius = (radius = 1) => unitTetrahedron().scale(radius);
 export const ofDiameter = (diameter = 1) => unitTetrahedron().scale(diameter / 2);

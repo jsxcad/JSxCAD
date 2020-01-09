@@ -255,13 +255,13 @@ interiorMethod.signature = 'Shape -> interior() -> Shape';
  *
  **/
 
-const lathe = (shape, endDegrees = 360, { resolution = 5 } = {}) => {
+const lathe = (shape, endDegrees = 360, { sides = 32 } = {}) => {
   const profile = shape.chop(Y$1(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
     for (const path of geometry.paths) {
-      solids.push(Shape.fromGeometry(lathe$1(path, endDegrees * Math.PI / 180, resolution)));
+      solids.push(Shape.fromGeometry(lathe$1(path, endDegrees * Math.PI / 180, sides)));
     }
   }
   return assemble(...solids);

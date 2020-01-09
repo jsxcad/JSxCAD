@@ -17,7 +17,10 @@ import { numbers } from '@jsxcad/api-v1-math';
  * :::
  **/
 
-export const Wave = (toPathFromXDistance = (xDistance) => [0], { from = 0, to = 360, by = 1 } = {}) => {
+export const Wave = (toPathFromXDistance = (xDistance) => [[0]], { from = 0, to = 360, by, resolution } = {}) => {
+  if (by === undefined && resolution === undefined) {
+    by = 1;
+  }
   let path = [null];
   for (const xDistance of numbers(distance => distance, { from, to, by })) {
     const subpath = toPathFromXDistance(xDistance);

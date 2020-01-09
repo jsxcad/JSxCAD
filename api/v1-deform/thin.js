@@ -6,8 +6,8 @@ import { scale } from '@jsxcad/math-vec2';
 
 const scaleXY = (factor, [x, y, z]) => [...scale(factor, [x, y]), z];
 
-export const taper = (shape, gradient = 1, { resolution = 1 } = {}) => {
-  const squeeze = ([x, y, z]) => scaleXY(1 - z * gradient, [x, y, z]);
+export const thin = (shape, widthAt = (z => 1 - z * 0.1), { resolution = 1 } = {}) => {
+  const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
 
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
@@ -18,7 +18,7 @@ export const taper = (shape, gradient = 1, { resolution = 1 } = {}) => {
   return Shape.fromGeometry({ assembly });
 };
 
-const taperMethod = function (...args) { return taper(this, ...args); };
-Shape.prototype.taper = taperMethod;
+const thinMethod = function (...args) { return thin(this, ...args); };
+Shape.prototype.thin = thinMethod;
 
-export default taper;
+export default thin;

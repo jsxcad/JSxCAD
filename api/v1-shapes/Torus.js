@@ -1,5 +1,4 @@
 import { Circle } from './Circle';
-import { lathe } from '@jsxcad/api-v1-extrude';
 
 /**
  *
@@ -29,11 +28,11 @@ import { lathe } from '@jsxcad/api-v1-extrude';
  *
  **/
 
-export const Torus = ({ thickness = 1, radius = 1, segments = 16, sides = 16, rotation = 0 } = {}) =>
-  lathe({ sides: segments },
-        Circle({ sides, radius: thickness })
-            .rotateZ(rotation)
-            .move(0, radius))
+export const Torus = (radius = 1, height = 1, { segments = 32, sides = 32, rotation = 0 } = {}) =>
+  Circle(height / 2, { sides })
+      .rotateZ(rotation)
+      .moveY(radius)
+      .lathe(360, { sides: segments })
       .rotateY(90);
 
 export default Torus;
