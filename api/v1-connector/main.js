@@ -4,6 +4,7 @@ import './chop';
 import './flat';
 import './front';
 import './left';
+import './on';
 import './right';
 import './top';
 import './unfold';

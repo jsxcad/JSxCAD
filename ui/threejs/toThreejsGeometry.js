@@ -38,12 +38,8 @@ const surfaceToThreejsSurface = (surface) => {
   const positions = [];
   for (const triangle of toTriangles({}, makeConvex(surface))) {
     for (const point of triangle) {
-      const [x, y, z, w] = toPlane(triangle);
+      const [x, y, z] = toPlane(triangle);
       normals.push(x, y, z);
-      if (isNaN(x)) {
-        console.log(`QQ/triangle: ${triangle}`);
-        console.log(`QQ/normal: ${x} ${y} ${z} ${w}`);
-      }
       positions.push(...point);
     }
   }

@@ -201,7 +201,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
     const geometry = new Geometry();
     const material = new LineBasicMaterial({ color: 0xffffff, vertexColors: VertexColors });
     const color = new Color(setColor(tags, {}, [0, 0, 0]).color);
-    for (const [[aX, aY, aZ], [bX, bY, bZ]] of segments) {
+    for (const [[aX = 0, aY = 0, aZ = 0], [bX = 0, bY = 0, bZ = 0]] of segments) {
       geometry.colors.push(color, color);
       geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
     }

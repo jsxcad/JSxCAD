@@ -1,7 +1,7 @@
+import { concatenate, rotateZ } from '@jsxcad/geometry-path';
+
 import Shape from '@jsxcad/api-v1-shape';
-import { fromZRotation } from '@jsxcad/math-mat4';
 import { numbers } from '@jsxcad/api-v1-math';
-import { transform } from '@jsxcad/math-vec3';
 
 /**
  *
@@ -11,25 +11,29 @@ import { transform } from '@jsxcad/math-vec3';
  *
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
- * Spiral(angle => angle,
+ * Spiral(angle => [angle],
  *        { to: 360 * 5 });
  * ```
  * :::
  * ::: illustration { "view": { "position": [0, 0, 10] } }
  * ```
  * Spiral({ to: 360 },
- *        (angle) => 2 + sin(angle * 20))
+ *        (angle) => [[2 + sin(angle * 20)]])
  *   .close()
  *   .interior()
  * ```
  * :::
  **/
 
-export const Spiral = (toRadiusFromAngle = (angle) => angle, { from = 0, to = 360, by = 1 } = {}) => {
-  const path = [null];
-  for (const angle of numbers(angle => angle, { from, to, by })) {
-    const radius = toRadiusFromAngle(angle);
-    path.push(transform(fromZRotation(angle * Math.PI / 180), [radius, 0, 0]));
+export const Spiral = (toPathFromAngle = (angle => [angle]), { from = 0, to = 360, by, resolution } = {}) => {
+  if (resolution === undefined) {
+    by = 1;
+  }
+  let path = [null];
+  for (const angle of numbers(angle => angle, { from, to, by, resolution })) {
+    const radians = angle * Math.PI / 180;
+    const subpath = toPathFromAngle(angle);
+    path = concatenate(path, rotateZ(radians, subpath));
   }
   return Shape.fromPath(path);
 };

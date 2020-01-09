@@ -7,6 +7,12 @@
  * the api uses.
  */
 
+import '@jsxcad/api-v1-connector';
+import '@jsxcad/api-v1-deform';
+import '@jsxcad/api-v1-extrude';
+import '@jsxcad/api-v1-item';
+import '@jsxcad/api-v1-shell';
+
 export {
   source
 } from './source';
@@ -27,6 +33,7 @@ export {
 } from '@jsxcad/api-v1-layout';
 
 export {
+  Arc,
   Circle,
   Cone,
   Cube,
@@ -40,6 +47,7 @@ export {
   Polyhedron,
   Prism,
   Sphere,
+  Spiral,
   Square,
   Tetrahedron,
   Torus,
