@@ -5,7 +5,7 @@ import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, toKeptGeometry, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
+import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
 
@@ -3377,7 +3377,7 @@ const toSvg = async ({ padding = 0 }, baseGeometry) => {
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
   const translated = translate([width / 2, height / 2, 0], baseGeometry);
-  const geometry = toKeptGeometry(translated);
+  const geometry = canonicalize$2(toKeptGeometry(translated));
 
   const svg = [
     `<?xml version="1.0" encoding="UTF-8"?>`,

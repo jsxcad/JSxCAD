@@ -10,9 +10,9 @@ import {
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
 
-import {
-  makeConvex
-} from '@jsxcad/geometry-surface';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+
+import { makeConvex } from '@jsxcad/geometry-surface';
 
 const X = 0;
 const Y = 1;
@@ -61,6 +61,8 @@ const walkZ = (min, max, resolution) => {
 };
 
 export const deform = (solid, transform, min, max, resolution) => {
+  const normalize = createNormalize3();
+
   const solidPolygons = toPolygonsFromSolid({}, alignVertices(solid));
 
   const bsp = walkX(min, max, resolution);
@@ -68,7 +70,7 @@ export const deform = (solid, transform, min, max, resolution) => {
   // Classify the solid with it.
   const dividedPolygons = [];
 
-  for (const polygon of dividePolygons(bsp, solidPolygons)) {
+  for (const polygon of dividePolygons(bsp, solidPolygons, normalize)) {
     if (polygon.length > 3) {
       for (const triangle of makeConvex([polygon])) {
         dividedPolygons.push(triangle);

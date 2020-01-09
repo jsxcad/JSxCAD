@@ -1,8 +1,10 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, fromPolygons as fromPolygons$1, makeConvex, makeSimple, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, clean as clean$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+export { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { deduplicate, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
+import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
 
 const transform = (matrix, solid) => solid.map(surface => transform$1(matrix, surface));
 
@@ -11,49 +13,6 @@ const rotateY = (radians, solid) => transform(fromYRotation(radians), solid);
 const rotateZ = (radians, solid) => transform(fromZRotation(radians), solid);
 const scale = (vector, solid) => transform(fromScaling(vector), solid);
 const translate = (vector, solid) => transform(fromTranslation(vector), solid);
-
-// The resolution is 1 / multiplier.
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-
-const createNormalize3 = (multiplier = 1e7) => {
-  const map = new Map();
-  const normalize3 = (coordinate) => {
-    // Apply a spatial quantization to the 3 dimensional coordinate.
-    const nx = Math.floor(coordinate[X] * multiplier - 0.5);
-    const ny = Math.floor(coordinate[Y] * multiplier - 0.5);
-    const nz = Math.floor(coordinate[Z] * multiplier - 0.5);
-    // Look for an existing inhabitant.
-    const value = map.get(`${nx}/${ny}/${nz}`);
-    if (value !== undefined) {
-      return value;
-    }
-    // One of the ~0 or ~1 values will match the rounded values above.
-    // The other will match the adjacent cell.
-    const nx0 = nx;
-    const ny0 = ny;
-    const nz0 = nz;
-    const nx1 = nx0 + 1;
-    const ny1 = ny0 + 1;
-    const nz1 = nz0 + 1;
-    // Populate the space of the quantized coordinate and its adjacencies.
-    // const normalized = [nx1 / multiplier, ny1 / multiplier, nz1 / multiplier];
-    const normalized = coordinate;
-    map.set(`${nx0}/${ny0}/${nz0}`, normalized);
-    map.set(`${nx0}/${ny0}/${nz1}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz0}`, normalized);
-    map.set(`${nx0}/${ny1}/${nz1}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz0}`, normalized);
-    map.set(`${nx1}/${ny0}/${nz1}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz0}`, normalized);
-    map.set(`${nx1}/${ny1}/${nz1}`, normalized);
-    // This is now the normalized coordinate for this region.
-    return normalized;
-  };
-  return normalize3;
-};
 
 const alignVertices = (solid, normalize3 = createNormalize3()) => {
   const aligned = solid.map(surface =>
@@ -70,6 +29,8 @@ const assertGood = (solid) => {
 };
 
 const canonicalize = (solid) => solid.map(canonicalize$1);
+
+const clean = (solid) => solid.map(clean$1);
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 const measureBoundingBox = (solid) => {
@@ -91,9 +52,9 @@ const measureBoundingBox = (solid) => {
 };
 
 const iota = 1e-5;
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X = 0;
+const Y = 1;
+const Z = 2;
 
 // Tolerates overlap up to one iota.
 const doesNotOverlap = (a, b) => {
@@ -102,12 +63,12 @@ const doesNotOverlap = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X$1] <= minB[X$1] + iota) { return true; }
-  if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
-  if (maxA[Z$1] <= minB[Z$1] + iota) { return true; }
-  if (maxB[X$1] <= minA[X$1] + iota) { return true; }
-  if (maxB[Y$1] <= minA[Y$1] + iota) { return true; }
-  if (maxB[Z$1] <= minA[Z$1] + iota) { return true; }
+  if (maxA[X] <= minB[X] + iota) { return true; }
+  if (maxA[Y] <= minB[Y] + iota) { return true; }
+  if (maxA[Z] <= minB[Z] + iota) { return true; }
+  if (maxB[X] <= minA[X] + iota) { return true; }
+  if (maxB[Y] <= minA[Y] + iota) { return true; }
+  if (maxB[Z] <= minA[Z] + iota) { return true; }
   return false;
 };
 
@@ -119,8 +80,9 @@ const eachPoint = (thunk, solid) => {
 
 // Expects aligned vertices.
 
-const findOpenEdges = (solid, isOpen) => {
+const findOpenEdges = (solid, isOpen = true) => {
   const test = (closed) => isOpen ? !closed : closed;
+
   const edges = new Set();
   for (const surface of solid) {
     for (const face of surface) {
@@ -147,18 +109,18 @@ const flip = (solid) => solid.map(surface => flip$1(surface));
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
-const X$2 = 0;
-const Y$2 = 1;
-const Z$2 = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 const W = 3;
 
 const createNormalize4 = () => {
   const map = new Map();
   const normalize4 = (coordinate) => {
     // Apply a spatial quantization to the 4 dimensional coordinate.
-    const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
-    const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
-    const nz = Math.floor(coordinate[Z$2] * multiplier - 0.5);
+    const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
+    const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
+    const nz = Math.floor(coordinate[Z$1] * multiplier - 0.5);
     const nw = Math.floor(coordinate[W] * multiplier - 0.5);
     // Look for an existing inhabitant.
     const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
@@ -202,7 +164,55 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-const fromPolygons = (options = {}, polygons) => {
+// We expect a solid of reconciled triangles.
+
+const fix = (solid, normalize) => {
+  const vertices = new Set();
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const point of path) {
+        const reconciledPoint = normalize(point);
+        vertices.add(reconciledPoint);
+      }
+    }
+  }
+
+  const repairedSolid = [];
+  for (const surface of solid) {
+    const repairedPaths = [];
+    for (const path of surface) {
+      const repairedPath = [];
+      for (const [start, end] of getEdges(path)) {
+        repairedPath.push(start);
+        const span = distance(start, end);
+        const colinear = [];
+        for (const vertex of vertices) {
+          // FIX: Threshold
+          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
+            // FIX: Clip an ear instead.
+            // Vertex is on the open edge.
+            colinear.push(vertex);
+          }
+        }
+        // Arrange by distance from start.
+        colinear.sort((a, b) => distance(start, a) - distance(start, b));
+        // Insert into the path.
+        repairedPath.push(...colinear);
+      }
+      repairedPaths.push(repairedPath);
+    }
+    repairedSolid.push(repairedPaths);
+  }
+  // At this point we should have the correct structure for assembly into a solid.
+  // We just need to ensure convexity.
+
+  return repairedSolid;
+
+  // const convex = repairedSolid.map(surface => makeConvex(surface, normalize));
+  // return convex;
+};
+
+const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
@@ -213,7 +223,8 @@ const fromPolygons = (options = {}, polygons) => {
     }
     const plane = toPlane(polygon);
     if (plane === undefined) {
-      console.log(`QQ/fromPolygons/degenerate`);
+      // Polygon is degenerate -- probably on a line.
+      // console.log(`QQ/fromPolygons/degenerate`);
       continue;
     }
     const key = normalize4(toPlane(polygon));
@@ -228,38 +239,18 @@ const fromPolygons = (options = {}, polygons) => {
   }
 
   // The solid is a list of surfaces, which are lists of coplanar polygons.
-  const solid = [];
+  const defragmented = [];
 
+  // Erase substructure and make convex.
   for (const [plane, polygons] of coplanarGroups) {
-    if (polygons.length === 1) {
-      // A single polygon forms a valid surface.
-      solid.push(polygons);
-    } else {
-      const surface = fromPolygons$1({ plane }, polygons);
-      solid.push(surface);
-    }
+    const surface = makeConvex(polygons, normalize3, plane);
+    defragmented.push(surface);
   }
 
-  const alignedSolid = alignVertices(solid);
-  return alignedSolid;
+  // Rebuild with additional substructure to support adjacent faces.
+  const fixed = fix(defragmented, normalize3);
+  return fixed;
 };
-
-const convexSurfaces = Symbol('convexSurfaces');
-
-const makeSurfacesConvex = (rawSolid) => {
-  if (rawSolid.length === undefined) {
-    throw Error('die');
-  }
-  if (rawSolid[convexSurfaces] === undefined) {
-    const solid = alignVertices(rawSolid);
-    assertGood(solid);
-    const convex = solid.map(surface => makeConvex(surface));
-    rawSolid[convexSurfaces] = alignVertices(convex);
-  }
-  return rawSolid[convexSurfaces];
-};
-
-const makeSurfacesSimple = (options = {}, solid) => solid.map(surface => makeSimple({}, surface));
 
 /** Measure the bounding sphere of the given poly3
  * @param {poly3} the poly3 to measure
@@ -292,4 +283,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, createNormalize3, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, makeSurfacesConvex, makeSurfacesSimple, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, clean, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };

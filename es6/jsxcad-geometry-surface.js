@@ -1,17 +1,18 @@
-import { canonicalize as canonicalize$1, transform as transform$1, toPlane as toPlane$1, flip as flip$1, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
+import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
 import { fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { subtract, scale as scale$1, dot, add, distance } from './jsxcad-math-vec3.js';
 import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { cacheCut } from './jsxcad-cache.js';
+import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
+import { clean as clean$1, union } from './jsxcad-geometry-z0surface-boolean.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
-import { union } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
 const canonicalize = (surface) => surface.map(canonicalize$1);
 
 // Transforms
-const transform = (matrix, surface) => surface.map(polygon => transform$1(matrix, polygon));
+const transform = (matrix, surface) => surface.map(polygon => transform$2(matrix, polygon));
 const translate = (vector, surface) => transform(fromTranslation(vector), surface);
 const rotateZ = (angle, surface) => transform(fromZRotation(angle), surface);
 const scale = (vector, surface) => transform(fromScaling(vector), surface);
@@ -250,6 +251,18 @@ const assertGood = (surface) => {
   }
 };
 
+const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
+
+const transform$1 = cacheTransform(transformImpl);
+
+const clean = (surface, plane = toPlane(surface)) => {
+  // FIX: Detect when the surfaces aren't in the same plane.
+  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
+  const z0Surface = transform$1(toZ0, surface);
+  const cleanedZ0Surface = clean$1(z0Surface);
+  return transform$1(fromZ0, cleanedZ0Surface);
+};
+
 const eachPoint = (thunk, surface) => {
   for (const polygon of surface) {
     for (const [x = 0, y = 0, z = 0] of polygon) {
@@ -277,7 +290,7 @@ const map = (original, transform) => {
 
 const flip = (surface) => map(surface, flip$1);
 
-const makeConvex = (surface) => {
+const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
   }
@@ -285,14 +298,16 @@ const makeConvex = (surface) => {
     // An empty surface is not non-convex.
     return surface;
   }
-  const plane = toPlane(surface);
+  if (surface.length === 1 && surface[0].length === 3) {
+    // A surface that is a triangle is convex.
+    return surface;
+  }
+  if (plane === undefined) {
+    plane = toPlane(surface);
+  }
   const [to, from] = toXYPlaneTransforms(plane);
-  const convexZ0Surface = makeConvex$1(transform(to, surface));
-  const convexSurface = transform(from, convexZ0Surface);
-  // FIX: Is this plane enforecement necessary?
-  // for (const path of convexSurface) {
-  //   path.plane = plane;
-  // }
+  const convexZ0Surface = makeConvex$1(transform(to, surface.map(path => path.map(normalize3))));
+  const convexSurface = transform(from, convexZ0Surface).map(path => path.map(normalize3));
   return convexSurface;
 };
 
@@ -353,4 +368,4 @@ const toPoints = (surface) => {
 
 const toPolygons = (options = {}, surface) => surface;
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, clean, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

@@ -3,14 +3,13 @@ import { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
 import { alignVertices } from './alignVertices';
 import { assertGood } from './assertGood';
 import { canonicalize } from './canonicalize';
+import { clean } from './clean';
 import { createNormalize3 } from './createNormalize3';
 import { doesNotOverlap } from './doesNotOverlap';
 import { eachPoint } from './eachPoint';
 import { findOpenEdges } from './findOpenEdges';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
-import { makeSurfacesConvex } from './makeSurfacesConvex';
-import { makeSurfacesSimple } from './makeSurfacesSimple';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { toGeneric } from './toGeneric';
@@ -21,14 +20,13 @@ export {
   alignVertices,
   assertGood,
   canonicalize,
+  clean,
   createNormalize3,
   doesNotOverlap,
   eachPoint,
   findOpenEdges,
   flip,
   fromPolygons,
-  makeSurfacesConvex,
-  makeSurfacesSimple,
   measureBoundingBox,
   measureBoundingSphere,
   rotateX,
