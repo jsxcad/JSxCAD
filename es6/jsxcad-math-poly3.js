@@ -86,7 +86,7 @@ const areVerticesConvex = (vertices, plane) => {
     return false;
   }
   const numvertices = vertices.length;
-  if (numvertices > 2) {
+  if (numvertices > 3) {
     let prevprevpos = vertices[numvertices - 2];
     let prevpos = vertices[numvertices - 1];
     for (let i = 0; i < numvertices; i++) {
@@ -105,21 +105,13 @@ const areVerticesConvex = (vertices, plane) => {
 //  prevpoint, point, nextpoint: the 3 coordinates (Vector3D instances)
 //  normal: the normal vector of the plane
 const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
-  const crossproduct = cross(
-    subtract(point, prevpoint),
-    subtract(nextpoint, point)
-  );
-  // note: plane ~= normal point
+  const crossproduct = cross(subtract(point, prevpoint),
+                             subtract(nextpoint, point));
+  // The plane of a polygon is structurally equivalent to its normal.
   const crossdotnormal = dot(crossproduct, plane);
+  // CHECK: 0 or EPS?
   return crossdotnormal >= 0;
 };
-
-// FIXME: not used anywhere ???
-/* const isStrictlyConvexPoint = function (prevpoint, point, nextpoint, normal) {
-  let crossproduct = point.minus(prevpoint).cross(nextpoint.minus(point))
-  let crossdotnormal = crossproduct.dot(normal)
-  return (crossdotnormal >= EPS)
-} */
 
 const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
 
