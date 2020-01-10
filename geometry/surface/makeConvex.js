@@ -5,6 +5,15 @@ import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './ops';
 
+// Cut the corners to produce triangles.
+const triangulateConvexPolygon = (polygon) => {
+  const surface = [];
+  for (let i = 2; i < polygon.length; i++) {
+    surface.push([polygon[0], polygon[i - 1], polygon[i]]);
+  }
+  return surface;
+};
+
 export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
@@ -13,8 +22,15 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
     // An empty surface is not non-convex.
     return surface;
   }
-  if (surface.length === 1 && isConvex(surface[0])) {
-    return surface;
+  if (surface.length === 1) {
+    const polygon = surface[0];
+    if (polygon.length === 3) {
+      // A triangle is already convex.
+      return surface;
+    }
+    if (polygon.length > 3 && isConvex(polygon)) {
+      return triangulateConvexPolygon(polygon.map(normalize3));
+    }
   }
   if (plane === undefined) {
     plane = toPlane(surface);
