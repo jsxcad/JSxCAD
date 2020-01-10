@@ -114,11 +114,46 @@ const toString = (bsp) => {
   }
 };
 
+const keep = (polygons) => {
+  for (const polygon of polygons) {
+    polygon.kept = true;
+  }
+  return polygons;
+};
+
+// let mergeCount = 0;
+// let mergeParentCount = 0;
+
+// Merge the result of a split.
+const merge = (front, back) => {
+  const merged = [];
+  for (const polygon of back) {
+    // mergeCount++;
+    if (polygon.kept) {
+      if (polygon.sibling && polygon.sibling.kept) {
+        polygon.parent.kept = true;
+        merged.push(polygon.parent);
+        // mergeParentCount++;
+      } else {
+        merged.push(polygon);
+      }
+    }
+  }
+  for (const polygon of front) {
+    if (!polygon.parent || !polygon.parent.kept) {
+      merged.push(polygon);
+    }
+  }
+  // console.log(`QQ/mergeCount: ${mergeCount}`);
+  // console.log(`QQ/mergeParentCount: ${mergeParentCount}`);
+  return merged;
+};
+
 const removeInteriorPolygons = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
-    return polygons;
+    return keep(polygons);
   } else {
     const front = [];
     const back = [];
@@ -139,7 +174,7 @@ const removeInteriorPolygons = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
@@ -148,7 +183,7 @@ const removeInteriorPolygonsAndSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
-    return polygons;
+    return keep(polygons);
   } else {
     const front = [];
     const back = [];
@@ -169,7 +204,7 @@ const removeInteriorPolygonsAndSkin = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
@@ -178,7 +213,7 @@ const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
-    return polygons;
+    return keep(polygons);
   } else {
     const front = [];
     const back = [];
@@ -199,7 +234,7 @@ const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
@@ -208,7 +243,7 @@ const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
-    return polygons;
+    return keep(polygons);
   } else {
     const front = [];
     const back = [];
@@ -229,14 +264,14 @@ const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
 
 const removeExteriorPolygons = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return polygons;
+    return keep(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -259,14 +294,14 @@ const removeExteriorPolygons = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
 
 const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return polygons;
+    return keep(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -289,14 +324,14 @@ const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
 
 const removeExteriorPolygonsAndSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return polygons;
+    return keep(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -319,14 +354,14 @@ const removeExteriorPolygonsAndSkin = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
 
 const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return polygons;
+    return keep(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -349,11 +384,12 @@ const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
     } else if (trimmedBack.length === 0) {
       return trimmedFront;
     } else {
-      return [].concat(trimmedFront, trimmedBack);
+      return merge(trimmedFront, trimmedBack);
     }
   }
 };
 
+// Don't merge the fragments for this one.
 const dividePolygons = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return polygons;
