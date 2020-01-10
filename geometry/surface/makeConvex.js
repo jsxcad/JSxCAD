@@ -1,4 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { isConvex } from '@jsxcad/math-poly3';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -12,8 +13,7 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
     // An empty surface is not non-convex.
     return surface;
   }
-  if (surface.length === 1 && surface[0].length === 3) {
-    // A surface that is a triangle is convex.
+  if (surface.length === 1 && isConvex(surface[0])) {
     return surface;
   }
   if (plane === undefined) {

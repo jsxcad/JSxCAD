@@ -1,0 +1,17 @@
+cp jsxcad/observed/assembly/time expected/assembly/time
+cp jsxcad/observed/atg-sft003/time expected/atg-sft003/time
+cp jsxcad/observed/butterfly/time expected/butterfly/time
+cp jsxcad/observed/chainHull/time expected/chainHull/time
+cp jsxcad/observed/cursor/time expected/cursor/time
+cp jsxcad/observed/cutCubes/time expected/cutCubes/time
+cp jsxcad/observed/flat/time expected/flat/time
+cp jsxcad/observed/gear/time expected/gear/time
+cp jsxcad/observed/importScript/time expected/importScript/time
+cp jsxcad/observed/interlock-proof-of-concept/time expected/interlock-proof-of-concept/time
+cp jsxcad/observed/mold/time expected/mold/time
+cp jsxcad/observed/sphereCubeHull/time expected/sphereCubeHull/time
+cp jsxcad/observed/square/time expected/square/time
+cp jsxcad/observed/squares/time expected/squares/time
+cp jsxcad/observed/squaresIntersection/time expected/squaresIntersection/time
+cp jsxcad/observed/svg/time expected/svg/time
+cp jsxcad/observed/text/time expected/text/time
