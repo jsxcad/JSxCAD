@@ -873,38 +873,7 @@ const config$1 = {
 };
 
 let nextId = 0;
-
-// Requests are put on a queue.
-// We don't send the request to the worker until the worker
-// is finished. This probably adds a small amount of latency
-// but the issue is imagine you have 2 workers. You give worker
-// A x seconds of work to do and worker B y seconds of work to
-// do. You don't know which will finish first. If you give
-// the worker with more work to do the request then you'll
-// waste time.
-
-// note: we can't check `workers.length` for deciding if
-// we've reached `config.numWorkers` because creation the worker
-// is async which means other requests to make workers might
-// come in before a worker gets added to `workers`
-let numWorkers = 0;
-let canUseWorkers = true;   // gets set to false if we can't start a worker
-const workers = [];
-const availableWorkers = [];
 const waitingForWorkerQueue = [];
-const currentlyProcessingIdToRequestMap = new Map();
-
-function handleResult(e) {
-  makeWorkerAvailable(e.target);
-  const {id, error, data} = e.data;
-  const request = currentlyProcessingIdToRequestMap.get(id);
-  currentlyProcessingIdToRequestMap.delete(id);
-  if (error) {
-    request.reject(error);
-  } else {
-    request.resolve(data);
-  }
-}
 
 // Because Firefox uses non-standard onerror to signal an error.
 function startWorker(url) {
@@ -977,27 +946,6 @@ const workerHelper = (function() {
   }
 }());
 
-function makeWorkerAvailable(worker) {
-  availableWorkers.push(worker);
-  processWaitingForWorkerQueue();
-}
-
-async function getAvailableWorker() {
-  if (availableWorkers.length === 0 && numWorkers < config$1.numWorkers) {
-    ++numWorkers;  // see comment at numWorkers declaration
-    try {
-      const worker = await workerHelper.createWorker(config$1.workerURL);
-      workers.push(worker);
-      availableWorkers.push(worker);
-      workerHelper.addEventListener(worker, handleResult);
-    } catch (e) {
-      // set this global out-of-band (needs refactor)
-      canUseWorkers = false;
-    }
-  }
-  return availableWorkers.pop();
-}
-
 // @param {Uint8Array} src
 // @param {number} uncompressedSize
 // @param {string} [type] mime-type
@@ -1013,46 +961,6 @@ function inflateRawLocal(src, uncompressedSize, type, resolve) {
 async function processWaitingForWorkerQueue() {
   if (waitingForWorkerQueue.length === 0) {
     return;
-  }
-
-  if (config$1.useWorkers && canUseWorkers) {
-    const worker = await getAvailableWorker();
-    // canUseWorkers might have been set out-of-band (need refactor)
-    if (canUseWorkers) {
-      if (worker) {
-        if (waitingForWorkerQueue.length === 0) {
-          // the queue might be empty while we awaited for a worker.
-          makeWorkerAvailable(worker);
-          return;
-        }
-        const {id, src, uncompressedSize, type, resolve, reject} = waitingForWorkerQueue.shift();
-        currentlyProcessingIdToRequestMap.set(id, {id, resolve, reject});
-        const transferables = [];
-        // NOTE: Originally I thought you could transfer an ArrayBuffer.
-        // The code on this side is often using views into the entire file
-        // which means if we transferred we'd lose the entire file. That sucks
-        // because it means there's an expensive copy to send the uncompressed
-        // data to the worker.
-        //
-        // Also originally I thought we could send a Blob but we'd need to refactor
-        // the code in unzipit/readEntryData as currently it reads the uncompressed
-        // bytes.
-        //
-        //if (!isBlob(src) && !isSharedArrayBuffer(src)) {
-        //  transferables.push(src);
-        //}
-        worker.postMessage({
-          type: 'inflate',
-          data: {
-            id,
-            type,
-            src,
-            uncompressedSize,
-          },
-        }, transferables);
-      }
-      return;
-    }
   }
 
   // inflate locally

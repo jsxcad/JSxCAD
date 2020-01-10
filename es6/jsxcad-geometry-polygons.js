@@ -1,6 +1,6 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, map as map$1, toPlane, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { equals, max, min, scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
+import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, map as map$1, transform as transform$1 } from './jsxcad-math-poly3.js';
+import { equals, canonicalize as canonicalize$2, lerp, dot, subtract, max, min, scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
 import { isClosed } from './jsxcad-geometry-path.js';
 
 const isDegenerate = (polygon) => {
@@ -21,6 +21,233 @@ const canonicalize = (polygons) => {
     }
   }
   return canonicalized;
+};
+
+// Edge Properties.
+const START = 0;
+const END = 1;
+
+const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
+  if (aX < bX) { return -1; }
+  if (aX > bX) { return 1; }
+  if (aY < bY) { return -1; }
+  if (aY > bY) { return 1; }
+  if (aZ < bZ) { return -1; }
+  if (aZ > bZ) { return 1; }
+  return 0;
+};
+
+const toLoops = ({ allowOpenPaths = false }, edges) => {
+  const extractSuccessor = (edges, start) => {
+    // FIX: Use a binary search to take advantage of the sorting of the edges.
+    for (let nth = 0; nth < edges.length; nth++) {
+      const candidate = edges[nth];
+      if (equals(candidate[START], start)) {
+        edges.splice(nth, 1);
+        return candidate;
+      }
+    }
+    // Given manifold geometry, there must always be a successor.
+    throw Error('Non-manifold');
+  };
+
+  // Sort the edges so that deduplication is efficient.
+  edges.sort(lexicographcalPointOrder);
+
+  // Assemble the edges into loops which are closed paths.
+  const loops = [];
+  while (edges.length > 0) {
+    let edge = edges.shift();
+    const loop = [edge[START]];
+    try {
+      while (!equals(edge[END], loop[0])) {
+        edge = extractSuccessor(edges, edge[END]);
+        loop.push(edge[START]);
+      }
+    } catch (e) {
+      if (allowOpenPaths) {
+        // FIX: Check the error.
+        loop.unshift(null);
+      } else {
+        throw e;
+      }
+    }
+    loops.push(loop);
+  }
+
+  return loops;
+};
+
+const EPSILON = 1e-5;
+
+// Point Classification.
+const COPLANAR = 0;
+const FRONT = 1;
+const BACK = 2;
+
+// Plane Properties.
+const W = 3;
+
+const toType = (plane, point) => {
+  let t = dot(plane, point) - plane[W];
+  if (t < -EPSILON) {
+    return BACK;
+  } else if (t > EPSILON) {
+    return FRONT;
+  } else {
+    return COPLANAR;
+  }
+};
+
+const spanPoint = (plane, startPoint, endPoint) => {
+  let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+  return canonicalize$2(lerp(t, startPoint, endPoint));
+};
+
+/**
+ * Takes a cross-section of a triangulated solid at a plane, yielding surface defining loops
+ * in that plane.
+ *
+ * FIX: Make sure this works properly for solids with holes in them, etc.
+ * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.
+ */
+const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
+  let edges = [];
+  const addEdge = (start, end) => {
+    edges.push([canonicalize$2(start), canonicalize$2(end)]);
+  };
+
+  // Find the edges along the plane and fold them into paths to produce a set of closed loops.
+  for (let nth = 0; nth < triangles.length; nth++) {
+    const triangle = triangles[nth];
+    const [a, b, c] = triangle;
+    const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];
+
+    switch (aType) {
+      case FRONT:
+        switch (bType) {
+          case FRONT:
+            switch (cType) {
+              case FRONT:
+                // No intersection.
+                break;
+              case COPLANAR:
+                // Corner touches.
+                break;
+              case BACK:
+                // b-c down c-a up
+                addEdge(spanPoint(plane, b, c), spanPoint(plane, c, a));
+                break;
+            }
+            break;
+          case COPLANAR:
+            switch (cType) {
+              case FRONT:
+                // Corner touches.
+                break;
+              case COPLANAR:
+                // b-c along plane.
+                addEdge(b, c);
+                break;
+              case BACK:
+                // down at b, up c-a.
+                addEdge(b, spanPoint(plane, c, a));
+                break;
+            }
+            break;
+          case BACK:
+            switch (cType) {
+              case FRONT:
+                // a-b down, b-c up.
+                addEdge(spanPoint(plane, a, b), spanPoint(plane, b, c));
+                break;
+              case COPLANAR:
+                // a-b down, c up.
+                addEdge(spanPoint(plane, a, b), c);
+                break;
+              case BACK:
+                // a-b down, c-a up.
+                addEdge(spanPoint(plane, a, b), spanPoint(plane, c, a));
+                break;
+            }
+            break;
+        }
+        break;
+      case COPLANAR:
+        switch (bType) {
+          case FRONT:
+            switch (cType) {
+              case FRONT:
+                // Corner touches.
+                break;
+              case COPLANAR:
+                // c-a along plane.
+                addEdge(c, a);
+                break;
+              case BACK:
+                // down at b-c, up at a
+                addEdge(spanPoint(plane, b, c), a);
+                break;
+            }
+            break;
+          case COPLANAR:
+            switch (cType) {
+              case FRONT:
+                // a-b along plane.
+                addEdge(a, b);
+                break;
+            }
+            break;
+          case BACK:
+            switch (cType) {
+              case FRONT:
+                // down at a, up at b-c.
+                addEdge(a, spanPoint(plane, b, c));
+                break;
+            }
+            break;
+        }
+        break;
+      case BACK:
+        switch (bType) {
+          case FRONT:
+            switch (cType) {
+              case FRONT:
+                // down at c-a, up at a-b
+                addEdge(spanPoint(plane, c, a), spanPoint(plane, a, b));
+                break;
+              case COPLANAR:
+                // down at c, up at a-b
+                addEdge(c, spanPoint(plane, a, b));
+                break;
+              case BACK:
+                // down at b-c, up at a-b.
+                addEdge(spanPoint(plane, b, c), spanPoint(plane, a, b));
+                break;
+            }
+            break;
+          case COPLANAR:
+            switch (cType) {
+              case FRONT:
+                // down at c-a, up at b.
+                addEdge(spanPoint(plane, c, a), b);
+                break;
+            }
+            break;
+          case BACK:
+            switch (cType) {
+              case FRONT:
+                // down at c-a, up at b-c.
+                addEdge(spanPoint(plane, c, a), spanPoint(plane, b, c));
+                break;
+            }
+            break;
+        }
+        break;
+    }
+  }
+
+  return toLoops({ allowOpenPaths }, edges);
 };
 
 const eachPoint = (options = {}, thunk, polygons) => {
@@ -95,32 +322,14 @@ const toPoints = (options = {}, polygons) => {
   return points;
 };
 
-const blessAsTriangles = (paths) => { paths.isTriangles = true; return paths; };
-
 const toTriangles = (options = {}, paths) => {
-  if (paths.isTriangles) {
-    return paths;
-  }
   const triangles = [];
   for (const path of paths) {
-    const a = path[0];
     for (let nth = 2; nth < path.length; nth++) {
-      const b = path[nth - 1];
-      const c = path[nth];
-      if (equals(a, b) || equals(a, c) || equals(b, c)) {
-        // Skip degenerate triangles introduced by colinear points.
-        continue;
-      }
-      const triangle = [a, b, c];
-      if (!toPlane(triangle)) {
-        // FIX: Why isn't this degeneracy detected above?
-        // Skip degenerate triangles introduced by colinear points.
-        continue;
-      }
-      triangles.push([a, b, c]);
+      triangles.push([path[0], path[nth - 1], path[nth]]);
     }
   }
-  return blessAsTriangles(triangles);
+  return triangles;
 };
 
 const transform = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
@@ -131,4 +340,4 @@ const rotateZ = (angle, polygons) => transform(fromZRotation(angle), polygons);
 const scale = (vector, polygons) => transform(fromScaling(vector), polygons);
 const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
 
-export { canonicalize, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toTriangles, transform, translate };
+export { canonicalize, cutTrianglesByPlane, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toLoops, toPoints, toTriangles, transform, translate };
