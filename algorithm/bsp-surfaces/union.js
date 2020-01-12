@@ -2,16 +2,19 @@ import {
   alignVertices,
   createNormalize3,
   doesNotOverlap,
+  measureBoundingBox,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
 
 import {
+  boundPolygons,
+  fromBoundingBoxes,
+  inLeaf,
+  outLeaf,
   removeInteriorPolygonsKeepingSkin,
-  fromSolid as toBspFromSolid
+  fromPolygons as toBspFromPolygons
 } from './bsp';
-
-import { merge } from './merge';
 
 // An asymmetric binary merge.
 export const union = (...solids) => {
@@ -28,16 +31,23 @@ export const union = (...solids) => {
       continue;
     }
 
+    const aBB = measureBoundingBox(a);
+    const bBB = measureBoundingBox(b);
+
+    const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
+
     const aPolygons = toPolygonsFromSolid({}, a);
-    const aBsp = toBspFromSolid(a, normalize);
+    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
+    const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(aIn, normalize));
 
     const bPolygons = toPolygonsFromSolid({}, b);
-    const bBsp = toBspFromSolid(b, normalize);
+    const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
+    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
 
-    const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
-    const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
+    const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
+    const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-    solids.push(toSolidFromPolygons({}, merge(aTrimmed, bTrimmed), normalize));
+    solids.push(toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bOut, ...bTrimmed], normalize));
   }
   return alignVertices(solids[0], normalize);
 };

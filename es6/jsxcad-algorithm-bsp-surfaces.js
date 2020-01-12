@@ -1,7 +1,7 @@
+import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
-import { squaredDistance } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, doesNotOverlap, flip, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
+import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, doesNotOverlap, flip, createNormalize3 as createNormalize3$1, measureBoundingBox } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 
@@ -143,23 +143,70 @@ const BRANCH = 0;
 const IN_LEAF = 1;
 const OUT_LEAF = 2;
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 const inLeaf = {
-  plane: [0, 0, 0, 0],
+  plane: null,
   same: [],
-  kind: IN_LEAF
+  kind: IN_LEAF,
+  back: null,
+  front: null,
 };
 
-inLeaf.back = inLeaf;
-inLeaf.front = inLeaf;
+// inLeaf.back = inLeaf;
+// inLeaf.front = inLeaf;
 
 const outLeaf = {
-  plane: [0, 0, 0, 0],
+  plane: null,
   same: [],
-  kind: OUT_LEAF
+  kind: OUT_LEAF,
+  back: null,
+  front: null,
 };
 
-outLeaf.back = outLeaf;
-outLeaf.front = outLeaf;
+const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = inLeaf) => {
+  const cMin = max(aMin, bMin);
+  const cMax = min(aMax, bMax);
+  return {
+    // Bottom
+    kind: BRANCH,
+    plane: [0, 0, -1, -cMin[Z] + EPSILON],
+    front,
+    back: {
+      // Top
+      kind: BRANCH,
+      plane: [0, 0, 1, cMax[Z] + EPSILON],
+      front,
+      back: {
+        // Left
+        kind: BRANCH,
+        plane: [-1, 0, 0, -cMin[X] + EPSILON],
+        front,
+        back: {
+          // Right
+          kind: BRANCH,
+          plane: [1, 0, 0, cMax[X] + EPSILON],
+          front,
+          back: {
+            // Back
+            kind: BRANCH,
+            plane: [0, -1, 0, -cMin[Y] + EPSILON],
+            front,
+            back: {
+              // Front
+              kind: BRANCH,
+              plane: [0, 1, 0, cMax[Y] + EPSILON],
+              front: outLeaf,
+              back
+            }
+          }
+        }
+      }
+    }
+  }
+};
 
 const fromPolygons = (polygons, normalize) => {
   if (polygons.length === 0) {
@@ -169,7 +216,7 @@ const fromPolygons = (polygons, normalize) => {
   let same = [];
   let front = [];
   let back = [];
-  let plane = toPlane(polygons[0]);
+  let plane = toPlane(polygons[polygons.length >> 1]);
 
   for (const polygon of polygons) {
     splitPolygon(normalize,
@@ -200,9 +247,16 @@ const fromSolid = (solid, normalize) => {
   return fromPolygons(polygons, normalize);
 };
 
-const keep = (polygons) => {
+const keepIn = (polygons) => {
   for (const polygon of polygons) {
-    polygon.kept = true;
+    polygon.leaf = inLeaf;
+  }
+  return polygons;
+};
+
+const keepOut = (polygons) => {
+  for (const polygon of polygons) {
+    polygon.leaf = outLeaf;
   }
   return polygons;
 };
@@ -215,9 +269,9 @@ const merge = (front, back) => {
   const merged = [];
   for (const polygon of back) {
     // mergeCount++;
-    if (polygon.kept) {
-      if (polygon.sibling && polygon.sibling.kept) {
-        polygon.parent.kept = true;
+    if (polygon.leaf) {
+      if (polygon.sibling && polygon.sibling.leaf === polygon.leaf) {
+        polygon.parent.leaf = polygon.leaf;
         merged.push(polygon.parent);
         // mergeParentCount++;
       } else {
@@ -226,7 +280,7 @@ const merge = (front, back) => {
     }
   }
   for (const polygon of front) {
-    if (!polygon.parent || !polygon.parent.kept) {
+    if (!polygon.parent || polygon.parent.leaf !== polygon.leaf) {
       merged.push(polygon);
     }
   }
@@ -239,7 +293,7 @@ const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
-    return keep(polygons);
+    return keepOut(polygons);
   } else {
     const front = [];
     const back = [];
@@ -269,7 +323,7 @@ const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
-    return keep(polygons);
+    return keepOut(polygons);
   } else {
     const front = [];
     const back = [];
@@ -297,7 +351,7 @@ const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
 
 const removeExteriorPolygons = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return keep(polygons);
+    return keepIn(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -327,7 +381,7 @@ const removeExteriorPolygons = (bsp, polygons, normalize) => {
 
 const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return keep(polygons);
+    return keepIn(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -357,7 +411,7 @@ const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
 
 const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
-    return keep(polygons);
+    return keepIn(polygons);
   } else if (bsp === outLeaf) {
     return [];
   } else {
@@ -399,7 +453,7 @@ const dividePolygons = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */back,
-                   /* coplanarBack= */back,
+                   /* coplanarBack= */front,
                    /* coplanarFront= */back,
                    /* front= */front);
     }
@@ -414,6 +468,47 @@ const dividePolygons = (bsp, polygons, normalize) => {
       return [].concat(trimmedFront, trimmedBack);
     }
   }
+};
+
+// Merge the fragments for this one.
+const separatePolygons = (bsp, polygons, normalize) => {
+  if (polygons.length === 0) {
+    return [];
+  } else if (bsp === inLeaf) {
+    return keepIn(polygons);
+  } else if (bsp === outLeaf) {
+    return keepOut(polygons);
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(normalize,
+                   bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */front,
+                   /* front= */front);
+    }
+    const trimmedFront = separatePolygons(bsp.front, front, normalize);
+    const trimmedBack = separatePolygons(bsp.back, back, normalize);
+
+    // return merge(trimmedFront, trimmedBack);
+    return [...trimmedFront, ...trimmedBack];
+  }
+};
+
+const boundPolygons = (bsp, polygons, normalize) => {
+  const inPolygons = [];
+  const outPolygons = [];
+  for (const polygon of separatePolygons(bsp, polygons, normalize)) {
+    if (polygon.leaf === inLeaf) {
+      inPolygons.push(polygon);
+    } else if (polygon.leaf === outLeaf) {
+      outPolygons.push(polygon);
+    }
+  }
+  return [inPolygons, outPolygons];
 };
 
 const cut = (solid, surface) => {
@@ -467,18 +562,18 @@ const containsPoint = (bsp, point) => {
   }
 };
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const walkX = (min, max, resolution) => {
-  if (min[X] + resolution > max[X]) {
+  if (min[X$1] + resolution > max[X$1]) {
     return inLeaf;
   }
-  const midX = (min[X] + max[X]) / 2;
+  const midX = (min[X$1] + max[X$1]) / 2;
   return {
-    back: walkY(min, [midX, max[Y], max[Z]], resolution),
-    front: walkY([midX, min[Y], min[Z]], max, resolution),
+    back: walkY(min, [midX, max[Y$1], max[Z$1]], resolution),
+    front: walkY([midX, min[Y$1], min[Z$1]], max, resolution),
     kind: BRANCH,
     plane: [1, 0, 0, midX],
     same: []
@@ -486,13 +581,13 @@ const walkX = (min, max, resolution) => {
 };
 
 const walkY = (min, max, resolution) => {
-  if (min[Y] + resolution > max[Y]) {
+  if (min[Y$1] + resolution > max[Y$1]) {
     return inLeaf;
   }
-  const midY = (min[Y] + max[Y]) / 2;
+  const midY = (min[Y$1] + max[Y$1]) / 2;
   return {
-    back: walkZ(min, [max[X], midY, max[Z]], resolution),
-    front: walkZ([min[X], midY, min[Z]], max, resolution),
+    back: walkZ(min, [max[X$1], midY, max[Z$1]], resolution),
+    front: walkZ([min[X$1], midY, min[Z$1]], max, resolution),
     kind: BRANCH,
     plane: [0, 1, 0, midY],
     same: []
@@ -500,13 +595,13 @@ const walkY = (min, max, resolution) => {
 };
 
 const walkZ = (min, max, resolution) => {
-  if (min[Z] + resolution > max[Z]) {
+  if (min[Z$1] + resolution > max[Z$1]) {
     return inLeaf;
   }
-  const midZ = (min[Z] + max[Z]) / 2;
+  const midZ = (min[Z$1] + max[Z$1]) / 2;
   return {
-    back: walkX(min, [max[X], max[Y], midZ], resolution),
-    front: walkX([min[X], min[Y], midZ], max, resolution),
+    back: walkX(min, [max[X$1], max[Y$1], midZ], resolution),
+    front: walkX([min[X$1], min[Y$1], midZ], max, resolution),
     kind: BRANCH,
     plane: [0, 0, 1, midZ],
     same: []
@@ -629,16 +724,26 @@ const union = (...solids) => {
       continue;
     }
 
+    const aBB = measureBoundingBox(a);
+    const bBB = measureBoundingBox(b);
+
+    const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
+
     const aPolygons = toPolygons({}, a);
-    const aBsp = fromSolid(a, normalize);
+    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
+    const aBspOrg = fromPolygons(aPolygons, normalize);
+    const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
 
     const bPolygons = toPolygons({}, b);
-    const bBsp = fromSolid(b, normalize);
+    const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
+    const bBspOrg = fromPolygons(bPolygons, normalize);
+    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
 
-    const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aPolygons, normalize);
-    const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bPolygons, normalize);
+    const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
+    const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-    solids.push(fromPolygons$1({}, merge$1(aTrimmed, bTrimmed), normalize));
+    // solids.push(toSolidFromPolygons({}, [...bTrimmed, ...aIn], normalize));
+    solids.push(fromPolygons$1({}, [...aOut, ...aTrimmed, ...bOut, ...bTrimmed], normalize));
   }
   return alignVertices(solids[0], normalize);
 };
