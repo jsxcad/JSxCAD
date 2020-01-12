@@ -25,9 +25,6 @@ const inLeaf = {
   front: null
 };
 
-// inLeaf.back = inLeaf;
-// inLeaf.front = inLeaf;
-
 const outLeaf = {
   plane: null,
   same: [],
