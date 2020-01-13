@@ -7,7 +7,6 @@ import { transform } from '@jsxcad/geometry-polygons';
 
 const RESOLUTION = 10000;
 
-// const URL_PREFIX = 'https://github.com/ctiller/ldraw/blob/master/';
 const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
 const readPart = async (part) => {

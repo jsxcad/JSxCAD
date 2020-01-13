@@ -125,10 +125,18 @@ const splitPolygon = (normalize, plane, polygon, back, coplanarBack, coplanarFro
       }
       if (frontPoints.length >= 3) {
         frontPoints.plane = polygon.plane;
+        if (backPoints.length >= 3) {
+          frontPoints.parent = polygon;
+          frontPoints.sibling = backPoints;
+        }
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
         backPoints.plane = polygon.plane;
+        if (frontPoints.length >= 3) {
+          backPoints.parent = polygon;
+          backPoints.sibling = frontPoints;
+        }
         back.push(backPoints);
       }
       break;
@@ -140,6 +148,7 @@ export {
   BACK,
   COPLANAR_BACK,
   COPLANAR_FRONT,
+  EPSILON,
   FRONT,
   splitPolygon
 };

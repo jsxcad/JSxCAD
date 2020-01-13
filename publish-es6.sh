@@ -61,6 +61,7 @@ cp doc/dist/main.js es6/jsxcad-doc.js
 cp geometry/path/dist/main.js es6/jsxcad-geometry-path.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js
 cp geometry/points/dist/main.js es6/jsxcad-geometry-points.js
+cp geometry/polygons/dist/main.js es6/jsxcad-geometry-polygons.js
 cp geometry/solid-boolean/dist/main.js es6/jsxcad-geometry-solid-boolean.js
 cp geometry/solid/dist/main.js es6/jsxcad-geometry-solid.js
 cp geometry/surface-boolean/dist/main.js es6/jsxcad-geometry-surface-boolean.js
