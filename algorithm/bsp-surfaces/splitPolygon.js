@@ -148,6 +148,7 @@ export {
   BACK,
   COPLANAR_BACK,
   COPLANAR_FRONT,
+  EPSILON,
   FRONT,
   splitPolygon
 };
