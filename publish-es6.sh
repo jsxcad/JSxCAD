@@ -81,5 +81,6 @@ cp math/vec4/dist/main.js es6/jsxcad-math-vec4.js
 cp sys/dist/main.js es6/jsxcad-sys.js
 cp ui/threejs/dist/main.js es6/jsxcad-ui-threejs.js
 cp ui/v1/dist/main.js es6/jsxcad-ui-v1.js
+cp ui/v1/dist/webworker.js es6/jsxcad-ui-v1-webworker.js
 
 git add es6/*.js

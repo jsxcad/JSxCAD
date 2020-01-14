@@ -87340,10 +87340,11 @@ class Ui extends react.PureComponent {
     const {
       ask: ask$1
     } = await createService({
-      webWorker: './webworker.js',
+      webWorker: './jsxcad-ui-v1-webworker.js',
       agent,
       workerType: 'module'
-    });
+    }); // const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
+
     this.setState({
       ask: ask$1,
       creationWatcher,

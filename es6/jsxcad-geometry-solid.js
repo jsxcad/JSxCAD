@@ -164,54 +164,6 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-// We expect a solid of reconciled triangles.
-
-const fix = (solid, normalize) => {
-  const vertices = new Set();
-  for (const surface of solid) {
-    for (const path of surface) {
-      for (const point of path) {
-        const reconciledPoint = normalize(point);
-        vertices.add(reconciledPoint);
-      }
-    }
-  }
-
-  const repairedSolid = [];
-  for (const surface of solid) {
-    const repairedPaths = [];
-    for (const path of surface) {
-      const repairedPath = [];
-      for (const [start, end] of getEdges(path)) {
-        repairedPath.push(start);
-        const span = distance(start, end);
-        const colinear = [];
-        for (const vertex of vertices) {
-          // FIX: Threshold
-          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
-            // FIX: Clip an ear instead.
-            // Vertex is on the open edge.
-            colinear.push(vertex);
-          }
-        }
-        // Arrange by distance from start.
-        colinear.sort((a, b) => distance(start, a) - distance(start, b));
-        // Insert into the path.
-        repairedPath.push(...colinear);
-      }
-      repairedPaths.push(repairedPath);
-    }
-    repairedSolid.push(repairedPaths);
-  }
-  // At this point we should have the correct structure for assembly into a solid.
-  // We just need to ensure convexity.
-
-  return repairedSolid;
-
-  // const convex = repairedSolid.map(surface => makeConvex(surface, normalize));
-  // return convex;
-};
-
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
@@ -247,9 +199,58 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
     defragmented.push(surface);
   }
 
-  // Rebuild with additional substructure to support adjacent faces.
-  const fixed = fix(defragmented, normalize3);
-  return fixed;
+  return defragmented;
+};
+
+// We expect a solid of reconciled triangles.
+
+const watertight = Symbol('watertight');
+
+const makeWatertight = (solid, normalize = createNormalize3()) => {
+  if (!solid[watertight]) {
+    const vertices = new Set();
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const point of path) {
+          const reconciledPoint = normalize(point);
+          vertices.add(reconciledPoint);
+        }
+      }
+    }
+
+    const watertightSolid = [];
+    for (const surface of solid) {
+      const watertightPaths = [];
+      for (const path of surface) {
+        const watertightPath = [];
+        for (const [start, end] of getEdges(path)) {
+          watertightPath.push(start);
+          const span = distance(start, end);
+          const colinear = [];
+          for (const vertex of vertices) {
+            // FIX: Threshold
+            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
+              // FIX: Clip an ear instead.
+              // Vertex is on the open edge.
+              colinear.push(vertex);
+            }
+          }
+          // Arrange by distance from start.
+          colinear.sort((a, b) => distance(start, a) - distance(start, b));
+          // Insert into the path.
+          watertightPath.push(...colinear);
+        }
+        watertightPaths.push(watertightPath);
+      }
+      watertightSolid.push(watertightPaths);
+    }
+    // At this point we should have the correct structure for assembly into a solid.
+    // We just need to ensure convexity.
+
+    solid[watertight] = watertightSolid;
+  }
+
+  return solid[watertight];
 };
 
 /** Measure the bounding sphere of the given poly3
@@ -283,4 +284,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, clean, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, clean, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, makeWatertight, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
