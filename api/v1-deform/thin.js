@@ -1,7 +1,8 @@
+import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
+
 import Shape from '@jsxcad/api-v1-shape';
 import { deform } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { measureBoundingBox } from '@jsxcad/geometry-solid';
 import { scale } from '@jsxcad/math-vec2';
 
 const scaleXY = (factor, [x, y, z]) => [...scale(factor, [x, y]), z];
@@ -12,7 +13,7 @@ export const thin = (shape, widthAt = (z => 1 - z * 0.1), { resolution = 1 } = {
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
-    assembly.push({ solid: deform(solid, squeeze, min, max, resolution), tags });
+    assembly.push({ solid: deform(makeWatertight(solid), squeeze, min, max, resolution), tags });
   }
 
   return Shape.fromGeometry({ assembly });

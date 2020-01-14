@@ -142,7 +142,8 @@ class Ui extends React.PureComponent {
       }
     };
 
-    const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
+    const { ask } = await createService({ webWorker: '@jsxcad/ui-v1-webworker', agent, workerType: 'module' });
+    // const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
     this.setState({ ask, creationWatcher, deletionWatcher, logWatcher });
     setHandleAskUser(this.askUser);
 

@@ -10,6 +10,7 @@ import { eachPoint } from './eachPoint';
 import { findOpenEdges } from './findOpenEdges';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
+import { makeWatertight } from './makeWatertight';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { toGeneric } from './toGeneric';
@@ -27,6 +28,7 @@ export {
   findOpenEdges,
   flip,
   fromPolygons,
+  makeWatertight,
   measureBoundingBox,
   measureBoundingSphere,
   rotateX,

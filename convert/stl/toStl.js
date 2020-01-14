@@ -1,7 +1,7 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
 import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
-import { fixTJunctions } from './fixTJunctions';
+import { makeWatertight } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
 
 /**
@@ -30,7 +30,7 @@ export const toStl = async (options = {}, geometry) => {
   const keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry);
   if (doFixTJunctions) {
-    solids = fixTJunctions(solids);
+    solids = solids.map(solid => ({ ...solid, solid: makeWatertight(solid.solid) }));
   }
   const triangles = geometryToTriangles(solids);
   return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;

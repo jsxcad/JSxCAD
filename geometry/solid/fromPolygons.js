@@ -1,6 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-import { fix } from './fix';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 
@@ -39,7 +38,5 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
     defragmented.push(surface);
   }
 
-  // Rebuild with additional substructure to support adjacent faces.
-  const fixed = fix(defragmented, normalize3);
-  return fixed;
+  return defragmented;
 };
