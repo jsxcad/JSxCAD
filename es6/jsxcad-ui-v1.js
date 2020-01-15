@@ -87221,7 +87221,8 @@ class Ui extends react.PureComponent {
   static get propTypes() {
     return {
       project: propTypes.string,
-      projects: propTypes.array
+      projects: propTypes.array,
+      sha: propTypes.string
     };
   }
 
@@ -87260,6 +87261,9 @@ class Ui extends react.PureComponent {
     const {
       project
     } = this.state;
+    const {
+      sha
+    } = this.props;
 
     const fileUpdater = async () => this.setState({
       projects: await listFilesystems(),
@@ -87340,7 +87344,7 @@ class Ui extends react.PureComponent {
     const {
       ask: ask$1
     } = await createService({
-      webWorker: './jsxcad-ui-v1-webworker.js',
+      webWorker: `./webworker.js#${sha}`,
       agent,
       workerType: 'module'
     }); // const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
@@ -87994,7 +87998,7 @@ class Ui extends react.PureComponent {
 
 }
 
-const setupUi = async () => {
+const setupUi = async sha => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
   const [encodedProject] = hash.split('@');
@@ -88002,6 +88006,7 @@ const setupUi = async () => {
   reactDom.render(react.createElement(Ui, {
     projects: [...filesystems],
     project: project,
+    sha: sha,
     width: "100%",
     height: "100%",
     cols: 24,
@@ -88045,7 +88050,8 @@ const defaultPaneViews$1 = [['0', {
 }]];
 const installUi = async ({
   document,
-  project
+  project,
+  sha
 }) => {
   if (project !== '') {
     await setupFilesystem({
@@ -88053,7 +88059,7 @@ const installUi = async ({
     });
   }
 
-  await setupUi();
+  await setupUi(sha);
 };
 
 export { installUi };

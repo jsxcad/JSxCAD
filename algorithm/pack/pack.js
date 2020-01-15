@@ -1,9 +1,9 @@
-import { measureBoundingBox, rotateZ, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
+import { measureBoundingBox, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
 
-import { BP2D } from 'binpackingjs';
+import { MaxRectBinPack } from 'bin-packing-core';
 
-// const { BP2D } = BinPacking;
-const { Bin, Box, Packer } = BP2D;
+const DO_NOT_ALLOW_ROTATE = false;
+const SHORT_SIDE_FIT = 0;
 
 const X = 0;
 const Y = 1;
@@ -21,36 +21,29 @@ const measureOrigin = (geometry) => {
   return [x, y];
 };
 
-export const pack = ({ size = [210, 297], margin = 5 }, ...geometries) => {
+export const pack = ({ size = [210, 297], margin = 1 }, ...geometries) => {
   // Center the output to match pages.
   const xOffset = size[X] / -2;
   const yOffset = size[Y] / -2;
-  const bin = new Bin(...size);
-  const packer = new Packer([bin]);
-  const boxes = [];
+
+  const packedGeometries = [];
+  const unpackedGeometries = [];
+
+  const packer = new MaxRectBinPack(size[0], size[1], DO_NOT_ALLOW_ROTATE);
+
   for (const geometry of geometries) {
     const [width, height] = measureSize(geometry);
-    const box = new Box(width + margin * 2, height + margin * 2);
-    box.geometry = geometry;
-    box.originalWidth = box.width;
-    box.originalHeight = box.height;
-    box.geometryWidth = width;
-    box.geometryHeight = height;
-    boxes.push(box);
-  }
-  const isPackedGeometry = new Set();
-  const packedGeometries = [];
-  for (const box of packer.pack(boxes)) {
-    let geometry = box.geometry;
-    isPackedGeometry.add(geometry);
-    if (box.width !== box.originalWidth) {
-      geometry = rotateZ(90, geometry);
+    const [boxWidth, boxHeight] = [width + margin * 2, height + margin * 2];
+    const result = packer.insert(boxWidth, boxHeight, SHORT_SIDE_FIT);
+    if (result.width === 0 && result.height === 0) {
+      unpackedGeometries.push(geometry);
+    } else {
+      const [x, y] = measureOrigin(geometry);
+      const transformed = toTransformedGeometry(translate([result.x - x + margin + xOffset, 0 - yOffset - ((result.y - y) + margin), 0], geometry));
+      packedGeometries.push(transformed);
     }
-    const [x, y] = measureOrigin(geometry);
-    geometry = toTransformedGeometry(translate([box.x - x + margin + xOffset, box.y - y + margin + yOffset, 0], geometry));
-    packedGeometries.push(geometry);
   }
-  const unpackedGeometries = geometries.filter(geometry => !isPackedGeometry.has(geometry));
+
   return [packedGeometries, unpackedGeometries];
 };
 
