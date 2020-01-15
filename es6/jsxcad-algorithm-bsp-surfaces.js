@@ -1,10 +1,10 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3 as createNormalize3$1, doesNotOverlap, measureBoundingBox } from './jsxcad-geometry-solid.js';
+import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
-import { flip } from './jsxcad-geometry-polygons.js';
+import { doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 
 const EPSILON = 1e-5;
 const EPSILON2 = 1e-10;
@@ -645,43 +645,47 @@ const deform = (solid, transform, min, max, resolution) => {
 };
 
 const difference = (aSolid, ...bSolids) => {
-  const normalize = createNormalize3$1();
-  while (bSolids.length > 0) {
-    const a = alignVertices(aSolid, normalize);
-    const b = alignVertices(bSolids.shift(), normalize);
+  if (bSolids.length === 0) {
+    return aSolid;
+  }
 
-    if (doesNotOverlap(a, b)) {
-      continue;
-    }
+  const normalize = createNormalize3$1();
+  let a = toPolygons({}, alignVertices(aSolid, normalize));
+  let bs = bSolids
+      .map(b => toPolygons({}, alignVertices(b, normalize)))
+      .filter(b => !doesNotOverlap(a, b));
+
+  while (bs.length > 0) {
+    const b = bs.shift();
 
     const aBB = measureBoundingBox(a);
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = toPolygons({}, a);
+    const aPolygons = a;
     const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
     const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
 
-    const bPolygons = toPolygons({}, b);
+    const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
-      const aBsp = fromSolid(a, normalize);
+      const aBsp = fromPolygons(a, normalize);
       if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed; invert b.
-        aSolid = fromPolygons$1({}, [...aOut, ...flip(bIn)]);
+        a = [...aOut, ...flip(bIn)];
       } else {
         // The space is fully vacated; nothing to be cut.
         continue;
       }
     } else if (bIn.length === 0) {
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
-      const bBsp = fromSolid(b, normalize);
+      const bBsp = fromPolygons(b, normalize);
       if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed; only the out region remains.
-        aSolid = fromPolygons$1({}, aOut);
+        a = aOut;
       } else {
         // The space is fully vacated; nothing to cut with.
         continue;
@@ -690,10 +694,11 @@ const difference = (aSolid, ...bSolids) => {
       const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aIn, normalize);
       const bTrimmed = removeExteriorPolygons2(aBsp, flip(bIn), normalize);
 
-      aSolid = fromPolygons$1({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
+      // aSolid = toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
+      a = [...aOut, ...aTrimmed, ...bTrimmed];
     }
   }
-  return alignVertices(aSolid, normalize);
+  return fromPolygons$1({}, a, normalize);
 };
 
 // An asymmetric binary merge.
@@ -701,10 +706,14 @@ const intersection = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
+  if (solids.length === 1) {
+    return solids[0];
+  }
   const normalize = createNormalize3$1();
-  while (solids.length > 1) {
-    const a = alignVertices(solids.shift(), normalize);
-    const b = alignVertices(solids.shift(), normalize);
+  const s = solids.map(solid => toPolygons({}, alignVertices(solid, normalize)));
+  while (s.length > 1) {
+    const a = s.shift();
+    const b = s.shift();
 
     if (doesNotOverlap(a, b)) {
       return [];
@@ -714,31 +723,31 @@ const intersection = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = toPolygons({}, a);
+    const aPolygons = a;
     const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
 
     const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons(aIn, normalize));
 
-    const bPolygons = toPolygons({}, b);
+    const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully exclosed or fully vacated.
-      const aBsp = fromSolid(a, normalize);
+      const aBsp = fromPolygons(a, normalize);
       if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed.
-        solids.push(fromPolygons$1({}, bIn));
+        s.push(bIn);
       } else {
         // The space is fully vacated.
         return [];
       }
     } else if (bIn.length === 0) {
       // There are two ways for bIn to be empty: the space is fully exclosed or fully vacated.
-      const bBsp = fromSolid(b, normalize);
+      const bBsp = fromPolygons(b, normalize);
       if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed.
-        solids.push(fromPolygons$1({}, aIn));
+        s.push(aIn);
       } else {
         // The space is fully vacated.
         return [];
@@ -747,10 +756,10 @@ const intersection = (...solids) => {
       const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
       const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-      solids.push(fromPolygons$1({}, [...aTrimmed, ...bTrimmed], normalize));
+      s.push([...aTrimmed, ...bTrimmed]);
     }
   }
-  return alignVertices(solids[0], normalize);
+  return fromPolygons$1({}, s[0], normalize);
 };
 
 const section = (solid, surface) => {
@@ -764,13 +773,17 @@ const union = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
+  if (solids.length === 1) {
+    return solids[0];
+  }
   const normalize = createNormalize3$1();
-  while (solids.length > 1) {
-    const a = alignVertices(solids.shift(), normalize);
-    const b = alignVertices(solids.shift(), normalize);
+  const s = solids.map(solid => toPolygons({}, alignVertices(solid, normalize)));
+  while (s.length >= 2) {
+    const a = s.shift();
+    const b = s.shift();
 
     if (doesNotOverlap(a, b)) {
-      solids.push([...a, ...b]);
+      s.push([...a, ...b]);
       continue;
     }
 
@@ -778,43 +791,43 @@ const union = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = toPolygons({}, a);
+    const aPolygons = a;
     const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
     const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
 
-    const bPolygons = toPolygons({}, b);
+    const bPolygons = b;
     const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
-      const aBsp = fromSolid(a, normalize);
+      const aBsp = fromPolygons(a, normalize);
       if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed; bIn is redundant.
-        solids.push(fromPolygons$1({}, [...aOut, ...aIn, ...bOut]));
+        s.push([...aOut, ...aIn, ...bOut]);
       } else {
-        solids.push(fromPolygons$1({}, [...aOut, ...aIn, ...bOut]));
+        s.push([...aOut, ...aIn, ...bOut]);
         // The space is fully vacated; nothing overlaps b.
-        solids.push([...a, ...b]);
+        s.push([...a, ...b]);
       }
     } else if (bIn.length === 0) {
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
-      const bBsp = fromSolid(b, normalize);
+      const bBsp = fromPolygons(b, normalize);
       if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed; aIn is redundant.
-        solids.push(fromPolygons$1({}, [...aOut, ...bIn, ...bOut]));
+        s.push([...aOut, ...bIn, ...bOut]);
       } else {
         // The space is fully vacated; nothing overlaps a.
-        solids.push([...a, ...b]);
+        s.push([...a, ...b]);
       }
     } else {
       const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-      solids.push(fromPolygons$1({}, [...aOut, ...aTrimmed, ...bOut, ...bTrimmed], normalize));
+      s.push([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]);
     }
   }
-  return alignVertices(solids[0], normalize);
+  return fromPolygons$1({}, s[0], normalize);
 };
 
 export { containsPoint, cut, cutOpen, deform, difference, fromSolid, intersection, section, union };
