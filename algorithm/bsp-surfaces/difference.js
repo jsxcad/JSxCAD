@@ -1,8 +1,6 @@
 import {
   alignVertices,
   createNormalize3,
-  doesNotOverlap,
-  measureBoundingBox,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
@@ -14,52 +12,60 @@ import {
   outLeaf,
   removeExteriorPolygons2,
   removeInteriorPolygonsKeepingSkin2,
-  fromPolygons as toBspFromPolygons,
-  fromSolid as toBspFromSolid
+  fromPolygons as toBspFromPolygons
 } from './bsp';
 
+import {
+  doesNotOverlap,
+  flip,
+  measureBoundingBox
+} from '@jsxcad/geometry-polygons';
+
 import { containsPoint } from './containsPoint';
-import { flip } from '@jsxcad/geometry-polygons';
 import { max } from '@jsxcad/math-vec3';
 
 export const difference = (aSolid, ...bSolids) => {
-  const normalize = createNormalize3();
-  while (bSolids.length > 0) {
-    const a = alignVertices(aSolid, normalize);
-    const b = alignVertices(bSolids.shift(), normalize);
+  if (bSolids.length === 0) {
+    return aSolid;
+  }
 
-    if (doesNotOverlap(a, b)) {
-      continue;
-    }
+  const normalize = createNormalize3();
+  let a = toPolygonsFromSolid({}, alignVertices(aSolid, normalize));
+  let bs = bSolids
+      .map(b => toPolygonsFromSolid({}, alignVertices(b, normalize)))
+      .filter(b => !doesNotOverlap(a, b));
+
+  while (bs.length > 0) {
+    const b = bs.shift();
 
     const aBB = measureBoundingBox(a);
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = toPolygonsFromSolid({}, a);
+    const aPolygons = a;
     const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
     const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(aIn, normalize));
 
-    const bPolygons = toPolygonsFromSolid({}, b);
+    const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
-      const aBsp = toBspFromSolid(a, normalize);
+      const aBsp = toBspFromPolygons(a, normalize);
       if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed; invert b.
-        aSolid = toSolidFromPolygons({}, [...aOut, ...flip(bIn)]);
+        a = [...aOut, ...flip(bIn)];
       } else {
         // The space is fully vacated; nothing to be cut.
         continue;
       }
     } else if (bIn.length === 0) {
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
-      const bBsp = toBspFromSolid(b, normalize);
+      const bBsp = toBspFromPolygons(b, normalize);
       if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed; only the out region remains.
-        aSolid = toSolidFromPolygons({}, aOut);
+        a = aOut;
       } else {
         // The space is fully vacated; nothing to cut with.
         continue;
@@ -68,8 +74,9 @@ export const difference = (aSolid, ...bSolids) => {
       const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aIn, normalize);
       const bTrimmed = removeExteriorPolygons2(aBsp, flip(bIn), normalize);
 
-      aSolid = toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
+      // aSolid = toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
+      a = [...aOut, ...aTrimmed, ...bTrimmed];
     }
   }
-  return alignVertices(aSolid, normalize);
+  return toSolidFromPolygons({}, a, normalize);
 };

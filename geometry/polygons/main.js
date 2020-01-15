@@ -2,6 +2,7 @@ import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotati
 
 import { canonicalize } from './canonicalize';
 import { cutTrianglesByPlane } from './cutTrianglesByPlane';
+import { doesNotOverlap } from './doesNotOverlap';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
 import { fromPointsAndPaths } from './fromPointsAndPaths';
@@ -24,6 +25,7 @@ const translate = (vector, polygons) => transform(fromTranslation(vector), polyg
 export {
   canonicalize,
   cutTrianglesByPlane,
+  doesNotOverlap,
   eachPoint,
   flip,
   fromPointsAndPaths,

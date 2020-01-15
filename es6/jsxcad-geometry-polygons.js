@@ -1,6 +1,6 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, map as map$1, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { equals, canonicalize as canonicalize$2, lerp, dot, subtract, max, min, scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
+import { equals, canonicalize as canonicalize$2, lerp, dot, subtract, scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
 import { isClosed } from './jsxcad-geometry-path.js';
 
 const isDegenerate = (polygon) => {
@@ -250,6 +250,46 @@ const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
   return toLoops({ allowOpenPaths }, edges);
 };
 
+const measureBoundingBox = (polygons) => {
+  if (polygons.measureBoundingBox === undefined) {
+    const min = [Infinity, Infinity, Infinity];
+    const max = [-Infinity, -Infinity, -Infinity];
+    for (const path of polygons) {
+      for (const point of path) {
+        if (point[0] < min[0]) min[0] = point[0];
+        if (point[1] < min[1]) min[1] = point[1];
+        if (point[2] < min[2]) min[2] = point[2];
+        if (point[0] > max[0]) max[0] = point[0];
+        if (point[1] > max[1]) max[1] = point[1];
+        if (point[2] > max[2]) max[2] = point[2];
+      }
+    }
+    polygons.measureBoundingBox = [min, max];
+  }
+  return polygons.measureBoundingBox;
+};
+
+const iota = 1e-5;
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+// Tolerates overlap up to one iota.
+const doesNotOverlap = (a, b) => {
+  if (a.length === 0 || b.length === 0) {
+    return true;
+  }
+  const [minA, maxA] = measureBoundingBox(a);
+  const [minB, maxB] = measureBoundingBox(b);
+  if (maxA[X] <= minB[X] + iota) { return true; }
+  if (maxA[Y] <= minB[Y] + iota) { return true; }
+  if (maxA[Z] <= minB[Z] + iota) { return true; }
+  if (maxB[X] <= minA[X] + iota) { return true; }
+  if (maxB[Y] <= minA[Y] + iota) { return true; }
+  if (maxB[Z] <= minA[Z] + iota) { return true; }
+  return false;
+};
+
 const eachPoint = (options = {}, thunk, polygons) => {
   for (const polygon of polygons) {
     for (const point of polygon) {
@@ -286,19 +326,6 @@ const fromPointsAndPaths = ({ points = [], paths = [] }) => {
 };
 
 const isTriangle = (path) => isClosed(path) && path.length === 3;
-
-// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-const measureBoundingBox = (polygons) => {
-  let max$1 = polygons[0][0];
-  let min$1 = polygons[0][0];
-  eachPoint({},
-            point => {
-              max$1 = max(max$1, point);
-              min$1 = min(min$1, point);
-            },
-            polygons);
-  return [min$1, max$1];
-};
 
 /** Measure the bounding sphere of the given poly3
  * @param {poly3} the poly3 to measure
@@ -340,4 +367,4 @@ const rotateZ = (angle, polygons) => transform(fromZRotation(angle), polygons);
 const scale = (vector, polygons) => transform(fromScaling(vector), polygons);
 const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
 
-export { canonicalize, cutTrianglesByPlane, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toLoops, toPoints, toTriangles, transform, translate };
+export { canonicalize, cutTrianglesByPlane, doesNotOverlap, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toLoops, toPoints, toTriangles, transform, translate };
