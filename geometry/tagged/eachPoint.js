@@ -7,6 +7,8 @@ export const eachPoint = (operation, geometry) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
+    } else if (geometry.layers) {
+      geometry.layers.forEach(walk);
     } else if (geometry.disjointAssembly) {
       geometry.disjointAssembly.forEach(walk);
     } else if (geometry.connection) {

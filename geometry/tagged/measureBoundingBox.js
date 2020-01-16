@@ -38,17 +38,13 @@ export const measureBoundingBox = (rawGeometry) => {
 
   const walk = (item) => {
     if (item.assembly) {
-      // Should we cache at the assembly level?
-      for (const subitem of item.assembly) {
-        walk(subitem);
-      }
+      item.assembly.forEach(walk);
+    } else if (item.layers) {
+      item.layers.forEach(walk);
     } else if (item.connection) {
       item.geometries.map(walk);
     } else if (item.disjointAssembly) {
-      // Should we cache at the disjointAssembly level?
-      for (const subitem of item.disjointAssembly) {
-        walk(subitem);
-      }
+      item.disjointAssembly.forEach(walk);
     } else if (item.item) {
       walk(item.item);
     } else if (item.solid) {

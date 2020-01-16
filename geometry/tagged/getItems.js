@@ -7,6 +7,7 @@ export const getItems = (geometry) => {
              if (item.item) {
                items.push(item);
              }
-           });
+           },
+           false);
   return items;
 };

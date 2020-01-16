@@ -24,7 +24,7 @@ const clean = (geometry) => {
 };
 
 // Rewrite on the way back up the call-path.
-export const rewriteUp = (geometry, op) => {
+export const rewriteUp = (geometry, op, traverseItem = true) => {
   // FIX: Minimize identity churn.
   const walk = (geometry) => {
     const q = (postopGeometry) => {
@@ -51,6 +51,13 @@ export const rewriteUp = (geometry, op) => {
       } else {
         return q(op({ ...geometry, disjointAssembly }));
       }
+    } else if (geometry.layers) {
+      const layers = geometry.layers.map(walk);
+      if (shallowEq(layers, geometry.layers)) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, layers }));
+      }
     } else if (geometry.connection) {
       const geometries = geometry.geometries.map(walk);
       const connectors = geometry.connectors.map(walk);
@@ -61,7 +68,7 @@ export const rewriteUp = (geometry, op) => {
         return q(op({ ...geometry, geometries, connectors }));
       }
     } else if (geometry.item) {
-      const item = walk(geometry.item);
+      const item = traverseItem ? walk(geometry.item) : geometry.item;
       if (item === geometry.item) {
         return q(op(geometry));
       } else {
