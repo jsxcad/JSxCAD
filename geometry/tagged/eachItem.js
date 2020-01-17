@@ -1,9 +1,9 @@
 import { rewriteUp } from './rewrite';
 
-export const eachItem = (geometry, op, traverseItem = true) => {
+export const eachItem = (geometry, op) => {
   const read = (geometry) => {
     op(geometry);
     return geometry;
   };
-  rewriteUp(geometry, read, traverseItem);
+  rewriteUp(geometry, read);
 };

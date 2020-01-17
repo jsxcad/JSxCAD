@@ -3,8 +3,8 @@ import { getItems } from '@jsxcad/geometry-tagged';
 
 export const items = (shape, op = (_ => _)) => {
   const items = [];
-  for (const solid of getItems(shape.toKeptGeometry())) {
-    items.push(op(Shape.fromGeometry(solid)));
+  for (const item of getItems(shape.toKeptGeometry())) {
+    items.push(op(Shape.fromGeometry(item)));
   }
   return items;
 };

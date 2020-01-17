@@ -1,10 +1,12 @@
 import Arc from './Arc';
+import Assembly from './Assembly';
 import Circle from './Circle';
 import Cone from './Cone';
 import Cube from './Cube.js';
 import Cylinder from './Cylinder.js';
 import Hexagon from './Hexagon.js';
 import Icosahedron from './Icosahedron.js';
+import Layers from './Layers.js';
 import Line from './Line.js';
 import Path from './Path.js';
 import Point from './Point.js';
@@ -18,16 +20,19 @@ import Square from './Square.js';
 import Tetrahedron from './Tetrahedron.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
+import Void from './Void.js';
 import Wave from './Wave.js';
 
 const api = {
   Arc,
+  Assembly,
   Circle,
   Cone,
   Cube,
   Cylinder,
   Hexagon,
   Icosahedron,
+  Layers,
   Line,
   Path,
   Point,
@@ -41,17 +46,20 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 };
 
 export {
   Arc,
+  Assembly,
   Circle,
   Cone,
   Cube,
   Cylinder,
   Hexagon,
   Icosahedron,
+  Layers,
   Line,
   Path,
   Point,
@@ -65,6 +73,7 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 };
 

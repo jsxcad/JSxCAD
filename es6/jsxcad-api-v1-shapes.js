@@ -45,6 +45,8 @@ const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
 const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
+const Assembly = (...shapes) => Shape.fromGeometry({ assembly: shapes.map(shape => shape.toGeometry()) });
+
 const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
@@ -476,6 +478,8 @@ Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
 Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
 Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
 
+const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
+
 const fromPoints = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
@@ -827,6 +831,8 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
+const Void = (...shapes) => Shape.fromGeometry({ layers: [] });
+
 /**
  *
  * # Wave
@@ -855,12 +861,14 @@ const Wave = (toPathFromXDistance = (xDistance) => [[0]], { from = 0, to = 360, 
 
 const api = {
   Arc,
+  Assembly,
   Circle,
   Cone,
   Cube,
   Cylinder,
   Hexagon,
   Icosahedron,
+  Layers,
   Line,
   Path,
   Point,
@@ -874,8 +882,9 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 };
 
 export default api;
-export { Arc, Circle, Cone, Cube, Cylinder, Hexagon, Icosahedron, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Void, Wave };

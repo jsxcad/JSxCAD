@@ -27,7 +27,7 @@ class Shape {
     return Shape.fromOpenPath(concatenate(...paths));
   }
 
-  constructor (geometry = fromGeometry({ assembly: [] }),
+  constructor (geometry = { assembly: [] },
                context) {
     if (geometry.geometry) {
       throw Error('die');
@@ -790,10 +790,12 @@ keptMethod.signature = 'Shape -> kept() -> Shape';
 
 const log = (text) => log$1({ op: 'text', text: String(text) });
 
-const logMethod = function () { log(JSON.stringify(this.toKeptGeometry())); return this; };
+const logOp = (shape, op) => log$1({ op: 'text', text: String(op(shape)) });
+
+const logMethod = function (op = (shape => JSON.stringify(shape.toKeptGeometry()))) { logOp(this, op); return this; };
 Shape.prototype.log = logMethod;
 
-log.signature = 'log(text:string)';
+log.signature = 'log(op:function)';
 
 /**
  *

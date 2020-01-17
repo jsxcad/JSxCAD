@@ -43,7 +43,7 @@ export class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor (geometry = fromGeometry({ assembly: [] }),
+  constructor (geometry = { assembly: [] },
                context) {
     if (geometry.geometry) {
       throw Error('die');

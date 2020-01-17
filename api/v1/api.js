@@ -11,6 +11,7 @@ import '@jsxcad/api-v1-connector';
 import '@jsxcad/api-v1-deform';
 import '@jsxcad/api-v1-extrude';
 import '@jsxcad/api-v1-item';
+import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-shell';
 
 export {
@@ -34,12 +35,14 @@ export {
 
 export {
   Arc,
+  Assembly,
   Circle,
   Cone,
   Cube,
   Cylinder,
   Hexagon,
   Icosahedron,
+  Layers,
   Line,
   Point,
   Points,
@@ -52,6 +55,7 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 } from '@jsxcad/api-v1-shapes';
 

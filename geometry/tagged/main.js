@@ -1,4 +1,5 @@
 import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
+import { rewrite, visit } from './visit';
 
 import { allTags } from './allTags';
 import { assemble } from './assemble';
@@ -69,6 +70,7 @@ export {
   measureBoundingBox,
   nonNegative,
   outline,
+  rewrite,
   rewriteTags,
   specify,
   splice,
@@ -77,7 +79,8 @@ export {
   toPoints,
   toTransformedGeometry,
   transform,
-  union
+  union,
+  visit
 };
 
 export const rotateX = (angle, assembly) => transform(fromXRotation(angle * Math.PI / 180), assembly);
