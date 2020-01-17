@@ -27,6 +27,11 @@ export const toTransformedGeometry = (geometry) => {
           disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
           tags
         };
+      } else if (geometry.layers) {
+        return {
+          layers: geometry.layers.map(geometry => walk(matrix, geometry)),
+          tags
+        };
       } else if (geometry.item) {
         return {
           item: walk(matrix, geometry.item),

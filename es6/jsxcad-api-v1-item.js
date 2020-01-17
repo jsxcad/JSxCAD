@@ -12,6 +12,7 @@ import { rewriteTags, getItems } from './jsxcad-geometry-tagged.js';
 const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: shape.toGeometry() }));
 
 const toItemMethod = function (id) { return Item(this, id); };
+Shape.prototype.Item = toItemMethod;
 Shape.prototype.toItem = toItemMethod;
 
 Item.signature = 'Item(shape:Shape, id:string) -> Shape';

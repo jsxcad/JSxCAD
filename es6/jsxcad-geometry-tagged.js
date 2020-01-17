@@ -37,7 +37,7 @@ const clean = (geometry) => {
 };
 
 // Rewrite on the way back up the call-path.
-const rewriteUp = (geometry, op) => {
+const rewriteUp = (geometry, op, traverseItem = true) => {
   // FIX: Minimize identity churn.
   const walk = (geometry) => {
     const q = (postopGeometry) => {
@@ -64,6 +64,13 @@ const rewriteUp = (geometry, op) => {
       } else {
         return q(op({ ...geometry, disjointAssembly }));
       }
+    } else if (geometry.layers) {
+      const layers = geometry.layers.map(walk);
+      if (shallowEq(layers, geometry.layers)) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, layers }));
+      }
     } else if (geometry.connection) {
       const geometries = geometry.geometries.map(walk);
       const connectors = geometry.connectors.map(walk);
@@ -74,7 +81,7 @@ const rewriteUp = (geometry, op) => {
         return q(op({ ...geometry, geometries, connectors }));
       }
     } else if (geometry.item) {
-      const item = walk(geometry.item);
+      const item = traverseItem ? walk(geometry.item) : geometry.item;
       if (item === geometry.item) {
         return q(op(geometry));
       } else {
@@ -144,6 +151,11 @@ const toTransformedGeometry = (geometry) => {
       } else if (geometry.disjointAssembly) {
         return {
           disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
+          tags
+        };
+      } else if (geometry.layers) {
+        return {
+          layers: geometry.layers.map(geometry => walk(matrix, geometry)),
           tags
         };
       } else if (geometry.item) {
@@ -241,12 +253,12 @@ const canonicalize = (rawGeometry) => {
   return canonicalized;
 };
 
-const eachItem = (geometry, op) => {
+const eachItem = (geometry, op, traverseItem = true) => {
   const read = (geometry) => {
     op(geometry);
     return geometry;
   };
-  rewriteUp(geometry, read);
+  rewriteUp(geometry, read, traverseItem);
 };
 
 const getConnections = (geometry) => {
@@ -267,7 +279,8 @@ const getItems = (geometry) => {
              if (item.item) {
                items.push(item);
              }
-           });
+           },
+           false);
   return items;
 };
 
@@ -468,6 +481,8 @@ const eachPoint = (operation, geometry) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
       geometry.assembly.forEach(walk);
+    } else if (geometry.layers) {
+      geometry.layers.forEach(walk);
     } else if (geometry.disjointAssembly) {
       geometry.disjointAssembly.forEach(walk);
     } else if (geometry.connection) {
@@ -504,6 +519,8 @@ const flip = (geometry) => {
       return { ...geometry, solid: flip$4(geometry.solid) };
     } else if (geometry.assembly) {
       return geometry;
+    } else if (geometry.layers) {
+      return geometry;
     } else if (geometry.disjointAssembly) {
       return geometry;
     } else if (geometry.plan) {
@@ -528,52 +545,6 @@ const flip = (geometry) => {
   };
   return rewriteUp(geometry, op);
 };
-
-/*
-export const flip = (geometry) => {
-  const flipped = {};
-  if (geometry.points) {
-    flipped.points = flipPoints(geometry.points);
-  } else if (geometry.paths) {
-    flipped.paths = flipPaths(geometry.paths);
-  } else if (geometry.surface) {
-    flipped.surface = flipSurface(geometry.surface);
-  } else if (geometry.z0Surface) {
-    flipped.z0Surface = flipSurface(geometry.z0Surface);
-  } else if (geometry.solid) {
-    flipped.solid = flipSolid(geometry.solid);
-  } else if (geometry.assembly) {
-    flipped.assembly = geometry.assembly.map(flip);
-  } else if (geometry.disjointAssembly) {
-    flipped.assembly = geometry.disjointAssembly.map(flip);
-  } else if (geometry.plan) {
-    if (geometry.plan.connector) {
-      flipped.plan = geometry.plan;
-      flipped.marks = geometry.marks;
-      flipped.planes = geometry.planes.map(flipPlane);
-      // FIX: Mirror?
-      flipped.visualization = geometry.visualization;
-    } else {
-      // Leave other plans be for now.
-      flipped.plan = geometry.plan;
-      flipped.marks = geometry.marks;
-      flipped.planes = geometry.planes;
-      flipped.visualization = geometry.visualization;
-    }
-  } else if (geometry.connection) {
-    flipped.connection = geometry.connection;
-    flipped.geometries = geometry.geometries.map(flip);
-    flipped.connectors = geometry.connectors.map(flip);
-  } else if (geometry.item) {
-    // FIX: How should items deal with flip?
-    flipped.item = geometry.item;
-  } else {
-    throw Error(`die: ${JSON.stringify(geometry)}`);
-  }
-  flipped.tags = geometry.tags;
-  return flipped;
-};
-*/
 
 const fromPathToSurfaceImpl = (path) => {
   return { surface: [path] };
@@ -690,8 +661,12 @@ const map = (geometry, operation) => {
   const present = item => item !== undefined;
   const walk = (geometry) => {
     if (geometry.assembly) {
+      // CHECK: When can items not be present?
       const assembly = geometry.assembly.map(walk).filter(present);
       return operation({ assembly, tags: geometry.tags });
+    } else if (geometry.layers) {
+      const layers = geometry.layers.map(walk);
+      return operation({ layers, tags: geometry.tags });
     } else if (geometry.disjointAssembly) {
       // FIX: Consider the case where the operation does not preserve disjoinedness.
       const disjointAssembly = geometry.disjointAssembly.map(walk).filter(present);
@@ -718,6 +693,11 @@ const toDisjointAssembly = (geometry) => {
       ...geometry,
       connectors: geometry.connectors.map(toDisjointGeometry),
       geometries: geometry.geometries.map(toDisjointGeometry)
+    };
+  } else if (geometry.layers) {
+    return {
+      ...geometry,
+      layers: geometry.layers.map(toDisjointGeometry)
     };
   } else if (geometry.assembly) {
     if (geometry.assembly.length === 0) {
@@ -824,17 +804,13 @@ const measureBoundingBox = (rawGeometry) => {
 
   const walk = (item) => {
     if (item.assembly) {
-      // Should we cache at the assembly level?
-      for (const subitem of item.assembly) {
-        walk(subitem);
-      }
+      item.assembly.forEach(walk);
+    } else if (item.layers) {
+      item.layers.forEach(walk);
     } else if (item.connection) {
       item.geometries.map(walk);
     } else if (item.disjointAssembly) {
-      // Should we cache at the disjointAssembly level?
-      for (const subitem of item.disjointAssembly) {
-        walk(subitem);
-      }
+      item.disjointAssembly.forEach(walk);
     } else if (item.item) {
       walk(item.item);
     } else if (item.solid) {

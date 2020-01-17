@@ -17,6 +17,11 @@ const toDisjointAssembly = (geometry) => {
       connectors: geometry.connectors.map(toDisjointGeometry),
       geometries: geometry.geometries.map(toDisjointGeometry)
     };
+  } else if (geometry.layers) {
+    return {
+      ...geometry,
+      layers: geometry.layers.map(toDisjointGeometry)
+    };
   } else if (geometry.assembly) {
     if (geometry.assembly.length === 0) {
       return { disjointAssembly: [] };
