@@ -5,13 +5,13 @@ import { setColor } from './color';
 const loader = new TextureLoader();
 
 // FIX: Make this lazy.
-const loadTexture = (url) => {
-  const texture = loader.load(url);
-  texture.wrapS = texture.wrapT = RepeatWrapping;
-  texture.offset.set(0, 0);
-  texture.repeat.set(1, 1);
-  return texture;
-};
+const loadTexture = (url) =>
+  new Promise((resolve, reject) => {
+    const texture = loader.load(url, resolve);
+    texture.wrapS = texture.wrapT = RepeatWrapping;
+    texture.offset.set(0, 0);
+    texture.repeat.set(1, 1);
+  });
 
 const materialProperties = {
   paper: {
@@ -104,33 +104,33 @@ const materialProperties = {
   }
 };
 
-const merge = (properties, parameters) => {
+const merge = async (properties, parameters) => {
   for (const key of Object.keys(properties)) {
     if (key === 'map') {
-      parameters[key] = loadTexture(properties[key]);
+      parameters[key] = await loadTexture(properties[key]);
     } else {
       parameters[key] = properties[key];
     }
   }
 };
 
-export const setMaterial = (tags, parameters) => {
+export const setMaterial = async (tags, parameters) => {
   for (const tag of tags) {
     if (tag.startsWith('material/')) {
       const material = tag.substring(9);
       const properties = materialProperties[material];
       if (properties !== undefined) {
-        merge(properties, parameters);
+        await merge(properties, parameters);
       }
     }
   }
 };
 
-export const buildMeshMaterial = (tags) => {
+export const buildMeshMaterial = async (tags) => {
   if (tags !== undefined) {
     const parameters = {};
     setColor(tags, parameters, null);
-    setMaterial(tags, parameters);
+    await setMaterial(tags, parameters);
     if (Object.keys(parameters).length > 0) {
       return new MeshPhysicalMaterial(parameters);
     }

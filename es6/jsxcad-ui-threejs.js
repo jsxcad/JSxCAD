@@ -52261,13 +52261,13 @@ const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
 const loader = new TextureLoader();
 
 // FIX: Make this lazy.
-const loadTexture = (url) => {
-  const texture = loader.load(url);
-  texture.wrapS = texture.wrapT = RepeatWrapping;
-  texture.offset.set(0, 0);
-  texture.repeat.set(1, 1);
-  return texture;
-};
+const loadTexture = (url) =>
+  new Promise((resolve, reject) => {
+    const texture = loader.load(url, resolve);
+    texture.wrapS = texture.wrapT = RepeatWrapping;
+    texture.offset.set(0, 0);
+    texture.repeat.set(1, 1);
+  });
 
 const materialProperties = {
   paper: {
@@ -52360,33 +52360,33 @@ const materialProperties = {
   }
 };
 
-const merge = (properties, parameters) => {
+const merge = async (properties, parameters) => {
   for (const key of Object.keys(properties)) {
     if (key === 'map') {
-      parameters[key] = loadTexture(properties[key]);
+      parameters[key] = await loadTexture(properties[key]);
     } else {
       parameters[key] = properties[key];
     }
   }
 };
 
-const setMaterial = (tags, parameters) => {
+const setMaterial = async (tags, parameters) => {
   for (const tag of tags) {
     if (tag.startsWith('material/')) {
       const material = tag.substring(9);
       const properties = materialProperties[material];
       if (properties !== undefined) {
-        merge(properties, parameters);
+        await merge(properties, parameters);
       }
     }
   }
 };
 
-const buildMeshMaterial = (tags) => {
+const buildMeshMaterial = async (tags) => {
   if (tags !== undefined) {
     const parameters = {};
     setColor(tags, parameters, null);
-    setMaterial(tags, parameters);
+    await setMaterial(tags, parameters);
     if (Object.keys(parameters).length > 0) {
       return new MeshPhysicalMaterial(parameters);
     }
@@ -52411,7 +52411,6 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   const coords = [];
   coords.length = 2 * geom.attributes.position.array.length / 3;
 
-  // geom.removeAttribute('uv');
   if (geom.attributes.uv === undefined) {
     geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
   }
@@ -52567,7 +52566,7 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene, layer }));
@@ -52595,7 +52594,7 @@ const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER 
     geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
     geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
     applyBoxUV(geometry);
-    const material = buildMeshMaterial(tags);
+    const material = await buildMeshMaterial(tags);
     dataset.mesh = new Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
@@ -52608,7 +52607,7 @@ const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER 
     geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
     geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
     applyBoxUV(geometry);
-    const material = buildMeshMaterial(tags);
+    const material = await buildMeshMaterial(tags);
     dataset.mesh = new Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
@@ -52792,7 +52791,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
 const GEOMETRY_LAYER$1 = 0;
 const PLAN_LAYER$1 = 1;
 
-const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
+const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -52814,7 +52813,7 @@ const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
     renderer.render(scene, camera);
   };
 
-  buildMeshes({ datasets, threejsGeometry, scene });
+  await buildMeshes({ datasets, threejsGeometry, scene });
 
   render();
 
