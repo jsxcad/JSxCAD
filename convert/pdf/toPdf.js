@@ -45,7 +45,7 @@ const footer =
     `trailer << /Root 1 0 R /Size 4 >>`,
     `%%EOF`];
 
-export const toPdf = async ({ orientation = 'portrait', unit = 'mm', lineWidth = 0.096, size = [210, 297] }, geometry) => {
+export const toPdf = async ({ lineWidth = 0.096, size = [210, 297] }, geometry) => {
   geometry = await geometry;
 
   // This is the size of a post-script point in mm.
