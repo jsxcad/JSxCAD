@@ -26,10 +26,10 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-export const view = (shape, { view, width = 256, height = 128 } = {}) => {
+export const view = async (shape, { view, width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
-  const { renderer } = staticDisplay({ view, threejsGeometry },
-                                     { offsetWidth: width, offsetHeight: height });
+  const { renderer } = await staticDisplay({ view, threejsGeometry },
+                                           { offsetWidth: width, offsetHeight: height });
   const canvas = toCanvasFromWebglContext(renderer.getContext());
   canvas.style = `width: ${width}px; height: ${height}px`;
   renderer.forceContextLoss();
@@ -37,13 +37,13 @@ export const view = (shape, { view, width = 256, height = 128 } = {}) => {
 };
 
 // Work around the name collision in destructuring.
-const buildView = (...args) => view(...args);
+const buildView = async (...args) => view(...args);
 
-const bigViewMethod = function ({ width = 512, height = 256, view = { position: [100, -100, 100] } } = {}) { return buildView(this, { width, height, view }); };
-const bigTopViewMethod = function ({ width = 512, height = 256, view = { position: [0, 0, 100] } } = {}) { return buildView(this, { width, height, view }); };
-const viewMethod = function ({ width = 256, height = 128, view = { position: [100, -100, 100] } } = {}) { return buildView(this, { width, height, view }); };
-const topViewMethod = function ({ width = 256, height = 128, view = { position: [0, 0, 100] } } = {}) { return buildView(this, { width, height, view }); };
-const frontViewMethod = function ({ width = 256, height = 128, view = { position: [0, -100, 0] } } = {}) { return buildView(this, { width, height, view }); };
+const bigViewMethod = async function ({ width = 512, height = 256, view = { position: [100, -100, 100] } } = {}) { return buildView(this, { width, height, view }); };
+const bigTopViewMethod = async function ({ width = 512, height = 256, view = { position: [0, 0, 100] } } = {}) { return buildView(this, { width, height, view }); };
+const viewMethod = async function ({ width = 256, height = 128, view = { position: [100, -100, 100] } } = {}) { return buildView(this, { width, height, view }); };
+const topViewMethod = async function ({ width = 256, height = 128, view = { position: [0, 0, 100] } } = {}) { return buildView(this, { width, height, view }); };
+const frontViewMethod = async function ({ width = 256, height = 128, view = { position: [0, -100, 0] } } = {}) { return buildView(this, { width, height, view }); };
 
 Shape.prototype.view = viewMethod;
 Shape.prototype.bigView = bigViewMethod;

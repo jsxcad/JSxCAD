@@ -1,30 +1,18 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { toPdf } from '@jsxcad/convert-pdf';
+import { toPdf as convertToPdf } from '@jsxcad/convert-pdf';
 import { writeFile } from '@jsxcad/sys';
 
-/**
- *
- * # Write PDF
- *
- * ```
- * Cube().section().writePdf('cube.pdf');
- * ```
- *
- **/
+export const toPdf = async (shape, path, { lineWidth = 0.096, size = [210, 297] } = {}) =>
+  convertToPdf({ lineWidth, size }, shape.toKeptGeometry());
 
-export const writePdf = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writePdf('foo', bar);
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const pdf = await toPdf({ preview: true, ...options }, geometry);
+export const writePdf = async (shape, path, { lineWidth = 0.096, size = [210, 297] } = {}) => {
+  const pdf = await toPdf(shape, path, { lineWidth, size });
   await writeFile({}, `output/${path}`, pdf);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(shape.toKeptGeometry()));
 };
 
-const method = function (options = {}) { return writePdf(options, this); };
-Shape.prototype.writePdf = method;
+const toPdfMethod = function (...args) { return toPdf(this, ...args); };
+Shape.prototype.toPdf = toPdfMethod;
 
-export default writePdf;
+const writePdfMethod = function (...args) { return writePdf(this, ...args); };
+Shape.prototype.writePdf = writePdfMethod;

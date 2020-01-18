@@ -5,7 +5,7 @@ import { buildScene } from './scene';
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-export const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
+export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -27,7 +27,7 @@ export const staticDisplay = ({ view = {}, threejsGeometry } = {}, page) => {
     renderer.render(scene, camera);
   };
 
-  buildMeshes({ datasets, threejsGeometry, scene });
+  await buildMeshes({ datasets, threejsGeometry, scene });
 
   render();
 
