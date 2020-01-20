@@ -62,6 +62,7 @@
     "@jsxcad/api-v1-gcode": "^0.0.79",
     "@jsxcad/api-v1-gear": "^0.0.79",
     "@jsxcad/api-v1-item": "^0.0.79",
+    "@jsxcad/api-v1-items": "^0.0.79",
     "@jsxcad/api-v1-jscad": "^0.0.79",
     "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-lego": "^0.0.79",

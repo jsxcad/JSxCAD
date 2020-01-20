@@ -60,6 +60,10 @@ export {
 } from '@jsxcad/api-v1-shapes';
 
 export {
+  WoodScrew
+} from '@jsxcad/api-v1-items';
+
+export {
   acos,
   cos,
   ease,
