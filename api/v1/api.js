@@ -40,6 +40,7 @@ export {
   Cone,
   Cube,
   Cylinder,
+  Empty,
   Hexagon,
   Icosahedron,
   Layers,
@@ -55,7 +56,6 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
-  Void,
   Wave
 } from '@jsxcad/api-v1-shapes';
 
