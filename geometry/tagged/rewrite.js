@@ -51,6 +51,13 @@ export const rewriteUp = (geometry, op) => {
       } else {
         return q(op({ ...geometry, disjointAssembly }));
       }
+    } else if (geometry.layers) {
+      const layers = geometry.layers.map(walk);
+      if (shallowEq(layers, geometry.layers)) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, layers }));
+      }
     } else if (geometry.connection) {
       const geometries = geometry.geometries.map(walk);
       const connectors = geometry.connectors.map(walk);

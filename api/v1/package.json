@@ -62,6 +62,7 @@
     "@jsxcad/api-v1-gcode": "^0.0.79",
     "@jsxcad/api-v1-gear": "^0.0.79",
     "@jsxcad/api-v1-item": "^0.0.79",
+    "@jsxcad/api-v1-items": "^0.0.79",
     "@jsxcad/api-v1-jscad": "^0.0.79",
     "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-lego": "^0.0.79",
@@ -84,7 +85,7 @@
     "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
-    "ava": "^1.4.1",
+    "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",

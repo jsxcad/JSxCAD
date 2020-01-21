@@ -1,12 +1,14 @@
-import { eachItem } from './eachItem';
+import { visit } from './visit';
 
 export const getItems = (geometry) => {
   const items = [];
-  eachItem(geometry,
-           item => {
-             if (item.item) {
-               items.push(item);
-             }
-           });
+  const op = (geometry, descend) => {
+    if (geometry.item) {
+      items.push(geometry);
+    } else {
+      descend();
+    }
+  };
+  visit(geometry, op);
   return items;
 };

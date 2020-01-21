@@ -1,8 +1,6 @@
 import {
   alignVertices,
   createNormalize3,
-  doesNotOverlap,
-  measureBoundingBox,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
@@ -13,12 +11,15 @@ import {
   inLeaf,
   outLeaf,
   removeExteriorPolygonsKeepingSkin,
-  fromPolygons as toBspFromPolygons,
-  fromSolid as toBspFromSolid
+  fromPolygons as toBspFromPolygons
 } from './bsp';
 
-import { containsPoint } from './containsPoint';
+import {
+  doesNotOverlap,
+  measureBoundingBox
+} from '@jsxcad/geometry-polygons';
 
+import { containsPoint } from './containsPoint';
 import { max } from '@jsxcad/math-vec3';
 
 // An asymmetric binary merge.
@@ -26,10 +27,14 @@ export const intersection = (...solids) => {
   if (solids.length === 0) {
     return [];
   }
+  if (solids.length === 1) {
+    return solids[0];
+  }
   const normalize = createNormalize3();
-  while (solids.length > 1) {
-    const a = alignVertices(solids.shift(), normalize);
-    const b = alignVertices(solids.shift(), normalize);
+  const s = solids.map(solid => toPolygonsFromSolid({}, alignVertices(solid, normalize)));
+  while (s.length > 1) {
+    const a = s.shift();
+    const b = s.shift();
 
     if (doesNotOverlap(a, b)) {
       return [];
@@ -39,31 +44,31 @@ export const intersection = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = toPolygonsFromSolid({}, a);
+    const aPolygons = a;
     const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
 
     const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, toBspFromPolygons(aIn, normalize));
 
-    const bPolygons = toPolygonsFromSolid({}, b);
+    const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, toBspFromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully exclosed or fully vacated.
-      const aBsp = toBspFromSolid(a, normalize);
+      const aBsp = toBspFromPolygons(a, normalize);
       if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed.
-        solids.push(toSolidFromPolygons({}, bIn));
+        s.push(bIn);
       } else {
         // The space is fully vacated.
         return [];
       }
     } else if (bIn.length === 0) {
       // There are two ways for bIn to be empty: the space is fully exclosed or fully vacated.
-      const bBsp = toBspFromSolid(b, normalize);
+      const bBsp = toBspFromPolygons(b, normalize);
       if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
         // The space is fully enclosed.
-        solids.push(toSolidFromPolygons({}, aIn));
+        s.push(aIn);
       } else {
         // The space is fully vacated.
         return [];
@@ -72,8 +77,8 @@ export const intersection = (...solids) => {
       const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
       const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-      solids.push(toSolidFromPolygons({}, [...aTrimmed, ...bTrimmed], normalize));
+      s.push([...aTrimmed, ...bTrimmed]);
     }
   }
-  return alignVertices(solids[0], normalize);
+  return toSolidFromPolygons({}, s[0], normalize);
 };

@@ -9,7 +9,7 @@ import { buildMeshes } from './mesh';
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-export const display = ({ view = {}, threejsGeometry } = {}, page) => {
+export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -46,7 +46,7 @@ export const display = ({ view = {}, threejsGeometry } = {}, page) => {
   resize();
   new ResizeObserver(resize).observe(container);
 
-  buildMeshes({ datasets, threejsGeometry, scene });
+  await buildMeshes({ datasets, threejsGeometry, scene });
   buildGuiControls({ datasets, gui });
 
   const animate = () => {

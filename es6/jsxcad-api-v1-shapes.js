@@ -45,6 +45,8 @@ const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
 const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
+const Assembly = (...shapes) => Shape.fromGeometry({ assembly: shapes.map(shape => shape.toGeometry()) });
+
 const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
@@ -399,6 +401,8 @@ Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:num
 Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
 Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
+const Empty = (...shapes) => Shape.fromGeometry({ layers: [] });
+
 /**
  *
  * # Hexagon
@@ -475,6 +479,8 @@ Icosahedron.ofDiameter = ofDiameter$7;
 Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
 Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
 Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+
+const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
 
 const fromPoints = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
@@ -855,12 +861,15 @@ const Wave = (toPathFromXDistance = (xDistance) => [[0]], { from = 0, to = 360, 
 
 const api = {
   Arc,
+  Assembly,
   Circle,
   Cone,
   Cube,
   Cylinder,
+  Empty,
   Hexagon,
   Icosahedron,
+  Layers,
   Line,
   Path,
   Point,
@@ -878,4 +887,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Circle, Cone, Cube, Cylinder, Hexagon, Icosahedron, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave };

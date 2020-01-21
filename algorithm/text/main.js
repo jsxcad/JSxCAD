@@ -1,3 +1,4 @@
+import { clean } from '@jsxcad/geometry-z0surface-boolean';
 import { fromSvgPath } from '@jsxcad/convert-svg';
 import { parse } from 'opentype.js';
 import { scale } from '@jsxcad/geometry-tagged';
@@ -17,7 +18,7 @@ export const toFont = (options = {}, bytes) => {
     const pathsets = [];
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
       // Cleaning forces the first path to not be a hole.
-      pathsets.push(paths);
+      pathsets.push(clean(paths));
     }
     return scale([factor, factor, factor], { assembly: pathsets.map(pathset => ({ z0Surface: pathset })) });
   };

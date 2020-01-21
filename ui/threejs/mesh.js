@@ -13,8 +13,6 @@ import {
   VertexColors
 } from 'three';
 
-// import { add, normalize, scale, subtract } from '@jsxcad/math-vec2';
-
 import { buildMeshMaterial } from './material';
 import { setColor } from './color';
 
@@ -33,7 +31,6 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   const coords = [];
   coords.length = 2 * geom.attributes.position.array.length / 3;
 
-  // geom.removeAttribute('uv');
   if (geom.attributes.uv === undefined) {
     geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
   }
@@ -189,7 +186,7 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene, layer }));
@@ -217,7 +214,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
     geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
     geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
     applyBoxUV(geometry);
-    const material = buildMeshMaterial(tags);
+    const material = await buildMeshMaterial(tags);
     dataset.mesh = new Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
@@ -230,7 +227,7 @@ export const buildMeshes = ({ datasets, threejsGeometry, scene, layer = GEOMETRY
     geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
     geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
     applyBoxUV(geometry);
-    const material = buildMeshMaterial(tags);
+    const material = await buildMeshMaterial(tags);
     dataset.mesh = new Mesh(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);

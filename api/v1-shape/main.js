@@ -4,6 +4,7 @@ import './clip';
 import './cut';
 import './defragment';
 import './faces';
+import './layer';
 import './openEdges';
 import './void';
 import './wireframe';

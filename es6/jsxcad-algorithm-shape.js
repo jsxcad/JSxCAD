@@ -4070,12 +4070,11 @@ var util = {
   debuglog: debuglog
 };
 
-var hasFlag = (flag, argv) => {
-	argv = argv || process.argv;
+var hasFlag = (flag, argv = process.argv) => {
 	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const pos = argv.indexOf(prefix + flag);
-	const terminatorPos = argv.indexOf('--');
-	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+	const position = argv.indexOf(prefix + flag);
+	const terminatorPosition = argv.indexOf('--');
+	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
 };
 
 const {env: env$1} = process;
@@ -4092,10 +4091,11 @@ if (hasFlag('no-color') ||
 	hasFlag('color=always')) {
 	forceColor = 1;
 }
+
 if ('FORCE_COLOR' in env$1) {
-	if (env$1.FORCE_COLOR === true || env$1.FORCE_COLOR === 'true') {
+	if (env$1.FORCE_COLOR === 'true') {
 		forceColor = 1;
-	} else if (env$1.FORCE_COLOR === false || env$1.FORCE_COLOR === 'false') {
+	} else if (env$1.FORCE_COLOR === 'false') {
 		forceColor = 0;
 	} else {
 		forceColor = env$1.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env$1.FORCE_COLOR, 10), 3);
@@ -4115,7 +4115,7 @@ function translateLevel(level) {
 	};
 }
 
-function supportsColor(stream) {
+function supportsColor(haveStream, streamIsTTY) {
 	if (forceColor === 0) {
 		return 0;
 	}
@@ -4130,7 +4130,7 @@ function supportsColor(stream) {
 		return 2;
 	}
 
-	if (stream && !stream.isTTY && forceColor === undefined) {
+	if (haveStream && !streamIsTTY && forceColor === undefined) {
 		return 0;
 	}
 
@@ -4150,6 +4150,10 @@ function supportsColor(stream) {
 
 	if ('TEAMCITY_VERSION' in env$1) {
 		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env$1.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if ('GITHUB_ACTIONS' in env$1) {
+		return 1;
 	}
 
 	if (env$1.COLORTERM === 'truecolor') {
@@ -4184,14 +4188,14 @@ function supportsColor(stream) {
 }
 
 function getSupportLevel(stream) {
-	const level = supportsColor(stream);
+	const level = supportsColor(stream, stream && stream.isTTY);
 	return translateLevel(level);
 }
 
 var supportsColor_1 = {
 	supportsColor: getSupportLevel,
-	stdout: getSupportLevel(process.stdout),
-	stderr: getSupportLevel(process.stderr)
+	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
 };
 
 var node = createCommonjsModule(function (module, exports) {

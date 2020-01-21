@@ -56,7 +56,8 @@ class Ui extends React.PureComponent {
   static get propTypes () {
     return {
       project: PropTypes.string,
-      projects: PropTypes.array
+      projects: PropTypes.array,
+      sha: PropTypes.string
     };
   }
 
@@ -96,6 +97,7 @@ class Ui extends React.PureComponent {
 
   async componentDidMount () {
     const { project } = this.state;
+    const { sha } = this.props;
 
     const fileUpdater = async () => this.setState({
       projects: await listFilesystems(),
@@ -142,7 +144,8 @@ class Ui extends React.PureComponent {
       }
     };
 
-    const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
+    const { ask } = await createService({ webWorker: `./webworker.js#${sha}`, agent, workerType: 'module' });
+    // const { ask } = await createService({ webWorker: './webworker.js', agent, workerType: 'module' });
     this.setState({ ask, creationWatcher, deletionWatcher, logWatcher });
     setHandleAskUser(this.askUser);
 
@@ -642,7 +645,7 @@ class Ui extends React.PureComponent {
   }
 };
 
-const setupUi = async () => {
+const setupUi = async (sha) => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
   const [encodedProject] = hash.split('@');
@@ -650,6 +653,7 @@ const setupUi = async () => {
   ReactDOM.render(
     <Ui projects={[...filesystems]}
       project={project}
+      sha={sha}
       width="100%"
       height="100%"
       cols={24}
@@ -695,9 +699,9 @@ const defaultPaneViews = [
   }]
 ];
 
-export const installUi = async ({ document, project }) => {
+export const installUi = async ({ document, project, sha }) => {
   if (project !== '') {
     await setupFilesystem({ fileBase: project });
   }
-  await setupUi();
+  await setupUi(sha);
 };

@@ -66,6 +66,12 @@ export const toThreejsGeometry = (geometry, supertags) => {
       tags,
       isThreejsGeometry: true
     };
+  } else if (geometry.layers) {
+    return {
+      assembly: geometry.layers.map(item => toThreejsGeometry(item, tags)),
+      tags,
+      isThreejsGeometry: true
+    };
   } else if (geometry.item) {
     return {
       item: toThreejsGeometry(geometry.item, tags),

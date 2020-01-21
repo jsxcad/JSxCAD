@@ -110,7 +110,7 @@ export class ViewUi extends Pane {
 
     const geometryPath = file;
 
-    const updateGeometry = (geometry) => {
+    const updateGeometry = async (geometry) => {
       if (geometry !== undefined) {
         // Delete any previous dataset in the window.
         const controllers = new Set();
@@ -129,14 +129,14 @@ export class ViewUi extends Pane {
         // Build new datasets from the written data, and display them.
         datasets = [];
 
-        buildMeshes({ datasets, threejsGeometry, scene });
+        await buildMeshes({ datasets, threejsGeometry, scene });
         buildGuiControls({ datasets, gui });
       }
     };
 
     const json = await readFile({}, geometryPath);
     if (json !== undefined) {
-      updateGeometry(JSON.parse(json));
+      await updateGeometry(JSON.parse(json));
     }
 
     const watcher = await watchFile(geometryPath,

@@ -23,10 +23,10 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/geometry-tagged": "^0.0.79",
-    "binpackingjs": "^2.3.2"
+    "bin-packing-core": "^0.2.0-beta02"
   },
   "devDependencies": {
-    "ava": "^1.4.1",
+    "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",

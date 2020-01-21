@@ -1,5 +1,6 @@
 import Shape from '@jsxcad/api-v1-shape';
 
+import { fromDesignator } from './designator';
 import { rewriteTags } from '@jsxcad/geometry-tagged';
 
 /**
@@ -10,12 +11,24 @@ import { rewriteTags } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const Item = (shape, id) => Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: shape.toGeometry() }));
+// Constructs an item from the designator.
+export const Item = (designator) => {
+  if (typeof designator === 'string') {
+    return fromDesignator(designator);
+  } else if (designator instanceof Array) {
+    return fromDesignator(...designator);
+  }
+};
 
-const toItemMethod = function (id) { return Item(this, id); };
-Shape.prototype.toItem = toItemMethod;
+// Turns the current shape into an item.
+const itemMethod = function (id) {
+  return Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }));
+};
+
+Shape.prototype.Item = itemMethod;
+Shape.prototype.toItem = itemMethod;
 
 Item.signature = 'Item(shape:Shape, id:string) -> Shape';
-toItemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
+itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
 
 export default Item;

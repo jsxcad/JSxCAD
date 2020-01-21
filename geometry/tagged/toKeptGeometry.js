@@ -23,6 +23,11 @@ export const toKeptGeometry = (geometry) => {
           } else {
             return undefined;
           }
+        } else if (geometry.item) {
+          return {
+            ...geometry,
+            item: toKeptGeometry(geometry.item)
+          };
         } else if (geometry.connection) {
           return {
             ...geometry,
