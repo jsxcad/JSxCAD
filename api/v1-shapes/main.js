@@ -4,6 +4,7 @@ import Circle from './Circle';
 import Cone from './Cone';
 import Cube from './Cube.js';
 import Cylinder from './Cylinder.js';
+import Empty from './Empty.js';
 import Hexagon from './Hexagon.js';
 import Icosahedron from './Icosahedron.js';
 import Layers from './Layers.js';
@@ -20,7 +21,6 @@ import Square from './Square.js';
 import Tetrahedron from './Tetrahedron.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
-import Void from './Void.js';
 import Wave from './Wave.js';
 
 const api = {
@@ -30,6 +30,7 @@ const api = {
   Cone,
   Cube,
   Cylinder,
+  Empty,
   Hexagon,
   Icosahedron,
   Layers,
@@ -46,7 +47,6 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
-  Void,
   Wave
 };
 
@@ -57,6 +57,7 @@ export {
   Cone,
   Cube,
   Cylinder,
+  Empty,
   Hexagon,
   Icosahedron,
   Layers,
@@ -73,7 +74,6 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
-  Void,
   Wave
 };
 

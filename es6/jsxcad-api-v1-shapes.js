@@ -401,6 +401,8 @@ Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:num
 Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
 Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
+const Empty = (...shapes) => Shape.fromGeometry({ layers: [] });
+
 /**
  *
  * # Hexagon
@@ -831,8 +833,6 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
-const Void = (...shapes) => Shape.fromGeometry({ layers: [] });
-
 /**
  *
  * # Wave
@@ -866,6 +866,7 @@ const api = {
   Cone,
   Cube,
   Cylinder,
+  Empty,
   Hexagon,
   Icosahedron,
   Layers,
@@ -882,9 +883,8 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
-  Void,
   Wave
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave };

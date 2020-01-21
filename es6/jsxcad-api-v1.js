@@ -11,6 +11,8 @@ import { Shape, log } from './jsxcad-api-v1-shape.js';
 export { Shape, log } from './jsxcad-api-v1-shape.js';
 import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Hexagon, Icosahedron, Layers, Line, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Void, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Hexagon, Icosahedron, Layers, Line, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Void, Wave } from './jsxcad-api-v1-shapes.js';
+import { WoodScrew } from './jsxcad-api-v1-items.js';
+export { WoodScrew } from './jsxcad-api-v1-items.js';
 import { acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 export { acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
@@ -60,6 +62,7 @@ var api = /*#__PURE__*/Object.freeze({
   Triangle: Triangle,
   Void: Void,
   Wave: Wave,
+  WoodScrew: WoodScrew,
   acos: acos,
   cos: cos,
   ease: ease,
