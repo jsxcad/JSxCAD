@@ -4,10 +4,10 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 
-import { assemble, intersection, union } from '@jsxcad/api-v1-shape';
+import { Assembly, intersection, union } from '@jsxcad/api-v1-shape';
 import { clearCache } from '@jsxcad/cache';
 import { hull } from '@jsxcad/api-v1-extrude';
-// import { pack } from '@jsxcad/api-v1-layout';
+import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -21,9 +21,9 @@ const agent = async ({ ask, question }) => {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
         if (values[1]) {
-          return assemble(...inputs).drop('cutAway').toKeptGeometry();
+          return Assembly(...inputs).drop('cutAway').toKeptGeometry();
         } else {
-          return assemble(...inputs).toDisjointGeometry();
+          return Assembly(...inputs).toDisjointGeometry();
         }
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
@@ -61,7 +61,7 @@ const agent = async ({ ask, question }) => {
           x => x.flat().to(api.Z()))
         );
         console.log(unpacked);
-        return assemble(...packed).toDisjointGeometry();
+        return Assembly(...packed).toDisjointGeometry();
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
       case 'extractTag':
