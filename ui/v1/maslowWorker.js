@@ -57,7 +57,7 @@ const agent = async ({ ask, question }) => {
         let items = api.Shape.fromGeometry(values[0]).toItems();
         const sheetX = values[2];
         const sheetY = values[3];
-        const [packed, unpacked] = api.pack({ size: [sheetX, sheetY], margin: values[1] }, ...items.map(
+        const [packed, unpacked] = pack({ size: [sheetX, sheetY], margin: values[1] }, ...items.map(
           x => x.flat().to(api.Z()))
         );
         console.log(unpacked);
