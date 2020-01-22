@@ -4,16 +4,16 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 
-import { assemble, difference, intersection, union } from '@jsxcad/api-v1-shape';
+import { assemble, intersection, union } from '@jsxcad/api-v1-shape';
 import { clearCache } from '@jsxcad/cache';
 import { hull } from '@jsxcad/api-v1-extrude';
-import { pack } from '@jsxcad/api-v1-layout';
+// import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
-  console.log("This ran");
+  console.log('This ran');
   try {
     var { key, values } = question;
     clearCache();
@@ -47,11 +47,10 @@ const agent = async ({ ask, question }) => {
         const signature = '{ ' + Object.keys(api).join(', ') + ', ' + Object.keys(inputs).join(', ') + ' }';
         const foo = new Function(signature, values[0]);
         const returnVal = foo({ ...api, ...inputs });
-        if(typeof returnVal == "object"){
-            return returnVal.toDisjointGeometry();
-        }
-        else{
-            return returnVal;
+        if (typeof returnVal === 'object') {
+          return returnVal.toDisjointGeometry();
+        } else {
+          return returnVal;
         }
       case 'getLayoutSvgs':
         // Extract shapes
@@ -77,7 +76,7 @@ const agent = async ({ ask, question }) => {
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'Over Cut Inside Corners':
-        console.log("Overcutting corners")
+        console.log('Overcutting corners');
         const overcutShape = api.Shape.fromGeometry(values[0]);
         const overcutSection = overcutShape.section(api.Z());
         const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
@@ -86,16 +85,15 @@ const agent = async ({ ask, question }) => {
         return overcutShape.cut(sweep).toDisjointGeometry();
       case 'render':
         var fromGeo = null;
-        if(values[1] == true && values[2] == false){ //Solid, no wireframe
+        if (values[1] === true && values[2] === false) { // Solid, no wireframe
           fromGeo = api.Shape.fromGeometry(values[0]);
-        } else if(values[1] == false && values[2] == true){
+        } else if (values[1] === false && values[2] === true) {
           fromGeo = api.Shape.fromGeometry(values[0]).wireframe();
-        } else if(values[1] == true && values[2] == true){
+        } else if (values[1] === true && values[2] === true) {
           const intermediate = api.Shape.fromGeometry(values[0]);
           fromGeo = intermediate.with(intermediate.wireframe());
-        }
-        else{
-          fromGeo = api.Shape.fromGeometry([]);  //This should be an empty geometry
+        } else {
+          fromGeo = api.Shape.fromGeometry([]); // This should be an empty geometry
         }
         return convertThree.toThreejsGeometry(fromGeo.toDisjointGeometry());
       case 'rotate':
