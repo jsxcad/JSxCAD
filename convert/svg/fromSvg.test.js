@@ -19,7 +19,7 @@ test('Rectangle', async t => {
                                   fill="yellow" stroke="navy" stroke-width="10"  />
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.rectangle.pdf', pdf);
   t.is(pdf, await readFile('test.rectangle.pdf', { encoding: 'utf8' }));
 });
@@ -47,7 +47,7 @@ test('Rounded Rectangle', async t => {
                               </g>
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.rounded-rectangle.pdf', pdf);
   t.is(pdf, await readFile('test.rounded-rectangle.pdf', { encoding: 'utf8' }));
 });
@@ -72,7 +72,7 @@ test('Polyline', async t => {
                                                 1150,375" />
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.polyline.pdf', pdf);
   t.is(pdf, await readFile('test.polyline.pdf', { encoding: 'utf8' }));
 });
@@ -91,7 +91,7 @@ test('Circle', async t => {
                                     fill="red" stroke="blue" stroke-width="10"  />
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.circle.pdf', pdf);
   t.is(pdf, await readFile('test.circle.pdf', { encoding: 'utf8' }));
 });
@@ -115,7 +115,7 @@ test('Ellipse', async t => {
                                     fill="none" stroke="blue" stroke-width="20"  />
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.ellipse.pdf', pdf);
   t.is(pdf, await readFile('test.ellipse.pdf', { encoding: 'utf8' }));
 });
@@ -139,7 +139,7 @@ test('Polygon', async t => {
                                                 850,325 742,262.6 742,137.5" />
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.polygon.pdf', pdf);
   t.is(pdf, await readFile('test.polygon.pdf', { encoding: 'utf8' }));
 });
@@ -174,7 +174,7 @@ test('Complex', async t => {
                                     text-anchor="middle">S400,300 400,200</text>
                             </svg>
                            `);
-  const pdf = await toPdf({}, assembly);
+  const pdf = await toPdf(assembly);
   await writeFile('out.complex.pdf', pdf);
   t.is(pdf, await readFile('test.complex.pdf', { encoding: 'utf8' }));
 });

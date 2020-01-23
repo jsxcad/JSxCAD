@@ -4,7 +4,7 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 
-import { assemble, difference, intersection, union } from '@jsxcad/api-v1-shape';
+import { intersection, union } from '@jsxcad/api-v1-shape';
 import { clearCache } from '@jsxcad/cache';
 import { hull } from '@jsxcad/api-v1-extrude';
 import { pack } from '@jsxcad/api-v1-layout';
@@ -13,6 +13,7 @@ import { toSvg } from '@jsxcad/convert-svg';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
+  console.log('This ran');
   try {
     var { key, values } = question;
     clearCache();
@@ -20,14 +21,14 @@ const agent = async ({ ask, question }) => {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
         if (values[1]) {
-          return assemble(...inputs).drop('cutAway').toKeptGeometry();
+          return api.Assembly(...inputs).drop('cutAway').toKeptGeometry();
         } else {
-          return assemble(...inputs).toDisjointGeometry();
+          return api.Assembly(...inputs).toDisjointGeometry();
         }
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
-        return api.Circle.ofDiameter(values[0], values[1]).toDisjointGeometry();// {center: true, sides: values[1] }).toDisjointGeometry();
+        return api.Circle.ofDiameter(values[0], { sides: values[1] }).toDisjointGeometry();// {center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
         if (values[1] === 'Keep Out') {
           return api.Shape.fromGeometry(values[0]).color('Red').material('keepout').toDisjointGeometry();
@@ -46,19 +47,23 @@ const agent = async ({ ask, question }) => {
         const signature = '{ ' + Object.keys(api).join(', ') + ', ' + Object.keys(inputs).join(', ') + ' }';
         const foo = new Function(signature, values[0]);
         const returnVal = foo({ ...api, ...inputs });
-        return returnVal.toDisjointGeometry();
+        if (typeof returnVal === 'object') {
+          return returnVal.toDisjointGeometry();
+        } else {
+          return returnVal;
+        }
       case 'getLayoutSvgs':
         // Extract shapes
         let items = api.Shape.fromGeometry(values[0]).toItems();
         const sheetX = values[2];
         const sheetY = values[3];
-        const [packed, unpacked] = pack({ size: [sheetX, sheetY], margin: 4 }, ...items.map(
-          x => x.flat())
+        const [packed, unpacked] = pack({ size: [sheetX, sheetY], margin: values[1] }, ...items.map(
+          x => x.flat().to(api.Z()))
         );
         console.log(unpacked);
-        return assemble(...packed).toDisjointGeometry();
+        return api.Assembly(...packed).toDisjointGeometry();
       case 'difference':
-        return difference(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
       case 'extractTag':
         return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
       case 'extrude':
@@ -70,13 +75,27 @@ const agent = async ({ ask, question }) => {
         return intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
-      case 'Overcut Inside Corners':
+      case 'Over Cut Inside Corners':
+        console.log('Overcutting corners');
         const overcutShape = api.Shape.fromGeometry(values[0]);
-        const toolpath = overcutShape.toolpath(4, true, true);
-        const sweep = api.Circle(4).sweep(toolpath);
-        return sweep.toDisjointGeometry();
+        const overcutSection = overcutShape.section(api.Z());
+        const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
+        const height = overcutShape.size().height;
+        const sweep = toolpath.sweep(api.Circle(values[1])).extrude(height);
+        return overcutShape.cut(sweep).toDisjointGeometry();
       case 'render':
-        return convertThree.toThreejsGeometry(api.Shape.fromGeometry(values).toDisjointGeometry());
+        var fromGeo = null;
+        if (values[1] === true && values[2] === false) { // Solid, no wireframe
+          fromGeo = api.Shape.fromGeometry(values[0]);
+        } else if (values[1] === false && values[2] === true) {
+          fromGeo = api.Shape.fromGeometry(values[0]).wireframe();
+        } else if (values[1] === true && values[2] === true) {
+          const intermediate = api.Shape.fromGeometry(values[0]);
+          fromGeo = intermediate.with(intermediate.wireframe());
+        } else {
+          fromGeo = api.Shape.fromGeometry([]); // This should be an empty geometry
+        }
+        return convertThree.toThreejsGeometry(fromGeo.toDisjointGeometry());
       case 'rotate':
         return api.Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toDisjointGeometry();
       case 'scale':
@@ -100,7 +119,7 @@ const agent = async ({ ask, question }) => {
       case 'specify':
         return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
       case 'translate':
-        return api.Shape.fromGeometry(values[0]).translate(values[1], values[2], values[3]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
       case 'union':

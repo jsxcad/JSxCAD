@@ -680,10 +680,15 @@ const getAnySurfaces = (geometry) => {
 
 const getLayers = (geometry) => {
   const layers = [];
-  // FIX: Clarify this.
-  // Skip the part above the layers for now.
-  // // Push the top layer on the front.
-  // layers.unshift(rewrite(geometry, op));
+  const op = (geometry, descend, walk) => {
+    if (geometry.layers) {
+      geometry.layers.forEach(layer => layers.unshift(walk(layer)));
+      return { assembly: [] };
+    } else {
+      return descend();
+    }
+  };
+  rewrite(geometry, op);
   return layers;
 };
 
