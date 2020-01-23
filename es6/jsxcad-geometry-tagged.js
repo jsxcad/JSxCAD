@@ -325,11 +325,10 @@ const canonicalize = (rawGeometry) => {
     canonicalized.solid = canonicalize$5(geometry.solid);
   } else if (geometry.assembly !== undefined) {
     canonicalized.assembly = geometry.assembly.map(canonicalize);
+  } else if (geometry.layers !== undefined) {
+    canonicalized.layers = geometry.layers.map(canonicalize);
   } else if (geometry.disjointAssembly !== undefined) {
     canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize);
-    if (geometry.nonNegative) {
-      canonicalized.nonNegative = geometry.nonNegative.map(canonicalize);
-    }
   } else if (geometry.item !== undefined) {
     canonicalized.item = geometry.item(canonicalize);
   } else {

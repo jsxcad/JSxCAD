@@ -1,4 +1,4 @@
-import { Shape, union } from '@jsxcad/api-v1-shape';
+import { Shape, layer } from '@jsxcad/api-v1-shape';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
@@ -63,14 +63,13 @@ export const section = (solidShape, ...connectors) => {
   const shapes = [];
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
     const sections = bspSection(solid, planeSurfaces);
-    // CHECK: Do we need to do this?
-    const surfaces = sections.map(makeConvex);
+    const surfaces = sections.map(section => makeConvex(section));
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
     }
   }
-  return union(...shapes);
+  return layer(...shapes);
 };
 
 const sectionMethod = function (...args) { return section(this, ...args); };
