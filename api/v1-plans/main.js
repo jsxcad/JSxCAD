@@ -2,7 +2,7 @@ import Apothem from './Apothem';
 import Diameter from './Diameter';
 import Label from './Label';
 import Length from './Length';
-import Plan from './Plan';
+import Page from './Page';
 import Radius from './Radius';
 import Sketch from './Sketch';
 
@@ -11,7 +11,7 @@ const api = {
   Diameter,
   Label,
   Length,
-  Plan,
+  Page,
   Radius,
   Sketch
 };
@@ -21,7 +21,7 @@ export {
   Diameter,
   Label,
   Length,
-  Plan,
+  Page,
   Radius,
   Sketch
 };

@@ -52614,7 +52614,8 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
     scene.add(dataset.mesh);
     datasets.push(dataset);
   } else if (threejsGeometry.threejsPlan) {
-    return buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
+    buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
+    buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
   }
 };
 

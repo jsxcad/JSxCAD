@@ -54,7 +54,7 @@ export const measureBoundingBox = (rawGeometry) => {
     } else if (item.z0Surface) {
       update(measureBoundingBoxOfZ0Surface(item.z0Surface));
     } else if (item.plan) {
-      // Plans do not contribute to bounding boxes.
+      walk(item.content);
     } else {
       update(measureBoundingBoxGeneric(item));
     }

@@ -458,9 +458,7 @@ const faces = (shape, op = (x => x)) => {
 const facesMethod = function (...args) { return faces(this, ...args); };
 Shape.prototype.faces = facesMethod;
 
-const layer = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
-
-const layerMethod = function (...shapes) { return layer(this, ...shapes); };
+const layerMethod = function (...shapes) { return this.with(...shapes); };
 Shape.prototype.layer = layerMethod;
 
 const openEdges = (shape, { isOpen = true } = {}) => {

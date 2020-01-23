@@ -1,27 +1,36 @@
-import { getItems, toKeptGeometry } from '@jsxcad/geometry-tagged';
-
 import Shape from '@jsxcad/api-v1-shape';
+import { getLeafs } from '@jsxcad/geometry-tagged';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
-export const pack = (shape, { size = [210, 297], margin = 5 }) => {
-  let items = [];
-  for (const item of getItems(shape.toKeptGeometry())) {
-    items.push(toKeptGeometry(item));
+export const pack = (shape, { size = [210, 297], pageMargin = 5, itemMargin = 1, perLayout = Infinity }) => {
+  if (perLayout === 0) {
+    // Packing was disabled -- do nothing.
+    return shape;
   }
-  const packs = [];
+
+  let todo = [];
+  for (const leaf of getLeafs(shape.toKeptGeometry())) {
+    todo.push(leaf);
+  }
+  const packedLayers = [];
   while (true) {
-    const [packed, unpacked] = packAlgorithm({ size, margin }, ...items);
+    const [packed, unpacked] = packAlgorithm({ size, pageMargin, itemMargin }, ...todo.slice(0, perLayout));
     if (packed.length === 0) {
       break;
     } else {
-      packs.push({ item: { layers: packed } });
+      packedLayers.push({ item: { disjointAssembly: packed } });
     }
     if (unpacked.length === 0) {
       break;
     }
-    items = unpacked;
+    todo = unpacked;
   }
-  return Shape.fromGeometry({ layers: packs });
+  if (packedLayers.length === 1) {
+    // This is a reasonably common case.
+    return Shape.fromGeometry(packedLayers[0]);
+  } else {
+    return Shape.fromGeometry({ layers: packedLayers });
+  }
 };
 
 const packMethod = function (...args) { return pack(this, ...args); };

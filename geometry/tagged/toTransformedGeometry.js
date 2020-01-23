@@ -56,6 +56,7 @@ export const toTransformedGeometry = (geometry) => {
           plan: geometry.plan,
           marks: transformPoints(matrix, geometry.marks),
           planes: geometry.planes.map(plane => transformPlane(matrix, plane)),
+          content: walk(matrix, geometry.content),
           visualization: walk(matrix, geometry.visualization),
           tags
         };

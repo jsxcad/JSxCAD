@@ -4,7 +4,7 @@ import pack from './pack';
 import test from 'ava';
 
 test('Partial fit', t => {
-  const [packed, unpacked] = pack({ size: [110, 110] },
+  const [packed, unpacked] = pack({ size: [110, 110], itemMargin: 1, pageMargin: 0 },
                                   { paths: [[[50, 50, 0], [100, 100, 0]]], tags: ['one'] },
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });
@@ -15,7 +15,7 @@ test('Partial fit', t => {
 });
 
 test('Partial rotated fit', t => {
-  const [packed, unpacked] = pack({ size: [60, 110] },
+  const [packed, unpacked] = pack({ size: [60, 110], itemMargin: 1, pageMargin: 0 },
                                   { paths: [[[50, 50, 0], [100, 100, 0]]], tags: ['one'] },
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });
@@ -26,7 +26,7 @@ test('Partial rotated fit', t => {
 });
 
 test('Complete fit', t => {
-  const [packed, unpacked] = pack({ size: [200, 200] },
+  const [packed, unpacked] = pack({ size: [200, 200], itemMargin: 1, pageMargin: 0 },
                                   { paths: [[[50, 50, 0], [100, 100, 0]]], tags: ['one'] },
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });

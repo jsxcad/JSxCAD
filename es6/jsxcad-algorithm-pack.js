@@ -827,25 +827,25 @@ const measureOrigin = (geometry) => {
   return [x, y];
 };
 
-const pack = ({ size = [210, 297], margin = 1 }, ...geometries) => {
+const pack = ({ size = [210, 297], itemMargin = 1, pageMargin = 5 }, ...geometries) => {
   // Center the output to match pages.
-  const xOffset = size[X] / -2;
-  const yOffset = size[Y] / -2;
+  const xOffset = size[X] / -2 + pageMargin;
+  const yOffset = size[Y] / -2 + pageMargin;
 
   const packedGeometries = [];
   const unpackedGeometries = [];
 
-  const packer = new MaxRectBinPack(size[0], size[1], DO_NOT_ALLOW_ROTATE);
+  const packer = new MaxRectBinPack(size[0] - pageMargin * 2, size[1] - pageMargin * 2, DO_NOT_ALLOW_ROTATE);
 
   for (const geometry of geometries) {
     const [width, height] = measureSize(geometry);
-    const [boxWidth, boxHeight] = [width + margin * 2, height + margin * 2];
+    const [boxWidth, boxHeight] = [width + itemMargin * 2, height + itemMargin * 2];
     const result = packer.insert(boxWidth, boxHeight, SHORT_SIDE_FIT);
     if (result.width === 0 && result.height === 0) {
       unpackedGeometries.push(geometry);
     } else {
       const [x, y] = measureOrigin(geometry);
-      const transformed = toTransformedGeometry(translate([result.x - x + margin + xOffset, 0 - yOffset - ((result.y - y) + margin), 0], geometry));
+      const transformed = toTransformedGeometry(translate([result.x - x + itemMargin + xOffset, 0 - yOffset - ((result.y - y) + itemMargin), 0], geometry));
       packedGeometries.push(transformed);
     }
   }

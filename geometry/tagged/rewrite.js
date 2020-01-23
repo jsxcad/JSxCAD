@@ -1,3 +1,5 @@
+import { fresh } from './fresh';
+
 const shallowEq = (a, b) => {
   if (a === undefined) throw Error('die');
   if (b === undefined) throw Error('die');
@@ -12,17 +14,6 @@ const shallowEq = (a, b) => {
   return true;
 };
 
-// Remove any symbols (which refer to cached values).
-const clean = (geometry) => {
-  const cleaned = {};
-  for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
-      cleaned[key] = geometry[key];
-    }
-  }
-  return cleaned;
-};
-
 // Rewrite on the way back up the call-path.
 export const rewriteUp = (geometry, op) => {
   // FIX: Minimize identity churn.
@@ -33,7 +24,7 @@ export const rewriteUp = (geometry, op) => {
       } else if (postopGeometry === geometry) {
         return geometry;
       } else {
-        return clean(postopGeometry);
+        return fresh(postopGeometry);
       }
     };
 
@@ -77,7 +68,12 @@ export const rewriteUp = (geometry, op) => {
     } else if (geometry.paths) {
       return q(op(geometry));
     } else if (geometry.plan) {
-      return q(op(geometry));
+      const content = walk(geometry.content);
+      if (content === geometry.content) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, content }));
+      }
     } else if (geometry.points) {
       return q(op(geometry));
     } else if (geometry.solid) {

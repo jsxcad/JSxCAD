@@ -41,6 +41,7 @@ const surfaceToThreejsSurface = (surface) => {
   for (const triangle of toTriangles({}, makeConvex(surface))) {
     for (const point of triangle) {
       const plane = toPlane(triangle);
+      if (plane === undefined) continue;
       const [x, y, z] = plane;
       normals.push(x, y, z);
       positions.push(...point);
@@ -91,6 +92,7 @@ export const toThreejsGeometry = (geometry, supertags) => {
       threejsPlan: geometry.plan,
       threejsMarks: geometry.marks,
       threejsVisualization: toThreejsGeometry(geometry.visualization),
+      threejsContent: toThreejsGeometry(geometry.content),
       tags,
       isThreejsGeometry: true
     };
