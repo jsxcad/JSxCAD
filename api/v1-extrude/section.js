@@ -1,4 +1,4 @@
-import { Shape, union } from '@jsxcad/api-v1-shape';
+import { Shape, layer } from '@jsxcad/api-v1-shape';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
@@ -54,21 +54,26 @@ const toSurface = (plane) => {
   return [polygon];
 };
 
-export const section = (solidShape, connector = Z(0)) => {
-  const plane = toPlane(connector);
-  const planeSurface = toSurface(plane);
+export const section = (solidShape, ...connectors) => {
+  if (connectors.length === 0) {
+    connectors.push(Z(0));
+  }
+  const planes = connectors.map(toPlane);
+  const planeSurfaces = planes.map(toSurface);
   const shapes = [];
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-    const section = bspSection(solid, planeSurface);
+    const sections = bspSection(solid, planeSurfaces);
     // CHECK: Do we need to do this?
-    const surface = makeConvex(section);
-    surface.plane = plane;
-    shapes.push(Shape.fromGeometry({ surface }));
+    const surfaces = sections.map(makeConvex);
+    for (let i = 0; i < surfaces.length; i++) {
+      surfaces[i].plane = planes[i];
+      shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+    }
   }
-  return union(...shapes);
+  return layer(...shapes);
 };
 
-const method = function (surface) { return section(this, surface); };
-Shape.prototype.section = method;
+const sectionMethod = function (...args) { return section(this, ...args); };
+Shape.prototype.section = sectionMethod;
 
 export default section;

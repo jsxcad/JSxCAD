@@ -4,7 +4,6 @@ import './clip';
 import './cut';
 import './defragment';
 import './faces';
-import './layer';
 import './openEdges';
 import './void';
 import './wireframe';
@@ -21,6 +20,7 @@ import drop from './drop';
 import intersection from './intersection';
 import keep from './keep';
 import kept from './kept';
+import layer from './layer';
 import log from './log';
 import material from './material';
 import move from './move';
@@ -56,6 +56,7 @@ export {
   intersection,
   keep,
   kept,
+  layer,
   log,
   material,
   move,

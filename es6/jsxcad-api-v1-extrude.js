@@ -1,4 +1,4 @@
-import { Shape, union, assemble } from './jsxcad-api-v1-shape.js';
+import { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { getZ0Surfaces, getSurfaces, getAnySurfaces, getPaths, outline as outline$1, getSolids, getPlans } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip } from './jsxcad-geometry-surface.js';
@@ -383,22 +383,27 @@ const toSurface = (plane) => {
   return [polygon];
 };
 
-const section = (solidShape, connector = Z$3(0)) => {
-  const plane = toPlane(connector);
-  const planeSurface = toSurface(plane);
+const section = (solidShape, ...connectors) => {
+  if (connectors.length === 0) {
+    connectors.push(Z$3(0));
+  }
+  const planes = connectors.map(toPlane);
+  const planeSurfaces = planes.map(toSurface);
   const shapes = [];
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-    const section = section$1(solid, planeSurface);
+    const sections = section$1(solid, planeSurfaces);
     // CHECK: Do we need to do this?
-    const surface = makeConvex(section);
-    surface.plane = plane;
-    shapes.push(Shape.fromGeometry({ surface }));
+    const surfaces = sections.map(makeConvex);
+    for (let i = 0; i < surfaces.length; i++) {
+      surfaces[i].plane = planes[i];
+      shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+    }
   }
-  return union(...shapes);
+  return layer(...shapes);
 };
 
-const method = function (surface) { return section(this, surface); };
-Shape.prototype.section = method;
+const sectionMethod = function (...args) { return section(this, ...args); };
+Shape.prototype.section = sectionMethod;
 
 /**
  *
@@ -443,8 +448,8 @@ const stretch = (shape, length, connector = Z$3()) => {
   return assemble(...stretches);
 };
 
-const method$1 = function (...args) { return stretch(this, ...args); };
-Shape.prototype.stretch = method$1;
+const method = function (...args) { return stretch(this, ...args); };
+Shape.prototype.stretch = method;
 
 /**
  *
@@ -474,9 +479,9 @@ Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, 
 const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
   Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
 
-const method$2 = function (...options) { return toolpath(this, ...options); };
+const method$1 = function (...options) { return toolpath(this, ...options); };
 
-Shape.prototype.toolpath = method$2;
+Shape.prototype.toolpath = method$1;
 Shape.prototype.withToolpath = function (...args) { return assemble(this, toolpath(this, ...args)); };
 
 const X = 0;

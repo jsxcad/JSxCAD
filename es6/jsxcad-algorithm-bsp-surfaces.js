@@ -762,10 +762,10 @@ const intersection = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
-const section = (solid, surface) => {
+const section = (solid, ...surfaces) => {
   const normalize = createNormalize3();
   const bsp = fromSolid(alignVertices(solid, normalize), normalize);
-  return removeExteriorPolygons(bsp, surface, normalize);
+  return surfaces.map(surface => removeExteriorPolygons(bsp, surface, normalize));
 };
 
 // An asymmetric binary merge.
