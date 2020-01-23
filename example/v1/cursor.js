@@ -12,4 +12,5 @@ await Cursor.fromOrigin()
             .move(1)
             .rotateZ(90)
             .toShape()
-            .writePdf('pdf/cursor.pdf');
+            .Page()
+            .writePdf('cursor');

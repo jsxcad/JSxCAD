@@ -12,7 +12,6 @@ import '@jsxcad/api-v1-deform';
 import '@jsxcad/api-v1-extrude';
 import '@jsxcad/api-v1-item';
 import '@jsxcad/api-v1-layout';
-import '@jsxcad/api-v1-plans';
 import '@jsxcad/api-v1-shell';
 
 export {
@@ -37,6 +36,10 @@ export {
 export {
   Plan
 } from '@jsxcad/api-v1-plan';
+
+export {
+  Page
+} from '@jsxcad/api-v1-plans';
 
 export {
   Arc,
