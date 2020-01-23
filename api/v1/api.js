@@ -34,6 +34,14 @@ export {
 } from '@jsxcad/api-v1-layout';
 
 export {
+  Plan
+} from '@jsxcad/api-v1-plan';
+
+export {
+  Page
+} from '@jsxcad/api-v1-plans';
+
+export {
   Arc,
   Assembly,
   Circle,

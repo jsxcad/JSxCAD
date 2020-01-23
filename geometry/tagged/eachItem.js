@@ -1,9 +1,6 @@
-import { rewriteUp } from './rewrite';
+import { visit } from './visit';
 
 export const eachItem = (geometry, op) => {
-  const read = (geometry) => {
-    op(geometry);
-    return geometry;
-  };
-  rewriteUp(geometry, read);
+  const walk = (geometry, descend) => { op(geometry); descend(); };
+  visit(geometry, walk);
 };

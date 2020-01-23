@@ -5,10 +5,13 @@ import './jsxcad-api-v1-extrude.js';
 import './jsxcad-api-v1-item.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
+import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-shell.js';
 import { addSource, readFile, getSources } from './jsxcad-sys.js';
 import { Shape, log } from './jsxcad-api-v1-shape.js';
 export { Shape, log } from './jsxcad-api-v1-shape.js';
+import { Plan } from './jsxcad-api-v1-plan.js';
+export { Plan } from './jsxcad-api-v1-plan.js';
 import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave } from './jsxcad-api-v1-shapes.js';
 import { WoodScrew } from './jsxcad-api-v1-items.js';
@@ -39,6 +42,7 @@ var api = /*#__PURE__*/Object.freeze({
   Shape: Shape,
   log: log,
   pack: pack,
+  Plan: Plan,
   Arc: Arc,
   Assembly: Assembly,
   Circle: Circle,

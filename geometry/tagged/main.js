@@ -9,6 +9,7 @@ import { drop } from './drop';
 import { eachItem } from './eachItem';
 import { eachPoint } from './eachPoint';
 import { flip } from './flip';
+import { fresh } from './fresh';
 import { fromPathToSurface } from './fromPathToSurface';
 import { fromPathToZ0Surface } from './fromPathToZ0Surface';
 import { fromPathsToSurface } from './fromPathsToSurface';
@@ -17,6 +18,8 @@ import { fromSurfaceToPaths } from './fromSurfaceToPaths';
 import { getAnySurfaces } from './getAnySurfaces';
 import { getConnections } from './getConnections';
 import { getItems } from './getItems';
+import { getLayers } from './getLayers';
+import { getLeafs } from './getLeafs';
 import { getPaths } from './getPaths';
 import { getPlans } from './getPlans';
 import { getPoints } from './getPoints';
@@ -39,6 +42,7 @@ import { toPoints } from './toPoints';
 import { toTransformedGeometry } from './toTransformedGeometry';
 import { transform } from './transform';
 import { union } from './union';
+import { update } from './update';
 
 export {
   allTags,
@@ -49,6 +53,7 @@ export {
   eachItem,
   eachPoint,
   flip,
+  fresh,
   fromPathToSurface,
   fromPathToZ0Surface,
   fromPathsToSurface,
@@ -58,6 +63,8 @@ export {
   getConnections,
   getPoints,
   getItems,
+  getLayers,
+  getLeafs,
   getPaths,
   getPlans,
   getSolids,
@@ -79,6 +86,7 @@ export {
   toPoints,
   toTransformedGeometry,
   transform,
+  update,
   union,
   visit
 };
