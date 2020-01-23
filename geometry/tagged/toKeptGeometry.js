@@ -28,6 +28,11 @@ export const toKeptGeometry = (geometry) => {
             ...geometry,
             item: toKeptGeometry(geometry.item)
           };
+        } else if (geometry.plan) {
+          return {
+            ...geometry,
+            content: toKeptGeometry(geometry.content)
+          };
         } else if (geometry.connection) {
           return {
             ...geometry,

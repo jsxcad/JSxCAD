@@ -4,4 +4,5 @@ await Cube(30)
         .add(Cube(30).move(5, 5),
              Cube(30).move(-5, -5))
         .section()
-        .writePdf('pdf/cutCubes.pdf');
+        .Page()
+        .writePdf('cutCubes');

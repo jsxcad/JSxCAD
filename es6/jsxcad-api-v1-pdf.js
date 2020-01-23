@@ -1,17 +1,34 @@
+import { getPlans, getLeafs, toKeptGeometry } from './jsxcad-geometry-tagged.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { toPdf as toPdf$1 } from './jsxcad-convert-pdf.js';
 import { writeFile } from './jsxcad-sys.js';
 
-const toPdf = async (shape, path, { lineWidth = 0.096, size = [210, 297] } = {}) =>
-  toPdf$1({ lineWidth, size }, shape.toKeptGeometry());
+// FIX: Support multi-page pdf, and multi-page preview.
 
-const writePdf = async (shape, path, { lineWidth = 0.096, size = [210, 297] } = {}) => {
-  const pdf = await toPdf(shape, path, { lineWidth, size });
-  await writeFile({}, `output/${path}`, pdf);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(shape.toKeptGeometry()));
+const toPdf = async (shape, { lineWidth = 0.096 } = {}) => {
+  const pages = [];
+  // CHECK: Should this be limited to Page plans?
+  const geometry = shape.toKeptGeometry();
+  for (const entry of getPlans(geometry)) {
+    if (entry.plan.page) {
+      const { size } = entry.plan.page;
+      for (let leaf of getLeafs(entry.content)) {
+        const pdf = await toPdf$1(leaf, { lineWidth, size });
+        pages.push({ pdf, leaf: { ...entry, content: leaf }, index: pages.length });
+      }
+    }
+  }
+  return pages;
 };
 
-const toPdfMethod = function (...args) { return toPdf(this); };
+const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
+  for (const { pdf, leaf, index } of await toPdf(shape, { lineWidth })) {
+    await writeFile({}, `output/${name}_${index}.pdf`, pdf);
+    await writeFile({}, `geometry/${name}_${index}.pdf`, JSON.stringify(toKeptGeometry(leaf)));
+  }
+};
+
+const toPdfMethod = function (...args) { return toPdf(this, ...args); };
 Shape.prototype.toPdf = toPdfMethod;
 
 const writePdfMethod = function (...args) { return writePdf(this, ...args); };

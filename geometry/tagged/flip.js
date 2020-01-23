@@ -29,7 +29,7 @@ export const flip = (geometry) => {
         // FIX: Mirror visualization?
         return { ...geometry, planes: geometry.planes.map(flipPlane) };
       } else {
-        return geometry;
+        return { ...geometry, content: flip(geometry.content) };
       }
     } else if (geometry.connection) {
       return {

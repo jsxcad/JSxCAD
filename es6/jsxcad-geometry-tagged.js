@@ -6,33 +6,42 @@ import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as 
 import { transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-solid.js';
 import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
-import { difference as difference$3, intersection as intersection$3, clean as clean$1, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
+import { difference as difference$3, intersection as intersection$3, clean, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
 import { difference as difference$2, intersection as intersection$2, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
+const update = (geometry, updates) => {
+  const updated = {};
+  for (const key of Object.keys(geometry)) {
+    if (typeof key !== 'symbol') {
+      updated[key] = geometry[key];
+    }
+  }
+  for (const key of Object.keys(updates)) {
+    updated[key] = updates[key];
+  }
+  return updated;
+};
+
 const rewrite = (geometry, op) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
-      return op(geometry, _ => ({ ...geometry, assembly: geometry.assembly.map(walk) }), walk);
+      return op(geometry, _ => update(geometry, { assembly: geometry.assembly.map(walk) }), walk);
     } else if (geometry.disjointAssembly) {
-      return op(geometry, _ => ({ ...geometry, disjointAssembly: geometry.disjointAssembly.map(walk) }), walk);
+      return op(geometry, _ => update(geometry, { disjointAssembly: geometry.disjointAssembly.map(walk) }), walk);
     } else if (geometry.layers) {
-      return op(geometry, _ => ({ ...geometry, layers: geometry.layers.map(walk) }), walk);
+      return op(geometry, _ => update(geometry, { layers: geometry.layers.map(walk) }), walk);
     } else if (geometry.connection) {
       return op(geometry,
-                _ => ({
-                  ...geometry,
-                  geometries: geometry.geometries.map(walk),
-                  connectors: geometry.connectors.map(walk)
-                }),
+                _ => update(geometry, { geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk) }),
                 walk);
     } else if (geometry.item) {
-      return op(geometry, _ => ({ ...geometry, item: walk(geometry.item) }), walk);
+      return op(geometry, _ => update(geometry, { item: walk(geometry.item) }), walk);
     } else if (geometry.paths) {
       return op(geometry, _ => geometry, walk);
     } else if (geometry.plan) {
-      return op(geometry, _ => geometry, walk);
+      return op(geometry, _ => update(geometry, { content: walk(geometry.content) }), walk);
     } else if (geometry.points) {
       return op(geometry, _ => geometry, walk);
     } else if (geometry.solid) {
@@ -40,7 +49,7 @@ const rewrite = (geometry, op) => {
     } else if (geometry.surface) {
       return op(geometry, _ => geometry, walk);
     } else if (geometry.untransformed) {
-      return op(geometry, _ => ({ ...geometry, untransformed: walk(geometry.untransformed) }), walk);
+      return op(geometry, _ => update(geometry, { untransformed: walk(geometry.untransformed) }), walk);
     } else if (geometry.z0Surface) {
       return op(geometry, _ => geometry, walk);
     } else {
@@ -65,7 +74,7 @@ const visit = (geometry, op) => {
     } else if (geometry.paths) {
       op(geometry, _ => undefined);
     } else if (geometry.plan) {
-      op(geometry, _ => undefined);
+      op(geometry, _ => { walk(geometry.content); });
     } else if (geometry.points) {
       op(geometry, _ => undefined);
     } else if (geometry.solid) {
@@ -83,6 +92,17 @@ const visit = (geometry, op) => {
   walk(geometry);
 };
 
+// Remove any symbols (which refer to cached values).
+const fresh = (geometry) => {
+  const fresh = {};
+  for (const key of Object.keys(geometry)) {
+    if (typeof key !== 'symbol') {
+      fresh[key] = geometry[key];
+    }
+  }
+  return fresh;
+};
+
 const shallowEq = (a, b) => {
   if (a === undefined) throw Error('die');
   if (b === undefined) throw Error('die');
@@ -97,17 +117,6 @@ const shallowEq = (a, b) => {
   return true;
 };
 
-// Remove any symbols (which refer to cached values).
-const clean = (geometry) => {
-  const cleaned = {};
-  for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
-      cleaned[key] = geometry[key];
-    }
-  }
-  return cleaned;
-};
-
 // Rewrite on the way back up the call-path.
 const rewriteUp = (geometry, op) => {
   // FIX: Minimize identity churn.
@@ -118,7 +127,7 @@ const rewriteUp = (geometry, op) => {
       } else if (postopGeometry === geometry) {
         return geometry;
       } else {
-        return clean(postopGeometry);
+        return fresh(postopGeometry);
       }
     };
 
@@ -161,7 +170,12 @@ const rewriteUp = (geometry, op) => {
       }    } else if (geometry.paths) {
       return q(op(geometry));
     } else if (geometry.plan) {
-      return q(op(geometry));
+      const content = walk(geometry.content);
+      if (content === geometry.content) {
+        return q(op(geometry));
+      } else {
+        return q(op({ ...geometry, content }));
+      }
     } else if (geometry.points) {
       return q(op(geometry));
     } else if (geometry.solid) {
@@ -254,6 +268,7 @@ const toTransformedGeometry = (geometry) => {
           plan: geometry.plan,
           marks: transform$2(matrix, geometry.marks),
           planes: geometry.planes.map(plane => transform$3(matrix, plane)),
+          content: walk(matrix, geometry.content),
           visualization: walk(matrix, geometry.visualization),
           tags
         };
@@ -299,6 +314,7 @@ const canonicalize = (rawGeometry) => {
     canonicalized.marks = canonicalize$1(geometry.marks);
     canonicalized.planes = geometry.planes.map(canonicalize$3);
     canonicalized.visualization = canonicalize(geometry.visualization);
+    canonicalized.content = canonicalize(geometry.content);
   } else if (geometry.connection) {
     canonicalized.connection = geometry.connection;
     canonicalized.geometries = geometry.geometries.map(canonicalize);    canonicalized.connectors = geometry.connectors.map(canonicalize);  } else if (geometry.surface !== undefined) {
@@ -326,11 +342,8 @@ const canonicalize = (rawGeometry) => {
 };
 
 const eachItem = (geometry, op) => {
-  const read = (geometry) => {
-    op(geometry);
-    return geometry;
-  };
-  rewriteUp(geometry, read);
+  const walk = (geometry, descend) => { op(geometry); descend(); };
+  visit(geometry, walk);
 };
 
 const getConnections = (geometry) => {
@@ -601,7 +614,7 @@ const flip = (geometry) => {
         // FIX: Mirror visualization?
         return { ...geometry, planes: geometry.planes.map(flip$5) };
       } else {
-        return geometry;
+        return { ...geometry, content: flip(geometry.content) };
       }
     } else if (geometry.connection) {
       return {
@@ -661,6 +674,37 @@ const getAnySurfaces = (geometry) => {
              }
            });
   return surfaces;
+};
+
+// This gets each layer independently.
+
+const getLayers = (geometry) => {
+  const layers = [];
+  const op = (geometry, descend, walk) => {
+    if (geometry.layers) {
+      geometry.layers.forEach(layer => layers.unshift(walk(layer)));
+      return { assembly: [] };
+    } else {
+      return descend();
+    }
+  };
+  rewrite(geometry, op);
+  return layers;
+};
+
+// Retrieve leaf geometry.
+
+const getLeafs = (geometry) => {
+  const leafs = [];
+  const op = (geometry, descend) => {
+    if (geometry.assembly || geometry.disjointAssembly || geometry.layers || geometry.content) {
+      descend();
+    } else {
+      leafs.push(geometry);
+    }
+  };
+  visit(geometry, op);
+  return leafs;
 };
 
 const getTags = (geometry) => {
@@ -834,6 +878,11 @@ const toKeptGeometry = (geometry) => {
             ...geometry,
             item: toKeptGeometry(geometry.item)
           };
+        } else if (geometry.plan) {
+          return {
+            ...geometry,
+            content: toKeptGeometry(geometry.content)
+          };
         } else if (geometry.connection) {
           return {
             ...geometry,
@@ -897,7 +946,9 @@ const measureBoundingBox = (rawGeometry) => {
       update(measureBoundingBox$2(item.surface));
     } else if (item.z0Surface) {
       update(measureBoundingBox$3(item.z0Surface));
-    } else if (item.plan) ; else {
+    } else if (item.plan) {
+      walk(item.content);
+    } else {
       update(measureBoundingBoxGeneric(item));
     }
   };
@@ -911,7 +962,7 @@ const measureBoundingBox = (rawGeometry) => {
   }
 };
 
-const toOutlineFromSurface = (surface) => clean$1(surface);
+const toOutlineFromSurface = (surface) => clean(surface);
 
 const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
@@ -1059,4 +1110,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, keep, map, measureBoundingBox, nonNegative, outline, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };

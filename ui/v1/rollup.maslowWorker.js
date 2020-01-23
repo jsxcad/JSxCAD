@@ -28,9 +28,7 @@ export default {
     builtins(),
     commonjs({
       namedExports: {
-        '../../node_modules/binpackingjs/dist/BinPacking.min.js': ['BP2D'],
-        '../../node_modules/bin-packing-core/lib/index.js': ['MaxRectBinPack'],
-        '../../node_modules/bin-packing-es/build/bin-packing.js': ['Packer'],
+        '../../node_modules/bin-packing-es/build/bin-packing.js': ['GrowingPacker', 'Packer'],
         '../../node_modules/opentype.js/dist/opentype.js': ['parse'],
         '../../node_modules/three/build/three.js': [
           'AmbientLight', 'BackSide', 'Box2', 'Box3', 'BufferGeometry', 'Camera', 'Color', 'DirectionalLight',
