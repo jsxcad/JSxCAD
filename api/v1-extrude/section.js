@@ -1,4 +1,4 @@
-import { Shape, layer } from '@jsxcad/api-v1-shape';
+import { Shape, union } from '@jsxcad/api-v1-shape';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
@@ -70,7 +70,7 @@ export const section = (solidShape, ...connectors) => {
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
     }
   }
-  return layer(...shapes);
+  return union(...shapes);
 };
 
 const sectionMethod = function (...args) { return section(this, ...args); };

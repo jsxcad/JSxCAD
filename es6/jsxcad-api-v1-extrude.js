@@ -1,4 +1,4 @@
-import { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
+import { Shape, union, assemble } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { getZ0Surfaces, getSurfaces, getAnySurfaces, getPaths, outline as outline$1, getSolids, getPlans } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip } from './jsxcad-geometry-surface.js';
@@ -399,7 +399,7 @@ const section = (solidShape, ...connectors) => {
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
     }
   }
-  return layer(...shapes);
+  return union(...shapes);
 };
 
 const sectionMethod = function (...args) { return section(this, ...args); };
