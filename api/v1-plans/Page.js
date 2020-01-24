@@ -7,6 +7,7 @@ import { pack } from '@jsxcad/api-v1-layout';
 
 export const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...items) => {
   if (size) {
+    // Content fits to page size.
     const [width, length] = size;
     return Plan({
       plan: { page: { size, margin: pageMargin } },
@@ -19,8 +20,10 @@ export const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infi
                         .color('red')
     });
   } else {
+    // Page fits to content size.
     const content = pack(Shape.fromGeometry({ layers: items.map(item => item.toGeometry()) }),
-                         { pageMargin, itemMargin, perLayout: itemsPerPage });
+                         { pageMargin, itemMargin, perLayout: itemsPerPage })
+        .center();
     const { width, length } = content.size();
     return Plan({
       plan: { page: { size, margin: pageMargin } },
