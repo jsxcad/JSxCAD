@@ -2,7 +2,7 @@ import Shape from './jsxcad-api-v1-shape.js';
 import { getLeafs } from './jsxcad-geometry-tagged.js';
 import { pack as pack$1 } from './jsxcad-algorithm-pack.js';
 
-const pack = (shape, { size = [210, 297], pageMargin = 5, itemMargin = 1, perLayout = Infinity }) => {
+const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity }) => {
   if (perLayout === 0) {
     // Packing was disabled -- do nothing.
     return shape;
@@ -25,12 +25,17 @@ const pack = (shape, { size = [210, 297], pageMargin = 5, itemMargin = 1, perLay
     }
     todo = unpacked;
   }
+  let packedShape;
   if (packedLayers.length === 1) {
     // This is a reasonably common case.
-    return Shape.fromGeometry(packedLayers[0]);
+    packedShape = Shape.fromGeometry(packedLayers[0]);
   } else {
-    return Shape.fromGeometry({ layers: packedLayers });
+    packedShape = Shape.fromGeometry({ layers: packedLayers });
   }
+  if (size === undefined) {
+    packedShape = packedShape.center();
+  }
+  return packedShape;
 };
 
 const packMethod = function (...args) { return pack(this, ...args); };

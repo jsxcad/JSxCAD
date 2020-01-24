@@ -458,9 +458,6 @@ const faces = (shape, op = (x => x)) => {
 const facesMethod = function (...args) { return faces(this, ...args); };
 Shape.prototype.faces = facesMethod;
 
-const layerMethod = function (...shapes) { return this.with(...shapes); };
-Shape.prototype.layer = layerMethod;
-
 const openEdges = (shape, { isOpen = true } = {}) => {
   const r = (v) => v + (Math.random() - 0.5) * 0.2;
   const paths = [];
@@ -773,6 +770,11 @@ Shape.prototype.kept = keptMethod;
 
 kept.signature = 'kept(shape:Shape) -> Shape';
 keptMethod.signature = 'Shape -> kept() -> Shape';
+
+const layer = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
+
+const layerMethod = function (...shapes) { return this.with(...shapes); };
+Shape.prototype.layer = layerMethod;
 
 /**
  *
@@ -1276,4 +1278,4 @@ const turnZMethod = function (angle) { return turnZ(this, angle); };
 Shape.prototype.turnZ = turnZMethod;
 
 export default Shape;
-export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, log, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
+export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
