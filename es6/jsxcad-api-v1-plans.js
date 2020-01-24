@@ -56,6 +56,7 @@ Plan.Length = Length;
 
 const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity }, ...items) => {
   if (size) {
+    // Content fits to page size.
     const [width, length] = size;
     return Plan$1({
       plan: { page: { size, margin: pageMargin } },
@@ -68,8 +69,10 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
                         .color('red')
     });
   } else {
+    // Page fits to content size.
     const content = pack(Shape$1.fromGeometry({ layers: items.map(item => item.toGeometry()) }),
-                         { pageMargin, itemMargin, perLayout: itemsPerPage });
+                         { pageMargin, itemMargin, perLayout: itemsPerPage })
+        .center();
     const { width, length } = content.size();
     return Plan$1({
       plan: { page: { size, margin: pageMargin } },

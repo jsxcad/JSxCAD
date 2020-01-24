@@ -1,14 +1,16 @@
-import { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
+import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { getZ0Surfaces, getSurfaces, getAnySurfaces, getPaths, outline as outline$1, getSolids, getPlans } from './jsxcad-geometry-tagged.js';
-import { toPlane as toPlane$1, transform, makeConvex, flip } from './jsxcad-geometry-surface.js';
+import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
 import { intersectionOfPathsBySurfaces } from './jsxcad-algorithm-clipper.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
-import { isClosed, transform as transform$3 } from './jsxcad-geometry-path.js';
+import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
+import { clean } from './jsxcad-geometry-z0surface-boolean.js';
+import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
@@ -404,6 +406,49 @@ const section = (solidShape, ...connectors) => {
 const sectionMethod = function (...args) { return section(this, ...args); };
 Shape.prototype.section = sectionMethod;
 
+const squash = (shape) => {
+  const geometry = shape.toKeptGeometry();
+  const result = { layers: [] };
+  for (const { solid } of getSolids(geometry)) {
+    const polygons = [];
+    for (const surface of solid) {
+      for (const path of surface) {
+        const flat = path.map(([x, y]) => [x, y, 0]);
+        if (toPlane$2(flat) === undefined) continue;
+        polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
+      }
+    }
+    result.layers.push({ z0Surface: clean(polygons) });
+  }
+  for (const { surface } of getSurfaces(geometry)) {
+    const polygons = [];
+    for (const path of surface) {
+      const flat = path.map(([x, y]) => [x, y, 0]);
+      if (toPlane$2(flat) === undefined) continue;
+      polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
+    }
+    result.layers.push({ z0Surface: polygons });
+  }
+  for (const { z0Surface } of getZ0Surfaces(geometry)) {
+    const polygons = [];
+    for (const path of z0Surface) {
+      polygons.push(path);
+    }
+    result.layers.push({ z0Surface: polygons });
+  }
+  for (const { paths } of getPaths(geometry)) {
+    const flatPaths = [];
+    for (const path of paths) {
+      flatPaths.push(path.map(([x, y]) => [x, y, 0]));
+    }
+    result.layers.push({ paths: flatPaths });
+  }
+  return Shape$1.fromGeometry(result);
+};
+
+const squashMethod = function () { return squash(this); };
+Shape$1.prototype.squash = squashMethod;
+
 /**
  *
  * # Stretch
@@ -436,7 +481,7 @@ const stretch = (shape, length, connector = Z$3()) => {
     }
     const bottom = cutOpen(solid, planeSurface);
     const profile = section$1(solid, planeSurface);
-    const top = cutOpen(solid, flip(planeSurface));
+    const top = cutOpen(solid, flip$1(planeSurface));
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
     const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, 1, 0, false);
     const middle = transform$1(fromZ0, z0SolidGeometry);
@@ -540,6 +585,7 @@ const api = {
   minkowski,
   outline,
   section,
+  squash,
   stretch,
   sweep,
   toolpath,
@@ -547,4 +593,4 @@ const api = {
 };
 
 export default api;
-export { chainHull, extrude, fill, hull, interior, lathe, minkowski, outline, section, stretch, sweep, toolpath, voxels };
+export { chainHull, extrude, fill, hull, interior, lathe, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };

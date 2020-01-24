@@ -225,12 +225,12 @@ const measureOrigin = (geometry) => {
 
 const measureOffsets = (size, pageMargin) => {
   if (size) {
-    const [width, length] = size;
+    const [width, height] = size;
 
     // Center the output to match pages.
-    const xOffset = width / -2 + pageMargin;
-    const yOffset = length / -2 + pageMargin;
-    const packer = new Packer(width, length);
+    const xOffset = width / -2;
+    const yOffset = height / -2;
+    const packer = new Packer(width - pageMargin * 2, height - pageMargin * 2);
 
     return [xOffset, yOffset, packer];
   } else {
@@ -248,8 +248,8 @@ const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
   const blocks = [];
 
   for (const geometry of geometries) {
-    const [width, length] = measureSize(geometry);
-    const [w, h] = [width + itemMargin * 2, length + itemMargin * 2];
+    const [width, height] = measureSize(geometry);
+    const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
     blocks.push({ w, h, geometry });
   }
 
@@ -258,11 +258,12 @@ const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
   packer.fit(blocks);
 
   for (const { geometry, fit } of blocks) {
-    if (fit) {
+    if (fit && fit.used) {
       const [x, y] = measureOrigin(geometry);
-      const xo = fit.x - x + itemMargin + xOffset;
-      const yo = 0 - yOffset - ((fit.y - y) + itemMargin);
-      packedGeometries.push(toTransformedGeometry(translate([xo, yo, 0], geometry)));
+      const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
+      const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
+      const transformed = toTransformedGeometry(translate([xo, yo, 0], geometry));
+      packedGeometries.push(transformed);
     } else {
       unpackedGeometries.push(geometry);
     }
