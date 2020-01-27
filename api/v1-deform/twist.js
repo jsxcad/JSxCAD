@@ -8,12 +8,12 @@ import { rotateZ } from '@jsxcad/math-vec3';
 const Z = 2;
 
 export const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
-  const radians = angle * Math.PI / 180;
-  const rotate = point => rotateZ(point, radians * point[Z]);
-
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
+    const height = max[Z] - min[Z];
+    const radians = (angle / height) * (Math.PI / 180);
+    const rotate = point => rotateZ(point, radians * point[Z]);
     assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
   }
 
