@@ -1,6 +1,6 @@
 import Shape from './jsxcad-api-v1-shape.js';
 import { translate } from './jsxcad-geometry-paths.js';
-import { readFile, getSources } from './jsxcad-sys.js';
+import { readFile } from './jsxcad-sys.js';
 import { toFont } from './jsxcad-algorithm-text.js';
 
 // Hershey simplex one line font.
@@ -68,14 +68,13 @@ Hershey.toPaths = toPaths;
 
 const toEmSizeFromMm = (mm) => mm * 1.5;
 
-const readFont = async (path, { flip = false } = {}) => {
+const readFont = async (path, { url } = {}) => {
   let data = await readFile({ as: 'bytes' }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`) }, `cache/${path}`);
+    data = await readFile({ as: 'bytes', sources: [url] }, `cache/${path}`);
   }
   const font = toFont({ path }, data);
-  const xform = flip ? shape => shape.flip() : _ => _;
-  const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text)).op(xform);
+  const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
   return fontFactory;
 };
 
