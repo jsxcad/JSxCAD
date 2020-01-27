@@ -24,6 +24,7 @@
   "dependencies": {
     "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
     "@jsxcad/algorithm-clipper": "^0.0.79",
+    "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/algorithm-shape": "^0.0.79",
     "@jsxcad/algorithm-toolpath": "^0.0.79",
     "@jsxcad/api-v1-connector": "^0.0.79",

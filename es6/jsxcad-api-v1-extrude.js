@@ -14,6 +14,7 @@ import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 /**
  *
@@ -483,7 +484,7 @@ const stretch = (shape, length, connector = Z$3()) => {
       continue;
     }
     const bottom = cutOpen(solid, planeSurface);
-    const profile = section$1(solid, planeSurface);
+    const [profile] = section$1(solid, [planeSurface]);
     const top = cutOpen(solid, flip$1(planeSurface));
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
     const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, 1, 0, false);
@@ -540,7 +541,7 @@ const voxels = (shape, resolution = 1) => {
   const voxels = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
-    const bsp = fromSolid(solid);
+    const bsp = fromSolid(solid, createNormalize3());
     const polygons = [];
     for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
       for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
