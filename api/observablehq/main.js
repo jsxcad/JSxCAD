@@ -10,3 +10,4 @@
 import './view';
 
 export * from '@jsxcad/api-v1';
+export * from '@jsxcad/api-v1-font';
