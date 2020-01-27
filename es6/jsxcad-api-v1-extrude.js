@@ -299,6 +299,9 @@ const minkowski = (a, b) => {
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
 
+const minkowskiMethod = function (shape) { return minkowski(this, shape); };
+Shape.prototype.minkowski = minkowskiMethod;
+
 minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
 
 /**
@@ -532,7 +535,7 @@ const X = 0;
 const Y = 1;
 const Z$2 = 2;
 
-const voxels = ({ resolution = 1 }, shape) => {
+const voxels = (shape, resolution = 1) => {
   const offset = resolution / 2;
   const voxels = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
@@ -572,7 +575,7 @@ const voxels = ({ resolution = 1 }, shape) => {
   return assemble(...voxels);
 };
 
-const vowelsMethod = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
+const vowelsMethod = function (...args) { return voxels(this, ...args); };
 Shape.prototype.voxels = vowelsMethod;
 
 const api = {

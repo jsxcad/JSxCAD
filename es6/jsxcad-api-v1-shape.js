@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, getSolids, assemble as assemble$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, getSolids, assemble as assemble$1, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, clean, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -458,6 +458,63 @@ const faces = (shape, op = (x => x)) => {
 const facesMethod = function (...args) { return faces(this, ...args); };
 Shape.prototype.faces = facesMethod;
 
+/**
+ *
+ * # Measure Bounding Box
+ *
+ * Provides the corners of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * const [corner1, corner2] = Sphere(7).measureBoundingBox();
+ * Cube.fromCorners(corner1, corner2)
+ * ```
+ * :::
+ **/
+
+const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
+
+const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
+Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
+
+measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
+measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
+
+/**
+ *
+ * # Measure Center
+ *
+ * Provides the center of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ **/
+
+const measureCenter = (shape) => {
+  // FIX: Produce a clearer definition of center.
+  const geometry = shape.toKeptGeometry();
+  if (geometry.plan && geometry.plan.connector) {
+    // Return the center of the connector.
+    return geometry.marks[0];
+  }
+  const [high, low] = measureBoundingBox(shape);
+  return scale$1(0.5, add(high, low));
+};
+
+const measureCenterMethod = function () { return measureCenter(this); };
+Shape.prototype.measureCenter = measureCenterMethod;
+
+measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
+measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
+
 const openEdges = (shape, { isOpen = true } = {}) => {
   const r = (v) => v + (Math.random() - 0.5) * 0.2;
   const paths = [];
@@ -615,33 +672,6 @@ const canonicalize = (shape) => Shape.fromGeometry(canonicalize$1(shape.toGeomet
 
 const canonicalizeMethod = function () { return canonicalize(this); };
 Shape.prototype.canonicalize = canonicalizeMethod;
-
-/**
- *
- * # Measure Bounding Box
- *
- * Provides the corners of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * const [corner1, corner2] = Sphere(7).measureBoundingBox();
- * Cube.fromCorners(corner1, corner2)
- * ```
- * :::
- **/
-
-const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
-
-const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
-Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
-
-measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
-measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
 
 /**
  *
