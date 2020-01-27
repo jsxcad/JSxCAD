@@ -53,6 +53,7 @@ export {
   Icosahedron,
   Layers,
   Line,
+  Path,
   Point,
   Points,
   Polygon,

@@ -5,7 +5,29 @@ import { buildScene } from './scene';
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
+let locked = false;
+const pending = [];
+
+const acquire = async () => {
+  if (locked) {
+    return new Promise((resolve, reject) => pending.push(resolve));
+  } else {
+    locked = true;
+  }
+};
+
+const release = async () => {
+  if (pending.length > 0) {
+    pending.pop()();
+  } else {
+    locked = false;
+  }
+};
+
 export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
+  if (locked === true) await acquire();
+  locked = true;
+
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -30,6 +52,8 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
   await buildMeshes({ datasets, threejsGeometry, scene });
 
   render();
+
+  await release();
 
   return { canvas, hudCanvas, renderer };
 };
