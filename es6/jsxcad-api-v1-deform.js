@@ -23,14 +23,19 @@ const crumple = (shape, amount = 0.1, { resolution = 1, rng = Random() } = {}) =
 const crumpleMethod = function (...args) { return crumple(this, ...args); };
 Shape.prototype.crumple = crumpleMethod;
 
+const Z = 2;
+
 const scaleXY = (factor, [x, y, z]) => [...scale(factor, [x, y]), z];
 
-const thin = (shape, widthAt = (z => 1 - z * 0.1), { resolution = 1 } = {}) => {
-  const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
-
+const thin = (shape, factor, { resolution = 1 } = {}) => {
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
+    const maxZ = max[Z];
+    const minZ = min[Z];
+    const height = maxZ - minZ;
+    const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
+    const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
     assembly.push({ solid: deform(makeWatertight(solid), squeeze, min, max, resolution), tags });
   }
 
@@ -40,15 +45,15 @@ const thin = (shape, widthAt = (z => 1 - z * 0.1), { resolution = 1 } = {}) => {
 const thinMethod = function (...args) { return thin(this, ...args); };
 Shape.prototype.thin = thinMethod;
 
-const Z = 2;
+const Z$1 = 2;
 
 const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
-  const radians = angle * Math.PI / 180;
-  const rotate = point => rotateZ(point, radians * point[Z]);
-
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
+    const height = max[Z$1] - min[Z$1];
+    const radians = (angle / height) * (Math.PI / 180);
+    const rotate = point => rotateZ(point, radians * point[Z$1]);
     assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
   }
 
