@@ -9,9 +9,9 @@ test('Partial fit', t => {
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });
   t.deepEqual(packed.map(canonicalize),
-              [{ 'paths': [[[-54, -54, 0], [-4, -4, 0]]], 'tags': ['one'] }, { 'paths': [[[-54, -2, 0], [46, 48, 0]]], 'tags': ['three'] }]);
+              [{ 'paths': [[[-54, -54, 0], [-4, 46, 0]]], 'tags': ['two'] }, { 'paths': [[[-2, -54, 0], [48, -4, 0]]], 'tags': ['one'] }]);
   t.deepEqual(unpacked.map(canonicalize),
-              [{ 'paths': [[[50, 50, 0], [100, 150, 0]]], 'tags': ['two'] }]);
+              [{ 'paths': [[[50, 50, 0], [150, 100, 0]]], 'tags': ['three'] }]);
 });
 
 test('Partial rotated fit', t => {
@@ -20,9 +20,9 @@ test('Partial rotated fit', t => {
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });
   t.deepEqual(packed.map(canonicalize),
-              [{ 'paths': [[[-29, -54, 0], [21, -4, 0]]], 'tags': ['one'] }]);
+              [{ 'paths': [[[-29, -54, 0], [21, 46, 0]]], 'tags': ['two'] }]);
   t.deepEqual(unpacked.map(canonicalize),
-              [{ 'paths': [[[50, 50, 0], [100, 150, 0]]], 'tags': ['two'] }, { 'paths': [[[50, 50, 0], [150, 100, 0]]], 'tags': ['three'] }]);
+              [{ 'paths': [[[50, 50, 0], [150, 100, 0]]], 'tags': ['three'] }, { 'paths': [[[50, 50, 0], [100, 100, 0]]], 'tags': ['one'] }]);
 });
 
 test('Complete fit', t => {
@@ -31,7 +31,7 @@ test('Complete fit', t => {
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });
   t.deepEqual(packed.map(canonicalize),
-              [{ 'paths': [[[-99, -99, 0], [-49, -49, 0]]], 'tags': ['one'] }, { 'paths': [[[-99, -47, 0], [-49, 53, 0]]], 'tags': ['two'] }, { 'paths': [[[-47, -99, 0], [53, -49, 0]]], 'tags': ['three'] }]);
+              [{ 'paths': [[[-99, -99, 0], [-49, 1, 0]]], 'tags': ['two'] }, { 'paths': [[[-47, -99, 0], [53, -49, 0]]], 'tags': ['three'] }, { 'paths': [[[-99, 3, 0], [-49, 53, 0]]], 'tags': ['one'] }]);
   t.deepEqual(unpacked.map(canonicalize),
               []);
 });
@@ -42,7 +42,7 @@ test('Growing fit', t => {
                                   { paths: [[[50, 50, 0], [100, 150, 0]]], tags: ['two'] },
                                   { paths: [[[50, 50, 0], [150, 100, 0]]], tags: ['three'] });
   t.deepEqual(packed.map(canonicalize),
-              [{ 'paths': [[[6, 6, 0], [56, 56, 0]]], 'tags': ['one'] }, { 'paths': [[[6, 58, 0], [56, 158, 0]]], 'tags': ['two'] }, { 'paths': [[[58, 6, 0], [158, 56, 0]]], 'tags': ['three'] }]);
+              [{ 'paths': [[[6, 6, 0], [56, 106, 0]]], 'tags': ['two'] }, { 'paths': [[[58, 6, 0], [158, 56, 0]]], 'tags': ['three'] }, { 'paths': [[[6, 108, 0], [56, 158, 0]]], 'tags': ['one'] }]);
   t.deepEqual(unpacked.map(canonicalize),
               []);
 });

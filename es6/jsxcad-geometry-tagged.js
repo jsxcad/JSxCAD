@@ -946,6 +946,9 @@ const measureBoundingBox = (rawGeometry) => {
     } else if (item.z0Surface) {
       update(measureBoundingBox$3(item.z0Surface));
     } else if (item.plan) {
+      if (item.plan.page) {
+        update(item.marks);
+      }
       walk(item.content);
     } else {
       update(measureBoundingBoxGeneric(item));

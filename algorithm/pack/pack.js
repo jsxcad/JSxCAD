@@ -1,4 +1,5 @@
 import { GrowingPacker, Packer } from 'bin-packing-es';
+import { max, min } from '@jsxcad/math-vec3';
 import { measureBoundingBox, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
 
 const X = 0;
@@ -47,15 +48,21 @@ export const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) =>
     blocks.push({ w, h, geometry });
   }
 
-  blocks.sort((a, b) => b.h < a.h); // sort inputs for best results
+  // Place largest cells first
+  blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
 
   packer.fit(blocks);
+
+  let minPoint = [Infinity, Infinity, 0];
+  let maxPoint = [-Infinity, -Infinity, 0];
 
   for (const { geometry, fit } of blocks) {
     if (fit && fit.used) {
       const [x, y] = measureOrigin(geometry);
       const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
       const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
+      minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
+      maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
       const transformed = toTransformedGeometry(translate([xo, yo, 0], geometry));
       packedGeometries.push(transformed);
     } else {
@@ -63,7 +70,7 @@ export const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) =>
     }
   }
 
-  return [packedGeometries, unpackedGeometries];
+  return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
 };
 
 export default pack;

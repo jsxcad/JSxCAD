@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/algorithm-pack",
+  "name": "@jsxcad/api-v1-view",
   "version": "0.0.79",
-  "description": "Packing algorithms for JSxCAD",
+  "description": "View api for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -11,7 +11,7 @@
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "ava *.test.js"
+    "tests": "echo ok"
   },
   "contributors": [
     {
@@ -22,9 +22,12 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/api-v1-plans": "^0.0.79",
+    "@jsxcad/api-v1-shape": "^0.0.79",
+    "@jsxcad/api-v1-shape": "^0.0.79",
+    "@jsxcad/api-v1-shapes": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79",
-    "bin-packing-es": "^0.0.3"
+    "@jsxcad/sys": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^2.4.0",

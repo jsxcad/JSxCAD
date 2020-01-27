@@ -47,7 +47,7 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     scene.add(grid);
   }
 
-  const ambientLight = new AmbientLight(0xffffff, 0.75);
+  const ambientLight = new AmbientLight(0xffffff, 0.5);
   ambientLight.layers.set(0);
   scene.add(ambientLight);
 
