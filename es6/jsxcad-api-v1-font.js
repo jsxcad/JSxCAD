@@ -68,10 +68,10 @@ Hershey.toPaths = toPaths;
 
 const toEmSizeFromMm = (mm) => mm * 1.5;
 
-const readFont = async (path, { url } = {}) => {
+const readFont = async (path, { src } = {}) => {
   let data = await readFile({ as: 'bytes' }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: [url] }, `cache/${path}`);
+    data = await readFile({ as: 'bytes', sources: [src] }, `cache/${path}`);
   }
   const font = toFont({ path }, data);
   const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
@@ -84,7 +84,7 @@ const Font = (size) => ofSize$1(size);
 
 Font.Hershey = Hershey;
 Font.ofSize = ofSize$1;
-Font.read = async (path, { flip = false } = {}) => readFont(path, { flip });
+Font.read = async (...args) => readFont(...args);
 
 Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
 Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';

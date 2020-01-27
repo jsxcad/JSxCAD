@@ -42,10 +42,10 @@ import { toFont } from '@jsxcad/algorithm-text';
 
 const toEmSizeFromMm = (mm) => mm * 1.5;
 
-export const readFont = async (path, { url } = {}) => {
+export const readFont = async (path, { src } = {}) => {
   let data = await readFile({ as: 'bytes' }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: [url] }, `cache/${path}`);
+    data = await readFile({ as: 'bytes', sources: [src] }, `cache/${path}`);
   }
   const font = toFont({ path }, data);
   const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));

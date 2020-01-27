@@ -7,7 +7,7 @@ export const Font = (size) => ofSize(size);
 
 Font.Hershey = Hershey;
 Font.ofSize = ofSize;
-Font.read = async (path, { flip = false } = {}) => readFont(path, { flip });
+Font.read = async (...args) => readFont(...args);
 
 Font.Hershey.signature = 'Font.Hershey(size:number) -> Font';
 Font.ofSize.signature = 'Font.ofSize(size:number) -> Font';
