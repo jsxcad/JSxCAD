@@ -13,8 +13,8 @@ import { Plan } from './jsxcad-api-v1-plan.js';
 export { Plan } from './jsxcad-api-v1-plan.js';
 import { Page } from './jsxcad-api-v1-plans.js';
 export { Page } from './jsxcad-api-v1-plans.js';
-import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave } from './jsxcad-api-v1-shapes.js';
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave } from './jsxcad-api-v1-shapes.js';
+import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave } from './jsxcad-api-v1-shapes.js';
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { WoodScrew } from './jsxcad-api-v1-items.js';
@@ -58,6 +58,7 @@ var api = /*#__PURE__*/Object.freeze({
   Icosahedron: Icosahedron,
   Layers: Layers,
   Line: Line,
+  Path: Path,
   Point: Point,
   Points: Points,
   Polygon: Polygon,
