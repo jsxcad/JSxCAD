@@ -8,7 +8,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
-export const voxels = ({ resolution = 1 }, shape) => {
+export const voxels = (shape, resolution = 1) => {
   const offset = resolution / 2;
   const voxels = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
@@ -48,7 +48,7 @@ export const voxels = ({ resolution = 1 }, shape) => {
   return assemble(...voxels);
 };
 
-const vowelsMethod = function ({ resolution = 1 } = {}) { return voxels({ resolution }, this); };
+const vowelsMethod = function (...args) { return voxels(this, ...args); };
 Shape.prototype.voxels = vowelsMethod;
 
 export default voxels;

@@ -25,6 +25,9 @@ export const minkowski = (a, b) => {
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
 
-export default minkowski;
+const minkowskiMethod = function (shape) { return minkowski(this, shape); };
+Shape.prototype.minkowski = minkowskiMethod;
 
 minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
+
+export default minkowski;
