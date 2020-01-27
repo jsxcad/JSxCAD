@@ -1,4 +1,5 @@
 import { Cylinder, Cube } from './jsxcad-api-v1-shapes.js';
+import { foot, inch } from './jsxcad-api-v1-units.js';
 import { registerDesignator } from './jsxcad-api-v1-item.js';
 
 // TODO: Support designation decoding.
@@ -3426,7 +3427,7 @@ const metricSizeAndLength = seq$1(metricSize.skip(word('x')), metricLength).map(
 const size = alt$1(nominalSizeAndLength, metricSizeAndLength);
 
 const driveStyle = alt$1(word('slotted'),
-                       word('Phillips'),
+                       word('phillips'), // Phillips
                        word('square')
 ).map((driveStyle) => ({ driveStyle }));
 
@@ -3471,10 +3472,25 @@ Examples:
 const decode = (designator) => {
   return WoodScrewDesignator
       .tryParse(designator.toLowerCase())
-      .reduce((value, object) => ({ ...object, ...value }), {});
+      .reduce((value, object) => ({ ...object, ...value, designator }), {});
 };
 
-const WoodScrew = ({ fastenerName, headType, driveStyle, inchDiameter, feetLength, material, mmDiameter, mmLength, protectiveFinish }) => Cylinder(2, 10);
+const WoodScrew = ({
+  fastenerName = 'wood screw',
+  headType,
+  driveStyle,
+  inchDiameter,
+  feetLength,
+  material = 'steel',
+  mmDiameter,
+  mmLength,
+  protectiveFinish,
+  designator
+}) => {
+  if (feetLength) { mmLength = feetLength * foot; }
+  if (inchDiameter) { mmDiameter = inchDiameter * inch; }
+  return Cylinder(mmDiameter, mmLength).material('thread').Item(designator);
+};
 
 registerDesignator(decode, WoodScrew);
 

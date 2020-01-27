@@ -24,6 +24,7 @@
   "dependencies": {
     "@jsxcad/api-v1-item": "^0.0.79",
     "@jsxcad/api-v1-shapes": "^0.0.79",
+    "@jsxcad/api-v1-units": "^0.0.79",
     "parsimmon": "^1.13.0"
   },
   "devDependencies": {

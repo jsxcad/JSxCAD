@@ -656,9 +656,17 @@ measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingB
  * :::
  **/
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 const center = (shape) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   let center = scale$1(0.5, add(minPoint, maxPoint));
+  // FIX: Find a more principled way to handle centering empty shapes.
+  if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
+    return shape;
+  }
   const moved = shape.move(...negate(center));
   return moved;
 };
@@ -773,8 +781,9 @@ keptMethod.signature = 'Shape -> kept() -> Shape';
 
 const layer = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
 
-const layerMethod = function (...shapes) { return this.with(...shapes); };
+const layerMethod = function (...shapes) { return layer(this, ...shapes); };
 Shape.prototype.layer = layerMethod;
+Shape.prototype.and = layerMethod;
 
 /**
  *
@@ -1194,15 +1203,15 @@ const scale = (factor, shape) => {
 const scaleMethod = function (factor) { return scale(factor, this); };
 Shape.prototype.scale = scaleMethod;
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const size = (shape) => {
   const [min, max] = measureBoundingBox(shape);
-  const length = max[X] - min[X];
-  const width = max[Y] - min[Y];
-  const height = max[Z] - min[Z];
+  const width = max[X$1] - min[X$1];
+  const length = max[Y$1] - min[Y$1];
+  const height = max[Z$1] - min[Z$1];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
   return { length, width, height, max, min, center, radius };

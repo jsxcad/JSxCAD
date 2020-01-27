@@ -2,7 +2,7 @@ import Shape from '@jsxcad/api-v1-shape';
 import { getLeafs } from '@jsxcad/geometry-tagged';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
-export const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity }) => {
+export const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinity, packSize = [] }) => {
   if (perLayout === 0) {
     // Packing was disabled -- do nothing.
     return shape;
@@ -14,7 +14,9 @@ export const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = 
   }
   const packedLayers = [];
   while (true) {
-    const [packed, unpacked] = packAlgorithm({ size, pageMargin, itemMargin }, ...todo.slice(0, perLayout));
+    const [packed, unpacked, minPoint, maxPoint] = packAlgorithm({ size, pageMargin, itemMargin }, ...todo.slice(0, perLayout));
+    packSize[0] = minPoint;
+    packSize[1] = maxPoint;
     if (packed.length === 0) {
       break;
     } else {
@@ -25,13 +27,7 @@ export const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = 
     }
     todo = unpacked;
   }
-  let packedShape;
-  if (packedLayers.length === 1) {
-    // This is a reasonably common case.
-    packedShape = Shape.fromGeometry(packedLayers[0]);
-  } else {
-    packedShape = Shape.fromGeometry({ layers: packedLayers });
-  }
+  let packedShape = Shape.fromGeometry({ layers: packedLayers });
   if (size === undefined) {
     packedShape = packedShape.center();
   }

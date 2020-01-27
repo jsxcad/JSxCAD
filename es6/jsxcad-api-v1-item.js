@@ -1,20 +1,23 @@
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
-import { rewriteTags, visit, rewrite, update, getItems } from './jsxcad-geometry-tagged.js';
+import { rewriteTags, visit, rewrite, update, getItems, getLeafs } from './jsxcad-geometry-tagged.js';
 
 const registry = [];
+
+// FIX: Need to clear out temporary registrations.
 
 const fromDesignator = (designator) => {
   for (const { parser, constructor } of registry) {
     const spec = parser(designator);
-    if (spec !== undefined) {
+    if (spec !== undefined && spec !== null && spec !== false) {
       return constructor(spec);
     }
   }
   throw Error('die');
 };
 
+// Later definitions override earlier definitions.
 const registerDesignator = (parser, constructor) =>
-  registry.push({ parser, constructor });
+  registry.unshift({ parser, constructor });
 
 /**
  *
@@ -35,7 +38,10 @@ const Item = (designator) => {
 
 // Turns the current shape into an item.
 const itemMethod = function (id) {
-  return Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }));
+  const shape = Shape.fromGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }));
+  // Register the designator for re-use.
+  registerDesignator(d => (d === id), () => shape);
+  return shape;
 };
 
 Shape.prototype.Item = itemMethod;
@@ -119,6 +125,20 @@ Shape.prototype.items = itemsMethod;
 items.signature = 'items(shape:Shape, op:function) -> Shapes';
 itemsMethod.signature = 'Shape -> items(op:function) -> Shapes';
 
+const leafs = (shape, op = (_ => _)) => {
+  const leafs = [];
+  for (const leaf of getLeafs(shape.toKeptGeometry())) {
+    leafs.push(op(Shape.fromGeometry(leaf)));
+  }
+  return leafs;
+};
+
+const leafsMethod = function (...args) { return leafs(this, ...args); };
+Shape.prototype.leafs = leafsMethod;
+
+leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
+leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
+
 const toBillOfMaterial = (shape) => {
   const specifications = [];
   for (const { tags } of getItems(shape.toKeptGeometry())) {
@@ -143,9 +163,10 @@ const api = {
   fuse,
   inItems,
   items,
+  leafs,
   registerDesignator,
   toBillOfMaterial: toBillOfMaterialMethod
 };
 
 export default api;
-export { Item, bom, fromDesignator, fuse, inItems, items, registerDesignator, toBillOfMaterialMethod as toBillOfMaterial };
+export { Item, bom, fromDesignator, fuse, inItems, items, leafs, registerDesignator, toBillOfMaterialMethod as toBillOfMaterial };
