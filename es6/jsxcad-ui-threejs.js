@@ -52754,7 +52754,7 @@ const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
   return { resize };
 };
 
-const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) => {
+const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 3500);
@@ -52792,15 +52792,17 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   // viewerElement.id = 'viewer';
   // viewerElement.style.height = '100%';
 
-  const renderer = new WebGLRenderer({ antialias: true });
-  renderer.autoClear = false;
-  renderer.setSize(width, height);
-  renderer.setClearColor(0xFFFFFF);
-  renderer.antiAlias = false;
-  renderer.inputGamma = true;
-  renderer.outputGamma = true;
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  if (renderer === undefined) {
+    renderer = new WebGLRenderer({ antialias: true });
+    renderer.autoClear = false;
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xFFFFFF);
+    renderer.antiAlias = false;
+    renderer.inputGamma = true;
+    renderer.outputGamma = true;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  }
   const canvas = renderer.domElement;
   // viewerElement.appendChild(renderer.domElement);
 
@@ -52818,6 +52820,7 @@ const GEOMETRY_LAYER$1 = 0;
 const PLAN_LAYER$1 = 1;
 
 let locked = false;
+let staticRenderer;
 const pending = [];
 
 const acquire = async () => {
@@ -52850,7 +52853,9 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, renderer: staticRenderer });
+
+  staticRenderer = renderer;
 
   const render = () => {
     renderer.clear();
