@@ -32,7 +32,7 @@ export const view = async (shape, path, { view, width = 256, height = 128 } = {}
                                            { offsetWidth: width, offsetHeight: height });
   const canvas = toCanvasFromWebglContext(renderer.getContext());
   canvas.style = `width: ${width}px; height: ${height}px`;
-  renderer.forceContextLoss();
+  // renderer.forceContextLoss();
   return canvas;
 };
 
