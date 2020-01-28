@@ -52788,10 +52788,6 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
   light.layers.set(0);
   camera.add(light);
 
-  // const viewerElement = document.createElement('div');
-  // viewerElement.id = 'viewer';
-  // viewerElement.style.height = '100%';
-
   if (renderer === undefined) {
     renderer = new WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
@@ -52804,14 +52800,12 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
     renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   }
   const canvas = renderer.domElement;
-  // viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
   hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
   hudCanvas.id = 'hudCanvas';
   hudCanvas.width = width;
   hudCanvas.height = height;
-  // viewerElement.appendChild(hudCanvas);
 
   return { camera, canvas, hudCanvas, renderer, scene };
 };
@@ -52820,7 +52814,6 @@ const GEOMETRY_LAYER$1 = 0;
 const PLAN_LAYER$1 = 1;
 
 let locked = false;
-let staticRenderer;
 const pending = [];
 
 const acquire = async () => {
@@ -52833,7 +52826,8 @@ const acquire = async () => {
 
 const release = async () => {
   if (pending.length > 0) {
-    pending.pop()();
+    const resolve = pending.pop();
+    resolve(true);
   } else {
     locked = false;
   }
@@ -52853,9 +52847,7 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, renderer: staticRenderer });
-
-  staticRenderer = renderer;
+  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
 
   const render = () => {
     renderer.clear();
