@@ -6,7 +6,6 @@ const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
 let locked = false;
-let staticRenderer;
 const pending = [];
 
 const acquire = async () => {
@@ -19,7 +18,8 @@ const acquire = async () => {
 
 const release = async () => {
   if (pending.length > 0) {
-    pending.pop()();
+    const resolve = pending.pop();
+    resolve(true);
   } else {
     locked = false;
   }
@@ -39,9 +39,7 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, renderer: staticRenderer });
-
-  staticRenderer = renderer;
+  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
 
   const render = () => {
     renderer.clear();
