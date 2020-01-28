@@ -52594,9 +52594,11 @@ const PLAN_LAYER = 1;
 const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
-    threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene, layer }));
+    for (const subGeometry of threejsGeometry.assembly) {
+      await buildMeshes({ datasets, threejsGeometry: subGeometry, scene, layer });
+    }
   } else if (threejsGeometry.item) {
-    buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
+    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
   } else if (threejsGeometry.threejsSegments) {
     const segments = threejsGeometry.threejsSegments;
     const dataset = {};
@@ -52639,8 +52641,8 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
     scene.add(dataset.mesh);
     datasets.push(dataset);
   } else if (threejsGeometry.threejsPlan) {
-    buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
-    buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
+    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
+    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
   }
 };
 
