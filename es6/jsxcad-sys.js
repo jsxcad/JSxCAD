@@ -284,13 +284,15 @@ const setHandleAskUser = (handler) => {
 
 const tasks = [];
 
+// Add task to complete before using system.
+// Note: These are expected to be idempotent.
 const onBoot = (op) => {
   tasks.push(op);
 };
 
+// Execute tasks to complete before using system.
 const boot = async () => {
-  while (tasks.length > 0) {
-    const task = tasks.shift();
+  for (const task of tasks) {
     await task();
   }
 };

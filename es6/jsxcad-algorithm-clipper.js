@@ -2499,6 +2499,8 @@ const setup = async () => {
       // NativeClipperLibRequestedFormat.WasmWithAsmJsFallback
       web_6.WasmOnly
     );
+    clipper$1.strictlySimple = true;
+    clipper$1.preserveCollinear = true;
   }
 };
 
@@ -2511,7 +2513,7 @@ onBoot(setup);
 // CHECK: Should this be sqrt(2)?
 const CLEAN_DISTANCE = 1;
 
-const RESOLUTION = 1e7;
+const RESOLUTION = 1e6;
 
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
@@ -2581,7 +2583,7 @@ const clean = (surface, normalize = p => p) => {
     {
       clipType: web_2.Union,
       // strictlySimple: true,
-      subjectInputs: surface.map(path => ({ data: clipper$1.cleanPolygons(fromSurface([path], normalize), CLEAN_DISTANCE), closed: true })),
+      subjectInputs: surface.map(path => ({ data: fromSurface([path], normalize), closed: true })),
       subjectFillType: web_8.NonZero
     });
   return toSurface(result, normalize);
@@ -3391,36 +3393,34 @@ earcut.flatten = function (data) {
 earcut_1.default = default_1;
 
 const makeConvex = (surface, normalize = p => p) => {
-  console.log(`QQ/makeConvex/surface: ${JSON.stringify(surface)}`);
   const request =
     {
       clipType: web_2.Union,
       subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
       subjectFillType: web_8.NonZero
     };
-  console.log(`QQ/makeConvex/request: ${JSON.stringify(request)}`);
   const result = clipper$1.clipToPolyTree(request);
   const convexSurface = [];
 
   // eslint-disable-next-line camelcase
   const walkContour = ({ contour, childs }) => {
-    const cleanContour = [];
+    const earContour = [];
     const holes = [];
     for (const { x, y } of clipper$1.cleanPolygon(contour, CLEAN_DISTANCE)) {
-      cleanContour.push(x, y);
+      earContour.push(x, y);
     }
     // eslint-disable-next-line camelcase
     for (const child of childs) {
-      walkHole(child, cleanContour, holes);
+      walkHole(child, earContour, holes);
     }
-    const triangles = earcut_1(cleanContour, holes);
+    const triangles = earcut_1(earContour, holes);
     for (let i = 0; i < triangles.length; i += 3) {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[cleanContour[a * 2 + 0] / RESOLUTION, cleanContour[a * 2 + 1] / RESOLUTION, 0],
-                        [cleanContour[b * 2 + 0] / RESOLUTION, cleanContour[b * 2 + 1] / RESOLUTION, 0],
-                        [cleanContour[c * 2 + 0] / RESOLUTION, cleanContour[c * 2 + 1] / RESOLUTION, 0]];
+      const triangle = [[earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0],
+                        [earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0],
+                        [earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0]];
       if (isClockwise(triangle)) {
         triangle.reverse();
       }
@@ -3429,12 +3429,12 @@ const makeConvex = (surface, normalize = p => p) => {
   };
 
   // eslint-disable-next-line camelcase
-  const walkHole = ({ contour, childs }, cleanContour, holes) => {
-    const start = cleanContour.length;
+  const walkHole = ({ contour, childs }, earContour, holes) => {
+    const start = earContour.length;
     for (const { x, y } of clipper$1.cleanPolygon(contour, CLEAN_DISTANCE)) {
-      cleanContour.push(x, y);
+      earContour.push(x, y);
     }
-    if (contour.length > start) {
+    if (earContour.length > start) {
       holes.push(start >>> 1);
     }
     // eslint-disable-next-line camelcase

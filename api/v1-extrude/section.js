@@ -5,6 +5,7 @@ import { getAnySurfaces, getPlans, getSolids } from '@jsxcad/geometry-tagged';
 import { Z } from '@jsxcad/api-v1-connector';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { clean as z0Clean } from '@jsxcad/geometry-z0surface-boolean';
+import { makeWatertight } from '@jsxcad/geometry-solid';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from '@jsxcad/geometry-path';
@@ -74,15 +75,6 @@ export const section = (solidShape, ...connectors) => {
       surfaces[i].plane = planes[i];
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
     }
-  }
-  const coords = new Set();
-  for (const shape of shapes) {
-    for (const point of shape.toPoints()) {
-      coords.add(point);
-    }
-  }
-  for (const coord of coords) {
-    console.log(`QQ/coord: ${JSON.stringify(coord)}`);
   }
   return layer(...shapes);
 };

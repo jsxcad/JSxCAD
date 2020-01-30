@@ -5,7 +5,7 @@ import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransf
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
 import { clean as clean$1, union } from './jsxcad-geometry-z0surface-boolean.js';
-import { createNormalize3 as createNormalize3$1 } from './jsxcad-algorithm-quantize.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
@@ -299,7 +299,7 @@ const triangulateConvexPolygon = (polygon) => {
   return surface;
 };
 
-const makeConvex = (surface, normalize3 = createNormalize3$1(), plane) => {
+const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
   }

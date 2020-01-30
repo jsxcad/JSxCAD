@@ -16,6 +16,8 @@ export const setup = async () => {
       // NativeClipperLibRequestedFormat.WasmWithAsmJsFallback
       NativeClipperLibRequestedFormat.WasmOnly
     );
+    clipper.strictlySimple = true;
+    clipper.preserveCollinear = true;
   }
 };
 

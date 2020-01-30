@@ -408,15 +408,6 @@ const section = (solidShape, ...connectors) => {
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
     }
   }
-  const coords = new Set();
-  for (const shape of shapes) {
-    for (const point of shape.toPoints()) {
-      coords.add(point);
-    }
-  }
-  for (const coord of coords) {
-    console.log(`QQ/coord: ${JSON.stringify(coord)}`);
-  }
   return layer(...shapes);
 };
 

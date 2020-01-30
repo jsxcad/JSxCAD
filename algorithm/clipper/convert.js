@@ -4,7 +4,7 @@ import { isClosed, isOpen } from '@jsxcad/geometry-path';
 // CHECK: Should this be sqrt(2)?
 export const CLEAN_DISTANCE = 1;
 
-export const RESOLUTION = 1e7;
+export const RESOLUTION = 1e6;
 
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
