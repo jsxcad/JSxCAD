@@ -5,13 +5,15 @@ import earcut from 'earcut';
 import { isClockwise } from '@jsxcad/geometry-path';
 
 export const makeConvex = (surface, normalize = p => p) => {
-  const result = clipper.clipToPolyTree(
+  console.log(`QQ/makeConvex/surface: ${JSON.stringify(surface)}`);
+  const request =
     {
       clipType: ClipType.Union,
       subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
       subjectFillType: PolyFillType.NonZero
-    });
-
+    };
+  console.log(`QQ/makeConvex/request: ${JSON.stringify(request)}`);
+  const result = clipper.clipToPolyTree(request);
   const convexSurface = [];
 
   // eslint-disable-next-line camelcase
@@ -59,5 +61,5 @@ export const makeConvex = (surface, normalize = p => p) => {
     walkContour(child);
   }
 
-  return convexSurface;
+  return convexSurface.map(path => path.map(normalize));
 };

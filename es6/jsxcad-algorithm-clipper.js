@@ -2511,7 +2511,7 @@ onBoot(setup);
 // CHECK: Should this be sqrt(2)?
 const CLEAN_DISTANCE = 1;
 
-const RESOLUTION = 1e5;
+const RESOLUTION = 1e7;
 
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
@@ -2528,7 +2528,6 @@ const fromClosedPath = (path, normalize) => {
     closedPath.push(new IntPoint(toInt(x), toInt(y)));
   }
   const entry = { data: clipper$1.cleanPolygon(closedPath, CLEAN_DISTANCE), closed: true };
-console.log(`QQ/fromClosedPath/entry: ${JSON.stringify(entry)}`);
   return entry;
 };
 
@@ -3392,13 +3391,15 @@ earcut.flatten = function (data) {
 earcut_1.default = default_1;
 
 const makeConvex = (surface, normalize = p => p) => {
-  const result = clipper$1.clipToPolyTree(
+  console.log(`QQ/makeConvex/surface: ${JSON.stringify(surface)}`);
+  const request =
     {
       clipType: web_2.Union,
       subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
       subjectFillType: web_8.NonZero
-    });
-
+    };
+  console.log(`QQ/makeConvex/request: ${JSON.stringify(request)}`);
+  const result = clipper$1.clipToPolyTree(request);
   const convexSurface = [];
 
   // eslint-disable-next-line camelcase
@@ -3446,7 +3447,7 @@ const makeConvex = (surface, normalize = p => p) => {
     walkContour(child);
   }
 
-  return convexSurface;
+  return convexSurface.map(path => path.map(normalize));
 };
 
 /**

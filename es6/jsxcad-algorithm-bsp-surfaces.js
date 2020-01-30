@@ -6,8 +6,8 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 
-const EPSILON = 1e-6; // was 1e-5
-const EPSILON2 = 1e-12; // was 1e-10
+const EPSILON = 1e-5;
+const EPSILON2 = 1e-10;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
