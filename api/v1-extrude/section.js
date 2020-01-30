@@ -1,9 +1,11 @@
 import { Shape, layer } from '@jsxcad/api-v1-shape';
-import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
+import { clean, makeConvex } from '@jsxcad/geometry-surface';
+import { getAnySurfaces, getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { clean as z0Clean } from '@jsxcad/geometry-z0surface-boolean';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
-import { makeConvex } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from '@jsxcad/geometry-path';
 
@@ -61,18 +63,42 @@ export const section = (solidShape, ...connectors) => {
   const planes = connectors.map(toPlane);
   const planeSurfaces = planes.map(toSurface);
   const shapes = [];
+  const normalize = createNormalize3();
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-    const sections = bspSection(solid, planeSurfaces);
-    const surfaces = sections.map(section => makeConvex(section));
+    const sections = bspSection(solid, planeSurfaces, normalize);
+    const surfaces = sections.map(section => makeConvex(section, normalize));
+    // const surfaces = sections.map(section => z0Clean(section, normalize));
+    // const surfaces = sections.map(section => section);
+    // const surfaces = sections;
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
     }
+  }
+  const coords = new Set();
+  for (const shape of shapes) {
+    for (const point of shape.toPoints()) {
+      coords.add(point);
+    }
+  }
+  for (const coord of coords) {
+    console.log(`QQ/coord: ${JSON.stringify(coord)}`);
   }
   return layer(...shapes);
 };
 
 const sectionMethod = function (...args) { return section(this, ...args); };
 Shape.prototype.section = sectionMethod;
+
+export const cleanOp = (shape) => {
+  const shapes = [];
+  const normalize3 = createNormalize3();
+  for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+    shapes.push(Shape.fromGeometry({ paths: z0Clean(surface || z0Surface, normalize3) }));
+  }
+  return layer(...shapes);
+};
+const cleanMethod = function (...args) { return cleanOp(this, ...args); };
+Shape.prototype.clean = cleanMethod;
 
 export default section;

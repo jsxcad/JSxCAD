@@ -5,7 +5,7 @@ import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransf
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
 import { clean as clean$1, union } from './jsxcad-geometry-z0surface-boolean.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { createNormalize3 as createNormalize3$1 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
@@ -255,12 +255,12 @@ const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(
 
 const transform$1 = cacheTransform(transformImpl);
 
-const clean = (surface, plane = toPlane(surface)) => {
+const clean = (surface, normalize = createNormalize3(), plane = toPlane(surface)) => {
   // FIX: Detect when the surfaces aren't in the same plane.
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Surface = transform$1(toZ0, surface);
-  const cleanedZ0Surface = clean$1(z0Surface);
-  return transform$1(fromZ0, cleanedZ0Surface);
+  const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize)));
+  const cleanedZ0Surface = clean$1(z0Surface, normalize);
+  return transform$1(fromZ0, cleanedZ0Surface).map(path => path.map(normalize));
 };
 
 const eachPoint = (thunk, surface) => {
@@ -299,7 +299,7 @@ const triangulateConvexPolygon = (polygon) => {
   return surface;
 };
 
-const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
+const makeConvex = (surface, normalize3 = createNormalize3$1(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
   }

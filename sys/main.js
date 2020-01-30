@@ -1,5 +1,6 @@
 import { addSource, getSources } from './source';
 import { ask, setHandleAskUser } from './ask';
+import { boot, onBoot } from './boot';
 import { getFilesystem, setupFilesystem } from './filesystem';
 import { listFiles, listFilesystems } from './listFiles';
 import { log, unwatchLog, watchLog } from './log';
@@ -15,6 +16,7 @@ import { writeFile } from './writeFile';
 export {
   addSource,
   ask,
+  boot,
   createService,
   conversation,
   deleteFile,
@@ -24,6 +26,7 @@ export {
   listFiles,
   listFilesystems,
   log,
+  onBoot,
   readFile,
   setupFilesystem,
   unwatchFile,

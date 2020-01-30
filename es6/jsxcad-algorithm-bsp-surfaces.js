@@ -6,8 +6,8 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 
-const EPSILON = 1e-5;
-const EPSILON2 = 1e-10;
+const EPSILON = 1e-6; // was 1e-5
+const EPSILON2 = 1e-12; // was 1e-10
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -762,8 +762,7 @@ const intersection = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
-const section = (solid, surfaces) => {
-  const normalize = createNormalize3();
+const section = (solid, surfaces, normalize /* = createNormalize3() */) => {
   const bsp = fromSolid(alignVertices(solid, normalize), normalize);
   return surfaces.map(surface => removeExteriorPolygons(bsp, surface, normalize));
 };

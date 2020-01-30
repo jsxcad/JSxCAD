@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { conversation, log } from './jsxcad-sys.js';
+import { boot, conversation, log } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
@@ -75,17 +75,22 @@ const agent = async ({
   }
 };
 
-const {
-  ask,
-  hear
-} = conversation({
-  agent,
-  say
-});
-self.ask = ask;
+const bootstrap = async () => {
+  await boot();
+  const {
+    ask,
+    hear
+  } = conversation({
+    agent,
+    say
+  });
+  self.ask = ask;
 
-onmessage = ({
-  data
-}) => hear(data);
+  onmessage = ({
+    data
+  }) => hear(data);
 
-if (onmessage === undefined) throw Error('die');
+  if (onmessage === undefined) throw Error('die');
+};
+
+bootstrap();

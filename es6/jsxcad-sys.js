@@ -282,6 +282,19 @@ const setHandleAskUser = (handler) => {
   handleAskUser = handler;
 };
 
+const tasks = [];
+
+const onBoot = (op) => {
+  tasks.push(op);
+};
+
+const boot = async () => {
+  while (tasks.length > 0) {
+    const task = tasks.shift();
+    await task();
+  }
+};
+
 // When base is undefined the persistent filesystem is disabled.
 let base;
 
@@ -8439,4 +8452,4 @@ const readFile = async (options, path) => {
   }
 };
 
-export { addSource, ask, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles, listFilesystems, log, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles, listFilesystems, log, onBoot, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };

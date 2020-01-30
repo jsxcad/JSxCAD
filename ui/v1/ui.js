@@ -4,6 +4,7 @@ import { Mosaic, MosaicZeroState } from 'react-mosaic-component';
 
 import {
   ask as askSys,
+  boot,
   createService,
   deleteFile,
   getFilesystem,
@@ -700,6 +701,7 @@ const defaultPaneViews = [
 ];
 
 export const installUi = async ({ document, project, sha }) => {
+  await boot();
   if (project !== '') {
     await setupFilesystem({ fileBase: project });
   }
