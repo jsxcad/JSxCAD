@@ -3,7 +3,7 @@ let base;
 
 export const getBase = () => base;
 
-export const qualifyPath = (path, project) => `jsxcad/${project || getBase() || ''}${path}`;
+export const qualifyPath = (path, project) => `jsxcad/${project + '/' || getBase() || '/'}${path}`;
 
 export const setupFilesystem = ({ fileBase }) => {
   // A prefix used to partition the persistent filesystem for multiple projects.
