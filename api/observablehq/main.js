@@ -10,14 +10,10 @@
 import './view';
 
 import * as v1 from '@jsxcad/api-v1';
-import Font from '@jsxcad/api-v1-font';
 
 import { boot } from '@jsxcad/sys';
 
 export const api = async () => {
   await boot();
-  return {
-    ...v1,
-    Font
-  };
+  return v1;
 };

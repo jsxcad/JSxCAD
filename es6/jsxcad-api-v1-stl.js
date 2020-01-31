@@ -1,6 +1,6 @@
-import { readFile, getSources, writeFile } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
+import { readFile, writeFile } from './jsxcad-sys.js';
 
 /**
  *
@@ -25,17 +25,13 @@ const formatToAs = (format) => {
   }
 };
 
-const readStl = async (options) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path, format = 'ascii' } = options;
+const readStl = async (path, { src, format = 'ascii' }) => {
   const as = formatToAs(format);
-  let data = await readFile({ as, ...options }, `source/${path}`);
-  if (data === undefined) {
-    data = await readFile({ as, sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+  let data = await readFile({ as }, `source/${path}`);
+  if (data === undefined && src) {
+    data = await readFile({ as, sources: [src] }, `cache/${path}`);
   }
-  return Shape.fromGeometry(await fromStl(options, data));
+  return Shape.fromGeometry(await fromStl(data, { format }));
 };
 
 /**
@@ -51,20 +47,19 @@ const readStl = async (options) => {
  *
  **/
 
-const writeStl = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
+const writeStl = async (shape, path, options = {}) => {
   const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toStl(options, geometry));
+  await writeFile({}, `output/${path}`, toStl(geometry, options));
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method = function (options = {}) { return writeStl(options, this); };
+const method = function (...args) { return writeStl(this, ...args); };
 Shape.prototype.writeStl = method;
 
-const api = { readStl, writeStl };
+const api = {
+  readStl,
+  writeStl
+};
 
 export default api;
 export { readStl, writeStl };

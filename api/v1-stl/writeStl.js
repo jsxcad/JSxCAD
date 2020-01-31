@@ -15,17 +15,13 @@ import { writeFile } from '@jsxcad/sys';
  *
  **/
 
-export const writeStl = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
+export const writeStl = async (shape, path, options = {}) => {
   const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toStl(options, geometry));
+  await writeFile({}, `output/${path}`, toStl(geometry, options));
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const method = function (options = {}) { return writeStl(options, this); };
+const method = function (...args) { return writeStl(this, ...args); };
 Shape.prototype.writeStl = method;
 
 export default writeStl;

@@ -107,7 +107,7 @@ const toParser = (format) => {
   }
 };
 
-const fromStl = async ({ format = 'ascii' }, stl) => {
+const fromStl = async (stl, { format = 'ascii' } = {}) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
@@ -138,7 +138,7 @@ const geometryToTriangles = (solids) => {
   return triangles;
 };
 
-const toStl = async (options = {}, geometry) => {
+const toStl = async (geometry, options = {}) => {
   const { doFixTJunctions = true } = options;
   const keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry);
