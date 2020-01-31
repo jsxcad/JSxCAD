@@ -16,9 +16,17 @@ import measureBoundingBox from './measureBoundingBox';
  * :::
  **/
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 export const center = (shape) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   let center = scale(0.5, add(minPoint, maxPoint));
+  // FIX: Find a more principled way to handle centering empty shapes.
+  if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
+    return shape;
+  }
   const moved = shape.move(...negate(center));
   return moved;
 };

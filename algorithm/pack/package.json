@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79",
     "bin-packing-es": "^0.0.3"
   },
   "devDependencies": {

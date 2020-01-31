@@ -1,21 +1,39 @@
+import { IntPoint, PolyFillType } from './clipper-lib';
 import { isClosed, isOpen } from '@jsxcad/geometry-path';
 
-import ClipperLib from 'clipper-lib';
-
-const { Clipper, IntPoint, PolyFillType, PolyTree } = ClipperLib;
+import { toPlane } from '@jsxcad/math-poly3';
 
 // CHECK: Should this be sqrt(2)?
-const CLEAN_DISTANCE = 1;
+export const CLEAN_DISTANCE = 1;
 
-export const RESOLUTION = 1e7;
+export const RESOLUTION = 1e6;
 
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
 
 export const fillType = PolyFillType.pftNonZero;
 
+/*
 export const fromSurface = (surface, normalize) =>
   surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
+*/
+
+export const fromSurface = (surface, normalize) => {
+  const normalized = surface.map(path => path.map(normalize));
+  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const filtered = scaled.filter(path => toPlane(path) !== undefined);
+  return filtered.map(path => path.map(([X, Y]) => new IntPoint(X, Y)));
+};
+
+export const fromClosedPath = (path, normalize) => {
+  const closedPath = [];
+  for (let i = 0; i < path.length; i++) {
+    const [x, y] = normalize(path[i]);
+    closedPath.push(new IntPoint(toInt(x), toInt(y)));
+  }
+  const entry = { data: closedPath, closed: true };
+  return entry;
+};
 
 export const fromOpenPaths = (paths, normalize) => {
   const openPaths = [];
@@ -23,8 +41,8 @@ export const fromOpenPaths = (paths, normalize) => {
     if (isOpen(path)) {
       const openPath = [];
       for (let i = 1; i < path.length; i++) {
-        const [X, Y] = normalize(path[i]);
-        openPath.push(new IntPoint(toInt(X), toInt(Y)));
+        const [x, y] = normalize(path[i]);
+        openPath.push(new IntPoint(toInt(x), toInt(y)));
       }
       openPaths.push(openPath);
     }
@@ -38,8 +56,8 @@ export const fromClosedPaths = (paths, normalize) => {
     if (isClosed(path)) {
       const closedPath = [];
       for (let i = 0; i < path.length; i++) {
-        const [X, Y] = normalize(path[i]);
-        closedPath.push(new IntPoint(toInt(X), toInt(Y)));
+        const [x, y] = normalize(path[i]);
+        closedPath.push(new IntPoint(toInt(x), toInt(y)));
       }
       closedPaths.push(closedPath);
     }
@@ -47,33 +65,16 @@ export const fromClosedPaths = (paths, normalize) => {
   return closedPaths;
 };
 
-export const toSurface = (clipper, op, normalize) => {
-  const result = [];
-  clipper.Execute(op, result, fillType, fillType);
-  const cleaned = Clipper.CleanPolygons(result, CLEAN_DISTANCE);
-  // CHECK: Do we need to renormalize here?
-  const surface = [];
-  for (const path of cleaned) {
-    if (path.length > 0) {
-      surface.push(path.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)])));
-    }
-  }
-  return surface;
-};
+export const toSurface = (clipperPaths, normalize) =>
+  clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));
 
-export const toPaths = (clipper, op, normalize) => {
-  const result = new PolyTree();
-  clipper.Execute(op, result, fillType, fillType);
-  // CHECK: Do we need to renormalize here?
+export const toPaths = (clipper, polytree, normalize) => {
   const paths = [];
-  for (const entry of result.m_AllPolys) {
-    if (entry.m_polygon.length > 0) {
-      if (entry.IsOpen) {
-        paths.push([null, ...entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)]))]);
-      } else {
-        paths.push(entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)])));
-      }
-    }
+  for (const path of clipper.openPathsFromPolyTree(polytree)) {
+    paths.push([null, ...path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))]);
+  }
+  for (const path of clipper.closedPathsFromPolyTree(polytree)) {
+    paths.push(path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));
   }
   return paths;
 };

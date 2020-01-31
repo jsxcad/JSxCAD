@@ -7,6 +7,7 @@ import lathe from './lathe';
 import minkowski from './minkowski';
 import outline from './outline';
 import section from './section';
+import squash from './squash';
 import stretch from './stretch';
 import sweep from './sweep';
 import toolpath from './toolpath';
@@ -22,6 +23,7 @@ const api = {
   minkowski,
   outline,
   section,
+  squash,
   stretch,
   sweep,
   toolpath,
@@ -38,6 +40,7 @@ export {
   minkowski,
   outline,
   section,
+  squash,
   stretch,
   sweep,
   toolpath,

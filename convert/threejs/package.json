@@ -22,18 +22,13 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
-    "dat.gui": "0.7.6",
-    "fast-png": "^5.0.1",
-    "gl": "^4.4.0",
     "three": "^0.104.0",
-    "three-trackballcontrols": "^0.0.8",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {

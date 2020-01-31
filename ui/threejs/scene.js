@@ -22,10 +22,10 @@ export const createResizer = ({ camera, renderer, trackball, viewerElement }) =>
   return { resize };
 };
 
-export const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) => {
+export const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
-  const camera = new PerspectiveCamera(27, width / height, 1, 3500);
+  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.lookAt(...target);
@@ -47,7 +47,7 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     scene.add(grid);
   }
 
-  const ambientLight = new AmbientLight(0xffffff, 0.75);
+  const ambientLight = new AmbientLight(0xffffff, 0.5);
   ambientLight.layers.set(0);
   scene.add(ambientLight);
 
@@ -56,28 +56,24 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   light.layers.set(0);
   camera.add(light);
 
-  // const viewerElement = document.createElement('div');
-  // viewerElement.id = 'viewer';
-  // viewerElement.style.height = '100%';
-
-  const renderer = new WebGLRenderer({ antialias: true });
-  renderer.autoClear = false;
-  renderer.setSize(width, height);
-  renderer.setClearColor(0xFFFFFF);
-  renderer.antiAlias = false;
-  renderer.inputGamma = true;
-  renderer.outputGamma = true;
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  if (renderer === undefined) {
+    renderer = new WebGLRenderer({ antialias: true });
+    renderer.autoClear = false;
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xFFFFFF);
+    renderer.antiAlias = false;
+    renderer.inputGamma = true;
+    renderer.outputGamma = true;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  }
   const canvas = renderer.domElement;
-  // viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
   hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
   hudCanvas.id = 'hudCanvas';
   hudCanvas.width = width;
   hudCanvas.height = height;
-  // viewerElement.appendChild(hudCanvas);
 
   return { camera, canvas, hudCanvas, renderer, scene };
 };

@@ -1,38 +1,38 @@
-import { RESOLUTION, fillType, fromSurface } from './convert';
+import { CLEAN_DISTANCE, RESOLUTION, fromClosedPath } from './convert';
+import { ClipType, PolyFillType, clipper } from './clipper-lib';
 
-import ClipperLib from 'clipper-lib';
 import earcut from 'earcut';
 import { isClockwise } from '@jsxcad/geometry-path';
 
-const { Clipper, ClipType, PolyTree, PolyType } = ClipperLib;
-
 export const makeConvex = (surface, normalize = p => p) => {
-  const clipper = new Clipper();
-  clipper.AddPaths(fromSurface(surface, normalize), PolyType.ptSubject, true);
-  const result = new PolyTree();
-  clipper.Execute(ClipType.ctUnion, result, fillType, fillType);
-
+  const request =
+    {
+      clipType: ClipType.Union,
+      subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
+      subjectFillType: PolyFillType.NonZero
+    };
+  const result = clipper.clipToPolyTree(request);
   const convexSurface = [];
 
   // eslint-disable-next-line camelcase
-  const walkContour = ({ m_polygon, m_Childs }) => {
-    const contour = [];
+  const walkContour = ({ contour, childs }) => {
+    const earContour = [];
     const holes = [];
-    for (const { X, Y } of Clipper.CleanPolygon(m_polygon, 1)) {
-      contour.push(X, Y);
+    for (const { x, y } of clipper.cleanPolygon(contour, CLEAN_DISTANCE)) {
+      earContour.push(x, y);
     }
     // eslint-disable-next-line camelcase
-    for (const child of m_Childs) {
-      walkHole(child, contour, holes);
+    for (const child of childs) {
+      walkHole(child, earContour, holes);
     }
-    const triangles = earcut(contour, holes);
+    const triangles = earcut(earContour, holes);
     for (let i = 0; i < triangles.length; i += 3) {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[contour[a * 2 + 0] / RESOLUTION, contour[a * 2 + 1] / RESOLUTION, 0],
-                        [contour[b * 2 + 0] / RESOLUTION, contour[b * 2 + 1] / RESOLUTION, 0],
-                        [contour[c * 2 + 0] / RESOLUTION, contour[c * 2 + 1] / RESOLUTION, 0]];
+      const triangle = [[earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0],
+                        [earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0],
+                        [earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0]];
       if (isClockwise(triangle)) {
         triangle.reverse();
       }
@@ -41,23 +41,23 @@ export const makeConvex = (surface, normalize = p => p) => {
   };
 
   // eslint-disable-next-line camelcase
-  const walkHole = ({ m_polygon, m_Childs }, contour, holes) => {
-    const start = contour.length;
-    for (const { X, Y } of Clipper.CleanPolygon(m_polygon, 1)) {
-      contour.push(X, Y);
+  const walkHole = ({ contour, childs }, earContour, holes) => {
+    const start = earContour.length;
+    for (const { x, y } of clipper.cleanPolygon(contour, CLEAN_DISTANCE)) {
+      earContour.push(x, y);
     }
-    if (contour.length > start) {
+    if (earContour.length > start) {
       holes.push(start >>> 1);
     }
     // eslint-disable-next-line camelcase
-    for (const child of m_Childs) {
+    for (const child of childs) {
       walkContour(child);
     }
   };
 
-  for (const child of result.m_Childs) {
+  for (const child of result.childs) {
     walkContour(child);
   }
 
-  return convexSurface;
+  return convexSurface.map(path => path.map(normalize));
 };

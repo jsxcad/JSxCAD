@@ -1,11 +1,12 @@
 import { rotateZ, scale } from '@jsxcad/geometry-surface';
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
+import { boot } from '@jsxcad/sys';
 import { canonicalize } from './canonicalize';
 import { difference } from './difference';
 import test from 'ava';
 
-Error.stackTraceLimit = Infinity;
+test.beforeEach(async t => { await boot(); });
 
 test('Simple', t => {
   const geometry = difference({ assembly: [{ z0Surface: [unitSquarePolygon] }] },

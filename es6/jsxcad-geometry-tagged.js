@@ -3,11 +3,11 @@ import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
 import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-solid.js';
-import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
+import { transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1, outline as outline$1 } from './jsxcad-geometry-solid.js';
+import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
-import { difference as difference$3, intersection as intersection$3, clean, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$2, intersection as intersection$2, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
+import { difference as difference$3, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
+import { difference as difference$2, intersection as intersection$2, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
@@ -325,11 +325,10 @@ const canonicalize = (rawGeometry) => {
     canonicalized.solid = canonicalize$5(geometry.solid);
   } else if (geometry.assembly !== undefined) {
     canonicalized.assembly = geometry.assembly.map(canonicalize);
+  } else if (geometry.layers !== undefined) {
+    canonicalized.layers = geometry.layers.map(canonicalize);
   } else if (geometry.disjointAssembly !== undefined) {
     canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize);
-    if (geometry.nonNegative) {
-      canonicalized.nonNegative = geometry.nonNegative.map(canonicalize);
-    }
   } else if (geometry.item !== undefined) {
     canonicalized.item = geometry.item(canonicalize);
   } else {
@@ -947,6 +946,9 @@ const measureBoundingBox = (rawGeometry) => {
     } else if (item.z0Surface) {
       update(measureBoundingBox$3(item.z0Surface));
     } else if (item.plan) {
+      if (item.plan.page) {
+        update(item.marks);
+      }
       walk(item.content);
     } else {
       update(measureBoundingBoxGeneric(item));
@@ -962,20 +964,18 @@ const measureBoundingBox = (rawGeometry) => {
   }
 };
 
-const toOutlineFromSurface = (surface) => clean(surface);
-
 const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
   for (const { solid } of getSolids(keptGeometry)) {
-    for (const surface of solid) {
-      outlines.push(toOutlineFromSurface(surface));
-    }
+    outlines.push(outline$1(solid));
   }
-  for (const { surface, z0Surface } of getAnySurfaces(keptGeometry)) {
-    const anySurface = surface || z0Surface;
-    outlines.push(toOutlineFromSurface(anySurface));
+  for (const { surface } of getSurfaces(keptGeometry)) {
+    outlines.push(outline$2(surface));
+  }
+  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
+    outlines.push(outline$3(z0Surface));
   }
   return outlines.map(outline => ({ paths: outline }));
 };

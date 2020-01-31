@@ -4,7 +4,7 @@
 
 import * as fs from 'fs';
 
-import { getBase, getFilesystem, setupFilesystem } from './filesystem';
+import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { getFile } from './files';
@@ -25,15 +25,15 @@ const getUrlFetcher = async () => {
   }
 };
 
-const getFileFetcher = async (prefix) => {
+const getFileFetcher = async (qualify = qualifyPath) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises.readFile(`${prefix}${path}`);
+      return promises.readFile(qualify(path));
     };
   } else if (isBrowser) {
     return async (path) => {
-      const data = await localForage.getItem(`${prefix}${path}`);
+      const data = await localForage.getItem(qualify(path));
       if (data !== null) {
         return new Uint8Array(toByteArray(data));
       }
@@ -48,8 +48,8 @@ const fetchPersistent = async (path) => {
   try {
     const base = getBase();
     if (base !== undefined) {
-      const fetchFile = await getFileFetcher('jsxcad/');
-      const data = await fetchFile(`${base}${path}`);
+      const fetchFile = await getFileFetcher();
+      const data = await fetchFile(path);
       return data;
     }
   } catch (e) {
@@ -63,7 +63,7 @@ const fetchPersistent = async (path) => {
 // Fetch from external sources.
 const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher('');
+  const fetchFile = await getFileFetcher(path => path);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {

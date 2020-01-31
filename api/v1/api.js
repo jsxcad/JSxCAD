@@ -10,9 +10,9 @@
 import '@jsxcad/api-v1-connector';
 import '@jsxcad/api-v1-deform';
 import '@jsxcad/api-v1-extrude';
-import '@jsxcad/api-v1-item';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-shell';
+import '@jsxcad/api-v1-view';
 
 export {
   source
@@ -53,6 +53,7 @@ export {
   Icosahedron,
   Layers,
   Line,
+  Path,
   Point,
   Points,
   Polygon,
@@ -66,6 +67,10 @@ export {
   Triangle,
   Wave
 } from '@jsxcad/api-v1-shapes';
+
+export {
+  Item
+} from '@jsxcad/api-v1-item';
 
 export {
   WoodScrew

@@ -1,4 +1,5 @@
 import { GrowingPacker, Packer } from 'bin-packing-es';
+import { max, min } from '@jsxcad/math-vec3';
 import { measureBoundingBox, toTransformedGeometry, translate } from '@jsxcad/geometry-tagged';
 
 const X = 0;
@@ -19,12 +20,12 @@ const measureOrigin = (geometry) => {
 
 const measureOffsets = (size, pageMargin) => {
   if (size) {
-    const [width, length] = size;
+    const [width, height] = size;
 
     // Center the output to match pages.
-    const xOffset = width / -2 + pageMargin;
-    const yOffset = length / -2 + pageMargin;
-    const packer = new Packer(width, length);
+    const xOffset = width / -2;
+    const yOffset = height / -2;
+    const packer = new Packer(width - pageMargin * 2, height - pageMargin * 2);
 
     return [xOffset, yOffset, packer];
   } else {
@@ -42,27 +43,34 @@ export const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) =>
   const blocks = [];
 
   for (const geometry of geometries) {
-    const [width, length] = measureSize(geometry);
-    const [w, h] = [width + itemMargin * 2, length + itemMargin * 2];
+    const [width, height] = measureSize(geometry);
+    const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
     blocks.push({ w, h, geometry });
   }
 
-  blocks.sort((a, b) => b.h < a.h); // sort inputs for best results
+  // Place largest cells first
+  blocks.sort((a, b) => 0 - Math.max(a.w, a.h) + Math.max(b.w, b.h));
 
   packer.fit(blocks);
 
+  let minPoint = [Infinity, Infinity, 0];
+  let maxPoint = [-Infinity, -Infinity, 0];
+
   for (const { geometry, fit } of blocks) {
-    if (fit) {
+    if (fit && fit.used) {
       const [x, y] = measureOrigin(geometry);
-      const xo = fit.x - x + itemMargin + xOffset;
-      const yo = 0 - yOffset - ((fit.y - y) + itemMargin);
-      packedGeometries.push(toTransformedGeometry(translate([xo, yo, 0], geometry)));
+      const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
+      const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
+      minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
+      maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
+      const transformed = toTransformedGeometry(translate([xo, yo, 0], geometry));
+      packedGeometries.push(transformed);
     } else {
       unpackedGeometries.push(geometry);
     }
   }
 
-  return [packedGeometries, unpackedGeometries];
+  return [packedGeometries, unpackedGeometries, minPoint, maxPoint];
 };
 
 export default pack;

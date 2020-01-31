@@ -20,7 +20,7 @@ const metricSizeAndLength = seq(metricSize.skip(word('x')), metricLength).map(([
 const size = alt(nominalSizeAndLength, metricSizeAndLength);
 
 const driveStyle = alt(word('slotted'),
-                       word('Phillips'),
+                       word('phillips'), // Phillips
                        word('square')
 ).map((driveStyle) => ({ driveStyle }));
 
