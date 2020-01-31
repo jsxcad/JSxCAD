@@ -93,7 +93,7 @@ export const listFiles = async ({ project } = {}) => {
   if (project === undefined) {
     project = getFilesystem();
   }
-  const prefix = qualifyPath('', project) + '/';
+  const prefix = qualifyPath('', project);
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {

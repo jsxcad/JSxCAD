@@ -302,7 +302,7 @@ let base;
 
 const getBase = () => base;
 
-const qualifyPath = (path, project) => `jsxcad/${project || getBase() || ''}${path}`;
+const qualifyPath = (path, project) => `jsxcad/${project + '/' || getBase() || '/'}${path}`;
 
 const setupFilesystem = ({ fileBase }) => {
   // A prefix used to partition the persistent filesystem for multiple projects.
@@ -3276,7 +3276,7 @@ const listFiles$1 = async ({ project } = {}) => {
   if (project === undefined) {
     project = getFilesystem();
   }
-  const prefix = qualifyPath('', project) + '/';
+  const prefix = qualifyPath('', project);
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {
