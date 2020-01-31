@@ -15,6 +15,7 @@ export const readProject = async (gistId, { project }) => {
   if (files === undefined) return;
   for (const path of Object.keys(files)) {
     const file = files[path];
+    // FIX: An oversize file will have file.content === '' and be silently ignored.
     if (file && file.content) {
       await writeFile({ project }, `source/${path}`, file.content);
     }

@@ -84920,7 +84920,7 @@ const readProject$1 = async (gistId, {
   if (files === undefined) return;
 
   for (const path of Object.keys(files)) {
-    const file = files[path];
+    const file = files[path]; // FIX: An oversize file will have file.content === '' and be silently ignored.
 
     if (file && file.content) {
       await writeFile({
