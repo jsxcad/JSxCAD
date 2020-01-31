@@ -302,6 +302,8 @@ let base;
 
 const getBase = () => base;
 
+const qualifyPath = (path, project) => `jsxcad/${project || getBase() || ''}${path}`;
+
 const setupFilesystem = ({ fileBase }) => {
   // A prefix used to partition the persistent filesystem for multiple projects.
   if (fileBase !== undefined) {
@@ -335,10 +337,10 @@ const getFile = async (options, unqualifiedPath) => {
   if (typeof unqualifiedPath !== 'string') {
     throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
   }
-  const path = `${getBase()}${unqualifiedPath}`;
+  const path = qualifyPath(unqualifiedPath);
   let file = files.get(path);
   if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: `jsxcad/${path}` };
+    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
     files.set(path, file);
     for (const watcher of fileCreationWatchers) {
       await watcher(options, file);
@@ -347,14 +349,20 @@ const getFile = async (options, unqualifiedPath) => {
   return file;
 };
 
+const listFiles = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
 const deleteFile = async (options, unqualifiedPath) => {
-  const path = `${getBase()}${unqualifiedPath}`;
+  const path = qualifyPath(unqualifiedPath);
   let file = files.get(path);
   if (file !== undefined) {
     files.delete(path);
   } else {
     // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: `jsxcad/${path}` };
+    file = { path: unqualifiedPath, storageKey: path };
   }
   for (const watcher of fileDeletionWatchers) {
     await watcher(options, file);
@@ -3215,13 +3223,21 @@ const getFileLister = async () => {
         }
       };
       await walk('jsxcad/');
+      listFiles(qualifiedPaths);
       return qualifiedPaths;
     };
   } else if (isBrowser) {
-    return async () => {
-      const qualifiedPaths = new Set(await localforage.keys());
+    if (getFilesystem() === undefined) {
+      const qualifiedPaths = new Set();
+      listFiles(qualifiedPaths);
       return qualifiedPaths;
-    };
+    } else {
+      return async () => {
+        const qualifiedPaths = new Set(await localforage.keys());
+        listFiles(qualifiedPaths);
+        return qualifiedPaths;
+      };
+    }
   } else {
     throw Error('die');
   }
@@ -3254,14 +3270,11 @@ const listFilesystems = async () => {
   return [...filesystems];
 };
 
-const listFiles = async ({ project } = {}) => {
+const listFiles$1 = async ({ project } = {}) => {
   if (project === undefined) {
     project = getFilesystem();
   }
-  if (project === undefined) {
-    return [];
-  }
-  const prefix = `jsxcad/${project}/`;
+  const prefix = qualifyPath('', project) + '/';
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {
@@ -3373,15 +3386,15 @@ const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
 
 const { promises: promises$1 } = fs;
 
-const getFileDeleter = async (prefix) => {
+const getFileDeleter = async () => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises$1.unlink(`${prefix}${path}`);
+      return promises$1.unlink(qualifyPath(path));
     };
   } else if (isBrowser) {
     return async (path) => {
-      await localforage.removeItem(`${prefix}${path}`);
+      await localforage.removeItem(qualifyPath(path));
     };
   } else {
     throw Error('die');
@@ -3392,9 +3405,8 @@ const deleteFile$1 = async (options, path) => {
   if (isWebWorker) {
     return self.ask({ deleteFile: { options, path } });
   }
-  const deleter = await getFileDeleter('jsxcad/');
-  const base = getBase();
-  await deleter(`${base}${path}`);
+  const deleter = await getFileDeleter();
+  await deleter(path);
   await deleteFile(options, path);
 };
 
@@ -8282,10 +8294,7 @@ const { promises: promises$2 } = fs;
 
 const writeFile = async (options, path, data) => {
   data = await data;
-  if (path.endsWith('[object Set]')) {
-    throw Error('die');
-  }
-
+  // FIX: Should be checking for a proxy fs, not webworker.
   if (isWebWorker) {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   }
@@ -8312,7 +8321,7 @@ const writeFile = async (options, path, data) => {
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
-    const persistentPath = `jsxcad/${base}${path}`;
+    const persistentPath = qualifyPath(path);
     if (isNode) {
       try {
         await promises$2.mkdir(dirname(persistentPath), { recursive: true });
@@ -8321,7 +8330,6 @@ const writeFile = async (options, path, data) => {
       try {
         await promises$2.writeFile(persistentPath, data);
       } catch (error) {
-        console.log(`QQ/writeFile/error: ${error.toString()}`);
       }
     } else if (isBrowser) {
       await localforage.setItem(persistentPath, fromByteArray_1(data));
@@ -8346,15 +8354,15 @@ const getUrlFetcher = async () => {
   }
 };
 
-const getFileFetcher = async (prefix) => {
+const getFileFetcher = async (qualify = qualifyPath) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises$3.readFile(`${prefix}${path}`);
+      return promises$3.readFile(qualify(path));
     };
   } else if (isBrowser) {
     return async (path) => {
-      const data = await localforage.getItem(`${prefix}${path}`);
+      const data = await localforage.getItem(qualify(path));
       if (data !== null) {
         return new Uint8Array(toByteArray_1(data));
       }
@@ -8369,8 +8377,8 @@ const fetchPersistent = async (path) => {
   try {
     const base = getBase();
     if (base !== undefined) {
-      const fetchFile = await getFileFetcher('jsxcad/');
-      const data = await fetchFile(`${base}${path}`);
+      const fetchFile = await getFileFetcher();
+      const data = await fetchFile(path);
       return data;
     }
   } catch (e) {
@@ -8384,7 +8392,7 @@ const fetchPersistent = async (path) => {
 // Fetch from external sources.
 const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher('');
+  const fetchFile = await getFileFetcher(path => path);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
@@ -8454,4 +8462,4 @@ const readFile = async (options, path) => {
   }
 };
 
-export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles, listFilesystems, log, onBoot, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
