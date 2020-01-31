@@ -1,5 +1,5 @@
-import { outline } from './jsxcad-geometry-z0surface-boolean.js';
 import { fromSvgPath } from './jsxcad-convert-svg.js';
+import { outline } from './jsxcad-geometry-z0surface-boolean.js';
 import { scale } from './jsxcad-geometry-tagged.js';
 
 /*! https://mths.be/codepointat v0.2.0 by @mathias */

@@ -1,8 +1,8 @@
 import Shape from './jsxcad-api-v1-shape.js';
 import { staticDisplay } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
-export * from './jsxcad-api-v1.js';
-export * from './jsxcad-api-v1-font.js';
+import * as v1 from './jsxcad-api-v1.js';
+import { boot } from './jsxcad-sys.js';
 
 /* global document */
 
@@ -52,3 +52,19 @@ Shape.prototype.bigView = bigViewMethod;
 Shape.prototype.topView = topViewMethod;
 Shape.prototype.bigTopView = bigTopViewMethod;
 Shape.prototype.frontView = frontViewMethod;
+
+/**
+ *
+ * Defines the interface used by the api to access the rest of the system on
+ * behalf of a user. e.g., algorithms and geometries.
+ *
+ * A user can destructively update this mapping in their code to change what
+ * the api uses.
+ */
+
+const api = async () => {
+  await boot();
+  return v1;
+};
+
+export { api };
