@@ -1,9 +1,12 @@
 import { rotateZ, scale } from '@jsxcad/geometry-surface';
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
+import { boot } from '@jsxcad/sys';
 import { canonicalize } from './canonicalize';
 import { intersection } from './intersection';
 import test from 'ava';
+
+test.beforeEach(async t => { await boot(); });
 
 test('Simple', t => {
   const surface = intersection({ assembly: [{ z0Surface: [unitSquarePolygon] }] },

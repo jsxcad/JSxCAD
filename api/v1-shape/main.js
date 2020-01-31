@@ -2,7 +2,6 @@ import './as';
 import './add';
 import './clip';
 import './cut';
-import './defragment';
 import './faces';
 import './measureCenter';
 import './openEdges';

@@ -1,12 +1,10 @@
 import { Shape, layer } from '@jsxcad/api-v1-shape';
-import { clean, makeConvex } from '@jsxcad/geometry-surface';
-import { getAnySurfaces, getPlans, getSolids } from '@jsxcad/geometry-tagged';
+import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { clean as z0Clean } from '@jsxcad/geometry-z0surface-boolean';
-import { makeWatertight } from '@jsxcad/geometry-solid';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { makeConvex } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from '@jsxcad/geometry-path';
 
@@ -68,7 +66,7 @@ export const section = (solidShape, ...connectors) => {
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
     const sections = bspSection(solid, planeSurfaces, normalize);
     const surfaces = sections.map(section => makeConvex(section, normalize));
-    // const surfaces = sections.map(section => z0Clean(section, normalize));
+    // const surfaces = sections.map(section => outlineSurface(section, normalize));
     // const surfaces = sections.map(section => section);
     // const surfaces = sections;
     for (let i = 0; i < surfaces.length; i++) {
@@ -81,16 +79,5 @@ export const section = (solidShape, ...connectors) => {
 
 const sectionMethod = function (...args) { return section(this, ...args); };
 Shape.prototype.section = sectionMethod;
-
-export const cleanOp = (shape) => {
-  const shapes = [];
-  const normalize3 = createNormalize3();
-  for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
-    shapes.push(Shape.fromGeometry({ paths: z0Clean(surface || z0Surface, normalize3) }));
-  }
-  return layer(...shapes);
-};
-const cleanMethod = function (...args) { return cleanOp(this, ...args); };
-Shape.prototype.clean = cleanMethod;
 
 export default section;

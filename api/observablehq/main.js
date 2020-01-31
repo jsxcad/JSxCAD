@@ -9,5 +9,11 @@
 
 import './view';
 
-export * from '@jsxcad/api-v1';
-export * from '@jsxcad/api-v1-font';
+import * as v1 from '@jsxcad/api-v1';
+
+import { boot } from '@jsxcad/sys';
+
+export const api = async () => {
+  await boot();
+  return v1;
+};

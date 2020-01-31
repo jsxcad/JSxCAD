@@ -22,7 +22,7 @@ export const difference = (a, ...z0Surfaces) => {
           clipType: ClipType.Difference,
           subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
           clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
-          subjectFillType: PolyFillType.NonZero
+          subjectFillType: PolyFillType.Positive
         });
       a = toSurface(result, normalize);
     }

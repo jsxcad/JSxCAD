@@ -2,7 +2,7 @@ import { flip, isCounterClockwise } from '@jsxcad/geometry-path';
 import { getPaths, getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
-import { clean } from '@jsxcad/geometry-z0surface-boolean';
+import { outline } from '@jsxcad/geometry-z0surface-boolean';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export const squash = (shape) => {
@@ -17,7 +17,7 @@ export const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.layers.push({ z0Surface: clean(polygons) });
+    result.layers.push({ z0Surface: outline(polygons) });
   }
   for (const { surface } of getSurfaces(geometry)) {
     const polygons = [];

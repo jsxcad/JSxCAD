@@ -1,7 +1,7 @@
 import {
   NativeClipperLibRequestedFormat,
   loadNativeClipperLibInstanceAsync
-} from 'js-angusj-clipper/web';
+} from './js-angusj-clipperjs-web/index.js';
 
 import {
   onBoot
@@ -26,6 +26,6 @@ export function IntPoint (x, y) {
   this.y = y;
 };
 
-export { ClipType, PolyFillType, PolyTree } from 'js-angusj-clipper/web';
+export { ClipType, PolyFillType, PolyTree } from './js-angusj-clipperjs-web/index.js';
 
 onBoot(setup);

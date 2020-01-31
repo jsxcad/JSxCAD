@@ -27,7 +27,7 @@ export const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
           subjectInputs: [{ data: fromOpenPaths(a, normalize), closed: false },
                           { data: fromClosedPaths(a, normalize), closed: true }],
           clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
-          subjectFillType: PolyFillType.NonZero
+          subjectFillType: PolyFillType.Positive
         });
       a = toPaths(clipper, result, normalize);
     }

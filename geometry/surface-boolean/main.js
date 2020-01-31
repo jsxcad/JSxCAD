@@ -1,11 +1,11 @@
-import { clean } from './clean';
 import { difference } from './difference';
 import { intersection } from './intersection';
+import { outline } from './outline';
 import { union } from './union';
 
 export {
-  clean,
   difference,
   intersection,
+  outline,
   union
 };

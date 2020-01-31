@@ -39,6 +39,6 @@ const bootstrap = async () => {
   self.ask = ask;
   onmessage = ({ data }) => hear(data);
   if (onmessage === undefined) throw Error('die');
-}
+};
 
 bootstrap();

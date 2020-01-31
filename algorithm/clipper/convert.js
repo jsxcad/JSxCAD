@@ -1,5 +1,7 @@
-import { IntPoint, PolyFillType, clipper } from './clipper-lib';
+import { IntPoint, PolyFillType } from './clipper-lib';
 import { isClosed, isOpen } from '@jsxcad/geometry-path';
+
+import { toPlane } from '@jsxcad/math-poly3';
 
 // CHECK: Should this be sqrt(2)?
 export const CLEAN_DISTANCE = 1;
@@ -11,8 +13,17 @@ const toFloat = (integer) => integer / RESOLUTION;
 
 export const fillType = PolyFillType.pftNonZero;
 
+/*
 export const fromSurface = (surface, normalize) =>
   surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
+*/
+
+export const fromSurface = (surface, normalize) => {
+  const normalized = surface.map(path => path.map(normalize));
+  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const filtered = scaled.filter(path => toPlane(path) !== undefined);
+  return filtered.map(path => path.map(([X, Y]) => new IntPoint(X, Y)));
+};
 
 export const fromClosedPath = (path, normalize) => {
   const closedPath = [];
@@ -20,7 +31,7 @@ export const fromClosedPath = (path, normalize) => {
     const [x, y] = normalize(path[i]);
     closedPath.push(new IntPoint(toInt(x), toInt(y)));
   }
-  const entry = { data: clipper.cleanPolygon(closedPath, CLEAN_DISTANCE), closed: true };
+  const entry = { data: closedPath, closed: true };
   return entry;
 };
 
@@ -48,7 +59,7 @@ export const fromClosedPaths = (paths, normalize) => {
         const [x, y] = normalize(path[i]);
         closedPath.push(new IntPoint(toInt(x), toInt(y)));
       }
-      closedPaths.push(clipper.simplifyPolygon(closedPath, CLEAN_DISTANCE));
+      closedPaths.push(closedPath);
     }
   }
   return closedPaths;

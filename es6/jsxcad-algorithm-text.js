@@ -1,4 +1,4 @@
-import { clean } from './jsxcad-geometry-z0surface-boolean.js';
+import { outline } from './jsxcad-geometry-z0surface-boolean.js';
 import { fromSvgPath } from './jsxcad-convert-svg.js';
 import { scale } from './jsxcad-geometry-tagged.js';
 
@@ -15652,8 +15652,8 @@ const toFont = (options = {}, bytes) => {
                           });
     const pathsets = [];
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
-      // Cleaning forces the first path to not be a hole.
-      pathsets.push(clean(paths));
+      // Outlining forces re-orientation.
+      pathsets.push(outline(paths));
     }
     return scale([factor, factor, factor], { assembly: pathsets.map(pathset => ({ z0Surface: pathset })) });
   };

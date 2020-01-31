@@ -4,9 +4,9 @@ import { subtract, scale as scale$1, dot, add, distance } from './jsxcad-math-ve
 import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
-import { clean as clean$1, union } from './jsxcad-geometry-z0surface-boolean.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
+import { union, outline as outline$1 } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
 const canonicalize = (surface) => surface.map(canonicalize$1);
@@ -251,18 +251,6 @@ const assertGood = (surface) => {
   }
 };
 
-const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
-
-const transform$1 = cacheTransform(transformImpl);
-
-const clean = (surface, normalize = createNormalize3(), plane = toPlane(surface)) => {
-  // FIX: Detect when the surfaces aren't in the same plane.
-  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize)));
-  const cleanedZ0Surface = clean$1(z0Surface, normalize);
-  return transform$1(fromZ0, cleanedZ0Surface).map(path => path.map(normalize));
-};
-
 const eachPoint = (thunk, surface) => {
   for (const polygon of surface) {
     for (const [x = 0, y = 0, z = 0] of polygon) {
@@ -373,6 +361,18 @@ const measureBoundingSphere = (surface) => {
   return surface.measureBoundingSphere;
 };
 
+const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
+
+const transform$1 = cacheTransform(transformImpl);
+
+const outline = (surface, normalize = createNormalize3(), plane = toPlane(surface)) => {
+  // FIX: Detect when the surfaces aren't in the same plane.
+  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
+  const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize)));
+  const outlinedZ0Surface = outline$1(z0Surface, normalize);
+  return transform$1(fromZ0, outlinedZ0Surface).map(path => path.map(normalize));
+};
+
 const toGeneric = (surface) => surface.map(path => path.map(point => [...point]));
 
 const toPoints = (surface) => {
@@ -383,4 +383,4 @@ const toPoints = (surface) => {
 
 const toPolygons = (options = {}, surface) => surface;
 
-export { assertCoplanar, assertGood, canonicalize, clean, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, outline, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

@@ -26,7 +26,7 @@ export const intersection = (a, ...z0Surfaces) => {
           clipType: ClipType.Intersection,
           subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
           clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
-          subjectFillType: PolyFillType.NonZero
+          subjectFillType: PolyFillType.Positive
         });
       a = toSurface(result, normalize);
     }

@@ -1,9 +1,12 @@
 import { unitCubePolygons, unitGeodesicSphere20Polygons } from '@jsxcad/data-shape';
 
+import { boot } from '@jsxcad/sys';
 import { buildConvexMinkowskiSum } from './buildConvexMinkowskiSum';
 import { canonicalize } from '@jsxcad/geometry-tagged';
 import test from 'ava';
 import { toPoints } from '@jsxcad/geometry-surface';
+
+test.beforeEach(async t => { await boot(); });
 
 test('Minkowski sum of a cube and a sphere.', t => {
   const solid = buildConvexMinkowskiSum(toPoints(unitCubePolygons),

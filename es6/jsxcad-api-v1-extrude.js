@@ -8,9 +8,9 @@ import { intersectionOfPathsBySurfaces } from './jsxcad-algorithm-clipper.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { clean } from './jsxcad-geometry-z0surface-boolean.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
@@ -400,7 +400,7 @@ const section = (solidShape, ...connectors) => {
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
     const sections = section$1(solid, planeSurfaces, normalize);
     const surfaces = sections.map(section => makeConvex(section, normalize));
-    // const surfaces = sections.map(section => z0Clean(section, normalize));
+    // const surfaces = sections.map(section => outlineSurface(section, normalize));
     // const surfaces = sections.map(section => section);
     // const surfaces = sections;
     for (let i = 0; i < surfaces.length; i++) {
@@ -414,17 +414,6 @@ const section = (solidShape, ...connectors) => {
 const sectionMethod = function (...args) { return section(this, ...args); };
 Shape.prototype.section = sectionMethod;
 
-const cleanOp = (shape) => {
-  const shapes = [];
-  const normalize3 = createNormalize3();
-  for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
-    shapes.push(Shape.fromGeometry({ paths: clean(surface || z0Surface, normalize3) }));
-  }
-  return layer(...shapes);
-};
-const cleanMethod = function (...args) { return cleanOp(this); };
-Shape.prototype.clean = cleanMethod;
-
 const squash = (shape) => {
   const geometry = shape.toKeptGeometry();
   const result = { layers: [] };
@@ -437,7 +426,7 @@ const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.layers.push({ z0Surface: clean(polygons) });
+    result.layers.push({ z0Surface: outline$2(polygons) });
   }
   for (const { surface } of getSurfaces(geometry)) {
     const polygons = [];
