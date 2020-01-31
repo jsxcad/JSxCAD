@@ -16,7 +16,11 @@ export default {
   },
   plugins: [
     builtins(),
-    commonjs(),
+    commonjs({
+      namedExports: {
+        './clipper.js': ['Clipper', 'ClipType', 'IntPoint', 'PolyFillType', 'PolyTree', 'PolyType']
+      }
+    }),
     globals(),
     nodeResolve({ preferBuiltins: true }),
     { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }

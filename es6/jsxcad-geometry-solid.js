@@ -1,5 +1,5 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, clean as clean$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 export { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { deduplicate, getEdges } from './jsxcad-geometry-path.js';
@@ -29,8 +29,6 @@ const assertGood = (solid) => {
 };
 
 const canonicalize = (solid) => solid.map(canonicalize$1);
-
-const clean = (solid) => solid.map(clean$1);
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 const measureBoundingBox = (solid) => {
@@ -245,7 +243,7 @@ const makeWatertight = (solid, normalize = createNormalize3()) => {
       watertightSolid.push(watertightPaths);
     }
     // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure convexity.
+    // We just need to ensure triangulation to support deformation.
 
     solid[watertight] = watertightSolid;
   }
@@ -267,6 +265,8 @@ const measureBoundingSphere = (solid) => {
   return solid.boundingSphere;
 };
 
+const outline = (solid) => solid.map(outline$1);
+
 const toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));
 
 const toPoints = (solid) => {
@@ -284,4 +284,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, clean, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, makeWatertight, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };

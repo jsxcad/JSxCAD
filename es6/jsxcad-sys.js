@@ -282,6 +282,21 @@ const setHandleAskUser = (handler) => {
   handleAskUser = handler;
 };
 
+const tasks = [];
+
+// Add task to complete before using system.
+// Note: These are expected to be idempotent.
+const onBoot = (op) => {
+  tasks.push(op);
+};
+
+// Execute tasks to complete before using system.
+const boot = async () => {
+  for (const task of tasks) {
+    await task();
+  }
+};
+
 // When base is undefined the persistent filesystem is disabled.
 let base;
 
@@ -8439,4 +8454,4 @@ const readFile = async (options, path) => {
   }
 };
 
-export { addSource, ask, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles, listFilesystems, log, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles, listFilesystems, log, onBoot, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };

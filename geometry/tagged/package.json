@@ -34,6 +34,7 @@
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",

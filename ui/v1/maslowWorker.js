@@ -134,7 +134,13 @@ const agent = async ({ ask, question }) => {
     return -1;
   }
 };
-const { ask, hear } = sys.conversation({ agent, say });
-self.ask = ask;
-onmessage = ({ data }) => hear(data);
-if (onmessage === undefined) throw Error('die');
+
+const bootstrap = async () => {
+  await sys.boot();
+  const { ask, hear } = sys.conversation({ agent, say });
+  self.ask = ask;
+  onmessage = ({ data }) => hear(data);
+  if (onmessage === undefined) throw Error('die');
+};
+
+bootstrap();

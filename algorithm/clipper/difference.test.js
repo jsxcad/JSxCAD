@@ -1,9 +1,9 @@
 import { canonicalize, transform } from '@jsxcad/geometry-paths';
 
+import { boot } from '@jsxcad/sys';
 import { degToRad } from '@jsxcad/math-utils';
 import { difference } from './difference';
 import { fromZRotation } from '@jsxcad/math-mat4';
-// import polygonClipping from 'polygon-clipping';
 import test from 'ava';
 
 // FIX: Check multipolygon construction against example/v1/squares*.js
@@ -12,6 +12,8 @@ const squares = [[[-0.5, -0.5, 0], [0.5, -0.5, 0], [0.5, 0.5, 0], [-0.5, 0.5, 0]
                  [[1.5, -0.5, 0], [2, -0.5, 0], [2, 0.5, 0], [1.5, 0.5, 0]]];
 
 const rectangle = [[[0, 0, 0], [2, 0, 0], [2, 1, 0], [0, 1, 0]]];
+
+test.beforeEach(async t => { await boot(); });
 
 test('difference: Difference of one geometry produces that geometry', t => {
   t.deepEqual(difference(rectangle), rectangle);

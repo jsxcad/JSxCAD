@@ -762,8 +762,7 @@ const intersection = (...solids) => {
   return fromPolygons$1({}, s[0], normalize);
 };
 
-const section = (solid, surfaces) => {
-  const normalize = createNormalize3();
+const section = (solid, surfaces, normalize) => {
   const bsp = fromSolid(alignVertices(solid, normalize), normalize);
   return surfaces.map(surface => removeExteriorPolygons(bsp, surface, normalize));
 };

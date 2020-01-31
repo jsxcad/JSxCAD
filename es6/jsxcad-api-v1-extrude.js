@@ -9,12 +9,12 @@ import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
-import { clean } from './jsxcad-geometry-z0surface-boolean.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 /**
  *
@@ -396,9 +396,13 @@ const section = (solidShape, ...connectors) => {
   const planes = connectors.map(toPlane);
   const planeSurfaces = planes.map(toSurface);
   const shapes = [];
+  const normalize = createNormalize3();
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-    const sections = section$1(solid, planeSurfaces);
-    const surfaces = sections.map(section => makeConvex(section));
+    const sections = section$1(solid, planeSurfaces, normalize);
+    const surfaces = sections.map(section => makeConvex(section, normalize));
+    // const surfaces = sections.map(section => outlineSurface(section, normalize));
+    // const surfaces = sections.map(section => section);
+    // const surfaces = sections;
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
@@ -422,7 +426,7 @@ const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.layers.push({ z0Surface: clean(polygons) });
+    result.layers.push({ z0Surface: outline$2(polygons) });
   }
   for (const { surface } of getSurfaces(geometry)) {
     const polygons = [];

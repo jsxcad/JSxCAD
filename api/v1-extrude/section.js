@@ -3,6 +3,7 @@ import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
 import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from '@jsxcad/geometry-path';
@@ -61,9 +62,13 @@ export const section = (solidShape, ...connectors) => {
   const planes = connectors.map(toPlane);
   const planeSurfaces = planes.map(toSurface);
   const shapes = [];
+  const normalize = createNormalize3();
   for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
-    const sections = bspSection(solid, planeSurfaces);
-    const surfaces = sections.map(section => makeConvex(section));
+    const sections = bspSection(solid, planeSurfaces, normalize);
+    const surfaces = sections.map(section => makeConvex(section, normalize));
+    // const surfaces = sections.map(section => outlineSurface(section, normalize));
+    // const surfaces = sections.map(section => section);
+    // const surfaces = sections;
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
       shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));

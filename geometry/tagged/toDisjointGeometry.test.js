@@ -1,9 +1,12 @@
 import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
 
+import { boot } from '@jsxcad/sys';
 import { canonicalize } from './canonicalize';
 import { rotateZ } from '@jsxcad/geometry-surface';
 import test from 'ava';
 import { toDisjointGeometry } from './toDisjointGeometry';
+
+test.beforeEach(async t => { await boot(); });
 
 test('Simple', t => {
   const disjoint = toDisjointGeometry({ assembly: [{ z0Surface: [unitSquarePolygon], tags: ['a'] },

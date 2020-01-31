@@ -53,7 +53,7 @@ export const makeWatertight = (solid, normalize = createNormalize3()) => {
     };
 
     // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure convexity.
+    // We just need to ensure triangulation to support deformation.
 
     solid[watertight] = watertightSolid;
   }

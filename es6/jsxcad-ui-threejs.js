@@ -52759,7 +52759,7 @@ const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
 const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
-  const camera = new PerspectiveCamera(27, width / height, 1, 3500);
+  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.lookAt(...target);
