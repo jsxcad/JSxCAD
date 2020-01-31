@@ -45,9 +45,11 @@ const getFileLister = async () => {
     };
   } else if (isBrowser) {
     if (getFilesystem() === undefined) {
-      const qualifiedPaths = new Set();
-      listEphemeralFiles(qualifiedPaths);
-      return qualifiedPaths;
+      return async () => {
+        const qualifiedPaths = new Set();
+        listEphemeralFiles(qualifiedPaths);
+        return qualifiedPaths;
+      };
     } else {
       return async () => {
         const qualifiedPaths = new Set(await localForage.keys());

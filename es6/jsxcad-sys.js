@@ -3228,9 +3228,11 @@ const getFileLister = async () => {
     };
   } else if (isBrowser) {
     if (getFilesystem() === undefined) {
-      const qualifiedPaths = new Set();
-      listFiles(qualifiedPaths);
-      return qualifiedPaths;
+      return async () => {
+        const qualifiedPaths = new Set();
+        listFiles(qualifiedPaths);
+        return qualifiedPaths;
+      };
     } else {
       return async () => {
         const qualifiedPaths = new Set(await localforage.keys());
