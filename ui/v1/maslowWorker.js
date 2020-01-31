@@ -3,7 +3,6 @@
 import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
-
 import { intersection, union } from '@jsxcad/api-v1-shape';
 import { clearCache } from '@jsxcad/cache';
 import { hull } from '@jsxcad/api-v1-extrude';
@@ -13,9 +12,10 @@ import { toSvg } from '@jsxcad/convert-svg';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
-  console.log('This ran');
+  
   try {
     var { key, values } = question;
+    console.log('Thread doing: ' + key);
     clearCache();
     switch (key) {
       case 'assemble':
@@ -93,7 +93,7 @@ const agent = async ({ ask, question }) => {
           const intermediate = api.Shape.fromGeometry(values[0]);
           fromGeo = intermediate.with(intermediate.wireframe());
         } else {
-          fromGeo = api.Shape.fromGeometry([]); // This should be an empty geometry
+          fromGeo = api.Empty(); // This should be an empty geometry
         }
         return convertThree.toThreejsGeometry(fromGeo.toDisjointGeometry());
       case 'rotate':
@@ -117,11 +117,12 @@ const agent = async ({ ask, question }) => {
       case 'tag':
         return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
       case 'specify':
-        return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
+        console.log(api.Shape.fromGeometry(values[0]));
+        return api.Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
       case 'translate':
         return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();
       case 'getBOM':
-        return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
+        return api.Shape.fromGeometry(values[0]).bom();
       case 'union':
         return union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       default:
