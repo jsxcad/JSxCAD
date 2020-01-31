@@ -509,8 +509,9 @@ const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
 
 Line.signature = 'Line(length:number) -> Shape';
 
-const fromPoint = (point) => Shape.fromPoint(point);
-const Point = (point) => fromPoint(point);
+const fromPoint = (x = 0, y = 0, z = 0) => Shape.fromPoint([x, y, z]);
+const Point = (...args) => fromPoint(...args);
+Point.fromPoint = fromPoint;
 
 Point.signature = 'Point(point:Point) -> Shape';
 

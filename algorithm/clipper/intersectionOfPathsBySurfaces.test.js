@@ -1,5 +1,8 @@
+import { boot } from '@jsxcad/sys';
 import { intersectionOfPathsBySurfaces } from './intersectionOfPathsBySurfaces';
 import test from 'ava';
+
+test.beforeEach(async t => { await boot(); });
 
 test('Line vs Square', t => {
   const paths = intersectionOfPathsBySurfaces([[null, [0, 0, 0], [20, 20, 0]]],

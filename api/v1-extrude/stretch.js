@@ -42,7 +42,7 @@ export const stretch = (shape, length, connector = Z()) => {
       continue;
     }
     const bottom = cutOpen(solid, planeSurface);
-    const profile = section(solid, planeSurface);
+    const [profile] = section(solid, [planeSurface]);
     const top = cutOpen(solid, flip(planeSurface));
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
     const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, 1, 0, false);

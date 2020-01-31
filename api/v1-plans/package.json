@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-v1-font": "^0.0.79",
+    "@jsxcad/api-v1-item": "^0.0.79",
     "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/api-v1-plan": "^0.0.79",

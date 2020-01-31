@@ -1,4 +1,4 @@
-import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, ask } from './jsxcad-sys.js';
+import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
 import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls, drawHud } from './jsxcad-ui-threejs.js';
@@ -84920,7 +84920,7 @@ const readProject$1 = async (gistId, {
   if (files === undefined) return;
 
   for (const path of Object.keys(files)) {
-    const file = files[path];
+    const file = files[path]; // FIX: An oversize file will have file.content === '' and be silently ignored.
 
     if (file && file.content) {
       await writeFile({
@@ -88141,6 +88141,8 @@ const installUi = async ({
   project,
   sha
 }) => {
+  await boot();
+
   if (project !== '') {
     await setupFilesystem({
       fileBase: project

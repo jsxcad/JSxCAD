@@ -52270,6 +52270,12 @@ const loadTexture = (url) =>
   });
 
 const materialProperties = {
+  cardboard: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/cardboard.png'
+  },
   paper: {
     roughness: 0.5,
     metalness: 0.0,
@@ -52279,13 +52285,14 @@ const materialProperties = {
   wood: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5,
+    reflectivity: 0.0,
     map: 'https://jsxcad.js.org/texture/wood.png'
   },
   plastic: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5
+    reflectivity: 0.0,
+    map: 'https://jsxcad.js.org/texture/plastic.png'
   },
   leaves: {
     roughness: 0.5,
@@ -52323,13 +52330,37 @@ const materialProperties = {
     reflectivity: 0.5,
     map: 'https://jsxcad.js.org/texture/rock.png'
   },
-  'steel': {
+  steel: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.5, // was 0.9
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
+  },
+  thread: {
     roughness: 0.5,
     metalness: 0.5,
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
-    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
+    map: 'https://jsxcad.js.org/texture/thread.png'
+  },
+  aluminium: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/aluminium.png'
+  },
+  brass: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/brass.png'
   },
   copper: {
     roughness: 0.5,
@@ -52569,9 +52600,11 @@ const PLAN_LAYER = 1;
 const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
-    threejsGeometry.assembly.forEach(threejsGeometry => buildMeshes({ datasets, threejsGeometry, scene, layer }));
+    for (const subGeometry of threejsGeometry.assembly) {
+      await buildMeshes({ datasets, threejsGeometry: subGeometry, scene, layer });
+    }
   } else if (threejsGeometry.item) {
-    buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
+    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
   } else if (threejsGeometry.threejsSegments) {
     const segments = threejsGeometry.threejsSegments;
     const dataset = {};
@@ -52614,8 +52647,8 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
     scene.add(dataset.mesh);
     datasets.push(dataset);
   } else if (threejsGeometry.threejsPlan) {
-    buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
-    buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
+    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
+    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
   }
 };
 
@@ -52729,10 +52762,10 @@ const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
   return { resize };
 };
 
-const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) => {
+const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
-  const camera = new PerspectiveCamera(27, width / height, 1, 3500);
+  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
   camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.lookAt(...target);
@@ -52754,7 +52787,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
     scene.add(grid);
   }
 
-  const ambientLight = new AmbientLight(0xffffff, 0.75);
+  const ambientLight = new AmbientLight(0xffffff, 0.5);
   ambientLight.layers.set(0);
   scene.add(ambientLight);
 
@@ -52763,28 +52796,24 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
   light.layers.set(0);
   camera.add(light);
 
-  // const viewerElement = document.createElement('div');
-  // viewerElement.id = 'viewer';
-  // viewerElement.style.height = '100%';
-
-  const renderer = new WebGLRenderer({ antialias: true });
-  renderer.autoClear = false;
-  renderer.setSize(width, height);
-  renderer.setClearColor(0xFFFFFF);
-  renderer.antiAlias = false;
-  renderer.inputGamma = true;
-  renderer.outputGamma = true;
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  if (renderer === undefined) {
+    renderer = new WebGLRenderer({ antialias: true });
+    renderer.autoClear = false;
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xFFFFFF);
+    renderer.antiAlias = false;
+    renderer.inputGamma = true;
+    renderer.outputGamma = true;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  }
   const canvas = renderer.domElement;
-  // viewerElement.appendChild(renderer.domElement);
 
   const hudCanvas = document.createElement('canvas');
   hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
   hudCanvas.id = 'hudCanvas';
   hudCanvas.width = width;
   hudCanvas.height = height;
-  // viewerElement.appendChild(hudCanvas);
 
   return { camera, canvas, hudCanvas, renderer, scene };
 };
@@ -52792,7 +52821,30 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true }) 
 const GEOMETRY_LAYER$1 = 0;
 const PLAN_LAYER$1 = 1;
 
+let locked = false;
+const pending = [];
+
+const acquire = async () => {
+  if (locked) {
+    return new Promise((resolve, reject) => pending.push(resolve));
+  } else {
+    locked = true;
+  }
+};
+
+const release = async () => {
+  if (pending.length > 0) {
+    const resolve = pending.pop();
+    resolve(true);
+  } else {
+    locked = false;
+  }
+};
+
 const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
+  if (locked === true) await acquire();
+  locked = true;
+
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -52817,6 +52869,8 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   await buildMeshes({ datasets, threejsGeometry, scene });
 
   render();
+
+  await release();
 
   return { canvas, hudCanvas, renderer };
 };

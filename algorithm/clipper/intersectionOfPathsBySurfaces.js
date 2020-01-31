@@ -1,10 +1,8 @@
+import { ClipType, PolyFillType, clipper } from './clipper-lib';
 import { fromClosedPaths, fromOpenPaths, fromSurface, toPaths } from './convert';
 
-import ClipperLib from 'clipper-lib';
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import { doesNotOverlapOrAbut } from './doesNotOverlap';
-
-const { Clipper, ClipType, PolyType } = ClipperLib;
 
 /**
  * Produces a surface that is the intersection of all provided surfaces.
@@ -23,18 +21,15 @@ export const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       return [];
     } else {
-      const clipper = new Clipper();
-      const openPaths = fromOpenPaths(a, normalize);
-      if (openPaths.length > 0) {
-        clipper.AddPaths(openPaths, PolyType.ptSubject, false);
-      }
-      const closedPaths = fromClosedPaths(a, normalize);
-      if (closedPaths.length > 0) {
-        clipper.AddPaths(closedPaths, PolyType.ptSubject, true);
-      }
-      clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
-      // How do we tell which are open or closed?
-      a = toPaths(clipper, ClipType.ctIntersection, normalize);
+      const result = clipper.clipToPolyTree(
+        {
+          clipType: ClipType.Intersection,
+          subjectInputs: [{ data: fromOpenPaths(a, normalize), closed: false },
+                          { data: fromClosedPaths(a, normalize), closed: true }],
+          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
+          subjectFillType: PolyFillType.Positive
+        });
+      a = toPaths(clipper, result, normalize);
     }
   }
   return a;

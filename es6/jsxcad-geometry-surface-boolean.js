@@ -1,35 +1,8 @@
-import { clean as clean$1, difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-z0surface-boolean.js';
-import { toPlane as toPlane$1, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import { difference as difference$1, intersection as intersection$1, outline as outline$1, union as union$1 } from './jsxcad-geometry-z0surface-boolean.js';
 import { distance } from './jsxcad-math-vec3.js';
 import { measureBoundingSphere } from './jsxcad-geometry-surface.js';
-
-// FIX
-
-const toPlane = (surface) => {
-  if (surface.plane !== undefined) {
-    return surface.plane;
-  } else {
-    for (const polygon of surface) {
-      const plane = toPlane$1(polygon);
-      if (plane !== undefined) {
-        surface.plane = plane;
-        return surface.plane;
-      }
-    }
-    throw Error('die');
-  }
-};
-
-const transform = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
-
-const clean = (surface) => {
-  // FIX: Detect when the surfaces aren't in the same plane.
-  const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
-  const z0Surface = transform(toZ0, surface);
-  const cleanedZ0Surface = clean$1(z0Surface);
-  return transform(fromZ0, cleanedZ0Surface);
-};
+import { toPlane as toPlane$1, transform as transform$1 } from './jsxcad-math-poly3.js';
+import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -92,6 +65,25 @@ const equals = (a, b) => {
   return normalize4(a) === normalize4(b);
 };
 
+// FIX
+
+const toPlane = (surface) => {
+  if (surface.plane !== undefined) {
+    return surface.plane;
+  } else {
+    for (const polygon of surface) {
+      const plane = toPlane$1(polygon);
+      if (plane !== undefined) {
+        surface.plane = plane;
+        return surface.plane;
+      }
+    }
+    throw Error('die');
+  }
+};
+
+const transform = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
+
 const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
 
 const difference = (baseSurface, ...surfaces) => {
@@ -130,6 +122,14 @@ const intersection = (...surfaces) => {
   return transform(fromZ0, z0Surface);
 };
 
+const outline = (surface) => {
+  // FIX: Detect when the surfaces aren't in the same plane.
+  const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surface));
+  const z0Surface = transform(toZ0, surface);
+  const outlinedZ0Surface = outline$1(z0Surface);
+  return transform(fromZ0, outlinedZ0Surface);
+};
+
 const union = (...surfaces) => {
   // Trim initial empty surfaces.
   while (surfaces.length > 0 && surfaces[0].length === 0) {
@@ -152,4 +152,4 @@ const union = (...surfaces) => {
   return transform(fromZ0, z0Surface);
 };
 
-export { clean, difference, intersection, union };
+export { difference, intersection, outline, union };

@@ -14,6 +14,12 @@ const loadTexture = (url) =>
   });
 
 const materialProperties = {
+  cardboard: {
+    roughness: 0.5,
+    metalness: 0.0,
+    reflectivity: 0.5,
+    map: 'https://jsxcad.js.org/texture/cardboard.png'
+  },
   paper: {
     roughness: 0.5,
     metalness: 0.0,
@@ -23,13 +29,14 @@ const materialProperties = {
   wood: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5,
+    reflectivity: 0.0,
     map: 'https://jsxcad.js.org/texture/wood.png'
   },
   plastic: {
     roughness: 0.5,
     metalness: 0.0,
-    reflectivity: 0.5
+    reflectivity: 0.0,
+    map: 'https://jsxcad.js.org/texture/plastic.png'
   },
   leaves: {
     roughness: 0.5,
@@ -67,13 +74,37 @@ const materialProperties = {
     reflectivity: 0.5,
     map: 'https://jsxcad.js.org/texture/rock.png'
   },
-  'steel': {
+  steel: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.5, // was 0.9
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
+  },
+  thread: {
     roughness: 0.5,
     metalness: 0.5,
     reflectivity: 0.9,
     clearCoat: 1,
     clearCoatRoughness: 0,
-    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
+    map: 'https://jsxcad.js.org/texture/thread.png'
+  },
+  aluminium: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/aluminium.png'
+  },
+  brass: {
+    roughness: 0.5,
+    metalness: 0.5,
+    reflectivity: 0.9,
+    clearCoat: 1,
+    clearCoatRoughness: 0,
+    map: 'https://jsxcad.js.org/texture/brass.png'
   },
   copper: {
     roughness: 0.5,

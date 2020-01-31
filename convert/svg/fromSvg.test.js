@@ -1,9 +1,12 @@
+import { boot } from '@jsxcad/sys';
 import { fromSvg } from './fromSvg';
 import fs from 'fs';
 import test from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';
 
 const { readFile, writeFile } = fs.promises;
+
+test.beforeEach(async t => { await boot(); });
 
 test('Rectangle', async t => {
   const assembly = await fromSvg({},

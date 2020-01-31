@@ -2,7 +2,7 @@
 
 import * as fs from 'fs';
 
-import { getBase, getFilesystem, setupFilesystem } from './filesystem';
+import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { dirname } from 'path';
@@ -17,10 +17,7 @@ const { promises } = fs;
 
 export const writeFile = async (options, path, data) => {
   data = await data;
-  if (path.endsWith('[object Set]')) {
-    throw Error('die');
-  }
-
+  // FIX: Should be checking for a proxy fs, not webworker.
   if (isWebWorker) {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   }
@@ -47,7 +44,7 @@ export const writeFile = async (options, path, data) => {
 
   const base = getBase();
   if (!ephemeral && base !== undefined) {
-    const persistentPath = `jsxcad/${base}${path}`;
+    const persistentPath = qualifyPath(path);
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
@@ -56,7 +53,6 @@ export const writeFile = async (options, path, data) => {
       try {
         await promises.writeFile(persistentPath, data);
       } catch (error) {
-        console.log(`QQ/writeFile/error: ${error.toString()}`);
       }
     } else if (isBrowser) {
       await localForage.setItem(persistentPath, fromByteArray(data));

@@ -1,10 +1,8 @@
+import { ClipType, PolyFillType, clipper } from './clipper-lib';
 import { fromSurface, toSurface } from './convert';
 
-import ClipperLib from 'clipper-lib';
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import { doesNotOverlapOrAbut } from './doesNotOverlap';
-
-const { Clipper, ClipType, PolyType } = ClipperLib;
 
 export const difference = (a, ...z0Surfaces) => {
   if (a === undefined || a.length === 0) {
@@ -18,10 +16,15 @@ export const difference = (a, ...z0Surfaces) => {
     } else if (doesNotOverlapOrAbut(a, b)) {
       continue;
     } else {
-      const clipper = new Clipper();
-      clipper.AddPaths(fromSurface(a, normalize), PolyType.ptSubject, true);
-      clipper.AddPaths(fromSurface(b, normalize), PolyType.ptClip, true);
-      a = toSurface(clipper, ClipType.ctDifference, normalize);
+      // const clipper = new Clipper();
+      const result = clipper.clipToPaths(
+        {
+          clipType: ClipType.Difference,
+          subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
+          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
+          subjectFillType: PolyFillType.Positive
+        });
+      a = toSurface(result, normalize);
     }
   }
   return a;

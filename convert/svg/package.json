@@ -32,6 +32,7 @@
     "@jsxcad/math-mat4": "^0.0.79",
     "@jsxcad/math-utils": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
+    "@jsxcad/sys": "^0.0.79",
     "abs-svg-path": "^0.1.1",
     "curvify-svg-path": "^1.0.0",
     "parse-svg-path": "^0.1.2",

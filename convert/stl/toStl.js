@@ -25,7 +25,7 @@ const geometryToTriangles = (solids) => {
   return triangles;
 };
 
-export const toStl = async (options = {}, geometry) => {
+export const toStl = async (geometry, options = {}) => {
   const { doFixTJunctions = true } = options;
   const keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry);

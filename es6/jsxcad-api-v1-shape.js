@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, getSolids, assemble as assemble$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, clean, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { fromPolygons, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { log as log$1, writeFile, readFile, getSources } from './jsxcad-sys.js';
@@ -364,17 +364,6 @@ Shape.prototype.cut = cutMethod;
 
 cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';
 
-const defragment = (shape) => {
-  const assembly = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    assembly.push({ solid: clean(solid) });
-  }
-  return Shape.fromGeometry({ assembly });
-};
-
-const defragmentMethod = function () { return defragment(this); };
-Shape.prototype.defragment = defragmentMethod;
-
 /**
  *
  * # Assemble
@@ -458,8 +447,62 @@ const faces = (shape, op = (x => x)) => {
 const facesMethod = function (...args) { return faces(this, ...args); };
 Shape.prototype.faces = facesMethod;
 
-const layerMethod = function (...shapes) { return this.with(...shapes); };
-Shape.prototype.layer = layerMethod;
+/**
+ *
+ * # Measure Bounding Box
+ *
+ * Provides the corners of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * const [corner1, corner2] = Sphere(7).measureBoundingBox();
+ * Cube.fromCorners(corner1, corner2)
+ * ```
+ * :::
+ **/
+
+const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
+
+const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
+Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
+
+measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
+measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
+
+/**
+ *
+ * # Measure Center
+ *
+ * Provides the center of the smallest orthogonal box containing the shape.
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * Sphere(7)
+ * ```
+ * :::
+ **/
+
+const measureCenter = (shape) => {
+  // FIX: Produce a clearer definition of center.
+  const geometry = shape.toKeptGeometry();
+  if (geometry.plan && geometry.plan.connector) {
+    // Return the center of the connector.
+    return geometry.marks[0];
+  }
+  const [high, low] = measureBoundingBox(shape);
+  return scale$1(0.5, add(high, low));
+};
+
+const measureCenterMethod = function () { return measureCenter(this); };
+Shape.prototype.measureCenter = measureCenterMethod;
+
+measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
+measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
 const openEdges = (shape, { isOpen = true } = {}) => {
   const r = (v) => v + (Math.random() - 0.5) * 0.2;
@@ -621,33 +664,6 @@ Shape.prototype.canonicalize = canonicalizeMethod;
 
 /**
  *
- * # Measure Bounding Box
- *
- * Provides the corners of the smallest orthogonal box containing the shape.
- *
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * Sphere(7)
- * ```
- * :::
- * ::: illustration { "view": { "position": [40, 40, 40] } }
- * ```
- * const [corner1, corner2] = Sphere(7).measureBoundingBox();
- * Cube.fromCorners(corner1, corner2)
- * ```
- * :::
- **/
-
-const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
-
-const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
-Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
-
-measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
-measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
-
-/**
- *
  * # Center
  *
  * Moves the shape so that its bounding box is centered on the origin.
@@ -659,9 +675,17 @@ measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingB
  * :::
  **/
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 const center = (shape) => {
   const [minPoint, maxPoint] = measureBoundingBox(shape);
   let center = scale$1(0.5, add(minPoint, maxPoint));
+  // FIX: Find a more principled way to handle centering empty shapes.
+  if (isNaN(center[X]) || isNaN(center[Y]) || isNaN(center[Z])) {
+    return shape;
+  }
   const moved = shape.move(...negate(center));
   return moved;
 };
@@ -773,6 +797,12 @@ Shape.prototype.kept = keptMethod;
 
 kept.signature = 'kept(shape:Shape) -> Shape';
 keptMethod.signature = 'Shape -> kept() -> Shape';
+
+const layer = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
+
+const layerMethod = function (...shapes) { return layer(this, ...shapes); };
+Shape.prototype.layer = layerMethod;
+Shape.prototype.and = layerMethod;
 
 /**
  *
@@ -1192,15 +1222,15 @@ const scale = (factor, shape) => {
 const scaleMethod = function (factor) { return scale(factor, this); };
 Shape.prototype.scale = scaleMethod;
 
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 const size = (shape) => {
   const [min, max] = measureBoundingBox(shape);
-  const length = max[X] - min[X];
-  const width = max[Y] - min[Y];
-  const height = max[Z] - min[Z];
+  const width = max[X$1] - min[X$1];
+  const length = max[Y$1] - min[Y$1];
+  const height = max[Z$1] - min[Z$1];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
   return { length, width, height, max, min, center, radius };
@@ -1276,4 +1306,4 @@ const turnZMethod = function (angle) { return turnZ(this, angle); };
 Shape.prototype.turnZ = turnZMethod;
 
 export default Shape;
-export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, log, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
+export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };

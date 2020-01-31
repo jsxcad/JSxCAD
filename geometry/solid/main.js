@@ -3,7 +3,6 @@ import { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
 import { alignVertices } from './alignVertices';
 import { assertGood } from './assertGood';
 import { canonicalize } from './canonicalize';
-import { clean } from './clean';
 import { createNormalize3 } from './createNormalize3';
 import { doesNotOverlap } from './doesNotOverlap';
 import { eachPoint } from './eachPoint';
@@ -13,6 +12,7 @@ import { fromPolygons } from './fromPolygons';
 import { makeWatertight } from './makeWatertight';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
+import { outline } from './outline';
 import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
@@ -21,7 +21,6 @@ export {
   alignVertices,
   assertGood,
   canonicalize,
-  clean,
   createNormalize3,
   doesNotOverlap,
   eachPoint,
@@ -31,6 +30,7 @@ export {
   makeWatertight,
   measureBoundingBox,
   measureBoundingSphere,
+  outline,
   rotateX,
   rotateY,
   rotateZ,

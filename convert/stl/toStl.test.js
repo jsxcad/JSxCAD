@@ -13,6 +13,6 @@ const box1Solid =
   ];
 
 test('Correctly render a box', async t => {
-  const stl = await toStl({}, { solid: box1Solid });
+  const stl = await toStl({ solid: box1Solid });
   t.is(stl, readFileSync('toStl.test.box.stl', { encoding: 'utf8' }));
 });
