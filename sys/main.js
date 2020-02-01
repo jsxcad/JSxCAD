@@ -1,7 +1,7 @@
 import { addSource, getSources } from './source';
 import { ask, setHandleAskUser } from './ask';
 import { boot, onBoot } from './boot';
-import { getFilesystem, setupFilesystem } from './filesystem';
+import { getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 import { listFiles, listFilesystems } from './listFiles';
 import { log, unwatchLog, watchLog } from './log';
 import { unwatchFile, watchFile } from './watchFile';
@@ -27,6 +27,7 @@ export {
   listFilesystems,
   log,
   onBoot,
+  qualifyPath,
   readFile,
   setupFilesystem,
   unwatchFile,
