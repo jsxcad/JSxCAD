@@ -302,7 +302,15 @@ let base;
 
 const getBase = () => base;
 
-const qualifyPath = (path, project) => `jsxcad/${project + '/' || getBase() || '/'}${path}`;
+const qualifyPath = (path = '', project) => {
+  if (project !== undefined) {
+    return `jsxcad/${project}/${path}`;
+  } else if (base !== undefined) {
+    return `jsxcad/${base}${path}`;
+  } else {
+    return `jsxcad//${path}`;
+  }
+};
 
 const setupFilesystem = ({ fileBase }) => {
   // A prefix used to partition the persistent filesystem for multiple projects.
@@ -8464,4 +8472,4 @@ const readFile = async (options, path) => {
   }
 };
 
-export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };

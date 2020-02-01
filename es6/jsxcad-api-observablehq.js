@@ -2,7 +2,7 @@ import Shape from './jsxcad-api-v1-shape.js';
 import { staticDisplay } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import * as v1 from './jsxcad-api-v1.js';
-import { boot } from './jsxcad-sys.js';
+import { qualifyPath, boot } from './jsxcad-sys.js';
 import { toZipFromFilesystem } from './jsxcad-convert-zip.js';
 
 /* global document */
@@ -69,12 +69,15 @@ var FileSaver_min = createCommonjsModule(function (module, exports) {
 /* global Blob, document */
 
 const doDownload = async (filename) => {
-  const zip = await toZipFromFilesystem();
+  const prefix = `${qualifyPath('output')}/`;
+  const filterPath = path => path.startsWith(prefix);
+  const transformPath = path => `${filename}/${path.substring(prefix.length)}`;
+  const zip = await toZipFromFilesystem({ filterPath, transformPath });
   const blob = new Blob([zip.buffer], { type: 'application/zip' });
-  FileSaver_min(blob, filename);
+  FileSaver_min(blob, `${filename}.zip`);
 };
 
-const download = (filename = 'project.zip') => {
+const downloadAsZip = (filename = 'project.zip') => {
   const button = document.createElement('button');
   button.innerHTML = 'Download';
   button.onclick = () => doDownload(filename);
@@ -92,7 +95,7 @@ const download = (filename = 'project.zip') => {
 
 const api = async () => {
   await boot();
-  return { ...v1, download };
+  return { ...v1, downloadAsZip };
 };
 
 export { api };

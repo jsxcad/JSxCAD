@@ -1,4 +1,4 @@
-import { writeFile, getFilesystem, listFiles, readFile } from './jsxcad-sys.js';
+import { writeFile, listFiles, readFile, qualifyPath } from './jsxcad-sys.js';
 
 var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
@@ -3541,15 +3541,18 @@ var toArray = files => {
 	return [...fileData, ...centralDirectory, 0x50, 0x4B, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, ...int(files.length, 2), ...int(files.length, 2), ...int(centralDirectory.length, 4), ...int(fileData.length, 4), 0x00, 0x00];
 };
 
-const toZipFromFilesystem = async (options = {}) => {
+const toZipFromFilesystem = async ({ filterPath = (a => true), transformPath = (a => a) } = {}) => {
   const entries = [];
-  const prefix = `jsxcad/${getFilesystem()}`;
   for (const file of await listFiles()) {
     const data = await readFile({ as: 'bytes' }, file);
-    entries.push({
-      path: `${prefix}/${file}`,
-      data: new Uint8Array(data)
-    });
+    const qualifiedPath = qualifyPath(file);
+    if (filterPath(qualifiedPath)) {
+      const path = transformPath(qualifiedPath);
+      entries.push({
+        path,
+        data: new Uint8Array(data)
+      });
+    }
   }
   return new Uint8Array(toArray(entries));
 };

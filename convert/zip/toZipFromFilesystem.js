@@ -1,16 +1,19 @@
-import { getFilesystem, listFiles, readFile } from '@jsxcad/sys';
+import { listFiles, qualifyPath, readFile } from '@jsxcad/sys';
 
 import { toArray } from 'do-not-zip';
 
-export const toZipFromFilesystem = async (options = {}) => {
+export const toZipFromFilesystem = async ({ filterPath = (a => true), transformPath = (a => a) } = {}) => {
   const entries = [];
-  const prefix = `jsxcad/${getFilesystem()}`;
   for (const file of await listFiles()) {
     const data = await readFile({ as: 'bytes' }, file);
-    entries.push({
-      path: `${prefix}/${file}`,
-      data: new Uint8Array(data)
-    });
+    const qualifiedPath = qualifyPath(file);
+    if (filterPath(qualifiedPath)) {
+      const path = transformPath(qualifiedPath);
+      entries.push({
+        path,
+        data: new Uint8Array(data)
+      });
+    }
   }
   return new Uint8Array(toArray(entries));
 };

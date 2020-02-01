@@ -21,11 +21,19 @@ export const intersection = (a, ...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       return [];
     } else {
+      const aPolygons = fromSurface(a, normalize);
+      if (aPolygons.length === 0) {
+        return [];
+      }
+      const bPolygons = fromSurface(b, normalize);
+      if (bPolygons.length === 0) {
+        return [];
+      }
       const result = clipper.clipToPaths(
         {
           clipType: ClipType.Intersection,
-          subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
-          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
+          subjectInputs: [{ data: aPolygons, closed: true }],
+          clipInputs: [{ data: bPolygons, closed: true }],
           subjectFillType: PolyFillType.Positive
         });
       a = toSurface(result, normalize);
