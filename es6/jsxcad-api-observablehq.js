@@ -77,7 +77,7 @@ const doDownload = async (filename) => {
   FileSaver_min(blob, `${filename}.zip`);
 };
 
-const download = (filename = 'project.zip') => {
+const downloadAsZip = (filename = 'project.zip') => {
   const button = document.createElement('button');
   button.innerHTML = 'Download';
   button.onclick = () => doDownload(filename);
@@ -95,7 +95,7 @@ const download = (filename = 'project.zip') => {
 
 const api = async () => {
   await boot();
-  return { ...v1, download };
+  return { ...v1, downloadAsZip };
 };
 
 export { api };

@@ -13,11 +13,11 @@ const doDownload = async (filename) => {
   saveAs(blob, `${filename}.zip`);
 };
 
-export const download = (filename = 'project.zip') => {
+export const downloadAsZip = (filename = 'project.zip') => {
   const button = document.createElement('button');
   button.innerHTML = 'Download';
   button.onclick = () => doDownload(filename);
   return button;
 };
 
-export default download;
+export default downloadAsZip;

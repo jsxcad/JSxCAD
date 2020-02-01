@@ -3545,8 +3545,9 @@ const toZipFromFilesystem = async ({ filterPath = (a => true), transformPath = (
   const entries = [];
   for (const file of await listFiles()) {
     const data = await readFile({ as: 'bytes' }, file);
-    const path = transformPath(qualifyPath(file));
-    if (filterPath(path)) {
+    const qualifiedPath = qualifyPath(file);
+    if (filterPath(qualifiedPath)) {
+      const path = transformPath(qualifiedPath);
       entries.push({
         path,
         data: new Uint8Array(data)
