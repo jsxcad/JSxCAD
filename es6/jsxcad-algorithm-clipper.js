@@ -2640,12 +2640,19 @@ const difference = (a, ...z0Surfaces) => {
     } else if (doesNotOverlapOrAbut(a, b)) {
       continue;
     } else {
-      // const clipper = new Clipper();
+      const aPolygons = fromSurface(a, normalize);
+      if (aPolygons.length === 0) {
+        return [];
+      }
+      const bPolygons = fromSurface(b, normalize);
+      if (bPolygons.length === 0) {
+        continue;
+      }
       const result = clipper$1.clipToPaths(
         {
           clipType: jsAngusjClipperjsWeb_2.Difference,
-          subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
-          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
+          subjectInputs: [{ data: aPolygons, closed: true }],
+          clipInputs: [{ data: bPolygons, closed: true }],
           subjectFillType: jsAngusjClipperjsWeb_8.Positive
         });
       a = toSurface(result, normalize);
@@ -2671,11 +2678,19 @@ const intersection = (a, ...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       return [];
     } else {
+      const aPolygons = fromSurface(a, normalize);
+      if (aPolygons.length === 0) {
+        return [];
+      }
+      const bPolygons = fromSurface(b, normalize);
+      if (bPolygons.length === 0) {
+        return [];
+      }
       const result = clipper$1.clipToPaths(
         {
           clipType: jsAngusjClipperjsWeb_2.Intersection,
-          subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
-          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
+          subjectInputs: [{ data: aPolygons, closed: true }],
+          clipInputs: [{ data: bPolygons, closed: true }],
           subjectFillType: jsAngusjClipperjsWeb_8.Positive
         });
       a = toSurface(result, normalize);
@@ -3522,14 +3537,22 @@ const union = (...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
-      const result = clipper$1.clipToPaths(
-        {
-          clipType: jsAngusjClipperjsWeb_2.Union,
-          subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
-          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
-          subjectFillType: jsAngusjClipperjsWeb_8.Positive
-        });
-      z0Surfaces.push(toSurface(result, normalize));
+      const aPolygons = fromSurface(a, normalize);
+      const bPolygons = fromSurface(b, normalize);
+      if (aPolygons.length === 0) {
+        z0Surfaces.push(b);
+      } else if (bPolygons.length === 0) {
+        z0Surfaces.push(a);
+      } else {
+        const result = clipper$1.clipToPaths(
+          {
+            clipType: jsAngusjClipperjsWeb_2.Union,
+            subjectInputs: [{ data: aPolygons, closed: true }],
+            clipInputs: [{ data: bPolygons, closed: true }],
+            subjectFillType: jsAngusjClipperjsWeb_8.Positive
+          });
+        z0Surfaces.push(toSurface(result, normalize));
+      }
     }
   }
   return z0Surfaces[0];

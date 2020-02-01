@@ -22,14 +22,22 @@ export const union = (...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
-      const result = clipper.clipToPaths(
-        {
-          clipType: ClipType.Union,
-          subjectInputs: [{ data: fromSurface(a, normalize), closed: true }],
-          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
-          subjectFillType: PolyFillType.Positive
-        });
-      z0Surfaces.push(toSurface(result, normalize));
+      const aPolygons = fromSurface(a, normalize);
+      const bPolygons = fromSurface(b, normalize);
+      if (aPolygons.length === 0) {
+        z0Surfaces.push(b);
+      } else if (bPolygons.length === 0) {
+        z0Surfaces.push(a);
+      } else {
+        const result = clipper.clipToPaths(
+          {
+            clipType: ClipType.Union,
+            subjectInputs: [{ data: aPolygons, closed: true }],
+            clipInputs: [{ data: bPolygons, closed: true }],
+            subjectFillType: PolyFillType.Positive
+          });
+        z0Surfaces.push(toSurface(result, normalize));
+      }
     }
   }
   return z0Surfaces[0];
