@@ -53,7 +53,7 @@ const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const [min, max] = measureBoundingBox(solid);
     const height = max[Z$1] - min[Z$1];
     const radians = (angle / height) * (Math.PI / 180);
-    const rotate = point => rotateZ(point, radians * point[Z$1]);
+    const rotate = point => rotateZ(point, radians * (point[Z$1] - min[Z$1]));
     assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
   }
 
