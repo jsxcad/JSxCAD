@@ -265,7 +265,7 @@ const measureBoundingSphere = (solid) => {
   return solid.boundingSphere;
 };
 
-const outline = (solid) => solid.map(outline$1);
+const outline = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
 
 const toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));
 

@@ -44,19 +44,12 @@ const getFileLister = async () => {
       return qualifiedPaths;
     };
   } else if (isBrowser) {
-    if (getFilesystem() === undefined) {
-      return async () => {
-        const qualifiedPaths = new Set();
-        listEphemeralFiles(qualifiedPaths);
-        return qualifiedPaths;
-      };
-    } else {
-      return async () => {
-        const qualifiedPaths = new Set(await localForage.keys());
-        listEphemeralFiles(qualifiedPaths);
-        return qualifiedPaths;
-      };
-    }
+    // FIX: Make localstorage optional.
+    return async () => {
+      const qualifiedPaths = new Set(await localForage.keys());
+      listEphemeralFiles(qualifiedPaths);
+      return qualifiedPaths;
+    };
   } else {
     throw Error('die');
   }

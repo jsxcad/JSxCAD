@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/cache": "^0.0.79",
+    "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-paths": "^0.0.79",
     "@jsxcad/geometry-points": "^0.0.79",
     "@jsxcad/geometry-solid": "^0.0.79",
