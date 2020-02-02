@@ -137,11 +137,11 @@ const fromPartToPolygons = async ({ part, invert = false, stack = [] }) => {
   return polygons;
 };
 
-const fromLDraw = async ({ part }) =>
+const fromLDraw = async (part) =>
   ({
     solid: rotateX(-90 * Math.PI / 180,
                    scale([0.4, 0.4, 0.4],
-                         fromPolygons({}, await fromPartToPolygons({ part }))))
+                         fromPolygons({}, await fromPartToPolygons({ part: `${part}.dat` }))))
   });
 
 export { fromLDraw };
