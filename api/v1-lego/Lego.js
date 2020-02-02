@@ -1,6 +1,8 @@
 import { Cube, Cylinder } from '@jsxcad/api-v1-shapes';
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
+import { Connector } from '@jsxcad/api-v1-connector';
+
 export const Stud =
     (diameter = 5, height = 1.8,
      {
@@ -33,7 +35,9 @@ export const StudSheet =
         }
       }
       return Cube(width - play * 2, length - play * 2, height)
-          .with(...studs);
+          .with(...studs,
+                Connector('top').moveZ(height / 2),
+                Connector('bottom').moveZ(height / -2).flip());
     };
 
 export const Socket =
@@ -79,7 +83,8 @@ export const SocketSheet =
       }
       return assemble(...sockets)
           .clip(box)
-          .moveZ(height / -2);
+          .with(Connector('top').moveZ(height / 2),
+                Connector('bottom').moveZ(height / -2).flip());
     };
 
 export const AxleProfile = () =>

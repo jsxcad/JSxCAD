@@ -1,7 +1,7 @@
 import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
-import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls, drawHud } from './jsxcad-ui-threejs.js';
+import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -86673,7 +86673,6 @@ class ViewUi extends Pane {
     let height = container.offsetHeight;
     const {
       camera,
-      hudCanvas,
       renderer,
       scene
     } = buildScene({
@@ -86685,13 +86684,11 @@ class ViewUi extends Pane {
     viewerElement.id = 'viewer';
     viewerElement.style.height = '100%';
     viewerElement.appendChild(renderer.domElement);
-    viewerElement.appendChild(hudCanvas);
     const {
       gui
     } = buildGui({
       viewerElement
     });
-    const hudContext = hudCanvas.getContext('2d');
 
     const render = () => {
       renderer.clear();
@@ -86702,30 +86699,12 @@ class ViewUi extends Pane {
       renderer.render(scene, camera);
     };
 
-    const updateHud = () => {
-      hudContext.clearRect(0, 0, width, height);
-      drawHud({
-        camera,
-        datasets,
-        threejsGeometry,
-        hudCanvas
-      }); // hudContext.fillStyle = '#FF0000';
-
-      hudContext.fillStyle = '#00FF00';
-    };
-
     container.appendChild(viewerElement);
-
-    const animate = () => {
-      updateHud();
-      render();
-    };
-
     const {
       trackball
     } = buildTrackballControls({
       camera,
-      render: animate,
+      render,
       view,
       viewerElement
     });
@@ -86739,24 +86718,21 @@ class ViewUi extends Pane {
     });
     resize();
     new ResizeObserver(() => {
-      ({
-        width,
-        height
-      } = resize());
-      hudCanvas.width = width;
-      hudCanvas.height = height;
+      resize();
+      render();
     }).observe(container);
 
     const track = () => {
-      animate();
       trackball.update();
       window.requestAnimationFrame(track);
     };
 
+    render();
     track();
     const geometryPath = file;
 
     const updateGeometry = async geometry => {
+      // FIX: Handle undefined geometry.
       if (geometry !== undefined) {
         // Delete any previous dataset in the window.
         const controllers = new Set();
@@ -86795,6 +86771,7 @@ class ViewUi extends Pane {
 
     if (json !== undefined) {
       await updateGeometry(JSON.parse(json));
+      render();
     }
 
     const watcher = await watchFile(geometryPath, async () => updateGeometry(JSON.parse((await readFile({}, geometryPath)))));
