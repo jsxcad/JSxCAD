@@ -1,6 +1,6 @@
 import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { getZ0Surfaces, getSurfaces, getAnySurfaces, getPaths, outline as outline$1, getSolids, getPlans } from './jsxcad-geometry-tagged.js';
+import { getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, getPaths, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
@@ -115,6 +115,10 @@ const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) =>
       const solid = transform$1(fromZ0, z0SolidGeometry);
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
+  }
+  // Keep plans.
+  for (const entry of getPlans(keptGeometry)) {
+    solids.push(entry);
   }
   return assemble(...solids);
 };
