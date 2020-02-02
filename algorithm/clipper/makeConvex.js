@@ -1,4 +1,4 @@
-import { CLEAN_DISTANCE, RESOLUTION, fromClosedPath } from './convert';
+import { CLEAN_DISTANCE, RESOLUTION, fromSurfaceAsClosedPaths } from './convert';
 import { ClipType, PolyFillType, clipper } from './clipper-lib';
 
 import earcut from 'earcut';
@@ -8,7 +8,8 @@ export const makeConvex = (surface, normalize = p => p) => {
   const request =
     {
       clipType: ClipType.Union,
-      subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
+      // subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
+      subjectInputs: fromSurfaceAsClosedPaths(surface, normalize),
       subjectFillType: PolyFillType.NonZero
     };
   const result = clipper.clipToPolyTree(request);

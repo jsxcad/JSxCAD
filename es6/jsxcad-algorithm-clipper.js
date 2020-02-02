@@ -2522,11 +2522,6 @@ const toFloat = (integer) => integer / RESOLUTION;
 
 const fillType = jsAngusjClipperjsWeb_8.pftNonZero;
 
-/*
-export const fromSurface = (surface, normalize) =>
-  surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
-*/
-
 const fromSurface = (surface, normalize) => {
   const normalized = surface.map(path => path.map(normalize));
   const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
@@ -2534,14 +2529,11 @@ const fromSurface = (surface, normalize) => {
   return filtered.map(path => path.map(([X, Y]) => new IntPoint(X, Y)));
 };
 
-const fromClosedPath = (path, normalize) => {
-  const closedPath = [];
-  for (let i = 0; i < path.length; i++) {
-    const [x, y] = normalize(path[i]);
-    closedPath.push(new IntPoint(toInt(x), toInt(y)));
-  }
-  const entry = { data: closedPath, closed: true };
-  return entry;
+const fromSurfaceAsClosedPaths = (surface, normalize) => {
+  const normalized = surface.map(path => path.map(normalize));
+  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const filtered = scaled.filter(path => toPlane(path) !== undefined);
+  return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
 };
 
 const fromOpenPaths = (paths, normalize) => {
@@ -3410,7 +3402,8 @@ const makeConvex = (surface, normalize = p => p) => {
   const request =
     {
       clipType: jsAngusjClipperjsWeb_2.Union,
-      subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
+      // subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
+      subjectInputs: fromSurfaceAsClosedPaths(surface, normalize),
       subjectFillType: jsAngusjClipperjsWeb_8.NonZero
     };
   const result = clipper$1.clipToPolyTree(request);
