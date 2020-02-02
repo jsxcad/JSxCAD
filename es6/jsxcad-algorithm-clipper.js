@@ -1,5 +1,5 @@
 import { onBoot } from './jsxcad-sys.js';
-import { isOpen, isClosed, isClockwise, getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { isClosed, isOpen, isClockwise, getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { distance } from './jsxcad-math-vec3.js';
@@ -2520,8 +2520,6 @@ const RESOLUTION = 1e6;
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
 
-const fillType = jsAngusjClipperjsWeb_8.pftNonZero;
-
 const fromSurface = (surface, normalize) => {
   const normalized = surface.map(path => path.map(normalize));
   const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
@@ -2549,6 +2547,19 @@ const fromOpenPaths = (paths, normalize) => {
     }
   }
   return openPaths;
+};
+
+const fromPaths = (paths, normalize) => {
+  const clipperPaths = [];
+  const closedPaths = fromClosedPaths(paths, normalize);
+  if (closedPaths.length > 0) {
+    clipperPaths.push({ data: closedPaths, closed: true });
+  }
+  const openPaths = fromOpenPaths(paths, normalize);
+  if (openPaths.length > 0) {
+    clipperPaths.push({ data: openPaths, closed: false });
+  }
+  return clipperPaths;
 };
 
 const fromClosedPaths = (paths, normalize) => {
@@ -2699,7 +2710,7 @@ const intersection = (a, ...z0Surfaces) => {
  * @returns {Z0Surface} the resulting z0 surface.
  */
 const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
-  if (a === undefined || a.length === 0) {
+  if (a === undefined || a.length === 0 || z0Surfaces.length === 0) {
     return [];
   }
   const normalize = createNormalize2();
@@ -2708,12 +2719,19 @@ const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       return [];
     } else {
+      const subjectInputs = fromPaths(a, normalize);
+      if (subjectInputs.length === 0) {
+        return [];
+      }
+      const clipInputs = fromSurfaceAsClosedPaths(b, normalize);
+      if (clipInputs.length === 0) {
+        return [];
+      }
       const result = clipper$1.clipToPolyTree(
         {
           clipType: jsAngusjClipperjsWeb_2.Intersection,
-          subjectInputs: [{ data: fromOpenPaths(a, normalize), closed: false },
-                          { data: fromClosedPaths(a, normalize), closed: true }],
-          clipInputs: [{ data: fromSurface(b, normalize), closed: true }],
+          subjectInputs,
+          clipInputs,
           subjectFillType: jsAngusjClipperjsWeb_8.Positive
         });
       a = toPaths(clipper$1, result, normalize);
@@ -3399,12 +3417,18 @@ earcut.flatten = function (data) {
 earcut_1.default = default_1;
 
 const makeConvex = (surface, normalize = p => p) => {
+  if (surface.length === 0) {
+    return [];
+  }
+  const subjectInputs = fromSurfaceAsClosedPaths(surface, normalize);
+  if (subjectInputs.length === 0) {
+    return [];
+  }
   const request =
     {
       clipType: jsAngusjClipperjsWeb_2.Union,
-      // subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
-      subjectInputs: fromSurfaceAsClosedPaths(surface, normalize),
-      subjectFillType: jsAngusjClipperjsWeb_8.NonZero
+      subjectInputs,
+      subjectFillType: jsAngusjClipperjsWeb_8.Positive
     };
   const result = clipper$1.clipToPolyTree(request);
   const convexSurface = [];

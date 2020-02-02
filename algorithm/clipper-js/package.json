@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/api-v1-extrude",
+  "name": "@jsxcad/algorithm-clipper-js",
   "version": "0.0.79",
-  "description": "Extrude api for JSxCAD",
+  "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -11,7 +11,7 @@
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "echo ok"
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
@@ -22,24 +22,15 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
     "@jsxcad/algorithm-quantize": "^0.0.79",
-    "@jsxcad/algorithm-shape": "^0.0.79",
-    "@jsxcad/algorithm-toolpath": "^0.0.79",
-    "@jsxcad/api-v1-connector": "^0.0.79",
-    "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/geometry-paths": "^0.0.79",
-    "@jsxcad/geometry-solid": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/geometry-tagged": "^0.0.79",
-    "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-plane": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "clipper-lib": "^6.4.2",
+    "earcut": "^2.2.1"
   },
   "devDependencies": {
+    "@jsxcad/geometry-paths": "^0.0.79",
+    "@jsxcad/math-mat4": "^0.0.79",
+    "@jsxcad/math-utils": "^0.0.79",
     "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
