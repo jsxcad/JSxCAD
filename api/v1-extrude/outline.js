@@ -1,4 +1,5 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
+
 import { outline as outlineGeometry } from '@jsxcad/geometry-tagged';
 
 /**

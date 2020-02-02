@@ -10,6 +10,7 @@ import { difference as difference$3, intersection as intersection$3, union as un
 import { difference as difference$2, intersection as intersection$2, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 const update = (geometry, updates) => {
   const updated = {};
@@ -965,17 +966,19 @@ const measureBoundingBox = (rawGeometry) => {
 };
 
 const outlineImpl = (geometry) => {
+  const normalize = createNormalize3();
+
   // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
   for (const { solid } of getSolids(keptGeometry)) {
-    outlines.push(outline$1(solid));
+    outlines.push(outline$1(solid, normalize));
   }
   for (const { surface } of getSurfaces(keptGeometry)) {
-    outlines.push(outline$2(surface));
+    outlines.push(outline$2(surface, normalize));
   }
   for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    outlines.push(outline$3(z0Surface));
+    outlines.push(outline$3(z0Surface, normalize));
   }
   return outlines.map(outline => ({ paths: outline }));
 };
