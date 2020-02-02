@@ -2,7 +2,7 @@ import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import { getAnySurfaces, getPaths } from '@jsxcad/geometry-tagged';
 import { toPlane, transform as transformSurface } from '@jsxcad/geometry-surface';
 
-import { intersectionOfPathsBySurfaces } from '@jsxcad/algorithm-clipper';
+import { intersectionOfPathsBySurfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
 
