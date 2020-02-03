@@ -25,8 +25,7 @@
     "@jsxcad/api-v1-connector": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/api-v1-shapes": "^0.0.79",
-    "@jsxcad/convert-ldraw": "^0.0.79",
-    "@jsxcad/sys": "^0.0.79"
+    "@jsxcad/convert-ldraw": "^0.0.79"
   },
   "devDependencies": {
     "ava": "^2.4.0",

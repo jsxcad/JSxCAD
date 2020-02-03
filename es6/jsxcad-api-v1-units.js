@@ -1,11 +1,11 @@
-const foot = 30.48;
+const foot = 304.8;
 const inch = 25.4;
 const mm = 1;
 const mil = 0.0254;
 const cm = 10;
-const m = 100;
+const m = 1000;
 const thou = 0.0254;
-const yard = 91.44;
+const yard = 914.4;
 
 var api = /*#__PURE__*/Object.freeze({
 	__proto__: null,

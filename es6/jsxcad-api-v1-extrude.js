@@ -1,16 +1,15 @@
 import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
-import { getZ0Surfaces, getSurfaces, getAnySurfaces, getPaths, outline as outline$1, getSolids, getPlans } from './jsxcad-geometry-tagged.js';
+import { getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, getPaths, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
-import { intersectionOfPathsBySurfaces } from './jsxcad-algorithm-clipper.js';
+import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
@@ -116,6 +115,10 @@ const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) =>
       const solid = transform$1(fromZ0, z0SolidGeometry);
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
+  }
+  // Keep plans.
+  for (const entry of getPlans(keptGeometry)) {
+    solids.push(entry);
   }
   return assemble(...solids);
 };

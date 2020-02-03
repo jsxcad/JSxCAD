@@ -1,6 +1,7 @@
 import { Cylinder, Cube } from './jsxcad-api-v1-shapes.js';
-import { assemble, Shape } from './jsxcad-api-v1-shape.js';
+import Shape$1, { assemble, Shape } from './jsxcad-api-v1-shape.js';
 import { Connector } from './jsxcad-api-v1-connector.js';
+import { fromLDraw } from './jsxcad-convert-ldraw.js';
 
 const Stud =
     (diameter = 5, height = 1.8,
@@ -114,5 +115,21 @@ var Lego = /*#__PURE__*/Object.freeze({
   AxleProfile: AxleProfile
 });
 
-export default Lego;
-export { AxleProfile, Socket, SocketSheet, Stud, StudSheet };
+/**
+ *
+ * # Read LDraw Parts
+ *
+ * ::: illustration { "view": { "position": [40, 40, 40] } }
+ * ```
+ * await readLDraw({ part: '3004' })
+ * ```
+ * :::
+ *
+ **/
+
+const readLDraw = async (part) => Shape$1.fromGeometry(await fromLDraw(part));
+
+const api = { ...Lego, readLDraw };
+
+export default api;
+export { AxleProfile, Socket, SocketSheet, Stud, StudSheet, readLDraw };

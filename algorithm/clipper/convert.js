@@ -1,6 +1,6 @@
-import { IntPoint, PolyFillType } from './clipper-lib';
 import { isClosed, isOpen } from '@jsxcad/geometry-path';
 
+import { IntPoint } from './clipper-lib';
 import { toPlane } from '@jsxcad/math-poly3';
 
 // CHECK: Should this be sqrt(2)?
@@ -10,8 +10,6 @@ export const RESOLUTION = 1e6;
 
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
-
-export const fillType = PolyFillType.pftNonZero;
 
 export const fromSurface = (surface, normalize) => {
   const normalized = surface.map(path => path.map(normalize));
@@ -50,6 +48,19 @@ export const fromOpenPaths = (paths, normalize) => {
     }
   }
   return openPaths;
+};
+
+export const fromPaths = (paths, normalize) => {
+  const clipperPaths = [];
+  const closedPaths = fromClosedPaths(paths, normalize);
+  if (closedPaths.length > 0) {
+    clipperPaths.push({ data: closedPaths, closed: true });
+  }
+  const openPaths = fromOpenPaths(paths, normalize);
+  if (openPaths.length > 0) {
+    clipperPaths.push({ data: openPaths, closed: false });
+  }
+  return clipperPaths;
 };
 
 export const fromClosedPaths = (paths, normalize) => {

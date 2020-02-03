@@ -5,12 +5,18 @@ import earcut from 'earcut';
 import { isClockwise } from '@jsxcad/geometry-path';
 
 export const makeConvex = (surface, normalize = p => p) => {
+  if (surface.length === 0) {
+    return [];
+  }
+  const subjectInputs = fromSurfaceAsClosedPaths(surface, normalize);
+  if (subjectInputs.length === 0) {
+    return [];
+  }
   const request =
     {
       clipType: ClipType.Union,
-      // subjectInputs: surface.map(path => fromClosedPath(path, normalize)),
-      subjectInputs: fromSurfaceAsClosedPaths(surface, normalize),
-      subjectFillType: PolyFillType.NonZero
+      subjectInputs,
+      subjectFillType: PolyFillType.Positive
     };
   const result = clipper.clipToPolyTree(request);
   const convexSurface = [];

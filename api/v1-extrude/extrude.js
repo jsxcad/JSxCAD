@@ -1,6 +1,6 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
-import { getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getPlans, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
@@ -62,6 +62,10 @@ export const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } =
       const solid = transformSolid(fromZ0, z0SolidGeometry);
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
+  }
+  // Keep plans.
+  for (const entry of getPlans(keptGeometry)) {
+    solids.push(entry);
   }
   return assemble(...solids);
 };

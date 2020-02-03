@@ -2,6 +2,7 @@
 
 cp algorithm/bsp-surfaces/dist/main.js es6/jsxcad-algorithm-bsp-surfaces.js
 cp algorithm/clipper/dist/main.js es6/jsxcad-algorithm-clipper.js
+cp algorithm/clipper-js/dist/main.js es6/jsxcad-algorithm-clipper-js.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
