@@ -40,7 +40,11 @@ const shell = (shape, radius = 1, resolution = 8) => {
 
   // Handle surface aspects.
   for (const geometry of getAnySurfaces(keptGeometry)) {
-    const plane = toPlane(geometry.surface || geometry.z0Surface);
+    const anySurface = geometry.surface || geometry.z0Surface;
+    const plane = toPlane(anySurface);
+    if (plane === undefined) {
+      continue;
+    }
     const [to, from] = toXYPlaneTransforms(plane);
     const pieces = [];
     for (const { paths } of outline(transform(to, geometry))) {

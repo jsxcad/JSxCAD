@@ -307,6 +307,9 @@ const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   }
   if (plane === undefined) {
     plane = toPlane(surface);
+    if (plane === undefined) {
+      return [];
+    }
   }
   const [to, from] = toXYPlaneTransforms(plane);
   const convexZ0Surface = makeConvex$1(transform(to, surface.map(path => path.map(normalize3))));
@@ -366,6 +369,9 @@ const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(
 const transform$1 = cacheTransform(transformImpl);
 
 const outline = (surface, normalize = createNormalize3(), plane = toPlane(surface)) => {
+  if (plane === undefined) {
+    return [];
+  }
   // FIX: Detect when the surfaces aren't in the same plane.
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
   const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize)));

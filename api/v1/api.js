@@ -65,6 +65,7 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 } from '@jsxcad/api-v1-shapes';
 

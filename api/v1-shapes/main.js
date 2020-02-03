@@ -21,6 +21,7 @@ import Square from './Square.js';
 import Tetrahedron from './Tetrahedron.js';
 import Torus from './Torus.js';
 import Triangle from './Triangle.js';
+import Void from './Void.js';
 import Wave from './Wave.js';
 
 const api = {
@@ -47,6 +48,7 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 };
 
@@ -74,6 +76,7 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 };
 
