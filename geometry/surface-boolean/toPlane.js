@@ -1,7 +1,5 @@
 import { toPlane as toPlaneOfPolygon } from '@jsxcad/math-poly3';
 
-// FIX
-
 export const toPlane = (surface) => {
   if (surface.plane !== undefined) {
     return surface.plane;
@@ -13,6 +11,5 @@ export const toPlane = (surface) => {
         return surface.plane;
       }
     }
-    throw Error('die');
   }
 };
