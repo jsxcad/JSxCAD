@@ -1,6 +1,6 @@
 import { fromSvgPath } from '@jsxcad/convert-svg';
-import { outline } from '@jsxcad/geometry-z0surface-boolean';
 import { parse } from 'opentype.js';
+import { reorient } from '@jsxcad/geometry-z0surface-boolean';
 import { scale } from '@jsxcad/geometry-tagged';
 
 export const toFont = (options = {}, bytes) => {
@@ -18,7 +18,7 @@ export const toFont = (options = {}, bytes) => {
     const pathsets = [];
     for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
       // Outlining forces re-orientation.
-      pathsets.push(outline(paths));
+      pathsets.push(reorient(paths));
     }
     return scale([factor, factor, factor], { assembly: pathsets.map(pathset => ({ z0Surface: pathset })) });
   };

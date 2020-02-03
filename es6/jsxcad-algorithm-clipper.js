@@ -3536,6 +3536,25 @@ const outline = (surface, normalize = p => p) => {
   return surfaceResult;
 };
 
+// Here we have a surface with a confused orientation.
+// This reorients the most exterior paths to be ccw.
+
+const reorient = (surface, normalize = p => p) => {
+  const polygons = fromSurface(surface, normalize);
+  if (polygons.length === 0) {
+    return [];
+  }
+  const subjectInputs = polygons.map(polygon => ({ data: polygon, closed: true }));
+  const result = clipper$1.clipToPaths(
+    {
+      clipType: jsAngusjClipperjsWeb_2.Union,
+      subjectInputs,
+      subjectFillType: jsAngusjClipperjsWeb_8.NonZero
+    });
+  const surfaceResult = toSurface(result, normalize);
+  return surfaceResult;
+};
+
 /**
  * Produces a surface that is the union of all provided surfaces.
  * The union of no surfaces is the empty surface.
@@ -3575,4 +3594,4 @@ const union = (...z0Surfaces) => {
   return z0Surfaces[0];
 };
 
-export { difference, intersection, intersectionOfPathsBySurfaces, makeConvex, outline, union };
+export { difference, intersection, intersectionOfPathsBySurfaces, makeConvex, outline, reorient, union };
