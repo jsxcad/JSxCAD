@@ -13,9 +13,9 @@ const doDownload = async (filename) => {
   saveAs(blob, `${filename}.zip`);
 };
 
-export const downloadAsZip = (filename = 'project.zip') => {
+export const downloadAsZip = (filename = 'project.zip', { title = 'Download' }) => {
   const button = document.createElement('button');
-  button.innerHTML = 'Download';
+  button.textContent = title;
   button.onclick = () => doDownload(filename);
   return button;
 };
