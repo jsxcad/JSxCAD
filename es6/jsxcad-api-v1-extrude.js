@@ -484,15 +484,16 @@ const toSurface$1 = (plane) => {
 };
 
 const stretch = (shape, length, connector = Z$3()) => {
+  const normalize = createNormalize3();
   const stretches = [];
   const planeSurface = toSurface$1(toPlaneFromConnector(connector));
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     if (solid.length === 0) {
       continue;
     }
-    const bottom = cutOpen(solid, planeSurface);
-    const [profile] = section$1(solid, [planeSurface]);
-    const top = cutOpen(solid, flip$1(planeSurface));
+    const bottom = cutOpen(solid, planeSurface, normalize);
+    const [profile] = section$1(solid, [planeSurface], normalize);
+    const top = cutOpen(solid, flip$1(planeSurface), normalize);
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
     const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, 1, 0, false);
     const middle = transform$1(fromZ0, z0SolidGeometry);

@@ -90,7 +90,7 @@ const fetchSources = async (options = {}, sources) => {
 };
 
 export const readFile = async (options, path) => {
-  const { ephemeral, as = 'utf8' } = options;
+  const { allowFetch = true, ephemeral, as = 'utf8' } = options;
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
@@ -111,7 +111,7 @@ export const readFile = async (options, path) => {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalProject });
   }
-  if (file.data === undefined) {
+  if (file.data === undefined && allowFetch) {
     file.data = await fetchSources({}, sources);
     if (!ephemeral && file.data !== undefined) {
       // Update persistent storage.
