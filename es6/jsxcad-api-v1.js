@@ -98,7 +98,7 @@ const DYNAMIC_MODULES = new Map();
 const registerDynamicModule = (bare, path) => DYNAMIC_MODULES.set(bare, path);
 
 const buildImportModule = (api) =>
-  async (name) => {
+  async (name, { src } = {}) => {
     const internalModule = DYNAMIC_MODULES.get(name);
     if (internalModule !== undefined) {
       const module = await import(internalModule);
@@ -112,6 +112,9 @@ const buildImportModule = (api) =>
     if (script === undefined) {
       const path = `cache/${name}`;
       const sources = getSources(path);
+      if (src) {
+        sources.push(src);
+      }
       script = await readFile({ path, as: 'utf8', sources }, path);
     }
     const ecmascript = toEcmascript({}, script);
