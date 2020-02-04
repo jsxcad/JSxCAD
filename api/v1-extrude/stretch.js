@@ -4,6 +4,7 @@ import { flip, toPlane, transform as transformSurface } from '@jsxcad/geometry-s
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { extrude } from '@jsxcad/algorithm-shape';
 import { fromTranslation } from '@jsxcad/math-mat4';
 import { scale } from '@jsxcad/math-vec3';
@@ -35,15 +36,16 @@ const toSurface = (plane) => {
 };
 
 export const stretch = (shape, length, connector = Z()) => {
+  const normalize = createNormalize3();
   const stretches = [];
   const planeSurface = toSurface(toPlaneFromConnector(connector));
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     if (solid.length === 0) {
       continue;
     }
-    const bottom = cutOpen(solid, planeSurface);
-    const [profile] = section(solid, [planeSurface]);
-    const top = cutOpen(solid, flip(planeSurface));
+    const bottom = cutOpen(solid, planeSurface, normalize);
+    const [profile] = section(solid, [planeSurface], normalize);
+    const top = cutOpen(solid, flip(planeSurface), normalize);
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
     const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, 1, 0, false);
     const middle = transformSolid(fromZ0, z0SolidGeometry);
