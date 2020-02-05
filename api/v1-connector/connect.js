@@ -56,7 +56,7 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   const aFlatConnector = aConnectorShape.transform(aTo);
   const aMarks = aFlatConnector.toKeptGeometry().marks;
   const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
-  const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
+  // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
   const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
@@ -67,16 +67,18 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
   const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
   const angle = measureAngle(aOrientation, bOrientation);
   const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
-  const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
+  // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
 
   // Move a to the flat position of b.
   const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
-  const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
+  // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
   // Move a to the oriented position of b.
   const aMovedShape = aFlatBShape.transform(bFrom);
-  const aMovedConnector = aFlatBConnector.transform(bFrom);
+  // const aMovedConnector = aFlatBConnector.transform(bFrom);
 
   if (doConnect) {
+    return aMovedShape.Item().with(bShape).Item();
+    /*
     return Shape.fromGeometry(
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
@@ -86,6 +88,7 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true } =
               ? []
               : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
       });
+    */
   } else {
     return aMovedShape;
   }
