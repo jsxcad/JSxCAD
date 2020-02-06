@@ -47,7 +47,7 @@ export const stretch = (shape, length, connector = Z()) => {
     const [profile] = section(solid, [planeSurface], normalize);
     const top = cutOpen(solid, flip(planeSurface), normalize);
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
-    const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, 1, 0, false);
+    const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, false);
     const middle = transformSolid(fromZ0, z0SolidGeometry);
     const topMoved = transformSolid(fromTranslation(scale(length, toPlane(profile))), top);
     stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
