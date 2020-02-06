@@ -505,7 +505,7 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
-const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) => {
+const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
   const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
@@ -519,7 +519,7 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   const aFlatConnector = aConnectorShape.transform(aTo);
   const aMarks = aFlatConnector.toKeptGeometry().marks;
   const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
-  const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
+  // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
   const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
@@ -530,16 +530,22 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   const bOrientation = subtract(bMarks[RIGHT], bMarks[CENTER]);
   const angle = measureAngle(aOrientation, bOrientation);
   const aFlatOriginRotatedShape = aFlatOriginShape.rotateZ(-angle);
-  const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
+  // const aFlatOriginRotatedConnector = aFlatOriginConnector.rotateZ(-angle);
 
   // Move a to the flat position of b.
   const aFlatBShape = aFlatOriginRotatedShape.move(...bMarks[CENTER]);
-  const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
+  // const aFlatBConnector = aFlatOriginRotatedConnector.move(...bMarks[CENTER]);
   // Move a to the oriented position of b.
   const aMovedShape = aFlatBShape.transform(bFrom);
-  const aMovedConnector = aFlatBConnector.transform(bFrom);
+  // const aMovedConnector = aFlatBConnector.transform(bFrom);
 
   if (doConnect) {
+    if (doAssemble) {
+      return aMovedShape.Item().with(bShape).Item();
+    } else {
+      return aMovedShape.Item().layer(bShape).Item();
+    }
+    /*
     return Shape.fromGeometry(
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
@@ -549,20 +555,21 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
               ? []
               : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
       });
+    */
   } else {
     return aMovedShape;
   }
 };
 
-const toMethod = function (connector) { return connect(this, connector); };
+const toMethod = function (connector, options) { return connect(this, connector, options); };
 Shape.prototype.to = toMethod;
 toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
-const fromMethod = function (connector) { return connect(connector, this); };
+const fromMethod = function (connector, options) { return connect(connector, this, options); };
 Shape.prototype.from = fromMethod;
 fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
 
-const atMethod = function (connector) { return connect(this, connector, { doConnect: false }); };
+const atMethod = function (connector, options) { return connect(this, connector, { ...options, doConnect: false }); };
 Shape.prototype.at = atMethod;
 atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
 

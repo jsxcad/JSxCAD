@@ -2,7 +2,7 @@ import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
-import { getAnySurfaces, getPaths } from './jsxcad-geometry-tagged.js';
+import { getAnySurfaces, getPaths, rewriteTags } from './jsxcad-geometry-tagged.js';
 
 /**
  *
@@ -834,6 +834,11 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
+const Void = (shape) => Shape.fromGeometry(rewriteTags(['compose/non-positive'], [], shape.toGeometry()));
+
+const VoidMethod = function () { return Void(this); };
+Shape.prototype.Void = VoidMethod;
+
 /**
  *
  * # Wave
@@ -884,8 +889,9 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
+  Void,
   Wave
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Void, Wave };

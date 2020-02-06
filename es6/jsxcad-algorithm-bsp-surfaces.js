@@ -264,6 +264,8 @@ const keepOut = (polygons) => {
 
 // Merge the result of a split.
 const merge = (front, back) => {
+  return [...front, ...back];
+/*
   const merged = [];
   for (const polygon of back) {
     // mergeCount++;
@@ -282,9 +284,8 @@ const merge = (front, back) => {
       merged.push(polygon);
     }
   }
-  // console.log(`QQ/mergeCount: ${mergeCount}`);
-  // console.log(`QQ/mergeParentCount: ${mergeParentCount}`);
   return merged;
+*/
 };
 
 const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
@@ -508,9 +509,7 @@ const boundPolygons = (bsp, polygons, normalize) => {
   return [inPolygons, outPolygons];
 };
 
-const cut = (solid, surface) => {
-  const normalize = createNormalize3();
-
+const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
   const solidPolygons = toPolygons({}, solid);
@@ -526,9 +525,7 @@ const cut = (solid, surface) => {
   return fromPolygons$1({}, [...trimmedSolid, ...trimmedPolygons]);
 };
 
-const cutOpen = (solid, surface) => {
-  const normalize = createNormalize3();
-
+const cutOpen = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
   const solidPolygons = toPolygons({}, solid);

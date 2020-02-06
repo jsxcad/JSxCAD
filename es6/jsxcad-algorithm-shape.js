@@ -1,13 +1,12 @@
 import { cache as cache$1, cachePoints } from './jsxcad-cache.js';
 import { fromPolygons } from './jsxcad-geometry-solid.js';
 import { translate } from './jsxcad-geometry-points.js';
-import { deduplicate, assertGood, flip, translate as translate$1, rotateZ, scale as scale$2, rotateX, isClosed } from './jsxcad-geometry-path.js';
-import { makeConvex, flip as flip$1, translate as translate$2, rotateZ as rotateZ$1 } from './jsxcad-geometry-surface.js';
+import { deduplicate, assertGood, flip, translate as translate$1, scale as scale$2, rotateX, isClosed } from './jsxcad-geometry-path.js';
+import { makeConvex, flip as flip$1, translate as translate$2 } from './jsxcad-geometry-surface.js';
 import { fromPolygon } from './jsxcad-math-plane.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
-import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
 function clone(point) { //TODO: use gl-vec2 for this
@@ -6644,49 +6643,37 @@ const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
-const extrudeImpl = (z0Surface, height = 1, depth = 0, steps = 1, twistRadians = 0, cap = true) => {
-  const normalize = createNormalize2();
+const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   const surface = z0Surface;
   const polygons = [];
-  const stepHeight = (height - depth) / steps;
-  const twistPerStep = twistRadians * (height - depth) / steps;
+  const stepHeight = height - depth;
 
   // Build the walls.
   for (const polygon of surface) {
-    const wall = flip(polygon.map(normalize));
-    for (let step = 0; step < steps; step++) {
-      const floor = translate$1([0, 0, depth + stepHeight * (step + 0)],
-                                  rotateZ(twistPerStep * (step + 0), wall));
-      const roof = translate$1([0, 0, depth + stepHeight * (step + 1)],
-                                 rotateZ(twistPerStep * (step + 1), wall));
-      // Walk around the floor to build the walls.
-      for (let i = 0; i < floor.length; i++) {
-        const floorStart = floor[i];
-        const floorEnd = floor[(i + 1) % floor.length];
-        const roofStart = roof[i];
-        const roofEnd = roof[(i + 1) % roof.length];
-        if (twistRadians === 0) {
-          polygons.push([floorStart, roofStart, roofEnd, floorEnd]);
-        } else {
-          polygons.push([floorStart, roofStart, floorEnd]);
-          polygons.push([roofStart, roofEnd, floorEnd]);
-        }
-      }
+    const wall = flip(polygon);
+    const floor = translate$1([0, 0, depth + stepHeight * 0], wall);
+    const roof = translate$1([0, 0, depth + stepHeight * 1], wall);
+    // Walk around the floor to build the walls.
+    for (let i = 0; i < floor.length; i++) {
+      const floorStart = floor[i];
+      const floorEnd = floor[(i + 1) % floor.length];
+      const roofStart = roof[i];
+      const roofEnd = roof[(i + 1) % roof.length];
+      polygons.push([floorStart, roofStart, roofEnd, floorEnd]);
     }
   }
 
   if (cap) {
     // FIX: This is already Z0.
     // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex(z0Surface, normalize);
+    const surface = makeConvex(z0Surface);
 
     // Roof goes up.
-    const roof = translate$2([0, 0, height], rotateZ$1(twistPerStep * steps, surface));
+    const roof = translate$2([0, 0, height], surface);
+    polygons.push(...roof);
 
     // floor faces down.
     const floor = translate$2([0, 0, depth], flip$1(surface));
-
-    polygons.push(...roof);
     polygons.push(...floor);
   }
 
