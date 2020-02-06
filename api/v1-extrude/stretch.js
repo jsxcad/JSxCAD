@@ -1,4 +1,5 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
+import { alignVertices, transform as transformSolid } from '@jsxcad/geometry-solid';
 import { cutOpen, section } from '@jsxcad/algorithm-bsp-surfaces';
 import { flip, toPlane, transform as transformSurface } from '@jsxcad/geometry-surface';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
@@ -10,7 +11,6 @@ import { fromTranslation } from '@jsxcad/math-mat4';
 import { scale } from '@jsxcad/math-vec3';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform as transformPath } from '@jsxcad/geometry-path';
-import { transform as transformSolid } from '@jsxcad/geometry-solid';
 
 /**
  *
@@ -50,7 +50,7 @@ export const stretch = (shape, length, connector = Z()) => {
     const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, 1, 0, false);
     const middle = transformSolid(fromZ0, z0SolidGeometry);
     const topMoved = transformSolid(fromTranslation(scale(length, toPlane(profile))), top);
-    stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
+    stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
   }
 
   return assemble(...stretches);

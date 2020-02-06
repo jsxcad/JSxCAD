@@ -3,7 +3,7 @@ import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as
 import { getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, getPaths, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
+import { transform as transform$1, alignVertices, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
@@ -498,7 +498,7 @@ const stretch = (shape, length, connector = Z$3()) => {
     const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, 1, 0, false);
     const middle = transform$1(fromZ0, z0SolidGeometry);
     const topMoved = transform$1(fromTranslation(scale(length, toPlane$1(profile))), top);
-    stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
+    stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
   }
 
   return assemble(...stretches);
