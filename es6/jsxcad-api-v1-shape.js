@@ -1113,9 +1113,9 @@ const readShape = async (options, build) => {
  * :::
  **/
 
-const rotate = (shape, axis, angle) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
+const rotate = (shape, angle = 0, axis = [0, 0, 1]) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
 
-const rotateMethod = function (angle, axis) { return rotate(this, axis, angle); };
+const rotateMethod = function (...args) { return rotate(this, ...args); };
 Shape.prototype.rotate = rotateMethod;
 
 /**

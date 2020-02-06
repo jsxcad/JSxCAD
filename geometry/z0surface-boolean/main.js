@@ -4,5 +4,6 @@ export {
   intersectionOfPathsBySurfaces,
   makeConvex,
   outline,
+  reorient,
   union
 } from '@jsxcad/algorithm-clipper';

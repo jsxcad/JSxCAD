@@ -34,6 +34,9 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   }
   if (plane === undefined) {
     plane = toPlane(surface);
+    if (plane === undefined) {
+      return [];
+    }
   }
   const [to, from] = toXYPlaneTransforms(plane);
   const convexZ0Surface = makeConvexZ0Surface(transform(to, surface.map(path => path.map(normalize3))));

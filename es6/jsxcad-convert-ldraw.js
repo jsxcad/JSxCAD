@@ -8,21 +8,19 @@ const RESOLUTION = 10000;
 
 const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
 
-const readPart = async (part) => {
+const readPart = async (part, { allowFetch = true } = {}) => {
+  const sources = [`${URL_PREFIX}/parts/${part}`, `${URL_PREFIX}/p/48/${part}`, `${URL_PREFIX}/p/${part}`];
+  if (!allowFetch) sources.length = 0;
   part = part.toLowerCase().replace(/\\/, '/');
-  return readFile({
-    ephemeral: true,
-    sources: [`${URL_PREFIX}/parts/${part}`,
-              `${URL_PREFIX}/p/48/${part}`,
-              `${URL_PREFIX}/p/${part}`],
-    decode: 'utf8'
-  },
-                  `cache/ldraw/${part}`);
+  const parts = await readFile({ allowFetch, ephemeral: true, sources, decode: 'utf8' }, `cache/ldraw/parts/${part}`);
+  const p48 = await readFile({ allowFetch, ephemeral: true, sources, decode: 'utf8' }, `cache/ldraw/p48/${part}`);
+  const p = await readFile({ allowFetch, ephemeral: true, sources, decode: 'utf8' }, `cache/ldraw/p/${part}`);
+  return parts || p48 || p;
 };
 
-const loadPart = async (part) => {
+const loadPart = async (part, { allowFetch = true } = {}) => {
   let code = [];
-  let source = await readPart(part);
+  let source = await readPart(part, { allowFetch });
   for (let line of source.split('\r\n')) {
     let args = line.replace(/^\s+/, '').split(/\s+/);
     code.push(args);
@@ -33,8 +31,8 @@ const loadPart = async (part) => {
 const flt = (text) => parseFloat(text);
 const ldu = (text) => Math.round(flt(text) * RESOLUTION) / RESOLUTION;
 
-const fromPartToPolygons = async ({ part, invert = false, stack = [] }) => {
-  let code = await loadPart(part);
+const fromPartToPolygons = async (part, { allowFetch = true, invert = false, stack = [] }) => {
+  let code = await loadPart(part, { allowFetch });
   let polygons = [];
   let direction = 'CCW';
   let invertNext = 0;
@@ -86,7 +84,7 @@ const fromPartToPolygons = async ({ part, invert = false, stack = [] }) => {
                                         flt(b), flt(e), flt(h), 0.0,
                                         flt(c), flt(f), flt(i), 0.0,
                                         ldu(x), ldu(y), ldu(z), 1.0);
-        polygons.push(...transform(matrix, await fromPartToPolygons({ part: subPart, invert: subInvert, stack })));
+        polygons.push(...transform(matrix, await fromPartToPolygons(subPart, { invert: subInvert, stack, allowFetch })));
         stack.pop();
         break;
       }
@@ -137,11 +135,11 @@ const fromPartToPolygons = async ({ part, invert = false, stack = [] }) => {
   return polygons;
 };
 
-const fromLDraw = async (part) =>
+const fromLDraw = async (part, { allowFetch = true } = {}) =>
   ({
     solid: rotateX(-90 * Math.PI / 180,
                    scale([0.4, 0.4, 0.4],
-                         fromPolygons({}, await fromPartToPolygons({ part: `${part}.dat` }))))
+                         fromPolygons({}, await fromPartToPolygons(`${part}.dat`, { allowFetch }))))
   });
 
 export { fromLDraw };

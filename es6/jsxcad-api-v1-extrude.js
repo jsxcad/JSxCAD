@@ -1,9 +1,9 @@
 import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { alignVertices, transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
 import { getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, getPaths, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
-import { transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
@@ -94,25 +94,24 @@ chainHull.signature = 'chainHull(...shapes:Shape) -> Shape';
  *
  **/
 
-const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) => {
+const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
     [height, depth] = [depth, height];
   }
-  const twistRadians = twist * Math.PI / 180;
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
   for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
-      const solid = extrude$1(z0Surface, height, depth, steps, twistRadians);
+      const solid = alignVertices(extrude$1(z0Surface, height, depth));
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
       const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-      const z0SolidGeometry = extrude$1(transform(toZ0, surface), height, depth, steps, twistRadians);
-      const solid = transform$1(fromZ0, z0SolidGeometry);
+      const z0SolidGeometry = extrude$1(transform(toZ0, surface), height, depth);
+      const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
@@ -126,8 +125,8 @@ const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) =>
 const extrudeMethod = function (...args) { return extrude(this, ...args); };
 Shape.prototype.extrude = extrudeMethod;
 
-extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
-extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
+extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
+extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
 
 const fill = (shape, pathsShape) => {
   const fills = [];
@@ -484,20 +483,21 @@ const toSurface$1 = (plane) => {
 };
 
 const stretch = (shape, length, connector = Z$3()) => {
+  const normalize = createNormalize3();
   const stretches = [];
   const planeSurface = toSurface$1(toPlaneFromConnector(connector));
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     if (solid.length === 0) {
       continue;
     }
-    const bottom = cutOpen(solid, planeSurface);
-    const [profile] = section$1(solid, [planeSurface]);
-    const top = cutOpen(solid, flip$1(planeSurface));
+    const bottom = cutOpen(solid, planeSurface, normalize);
+    const [profile] = section$1(solid, [planeSurface], normalize);
+    const top = cutOpen(solid, flip$1(planeSurface), normalize);
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-    const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, 1, 0, false);
+    const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, false);
     const middle = transform$1(fromZ0, z0SolidGeometry);
     const topMoved = transform$1(fromTranslation(scale(length, toPlane$1(profile))), top);
-    stretches.push(Shape.fromGeometry({ solid: [...bottom, ...middle, ...topMoved], tags }));
+    stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
   }
 
   return assemble(...stretches);

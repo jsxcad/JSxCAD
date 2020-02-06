@@ -62,10 +62,12 @@ const equals = (a, b) => {
     return normalized;
   };
 
+  if (a === undefined || b === undefined) {
+    return false;
+  }
+
   return normalize4(a) === normalize4(b);
 };
-
-// FIX
 
 const toPlane = (surface) => {
   if (surface.plane !== undefined) {
@@ -78,7 +80,6 @@ const toPlane = (surface) => {
         return surface.plane;
       }
     }
-    throw Error('die');
   }
 };
 

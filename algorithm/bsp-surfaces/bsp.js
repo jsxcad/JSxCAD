@@ -179,6 +179,8 @@ const keepOut = (polygons) => {
 
 // Merge the result of a split.
 const merge = (front, back) => {
+  return [...front, ...back];
+/*
   const merged = [];
   for (const polygon of back) {
     // mergeCount++;
@@ -197,9 +199,8 @@ const merge = (front, back) => {
       merged.push(polygon);
     }
   }
-  // console.log(`QQ/mergeCount: ${mergeCount}`);
-  // console.log(`QQ/mergeParentCount: ${mergeParentCount}`);
   return merged;
+*/
 };
 
 const removeInteriorPolygons = (bsp, polygons, normalize) => {
