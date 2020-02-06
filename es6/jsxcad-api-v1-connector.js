@@ -505,7 +505,7 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
-const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) => {
+const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
   const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
@@ -540,7 +540,11 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   // const aMovedConnector = aFlatBConnector.transform(bFrom);
 
   if (doConnect) {
-    return aMovedShape.Item().with(bShape).Item();
+    if (doAssemble) {
+      return aMovedShape.Item().with(bShape).Item();
+    } else {
+      return aMovedShape.Item().layer(bShape).Item();
+    }
     /*
     return Shape.fromGeometry(
       {
@@ -557,15 +561,15 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true } = {}) =>
   }
 };
 
-const toMethod = function (connector) { return connect(this, connector); };
+const toMethod = function (connector, options) { return connect(this, connector, options); };
 Shape.prototype.to = toMethod;
 toMethod.signature = 'Connector -> to(from:Connector) -> Shape';
 
-const fromMethod = function (connector) { return connect(connector, this); };
+const fromMethod = function (connector, options) { return connect(connector, this, options); };
 Shape.prototype.from = fromMethod;
 fromMethod.signature = 'Connector -> from(from:Connector) -> Shape';
 
-const atMethod = function (connector) { return connect(this, connector, { doConnect: false }); };
+const atMethod = function (connector, options) { return connect(this, connector, { ...options, doConnect: false }); };
 Shape.prototype.at = atMethod;
 atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
 
