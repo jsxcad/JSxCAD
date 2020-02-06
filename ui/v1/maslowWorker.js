@@ -102,7 +102,7 @@ const agent = async ({ ask, question }) => {
         return api.Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry();
       case 'stl':
         const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
-        const stlString = await toStl({}, inflated);
+        const stlString = await toStl(inflated);
         return stlString;
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
