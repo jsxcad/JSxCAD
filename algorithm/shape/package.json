@@ -22,7 +22,6 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/cache": "^0.0.79",
     "@jsxcad/data-shape": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",

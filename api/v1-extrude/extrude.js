@@ -1,11 +1,11 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
+import { alignVertices, transform as transformSolid } from '@jsxcad/geometry-solid';
 import { getPlans, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
 
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform as transformSolid } from '@jsxcad/geometry-solid';
 
 /**
  *
@@ -41,25 +41,24 @@ import { transform as transformSolid } from '@jsxcad/geometry-solid';
  *
  **/
 
-export const extrude = (shape, height = 1, depth = 0, { twist = 0, steps = 1 } = {}) => {
+export const extrude = (shape, height = 1, depth = 0) => {
   if (height < depth) {
     [height, depth] = [depth, height];
   }
-  const twistRadians = twist * Math.PI / 180;
   // FIX: Handle extrusion along a vector properly.
   const solids = [];
   const keptGeometry = shape.toKeptGeometry();
   for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
-      const solid = extrudeAlgorithm(z0Surface, height, depth, steps, twistRadians);
+      const solid = alignVertices(extrudeAlgorithm(z0Surface, height, depth));
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
       const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
-      const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, depth, steps, twistRadians);
-      const solid = transformSolid(fromZ0, z0SolidGeometry);
+      const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, depth);
+      const solid = alignVertices(transformSolid(fromZ0, z0SolidGeometry));
       solids.push(Shape.fromGeometry({ solid, tags }));
     }
   }
@@ -75,5 +74,5 @@ Shape.prototype.extrude = extrudeMethod;
 
 export default extrude;
 
-extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
-extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1, { twist:number = 0, steps:number = 1 }) -> Shape';
+extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
+extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
