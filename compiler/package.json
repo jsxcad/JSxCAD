@@ -22,9 +22,8 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@babel/parser": "^7.4.5",
-    "esm": "^3.2.10",
-    "recast": "^0.17.5"
+    "acorn": "^7.1.0",
+    "astring": "^1.4.3"
   },
   "devDependencies": {
     "ava": "^2.4.0",

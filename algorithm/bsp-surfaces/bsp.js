@@ -174,33 +174,26 @@ const keepOut = (polygons) => {
   return polygons;
 };
 
-// let mergeCount = 0;
-// let mergeParentCount = 0;
-
 // Merge the result of a split.
 const merge = (front, back) => {
-  return [...front, ...back];
-/*
   const merged = [];
-  for (const polygon of back) {
-    // mergeCount++;
-    if (polygon.leaf) {
-      if (polygon.sibling && polygon.sibling.leaf === polygon.leaf) {
-        polygon.parent.leaf = polygon.leaf;
-        merged.push(polygon.parent);
-        // mergeParentCount++;
-      } else {
-        merged.push(polygon);
+  const scan = (polygons) => {
+    for (const polygon of polygons) {
+      if (polygon.leaf) {
+        if (polygon.sibling && polygon.sibling.leaf === polygon.leaf) {
+          polygon.parent.leaf = polygon.leaf;
+          polygon.leaf = null;
+          polygon.sibling.leaf = undefined;
+          merged.push(polygon.parent);
+        } else {
+          merged.push(polygon);
+        }
       }
     }
-  }
-  for (const polygon of front) {
-    if (!polygon.parent || polygon.parent.leaf !== polygon.leaf) {
-      merged.push(polygon);
-    }
-  }
+  };
+  scan(front);
+  scan(back);
   return merged;
-*/
 };
 
 const removeInteriorPolygons = (bsp, polygons, normalize) => {
