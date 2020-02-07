@@ -1,7 +1,7 @@
 // FIX: Is this specific to the v1 api? If so, move it there.
 
-import { parse } from '@babel/parser';
-import recast from 'recast';
+import { generate } from 'astring';
+import { parse } from 'acorn';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -21,17 +21,13 @@ export const strip = (ast) => {
 };
 
 export const toGraph = ({ includeSource = false }, script) => {
-  let ast = recast.parse(script,
-                         {
-                           parser: {
-                             parse: (script) => parse(script,
-                                                      {
-                                                        allowAwaitOutsideFunction: true,
-                                                        allowReturnOutsideFunction: true,
-                                                        sourceType: 'module'
-                                                      })
-                           }
-                         });
+  let ast = parse(script,
+                  {
+                    allowAwaitOutsideFunction: true,
+                    allowReturnOutsideFunction: true,
+                    sourceType: 'module'
+                  }
+  );
 
   const strippedAst = strip(ast);
 
@@ -110,7 +106,7 @@ export const toGraph = ({ includeSource = false }, script) => {
     body.forEach(walkStatement);
   };
 
-  walkProgram(strippedAst.program);
+  walkProgram(strippedAst);
 
   return { nodes, edges };
 };
@@ -124,7 +120,7 @@ export const toDot = ({ nodes, edges }) => {
     if (node === undefined) {
       break;
     }
-    const js = recast.print(node.source).code;
+    const js = generate(node.source);
     dot.push(`  "${nodeId}" [label="${js}"];`);
   }
   for (let nodeId = 0; ; nodeId++) {

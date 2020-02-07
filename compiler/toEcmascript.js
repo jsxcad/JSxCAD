@@ -1,7 +1,7 @@
 // FIX: Is this specific to the v1 api? If so, move it there.
 
-import { parse } from '@babel/parser';
-import recast from 'recast';
+import { generate } from 'astring';
+import { parse } from 'acorn';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -37,22 +37,17 @@ const fromObjectExpression = ({ properties }) => {
 };
 
 export const toEcmascript = (options, script) => {
-  let ast = recast.parse(script,
-                         {
-                           parser: {
-                             parse: (script) => parse(script,
-                                                      {
-                                                        allowAwaitOutsideFunction: true,
-                                                        allowReturnOutsideFunction: true,
-                                                        sourceType: 'module'
-                                                      })
-                           }
-                         });
+  const parseOptions = {
+    allowAwaitOutsideFunction: true,
+    allowReturnOutsideFunction: true,
+    sourceType: 'module'
+  };
+  let ast = parse(script, parseOptions);
 
   const exportNames = [];
   const expressions = [];
 
-  const body = ast.program.body;
+  const body = ast.body;
   const out = [];
   const annotations = { imports: {} };
 
@@ -85,75 +80,18 @@ export const toEcmascript = (options, script) => {
       const { specifiers, source } = entry;
 
       if (specifiers.length === 0) {
-        out.push({
-          type: 'ExpressionStatement',
-          expression: {
-            type: 'AwaitExpression',
-            argument: {
-              type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'importModule' },
-              arguments: [source]
-            }
-          }
-        });
+        out.push(parse(`await importModule('${source.value}');`, parseOptions));
       } else {
-        const declarations = [];
         for (const { imported, local, type } of specifiers) {
           switch (type) {
             case 'ImportDefaultSpecifier':
-              declarations.push({
-                type: 'VariableDeclarator',
-                kind: 'const',
-                id: {
-                  type: 'Identifier',
-                  name: local.name
-                },
-                init: {
-                  type: 'MemberExpression',
-                  object: {
-                    type: 'ParenthesizedExpression',
-                    expression: {
-                      type: 'AwaitExpression',
-                      argument: {
-                        type: 'CallExpression',
-                        callee: { type: 'Identifier', name: 'importModule' },
-                        arguments: [source]
-                      }
-                    }
-                  },
-                  property: { type: 'Identifier', name: 'default' },
-                  computed: false
-                }
-              });
+              out.push(parse(`const ${local.name} = (await importModule('${source.value}')).default;`, parseOptions));
               break;
             case 'ImportSpecifier':
-              declarations.push({
-                type: 'VariableDeclarator',
-                kind: 'const',
-                id: {
-                  type: 'ObjectPattern',
-                  properties: [{
-                    type: 'ObjectProperty',
-                    key: { type: 'Identifier', name: imported.name },
-                    value: { type: 'Identifier', name: imported.name }
-                  }]
-                },
-                init: {
-                  type: 'AwaitExpression',
-                  argument: {
-                    type: 'CallExpression',
-                    callee: {
-                      type: 'Identifier',
-                      name: 'importModule'
-                    },
-                    arguments: [source]
-                  }
-                }
-              });
+              out.push(parse(`const { ${imported.name} } = await importModule('${source.value}');`, parseOptions));
               break;
           }
         }
-        out.push({ type: 'VariableDeclaration', kind: 'const', declarations });
       }
     } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
       Object.assign(annotations, fromObjectExpression(entry.expression));
@@ -176,71 +114,17 @@ export const toEcmascript = (options, script) => {
       const last = expressions.length - 1;
       const tail = expressions[last];
       if (tail.type === 'ExpressionStatement') {
-        expressions[last] = {
-          type: 'ReturnStatement',
-          argument: expressions[last].expression
-        };
+        expressions[last] = parse(`return ${generate(expressions[last])}`, parseOptions);
       }
     }
-    const main = {
-      type: 'VariableDeclaration',
-      declarations: [{
-        type: 'VariableDeclarator',
-        id: {
-          type: 'Identifier',
-          name: 'main'
-        },
-        init: {
-          type: 'ArrowFunctionExpression',
-          id: null,
-          params: [],
-          body: {
-            type: 'BlockStatement',
-            body: expressions
-          },
-          generator: false,
-          expression: true,
-          async: true
-        }
-      }],
-      kind: 'const'
-    };
+    const main = parse(`const main = async () => { ${expressions.map(expression => generate(expression)).join('\n')} };`, parseOptions);
     out.push(main);
     exportNames.push('main');
   }
 
   // Return the exports as an object.
-  out.push({
-    type: 'ReturnStatement',
-    argument: {
-      type: 'ObjectExpression',
-      properties:
-            exportNames.map(name => ({
-              type: 'Property',
-              key: { type: 'Identifier', name },
-              value: { type: 'Identifier', name }
-            }))
-    }
-  });
+  out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
-  ast = {
-    type: 'Program',
-    body: [{
-      type: 'ReturnStatement',
-      argument: {
-        type: 'ArrowFunctionExpression',
-        id: null,
-        expression: true,
-        generator: false,
-        async: true,
-        params: [],
-        body: {
-          type: 'BlockStatement',
-          body: out
-        }
-      }
-    }]
-  };
-
-  return recast.print(ast).code;
+  const result = generate(parse(`return async () => { ${out.map(generate).join('\n')} };`, parseOptions));
+  return result;
 };
