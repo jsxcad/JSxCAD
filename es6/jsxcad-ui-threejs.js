@@ -52244,6 +52244,70 @@ const buildGuiControls = ({ datasets, gui }) => {
   return count;
 };
 
+const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
+  const resize = () => {
+    const width = viewerElement.clientWidth - 10;
+    const height = viewerElement.clientHeight - 5;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    trackball.handleResize();
+    renderer.setSize(width, height);
+    return { width, height };
+  };
+
+  return { resize };
+};
+
+const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
+  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
+
+  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
+  camera.layers.enable(1);
+  [camera.position.x, camera.position.y, camera.position.z] = position;
+  camera.lookAt(...target);
+  camera.up.set(...up);
+
+  const scene = new Scene();
+  scene.add(camera);
+
+  if (withAxes) {
+    const axes = new AxesHelper(5);
+    axes.layers.set(1);
+    scene.add(axes);
+  }
+
+  if (withGrid) {
+    const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
+    grid.rotation.x = -Math.PI / 2;
+    grid.layers.set(1);
+    scene.add(grid);
+  }
+
+  const ambientLight = new AmbientLight(0xffffff, 0.5);
+  ambientLight.layers.set(0);
+  scene.add(ambientLight);
+
+  const light = new DirectionalLight(0xffffff, 0.5);
+  light.position.set(1, 1, 1);
+  light.layers.set(0);
+  camera.add(light);
+
+  if (renderer === undefined) {
+    renderer = new WebGLRenderer({ antialias: true });
+    renderer.autoClear = false;
+    renderer.setSize(width, height);
+    renderer.setClearColor(0xFFFFFF);
+    renderer.antiAlias = false;
+    renderer.inputGamma = true;
+    renderer.outputGamma = true;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+  }
+  const canvas = renderer.domElement;
+
+  return { camera, canvas, renderer, scene };
+};
+
 const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
   let rgb = toRgb(tags, null);
   if (rgb === null) {
@@ -52652,168 +52716,48 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
   }
 };
 
-const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
-  if (threejsGeometry === undefined) {
-    return;
-  }
-
-  const project = (point) => {
-    const vector = new Vector3();
-    vector.set(...point);
-    // map to normalized device coordinate (NDC) space
-    vector.project(camera);
-    // map to 2D screen space
-    const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
-    const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
-    return [x, y];
-  };
-
-  const ctx = hudCanvas.getContext('2d');
-  ctx.fillStyle = '#000000';
-  ctx.strokeStyle = '#000000';
-  // ctx.font = '16px "Arial Black", Gadget, sans-serif';
-  ctx.font = '16px "Courier", Gadget, sans-serif';
-  const margin = 10;
-
-  const drawLabel = (label, x, y) => {
-    ctx.shadowBlur = 7;
-    ctx.setLineDash([3, 3]);
-
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.moveTo(x, y);
-    ctx.lineTo(margin + ctx.measureText(label).width + margin, y);
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-
-    ctx.strokeText(label, margin, y);
-    ctx.fillText(label, margin, y);
-
-    ctx.shadowBlur = 0;
-  };
-
-  const walk = (threejsGeometry) => {
-    if (threejsGeometry.assembly) {
-      threejsGeometry.assembly.forEach(walk);
-    } else if (threejsGeometry.threejsPlan) {
-      const { threejsPlan, threejsMarks, threejsVisualization } = threejsGeometry;
-      if (threejsPlan.label) {
-        ctx.strokeStyle = '#000000';
-        ctx.fillStyle = '#000000';
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 7;
-
-        const [dX, dY] = project(threejsMarks[0]);
-        ctx.beginPath();
-        ctx.arc(dX, dY, 4, 0, Math.PI * 2);
-        ctx.stroke();
-        drawLabel(threejsPlan.label, dX, dY);
-      } else if (threejsPlan.connector) {
-        ctx.strokeStyle = '#000000';
-        ctx.fillStyle = '#000000';
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 7;
-
-        const ORIGIN = 0;
-        // const AXIS = 1;
-        const ORIENTATION = 2;
-        const END = 3;
-
-        const [originX, originY] = project(threejsMarks[ORIGIN]);
-        const [endX, endY] = project(threejsMarks[END]);
-        const [orientationX, orientationY] = project(threejsMarks[ORIENTATION]);
-
-        // const normalizedLine = (origin, point, length) =>
-        //  add(origin, scale(length, normalize(subtract(point, origin))));
-
-        // const [endXN, endYN] = normalizedLine([originX, originY], [endX, endY], 25 / 2);
-        // const [orientationXN, orientationYN] = normalizedLine([originX, originY], [orientationX, orientationY], 100 / 2);
-
-        ctx.beginPath();
-        ctx.lineWidth = 1;
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(originX, originY);
-        ctx.lineTo(orientationX, orientationY);
-        ctx.closePath();
-        ctx.stroke();
-
-        drawLabel(threejsPlan.connector, originX, originY);
-      }
-      if (threejsVisualization) {
-        walk(threejsVisualization);
-      }
-    }
-  };
-  walk(threejsGeometry);
-};
-
-const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
-  const resize = () => {
-    const width = viewerElement.clientWidth - 10;
-    const height = viewerElement.clientHeight - 5;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    trackball.handleResize();
-    renderer.setSize(width, height);
-    return { width, height };
-  };
-
-  return { resize };
-};
-
-const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
-  const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
-
-  const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
-  camera.layers.enable(1);
-  [camera.position.x, camera.position.y, camera.position.z] = position;
-  camera.lookAt(...target);
-  camera.up.set(...up);
-
-  const scene = new Scene();
-  scene.add(camera);
-
-  if (withAxes) {
-    const axes = new AxesHelper(5);
-    axes.layers.set(1);
-    scene.add(axes);
-  }
-
-  if (withGrid) {
-    const grid = new GridHelper(1000, 100, 0x000080, 0xc0c0c0);
-    grid.rotation.x = -Math.PI / 2;
-    grid.layers.set(1);
-    scene.add(grid);
-  }
-
-  const ambientLight = new AmbientLight(0xffffff, 0.5);
-  ambientLight.layers.set(0);
-  scene.add(ambientLight);
-
-  const light = new DirectionalLight(0xffffff, 0.5);
-  light.position.set(1, 1, 1);
-  light.layers.set(0);
-  camera.add(light);
-
-  if (renderer === undefined) {
-    renderer = new WebGLRenderer({ antialias: true });
-    renderer.autoClear = false;
-    renderer.setSize(width, height);
-    renderer.setClearColor(0xFFFFFF);
-    renderer.antiAlias = false;
-    renderer.inputGamma = true;
-    renderer.outputGamma = true;
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
-  }
-  const canvas = renderer.domElement;
-
-  return { camera, canvas, renderer, scene };
-};
-
 const GEOMETRY_LAYER$1 = 0;
 const PLAN_LAYER$1 = 1;
+
+const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
+  const datasets = [];
+  const width = page.offsetWidth;
+  const height = page.offsetHeight;
+
+  const geometryLayers = new Layers();
+  geometryLayers.set(GEOMETRY_LAYER$1);
+
+  const planLayers = new Layers();
+  planLayers.set(PLAN_LAYER$1);
+
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+
+  const render = () => {
+    renderer.clear();
+    camera.layers.set(GEOMETRY_LAYER$1);
+    renderer.render(scene, camera);
+
+    camera.layers.set(PLAN_LAYER$1);
+    renderer.render(scene, camera);
+  };
+
+  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
+
+  await buildMeshes({ datasets, threejsGeometry, scene });
+
+  const track = () => {
+    trackball.update();
+    window.requestAnimationFrame(track);
+  };
+
+  render();
+  track();
+
+  return { canvas, renderer };
+};
+
+const GEOMETRY_LAYER$2 = 0;
+const PLAN_LAYER$2 = 1;
 
 let locked = false;
 const pending = [];
@@ -52844,19 +52788,19 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const height = page.offsetHeight;
 
   const geometryLayers = new Layers();
-  geometryLayers.set(GEOMETRY_LAYER$1);
+  geometryLayers.set(GEOMETRY_LAYER$2);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER$1);
+  planLayers.set(PLAN_LAYER$2);
 
   const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
 
   const render = () => {
     renderer.clear();
-    camera.layers.set(GEOMETRY_LAYER$1);
+    camera.layers.set(GEOMETRY_LAYER$2);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER$1);
+    camera.layers.set(PLAN_LAYER$2);
     renderer.render(scene, camera);
   };
 
@@ -52869,4 +52813,4 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   return { canvas, renderer };
 };
 
-export { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud, staticDisplay };
+export { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, orbitDisplay, staticDisplay };
