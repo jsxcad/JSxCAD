@@ -41,12 +41,9 @@ const staticView = async (shape, { target, position, up, width = 256, height = 1
 
 const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
-  const { renderer } = await orbitDisplay({ view: { target, position, up }, threejsGeometry },
-                                          { offsetWidth: width, offsetHeight: height });
-  const canvas = toCanvasFromWebglContext(renderer.getContext());
-  canvas.style = `width: ${width}px; height: ${height}px`;
-  renderer.forceContextLoss();
-  return canvas;
+  const { viewerElement } = await orbitDisplay({ view: { target, position, up }, threejsGeometry },
+                                               { offsetWidth: width, offsetHeight: height });
+  return viewerElement;
 };
 
 // Work around the name collision in destructuring.

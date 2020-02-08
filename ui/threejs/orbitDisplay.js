@@ -1,3 +1,5 @@
+/* global document */
+
 import { Layers } from 'three';
 import { buildMeshes } from './mesh';
 import { buildScene } from './scene';
@@ -17,7 +19,12 @@ export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) =>
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+
+  const viewerElement = document.createElement('div');
+  viewerElement.id = 'viewer';
+  viewerElement.style.height = '100%';
+  viewerElement.appendChild(renderer.domElement);
 
   const render = () => {
     renderer.clear();
@@ -28,7 +35,7 @@ export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) =>
     renderer.render(scene, camera);
   };
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
+  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
 
   await buildMeshes({ datasets, threejsGeometry, scene });
 
@@ -40,7 +47,7 @@ export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) =>
   render();
   track();
 
-  return { canvas, renderer };
+  return { viewerElement, renderer };
 };
 
 export default orbitDisplay;
