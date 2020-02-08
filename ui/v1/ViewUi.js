@@ -91,38 +91,40 @@ export class ViewUi extends Pane {
     const geometryPath = file;
 
     const updateGeometry = async (geometry) => {
-      // FIX: Handle undefined geometry.
-      if (geometry !== undefined) {
-        // Delete any previous dataset in the window.
-        const controllers = new Set();
-        for (const { controller, mesh } of datasets) {
-          if (controller) {
-            controllers.add(controller);
-          }
-          scene.remove(mesh);
+      // Delete any previous dataset in the window.
+      const controllers = new Set();
+      for (const { controller, mesh } of datasets) {
+        if (controller) {
+          controllers.add(controller);
         }
-        for (const controller of controllers) {
-          gui.remove(controller.ui);
-        }
+        scene.remove(mesh);
+      }
+      for (const controller of controllers) {
+        gui.remove(controller.ui);
+      }
 
-        threejsGeometry = toThreejsGeometry(geometry);
+      threejsGeometry = toThreejsGeometry(geometry);
 
-        // Build new datasets from the written data, and display them.
-        datasets = [];
+      // Build new datasets from the written data, and display them.
+      datasets = [];
 
-        await buildMeshes({ datasets, threejsGeometry, scene });
-        buildGuiControls({ datasets, gui });
+      await buildMeshes({ datasets, threejsGeometry, scene });
+      buildGuiControls({ datasets, gui });
+      render();
+    };
+
+    const readAndUpdate = async () => {
+      const json = await readFile({}, geometryPath);
+      if (json === undefined) {
+        await updateGeometry({ assembly: [] });
+      } else {
+        await updateGeometry(JSON.parse(json));
       }
     };
 
-    const json = await readFile({}, geometryPath);
-    if (json !== undefined) {
-      await updateGeometry(JSON.parse(json));
-      render();
-    }
+    await readAndUpdate();
 
-    const watcher = await watchFile(geometryPath,
-                                    async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
+    const watcher = await watchFile(geometryPath, readAndUpdate);
 
     this.setState({ watcher });
   }

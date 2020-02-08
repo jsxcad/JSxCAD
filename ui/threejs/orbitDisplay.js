@@ -1,34 +1,12 @@
 import { Layers } from 'three';
 import { buildMeshes } from './mesh';
 import { buildScene } from './scene';
+import { buildTrackballControls } from './controls';
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-let locked = false;
-const pending = [];
-
-const acquire = async () => {
-  if (locked) {
-    return new Promise((resolve, reject) => pending.push(resolve));
-  } else {
-    locked = true;
-  }
-};
-
-const release = async () => {
-  if (pending.length > 0) {
-    const resolve = pending.pop();
-    resolve(true);
-  } else {
-    locked = false;
-  }
-};
-
-export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
-  if (locked === true) await acquire();
-  locked = true;
-
+export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
@@ -39,7 +17,7 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
 
   const render = () => {
     renderer.clear();
@@ -50,13 +28,19 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
     renderer.render(scene, camera);
   };
 
+  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
+
   await buildMeshes({ datasets, threejsGeometry, scene });
 
-  render();
+  const track = () => {
+    trackball.update();
+    window.requestAnimationFrame(track);
+  };
 
-  await release();
+  render();
+  track();
 
   return { canvas, renderer };
 };
 
-export default staticDisplay;
+export default orbitDisplay;

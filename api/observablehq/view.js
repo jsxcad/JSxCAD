@@ -1,7 +1,8 @@
 /* global document */
 
+import { orbitDisplay, staticDisplay } from '@jsxcad/ui-threejs';
+
 import Shape from '@jsxcad/api-v1-shape';
-import { staticDisplay } from '@jsxcad/ui-threejs';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 const toCanvasFromWebglContext = (webgl) => {
@@ -26,7 +27,7 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-export const view = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+export const staticView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
                                            { offsetWidth: width, offsetHeight: height });
@@ -36,14 +37,28 @@ export const view = async (shape, { target, position, up, width = 256, height = 
   return canvas;
 };
 
-// Work around the name collision in destructuring.
-const buildView = async (...args) => view(...args);
+export const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
+  const { renderer } = await orbitDisplay({ view: { target, position, up }, threejsGeometry },
+                                          { offsetWidth: width, offsetHeight: height });
+  const canvas = toCanvasFromWebglContext(renderer.getContext());
+  canvas.style = `width: ${width}px; height: ${height}px`;
+  renderer.forceContextLoss();
+  return canvas;
+};
 
-const bigViewMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return buildView(this, { width, height, position }); };
-const bigTopViewMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return buildView(this, { width, height, position }); };
-const viewMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return buildView(this, { width, height, position }); };
-const topViewMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return buildView(this, { width, height, position }); };
-const frontViewMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return buildView(this, { width, height, position }); };
+// Work around the name collision in destructuring.
+const buildOrbitView = async (...args) => orbitView(...args);
+const buildStaticView = async (...args) => staticView(...args);
+
+const bigViewMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const bigTopViewMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const viewMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const topViewMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const frontViewMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return buildStaticView(this, { width, height, position }); };
+
+const orbitViewMethod = async function ({ width = 512, height = 512, position = [100, -100, 100] } = {}) { return buildOrbitView(this, { width, height, position }); };
+const bigOrbitViewMethod = async function ({ width = 1024, height = 1024, position = [100, -100, 100] } = {}) { return buildOrbitView(this, { width, height, position }); };
 
 Shape.prototype.view = viewMethod;
 Shape.prototype.bigView = bigViewMethod;
@@ -51,4 +66,7 @@ Shape.prototype.topView = topViewMethod;
 Shape.prototype.bigTopView = bigTopViewMethod;
 Shape.prototype.frontView = frontViewMethod;
 
-export default view;
+Shape.prototype.orbitView = orbitViewMethod;
+Shape.prototype.bigOrbitView = bigOrbitViewMethod;
+
+export default staticView;
