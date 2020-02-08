@@ -1,5 +1,5 @@
+import { staticDisplay, orbitDisplay } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
-import { staticDisplay } from './jsxcad-ui-threejs.js';
 import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import * as v1 from './jsxcad-api-v1.js';
 import { qualifyPath, boot } from './jsxcad-sys.js';
@@ -29,7 +29,7 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-const view = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+const staticView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
                                            { offsetWidth: width, offsetHeight: height });
@@ -39,20 +39,37 @@ const view = async (shape, { target, position, up, width = 256, height = 128 } =
   return canvas;
 };
 
-// Work around the name collision in destructuring.
-const buildView = async (...args) => view(...args);
+const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
+  const { renderer } = await orbitDisplay({ view: { target, position, up }, threejsGeometry },
+                                          { offsetWidth: width, offsetHeight: height });
+  const canvas = toCanvasFromWebglContext(renderer.getContext());
+  canvas.style = `width: ${width}px; height: ${height}px`;
+  renderer.forceContextLoss();
+  return canvas;
+};
 
-const bigViewMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return buildView(this, { width, height, position }); };
-const bigTopViewMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return buildView(this, { width, height, position }); };
-const viewMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return buildView(this, { width, height, position }); };
-const topViewMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return buildView(this, { width, height, position }); };
-const frontViewMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return buildView(this, { width, height, position }); };
+// Work around the name collision in destructuring.
+const buildOrbitView = async (...args) => orbitView(...args);
+const buildStaticView = async (...args) => staticView(...args);
+
+const bigViewMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const bigTopViewMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const viewMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const topViewMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return buildStaticView(this, { width, height, position }); };
+const frontViewMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return buildStaticView(this, { width, height, position }); };
+
+const orbitViewMethod = async function ({ width = 512, height = 512, position = [100, -100, 100] } = {}) { return buildOrbitView(this, { width, height, position }); };
+const bigOrbitViewMethod = async function ({ width = 1024, height = 1024, position = [100, -100, 100] } = {}) { return buildOrbitView(this, { width, height, position }); };
 
 Shape.prototype.view = viewMethod;
 Shape.prototype.bigView = bigViewMethod;
 Shape.prototype.topView = topViewMethod;
 Shape.prototype.bigTopView = bigTopViewMethod;
 Shape.prototype.frontView = frontViewMethod;
+
+Shape.prototype.orbitView = orbitViewMethod;
+Shape.prototype.bigOrbitView = bigOrbitViewMethod;
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 

@@ -69,11 +69,5 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   }
   const canvas = renderer.domElement;
 
-  const hudCanvas = document.createElement('canvas');
-  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
-  hudCanvas.id = 'hudCanvas';
-  hudCanvas.width = width;
-  hudCanvas.height = height;
-
-  return { camera, canvas, hudCanvas, renderer, scene };
+  return { camera, canvas, renderer, scene };
 };

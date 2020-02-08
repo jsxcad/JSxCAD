@@ -52809,13 +52809,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
   }
   const canvas = renderer.domElement;
 
-  const hudCanvas = document.createElement('canvas');
-  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
-  hudCanvas.id = 'hudCanvas';
-  hudCanvas.width = width;
-  hudCanvas.height = height;
-
-  return { camera, canvas, hudCanvas, renderer, scene };
+  return { camera, canvas, renderer, scene };
 };
 
 const GEOMETRY_LAYER$1 = 0;
@@ -52855,7 +52849,7 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
 
   const render = () => {
     renderer.clear();
@@ -52872,7 +52866,7 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
 
   await release();
 
-  return { canvas, hudCanvas, renderer };
+  return { canvas, renderer };
 };
 
 export { buildGui, buildGuiControls, buildMeshes, buildScene, buildTrackballControls, createResizer, drawHud, staticDisplay };
