@@ -52716,6 +52716,8 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
   }
 };
 
+/* global document */
+
 const GEOMETRY_LAYER$1 = 0;
 const PLAN_LAYER$1 = 1;
 
@@ -52730,7 +52732,12 @@ const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+
+  const viewerElement = document.createElement('div');
+  viewerElement.id = 'viewer';
+  viewerElement.style.height = '100%';
+  viewerElement.appendChild(renderer.domElement);
 
   const render = () => {
     renderer.clear();
@@ -52741,7 +52748,7 @@ const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
     renderer.render(scene, camera);
   };
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
+  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
 
   await buildMeshes({ datasets, threejsGeometry, scene });
 
@@ -52753,7 +52760,7 @@ const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   render();
   track();
 
-  return { canvas, renderer };
+  return { viewerElement, renderer };
 };
 
 const GEOMETRY_LAYER$2 = 0;
