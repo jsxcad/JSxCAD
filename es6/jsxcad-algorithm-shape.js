@@ -6850,27 +6850,29 @@ const buildWalls$3 = (polygons, floor, roof) => {
 };
 
 // Rotate a path around the X axis to produce the polygons of a solid.
-const latheImpl = (path, endRadians = Math.PI * 2, resolution = 1) => {
-  const stepRadians = endRadians / resolution;
+const loopImpl = (path, endRadians = Math.PI * 2, resolution = 16, pitch = 0) => {
+  const stepRadians = (Math.PI * 2) / resolution;
+  const pitchPerRadian = pitch / (Math.PI * 2);
   let lastPath;
   const polygons = [];
-  if (endRadians !== Math.PI * 2) {
-    polygons.push(flip(path), rotateX(endRadians, path));
+  if (endRadians !== Math.PI * 2 || pitch !== 0) {
+    // Cap the loop.
+    polygons.push(flip(path), translate$1([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path)));
   }
   for (let radians = 0; radians < endRadians; radians += stepRadians) {
-    const rotatedPath = rotateX(radians, path);
+    const rotatedPath = translate$1([pitchPerRadian * radians, 0, 0], rotateX(radians, path));
     if (lastPath !== undefined) {
       buildWalls$3(polygons, rotatedPath, lastPath);
     }
     lastPath = rotatedPath;
   }
   if (lastPath !== undefined) {
-    buildWalls$3(polygons, rotateX(endRadians, path), lastPath);
+    buildWalls$3(polygons, translate$1([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path)), lastPath);
   }
   return { solid: fromPolygons({}, polygons) };
 };
 
-const lathe = cache$1(latheImpl);
+const loop = cache$1(loopImpl);
 
 const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
 
@@ -6994,4 +6996,4 @@ const simplifyPath$1 = (path, tolerance = 0.01) => {
 const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
 const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-export { buildAdaptiveCubicBezierCurve, buildConvexHull, buildConvexMinkowskiSum, buildConvexSurfaceHull, buildFromFunction, buildFromSlices, buildGeodesicSphere, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularPolygon, buildRegularPrism, buildRegularTetrahedron, buildRingSphere, buildUniformCubicBezierCurve, extrude, lathe, regularPolygonEdgeLengthToRadius, simplifyPath$1 as simplifyPath, subdivideTriangle, subdivideTriangularMesh, toRadiusFromApothem, toRadiusFromEdge };
+export { buildAdaptiveCubicBezierCurve, buildConvexHull, buildConvexMinkowskiSum, buildConvexSurfaceHull, buildFromFunction, buildFromSlices, buildGeodesicSphere, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularPolygon, buildRegularPrism, buildRegularTetrahedron, buildRingSphere, buildUniformCubicBezierCurve, extrude, loop, regularPolygonEdgeLengthToRadius, simplifyPath$1 as simplifyPath, subdivideTriangle, subdivideTriangularMesh, toRadiusFromApothem, toRadiusFromEdge };

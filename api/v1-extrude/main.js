@@ -3,7 +3,7 @@ import extrude from './extrude';
 import fill from './fill';
 import hull from './hull';
 import interior from './interior';
-import lathe from './lathe';
+import loop from './loop';
 import minkowski from './minkowski';
 import outline from './outline';
 import section from './section';
@@ -19,7 +19,7 @@ const api = {
   fill,
   hull,
   interior,
-  lathe,
+  loop,
   minkowski,
   outline,
   section,
@@ -36,7 +36,7 @@ export {
   fill,
   hull,
   interior,
-  lathe,
+  loop,
   minkowski,
   outline,
   section,

@@ -13,7 +13,7 @@ import { buildRegularTetrahedron } from './buildRegularTetrahedron';
 import { buildRingSphere } from './buildRingSphere';
 import { buildUniformCubicBezierCurve } from './buildUniformCubicBezierCurve';
 import { extrude } from './extrude';
-import { lathe } from './lathe';
+import { loop } from './loop';
 import { regularPolygonEdgeLengthToRadius } from './regularPolygonEdgeLengthToRadius';
 import { simplifyPath } from './simplifyPath';
 import { subdivideTriangle } from './subdivideTriangle';
@@ -38,7 +38,7 @@ export {
   buildRingSphere,
   buildUniformCubicBezierCurve,
   extrude,
-  lathe,
+  loop,
   regularPolygonEdgeLengthToRadius,
   simplifyPath,
   subdivideTriangle,
