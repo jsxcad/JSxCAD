@@ -37,7 +37,7 @@ export const staticView = async (shape, { target, position, up, width = 256, hei
   return canvas;
 };
 
-export const dataURL = async (...args) => (await staticView(...args)).toDataURL('png');
+export const dataUrl = async (...args) => (await staticView(...args)).toDataURL('png');
 
 export const image = async (...args) => {
   const image = document.createElement('img');
@@ -69,11 +69,11 @@ Shape.prototype.topView = topViewMethod;
 Shape.prototype.bigTopView = bigTopViewMethod;
 Shape.prototype.frontView = frontViewMethod;
 
-const bigDataUrlMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return staticView(this, { width, height, position }); };
-const bigTopDataUrlMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return staticView(this, { width, height, position }); };
-const dataUrlMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return staticView(this, { width, height, position }); };
-const topDataUrlMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return staticView(this, { width, height, position }); };
-const frontDataUrlMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return staticView(this, { width, height, position }); };
+const bigDataUrlMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return dataUrl(this, { width, height, position }); };
+const bigTopDataUrlMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return dataUrl(this, { width, height, position }); };
+const dataUrlMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return dataUrl(this, { width, height, position }); };
+const topDataUrlMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return dataUrl(this, { width, height, position }); };
+const frontDataUrlMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return dataUrl(this, { width, height, position }); };
 
 Shape.prototype.dataUrl = dataUrlMethod;
 Shape.prototype.bigDataUrl = bigDataUrlMethod;
@@ -81,11 +81,11 @@ Shape.prototype.topDataUrl = topDataUrlMethod;
 Shape.prototype.bigTopDataUrl = bigTopDataUrlMethod;
 Shape.prototype.frontDataUrl = frontDataUrlMethod;
 
-const bigImageMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return staticView(this, { width, height, position }); };
-const bigTopImageMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return staticView(this, { width, height, position }); };
-const imageMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return staticView(this, { width, height, position }); };
-const topImageMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return staticView(this, { width, height, position }); };
-const frontImageMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return staticView(this, { width, height, position }); };
+const bigImageMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return image(this, { width, height, position }); };
+const bigTopImageMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return image(this, { width, height, position }); };
+const imageMethod = async function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) { return image(this, { width, height, position }); };
+const topImageMethod = async function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) { return image(this, { width, height, position }); };
+const frontImageMethod = async function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) { return image(this, { width, height, position }); };
 
 Shape.prototype.image = imageMethod;
 Shape.prototype.bigImage = bigImageMethod;
