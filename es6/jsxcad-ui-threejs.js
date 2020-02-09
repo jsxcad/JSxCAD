@@ -52549,12 +52549,9 @@ var threeOrbitControls = function( THREE ) {
 	return OrbitControls;
 };
 
-const OrbitControls = threeOrbitControls(THREE$1);
-
-// import TrackballControls from 'three-trackballcontrols';
-
 const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
   const { target = [0, 0, 0] } = view;
+  const OrbitControls = threeOrbitControls(THREE$1);
   const trackball = new OrbitControls(camera, viewerElement);
   trackball.keys = [65, 83, 68];
   trackball.addEventListener('change', render);
