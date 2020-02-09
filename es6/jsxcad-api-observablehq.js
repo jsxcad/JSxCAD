@@ -40,14 +40,11 @@ const staticView = async (shape, { target, position, up, width = 256, height = 1
 };
 
 const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
-  throw Error('die: ' + orbitDisplay);
-/*
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
   await orbitDisplay({ view: { target, position, up }, threejsGeometry }, container);
   return container;
-*/
 };
 
 const bigViewMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return staticView(this, { width, height, position }); };
