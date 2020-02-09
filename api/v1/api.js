@@ -34,6 +34,10 @@ export {
 } from '@jsxcad/api-v1-layout';
 
 export {
+  Line2
+} from '@jsxcad/api-v1-line2';
+
+export {
   Plan
 } from '@jsxcad/api-v1-plan';
 
