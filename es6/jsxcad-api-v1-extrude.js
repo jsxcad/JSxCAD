@@ -1,5 +1,5 @@
 import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
-import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, loop as loop$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { alignVertices, transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
 import { getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, getPaths, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
@@ -260,23 +260,20 @@ interiorMethod.signature = 'Shape -> interior() -> Shape';
  *
  **/
 
-const lathe = (shape, endDegrees = 360, { sides = 32 } = {}) => {
+const loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
   const profile = shape.chop(Y$1(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
     for (const path of geometry.paths) {
-      solids.push(Shape.fromGeometry(lathe$1(path, endDegrees * Math.PI / 180, sides)));
+      solids.push(Shape.fromGeometry(loop$1(path, endDegrees * Math.PI / 180, sides, pitch)));
     }
   }
   return assemble(...solids);
 };
 
-const latheMethod = function (...args) { return lathe(this, ...args); };
-Shape.prototype.lathe = latheMethod;
-
-lathe.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
-latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';
+const loopMethod = function (...args) { return loop(this, ...args); };
+Shape.prototype.loop = loopMethod;
 
 /**
  *
@@ -592,7 +589,7 @@ const api = {
   fill,
   hull,
   interior,
-  lathe,
+  loop,
   minkowski,
   outline,
   section,
@@ -604,4 +601,4 @@ const api = {
 };
 
 export default api;
-export { chainHull, extrude, fill, hull, interior, lathe, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { chainHull, extrude, fill, hull, interior, loop, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
