@@ -187,6 +187,9 @@ const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
 export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+  if (threejsGeometry === undefined) {
+    return;
+  }
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     for (const subGeometry of threejsGeometry.assembly) {

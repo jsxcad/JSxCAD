@@ -39,8 +39,9 @@ export const staticView = async (shape, { target, position, up, width = 256, hei
 
 export const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
-  const { viewerElement } = await orbitDisplay({ view: { target, position, up }, threejsGeometry },
-                                               { offsetWidth: width, offsetHeight: height });
+  const container = document.createElement('div');
+  container.style = `width: ${width}px; height: ${height}px`;
+  const { viewerElement } = await orbitDisplay({ view: { target, position, up }, threejsGeometry }, container);
   return viewerElement;
 };
 
