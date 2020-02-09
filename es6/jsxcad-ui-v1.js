@@ -1,8 +1,7 @@
 import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
-import { buildScene, buildGui, buildTrackballControls, createResizer, buildMeshes, buildGuiControls } from './jsxcad-ui-threejs.js';
-import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
+import { orbitDisplay } from './jsxcad-ui-threejs.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -86628,7 +86627,7 @@ Toast.displayName = 'Toast';
 Toast.Body = Body$1;
 Toast.Header = ToastHeader;
 
-/* global Blob, ResizeObserver, window */
+/* global Blob */
 
 const downloadFile = async path => {
   const data = await readFile({
@@ -86667,103 +86666,18 @@ class ViewUi extends Pane {
       position: [0, 0, 200],
       up: [0, 1, 0]
     };
-    let datasets = [];
-    let threejsGeometry;
-    let width = container.offsetWidth;
-    let height = container.offsetHeight;
+    const page = document.createElement('div');
+    page.id = 'viewer';
+    page.style.height = '100%';
     const {
-      camera,
-      renderer,
-      scene
-    } = buildScene({
-      width,
-      height,
-      view
-    });
-    const viewerElement = document.createElement('div');
-    viewerElement.id = 'viewer';
-    viewerElement.style.height = '100%';
-    viewerElement.appendChild(renderer.domElement);
-    const {
-      gui
-    } = buildGui({
-      viewerElement
-    });
-
-    const render = () => {
-      renderer.clear();
-      camera.layers.set(0);
-      renderer.render(scene, camera);
-      renderer.clearDepth();
-      camera.layers.set(1);
-      renderer.render(scene, camera);
-    };
-
-    container.appendChild(viewerElement);
-    const {
-      trackball
-    } = buildTrackballControls({
-      camera,
-      render,
+      updateGeometry
+    } = await orbitDisplay({
       view,
-      viewerElement
-    });
-    const {
-      resize
-    } = createResizer({
-      camera,
-      trackball,
-      renderer,
-      viewerElement
-    });
-    resize();
-    new ResizeObserver(() => {
-      resize();
-      render();
-    }).observe(container);
-
-    const track = () => {
-      trackball.update();
-      window.requestAnimationFrame(track);
-    };
-
-    render();
-    track();
+      geometry: {
+        assembly: []
+      }
+    }, page);
     const geometryPath = file;
-
-    const updateGeometry = async geometry => {
-      // Delete any previous dataset in the window.
-      const controllers = new Set();
-
-      for (const {
-        controller,
-        mesh
-      } of datasets) {
-        if (controller) {
-          controllers.add(controller);
-        }
-
-        scene.remove(mesh);
-      }
-
-      for (const controller of controllers) {
-        gui.remove(controller.ui);
-      }
-
-      threejsGeometry = toThreejsGeometry(geometry); // Build new datasets from the written data, and display them.
-
-      datasets = [];
-      await buildMeshes({
-        datasets,
-        threejsGeometry,
-        scene
-      });
-      buildGuiControls({
-        datasets,
-        gui
-      });
-      render();
-    };
 
     const readAndUpdate = async () => {
       const json = await readFile({}, geometryPath);
@@ -86782,6 +86696,7 @@ class ViewUi extends Pane {
     this.setState({
       watcher
     });
+    container.appendChild(page);
   }
 
   async componentWillUnmount() {

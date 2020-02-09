@@ -28,7 +28,7 @@
     "@jsxcad/math-poly3": "^0.0.79",
     "dat.gui": "0.7.6",
     "three": "^0.104.0",
-    "three-trackballcontrols": "^0.0.8"
+    "three-orbit-controls": "^82.1.0"
   },
   "devDependencies": {
     "depcheck": "^0.9.1",

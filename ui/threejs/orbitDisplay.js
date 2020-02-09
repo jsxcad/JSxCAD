@@ -1,15 +1,17 @@
-/* global document */
+/* global ResizeObserver */
+
+import { buildScene, createResizer } from './scene';
 
 import { Layers } from 'three';
 import { buildMeshes } from './mesh';
-import { buildScene } from './scene';
 import { buildTrackballControls } from './controls';
+import { toThreejsGeometry } from './toThreejsGeometry';
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
-  const datasets = [];
+export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
+  let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
@@ -19,12 +21,7 @@ export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) =>
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
-
-  const viewerElement = document.createElement('div');
-  viewerElement.id = 'viewer';
-  viewerElement.style.height = '100%';
-  viewerElement.appendChild(renderer.domElement);
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
 
   const render = () => {
     renderer.clear();
@@ -35,19 +32,34 @@ export const orbitDisplay = async ({ view = {}, threejsGeometry } = {}, page) =>
     renderer.render(scene, camera);
   };
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
+  page.appendChild(canvas);
 
-  await buildMeshes({ datasets, threejsGeometry, scene });
+  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
+  const { resize } = createResizer({ camera, trackball, renderer, viewerElement: page });
 
-  const track = () => {
-    trackball.update();
-    window.requestAnimationFrame(track);
+  new ResizeObserver(() => { resize(); render(); }).observe(page);
+
+  const updateGeometry = async (geometry) => {
+    // Delete any previous dataset in the window.
+    for (const { mesh } of datasets) {
+      scene.remove(mesh);
+    }
+
+    const threejsGeometry = toThreejsGeometry(geometry);
+
+    // Build new datasets from the written data, and display them.
+    datasets = [];
+
+    await buildMeshes({ datasets, threejsGeometry, scene });
+    render();
   };
 
-  render();
-  track();
+  if (geometry) {
+    await updateGeometry(geometry);
+    render();
+  }
 
-  return { viewerElement, renderer };
+  return { canvas, render, updateGeometry };
 };
 
 export default orbitDisplay;
