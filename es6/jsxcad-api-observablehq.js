@@ -95,8 +95,8 @@ Shape.prototype.topImage = topImageMethod;
 Shape.prototype.bigTopImage = bigTopImageMethod;
 Shape.prototype.frontImage = frontImageMethod;
 
-const orbitViewMethod = async function ({ width = 512, height = 512, position = [100, -100, 100] } = {}) { return orbitView(this, { width, height, position }); };
-const bigOrbitViewMethod = async function ({ width = 1024, height = 1024, position = [100, -100, 100] } = {}) { return orbitView(this, { width, height, position }); };
+const orbitViewMethod = async function ({ width = 512, height = 512, position = [0, -100, 0] } = {}) { return orbitView(this, { width, height, position }); };
+const bigOrbitViewMethod = async function ({ width = 1024, height = 1024, position = [0, -100, 0] } = {}) { return orbitView(this, { width, height, position }); };
 
 Shape.prototype.orbitView = orbitViewMethod;
 Shape.prototype.bigOrbitView = bigOrbitViewMethod;

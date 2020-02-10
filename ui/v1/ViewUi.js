@@ -43,7 +43,7 @@ export class ViewUi extends Pane {
     const { containerId, file } = this.state;
     const container = document.getElementById(containerId);
 
-    const view = { target: [0, 0, 0], position: [0, 0, 200], up: [0, 1, 0] };
+    const view = { target: [0, 0, 0], position: [0, -200, 0], up: [0, 1, 0] };
 
     const page = document.createElement('div');
     page.id = 'viewer';

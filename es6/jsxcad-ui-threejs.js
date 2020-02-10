@@ -52634,11 +52634,11 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
     scene.add(grid);
   }
 
-  const ambientLight = new AmbientLight(0xffffff, 0.5);
-  ambientLight.layers.set(0);
-  scene.add(ambientLight);
+  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.50);
+  hemiLight.position.set(0, 0, 300);
+  scene.add(hemiLight);
 
-  const light = new DirectionalLight(0xffffff, 0.5);
+  const light = new DirectionalLight(0xffffff, 0.50);
   light.position.set(1, 1, 1);
   light.layers.set(0);
   camera.add(light);
@@ -52684,124 +52684,81 @@ const loadTexture = (url) =>
     texture.repeat.set(1, 1);
   });
 
+const basic = { metalness: 0.0, roughness: 0.5, reflectivity: 0.5 };
+const metal = { metalness: 0.0, roughness: 0.5, reflectivity: 0.8 };
+const transparent = { opacity: 0.5, transparent: true };
+const glass = { ...transparent, metalness: 0.0, clearCoat: 1, clearCoatRoughness: 0 };
+
 const materialProperties = {
   cardboard: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/cardboard.png'
   },
   paper: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/paper.png'
   },
   wood: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.0,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/wood.png'
   },
   plastic: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.0,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/plastic.png'
   },
   leaves: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/leaves.png'
   },
   water: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/water.png'
   },
   grass: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/grass.png'
   },
   brick: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/brick.png'
   },
   circuit: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/circuit.png'
   },
   rock: {
-    roughness: 0.5,
-    metalness: 0.0,
-    reflectivity: 0.5,
+    ...basic,
     map: 'https://jsxcad.js.org/texture/rock.png'
   },
   steel: {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.5, // was 0.9
-    clearCoat: 1,
-    clearCoatRoughness: 0,
+    ...metal,
     map: 'https://jsxcad.js.org/texture/sheet-metal.png'
   },
+  'zinc-steel': {
+    ...metal,
+    map: 'https://jsxcad.js.org/texture/zinc-steel.png'
+  },
   thread: {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.9,
-    clearCoat: 1,
-    clearCoatRoughness: 0,
+    ...metal,
     map: 'https://jsxcad.js.org/texture/thread.png'
   },
   aluminium: {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.9,
-    clearCoat: 1,
-    clearCoatRoughness: 0,
+    ...metal,
     map: 'https://jsxcad.js.org/texture/aluminium.png'
   },
   brass: {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.9,
-    clearCoat: 1,
-    clearCoatRoughness: 0,
+    ...metal,
     map: 'https://jsxcad.js.org/texture/brass.png'
   },
   copper: {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.9,
-    clearCoat: 1,
-    clearCoatRoughness: 0,
+    ...metal,
     map: 'https://jsxcad.js.org/texture/copper.png'
   },
   glass: {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.9,
-    clearCoat: 1,
-    clearCoatRoughness: 0,
-    opacity: 0.5,
-    transparent: true
+    ...glass
   },
   'wet-glass': {
-    roughness: 0.5,
-    metalness: 0.5,
-    reflectivity: 0.9,
-    clearCoat: 1,
-    clearCoatRoughness: 0,
-    opacity: 0.5,
-    transparent: true,
+    ...glass,
     map: 'https://jsxcad.js.org/texture/wet-glass.png'
   }
 };

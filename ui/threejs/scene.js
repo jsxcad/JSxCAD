@@ -1,8 +1,8 @@
 import {
-  AmbientLight,
   AxesHelper,
   DirectionalLight,
   GridHelper,
+  HemisphereLight,
   PerspectiveCamera,
   Scene,
   WebGLRenderer
@@ -50,11 +50,11 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     scene.add(grid);
   }
 
-  const ambientLight = new AmbientLight(0xffffff, 0.5);
-  ambientLight.layers.set(0);
-  scene.add(ambientLight);
+  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.50);
+  hemiLight.position.set(0, 0, 300);
+  scene.add(hemiLight);
 
-  const light = new DirectionalLight(0xffffff, 0.5);
+  const light = new DirectionalLight(0xffffff, 0.50);
   light.position.set(1, 1, 1);
   light.layers.set(0);
   camera.add(light);
