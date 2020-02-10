@@ -1,12 +1,13 @@
 import { X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import './jsxcad-api-v1-deform.js';
-import './jsxcad-api-v1-extrude.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
 import './jsxcad-api-v1-shell.js';
 import './jsxcad-api-v1-view.js';
 import { addSource, readFile, getSources } from './jsxcad-sys.js';
+import { Loop } from './jsxcad-api-v1-extrude.js';
+export { Loop } from './jsxcad-api-v1-extrude.js';
 import { Shape, log } from './jsxcad-api-v1-shape.js';
 export { Shape, log } from './jsxcad-api-v1-shape.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
@@ -44,6 +45,7 @@ var api = /*#__PURE__*/Object.freeze({
   X: X,
   Y: Y,
   Z: Z,
+  Loop: Loop,
   Shape: Shape,
   log: log,
   pack: pack,
