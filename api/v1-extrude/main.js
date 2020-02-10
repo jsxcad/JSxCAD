@@ -1,9 +1,9 @@
+import Loop from './Loop';
 import chainHull from './chainHull';
 import extrude from './extrude';
 import fill from './fill';
 import hull from './hull';
 import interior from './interior';
-import loop from './loop';
 import minkowski from './minkowski';
 import outline from './outline';
 import section from './section';
@@ -14,12 +14,12 @@ import toolpath from './toolpath';
 import voxels from './voxels';
 
 const api = {
+  Loop,
   chainHull,
   extrude,
   fill,
   hull,
   interior,
-  loop,
   minkowski,
   outline,
   section,
@@ -31,12 +31,12 @@ const api = {
 };
 
 export {
+  Loop,
   chainHull,
   extrude,
   fill,
   hull,
   interior,
-  loop,
   minkowski,
   outline,
   section,

@@ -6845,7 +6845,10 @@ const buildWalls$3 = (polygons, floor, roof) => {
       continue;
     }
     // Remember that we are walking CCW.
-    polygons.push([floor[start], floor[end], roof[end], roof[start]].reverse());
+    // polygons.push([roof[start], roof[end], floor[end], floor[start]]);
+
+    polygons.push([roof[start], roof[end], floor[start]]);
+    polygons.push([roof[end], floor[end], floor[start]]);
   }
 };
 
