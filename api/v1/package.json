@@ -66,6 +66,7 @@
     "@jsxcad/api-v1-jscad": "^0.0.79",
     "@jsxcad/api-v1-layout": "^0.0.79",
     "@jsxcad/api-v1-lego": "^0.0.79",
+    "@jsxcad/api-v1-line2": "^0.0.79",
     "@jsxcad/api-v1-math": "^0.0.79",
     "@jsxcad/api-v1-motor": "^0.0.79",
     "@jsxcad/api-v1-pdf": "^0.0.79",

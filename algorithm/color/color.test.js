@@ -1,13 +1,13 @@
-import { toRgb, toTagFromRgbInt } from './color';
+import { toRgbFromTags, toTagFromRgbInt } from './color';
 
 import test from 'ava';
 
 test('Default works.', t => {
-  t.deepEqual(toRgb(['color/black']), [0, 0, 0]);
+  t.deepEqual(toRgbFromTags(['color/black']), [0, 0, 0]);
 });
 
 test('Blue works.', t => {
-  t.deepEqual(toRgb(['color/blue']), [0, 0, 255]);
+  t.deepEqual(toRgbFromTags(['color/blue']), [0, 0, 255]);
 });
 
 test('255 works.', t => {

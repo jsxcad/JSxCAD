@@ -777,7 +777,7 @@ const Torus = (radius = 1, height = 1, { segments = 32, sides = 32, rotation = 0
   Circle(height / 2, { sides })
       .rotateZ(rotation)
       .moveY(radius)
-      .lathe(360, { sides: segments })
+      .Loop(360, { sides: segments })
       .rotateY(90);
 
 /**

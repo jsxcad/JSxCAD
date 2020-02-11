@@ -221,7 +221,7 @@ const fromPolygons = (polygons, normalize) => {
                  plane,
                  polygon,
                  /* back= */back,
-                 /* coplanarBack= */same,
+                 /* coplanarBack= */back,
                  /* coplanarFront= */same,
                  /* front= */front);
   }
@@ -281,6 +281,14 @@ const merge = (front, back) => {
   return merged;
 };
 
+const clean = (polygons) => {
+  for (const polygon of polygons) {
+    delete polygon.parent;
+    delete polygon.sibling;
+  }
+  return polygons;
+};
+
 const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
@@ -311,7 +319,7 @@ const removeInteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   }
 };
 
-const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
+const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return [];
   } else if (bsp === outLeaf) {
@@ -324,12 +332,12 @@ const removeInteriorPolygonsKeepingSkin2 = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */back,
-                   /* coplanarBack= */front,
+                   /* coplanarBack= */back,
                    /* coplanarFront= */back,
                    /* front= */front);
     }
-    const trimmedFront = removeInteriorPolygonsKeepingSkin2(bsp.front, front, normalize);
-    const trimmedBack = removeInteriorPolygonsKeepingSkin2(bsp.back, back, normalize);
+    const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, front, normalize);
+    const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, back, normalize);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -371,7 +379,7 @@ const removeExteriorPolygons = (bsp, polygons, normalize) => {
   }
 };
 
-const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
+const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return keepIn(polygons);
   } else if (bsp === outLeaf) {
@@ -385,11 +393,11 @@ const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
                    polygons[i],
                    /* back= */back,
                    /* coplanarBack= */front,
-                   /* coplanarFront= */back,
+                   /* coplanarFront= */front,
                    /* front= */front);
     }
-    const trimmedFront = removeExteriorPolygons2(bsp.front, front, normalize);
-    const trimmedBack = removeExteriorPolygons2(bsp.back, back, normalize);
+    const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, front, normalize);
+    const trimmedBack = removeExteriorPolygonsForDifference(bsp.back, back, normalize);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -400,6 +408,15 @@ const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
     }
   }
 };
+
+/*
+
+There is a tension here between the local and ultimate classifications.
+
+The local classification is between front and back.
+The ultimate classification is between in and out.
+
+*/
 
 const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
@@ -420,6 +437,36 @@ const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
     }
     const trimmedFront = removeExteriorPolygonsKeepingSkin(bsp.front, front, normalize);
     const trimmedBack = removeExteriorPolygonsKeepingSkin(bsp.back, back, normalize);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
+const removeExteriorPolygonsForIntersection = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return keepIn(polygons);
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(normalize,
+                   bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */back,
+                   /* front= */front);
+    }
+    const trimmedFront = removeExteriorPolygonsForIntersection(bsp.front, front, normalize);
+    const trimmedBack = removeExteriorPolygonsForIntersection(bsp.back, back, normalize);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -463,7 +510,7 @@ const dividePolygons = (bsp, polygons, normalize) => {
 };
 
 // Merge the fragments for this one.
-const separatePolygons = (bsp, polygons, normalize) => {
+const separatePolygonsSkinIn = (bsp, polygons, normalize) => {
   if (polygons.length === 0) {
     return [];
   } else if (bsp === inLeaf) {
@@ -479,11 +526,11 @@ const separatePolygons = (bsp, polygons, normalize) => {
                    polygons[i],
                    /* back= */back,
                    /* coplanarBack= */back,
-                   /* coplanarFront= */front,
+                   /* coplanarFront= */back,
                    /* front= */front);
     }
-    const trimmedFront = separatePolygons(bsp.front, front, normalize);
-    const trimmedBack = separatePolygons(bsp.back, back, normalize);
+    const trimmedFront = separatePolygonsSkinIn(bsp.front, front, normalize);
+    const trimmedBack = separatePolygonsSkinIn(bsp.back, back, normalize);
 
     return [...trimmedFront, ...trimmedBack];
   }
@@ -492,14 +539,14 @@ const separatePolygons = (bsp, polygons, normalize) => {
 const boundPolygons = (bsp, polygons, normalize) => {
   const inPolygons = [];
   const outPolygons = [];
-  for (const polygon of separatePolygons(bsp, polygons, normalize)) {
+  for (const polygon of separatePolygonsSkinIn(bsp, polygons, normalize)) {
     if (polygon.leaf === inLeaf) {
       inPolygons.push(polygon);
     } else if (polygon.leaf === outLeaf) {
       outPolygons.push(polygon);
     }
   }
-  return [inPolygons, outPolygons];
+  return [clean(inPolygons), clean(outPolygons)];
 };
 
 const cut = (solid, surface, normalize = createNormalize3()) => {
@@ -513,7 +560,7 @@ const cut = (solid, surface, normalize = createNormalize3()) => {
   // The solid will have holes that need to be patched with the parts of the
   // planar polygon that are on the solid boundary.
   const solidBsp = fromPolygons(solidPolygons, normalize);
-  const trimmedPolygons = removeExteriorPolygons(solidBsp, surface, normalize);
+  const trimmedPolygons = removeExteriorPolygonsKeepingSkin(solidBsp, surface, normalize);
 
   return fromPolygons$1({}, [...trimmedSolid, ...trimmedPolygons]);
 };
@@ -681,11 +728,10 @@ const difference = (aSolid, ...bSolids) => {
         continue;
       }
     } else {
-      const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aIn, normalize);
-      const bTrimmed = removeExteriorPolygons2(aBsp, flip(bIn), normalize);
+      const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
+      const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
 
-      // aSolid = toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
-      a = [...aOut, ...aTrimmed, ...bTrimmed];
+      a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);
     }
   }
   return fromPolygons$1({}, a, normalize);
@@ -743,10 +789,10 @@ const intersection = (...solids) => {
         return [];
       }
     } else {
-      const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
-      const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
+      const aTrimmed = removeExteriorPolygonsForIntersection(bBsp, aIn, normalize);
+      const bTrimmed = removeExteriorPolygonsForIntersection(aBsp, bIn, normalize);
 
-      s.push([...aTrimmed, ...bTrimmed]);
+      s.push(clean([...aTrimmed, ...bTrimmed]));
     }
   }
   return fromPolygons$1({}, s[0], normalize);
@@ -813,7 +859,7 @@ const union = (...solids) => {
       const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-      s.push([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]);
+      s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
     }
   }
   return fromPolygons$1({}, s[0], normalize);
