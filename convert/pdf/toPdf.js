@@ -8,6 +8,8 @@ import { toRgbFromTags } from '@jsxcad/algorithm-color';
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
 const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
 
+const black = [0, 0, 0];
+
 // Not entirely sure how conformant this is, but it seems to work for simple
 // cases.
 
@@ -57,8 +59,8 @@ export const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } =
                           fromScaling([scale, scale, scale]));
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
   for (const { tags, surface } of getSurfaces(keptGeometry)) {
-    lines.push(toFillColor(toRgbFromTags(tags)));
-    lines.push(toStrokeColor(toRgbFromTags(tags)));
+    lines.push(toFillColor(toRgbFromTags(tags, black)));
+    lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of makeConvexSurface(surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
@@ -72,8 +74,8 @@ export const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } =
     }
   }
   for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
-    lines.push(toFillColor(toRgbFromTags(tags)));
-    lines.push(toStrokeColor(toRgbFromTags(tags)));
+    lines.push(toFillColor(toRgbFromTags(tags, black)));
+    lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     // FIX: Avoid making the surface convex.
     for (const path of makeConvexZ0Surface(z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
@@ -88,7 +90,7 @@ export const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } =
     }
   }
   for (const { tags, paths } of getPaths(keptGeometry)) {
-    lines.push(toStrokeColor(toRgbFromTags(tags)));
+    lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of paths) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];

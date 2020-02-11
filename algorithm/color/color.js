@@ -70,4 +70,10 @@ export const toTagsFromName = (name) => [toTagFromName(name)];
 
 export const toRgbFromName = (name) => toArrayFromRgbInt(toRgbIntFromName(name));
 
-export const toRgbFromTags = (tags) => toArrayFromRgbInt(toRgbIntFromTags(tags));
+export const toRgbFromTags = (tags, defaultRgb) => {
+  const rgbInt = toRgbIntFromTags(tags, null);
+  if (rgbInt === null) {
+    return defaultRgb;
+  }
+  return toArrayFromRgbInt(rgbInt);
+};

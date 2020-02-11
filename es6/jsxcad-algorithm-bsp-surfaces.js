@@ -401,6 +401,15 @@ const removeExteriorPolygons2 = (bsp, polygons, normalize) => {
   }
 };
 
+/*
+
+There is a tension here between the local and ultimate classifications.
+
+The local classification is between front and back.
+The ultimate classification is between in and out.
+
+*/
+
 const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return keepIn(polygons);
