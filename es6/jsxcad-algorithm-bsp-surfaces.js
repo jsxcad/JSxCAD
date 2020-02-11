@@ -221,7 +221,7 @@ const fromPolygons = (polygons, normalize) => {
                  plane,
                  polygon,
                  /* back= */back,
-                 /* coplanarBack= */same,
+                 /* coplanarBack= */back,
                  /* coplanarFront= */same,
                  /* front= */front);
   }
