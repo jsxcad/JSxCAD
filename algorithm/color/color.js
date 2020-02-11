@@ -1,5 +1,6 @@
-import Chroma from 'chroma-js';
+// import Chroma from 'chroma-js';
 import colors from './colors';
+import { proximity } from 'colour-proximity';
 
 const toChromaNameFromRgb = (rgb) => {
   const suffix = rgb.toString(16);
@@ -11,7 +12,7 @@ const toEntryFromChromaName = (chromaName) => {
   let bestDistance = Infinity;
   let best;
   for (const entry of colors) {
-    const distance = Chroma.distance(chromaName, toChromaNameFromRgb(entry.rgb));
+    const distance = proximity(chromaName, toChromaNameFromRgb(entry.rgb));
     if (distance < bestDistance) {
       best = entry;
       bestDistance = distance;
