@@ -1,12 +1,12 @@
 import {
-  toRgb,
+  toRgbFromTags,
   toTagFromName,
   toTagFromRgbInt,
   toTagsFromName
 } from './color';
 
 export {
-  toRgb,
+  toRgbFromTags,
   toTagFromName,
   toTagFromRgbInt,
   toTagsFromName

@@ -22,7 +22,6 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "colour-proximity": "^0.0.2"
   },
   "devDependencies": {
     "ava": "^2.4.0",

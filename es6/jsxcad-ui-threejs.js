@@ -1,4 +1,4 @@
-import { toRgb } from './jsxcad-algorithm-color.js';
+import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { toSegments } from './jsxcad-geometry-path.js';
@@ -52660,7 +52660,7 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
 };
 
 const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
-  let rgb = toRgb(tags, null);
+  let rgb = toRgbFromTags(tags, null);
   if (rgb === null) {
     rgb = otherwise;
   }
