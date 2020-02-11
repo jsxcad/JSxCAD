@@ -2131,6 +2131,12 @@ const toTagFromRgbInt = (rgbInt, defaultTag = 'color/black') =>
 
 const toTagsFromName = (name) => [toTagFromName(name)];
 
-const toRgbFromTags = (tags) => toArrayFromRgbInt(toRgbIntFromTags(tags));
+const toRgbFromTags = (tags, defaultRgb) => {
+  const rgbInt = toRgbIntFromTags(tags, null);
+  if (rgbInt === null) {
+    return defaultRgb;
+  }
+  return toArrayFromRgbInt(rgbInt);
+};
 
 export { toRgbFromTags, toTagFromName, toTagFromRgbInt, toTagsFromName };
