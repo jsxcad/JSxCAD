@@ -88,10 +88,10 @@ const agent = async ({ ask, question }) => {
         if (values[1] === true && values[2] === false) { // Solid, no wireframe
           fromGeo = api.Shape.fromGeometry(values[0]);
         } else if (values[1] === false && values[2] === true) {
-          fromGeo = api.Shape.fromGeometry(values[0]).wireframe();
+          fromGeo = api.Shape.fromGeometry(values[0]).outline();
         } else if (values[1] === true && values[2] === true) {
           const intermediate = api.Shape.fromGeometry(values[0]);
-          fromGeo = intermediate.with(intermediate.wireframe());
+          fromGeo = intermediate.with(intermediate.outline());
         } else {
           fromGeo = api.Empty(); // This should be an empty geometry
         }
