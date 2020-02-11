@@ -22,7 +22,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "chroma-js": "^2.1.0"
+    "colour-proximity": "^0.0.2"
   },
   "devDependencies": {
     "ava": "^2.4.0",
