@@ -7644,7 +7644,7 @@ UPNG.encode.alphaMul = function(img, roundA) {
 })();
 });
 
-const fromPng = async (options = {}, data) => {
+const fromPng = async (data) => {
   const img = UPNG.decode(data);
   const { width, height } = img;
   const rgba = UPNG.toRGBA8(img)[0];

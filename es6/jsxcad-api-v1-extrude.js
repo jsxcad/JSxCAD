@@ -1,19 +1,45 @@
-import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
-import { buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, lathe as lathe$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
+import Shape$1, { Shape, assemble, union, layer } from './jsxcad-api-v1-shape.js';
+import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
+import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
+import { loop, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { alignVertices, transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
-import { getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, getPaths, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
-import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
+
+/**
+ *
+ * # Lathe
+ *
+ * ::: illustration { "view": { "position": [-80, -80, 80] } }
+ * ```
+ * ```
+ * :::
+ *
+ **/
+
+const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
+  const profile = shape.chop(Y$1(0));
+  const outline = profile.outline();
+  const solids = [];
+  for (const geometry of getPaths(outline.toKeptGeometry())) {
+    for (const path of geometry.paths) {
+      solids.push(Shape.fromGeometry(loop(path, endDegrees * Math.PI / 180, sides, pitch)));
+    }
+  }
+  return assemble(...solids);
+};
+
+const LoopMethod = function (...args) { return Loop(this, ...args); };
+Shape.prototype.Loop = LoopMethod;
 
 /**
  *
@@ -248,35 +274,6 @@ Shape.prototype.interior = interiorMethod;
 
 interior.signature = 'interior(shape:Shape) -> Shape';
 interiorMethod.signature = 'Shape -> interior() -> Shape';
-
-/**
- *
- * # Lathe
- *
- * ::: illustration { "view": { "position": [-80, -80, 80] } }
- * ```
- * ```
- * :::
- *
- **/
-
-const lathe = (shape, endDegrees = 360, { sides = 32 } = {}) => {
-  const profile = shape.chop(Y$1(0));
-  const outline = profile.outline();
-  const solids = [];
-  for (const geometry of getPaths(outline.toKeptGeometry())) {
-    for (const path of geometry.paths) {
-      solids.push(Shape.fromGeometry(lathe$1(path, endDegrees * Math.PI / 180, sides)));
-    }
-  }
-  return assemble(...solids);
-};
-
-const latheMethod = function (...args) { return lathe(this, ...args); };
-Shape.prototype.lathe = latheMethod;
-
-lathe.signature = 'lathe(shape:Shape, endDegrees:number = 360, { resolution:number = 5 })';
-latheMethod.signature = 'Shape -> lathe(endDegrees:number = 360, { resolution:number = 5 })';
 
 /**
  *
@@ -587,12 +584,12 @@ const vowelsMethod = function (...args) { return voxels(this, ...args); };
 Shape.prototype.voxels = vowelsMethod;
 
 const api = {
+  Loop,
   chainHull,
   extrude,
   fill,
   hull,
   interior,
-  lathe,
   minkowski,
   outline,
   section,
@@ -604,4 +601,4 @@ const api = {
 };
 
 export default api;
-export { chainHull, extrude, fill, hull, interior, lathe, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { Loop, chainHull, extrude, fill, hull, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };

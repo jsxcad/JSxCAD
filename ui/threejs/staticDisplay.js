@@ -39,7 +39,7 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, hudCanvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
 
   const render = () => {
     renderer.clear();
@@ -56,5 +56,7 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
 
   await release();
 
-  return { canvas, hudCanvas, renderer };
+  return { canvas, renderer };
 };
+
+export default staticDisplay;

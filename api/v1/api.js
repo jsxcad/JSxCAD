@@ -9,7 +9,6 @@
 
 import '@jsxcad/api-v1-connector';
 import '@jsxcad/api-v1-deform';
-import '@jsxcad/api-v1-extrude';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-shell';
 import '@jsxcad/api-v1-view';
@@ -25,6 +24,10 @@ export {
 } from '@jsxcad/api-v1-connector';
 
 export {
+  Loop
+} from '@jsxcad/api-v1-extrude';
+
+export {
   Shape,
   log
 } from '@jsxcad/api-v1-shape';
@@ -32,6 +35,10 @@ export {
 export {
   pack
 } from '@jsxcad/api-v1-layout';
+
+export {
+  Line2
+} from '@jsxcad/api-v1-line2';
 
 export {
   Plan

@@ -22,7 +22,6 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "chroma-js": "^2.1.0"
   },
   "devDependencies": {
     "ava": "^2.4.0",

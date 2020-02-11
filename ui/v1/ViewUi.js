@@ -1,15 +1,10 @@
-/* global Blob, ResizeObserver, window */
+/* global Blob */
 
 import {
-  buildGui,
-  buildGuiControls,
-  buildMeshes,
-  buildScene,
-  buildTrackballControls,
-  createResizer
-} from '@jsxcad/ui-threejs';
-
-import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
+  readFile,
+  unwatchFiles,
+  watchFile
+} from '@jsxcad/sys';
 
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
@@ -18,8 +13,8 @@ import Pane from './Pane';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Row from 'react-bootstrap/Row';
+import { orbitDisplay } from '@jsxcad/ui-threejs';
 import saveAs from 'file-saver';
-import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 const downloadFile = async (path) => {
   const data = await readFile({ as: 'bytes' }, path);
@@ -48,83 +43,32 @@ export class ViewUi extends Pane {
     const { containerId, file } = this.state;
     const container = document.getElementById(containerId);
 
-    const view = { target: [0, 0, 0], position: [0, 0, 200], up: [0, 1, 0] };
-    let datasets = [];
-    let threejsGeometry;
-    let width = container.offsetWidth;
-    let height = container.offsetHeight;
+    const view = { target: [0, 0, 0], position: [0, -200, 0], up: [0, 1, 0] };
 
-    const { camera, renderer, scene } = buildScene({ width, height, view });
-    const viewerElement = document.createElement('div');
-    viewerElement.id = 'viewer';
-    viewerElement.style.height = '100%';
-    viewerElement.appendChild(renderer.domElement);
-    const { gui } = buildGui({ viewerElement });
+    const page = document.createElement('div');
+    page.id = 'viewer';
+    page.style.height = '100%';
 
-    const render = () => {
-      renderer.clear();
-      camera.layers.set(0);
-      renderer.render(scene, camera);
-
-      renderer.clearDepth();
-      camera.layers.set(1);
-      renderer.render(scene, camera);
-    };
-
-    container.appendChild(viewerElement);
-
-    const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
-
-    const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
-
-    resize();
-    new ResizeObserver(() => { resize(); render(); }).observe(container);
-
-    const track = () => {
-      trackball.update();
-      window.requestAnimationFrame(track);
-    };
-
-    render();
-    track();
+    const { updateGeometry } = await orbitDisplay({ view, geometry: { assembly: [] } }, page);
 
     const geometryPath = file;
 
-    const updateGeometry = async (geometry) => {
-      // FIX: Handle undefined geometry.
-      if (geometry !== undefined) {
-        // Delete any previous dataset in the window.
-        const controllers = new Set();
-        for (const { controller, mesh } of datasets) {
-          if (controller) {
-            controllers.add(controller);
-          }
-          scene.remove(mesh);
-        }
-        for (const controller of controllers) {
-          gui.remove(controller.ui);
-        }
-
-        threejsGeometry = toThreejsGeometry(geometry);
-
-        // Build new datasets from the written data, and display them.
-        datasets = [];
-
-        await buildMeshes({ datasets, threejsGeometry, scene });
-        buildGuiControls({ datasets, gui });
+    const readAndUpdate = async () => {
+      const json = await readFile({}, geometryPath);
+      if (json === undefined) {
+        await updateGeometry({ assembly: [] });
+      } else {
+        await updateGeometry(JSON.parse(json));
       }
     };
 
-    const json = await readFile({}, geometryPath);
-    if (json !== undefined) {
-      await updateGeometry(JSON.parse(json));
-      render();
-    }
+    await readAndUpdate();
 
-    const watcher = await watchFile(geometryPath,
-                                    async () => updateGeometry(JSON.parse(await readFile({}, geometryPath))));
+    const watcher = await watchFile(geometryPath, readAndUpdate);
 
     this.setState({ watcher });
+
+    container.appendChild(page);
   }
 
   async componentWillUnmount () {

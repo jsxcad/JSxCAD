@@ -29,6 +29,7 @@ cp api/v1-items/dist/main.js es6/jsxcad-api-v1-items.js
 cp api/v1-jscad/dist/main.js es6/jsxcad-api-v1-jscad.js
 cp api/v1-layout/dist/main.js es6/jsxcad-api-v1-layout.js
 cp api/v1-lego/dist/main.js es6/jsxcad-api-v1-lego.js
+cp api/v1-line2/dist/main.js es6/jsxcad-api-v1-line2.js
 cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
 cp api/v1-motor/dist/main.js es6/jsxcad-api-v1-motor.js
 cp api/v1-pdf/dist/main.js es6/jsxcad-api-v1-pdf.js

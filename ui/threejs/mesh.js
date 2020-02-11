@@ -187,6 +187,9 @@ const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
 export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+  if (threejsGeometry === undefined) {
+    return;
+  }
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     for (const subGeometry of threejsGeometry.assembly) {
@@ -239,100 +242,4 @@ export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GE
     await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
     await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
   }
-};
-
-export const drawHud = ({ camera, datasets, threejsGeometry, hudCanvas }) => {
-  if (threejsGeometry === undefined) {
-    return;
-  }
-
-  const project = (point) => {
-    const vector = new Vector3();
-    vector.set(...point);
-    // map to normalized device coordinate (NDC) space
-    vector.project(camera);
-    // map to 2D screen space
-    const x = Math.round((0 + vector.x + 1) * hudCanvas.width / 2);
-    const y = Math.round((0 - vector.y + 1) * hudCanvas.height / 2);
-    return [x, y];
-  };
-
-  const ctx = hudCanvas.getContext('2d');
-  ctx.fillStyle = '#000000';
-  ctx.strokeStyle = '#000000';
-  // ctx.font = '16px "Arial Black", Gadget, sans-serif';
-  ctx.font = '16px "Courier", Gadget, sans-serif';
-  const margin = 10;
-
-  const drawLabel = (label, x, y) => {
-    ctx.shadowBlur = 7;
-    ctx.setLineDash([3, 3]);
-
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.moveTo(x, y);
-    ctx.lineTo(margin + ctx.measureText(label).width + margin, y);
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-
-    ctx.strokeText(label, margin, y);
-    ctx.fillText(label, margin, y);
-
-    ctx.shadowBlur = 0;
-  };
-
-  const walk = (threejsGeometry) => {
-    if (threejsGeometry.assembly) {
-      threejsGeometry.assembly.forEach(walk);
-    } else if (threejsGeometry.threejsPlan) {
-      const { threejsPlan, threejsMarks, threejsVisualization } = threejsGeometry;
-      if (threejsPlan.label) {
-        ctx.strokeStyle = '#000000';
-        ctx.fillStyle = '#000000';
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 7;
-
-        const [dX, dY] = project(threejsMarks[0]);
-        ctx.beginPath();
-        ctx.arc(dX, dY, 4, 0, Math.PI * 2);
-        ctx.stroke();
-        drawLabel(threejsPlan.label, dX, dY);
-      } else if (threejsPlan.connector) {
-        ctx.strokeStyle = '#000000';
-        ctx.fillStyle = '#000000';
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 7;
-
-        const ORIGIN = 0;
-        // const AXIS = 1;
-        const ORIENTATION = 2;
-        const END = 3;
-
-        const [originX, originY] = project(threejsMarks[ORIGIN]);
-        const [endX, endY] = project(threejsMarks[END]);
-        const [orientationX, orientationY] = project(threejsMarks[ORIENTATION]);
-
-        // const normalizedLine = (origin, point, length) =>
-        //  add(origin, scale(length, normalize(subtract(point, origin))));
-
-        // const [endXN, endYN] = normalizedLine([originX, originY], [endX, endY], 25 / 2);
-        // const [orientationXN, orientationYN] = normalizedLine([originX, originY], [orientationX, orientationY], 100 / 2);
-
-        ctx.beginPath();
-        ctx.lineWidth = 1;
-        ctx.moveTo(endX, endY);
-        ctx.lineTo(originX, originY);
-        ctx.lineTo(orientationX, orientationY);
-        ctx.closePath();
-        ctx.stroke();
-
-        drawLabel(threejsPlan.connector, originX, originY);
-      }
-      if (threejsVisualization) {
-        walk(threejsVisualization);
-      }
-    }
-  };
-  walk(threejsGeometry);
 };

@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/ui-threejs",
+  "name": "@jsxcad/api-v1-line2",
   "version": "0.0.79",
-  "description": "ThreeJs ui for JSxCAD",
+  "description": "2d line api for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -10,6 +10,7 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
+    "test": "ava",
     "tests": "echo ok"
   },
   "contributors": [
@@ -21,25 +22,21 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.79",
-    "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/geometry-polygons": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "dat.gui": "0.7.6",
-    "three": "^0.104.0",
-    "three-orbit-controls": "^82.1.0"
+    "@jsxcad/math-line2": "^0.0.79"
   },
   "devDependencies": {
+    "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"
+  },
+  "ava": {
+    "require": "esm"
   },
   "publishConfig": {
     "access": "public"

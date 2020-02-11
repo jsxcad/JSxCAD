@@ -6,7 +6,7 @@ const { readFile } = fs.promises;
 
 test('Simple', async t => {
   const data = await readFile('test.png');
-  const { width, height, pixels } = await fromPng({}, data);
+  const { width, height, pixels } = await fromPng(data);
   t.is(width, 4);
   t.is(height, 4);
   t.deepEqual([...pixels],

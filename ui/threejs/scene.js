@@ -1,8 +1,8 @@
 import {
-  AmbientLight,
   AxesHelper,
   DirectionalLight,
   GridHelper,
+  HemisphereLight,
   PerspectiveCamera,
   Scene,
   WebGLRenderer
@@ -10,11 +10,14 @@ import {
 
 export const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
   const resize = () => {
-    const width = viewerElement.clientWidth - 10;
-    const height = viewerElement.clientHeight - 5;
+    // const width = viewerElement.clientWidth - 10;
+    // const height = viewerElement.clientHeight - 5;
+    const width = viewerElement.clientWidth;
+    const height = viewerElement.clientHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    trackball.handleResize();
+    // trackball.handleResize();
+    trackball.update();
     renderer.setSize(width, height);
     return { width, height };
   };
@@ -47,11 +50,11 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     scene.add(grid);
   }
 
-  const ambientLight = new AmbientLight(0xffffff, 0.5);
-  ambientLight.layers.set(0);
-  scene.add(ambientLight);
+  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.50);
+  hemiLight.position.set(0, 0, 300);
+  scene.add(hemiLight);
 
-  const light = new DirectionalLight(0xffffff, 0.5);
+  const light = new DirectionalLight(0xffffff, 0.50);
   light.position.set(1, 1, 1);
   light.layers.set(0);
   camera.add(light);
@@ -69,11 +72,5 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
   }
   const canvas = renderer.domElement;
 
-  const hudCanvas = document.createElement('canvas');
-  hudCanvas.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 2';
-  hudCanvas.id = 'hudCanvas';
-  hudCanvas.width = width;
-  hudCanvas.height = height;
-
-  return { camera, canvas, hudCanvas, renderer, scene };
+  return { camera, canvas, renderer, scene };
 };
