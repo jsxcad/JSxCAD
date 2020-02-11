@@ -7,10 +7,11 @@ import {
 
 import {
   boundPolygons,
+  clean,
   fromBoundingBoxes,
   inLeaf,
   outLeaf,
-  removeExteriorPolygonsKeepingSkin,
+  removeExteriorPolygonsForIntersection,
   fromPolygons as toBspFromPolygons
 } from './bsp';
 
@@ -74,10 +75,10 @@ export const intersection = (...solids) => {
         return [];
       }
     } else {
-      const aTrimmed = removeExteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
-      const bTrimmed = removeExteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
+      const aTrimmed = removeExteriorPolygonsForIntersection(bBsp, aIn, normalize);
+      const bTrimmed = removeExteriorPolygonsForIntersection(aBsp, bIn, normalize);
 
-      s.push([...aTrimmed, ...bTrimmed]);
+      s.push(clean([...aTrimmed, ...bTrimmed]));
     }
   }
   return toSolidFromPolygons({}, s[0], normalize);

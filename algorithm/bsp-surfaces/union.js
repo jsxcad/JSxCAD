@@ -7,6 +7,7 @@ import {
 
 import {
   boundPolygons,
+  clean,
   fromBoundingBoxes,
   inLeaf,
   outLeaf,
@@ -78,7 +79,7 @@ export const union = (...solids) => {
       const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
 
-      s.push([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]);
+      s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
     }
   }
   return toSolidFromPolygons({}, s[0], normalize);

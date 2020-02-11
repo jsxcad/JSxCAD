@@ -7,11 +7,12 @@ import {
 
 import {
   boundPolygons,
+  clean,
   fromBoundingBoxes,
   inLeaf,
   outLeaf,
-  removeExteriorPolygons2,
-  removeInteriorPolygonsKeepingSkin2,
+  removeExteriorPolygonsForDifference,
+  removeInteriorPolygonsForDifference,
   fromPolygons as toBspFromPolygons
 } from './bsp';
 
@@ -71,11 +72,10 @@ export const difference = (aSolid, ...bSolids) => {
         continue;
       }
     } else {
-      const aTrimmed = removeInteriorPolygonsKeepingSkin2(bBsp, aIn, normalize);
-      const bTrimmed = removeExteriorPolygons2(aBsp, flip(bIn), normalize);
+      const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
+      const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
 
-      // aSolid = toSolidFromPolygons({}, [...aOut, ...aTrimmed, ...bTrimmed], normalize);
-      a = [...aOut, ...aTrimmed, ...bTrimmed];
+      a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);
     }
   }
   return toSolidFromPolygons({}, a, normalize);
