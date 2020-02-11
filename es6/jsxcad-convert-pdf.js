@@ -2,7 +2,7 @@ import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { toKeptGeometry, transform, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
-import { toRgb } from './jsxcad-algorithm-color.js';
+import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
 const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
@@ -56,8 +56,8 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
                           fromScaling([scale, scale, scale]));
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
   for (const { tags, surface } of getSurfaces(keptGeometry)) {
-    lines.push(toFillColor(toRgb(tags)));
-    lines.push(toStrokeColor(toRgb(tags)));
+    lines.push(toFillColor(toRgbFromTags(tags)));
+    lines.push(toStrokeColor(toRgbFromTags(tags)));
     for (const path of makeConvex(surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
@@ -71,8 +71,8 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
     }
   }
   for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
-    lines.push(toFillColor(toRgb(tags)));
-    lines.push(toStrokeColor(toRgb(tags)));
+    lines.push(toFillColor(toRgbFromTags(tags)));
+    lines.push(toStrokeColor(toRgbFromTags(tags)));
     // FIX: Avoid making the surface convex.
     for (const path of makeConvex$1(z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
@@ -87,7 +87,7 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
     }
   }
   for (const { tags, paths } of getPaths(keptGeometry)) {
-    lines.push(toStrokeColor(toRgb(tags)));
+    lines.push(toStrokeColor(toRgbFromTags(tags)));
     for (const path of paths) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
