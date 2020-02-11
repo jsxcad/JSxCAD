@@ -409,6 +409,45 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   }
 };
 
+/*
+
+There is a tension here between the local and ultimate classifications.
+
+The local classification is between front and back.
+The ultimate classification is between in and out.
+
+*/
+
+const removeExteriorPolygonsKeepingSkin = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return keepIn(polygons);
+  } else if (bsp === outLeaf) {
+    return [];
+  } else {
+    const front = [];
+    const back = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(normalize,
+                   bsp.plane,
+                   polygons[i],
+                   /* back= */back,
+                   /* coplanarBack= */back,
+                   /* coplanarFront= */back,
+                   /* front= */front);
+    }
+    const trimmedFront = removeExteriorPolygonsKeepingSkin(bsp.front, front, normalize);
+    const trimmedBack = removeExteriorPolygonsKeepingSkin(bsp.back, back, normalize);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 const removeExteriorPolygonsForIntersection = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return keepIn(polygons);
@@ -521,7 +560,7 @@ const cut = (solid, surface, normalize = createNormalize3()) => {
   // The solid will have holes that need to be patched with the parts of the
   // planar polygon that are on the solid boundary.
   const solidBsp = fromPolygons(solidPolygons, normalize);
-  const trimmedPolygons = removeExteriorPolygons(solidBsp, surface, normalize);
+  const trimmedPolygons = removeExteriorPolygonsKeepingSkin(solidBsp, surface, normalize);
 
   return fromPolygons$1({}, [...trimmedSolid, ...trimmedPolygons]);
 };
