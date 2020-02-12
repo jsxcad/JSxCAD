@@ -1,7 +1,7 @@
+import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import Shape$1, { Shape, assemble, union, layer } from './jsxcad-api-v1-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
 import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids } from './jsxcad-geometry-tagged.js';
-import { loop, buildConvexSurfaceHull, buildConvexHull, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { alignVertices, transform as transform$1, measureBoundingBox, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -14,6 +14,58 @@ import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
 import { overcut } from './jsxcad-algorithm-toolpath.js';
+
+/**
+ *
+ * # Hull
+ *
+ * Builds the convex hull of a set of shapes.
+ *
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * hull(Point([0, 0, 10]),
+ *      Circle(10))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * assemble(Point([0, 0, 10]),
+ *          Circle(10))
+ *   .hull()
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * Point([0, 0, 10]).hull(Circle(10))
+ * ```
+ * :::
+ * ::: illustration { "view": { "position": [30, 30, 30] } }
+ * ```
+ * hull(Circle(4),
+ *      Circle(2).move(8));
+ * ```
+ * :::
+ *
+ **/
+
+const Z = 2;
+
+const Hull = (...shapes) => {
+  const points = [];
+  shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
+  // FIX: Detect planar hulls properly.
+  if (points.every(point => point[Z] === 0)) {
+    return Shape.fromGeometry(buildConvexSurfaceHull(points));
+  } else {
+    return Shape.fromGeometry(buildConvexHull(points));
+  }
+};
+
+const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
+Shape.prototype.Hull = HullMethod;
+
+Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
+HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
 
 /**
  *
@@ -65,14 +117,14 @@ Shape.prototype.Loop = LoopMethod;
  *
  **/
 
-const Z = 2;
+const Z$1 = 2;
 
 const chainHull = (...shapes) => {
   const pointsets = shapes.map(shape => shape.toPoints());
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    if (points.every(point => point[Z] === 0)) {
+    if (points.every(point => point[Z$1] === 0)) {
       chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
     } else {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -180,58 +232,6 @@ Shape.prototype.withFill = withFillMethod;
 fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
 fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
 withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
-
-/**
- *
- * # Hull
- *
- * Builds the convex hull of a set of shapes.
- *
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * hull(Point([0, 0, 10]),
- *      Circle(10))
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * assemble(Point([0, 0, 10]),
- *          Circle(10))
- *   .hull()
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * Point([0, 0, 10]).hull(Circle(10))
- * ```
- * :::
- * ::: illustration { "view": { "position": [30, 30, 30] } }
- * ```
- * hull(Circle(4),
- *      Circle(2).move(8));
- * ```
- * :::
- *
- **/
-
-const Z$1 = 2;
-
-const hull = (...shapes) => {
-  const points = [];
-  shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
-  // FIX: Detect planar hulls properly.
-  if (points.every(point => point[Z$1] === 0)) {
-    return Shape.fromGeometry(buildConvexSurfaceHull(points));
-  } else {
-    return Shape.fromGeometry(buildConvexHull(points));
-  }
-};
-
-const hullMethod = function (...shapes) { return hull(this, ...shapes); };
-Shape.prototype.hull = hullMethod;
-
-hull.signature = 'hull(shape:Shape, ...shapes:Shape) -> Shape';
-hullMethod.signature = 'Shape -> hull(...shapes:Shape) -> Shape';
 
 /**
  *
@@ -584,11 +584,11 @@ const vowelsMethod = function (...args) { return voxels(this, ...args); };
 Shape.prototype.voxels = vowelsMethod;
 
 const api = {
+  Hull,
   Loop,
   chainHull,
   extrude,
   fill,
-  hull,
   interior,
   minkowski,
   outline,
@@ -601,4 +601,4 @@ const api = {
 };
 
 export default api;
-export { Loop, chainHull, extrude, fill, hull, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };
+export { Hull, Loop, chainHull, extrude, fill, interior, minkowski, outline, section, squash, stretch, sweep, toolpath, voxels };

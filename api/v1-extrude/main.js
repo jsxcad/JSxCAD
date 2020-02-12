@@ -1,8 +1,8 @@
+import Hull from './Hull';
 import Loop from './Loop';
 import chainHull from './chainHull';
 import extrude from './extrude';
 import fill from './fill';
-import hull from './hull';
 import interior from './interior';
 import minkowski from './minkowski';
 import outline from './outline';
@@ -14,11 +14,11 @@ import toolpath from './toolpath';
 import voxels from './voxels';
 
 const api = {
+  Hull,
   Loop,
   chainHull,
   extrude,
   fill,
-  hull,
   interior,
   minkowski,
   outline,
@@ -31,11 +31,11 @@ const api = {
 };
 
 export {
+  Hull,
   Loop,
   chainHull,
   extrude,
   fill,
-  hull,
   interior,
   minkowski,
   outline,
