@@ -170,7 +170,7 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
   return {
     // Bottom
     kind: BRANCH,
-    plane: [0, 0, -1, -(cMin[Z] - EPSILON * 10)],
+    plane: [0, 0, -1, -cMin[Z] + EPSILON * 10],
     front,
     back: {
       // Top
@@ -180,7 +180,7 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
       back: {
         // Left
         kind: BRANCH,
-        plane: [-1, 0, 0, -(cMin[X] - EPSILON * 10)],
+        plane: [-1, 0, 0, -cMin[X] + EPSILON * 10],
         front,
         back: {
           // Right
@@ -190,7 +190,7 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
           back: {
             // Back
             kind: BRANCH,
-            plane: [0, -1, 0, -(cMin[Y] - EPSILON * 10)],
+            plane: [0, -1, 0, -cMin[Y] + EPSILON * 10],
             front,
             back: {
               // Front
@@ -325,19 +325,19 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   } else if (bsp === outLeaf) {
     return keepOut(polygons);
   } else {
-    const front = [];
-    const back = [];
+    const outward = [];
+    const inward = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* coplanarBack= */back,
-                   /* coplanarFront= */back,
-                   /* front= */front);
+                   /* back= */inward,
+                   /* coplanarBack= */inward,
+                   /* coplanarFront= */inward,
+                   /* front= */outward);
     }
-    const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, front, normalize);
-    const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, back, normalize);
+    const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
+    const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, inward, normalize);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -385,19 +385,19 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   } else if (bsp === outLeaf) {
     return [];
   } else {
-    const front = [];
-    const back = [];
+    const outward = [];
+    const inward = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* coplanarBack= */front,
-                   /* coplanarFront= */front,
-                   /* front= */front);
+                   /* back= */inward,
+                   /* coplanarBack= */outward,
+                   /* coplanarFront= */outward,
+                   /* front= */outward);
     }
-    const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, front, normalize);
-    const trimmedBack = removeExteriorPolygonsForDifference(bsp.back, back, normalize);
+    const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, outward, normalize);
+    const trimmedBack = removeExteriorPolygonsForDifference(bsp.back, inward, normalize);
 
     if (trimmedFront.length === 0) {
       return trimmedBack;
@@ -705,7 +705,9 @@ const difference = (aSolid, ...bSolids) => {
 
     const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
+    // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
+    // const bBsp = toBspFromPolygons(bIn, normalize);
+    const bBsp = fromPolygons(bPolygons, normalize);
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
