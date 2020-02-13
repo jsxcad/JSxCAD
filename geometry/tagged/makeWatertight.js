@@ -1,6 +1,14 @@
+import {
+  isWatertight as isWatertightSolid,
+  makeWatertight as makeWatertightSolid
+} from '@jsxcad/geometry-solid';
+
+import {
+  rewrite,
+  visit
+} from './visit';
+
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { makeWatertight as makeWatertightSolid } from '@jsxcad/geometry-solid';
-import { rewrite } from './visit';
 
 export const makeWatertight = (geometry, normalize = createNormalize3(), onFixed) =>
   rewrite(geometry,
@@ -14,3 +22,15 @@ export const makeWatertight = (geometry, normalize = createNormalize3(), onFixed
               return descend();
             }
           });
+
+export const isWatertight = (geometry, normalize = createNormalize3()) => {
+  let watertight = true;
+  visit(geometry,
+        (geometry, descend) => {
+          if (geometry.solid && !isWatertightSolid(geometry.solid)) {
+            watertight = false;
+          }
+          return descend();
+        });
+  return watertight;
+};

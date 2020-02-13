@@ -11,6 +11,7 @@ import {
   fromPathToZ0Surface,
   fromPathsToSurface,
   fromPathsToZ0Surface,
+  isWatertight,
   makeWatertight,
   toDisjointGeometry,
   toKeptGeometry as toKeptTaggedGeometry,
@@ -101,26 +102,18 @@ export class Shape {
   }
 
   assertWatertight () {
-    const onFixed = (fixed) => {
-      if (fixed) {
-        throw Error('not watertight');
-      }
-    };
-    this.makeWatertight(onFixed);
+    if (!this.isWatertight()) {
+      throw Error('not watertight');
+    }
     return this;
   }
 
   isWatertight () {
-    let notWatertight = false;
-    const onFixed = (fixed) => {
-      notWatertight = fixed;
-    };
-    this.makeWatertight(onFixed);
-    return notWatertight === false;
+    return isWatertight(this.toKeptGeometry());
   }
 
   makeWatertight (onFixed = (_ => _)) {
-    return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined, onFixed));
+    return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined));
   }
 }
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
