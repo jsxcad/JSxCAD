@@ -49,7 +49,9 @@ export const difference = (aSolid, ...bSolids) => {
 
     const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
+    // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
+    // const bBsp = toBspFromPolygons(bIn, normalize);
+    const bBsp = toBspFromPolygons(bPolygons, normalize);
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.

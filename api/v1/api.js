@@ -24,6 +24,7 @@ export {
 } from '@jsxcad/api-v1-connector';
 
 export {
+  ChainedHull,
   Hull,
   Loop
 } from '@jsxcad/api-v1-extrude';
