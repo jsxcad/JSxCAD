@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
@@ -81,6 +81,29 @@ class Shape {
       throw Error('die');
     }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+  }
+
+  assertWatertight () {
+    const onFixed = (fixed) => {
+      if (fixed) {
+        throw Error('not watertight');
+      }
+    };
+    this.makeWatertight(onFixed);
+    return this;
+  }
+
+  isWatertight () {
+    let notWatertight = false;
+    const onFixed = (fixed) => {
+      notWatertight = fixed;
+    };
+    this.makeWatertight(onFixed);
+    return notWatertight === false;
+  }
+
+  makeWatertight (onFixed = (_ => _)) {
+    return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined, onFixed));
   }
 }
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);

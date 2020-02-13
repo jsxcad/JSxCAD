@@ -187,10 +187,18 @@ const extrude = (shape, height = 1, depth = 0) => {
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-      const z0SolidGeometry = extrude$1(transform(toZ0, surface), height, depth);
-      const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
-      solids.push(Shape.fromGeometry({ solid, tags }));
+      const plane = toPlane$1(surface);
+      if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
+        // Detect Z0.
+        // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
+        const solid = extrude$1(surface, height, depth);
+        solids.push(Shape.fromGeometry({ solid, tags }));
+      } else {
+        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
+        const z0SolidGeometry = extrude$1(transform(toZ0, surface), height, depth);
+        const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
+        solids.push(Shape.fromGeometry({ solid, tags }));
+      }
     }
   }
   // Keep plans.
