@@ -5,7 +5,7 @@ import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 import { intersection, union } from '@jsxcad/api-v1-shape';
 import { clearCache } from '@jsxcad/cache';
-import { hull } from '@jsxcad/api-v1-extrude';
+import { Hull } from '@jsxcad/api-v1-extrude';
 import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
@@ -70,7 +70,7 @@ const agent = async ({ ask, question }) => {
         return api.Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
       case 'hull':
         values = values.map(api.Shape.fromGeometry);
-        return hull(...values).toDisjointGeometry();
+        return Hull(...values).toDisjointGeometry();
       case 'intersection':
         return intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       case 'rectangle':
