@@ -23309,32 +23309,18 @@ vertex 14.40754 -1.71792 -5
 vertex 15.40372 -2.28673 -5
 endloop
 endfacet
-facet normal 0 0 0.9999999999999999
+facet normal 0 0 -1
 outer loop
-vertex 16.82565 -2.40786 -5
 vertex 16.82565 -2.40787 -5
-vertex 17.34227 -2.24033 -5
-endloop
-endfacet
-facet normal -2.449807230075508e-13 0 -1
-outer loop
-vertex 16.82565 -2.40786 -5
 vertex 17.34227 -2.24033 -5
 vertex 18.6766 -1.81465 -5
 endloop
 endfacet
-facet normal 2.449807230075508e-13 0 1
+facet normal 0 0 1
 outer loop
-vertex 16.82565 -2.40786 -5
+vertex 16.82565 -2.40787 -5
 vertex 18.6766 -1.81465 -5
 vertex 17.34227 -2.24033 -5
-endloop
-endfacet
-facet normal 0 0 -0.9999999999999999
-outer loop
-vertex 16.82565 -2.40786 -5
-vertex 17.34227 -2.24033 -5
-vertex 16.82565 -2.40787 -5
 endloop
 endfacet
 facet normal 0 0 -1
@@ -23449,20 +23435,6 @@ vertex 16.27494 -2.48407 -5
 vertex 16.82565 -2.40787 -5
 endloop
 endfacet
-facet normal 0 0 1
-outer loop
-vertex 16.09883 -2.81687 -5
-vertex 16.82565 -2.40787 -5
-vertex 16.82565 -2.40786 -5
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
-vertex 16.09883 -2.81687 -5
-vertex 16.82565 -2.40786 -5
-vertex 16.82565 -2.40787 -5
-endloop
-endfacet
 facet normal 0 0 -1
 outer loop
 vertex 16.87449 -1.27753 -5
@@ -23486,20 +23458,6 @@ endloop
 endfacet
 facet normal 0 0 -1
 outer loop
-vertex 18.4171 -2.00965 -5
-vertex 16.82565 -2.40787 -5
-vertex 16.82565 -2.40786 -5
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 18.4171 -2.00965 -5
-vertex 16.82565 -2.40786 -5
-vertex 16.82565 -2.40787 -5
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
 vertex 17.66827 -1.64911 -5
 vertex 16.87449 -1.27753 -5
 vertex 16.46626 -0.75238 -5
@@ -23510,20 +23468,6 @@ outer loop
 vertex 16.65093 1.50817 -5
 vertex 17.07113 1.49296 -5
 vertex 17.23079 1.25318 -5
-endloop
-endfacet
-facet normal 0 0 -1
-outer loop
-vertex 18.4171 -2.00965 -5
-vertex 16.82565 -2.40787 -5
-vertex 16.82565 -2.40786 -5
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 18.4171 -2.00965 -5
-vertex 16.82565 -2.40786 -5
-vertex 16.82565 -2.40787 -5
 endloop
 endfacet
 facet normal 0 0 -1

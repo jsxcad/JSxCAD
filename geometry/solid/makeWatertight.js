@@ -29,7 +29,7 @@ export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = 
     }
 
     const watertightSolid = [];
-    for (const surface of solid) {
+    for (const surface of reconciledSolid) {
       const watertightPaths = [];
       for (const path of surface) {
         const watertightPath = [];
@@ -67,4 +67,25 @@ export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = 
   }
 
   return solid[watertight];
+};
+
+export const isWatertight = (solid) => {
+  const edges = new Set();
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const [start, end] of getEdges(path)) {
+        edges.add(`${JSON.stringify([start, end])}`);
+      }
+    }
+  }
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const [start, end] of getEdges(path)) {
+        if (!edges.has(`${JSON.stringify([end, start])}`)) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 };
