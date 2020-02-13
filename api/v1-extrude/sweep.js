@@ -1,6 +1,6 @@
 import { Shape, assemble, union } from '@jsxcad/api-v1-shape';
 
-import { chainHull } from './chainHull';
+import ChainedHull from './ChainedHull';
 import { getPaths } from '@jsxcad/geometry-tagged';
 
 /**
@@ -16,7 +16,7 @@ export const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      chains.push(chainHull(...path.map(point => tool.move(...point))));
+      chains.push(ChainedHull(...path.map(point => tool.move(...point))));
     }
   }
   return union(...chains);

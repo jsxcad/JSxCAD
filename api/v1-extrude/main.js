@@ -1,6 +1,6 @@
+import ChainedHull from './ChainedHull';
 import Hull from './Hull';
 import Loop from './Loop';
-import chainHull from './chainHull';
 import extrude from './extrude';
 import fill from './fill';
 import interior from './interior';
@@ -14,9 +14,9 @@ import toolpath from './toolpath';
 import voxels from './voxels';
 
 const api = {
+  ChainedHull,
   Hull,
   Loop,
-  chainHull,
   extrude,
   fill,
   interior,
@@ -31,9 +31,9 @@ const api = {
 };
 
 export {
+  ChainedHull,
   Hull,
   Loop,
-  chainHull,
   extrude,
   fill,
   interior,

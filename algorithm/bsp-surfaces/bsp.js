@@ -332,7 +332,6 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   } else {
     const outward = [];
     const inward = [];
-    const cpFront = [];
     for (let i = 0; i < polygons.length; i++) {
       splitPolygon(normalize,
                    bsp.plane,

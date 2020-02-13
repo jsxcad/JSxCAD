@@ -6,8 +6,6 @@
   "main": "main.js",
   "module": "dist/main.js",
   "scripts": {
-    "build:UserGuide": "node -r esm buildUserGuide",
-    "build:UserGuide2": "node -r esm buildUserGuide2",
     "depcheck": "echo ok",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
