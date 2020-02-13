@@ -1,5 +1,20 @@
-import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
-import { rewrite, visit } from './visit';
+import {
+  fromScaling,
+  fromTranslation,
+  fromXRotation,
+  fromYRotation,
+  fromZRotation
+} from '@jsxcad/math-mat4';
+
+import {
+  isWatertight,
+  makeWatertight
+} from './makeWatertight';
+
+import {
+  rewrite,
+  visit
+} from './visit';
 
 import { allTags } from './allTags';
 import { assemble } from './assemble';
@@ -72,8 +87,10 @@ export {
   getTags,
   getZ0Surfaces,
   intersection,
+  isWatertight,
   keep,
   map,
+  makeWatertight,
   measureBoundingBox,
   nonNegative,
   outline,

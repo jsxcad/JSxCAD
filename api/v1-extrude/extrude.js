@@ -1,5 +1,4 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
-
 import { alignVertices, transform as transformSolid } from '@jsxcad/geometry-solid';
 import { getPlans, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
@@ -56,10 +55,18 @@ export const extrude = (shape, height = 1, depth = 0) => {
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
-      const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
-      const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, depth);
-      const solid = alignVertices(transformSolid(fromZ0, z0SolidGeometry));
-      solids.push(Shape.fromGeometry({ solid, tags }));
+      const plane = toPlaneOfSurface(surface);
+      if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
+        // Detect Z0.
+        // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
+        const solid = extrudeAlgorithm(surface, height, depth);
+        solids.push(Shape.fromGeometry({ solid, tags }));
+      } else {
+        const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
+        const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, depth);
+        const solid = alignVertices(transformSolid(fromZ0, z0SolidGeometry));
+        solids.push(Shape.fromGeometry({ solid, tags }));
+      }
     }
   }
   // Keep plans.

@@ -37,7 +37,7 @@ import { Shape } from '@jsxcad/api-v1-shape';
 
 const Z = 2;
 
-export const hull = (...shapes) => {
+export const Hull = (...shapes) => {
   const points = [];
   shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
   // FIX: Detect planar hulls properly.
@@ -48,10 +48,10 @@ export const hull = (...shapes) => {
   }
 };
 
-const hullMethod = function (...shapes) { return hull(this, ...shapes); };
-Shape.prototype.hull = hullMethod;
+const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
+Shape.prototype.Hull = HullMethod;
 
-hull.signature = 'hull(shape:Shape, ...shapes:Shape) -> Shape';
-hullMethod.signature = 'Shape -> hull(...shapes:Shape) -> Shape';
+Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
+HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
 
-export default hull;
+export default Hull;

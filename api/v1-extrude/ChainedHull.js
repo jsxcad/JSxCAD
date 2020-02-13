@@ -3,7 +3,7 @@ import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/algorithm-shape
 
 /**
  *
- * # Chain Hull
+ * # Chained Hull
  *
  * Builds a convex hull between adjacent pairs in a sequence of shapes.
  *
@@ -27,7 +27,7 @@ import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/algorithm-shape
 
 const Z = 2;
 
-export const chainHull = (...shapes) => {
+export const ChainedHull = (...shapes) => {
   const pointsets = shapes.map(shape => shape.toPoints());
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
@@ -41,9 +41,9 @@ export const chainHull = (...shapes) => {
   return union(...chain);
 };
 
-const chainHullMethod = function (...args) { return chainHull(this, ...args); };
-Shape.prototype.chainHull = chainHullMethod;
+const ChainedHullMethod = function (...args) { return ChainedHull(this, ...args); };
+Shape.prototype.ChainedHull = ChainedHullMethod;
 
-chainHull.signature = 'chainHull(...shapes:Shape) -> Shape';
+ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
 
-export default chainHull;
+export default ChainedHull;

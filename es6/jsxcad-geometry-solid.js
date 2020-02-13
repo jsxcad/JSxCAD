@@ -1,10 +1,97 @@
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 export { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { deduplicate, getEdges } from './jsxcad-geometry-path.js';
-import { toPlane } from './jsxcad-math-poly3.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
+import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { toPlane } from './jsxcad-math-poly3.js';
+
+const THRESHOLD = 1e-5;
+
+// We expect a solid of reconciled triangles.
+
+const watertight = Symbol('watertight');
+
+const makeWatertight = (solid, normalize = createNormalize3(), onFixed = (_ => _)) => {
+  if (!solid[watertight]) {
+    let fixed = false;
+    const vertices = new Set();
+
+    const reconciledSolid = [];
+    for (const surface of solid) {
+      const reconciledSurface = [];
+      for (const path of surface) {
+        const reconciledPath = [];
+        for (const point of path) {
+          const reconciledPoint = normalize(point);
+          reconciledPath.push(reconciledPoint);
+          vertices.add(reconciledPoint);
+        }
+        reconciledSurface.push(reconciledPath);
+      }
+      reconciledSolid.push(reconciledSurface);
+    }
+
+    const watertightSolid = [];
+    for (const surface of reconciledSolid) {
+      const watertightPaths = [];
+      for (const path of surface) {
+        const watertightPath = [];
+        for (const [start, end] of getEdges(path)) {
+          watertightPath.push(start);
+          const span = distance(start, end);
+          const colinear = [];
+          for (const vertex of vertices) {
+            // FIX: Threshold
+            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+              if (vertex !== start && vertex !== end) {
+                // FIX: Clip an ear instead.
+                // Vertex is on the open edge.
+                colinear.push(vertex);
+                fixed = true;
+              }
+            }
+          }
+          // Arrange by distance from start.
+          colinear.sort((a, b) => distance(start, a) - distance(start, b));
+          // Insert into the path.
+          watertightPath.push(...colinear);
+        }
+        watertightPaths.push(watertightPath);
+      }
+      watertightSolid.push(watertightPaths);
+    }
+    // At this point we should have the correct structure for assembly into a solid.
+    // We just need to ensure triangulation to support deformation.
+
+    onFixed(fixed);
+
+    solid[watertight] = watertightSolid;
+  }
+
+  return solid[watertight];
+};
+
+const isWatertight = (solid) => {
+  const edges = new Set();
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const [start, end] of getEdges(path)) {
+        edges.add(`${JSON.stringify([start, end])}`);
+      }
+    }
+  }
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const [start, end] of getEdges(path)) {
+        if (!edges.has(`${JSON.stringify([end, start])}`)) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+};
 
 const transform = (matrix, solid) => solid.map(surface => transform$1(matrix, surface));
 
@@ -200,57 +287,6 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
   return defragmented;
 };
 
-// We expect a solid of reconciled triangles.
-
-const watertight = Symbol('watertight');
-
-const makeWatertight = (solid, normalize = createNormalize3()) => {
-  if (!solid[watertight]) {
-    const vertices = new Set();
-    for (const surface of solid) {
-      for (const path of surface) {
-        for (const point of path) {
-          const reconciledPoint = normalize(point);
-          vertices.add(reconciledPoint);
-        }
-      }
-    }
-
-    const watertightSolid = [];
-    for (const surface of solid) {
-      const watertightPaths = [];
-      for (const path of surface) {
-        const watertightPath = [];
-        for (const [start, end] of getEdges(path)) {
-          watertightPath.push(start);
-          const span = distance(start, end);
-          const colinear = [];
-          for (const vertex of vertices) {
-            // FIX: Threshold
-            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
-              // FIX: Clip an ear instead.
-              // Vertex is on the open edge.
-              colinear.push(vertex);
-            }
-          }
-          // Arrange by distance from start.
-          colinear.sort((a, b) => distance(start, a) - distance(start, b));
-          // Insert into the path.
-          watertightPath.push(...colinear);
-        }
-        watertightPaths.push(watertightPath);
-      }
-      watertightSolid.push(watertightPaths);
-    }
-    // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure triangulation to support deformation.
-
-    solid[watertight] = watertightSolid;
-  }
-
-  return solid[watertight];
-};
-
 /** Measure the bounding sphere of the given poly3
  * @param {poly3} the poly3 to measure
  * @returns computed bounding sphere; center (vec3) and radius
@@ -284,4 +320,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };

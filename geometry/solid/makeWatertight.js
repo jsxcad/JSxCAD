@@ -2,12 +2,15 @@ import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 
+const THRESHOLD = 1e-5;
+
 // We expect a solid of reconciled triangles.
 
 const watertight = Symbol('watertight');
 
-export const makeWatertight = (solid, normalize = createNormalize3()) => {
+export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = (_ => _)) => {
   if (!solid[watertight]) {
+    let fixed = false;
     const vertices = new Set();
 
     const reconciledSolid = [];
@@ -26,7 +29,7 @@ export const makeWatertight = (solid, normalize = createNormalize3()) => {
     }
 
     const watertightSolid = [];
-    for (const surface of solid) {
+    for (const surface of reconciledSolid) {
       const watertightPaths = [];
       for (const path of surface) {
         const watertightPath = [];
@@ -36,10 +39,13 @@ export const makeWatertight = (solid, normalize = createNormalize3()) => {
           const colinear = [];
           for (const vertex of vertices) {
             // FIX: Threshold
-            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
-              // FIX: Clip an ear instead.
-              // Vertex is on the open edge.
-              colinear.push(vertex);
+            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+              if (vertex !== start && vertex !== end) {
+                // FIX: Clip an ear instead.
+                // Vertex is on the open edge.
+                colinear.push(vertex);
+                fixed = true;
+              }
             }
           }
           // Arrange by distance from start.
@@ -55,8 +61,31 @@ export const makeWatertight = (solid, normalize = createNormalize3()) => {
     // At this point we should have the correct structure for assembly into a solid.
     // We just need to ensure triangulation to support deformation.
 
+    onFixed(fixed);
+
     solid[watertight] = watertightSolid;
   }
 
   return solid[watertight];
+};
+
+export const isWatertight = (solid) => {
+  const edges = new Set();
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const [start, end] of getEdges(path)) {
+        edges.add(`${JSON.stringify([start, end])}`);
+      }
+    }
+  }
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const [start, end] of getEdges(path)) {
+        if (!edges.has(`${JSON.stringify([end, start])}`)) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 };

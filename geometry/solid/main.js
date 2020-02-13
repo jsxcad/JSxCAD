@@ -1,3 +1,4 @@
+import { isWatertight, makeWatertight } from './makeWatertight';
 import { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
 
 import { alignVertices } from './alignVertices';
@@ -9,7 +10,6 @@ import { eachPoint } from './eachPoint';
 import { findOpenEdges } from './findOpenEdges';
 import { flip } from './flip';
 import { fromPolygons } from './fromPolygons';
-import { makeWatertight } from './makeWatertight';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { outline } from './outline';
@@ -27,6 +27,7 @@ export {
   findOpenEdges,
   flip,
   fromPolygons,
+  isWatertight,
   makeWatertight,
   measureBoundingBox,
   measureBoundingSphere,
