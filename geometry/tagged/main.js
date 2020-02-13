@@ -29,6 +29,7 @@ import { getTags } from './getTags';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { intersection } from './intersection';
 import { keep } from './keep';
+import { makeWatertight } from './makeWatertight';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
 import { nonNegative } from './nonNegative';
@@ -74,6 +75,7 @@ export {
   intersection,
   keep,
   map,
+  makeWatertight,
   measureBoundingBox,
   nonNegative,
   outline,
