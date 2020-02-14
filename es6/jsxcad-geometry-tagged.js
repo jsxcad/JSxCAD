@@ -1,6 +1,7 @@
-import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1, outline as outline$1 } from './jsxcad-geometry-solid.js';
+import { makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1, outline as outline$1 } from './jsxcad-geometry-solid.js';
+import { close } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
 import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
@@ -106,7 +107,7 @@ const makeWatertight = (geometry, normalize = createNormalize3(), onFixed) =>
             }
           });
 
-const isWatertight = (geometry, normalize = createNormalize3()) => {
+const isWatertight = (geometry) => {
   let watertight = true;
   visit(geometry,
         (geometry, descend) => {
@@ -116,6 +117,18 @@ const isWatertight = (geometry, normalize = createNormalize3()) => {
           return descend();
         });
   return watertight;
+};
+
+const findOpenEdges = (geometry) => {
+  const openEdges = [];
+  visit(geometry,
+        (geometry, descend) => {
+          if (geometry.solid) {
+            openEdges.push(...findOpenEdges$1(geometry.solid).map(close));
+          }
+          return descend();
+        });
+  return { paths: openEdges };
 };
 
 // Remove any symbols (which refer to cached values).
@@ -1138,4 +1151,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isWatertight, keep, makeWatertight, map, measureBoundingBox, nonNegative, outline, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isWatertight, keep, makeWatertight, map, measureBoundingBox, nonNegative, outline, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };

@@ -116,6 +116,7 @@ export class Shape {
     return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined));
   }
 }
+
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
 Shape.fromClosedPath = (path, context) => fromGeometry({ paths: [closePath(path)] }, context);
