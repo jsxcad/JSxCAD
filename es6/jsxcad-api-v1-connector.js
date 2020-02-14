@@ -484,8 +484,11 @@ const Y$2 = (y = 0) => {
 
 const toShape = (connector) => connector.getContext(shapeToConnect);
 
-const dropConnector = (shape, ...connectors) =>
-  Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+const dropConnector = (shape, ...connectors) => {
+  if (shape !== undefined) {
+    return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+  }
+};
 
 const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
 Shape.prototype.dropConnector = dropConnectorMethod;
@@ -541,9 +544,15 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssembl
 
   if (doConnect) {
     if (doAssemble) {
-      return aMovedShape.Item().with(bShape).Item();
+      return dropConnector(aMovedShape, aConnector.plan.connector)
+          .Item()
+          .with(dropConnector(bShape, bConnector.plan.connector))
+          .Item();
     } else {
-      return aMovedShape.Item().layer(bShape).Item();
+      return dropConnector(aMovedShape, aConnector.plan.connector)
+          .Item()
+          .layer(dropConnector(bShape, bConnector.plan.connector))
+          .Item();
     }
     /*
     return Shape.fromGeometry(
