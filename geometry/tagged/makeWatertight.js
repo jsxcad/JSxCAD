@@ -1,4 +1,5 @@
 import {
+  findOpenEdges as findOpenEdgesOfSolid,
   isWatertight as isWatertightSolid,
   makeWatertight as makeWatertightSolid
 } from '@jsxcad/geometry-solid';
@@ -8,6 +9,7 @@ import {
   visit
 } from './visit';
 
+import { close } from '@jsxcad/geometry-path';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 
 export const makeWatertight = (geometry, normalize = createNormalize3(), onFixed) =>
@@ -23,7 +25,7 @@ export const makeWatertight = (geometry, normalize = createNormalize3(), onFixed
             }
           });
 
-export const isWatertight = (geometry, normalize = createNormalize3()) => {
+export const isWatertight = (geometry) => {
   let watertight = true;
   visit(geometry,
         (geometry, descend) => {
@@ -33,4 +35,16 @@ export const isWatertight = (geometry, normalize = createNormalize3()) => {
           return descend();
         });
   return watertight;
+};
+
+export const findOpenEdges = (geometry) => {
+  const openEdges = [];
+  visit(geometry,
+        (geometry, descend) => {
+          if (geometry.solid) {
+            openEdges.push(...findOpenEdgesOfSolid(geometry.solid).map(close));
+          }
+          return descend();
+        });
+  return { paths: openEdges };
 };

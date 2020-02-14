@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
-import { fromPolygons, findOpenEdges, alignVertices } from './jsxcad-geometry-solid.js';
+import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { log as log$1, writeFile, readFile, getSources } from './jsxcad-sys.js';
@@ -98,6 +98,7 @@ class Shape {
     return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined));
   }
 }
+
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
 Shape.fromClosedPath = (path, context) => fromGeometry({ paths: [close(path)] }, context);
@@ -520,10 +521,10 @@ measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
 measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
 const openEdges = (shape, { isOpen = true } = {}) => {
-  const r = (v) => v + (Math.random() - 0.5) * 0.2;
+  const r = (v) => v;
   const paths = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    paths.push(...findOpenEdges(alignVertices(solid), isOpen));
+    paths.push(...findOpenEdges(solid, isOpen));
   }
   return Shape.fromGeometry({ paths: paths.map(path => path.map(([x, y, z]) => [r(x), r(y), r(z)])) });
 };

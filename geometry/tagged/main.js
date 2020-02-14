@@ -1,15 +1,16 @@
 import {
+  findOpenEdges,
+  isWatertight,
+  makeWatertight
+} from './makeWatertight';
+
+import {
   fromScaling,
   fromTranslation,
   fromXRotation,
   fromYRotation,
   fromZRotation
 } from '@jsxcad/math-mat4';
-
-import {
-  isWatertight,
-  makeWatertight
-} from './makeWatertight';
 
 import {
   rewrite,
@@ -67,6 +68,7 @@ export {
   drop,
   eachItem,
   eachPoint,
+  findOpenEdges,
   flip,
   fresh,
   fromPathToSurface,
