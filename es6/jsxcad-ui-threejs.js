@@ -53114,6 +53114,7 @@ const toThreejsGeometry = (geometry, supertags) => {
       threejsPlan: geometry.plan,
       threejsMarks: geometry.marks,
       threejsVisualization: toThreejsGeometry(geometry.visualization),
+      threejsContent: toThreejsGeometry(geometry.content),
       tags,
       isThreejsGeometry: true
     };
