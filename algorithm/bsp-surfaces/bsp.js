@@ -337,8 +337,8 @@ const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */inward,
-                   /* coplanarBack= */inward,
-                   /* coplanarFront= */inward,
+                   /* coplanarBack= */outward, // opposite facing
+                   /* coplanarFront= */inward, // same facing
                    /* front= */outward);
     }
     const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
@@ -427,8 +427,8 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */inward,
-                   /* coplanarBack= */outward,
-                   /* coplanarFront= */outward,
+                   /* coplanarBack= */inward, // difference facing are kept
+                   /* coplanarFront= */outward, // same facing are removed
                    /* front= */outward);
     }
     const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, outward, normalize);
