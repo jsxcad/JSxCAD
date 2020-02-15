@@ -4,6 +4,7 @@ import './clip';
 import './cut';
 import './faces';
 import './measureCenter';
+import './op';
 import './openEdges';
 import './void';
 import './wireframe';
