@@ -34,7 +34,7 @@ export const planeDistance = (plane, point) =>
 
 const pointType = [];
 
-const splitPolygon = (normalize, plane, polygon, back, coplanarBack, coplanarFront, front) => {
+const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
   if (normalize === undefined) {
     throw Error('die: no normalize');
   }
@@ -80,9 +80,11 @@ const splitPolygon = (normalize, plane, polygon, back, coplanarBack, coplanarFro
   switch (polygonType) {
     case COPLANAR:
       if (dot(plane, polygonPlane) > 0) {
-        coplanarFront.push(polygon);
+        // The plane and the polygon face the same way, so the spaces overlap.
+        overlapping.push(polygon);
       } else {
-        coplanarBack.push(polygon);
+        // The plane and the polygon face the opposite directions, so the spaces abut.
+        abutting.push(polygon);
       }
       return;
     case FRONT:
