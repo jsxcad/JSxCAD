@@ -55,7 +55,7 @@ const findOpenEdges = (paths, isOpen) => {
 
 const flip = (paths) => paths.map(flip$1);
 
-const intersection = (...pathsets) => { throw Error('Not implemented'); };
+const intersection = (pathset, ...pathsets) => pathset;
 
 const last = (paths) => paths.length >= 1 ? paths[paths.length - 1] : [null];
 
