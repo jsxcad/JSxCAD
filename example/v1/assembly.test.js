@@ -4,7 +4,7 @@ import test from 'ava';
 
 test('Expected stl', async (t) => {
   await run('assembly');
-  isExpected(t, 'assembly/output/stl/cube.stl');
-  isExpected(t, 'assembly/output/stl/cylinder.stl');
-  isExpected(t, 'assembly/output/stl/cube-cylinder.stl');
+  isExpected(t, 'assembly/output/cube_0.stl');
+  isExpected(t, 'assembly/output/cylinder_0.stl');
+  isExpected(t, 'assembly/output/cube-cylinder_0.stl');
 });

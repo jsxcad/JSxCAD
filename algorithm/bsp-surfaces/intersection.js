@@ -11,7 +11,8 @@ import {
   fromBoundingBoxes,
   inLeaf,
   outLeaf,
-  removeExteriorPolygonsForIntersection,
+  removeExteriorPolygonsForIntersectionDroppingOverlap,
+  removeExteriorPolygonsForIntersectionKeepingOverlap,
   fromPolygons as toBspFromPolygons
 } from './bsp';
 
@@ -75,8 +76,8 @@ export const intersection = (...solids) => {
         return [];
       }
     } else {
-      const aTrimmed = removeExteriorPolygonsForIntersection(bBsp, aIn, normalize);
-      const bTrimmed = removeExteriorPolygonsForIntersection(aBsp, bIn, normalize);
+      const aTrimmed = removeExteriorPolygonsForIntersectionKeepingOverlap(bBsp, aIn, normalize);
+      const bTrimmed = removeExteriorPolygonsForIntersectionDroppingOverlap(aBsp, bIn, normalize);
 
       s.push(clean([...aTrimmed, ...bTrimmed]));
     }
