@@ -62,10 +62,6 @@ export class Shape {
     return fromGeometry(flip(toKeptGeometry(this)), this.context);
   }
 
-  op (op, ...args) {
-    return op(this, ...args);
-  }
-
   setTags (tags) {
     return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
@@ -116,6 +112,7 @@ export class Shape {
     return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined));
   }
 }
+
 const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
 
 Shape.fromClosedPath = (path, context) => fromGeometry({ paths: [closePath(path)] }, context);

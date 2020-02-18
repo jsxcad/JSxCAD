@@ -13,8 +13,12 @@ const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinit
     todo.push(leaf);
   }
   const packedLayers = [];
-  while (true) {
-    const [packed, unpacked, minPoint, maxPoint] = pack$1({ size, pageMargin, itemMargin }, ...todo.slice(0, perLayout));
+  while (todo.length > 0) {
+    const input = [];
+    while (todo.length > 0 && input.length < perLayout) {
+      input.push(todo.shift());
+    }
+    const [packed, unpacked, minPoint, maxPoint] = pack$1({ size, pageMargin, itemMargin }, ...input);
     packSize[0] = minPoint;
     packSize[1] = maxPoint;
     if (packed.length === 0) {
@@ -22,10 +26,7 @@ const pack = (shape, { size, pageMargin = 5, itemMargin = 1, perLayout = Infinit
     } else {
       packedLayers.push({ item: { disjointAssembly: packed } });
     }
-    if (unpacked.length === 0) {
-      break;
-    }
-    todo = unpacked;
+    todo.unshift(...unpacked);
   }
   let packedShape = Shape.fromGeometry({ layers: packedLayers });
   if (size === undefined) {

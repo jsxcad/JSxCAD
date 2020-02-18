@@ -591,6 +591,19 @@ const voxels = (shape, resolution = 1) => {
 const vowelsMethod = function (...args) { return voxels(this, ...args); };
 Shape.prototype.voxels = vowelsMethod;
 
+const probe = (shape, point) => {
+  const decisions = [];
+  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
+    const [min, max] = measureBoundingBox(solid);
+    const bsp = fromSolid(solid, createNormalize3());
+    decisions.push(containsPoint(bsp, point));
+  }
+  return decisions;
+};
+
+const probeMethod = function (point) { return probe(this, point); };
+Shape.prototype.probe = probeMethod;
+
 const api = {
   ChainedHull,
   Hull,

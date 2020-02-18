@@ -1,6 +1,6 @@
 import { toPlane as toPlaneOfPolygon } from '@jsxcad/math-poly3';
 
-// FIX
+// FIX: This is incorrect, since it assumes the first non-degenerate polygon is representative.
 
 export const toPlane = (surface) => {
   if (surface.plane !== undefined) {

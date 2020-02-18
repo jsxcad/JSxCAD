@@ -11,7 +11,8 @@ import {
   fromBoundingBoxes,
   inLeaf,
   outLeaf,
-  removeInteriorPolygonsKeepingSkin,
+  removeInteriorPolygonsForUnionDroppingOverlap,
+  removeInteriorPolygonsForUnionKeepingOverlap,
   fromPolygons as toBspFromPolygons
 } from './bsp';
 
@@ -76,10 +77,10 @@ export const union = (...solids) => {
         s.push([...a, ...b]);
       }
     } else {
-      const aTrimmed = removeInteriorPolygonsKeepingSkin(bBsp, aIn, normalize);
-      const bTrimmed = removeInteriorPolygonsKeepingSkin(aBsp, bIn, normalize);
+      const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
+      const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
 
-      s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
+      s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
   return toSolidFromPolygons({}, s[0], normalize);

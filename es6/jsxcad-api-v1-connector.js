@@ -287,19 +287,22 @@ chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
 
 const Z$2 = 2;
 
-const flat = (shape) => {
+const findFlatTransforms = (shape) => {
   let bestDepth = Infinity;
+  let bestTo;
+  let bestFrom;
   let bestSurface;
 
   const assay = (surface) => {
     const plane = toPlane$1(surface);
     if (plane !== undefined) {
-      const [to] = toXYPlaneTransforms(plane);
+      const [to, from] = toXYPlaneTransforms(plane);
       const flatShape = shape.transform(to);
       const [min, max] = flatShape.measureBoundingBox();
       const depth = max[Z$2] - min[Z$2];
       if (depth < bestDepth) {
-        bestDepth = depth;
+        bestTo = to;
+        bestFrom = from;
         bestSurface = surface;
       }
     }
@@ -318,6 +321,11 @@ const flat = (shape) => {
     assay(z0Surface);
   }
 
+  return [bestTo, bestFrom, bestSurface];
+};
+
+const flat = (shape) => {
+  const [, , bestSurface] = findFlatTransforms(shape);
   return withConnector(shape, bestSurface, 'flat');
 };
 
@@ -326,6 +334,17 @@ Shape.prototype.flat = flatMethod;
 
 flat.signature = 'flat(shape:Shape) -> Connector';
 flatMethod.signature = 'Shape -> flat() -> Connector';
+
+// Perform an operation on the shape in its best flat orientation,
+// returning the result in the original orientation.
+
+const inFlat = (shape, op) => {
+  const [to, from] = findFlatTransforms(shape);
+  return op(shape.transform(to)).transform(from);
+};
+
+const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
+Shape.prototype.inFlat = inFlatMethod;
 
 const Y$1 = 1;
 
@@ -484,8 +503,11 @@ const Y$2 = (y = 0) => {
 
 const toShape = (connector) => connector.getContext(shapeToConnect);
 
-const dropConnector = (shape, ...connectors) =>
-  Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+const dropConnector = (shape, ...connectors) => {
+  if (shape !== undefined) {
+    return Shape.fromGeometry(drop(connectors.map(connector => `connector/${connector}`), shape.toGeometry()));
+  }
+};
 
 const dropConnectorMethod = function (...connectors) { return dropConnector(this, ...connectors); };
 Shape.prototype.dropConnector = dropConnectorMethod;
@@ -541,9 +563,15 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssembl
 
   if (doConnect) {
     if (doAssemble) {
-      return aMovedShape.Item().with(bShape).Item();
+      return dropConnector(aMovedShape, aConnector.plan.connector)
+          .Item()
+          .with(dropConnector(bShape, bConnector.plan.connector))
+          .Item();
     } else {
-      return aMovedShape.Item().layer(bShape).Item();
+      return dropConnector(aMovedShape, aConnector.plan.connector)
+          .Item()
+          .layer(dropConnector(bShape, bConnector.plan.connector))
+          .Item();
     }
     /*
     return Shape.fromGeometry(

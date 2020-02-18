@@ -6,13 +6,13 @@ const assembly = Cube(30)
                    .with(Cylinder(5, 30)
                            .as('cylinder'));
 
-await assembly.keep('cube').writeStl('stl/cube.stl');
+await assembly.keep('cube').Item().Page().writeStl('cube');
 
 // This should produce the cube with a hole in it filled by the cylinder.
-await assembly.keep('cube', 'cylinder').writeStl('stl/cube-cylinder.stl');
+await assembly.keep('cube', 'cylinder').Item().Page().writeStl('cube-cylinder');
 
 // This should produce just the cylinder and no cube.
-await assembly.keep('cylinder').writeStl('stl/cylinder.stl');
+await assembly.keep('cylinder').Item().Page().writeStl('cylinder');
 
 // This should produce a threejs page with the two distinct geometries together.
 await assembly.writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'html/assembly.html' });

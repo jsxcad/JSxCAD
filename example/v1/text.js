@@ -6,8 +6,14 @@ const string = 'JSxCAD';
 const greatVibes = await readFont('ttf/GreatVibes.ttf', { src: './great-vibes/GreatVibes-Regular.ttf' });
 const letters = greatVibes(10)(string);
 
-await letters.Item().Page().writePdf('text');
+await letters
+        .Item()
+        .Page()
+        .writePdf('text');
 
-await letters.extrude(10)
-             .center()
-             .writeStl('stl/text.stl');
+await letters
+        .extrude(10)
+        .center()
+        .Item()
+        .Page()
+        .writeStl('text');

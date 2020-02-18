@@ -1,6 +1,7 @@
 import Shape from './jsxcad-api-v1-shape.js';
-import { fromStl, toStl } from './jsxcad-convert-stl.js';
+import { fromStl, toStl as toStl$1 } from './jsxcad-convert-stl.js';
 import { readFile, writeFile } from './jsxcad-sys.js';
+import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js';
 
 /**
  *
@@ -47,10 +48,26 @@ const readStl = async (path, { src, format = 'ascii' }) => {
  *
  **/
 
-const writeStl = async (shape, path, options = {}) => {
+const toStl = async (shape, options = {}) => {
+  const pages = [];
+  // CHECK: Should this be limited to Page plans?
   const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toStl(geometry, options));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  for (const entry of getPlans(geometry)) {
+    if (entry.plan.page) {
+      for (let leaf of getLeafs(entry.content)) {
+        const stl = await toStl$1(leaf, {});
+        pages.push({ stl, leaf: { ...entry, content: leaf }, index: pages.length });
+      }
+    }
+  }
+  return pages;
+};
+
+const writeStl = async (shape, name, options = {}) => {
+  for (const { stl, leaf, index } of await toStl(shape, {})) {
+    await writeFile({}, `output/${name}_${index}.stl`, stl);
+    await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
+  }
 };
 
 const method = function (...args) { return writeStl(this, ...args); };
