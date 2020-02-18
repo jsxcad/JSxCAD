@@ -1,4 +1,4 @@
-import { isClosed, isOpen } from '@jsxcad/geometry-path';
+import { isClockwise, isClosed, isOpen } from '@jsxcad/geometry-path';
 
 import { IntPoint } from './clipper-lib';
 import { toPlane } from '@jsxcad/math-poly3';
@@ -7,6 +7,14 @@ import { toPlane } from '@jsxcad/math-poly3';
 export const CLEAN_DISTANCE = 1;
 
 export const RESOLUTION = 1e6;
+
+const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+
+// Reorder in-place such that counterclockwise paths preceed clockwise paths.
+const clockSort = (surface) => {
+  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
+  return surface;
+};
 
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
@@ -79,7 +87,7 @@ export const fromClosedPaths = (paths, normalize) => {
 };
 
 export const toSurface = (clipperPaths, normalize) =>
-  clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));
+  clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
 
 export const toPaths = (clipper, polytree, normalize) => {
   const paths = [];

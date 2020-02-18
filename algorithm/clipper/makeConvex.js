@@ -66,5 +66,6 @@ export const makeConvex = (surface, normalize = p => p) => {
     walkContour(child);
   }
 
-  return convexSurface.map(path => path.map(normalize));
+  const normalized = convexSurface.map(path => path.map(normalize));
+  return normalized;
 };

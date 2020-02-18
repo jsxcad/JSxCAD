@@ -98,6 +98,9 @@ const fromPolygons = (polygons, normalize) => {
   let plane = toPlane(polygons[polygons.length >> 1]);
 
   for (const polygon of polygons) {
+    if (toPlane([...polygon]) === undefined) {
+      continue;
+    }
     splitPolygon(normalize,
                  plane,
                  polygon,
@@ -154,7 +157,7 @@ const toString = (bsp) => {
     case OUT_LEAF:
       return `[OUT]`;
     case BRANCH:
-      return `[BRANCH same: ${JSON.stringify(bsp.same)} back: ${toString(bsp.back)} front: ${toString(bsp.front)}]`;
+      return `[BRANCH plane: ${JSON.stringify(bsp.plane)} back: ${toString(bsp.back)} front: ${toString(bsp.front)}]`;
     default:
       throw Error('die');
   }
@@ -520,10 +523,10 @@ const separatePolygonsSkinIn = (bsp, polygons, normalize) => {
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* abutting= */front, // was back
-                   /* overlapping= */back,
-                   /* front= */front);
+                   /* back= */back, // toward keepIn
+                   /* abutting= */back, // toward keepIn
+                   /* overlapping= */back, // toward keepIn
+                   /* front= */front); // toward keepOut
     }
     const trimmedFront = separatePolygonsSkinIn(bsp.front, front, normalize);
     const trimmedBack = separatePolygonsSkinIn(bsp.back, back, normalize);

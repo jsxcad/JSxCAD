@@ -80,7 +80,7 @@ export const union = (...solids) => {
       const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
 
-      s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
+      s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
   return toSolidFromPolygons({}, s[0], normalize);

@@ -1,6 +1,6 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
-import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
-import { toPlane } from './jsxcad-math-poly3.js';
+import { measureArea, toPlane } from './jsxcad-math-poly3.js';
+import { squaredDistance, distance, max, min } from './jsxcad-math-vec3.js';
 import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
@@ -31,9 +31,8 @@ const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const pointType = [];
 
 const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
-  if (normalize === undefined) {
-    throw Error('die: no normalize');
-  }
+  const area = measureArea(polygon);
+  console.log(`QQ/area: ${area}`);
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.
@@ -91,7 +90,9 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
+      let lastFront;
       const backPoints = [];
+      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -100,21 +101,31 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         const endType = pointType[nth];
         if (startType !== BACK) {
           // The inequality is important as it includes COPLANAR points.
-          frontPoints.push(startPoint);
+          if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
+            lastFront = startPoint;
+            frontPoints.push(startPoint);
+          }
         }
         if (startType !== FRONT) {
           // The inequality is important as it includes COPLANAR points.
-          backPoints.push(startPoint);
+          if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
+            lastBack = startPoint;
+            backPoints.push(startPoint);
+          }
         }
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
+          // if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
+          if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
+            lastFront = spanPoint;
             frontPoints.push(spanPoint);
           }
-          if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
+          // if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
+          if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
+            lastBack = spanPoint;
             backPoints.push(spanPoint);
           }
         }
@@ -122,20 +133,27 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         startType = endType;
       }
       if (frontPoints.length >= 3) {
-        frontPoints.plane = polygon.plane;
+        frontPoints.plane = polygonPlane;
         if (backPoints.length >= 3) {
           frontPoints.parent = polygon;
           frontPoints.sibling = backPoints;
         }
+        if (JSON.stringify(frontPoints) === "[[-0.9999999999999997,1.3322676295501878e-15,1.9999999999999998],[-0.9807852804032302,0.1950903220161286,1.9999999999999998],[-0.9999999999999998,1.2246467991473532e-16,1.9999999999999998]]") {
+          console.log(`QQ/1`);
+        }
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
-        backPoints.plane = polygon.plane;
+        backPoints.plane = polygonPlane;
         if (frontPoints.length >= 3) {
           backPoints.parent = polygon;
           backPoints.sibling = frontPoints;
         }
-        back.push(backPoints);
+        if (JSON.stringify(backPoints) === "[[-0.9999999999999997,1.3322676295501878e-15,1.9999999999999998],[-0.9807852804032302,0.1950903220161286,1.9999999999999998],[-0.9999999999999998,1.2246467991473532e-16,1.9999999999999998]]") {
+          console.log(`QQ/2: ${distance(backPoints[0], backPoints[1])}`);
+        } else {
+          back.push(backPoints);
+        }
       }
       break;
     }
@@ -219,6 +237,9 @@ const fromPolygons = (polygons, normalize) => {
   let plane = toPlane(polygons[polygons.length >> 1]);
 
   for (const polygon of polygons) {
+    if (toPlane([...polygon]) === undefined) {
+      continue;
+    }
     splitPolygon(normalize,
                  plane,
                  polygon,
@@ -607,10 +628,10 @@ const separatePolygonsSkinIn = (bsp, polygons, normalize) => {
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* abutting= */front, // was back
-                   /* overlapping= */back,
-                   /* front= */front);
+                   /* back= */back, // toward keepIn
+                   /* abutting= */back, // toward keepIn
+                   /* overlapping= */back, // toward keepIn
+                   /* front= */front); // toward keepOut
     }
     const trimmedFront = separatePolygonsSkinIn(bsp.front, front, normalize);
     const trimmedBack = separatePolygonsSkinIn(bsp.back, back, normalize);
@@ -914,10 +935,14 @@ const union = (...solids) => {
     const aPolygons = a;
     const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
     const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
+    // const [aIn, aOut] = [aPolygons, []];
+    // const aBsp = toBspFromPolygons(aIn, normalize);
 
     const bPolygons = b;
     const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
+    // const [bIn, bOut] = [bPolygons, []];
+    // const bBsp = toBspFromPolygons(bIn, normalize);
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
@@ -944,7 +969,8 @@ const union = (...solids) => {
       const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
 
-      s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
+      // s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
+      s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
   return fromPolygons$1({}, s[0], normalize);

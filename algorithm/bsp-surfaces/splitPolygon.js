@@ -35,9 +35,6 @@ export const planeDistance = (plane, point) =>
 const pointType = [];
 
 const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
-  if (normalize === undefined) {
-    throw Error('die: no normalize');
-  }
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.
@@ -95,7 +92,9 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
+      let lastFront;
       const backPoints = [];
+      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -104,21 +103,29 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         const endType = pointType[nth];
         if (startType !== BACK) {
           // The inequality is important as it includes COPLANAR points.
-          frontPoints.push(startPoint);
+          if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
+            lastFront = startPoint;
+            frontPoints.push(startPoint);
+          }
         }
         if (startType !== FRONT) {
           // The inequality is important as it includes COPLANAR points.
-          backPoints.push(startPoint);
+          if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
+            lastBack = startPoint;
+            backPoints.push(startPoint);
+          }
         }
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
+          if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
+            lastFront = spanPoint;
             frontPoints.push(spanPoint);
           }
-          if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
+          if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
+            lastBack = spanPoint;
             backPoints.push(spanPoint);
           }
         }
@@ -126,7 +133,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         startType = endType;
       }
       if (frontPoints.length >= 3) {
-        frontPoints.plane = polygon.plane;
+        frontPoints.plane = polygonPlane;
         if (backPoints.length >= 3) {
           frontPoints.parent = polygon;
           frontPoints.sibling = backPoints;
@@ -134,7 +141,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
-        backPoints.plane = polygon.plane;
+        backPoints.plane = polygonPlane;
         if (frontPoints.length >= 3) {
           backPoints.parent = polygon;
           backPoints.sibling = frontPoints;

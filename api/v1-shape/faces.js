@@ -1,15 +1,13 @@
 import Shape from './Shape';
 import assemble from './assemble';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { makeConvex } from '@jsxcad/geometry-surface';
-import { outline } from '@jsxcad/geometry-solid';
+import { outline } from '@jsxcad/geometry-surface';
 
 export const faces = (shape, op = (x => x)) => {
   const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
-    for (const loop of outline(solid)) {
-      const face = Shape.fromGeometry({ surface: makeConvex([loop]) });
-      faces.push(op(face, faces.length));
+    for (const surface of solid) {
+      faces.push(op(Shape.fromGeometry({ paths: outline(surface) }), faces.length));
     }
   }
   return assemble(...faces);

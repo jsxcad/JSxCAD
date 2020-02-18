@@ -1,5 +1,5 @@
 import { onBoot } from './jsxcad-sys.js';
-import { isClosed, isOpen, isClockwise, getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { isClockwise, isClosed, isOpen, getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { distance } from './jsxcad-math-vec3.js';
@@ -2517,6 +2517,14 @@ const CLEAN_DISTANCE = 1;
 
 const RESOLUTION = 1e6;
 
+const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+
+// Reorder in-place such that counterclockwise paths preceed clockwise paths.
+const clockSort = (surface) => {
+  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
+  return surface;
+};
+
 const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
 
@@ -2578,7 +2586,7 @@ const fromClosedPaths = (paths, normalize) => {
 };
 
 const toSurface = (clipperPaths, normalize) =>
-  clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));
+  clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
 
 const toPaths = (clipper, polytree, normalize) => {
   const paths = [];
@@ -3478,8 +3486,11 @@ const makeConvex = (surface, normalize = p => p) => {
     walkContour(child);
   }
 
-  return convexSurface.map(path => path.map(normalize));
+  const normalized = convexSurface.map(path => path.map(normalize));
+  return normalized;
 };
+
+const THRESHOLD = 1e-5;
 
 // We expect a surface of reconciled triangles.
 
@@ -3501,7 +3512,7 @@ const makeWatertight = (surface) => {
       const colinear = [];
       for (const vertex of vertices) {
         // FIX: Threshold
-        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
+        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
           // FIX: Clip an ear instead.
           // Vertex is on the open edge.
           colinear.push(vertex);
@@ -3519,28 +3530,12 @@ const makeWatertight = (surface) => {
   return watertightPaths;
 };
 
-const outline = (surface, normalize = p => p) => {
-  const watertightSurface = makeWatertight(surface.map(path => path.map(normalize)));
-  const polygons = fromSurface(watertightSurface, normalize);
-  if (polygons.length === 0) {
-    return [];
-  }
-  const subjectInputs = polygons.map(polygon => ({ data: polygon, closed: true }));
-  const result = clipper$1.clipToPaths(
-    {
-      clipType: jsAngusjClipperjsWeb_2.Union,
-      subjectInputs,
-      subjectFillType: jsAngusjClipperjsWeb_8.Positive
-    });
-  const surfaceResult = toSurface(result, normalize);
-  return surfaceResult;
-};
-
 // Here we have a surface with a confused orientation.
 // This reorients the most exterior paths to be ccw.
 
 const reorient = (surface, normalize = p => p) => {
-  const polygons = fromSurface(surface, normalize);
+  const watertightSurface = makeWatertight(surface.map(path => path.map(normalize)));
+  const polygons = fromSurface(watertightSurface, normalize);
   if (polygons.length === 0) {
     return [];
   }
@@ -3593,5 +3588,7 @@ const union = (...z0Surfaces) => {
   }
   return z0Surfaces[0];
 };
+
+const outline = reorient;
 
 export { difference, intersection, intersectionOfPathsBySurfaces, makeConvex, outline, reorient, union };
