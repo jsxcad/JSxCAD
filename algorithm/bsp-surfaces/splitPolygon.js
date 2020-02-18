@@ -35,9 +35,6 @@ export const planeDistance = (plane, point) =>
 const pointType = [];
 
 const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
-  if (normalize === undefined) {
-    throw Error('die: no normalize');
-  }
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.
@@ -115,10 +112,10 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
+          if (true || squaredDistance(spanPoint, startPoint) > EPSILON2) {
             frontPoints.push(spanPoint);
           }
-          if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
+          if (true || squaredDistance(spanPoint, endPoint) > EPSILON2) {
             backPoints.push(spanPoint);
           }
         }
@@ -126,7 +123,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         startType = endType;
       }
       if (frontPoints.length >= 3) {
-        frontPoints.plane = polygon.plane;
+        frontPoints.plane = polygonPlane;
         if (backPoints.length >= 3) {
           frontPoints.parent = polygon;
           frontPoints.sibling = backPoints;
@@ -134,7 +131,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
-        backPoints.plane = polygon.plane;
+        backPoints.plane = polygonPlane;
         if (frontPoints.length >= 3) {
           backPoints.parent = polygon;
           backPoints.sibling = frontPoints;
