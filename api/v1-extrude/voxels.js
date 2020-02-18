@@ -1,5 +1,5 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
-import { containsPoint, fromSolid } from '@jsxcad/algorithm-bsp-surfaces';
+import { containsPoint as containsPointAlgorithm, fromSolid } from '@jsxcad/algorithm-bsp-surfaces';
 import { fromPolygons, measureBoundingBox } from '@jsxcad/geometry-solid';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -19,22 +19,22 @@ export const voxels = (shape, resolution = 1) => {
     for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
       for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
         for (let z = min[Z] - offset; z <= max[Z] + offset; z += resolution) {
-          const state = containsPoint(bsp, [x, y, z]);
-          if (state !== containsPoint(bsp, [x + resolution, y, z])) {
+          const state = containsPointAlgorithm(bsp, [x, y, z]);
+          if (state !== containsPointAlgorithm(bsp, [x + resolution, y, z])) {
             const face = [[x + offset, y - offset, z - offset],
                           [x + offset, y + offset, z - offset],
                           [x + offset, y + offset, z + offset],
                           [x + offset, y - offset, z + offset]];
             polygons.push(state ? face : face.reverse());
           }
-          if (state !== containsPoint(bsp, [x, y + resolution, z])) {
+          if (state !== containsPointAlgorithm(bsp, [x, y + resolution, z])) {
             const face = [[x - offset, y + offset, z - offset],
                           [x + offset, y + offset, z - offset],
                           [x + offset, y + offset, z + offset],
                           [x - offset, y + offset, z + offset]];
             polygons.push(state ? face.reverse() : face);
           }
-          if (state !== containsPoint(bsp, [x, y, z + resolution])) {
+          if (state !== containsPointAlgorithm(bsp, [x, y, z + resolution])) {
             const face = [[x - offset, y - offset, z + offset],
                           [x + offset, y - offset, z + offset],
                           [x + offset, y + offset, z + offset],
@@ -49,20 +49,21 @@ export const voxels = (shape, resolution = 1) => {
   return assemble(...voxels);
 };
 
-const vowelsMethod = function (...args) { return voxels(this, ...args); };
-Shape.prototype.voxels = vowelsMethod;
+const voxelsMethod = function (...args) { return voxels(this, ...args); };
+Shape.prototype.voxels = voxelsMethod;
 
-export const probe = (shape, point) => {
-  const decisions = [];
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    const [min, max] = measureBoundingBox(solid);
+// FIX: move this
+export const containsPoint = (shape, point) => {
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
     const bsp = fromSolid(solid, createNormalize3());
-    decisions.push(containsPoint(bsp, point));
+    if (containsPointAlgorithm(bsp, point)) {
+      return true;
+    }
   }
-  return decisions;
-}
+  return false;
+};
 
-const probeMethod = function (point) { return probe(this, point); }
-Shape.prototype.probe = probeMethod;
+const containsPointMethod = function (point) { return containsPoint(this, point); };
+Shape.prototype.containsPoint = containsPointMethod;
 
 export default voxels;

@@ -2,6 +2,8 @@ import { deduplicate, getEdges } from '@jsxcad/geometry-path';
 
 import { distance } from '@jsxcad/math-vec3';
 
+const THRESHOLD = 1e-5;
+
 // We expect a surface of reconciled triangles.
 
 export const makeWatertight = (surface) => {
@@ -22,7 +24,7 @@ export const makeWatertight = (surface) => {
       const colinear = [];
       for (const vertex of vertices) {
         // FIX: Threshold
-        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < 0.001) {
+        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
           // FIX: Clip an ear instead.
           // Vertex is on the open edge.
           colinear.push(vertex);

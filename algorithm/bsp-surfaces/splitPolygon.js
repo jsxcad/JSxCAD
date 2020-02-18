@@ -92,7 +92,9 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
+      let lastFront;
       const backPoints = [];
+      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -101,21 +103,29 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         const endType = pointType[nth];
         if (startType !== BACK) {
           // The inequality is important as it includes COPLANAR points.
-          frontPoints.push(startPoint);
+          if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
+            lastFront = startPoint;
+            frontPoints.push(startPoint);
+          }
         }
         if (startType !== FRONT) {
           // The inequality is important as it includes COPLANAR points.
-          backPoints.push(startPoint);
+          if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
+            lastBack = startPoint;
+            backPoints.push(startPoint);
+          }
         }
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (true || squaredDistance(spanPoint, startPoint) > EPSILON2) {
+          if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
+            lastFront = spanPoint;
             frontPoints.push(spanPoint);
           }
-          if (true || squaredDistance(spanPoint, endPoint) > EPSILON2) {
+          if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
+            lastBack = spanPoint;
             backPoints.push(spanPoint);
           }
         }

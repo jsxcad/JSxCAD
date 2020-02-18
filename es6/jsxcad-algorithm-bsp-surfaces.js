@@ -1,12 +1,13 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
-import { max, min } from './jsxcad-math-vec3.js';
-import { toPlane } from './jsxcad-math-poly3.js';
+import { measureArea, toPlane } from './jsxcad-math-poly3.js';
+import { squaredDistance, distance, max, min } from './jsxcad-math-vec3.js';
 import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 
 const EPSILON = 1e-5;
+const EPSILON2 = 1e-10;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -30,6 +31,8 @@ const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const pointType = [];
 
 const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
+  const area = measureArea(polygon);
+  console.log(`QQ/area: ${area}`);
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.
@@ -87,7 +90,9 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
+      let lastFront;
       const backPoints = [];
+      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -96,21 +101,31 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         const endType = pointType[nth];
         if (startType !== BACK) {
           // The inequality is important as it includes COPLANAR points.
-          frontPoints.push(startPoint);
+          if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
+            lastFront = startPoint;
+            frontPoints.push(startPoint);
+          }
         }
         if (startType !== FRONT) {
           // The inequality is important as it includes COPLANAR points.
-          backPoints.push(startPoint);
+          if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
+            lastBack = startPoint;
+            backPoints.push(startPoint);
+          }
         }
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          {
+          // if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
+          if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
+            lastFront = spanPoint;
             frontPoints.push(spanPoint);
           }
-          {
+          // if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
+          if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
+            lastBack = spanPoint;
             backPoints.push(spanPoint);
           }
         }
@@ -123,6 +138,9 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints.parent = polygon;
           frontPoints.sibling = backPoints;
         }
+        if (JSON.stringify(frontPoints) === "[[-0.9999999999999997,1.3322676295501878e-15,1.9999999999999998],[-0.9807852804032302,0.1950903220161286,1.9999999999999998],[-0.9999999999999998,1.2246467991473532e-16,1.9999999999999998]]") {
+          console.log(`QQ/1`);
+        }
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
@@ -131,7 +149,11 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           backPoints.parent = polygon;
           backPoints.sibling = frontPoints;
         }
-        back.push(backPoints);
+        if (JSON.stringify(backPoints) === "[[-0.9999999999999997,1.3322676295501878e-15,1.9999999999999998],[-0.9807852804032302,0.1950903220161286,1.9999999999999998],[-0.9999999999999998,1.2246467991473532e-16,1.9999999999999998]]") {
+          console.log(`QQ/2: ${distance(backPoints[0], backPoints[1])}`);
+        } else {
+          back.push(backPoints);
+        }
       }
       break;
     }
@@ -244,19 +266,6 @@ const fromSolid = (solid, normalize) => {
     polygons.push(...surface);
   }
   return fromPolygons(polygons, normalize);
-};
-
-const toString = (bsp) => {
-  switch (bsp.kind) {
-    case IN_LEAF:
-      return `[IN]`;
-    case OUT_LEAF:
-      return `[OUT]`;
-    case BRANCH:
-      return `[BRANCH plane: ${JSON.stringify(bsp.plane)} back: ${toString(bsp.back)} front: ${toString(bsp.front)}]`;
-    default:
-      throw Error('die');
-  }
 };
 
 const keepIn = (polygons) => {
@@ -916,7 +925,6 @@ const union = (...solids) => {
 
     if (doesNotOverlap(a, b)) {
       s.push([...a, ...b]);
-console.log(`QQ/1`);
       continue;
     }
 
@@ -925,58 +933,44 @@ console.log(`QQ/1`);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
     const aPolygons = a;
-    // const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-    // const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(aIn, normalize));
-    const [aIn, aOut] = [aPolygons, []];
-    const aBsp = fromPolygons(aIn, normalize);
-    if (aOut.length > 0) console.log(`QQ/aOut`);
+    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
+    const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
+    // const [aIn, aOut] = [aPolygons, []];
+    // const aBsp = toBspFromPolygons(aIn, normalize);
 
     const bPolygons = b;
-    // const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
-    // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
-    const [bIn, bOut] = [bPolygons, []];
-    const bBsp = fromPolygons(bIn, normalize);
-    if (bOut.length > 0) console.log(`QQ/bOut`);
+    const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
+    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
+    // const [bIn, bOut] = [bPolygons, []];
+    // const bBsp = toBspFromPolygons(bIn, normalize);
 
     if (aIn.length === 0) {
-console.log(`QQ/2`);
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
       const aBsp = fromPolygons(a, normalize);
       if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
-console.log(`QQ/3`);
         // The space is fully enclosed; bIn is redundant.
         s.push([...aOut, ...aIn, ...bOut]);
       } else {
-console.log(`QQ/4`);
         s.push([...aOut, ...aIn, ...bOut]);
         // The space is fully vacated; nothing overlaps b.
         s.push([...a, ...b]);
       }
     } else if (bIn.length === 0) {
-console.log(`QQ/5`);
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
       const bBsp = fromPolygons(b, normalize);
       if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
-console.log(`QQ/6`);
         // The space is fully enclosed; aIn is redundant.
         s.push([...aOut, ...bIn, ...bOut]);
       } else {
-console.log(`QQ/7`);
         // The space is fully vacated; nothing overlaps a.
         s.push([...a, ...b]);
       }
     } else {
-console.log(`QQ/8`);
-console.log(`QQ/aBsp: ${toString(aBsp)}`);
-console.log(`QQ/bBsp: ${toString(bBsp)}`);
       const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
-      // const aTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
 
-      s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
-      // s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
-      // s.push(clean([...aTrimmed, ...bTrimmed]));
-      // s.push(clean([...aOut, ...bOut]));
+      // s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
+      s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
   return fromPolygons$1({}, s[0], normalize);

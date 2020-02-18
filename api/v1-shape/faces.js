@@ -1,8 +1,7 @@
-import { outline } from '@jsxcad/geometry-surface';
-
 import Shape from './Shape';
 import assemble from './assemble';
 import { getSolids } from '@jsxcad/geometry-tagged';
+import { outline } from '@jsxcad/geometry-surface';
 
 export const faces = (shape, op = (x => x)) => {
   const faces = [];
