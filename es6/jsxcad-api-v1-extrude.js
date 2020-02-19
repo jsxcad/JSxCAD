@@ -8,7 +8,7 @@ import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
-import { section as section$1, cutOpen, fromSolid, containsPoint } from './jsxcad-algorithm-bsp-surfaces.js';
+import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-algorithm-bsp-surfaces.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
@@ -558,22 +558,22 @@ const voxels = (shape, resolution = 1) => {
     for (let x = min[X] - offset; x <= max[X] + offset; x += resolution) {
       for (let y = min[Y] - offset; y <= max[Y] + offset; y += resolution) {
         for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
-          const state = containsPoint(bsp, [x, y, z]);
-          if (state !== containsPoint(bsp, [x + resolution, y, z])) {
+          const state = containsPoint$1(bsp, [x, y, z]);
+          if (state !== containsPoint$1(bsp, [x + resolution, y, z])) {
             const face = [[x + offset, y - offset, z - offset],
                           [x + offset, y + offset, z - offset],
                           [x + offset, y + offset, z + offset],
                           [x + offset, y - offset, z + offset]];
             polygons.push(state ? face : face.reverse());
           }
-          if (state !== containsPoint(bsp, [x, y + resolution, z])) {
+          if (state !== containsPoint$1(bsp, [x, y + resolution, z])) {
             const face = [[x - offset, y + offset, z - offset],
                           [x + offset, y + offset, z - offset],
                           [x + offset, y + offset, z + offset],
                           [x - offset, y + offset, z + offset]];
             polygons.push(state ? face.reverse() : face);
           }
-          if (state !== containsPoint(bsp, [x, y, z + resolution])) {
+          if (state !== containsPoint$1(bsp, [x, y, z + resolution])) {
             const face = [[x - offset, y - offset, z + offset],
                           [x + offset, y - offset, z + offset],
                           [x + offset, y + offset, z + offset],
@@ -588,21 +588,22 @@ const voxels = (shape, resolution = 1) => {
   return assemble(...voxels);
 };
 
-const vowelsMethod = function (...args) { return voxels(this, ...args); };
-Shape.prototype.voxels = vowelsMethod;
+const voxelsMethod = function (...args) { return voxels(this, ...args); };
+Shape.prototype.voxels = voxelsMethod;
 
-const probe = (shape, point) => {
-  const decisions = [];
-  for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
-    const [min, max] = measureBoundingBox(solid);
+// FIX: move this
+const containsPoint = (shape, point) => {
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
     const bsp = fromSolid(solid, createNormalize3());
-    decisions.push(containsPoint(bsp, point));
+    if (containsPoint$1(bsp, point)) {
+      return true;
+    }
   }
-  return decisions;
+  return false;
 };
 
-const probeMethod = function (point) { return probe(this, point); };
-Shape.prototype.probe = probeMethod;
+const containsPointMethod = function (point) { return containsPoint(this, point); };
+Shape.prototype.containsPoint = containsPointMethod;
 
 const api = {
   ChainedHull,

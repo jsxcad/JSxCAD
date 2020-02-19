@@ -1,6 +1,6 @@
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
-import { measureArea, toPlane } from './jsxcad-math-poly3.js';
-import { squaredDistance, distance, max, min } from './jsxcad-math-vec3.js';
+import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
+import { toPlane } from './jsxcad-math-poly3.js';
 import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
@@ -31,8 +31,6 @@ const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const pointType = [];
 
 const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
-  const area = measureArea(polygon);
-  console.log(`QQ/area: ${area}`);
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.
@@ -118,12 +116,10 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          // if (squaredDistance(spanPoint, startPoint) > EPSILON2) {
           if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
             lastFront = spanPoint;
             frontPoints.push(spanPoint);
           }
-          // if (squaredDistance(spanPoint, endPoint) > EPSILON2) {
           if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
             lastBack = spanPoint;
             backPoints.push(spanPoint);
@@ -138,9 +134,6 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints.parent = polygon;
           frontPoints.sibling = backPoints;
         }
-        if (JSON.stringify(frontPoints) === "[[-0.9999999999999997,1.3322676295501878e-15,1.9999999999999998],[-0.9807852804032302,0.1950903220161286,1.9999999999999998],[-0.9999999999999998,1.2246467991473532e-16,1.9999999999999998]]") {
-          console.log(`QQ/1`);
-        }
         front.push(frontPoints);
       }
       if (backPoints.length >= 3) {
@@ -149,11 +142,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           backPoints.parent = polygon;
           backPoints.sibling = frontPoints;
         }
-        if (JSON.stringify(backPoints) === "[[-0.9999999999999997,1.3322676295501878e-15,1.9999999999999998],[-0.9807852804032302,0.1950903220161286,1.9999999999999998],[-0.9999999999999998,1.2246467991473532e-16,1.9999999999999998]]") {
-          console.log(`QQ/2: ${distance(backPoints[0], backPoints[1])}`);
-        } else {
-          back.push(backPoints);
-        }
+        back.push(backPoints);
       }
       break;
     }
@@ -935,14 +924,10 @@ const union = (...solids) => {
     const aPolygons = a;
     const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
     const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
-    // const [aIn, aOut] = [aPolygons, []];
-    // const aBsp = toBspFromPolygons(aIn, normalize);
 
     const bPolygons = b;
     const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
     const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
-    // const [bIn, bOut] = [bPolygons, []];
-    // const bBsp = toBspFromPolygons(bIn, normalize);
 
     if (aIn.length === 0) {
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
@@ -969,7 +954,6 @@ const union = (...solids) => {
       const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
       const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
 
-      // s.push(clean([...aOut, ...aTrimmed, ...bOut, ...bTrimmed]));
       s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }
   }
