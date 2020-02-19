@@ -52,13 +52,25 @@ const agent = async ({ ask, question }) => {
         } else {
           return returnVal;
         }
-      case 'getLayoutSvgs':
+      case 'layout':
+        const solidToSplit = api.Shape.fromGeometry(values[0]);
         // Extract shapes
-        let items = api.Shape.fromGeometry(values[0]).toItems();
+        let items = solidToSplit.bom();
+        
+        console.log("Here:");
+        console.log(items);
+        
+        var shapes = [];
+        items.forEach(item => {
+            shapes.push(solidToSplit.keep(item))
+        })
+        
+        console.log(shapes);
+        
         const sheetX = values[2];
         const sheetY = values[3];
-        const [packed, unpacked] = pack({ size: [sheetX, sheetY], margin: values[1] }, ...items.map(
-          x => x.flat().to(api.Z()))
+        const [packed, unpacked] = pack(...shapes.map(
+          x => x.flat().to(api.Z(0)), { size: [sheetX, sheetY], margin: values[1] })
         );
         console.log(unpacked);
         return api.Assembly(...packed).toDisjointGeometry();
