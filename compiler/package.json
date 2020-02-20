@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "acorn": "^7.1.0",
+    "acorn-walk": "^7.1.1",
     "astring": "^1.4.3"
   },
   "devDependencies": {
