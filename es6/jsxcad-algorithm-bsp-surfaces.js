@@ -129,12 +129,22 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         startType = endType;
       }
       if (frontPoints.length >= 3) {
+        while (squaredDistance(frontPoints[0], lastFront) <= EPSILON2) {
+          lastFront = frontPoints.pop();
+        }
+      }
+      if (frontPoints.length >= 3) {
         frontPoints.plane = polygonPlane;
         if (backPoints.length >= 3) {
           frontPoints.parent = polygon;
           frontPoints.sibling = backPoints;
         }
         front.push(frontPoints);
+      }
+      if (backPoints.length >= 3) {
+        while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
+          lastBack = backPoints.pop();
+        }
       }
       if (backPoints.length >= 3) {
         backPoints.plane = polygonPlane;
