@@ -31,7 +31,5 @@ export const toEcmascript = (script) => {
 
   recursive(ast, undefined, { CallExpression });
 
-  console.log(definitions.join('\n'));
-
   return generate(parse(definitions.join('\n'), parseOptions));
 };
