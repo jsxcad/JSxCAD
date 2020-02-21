@@ -26,7 +26,7 @@ const formatToAs = (format) => {
   }
 };
 
-const readStl = async (path, { src, format = 'ascii' }) => {
+const readStl = async (path, { src, format = 'ascii' } = {}) => {
   const as = formatToAs(format);
   let data = await readFile({ as }, `source/${path}`);
   if (data === undefined && src) {
