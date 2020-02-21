@@ -8,8 +8,8 @@ import { toTagsFromName } from '@jsxcad/algorithm-color';
 import { transform } from '@jsxcad/geometry-tagged';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
-const fromSvgPath = (options = {}, svgPath) =>
-  baseFromSvgPath(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);
+const fromSvgPath = (svgPath, options = {}) =>
+  baseFromSvgPath(svgPath, Object.assign({ normalizeCoordinateSystem: false }, options));
 
 const ELEMENT_NODE = 1;
 const ATTRIBUTE_NODE = 2;
@@ -81,7 +81,7 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const fromSvg = async (options = {}, svgString) => {
+export const fromSvg = async (svgString, options = {}) => {
   const geometry = { assembly: [] };
   const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
 
@@ -140,7 +140,7 @@ export const fromSvg = async (options = {}, svgString) => {
         }
 
         const output = (svgPath) => {
-          const paths = fromSvgPath({}, svgPath).paths;
+          const paths = fromSvgPath(svgPath).paths;
           const fill = node.getAttribute('fill');
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?

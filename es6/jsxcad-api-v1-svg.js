@@ -1,6 +1,7 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
-import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
+import { fromSvgPath, fromSvg, toSvg as toSvg$1 } from './jsxcad-convert-svg.js';
 import { readFile, getSources, writeFile } from './jsxcad-sys.js';
+import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js';
 
 /**
  *
@@ -10,8 +11,7 @@ import { readFile, getSources, writeFile } from './jsxcad-sys.js';
  *
  * ::: illustration
  * ```
- * SvgPath({},
- *         'M 120.25163,89.678938 C 105.26945,76.865343 86.290871,70.978848 64.320641,70.277872 z')
+ * SvgPath('M 120.25163,89.678938 C 105.26945,76.865343 86.290871,70.978848 64.320641,70.277872 z')
  *   .center()
  *   .scale(0.2)
  * ```
@@ -19,8 +19,8 @@ import { readFile, getSources, writeFile } from './jsxcad-sys.js';
  *
  **/
 
-const SvgPath = (options = {}, svgPath) =>
-  Shape.fromGeometry(fromSvgPath(options, svgPath));
+const SvgPath = (svgPath, options = {}) =>
+  Shape.fromGeometry(fromSvgPath(svgPath, options));
 
 /**
  *
@@ -68,30 +68,29 @@ const readSvgPath = async (options) => {
   return Shape$1.fromGeometry(await fromSvgPath(options, data));
 };
 
-/**
- *
- * # Write SVG
- *
- * ::: illustration
- * ```
- * await Cube().section().writeSvg('svg/cube1.svg');
- * await readSvg({ path: 'svg/cube1.svg' })
- * ```
- * :::
- *
- **/
-
-const writeSvg = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
+const toSvg = async (shape, options = {}) => {
+  const pages = [];
+  // CHECK: Should this be limited to Page plans?
   const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toSvg(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  for (const entry of getPlans(geometry)) {
+    if (entry.plan.page) {
+      for (let leaf of getLeafs(entry.content)) {
+        const svg = await toSvg$1(leaf);
+        pages.push({ svg, leaf: { ...entry, content: leaf }, index: pages.length });
+      }
+    }
+  }
+  return pages;
 };
 
-const method = function (options = {}) { return writeSvg(options, this); };
+const writeSvg = async (shape, name, options = {}) => {
+  for (const { svg, leaf, index } of await toSvg(shape, options)) {
+    await writeFile({}, `output/${name}_${index}.svg`, svg);
+    await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
+  }
+};
+
+const method = function (...args) { return writeSvg(this, ...args); };
 Shape$1.prototype.writeSvg = method;
 
 const api = { SvgPath, readSvg, readSvgPath, writeSvg };

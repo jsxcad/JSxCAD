@@ -30,7 +30,7 @@ const toColorFromTags = (tags, otherwise = 'black') => {
   return otherwise;
 };
 
-export const toSvg = async ({ padding = 0 }, baseGeometry) => {
+export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   const [min, max] = measureBoundingBox(baseGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];

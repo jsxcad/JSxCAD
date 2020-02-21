@@ -2682,7 +2682,7 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
   }
 };
 
-const fromSvgPath = (options = {}, svgPath) => {
+const fromSvgPath = (svgPath, options = {}) => {
   const paths = toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath))));
   for (const path of paths) {
     assertGood(path);
@@ -3191,8 +3191,8 @@ var toPath = function toPath(s) {
 };
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
-const fromSvgPath$1 = (options = {}, svgPath) =>
-  fromSvgPath(Object.assign({ normalizeCoordinateSystem: false }, options), svgPath);
+const fromSvgPath$1 = (svgPath, options = {}) =>
+  fromSvgPath(svgPath, Object.assign({ normalizeCoordinateSystem: false }, options));
 
 const ELEMENT_NODE$1 = 1;
 
@@ -3253,7 +3253,7 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-const fromSvg = async (options = {}, svgString) => {
+const fromSvg = async (svgString, options = {}) => {
   const geometry = { assembly: [] };
   const svg = new domParser_3().parseFromString(await svgString, 'image/svg+xml');
 
@@ -3312,7 +3312,7 @@ const fromSvg = async (options = {}, svgString) => {
         }
 
         const output = (svgPath) => {
-          const paths = fromSvgPath$1({}, svgPath).paths;
+          const paths = fromSvgPath$1(svgPath).paths;
           const fill = node.getAttribute('fill');
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
@@ -3372,7 +3372,7 @@ const toColorFromTags = (tags, otherwise = 'black') => {
   return otherwise;
 };
 
-const toSvg = async ({ padding = 0 }, baseGeometry) => {
+const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   const [min, max] = measureBoundingBox(baseGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
