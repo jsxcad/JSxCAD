@@ -129,7 +129,9 @@ const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
     for (const path of geometry.paths) {
-      solids.push(Shape.fromGeometry(loop(path, endDegrees * Math.PI / 180, sides, pitch)));
+      for (let startDegrees = 0; startDegrees < endDegrees; startDegrees += 360) {
+        solids.push(Shape.fromGeometry(loop(path, Math.min(360, endDegrees - startDegrees) * Math.PI / 180, sides, pitch)).moveX(pitch * startDegrees / 360));
+      }
     }
   }
   return assemble(...solids);
