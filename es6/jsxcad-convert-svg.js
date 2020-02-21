@@ -5,9 +5,8 @@ import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
-import { makeConvex } from './jsxcad-geometry-surface.js';
-import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
+import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnySurfaces, getPaths } from './jsxcad-geometry-tagged.js';
+import { outline } from './jsxcad-geometry-surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [directive, ...args.map(reallyQuantizeForSpace)];
 
@@ -3386,25 +3385,23 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`
   ];
 
-  for (const { surface, tags } of getSurfaces(geometry)) {
+  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry)) {
+    const anySurface = surface || z0Surface;
+    if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
-    for (const polygon of makeConvex(surface)) {
-      svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+    const paths = [];
+    for (const polygon of outline(anySurface)) {
+      paths.push(`${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z`);
     }
-  }
-  for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
-    const color = toColorFromTags(tags);
-    for (const polygon of makeConvex$1(z0Surface)) {
-      svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
-    }
+    svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
   for (const { paths, tags } of getPaths(geometry)) {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {
-        svg.push(`<path stroke="${color}" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
+        svg.push(`<path stroke="${color}" fill="none" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
       } else {
-        svg.push(`<path stroke="${color}" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+        svg.push(`<path stroke="${color}" fill="none" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
       }
     }
   }

@@ -1,7 +1,6 @@
 import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { toKeptGeometry, transform, getSurfaces, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
-import { makeConvex } from './jsxcad-geometry-surface.js';
-import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
+import { outline } from './jsxcad-geometry-surface.js';
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 
 const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
@@ -60,7 +59,7 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
   for (const { tags, surface } of getSurfaces(keptGeometry)) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
-    for (const path of makeConvex(surface)) {
+    for (const path of outline(surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
@@ -68,15 +67,15 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
         const [x2, y2] = path[nth];
         lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
       }
-      // lines.push(`h`); // Surface paths are always closed.
-      lines.push(`f`); // Surface paths are always filled.
+      lines.push(`h`); // Surface paths are always closed.
     }
+    lines.push(`f`); // Surface paths are always filled.
   }
   for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry)) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     // FIX: Avoid making the surface convex.
-    for (const path of makeConvex$1(z0Surface)) {
+    for (const path of outline(z0Surface)) {
       let nth = (path[0] === null) ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
@@ -84,9 +83,9 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
         const [x2, y2] = path[nth];
         lines.push(`${x2.toFixed(9)} ${y2.toFixed(9)} l`); // line-to.
       }
-      // lines.push(`h`); // Surface paths are always closed.
-      lines.push(`f`); // Surface paths are always filled.
+      lines.push(`h`); // Surface paths are always closed.
     }
+    lines.push(`f`); // Surface paths are always filled.
   }
   for (const { tags, paths } of getPaths(keptGeometry)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
