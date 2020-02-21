@@ -17,7 +17,7 @@ const translate = (vector, surface) => transform(fromTranslation(vector), surfac
 const rotateZ = (angle, surface) => transform(fromZRotation(angle), surface);
 const scale = (vector, surface) => transform(fromScaling(vector), surface);
 
-// FIX
+// FIX: This is incorrect, since it assumes the first non-degenerate polygon is representative.
 
 const toPlane = (surface) => {
   if (surface.plane !== undefined) {

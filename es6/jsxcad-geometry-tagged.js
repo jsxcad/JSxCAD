@@ -6,7 +6,7 @@ import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
 import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
+import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
 import { difference as difference$3, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
 import { difference as difference$2, intersection as intersection$2, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
@@ -683,7 +683,7 @@ const fromPathToZ0SurfaceImpl = (path) => {
 const fromPathToZ0Surface = cache(fromPathToZ0SurfaceImpl);
 
 const fromPathsToSurfaceImpl = (paths) => {
-  return { surface: paths };
+  return { surface: makeConvex(paths) };
 };
 
 const fromPathsToSurface = cache(fromPathsToSurfaceImpl);
