@@ -28,9 +28,6 @@ const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
   }
 };
 
-const toPdfMethod = function (...args) { return toPdf(this, ...args); };
-Shape.prototype.toPdf = toPdfMethod;
-
 const writePdfMethod = function (...args) { return writePdf(this, ...args); };
 Shape.prototype.writePdf = writePdfMethod;
 
