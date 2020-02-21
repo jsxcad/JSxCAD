@@ -1,31 +1,32 @@
+import { getLeafs, getPlans, toKeptGeometry } from '@jsxcad/geometry-tagged';
+
 import Shape from '@jsxcad/api-v1-shape';
-import { toSvg } from '@jsxcad/convert-svg';
+import { toSvg as convertToSvg } from '@jsxcad/convert-svg';
 import { writeFile } from '@jsxcad/sys';
 
-/**
- *
- * # Write SVG
- *
- * ::: illustration
- * ```
- * await Cube().section().writeSvg('svg/cube1.svg');
- * await readSvg({ path: 'svg/cube1.svg' })
- * ```
- * :::
- *
- **/
-
-export const writeSvg = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
+export const toSvg = async (shape, options = {}) => {
+  const pages = [];
+  // CHECK: Should this be limited to Page plans?
   const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toSvg(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  for (const entry of getPlans(geometry)) {
+    if (entry.plan.page) {
+      for (let leaf of getLeafs(entry.content)) {
+        const svg = await convertToSvg(leaf);
+        pages.push({ svg, leaf: { ...entry, content: leaf }, index: pages.length });
+      }
+    }
+  }
+  return pages;
 };
 
-const method = function (options = {}) { return writeSvg(options, this); };
+export const writeSvg = async (shape, name, options = {}) => {
+  for (const { svg, leaf, index } of await toSvg(shape, options)) {
+    await writeFile({}, `output/${name}_${index}.svg`, svg);
+    await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
+  }
+};
+
+const method = function (...args) { return writeSvg(this, ...args); };
 Shape.prototype.writeSvg = method;
 
 export default writeSvg;
