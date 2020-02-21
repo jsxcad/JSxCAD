@@ -424,7 +424,7 @@ Shape.prototype.section = sectionMethod;
 const squash = (shape) => {
   const geometry = shape.toKeptGeometry();
   const result = { layers: [] };
-  for (const { solid } of getSolids(geometry)) {
+  for (const { solid, tags } of getSolids(geometry)) {
     const polygons = [];
     for (const surface of solid) {
       for (const path of surface) {
@@ -433,30 +433,30 @@ const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.layers.push({ z0Surface: outline$2(polygons) });
+    result.layers.push({ z0Surface: outline$2(polygons), tags });
   }
-  for (const { surface } of getSurfaces(geometry)) {
+  for (const { surface, tags } of getSurfaces(geometry)) {
     const polygons = [];
     for (const path of surface) {
       const flat = path.map(([x, y]) => [x, y, 0]);
       if (toPlane$2(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
-    result.layers.push({ z0Surface: polygons });
+    result.layers.push({ z0Surface: polygons, tags });
   }
-  for (const { z0Surface } of getZ0Surfaces(geometry)) {
+  for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
     const polygons = [];
     for (const path of z0Surface) {
       polygons.push(path);
     }
-    result.layers.push({ z0Surface: polygons });
+    result.layers.push({ z0Surface: polygons, tags });
   }
-  for (const { paths } of getPaths(geometry)) {
+  for (const { paths, tags } of getPaths(geometry)) {
     const flatPaths = [];
     for (const path of paths) {
       flatPaths.push(path.map(([x, y]) => [x, y, 0]));
     }
-    result.layers.push({ paths: flatPaths });
+    result.layers.push({ paths: flatPaths, tags });
   }
   return Shape$1.fromGeometry(result);
 };
