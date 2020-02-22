@@ -15651,7 +15651,7 @@ const toFont = (options = {}, bytes) => {
                             svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
                           });
     const pathsets = [];
-    for (let { paths } of svgPaths.map(svgPath => fromSvgPath({ curveSegments: curveSegments }, svgPath))) {
+    for (let { paths } of svgPaths.map(svgPath => fromSvgPath(svgPath, { curveSegments: curveSegments }))) {
       // Outlining forces re-orientation.
       pathsets.push(reorient(paths));
     }

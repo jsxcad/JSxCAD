@@ -1,20 +1,15 @@
 import {
   canonicalize,
+  getAnySurfaces,
   getPaths,
-  getSurfaces,
-  getZ0Surfaces,
   measureBoundingBox,
   toKeptGeometry,
   translate
 } from '@jsxcad/geometry-tagged';
 
 import {
-  makeConvex as makeConvexSurface
+  outline
 } from '@jsxcad/geometry-surface';
-
-import {
-  makeConvex as makeConvexZ0Surface
-} from '@jsxcad/geometry-z0surface';
 
 const X = 0;
 const Y = 1;
@@ -30,7 +25,7 @@ const toColorFromTags = (tags, otherwise = 'black') => {
   return otherwise;
 };
 
-export const toSvg = async ({ padding = 0 }, baseGeometry) => {
+export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
   const [min, max] = measureBoundingBox(baseGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
@@ -44,25 +39,23 @@ export const toSvg = async ({ padding = 0 }, baseGeometry) => {
     `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`
   ];
 
-  for (const { surface, tags } of getSurfaces(geometry)) {
+  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry)) {
+    const anySurface = surface || z0Surface;
+    if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
-    for (const polygon of makeConvexSurface(surface)) {
-      svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+    const paths = [];
+    for (const polygon of outline(anySurface)) {
+      paths.push(`${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z`);
     }
-  }
-  for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
-    const color = toColorFromTags(tags);
-    for (const polygon of makeConvexZ0Surface(z0Surface)) {
-      svg.push(`<path fill="${color}" d="${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
-    }
+    svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
   for (const { paths, tags } of getPaths(geometry)) {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {
-        svg.push(`<path stroke="${color}" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
+        svg.push(`<path stroke="${color}" fill="none" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
       } else {
-        svg.push(`<path stroke="${color}" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+        svg.push(`<path stroke="${color}" fill="none" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
       }
     }
   }

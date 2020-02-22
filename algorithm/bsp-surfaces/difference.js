@@ -25,6 +25,8 @@ import {
 import { containsPoint } from './containsPoint';
 import { max } from '@jsxcad/math-vec3';
 
+const MIN = 0;
+
 export const difference = (aSolid, ...bSolids) => {
   if (bSolids.length === 0) {
     return aSolid;
@@ -49,14 +51,13 @@ export const difference = (aSolid, ...bSolids) => {
 
     const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
-    // const bBsp = toBspFromPolygons(bIn, normalize);
-    const bBsp = toBspFromPolygons(bPolygons, normalize);
+    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
+      const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
       const aBsp = toBspFromPolygons(a, normalize);
-      if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed; invert b.
         a = [...aOut, ...flip(bIn)];
       } else {
@@ -64,9 +65,10 @@ export const difference = (aSolid, ...bSolids) => {
         continue;
       }
     } else if (bIn.length === 0) {
+      const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
       const bBsp = toBspFromPolygons(b, normalize);
-      if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed; only the out region remains.
         a = aOut;
       } else {

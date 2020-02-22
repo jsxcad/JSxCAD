@@ -6644,12 +6644,14 @@ const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
-  const surface = z0Surface;
+  // FIX: We need to remove interior walls.
+  // const surfaceOutline = outline(z0Surface);
+  const surfaceOutline = z0Surface;
   const polygons = [];
   const stepHeight = height - depth;
 
   // Build the walls.
-  for (const polygon of surface) {
+  for (const polygon of surfaceOutline) {
     const wall = flip(polygon);
     const floor = translate$1([0, 0, depth + stepHeight * 0], wall);
     const roof = translate$1([0, 0, depth + stepHeight * 1], wall);
@@ -6666,7 +6668,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   if (cap) {
     // FIX: This is already Z0.
     // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex(z0Surface);
+    const surface = makeConvex(surfaceOutline);
 
     // Roof goes up.
     const roof = translate$2([0, 0, height], surface);

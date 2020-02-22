@@ -134,7 +134,8 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       }
       if (frontPoints.length >= 3) {
         while (squaredDistance(frontPoints[0], lastFront) <= EPSILON2) {
-          lastFront = frontPoints.pop();
+          frontPoints.pop();
+          lastFront = frontPoints[frontPoints.length - 1];
         }
       }
       if (frontPoints.length >= 3) {
@@ -147,7 +148,8 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       }
       if (backPoints.length >= 3) {
         while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
-          lastBack = backPoints.pop();
+          backPoints.pop();
+          lastBack = backPoints[backPoints.length - 1];
         }
       }
       if (backPoints.length >= 3) {

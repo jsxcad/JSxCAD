@@ -9,8 +9,8 @@ const { readFile, writeFile } = fs.promises;
 test.beforeEach(async t => { await boot(); });
 
 test('Rectangle', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
@@ -28,8 +28,8 @@ test('Rectangle', async t => {
 });
 
 test('Rounded Rectangle', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
@@ -56,8 +56,8 @@ test('Rounded Rectangle', async t => {
 });
 
 test('Polyline', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
@@ -81,8 +81,8 @@ test('Polyline', async t => {
 });
 
 test('Circle', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
@@ -100,8 +100,8 @@ test('Circle', async t => {
 });
 
 test('Ellipse', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
@@ -124,8 +124,8 @@ test('Ellipse', async t => {
 });
 
 test('Polygon', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
@@ -148,8 +148,8 @@ test('Polygon', async t => {
 });
 
 test('Complex', async t => {
-  const assembly = await fromSvg({},
-                                 `
+  const assembly = await fromSvg(
+    `
                             <?xml version="1.0"?>
                             <svg width="5cm" height="4cm" viewBox="0 0 500 400"
                                  xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny">
