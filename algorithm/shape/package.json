@@ -29,6 +29,7 @@
     "@jsxcad/geometry-solid": "^0.0.79",
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79",
+    "@jsxcad/geometry-z0surface-boolean": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-utils": "^0.0.79",

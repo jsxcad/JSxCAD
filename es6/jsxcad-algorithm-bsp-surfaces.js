@@ -680,13 +680,14 @@ const cutOpen = (solid, surface, normalize = createNormalize3()) => {
   return fromPolygons$1({}, trimmedSolid);
 };
 
-const containsPoint = (bsp, point) => {
+const containsPoint = (bsp, point, parent = []) => {
   while (true) {
     if (bsp === inLeaf) {
       return true;
     } else if (bsp === outLeaf) {
       return false;
     } else {
+      parent[0] = bsp;
       const plane = bsp.plane;
       // const t = planeDistance(plane, point);
       const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
