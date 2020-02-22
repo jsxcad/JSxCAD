@@ -48,7 +48,7 @@ export const fromPlane = (plane) => {
 const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = inLeaf) => {
   const cMin = max(aMin, bMin);
   const cMax = min(aMax, bMax);
-  return {
+  const bsp = {
     // Bottom
     kind: BRANCH,
     plane: [0, 0, -1, -cMin[Z] + EPSILON * 10],
@@ -85,6 +85,7 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
       }
     }
   };
+  return bsp;
 };
 
 const fromPolygons = (polygons, normalize) => {

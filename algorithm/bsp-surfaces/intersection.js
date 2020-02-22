@@ -24,6 +24,8 @@ import {
 import { containsPoint } from './containsPoint';
 import { max } from '@jsxcad/math-vec3';
 
+const MIN = 0;
+
 // An asymmetric binary merge.
 export const intersection = (...solids) => {
   if (solids.length === 0) {
@@ -48,7 +50,6 @@ export const intersection = (...solids) => {
 
     const aPolygons = a;
     const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
-
     const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, toBspFromPolygons(aIn, normalize));
 
     const bPolygons = b;
@@ -56,9 +57,10 @@ export const intersection = (...solids) => {
     const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, toBspFromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
+      const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for aIn to be empty: the space is fully exclosed or fully vacated.
       const aBsp = toBspFromPolygons(a, normalize);
-      if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed.
         s.push(bIn);
       } else {
@@ -66,9 +68,10 @@ export const intersection = (...solids) => {
         return [];
       }
     } else if (bIn.length === 0) {
+      const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for bIn to be empty: the space is fully exclosed or fully vacated.
       const bBsp = toBspFromPolygons(b, normalize);
-      if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed.
         s.push(aIn);
       } else {
