@@ -507,7 +507,7 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */inward,
-                   /* abutting= */inward, // dropward
+                   /* abutting= */inward, // keepward
                    /* overlapping= */outward, // dropward
                    /* front= */outward);
     }
@@ -799,10 +799,6 @@ const difference = (aSolid, ...bSolids) => {
   let bs = bSolids
       .map(b => toPolygons({}, alignVertices(b, normalize)))
       .filter(b => !doesNotOverlap(a, b));
-
-  if (bs.length === 0) {
-    return aSolid;
-  }
 
   while (bs.length > 0) {
     const b = bs.shift();

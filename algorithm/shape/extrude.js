@@ -13,9 +13,7 @@ import {
   cache
 } from '@jsxcad/cache';
 
-import {
-  outline
-} from '@jsxcad/geometry-z0surface-boolean';
+// import { outline } from '@jsxcad/geometry-z0surface-boolean';
 
 import {
   fromPolygons as toSolidFromPolygons
@@ -24,7 +22,9 @@ import {
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
-  const surfaceOutline = outline(z0Surface);
+  // FIX: We need to remove interior walls.
+  // const surfaceOutline = outline(z0Surface);
+  const surfaceOutline = z0Surface;
   const polygons = [];
   const stepHeight = height - depth;
 

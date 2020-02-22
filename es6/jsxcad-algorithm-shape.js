@@ -7,7 +7,6 @@ import { fromPolygon } from './jsxcad-math-plane.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
-import { outline } from './jsxcad-geometry-z0surface-boolean.js';
 import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
 function clone(point) { //TODO: use gl-vec2 for this
@@ -6645,7 +6644,9 @@ const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
-  const surfaceOutline = outline(z0Surface);
+  // FIX: We need to remove interior walls.
+  // const surfaceOutline = outline(z0Surface);
+  const surfaceOutline = z0Surface;
   const polygons = [];
   const stepHeight = height - depth;
 

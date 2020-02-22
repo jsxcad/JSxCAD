@@ -52697,7 +52697,8 @@ const materialProperties = {
   color: {
     metalness: 0.0,
     roughness: 0.9,
-    reflectivity: 0.1
+    reflectivity: 0.1,
+    emissiveIntensity: 0.25
   },
   cardboard: {
     ...basic,
@@ -52801,7 +52802,8 @@ const buildMeshMaterial = async (tags) => {
       return new MeshPhysicalMaterial(parameters);
     } else if (color) {
       await merge(materialProperties['color'], parameters);
-      return new MeshPhysicalMaterial(parameters);
+      parameters.emissive = parameters.color;
+      return new MeshPhongMaterial(parameters);
     }
   }
 

@@ -38,10 +38,6 @@ export const difference = (aSolid, ...bSolids) => {
       .map(b => toPolygonsFromSolid({}, alignVertices(b, normalize)))
       .filter(b => !doesNotOverlap(a, b));
 
-  if (bs.length === 0) {
-    return aSolid;
-  }
-
   while (bs.length > 0) {
     const b = bs.shift();
 
