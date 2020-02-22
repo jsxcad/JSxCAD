@@ -186,7 +186,7 @@ const outLeaf = {
 const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = inLeaf) => {
   const cMin = max(aMin, bMin);
   const cMax = min(aMax, bMax);
-  return {
+  const bsp = {
     // Bottom
     kind: BRANCH,
     plane: [0, 0, -1, -cMin[Z] + EPSILON * 10],
@@ -223,6 +223,7 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
       }
     }
   };
+  return bsp;
 };
 
 const fromPolygons = (polygons, normalize) => {
@@ -784,6 +785,8 @@ const deform = (solid, transform, min, max, resolution) => {
   return fromPolygons$1({}, transformedPolygons);
 };
 
+const MIN = 0;
+
 const difference = (aSolid, ...bSolids) => {
   if (bSolids.length === 0) {
     return aSolid;
@@ -813,9 +816,10 @@ const difference = (aSolid, ...bSolids) => {
     const bBsp = fromPolygons(bPolygons, normalize);
 
     if (aIn.length === 0) {
+      const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
       const aBsp = fromPolygons(a, normalize);
-      if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed; invert b.
         a = [...aOut, ...flip(bIn)];
       } else {
@@ -823,9 +827,10 @@ const difference = (aSolid, ...bSolids) => {
         continue;
       }
     } else if (bIn.length === 0) {
+      const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
       const bBsp = fromPolygons(b, normalize);
-      if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed; only the out region remains.
         a = aOut;
       } else {
@@ -841,6 +846,8 @@ const difference = (aSolid, ...bSolids) => {
   }
   return fromPolygons$1({}, a, normalize);
 };
+
+const MIN$1 = 0;
 
 // An asymmetric binary merge.
 const intersection = (...solids) => {
@@ -866,7 +873,6 @@ const intersection = (...solids) => {
 
     const aPolygons = a;
     const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
-
     const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons(aIn, normalize));
 
     const bPolygons = b;
@@ -874,9 +880,10 @@ const intersection = (...solids) => {
     const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
+      const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
       // There are two ways for aIn to be empty: the space is fully exclosed or fully vacated.
       const aBsp = fromPolygons(a, normalize);
-      if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed.
         s.push(bIn);
       } else {
@@ -884,9 +891,10 @@ const intersection = (...solids) => {
         return [];
       }
     } else if (bIn.length === 0) {
+      const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
       // There are two ways for bIn to be empty: the space is fully exclosed or fully vacated.
       const bBsp = fromPolygons(b, normalize);
-      if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed.
         s.push(aIn);
       } else {
@@ -907,6 +915,8 @@ const section = (solid, surfaces, normalize) => {
   const bsp = fromSolid(alignVertices(solid, normalize), normalize);
   return surfaces.map(surface => removeExteriorPolygonsForSection(bsp, surface, normalize));
 };
+
+const MIN$2 = 0;
 
 // An asymmetric binary merge.
 const union = (...solids) => {
@@ -940,9 +950,10 @@ const union = (...solids) => {
     const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
+      const bbMin = max(aBB[MIN$2], bBB[MIN$2]);
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
       const aBsp = fromPolygons(a, normalize);
-      if (containsPoint(aBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed; bIn is redundant.
         s.push([...aOut, ...aIn, ...bOut]);
       } else {
@@ -951,9 +962,10 @@ const union = (...solids) => {
         s.push([...a, ...b]);
       }
     } else if (bIn.length === 0) {
+      const bbMin = max(aBB[MIN$2], bBB[MIN$2]);
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
       const bBsp = fromPolygons(b, normalize);
-      if (containsPoint(bBsp, max(aBB[0], bBB[1]))) {
+      if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed; aIn is redundant.
         s.push([...aOut, ...bIn, ...bOut]);
       } else {
