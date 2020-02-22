@@ -95,8 +95,6 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       let startPoint = polygon[last];
       let startType = pointType[last];
       for (let nth = 0; nth < polygon.length; nth++) {
-        // lastFront = undefined;
-        // lastBack = undefined;
         const endPoint = polygon[nth];
         const endType = pointType[nth];
         if (startType !== BACK) {
@@ -143,8 +141,6 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints.sibling = backPoints;
         }
         front.push(frontPoints);
-      } else {
-        console.log(`QQ/frontPoints/drop`);
       }
       if (backPoints.length >= 3) {
         while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
@@ -159,8 +155,6 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           backPoints.sibling = frontPoints;
         }
         back.push(backPoints);
-      } else {
-        console.log(`QQ/backPoints/drop`);
       }
       break;
     }
@@ -380,36 +374,6 @@ const removeInteriorPolygonsForUnionDroppingOverlap = (bsp, polygons, normalize)
   }
 };
 
-const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
-  if (bsp === inLeaf) {
-    return [];
-  } else if (bsp === outLeaf) {
-    return keepOut(polygons);
-  } else {
-    const outward = [];
-    const inward = [];
-    for (let i = 0; i < polygons.length; i++) {
-      splitPolygon(normalize,
-                   bsp.plane,
-                   polygons[i],
-                   /* back= */inward,
-                   /* abutting= */outward,
-                   /* overlapping= */inward,
-                   /* front= */outward);
-    }
-    const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
-    const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, inward, normalize);
-
-    if (trimmedFront.length === 0) {
-      return trimmedBack;
-    } else if (trimmedBack.length === 0) {
-      return trimmedFront;
-    } else {
-      return merge(trimmedFront, trimmedBack);
-    }
-  }
-};
-
 const removeExteriorPolygonsForSection = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return keepIn(polygons);
@@ -500,6 +464,36 @@ const removeExteriorPolygonsForCutKeepingOverlap = (bsp, polygons, normalize) =>
   }
 };
 
+const removeInteriorPolygonsForDifference = (bsp, polygons, normalize) => {
+  if (bsp === inLeaf) {
+    return [];
+  } else if (bsp === outLeaf) {
+    return keepOut(polygons);
+  } else {
+    const outward = [];
+    const inward = [];
+    for (let i = 0; i < polygons.length; i++) {
+      splitPolygon(normalize,
+                   bsp.plane,
+                   polygons[i],
+                   /* back= */inward,
+                   /* abutting= */outward, // keepward
+                   /* overlapping= */inward, // dropward
+                   /* front= */outward);
+    }
+    const trimmedFront = removeInteriorPolygonsForDifference(bsp.front, outward, normalize);
+    const trimmedBack = removeInteriorPolygonsForDifference(bsp.back, inward, normalize);
+
+    if (trimmedFront.length === 0) {
+      return trimmedBack;
+    } else if (trimmedBack.length === 0) {
+      return trimmedFront;
+    } else {
+      return merge(trimmedFront, trimmedBack);
+    }
+  }
+};
+
 const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
   if (bsp === inLeaf) {
     return keepIn(polygons);
@@ -513,8 +507,8 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */inward,
-                   /* abutting= */outward,
-                   /* overlapping= */inward,
+                   /* abutting= */inward, // dropward
+                   /* overlapping= */outward, // dropward
                    /* front= */outward);
     }
     const trimmedFront = removeExteriorPolygonsForDifference(bsp.front, outward, normalize);

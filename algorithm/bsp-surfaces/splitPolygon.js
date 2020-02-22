@@ -99,8 +99,6 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       let startPoint = polygon[last];
       let startType = pointType[last];
       for (let nth = 0; nth < polygon.length; nth++) {
-        // lastFront = undefined;
-        // lastBack = undefined;
         const endPoint = polygon[nth];
         const endType = pointType[nth];
         if (startType !== BACK) {
