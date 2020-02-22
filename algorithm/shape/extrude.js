@@ -14,6 +14,10 @@ import {
 } from '@jsxcad/cache';
 
 import {
+  outline
+} from '@jsxcad/geometry-z0surface-boolean';
+
+import {
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
 
@@ -25,7 +29,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   const stepHeight = height - depth;
 
   // Build the walls.
-  for (const polygon of surface) {
+  for (const polygon of outline(surface)) {
     const wall = flipPath(polygon);
     const floor = translatePath([0, 0, depth + stepHeight * 0], wall);
     const roof = translatePath([0, 0, depth + stepHeight * 1], wall);
