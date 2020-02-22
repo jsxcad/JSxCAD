@@ -7,7 +7,6 @@ import { fromPolygon } from './jsxcad-math-plane.js';
 import { fromPoints } from './jsxcad-math-poly3.js';
 import { scale as scale$1, add as add$1, unit } from './jsxcad-math-vec3.js';
 import { fromAngleRadians } from './jsxcad-math-vec2.js';
-import { outline } from './jsxcad-geometry-z0surface-boolean.js';
 import { translate as translate$3 } from './jsxcad-geometry-tagged.js';
 
 function clone(point) { //TODO: use gl-vec2 for this
@@ -6645,12 +6644,14 @@ const buildRegularPolygon = cache$1(buildRegularPolygonImpl);
 // FIX: Rewrite via buildFromFunction.
 // FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
-  const surface = z0Surface;
+  // FIX: We need to remove interior walls.
+  // const surfaceOutline = outline(z0Surface);
+  const surfaceOutline = z0Surface;
   const polygons = [];
   const stepHeight = height - depth;
 
   // Build the walls.
-  for (const polygon of outline(surface)) {
+  for (const polygon of surfaceOutline) {
     const wall = flip(polygon);
     const floor = translate$1([0, 0, depth + stepHeight * 0], wall);
     const roof = translate$1([0, 0, depth + stepHeight * 1], wall);
@@ -6667,7 +6668,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   if (cap) {
     // FIX: This is already Z0.
     // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex(z0Surface);
+    const surface = makeConvex(surfaceOutline);
 
     // Roof goes up.
     const roof = translate$2([0, 0, height], surface);

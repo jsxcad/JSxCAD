@@ -51,9 +51,7 @@ export const difference = (aSolid, ...bSolids) => {
 
     const bPolygons = b;
     const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    // const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
-    // const bBsp = toBspFromPolygons(bIn, normalize);
-    const bBsp = toBspFromPolygons(bPolygons, normalize);
+    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);

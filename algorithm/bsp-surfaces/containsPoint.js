@@ -1,7 +1,8 @@
 import { inLeaf, outLeaf } from './bsp';
 
-export const containsPoint = (bsp, point) => {
+export const containsPoint = (bsp, point, history = []) => {
   while (true) {
+    history.push(bsp);
     if (bsp === inLeaf) {
       return true;
     } else if (bsp === outLeaf) {

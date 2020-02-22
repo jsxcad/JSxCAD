@@ -1,6 +1,14 @@
-import { MeshNormalMaterial, MeshPhysicalMaterial, RepeatWrapping, TextureLoader } from 'three';
+import {
+  MeshNormalMaterial,
+  MeshPhongMaterial,
+  MeshPhysicalMaterial,
+  RepeatWrapping,
+  TextureLoader
+} from 'three';
 
-import { setColor } from './color';
+import {
+  setColor
+} from './color';
 
 const loader = new TextureLoader();
 
@@ -19,6 +27,16 @@ const transparent = { opacity: 0.5, transparent: true };
 const glass = { ...transparent, metalness: 0.0, clearCoat: 1, clearCoatRoughness: 0 };
 
 const materialProperties = {
+  basic,
+  metal,
+  transparent,
+  glass,
+  color: {
+    metalness: 0.0,
+    roughness: 0.9,
+    reflectivity: 0.1,
+    emissiveIntensity: 0.25
+  },
   cardboard: {
     ...basic,
     map: 'https://jsxcad.js.org/texture/cardboard.png'
@@ -83,9 +101,6 @@ const materialProperties = {
     ...metal,
     map: 'https://jsxcad.js.org/texture/copper.png'
   },
-  glass: {
-    ...glass
-  },
   'wet-glass': {
     ...glass,
     map: 'https://jsxcad.js.org/texture/wet-glass.png'
@@ -109,6 +124,7 @@ export const setMaterial = async (tags, parameters) => {
       const properties = materialProperties[material];
       if (properties !== undefined) {
         await merge(properties, parameters);
+        return properties;
       }
     }
   }
@@ -117,10 +133,14 @@ export const setMaterial = async (tags, parameters) => {
 export const buildMeshMaterial = async (tags) => {
   if (tags !== undefined) {
     const parameters = {};
-    setColor(tags, parameters, null);
-    await setMaterial(tags, parameters);
-    if (Object.keys(parameters).length > 0) {
+    const color = setColor(tags, parameters, null);
+    const material = await setMaterial(tags, parameters);
+    if (material) {
       return new MeshPhysicalMaterial(parameters);
+    } else if (color) {
+      await merge(materialProperties['color'], parameters);
+      parameters.emissive = parameters.color;
+      return new MeshPhongMaterial(parameters);
     }
   }
 

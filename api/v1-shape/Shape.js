@@ -48,7 +48,7 @@ export class Shape {
   constructor (geometry = { assembly: [] },
                context) {
     if (geometry.geometry) {
-      throw Error('die');
+      throw Error('die: { geometry: ... } is not valid geometry.');
     }
     this.geometry = geometry;
     this.context = context;
@@ -92,7 +92,7 @@ export class Shape {
 
   transform (matrix) {
     if (matrix.some(item => typeof item !== 'number' || isNaN(item))) {
-      throw Error('die');
+      throw Error('die: matrix is malformed');
     }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
