@@ -5,26 +5,29 @@ import {
 
 import {
   flip as flipSurface,
-  makeConvex,
   translate as translateSurface
 } from '@jsxcad/geometry-surface';
+
+import {
+  makeConvex,
+  outline
+} from '@jsxcad/geometry-z0surface-boolean';
 
 import {
   cache
 } from '@jsxcad/cache';
 
-// import { outline } from '@jsxcad/geometry-z0surface-boolean';
+import {
+  createNormalize2
+} from '@jsxcad/algorithm-quantize';
 
 import {
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
 
-// FIX: Rewrite via buildFromFunction.
-// FIX: This only works on z0surface.
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
-  // FIX: We need to remove interior walls.
-  // const surfaceOutline = outline(z0Surface);
-  const surfaceOutline = z0Surface;
+  const normalize = createNormalize2();
+  const surfaceOutline = outline(z0Surface, normalize);
   const polygons = [];
   const stepHeight = height - depth;
 
@@ -46,7 +49,7 @@ const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   if (cap) {
     // FIX: This is already Z0.
     // FIX: This is bringing the vertices out of alignment?
-    const surface = makeConvex(surfaceOutline);
+    const surface = makeConvex(surfaceOutline, normalize);
 
     // Roof goes up.
     const roof = translateSurface([0, 0, height], surface);
