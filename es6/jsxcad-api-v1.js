@@ -3,7 +3,10 @@ export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import './jsxcad-api-v1-deform.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
+import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-shell.js';
+import './jsxcad-api-v1-svg.js';
+import './jsxcad-api-v1-stl.js';
 import './jsxcad-api-v1-view.js';
 import { addSource, readFile, getSources } from './jsxcad-sys.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -22,8 +25,8 @@ import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { WoodScrew } from './jsxcad-api-v1-items.js';
 export { WoodScrew } from './jsxcad-api-v1-items.js';
-import { acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+export { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -81,6 +84,7 @@ var api = /*#__PURE__*/Object.freeze({
   Wave: Wave,
   Item: Item,
   WoodScrew: WoodScrew,
+  Random: Random,
   acos: acos,
   cos: cos,
   ease: ease,
