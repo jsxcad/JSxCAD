@@ -1,7 +1,7 @@
+import { toPolygons, alignVertices, fromPolygons as fromPolygons$1, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toPolygons, fromPolygons as fromPolygons$1, alignVertices, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
@@ -416,10 +416,10 @@ const removeExteriorPolygonsForCutDroppingOverlap = (bsp, polygons, normalize) =
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* abutting= */front,
-                   /* overlapping= */front,
-                   /* front= */front);
+                   /* back= */back, // keepward
+                   /* abutting= */front, // dropward
+                   /* overlapping= */front, // dropward
+                   /* front= */front); // dropward
     }
     const trimmedFront = removeExteriorPolygonsForCutDroppingOverlap(bsp.front, front, normalize);
     const trimmedBack = removeExteriorPolygonsForCutDroppingOverlap(bsp.back, back, normalize);
@@ -446,10 +446,10 @@ const removeExteriorPolygonsForCutKeepingOverlap = (bsp, polygons, normalize) =>
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* abutting= */front,
-                   /* overlapping= */back,
-                   /* front= */front);
+                   /* back= */back, // keepward
+                   /* abutting= */front, // dropward
+                   /* overlapping= */back, // keepward
+                   /* front= */front); // dropward
     }
     const trimmedFront = removeExteriorPolygonsForCutKeepingOverlap(bsp.front, front, normalize);
     const trimmedBack = removeExteriorPolygonsForCutKeepingOverlap(bsp.back, back, normalize);
@@ -657,7 +657,7 @@ const boundPolygons = (bsp, polygons, normalize) => {
 const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
-  const solidPolygons = toPolygons({}, solid);
+  const solidPolygons = toPolygons({}, alignVertices(solid, normalize));
 
   // Classify the solid with it.
   const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -667,18 +667,18 @@ const cut = (solid, surface, normalize = createNormalize3()) => {
   const solidBsp = fromPolygons(solidPolygons, normalize);
   const trimmedPolygons = removeExteriorPolygonsForCutKeepingOverlap(solidBsp, surface, normalize);
 
-  return fromPolygons$1({}, [...trimmedSolid, ...trimmedPolygons]);
+  return fromPolygons$1({}, [...trimmedSolid, ...trimmedPolygons], normalize);
 };
 
 const cutOpen = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
-  const solidPolygons = toPolygons({}, solid);
+  const solidPolygons = toPolygons({}, alignVertices(solid, normalize));
 
   // Classify the solid with it.
   const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
 
-  return fromPolygons$1({}, trimmedSolid);
+  return fromPolygons$1({}, trimmedSolid, normalize);
 };
 
 const containsPoint = (bsp, point, history = []) => {

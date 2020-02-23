@@ -310,10 +310,10 @@ const removeExteriorPolygonsForCutDroppingOverlap = (bsp, polygons, normalize) =
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* abutting= */front,
-                   /* overlapping= */front,
-                   /* front= */front);
+                   /* back= */back, // keepward
+                   /* abutting= */front, // dropward
+                   /* overlapping= */front, // dropward
+                   /* front= */front); // dropward
     }
     const trimmedFront = removeExteriorPolygonsForCutDroppingOverlap(bsp.front, front, normalize);
     const trimmedBack = removeExteriorPolygonsForCutDroppingOverlap(bsp.back, back, normalize);
@@ -340,10 +340,10 @@ const removeExteriorPolygonsForCutKeepingOverlap = (bsp, polygons, normalize) =>
       splitPolygon(normalize,
                    bsp.plane,
                    polygons[i],
-                   /* back= */back,
-                   /* abutting= */front,
-                   /* overlapping= */back,
-                   /* front= */front);
+                   /* back= */back, // keepward
+                   /* abutting= */front, // dropward
+                   /* overlapping= */back, // keepward
+                   /* front= */front); // dropward
     }
     const trimmedFront = removeExteriorPolygonsForCutKeepingOverlap(bsp.front, front, normalize);
     const trimmedBack = removeExteriorPolygonsForCutKeepingOverlap(bsp.back, back, normalize);

@@ -10,7 +10,10 @@
 import '@jsxcad/api-v1-connector';
 import '@jsxcad/api-v1-deform';
 import '@jsxcad/api-v1-layout';
+import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-shell';
+import '@jsxcad/api-v1-svg';
+import '@jsxcad/api-v1-stl';
 import '@jsxcad/api-v1-view';
 
 export {
@@ -87,6 +90,7 @@ export {
 } from '@jsxcad/api-v1-items';
 
 export {
+  Random,
   acos,
   cos,
   ease,
