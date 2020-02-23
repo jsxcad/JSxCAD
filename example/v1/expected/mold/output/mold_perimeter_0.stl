@@ -83,11 +83,11 @@ vertex -23 -25.98076 3
 vertex -23 -25.98076 -3
 endloop
 endfacet
-facet normal -5.127901037535351e-16 0 1
+facet normal 1.0939521950244722e-15 0 1
 outer loop
-vertex -24 27.71281 3
 vertex -24 -27.71281 3
 vertex -23 -25.98076 3
+vertex -23 25.98076 3
 endloop
 endfacet
 facet normal 0 0 1
@@ -97,10 +97,10 @@ vertex -23 -25.98076 3
 vertex -24 -27.71281 3
 endloop
 endfacet
-facet normal 1.0939521950244722e-15 0 1
+facet normal 0 0 1
 outer loop
 vertex -24 27.71281 3
-vertex -23 -25.98076 3
+vertex -24 -27.71281 3
 vertex -23 25.98076 3
 endloop
 endfacet
