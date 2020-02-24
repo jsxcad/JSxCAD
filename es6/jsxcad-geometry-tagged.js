@@ -331,7 +331,7 @@ const toTransformedGeometry = (geometry) => {
         };
       } else if (geometry.solid) {
         return {
-          solid: transform$4(matrix, geometry.solid),
+          solid: transform$4(matrix, reconcile$1(geometry.solid)),
           tags
         };
       } else if (geometry.surface) {
