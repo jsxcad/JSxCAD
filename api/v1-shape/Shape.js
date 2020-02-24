@@ -13,6 +13,7 @@ import {
   fromPathsToZ0Surface,
   isWatertight,
   makeWatertight,
+  reconcile,
   toDisjointGeometry,
   toKeptGeometry as toKeptTaggedGeometry,
   toPoints,
@@ -95,6 +96,10 @@ export class Shape {
       throw Error('die: matrix is malformed');
     }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
+  }
+
+  reconcile () {
+    return fromGeometry(reconcile(this.toKeptGeometry()));
   }
 
   assertWatertight () {

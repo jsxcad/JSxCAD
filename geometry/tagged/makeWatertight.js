@@ -1,7 +1,8 @@
 import {
   findOpenEdges as findOpenEdgesOfSolid,
   isWatertight as isWatertightSolid,
-  makeWatertight as makeWatertightSolid
+  makeWatertight as makeWatertightSolid,
+  reconcile as reconcileSolid
 } from '@jsxcad/geometry-solid';
 
 import {
@@ -11,6 +12,19 @@ import {
 
 import { close } from '@jsxcad/geometry-path';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+
+export const reconcile = (geometry, normalize = createNormalize3()) =>
+  rewrite(geometry,
+          (geometry, descend) => {
+            if (geometry.solid) {
+              return {
+                solid: reconcileSolid(geometry.solid, normalize),
+                tags: geometry.tags
+              };
+            } else {
+              return descend();
+            }
+          });
 
 export const makeWatertight = (geometry, normalize = createNormalize3(), onFixed) =>
   rewrite(geometry,

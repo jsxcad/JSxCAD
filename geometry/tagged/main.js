@@ -1,7 +1,8 @@
 import {
   findOpenEdges,
   isWatertight,
-  makeWatertight
+  makeWatertight,
+  reconcile
 } from './makeWatertight';
 
 import {
@@ -96,6 +97,7 @@ export {
   measureBoundingBox,
   nonNegative,
   outline,
+  reconcile,
   rewrite,
   rewriteTags,
   specify,
