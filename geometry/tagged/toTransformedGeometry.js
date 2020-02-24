@@ -1,9 +1,16 @@
-import { identity, multiply } from '@jsxcad/math-mat4';
+import {
+  identity,
+  multiply
+} from '@jsxcad/math-mat4';
+
+import {
+  reconcile as reconcileSolid,
+  transform as transformSolid
+} from '@jsxcad/geometry-solid';
 
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
 import { transform as transformPlane } from '@jsxcad/math-plane';
 import { transform as transformPoints } from '@jsxcad/geometry-points';
-import { transform as transformSolid } from '@jsxcad/geometry-solid';
 import { transform as transformSurface } from '@jsxcad/geometry-surface';
 
 const transformedGeometry = Symbol('transformedGeometry');
@@ -67,7 +74,7 @@ export const toTransformedGeometry = (geometry) => {
         };
       } else if (geometry.solid) {
         return {
-          solid: transformSolid(matrix, geometry.solid),
+          solid: transformSolid(matrix, reconcileSolid(geometry.solid)),
           tags
         };
       } else if (geometry.surface) {

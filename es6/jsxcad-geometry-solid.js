@@ -303,6 +303,9 @@ const measureBoundingSphere = (solid) => {
 
 const outline = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
 
+const reconcile = (solid, normalize = createNormalize3()) =>
+  alignVertices(solid, normalize);
+
 const toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));
 
 const toPoints = (solid) => {
@@ -320,4 +323,4 @@ const toPolygons = (options = {}, solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, reconcile, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };

@@ -206,9 +206,15 @@ var Prando = /** @class */ (function () {
     return Prando;
 }());
 
+const to = (g) => (to) => g() * to;
+const vary = (g) => (degree) => (g() - 0.5) * degree * 2;
+
 const Random = (seed = 0) => {
   const rng = new Prando(seed);
-  return () => rng.next();
+  const g = () => rng.next();
+  g.to = to(g);
+  g.vary = vary(g);
+  return g;
 };
 
 /**

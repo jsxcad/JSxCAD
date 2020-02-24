@@ -13,6 +13,7 @@ import { fromPolygons } from './fromPolygons';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
 import { outline } from './outline';
+import { reconcile } from './reconcile';
 import { toGeneric } from './toGeneric';
 import { toPoints } from './toPoints';
 import { toPolygons } from './toPolygons';
@@ -32,6 +33,7 @@ export {
   measureBoundingBox,
   measureBoundingSphere,
   outline,
+  reconcile,
   rotateX,
   rotateY,
   rotateZ,
