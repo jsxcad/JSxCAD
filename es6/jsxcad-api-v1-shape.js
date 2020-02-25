@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, measureBoundingBox as measureBoundingBox$1, getAnySurfaces, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
@@ -531,6 +531,9 @@ const openEdges = (shape, { isOpen = true } = {}) => {
   const paths = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     paths.push(...findOpenEdges(solid, isOpen));
+  }
+  for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
+    paths.push(...findOpenEdges([surface || z0Surface], isOpen));
   }
   return Shape.fromGeometry({ paths: paths.map(path => path.map(([x, y, z]) => [r(x), r(y), r(z)])) });
 };

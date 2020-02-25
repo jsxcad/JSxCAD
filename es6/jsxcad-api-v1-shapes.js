@@ -401,7 +401,7 @@ Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:num
 Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
 Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
-const Empty = (...shapes) => Shape.fromGeometry({ layers: [] });
+const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
 /**
  *

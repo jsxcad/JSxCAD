@@ -1,6 +1,7 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
 import { makeConvex } from '@jsxcad/geometry-surface';
+import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
@@ -38,5 +39,5 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
     defragmented.push(surface);
   }
 
-  return defragmented;
+  return makeWatertight(defragmented);
 };

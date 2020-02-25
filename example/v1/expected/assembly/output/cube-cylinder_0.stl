@@ -335,20 +335,6 @@ vertex 5 0 -15
 vertex 5.0001 -0.00102 -15
 endloop
 endfacet
-facet normal 0 0 -1
-outer loop
-vertex 5 0 -15
-vertex 5.0001 -0.00102 -15
-vertex 5.0001 -3.68306 -15
-endloop
-endfacet
-facet normal 0 0 1
-outer loop
-vertex 5 0 -15
-vertex 5.0001 -3.68306 -15
-vertex 5.0001 -0.00102 -15
-endloop
-endfacet
 facet normal -4.059780229460068e-15 0 -1
 outer loop
 vertex -15 -15 -15
