@@ -8,6 +8,7 @@ import './op';
 import './openEdges';
 import './void';
 import './wireframe';
+import './wireframeFaces';
 import './with';
 
 import Shape from './Shape';
