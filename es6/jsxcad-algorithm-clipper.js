@@ -1,5 +1,5 @@
 import { onBoot } from './jsxcad-sys.js';
-import { isClockwise, isClosed, isOpen, getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { deduplicate, isClockwise, isClosed, isOpen, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { distance } from './jsxcad-math-vec3.js';
@@ -2586,7 +2586,7 @@ const fromClosedPaths = (paths, normalize) => {
 };
 
 const toSurface = (clipperPaths, normalize) =>
-  clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
+  clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
 
 const toPaths = (clipper, polytree, normalize) => {
   const paths = [];

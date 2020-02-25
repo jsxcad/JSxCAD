@@ -284,7 +284,7 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
     defragmented.push(surface);
   }
 
-  return defragmented;
+  return makeWatertight(defragmented);
 };
 
 /** Measure the bounding sphere of the given poly3

@@ -1,4 +1,4 @@
-import { isClockwise, isClosed, isOpen } from '@jsxcad/geometry-path';
+import { deduplicate, isClockwise, isClosed, isOpen } from '@jsxcad/geometry-path';
 
 import { IntPoint } from './clipper-lib';
 import { toPlane } from '@jsxcad/math-poly3';
@@ -87,7 +87,7 @@ export const fromClosedPaths = (paths, normalize) => {
 };
 
 export const toSurface = (clipperPaths, normalize) =>
-  clockSort(clipperPaths.map(clipperPath => clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))));
+  clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
 
 export const toPaths = (clipper, polytree, normalize) => {
   const paths = [];
