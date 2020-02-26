@@ -228,7 +228,7 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
   return bsp;
 };
 
-const fromPolygons = (polygons, normalize) => {
+const fromPolygonsToBspTree = (polygons, normalize) => {
   if (polygons.length === 0) {
     // Everything is outside of an empty geometry.
     return outLeaf;
@@ -239,9 +239,6 @@ const fromPolygons = (polygons, normalize) => {
   let plane = toPlane(polygons[polygons.length >> 1]);
 
   for (const polygon of polygons) {
-    if (toPlane([...polygon]) === undefined) {
-      continue;
-    }
     splitPolygon(normalize,
                  plane,
                  polygon,
@@ -252,8 +249,8 @@ const fromPolygons = (polygons, normalize) => {
   }
 
   const bsp = {
-    back: back.length === 0 ? inLeaf : fromPolygons(back, normalize),
-    front: front.length === 0 ? outLeaf : fromPolygons(front, normalize),
+    back: back.length === 0 ? inLeaf : fromPolygonsToBspTree(back, normalize),
+    front: front.length === 0 ? outLeaf : fromPolygonsToBspTree(front, normalize),
     kind: BRANCH,
     plane,
     same
@@ -261,6 +258,10 @@ const fromPolygons = (polygons, normalize) => {
 
   return bsp;
 };
+
+const fromPolygons = (polygons, normalize) =>
+  // fromPolygonsToBspTree(polygons.filter(polygon => toPlane(polygon) !== undefined), normalize);
+  fromPolygonsToBspTree(polygons, normalize);
 
 const fromSolid = (solid, normalize) => {
   const polygons = [];

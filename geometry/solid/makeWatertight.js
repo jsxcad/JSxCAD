@@ -2,7 +2,7 @@ import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 
-const THRESHOLD = 1e-5;
+const THRESHOLD = 1e-5 * 1.2;
 
 // We expect a solid of reconciled triangles.
 

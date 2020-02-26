@@ -3,6 +3,7 @@ import './add';
 import './clip';
 import './cut';
 import './faces';
+import './inSolids';
 import './measureCenter';
 import './op';
 import './openEdges';
