@@ -706,13 +706,6 @@ vertex 0 -10 10
 vertex -2.5 -2.50008 0.0001
 endloop
 endfacet
-facet normal -0.6666671111236853 -0.6666671110988972 -0.33333155554950145
-outer loop
-vertex 0 -10 10
-vertex -2.50001 -2.50007 0.0001
-vertex -2.5 -2.50008 0.0001
-endloop
-endfacet
 facet normal 0 -0.8192319205210358 -0.573462344360478
 outer loop
 vertex -2.50001 -2.50007 0.0001
