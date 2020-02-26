@@ -6,7 +6,7 @@ import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslati
 import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 
-const THRESHOLD = 1e-5;
+const THRESHOLD = 1e-5 * 1.2;
 
 // We expect a solid of reconciled triangles.
 
