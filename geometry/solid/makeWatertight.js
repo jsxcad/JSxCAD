@@ -1,6 +1,7 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
+import { toPlane } from '@jsxcad/math-poly3';
 
 const THRESHOLD = 1e-5 * 1.2;
 
@@ -23,7 +24,10 @@ export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = 
           reconciledPath.push(reconciledPoint);
           vertices.add(reconciledPoint);
         }
-        reconciledSurface.push(reconciledPath);
+        if (toPlane(reconciledPath) !== undefined) {
+          // Filter degenerates.
+          reconciledSurface.push(reconciledPath);
+        }
       }
       reconciledSolid.push(reconciledSurface);
     }
