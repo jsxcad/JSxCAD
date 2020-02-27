@@ -57,7 +57,10 @@ export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = 
           // Insert into the path.
           watertightPath.push(...colinear);
         }
-        watertightPaths.push(watertightPath);
+        if (toPlane(watertightPath) !== undefined) {
+          // Filter degenerates.
+          watertightPaths.push(watertightPath);
+        }
       }
       watertightSolid.push(watertightPaths);
     };
