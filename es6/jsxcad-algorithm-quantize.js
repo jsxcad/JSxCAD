@@ -41,7 +41,8 @@ const Y$1 = 1;
 const Z = 2;
 
 // The resolution is 1 / multiplier.
-const createNormalize3 = (multiplier = 1e5) => {
+// export const createNormalize3 = (multiplier = 1e5) => {
+const createNormalize3 = (multiplier = 1e5 * 2) => {
   const map = new Map();
   const update = (key, value) => {
     if (!map.has(key)) {

@@ -1,6 +1,5 @@
 import {
   alignVertices,
-  createNormalize3,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
@@ -23,6 +22,7 @@ import {
 } from '@jsxcad/geometry-polygons';
 
 import { containsPoint } from './containsPoint';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { max } from '@jsxcad/math-vec3';
 
 const MIN = 0;
