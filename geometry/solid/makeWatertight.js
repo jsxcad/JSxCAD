@@ -1,6 +1,7 @@
+import { assertGood, deduplicate, getEdges } from '@jsxcad/geometry-path';
+
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
-import { getEdges } from '@jsxcad/geometry-path';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const THRESHOLD = 1e-5 * 1.2;
@@ -9,7 +10,16 @@ const THRESHOLD = 1e-5 * 1.2;
 
 const watertight = Symbol('watertight');
 
-export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = (_ => _)) => {
+export const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
+  if (normalize === undefined) {
+    normalize = createNormalize3(1 / threshold);
+  }
+  if (!solid[watertight]) {
+    if (isWatertight(solid)) {
+      solid[watertight] = solid;
+    }
+  }
+
   if (!solid[watertight]) {
     let fixed = false;
     const vertices = new Set();
@@ -43,7 +53,7 @@ export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = 
           const colinear = [];
           for (const vertex of vertices) {
             // FIX: Threshold
-            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
               if (vertex !== start && vertex !== end) {
                 // FIX: Clip an ear instead.
                 // Vertex is on the open edge.
@@ -57,9 +67,11 @@ export const makeWatertight = (solid, normalize = createNormalize3(), onFixed = 
           // Insert into the path.
           watertightPath.push(...colinear);
         }
-        if (toPlane(watertightPath) !== undefined) {
+        const deduplicated = deduplicate(watertightPath);
+        assertGood(deduplicated);
+        if (toPlane(deduplicated) !== undefined) {
           // Filter degenerates.
-          watertightPaths.push(watertightPath);
+          watertightPaths.push(deduplicated);
         }
       }
       watertightSolid.push(watertightPaths);

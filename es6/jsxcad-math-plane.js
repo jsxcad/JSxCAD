@@ -105,7 +105,7 @@ const fromPolygon = (polygon) => {
   const factor = 1 / length(normal);
   const plane = scale(factor, normal);
   plane[W] = dot(reference, normal) * factor / polygon.length;
-  if (isNaN(plane[0])) {
+  if (isNaN(plane[X])) {
     return undefined;
   } else {
     return plane;

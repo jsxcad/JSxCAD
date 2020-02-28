@@ -4,7 +4,6 @@ import { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
 import { alignVertices } from './alignVertices';
 import { assertGood } from './assertGood';
 import { canonicalize } from './canonicalize';
-import { createNormalize3 } from './createNormalize3';
 import { doesNotOverlap } from './doesNotOverlap';
 import { eachPoint } from './eachPoint';
 import { findOpenEdges } from './findOpenEdges';
@@ -22,7 +21,6 @@ export {
   alignVertices,
   assertGood,
   canonicalize,
-  createNormalize3,
   doesNotOverlap,
   eachPoint,
   findOpenEdges,
