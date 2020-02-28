@@ -1,4 +1,4 @@
-import { toPolygons, alignVertices, fromPolygons as fromPolygons$1, createNormalize3 as createNormalize3$1 } from './jsxcad-geometry-solid.js';
+import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
@@ -795,7 +795,7 @@ const difference = (aSolid, ...bSolids) => {
     return aSolid;
   }
 
-  const normalize = createNormalize3$1();
+  const normalize = createNormalize3();
   let a = toPolygons({}, alignVertices(aSolid, normalize));
   let bs = bSolids
       .map(b => toPolygons({}, alignVertices(b, normalize)))
@@ -858,7 +858,7 @@ const intersection = (...solids) => {
   if (solids.length === 1) {
     return solids[0];
   }
-  const normalize = createNormalize3$1();
+  const normalize = createNormalize3();
   const s = solids.map(solid => toPolygons({}, alignVertices(solid, normalize)));
   while (s.length > 1) {
     const a = s.shift();
@@ -927,7 +927,7 @@ const union = (...solids) => {
   if (solids.length === 1) {
     return solids[0];
   }
-  const normalize = createNormalize3$1();
+  const normalize = createNormalize3();
   const s = solids.map(solid => toPolygons({}, alignVertices(solid, normalize)));
   while (s.length >= 2) {
     const a = s.shift();

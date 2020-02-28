@@ -95,8 +95,8 @@ class Shape {
     return isWatertight(this.toKeptGeometry());
   }
 
-  makeWatertight (onFixed = (_ => _)) {
-    return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined));
+  makeWatertight (threshold) {
+    return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined, undefined, threshold));
   }
 }
 
