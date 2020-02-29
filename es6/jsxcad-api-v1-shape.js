@@ -321,6 +321,11 @@ Shape.prototype.clip = clipMethod;
 
 clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
 
+const clipFromMethod = function (shape) { return intersection(shape, this); };
+Shape.prototype.clipFrom = clipFromMethod;
+
+clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
+
 /**
  *
  * # Difference

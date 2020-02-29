@@ -50,11 +50,8 @@ export const union = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut, aBsp] = partition(bbBsp, aBB, bBB, aPolygons, normalize);
-
-    const bPolygons = b;
-    const [bIn, bOut, bBsp] = partition(bbBsp, aBB, bBB, bPolygons, normalize);
+    const [aIn, aOut, aBsp] = partition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = partition(bbBsp, aBB, bBB, inLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);

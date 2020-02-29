@@ -215,7 +215,6 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
   // const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
-  // let i = 0;
   for (const polygon of polygons) {
     if (polygon.length < 3) {
       // Polygon became degenerate.
@@ -226,7 +225,6 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
       // Polygon is degenerate -- probably on a line.
       continue;
     }
-    // const key = i++;
     const key = JSON.stringify(toPlane(polygon));
     // const key = normalize4(toPlane(polygon));
     // const key = fromPlaneToKey(toPlane(polygon));

@@ -1,5 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-// import { createNormalize4 } from './createNormalize4';
+import { createNormalize4 } from './createNormalize4';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
@@ -12,7 +12,6 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
   // const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
-  // let i = 0;
   for (const polygon of polygons) {
     if (polygon.length < 3) {
       // Polygon became degenerate.
@@ -23,7 +22,6 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
       // Polygon is degenerate -- probably on a line.
       continue;
     }
-    // const key = i++;
     const key = JSON.stringify(toPlane(polygon));
     // const key = normalize4(toPlane(polygon));
     // const key = fromPlaneToKey(toPlane(polygon));

@@ -1,11 +1,23 @@
-import { ClipType, PolyFillType, clipper } from './clipper-lib';
-import { fromSurface, toSurface } from './convert';
+import {
+  ClipType,
+  PolyFillType,
+  clipper
+} from './clipper-lib';
+
+import {
+  fromSurface,
+  toSurface
+} from './convert';
+
+import {
+  fixTJunctions
+} from './fixTJunctions';
 
 // Here we have a surface with a confused orientation.
 // This reorients the most exterior paths to be ccw.
 
 export const reorient = (surface, normalize = p => p) => {
-  const polygons = fromSurface(surface, normalize);
+  const polygons = fromSurface(fixTJunctions(surface), normalize);
   if (polygons.length === 0) {
     return [];
   }

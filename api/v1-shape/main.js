@@ -2,6 +2,7 @@ import './as';
 import './add';
 import './addTo';
 import './clip';
+import './clipFrom';
 import './cut';
 import './cutFrom';
 import './faces';

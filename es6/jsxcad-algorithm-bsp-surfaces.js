@@ -753,7 +753,7 @@ const deform = (solid, transform, min, max, resolution) => {
   return fromPolygons$1({}, transformedPolygons);
 };
 
-const nullPartition = (bbBsp, aBB, bBB, aPolygons, normalize) => {
+const nullPartition = (bbBsp, aBB, bBB, bbOutLeaf, aPolygons, normalize) => {
   const aIn = aPolygons;
   const aBsp = fromPolygons(aIn, normalize);
   return [aIn, [], aBsp];
@@ -779,11 +779,8 @@ const difference = (aSolid, ...bSolids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, aPolygons, normalize);
-
-    const bPolygons = b;
-    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, bPolygons, normalize);
+    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
@@ -841,11 +838,8 @@ const intersection = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, aPolygons, normalize);
-
-    const bPolygons = b;
-    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, bPolygons, normalize);
+    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, outLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
@@ -909,11 +903,8 @@ const union = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, aPolygons, normalize);
-
-    const bPolygons = b;
-    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, bPolygons, normalize);
+    const [aIn, aOut, aBsp] = nullPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = nullPartition(bbBsp, aBB, bBB, inLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN$2], bBB[MIN$2]);

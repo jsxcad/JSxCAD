@@ -1,7 +1,8 @@
 import { onBoot } from './jsxcad-sys.js';
-import { deduplicate, isClockwise, isClosed, isOpen } from './jsxcad-geometry-path.js';
+import { deduplicate, isClockwise, isClosed, isOpen, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
+import { distance } from './jsxcad-math-vec3.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3489,11 +3490,51 @@ const makeConvex = (surface, normalize = p => p) => {
   return normalized;
 };
 
+const THRESHOLD = 1e-5;	
+
+// We expect a surface of reconciled triangles.	
+
+const fixTJunctions = (surface) => {	
+  const vertices = new Set();	
+
+  for (const path of surface) {	
+    for (const point of path) {	
+      vertices.add(point);	
+    }	
+  }	
+
+  const watertightPaths = [];	
+  for (const path of surface) {	
+    const watertightPath = [];	
+    for (const [start, end] of getEdges(path)) {	
+      watertightPath.push(start);	
+      const span = distance(start, end);	
+      const colinear = [];	
+      for (const vertex of vertices) {	
+        // FIX: Threshold	
+        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {	
+          // FIX: Clip an ear instead.	
+          // Vertex is on the open edge.	
+          colinear.push(vertex);	
+        }	
+      }	
+      // Arrange by distance from start.	
+      colinear.sort((a, b) => distance(start, a) - distance(start, b));	
+      // Insert into the path.	
+      watertightPath.push(...colinear);	
+    }
+    const deduplicated = deduplicate(watertightPath);	
+    watertightPaths.push(deduplicated);	
+  }	
+
+  return watertightPaths;	
+};
+
 // Here we have a surface with a confused orientation.
 // This reorients the most exterior paths to be ccw.
 
 const reorient = (surface, normalize = p => p) => {
-  const polygons = fromSurface(surface, normalize);
+  const polygons = fromSurface(fixTJunctions(surface), normalize);
   if (polygons.length === 0) {
     return [];
   }
