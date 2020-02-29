@@ -23,6 +23,7 @@ import {
 import { containsPoint } from './containsPoint';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { max } from '@jsxcad/math-vec3';
+import partition from './partition';
 
 const MIN = 0;
 
@@ -49,12 +50,10 @@ export const intersection = (...solids) => {
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
     const aPolygons = a;
-    const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
-    const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, toBspFromPolygons(aIn, normalize));
+    const [aIn, aOut, aBsp] = partition(bbBsp, aBB, bBB, aPolygons, normalize);
 
     const bPolygons = b;
-    const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, toBspFromPolygons(bIn, normalize));
+    const [bIn, bOut, bBsp] = partition(bbBsp, aBB, bBB, bPolygons, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);

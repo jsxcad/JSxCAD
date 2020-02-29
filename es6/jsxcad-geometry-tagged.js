@@ -1106,51 +1106,51 @@ const unionImpl = (baseGeometry, ...geometries) => {
     return { ...baseGeometry, item: union(baseGeometry.item, ...geometries) };
   }
 
-  const result = { disjointAssembly: [] };
+  const result = { assembly: [] };
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
   for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.disjointAssembly.push({ solid: union$1(solid, ...solids), tags });
+    result.assembly.push({ solid: union$1(solid, ...solids), tags });
   }
   // Surfaces -- generalize to surface unless specializable upon z0surface.
   const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
   const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
   for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
     if (surfaces.length === 0) {
-      result.disjointAssembly.push({ z0Surface: union$2(z0Surface, ...z0Surfaces), tags });
+      result.assembly.push({ z0Surface: union$2(z0Surface, ...z0Surfaces), tags });
     } else {
-      result.disjointAssembly.push({ surface: union$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      result.assembly.push({ surface: union$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
     }
   }
   for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.disjointAssembly.push({ surface: union$3(surface, ...surfaces, ...z0Surfaces), tags });
+    result.assembly.push({ surface: union$3(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
   for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.disjointAssembly.push({ paths: union$4(paths, ...pathsets), tags });
+    result.assembly.push({ paths: union$4(paths, ...pathsets), tags });
   }
   // Plans are preserved across union.
   for (const plan of getPlans(baseGeometry)) {
-    result.disjointAssembly.push(plan);
+    result.assembly.push(plan);
   }
   for (const geometry of geometries) {
     for (const plan of getPlans(geometry)) {
-      result.disjointAssembly.push(plan);
+      result.assembly.push(plan);
     }
   }
   // Connections
   for (const connection of getConnections(baseGeometry)) {
-    result.disjointAssembly.push(connection);
+    result.assembly.push(connection);
   }
   // Items
   for (const item of getItems(baseGeometry)) {
-    result.disjointAssembly.push(item);
+    result.assembly.push(item);
   }
   // Points
   for (const points of getPoints(baseGeometry)) {
     // FIX: Actually subtract points.
-    result.disjointAssembly.push(points);
+    result.assembly.push(points);
   }
   // FIX: Surfaces, Paths, etc.
   return result;

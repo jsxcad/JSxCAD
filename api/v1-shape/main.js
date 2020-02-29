@@ -1,12 +1,15 @@
 import './as';
 import './add';
+import './addTo';
 import './clip';
 import './cut';
+import './cutFrom';
 import './faces';
 import './inSolids';
 import './measureCenter';
 import './op';
 import './openEdges';
+import './tags';
 import './void';
 import './wireframe';
 import './wireframeFaces';

@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, allTags, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
@@ -243,6 +243,13 @@ Shape.prototype.add = addMethod;
 
 addMethod.signature = 'Shape -> (...Shapes) -> Shape';
 
+// x.addTo(y) === y.add(x)
+
+const addToMethod = function (shape) { return union(shape, this); };
+Shape.prototype.addTo = addToMethod;
+
+addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
+
 /**
  *
  * # Intersection
@@ -380,6 +387,13 @@ const cutMethod = function (...shapes) { return difference(this, ...shapes); };
 Shape.prototype.cut = cutMethod;
 
 cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';
+
+// a.cut(b) === b.cutFrom(a)
+
+const cutFromMethod = function (shape) { return difference(shape, this); };
+Shape.prototype.cutFrom = cutFromMethod;
+
+cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
 
 /**
  *
@@ -563,6 +577,15 @@ Shape.prototype.openEdges = openEdgesMethod;
 const withOpenEdgesMethod = function (...args) { return assemble(this, openEdges(this, ...args)); };
 Shape.prototype.withOpenEdges = withOpenEdgesMethod;
 
+const tags = (shape) =>
+  [...allTags(shape.toGeometry())]
+      .filter(tag => tag.startsWith('user/'))
+      .map(tag => tag.substring(5));
+
+const method = function () { return tags(this); };
+
+Shape.prototype.tags = method;
+
 /**
  *
  * # Drop from assembly
@@ -677,9 +700,9 @@ const wireframe = (options = {}, shape) => {
   return assemble(...pieces);
 };
 
-const method = function (options) { return wireframe(options, this); };
+const method$1 = function (options) { return wireframe(options, this); };
 
-Shape.prototype.wireframe = method;
+Shape.prototype.wireframe = method$1;
 Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
 
 const wireframeFaces = (shape, op = (x => x)) => {
@@ -950,8 +973,8 @@ materialMethod.signature = 'Shape -> material() -> Shape';
 
 const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
 
-const method$1 = function (...args) { return translate(this, ...args); };
-Shape.prototype.translate = method$1;
+const method$2 = function (...args) { return translate(this, ...args); };
+Shape.prototype.translate = method$2;
 
 /**
  *

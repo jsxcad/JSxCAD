@@ -1,14 +1,11 @@
 import { ClipType, PolyFillType, clipper } from './clipper-lib';
 import { fromSurface, toSurface } from './convert';
 
-import { makeWatertight } from './makeWatertight';
-
 // Here we have a surface with a confused orientation.
 // This reorients the most exterior paths to be ccw.
 
 export const reorient = (surface, normalize = p => p) => {
-  const watertightSurface = makeWatertight(surface.map(path => path.map(normalize)));
-  const polygons = fromSurface(watertightSurface, normalize);
+  const polygons = fromSurface(surface, normalize);
   if (polygons.length === 0) {
     return [];
   }

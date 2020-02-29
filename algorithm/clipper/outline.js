@@ -1,11 +1,8 @@
 import { ClipType, PolyFillType, clipper } from './clipper-lib';
 import { fromSurface, toSurface } from './convert';
 
-import { makeWatertight } from './makeWatertight';
-
 export const outline = (surface, normalize = p => p) => {
-  const watertightSurface = makeWatertight(surface.map(path => path.map(normalize)));
-  const polygons = fromSurface(watertightSurface, normalize);
+  const polygons = fromSurface(surface, normalize);
   if (polygons.length === 0) {
     return [];
   }
