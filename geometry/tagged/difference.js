@@ -13,8 +13,6 @@ import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
 import { difference as surfaceDifference } from '@jsxcad/geometry-surface-boolean';
 import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface-boolean';
 
-// PROVE: Is the non-negative behavior here correct for difference in general, or only difference when makeing disjoint?
-
 const differenceImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
     return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };
