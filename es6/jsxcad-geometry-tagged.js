@@ -3,13 +3,13 @@ import { close } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
-import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
+import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
-import { difference as difference$3, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$2, intersection as intersection$2, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
+import { difference as difference$2, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
+import { difference as difference$3, intersection as intersection$2, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
@@ -397,6 +397,20 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
+const getAnySurfaces = (geometry) => {
+  const surfaces = [];
+  eachItem(geometry,
+           item => {
+             if (item.surface) {
+               surfaces.push(item);
+             }
+             if (item.z0Surface) {
+               surfaces.push(item);
+             }
+           });
+  return surfaces;
+};
+
 const getConnections = (geometry) => {
   const connections = [];
   eachItem(geometry,
@@ -552,7 +566,8 @@ const isNegative = (geometry) => !isNonNegative(geometry);
 
 const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
-const differenceImpl = (baseGeometry, ...geometries) => {
+/*
+const differenceImplOld = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
     return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };
   }
@@ -561,25 +576,25 @@ const differenceImpl = (baseGeometry, ...geometries) => {
   // Solids.
   const solids = geometries.flatMap(geometry => getSolids(geometry)).filter(isNegative).map(item => item.solid);
   for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.disjointAssembly.push({ solid: difference$1(solid, ...solids), tags });
+    result.disjointAssembly.push({ solid: solidDifference(solid, ...solids), tags });
   }
   // Surfaces -- generalize to surface unless specializable upon z0surface.
   const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).filter(isNegative).map(item => item.z0Surface));
   const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).filter(isNegative).map(item => item.surface));
   for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
     if (surfaces.length === 0) {
-      result.disjointAssembly.push({ z0Surface: difference$2(z0Surface, ...z0Surfaces), tags });
+      result.disjointAssembly.push({ z0Surface: z0SurfaceDifference(z0Surface, ...z0Surfaces), tags });
     } else {
-      result.disjointAssembly.push({ surface: difference$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      result.disjointAssembly.push({ surface: surfaceDifference(z0Surface, ...z0Surfaces, ...surfaces), tags });
     }
   }
   for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.disjointAssembly.push({ surface: difference$3(surface, ...surfaces, ...z0Surfaces), tags });
+    result.disjointAssembly.push({ surface: surfaceDifference(surface, ...surfaces, ...z0Surfaces), tags });
   }
   // Paths.
   const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
   for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.disjointAssembly.push({ paths: difference$4(paths, ...pathsets), tags });
+    result.disjointAssembly.push({ paths: pathsDifference(paths, ...pathsets), tags });
   }
   // Plans are preserved over difference.
   for (const plan of getPlans(baseGeometry)) {
@@ -604,6 +619,52 @@ const differenceImpl = (baseGeometry, ...geometries) => {
     result.disjointAssembly.push(points);
   }
   return result;
+};
+*/
+
+const differenceImpl = (geometry, ...geometries) => {
+  const op = (geometry, descend) => {
+    if (geometry.solid) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { solid } of getSolids(geometry)) {
+          todo.push(solid);
+        }
+      }
+      return { solid: difference$1(geometry.solid, ...todo), tags: geometry.tags };
+    } else if (geometry.surface) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { surface } of getSurfaces(geometry)) {
+          todo.push(surface);
+        }
+        for (const { z0Surface } of getZ0Surfaces(geometry)) {
+          todo.push(z0Surface);
+        }
+      }
+      return { surface: difference$2(geometry.surface, ...todo), tags: geometry.tag };
+    } else if (geometry.z0Surface) {
+      const todoSurfaces = [];
+      const todoZ0Surfaces = [];
+      for (const geometry of geometries) {
+        for (const { surface } of getSurfaces(geometry)) {
+          todoSurfaces.push(surface);
+        }
+        for (const { z0Surface } of getZ0Surfaces(geometry)) {
+          todoZ0Surfaces.push(z0Surface);
+        }
+      }
+      if (todoSurfaces.length > 0) {
+        return { surface: difference$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tag };
+      } else {
+        return { surface: difference$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tag };
+      }
+    } else {
+      return descend();
+    }
+  };
+
+  return rewrite(geometry, op);
 };
 
 const difference = cache(differenceImpl);
@@ -710,20 +771,6 @@ const fromSurfaceToPathsImpl = (surface) => {
 };
 
 const fromSurfaceToPaths = cache(fromSurfaceToPathsImpl);
-
-const getAnySurfaces = (geometry) => {
-  const surfaces = [];
-  eachItem(geometry,
-           item => {
-             if (item.surface) {
-               surfaces.push(item);
-             }
-             if (item.z0Surface) {
-               surfaces.push(item);
-             }
-           });
-  return surfaces;
-};
 
 // This gets each layer independently.
 

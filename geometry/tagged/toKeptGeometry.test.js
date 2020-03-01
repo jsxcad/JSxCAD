@@ -23,5 +23,5 @@ test('With Keep', t => {
   const selectedGeometry = keep(['user/cylinder'], geometry);
   const keptGeometry = toKeptGeometry(selectedGeometry);
   t.deepEqual(keptGeometry,
-              { 'disjointAssembly': [{ 'disjointAssembly': [{ 'solid': [], 'tags': ['user/cylinder'] }] }] });
+              { 'disjointAssembly': [{ 'solid': [], 'tags': ['user/cylinder'] }] });
 });
