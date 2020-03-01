@@ -8,8 +8,8 @@ import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
-import { difference as difference$2, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$3, intersection as intersection$2, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
+import { difference as difference$2, intersection as intersection$2, union as union$3 } from './jsxcad-geometry-surface-boolean.js';
+import { difference as difference$3, intersection as intersection$3, outline as outline$3, union as union$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
@@ -441,62 +441,6 @@ const getZ0Surfaces = (geometry) => {
   return z0Surfaces;
 };
 
-/*
-const differenceImplOld = (baseGeometry, ...geometries) => {
-  if (baseGeometry.item) {
-    return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };
-  }
-
-  const result = { disjointAssembly: [] };
-  // Solids.
-  const solids = geometries.flatMap(geometry => getSolids(geometry)).filter(isNegative).map(item => item.solid);
-  for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.disjointAssembly.push({ solid: solidDifference(solid, ...solids), tags });
-  }
-  // Surfaces -- generalize to surface unless specializable upon z0surface.
-  const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).filter(isNegative).map(item => item.z0Surface));
-  const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).filter(isNegative).map(item => item.surface));
-  for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-    if (surfaces.length === 0) {
-      result.disjointAssembly.push({ z0Surface: z0SurfaceDifference(z0Surface, ...z0Surfaces), tags });
-    } else {
-      result.disjointAssembly.push({ surface: surfaceDifference(z0Surface, ...z0Surfaces, ...surfaces), tags });
-    }
-  }
-  for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.disjointAssembly.push({ surface: surfaceDifference(surface, ...surfaces, ...z0Surfaces), tags });
-  }
-  // Paths.
-  const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
-  for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.disjointAssembly.push({ paths: pathsDifference(paths, ...pathsets), tags });
-  }
-  // Plans are preserved over difference.
-  for (const plan of getPlans(baseGeometry)) {
-    result.disjointAssembly.push(plan);
-  }
-  for (const geometry of geometries) {
-    for (const plan of getPlans(geometry)) {
-      result.disjointAssembly.push(plan);
-    }
-  }
-  // Connections
-  for (const connection of getConnections(baseGeometry)) {
-    result.disjointAssembly.push(connection);
-  }
-  // Items
-  for (const item of getItems(baseGeometry)) {
-    result.disjointAssembly.push(item);
-  }
-  // Points
-  for (const points of getPoints(baseGeometry)) {
-    // FIX: Actually subtract points.
-    result.disjointAssembly.push(points);
-  }
-  return result;
-};
-*/
-
 const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     if (geometry.solid) {
@@ -811,67 +755,57 @@ const getTags = (geometry) => {
   }
 };
 
-// Dropped elements displace as usual, but are not included in positive output.
-
-const isNonNegative = (geometry) => hasMatchingTag(geometry.tags, ['compose/non-negative']);
-
-const isNegative = (geometry) => !isNonNegative(geometry);
-
-const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
-
-const intersectionImpl = (baseGeometry, ...geometries) => {
-  if (baseGeometry.item) {
-    return { ...baseGeometry, item: intersection(baseGeometry.item, ...geometries) };
-  }
-
-  const result = { disjointAssembly: [] };
-  // Solids.
-  const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
-  for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.disjointAssembly.push({ solid: intersection$1(solid, ...solids), tags });
-  }
-  // Surfaces -- generalize to surface unless specializable upon z0surface.
-  const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
-  const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
-  for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-    if (surfaces.length === 0) {
-      result.disjointAssembly.push({ z0Surface: intersection$2(z0Surface, ...z0Surfaces), tags });
+const intersectionImpl = (geometry, ...geometries) => {
+  const op = (geometry, descend) => {
+    if (geometry.solid) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { solid } of getSolids(geometry)) {
+          todo.push(solid);
+        }
+      }
+      return { solid: intersection$1(geometry.solid, ...todo), tags: geometry.tags };
+    } else if (geometry.surface) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { surface } of getSurfaces(geometry)) {
+          todo.push(surface);
+        }
+        for (const { z0Surface } of getZ0Surfaces(geometry)) {
+          todo.push(z0Surface);
+        }
+      }
+      return { surface: intersection$2(geometry.surface, ...todo), tags: geometry.tags };
+    } else if (geometry.z0Surface) {
+      const todoSurfaces = [];
+      const todoZ0Surfaces = [];
+      for (const geometry of geometries) {
+        for (const { surface } of getSurfaces(geometry)) {
+          todoSurfaces.push(surface);
+        }
+        for (const { z0Surface } of getZ0Surfaces(geometry)) {
+          todoZ0Surfaces.push(z0Surface);
+        }
+      }
+      if (todoSurfaces.length > 0) {
+        return { surface: intersection$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+      } else {
+        return { surface: intersection$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+      }
+    } else if (geometry.paths) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { paths } of getPaths(geometry)) {
+          todo.push(paths);
+        }
+      }
+      return { paths: intersection$4(geometry.paths, ...todo), tags: geometry.tags };
     } else {
-      result.disjointAssembly.push({ surface: intersection$3(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      return descend();
     }
-  }
-  for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.disjointAssembly.push({ surface: intersection$3(surface, ...surfaces, ...z0Surfaces), tags });
-  }
-  // Paths.
-  const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
-  for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.disjointAssembly.push({ paths: intersection$4(paths, ...pathsets), tags });
-  }
-  // Plans are preserved across intersection.
-  for (const plan of getPlans(baseGeometry)) {
-    result.disjointAssembly.push(plan);
-  }
-  for (const geometry of geometries) {
-    for (const plan of getPlans(geometry)) {
-      result.disjointAssembly.push(plan);
-    }
-  }
-  // Connections
-  for (const connection of getConnections(baseGeometry)) {
-    result.disjointAssembly.push(connection);
-  }
-  // Items
-  for (const item of getItems(baseGeometry)) {
-    result.disjointAssembly.push(item);
-  }
-  // Points
-  for (const points of getPoints(baseGeometry)) {
-    // FIX: Actually subtract points.
-    result.disjointAssembly.push(points);
-  }
-  // FIX: Surfaces, Paths, etc.
-  return result;
+  };
+
+  return rewrite(geometry, op);
 };
 
 const intersection = cache(intersectionImpl);
@@ -1068,6 +1002,14 @@ const measureBoundingBox = (rawGeometry) => {
     return [minPoint, maxPoint];
   }
 };
+
+// Dropped elements displace as usual, but are not included in positive output.
+
+const isNonNegative = (geometry) => hasMatchingTag(geometry.tags, ['compose/non-negative']);
+
+const isNegative = (geometry) => !isNonNegative(geometry);
+
+const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
 const outlineImpl = (geometry) => {
   const normalize = createNormalize3();
