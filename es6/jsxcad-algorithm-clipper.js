@@ -3490,44 +3490,44 @@ const makeConvex = (surface, normalize = p => p) => {
   return normalized;
 };
 
-const THRESHOLD = 1e-5;	
+const THRESHOLD = 1e-5;
 
-// We expect a surface of reconciled triangles.	
+// We expect a surface of reconciled triangles.
 
-const fixTJunctions = (surface) => {	
-  const vertices = new Set();	
+const fixTJunctions = (surface) => {
+  const vertices = new Set();
 
-  for (const path of surface) {	
-    for (const point of path) {	
-      vertices.add(point);	
-    }	
-  }	
-
-  const watertightPaths = [];	
-  for (const path of surface) {	
-    const watertightPath = [];	
-    for (const [start, end] of getEdges(path)) {	
-      watertightPath.push(start);	
-      const span = distance(start, end);	
-      const colinear = [];	
-      for (const vertex of vertices) {	
-        // FIX: Threshold	
-        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {	
-          // FIX: Clip an ear instead.	
-          // Vertex is on the open edge.	
-          colinear.push(vertex);	
-        }	
-      }	
-      // Arrange by distance from start.	
-      colinear.sort((a, b) => distance(start, a) - distance(start, b));	
-      // Insert into the path.	
-      watertightPath.push(...colinear);	
+  for (const path of surface) {
+    for (const point of path) {
+      vertices.add(point);
     }
-    const deduplicated = deduplicate(watertightPath);	
-    watertightPaths.push(deduplicated);	
-  }	
+  }
 
-  return watertightPaths;	
+  const watertightPaths = [];
+  for (const path of surface) {
+    const watertightPath = [];
+    for (const [start, end] of getEdges(path)) {
+      watertightPath.push(start);
+      const span = distance(start, end);
+      const colinear = [];
+      for (const vertex of vertices) {
+        // FIX: Threshold
+        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+          // FIX: Clip an ear instead.
+          // Vertex is on the open edge.
+          colinear.push(vertex);
+        }
+      }
+      // Arrange by distance from start.
+      colinear.sort((a, b) => distance(start, a) - distance(start, b));
+      // Insert into the path.
+      watertightPath.push(...colinear);
+    }
+    const deduplicated = deduplicate(watertightPath);
+    watertightPaths.push(deduplicated);
+  }
+
+  return watertightPaths;
 };
 
 // Here we have a surface with a confused orientation.

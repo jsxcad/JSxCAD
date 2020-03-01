@@ -4,12 +4,8 @@ import { makeConvex } from '@jsxcad/geometry-surface';
 import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
-// const s = (x) => (x === 0 && 1 / x < 0) ? '0' : x.toString();
-// const s = (x) => (x === 0 && 1 / x < 0) ? '-0' : x.toString();
-// const fromPlaneToKey = ([x, y, z, w]) => `${s(x)}/${s(y)}/${s(z)}/${s(w)}`;
-
 export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
-  // const normalize4 = createNormalize4();
+  const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
   for (const polygon of polygons) {
@@ -22,9 +18,10 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
       // Polygon is degenerate -- probably on a line.
       continue;
     }
-    const key = JSON.stringify(toPlane(polygon));
-    // const key = normalize4(toPlane(polygon));
-    // const key = fromPlaneToKey(toPlane(polygon));
+    // Here we use a strict plane identity to merge.
+    // This may result in fragmentation.
+    // const key = JSON.stringify(toPlane(polygon));
+    const key = normalize4(toPlane(polygon));
     const groups = coplanarGroups.get(key);
     if (groups === undefined) {
       const group = [polygon];

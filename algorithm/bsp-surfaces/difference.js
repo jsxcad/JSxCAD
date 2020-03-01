@@ -5,7 +5,6 @@ import {
 } from '@jsxcad/geometry-solid';
 
 import {
-  boundPolygons,
   clean,
   fromBoundingBoxes,
   inLeaf,
@@ -47,7 +46,7 @@ export const difference = (aSolid, ...bSolids) => {
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
     const [aIn, aOut, aBsp] = partition(bbBsp, aBB, bBB, inLeaf, a, normalize);
-    const [bIn, bOut, bBsp] = partition(bbBsp, aBB, bBB, outLeaf, b, normalize);
+    const [bIn, , bBsp] = partition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);

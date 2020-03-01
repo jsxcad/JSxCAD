@@ -552,8 +552,6 @@ const isNegative = (geometry) => !isNonNegative(geometry);
 
 const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
-// PROVE: Is the non-negative behavior here correct for difference in general, or only difference when makeing disjoint?
-
 const differenceImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
     return { ...baseGeometry, item: difference(baseGeometry.item, ...geometries) };

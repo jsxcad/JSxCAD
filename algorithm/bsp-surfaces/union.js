@@ -5,7 +5,6 @@ import {
 } from '@jsxcad/geometry-solid';
 
 import {
-  boundPolygons,
   clean,
   fromBoundingBoxes,
   inLeaf,
