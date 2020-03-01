@@ -58,7 +58,7 @@ export const visit = (geometry, op) => {
     } else if (geometry.surface) {
       op(geometry, _ => undefined);
     } else if (geometry.untransformed) {
-      op(geometry, _ => undefined, _ => walk(geometry.untransformed));
+      op(geometry, _ => walk(geometry.untransformed));
     } else if (geometry.z0Surface) {
       op(geometry, _ => undefined);
     } else {

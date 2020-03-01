@@ -3,7 +3,7 @@ import { close } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
-import { transform as transform$1, canonicalize as canonicalize$2, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
+import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
@@ -84,7 +84,7 @@ const visit = (geometry, op) => {
     } else if (geometry.surface) {
       op(geometry, _ => undefined);
     } else if (geometry.untransformed) {
-      op(geometry, _ => undefined, _ => walk(geometry.untransformed));
+      op(geometry, _ => walk(geometry.untransformed));
     } else if (geometry.z0Surface) {
       op(geometry, _ => undefined);
     } else {
@@ -397,44 +397,6 @@ const eachItem = (geometry, op) => {
   visit(geometry, walk);
 };
 
-const getAnySurfaces = (geometry) => {
-  const surfaces = [];
-  eachItem(geometry,
-           item => {
-             if (item.surface) {
-               surfaces.push(item);
-             }
-             if (item.z0Surface) {
-               surfaces.push(item);
-             }
-           });
-  return surfaces;
-};
-
-const getConnections = (geometry) => {
-  const connections = [];
-  eachItem(geometry,
-           item => {
-             if (item.connection) {
-               connections.push(item);
-             }
-           });
-  return connections;
-};
-
-const getItems = (geometry) => {
-  const items = [];
-  const op = (geometry, descend) => {
-    if (geometry.item) {
-      items.push(geometry);
-    } else {
-      descend();
-    }
-  };
-  visit(geometry, op);
-  return items;
-};
-
 const getPaths = (geometry) => {
   const pathsets = [];
   eachItem(geometry,
@@ -444,28 +406,6 @@ const getPaths = (geometry) => {
              }
            });
   return pathsets;
-};
-
-const getPlans = (geometry) => {
-  const plans = [];
-  eachItem(geometry,
-           item => {
-             if (item.plan) {
-               plans.push(item);
-             }
-           });
-  return plans;
-};
-
-const getPoints = (geometry) => {
-  const pointsets = [];
-  eachItem(geometry,
-           item => {
-             if (item.points) {
-               pointsets.push(item);
-             }
-           });
-  return pointsets;
 };
 
 const getSolids = (geometry) => {
@@ -500,71 +440,6 @@ const getZ0Surfaces = (geometry) => {
            });
   return z0Surfaces;
 };
-
-const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
-  if (set === undefined) {
-    return whenSetUndefined;
-  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const buildCondition = (conditionTags, conditionSpec) => {
-  switch (conditionSpec) {
-    case 'has':
-      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
-      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
-    default:
-      return undefined;
-  }
-};
-
-const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
-  const condition = buildCondition(conditionTags, conditionSpec);
-  const composeTags = (geometryTags) => {
-    if (condition === undefined || condition(geometryTags)) {
-      if (geometryTags === undefined) {
-        return add.filter(tag => !remove.includes(tag));
-      } else {
-        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
-      }
-    } else {
-      return geometryTags;
-    }
-  };
-
-  const op = (geometry) => {
-    if (geometry.assembly || geometry.disjointAssembly) {
-      // These structural geometries don't take tags.
-      return geometry;
-    }
-    const composedTags = composeTags(geometry.tags);
-    if (composedTags === undefined) {
-      const copy = { ...geometry };
-      delete copy.tags;
-      return copy;
-    } if (composedTags === geometry.tags) {
-      return geometry;
-    } else {
-      return { ...geometry, tags: composedTags };
-    }
-  };
-
-  return rewriteUp(geometry, op);
-};
-
-const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
-
-// Dropped elements displace as usual, but are not included in positive output.
-
-const isNonNegative = (geometry) => hasMatchingTag(geometry.tags, ['compose/non-negative']);
-
-const isNegative = (geometry) => !isNonNegative(geometry);
-
-const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
 /*
 const differenceImplOld = (baseGeometry, ...geometries) => {
@@ -642,7 +517,7 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(z0Surface);
         }
       }
-      return { surface: difference$2(geometry.surface, ...todo), tags: geometry.tag };
+      return { surface: difference$2(geometry.surface, ...todo), tags: geometry.tags };
     } else if (geometry.z0Surface) {
       const todoSurfaces = [];
       const todoZ0Surfaces = [];
@@ -655,10 +530,18 @@ const differenceImpl = (geometry, ...geometries) => {
         }
       }
       if (todoSurfaces.length > 0) {
-        return { surface: difference$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tag };
+        return { surface: difference$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
       } else {
-        return { surface: difference$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tag };
+        return { surface: difference$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
       }
+    } else if (geometry.paths) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { paths } of getPaths(geometry)) {
+          todo.push(paths);
+        }
+      }
+      return { paths: difference$4(geometry.paths, ...todo), tags: geometry.tags };
     } else {
       return descend();
     }
@@ -668,6 +551,63 @@ const differenceImpl = (geometry, ...geometries) => {
 };
 
 const difference = cache(differenceImpl);
+
+const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
+  if (set === undefined) {
+    return whenSetUndefined;
+  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const buildCondition = (conditionTags, conditionSpec) => {
+  switch (conditionSpec) {
+    case 'has':
+      return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
+    case 'has not':
+      return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
+    default:
+      return undefined;
+  }
+};
+
+const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
+  const condition = buildCondition(conditionTags, conditionSpec);
+  const composeTags = (geometryTags) => {
+    if (condition === undefined || condition(geometryTags)) {
+      if (geometryTags === undefined) {
+        return add.filter(tag => !remove.includes(tag));
+      } else {
+        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
+      }
+    } else {
+      return geometryTags;
+    }
+  };
+
+  const op = (geometry) => {
+    if (geometry.assembly || geometry.disjointAssembly) {
+      // These structural geometries don't take tags.
+      return geometry;
+    }
+    const composedTags = composeTags(geometry.tags);
+    if (composedTags === undefined) {
+      const copy = { ...geometry };
+      delete copy.tags;
+      return copy;
+    } if (composedTags === geometry.tags) {
+      return geometry;
+    } else {
+      return { ...geometry, tags: composedTags };
+    }
+  };
+
+  return rewriteUp(geometry, op);
+};
+
+const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
 
 // Dropped elements displace as usual, but are not included in positive output.
 
@@ -772,6 +712,44 @@ const fromSurfaceToPathsImpl = (surface) => {
 
 const fromSurfaceToPaths = cache(fromSurfaceToPathsImpl);
 
+const getAnySurfaces = (geometry) => {
+  const surfaces = [];
+  eachItem(geometry,
+           item => {
+             if (item.surface) {
+               surfaces.push(item);
+             }
+             if (item.z0Surface) {
+               surfaces.push(item);
+             }
+           });
+  return surfaces;
+};
+
+const getConnections = (geometry) => {
+  const connections = [];
+  eachItem(geometry,
+           item => {
+             if (item.connection) {
+               connections.push(item);
+             }
+           });
+  return connections;
+};
+
+const getItems = (geometry) => {
+  const items = [];
+  const op = (geometry, descend) => {
+    if (geometry.item) {
+      items.push(geometry);
+    } else {
+      descend();
+    }
+  };
+  visit(geometry, op);
+  return items;
+};
+
 // This gets each layer independently.
 
 const getLayers = (geometry) => {
@@ -803,6 +781,28 @@ const getLeafs = (geometry) => {
   return leafs;
 };
 
+const getPlans = (geometry) => {
+  const plans = [];
+  eachItem(geometry,
+           item => {
+             if (item.plan) {
+               plans.push(item);
+             }
+           });
+  return plans;
+};
+
+const getPoints = (geometry) => {
+  const pointsets = [];
+  eachItem(geometry,
+           item => {
+             if (item.points) {
+               pointsets.push(item);
+             }
+           });
+  return pointsets;
+};
+
 const getTags = (geometry) => {
   if (geometry.tags === undefined) {
     return [];
@@ -810,6 +810,14 @@ const getTags = (geometry) => {
     return geometry.tags;
   }
 };
+
+// Dropped elements displace as usual, but are not included in positive output.
+
+const isNonNegative = (geometry) => hasMatchingTag(geometry.tags, ['compose/non-negative']);
+
+const isNegative = (geometry) => !isNonNegative(geometry);
+
+const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
 
 const intersectionImpl = (baseGeometry, ...geometries) => {
   if (baseGeometry.item) {
