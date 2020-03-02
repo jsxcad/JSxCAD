@@ -3424,7 +3424,7 @@ earcut.flatten = function (data) {
 };
 earcut_1.default = default_1;
 
-const makeConvex = (surface, normalize = p => p) => {
+const makeConvex = (surface, normalize = createNormalize2()) => {
   if (surface.length === 0) {
     return [];
   }
