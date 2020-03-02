@@ -63,6 +63,10 @@ const unionImpl = (geometry, ...geometries) => {
     } else if (geometry.disjointAssembly) {
       // Likewise for disjointAssembly, but it needs to revert to an assembly, since it is no-longer disjoint.
       return { assembly: [...geometry.disjointAssembly, ...geometries], tags: geometry.tags };
+    } else if (geometry.layers) {
+      // We union with layers by appending a new layer.
+      // It is not entirely that this is ideal, but will preserve semantics for layer to assembly conversion.
+      return { layers: [...geometry.layers, ...geometries], tags: geometry.tags };
     } else {
       return descend();
     }
