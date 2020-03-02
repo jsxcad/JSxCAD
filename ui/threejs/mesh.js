@@ -8,6 +8,8 @@ import {
   LineSegments,
   Matrix4,
   Mesh,
+  Points,
+  PointsMaterial,
   Vector2,
   Vector3,
   VertexColors
@@ -208,6 +210,20 @@ export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GE
       geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
     }
     dataset.mesh = new LineSegments(geometry, material);
+    dataset.mesh.layers.set(layer);
+    dataset.name = toName(threejsGeometry);
+    scene.add(dataset.mesh);
+    datasets.push(dataset);
+  } else if (threejsGeometry.threejsPoints) {
+    const points = threejsGeometry.threejsPoints;
+    const dataset = {};
+    const geometry = new Geometry();
+    const material = new PointsMaterial({ color: setColor(tags, {}, [0, 0, 0]).color, size: 0.5 });
+    for (const [aX = 0, aY = 0, aZ = 0] of points) {
+      // geometry.colors.push(color, color);
+      geometry.vertices.push(new Vector3(aX, aY, aZ));
+    }
+    dataset.mesh = new Points(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);

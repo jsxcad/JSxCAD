@@ -3,9 +3,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 import { toSegments } from '@jsxcad/geometry-path';
 import { toTriangles } from '@jsxcad/geometry-polygons';
 
-const pointsToThreejsPoints = (geometry) => {
-  return geometry.points;
-};
+const pointsToThreejsPoints = (points) => points;
 
 const pathsToThreejsSegments = (geometry) => {
   const segments = [];
@@ -95,7 +93,7 @@ export const toThreejsGeometry = (geometry, supertags) => {
       isThreejsGeometry: true
     };
   } else if (geometry.points) {
-    return { threejsSegments: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
+    return { threejsPoints: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
   } else if (geometry.solid) {
     return { threejsSolid: solidToThreejsSolid(geometry.solid), tags, isThreejsGeometry: true };
   } else if (geometry.surface) {
