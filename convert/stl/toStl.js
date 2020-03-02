@@ -1,8 +1,8 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
 import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
-import { makeWatertight } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
+import { union } from '@jsxcad/geometry-solid-boolean';
 
 /**
  * Translates a polygon array [[[x, y, z], [x, y, z], ...]] to ascii STL.
@@ -13,26 +13,20 @@ import { toPlane } from '@jsxcad/math-poly3';
  * @returns {String} - the ascii STL output.
  */
 
-const geometryToTriangles = (solids) => {
+const fromSolidToTriangles = (solid) => {
   const triangles = [];
-  for (const { solid } of solids) {
-    for (const surface of solid) {
-      for (const triangle of toTriangles({}, surface)) {
-        triangles.push(triangle);
-      }
+  for (const surface of solid) {
+    for (const triangle of toTriangles({}, surface)) {
+      triangles.push(triangle);
     }
   }
   return triangles;
 };
 
 export const toStl = async (geometry, options = {}) => {
-  const { doFixTJunctions = true } = options;
   const keptGeometry = toKeptGeometry(geometry);
-  let solids = getSolids(keptGeometry);
-  if (doFixTJunctions) {
-    solids = solids.map(solid => ({ ...solid, solid: makeWatertight(solid.solid) }));
-  }
-  const triangles = geometryToTriangles(solids);
+  let solids = getSolids(keptGeometry).map(({ solid }) => solid);
+  const triangles = fromSolidToTriangles(union(...solids));
   return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
 };
 
