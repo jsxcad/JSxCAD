@@ -1,71 +1,78 @@
 import { cache } from '@jsxcad/cache';
-import { getConnections } from './getConnections';
-import { getItems } from './getItems';
 import { getPaths } from './getPaths';
-import { getPlans } from './getPlans';
-import { getPoints } from './getPoints';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
-import { isNegative } from './nonNegative';
 import { union as pathsUnion } from '@jsxcad/geometry-paths';
+import { rewrite } from './visit';
 import { union as solidUnion } from '@jsxcad/geometry-solid-boolean';
 import { union as surfaceUnion } from '@jsxcad/geometry-surface-boolean';
 import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface-boolean';
 
-const unionImpl = (baseGeometry, ...geometries) => {
-  if (baseGeometry.item) {
-    return { ...baseGeometry, item: union(baseGeometry.item, ...geometries) };
-  }
+// Union is a little more complex, since it can make violate disjointAssembly invariants.
 
-  const result = { assembly: [] };
-  // Solids.
-  const solids = geometries.flatMap(geometry => getSolids(geometry).map(item => item.solid));
-  for (const { solid, tags } of getSolids(baseGeometry)) {
-    result.assembly.push({ solid: solidUnion(solid, ...solids), tags });
-  }
-  // Surfaces -- generalize to surface unless specializable upon z0surface.
-  const z0Surfaces = geometries.flatMap(geometry => getZ0Surfaces(geometry).map(item => item.z0Surface));
-  const surfaces = geometries.flatMap(geometry => getSurfaces(geometry).map(item => item.surface));
-  for (const { z0Surface, tags } of getZ0Surfaces(baseGeometry)) {
-    if (surfaces.length === 0) {
-      result.assembly.push({ z0Surface: z0SurfaceUnion(z0Surface, ...z0Surfaces), tags });
+const unionImpl = (geometry, ...geometries) => {
+  const op = (geometry, descend) => {
+    if (geometry.solid) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { solid } of getSolids(geometry)) {
+          todo.push(solid);
+        }
+      }
+      return { solid: solidUnion(geometry.solid, ...todo), tags: geometry.tags };
+    } else if (geometry.surface) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { surface } of getSurfaces(geometry)) {
+          todo.push(surface);
+        }
+        for (const { z0Surface } of getZ0Surfaces(geometry)) {
+          todo.push(z0Surface);
+        }
+      }
+      return { surface: surfaceUnion(geometry.surface, ...todo), tags: geometry.tags };
+    } else if (geometry.z0Surface) {
+      const todoSurfaces = [];
+      const todoZ0Surfaces = [];
+      for (const geometry of geometries) {
+        for (const { surface } of getSurfaces(geometry)) {
+          todoSurfaces.push(surface);
+        }
+        for (const { z0Surface } of getZ0Surfaces(geometry)) {
+          todoZ0Surfaces.push(z0Surface);
+        }
+      }
+      if (todoSurfaces.length > 0) {
+        return { surface: surfaceUnion(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+      } else {
+        return { surface: z0SurfaceUnion(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+      }
+    } else if (geometry.paths) {
+      const todo = [];
+      for (const geometry of geometries) {
+        for (const { paths } of getPaths(geometry)) {
+          todo.push(paths);
+        }
+      }
+      return { paths: pathsUnion(geometry.paths, ...todo), tags: geometry.tags };
+    } else if (geometry.assembly) {
+      // Let's consider an assembly to have an implicit Empty() geometry at the end.
+      // Then we can implement union over assembly by assemble.
+      return { assembly: [...geometry.assembly, ...geometries], tags: geometry.tags };
+    } else if (geometry.disjointAssembly) {
+      // Likewise for disjointAssembly, but it needs to revert to an assembly, since it is no-longer disjoint.
+      return { assembly: [...geometry.disjointAssembly, ...geometries], tags: geometry.tags };
+    } else if (geometry.layers) {
+      // We union with layers by appending a new layer.
+      // It is not entirely that this is ideal, but will preserve semantics for layer to assembly conversion.
+      return { layers: [...geometry.layers, ...geometries], tags: geometry.tags };
     } else {
-      result.assembly.push({ surface: surfaceUnion(z0Surface, ...z0Surfaces, ...surfaces), tags });
+      return descend();
     }
-  }
-  for (const { surface, tags } of getSurfaces(baseGeometry)) {
-    result.assembly.push({ surface: surfaceUnion(surface, ...surfaces, ...z0Surfaces), tags });
-  }
-  // Paths.
-  const pathsets = geometries.flatMap(geometry => getPaths(geometry)).filter(isNegative).map(item => item.paths);
-  for (const { paths, tags } of getPaths(baseGeometry)) {
-    result.assembly.push({ paths: pathsUnion(paths, ...pathsets), tags });
-  }
-  // Plans are preserved across union.
-  for (const plan of getPlans(baseGeometry)) {
-    result.assembly.push(plan);
-  }
-  for (const geometry of geometries) {
-    for (const plan of getPlans(geometry)) {
-      result.assembly.push(plan);
-    }
-  }
-  // Connections
-  for (const connection of getConnections(baseGeometry)) {
-    result.assembly.push(connection);
-  }
-  // Items
-  for (const item of getItems(baseGeometry)) {
-    result.assembly.push(item);
-  }
-  // Points
-  for (const points of getPoints(baseGeometry)) {
-    // FIX: Actually subtract points.
-    result.assembly.push(points);
-  }
-  // FIX: Surfaces, Paths, etc.
-  return result;
+  };
+
+  return rewrite(geometry, op);
 };
 
 export const union = cache(unionImpl);
