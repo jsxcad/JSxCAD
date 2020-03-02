@@ -5,7 +5,6 @@ import {
 } from '@jsxcad/geometry-solid';
 
 import {
-  boundPolygons,
   clean,
   fromBoundingBoxes,
   inLeaf,
@@ -23,6 +22,7 @@ import {
 import { containsPoint } from './containsPoint';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { max } from '@jsxcad/math-vec3';
+import partition from './partition';
 
 const MIN = 0;
 
@@ -49,13 +49,8 @@ export const union = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-    const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(aIn, normalize));
-
-    const bPolygons = b;
-    const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, toBspFromPolygons(bIn, normalize));
+    const [aIn, aOut, aBsp] = partition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = partition(bbBsp, aBB, bBB, inLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);

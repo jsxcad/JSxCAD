@@ -3494,7 +3494,7 @@ const THRESHOLD = 1e-5;
 
 // We expect a surface of reconciled triangles.
 
-const makeWatertight = (surface) => {
+const fixTJunctions = (surface) => {
   const vertices = new Set();
 
   for (const path of surface) {
@@ -3534,8 +3534,7 @@ const makeWatertight = (surface) => {
 // This reorients the most exterior paths to be ccw.
 
 const reorient = (surface, normalize = p => p) => {
-  const watertightSurface = makeWatertight(surface.map(path => path.map(normalize)));
-  const polygons = fromSurface(watertightSurface, normalize);
+  const polygons = fromSurface(fixTJunctions(surface), normalize);
   if (polygons.length === 0) {
     return [];
   }

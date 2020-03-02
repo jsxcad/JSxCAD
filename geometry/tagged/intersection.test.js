@@ -12,5 +12,5 @@ test('Simple', t => {
   const surface = intersection({ assembly: [{ z0Surface: [unitSquarePolygon] }] },
                                { z0Surface: scale([0.8, 0.8, 0.8], rotateZ(Math.PI / 2, [unitRegularTrianglePolygon])) });
   t.deepEqual(canonicalize(surface),
-              { 'disjointAssembly': [{ 'surface': [[[0.5, -0.06602, 0], [0.17321, 0.5, 0], [-0.17321, 0.5, 0], [-0.5, -0.06602, 0], [-0.5, -0.4, 0], [0.5, -0.4, 0]]] }] });
+              { 'assembly': [{ 'surface': [[[0.5, -0.06602, 0], [0.17321, 0.5, 0], [-0.17321, 0.5, 0], [-0.5, -0.06602, 0], [-0.5, -0.4, 0], [0.5, -0.4, 0]]] }] });
 });

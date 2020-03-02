@@ -238,6 +238,10 @@ const fromPolygonsToBspTree = (polygons, normalize) => {
   let back = [];
   let plane = toPlane(polygons[polygons.length >> 1]);
 
+  if (plane === undefined) {
+    throw Error('die');
+  }
+
   for (const polygon of polygons) {
     splitPolygon(normalize,
                  plane,
@@ -788,6 +792,13 @@ const deform = (solid, transform, min, max, resolution) => {
   return fromPolygons$1({}, transformedPolygons);
 };
 
+const boxPartition = (bbBsp, aBB, bBB, bbOutLeaf, aPolygons, normalize) => {
+  const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
+  const aBsp = fromBoundingBoxes(aBB, bBB, bbOutLeaf, fromPolygons(aIn, normalize));
+  return [aIn, aOut, aBsp];
+};
+// export default nullPartition;
+
 const MIN = 0;
 
 const difference = (aSolid, ...bSolids) => {
@@ -808,13 +819,8 @@ const difference = (aSolid, ...bSolids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-    const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
-
-    const bPolygons = b;
-    const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
+    const [aIn, aOut, aBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, , bBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
@@ -872,13 +878,8 @@ const intersection = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn] = boundPolygons(bbBsp, aPolygons, normalize);
-    const aBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons(aIn, normalize));
-
-    const bPolygons = b;
-    const [bIn] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, inLeaf, fromPolygons(bIn, normalize));
+    const [aIn, , aBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, a, normalize);
+    const [bIn, , bBsp] = boxPartition(bbBsp, aBB, bBB, outLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN$1], bBB[MIN$1]);
@@ -942,13 +943,8 @@ const union = (...solids) => {
     const bBB = measureBoundingBox(b);
     const bbBsp = fromBoundingBoxes(aBB, bBB, outLeaf, inLeaf);
 
-    const aPolygons = a;
-    const [aIn, aOut] = boundPolygons(bbBsp, aPolygons, normalize);
-    const aBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(aIn, normalize));
-
-    const bPolygons = b;
-    const [bIn, bOut] = boundPolygons(bbBsp, bPolygons, normalize);
-    const bBsp = fromBoundingBoxes(aBB, bBB, outLeaf, fromPolygons(bIn, normalize));
+    const [aIn, aOut, aBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, a, normalize);
+    const [bIn, bOut, bBsp] = boxPartition(bbBsp, aBB, bBB, inLeaf, b, normalize);
 
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN$2], bBB[MIN$2]);

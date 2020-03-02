@@ -98,6 +98,10 @@ const fromPolygonsToBspTree = (polygons, normalize) => {
   let back = [];
   let plane = toPlane(polygons[polygons.length >> 1]);
 
+  if (plane === undefined) {
+    throw Error('die');
+  }
+
   for (const polygon of polygons) {
     splitPolygon(normalize,
                  plane,

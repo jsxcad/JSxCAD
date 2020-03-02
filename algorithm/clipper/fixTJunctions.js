@@ -6,7 +6,7 @@ const THRESHOLD = 1e-5;
 
 // We expect a surface of reconciled triangles.
 
-export const makeWatertight = (surface) => {
+export const fixTJunctions = (surface) => {
   const vertices = new Set();
 
   for (const path of surface) {
