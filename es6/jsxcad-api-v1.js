@@ -1,5 +1,3 @@
-import { X, Y, Z } from './jsxcad-api-v1-connector.js';
-export { X, Y, Z } from './jsxcad-api-v1-connector.js';
 import './jsxcad-api-v1-deform.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
@@ -9,6 +7,8 @@ import './jsxcad-api-v1-svg.js';
 import './jsxcad-api-v1-stl.js';
 import './jsxcad-api-v1-view.js';
 import { addSource, readFile, getSources } from './jsxcad-sys.js';
+import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
+export { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
 export { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
 import { Shape, log } from './jsxcad-api-v1-shape.js';
@@ -45,6 +45,7 @@ const source = (path, source) => addSource(`cache/${path}`, source);
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
   source: source,
+  Connector: Connector,
   X: X,
   Y: Y,
   Z: Z,

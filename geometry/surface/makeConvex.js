@@ -39,7 +39,9 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
     }
   }
   const [to, from] = toXYPlaneTransforms(plane);
-  const convexZ0Surface = makeConvexZ0Surface(transform(to, surface.map(path => path.map(normalize3))));
+  const z0Surface = transform(to, surface.map(path => path.map(normalize3)));
+  const convexZ0Surface = makeConvexZ0Surface(z0Surface);
+  // const convexZ0Surface = z0Surface;
   const convexSurface = transform(from, convexZ0Surface).map(path => path.map(normalize3));
   return convexSurface;
 };
