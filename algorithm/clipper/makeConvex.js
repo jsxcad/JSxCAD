@@ -1,10 +1,11 @@
 import { CLEAN_DISTANCE, RESOLUTION, fromSurfaceAsClosedPaths } from './convert';
 import { ClipType, PolyFillType, clipper } from './clipper-lib';
 
+import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import earcut from 'earcut';
 import { isClockwise } from '@jsxcad/geometry-path';
 
-export const makeConvex = (surface, normalize = p => p) => {
+export const makeConvex = (surface, normalize = createNormalize2()) => {
   if (surface.length === 0) {
     return [];
   }

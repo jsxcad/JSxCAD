@@ -7,7 +7,6 @@
  * the api uses.
  */
 
-import '@jsxcad/api-v1-connector';
 import '@jsxcad/api-v1-deform';
 import '@jsxcad/api-v1-layout';
 import '@jsxcad/api-v1-pdf';
@@ -21,6 +20,7 @@ export {
 } from './source';
 
 export {
+  Connector,
   X,
   Y,
   Z

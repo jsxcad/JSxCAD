@@ -53007,6 +53007,20 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
+  } else if (threejsGeometry.threejsPoints) {
+    const points = threejsGeometry.threejsPoints;
+    const dataset = {};
+    const geometry = new Geometry();
+    const material = new PointsMaterial({ color: setColor(tags, {}, [0, 0, 0]).color, size: 0.5 });
+    for (const [aX = 0, aY = 0, aZ = 0] of points) {
+      // geometry.colors.push(color, color);
+      geometry.vertices.push(new Vector3(aX, aY, aZ));
+    }
+    dataset.mesh = new Points(geometry, material);
+    dataset.mesh.layers.set(layer);
+    dataset.name = toName(threejsGeometry);
+    scene.add(dataset.mesh);
+    datasets.push(dataset);
   } else if (threejsGeometry.threejsSolid) {
     const { positions, normals } = threejsGeometry.threejsSolid;
     const dataset = {};
@@ -53039,9 +53053,7 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
   }
 };
 
-const pointsToThreejsPoints = (geometry) => {
-  return geometry.points;
-};
+const pointsToThreejsPoints = (points) => points;
 
 const pathsToThreejsSegments = (geometry) => {
   const segments = [];
@@ -53131,7 +53143,7 @@ const toThreejsGeometry = (geometry, supertags) => {
       isThreejsGeometry: true
     };
   } else if (geometry.points) {
-    return { threejsSegments: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
+    return { threejsPoints: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
   } else if (geometry.solid) {
     return { threejsSolid: solidToThreejsSolid(geometry.solid), tags, isThreejsGeometry: true };
   } else if (geometry.surface) {
