@@ -1,7 +1,7 @@
-import { assertGood, deduplicate, getEdges } from '@jsxcad/geometry-path';
-
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
+import { getEdges } from '@jsxcad/geometry-path';
+import { pushWhenValid } from '@jsxcad/geometry-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const THRESHOLD = 1e-5 * 1.2;
@@ -67,12 +67,7 @@ export const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold =
           // Insert into the path.
           watertightPath.push(...colinear);
         }
-        const deduplicated = deduplicate(watertightPath);
-        assertGood(deduplicated);
-        if (toPlane(deduplicated) !== undefined) {
-          // Filter degenerates.
-          watertightPaths.push(deduplicated);
-        }
+        pushWhenValid(watertightPaths, watertightPath);
       }
       watertightSolid.push(watertightPaths);
     };

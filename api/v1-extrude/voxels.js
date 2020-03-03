@@ -1,7 +1,7 @@
+import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import { containsPoint as containsPointAlgorithm, fromSolid } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids, measureBoundingBox } from '@jsxcad/geometry-tagged';
 
-import { Shape } from '@jsxcad/api-v1-shape';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromPolygons } from '@jsxcad/geometry-solid';
 
@@ -110,6 +110,9 @@ export const surfaceCloud = (shape, resolution = 1) => {
 
 const surfaceCloudMethod = function (...args) { return surfaceCloud(this, ...args); };
 Shape.prototype.surfaceCloud = surfaceCloudMethod;
+
+const withSurfaceCloudMethod = function (...args) { return assemble(this, surfaceCloud(this, ...args)); };
+Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
 
 export const cloud = (shape, resolution = 1) => {
   const offset = resolution / 2;

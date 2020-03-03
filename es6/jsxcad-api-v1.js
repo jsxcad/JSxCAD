@@ -11,8 +11,8 @@ import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
 export { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
-import { Shape, log } from './jsxcad-api-v1-shape.js';
-export { Shape, log } from './jsxcad-api-v1-shape.js';
+import { Shape, difference, intersection, log, union } from './jsxcad-api-v1-shape.js';
+export { Shape, difference, intersection, log, union } from './jsxcad-api-v1-shape.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
@@ -53,7 +53,10 @@ var api = /*#__PURE__*/Object.freeze({
   Hull: Hull,
   Loop: Loop,
   Shape: Shape,
+  difference: difference,
+  intersection: intersection,
   log: log,
+  union: union,
   pack: pack,
   Line2: Line2,
   Plan: Plan,

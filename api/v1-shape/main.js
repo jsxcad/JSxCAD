@@ -10,6 +10,7 @@ import './inSolids';
 import './measureCenter';
 import './op';
 import './openEdges';
+import './solids';
 import './tags';
 import './void';
 import './wireframe';

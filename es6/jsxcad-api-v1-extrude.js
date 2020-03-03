@@ -652,6 +652,9 @@ const surfaceCloud = (shape, resolution = 1) => {
 const surfaceCloudMethod = function (...args) { return surfaceCloud(this, ...args); };
 Shape.prototype.surfaceCloud = surfaceCloudMethod;
 
+const withSurfaceCloudMethod = function (...args) { return assemble(this, surfaceCloud(this, ...args)); };
+Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
+
 const cloud = (shape, resolution = 1) => {
   const offset = resolution / 2;
   const geometry = shape.toKeptGeometry();

@@ -10,6 +10,7 @@ import { isTriangle } from './isTriangle';
 import { map } from './map';
 import { measureBoundingBox } from './measureBoundingBox';
 import { measureBoundingSphere } from './measureBoundingSphere';
+import { pushWhenValid } from './pushWhenValid';
 import { toGeneric } from './toGeneric';
 import { toLoops } from './toLoops';
 import { toPoints } from './toPoints';
@@ -33,6 +34,7 @@ export {
   map,
   measureBoundingBox,
   measureBoundingSphere,
+  pushWhenValid,
   toGeneric,
   toLoops,
   toPoints,

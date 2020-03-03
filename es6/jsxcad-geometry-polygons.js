@@ -1,6 +1,6 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, map as map$1, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { equals, canonicalize as canonicalize$2, lerp, dot, subtract, scale as scale$1, add, distance } from './jsxcad-math-vec3.js';
+import { equals, canonicalize as canonicalize$2, lerp, dot, subtract, scale as scale$1, add, distance, squaredDistance } from './jsxcad-math-vec3.js';
 import { isClosed } from './jsxcad-geometry-path.js';
 
 const isDegenerate = (polygon) => {
@@ -341,6 +341,29 @@ const measureBoundingSphere = (polygons) => {
   return polygons.boundingSphere;
 };
 
+// const EPSILON = 1e-5;
+const EPSILON2 = 1e-10;
+
+const pushWhenValid = (out, points) => {
+  const validated = [];
+  const l = points.length;
+  for (let i = 0; i < l; i++) {
+    let good = true;
+    for (let j = i + 1; j < l; j++) {
+      if (squaredDistance(points[i], points[j]) <= EPSILON2) {
+        good = false;
+        break;
+      }
+    }
+    if (good) {
+      validated.push(points[i]);
+    }
+  }
+  if (validated.length >= 3) {
+    out.push(validated);
+  }
+};
+
 const toGeneric = (polygons) => map(polygons, map$1);
 
 const toPoints = (options = {}, polygons) => {
@@ -367,4 +390,4 @@ const rotateZ = (angle, polygons) => transform(fromZRotation(angle), polygons);
 const scale = (vector, polygons) => transform(fromScaling(vector), polygons);
 const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
 
-export { canonicalize, cutTrianglesByPlane, doesNotOverlap, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, rotateX, rotateY, rotateZ, scale, toGeneric, toLoops, toPoints, toTriangles, transform, translate };
+export { canonicalize, cutTrianglesByPlane, doesNotOverlap, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, pushWhenValid, rotateX, rotateY, rotateZ, scale, toGeneric, toLoops, toPoints, toTriangles, transform, translate };

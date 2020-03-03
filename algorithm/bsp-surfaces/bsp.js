@@ -51,32 +51,32 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
   const bsp = {
     // Bottom
     kind: BRANCH,
-    plane: [0, 0, -1, -cMin[Z] + EPSILON * 10],
+    plane: [0, 0, -1, -cMin[Z] + EPSILON * 1000],
     front,
     back: {
       // Top
       kind: BRANCH,
-      plane: [0, 0, 1, cMax[Z] + EPSILON * 10],
+      plane: [0, 0, 1, cMax[Z] + EPSILON * 1000],
       front,
       back: {
         // Left
         kind: BRANCH,
-        plane: [-1, 0, 0, -cMin[X] + EPSILON * 10],
+        plane: [-1, 0, 0, -cMin[X] + EPSILON * 1000],
         front,
         back: {
           // Right
           kind: BRANCH,
-          plane: [1, 0, 0, cMax[X] + EPSILON * 10],
+          plane: [1, 0, 0, cMax[X] + EPSILON * 1000],
           front,
           back: {
             // Back
             kind: BRANCH,
-            plane: [0, -1, 0, -cMin[Y] + EPSILON * 10],
+            plane: [0, -1, 0, -cMin[Y] + EPSILON * 1000],
             front,
             back: {
               // Front
               kind: BRANCH,
-              plane: [0, 1, 0, cMax[Y] + EPSILON * 10],
+              plane: [0, 1, 0, cMax[Y] + EPSILON * 1000],
               front: outLeaf,
               back
             }

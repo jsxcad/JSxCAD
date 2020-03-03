@@ -1,13 +1,13 @@
 import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
-import { squaredDistance, max, min } from './jsxcad-math-vec3.js';
+import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
+import { max, min } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
-import { doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 
 const EPSILON = 1e-5;
-const EPSILON2 = 1e-10;
+// const EPSILON2 = 1e-10;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -88,9 +88,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
-      let lastFront;
       const backPoints = [];
-      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -99,63 +97,25 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         const endType = pointType[nth];
         if (startType !== BACK) {
           // The inequality is important as it includes COPLANAR points.
-          if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
-            lastFront = startPoint;
-            frontPoints.push(startPoint);
-          }
+          frontPoints.push(startPoint);
         }
         if (startType !== FRONT) {
           // The inequality is important as it includes COPLANAR points.
-          if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
-            lastBack = startPoint;
-            backPoints.push(startPoint);
-          }
+          backPoints.push(startPoint);
         }
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
-            lastFront = spanPoint;
-            frontPoints.push(spanPoint);
-          }
-          if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
-            lastBack = spanPoint;
-            backPoints.push(spanPoint);
-          }
+          frontPoints.push(spanPoint);
+          backPoints.push(spanPoint);
         }
         startPoint = endPoint;
         startType = endType;
       }
-      if (frontPoints.length >= 3) {
-        while (squaredDistance(frontPoints[0], lastFront) <= EPSILON2) {
-          frontPoints.pop();
-          lastFront = frontPoints[frontPoints.length - 1];
-        }
-      }
-      if (frontPoints.length >= 3) {
-        frontPoints.plane = polygonPlane;
-        if (backPoints.length >= 3) {
-          frontPoints.parent = polygon;
-          frontPoints.sibling = backPoints;
-        }
-        front.push(frontPoints);
-      }
-      if (backPoints.length >= 3) {
-        while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
-          backPoints.pop();
-          lastBack = backPoints[backPoints.length - 1];
-        }
-      }
-      if (backPoints.length >= 3) {
-        backPoints.plane = polygonPlane;
-        if (frontPoints.length >= 3) {
-          backPoints.parent = polygon;
-          backPoints.sibling = frontPoints;
-        }
-        back.push(backPoints);
-      }
+      pushWhenValid(front, frontPoints);
+      pushWhenValid(back, backPoints);
       break;
     }
   }
@@ -191,32 +151,32 @@ const fromBoundingBoxes = ([aMin, aMax], [bMin, bMax], front = outLeaf, back = i
   const bsp = {
     // Bottom
     kind: BRANCH,
-    plane: [0, 0, -1, -cMin[Z] + EPSILON * 10],
+    plane: [0, 0, -1, -cMin[Z] + EPSILON * 1000],
     front,
     back: {
       // Top
       kind: BRANCH,
-      plane: [0, 0, 1, cMax[Z] + EPSILON * 10],
+      plane: [0, 0, 1, cMax[Z] + EPSILON * 1000],
       front,
       back: {
         // Left
         kind: BRANCH,
-        plane: [-1, 0, 0, -cMin[X] + EPSILON * 10],
+        plane: [-1, 0, 0, -cMin[X] + EPSILON * 1000],
         front,
         back: {
           // Right
           kind: BRANCH,
-          plane: [1, 0, 0, cMax[X] + EPSILON * 10],
+          plane: [1, 0, 0, cMax[X] + EPSILON * 1000],
           front,
           back: {
             // Back
             kind: BRANCH,
-            plane: [0, -1, 0, -cMin[Y] + EPSILON * 10],
+            plane: [0, -1, 0, -cMin[Y] + EPSILON * 1000],
             front,
             back: {
               // Front
               kind: BRANCH,
-              plane: [0, 1, 0, cMax[Y] + EPSILON * 10],
+              plane: [0, 1, 0, cMax[Y] + EPSILON * 1000],
               front: outLeaf,
               back
             }
