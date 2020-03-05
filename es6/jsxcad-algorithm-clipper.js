@@ -1,5 +1,5 @@
 import { onBoot } from './jsxcad-sys.js';
-import { deduplicate, isClockwise, isClosed, isOpen, getEdges } from './jsxcad-geometry-path.js';
+import { deduplicate, isClockwise, isClosed, isOpen, flip, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { distance } from './jsxcad-math-vec3.js';
@@ -3457,12 +3457,9 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0],
-                        [earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0],
-                        [earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0]];
-      if (isClockwise(triangle)) {
-        triangle.reverse();
-      }
+      const triangle = [normalize([earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0]),
+                        normalize([earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0]),
+                        normalize([earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0])];
       convexSurface.push(triangle);
     }
   };
@@ -3486,7 +3483,15 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
     walkContour(child);
   }
 
-  const normalized = convexSurface.map(path => path.map(normalize));
+  const normalized = convexSurface.map(path => path.map(normalize)).filter(path => toPlane(path) !== undefined);
+  const rectified = [];
+  for (const polygon of normalized) {
+    if (isClockwise(polygon)) {
+      rectified.push(flip(polygon));
+    } else {
+      rectified.push(polygon);
+    }
+  }
   return normalized;
 };
 

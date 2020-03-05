@@ -42,5 +42,8 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
     defragmented.push(surface);
   }
 
-  return makeWatertight(defragmented, normalize3);
+  // return defragmented;
+
+  const w = makeWatertight(defragmented, normalize3);
+  return w;
 };

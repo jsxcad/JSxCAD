@@ -43,16 +43,16 @@ endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex -15 -15 15
-vertex 15 -15 15
 vertex 15 15 15
+vertex -15 15 15
+vertex -15 -15 15
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex 15 15 15
-vertex -15 15 15
 vertex -15 -15 15
+vertex 15 -15 15
+vertex 15 15 15
 endloop
 endfacet
 facet normal 0 0 -1
