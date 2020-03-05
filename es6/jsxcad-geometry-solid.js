@@ -1,6 +1,5 @@
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
-import { equals } from './jsxcad-math-plane.js';
 import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
@@ -41,11 +40,6 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
           // Filter degenerates.
           reconciledSurface.push(reconciledPath);
         }
-        if (toPlane(reconciledPath) === undefined || !equals(toPlane(reconciledPath), toPlane(path))) {
-          console.log(`QQ/makeWatertight/reconciled/plane: ${JSON.stringify(toPlane(reconciledPath))}`);
-          console.log(`QQ/makeWatertight/path/plane: ${JSON.stringify(toPlane(path))}`);
-          console.log(`QQ/makeWatertight: plane drift`);
-        }
       }
       reconciledSolid.push(reconciledSurface);
     }
@@ -62,7 +56,7 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
           for (const vertex of vertices) {
             // FIX: Threshold
             if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
-              // if (vertex !== start && vertex !== end)
+              // Avoid trying to resolve t-junctions via self-intersection.
               if (!path.includes(vertex)) {
                 // FIX: Clip an ear instead.
                 // Vertex is on the open edge.

@@ -92,9 +92,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
-      let lastFront;
       const backPoints = [];
-      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];

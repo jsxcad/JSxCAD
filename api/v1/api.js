@@ -37,7 +37,7 @@ export {
   difference,
   intersection,
   log,
-  union,
+  union
 } from '@jsxcad/api-v1-shape';
 
 export {

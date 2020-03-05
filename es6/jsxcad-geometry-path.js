@@ -1,5 +1,5 @@
 import { fromTranslation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { equals, canonicalize as canonicalize$1, squaredDistance, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { equals, canonicalize as canonicalize$1, transform as transform$1 } from './jsxcad-math-vec3.js';
 
 const assertUnique = (path) => {
   let last = null;
@@ -101,29 +101,6 @@ const isCounterClockwise = (path) => measureArea(path) > 0;
 
 const open = (path) => isClosed(path) ? [null, ...path] : path;
 
-// const EPSILON = 1e-5;
-const EPSILON2 = 1e-10;
-
-const pushWhenValid = (out, points) => {
-  const validated = [];
-  const l = points.length;
-  for (let i = 0; i < l; i++) {
-    let good = true;
-    for (let j = i + 1; j < l; j++) {
-      if (squaredDistance(points[i], points[j]) <= EPSILON2) {
-        good = false;
-        break;
-      }
-    }
-    if (good) {
-      validated.push(points[i]);
-    }
-  }
-  if (validated.length >= 3) {
-    out.push(validated);
-  }
-};
-
 const toGeneric = (path) => [...path];
 
 const toPolygon = (path) => {
@@ -174,4 +151,4 @@ const rotateY = (radians, path) => transform(fromYRotation(radians), path);
 const rotateZ = (radians, path) => transform(fromZRotation(radians), path);
 const scale = (vector, path) => transform(fromScaling(vector), path);
 
-export { assertGood, assertUnique, canonicalize, close, concatenate, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, isOpen, measureArea, open, pushWhenValid, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };
+export { assertGood, assertUnique, canonicalize, close, concatenate, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, isOpen, measureArea, open, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };
