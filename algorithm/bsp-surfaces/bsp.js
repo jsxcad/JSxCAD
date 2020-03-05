@@ -103,6 +103,12 @@ const fromPolygonsToBspTree = (polygons, normalize) => {
   }
 
   for (const polygon of polygons) {
+/*
+    if (JSON.stringify(polygon) === "[[-3.236067977499788,69.6488589908301,8],[-3.236067977499788,69.64540904256228,8],[-10.5,72,8]]") {
+      console.log(`QQ/bad/1`);
+      continue;
+    }
+*/
     splitPolygon(normalize,
                  plane,
                  polygon,

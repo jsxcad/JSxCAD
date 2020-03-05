@@ -1,7 +1,8 @@
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { canonicalize as canonicalize$1, flip as flip$1, fromPoints, map as map$1, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { equals, canonicalize as canonicalize$2, lerp, dot, subtract, scale as scale$1, add, distance, squaredDistance } from './jsxcad-math-vec3.js';
+import { equals, canonicalize as canonicalize$2, lerp, dot as dot$1, subtract, scale as scale$1, add, distance, squaredDistance } from './jsxcad-math-vec3.js';
 import { isClosed } from './jsxcad-geometry-path.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
 
 const isDegenerate = (polygon) => {
   for (let nth = 0; nth < polygon.length; nth++) {
@@ -89,7 +90,7 @@ const BACK = 2;
 const W = 3;
 
 const toType = (plane, point) => {
-  let t = dot(plane, point) - plane[W];
+  let t = dot$1(plane, point) - plane[W];
   if (t < -EPSILON) {
     return BACK;
   } else if (t > EPSILON) {
@@ -100,7 +101,7 @@ const toType = (plane, point) => {
 };
 
 const spanPoint = (plane, startPoint, endPoint) => {
-  let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+  let t = (plane[W] - dot$1(plane, startPoint)) / dot$1(plane, subtract(endPoint, startPoint));
   return canonicalize$2(lerp(t, startPoint, endPoint));
 };
 
@@ -344,13 +345,16 @@ const measureBoundingSphere = (polygons) => {
 // const EPSILON = 1e-5;
 const EPSILON2 = 1e-10;
 
-const pushWhenValid = (out, points) => {
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+const pushWhenValid = (out, points, expectedPlane) => {
   const validated = [];
   const l = points.length;
   for (let i = 0; i < l; i++) {
     let good = true;
     for (let j = i + 1; j < l; j++) {
-      if (squaredDistance(points[i], points[j]) <= EPSILON2) {
+      const sd = squaredDistance(points[i], points[j]);
+      if (sd <= EPSILON2) {
         good = false;
         break;
       }
@@ -359,9 +363,34 @@ const pushWhenValid = (out, points) => {
       validated.push(points[i]);
     }
   }
-  if (validated.length >= 3) {
-    out.push(validated);
+  if (validated.length < 3) {
+    return;
   }
+  const plane = fromPolygon(validated);
+  if (plane === undefined) {
+    return;
+  }
+  if (expectedPlane !== undefined) {
+    const t = dot(plane, expectedPlane);
+    if (t < 0.9999999999999) {
+      console.log(`QQ/skew: ${t}`);
+    }
+  }
+/*
+  if (JSON.stringify(validated) === "[[-3.236067977499788,69.6488589908301,8],[-3.236067977499788,69.64540904256228,8],[-10.5,72,8]]") {
+    console.log(`QQ/bad/2`);
+    // out.push(flip(validated));
+    out.push(validated);
+    return;
+  }
+  if (JSON.stringify(validated) === "[[-3.236067977499788,69.6488589908301,8],[1.236067977499787,68.19577393481939,8],[-3.236067977499788,69.64540904256228,8]]") {
+    console.log(`QQ/bad/2a`);
+    // out.push(flip(validated));
+    out.push(validated);
+    return;
+  }
+*/
+  out.push(validated);
 };
 
 const toGeneric = (polygons) => map(polygons, map$1);

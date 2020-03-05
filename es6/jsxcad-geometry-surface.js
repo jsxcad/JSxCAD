@@ -1,4 +1,4 @@
-import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, isConvex, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
+import { canonicalize as canonicalize$1, transform as transform$2, toPlane as toPlane$1, flip as flip$1, measureArea as measureArea$1 } from './jsxcad-math-poly3.js';
 import { fromTranslation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 import { subtract, scale as scale$1, dot, add, distance } from './jsxcad-math-vec3.js';
 import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -278,15 +278,6 @@ const map = (original, transform) => {
 
 const flip = (surface) => map(surface, flip$1);
 
-// Cut the corners to produce triangles.
-const triangulateConvexPolygon = (polygon) => {
-  const surface = [];
-  for (let i = 2; i < polygon.length; i++) {
-    surface.push([polygon[0], polygon[i - 1], polygon[i]]);
-  }
-  return surface;
-};
-
 const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
@@ -294,16 +285,6 @@ const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === 0) {
     // An empty surface is not non-convex.
     return surface;
-  }
-  if (surface.length === 1) {
-    const polygon = surface[0];
-    if (polygon.length === 3) {
-      // A triangle is already convex.
-      return surface;
-    }
-    if (polygon.length > 3 && isConvex(polygon)) {
-      return triangulateConvexPolygon(polygon.map(normalize3));
-    }
   }
   if (plane === undefined) {
     plane = toPlane(surface);

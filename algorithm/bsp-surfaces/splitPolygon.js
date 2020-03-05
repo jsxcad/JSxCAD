@@ -120,8 +120,8 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         startPoint = endPoint;
         startType = endType;
       }
-      pushWhenValid(front, frontPoints);
-      pushWhenValid(back, backPoints);
+      pushWhenValid(front, frontPoints, polygonPlane);
+      pushWhenValid(back, backPoints, polygonPlane);
       break;
     }
   }

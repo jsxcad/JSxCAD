@@ -1,12 +1,13 @@
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
+import { equals } from './jsxcad-math-plane.js';
 import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
 
-const THRESHOLD = 1e-5 * 1.2;
+const THRESHOLD = 1e-5;
 
 // We expect a solid of reconciled triangles.
 
@@ -40,6 +41,11 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
           // Filter degenerates.
           reconciledSurface.push(reconciledPath);
         }
+        if (toPlane(reconciledPath) === undefined || !equals(toPlane(reconciledPath), toPlane(path))) {
+          console.log(`QQ/makeWatertight/reconciled/plane: ${JSON.stringify(toPlane(reconciledPath))}`);
+          console.log(`QQ/makeWatertight/path/plane: ${JSON.stringify(toPlane(path))}`);
+          console.log(`QQ/makeWatertight: plane drift`);
+        }
       }
       reconciledSolid.push(reconciledSurface);
     }
@@ -56,7 +62,8 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
           for (const vertex of vertices) {
             // FIX: Threshold
             if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
-              if (vertex !== start && vertex !== end) {
+              // if (vertex !== start && vertex !== end)
+              if (!path.includes(vertex)) {
                 // FIX: Clip an ear instead.
                 // Vertex is on the open edge.
                 colinear.push(vertex);
@@ -298,6 +305,8 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
     const surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
     defragmented.push(surface);
   }
+
+  // return defragmented;
 
   const w = makeWatertight(defragmented, normalize3);
   return w;
