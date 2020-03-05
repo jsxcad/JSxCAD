@@ -1,10 +1,10 @@
 import { equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
 
-import { squaredDistance } from '@jsxcad/math-vec3';
+import { pushWhenValid } from '@jsxcad/geometry-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 
 const EPSILON = 1e-5;
-const EPSILON2 = 1e-10;
+// const EPSILON2 = 1e-10;
 
 const COPLANAR = 0; // Neither front nor back.
 const FRONT = 1;
@@ -92,9 +92,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       return;
     case SPANNING: {
       const frontPoints = [];
-      let lastFront;
       const backPoints = [];
-      let lastBack;
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -103,63 +101,25 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         const endType = pointType[nth];
         if (startType !== BACK) {
           // The inequality is important as it includes COPLANAR points.
-          if (lastFront === undefined || squaredDistance(startPoint, lastFront) > EPSILON2) {
-            lastFront = startPoint;
-            frontPoints.push(startPoint);
-          }
+          frontPoints.push(startPoint);
         }
         if (startType !== FRONT) {
           // The inequality is important as it includes COPLANAR points.
-          if (lastBack === undefined || squaredDistance(startPoint, lastBack) > EPSILON2) {
-            lastBack = startPoint;
-            backPoints.push(startPoint);
-          }
+          backPoints.push(startPoint);
         }
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
           // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
           const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
-          if (lastFront === undefined || squaredDistance(spanPoint, lastFront) > EPSILON2) {
-            lastFront = spanPoint;
-            frontPoints.push(spanPoint);
-          }
-          if (lastBack === undefined || squaredDistance(spanPoint, lastBack) > EPSILON2) {
-            lastBack = spanPoint;
-            backPoints.push(spanPoint);
-          }
+          frontPoints.push(spanPoint);
+          backPoints.push(spanPoint);
         }
         startPoint = endPoint;
         startType = endType;
       }
-      if (frontPoints.length >= 3) {
-        while (squaredDistance(frontPoints[0], lastFront) <= EPSILON2) {
-          frontPoints.pop();
-          lastFront = frontPoints[frontPoints.length - 1];
-        }
-      }
-      if (frontPoints.length >= 3) {
-        frontPoints.plane = polygonPlane;
-        if (backPoints.length >= 3) {
-          frontPoints.parent = polygon;
-          frontPoints.sibling = backPoints;
-        }
-        front.push(frontPoints);
-      }
-      if (backPoints.length >= 3) {
-        while (squaredDistance(backPoints[0], lastBack) <= EPSILON2) {
-          backPoints.pop();
-          lastBack = backPoints[backPoints.length - 1];
-        }
-      }
-      if (backPoints.length >= 3) {
-        backPoints.plane = polygonPlane;
-        if (frontPoints.length >= 3) {
-          backPoints.parent = polygon;
-          backPoints.sibling = frontPoints;
-        }
-        back.push(backPoints);
-      }
+      pushWhenValid(front, frontPoints, polygonPlane);
+      pushWhenValid(back, backPoints, polygonPlane);
       break;
     }
   }

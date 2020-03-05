@@ -582,6 +582,17 @@ Shape.prototype.openEdges = openEdgesMethod;
 const withOpenEdgesMethod = function (...args) { return assemble(this, openEdges(this, ...args)); };
 Shape.prototype.withOpenEdges = withOpenEdgesMethod;
 
+const solids = (shape, xform = (_ => _)) => {
+  const solids = [];
+  for (const solid of getSolids(shape.toKeptGeometry())) {
+    solids.push(xform(Shape.fromGeometry(solid)));
+  }
+  return solids;
+};
+
+const solidsMethod = function (...args) { return solids(this, ...args); };
+Shape.prototype.solids = solidsMethod;
+
 const tags = (shape) =>
   [...allTags(shape.toGeometry())]
       .filter(tag => tag.startsWith('user/'))

@@ -1,9 +1,10 @@
 import { CLEAN_DISTANCE, RESOLUTION, fromSurfaceAsClosedPaths } from './convert';
 import { ClipType, PolyFillType, clipper } from './clipper-lib';
+import { flip, isClockwise } from '@jsxcad/geometry-path';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import earcut from 'earcut';
-import { isClockwise } from '@jsxcad/geometry-path';
+import { toPlane } from '@jsxcad/math-poly3';
 
 export const makeConvex = (surface, normalize = createNormalize2()) => {
   if (surface.length === 0) {
@@ -38,12 +39,9 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0],
-                        [earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0],
-                        [earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0]];
-      if (isClockwise(triangle)) {
-        triangle.reverse();
-      }
+      const triangle = [normalize([earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0]),
+                        normalize([earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0]),
+                        normalize([earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0])];
       convexSurface.push(triangle);
     }
   };
@@ -67,6 +65,14 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
     walkContour(child);
   }
 
-  const normalized = convexSurface.map(path => path.map(normalize));
+  const normalized = convexSurface.map(path => path.map(normalize)).filter(path => toPlane(path) !== undefined);
+  const rectified = [];
+  for (const polygon of normalized) {
+    if (isClockwise(polygon)) {
+      rectified.push(flip(polygon));
+    } else {
+      rectified.push(polygon);
+    }
+  }
   return normalized;
 };
