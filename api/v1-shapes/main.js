@@ -2,27 +2,30 @@ import Arc from './Arc';
 import Assembly from './Assembly';
 import Circle from './Circle';
 import Cone from './Cone';
-import Cube from './Cube.js';
-import Cylinder from './Cylinder.js';
-import Empty from './Empty.js';
-import Hexagon from './Hexagon.js';
-import Icosahedron from './Icosahedron.js';
-import Layers from './Layers.js';
-import Line from './Line.js';
-import Path from './Path.js';
-import Point from './Point.js';
-import Points from './Points.js';
-import Polygon from './Polygon.js';
-import Polyhedron from './Polyhedron.js';
-import Prism from './Prism.js';
-import Sphere from './Sphere.js';
-import Spiral from './Spiral.js';
-import Square from './Square.js';
-import Tetrahedron from './Tetrahedron.js';
-import Torus from './Torus.js';
-import Triangle from './Triangle.js';
-import Void from './Void.js';
-import Wave from './Wave.js';
+import Cube from './Cube';
+import Cylinder from './Cylinder';
+import Difference from './Difference';
+import Empty from './Empty';
+import Hexagon from './Hexagon';
+import Icosahedron from './Icosahedron';
+import Intersection from './Intersection';
+import Layers from './Layers';
+import Line from './Line';
+import Path from './Path';
+import Point from './Point';
+import Points from './Points';
+import Polygon from './Polygon';
+import Polyhedron from './Polyhedron';
+import Prism from './Prism';
+import Sphere from './Sphere';
+import Spiral from './Spiral';
+import Square from './Square';
+import Tetrahedron from './Tetrahedron';
+import Torus from './Torus';
+import Triangle from './Triangle';
+import Union from './Union';
+import Void from './Void';
+import Wave from './Wave';
 
 const api = {
   Arc,
@@ -31,9 +34,11 @@ const api = {
   Cone,
   Cube,
   Cylinder,
+  Difference,
   Empty,
   Hexagon,
   Icosahedron,
+  Intersection,
   Layers,
   Line,
   Path,
@@ -48,6 +53,7 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
+  Union,
   Void,
   Wave
 };
@@ -59,9 +65,11 @@ export {
   Cone,
   Cube,
   Cylinder,
+  Difference,
   Empty,
   Hexagon,
   Icosahedron,
+  Intersection,
   Layers,
   Line,
   Path,
@@ -76,6 +84,7 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
+  Union,
   Void,
   Wave
 };

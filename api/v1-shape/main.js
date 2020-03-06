@@ -30,6 +30,7 @@ import keep from './keep';
 import kept from './kept';
 import layer from './layer';
 import log from './log';
+import make from './make';
 import material from './material';
 import move from './move';
 import moveX from './moveX';
@@ -66,6 +67,7 @@ export {
   kept,
   layer,
   log,
+  make,
   material,
   move,
   moveX,
