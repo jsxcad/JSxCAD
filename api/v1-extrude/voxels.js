@@ -114,6 +114,19 @@ Shape.prototype.surfaceCloud = surfaceCloudMethod;
 const withSurfaceCloudMethod = function (...args) { return assemble(this, surfaceCloud(this, ...args)); };
 Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
 
+const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
+  const dX = aX - bX;
+  if (dX !== 0) {
+    return dX;
+  }
+  const dY = aY - bY;
+  if (dY !== 0) {
+    return dY;
+  }
+  const dZ = aZ - bZ;
+  return dZ;
+};
+
 export const cloud = (shape, resolution = 1) => {
   const offset = resolution / 2;
   const geometry = shape.toKeptGeometry();
@@ -143,6 +156,7 @@ export const cloud = (shape, resolution = 1) => {
       }
     }
   }
+  points.sort(orderPoints);
   return Shape.fromGeometry({ points });
 };
 
