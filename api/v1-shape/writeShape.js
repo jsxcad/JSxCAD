@@ -16,23 +16,18 @@ import { writeFile } from '@jsxcad/sys';
  *
  **/
 
-export const cacheShape = async (options, shape) => {
-  const { path } = options;
+export const cacheShape = async (shape, path) => {
   const geometry = shape.toGeometry();
   await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
 };
 
-export const writeShape = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
+export const writeShape = async (shape, path) => {
   const geometry = shape.toGeometry();
   await writeFile({}, `output/${path}`, JSON.stringify(geometry));
   await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
 };
 
-const writeShapeMethod = function (options = {}) { return writeShape(options, this); };
+const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
 Shape.prototype.writeShape = writeShapeMethod;
 
 export default writeShape;

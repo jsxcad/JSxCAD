@@ -4,7 +4,7 @@ import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { log as log$1, writeFile, readFile, getSources } from './jsxcad-sys.js';
+import { log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
 class Shape {
@@ -928,6 +928,53 @@ log.signature = 'log(op:function)';
 
 /**
  *
+ * # Write Shape Geometry
+ *
+ * This writes a shape as a tagged geometry in json format.
+ *
+ * ::: illustration { "view": { "position": [5, 5, 5] } }
+ * ```
+ * await Cube().writeShape('cube.shape');
+ * await readShape({ path: 'cube.shape' })
+ * ```
+ * :::
+ *
+ **/
+
+const cacheShape = async (shape, path) => {
+  const geometry = shape.toGeometry();
+  await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+};
+
+const writeShape = async (shape, path) => {
+  const geometry = shape.toGeometry();
+  await writeFile({}, `output/${path}`, JSON.stringify(geometry));
+  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+};
+
+const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
+Shape.prototype.writeShape = writeShapeMethod;
+
+const readShape = async (path, build, { ephemeral = false, src } = {}) => {
+  let data = await readFile({ as: 'utf8', ephemeral }, `source/${path}`);
+  if (data === undefined && src) {
+    data = await readFile({ as: 'utf8', sources: [src], ephemeral }, `cache/${path}`);
+  }
+  if (data === undefined && build !== undefined) {
+    const shape = await build();
+    if (!ephemeral) {
+      await cacheShape(shape, `cache/${path}`);
+    }
+    return shape;
+  }
+  const geometry = JSON.parse(data);
+  return Shape.fromGeometry(geometry);
+};
+
+const make = (path, builder) => readShape(path, builder);
+
+/**
+ *
  * # Material
  *
  * Produces a version of a shape with a given material.
@@ -1106,90 +1153,6 @@ Shape.prototype.orient = orientMethod;
 
 orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
 orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-
-/**
- *
- * # Write Shape Geometry
- *
- * This writes a shape as a tagged geometry in json format.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeShape('cube.shape');
- * await readShape({ path: 'cube.shape' })
- * ```
- * :::
- *
- **/
-
-const cacheShape = async (options, shape) => {
-  const { path } = options;
-  const geometry = shape.toGeometry();
-  await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
-};
-
-const writeShape = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { path } = options;
-  const geometry = shape.toGeometry();
-  await writeFile({}, `output/${path}`, JSON.stringify(geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
-};
-
-const writeShapeMethod = function (options = {}) { return writeShape(options, this); };
-Shape.prototype.writeShape = writeShapeMethod;
-
-/**
- *
- * # Read Shape Geometry
- *
- * This reads tagged geometry in json format and produces a shape.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeShape({ path: 'geometry/cube' })
- * await readShape({ path: 'geometry/cube' })
- * ```
- * :::
- *
- * A shape building function can be supplied to generate the shape to read if absent.
- *
- * The second read will not call the build function, and it will be present in re-runs.
- *
- * This allows the caching of complex geometry for fast recomposition.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await readShape({ path: 'geometry/sphere' }, () => Sphere())
- * await readShape({ path: 'geometry/sphere' }, () => Sphere())
- * ```
- * :::
- *
- **/
-
-const readShape = async (options, build) => {
-  if (typeof options === 'string') {
-    options = { path: options };
-  }
-  const { ephemeral, path } = options;
-
-  let data = await readFile({ as: 'utf8', ...options }, `source/${path}`);
-  if (data === undefined) {
-    data = await readFile({ as: 'utf8', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
-  }
-
-  if (data === undefined && build !== undefined) {
-    const shape = await build();
-    if (!ephemeral) {
-      await cacheShape(options, shape);
-    }
-    return shape;
-  }
-  const geometry = JSON.parse(data);
-  return Shape.fromGeometry(geometry);
-};
 
 /**
  *
@@ -1407,4 +1370,4 @@ const turnZMethod = function (angle) { return turnZ(this, angle); };
 Shape.prototype.turnZ = turnZMethod;
 
 export default Shape;
-export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
+export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, make, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
