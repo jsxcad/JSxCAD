@@ -1,5 +1,5 @@
 import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
-import Shape from './jsxcad-api-v1-shape.js';
+import Shape, { difference, intersection, union } from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 import { getAnySurfaces, getPaths, rewriteTags } from './jsxcad-geometry-tagged.js';
@@ -401,6 +401,8 @@ Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:num
 Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
 Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
+const Difference = (...args) => difference(...args);
+
 const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
 /**
@@ -479,6 +481,8 @@ Icosahedron.ofDiameter = ofDiameter$7;
 Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
 Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
 Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+
+const Intersection = (...args) => intersection(...args);
 
 const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
 
@@ -834,6 +838,8 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
+const Union = (...args) => union(...args);
+
 const Void = (shape) => Shape.fromGeometry(rewriteTags(['compose/non-positive'], [], shape.toGeometry()));
 
 const VoidMethod = function () { return Void(this); };
@@ -872,9 +878,11 @@ const api = {
   Cone,
   Cube,
   Cylinder,
+  Difference,
   Empty,
   Hexagon,
   Icosahedron,
+  Intersection,
   Layers,
   Line,
   Path,
@@ -889,9 +897,10 @@ const api = {
   Tetrahedron,
   Torus,
   Triangle,
+  Union,
   Void,
   Wave
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Empty, Hexagon, Icosahedron, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave };

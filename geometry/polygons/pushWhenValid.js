@@ -10,15 +10,7 @@ export const pushWhenValid = (out, points, expectedPlane) => {
   const validated = [];
   const l = points.length;
   for (let i = 0; i < l; i++) {
-    let good = true;
-    for (let j = i + 1; j < l; j++) {
-      const sd = squaredDistance(points[i], points[j]);
-      if (sd <= EPSILON2) {
-        good = false;
-        break;
-      }
-    }
-    if (good) {
+    if (squaredDistance(points[i], points[(i + 1) % l]) > EPSILON2) {
       validated.push(points[i]);
     }
   }
@@ -28,6 +20,9 @@ export const pushWhenValid = (out, points, expectedPlane) => {
   const plane = fromPolygon(validated);
   if (plane === undefined) {
     return;
+  }
+  if (expectedPlane !== undefined) {
+    validated.plane = expectedPlane;
   }
   out.push(validated);
 };

@@ -12,8 +12,6 @@ import {
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 
-import { makeConvex } from '@jsxcad/geometry-surface';
-
 const X = 0;
 const Y = 1;
 const Z = 2;
@@ -72,8 +70,8 @@ export const deform = (solid, transform, min, max, resolution) => {
 
   for (const polygon of dividePolygons(bsp, solidPolygons, normalize)) {
     if (polygon.length > 3) {
-      for (const triangle of makeConvex([polygon])) {
-        dividedPolygons.push(triangle);
+      for (let nth = 2; nth < polygon.length; nth++) {
+        dividedPolygons.push([polygon[0], polygon[nth - 1], polygon[nth]]);
       }
     } else if (polygon.length === 3) {
       dividedPolygons.push(polygon);
@@ -84,6 +82,8 @@ export const deform = (solid, transform, min, max, resolution) => {
 
   const vertices = new Map();
 
+  // We only need this for non-deterministic transforms.
+  // Let's require transforms be deterministic functions.
   for (const path of realignedPolygons) {
     for (const point of path) {
       const tag = JSON.stringify(point);
