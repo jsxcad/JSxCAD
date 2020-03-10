@@ -70,7 +70,7 @@ function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 			return entityMap[k]; 
 		}else if(k.charAt(0) === '#'){
 			return fixedFromCharCode(parseInt(k.substr(1).replace('x','0x')))
-		}else{
+		}else {
 			errorHandler.error('entity not found:'+a);
 			return a;
 		}
@@ -146,7 +146,7 @@ function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 					if(!endMatch){
 		            	errorHandler.fatalError("end tag name: "+tagName+' is not match the current start tagName:'+config.tagName );
 					}
-		        }else{
+		        }else {
 		        	parseStack.push(config);
 		        }
 				
@@ -190,7 +190,7 @@ function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 						parseStack.push(el);
 					}
 					domBuilder.locator = locator;
-				}else{
+				}else {
 					if(appendElement(el,domBuilder,currentNSMap)){
 						parseStack.push(el);
 					}
@@ -200,7 +200,7 @@ function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 				
 				if(el.uri === 'http://www.w3.org/1999/xhtml' && !el.closed){
 					end = parseHtmlSpecialContent(source,end,el.tagName,entityReplacer,domBuilder);
-				}else{
+				}else {
 					end++;
 				}
 			}
@@ -212,7 +212,7 @@ function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 		}
 		if(end>start){
 			start = end;
-		}else{
+		}else {
 			//TODO: 这里有可能sax回退，有位置错误风险
 			appendText(Math.max(tagStart,start)+1);
 		}
@@ -242,7 +242,7 @@ function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,error
 				s = S_EQ;
 			}else if(s === S_ATTR_SPACE){
 				s = S_EQ;
-			}else{
+			}else {
 				//fatalError: equal must after attrName or space after attrName
 				throw new Error('attribute equal must after attrName');
 			}
@@ -261,7 +261,7 @@ function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,error
 					value = source.slice(start,p).replace(/&#?\w+;/g,entityReplacer);
 					el.add(attrName,value,start-1);
 					s = S_ATTR_END;
-				}else{
+				}else {
 					//fatalError: no end quot match
 					throw new Error('attribute value no end \''+c+'\' match');
 				}
@@ -273,7 +273,7 @@ function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,error
 				errorHandler.warning('attribute "'+attrName+'" missed start quot('+c+')!!');
 				start = p+1;
 				s = S_ATTR_END;
-			}else{
+			}else {
 				//fatalError: no equal before
 				throw new Error('attribute value must after "="');
 			}
@@ -325,7 +325,7 @@ function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,error
 				if(s == S_ATTR_NOQUOT_VALUE){
 					errorHandler.warning('attribute "'+value+'" missed quot(")!!');
 					el.add(attrName,value.replace(/&#?\w+;/g,entityReplacer),start);
-				}else{
+				}else {
 					if(currentNSMap[''] !== 'http://www.w3.org/1999/xhtml' || !value.match(/^(?:disabled|checked|selected)$/i)){
 						errorHandler.warning('attribute "'+value+'" missed value!! "'+value+'" instead!!');
 					}
@@ -365,7 +365,7 @@ function parseElementStartPart(source,start,el,currentNSMap,entityReplacer,error
 				//case S_TAG_CLOSE:
 					//ignore warning
 				}
-			}else{//not space
+			}else {//not space
 //S_TAG,	S_ATTR,	S_EQ,	S_ATTR_NOQUOT_VALUE
 //S_ATTR_SPACE,	S_ATTR_END,	S_TAG_SPACE, S_TAG_CLOSE
 				switch(s){
@@ -417,7 +417,7 @@ function appendElement(el,domBuilder,currentNSMap){
 			var prefix = a.prefix = qName.slice(0,nsp);
 			var localName = qName.slice(nsp+1);
 			var nsPrefix = prefix === 'xmlns' && localName;
-		}else{
+		}else {
 			localName = qName;
 			prefix = null;
 			nsPrefix = qName === 'xmlns' && '';
@@ -455,7 +455,7 @@ function appendElement(el,domBuilder,currentNSMap){
 	if(nsp>0){
 		prefix = el.prefix = tagName.slice(0,nsp);
 		localName = el.localName = tagName.slice(nsp+1);
-	}else{
+	}else {
 		prefix = null;//important!!
 		localName = el.localName = tagName;
 	}
@@ -471,7 +471,7 @@ function appendElement(el,domBuilder,currentNSMap){
 				domBuilder.endPrefixMapping(prefix); 
 			}
 		}
-	}else{
+	}else {
 		el.currentNSMap = currentNSMap;
 		el.localNSMap = localNSMap;
 		//parseStack.push(el);
@@ -527,11 +527,11 @@ function parseDCC(source,start,domBuilder,errorHandler){//sure start with '<!'
 			if(end>start){
 				domBuilder.comment(source,start+4,end-start-4);
 				return end+3;
-			}else{
+			}else {
 				errorHandler.error("Unclosed comment");
 				return -1;
 			}
-		}else{
+		}else {
 			//error
 			return -1;
 		}
@@ -572,7 +572,7 @@ function parseInstruction(source,start,domBuilder){
 			var len = match[0].length;
 			domBuilder.processingInstruction(match[1], match[2]) ;
 			return end+2;
-		}else{//error
+		}else {//error
 			return -1;
 		}
 	}
@@ -727,7 +727,7 @@ var INVALID_ACCESS_ERR       	= ExceptionCode.INVALID_ACCESS_ERR      	= ((Excep
 function DOMException(code, message) {
 	if(message instanceof Error){
 		var error = message;
-	}else{
+	}else {
 		error = this;
 		Error.call(this, ExceptionMessage[code]);
 		this.message = ExceptionMessage[code];
@@ -807,7 +807,7 @@ function _findNodeIndex(list,node){
 function _addNamedNode(el,list,newAttr,oldAttr){
 	if(oldAttr){
 		list[_findNodeIndex(list,oldAttr)] = newAttr;
-	}else{
+	}else {
 		list[list.length++] = newAttr;
 	}
 	if(el){
@@ -835,7 +835,7 @@ function _removeNamedNode(el,list,attr){
 				attr.ownerElement = null;
 			}
 		}
-	}else{
+	}else {
 		throw DOMException(NOT_FOUND_ERR,new Error(el.tagName+'@'+attr))
 	}
 }
@@ -1004,7 +1004,7 @@ Node.prototype = {
 			if(next && next.nodeType == TEXT_NODE && child.nodeType == TEXT_NODE){
 				this.removeChild(next);
 				child.appendData(next.data);
-			}else{
+			}else {
 				child.normalize();
 				child = next;
 			}
@@ -1111,7 +1111,7 @@ function _onUpdateChild(doc,el,newChild){
 		var cs = el.childNodes;
 		if(newChild){
 			cs[cs.length++] = newChild;
-		}else{
+		}else {
 			//console.log(1)
 			var child = el.firstChild;
 			var i = 0;
@@ -1137,12 +1137,12 @@ function _removeChild(parentNode,child){
 	var next = child.nextSibling;
 	if(previous){
 		previous.nextSibling = next;
-	}else{
+	}else {
 		parentNode.firstChild = next;
 	}
 	if(next){
 		next.previousSibling = previous;
-	}else{
+	}else {
 		parentNode.lastChild = previous;
 	}
 	_onUpdateChild(parentNode.ownerDocument,parentNode);
@@ -1162,7 +1162,7 @@ function _insertBefore(parentNode,newChild,nextChild){
 			return newChild;
 		}
 		var newLast = newChild.lastChild;
-	}else{
+	}else {
 		newFirst = newLast = newChild;
 	}
 	var pre = nextChild ? nextChild.previousSibling : parentNode.lastChild;
@@ -1173,12 +1173,12 @@ function _insertBefore(parentNode,newChild,nextChild){
 	
 	if(pre){
 		pre.nextSibling = newFirst;
-	}else{
+	}else {
 		parentNode.firstChild = newFirst;
 	}
 	if(nextChild == null){
 		parentNode.lastChild = newLast;
-	}else{
+	}else {
 		nextChild.previousSibling = newLast;
 	}
 	do{
@@ -1204,7 +1204,7 @@ function _appendSingleChild(parentNode,newChild){
 	newChild.nextSibling = null;
 	if(pre){
 		pre.nextSibling = newChild;
-	}else{
+	}else {
 		parentNode.firstChild = newChild;
 	}
 	parentNode.lastChild = newChild;
@@ -1330,7 +1330,7 @@ Document.prototype = {
 		if(pl.length == 2){
 			node.prefix = pl[0];
 			node.localName = pl[1];
-		}else{
+		}else {
 			//el.prefix = null;
 			node.localName = qualifiedName;
 		}
@@ -1349,7 +1349,7 @@ Document.prototype = {
 		if(pl.length == 2){
 			node.prefix = pl[0];
 			node.localName = pl[1];
-		}else{
+		}else {
 			//el.prefix = null;
 			node.localName = qualifiedName;
 		}
@@ -1387,7 +1387,7 @@ function Element() {
 	appendChild:function(newChild){
 		if(newChild.nodeType === DOCUMENT_FRAGMENT_NODE){
 			return this.insertBefore(newChild,null);
-		}else{
+		}else {
 			return _appendSingleChild(this,newChild);
 		}
 	},
@@ -1609,7 +1609,7 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 				buf.push(node);
 				return;
 			}
-		}else{
+		}else {
 			return;
 		}
 		//buf.sort.apply(attrs, attributeSorter);
@@ -1664,7 +1664,7 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 				while(child){
 					if(child.data){
 						buf.push(child.data);
-					}else{
+					}else {
 						serializeToString(child,buf,isHTML,nodeFilter,visibleNamespaces);
 					}
 					child = child.nextSibling;
@@ -1677,7 +1677,7 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 				}
 			}
 			buf.push('</',nodeName,'>');
-		}else{
+		}else {
 			buf.push('/>');
 		}
 		// remove added visible namespaces
@@ -1711,7 +1711,7 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 			buf.push('">');
 		}else if(sysid && sysid!='.'){
 			buf.push(' SYSTEM "',sysid,'">');
-		}else{
+		}else {
 			var sub = node.internalSubset;
 			if(sub){
 				buf.push(" [",sub,"]");
@@ -1911,7 +1911,7 @@ DOMParser.prototype.parseFromString = function(source,mimeType){
 	defaultNSMap.xml = defaultNSMap.xml || 'http://www.w3.org/XML/1998/namespace';
 	if(source){
 		sax.parse(source,defaultNSMap,entityMap);
-	}else{
+	}else {
 		sax.errorHandler.error("invalid doc source");
 	}
 	return domBuilder.doc;
@@ -2078,7 +2078,7 @@ function _locator(l){
 function _toString(chars,start,length){
 	if(typeof chars == 'string'){
 		return chars.substr(start,length)
-	}else{//java sax connect width xmldom on rhino(what about: "? && !(chars instanceof String)")
+	}else {//java sax connect width xmldom on rhino(what about: "? && !(chars instanceof String)")
 		if(chars.length >= start+length || start){
 			return new java.lang.String(chars,start,length)+'';
 		}

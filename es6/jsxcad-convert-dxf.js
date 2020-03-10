@@ -1459,7 +1459,7 @@ var loglevel = createCommonjsModule(function (module) {
     // Slightly dubious tricks to cut down minimized file size
     var noop = function() {};
     var undefinedType = "undefined";
-    var isIE = (typeof window !== undefinedType) && (
+    var isIE = (typeof window !== undefinedType) && (typeof window.navigator !== undefinedType) && (
         /Trident\/|MSIE /.test(window.navigator.userAgent)
     );
 
@@ -2040,7 +2040,7 @@ DxfParser.prototype._parse = function(dxfString) {
 					if(curr.value === 'AcDbSymbolTable') {
 						// ignore
 						curr = scanner.next();
-					}else{
+					}else {
 						logUnhandledGroup(curr);
 						curr = scanner.next();
 					}
@@ -2682,6 +2682,9 @@ class Circle
 
 var Circle_1 = Circle;
 
+const H_ALIGN_CODES = ['left', 'center', 'right'];
+const V_ALIGN_CODES = ['baseline','bottom', 'middle', 'top'];
+
 class Text
 {
     /**
@@ -2690,14 +2693,18 @@ class Text
      * @param {number} height - Text height
      * @param {number} rotation - Text rotation
      * @param {string} value - the string itself
+     * @param {string} [horizontalAlignment="left"] left | center | right
+     * @param {string} [verticalAlignment="baseline"] baseline | bottom | middle | top
      */
-    constructor(x1, y1, height, rotation, value)
+    constructor(x1, y1, height, rotation, value, horizontalAlignment = 'left', verticalAlignment = 'baseline')
     {
         this.x1 = x1;
         this.y1 = y1;
         this.height = height;
         this.rotation = rotation;
         this.value = value;
+        this.hAlign = horizontalAlignment;
+        this.vAlign = verticalAlignment;
     }
 
     toDxfString()
@@ -2708,6 +2715,11 @@ class Text
         s += `1\n${this.value}\n`;
         s += `10\n${this.x1}\n20\n${this.y1}\n30\n0\n`;
         s += `40\n${this.height}\n50\n${this.rotation}\n`;
+        if (H_ALIGN_CODES.includes(this.hAlign, 1) || V_ALIGN_CODES.includes(this.vAlign, 1)){
+            s += `11\n${this.x1}\n21\n${this.y1}\n31\n0\n`;
+            s += `72\n${Math.max(H_ALIGN_CODES.indexOf(this.hAlign),0)}\n`;
+            s += `73\n${Math.max(V_ALIGN_CODES.indexOf(this.vAlign),0)}\n`;
+        }
         return s;
     }
 }
@@ -2936,10 +2948,12 @@ class Drawing
      * @param {number} height - Text height
      * @param {number} rotation - Text rotation
      * @param {string} value - the string itself
+     * @param {string} [horizontalAlignment="left"] left | center | right
+     * @param {string} [verticalAlignment="baseline"] baseline | bottom | middle | top
      */
-    drawText(x1, y1, height, rotation, value)
+    drawText(x1, y1, height, rotation, value, horizontalAlignment = 'left', verticalAlignment = 'baseline')
     {
-        this.activeLayer.addShape(new Text_1(x1, y1, height, rotation, value));
+        this.activeLayer.addShape(new Text_1(x1, y1, height, rotation, value, horizontalAlignment, verticalAlignment));
         return this;
     }
 
