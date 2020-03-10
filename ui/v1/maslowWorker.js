@@ -126,7 +126,6 @@ const agent = async ({ ask, question }) => {
       case 'tag':
         return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
       case 'specify':
-        console.log(api.Shape.fromGeometry(values[0]));
         return api.Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
       case 'translate':
         return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();
