@@ -40,6 +40,7 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
   for (const polygons of coplanarGroups.values()) {
     // const surface = polygons;
     // const surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+/*
     for (const a of polygons) {
       for (const b of polygons) {
         if (a === b) continue;
@@ -53,6 +54,7 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
         }
       }
     }
+*/
     const surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
     defragmented.push(surface);
   }
