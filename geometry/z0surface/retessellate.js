@@ -1,60 +1,7 @@
-import { canonicalize as canonicalize$1, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { cache } from './jsxcad-cache.js';
-export { makeConvex } from './jsxcad-geometry-z0surface-boolean.js';
-import { fromPoints, direction } from './jsxcad-math-line2.js';
-import { distance } from './jsxcad-math-vec2.js';
-import './jsxcad-math-vec3.js';
+import { direction, fromPoints as toLineFromPoints } from '@jsxcad/math-line2';
 
-const canonicalize = (surface) => surface.map(canonicalize$1);
-
-// Transforms
-const transform = (matrix, surface) => surface.map(polygon => transform$1(matrix, polygon));
-const rotateZ = (angle, surface) => transform(fromZRotation(angle), surface);
-const scale = (vector, surface) => transform(fromScaling(vector), surface);
-const translate = (vector, surface) => transform(fromTranslation(vector), surface);
-
-// returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
-const measureBoundingBox = (surface) => {
-  if (surface.measureBoundingBox === undefined) {
-    let max = [-Infinity, -Infinity, 0];
-    let min = [Infinity, Infinity, 0];
-    for (const polygon of surface) {
-      for (const point of polygon) {
-        if (point[0] < min[0]) min[0] = point[0];
-        if (point[1] < min[1]) min[1] = point[1];
-        if (point[0] > max[0]) max[0] = point[0];
-        if (point[1] > max[1]) max[1] = point[1];
-      }
-    }
-    surface.measureBoundingBox = [min, max];
-  }
-  return surface.measureBoundingBox;
-};
-
-const iota = 1e-5;
-const X = 0;
-const Y = 1;
-
-// Tolerates overlap up to one iota.
-const doesNotOverlap = (a, b) => {
-  if (a.length === 0 || b.length === 0) {
-    return true;
-  }
-  const [minA, maxA] = measureBoundingBox(a);
-  const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] <= minB[X] + iota) { return true; }
-  if (maxA[Y] <= minB[Y] + iota) { return true; }
-  if (maxB[X] <= minA[X] + iota) { return true; }
-  if (maxB[Y] <= minA[Y] + iota) { return true; }
-  return false;
-};
-
-// move to tagged
-
-const fromPathImpl = (path) => [path];
-
-const fromPath = cache(fromPathImpl);
+import { distance } from '@jsxcad/math-vec2';
+import { equals as equalsPoint } from '@jsxcad/math-vec3';
 
 const EPS = 1e-5;
 
@@ -111,15 +58,15 @@ const binY = (yCoordinateBins, y) => {
   }
 };
 
-const X$1 = 0;
-const Y$1 = 1;
+const X = 0;
+const Y = 1;
 const yCoordinateBinningFactor = 1.0 / EPS * 10;
 
 /**
  * Retesselation for a z0Surface.
  */
 
-const binPolygons = (sourcePolygons) => {
+export const binPolygons = (sourcePolygons) => {
   const normalizedPolygons = [];
   const polygonTopVertexIndexes = []; // array of indexes of topmost vertex per polygon
   const topYToPolygonIndexes = {};
@@ -144,7 +91,7 @@ const binPolygons = (sourcePolygons) => {
         const point = polygon[index];
         // perform binning of y coordinates: If we have multiple vertices very
         // close to each other, give them the same y coordinate:
-        const y = binY(yCoordinateBins, point[Y$1]);
+        const y = binY(yCoordinateBins, point[Y]);
         if (y > maxY) {
           maxY = y;
         }
@@ -152,10 +99,10 @@ const binPolygons = (sourcePolygons) => {
           minY = y;
           minIndex = points.length;
         }
-        points.push([point[X$1], y]);
+        points.push([point[X], y]);
       }
       for (let index = polygon.length - 1; index >= 0; index--) {
-        const y = points[index][Y$1];
+        const y = points[index][Y];
         if (!(y in yCoordinateToPolygonIndexes)) {
           yCoordinateToPolygonIndexes[y] = {};
         }
@@ -298,6 +245,18 @@ const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonI
   return nextYCoordinate;
 };
 
+const equalsPolygon = (a, b) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (!equalsPoint(a[i], b[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons }) => {
   // Now activePolygons is up to date
 
@@ -318,8 +277,8 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
       topRight,
       bottomLeft,
       bottomRight,
-      leftLine: fromPoints(topLeft, bottomLeft),
-      rightLine: fromPoints(bottomRight, topRight)
+      leftLine: toLineFromPoints(topLeft, bottomLeft),
+      rightLine: toLineFromPoints(bottomRight, topRight)
     };
     if (newPolygonRow.length > 0) {
       // Stitch together congruent edges.
@@ -342,7 +301,7 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
           break;
         }
         case 'new': {
-          if (outPolygon.topLeft[X$1] <= previousOutPolygon.topRight[X$1] + EPS) {
+          if (outPolygon.topLeft[X] <= previousOutPolygon.topRight[X] + EPS) {
             // These polygons overlap x-wise.
             // we can join this polygon with the one to the left:
             outPolygon.topLeft = previousOutPolygon.topLeft;
@@ -449,7 +408,7 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
   return previousPolygonRow;
 };
 
-const retessellate = (sourcePolygons) => {
+export const retessellate = (sourcePolygons) => {
   if (sourcePolygons.length < 2) {
     return sourcePolygons;
   }
@@ -489,5 +448,3 @@ const retessellate = (sourcePolygons) => {
            .filter(polygon => polygon.length >= 3)
            .map(polygon => polygon.map(([x, y]) => [x, y, 0]));
 };
-
-export { canonicalize, doesNotOverlap, fromPath, measureBoundingBox, retessellate, rotateZ, scale, transform, translate };

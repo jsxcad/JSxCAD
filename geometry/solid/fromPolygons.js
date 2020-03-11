@@ -1,6 +1,7 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-import { makeConvex } from '@jsxcad/geometry-surface';
+import { makeConvex, measureArea, retessellate } from '@jsxcad/geometry-surface';
+import { intersection } from '@jsxcad/geometry-surface-boolean';
 import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
@@ -38,7 +39,21 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
     // const surface = polygons;
-    const surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+    // const surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+    for (const a of polygons) {
+      for (const b of polygons) {
+        if (a === b) continue;
+        const overlap = intersection([a], [b]);
+        if (overlap.length > 0) {
+          const area = measureArea(overlap);
+          if (area > 1) {
+            console.log(`QQ/overlap/area: ${area}`);
+            throw Error('die: overlap');
+          }
+        }
+      }
+    }
+    const surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
     defragmented.push(surface);
   }
 
