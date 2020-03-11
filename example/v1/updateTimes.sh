@@ -8,8 +8,10 @@ cp jsxcad/observed/flat/time expected/flat/time
 cp jsxcad/observed/gear/time expected/gear/time
 cp jsxcad/observed/importScript/time expected/importScript/time
 cp jsxcad/observed/interlock-proof-of-concept/time expected/interlock-proof-of-concept/time
+cp jsxcad/observed/mount/time expected/mount/time
 cp jsxcad/observed/mold/time expected/mold/time
 cp jsxcad/observed/sphereCubeHull/time expected/sphereCubeHull/time
+cp jsxcad/observed/spinner/time expected/spinner/time
 cp jsxcad/observed/square/time expected/square/time
 cp jsxcad/observed/squares/time expected/squares/time
 cp jsxcad/observed/squaresIntersection/time expected/squaresIntersection/time
