@@ -4,7 +4,8 @@ import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import './jsxcad-geometry-surface-boolean.js';
 
 const THRESHOLD = 1e-5;
 
@@ -262,6 +263,8 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
+let doDefragment = 'retessellate';
+
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
@@ -295,8 +298,18 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
 
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
-    // const surface = polygons;
-    const surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+    let surface;
+    switch (doDefragment) {
+      default:
+        surface = polygons;
+        break;
+      case 'makeConvex':
+        surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+        break;
+      case 'retessellate':
+        surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
+        break;
+    }
     defragmented.push(surface);
   }
 

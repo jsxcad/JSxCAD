@@ -406,7 +406,7 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */inward,
-                   /* abutting= */inward, // keepward
+                   /* abutting= */outward, // dropward
                    /* overlapping= */outward, // dropward
                    /* front= */outward);
     }

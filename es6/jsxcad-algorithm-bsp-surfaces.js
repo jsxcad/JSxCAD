@@ -471,7 +471,7 @@ const removeExteriorPolygonsForDifference = (bsp, polygons, normalize) => {
                    bsp.plane,
                    polygons[i],
                    /* back= */inward,
-                   /* abutting= */inward, // keepward
+                   /* abutting= */outward, // dropward
                    /* overlapping= */outward, // dropward
                    /* front= */outward);
     }
@@ -806,7 +806,9 @@ const difference = (aSolid, ...bSolids) => {
         continue;
       }
     } else {
+      // Remove the parts of a that are inside b.
       const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
+      // Remove the parts of b that are outside a.
       const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
 
       a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);

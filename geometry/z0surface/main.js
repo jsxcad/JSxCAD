@@ -1,18 +1,7 @@
-import { canonicalize, rotateZ, scale, transform, translate } from './ops';
+export { canonicalize, rotateZ, scale, transform, translate } from './ops';
 
-import { doesNotOverlap } from './doesNotOverlap';
-import { fromPath } from './fromPath';
-import { makeConvex } from '@jsxcad/geometry-z0surface-boolean';
-import { measureBoundingBox } from './measureBoundingBox';
-
-export {
-  canonicalize,
-  doesNotOverlap,
-  fromPath,
-  makeConvex,
-  measureBoundingBox,
-  rotateZ,
-  scale,
-  transform,
-  translate
-};
+export { doesNotOverlap } from './doesNotOverlap';
+export { fromPath } from './fromPath';
+export { makeConvex } from '@jsxcad/geometry-z0surface-boolean';
+export { measureBoundingBox } from './measureBoundingBox';
+export { retessellate } from './retessellate';
