@@ -5,7 +5,7 @@ import { equals, splitLineSegmentByPlane, signedDistanceToPoint, toXYPlaneTransf
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { makeConvex as makeConvex$1 } from './jsxcad-geometry-z0surface.js';
+import { makeConvex as makeConvex$1, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
 import { union, outline as outline$1 } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
@@ -390,4 +390,20 @@ const toPoints = (surface) => {
 
 const toPolygons = (options = {}, surface) => surface;
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, outline, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+const retessellate = (surface, normalize3 = createNormalize3(), plane) => {
+  if (surface.length < 2) {
+    return surface;
+  }
+  if (plane === undefined) {
+    plane = toPlane(surface);
+    if (plane === undefined) {
+      return [];
+    }
+  }
+  const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
+  const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize3)));
+  const retessellated = retessellate$1(z0Surface);
+  return transform$1(fromZ0, retessellated).map(path => path.map(normalize3));
+};
+
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

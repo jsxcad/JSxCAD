@@ -1,43 +1,19 @@
-import { canonicalize, rotateZ, scale, transform, translate } from './ops';
-import { cut, cutSurface } from './cut';
+export { canonicalize, rotateZ, scale, transform, translate } from './ops';
+export { cut, cutSurface } from './cut';
 
-import { assertCoplanar } from './assertCoplanar';
-import { assertGood } from './assertGood';
-import { eachPoint } from './eachPoint';
-import { flip } from './flip';
-import { fromPolygons } from './fromPolygons';
-import { makeConvex } from './makeConvex';
-import { makeSimple } from './makeSimple';
-import { measureArea } from './measureArea';
-import { measureBoundingBox } from './measureBoundingBox';
-import { measureBoundingSphere } from './measureBoundingSphere';
-import { outline } from './outline';
-import { toGeneric } from './toGeneric';
-import { toPlane } from './toPlane';
-import { toPoints } from './toPoints';
-import { toPolygons } from './toPolygons';
-
-export {
-  assertCoplanar,
-  assertGood,
-  canonicalize,
-  cut,
-  cutSurface,
-  eachPoint,
-  flip,
-  fromPolygons,
-  makeConvex,
-  makeSimple,
-  measureArea,
-  measureBoundingBox,
-  measureBoundingSphere,
-  outline,
-  rotateZ,
-  toGeneric,
-  toPlane,
-  toPoints,
-  toPolygons,
-  transform,
-  translate,
-  scale
-};
+export { assertCoplanar } from './assertCoplanar';
+export { assertGood } from './assertGood';
+export { eachPoint } from './eachPoint';
+export { flip } from './flip';
+export { fromPolygons } from './fromPolygons';
+export { makeConvex } from './makeConvex';
+export { makeSimple } from './makeSimple';
+export { measureArea } from './measureArea';
+export { measureBoundingBox } from './measureBoundingBox';
+export { measureBoundingSphere } from './measureBoundingSphere';
+export { outline } from './outline';
+export { toGeneric } from './toGeneric';
+export { toPlane } from './toPlane';
+export { toPoints } from './toPoints';
+export { toPolygons } from './toPolygons';
+export { retessellate } from './retessellate';
