@@ -263,7 +263,7 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-let doDefragment = 'retessellate';
+let doDefragment = 'makeConvex';
 
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
