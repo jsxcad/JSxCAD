@@ -1,9 +1,13 @@
+import { makeConvex, measureArea, retessellate } from '@jsxcad/geometry-surface';
+
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-import { makeConvex, measureArea, retessellate } from '@jsxcad/geometry-surface';
 import { intersection } from '@jsxcad/geometry-surface-boolean';
 import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
+
+export let doCheckOverlap = false;
+export let doDefragment = 'retessellate';
 
 export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -38,24 +42,33 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
 
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
-    // const surface = polygons;
-    // const surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
-/*
-    for (const a of polygons) {
-      for (const b of polygons) {
-        if (a === b) continue;
-        const overlap = intersection([a], [b]);
-        if (overlap.length > 0) {
-          const area = measureArea(overlap);
-          if (area > 1) {
-            console.log(`QQ/overlap/area: ${area}`);
-            throw Error('die: overlap');
+    if (doCheckOverlap) {
+      for (const a of polygons) {
+        for (const b of polygons) {
+          if (a === b) continue;
+          const overlap = intersection([a], [b]);
+          if (overlap.length > 0) {
+            const area = measureArea(overlap);
+            if (area > 1) {
+              console.log(`QQ/overlap/area: ${area}`);
+              throw Error('die: overlap');
+            }
           }
         }
       }
     }
-*/
-    const surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
+    let surface;
+    switch (doDefragment) {
+      default:
+        surface = polygons;
+        break;
+      case 'makeConvex':
+        surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+        break;
+      case 'retessellate':
+        surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
+        break;
+    }
     defragmented.push(surface);
   }
 

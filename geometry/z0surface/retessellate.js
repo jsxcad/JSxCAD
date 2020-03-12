@@ -4,6 +4,9 @@ import { distance } from '@jsxcad/math-vec2';
 import { equals as equalsPoint } from '@jsxcad/math-vec3';
 
 const EPS = 1e-5;
+const X = 0;
+const Y = 1;
+const yCoordinateBinningFactor = 1e6;
 
 const interpolateXForY = (point1, point2, y) => {
   let f1 = y - point1[1];
@@ -22,6 +25,7 @@ const interpolateXForY = (point1, point2, y) => {
   } else {
     t = f1 / f2;
   }
+  // lerp
   let result = point1[0] + t * (point2[0] - point1[0]);
   return result;
 };
@@ -57,10 +61,6 @@ const binY = (yCoordinateBins, y) => {
     return y;
   }
 };
-
-const X = 0;
-const Y = 1;
-const yCoordinateBinningFactor = 1.0 / EPS * 10;
 
 /**
  * Retesselation for a z0Surface.
