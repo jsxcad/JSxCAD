@@ -1,7 +1,8 @@
-import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
+import { toPolygons, alignVertices, fromPolygons as fromPolygons$1, outline } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
+import './jsxcad-geometry-surface.js';
 import { max, min } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
@@ -86,8 +87,8 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       back.push(polygon);
       return;
     case SPANNING: {
-      const frontPoints = [];
-      const backPoints = [];
+      let frontPoints = [];
+      let backPoints = [];
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -115,7 +116,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints = [];
         }
         if (backPoints.length > 0 && endType !== BACK) {
-          pushWhenValid(back, backPointsPoints, polygonPlane);
+          pushWhenValid(back, backPoints, polygonPlane);
           frontPoints = [];
         }
         startPoint = endPoint;
@@ -780,9 +781,9 @@ const difference = (aSolid, ...bSolids) => {
   }
 
   const normalize = createNormalize3();
-  let a = toPolygons({}, alignVertices(aSolid, normalize));
+  let a = outline(alignVertices(aSolid, normalize), normalize);
   let bs = bSolids
-      .map(b => toPolygons({}, alignVertices(b, normalize)))
+      .map(b => outline(alignVertices(b, normalize), normalize))
       .filter(b => !doesNotOverlap(a, b));
 
   while (bs.length > 0) {
