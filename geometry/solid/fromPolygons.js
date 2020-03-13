@@ -7,7 +7,7 @@ import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export let doCheckOverlap = false;
-export let doDefragment = 'makeConvex';
+export let doDefragment = 'default';
 
 export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();

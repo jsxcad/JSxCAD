@@ -2,6 +2,7 @@ import { equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-pla
 
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
+import { toPlane as toPlaneFromSurface } from '@jsxcad/geometry-surface';
 
 const EPSILON = 1e-5;
 // const EPSILON2 = 1e-10;
@@ -115,13 +116,33 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
+        if (frontPoints.length > 0 && endType !== FRONT) {
+          pushWhenValid(front, frontPoints, polygonPlane);
+          frontPoints = [];
+        }
+        if (backPoints.length > 0 && endType !== BACK) {
+          pushWhenValid(back, backPointsPoints, polygonPlane);
+          frontPoints = [];
+        }
         startPoint = endPoint;
         startType = endType;
       }
-      pushWhenValid(front, frontPoints, polygonPlane);
-      pushWhenValid(back, backPoints, polygonPlane);
+      if (frontPoints.length > 0) {
+        pushWhenValid(front, frontPoints, polygonPlane);
+      }
+      if (backPoints.length > 0) {
+        pushWhenValid(back, backPoints, polygonPlane);
+      }
       break;
     }
+  }
+};
+
+const splitSurface = (normalize, plane, surface, back, abutting, overlapping, front) => {
+  const surfacePlane = toPlaneFromSurface(surface);
+  for (const polygon of surface) {
+    polygon.plane = surfacePlane;
+    splitPolygon(normalize, plane, surface, back, abutting, overlapping, front);
   }
 };
 
@@ -131,5 +152,6 @@ export {
   COPLANAR_FRONT,
   EPSILON,
   FRONT,
-  splitPolygon
+  splitPolygon,
+  splitSurface
 };

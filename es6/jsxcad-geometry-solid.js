@@ -263,7 +263,7 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-let doDefragment = 'makeConvex';
+let doDefragment = 'default';
 
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -348,8 +348,9 @@ const toPoints = (solid) => {
 
 // Relax the coplanar arrangement into polygon soup.
 const toPolygons = (options = {}, solid) => {
+  const normalize = createNormalize3();
   const polygons = [];
-  for (const surface of solid) {
+  for (const surface of outline(solid)) {
     polygons.push(...toPolygons$1({}, surface));
   }
   return polygons;

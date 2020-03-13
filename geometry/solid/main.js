@@ -1,44 +1,19 @@
-import { isWatertight, makeWatertight } from './makeWatertight';
-import { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
+export { isWatertight, makeWatertight } from './makeWatertight';
+export { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops';
 
-import { alignVertices } from './alignVertices';
-import { assertGood } from './assertGood';
-import { canonicalize } from './canonicalize';
-import { doesNotOverlap } from './doesNotOverlap';
-import { eachPoint } from './eachPoint';
-import { findOpenEdges } from './findOpenEdges';
-import { flip } from './flip';
-import { fromPolygons } from './fromPolygons';
-import { measureBoundingBox } from './measureBoundingBox';
-import { measureBoundingSphere } from './measureBoundingSphere';
-import { outline } from './outline';
-import { reconcile } from './reconcile';
-import { toGeneric } from './toGeneric';
-import { toPoints } from './toPoints';
-import { toPolygons } from './toPolygons';
-
-export {
-  alignVertices,
-  assertGood,
-  canonicalize,
-  doesNotOverlap,
-  eachPoint,
-  findOpenEdges,
-  flip,
-  fromPolygons,
-  isWatertight,
-  makeWatertight,
-  measureBoundingBox,
-  measureBoundingSphere,
-  outline,
-  reconcile,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  toGeneric,
-  toPoints,
-  toPolygons,
-  transform,
-  translate
-};
+export { alignVertices } from './alignVertices';
+export { assertGood } from './assertGood';
+export { canonicalize } from './canonicalize';
+export { doesNotOverlap } from './doesNotOverlap';
+export { eachPoint } from './eachPoint';
+export { findOpenEdges } from './findOpenEdges';
+export { flip } from './flip';
+export { fromPolygons } from './fromPolygons';
+export { measureBoundingBox } from './measureBoundingBox';
+export { measureBoundingSphere } from './measureBoundingSphere';
+export { outline } from './outline';
+export { reconcile } from './reconcile';
+export { toGeneric } from './toGeneric';
+export { toOutlinedSolid } from './toOutlinedSolid';
+export { toPoints } from './toPoints';
+export { toPolygons } from './toPolygons';

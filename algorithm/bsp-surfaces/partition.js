@@ -1,7 +1,8 @@
 import {
   boundPolygons,
   fromBoundingBoxes,
-  fromPolygons
+  fromPolygons,
+  fromSolid,
 } from './bsp';
 
 export const boxPartition = (bbBsp, aBB, bBB, bbOutLeaf, aPolygons, normalize) => {
@@ -10,11 +11,13 @@ export const boxPartition = (bbBsp, aBB, bBB, bbOutLeaf, aPolygons, normalize) =
   return [aIn, aOut, aBsp];
 };
 
-export const nullPartition = (bbBsp, aBB, bBB, bbOutLeaf, aPolygons, normalize) => {
-  const aIn = aPolygons;
-  const aBsp = fromPolygons(aIn, normalize);
+export const nullPartition = (bbBsp, aBB, bBB, bbOutLeaf, aSolid, normalize) => {
+  const aIn = aSolid;
+  const aBsp = fromSolid(aIn, normalize);
+console.log(`QQ/nullPartition/aIn: ${JSON.stringify(aIn)}`);
+console.log(`QQ/nullPartition/aBsp: ${JSON.stringify(aBsp)}`);
   return [aIn, [], aBsp];
 };
 
-export default boxPartition;
-// export default nullPartition;
+// export default boxPartition;
+export default nullPartition;

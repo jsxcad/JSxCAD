@@ -110,11 +110,23 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
         }
+        if (frontPoints.length > 0 && endType !== FRONT) {
+          pushWhenValid(front, frontPoints, polygonPlane);
+          frontPoints = [];
+        }
+        if (backPoints.length > 0 && endType !== BACK) {
+          pushWhenValid(back, backPointsPoints, polygonPlane);
+          frontPoints = [];
+        }
         startPoint = endPoint;
         startType = endType;
       }
-      pushWhenValid(front, frontPoints, polygonPlane);
-      pushWhenValid(back, backPoints, polygonPlane);
+      if (frontPoints.length > 0) {
+        pushWhenValid(front, frontPoints, polygonPlane);
+      }
+      if (backPoints.length > 0) {
+        pushWhenValid(back, backPoints, polygonPlane);
+      }
       break;
     }
   }

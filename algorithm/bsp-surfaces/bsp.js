@@ -1,7 +1,7 @@
-import { EPSILON, splitPolygon } from './splitPolygon';
+import { EPSILON, splitPolygon, splitSurface } from './splitPolygon';
 import { max, min } from '@jsxcad/math-vec3';
-
 import { toPlane } from '@jsxcad/math-poly3';
+import { toPlane as toPlaneFromSurface } from '@jsxcad/geometry-surface';
 
 const FRONT = 1;
 const BACK = 2;
@@ -130,10 +130,14 @@ const fromPolygons = (polygons, normalize) =>
 const fromSolid = (solid, normalize) => {
   const polygons = [];
   for (const surface of solid) {
-    polygons.push(...surface);
+    const plane = toPlaneFromSurface(surface);
+    for (const polygon of surface) {
+      polygon.plane = plane;
+      polygons.push(polygon);
+    }
   }
-  return fromPolygons(polygons, normalize);
-};
+  return fromPolygonsToBspTree(polygons, normalize);
+}
 
 const toPolygons = (bsp) => {
   const polygons = [];

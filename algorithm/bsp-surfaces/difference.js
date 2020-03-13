@@ -1,5 +1,9 @@
 import {
   alignVertices,
+  doesNotOverlap,
+  flip,
+  measureBoundingBox,
+  toOutlinedSolid,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
@@ -11,14 +15,8 @@ import {
   outLeaf,
   removeExteriorPolygonsForDifference,
   removeInteriorPolygonsForDifference,
-  fromPolygons as toBspFromPolygons
+  fromSolid as toBspFromSolid
 } from './bsp';
-
-import {
-  doesNotOverlap,
-  flip,
-  measureBoundingBox
-} from '@jsxcad/geometry-polygons';
 
 import { containsPoint } from './containsPoint';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -33,10 +31,13 @@ export const difference = (aSolid, ...bSolids) => {
   }
 
   const normalize = createNormalize3();
-  let a = toPolygonsFromSolid({}, alignVertices(aSolid, normalize));
+  let a = toOutlinedSolid(alignVertices(aSolid, normalize), normalize);
   let bs = bSolids
-      .map(b => toPolygonsFromSolid({}, alignVertices(b, normalize)))
+      .map(b => toOutlinedSolid(alignVertices(b, normalize), normalize))
       .filter(b => !doesNotOverlap(a, b));
+
+console.log(`QQ/a: ${JSON.stringify(a)}`);
+console.log(`QQ/bs: ${JSON.stringify(bs)}`);
 
   while (bs.length > 0) {
     const b = bs.shift();
@@ -51,7 +52,7 @@ export const difference = (aSolid, ...bSolids) => {
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
-      const aBsp = toBspFromPolygons(a, normalize);
+      const aBsp = toBspFromSolid(a, normalize);
       if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed; invert b.
         a = [...aOut, ...flip(bIn)];
@@ -62,7 +63,7 @@ export const difference = (aSolid, ...bSolids) => {
     } else if (bIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
-      const bBsp = toBspFromPolygons(b, normalize);
+      const bBsp = toBspFromSolid(b, normalize);
       if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed; only the out region remains.
         a = aOut;
