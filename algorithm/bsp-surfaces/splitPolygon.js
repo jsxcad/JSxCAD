@@ -92,8 +92,8 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       back.push(polygon);
       return;
     case SPANNING: {
-      const frontPoints = [];
-      const backPoints = [];
+      let frontPoints = [];
+      let backPoints = [];
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -121,7 +121,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
           frontPoints = [];
         }
         if (backPoints.length > 0 && endType !== BACK) {
-          pushWhenValid(back, backPointsPoints, polygonPlane);
+          pushWhenValid(back, backPoints, polygonPlane);
           frontPoints = [];
         }
         startPoint = endPoint;
@@ -138,14 +138,6 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
   }
 };
 
-const splitSurface = (normalize, plane, surface, back, abutting, overlapping, front) => {
-  const surfacePlane = toPlaneFromSurface(surface);
-  for (const polygon of surface) {
-    polygon.plane = surfacePlane;
-    splitPolygon(normalize, plane, surface, back, abutting, overlapping, front);
-  }
-};
-
 export {
   BACK,
   COPLANAR_BACK,
@@ -153,5 +145,4 @@ export {
   EPSILON,
   FRONT,
   splitPolygon,
-  splitSurface
 };

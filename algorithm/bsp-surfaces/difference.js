@@ -1,9 +1,6 @@
 import {
   alignVertices,
-  doesNotOverlap,
-  flip,
-  measureBoundingBox,
-  toOutlinedSolid,
+  outline,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
@@ -15,8 +12,14 @@ import {
   outLeaf,
   removeExteriorPolygonsForDifference,
   removeInteriorPolygonsForDifference,
-  fromSolid as toBspFromSolid
+  fromPolygons as toBspFromPolygons
 } from './bsp';
+
+import {
+  doesNotOverlap,
+  flip,
+  measureBoundingBox
+} from '@jsxcad/geometry-polygons';
 
 import { containsPoint } from './containsPoint';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -31,13 +34,10 @@ export const difference = (aSolid, ...bSolids) => {
   }
 
   const normalize = createNormalize3();
-  let a = toOutlinedSolid(alignVertices(aSolid, normalize), normalize);
+  let a = outline(alignVertices(aSolid, normalize), normalize);
   let bs = bSolids
-      .map(b => toOutlinedSolid(alignVertices(b, normalize), normalize))
+      .map(b => outline(alignVertices(b, normalize), normalize))
       .filter(b => !doesNotOverlap(a, b));
-
-console.log(`QQ/a: ${JSON.stringify(a)}`);
-console.log(`QQ/bs: ${JSON.stringify(bs)}`);
 
   while (bs.length > 0) {
     const b = bs.shift();
@@ -52,7 +52,7 @@ console.log(`QQ/bs: ${JSON.stringify(bs)}`);
     if (aIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for aIn to be empty: the space is fully enclosed or fully vacated.
-      const aBsp = toBspFromSolid(a, normalize);
+      const aBsp = toBspFromPolygons(a, normalize);
       if (containsPoint(aBsp, bbMin)) {
         // The space is fully enclosed; invert b.
         a = [...aOut, ...flip(bIn)];
@@ -63,7 +63,7 @@ console.log(`QQ/bs: ${JSON.stringify(bs)}`);
     } else if (bIn.length === 0) {
       const bbMin = max(aBB[MIN], bBB[MIN]);
       // There are two ways for bIn to be empty: the space is fully enclosed or fully vacated.
-      const bBsp = toBspFromSolid(b, normalize);
+      const bBsp = toBspFromPolygons(b, normalize);
       if (containsPoint(bBsp, bbMin)) {
         // The space is fully enclosed; only the out region remains.
         a = aOut;

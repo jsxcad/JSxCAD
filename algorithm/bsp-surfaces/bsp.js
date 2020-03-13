@@ -1,4 +1,4 @@
-import { EPSILON, splitPolygon, splitSurface } from './splitPolygon';
+import { EPSILON, splitPolygon } from './splitPolygon';
 import { max, min } from '@jsxcad/math-vec3';
 import { toPlane } from '@jsxcad/math-poly3';
 import { toPlane as toPlaneFromSurface } from '@jsxcad/geometry-surface';
