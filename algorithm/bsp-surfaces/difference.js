@@ -1,6 +1,5 @@
 import {
   alignVertices,
-  outline,
   toPolygons as toPolygonsFromSolid,
   fromPolygons as toSolidFromPolygons
 } from '@jsxcad/geometry-solid';
@@ -34,9 +33,9 @@ export const difference = (aSolid, ...bSolids) => {
   }
 
   const normalize = createNormalize3();
-  let a = outline(alignVertices(aSolid, normalize), normalize);
+  let a = toPolygonsFromSolid(alignVertices(aSolid, normalize));
   let bs = bSolids
-      .map(b => outline(alignVertices(b, normalize), normalize))
+      .map(b => toPolygonsFromSolid(alignVertices(b, normalize)))
       .filter(b => !doesNotOverlap(a, b));
 
   while (bs.length > 0) {

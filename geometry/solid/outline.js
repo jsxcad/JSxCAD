@@ -13,4 +13,4 @@ export const outline = (solid, normalize) => {
     }
   }
   return polygons;
-}
+};

@@ -61,7 +61,7 @@ const walkZ = (min, max, resolution) => {
 export const deform = (solid, transform, min, max, resolution) => {
   const normalize = createNormalize3();
 
-  const solidPolygons = toPolygonsFromSolid({}, alignVertices(solid));
+  const solidPolygons = toPolygonsFromSolid(alignVertices(solid));
 
   const bsp = walkX(min, max, resolution);
 

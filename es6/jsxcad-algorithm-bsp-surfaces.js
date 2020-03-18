@@ -1,9 +1,8 @@
-import { toPolygons, alignVertices, fromPolygons as fromPolygons$1, outline } from './jsxcad-geometry-solid.js';
+import { toPolygons, alignVertices, fromPolygons as fromPolygons$1 } from './jsxcad-geometry-solid.js';
 import { equals, splitLineSegmentByPlane } from './jsxcad-math-plane.js';
 import { pushWhenValid, doesNotOverlap, measureBoundingBox, flip } from './jsxcad-geometry-polygons.js';
+import { subtract, max, min } from './jsxcad-math-vec3.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import './jsxcad-geometry-surface.js';
-import { max, min } from './jsxcad-math-vec3.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 
 const EPSILON = 1e-5;
@@ -29,6 +28,99 @@ const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 // };
 
 const pointType = [];
+
+const splitConvex = (normalize, plane, points, polygonPlane, back, front) => {
+  const buildList = (points) => {
+    const nodes = [];
+    let head = null;
+    let tail = null;
+    const addLink = (point, type, next = null, link = null, visited = false) => {
+      const node = { point, type, next, link, visited };
+      if (head === null) {
+        head = node;
+        head.next = head;
+      } else {
+        tail.next = node;
+      }
+      nodes.push(node);
+      tail = node;
+      tail.next = head;
+    };
+    for (let index = 0; index < points.length; index++) {
+      addLink(points[index], pointType[index]);
+    }
+    return nodes;
+  };
+
+  const orderSpans = (spans) => {
+    const trendVector = subtract(spans[0].point, spans[1].point);
+    const trend = (point) => dot(point, trendVector);
+    const orderByTrend = (a, b) => {
+      const ta = trend(a.point);
+      const tb = trend(b.point);
+      return ta - tb;
+    };
+    spans.sort(orderByTrend);
+    return spans;
+  };
+
+  const buildSpans = (head) => {
+    const spans = [];
+    let node = head;
+    do {
+      const next = node.next;
+      if ((node.type === FRONT && next.type !== FRONT) ||
+          (node.type !== FRONT && next.type === FRONT)) {
+        // Interpolate a span-point.
+        const spanPoint = normalize(splitLineSegmentByPlane(plane, node.point, next.point));
+        const span = { point: spanPoint, type: COPLANAR, next, link: null, visited: true };
+        node.next = span;
+        // Remember the split for ordering.
+        spans.push(span);
+      }
+      node = next;
+    } while (node !== head);
+    return orderSpans(spans);
+  };
+
+  const nodes = buildList(points);
+  const spans = buildSpans(nodes[0]);
+
+  while (spans.length >= 2) {
+    const a = spans.pop();
+    const b = spans.pop();
+    a.link = b;
+    b.link = a;
+  }
+
+  for (const start of nodes) {
+    if (start.visited === true) {
+      continue;
+    }
+
+    const points = [];
+    let node = start;
+    let type = 0;
+    do {
+      node.visited = true;
+      type |= node.type;
+      points.push(node.point);
+      if (node.link !== null) {
+        node = node.link;
+        points.push(node.point);
+        node.visited = true;
+      }
+      node = node.next;
+    } while (node !== start);
+    if (type === FRONT) {
+      pushWhenValid(front, points, polygonPlane);
+    } else if (type === BACK) {
+      pushWhenValid(back, points, polygonPlane);
+    } else {
+      throw Error('die');
+    }
+  }
+};
 
 const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
   /*
@@ -87,8 +179,10 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       back.push(polygon);
       return;
     case SPANNING: {
-      let frontPoints = [];
-      let backPoints = [];
+      const frontPoints = [];
+      const backPoints = [];
+      const spanPoints = [];
+
       const last = polygon.length - 1;
       let startPoint = polygon[last];
       let startType = pointType[last];
@@ -106,28 +200,69 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
-          // const spanPoint = splitLineSegmentByPlane(plane, ...[startPoint, endPoint].sort());
-          const spanPoint = splitLineSegmentByPlane(plane, startPoint, endPoint);
+          const spanPoint = normalize(splitLineSegmentByPlane(plane, startPoint, endPoint));
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
-        }
-        if (frontPoints.length > 0 && endType !== FRONT) {
-          pushWhenValid(front, frontPoints, polygonPlane);
-          frontPoints = [];
-        }
-        if (backPoints.length > 0 && endType !== BACK) {
-          pushWhenValid(back, backPoints, polygonPlane);
-          frontPoints = [];
+          spanPoints.push(spanPoint);
         }
         startPoint = endPoint;
         startType = endType;
       }
-      if (frontPoints.length > 0) {
+      if (spanPoints.length <= 2) {
         pushWhenValid(front, frontPoints, polygonPlane);
-      }
-      if (backPoints.length > 0) {
         pushWhenValid(back, backPoints, polygonPlane);
+      } else {
+        splitConvex(normalize, plane, polygon, polygonPlane, back, front);
       }
+      /*
+      if ((spans.length % 2) === 0) {
+        throw Error('die: Even number of spans.');
+      }
+      if (spans.length > 3) {
+        const trendVector = subtract(spans[0][SPAN_POINT], spans[1][SPAN_POINT]);
+        const trend = (point) => dot(point, trendVector);
+        spans.sort(([a], [b]) => a === null ? -1 : trend(a) - trend(b));
+        // The order needs to be such that the span joins follow the winding
+        // direction.
+        for (let i = 0; i < spans; i++) {
+          spans[i][BACK_SPAN] = spans[spans.length - i][BACK_SPAN_BACKWARD];
+        }
+        // Each span-pair is now an enter + exit, given the winding rule.
+        // But not necessarily an enter + exit for the same contour.
+        // We must re-arrange so that the contours are connected properly.
+        // Check to split points.
+        // Now the span points are sequenced.
+        // Restitch the graph.
+        while (spans.length > 0) {
+          const exit = spans.pop();
+          const enter = spans.pop();
+          // Prepend the enter nodes to the exit nodes.
+          enter[FRONT_SPAN].unshift(...exit[FRONT_SPAN]);
+          enter[BACK_SPAN].unshift(...exit[BACK_SPAN]);
+          if (spans.length > 0) {
+            // If the enter ends with the next exit, join them up.
+            const nextExit = tail(spans);
+            if (equalsPoint(nextExit[SPAN_POINT], tail(enter[FRONT_SPAN]))) {
+              nextExit[FRONT_SPAN].unshift(...enter[FRONT_SPAN]);
+            } else {
+              pushWhenValid(front, enter[FRONT_SPAN], polygonPlane);
+            }
+            if (equalsPoint(nextExit[SPAN_POINT], tail(enter[BACK_SPAN]))) {
+              nextExit[BACK_SPAN].unshift(...enter[BACK_SPAN]);
+            } else {
+              pushWhenValid(back, enter[BACK_SPAN], polygonPlane);
+            }
+          } else {
+            // These are the final spans, they cannot be deferred.
+            pushWhenValid(front, enter[FRONT_SPAN], polygonPlane);
+            pushWhenValid(back, enter[BACK_SPAN], polygonPlane);
+          }
+        }
+      } else {
+        pushWhenValid(front, spans[0][FRONT_SPAN], polygonPlane);
+        pushWhenValid(back, spans[0][BACK_SPAN], polygonPlane);
+      }
+*/
       break;
     }
   }
@@ -634,7 +769,7 @@ const boundPolygons = (bsp, polygons, normalize) => {
 const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
-  const solidPolygons = toPolygons({}, alignVertices(solid, normalize));
+  const solidPolygons = toPolygons(alignVertices(solid, normalize));
 
   // Classify the solid with it.
   const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -650,7 +785,7 @@ const cut = (solid, surface, normalize = createNormalize3()) => {
 const cutOpen = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = fromPolygons(surface, normalize);
-  const solidPolygons = toPolygons({}, alignVertices(solid, normalize));
+  const solidPolygons = toPolygons(alignVertices(solid, normalize));
 
   // Classify the solid with it.
   const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -728,7 +863,7 @@ const walkZ = (min, max, resolution) => {
 const deform = (solid, transform, min, max, resolution) => {
   const normalize = createNormalize3();
 
-  const solidPolygons = toPolygons({}, alignVertices(solid));
+  const solidPolygons = toPolygons(alignVertices(solid));
 
   const bsp = walkX(min, max, resolution);
 
@@ -781,9 +916,9 @@ const difference = (aSolid, ...bSolids) => {
   }
 
   const normalize = createNormalize3();
-  let a = outline(alignVertices(aSolid, normalize), normalize);
+  let a = toPolygons(alignVertices(aSolid, normalize));
   let bs = bSolids
-      .map(b => outline(alignVertices(b, normalize), normalize))
+      .map(b => toPolygons(alignVertices(b, normalize)))
       .filter(b => !doesNotOverlap(a, b));
 
   while (bs.length > 0) {
@@ -841,7 +976,7 @@ const intersection = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map(solid => toPolygons({}, alignVertices(solid, normalize)));
+  const s = solids.map(solid => toPolygons(alignVertices(solid, normalize)));
   while (s.length > 1) {
     const a = s.shift();
     const b = s.shift();
@@ -905,7 +1040,7 @@ const union = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map(solid => toPolygons({}, alignVertices(solid, normalize)));
+  const s = solids.map(solid => toPolygons(alignVertices(solid, normalize)));
   while (s.length >= 2) {
     const a = s.shift();
     const b = s.shift();

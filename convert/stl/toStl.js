@@ -1,6 +1,7 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
 import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
+import { makeWatertight } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
 import { union } from '@jsxcad/geometry-solid-boolean';
 
@@ -15,7 +16,7 @@ import { union } from '@jsxcad/geometry-solid-boolean';
 
 const fromSolidToTriangles = (solid) => {
   const triangles = [];
-  for (const surface of solid) {
+  for (const surface of makeWatertight(solid)) {
     for (const triangle of toTriangles({}, surface)) {
       triangles.push(triangle);
     }
