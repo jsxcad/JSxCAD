@@ -3,11 +3,20 @@ import { makeConvex, measureArea, retessellate } from '@jsxcad/geometry-surface'
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
 import { intersection } from '@jsxcad/geometry-surface-boolean';
-import { makeWatertight } from './makeWatertight';
+import { isClockwise } from '@jsxcad/geometry-path';
+// import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export let doCheckOverlap = false;
-export let doDefragment = 'makeConvex';
+export let doDefragment = 'default';
+
+const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+
+// Reorder in-place such that counterclockwise paths preceed clockwise paths.
+const clockSort = (surface) => {
+  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
+  return surface;
+};
 
 export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -42,6 +51,7 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
 
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
+    clockSort(polygons);
     if (doCheckOverlap) {
       for (const a of polygons) {
         for (const b of polygons) {
@@ -72,8 +82,6 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
     defragmented.push(surface);
   }
 
-  // return defragmented;
-
-  const w = makeWatertight(defragmented, normalize3);
-  return w;
+  return defragmented;
+  // return makeWatertight(defragmented, normalize3);
 };

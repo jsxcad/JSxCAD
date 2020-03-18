@@ -35,7 +35,7 @@ export const intersection = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map(solid => toPolygonsFromSolid({}, alignVertices(solid, normalize)));
+  const s = solids.map(solid => toPolygonsFromSolid(alignVertices(solid, normalize)));
   while (s.length > 1) {
     const a = s.shift();
     const b = s.shift();

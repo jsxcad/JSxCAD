@@ -15,7 +15,7 @@ import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 export const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = toBspFromPolygons(surface, normalize);
-  const solidPolygons = toPolygonsFromSolid({}, alignVertices(solid, normalize));
+  const solidPolygons = toPolygonsFromSolid(alignVertices(solid, normalize));
 
   // Classify the solid with it.
   const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
@@ -31,7 +31,7 @@ export const cut = (solid, surface, normalize = createNormalize3()) => {
 export const cutOpen = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.
   const cutBsp = toBspFromPolygons(surface, normalize);
-  const solidPolygons = toPolygonsFromSolid({}, alignVertices(solid, normalize));
+  const solidPolygons = toPolygonsFromSolid(alignVertices(solid, normalize));
 
   // Classify the solid with it.
   const trimmedSolid = removeExteriorPolygonsForCutDroppingOverlap(cutBsp, solidPolygons, normalize);
