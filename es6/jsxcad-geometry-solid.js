@@ -1,10 +1,10 @@
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
-import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { getEdges, deduplicate, isClockwise } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, outline as outline$1, toPolygons as toPolygons$1 } from './jsxcad-geometry-surface.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
 import './jsxcad-geometry-surface-boolean.js';
 
 const THRESHOLD = 1e-5;
@@ -263,7 +263,15 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-let doDefragment = 'makeConvex';
+let doDefragment = 'default';
+
+const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+
+// Reorder in-place such that counterclockwise paths preceed clockwise paths.
+const clockSort = (surface) => {
+  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
+  return surface;
+};
 
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -298,6 +306,7 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
 
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
+    clockSort(polygons);
     let surface;
     switch (doDefragment) {
       default:
@@ -313,10 +322,8 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
     defragmented.push(surface);
   }
 
-  // return defragmented;
-
-  const w = makeWatertight(defragmented, normalize3);
-  return w;
+  return defragmented;
+  // return makeWatertight(defragmented, normalize3);
 };
 
 /** Measure the bounding sphere of the given poly3
@@ -333,12 +340,30 @@ const measureBoundingSphere = (solid) => {
   return solid.boundingSphere;
 };
 
-const outline = (solid, normalize) => solid.flatMap(surface => outline$1(surface, normalize));
+const outline = (solid, normalize) => {
+  const polygons = [];
+  for (const surface of solid) {
+    const plane = toPlane$1(surface);
+    for (const polygon of outline$1(surface)) {
+      polygon.plane = plane;
+      polygons.push(polygon);
+    }
+  }
+  return polygons;
+};
 
 const reconcile = (solid, normalize = createNormalize3()) =>
   alignVertices(solid, normalize);
 
 const toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));
+
+const toOutlinedSolid = (solid, normalize) => {
+  const outlines = [];
+  for (const surface of solid) {
+    outlines.push(outline$1(surface, normalize));
+  }
+  return outlines;
+};
 
 const toPoints = (solid) => {
   const points = [];
@@ -347,12 +372,12 @@ const toPoints = (solid) => {
 };
 
 // Relax the coplanar arrangement into polygon soup.
-const toPolygons = (options = {}, solid) => {
+const toPolygons = (solid) => {
   const polygons = [];
   for (const surface of solid) {
-    polygons.push(...toPolygons$1({}, surface));
+    polygons.push(...surface);
   }
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, reconcile, rotateX, rotateY, rotateZ, scale, toGeneric, toPoints, toPolygons, transform, translate };
+export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, reconcile, rotateX, rotateY, rotateZ, scale, toGeneric, toOutlinedSolid, toPoints, toPolygons, transform, translate };

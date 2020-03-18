@@ -33,9 +33,9 @@ export const difference = (aSolid, ...bSolids) => {
   }
 
   const normalize = createNormalize3();
-  let a = toPolygonsFromSolid({}, alignVertices(aSolid, normalize));
+  let a = toPolygonsFromSolid(alignVertices(aSolid, normalize));
   let bs = bSolids
-      .map(b => toPolygonsFromSolid({}, alignVertices(b, normalize)))
+      .map(b => toPolygonsFromSolid(alignVertices(b, normalize)))
       .filter(b => !doesNotOverlap(a, b));
 
   while (bs.length > 0) {
