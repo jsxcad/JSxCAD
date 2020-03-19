@@ -21,6 +21,7 @@ const agent = async ({ ask, question }) => {
       await sys.log({ op: 'text', text: 'Evaluation Succeeded', level: 'serious' });
       await sys.log({ op: 'evaluate', status: 'success' });
       if (shape !== undefined && shape.toKeptGeometry) {
+        await sys.log({ op: 'text', text: 'Preview Started', level: 'serious' });
         const keptGeometry = shape.toKeptGeometry();
         await sys.log({ op: 'text', text: 'Preview Rendered', level: 'serious' });
         return keptGeometry;

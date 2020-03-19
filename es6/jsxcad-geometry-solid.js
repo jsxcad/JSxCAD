@@ -1,11 +1,10 @@
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
-import { getEdges, deduplicate, isClockwise } from './jsxcad-geometry-path.js';
+import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
-import './jsxcad-geometry-surface-boolean.js';
 
 const THRESHOLD = 1e-5;
 
@@ -263,15 +262,7 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-let doDefragment = 'default';
-
-const clockOrder = (a) => isClockwise(a) ? 1 : 0;
-
-// Reorder in-place such that counterclockwise paths preceed clockwise paths.
-const clockSort = (surface) => {
-  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
-  return surface;
-};
+let doDefragment = 'none';
 
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -304,19 +295,19 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
   // The solid is a list of surfaces, which are lists of coplanar polygons.
   const defragmented = [];
 
-  // Erase substructure and make convex.
+  // Possibly erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
-    clockSort(polygons);
     let surface;
     switch (doDefragment) {
-      default:
-        surface = polygons;
-        break;
       case 'makeConvex':
         surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
         break;
       case 'retessellate':
         surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
+        break;
+      case 'none':
+      default:
+        surface = polygons;
         break;
     }
     defragmented.push(surface);
