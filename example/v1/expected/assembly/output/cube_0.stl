@@ -57,20 +57,6 @@ endloop
 endfacet
 facet normal 0 1 0
 outer loop
-vertex 15 15 15
-vertex 15 15 -15
-vertex 5.01 15 -15
-endloop
-endfacet
-facet normal 0 1 0
-outer loop
-vertex 15 15 15
-vertex 5.01 15 -15
-vertex 5.01 15 15
-endloop
-endfacet
-facet normal 0 1 0
-outer loop
 vertex -5.01 15 -15
 vertex -15 15 -15
 vertex -15 15 15
@@ -81,6 +67,20 @@ outer loop
 vertex -5.01 15 -15
 vertex -15 15 15
 vertex -5.01 15 15
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 15 15 15
+vertex 15 15 -15
+vertex 5.01 15 -15
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 15 15 15
+vertex 5.01 15 -15
+vertex 5.01 15 15
 endloop
 endfacet
 facet normal 0 1 0

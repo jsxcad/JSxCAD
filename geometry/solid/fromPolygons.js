@@ -1,24 +1,12 @@
-import { makeConvex, measureArea, retessellate } from '@jsxcad/geometry-surface';
+import { makeConvex, retessellate } from '@jsxcad/geometry-surface';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-import { intersection } from '@jsxcad/geometry-surface-boolean';
-import { isClockwise } from '@jsxcad/geometry-path';
 // import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
-const FRAGMENTATION_THRESHOLD = 3;
-
 export let doCheckOverlap = false;
-export let doDefragment = 'default';
-
-const clockOrder = (a) => isClockwise(a) ? 1 : 0;
-
-// Reorder in-place such that counterclockwise paths preceed clockwise paths.
-const clockSort = (surface) => {
-  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
-  return surface;
-};
+export let doDefragment = 'none';
 
 export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -51,55 +39,19 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
   // The solid is a list of surfaces, which are lists of coplanar polygons.
   const defragmented = [];
 
-  // Erase substructure and make convex.
+  // Possibly erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
-/*
-    let type = 0;
-    for (const polygon of polygons) {
-      if (isClockwise(polygon)) {
-        type |= 1;
-      } else {
-        type |= 2;
-      }
-    }
-    if (type === 3) {
-      throw Error('die');
-    }
-    clockSort(polygons);
-    if (doCheckOverlap) {
-      for (const a of polygons) {
-        for (const b of polygons) {
-          if (a === b) continue;
-          const overlap = intersection([a], [b]);
-          if (overlap.length > 0) {
-            const area = measureArea(overlap);
-            if (area > 1) {
-              console.log(`QQ/overlap/area: ${area}`);
-              throw Error('die: overlap');
-            }
-          }
-        }
-      }
-    }
-*/
     let surface;
     switch (doDefragment) {
-      default:
-        surface = polygons;
-        break;
-      case 'threshold':
-console.log(`QQ/polygons: ${polygons.length}`);
-        if (polygons.length < FRAGMENTATION_THRESHOLD) {
-          surface = polygons;
-        } else {
-          surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
-        }
-        break;
       case 'makeConvex':
         surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
         break;
       case 'retessellate':
         surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
+        break;
+      case 'none':
+      default:
+        surface = polygons;
         break;
     }
     defragmented.push(surface);
