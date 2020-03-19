@@ -1,6 +1,6 @@
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
-import { getEdges, deduplicate, isClockwise } from './jsxcad-geometry-path.js';
+import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
@@ -265,13 +265,7 @@ const createNormalize4 = () => {
 
 let doDefragment = 'default';
 
-const clockOrder = (a) => isClockwise(a) ? 1 : 0;
-
-// Reorder in-place such that counterclockwise paths preceed clockwise paths.
-const clockSort = (surface) => {
-  surface.sort((a, b) => clockOrder(a) - clockOrder(b));
-  return surface;
-};
+const FRAGMENTATION_THRESHOLD = 5;
 
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
@@ -306,11 +300,46 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
 
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
+/*
+    let type = 0;
+    for (const polygon of polygons) {
+      if (isClockwise(polygon)) {
+        type |= 1;
+      } else {
+        type |= 2;
+      }
+    }
+    if (type === 3) {
+      throw Error('die');
+    }
     clockSort(polygons);
+    if (doCheckOverlap) {
+      for (const a of polygons) {
+        for (const b of polygons) {
+          if (a === b) continue;
+          const overlap = intersection([a], [b]);
+          if (overlap.length > 0) {
+            const area = measureArea(overlap);
+            if (area > 1) {
+              console.log(`QQ/overlap/area: ${area}`);
+              throw Error('die: overlap');
+            }
+          }
+        }
+      }
+    }
+*/
     let surface;
     switch (doDefragment) {
       default:
         surface = polygons;
+        break;
+      case 'threshold':
+        if (polygons.length < FRAGMENTATION_THRESHOLD) {
+          surface = polygons;
+        } else {
+          surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+        }
         break;
       case 'makeConvex':
         surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));

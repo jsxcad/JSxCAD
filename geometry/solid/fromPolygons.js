@@ -7,6 +7,8 @@ import { isClockwise } from '@jsxcad/geometry-path';
 // import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
+const FRAGMENTATION_THRESHOLD = 3;
+
 export let doCheckOverlap = false;
 export let doDefragment = 'default';
 
@@ -51,6 +53,18 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
 
   // Erase substructure and make convex.
   for (const polygons of coplanarGroups.values()) {
+/*
+    let type = 0;
+    for (const polygon of polygons) {
+      if (isClockwise(polygon)) {
+        type |= 1;
+      } else {
+        type |= 2;
+      }
+    }
+    if (type === 3) {
+      throw Error('die');
+    }
     clockSort(polygons);
     if (doCheckOverlap) {
       for (const a of polygons) {
@@ -67,10 +81,19 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
         }
       }
     }
+*/
     let surface;
     switch (doDefragment) {
       default:
         surface = polygons;
+        break;
+      case 'threshold':
+console.log(`QQ/polygons: ${polygons.length}`);
+        if (polygons.length < FRAGMENTATION_THRESHOLD) {
+          surface = polygons;
+        } else {
+          surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
+        }
         break;
       case 'makeConvex':
         surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
