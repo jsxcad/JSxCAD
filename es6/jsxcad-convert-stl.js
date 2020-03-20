@@ -1,4 +1,4 @@
-import { fromPolygons } from './jsxcad-geometry-solid.js';
+import { fromPolygons, makeWatertight } from './jsxcad-geometry-solid.js';
 import { canonicalize, toTriangles } from './jsxcad-geometry-polygons.js';
 import { toKeptGeometry, getSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane } from './jsxcad-math-poly3.js';
@@ -129,8 +129,7 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
 
 const fromSolidToTriangles = (solid) => {
   const triangles = [];
-  // for (const surface of makeWatertight(solid)) {
-  for (const surface of solid) {
+  for (const surface of makeWatertight(solid)) {
     for (const triangle of toTriangles({}, surface)) {
       triangles.push(triangle);
     }

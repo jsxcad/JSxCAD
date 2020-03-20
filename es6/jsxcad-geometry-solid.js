@@ -25,7 +25,7 @@ const orderVertices = (a, b) => {
   return dZ;
 };
 
-const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
+const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
   if (!solid[watertight]) {
     if (isWatertight(solid)) {
       solid[watertight] = solid;
@@ -37,7 +37,6 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
       normalize = createNormalize3(1 / threshold);
     }
 
-    let fixed = false;
     const vertices = new Set();
 
     const reconciledSolid = [];
@@ -73,17 +72,12 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
           watertightPath.push(start);
           const span = distance(start, end);
           const colinear = [];
-          for (let i = start.index; i < end.index; i++) {
+          let limit = Math.max(start.index, end.index);
+          for (let i = Math.min(start.index, end.index); i < limit; i++) {
             const vertex = orderedVertices[i];
             // FIX: Threshold
             if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
-              // Avoid trying to resolve t-junctions via self-intersection.
-              if (!path.includes(vertex)) {
-                // FIX: Clip an ear instead.
-                // Vertex is on the open edge.
-                colinear.push(vertex);
-                fixed = true;
-              }
+              colinear.push(vertex);
             }
           }
           // Arrange by distance from start.
@@ -97,8 +91,6 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
     }
     // At this point we should have the correct structure for assembly into a solid.
     // We just need to ensure triangulation to support deformation.
-
-    onFixed(fixed);
 
     solid[watertight] = watertightSolid;
   }
