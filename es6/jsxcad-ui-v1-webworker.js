@@ -48,6 +48,11 @@ const agent = async ({
       });
 
       if (shape !== undefined && shape.toKeptGeometry) {
+        await log({
+          op: 'text',
+          text: 'Preview Started',
+          level: 'serious'
+        });
         const keptGeometry = shape.toKeptGeometry();
         await log({
           op: 'text',

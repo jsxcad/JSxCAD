@@ -160,4 +160,4 @@ function myBOMTag(shape, tag){
 const mount = main();
 
 await mount.cloud().writeShape('mount');
-await mount.Item().Page().writeStl('mount');
+// await mount.Item().Page().writeStl('mount');
