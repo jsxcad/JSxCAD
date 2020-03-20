@@ -917,7 +917,7 @@ Shape.prototype.and = layerMethod;
  *
  **/
 
-const log = (text) => log$1({ op: 'text', text: String(text) });
+const log = (text, level) => log$1({ op: 'text', text: String(text), level });
 
 const logOp = (shape, op) => log$1({ op: 'text', text: String(op(shape)) });
 
