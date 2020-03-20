@@ -1,6 +1,6 @@
+import { Shape, log } from '@jsxcad/api-v1-shape';
 import { getLeafs, getPlans, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
-import Shape from '@jsxcad/api-v1-shape';
 import { toStl as convertToStl } from '@jsxcad/convert-stl';
 import { writeFile } from '@jsxcad/sys';
 
@@ -33,10 +33,14 @@ export const toStl = async (shape, options = {}) => {
 };
 
 export const writeStl = async (shape, name, options = {}) => {
+  const start = new Date();
+  log(`writeStl start: ${start}`, 'serious');
   for (const { stl, leaf, index } of await toStl(shape, {})) {
     await writeFile({}, `output/${name}_${index}.stl`, stl);
     await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
   }
+  const end = new Date();
+  log(`writeStl end: ${end - start}`, 'serious');
 };
 
 const method = function (...args) { return writeStl(this, ...args); };

@@ -10,10 +10,20 @@ const THRESHOLD = 1e-5;
 
 const watertight = Symbol('watertight');
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const orderVertices = (a, b) => {
+  const dX = a[X] - b[X];
+  if (dX !== 0) return dX;
+  const dY = a[Y] - b[Y];
+  if (dY !== 0) return dY;
+  const dZ = a[Z] - b[Z];
+  return dZ;
+};
+
 export const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
-  if (normalize === undefined) {
-    normalize = createNormalize3(1 / threshold);
-  }
   if (!solid[watertight]) {
     if (isWatertight(solid)) {
       solid[watertight] = solid;
@@ -21,6 +31,10 @@ export const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold =
   }
 
   if (!solid[watertight]) {
+    if (normalize === undefined) {
+      normalize = createNormalize3(1 / threshold);
+    }
+
     let fixed = false;
     const vertices = new Set();
 
@@ -42,6 +56,12 @@ export const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold =
       reconciledSolid.push(reconciledSurface);
     }
 
+    const orderedVertices = [...vertices];
+    orderedVertices.sort(orderVertices);
+    for (let i = 0; i < orderedVertices.length; i++) {
+      orderedVertices[i].index = i;
+    }
+
     const watertightSolid = [];
     for (const surface of reconciledSolid) {
       const watertightPaths = [];
@@ -51,7 +71,8 @@ export const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold =
           watertightPath.push(start);
           const span = distance(start, end);
           const colinear = [];
-          for (const vertex of vertices) {
+          for (let i = start.index; i < end.index; i++) {
+            const vertex = orderedVertices[i];
             // FIX: Threshold
             if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
               // Avoid trying to resolve t-junctions via self-intersection.

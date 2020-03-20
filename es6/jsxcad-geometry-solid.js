@@ -12,10 +12,20 @@ const THRESHOLD = 1e-5;
 
 const watertight = Symbol('watertight');
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+const orderVertices = (a, b) => {
+  const dX = a[X] - b[X];
+  if (dX !== 0) return dX;
+  const dY = a[Y] - b[Y];
+  if (dY !== 0) return dY;
+  const dZ = a[Z] - b[Z];
+  return dZ;
+};
+
 const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESHOLD) => {
-  if (normalize === undefined) {
-    normalize = createNormalize3(1 / threshold);
-  }
   if (!solid[watertight]) {
     if (isWatertight(solid)) {
       solid[watertight] = solid;
@@ -23,6 +33,10 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
   }
 
   if (!solid[watertight]) {
+    if (normalize === undefined) {
+      normalize = createNormalize3(1 / threshold);
+    }
+
     let fixed = false;
     const vertices = new Set();
 
@@ -44,6 +58,12 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
       reconciledSolid.push(reconciledSurface);
     }
 
+    const orderedVertices = [...vertices];
+    orderedVertices.sort(orderVertices);
+    for (let i = 0; i < orderedVertices.length; i++) {
+      orderedVertices[i].index = i;
+    }
+
     const watertightSolid = [];
     for (const surface of reconciledSolid) {
       const watertightPaths = [];
@@ -53,7 +73,8 @@ const makeWatertight = (solid, normalize, onFixed = (_ => _), threshold = THRESH
           watertightPath.push(start);
           const span = distance(start, end);
           const colinear = [];
-          for (const vertex of vertices) {
+          for (let i = start.index; i < end.index; i++) {
+            const vertex = orderedVertices[i];
             // FIX: Threshold
             if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
               // Avoid trying to resolve t-junctions via self-intersection.
@@ -150,9 +171,9 @@ const measureBoundingBox = (solid) => {
 };
 
 const iota = 1e-5;
-const X = 0;
-const Y = 1;
-const Z = 2;
+const X$1 = 0;
+const Y$1 = 1;
+const Z$1 = 2;
 
 // Tolerates overlap up to one iota.
 const doesNotOverlap = (a, b) => {
@@ -161,12 +182,12 @@ const doesNotOverlap = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] <= minB[X] + iota) { return true; }
-  if (maxA[Y] <= minB[Y] + iota) { return true; }
-  if (maxA[Z] <= minB[Z] + iota) { return true; }
-  if (maxB[X] <= minA[X] + iota) { return true; }
-  if (maxB[Y] <= minA[Y] + iota) { return true; }
-  if (maxB[Z] <= minA[Z] + iota) { return true; }
+  if (maxA[X$1] <= minB[X$1] + iota) { return true; }
+  if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
+  if (maxA[Z$1] <= minB[Z$1] + iota) { return true; }
+  if (maxB[X$1] <= minA[X$1] + iota) { return true; }
+  if (maxB[Y$1] <= minA[Y$1] + iota) { return true; }
+  if (maxB[Z$1] <= minA[Z$1] + iota) { return true; }
   return false;
 };
 
@@ -207,18 +228,18 @@ const flip = (solid) => solid.map(surface => flip$1(surface));
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
 
-const X$1 = 0;
-const Y$1 = 1;
-const Z$1 = 2;
+const X$2 = 0;
+const Y$2 = 1;
+const Z$2 = 2;
 const W = 3;
 
 const createNormalize4 = () => {
   const map = new Map();
   const normalize4 = (coordinate) => {
     // Apply a spatial quantization to the 4 dimensional coordinate.
-    const nx = Math.floor(coordinate[X$1] * multiplier - 0.5);
-    const ny = Math.floor(coordinate[Y$1] * multiplier - 0.5);
-    const nz = Math.floor(coordinate[Z$1] * multiplier - 0.5);
+    const nx = Math.floor(coordinate[X$2] * multiplier - 0.5);
+    const ny = Math.floor(coordinate[Y$2] * multiplier - 0.5);
+    const nz = Math.floor(coordinate[Z$2] * multiplier - 0.5);
     const nw = Math.floor(coordinate[W] * multiplier - 0.5);
     // Look for an existing inhabitant.
     const value = map.get(`${nx}/${ny}/${nz}/${nw}`);
