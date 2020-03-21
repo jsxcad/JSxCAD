@@ -3345,7 +3345,7 @@ const fixKeys = async () => {
         if (typeof value === 'string') {
           console.log(`QQ/fixKeys: ${key}`);
           const decoded = await localforage.setItem(key, toByteArray_1(value));
-          await localforage.setItem(decoded);
+          await localforage.setItem(key, decoded);
         }
       }
     }

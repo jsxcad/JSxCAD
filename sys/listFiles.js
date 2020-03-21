@@ -70,7 +70,7 @@ export const fixKeys = async () => {
         if (typeof value === 'string') {
           console.log(`QQ/fixKeys: ${key}`);
           const decoded = await localForage.setItem(key, toByteArray(value));
-          await localForage.setItem(decoded);
+          await localForage.setItem(key, decoded);
         }
       }
     }
