@@ -337,72 +337,6 @@ var fs = /*#__PURE__*/Object.freeze({
   'default': empty
 });
 
-const files = new Map();
-const fileCreationWatchers = new Set();
-const fileDeletionWatchers = new Set();
-
-const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
-  }
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
-  }
-  return file;
-};
-
-const listFiles = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
-  }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileCreation = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileDeletion = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function commonjsRequire () {
@@ -3209,6 +3143,95 @@ module.exports = localforage_js;
 });
 });
 
+let dbInstance;
+
+const db = () => {
+  if (dbInstance === undefined) {
+    dbInstance = localforage.createInstance({
+      name: 'jsxcad',
+      driver: localforage.INDEXEDDB,
+      storeName: 'jsxcad',
+      description: 'jsxcad local filesystem'
+    });
+  }
+  return dbInstance;
+};
+
+let oldDbInstance;
+
+const oldDb = () => {
+  if (oldDbInstance === undefined) {
+    oldDbInstance = localforage.createInstance();
+  }
+  return oldDbInstance;
+};
+
+const files = new Map();
+const fileCreationWatchers = new Set();
+const fileDeletionWatchers = new Set();
+
+const getFile = async (options, unqualifiedPath) => {
+  if (typeof unqualifiedPath !== 'string') {
+    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+  }
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file === undefined) {
+    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
+    files.set(path, file);
+    for (const watcher of fileCreationWatchers) {
+      await watcher(options, file);
+    }
+  }
+  return file;
+};
+
+const listFiles = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
+const deleteFile = async (options, unqualifiedPath) => {
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file !== undefined) {
+    files.delete(path);
+  } else {
+    // It might not have been in the cache, but we still need to inform watchers.
+    file = { path: unqualifiedPath, storageKey: path };
+  }
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(options, file);
+  }
+};
+
+const unwatchFiles = async (thunk) => {
+  for (const file of files.values()) {
+    file.watchers.delete(thunk);
+  }
+};
+
+const watchFileCreation = async (thunk) => {
+  fileCreationWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileCreation = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFileDeletion = async (thunk) => {
+  fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileDeletion = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
 var toByteArray_1 = toByteArray;
 
 var lookup = [];
@@ -3323,7 +3346,7 @@ const getFileLister = async () => {
   } else if (isBrowser) {
     // FIX: Make localstorage optional.
     return async () => {
-      const qualifiedPaths = new Set(await localforage.keys());
+      const qualifiedPaths = new Set(await db().keys());
       listFiles(qualifiedPaths);
       return qualifiedPaths;
     };
@@ -3339,14 +3362,15 @@ const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageK
 
 const fixKeys = async () => {
   if (isBrowser) {
-    for (const key of cachedKeys) {
-      if (key.startsWith(`jsxcad/`)) {
-        const value = await localforage.getItem(key);
+    const dbKeys = new Set(await db().keys());
+    for (const key of await oldDb().keys()) {
+      if (!dbKeys.has(key)) {
+        let value = await oldDb().getItem(key);
+        console.log(`QQ/fixKeys: ${key}`);
         if (typeof value === 'string') {
-          console.log(`QQ/fixKeys: ${key}`);
-          const decoded = await localforage.setItem(key, toByteArray_1(value));
-          await localforage.setItem(key, decoded);
+          value = toByteArray_1(value);
         }
+        await db().setItem(key, value);
       }
     }
     console.log(`QQ/fixKeys/done`);
@@ -3500,7 +3524,7 @@ const getFileDeleter = async () => {
     };
   } else if (isBrowser) {
     return async (path) => {
-      await localforage.removeItem(qualifyPath(path));
+      await db().removeItem(qualifyPath(path));
     };
   } else {
     throw Error('die');
@@ -8296,7 +8320,7 @@ const writeFile = async (options, path, data) => {
       } catch (error) {
       }
     } else if (isBrowser) {
-      await localforage.setItem(persistentPath, data);
+      await db().setItem(persistentPath, data);
     }
   }
 
@@ -8326,12 +8350,7 @@ const getFileFetcher = async (qualify = qualifyPath) => {
     };
   } else if (isBrowser) {
     return async (path) => {
-      const data = await localforage.getItem(qualify(path));
-      /*
-      if (data !== null) {
-        return new Uint8Array(toByteArray(data));
-      }
-*/
+      const data = await db().getItem(qualify(path));
       return data;
     };
   } else {

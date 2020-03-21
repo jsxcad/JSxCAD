@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 
+import { db, oldDb } from './db';
+
 import {
   getFilesystem,
   qualifyPath
@@ -15,8 +17,6 @@ import {
   watchFileCreation,
   watchFileDeletion
 } from './files';
-
-import localForage from 'localforage';
 
 import { toByteArray } from 'base64-js';
 
@@ -48,7 +48,7 @@ const getFileLister = async () => {
   } else if (isBrowser) {
     // FIX: Make localstorage optional.
     return async () => {
-      const qualifiedPaths = new Set(await localForage.keys());
+      const qualifiedPaths = new Set(await db().keys());
       listEphemeralFiles(qualifiedPaths);
       return qualifiedPaths;
     };
@@ -64,14 +64,15 @@ const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageK
 
 export const fixKeys = async () => {
   if (isBrowser) {
-    for (const key of cachedKeys) {
-      if (key.startsWith(`jsxcad/`)) {
-        const value = await localForage.getItem(key);
+    const dbKeys = new Set(await db().keys());
+    for (const key of await oldDb().keys()) {
+      if (!dbKeys.has(key)) {
+        let value = await oldDb().getItem(key);
+        console.log(`QQ/fixKeys: ${key}`);
         if (typeof value === 'string') {
-          console.log(`QQ/fixKeys: ${key}`);
-          const decoded = await localForage.setItem(key, toByteArray(value));
-          await localForage.setItem(key, decoded);
+          value = toByteArray(value);
         }
+        await db().setItem(key, value);
       }
     }
     console.log(`QQ/fixKeys/done`);
