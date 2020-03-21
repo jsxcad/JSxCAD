@@ -7,9 +7,9 @@ import * as fs from 'fs';
 import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
+import { db } from './db';
 import { getFile } from './files';
 import isUrlHttp from 'is-url-http';
-import localForage from 'localforage';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
 import { writeFile } from './writeFile';
@@ -32,12 +32,7 @@ const getFileFetcher = async (qualify = qualifyPath) => {
     };
   } else if (isBrowser) {
     return async (path) => {
-      const data = await localForage.getItem(qualify(path));
-      /*
-      if (data !== null) {
-        return new Uint8Array(toByteArray(data));
-      }
-*/
+      const data = await db().getItem(qualify(path));
       return data;
     };
   } else {

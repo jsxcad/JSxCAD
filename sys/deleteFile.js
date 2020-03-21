@@ -4,8 +4,8 @@ import * as fs from 'fs';
 
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
+import { db } from './db';
 import { deleteFile as deleteCachedFile } from './files';
-import localForage from 'localforage';
 import { qualifyPath } from './filesystem';
 
 const { promises } = fs;
@@ -18,7 +18,7 @@ const getFileDeleter = async () => {
     };
   } else if (isBrowser) {
     return async (path) => {
-      await localForage.removeItem(qualifyPath(path));
+      await db().removeItem(qualifyPath(path));
     };
   } else {
     throw Error('die');

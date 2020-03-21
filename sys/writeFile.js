@@ -5,9 +5,9 @@ import * as fs from 'fs';
 import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
+import { db } from './db';
 import { dirname } from 'path';
 import { getFile } from './files';
-import localForage from 'localforage';
 import { log } from './log';
 
 const { promises } = fs;
@@ -54,7 +54,7 @@ export const writeFile = async (options, path, data) => {
       } catch (error) {
       }
     } else if (isBrowser) {
-      await localForage.setItem(persistentPath, data);
+      await db().setItem(persistentPath, data);
     }
   }
 
