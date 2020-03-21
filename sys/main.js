@@ -2,7 +2,7 @@ export { addSource, getSources } from './source';
 export { ask, setHandleAskUser } from './ask';
 export { boot, onBoot } from './boot';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
-export { fixKeys, listFiles, listFilesystems } from './listFiles';
+export { listFiles, listFilesystems } from './listFiles';
 export { log, unwatchLog, watchLog } from './log';
 export { unwatchFile, watchFile } from './watchFile';
 export { unwatchFileCreation, unwatchFileDeletion, unwatchFiles, watchFileCreation, watchFileDeletion } from './files';

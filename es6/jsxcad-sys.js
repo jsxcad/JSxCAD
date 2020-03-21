@@ -3337,28 +3337,31 @@ let cachedKeys;
 const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
 const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
 
+const fixKeys = async () => {
+  if (isBrowser) {
+    for (const key of cachedKeys) {
+      if (key.startsWith(`jsxcad/`)) {
+        const value = await localforage.getItem(key);
+        if (typeof value === 'string') {
+          console.log(`QQ/fixKeys: ${key}`);
+          const decoded = await localforage.setItem(key, toByteArray_1(value));
+          await localforage.setItem(decoded);
+        }
+      }
+    }
+    console.log(`QQ/fixKeys/done`);
+  }
+};
+
 const getKeys = async () => {
   if (cachedKeys === undefined) {
     const listFiles = await getFileLister();
     cachedKeys = await listFiles();
+    fixKeys();
     watchFileCreation(updateCachedKeys);
     watchFileDeletion(deleteCachedKeys);
   }
   return cachedKeys;
-};
-
-const fixKeys = async () => {
-  for (const key of cachedKeys) {
-    if (key.startsWith(`jsxcad/`)) {
-      const value = await localforage.getItem(key);
-      if (typeof old === 'string') {
-        console.log(`QQ/fixKeys: ${key}`);
-        const decoded = await localforage.setItem(key, toByteArray_1(value));
-        await localforage.setItem(decoded);
-      }
-    }
-  }
-  console.log(`QQ/fixKeys/done`);
 };
 
 const listFilesystems = async () => {
@@ -8426,4 +8429,4 @@ const readFile = async (options, path) => {
   }
 };
 
-export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, fixKeys, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };

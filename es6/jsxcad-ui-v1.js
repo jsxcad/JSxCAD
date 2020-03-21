@@ -1,4 +1,4 @@
-import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, fixKeys, boot, ask } from './jsxcad-sys.js';
+import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
 import { orbitDisplay } from './jsxcad-ui-threejs.js';
@@ -88029,12 +88029,6 @@ class Ui extends react.PureComponent {
           break;
         }
 
-      case 'fixKeys':
-        {
-          fixKeys();
-          break;
-        }
-
       case 'selectProject':
         {
           this.setState({
@@ -88185,9 +88179,7 @@ class Ui extends react.PureComponent {
       eventKey: "io"
     }, "Share")), react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
       eventKey: "reference"
-    }, "Reference")), react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      eventKey: "fixKeys"
-    }, "Fix Keys"))))), react.createElement(lib_1, {
+    }, "Reference"))))), react.createElement(lib_1, {
       style: {
         flex: '1 1 auto',
         background: '#e6ebf0'

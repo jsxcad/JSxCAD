@@ -62,28 +62,31 @@ let cachedKeys;
 const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
 const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
 
+export const fixKeys = async () => {
+  if (isBrowser) {
+    for (const key of cachedKeys) {
+      if (key.startsWith(`jsxcad/`)) {
+        const value = await localForage.getItem(key);
+        if (typeof value === 'string') {
+          console.log(`QQ/fixKeys: ${key}`);
+          const decoded = await localForage.setItem(key, toByteArray(value));
+          await localForage.setItem(decoded);
+        }
+      }
+    }
+    console.log(`QQ/fixKeys/done`);
+  }
+};
+
 const getKeys = async () => {
   if (cachedKeys === undefined) {
     const listFiles = await getFileLister();
     cachedKeys = await listFiles();
+    fixKeys();
     watchFileCreation(updateCachedKeys);
     watchFileDeletion(deleteCachedKeys);
   }
   return cachedKeys;
-};
-
-export const fixKeys = async () => {
-  for (const key of cachedKeys) {
-    if (key.startsWith(`jsxcad/`)) {
-      const value = await localForage.getItem(key);
-      if (typeof old === 'string') {
-        console.log(`QQ/fixKeys: ${key}`);
-        const decoded = await localForage.setItem(key, toByteArray(value));
-        await localForage.setItem(decoded);
-      }
-    }
-  }
-  console.log(`QQ/fixKeys/done`);
 };
 
 export const listFilesystems = async () => {
