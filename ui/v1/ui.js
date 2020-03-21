@@ -7,7 +7,6 @@ import {
   boot,
   createService,
   deleteFile,
-  fixKeys,
   getFilesystem,
   listFiles,
   listFilesystems,
@@ -507,10 +506,6 @@ class Ui extends React.PureComponent {
         window.open(`https://github.com/jsxcad/JSxCAD/wiki/Reference`);
         break;
       }
-      case 'fixKeys': {
-        fixKeys();
-        break;
-      }
       case 'selectProject': {
         this.setState({ showSelectProjectUi: true });
         break;
@@ -630,7 +625,6 @@ class Ui extends React.PureComponent {
               </Nav.Item>
               {(project !== '') && <Nav.Item><Nav.Link eventKey='io'>Share</Nav.Link></Nav.Item>}
               <Nav.Item><Nav.Link eventKey='reference'>Reference</Nav.Link></Nav.Item>
-              <Nav.Item><Nav.Link eventKey='fixKeys'>Fix Keys</Nav.Link></Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
