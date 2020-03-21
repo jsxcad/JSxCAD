@@ -18,6 +18,8 @@ import {
 
 import localForage from 'localforage';
 
+import { toByteArray } from 'base64-js';
+
 const { promises } = fs;
 
 const getFileLister = async () => {
@@ -68,6 +70,20 @@ const getKeys = async () => {
     watchFileDeletion(deleteCachedKeys);
   }
   return cachedKeys;
+};
+
+export const fixKeys = async () => {
+  for (const key of cachedKeys) {
+    if (key.startsWith(`jsxcad/`)) {
+      const value = await localForage.getItem(key);
+      if (typeof old === 'string') {
+        console.log(`QQ/fixKeys: ${key}`);
+        const decoded = await localForage.setItem(key, toByteArray(value));
+        await localForage.setItem(decoded);
+      }
+    }
+  }
+  console.log(`QQ/fixKeys/done`);
 };
 
 export const listFilesystems = async () => {

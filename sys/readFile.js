@@ -12,7 +12,6 @@ import isUrlHttp from 'is-url-http';
 import localForage from 'localforage';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
-import { toByteArray } from 'base64-js';
 import { writeFile } from './writeFile';
 
 const { promises } = fs;
@@ -34,9 +33,12 @@ const getFileFetcher = async (qualify = qualifyPath) => {
   } else if (isBrowser) {
     return async (path) => {
       const data = await localForage.getItem(qualify(path));
+      /*
       if (data !== null) {
         return new Uint8Array(toByteArray(data));
       }
+*/
+      return data;
     };
   } else {
     throw Error('die');

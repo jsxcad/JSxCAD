@@ -6,7 +6,6 @@ import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesyst
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { dirname } from 'path';
-import { fromByteArray } from 'base64-js';
 import { getFile } from './files';
 import localForage from 'localforage';
 import { log } from './log';
@@ -55,7 +54,7 @@ export const writeFile = async (options, path, data) => {
       } catch (error) {
       }
     } else if (isBrowser) {
-      await localForage.setItem(persistentPath, fromByteArray(data));
+      await localForage.setItem(persistentPath, data);
     }
   }
 
