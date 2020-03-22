@@ -9,29 +9,21 @@ import { toKeptGeometry } from './toKeptGeometry';
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  let empty = true;
   eachPoint(point => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-    empty = false;
   },
             geometry);
-  if (empty) {
-    return [[0, 0, 0], [0, 0, 0]];
-  } else {
-    return [minPoint, maxPoint];
-  }
+  return [minPoint, maxPoint];
 };
 
 export const measureBoundingBox = (rawGeometry) => {
   const geometry = toKeptGeometry(rawGeometry);
-  let empty = true;
 
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
 
   const update = ([itemMinPoint, itemMaxPoint]) => {
-    empty = false;
     minPoint = min(minPoint, itemMinPoint);
     maxPoint = max(maxPoint, itemMaxPoint);
   };
@@ -65,9 +57,5 @@ export const measureBoundingBox = (rawGeometry) => {
 
   walk(geometry);
 
-  if (empty) {
-    return [[0, 0, 0], [0, 0, 0]];
-  } else {
-    return [minPoint, maxPoint];
-  }
+  return [minPoint, maxPoint];
 };

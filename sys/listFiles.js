@@ -1,7 +1,5 @@
 import * as fs from 'fs';
 
-import { db, oldDb } from './db';
-
 import {
   getFilesystem,
   qualifyPath
@@ -18,7 +16,7 @@ import {
   watchFileDeletion
 } from './files';
 
-import { toByteArray } from 'base64-js';
+import { db } from './db';
 
 const { promises } = fs;
 
@@ -62,28 +60,10 @@ let cachedKeys;
 const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
 const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
 
-export const fixKeys = async () => {
-  if (isBrowser) {
-    const dbKeys = new Set(await db().keys());
-    for (const key of await oldDb().keys()) {
-      if (!dbKeys.has(key)) {
-        let value = await oldDb().getItem(key);
-        console.log(`QQ/fixKeys: ${key}`);
-        if (typeof value === 'string') {
-          value = toByteArray(value);
-        }
-        await db().setItem(key, value);
-      }
-    }
-    console.log(`QQ/fixKeys/done`);
-  }
-};
-
 const getKeys = async () => {
   if (cachedKeys === undefined) {
     const listFiles = await getFileLister();
     cachedKeys = await listFiles();
-    fixKeys();
     watchFileCreation(updateCachedKeys);
     watchFileDeletion(deleteCachedKeys);
   }

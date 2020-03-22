@@ -337,6 +337,72 @@ var fs = /*#__PURE__*/Object.freeze({
   'default': empty
 });
 
+const files = new Map();
+const fileCreationWatchers = new Set();
+const fileDeletionWatchers = new Set();
+
+const getFile = async (options, unqualifiedPath) => {
+  if (typeof unqualifiedPath !== 'string') {
+    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+  }
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file === undefined) {
+    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
+    files.set(path, file);
+    for (const watcher of fileCreationWatchers) {
+      await watcher(options, file);
+    }
+  }
+  return file;
+};
+
+const listFiles = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
+const deleteFile = async (options, unqualifiedPath) => {
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file !== undefined) {
+    files.delete(path);
+  } else {
+    // It might not have been in the cache, but we still need to inform watchers.
+    file = { path: unqualifiedPath, storageKey: path };
+  }
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(options, file);
+  }
+};
+
+const unwatchFiles = async (thunk) => {
+  for (const file of files.values()) {
+    file.watchers.delete(thunk);
+  }
+};
+
+const watchFileCreation = async (thunk) => {
+  fileCreationWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileCreation = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
+const watchFileDeletion = async (thunk) => {
+  fileDeletionWatchers.add(thunk);
+  return thunk;
+};
+
+const unwatchFileDeletion = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
+};
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function commonjsRequire () {
@@ -3157,167 +3223,6 @@ const db = () => {
   return dbInstance;
 };
 
-let oldDbInstance;
-
-const oldDb = () => {
-  if (oldDbInstance === undefined) {
-    oldDbInstance = localforage.createInstance();
-  }
-  return oldDbInstance;
-};
-
-const files = new Map();
-const fileCreationWatchers = new Set();
-const fileDeletionWatchers = new Set();
-
-const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
-  }
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
-  }
-  return file;
-};
-
-const listFiles = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
-  }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileCreation = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileDeletion = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-var toByteArray_1 = toByteArray;
-
-var lookup = [];
-var revLookup = [];
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
-
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i];
-  revLookup[code.charCodeAt(i)] = i;
-}
-
-// Support decoding URL-safe base64 strings, as Node.js does.
-// See: https://en.wikipedia.org/wiki/Base64#URL_applications
-revLookup['-'.charCodeAt(0)] = 62;
-revLookup['_'.charCodeAt(0)] = 63;
-
-function getLens (b64) {
-  var len = b64.length;
-
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
-  }
-
-  // Trim off extra bytes after placeholder bytes are found
-  // See: https://github.com/beatgammit/base64-js/issues/42
-  var validLen = b64.indexOf('=');
-  if (validLen === -1) validLen = len;
-
-  var placeHoldersLen = validLen === len
-    ? 0
-    : 4 - (validLen % 4);
-
-  return [validLen, placeHoldersLen]
-}
-
-function _byteLength (b64, validLen, placeHoldersLen) {
-  return ((validLen + placeHoldersLen) * 3 / 4) - placeHoldersLen
-}
-
-function toByteArray (b64) {
-  var tmp;
-  var lens = getLens(b64);
-  var validLen = lens[0];
-  var placeHoldersLen = lens[1];
-
-  var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
-
-  var curByte = 0;
-
-  // if there are placeholders, only get up to the last complete 4 chars
-  var len = placeHoldersLen > 0
-    ? validLen - 4
-    : validLen;
-
-  var i;
-  for (i = 0; i < len; i += 4) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 18) |
-      (revLookup[b64.charCodeAt(i + 1)] << 12) |
-      (revLookup[b64.charCodeAt(i + 2)] << 6) |
-      revLookup[b64.charCodeAt(i + 3)];
-    arr[curByte++] = (tmp >> 16) & 0xFF;
-    arr[curByte++] = (tmp >> 8) & 0xFF;
-    arr[curByte++] = tmp & 0xFF;
-  }
-
-  if (placeHoldersLen === 2) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 2) |
-      (revLookup[b64.charCodeAt(i + 1)] >> 4);
-    arr[curByte++] = tmp & 0xFF;
-  }
-
-  if (placeHoldersLen === 1) {
-    tmp =
-      (revLookup[b64.charCodeAt(i)] << 10) |
-      (revLookup[b64.charCodeAt(i + 1)] << 4) |
-      (revLookup[b64.charCodeAt(i + 2)] >> 2);
-    arr[curByte++] = (tmp >> 8) & 0xFF;
-    arr[curByte++] = tmp & 0xFF;
-  }
-
-  return arr
-}
-
 const { promises } = fs;
 
 const getFileLister = async () => {
@@ -3360,28 +3265,10 @@ let cachedKeys;
 const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
 const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
 
-const fixKeys = async () => {
-  if (isBrowser) {
-    const dbKeys = new Set(await db().keys());
-    for (const key of await oldDb().keys()) {
-      if (!dbKeys.has(key)) {
-        let value = await oldDb().getItem(key);
-        console.log(`QQ/fixKeys: ${key}`);
-        if (typeof value === 'string') {
-          value = toByteArray_1(value);
-        }
-        await db().setItem(key, value);
-      }
-    }
-    console.log(`QQ/fixKeys/done`);
-  }
-};
-
 const getKeys = async () => {
   if (cachedKeys === undefined) {
     const listFiles = await getFileLister();
     cachedKeys = await listFiles();
-    fixKeys();
     watchFileCreation(updateCachedKeys);
     watchFileDeletion(deleteCachedKeys);
   }
@@ -3829,23 +3716,23 @@ function toASCII(input) {
   });
 }
 
-var lookup$1 = [];
-var revLookup$1 = [];
-var Arr$1 = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
+var lookup = [];
+var revLookup = [];
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array;
 var inited = false;
 function init () {
   inited = true;
   var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   for (var i = 0, len = code.length; i < len; ++i) {
-    lookup$1[i] = code[i];
-    revLookup$1[code.charCodeAt(i)] = i;
+    lookup[i] = code[i];
+    revLookup[code.charCodeAt(i)] = i;
   }
 
-  revLookup$1['-'.charCodeAt(0)] = 62;
-  revLookup$1['_'.charCodeAt(0)] = 63;
+  revLookup['-'.charCodeAt(0)] = 62;
+  revLookup['_'.charCodeAt(0)] = 63;
 }
 
-function toByteArray$1 (b64) {
+function toByteArray (b64) {
   if (!inited) {
     init();
   }
@@ -3864,7 +3751,7 @@ function toByteArray$1 (b64) {
   placeHolders = b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0;
 
   // base64 is 4/3 + up to two characters of the original data
-  arr = new Arr$1(len * 3 / 4 - placeHolders);
+  arr = new Arr(len * 3 / 4 - placeHolders);
 
   // if there are placeholders, only get up to the last complete 4 chars
   l = placeHolders > 0 ? len - 4 : len;
@@ -3872,17 +3759,17 @@ function toByteArray$1 (b64) {
   var L = 0;
 
   for (i = 0, j = 0; i < l; i += 4, j += 3) {
-    tmp = (revLookup$1[b64.charCodeAt(i)] << 18) | (revLookup$1[b64.charCodeAt(i + 1)] << 12) | (revLookup$1[b64.charCodeAt(i + 2)] << 6) | revLookup$1[b64.charCodeAt(i + 3)];
+    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)];
     arr[L++] = (tmp >> 16) & 0xFF;
     arr[L++] = (tmp >> 8) & 0xFF;
     arr[L++] = tmp & 0xFF;
   }
 
   if (placeHolders === 2) {
-    tmp = (revLookup$1[b64.charCodeAt(i)] << 2) | (revLookup$1[b64.charCodeAt(i + 1)] >> 4);
+    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4);
     arr[L++] = tmp & 0xFF;
   } else if (placeHolders === 1) {
-    tmp = (revLookup$1[b64.charCodeAt(i)] << 10) | (revLookup$1[b64.charCodeAt(i + 1)] << 4) | (revLookup$1[b64.charCodeAt(i + 2)] >> 2);
+    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2);
     arr[L++] = (tmp >> 8) & 0xFF;
     arr[L++] = tmp & 0xFF;
   }
@@ -3891,7 +3778,7 @@ function toByteArray$1 (b64) {
 }
 
 function tripletToBase64 (num) {
-  return lookup$1[num >> 18 & 0x3F] + lookup$1[num >> 12 & 0x3F] + lookup$1[num >> 6 & 0x3F] + lookup$1[num & 0x3F]
+  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
 }
 
 function encodeChunk (uint8, start, end) {
@@ -3923,14 +3810,14 @@ function fromByteArray (uint8) {
   // pad the end with zeros, but make sure to not forget the extra bytes
   if (extraBytes === 1) {
     tmp = uint8[len - 1];
-    output += lookup$1[tmp >> 2];
-    output += lookup$1[(tmp << 4) & 0x3F];
+    output += lookup[tmp >> 2];
+    output += lookup[(tmp << 4) & 0x3F];
     output += '==';
   } else if (extraBytes === 2) {
     tmp = (uint8[len - 2] << 8) + (uint8[len - 1]);
-    output += lookup$1[tmp >> 10];
-    output += lookup$1[(tmp >> 4) & 0x3F];
-    output += lookup$1[(tmp << 2) & 0x3F];
+    output += lookup[tmp >> 10];
+    output += lookup[(tmp >> 4) & 0x3F];
+    output += lookup[(tmp << 2) & 0x3F];
     output += '=';
   }
 
@@ -5758,7 +5645,7 @@ function utf16leToBytes (str, units) {
 
 
 function base64ToBytes (str) {
-  return toByteArray$1(base64clean(str))
+  return toByteArray(base64clean(str))
 }
 
 function blitBuffer (src, dst, offset, length) {

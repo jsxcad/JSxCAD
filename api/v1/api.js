@@ -61,9 +61,11 @@ export {
   Cone,
   Cube,
   Cylinder,
+  Difference,
   Empty,
   Hexagon,
   Icosahedron,
+  Intersection,
   Layers,
   Line,
   Path,
@@ -78,6 +80,7 @@ export {
   Tetrahedron,
   Torus,
   Triangle,
+  Union,
   Void,
   Wave
 } from '@jsxcad/api-v1-shapes';

@@ -1,5 +1,5 @@
 import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
-import Shape, { difference, intersection, union } from './jsxcad-api-v1-shape.js';
+import Shape, { difference, intersection } from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
 import { getAnySurfaces, getPaths, rewriteTags } from './jsxcad-geometry-tagged.js';
@@ -403,7 +403,7 @@ Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:n
 
 const Difference = (...args) => difference(...args);
 
-const Empty = (...shapes) => Shape.fromGeometry({ layers: [{ solid: [] }, { surface: [] }, { paths: [] }] });
+const Empty = (...shapes) => Shape.fromGeometry({ disjointAssembly: [{ solid: [] }, { surface: [] }, { paths: [] }] });
 
 /**
  *
@@ -838,7 +838,10 @@ Triangle.ofApothem = ofApothem$8;
 Triangle.ofRadius = ofRadius$c;
 Triangle.ofDiameter = ofDiameter$b;
 
-const Union = (...args) => union(...args);
+const Union = (...args) => Empty().add(...args);
+
+const UnionMethod = function (...args) { return Union(this, ...args); };
+Shape.prototype.Union = UnionMethod;
 
 const Void = (shape) => Shape.fromGeometry(rewriteTags(['compose/non-positive'], [], shape.toGeometry()));
 
