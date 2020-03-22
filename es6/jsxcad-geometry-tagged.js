@@ -3,13 +3,13 @@ import { close } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { identity, multiply, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
 import { cache, cacheRewriteTags, cacheTransform } from './jsxcad-cache.js';
-import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
+import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$3 } from './jsxcad-geometry-paths.js';
 import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
 import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
 import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureBoundingBox as measureBoundingBox$2, outline as outline$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
 import { difference as difference$2, intersection as intersection$2, union as union$2 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$3, intersection as intersection$3, outline as outline$3, union as union$3 } from './jsxcad-geometry-z0surface-boolean.js';
+import { difference as difference$3, intersection as intersection$3, outline as outline$3, union as union$4 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 
@@ -940,29 +940,21 @@ const toKeptGeometry = (geometry) => {
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  let empty = true;
   eachPoint(point => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-    empty = false;
   },
             geometry);
-  if (empty) {
-    return [[0, 0, 0], [0, 0, 0]];
-  } else {
-    return [minPoint, maxPoint];
-  }
+  return [minPoint, maxPoint];
 };
 
 const measureBoundingBox = (rawGeometry) => {
   const geometry = toKeptGeometry(rawGeometry);
-  let empty = true;
 
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
 
   const update = ([itemMinPoint, itemMaxPoint]) => {
-    empty = false;
     minPoint = min(minPoint, itemMinPoint);
     maxPoint = max(maxPoint, itemMaxPoint);
   };
@@ -996,11 +988,7 @@ const measureBoundingBox = (rawGeometry) => {
 
   walk(geometry);
 
-  if (empty) {
-    return [[0, 0, 0], [0, 0, 0]];
-  } else {
-    return [minPoint, maxPoint];
-  }
+  return [minPoint, maxPoint];
 };
 
 const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
@@ -1092,62 +1080,90 @@ const transform = cacheTransform(transformImpl);
 
 // Union is a little more complex, since it can make violate disjointAssembly invariants.
 
+const unifySolids = (geometry, ...geometries) => {
+  const todo = [];
+  for (const geometry of geometries) {
+    for (const { solid } of getSolids(geometry)) {
+      todo.push(solid);
+    }
+  }
+  return { solid: union$1(geometry.solid, ...todo), tags: geometry.tags };
+};
+
+const unifySurfaces = (geometry, ...geometries) => {
+  const todo = [];
+  for (const geometry of geometries) {
+    for (const { surface } of getSurfaces(geometry)) {
+      todo.push(surface);
+    }
+    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+      todo.push(z0Surface);
+    }
+  }
+  return { surface: union$2(geometry.surface, ...todo), tags: geometry.tags };
+};
+
+const unifyZ0Surfaces = (geometry, ...geometries) => {
+  const todoSurfaces = [];
+  const todoZ0Surfaces = [];
+  for (const geometry of geometries) {
+    for (const { surface } of getSurfaces(geometry)) {
+      todoSurfaces.push(surface);
+    }
+    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+      todoZ0Surfaces.push(z0Surface);
+    }
+  }
+  if (todoSurfaces.length > 0) {
+    return { surface: union$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+  } else {
+    return { surface: union$4(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+  }
+};
+
+const unifyPaths = (geometry, ...geometries) => {
+  const todo = [];
+  for (const geometry of geometries) {
+    for (const { paths } of getPaths(geometry)) {
+      todo.push(paths);
+    }
+  }
+  return { paths: union$3(geometry.paths, ...todo), tags: geometry.tags };
+};
+
 const unionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
     if (geometry.solid) {
-      const todo = [];
-      for (const geometry of geometries) {
-        for (const { solid } of getSolids(geometry)) {
-          todo.push(solid);
-        }
-      }
-      return { solid: union$1(geometry.solid, ...todo), tags: geometry.tags };
+      return unifySolids(geometry, ...geometries);
     } else if (geometry.surface) {
-      const todo = [];
-      for (const geometry of geometries) {
-        for (const { surface } of getSurfaces(geometry)) {
-          todo.push(surface);
-        }
-        for (const { z0Surface } of getZ0Surfaces(geometry)) {
-          todo.push(z0Surface);
-        }
-      }
-      return { surface: union$2(geometry.surface, ...todo), tags: geometry.tags };
+      return unifySurfaces(geometry, ...geometries);
     } else if (geometry.z0Surface) {
-      const todoSurfaces = [];
-      const todoZ0Surfaces = [];
-      for (const geometry of geometries) {
-        for (const { surface } of getSurfaces(geometry)) {
-          todoSurfaces.push(surface);
-        }
-        for (const { z0Surface } of getZ0Surfaces(geometry)) {
-          todoZ0Surfaces.push(z0Surface);
-        }
-      }
-      if (todoSurfaces.length > 0) {
-        return { surface: union$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
-      } else {
-        return { surface: union$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
-      }
+      return unifyZ0Surfaces(geometry, ...geometries);
     } else if (geometry.paths) {
-      const todo = [];
-      for (const geometry of geometries) {
-        for (const { paths } of getPaths(geometry)) {
-          todo.push(paths);
-        }
-      }
-      return { paths: union$4(geometry.paths, ...todo), tags: geometry.tags };
-    } else if (geometry.assembly) {
-      // Let's consider an assembly to have an implicit Empty() geometry at the end.
-      // Then we can implement union over assembly by assemble.
-      return { assembly: [...geometry.assembly, ...geometries], tags: geometry.tags };
-    } else if (geometry.disjointAssembly) {
-      // Likewise for disjointAssembly, but it needs to revert to an assembly, since it is no-longer disjoint.
-      return { assembly: [...geometry.disjointAssembly, ...geometries], tags: geometry.tags };
+      return unifyPaths(geometry, ...geometries);
+    } else if (geometry.assembly || geometry.disjointAssembly) {
+      const payload = geometry.assembly || geometry.disjointAssembly;
+      // We consider assemblies to have an implicit Empty() at the end.
+      return {
+        assembly: [
+          ...payload,
+          unifySolids({ solid: [] }, ...geometries),
+          unifySurfaces({ surface: [] }, ...geometries),
+          unifyPaths({ paths: [] }, ...geometries)
+        ],
+        tags: geometry.tags
+      };
     } else if (geometry.layers) {
-      // We union with layers by appending a new layer.
-      // It is not entirely that this is ideal, but will preserve semantics for layer to assembly conversion.
-      return { layers: [...geometry.layers, ...geometries], tags: geometry.tags };
+      // We consider layers to have an implicit Empty() at the end.
+      return {
+        layers: [
+          ...geometry.layers,
+          unifySolids({ solid: [] }, ...geometries),
+          unifySurfaces({ surface: [] }, ...geometries),
+          unifyPaths({ paths: [] }, ...geometries)
+        ],
+        tags: geometry.tags
+      };
     } else {
       return descend();
     }

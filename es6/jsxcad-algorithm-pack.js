@@ -250,6 +250,9 @@ const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
 
   for (const geometry of geometries) {
     const [width, height] = measureSize(geometry);
+    if (!isFinite(width) || !isFinite(height)) {
+      continue;
+    }
     const [w, h] = [width + itemMargin * 2, height + itemMargin * 2];
     blocks.push({ w, h, geometry });
   }

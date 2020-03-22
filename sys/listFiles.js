@@ -16,7 +16,7 @@ import {
   watchFileDeletion
 } from './files';
 
-import localForage from 'localforage';
+import { db } from './db';
 
 const { promises } = fs;
 
@@ -46,7 +46,7 @@ const getFileLister = async () => {
   } else if (isBrowser) {
     // FIX: Make localstorage optional.
     return async () => {
-      const qualifiedPaths = new Set(await localForage.keys());
+      const qualifiedPaths = new Set(await db().keys());
       listEphemeralFiles(qualifiedPaths);
       return qualifiedPaths;
     };
