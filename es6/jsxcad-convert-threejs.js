@@ -51815,7 +51815,7 @@ const toSvgSync = (options = {}, geometry) => {
   if (includeXmlHeader) {
     svg = header + svg;
   }
-  return svg;
+  return new TextEncoder('utf8').encode(svg);
 };
 
 const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry) => {
@@ -51858,7 +51858,7 @@ const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry) => {
   </script>
  </body>
 </html>`;
-  return html;
+  return new TextEncoder('utf8').encode(html);
 };
 
 export { toSvg, toSvgSync, toThreejsGeometry, toThreejsPage };

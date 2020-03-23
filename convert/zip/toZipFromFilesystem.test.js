@@ -8,7 +8,7 @@ const { readFile, writeFile } = fs.promises;
 
 test('Simple', async t => {
   setupFilesystem({ fileBase: 'test' });
-  await writeFsFile({}, 'file/hello.txt', 'hello');
+  await writeFsFile({ doSerialize: false }, 'file/hello.txt', new TextEncoder('utf8').encode('hello'));
   const observed = await toZipFromFilesystem();
   const expected = await readFile('test.zip');
   await writeFile('observed.zip', observed);

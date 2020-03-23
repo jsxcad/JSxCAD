@@ -21,8 +21,8 @@ export const toSvg = async (shape, options = {}) => {
 
 export const writeSvg = async (shape, name, options = {}) => {
   for (const { svg, leaf, index } of await toSvg(shape, options)) {
-    await writeFile({}, `output/${name}_${index}.svg`, svg);
-    await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
+    await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
+    await writeFile({}, `geometry/${name}_${index}.svg`, toKeptGeometry(leaf));
   }
 };
 

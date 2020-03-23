@@ -5,7 +5,7 @@ import { toPdf } from './toPdf';
 test('Triangle', async t => {
   // A surface is a set of paths.
   const pdf = await toPdf({ tags: ['color/blue'], paths: buildRegularPolygon(3).z0Surface });
-  t.is(pdf,
+  t.is(new TextDecoder('utf8').decode(pdf),
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
         '2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj',
@@ -35,7 +35,7 @@ test('Triangle', async t => {
 test('Triangle with a custom page size', async t => {
   // A surface is a set of paths.
   const pdf = await toPdf({ paths: buildRegularPolygon(3).z0Surface }, { size: [100, 200] });
-  t.is(pdf,
+  t.is(new TextDecoder('utf8').decode(pdf),
        ['%PDF-1.5',
         '1 0 obj << /Pages 2 0 R /Type /Catalog >> endobj',
         '2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj',

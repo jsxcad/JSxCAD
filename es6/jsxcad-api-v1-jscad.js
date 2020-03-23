@@ -24,7 +24,7 @@ const readJscad = async (options = {}) => {
   let { path, script } = options;
   if (script === undefined) {
     if (path !== undefined) {
-      script = await readFile(options, `source/${path}`);
+      script = await readFile({ doSerialize: false, ...options }, `source/${path}`);
       if (script === undefined) {
         script = await readFile({ sources: getSources(`cache/${path}`), options }, `cache/${path}`);
       }

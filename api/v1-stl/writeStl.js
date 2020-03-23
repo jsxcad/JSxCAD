@@ -36,8 +36,8 @@ export const writeStl = async (shape, name, options = {}) => {
   const start = new Date();
   log(`writeStl start: ${start}`, 'serious');
   for (const { stl, leaf, index } of await toStl(shape, {})) {
-    await writeFile({}, `output/${name}_${index}.stl`, stl);
-    await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
+    await writeFile({ doSerialize: false }, `output/${name}_${index}.stl`, stl);
+    await writeFile({}, `geometry/${name}_${index}.stl`, toKeptGeometry(leaf));
   }
   const end = new Date();
   log(`writeStl end: ${end - start}`, 'serious');

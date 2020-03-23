@@ -60,5 +60,6 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }
   }
   svg.push('</svg>');
-  return svg.join('\n');
+  const output = svg.join('\n');
+  return new TextEncoder('utf8').encode(output);
 };

@@ -18,6 +18,6 @@ import { fromSvgPath } from '@jsxcad/convert-svg';
  **/
 
 export const SvgPath = (svgPath, options = {}) =>
-  Shape.fromGeometry(fromSvgPath(svgPath, options));
+  Shape.fromGeometry(fromSvgPath(new TextEncoder('utf8').encode(svgPath), options));
 
 export default SvgPath;

@@ -141,7 +141,8 @@ const toStl = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(geometry);
   let solids = getSolids(keptGeometry).map(({ solid }) => solid);
   const triangles = fromSolidToTriangles(union(...solids));
-  return `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
+  const output = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
+  return new TextEncoder('utf8').encode(output);
 };
 
 const convertToFacets = (options, polygons) =>

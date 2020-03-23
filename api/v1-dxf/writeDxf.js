@@ -20,8 +20,8 @@ export const writeDxf = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toKeptGeometry();
   const dxf = await toDxf({ preview: true, ...options }, geometry);
-  await writeFile({}, `output/${path}`, dxf);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  await writeFile({ doSerialize: false }, `output/${path}`, dxf);
+  await writeFile({}, `geometry/${path}`, geometry);
 };
 
 const method = function (options = {}) { return writeDxf(options, this); };
