@@ -20,7 +20,8 @@ export default {
       allowFallthrough: true,
       allowRealFiles: true,
       files: {
-        'node-fetch': 'export default _ => _;'
+        'node-fetch': 'export default _ => _;',
+        'v8': 'export default {};'
       }
     }),
     builtins(),

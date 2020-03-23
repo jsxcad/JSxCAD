@@ -41,5 +41,5 @@ export const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry)
   </script>
  </body>
 </html>`;
-  return html;
+  return new TextEncoder('utf8').encode(html);
 };

@@ -195,8 +195,8 @@ class Ui extends React.PureComponent {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
       await writeFile({}, 'source/script.jsxcad', defaultScript);
-      await writeFile({}, 'ui/paneLayout', JSON.stringify(defaultPaneLayout));
-      await writeFile({}, 'ui/paneViews', JSON.stringify(defaultPaneViews));
+      await writeFile({}, 'ui/paneLayout', defaultPaneLayout);
+      await writeFile({}, 'ui/paneViews', defaultPaneViews);
       await this.selectProject(project);
     }
   };
@@ -208,7 +208,11 @@ class Ui extends React.PureComponent {
     const paneLayoutData = await readFile({}, 'ui/paneLayout');
     let paneLayout;
     if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
-      paneLayout = JSON.parse(paneLayoutData);
+      if (paneLayoutData.buffer) {
+        paneLayout = JSON.parse(new TextDecoder('utf8').decode(paneLayoutData));
+      } else {
+        paneLayout = paneLayoutData;
+      }
     } else {
       paneLayout = '0';
     }
@@ -216,7 +220,11 @@ class Ui extends React.PureComponent {
     const paneViewsData = await readFile({}, 'ui/paneViews');
     let paneViews;
     if (paneViewsData !== undefined) {
-      paneViews = JSON.parse(paneViewsData);
+      if (paneViewsData.buffer) {
+        paneViews = JSON.parse(new TextDecoder('utf8').decode(paneViewsData));
+      } else {
+        paneViews = paneViewsData;
+      }
     } else {
       paneViews = [];
     }
@@ -298,7 +306,7 @@ class Ui extends React.PureComponent {
       paneLayout = '0';
     }
     this.setState({ paneLayout });
-    await writeFile({}, 'ui/paneLayout', JSON.stringify(paneLayout));
+    await writeFile({}, 'ui/paneLayout', paneLayout);
   }
 
   onRelease (paneLayout) {
@@ -358,7 +366,7 @@ class Ui extends React.PureComponent {
 
     this.setState({ paneViews: newPaneViews, switchView: undefined });
 
-    await writeFile({}, 'ui/paneViews', JSON.stringify(newPaneViews));
+    await writeFile({}, 'ui/paneViews', newPaneViews);
   }
 
   renderPane (views, id, path, createNode, onSelectView, onSelectFile) {

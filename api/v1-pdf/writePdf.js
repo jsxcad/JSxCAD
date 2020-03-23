@@ -24,8 +24,8 @@ export const toPdf = async (shape, { lineWidth = 0.096 } = {}) => {
 
 export const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
   for (const { pdf, leaf, index } of await toPdf(shape, { lineWidth })) {
-    await writeFile({}, `output/${name}_${index}.pdf`, pdf);
-    await writeFile({}, `geometry/${name}_${index}.pdf`, JSON.stringify(toKeptGeometry(leaf)));
+    await writeFile({ doSerialize: false }, `output/${name}_${index}.pdf`, pdf);
+    await writeFile({}, `geometry/${name}_${index}.pdf`, toKeptGeometry(leaf));
   }
 };
 

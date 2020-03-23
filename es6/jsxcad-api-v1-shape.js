@@ -943,22 +943,22 @@ log.signature = 'log(op:function)';
 
 const cacheShape = async (shape, path) => {
   const geometry = shape.toGeometry();
-  await writeFile({}, `cache/${path}`, JSON.stringify(geometry));
+  await writeFile({}, `cache/${path}`, geometry);
 };
 
 const writeShape = async (shape, path) => {
   const geometry = shape.toGeometry();
-  await writeFile({}, `output/${path}`, JSON.stringify(geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  await writeFile({ doSerialize: false }, `output/${path}`, JSON.stringify(geometry));
+  await writeFile({}, `geometry/${path}`, geometry);
 };
 
 const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
 Shape.prototype.writeShape = writeShapeMethod;
 
 const readShape = async (path, build, { ephemeral = false, src } = {}) => {
-  let data = await readFile({ as: 'utf8', ephemeral }, `source/${path}`);
+  let data = await readFile({ ephemeral }, `source/${path}`);
   if (data === undefined && src) {
-    data = await readFile({ as: 'utf8', sources: [src], ephemeral }, `cache/${path}`);
+    data = await readFile({ sources: [src], ephemeral }, `cache/${path}`);
   }
   if (data === undefined && build !== undefined) {
     const shape = await build();
@@ -967,8 +967,7 @@ const readShape = async (path, build, { ephemeral = false, src } = {}) => {
     }
     return shape;
   }
-  const geometry = JSON.parse(data);
-  return Shape.fromGeometry(geometry);
+  return Shape.fromGeometry(data);
 };
 
 const make = (path, builder) => readShape(path, builder);

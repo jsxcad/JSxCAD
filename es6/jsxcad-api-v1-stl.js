@@ -18,19 +18,10 @@ import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js'
  *
  **/
 
-const formatToAs = (format) => {
-  switch (format) {
-    case 'binary': return 'bytes';
-    case 'ascii':
-    default: return 'utf8';
-  }
-};
-
 const readStl = async (path, { src, format = 'ascii' } = {}) => {
-  const as = formatToAs(format);
-  let data = await readFile({ as }, `source/${path}`);
+  let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
-    data = await readFile({ as, sources: [src] }, `cache/${path}`);
+    data = await readFile({ sources: [src] }, `cache/${path}`);
   }
   return Shape.fromGeometry(await fromStl(data, { format }));
 };
@@ -67,8 +58,8 @@ const writeStl = async (shape, name, options = {}) => {
   const start = new Date();
   log(`writeStl start: ${start}`, 'serious');
   for (const { stl, leaf, index } of await toStl(shape, {})) {
-    await writeFile({}, `output/${name}_${index}.stl`, stl);
-    await writeFile({}, `geometry/${name}_${index}.stl`, JSON.stringify(toKeptGeometry(leaf)));
+    await writeFile({ doSerialize: false }, `output/${name}_${index}.stl`, stl);
+    await writeFile({}, `geometry/${name}_${index}.stl`, toKeptGeometry(leaf));
   }
   const end = new Date();
   log(`writeStl end: ${end - start}`, 'serious');

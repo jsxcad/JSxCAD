@@ -11,6 +11,6 @@ export const fromZipToFilesystem = async (options = {}, zip) => {
     // Cut off the stored fs, and write into the current fs.
     const localPath = path.join('/');
     const data = new Uint8Array(await entry.arrayBuffer());
-    await writeFile({}, localPath, data);
+    await writeFile({ doSerialize: false }, localPath, data);
   }
 };

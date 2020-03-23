@@ -6,7 +6,7 @@ import { toFont } from './main';
 
 test('Render a letter', async (t) => {
   await boot();
-  const bytes = await readFile({ as: 'bytes', sources: ['GreatVibes-Regular.ttf'] }, 'GreatVibes-Regular.ttf');
+  const bytes = await readFile({ doSerialize: false, sources: ['GreatVibes-Regular.ttf'] }, 'GreatVibes-Regular.ttf');
   const font = toFont({}, bytes);
   const letterA = font({}, 'ab');
   t.deepEqual(canonicalize(letterA),

@@ -2682,7 +2682,7 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
 };
 
 const fromSvgPath = (svgPath, options = {}) => {
-  const paths = toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(svgPath))));
+  const paths = toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))));
   for (const path of paths) {
     assertGood(path);
   }
@@ -3191,7 +3191,7 @@ var toPath = function toPath(s) {
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath$1 = (svgPath, options = {}) =>
-  fromSvgPath(svgPath, Object.assign({ normalizeCoordinateSystem: false }, options));
+  fromSvgPath(new TextEncoder('utf8').encode(svgPath), Object.assign({ normalizeCoordinateSystem: false }, options));
 
 const ELEMENT_NODE$1 = 1;
 
@@ -3252,7 +3252,8 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-const fromSvg = async (svgString, options = {}) => {
+const fromSvg = async (input, options = {}) => {
+  const svgString = new TextDecoder('utf8').decode(input);
   const geometry = { assembly: [] };
   const svg = new domParser_3().parseFromString(await svgString, 'image/svg+xml');
 
@@ -3406,7 +3407,8 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }
   }
   svg.push('</svg>');
-  return svg.join('\n');
+  const output = svg.join('\n');
+  return new TextEncoder('utf8').encode(output);
 };
 
 export { canonicalize, fromSvg, fromSvgPath, toSvg };

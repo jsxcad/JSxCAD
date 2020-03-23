@@ -133,10 +133,13 @@ export class JsEditorUi extends Pane {
     await this.save();
     await log({ op: 'open' });
     await log({ op: 'text', text: 'Running', level: 'serious' });
-    const script = await readFile({}, file);
+    let script = await readFile({}, file);
+    if (script.buffer) {
+      script = new TextDecoder('utf8').decode(script);
+    }
     const geometry = await ask({ evaluate: script });
     if (geometry) {
-      await writeFile({}, 'geometry/preview', JSON.stringify(geometry));
+      await writeFile({}, 'geometry/preview', geometry);
     }
   }
 
@@ -150,7 +153,10 @@ export class JsEditorUi extends Pane {
   async componentDidMount () {
     const { file } = this.props;
     if (file !== undefined) {
-      const code = await readFile({}, file);
+      let code = await readFile({}, file);
+      if (code.buffer) {
+        code = new TextDecoder('utf8').decode(code);
+      }
       this.setState({ code });
     }
   }

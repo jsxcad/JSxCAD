@@ -20,15 +20,15 @@ import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js'
  **/
 
 const SvgPath = (svgPath, options = {}) =>
-  Shape.fromGeometry(fromSvgPath(svgPath, options));
+  Shape.fromGeometry(fromSvgPath(new TextEncoder('utf8').encode(svgPath), options));
 
 const readSvg = async (path, { src } = {}) => {
-  let data = await readFile({ decode: 'utf8' }, `source/${path}`);
+  let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
     data = await readFile({ decode: 'utf8', sources: [src] }, `cache/${path}`);
   }
   if (data === undefined) {
-    data = await readFile({ decode: 'utf8' }, `output/${path}`);
+    data = await readFile({ doSerialize: false, decode: 'utf8' }, `output/${path}`);
   }
   if (data === undefined) {
     throw Error(`Cannot find ${path}`);
@@ -71,8 +71,8 @@ const toSvg = async (shape, options = {}) => {
 
 const writeSvg = async (shape, name, options = {}) => {
   for (const { svg, leaf, index } of await toSvg(shape, options)) {
-    await writeFile({}, `output/${name}_${index}.svg`, svg);
-    await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
+    await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
+    await writeFile({}, `geometry/${name}_${index}.svg`, toKeptGeometry(leaf));
   }
 };
 

@@ -3427,6 +3427,13 @@ const deleteFile$1 = async (options, path) => {
   await deleteFile(options, path);
 };
 
+var v8 = {};
+
+var v8$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': v8
+});
+
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 
 
@@ -8164,6 +8171,7 @@ function dirname(path) {
 /* global self */
 
 const { promises: promises$2 } = fs;
+const { serialize } = v8$1;
 
 // FIX Convert data by representation.
 
@@ -8174,16 +8182,12 @@ const writeFile = async (options, path, data) => {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   }
 
-  const { as = 'utf8', ephemeral, project = getFilesystem() } = options;
+  const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
     log({ op: 'text', text: `Write ${path} of ${project}` });
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: project });
-  }
-
-  if (typeof data === 'string') {
-    data = new TextEncoder(as).encode(data);
   }
 
   await log({ op: 'text', text: `Write ${path}` });
@@ -8203,6 +8207,9 @@ const writeFile = async (options, path, data) => {
       } catch (error) {
       }
       try {
+        if (doSerialize) {
+          data = serialize(data);
+        }
         await promises$2.writeFile(persistentPath, data);
       } catch (error) {
       }
@@ -8220,6 +8227,7 @@ const writeFile = async (options, path, data) => {
 /* global self */
 
 const { promises: promises$3 } = fs;
+const { deserialize } = v8$1;
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
@@ -8229,11 +8237,15 @@ const getUrlFetcher = async () => {
   }
 };
 
-const getFileFetcher = async (qualify = qualifyPath) => {
+const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      return promises$3.readFile(qualify(path));
+      let data = await promises$3.readFile(qualify(path));
+      if (doSerialize) {
+        data = deserialize(data);
+      }
+      return data;
     };
   } else if (isBrowser) {
     return async (path) => {
@@ -8246,11 +8258,11 @@ const getFileFetcher = async (qualify = qualifyPath) => {
 };
 
 // Fetch from internal store.
-const fetchPersistent = async (path) => {
+const fetchPersistent = async (path, doSerialize) => {
   try {
     const base = getBase();
     if (base !== undefined) {
-      const fetchFile = await getFileFetcher();
+      const fetchFile = await getFileFetcher(qualifyPath, doSerialize);
       const data = await fetchFile(path);
       return data;
     }
@@ -8265,7 +8277,7 @@ const fetchPersistent = async (path) => {
 // Fetch from external sources.
 const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher(path => path);
+  const fetchFile = await getFileFetcher(path => path, false);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
@@ -8292,7 +8304,7 @@ const fetchSources = async (options = {}, sources) => {
 };
 
 const readFile = async (options, path) => {
-  const { allowFetch = true, ephemeral, as = 'utf8' } = options;
+  const { allowFetch = true, ephemeral } = options;
   if (isWebWorker) {
     return self.ask({ readFile: { options, path } });
   }
@@ -8307,7 +8319,7 @@ const readFile = async (options, path) => {
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false) {
-    file.data = await fetchPersistent(path);
+    file.data = await fetchPersistent(path, true);
   }
   if (project !== originalProject) {
     // Switch back to the original filesystem, if necessary.
@@ -8316,8 +8328,8 @@ const readFile = async (options, path) => {
   if (file.data === undefined && allowFetch) {
     file.data = await fetchSources({}, sources);
     if (!ephemeral && file.data !== undefined) {
-      // Update persistent storage.
-      await writeFile(options, path, file.data);
+      // Update persistent cache.
+      await writeFile({ ...options, doSerialize: true }, path, file.data);
     }
   }
   if (file.data !== undefined) {
@@ -8326,13 +8338,7 @@ const readFile = async (options, path) => {
       file.data = await file.data;
     }
   }
-  if (file.data !== undefined) {
-    if (as === 'bytes') {
-      return file.data;
-    } else {
-      return new TextDecoder('utf8').decode(file.data);
-    }
-  }
+  return file.data;
 };
 
 export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };

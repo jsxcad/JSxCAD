@@ -22,7 +22,7 @@ const toGcode = async (options = {}, geometry) => {
     }
   }
   codes.push(``);
-  return codes.join('\n');
+  return new TextEncoder('utf8').encode(codes.join('\n'));
 };
 
 export { toGcode };

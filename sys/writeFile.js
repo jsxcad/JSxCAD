@@ -1,6 +1,7 @@
 /* global self */
 
 import * as fs from 'fs';
+import * as v8 from 'v8';
 
 import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
@@ -11,6 +12,7 @@ import { getFile } from './files';
 import { log } from './log';
 
 const { promises } = fs;
+const { serialize } = v8;
 
 // FIX Convert data by representation.
 
@@ -21,16 +23,12 @@ export const writeFile = async (options, path, data) => {
     return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   }
 
-  const { as = 'utf8', ephemeral, project = getFilesystem() } = options;
+  const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
     log({ op: 'text', text: `Write ${path} of ${project}` });
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: project });
-  }
-
-  if (typeof data === 'string') {
-    data = new TextEncoder(as).encode(data);
   }
 
   await log({ op: 'text', text: `Write ${path}` });
@@ -50,6 +48,9 @@ export const writeFile = async (options, path, data) => {
       } catch (error) {
       }
       try {
+        if (doSerialize) {
+          data = serialize(data);
+        }
         await promises.writeFile(persistentPath, data);
       } catch (error) {
       }

@@ -24,7 +24,11 @@ export class SettingsUi extends React.PureComponent {
     const { storage } = this.props;
     const state = await readFile({}, `settings/${storage}`);
     if (state !== undefined) {
-      this.setState(JSON.parse(state));
+      if (state.buffer) {
+        this.setState(JSON.parse(new TextDecoder('utf8').decode(state)));
+      } else {
+        this.setState(state);
+      }
     }
   }
 
@@ -55,7 +59,7 @@ export class SettingsUi extends React.PureComponent {
   async save () {
     const { storage } = this.props;
     if (storage) {
-      await writeFile({}, `settings/${storage}`, JSON.stringify(this.state));
+      await writeFile({}, `settings/${storage}`, this.state);
     }
   }
 }
