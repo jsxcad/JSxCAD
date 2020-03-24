@@ -1,16 +1,16 @@
 import crumple from './crumple';
-import thin from './thin';
+import taper from './taper';
 import twist from './twist';
 
 const api = {
   crumple,
-  thin,
+  taper,
   twist
 };
 
 export {
   crumple,
-  thin,
+  taper,
   twist
 };
 
