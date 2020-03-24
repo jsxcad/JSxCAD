@@ -27,7 +27,8 @@ const Z = 2;
 
 const scaleXY = (factor, [x, y, z]) => [...scale(factor, [x, y]), z];
 
-const thin = (shape, factor, { resolution = 1 } = {}) => {
+// TODO: Support different factors for x and y.
+const taper = (shape, factor, { resolution = 1 } = {}) => {
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
@@ -42,8 +43,8 @@ const thin = (shape, factor, { resolution = 1 } = {}) => {
   return Shape.fromGeometry({ assembly });
 };
 
-const thinMethod = function (...args) { return thin(this, ...args); };
-Shape.prototype.thin = thinMethod;
+const taperMethod = function (...args) { return taper(this, ...args); };
+Shape.prototype.taper = taperMethod;
 
 const Z$1 = 2;
 
@@ -65,9 +66,9 @@ Shape.prototype.twist = twistMethod;
 
 const api = {
   crumple,
-  thin,
+  taper,
   twist
 };
 
 export default api;
-export { crumple, thin, twist };
+export { crumple, taper, twist };
