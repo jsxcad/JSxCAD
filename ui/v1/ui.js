@@ -39,6 +39,7 @@ import LogUi from './LogUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import NotebookUi from './NotebookUi';
 import NothingUi from './NothingUi';
 import ParametersUi from './ParametersUi';
 import PropTypes from 'prop-types';
@@ -327,6 +328,7 @@ class Ui extends React.PureComponent {
       }
     }
 
+    views.push({ view: 'notebook', viewTitle: 'Notebook' });
     views.push({ view: 'files', viewTitle: 'Files' });
     views.push({ view: 'log', viewTitle: 'Log' });
     views.push({ view: 'parameters', viewTitle: 'Parameters' });
@@ -383,6 +385,18 @@ class Ui extends React.PureComponent {
     const { ask } = this.state;
 
     switch (view) {
+      case 'notebook':
+        return (
+          <NotebookUi
+            key={`${id}/notebook`}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'Notebook'}
+            onSelectView={onSelectView}
+          />);
       case 'geometry': {
         const fileTitle = file === undefined ? '' : file.substring('geometry/'.length);
         return (
@@ -672,7 +686,7 @@ const setupUi = async (sha) => {
     document.getElementById('top'));
 };
 
-const defaultScript = `// Circle(10);`;
+const defaultScript = `// Circle(10).topView();`;
 
 const defaultPaneLayout =
   {
@@ -693,14 +707,8 @@ const defaultPaneViews = [
     title: 'Edit script.jsxcad'
   }],
   ['1', {
-    view: 'geometry',
-    file: 'geometry/preview',
-    title: 'View preview'
-  }],
-  ['2', {
-    view: 'geometry',
-    file: 'geometry/preview',
-    title: 'View preview'
+    view: 'notebook',
+    title: 'Notebook'
   }],
   ['3', {
     view: 'log',

@@ -1,3 +1,13 @@
+const pending = [];
+
+const addPending = (promise) => pending.push(promise);
+
+const resolvePending = async () => {
+  while (pending.length > 0) {
+    await pending.pop();
+  }
+};
+
 const sources = new Map();
 
 // Note: later additions will be used in preference to earlier additions.
@@ -296,6 +306,14 @@ const boot = async () => {
     await task();
   }
 };
+
+const emitted = [];
+
+const clearEmitted = () => { emitted.length = 0; };
+
+const emit$1 = (value) => emitted.push(value);
+
+const getEmitted = () => emitted;
 
 // When base is undefined the persistent filesystem is disabled.
 let base;
@@ -8250,7 +8268,9 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
   } else if (isBrowser) {
     return async (path) => {
       const data = await db().getItem(qualify(path));
-      return data;
+      if (data !== null) {
+        return data;
+      }
     };
   } else {
     throw Error('die');
@@ -8341,4 +8361,4 @@ const readFile = async (options, path) => {
   return file.data;
 };
 
-export { addSource, ask, boot, conversation, createService, deleteFile$1 as deleteFile, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+export { addPending, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, resolvePending, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };

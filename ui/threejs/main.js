@@ -1,17 +1,7 @@
-import { buildGui, buildGuiControls, buildTrackballControls } from './controls';
-import { buildScene, createResizer } from './scene';
+export { buildGui, buildGuiControls, buildTrackballControls } from './controls';
+export { buildScene, createResizer } from './scene';
+export { dataUrl, image, staticView, orbitView } from './view';
 
-import { buildMeshes } from './mesh';
-import orbitDisplay from './orbitDisplay';
-import staticDisplay from './staticDisplay';
-
-export {
-  buildGui,
-  buildGuiControls,
-  buildMeshes,
-  buildTrackballControls,
-  buildScene,
-  createResizer,
-  orbitDisplay,
-  staticDisplay
-};
+export { buildMeshes } from './mesh';
+export { orbitDisplay } from './orbitDisplay';
+export { staticDisplay } from './staticDisplay';

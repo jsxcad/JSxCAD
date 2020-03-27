@@ -16,6 +16,7 @@ import './void';
 import './wireframe';
 import './wireframeFaces';
 import './with';
+import './view';
 
 import Shape from './Shape';
 import assemble from './assemble';
