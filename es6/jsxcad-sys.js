@@ -313,7 +313,7 @@ const clearEmitted = () => { emitted.length = 0; };
 
 const emit$1 = (value) => emitted.push(value);
 
-const getEmitted = () => emitted;
+const getEmitted = () => [...emitted];
 
 // When base is undefined the persistent filesystem is disabled.
 let base;

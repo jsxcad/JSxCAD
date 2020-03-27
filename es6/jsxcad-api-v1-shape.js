@@ -789,6 +789,18 @@ Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = 
   return view(this, { width, height, position });
 };
 
+Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.smallFrontView = function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.bigFrontView = function ({ width = 1024, height = 512, position = [0, -100, 0] } = {}) {
+  return view(this, { width, height, position });
+};
+
 const canonicalize = (shape) => Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
 
 const canonicalizeMethod = function () { return canonicalize(this); };

@@ -87968,29 +87968,34 @@ class NotebookUi extends Pane {
   }
 
   async update() {
+    const {
+      selected = -1
+    } = this.state;
     const notebook = await readFile({}, 'notebook');
+    const notes = this.buildNotes({
+      notebook,
+      selected
+    });
     this.setState({
-      notebook
+      notebook,
+      notes
     });
   }
 
-  renderPane() {
-    const {
-      id
-    } = this.props;
-    const {
-      notebook = [],
-      selected = -1
-    } = this.state;
+  buildNotes({
+    notebook = [],
+    selected = -1
+  }) {
     const notes = [];
     let nth = 0;
 
     for (const note of notebook) {
       nth += 1;
+      const isSelected = nth === selected;
+      const key = Math.random(); // nth;
 
       if (note.geometry) {
         const index = nth;
-        const isSelected = index === selected;
         const {
           width,
           height,
@@ -88001,13 +88006,17 @@ class NotebookUi extends Pane {
 
         const select = e => {
           e.stopPropagation();
-          this.setState({
+          const notes = this.buildNotes({ ...this.state,
             selected: index
+          });
+          this.setState({
+            selected: index,
+            notes
           });
         };
 
         notes.push(react.createElement(GeometryView, {
-          key: nth,
+          key: key,
           width: width,
           height: height,
           position: position,
@@ -88019,7 +88028,7 @@ class NotebookUi extends Pane {
       } else if (note.md) {
         const data = note.md;
         notes.push(react.createElement("div", {
-          key: nth,
+          key: key,
           dangerouslySetInnerHTML: {
             __html: marked_1(data)
           }
@@ -88027,9 +88036,30 @@ class NotebookUi extends Pane {
       }
     }
 
-    const unselect = () => this.setState({
-      selected: -1
-    });
+    return notes;
+  }
+
+  renderPane() {
+    const {
+      id
+    } = this.props;
+    const {
+      notes = []
+    } = this.state;
+
+    const unselect = async () => {
+      const {
+        notebook
+      } = this.state;
+      const notes = this.buildNotes({
+        notebook
+      });
+      this.setState({
+        selected: -1,
+        notes
+      });
+      await this.update();
+    };
 
     return react.createElement(Container, {
       key: id,
