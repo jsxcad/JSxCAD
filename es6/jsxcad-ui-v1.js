@@ -85510,7 +85510,7 @@ _defineProperty$4(Draggable, "defaultProps", { ...DraggableCore.defaultProps,
   scale: 1
 });
 
-function cloneElement(element, props) {
+const cloneElement = (element, props) => {
   if (props.style && element.props.style) {
     props.style = { ...element.props.style,
       ...props.style
@@ -85522,8 +85522,7 @@ function cloneElement(element, props) {
   }
 
   return react.cloneElement(element, props);
-}
-
+};
 class Resizable extends react.Component {
   constructor(...args) {
     super(...args);

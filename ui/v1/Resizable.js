@@ -1,7 +1,17 @@
 import { DraggableCore } from 'react-draggable';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { cloneElement } from './utils';
+
+// React.addons.cloneWithProps look-alike that merges style & className.
+export const cloneElement = (element, props) => {
+  if (props.style && element.props.style) {
+    props.style = { ...element.props.style, ...props.style };
+  }
+  if (props.className && element.props.className) {
+    props.className = `${element.props.className} ${props.className}`;
+  }
+  return React.cloneElement(element, props);
+};
 
 export default class Resizable extends React.Component {
   static propTypes = {
