@@ -37,7 +37,7 @@ const agent = async ({
       const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
       const constructor = await builder(api);
       const module = await constructor();
-      const shape = await module.main();
+      await module.main();
       await log({
         op: 'text',
         text: 'Evaluation Succeeded',

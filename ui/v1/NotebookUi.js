@@ -202,35 +202,49 @@ export class NotebookUi extends Pane {
   }
 
   async update () {
+    const { selected = -1 } = this.state;
+
     const notebook = await readFile({}, 'notebook');
-    this.setState({ notebook });
+    const notes = this.buildNotes({ notebook, selected });
+
+    this.setState({ notebook, notes });
   }
 
-  renderPane () {
-    const { id } = this.props;
-    const { notebook = [], selected = -1 } = this.state;
-
+  buildNotes ({ notebook = [], selected = -1 }) {
     const notes = [];
     let nth = 0;
     for (const note of notebook) {
       nth += 1;
+      const isSelected = (nth === selected);
+      const key = Math.random(); // nth;
       if (note.geometry) {
         const index = nth;
-        const isSelected = (index === selected);
         const { width, height, position, geometry } = note.geometry;
         const mode = (index === selected) ? 'dynamic' : 'static';
         const select = (e) => {
           e.stopPropagation();
-          this.setState({ selected: index });
+          const notes = this.buildNotes({ ...this.state, selected: index });
+          this.setState({ selected: index, notes });
         };
-        notes.push(<GeometryView key={nth} width={width} height={height} position={position} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
+        notes.push(<GeometryView key={key} width={width} height={height} position={position} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
       } else if (note.md) {
         const data = note.md;
-        notes.push(<div key={nth} dangerouslySetInnerHTML={{ __html: marked(data) }}/>);
+        notes.push(<div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }}/>);
       }
     }
+    return notes;
+  }
 
-    const unselect = () => this.setState({ selected: -1 });
+  renderPane () {
+    const { id } = this.props;
+    const { notes = [] } = this.state;
+
+    const unselect = async () => {
+      const { notebook } = this.state;
+      const notes = this.buildNotes({ notebook });
+      this.setState({ selected: -1, notes });
+      await this.update();
+    };
 
     return (
       <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
