@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log } from './jsxcad-sys.js';
+import { boot, conversation, log, clearEmitted, resolvePending, writeFile, getEmitted } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
@@ -24,6 +24,7 @@ const agent = async ({
     });
 
     if (question.evaluate) {
+      clearEmitted();
       const ecmascript = toEcmascript({}, question.evaluate);
       console.log({
         op: 'text',
@@ -45,17 +46,11 @@ const agent = async ({
       await log({
         op: 'evaluate',
         status: 'success'
-      });
+      }); // Wait for any pending operations.
 
-      if (shape !== undefined && shape.toKeptGeometry) {
-        const keptGeometry = shape.toKeptGeometry();
-        await log({
-          op: 'text',
-          text: 'Preview Rendered',
-          level: 'serious'
-        });
-        return keptGeometry;
-      }
+      resolvePending(); // Update the notebook.
+
+      await writeFile({}, 'notebook', getEmitted());
     }
   } catch (error) {
     await log({

@@ -39,7 +39,9 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
   } else if (isBrowser) {
     return async (path) => {
       const data = await db().getItem(qualify(path));
-      return data;
+      if (data !== null) {
+        return data;
+      }
     };
   } else {
     throw Error('die');

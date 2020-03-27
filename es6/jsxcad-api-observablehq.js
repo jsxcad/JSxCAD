@@ -1,63 +1,8 @@
-import { staticDisplay, orbitDisplay } from './jsxcad-ui-threejs.js';
+import { staticView, dataUrl, image, orbitView } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
-import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 import * as v1 from './jsxcad-api-v1.js';
 import { qualifyPath, boot } from './jsxcad-sys.js';
 import { toZipFromFilesystem } from './jsxcad-convert-zip.js';
-
-/* global document */
-
-const toCanvasFromWebglContext = (webgl) => {
-  // Derived from https://github.com/Jam3/webgl-to-canvas2d
-  const { width, height } = webgl.canvas;
-  const inImageData = new Uint8Array(width * height * 4);
-  webgl.readPixels(0, 0, width, height, webgl.RGBA, webgl.UNSIGNED_BYTE, inImageData);
-
-  const outCanvas = document.createElement('canvas');
-  outCanvas.width = width;
-  outCanvas.height = height;
-  const outContext = outCanvas.getContext('2d');
-  const outImageData = outContext.getImageData(0, 0, width, height);
-  outImageData.data.set(new Uint8ClampedArray(inImageData));
-
-  outContext.putImageData(outImageData, 0, 0);
-  outContext.translate(0, height);
-  outContext.scale(1, -1);
-  outContext.drawImage(outCanvas, 0, 0);
-  outContext.setTransform(1, 0, 0, 1, 0, 0);
-
-  return outCanvas;
-};
-
-const staticView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
-  const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
-  const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
-                                           { offsetWidth: width, offsetHeight: height });
-  const canvas = toCanvasFromWebglContext(renderer.getContext());
-  canvas.style = `width: ${width}px; height: ${height}px`;
-  renderer.forceContextLoss();
-  return canvas;
-};
-
-const dataUrl = async (...args) => (await staticView(...args)).toDataURL('png');
-
-const image = async (...args) => {
-  const image = document.createElement('img');
-  const dataUrl = (await staticView(...args)).toDataURL('png');
-  image.src = dataUrl;
-  return image;
-};
-
-const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
-  const container = document.createElement('div');
-  container.style = `width: ${width}px; height: ${height}px`;
-
-  const geometry = shape.toKeptGeometry();
-  const view = { target, position, up };
-
-  await orbitDisplay({ geometry, view }, container);
-  return container;
-};
 
 const bigViewMethod = async function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) { return staticView(this, { width, height, position }); };
 const bigTopViewMethod = async function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) { return staticView(this, { width, height, position }); };

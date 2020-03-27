@@ -1,7 +1,8 @@
-import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, listFilesystems, setupFilesystem, watchFile, unwatchFiles, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
+import { readFile, log as log$1, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
+import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
+import Shape from './jsxcad-api-v1-shape.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
-import { orbitDisplay } from './jsxcad-ui-threejs.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -17675,7 +17676,7 @@ const getAccessToken = async service => readFile({
   useCache: false
 }, `auth/${service}/accessToken`);
 const getNewAccessToken = async (service, oldToken = undefined, attempts = 10) => {
-  await log({
+  await log$1({
     op: 'text',
     text: `Re-Authenticating ${service}`,
     level: 'serious'
@@ -82648,10 +82649,10 @@ class JsEditorUi extends Pane {
       file
     } = this.props;
     await this.save();
-    await log({
+    await log$1({
       op: 'open'
     });
-    await log({
+    await log$1({
       op: 'text',
       text: 'Running',
       level: 'serious'
@@ -82662,13 +82663,9 @@ class JsEditorUi extends Pane {
       script = new TextDecoder('utf8').decode(script);
     }
 
-    const geometry = await ask({
+    await ask({
       evaluate: script
     });
-
-    if (geometry) {
-      await writeFile({}, 'geometry/preview', geometry);
-    }
   }
 
   async save() {
@@ -82679,7 +82676,7 @@ class JsEditorUi extends Pane {
       code = ''
     } = this.state;
     await writeFile({}, file, code);
-    await log({
+    await log$1({
       op: 'text',
       text: 'Saved',
       level: 'serious'
@@ -84105,6 +84102,3961 @@ DecoratedModal.Dialog = ModalDialog;
 DecoratedModal.TRANSITION_DURATION = 300;
 DecoratedModal.BACKDROP_TRANSITION_DURATION = 150;
 
+function _defineProperty$2(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function _extends$2() {
+  _extends$2 = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends$2.apply(this, arguments);
+}
+
+// @credits https://gist.github.com/rogozhnikoff/a43cfed27c41e4e68cdc
+function findInArray(array
+/*: Array<any> | TouchList*/
+, callback
+/*: Function*/
+)
+/*: any*/
+{
+  for (let i = 0, length = array.length; i < length; i++) {
+    if (callback.apply(callback, [array[i], i, array])) return array[i];
+  }
+}
+function isFunction$3(func
+/*: any*/
+)
+/*: boolean*/
+{
+  return typeof func === 'function' || Object.prototype.toString.call(func) === '[object Function]';
+}
+function isNum(num
+/*: any*/
+)
+/*: boolean*/
+{
+  return typeof num === 'number' && !isNaN(num);
+}
+function int(a
+/*: string*/
+)
+/*: number*/
+{
+  return parseInt(a, 10);
+}
+function dontSetMe(props
+/*: Object*/
+, propName
+/*: string*/
+, componentName
+/*: string*/
+) {
+  if (props[propName]) {
+    return new Error(`Invalid prop ${propName} passed to ${componentName} - do not set this, set it on the child.`);
+  }
+}
+
+const prefixes = ['Moz', 'Webkit', 'O', 'ms'];
+function getPrefix(prop
+/*: string*/
+= 'transform')
+/*: string*/
+{
+  // Checking specifically for 'window.document' is for pseudo-browser server-side
+  // environments that define 'window' as the global context.
+  // E.g. React-rails (see https://github.com/reactjs/react-rails/pull/84)
+  if (typeof window === 'undefined' || typeof window.document === 'undefined') return '';
+  const style = window.document.documentElement.style;
+  if (prop in style) return '';
+
+  for (let i = 0; i < prefixes.length; i++) {
+    if (browserPrefixToKey(prop, prefixes[i]) in style) return prefixes[i];
+  }
+
+  return '';
+}
+function browserPrefixToKey(prop
+/*: string*/
+, prefix
+/*: string*/
+)
+/*: string*/
+{
+  return prefix ? `${prefix}${kebabToTitleCase(prop)}` : prop;
+}
+
+function kebabToTitleCase(str
+/*: string*/
+)
+/*: string*/
+{
+  let out = '';
+  let shouldCapitalize = true;
+
+  for (let i = 0; i < str.length; i++) {
+    if (shouldCapitalize) {
+      out += str[i].toUpperCase();
+      shouldCapitalize = false;
+    } else if (str[i] === '-') {
+      shouldCapitalize = true;
+    } else {
+      out += str[i];
+    }
+  }
+
+  return out;
+} // Default export is the prefix itself, like 'Moz', 'Webkit', etc
+// Note that you may have to re-test for certain things; for instance, Chrome 50
+// can handle unprefixed `transform`, but not unprefixed `user-select`
+
+
+var browserPrefix = getPrefix();
+
+/*:: import type {ControlPosition, PositionOffsetControlPosition, MouseTouchEvent} from './types';*/
+
+let matchesSelectorFunc = '';
+function matchesSelector(el
+/*: Node*/
+, selector
+/*: string*/
+)
+/*: boolean*/
+{
+  if (!matchesSelectorFunc) {
+    matchesSelectorFunc = findInArray(['matches', 'webkitMatchesSelector', 'mozMatchesSelector', 'msMatchesSelector', 'oMatchesSelector'], function (method) {
+      // $FlowIgnore: Doesn't think elements are indexable
+      return isFunction$3(el[method]);
+    });
+  } // Might not be found entirely (not an Element?) - in that case, bail
+  // $FlowIgnore: Doesn't think elements are indexable
+
+
+  if (!isFunction$3(el[matchesSelectorFunc])) return false; // $FlowIgnore: Doesn't think elements are indexable
+
+  return el[matchesSelectorFunc](selector);
+} // Works up the tree to the draggable itself attempting to match selector.
+
+function matchesSelectorAndParentsTo(el
+/*: Node*/
+, selector
+/*: string*/
+, baseNode
+/*: Node*/
+)
+/*: boolean*/
+{
+  let node = el;
+
+  do {
+    if (matchesSelector(node, selector)) return true;
+    if (node === baseNode) return false;
+    node = node.parentNode;
+  } while (node);
+
+  return false;
+}
+function addEvent(el
+/*: ?Node*/
+, event
+/*: string*/
+, handler
+/*: Function*/
+)
+/*: void*/
+{
+  if (!el) {
+    return;
+  }
+
+  if (el.attachEvent) {
+    el.attachEvent('on' + event, handler);
+  } else if (el.addEventListener) {
+    el.addEventListener(event, handler, true);
+  } else {
+    // $FlowIgnore: Doesn't think elements are indexable
+    el['on' + event] = handler;
+  }
+}
+function removeEvent(el
+/*: ?Node*/
+, event
+/*: string*/
+, handler
+/*: Function*/
+)
+/*: void*/
+{
+  if (!el) {
+    return;
+  }
+
+  if (el.detachEvent) {
+    el.detachEvent('on' + event, handler);
+  } else if (el.removeEventListener) {
+    el.removeEventListener(event, handler, true);
+  } else {
+    // $FlowIgnore: Doesn't think elements are indexable
+    el['on' + event] = null;
+  }
+}
+function outerHeight(node
+/*: HTMLElement*/
+)
+/*: number*/
+{
+  // This is deliberately excluding margin for our calculations, since we are using
+  // offsetTop which is including margin. See getBoundPosition
+  let height = node.clientHeight;
+  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+  height += int(computedStyle.borderTopWidth);
+  height += int(computedStyle.borderBottomWidth);
+  return height;
+}
+function outerWidth(node
+/*: HTMLElement*/
+)
+/*: number*/
+{
+  // This is deliberately excluding margin for our calculations, since we are using
+  // offsetLeft which is including margin. See getBoundPosition
+  let width = node.clientWidth;
+  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+  width += int(computedStyle.borderLeftWidth);
+  width += int(computedStyle.borderRightWidth);
+  return width;
+}
+function innerHeight(node
+/*: HTMLElement*/
+)
+/*: number*/
+{
+  let height = node.clientHeight;
+  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+  height -= int(computedStyle.paddingTop);
+  height -= int(computedStyle.paddingBottom);
+  return height;
+}
+function innerWidth(node
+/*: HTMLElement*/
+)
+/*: number*/
+{
+  let width = node.clientWidth;
+  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
+  width -= int(computedStyle.paddingLeft);
+  width -= int(computedStyle.paddingRight);
+  return width;
+} // Get from offsetParent
+
+function offsetXYFromParent(evt
+/*: {clientX: number, clientY: number}*/
+, offsetParent
+/*: HTMLElement*/
+, scale
+/*: number*/
+)
+/*: ControlPosition*/
+{
+  const isBody = offsetParent === offsetParent.ownerDocument.body;
+  const offsetParentRect = isBody ? {
+    left: 0,
+    top: 0
+  } : offsetParent.getBoundingClientRect();
+  const x = (evt.clientX + offsetParent.scrollLeft - offsetParentRect.left) / scale;
+  const y = (evt.clientY + offsetParent.scrollTop - offsetParentRect.top) / scale;
+  return {
+    x,
+    y
+  };
+}
+function createCSSTransform(controlPos
+/*: ControlPosition*/
+, positionOffset
+/*: PositionOffsetControlPosition*/
+)
+/*: Object*/
+{
+  const translation = getTranslation(controlPos, positionOffset, 'px');
+  return {
+    [browserPrefixToKey('transform', browserPrefix)]: translation
+  };
+}
+function createSVGTransform(controlPos
+/*: ControlPosition*/
+, positionOffset
+/*: PositionOffsetControlPosition*/
+)
+/*: string*/
+{
+  const translation = getTranslation(controlPos, positionOffset, '');
+  return translation;
+}
+function getTranslation({
+  x,
+  y
+}
+/*: ControlPosition*/
+, positionOffset
+/*: PositionOffsetControlPosition*/
+, unitSuffix
+/*: string*/
+)
+/*: string*/
+{
+  let translation = `translate(${x}${unitSuffix},${y}${unitSuffix})`;
+
+  if (positionOffset) {
+    const defaultX = `${typeof positionOffset.x === 'string' ? positionOffset.x : positionOffset.x + unitSuffix}`;
+    const defaultY = `${typeof positionOffset.y === 'string' ? positionOffset.y : positionOffset.y + unitSuffix}`;
+    translation = `translate(${defaultX}, ${defaultY})` + translation;
+  }
+
+  return translation;
+}
+function getTouch(e
+/*: MouseTouchEvent*/
+, identifier
+/*: number*/
+)
+/*: ?{clientX: number, clientY: number}*/
+{
+  return e.targetTouches && findInArray(e.targetTouches, t => identifier === t.identifier) || e.changedTouches && findInArray(e.changedTouches, t => identifier === t.identifier);
+}
+function getTouchIdentifier(e
+/*: MouseTouchEvent*/
+)
+/*: ?number*/
+{
+  if (e.targetTouches && e.targetTouches[0]) return e.targetTouches[0].identifier;
+  if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].identifier;
+} // User-select Hacks:
+//
+// Useful for preventing blue highlights all over everything when dragging.
+// Note we're passing `document` b/c we could be iframed
+
+function addUserSelectStyles(doc
+/*: ?Document*/
+) {
+  if (!doc) return;
+  let styleEl = doc.getElementById('react-draggable-style-el');
+
+  if (!styleEl) {
+    styleEl = doc.createElement('style');
+    styleEl.type = 'text/css';
+    styleEl.id = 'react-draggable-style-el';
+    styleEl.innerHTML = '.react-draggable-transparent-selection *::-moz-selection {all: inherit;}\n';
+    styleEl.innerHTML += '.react-draggable-transparent-selection *::selection {all: inherit;}\n';
+    doc.getElementsByTagName('head')[0].appendChild(styleEl);
+  }
+
+  if (doc.body) addClassName(doc.body, 'react-draggable-transparent-selection');
+}
+function removeUserSelectStyles(doc
+/*: ?Document*/
+) {
+  try {
+    if (doc && doc.body) removeClassName(doc.body, 'react-draggable-transparent-selection'); // $FlowIgnore: IE
+
+    if (doc.selection) {
+      // $FlowIgnore: IE
+      doc.selection.empty();
+    } else {
+      window.getSelection().removeAllRanges(); // remove selection caused by scroll
+    }
+  } catch (e) {// probably IE
+  }
+}
+function styleHacks(childStyle
+/*: Object*/
+= {})
+/*: Object*/
+{
+  // Workaround IE pointer events; see #51
+  // https://github.com/mzabriskie/react-draggable/issues/51#issuecomment-103488278
+  return {
+    touchAction: 'none',
+    ...childStyle
+  };
+}
+function addClassName(el
+/*: HTMLElement*/
+, className
+/*: string*/
+) {
+  if (el.classList) {
+    el.classList.add(className);
+  } else {
+    if (!el.className.match(new RegExp(`(?:^|\\s)${className}(?!\\S)`))) {
+      el.className += ` ${className}`;
+    }
+  }
+}
+function removeClassName(el
+/*: HTMLElement*/
+, className
+/*: string*/
+) {
+  if (el.classList) {
+    el.classList.remove(className);
+  } else {
+    el.className = el.className.replace(new RegExp(`(?:^|\\s)${className}(?!\\S)`, 'g'), '');
+  }
+}
+
+/*:: import type Draggable from '../Draggable';*/
+
+/*:: import type {Bounds, ControlPosition, DraggableData, MouseTouchEvent} from './types';*/
+
+/*:: import type DraggableCore from '../DraggableCore';*/
+
+function getBoundPosition(draggable
+/*: Draggable*/
+, x
+/*: number*/
+, y
+/*: number*/
+)
+/*: [number, number]*/
+{
+  // If no bounds, short-circuit and move on
+  if (!draggable.props.bounds) return [x, y]; // Clone new bounds
+
+  let {
+    bounds
+  } = draggable.props;
+  bounds = typeof bounds === 'string' ? bounds : cloneBounds(bounds);
+  const node = findDOMNode(draggable);
+
+  if (typeof bounds === 'string') {
+    const {
+      ownerDocument
+    } = node;
+    const ownerWindow = ownerDocument.defaultView;
+    let boundNode;
+
+    if (bounds === 'parent') {
+      boundNode = node.parentNode;
+    } else {
+      boundNode = ownerDocument.querySelector(bounds);
+    }
+
+    if (!(boundNode instanceof ownerWindow.HTMLElement)) {
+      throw new Error('Bounds selector "' + bounds + '" could not find an element.');
+    }
+
+    const nodeStyle = ownerWindow.getComputedStyle(node);
+    const boundNodeStyle = ownerWindow.getComputedStyle(boundNode); // Compute bounds. This is a pain with padding and offsets but this gets it exactly right.
+
+    bounds = {
+      left: -node.offsetLeft + int(boundNodeStyle.paddingLeft) + int(nodeStyle.marginLeft),
+      top: -node.offsetTop + int(boundNodeStyle.paddingTop) + int(nodeStyle.marginTop),
+      right: innerWidth(boundNode) - outerWidth(node) - node.offsetLeft + int(boundNodeStyle.paddingRight) - int(nodeStyle.marginRight),
+      bottom: innerHeight(boundNode) - outerHeight(node) - node.offsetTop + int(boundNodeStyle.paddingBottom) - int(nodeStyle.marginBottom)
+    };
+  } // Keep x and y below right and bottom limits...
+
+
+  if (isNum(bounds.right)) x = Math.min(x, bounds.right);
+  if (isNum(bounds.bottom)) y = Math.min(y, bounds.bottom); // But above left and top limits.
+
+  if (isNum(bounds.left)) x = Math.max(x, bounds.left);
+  if (isNum(bounds.top)) y = Math.max(y, bounds.top);
+  return [x, y];
+}
+function snapToGrid(grid
+/*: [number, number]*/
+, pendingX
+/*: number*/
+, pendingY
+/*: number*/
+)
+/*: [number, number]*/
+{
+  const x = Math.round(pendingX / grid[0]) * grid[0];
+  const y = Math.round(pendingY / grid[1]) * grid[1];
+  return [x, y];
+}
+function canDragX(draggable
+/*: Draggable*/
+)
+/*: boolean*/
+{
+  return draggable.props.axis === 'both' || draggable.props.axis === 'x';
+}
+function canDragY(draggable
+/*: Draggable*/
+)
+/*: boolean*/
+{
+  return draggable.props.axis === 'both' || draggable.props.axis === 'y';
+} // Get {x, y} positions from event.
+
+function getControlPosition(e
+/*: MouseTouchEvent*/
+, touchIdentifier
+/*: ?number*/
+, draggableCore
+/*: DraggableCore*/
+)
+/*: ?ControlPosition*/
+{
+  const touchObj = typeof touchIdentifier === 'number' ? getTouch(e, touchIdentifier) : null;
+  if (typeof touchIdentifier === 'number' && !touchObj) return null; // not the right touch
+
+  const node = findDOMNode(draggableCore); // User can provide an offsetParent if desired.
+
+  const offsetParent = draggableCore.props.offsetParent || node.offsetParent || node.ownerDocument.body;
+  return offsetXYFromParent(touchObj || e, offsetParent, draggableCore.props.scale);
+} // Create an data object exposed by <DraggableCore>'s events
+
+function createCoreData(draggable
+/*: DraggableCore*/
+, x
+/*: number*/
+, y
+/*: number*/
+)
+/*: DraggableData*/
+{
+  const state = draggable.state;
+  const isStart = !isNum(state.lastX);
+  const node = findDOMNode(draggable);
+
+  if (isStart) {
+    // If this is our first move, use the x and y as last coords.
+    return {
+      node,
+      deltaX: 0,
+      deltaY: 0,
+      lastX: x,
+      lastY: y,
+      x,
+      y
+    };
+  } else {
+    // Otherwise calculate proper values.
+    return {
+      node,
+      deltaX: x - state.lastX,
+      deltaY: y - state.lastY,
+      lastX: state.lastX,
+      lastY: state.lastY,
+      x,
+      y
+    };
+  }
+} // Create an data exposed by <Draggable>'s events
+
+function createDraggableData(draggable
+/*: Draggable*/
+, coreData
+/*: DraggableData*/
+)
+/*: DraggableData*/
+{
+  const scale = draggable.props.scale;
+  return {
+    node: coreData.node,
+    x: draggable.state.x + coreData.deltaX / scale,
+    y: draggable.state.y + coreData.deltaY / scale,
+    deltaX: coreData.deltaX / scale,
+    deltaY: coreData.deltaY / scale,
+    lastX: draggable.state.x,
+    lastY: draggable.state.y
+  };
+} // A lot faster than stringify/parse
+
+function cloneBounds(bounds
+/*: Bounds*/
+)
+/*: Bounds*/
+{
+  return {
+    left: bounds.left,
+    top: bounds.top,
+    right: bounds.right,
+    bottom: bounds.bottom
+  };
+}
+
+function findDOMNode(draggable
+/*: Draggable | DraggableCore*/
+)
+/*: HTMLElement*/
+{
+  const node = reactDom.findDOMNode(draggable);
+
+  if (!node) {
+    throw new Error('<DraggableCore>: Unmounted during event!');
+  } // $FlowIgnore we can't assert on HTMLElement due to tests... FIXME
+
+
+  return node;
+}
+
+/*eslint no-console:0*/
+function log(...args) {
+}
+
+function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+/*:: import type {EventHandler, MouseTouchEvent} from './utils/types';*/
+
+/*:: import type {Element as ReactElement} from 'react';*/
+
+// Simple abstraction for dragging events names.
+const eventsFor = {
+  touch: {
+    start: 'touchstart',
+    move: 'touchmove',
+    stop: 'touchend'
+  },
+  mouse: {
+    start: 'mousedown',
+    move: 'mousemove',
+    stop: 'mouseup'
+  }
+}; // Default to mouse events.
+
+let dragEventFor = eventsFor.mouse;
+/*:: type DraggableCoreState = {
+  dragging: boolean,
+  lastX: number,
+  lastY: number,
+  touchIdentifier: ?number
+};*/
+
+/*:: export type DraggableBounds = {
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+};*/
+
+/*:: export type DraggableData = {
+  node: HTMLElement,
+  x: number, y: number,
+  deltaX: number, deltaY: number,
+  lastX: number, lastY: number,
+};*/
+
+/*:: export type DraggableEventHandler = (e: MouseEvent, data: DraggableData) => void;*/
+
+/*:: export type ControlPosition = {x: number, y: number};*/
+
+/*:: export type PositionOffsetControlPosition = {x: number|string, y: number|string};*/
+
+/*:: export type DraggableCoreProps = {
+  allowAnyClick: boolean,
+  cancel: string,
+  children: ReactElement<any>,
+  disabled: boolean,
+  enableUserSelectHack: boolean,
+  offsetParent: HTMLElement,
+  grid: [number, number],
+  handle: string,
+  onStart: DraggableEventHandler,
+  onDrag: DraggableEventHandler,
+  onStop: DraggableEventHandler,
+  onMouseDown: (e: MouseEvent) => void,
+  scale: number,
+};*/
+
+//
+// Define <DraggableCore>.
+//
+// <DraggableCore> is for advanced usage of <Draggable>. It maintains minimal internal state so it can
+// work well with libraries that require more control over the element.
+//
+class DraggableCore extends react.Component {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty$3(this, "state", {
+      dragging: false,
+      // Used while dragging to determine deltas.
+      lastX: NaN,
+      lastY: NaN,
+      touchIdentifier: null
+    });
+
+    _defineProperty$3(this, "handleDragStart", e => {
+      // Make it possible to attach event handlers on top of this one.
+      this.props.onMouseDown(e); // Only accept left-clicks.
+
+      if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false; // Get nodes. Be sure to grab relative document (could be iframed)
+
+      const thisNode = reactDom.findDOMNode(this);
+
+      if (!thisNode || !thisNode.ownerDocument || !thisNode.ownerDocument.body) {
+        throw new Error('<DraggableCore> not mounted on DragStart!');
+      }
+
+      const {
+        ownerDocument
+      } = thisNode; // Short circuit if handle or cancel prop was provided and selector doesn't match.
+
+      if (this.props.disabled || !(e.target instanceof ownerDocument.defaultView.Node) || this.props.handle && !matchesSelectorAndParentsTo(e.target, this.props.handle, thisNode) || this.props.cancel && matchesSelectorAndParentsTo(e.target, this.props.cancel, thisNode)) {
+        return;
+      } // Set touch identifier in component state if this is a touch event. This allows us to
+      // distinguish between individual touches on multitouch screens by identifying which
+      // touchpoint was set to this element.
+
+
+      const touchIdentifier = getTouchIdentifier(e);
+      this.setState({
+        touchIdentifier
+      }); // Get the current drag point from the event. This is used as the offset.
+
+      const position = getControlPosition(e, touchIdentifier, this);
+      if (position == null) return; // not possible but satisfies flow
+
+      const {
+        x,
+        y
+      } = position; // Create an event object with all the data parents need to make a decision here.
+
+      const coreEvent = createCoreData(this, x, y);
+
+      log('calling', this.props.onStart);
+      const shouldUpdate = this.props.onStart(e, coreEvent);
+      if (shouldUpdate === false) return; // Add a style to the body to disable user-select. This prevents text from
+      // being selected all over the page.
+
+      if (this.props.enableUserSelectHack) addUserSelectStyles(ownerDocument); // Initiate dragging. Set the current x and y as offsets
+      // so we know how much we've moved during the drag. This allows us
+      // to drag elements around even if they have been moved, without issue.
+
+      this.setState({
+        dragging: true,
+        lastX: x,
+        lastY: y
+      }); // Add events to the document directly so we catch when the user's mouse/touch moves outside of
+      // this element. We use different events depending on whether or not we have detected that this
+      // is a touch-capable device.
+
+      addEvent(ownerDocument, dragEventFor.move, this.handleDrag);
+      addEvent(ownerDocument, dragEventFor.stop, this.handleDragStop);
+    });
+
+    _defineProperty$3(this, "handleDrag", e => {
+      // Prevent scrolling on mobile devices, like ipad/iphone.
+      if (e.type === 'touchmove') e.preventDefault(); // Get the current drag point from the event. This is used as the offset.
+
+      const position = getControlPosition(e, this.state.touchIdentifier, this);
+      if (position == null) return;
+      let {
+        x,
+        y
+      } = position; // Snap to grid if prop has been provided
+
+      if (Array.isArray(this.props.grid)) {
+        let deltaX = x - this.state.lastX,
+            deltaY = y - this.state.lastY;
+        [deltaX, deltaY] = snapToGrid(this.props.grid, deltaX, deltaY);
+        if (!deltaX && !deltaY) return; // skip useless drag
+
+        x = this.state.lastX + deltaX, y = this.state.lastY + deltaY;
+      }
+
+      const coreEvent = createCoreData(this, x, y);
+
+      const shouldUpdate = this.props.onDrag(e, coreEvent);
+
+      if (shouldUpdate === false) {
+        try {
+          // $FlowIgnore
+          this.handleDragStop(new MouseEvent('mouseup'));
+        } catch (err) {
+          // Old browsers
+          const event = ((document.createEvent('MouseEvents')
+          /*: any*/
+          )
+          /*: MouseTouchEvent*/
+          ); // I see why this insanity was deprecated
+          // $FlowIgnore
+
+          event.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+          this.handleDragStop(event);
+        }
+
+        return;
+      }
+
+      this.setState({
+        lastX: x,
+        lastY: y
+      });
+    });
+
+    _defineProperty$3(this, "handleDragStop", e => {
+      if (!this.state.dragging) return;
+      const position = getControlPosition(e, this.state.touchIdentifier, this);
+      if (position == null) return;
+      const {
+        x,
+        y
+      } = position;
+      const coreEvent = createCoreData(this, x, y);
+      const thisNode = reactDom.findDOMNode(this);
+
+      if (thisNode) {
+        // Remove user-select hack
+        if (this.props.enableUserSelectHack) removeUserSelectStyles(thisNode.ownerDocument);
+      }
+
+      this.setState({
+        dragging: false,
+        lastX: NaN,
+        lastY: NaN
+      }); // Call event handler
+
+      this.props.onStop(e, coreEvent);
+
+      if (thisNode) {
+        removeEvent(thisNode.ownerDocument, dragEventFor.move, this.handleDrag);
+        removeEvent(thisNode.ownerDocument, dragEventFor.stop, this.handleDragStop);
+      }
+    });
+
+    _defineProperty$3(this, "onMouseDown", e => {
+      dragEventFor = eventsFor.mouse; // on touchscreen laptops we could switch back to mouse
+
+      return this.handleDragStart(e);
+    });
+
+    _defineProperty$3(this, "onMouseUp", e => {
+      dragEventFor = eventsFor.mouse;
+      return this.handleDragStop(e);
+    });
+
+    _defineProperty$3(this, "onTouchStart", e => {
+      // We're on a touch device now, so change the event handlers
+      dragEventFor = eventsFor.touch;
+      return this.handleDragStart(e);
+    });
+
+    _defineProperty$3(this, "onTouchEnd", e => {
+      // We're on a touch device now, so change the event handlers
+      dragEventFor = eventsFor.touch;
+      return this.handleDragStop(e);
+    });
+  }
+
+  componentWillUnmount() {
+    // Remove any leftover event handlers. Remove both touch and mouse handlers in case
+    // some browser quirk caused a touch event to fire during a mouse move, or vice versa.
+    const thisNode = reactDom.findDOMNode(this);
+
+    if (thisNode) {
+      const {
+        ownerDocument
+      } = thisNode;
+      removeEvent(ownerDocument, eventsFor.mouse.move, this.handleDrag);
+      removeEvent(ownerDocument, eventsFor.touch.move, this.handleDrag);
+      removeEvent(ownerDocument, eventsFor.mouse.stop, this.handleDragStop);
+      removeEvent(ownerDocument, eventsFor.touch.stop, this.handleDragStop);
+      if (this.props.enableUserSelectHack) removeUserSelectStyles(ownerDocument);
+    }
+  }
+
+  render() {
+    // Reuse the child provided
+    // This makes it flexible to use whatever element is wanted (div, ul, etc)
+    return react.cloneElement(react.Children.only(this.props.children), {
+      style: styleHacks(this.props.children.props.style),
+      // Note: mouseMove handler is attached to document so it will still function
+      // when the user drags quickly and leaves the bounds of the element.
+      onMouseDown: this.onMouseDown,
+      onTouchStart: this.onTouchStart,
+      onMouseUp: this.onMouseUp,
+      onTouchEnd: this.onTouchEnd
+    });
+  }
+
+}
+
+_defineProperty$3(DraggableCore, "displayName", 'DraggableCore');
+
+_defineProperty$3(DraggableCore, "propTypes", {
+  /**
+   * `allowAnyClick` allows dragging using any mouse button.
+   * By default, we only accept the left button.
+   *
+   * Defaults to `false`.
+   */
+  allowAnyClick: propTypes.bool,
+
+  /**
+   * `disabled`, if true, stops the <Draggable> from dragging. All handlers,
+   * with the exception of `onMouseDown`, will not fire.
+   */
+  disabled: propTypes.bool,
+
+  /**
+   * By default, we add 'user-select:none' attributes to the document body
+   * to prevent ugly text selection during drag. If this is causing problems
+   * for your app, set this to `false`.
+   */
+  enableUserSelectHack: propTypes.bool,
+
+  /**
+   * `offsetParent`, if set, uses the passed DOM node to compute drag offsets
+   * instead of using the parent node.
+   */
+  offsetParent: function (props
+  /*: DraggableCoreProps*/
+  , propName
+  /*: $Keys<DraggableCoreProps>*/
+  ) {
+    if (props[propName] && props[propName].nodeType !== 1) {
+      throw new Error('Draggable\'s offsetParent must be a DOM Node.');
+    }
+  },
+
+  /**
+   * `grid` specifies the x and y that dragging should snap to.
+   */
+  grid: propTypes.arrayOf(propTypes.number),
+
+  /**
+   * `handle` specifies a selector to be used as the handle that initiates drag.
+   *
+   * Example:
+   *
+   * ```jsx
+   *   let App = React.createClass({
+   *       render: function () {
+   *         return (
+   *            <Draggable handle=".handle">
+   *              <div>
+   *                  <div className="handle">Click me to drag</div>
+   *                  <div>This is some other content</div>
+   *              </div>
+   *           </Draggable>
+   *         );
+   *       }
+   *   });
+   * ```
+   */
+  handle: propTypes.string,
+
+  /**
+   * `cancel` specifies a selector to be used to prevent drag initialization.
+   *
+   * Example:
+   *
+   * ```jsx
+   *   let App = React.createClass({
+   *       render: function () {
+   *           return(
+   *               <Draggable cancel=".cancel">
+   *                   <div>
+   *                     <div className="cancel">You can't drag from here</div>
+   *                     <div>Dragging here works fine</div>
+   *                   </div>
+   *               </Draggable>
+   *           );
+   *       }
+   *   });
+   * ```
+   */
+  cancel: propTypes.string,
+
+  /**
+   * Called when dragging starts.
+   * If this function returns the boolean false, dragging will be canceled.
+   */
+  onStart: propTypes.func,
+
+  /**
+   * Called while dragging.
+   * If this function returns the boolean false, dragging will be canceled.
+   */
+  onDrag: propTypes.func,
+
+  /**
+   * Called when dragging stops.
+   * If this function returns the boolean false, the drag will remain active.
+   */
+  onStop: propTypes.func,
+
+  /**
+   * A workaround option which can be passed if onMouseDown needs to be accessed,
+   * since it'll always be blocked (as there is internal use of onMouseDown)
+   */
+  onMouseDown: propTypes.func,
+
+  /**
+   * `scale`, if set, applies scaling while dragging an element
+   */
+  scale: propTypes.number,
+
+  /**
+   * These properties should be defined on the child, not here.
+   */
+  className: dontSetMe,
+  style: dontSetMe,
+  transform: dontSetMe
+});
+
+_defineProperty$3(DraggableCore, "defaultProps", {
+  allowAnyClick: false,
+  // by default only accept left click
+  cancel: null,
+  disabled: false,
+  enableUserSelectHack: true,
+  offsetParent: null,
+  handle: null,
+  grid: null,
+  transform: null,
+  onStart: function () {},
+  onDrag: function () {},
+  onStop: function () {},
+  onMouseDown: function () {},
+  scale: 1
+});
+
+function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
+
+function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+/*:: import type {DraggableEventHandler} from './utils/types';*/
+
+/*:: import type {Element as ReactElement} from 'react';*/
+
+/*:: type DraggableState = {
+  dragging: boolean,
+  dragged: boolean,
+  x: number, y: number,
+  slackX: number, slackY: number,
+  isElementSVG: boolean,
+  prevPropsPosition: ?ControlPosition,
+};*/
+
+/*:: export type DraggableProps = {
+  ...$Exact<DraggableCoreProps>,
+  axis: 'both' | 'x' | 'y' | 'none',
+  bounds: DraggableBounds | string | false,
+  defaultClassName: string,
+  defaultClassNameDragging: string,
+  defaultClassNameDragged: string,
+  defaultPosition: ControlPosition,
+  positionOffset: PositionOffsetControlPosition,
+  position: ControlPosition,
+  scale: number
+};*/
+
+//
+// Define <Draggable>
+//
+class Draggable extends react.Component {
+  // React 16.3+
+  // Arity (props, state)
+  static getDerivedStateFromProps({
+    position
+  }
+  /*: DraggableProps*/
+  , {
+    prevPropsPosition
+  }
+  /*: DraggableState*/
+  ) {
+    // Set x/y if a new position is provided in props that is different than the previous.
+    if (position && (!prevPropsPosition || position.x !== prevPropsPosition.x || position.y !== prevPropsPosition.y)) {
+      return {
+        x: position.x,
+        y: position.y,
+        prevPropsPosition: { ...position
+        }
+      };
+    }
+
+    return null;
+  }
+
+  constructor(props
+  /*: DraggableProps*/
+  ) {
+    super(props);
+
+    _defineProperty$4(this, "onDragStart", (e, coreData) => {
+
+      const shouldStart = this.props.onStart(e, createDraggableData(this, coreData)); // Kills start event on core as well, so move handlers are never bound.
+
+      if (shouldStart === false) return false;
+      this.setState({
+        dragging: true,
+        dragged: true
+      });
+    });
+
+    _defineProperty$4(this, "onDrag", (e, coreData) => {
+      if (!this.state.dragging) return false;
+      const uiData = createDraggableData(this, coreData);
+      const newState
+      /*: $Shape<DraggableState>*/
+      = {
+        x: uiData.x,
+        y: uiData.y
+      }; // Keep within bounds.
+
+      if (this.props.bounds) {
+        // Save original x and y.
+        const {
+          x,
+          y
+        } = newState; // Add slack to the values used to calculate bound position. This will ensure that if
+        // we start removing slack, the element won't react to it right away until it's been
+        // completely removed.
+
+        newState.x += this.state.slackX;
+        newState.y += this.state.slackY; // Get bound position. This will ceil/floor the x and y within the boundaries.
+
+        const [newStateX, newStateY] = getBoundPosition(this, newState.x, newState.y);
+        newState.x = newStateX;
+        newState.y = newStateY; // Recalculate slack by noting how much was shaved by the boundPosition handler.
+
+        newState.slackX = this.state.slackX + (x - newState.x);
+        newState.slackY = this.state.slackY + (y - newState.y); // Update the event we fire to reflect what really happened after bounds took effect.
+
+        uiData.x = newState.x;
+        uiData.y = newState.y;
+        uiData.deltaX = newState.x - this.state.x;
+        uiData.deltaY = newState.y - this.state.y;
+      } // Short-circuit if user's callback killed it.
+
+
+      const shouldUpdate = this.props.onDrag(e, uiData);
+      if (shouldUpdate === false) return false;
+      this.setState(newState);
+    });
+
+    _defineProperty$4(this, "onDragStop", (e, coreData) => {
+      if (!this.state.dragging) return false; // Short-circuit if user's callback killed it.
+
+      const shouldStop = this.props.onStop(e, createDraggableData(this, coreData));
+      if (shouldStop === false) return false;
+      const newState
+      /*: $Shape<DraggableState>*/
+      = {
+        dragging: false,
+        slackX: 0,
+        slackY: 0
+      }; // If this is a controlled component, the result of this operation will be to
+      // revert back to the old position. We expect a handler on `onDragStop`, at the least.
+
+      const controlled = Boolean(this.props.position);
+
+      if (controlled) {
+        const {
+          x,
+          y
+        } = this.props.position;
+        newState.x = x;
+        newState.y = y;
+      }
+
+      this.setState(newState);
+    });
+
+    this.state = {
+      // Whether or not we are currently dragging.
+      dragging: false,
+      // Whether or not we have been dragged before.
+      dragged: false,
+      // Current transform x and y.
+      x: props.position ? props.position.x : props.defaultPosition.x,
+      y: props.position ? props.position.y : props.defaultPosition.y,
+      prevPropsPosition: { ...props.position
+      },
+      // Used for compensating for out-of-bounds drags
+      slackX: 0,
+      slackY: 0,
+      // Can only determine if SVG after mounting
+      isElementSVG: false
+    };
+
+    if (props.position && !(props.onDrag || props.onStop)) {
+      // eslint-disable-next-line no-console
+      console.warn('A `position` was applied to this <Draggable>, without drag handlers. This will make this ' + 'component effectively undraggable. Please attach `onDrag` or `onStop` handlers so you can adjust the ' + '`position` of this element.');
+    }
+  }
+
+  componentDidMount() {
+    // Check to see if the element passed is an instanceof SVGElement
+    if (typeof window.SVGElement !== 'undefined' && reactDom.findDOMNode(this) instanceof window.SVGElement) {
+      this.setState({
+        isElementSVG: true
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    this.setState({
+      dragging: false
+    }); // prevents invariant if unmounted while dragging
+  }
+
+  render()
+  /*: ReactElement<any>*/
+  {
+    const {
+      axis,
+      bounds,
+      children,
+      defaultPosition,
+      defaultClassName,
+      defaultClassNameDragging,
+      defaultClassNameDragged,
+      position,
+      positionOffset,
+      scale,
+      ...draggableCoreProps
+    } = this.props;
+    let style = {};
+    let svgTransform = null; // If this is controlled, we don't want to move it - unless it's dragging.
+
+    const controlled = Boolean(position);
+    const draggable = !controlled || this.state.dragging;
+    const validPosition = position || defaultPosition;
+    const transformOpts = {
+      // Set left if horizontal drag is enabled
+      x: canDragX(this) && draggable ? this.state.x : validPosition.x,
+      // Set top if vertical drag is enabled
+      y: canDragY(this) && draggable ? this.state.y : validPosition.y
+    }; // If this element was SVG, we use the `transform` attribute.
+
+    if (this.state.isElementSVG) {
+      svgTransform = createSVGTransform(transformOpts, positionOffset);
+    } else {
+      // Add a CSS transform to move the element around. This allows us to move the element around
+      // without worrying about whether or not it is relatively or absolutely positioned.
+      // If the item you are dragging already has a transform set, wrap it in a <span> so <Draggable>
+      // has a clean slate.
+      style = createCSSTransform(transformOpts, positionOffset);
+    } // Mark with class while dragging
+
+
+    const className = classnames(children.props.className || '', defaultClassName, {
+      [defaultClassNameDragging]: this.state.dragging,
+      [defaultClassNameDragged]: this.state.dragged
+    }); // Reuse the child provided
+    // This makes it flexible to use whatever element is wanted (div, ul, etc)
+
+    return react.createElement(DraggableCore, _extends$3({}, draggableCoreProps, {
+      onStart: this.onDragStart,
+      onDrag: this.onDrag,
+      onStop: this.onDragStop
+    }), react.cloneElement(react.Children.only(children), {
+      className: className,
+      style: { ...children.props.style,
+        ...style
+      },
+      transform: svgTransform
+    }));
+  }
+
+}
+
+_defineProperty$4(Draggable, "displayName", 'Draggable');
+
+_defineProperty$4(Draggable, "propTypes", { // Accepts all props <DraggableCore> accepts.
+  ...DraggableCore.propTypes,
+
+  /**
+   * `axis` determines which axis the draggable can move.
+   *
+   *  Note that all callbacks will still return data as normal. This only
+   *  controls flushing to the DOM.
+   *
+   * 'both' allows movement horizontally and vertically.
+   * 'x' limits movement to horizontal axis.
+   * 'y' limits movement to vertical axis.
+   * 'none' limits all movement.
+   *
+   * Defaults to 'both'.
+   */
+  axis: propTypes.oneOf(['both', 'x', 'y', 'none']),
+
+  /**
+   * `bounds` determines the range of movement available to the element.
+   * Available values are:
+   *
+   * 'parent' restricts movement within the Draggable's parent node.
+   *
+   * Alternatively, pass an object with the following properties, all of which are optional:
+   *
+   * {left: LEFT_BOUND, right: RIGHT_BOUND, bottom: BOTTOM_BOUND, top: TOP_BOUND}
+   *
+   * All values are in px.
+   *
+   * Example:
+   *
+   * ```jsx
+   *   let App = React.createClass({
+   *       render: function () {
+   *         return (
+   *            <Draggable bounds={{right: 300, bottom: 300}}>
+   *              <div>Content</div>
+   *           </Draggable>
+   *         );
+   *       }
+   *   });
+   * ```
+   */
+  bounds: propTypes.oneOfType([propTypes.shape({
+    left: propTypes.number,
+    right: propTypes.number,
+    top: propTypes.number,
+    bottom: propTypes.number
+  }), propTypes.string, propTypes.oneOf([false])]),
+  defaultClassName: propTypes.string,
+  defaultClassNameDragging: propTypes.string,
+  defaultClassNameDragged: propTypes.string,
+
+  /**
+   * `defaultPosition` specifies the x and y that the dragged item should start at
+   *
+   * Example:
+   *
+   * ```jsx
+   *      let App = React.createClass({
+   *          render: function () {
+   *              return (
+   *                  <Draggable defaultPosition={{x: 25, y: 25}}>
+   *                      <div>I start with transformX: 25px and transformY: 25px;</div>
+   *                  </Draggable>
+   *              );
+   *          }
+   *      });
+   * ```
+   */
+  defaultPosition: propTypes.shape({
+    x: propTypes.number,
+    y: propTypes.number
+  }),
+  positionOffset: propTypes.shape({
+    x: propTypes.oneOfType([propTypes.number, propTypes.string]),
+    y: propTypes.oneOfType([propTypes.number, propTypes.string])
+  }),
+
+  /**
+   * `position`, if present, defines the current position of the element.
+   *
+   *  This is similar to how form elements in React work - if no `position` is supplied, the component
+   *  is uncontrolled.
+   *
+   * Example:
+   *
+   * ```jsx
+   *      let App = React.createClass({
+   *          render: function () {
+   *              return (
+   *                  <Draggable position={{x: 25, y: 25}}>
+   *                      <div>I start with transformX: 25px and transformY: 25px;</div>
+   *                  </Draggable>
+   *              );
+   *          }
+   *      });
+   * ```
+   */
+  position: propTypes.shape({
+    x: propTypes.number,
+    y: propTypes.number
+  }),
+
+  /**
+   * These properties should be defined on the child, not here.
+   */
+  className: dontSetMe,
+  style: dontSetMe,
+  transform: dontSetMe
+});
+
+_defineProperty$4(Draggable, "defaultProps", { ...DraggableCore.defaultProps,
+  axis: 'both',
+  bounds: false,
+  defaultClassName: 'react-draggable',
+  defaultClassNameDragging: 'react-draggable-dragging',
+  defaultClassNameDragged: 'react-draggable-dragged',
+  defaultPosition: {
+    x: 0,
+    y: 0
+  },
+  position: null,
+  scale: 1
+});
+
+function cloneElement(element, props) {
+  if (props.style && element.props.style) {
+    props.style = { ...element.props.style,
+      ...props.style
+    };
+  }
+
+  if (props.className && element.props.className) {
+    props.className = `${element.props.className} ${props.className}`;
+  }
+
+  return react.cloneElement(element, props);
+}
+
+class Resizable extends react.Component {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty$2(this, "state", {
+      slackW: 0,
+      slackH: 0
+    });
+  }
+
+  lockAspectRatio(width, height, aspectRatio) {
+    height = width / aspectRatio;
+    width = height * aspectRatio;
+    return [width, height];
+  } // If you do this, be careful of constraints
+
+
+  runConstraints(width, height) {
+    const [min, max] = [this.props.minConstraints, this.props.maxConstraints];
+    if (!min && !max) return [width, height]; // Fit width & height to aspect ratio
+
+    if (this.props.lockAspectRatio) {
+      if (height === this.props.height) {
+        const ratio = this.props.width / this.props.height;
+        height = width / ratio;
+        width = height * ratio;
+      } else {
+        // Take into account vertical resize with N/S handles on locked aspect
+        // ratio. Calculate the change height-first, instead of width-first
+        const ratio = this.props.height / this.props.width;
+        width = height / ratio;
+        height = width * ratio;
+      }
+    }
+
+    const [oldW, oldH] = [width, height]; // Add slack to the values used to calculate bound position. This will ensure that if
+    // we start removing slack, the element won't react to it right away until it's been
+    // completely removed.
+
+    let {
+      slackW,
+      slackH
+    } = this.state;
+    width += slackW;
+    height += slackH;
+
+    if (min) {
+      width = Math.max(min[0], width);
+      height = Math.max(min[1], height);
+    }
+
+    if (max) {
+      width = Math.min(max[0], width);
+      height = Math.min(max[1], height);
+    } // If the numbers changed, we must have introduced some slack. Record it for the next iteration.
+
+
+    slackW += oldW - width;
+    slackH += oldH - height;
+
+    if (slackW !== this.state.slackW || slackH !== this.state.slackH) {
+      this.setState({
+        slackW,
+        slackH
+      });
+    }
+
+    return [width, height];
+  }
+  /**
+   * Wrapper around drag events to provide more useful data.
+   *
+   * @param  {String} handlerName Handler name to wrap.
+   * @return {Function}           Handler function.
+   */
+
+
+  resizeHandler(handlerName, axis) {
+    return (e, {
+      node,
+      deltaX,
+      deltaY
+    }) => {
+      deltaX /= this.props.transformScale;
+      deltaY /= this.props.transformScale; // Axis restrictions
+
+      const canDragX = (this.props.axis === 'both' || this.props.axis === 'x') && ['n', 's'].indexOf(axis) === -1;
+      const canDragY = (this.props.axis === 'both' || this.props.axis === 'y') && ['e', 'w'].indexOf(axis) === -1; // reverse delta if using top or left drag handles
+
+      if (canDragX && axis[axis.length - 1] === 'w') {
+        deltaX = -deltaX;
+      }
+
+      if (canDragY && axis[0] === 'n') {
+        deltaY = -deltaY;
+      } // Update w/h
+
+
+      let width = this.props.width + (canDragX ? deltaX : 0);
+      let height = this.props.height + (canDragY ? deltaY : 0); // Early return if no change
+
+      const widthChanged = width !== this.props.width;
+      const heightChanged = height !== this.props.height;
+      if (handlerName === 'onResize' && !widthChanged && !heightChanged) return;
+      [width, height] = this.runConstraints(width, height); // Set the appropriate state for this handler.
+
+      const newState = {};
+
+      if (handlerName === 'onResizeStart') ; else if (handlerName === 'onResizeStop') {
+        newState.slackW = newState.slackH = 0;
+      } else {
+        // Early return if no change after constraints
+        if (width === this.props.width && height === this.props.height) return;
+      }
+
+      const hasCb = typeof this.props[handlerName] === 'function';
+
+      if (hasCb) {
+        // $FlowIgnore isn't refining this correctly to SyntheticEvent
+        if (typeof e.persist === 'function') e.persist();
+        this.setState(newState, () => this.props[handlerName](e, {
+          node,
+          size: {
+            width,
+            height
+          },
+          handle: axis
+        }));
+      } else {
+        this.setState(newState);
+      }
+    };
+  }
+
+  renderResizeHandle(resizeHandle) {
+    const {
+      handle
+    } = this.props;
+
+    if (handle) {
+      if (typeof handle === 'function') {
+        return handle(resizeHandle);
+      }
+
+      return handle;
+    }
+
+    return react.createElement("span", {
+      className: `react-resizable-handle react-resizable-handle-${resizeHandle}`
+    });
+  }
+
+  render() {
+    // eslint-disable-next-line no-unused-vars
+    const {
+      children,
+      draggableOpts,
+      width,
+      height,
+      handleSize,
+      lockAspectRatio,
+      axis,
+      minConstraints,
+      maxConstraints,
+      onResize,
+      onResizeStop,
+      onResizeStart,
+      resizeHandles,
+      transformScale,
+      ...p
+    } = this.props;
+    const className = p.className ? `${p.className} react-resizable` : 'react-resizable'; // What we're doing here is getting the child of this element, and cloning it with this element's props.
+    // We are then defining its children as:
+    // Its original children (resizable's child's children), and
+    // One or more draggable handles.
+
+    return cloneElement(children, { ...p,
+      className,
+      children: [children.props.children, resizeHandles.map(h => react.createElement(DraggableCore, _extends$2({}, draggableOpts, {
+        key: `resizableHandle-${h}`,
+        onStop: this.resizeHandler('onResizeStop', h),
+        onStart: this.resizeHandler('onResizeStart', h),
+        onDrag: this.resizeHandler('onResize', h)
+      }), this.renderResizeHandle(h)))]
+    });
+  }
+
+}
+
+_defineProperty$2(Resizable, "propTypes", {
+  //
+  // Required Props
+  //
+  // Require that one and only one child be present.
+  children: propTypes.element.isRequired,
+  // Initial w/h
+  width: propTypes.number.isRequired,
+  height: propTypes.number.isRequired,
+  //
+  // Optional props
+  //
+  // Custom resize handle
+  handle: propTypes.element,
+  // If you change this, be sure to update your css
+  handleSize: propTypes.array,
+  // Defines which resize handles should be rendered (default: 'se')
+  // Allows for any combination of:
+  // 's' - South handle (bottom-center)
+  // 'w' - West handle (left-center)
+  // 'e' - East handle (right-center)
+  // 'n' - North handle (top-center)
+  // 'sw' - Southwest handle (bottom-left)
+  // 'nw' - Northwest handle (top-left)
+  // 'se' - Southeast handle (bottom-right)
+  // 'ne' - Northeast handle (top-center)
+  resizeHandles: propTypes.arrayOf(propTypes.oneOf(['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne'])),
+  transformScale: propTypes.number,
+  // If true, will only allow width/height to move in lockstep
+  lockAspectRatio: propTypes.bool,
+  // Restricts resizing to a particular axis (default: 'both')
+  // 'both' - allows resizing by width or height
+  // 'x' - only allows the width to be changed
+  // 'y' - only allows the height to be changed
+  // 'none' - disables resizing altogether
+  axis: propTypes.oneOf(['both', 'x', 'y', 'none']),
+  // Min/max size
+  minConstraints: propTypes.arrayOf(propTypes.number),
+  maxConstraints: propTypes.arrayOf(propTypes.number),
+  // Callbacks
+  onResizeStop: propTypes.func,
+  onResizeStart: propTypes.func,
+  onResize: propTypes.func,
+  // These will be passed wholesale to react-draggable's DraggableCore
+  draggableOpts: propTypes.object
+});
+
+_defineProperty$2(Resizable, "defaultProps", {
+  handleSize: [20, 20],
+  lockAspectRatio: false,
+  axis: 'both',
+  minConstraints: [20, 20],
+  maxConstraints: [Infinity, Infinity],
+  resizeHandles: ['se'],
+  transformScale: 1
+});
+
+class ResizableBox extends react.Component {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty$2(this, "state", {
+      width: this.props.width,
+      height: this.props.height,
+      propsWidth: this.props.width,
+      propsHeight: this.props.height
+    });
+
+    _defineProperty$2(this, "onResize", (e, data) => {
+      const {
+        size
+      } = data;
+
+      if (this.props.onResize) {
+        e.persist && e.persist();
+        this.setState(size, () => this.props.onResize && this.props.onResize(e, data));
+      } else {
+        this.setState(size);
+      }
+    });
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    // If parent changes height/width, set that in our state.
+    if (state.propsWidth !== props.width || state.propsHeight !== props.height) {
+      return {
+        width: props.width,
+        height: props.height,
+        propsWidth: props.width,
+        propsHeight: props.height
+      };
+    }
+
+    return null;
+  }
+
+  render() {
+    // Basic wrapper around a Resizable instance.
+    // If you use Resizable directly, you are responsible for updating the child component
+    // with a new width and height.
+    const {
+      style = {},
+      handle,
+      handleSize,
+      onResize,
+      onResizeStart,
+      onResizeStop,
+      draggableOpts,
+      minConstraints,
+      maxConstraints,
+      lockAspectRatio,
+      axis,
+      width,
+      height,
+      resizeHandles,
+      ...props
+    } = this.props;
+    return react.createElement(Resizable, {
+      handle: handle,
+      handleSize: handleSize,
+      width: this.state.width,
+      height: this.state.height,
+      onResizeStart: onResizeStart,
+      onResize: this.onResize,
+      onResizeStop: onResizeStop,
+      draggableOpts: draggableOpts,
+      minConstraints: minConstraints,
+      maxConstraints: maxConstraints,
+      lockAspectRatio: lockAspectRatio,
+      axis: axis,
+      resizeHandles: resizeHandles
+    }, react.createElement("div", _extends$2({
+      style: { ...style,
+        width: this.state.width + 'px',
+        height: this.state.height + 'px'
+      }
+    }, props)));
+  }
+
+}
+
+_defineProperty$2(ResizableBox, "propTypes", {
+  style: propTypes.object,
+  height: propTypes.number,
+  width: propTypes.number,
+  onResize: propTypes.func,
+  onResizeStart: propTypes.func,
+  onResizeStop: propTypes.func,
+  handle: propTypes.object,
+  handleSize: propTypes.array,
+  draggableOpts: propTypes.object,
+  minConstraints: propTypes.arrayOf(propTypes.number),
+  maxConstraints: propTypes.arrayOf(propTypes.number),
+  lockAspectRatio: propTypes.bool,
+  axis: propTypes.oneOf(['both', 'x', 'y', 'none']),
+  resizeHandles: propTypes.arrayOf(propTypes.oneOf(['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne']))
+});
+
+_defineProperty$2(ResizableBox, "defaultProps", {
+  handleSize: [20, 20]
+});
+
+var defaults = createCommonjsModule(function (module) {
+function getDefaults() {
+  return {
+    baseUrl: null,
+    breaks: false,
+    gfm: true,
+    headerIds: true,
+    headerPrefix: '',
+    highlight: null,
+    langPrefix: 'language-',
+    mangle: true,
+    pedantic: false,
+    renderer: null,
+    sanitize: false,
+    sanitizer: null,
+    silent: false,
+    smartLists: false,
+    smartypants: false,
+    xhtml: false
+  };
+}
+
+function changeDefaults(newDefaults) {
+  module.exports.defaults = newDefaults;
+}
+
+module.exports = {
+  defaults: getDefaults(),
+  getDefaults,
+  changeDefaults
+};
+});
+var defaults_1 = defaults.defaults;
+var defaults_2 = defaults.getDefaults;
+var defaults_3 = defaults.changeDefaults;
+
+/**
+ * Helpers
+ */
+const escapeTest = /[&<>"']/;
+const escapeReplace = /[&<>"']/g;
+const escapeTestNoEncode = /[<>"']|&(?!#?\w+;)/;
+const escapeReplaceNoEncode = /[<>"']|&(?!#?\w+;)/g;
+const escapeReplacements = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+const getEscapeReplacement = (ch) => escapeReplacements[ch];
+function escape(html, encode) {
+  if (encode) {
+    if (escapeTest.test(html)) {
+      return html.replace(escapeReplace, getEscapeReplacement);
+    }
+  } else {
+    if (escapeTestNoEncode.test(html)) {
+      return html.replace(escapeReplaceNoEncode, getEscapeReplacement);
+    }
+  }
+
+  return html;
+}
+
+const unescapeTest = /&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/ig;
+
+function unescape(html) {
+  // explicitly match decimal, hex, and named HTML entities
+  return html.replace(unescapeTest, (_, n) => {
+    n = n.toLowerCase();
+    if (n === 'colon') return ':';
+    if (n.charAt(0) === '#') {
+      return n.charAt(1) === 'x'
+        ? String.fromCharCode(parseInt(n.substring(2), 16))
+        : String.fromCharCode(+n.substring(1));
+    }
+    return '';
+  });
+}
+
+const caret = /(^|[^\[])\^/g;
+function edit(regex, opt) {
+  regex = regex.source || regex;
+  opt = opt || '';
+  const obj = {
+    replace: (name, val) => {
+      val = val.source || val;
+      val = val.replace(caret, '$1');
+      regex = regex.replace(name, val);
+      return obj;
+    },
+    getRegex: () => {
+      return new RegExp(regex, opt);
+    }
+  };
+  return obj;
+}
+
+const nonWordAndColonTest = /[^\w:]/g;
+const originIndependentUrl = /^$|^[a-z][a-z0-9+.-]*:|^[?#]/i;
+function cleanUrl(sanitize, base, href) {
+  if (sanitize) {
+    let prot;
+    try {
+      prot = decodeURIComponent(unescape(href))
+        .replace(nonWordAndColonTest, '')
+        .toLowerCase();
+    } catch (e) {
+      return null;
+    }
+    if (prot.indexOf('javascript:') === 0 || prot.indexOf('vbscript:') === 0 || prot.indexOf('data:') === 0) {
+      return null;
+    }
+  }
+  if (base && !originIndependentUrl.test(href)) {
+    href = resolveUrl(base, href);
+  }
+  try {
+    href = encodeURI(href).replace(/%25/g, '%');
+  } catch (e) {
+    return null;
+  }
+  return href;
+}
+
+const baseUrls = {};
+const justDomain = /^[^:]+:\/*[^/]*$/;
+const protocol = /^([^:]+:)[\s\S]*$/;
+const domain$1 = /^([^:]+:\/*[^/]*)[\s\S]*$/;
+
+function resolveUrl(base, href) {
+  if (!baseUrls[' ' + base]) {
+    // we can ignore everything in base after the last slash of its path component,
+    // but we might need to add _that_
+    // https://tools.ietf.org/html/rfc3986#section-3
+    if (justDomain.test(base)) {
+      baseUrls[' ' + base] = base + '/';
+    } else {
+      baseUrls[' ' + base] = rtrim(base, '/', true);
+    }
+  }
+  base = baseUrls[' ' + base];
+  const relativeBase = base.indexOf(':') === -1;
+
+  if (href.substring(0, 2) === '//') {
+    if (relativeBase) {
+      return href;
+    }
+    return base.replace(protocol, '$1') + href;
+  } else if (href.charAt(0) === '/') {
+    if (relativeBase) {
+      return href;
+    }
+    return base.replace(domain$1, '$1') + href;
+  } else {
+    return base + href;
+  }
+}
+
+const noopTest = { exec: function noopTest() {} };
+
+function merge(obj) {
+  let i = 1,
+    target,
+    key;
+
+  for (; i < arguments.length; i++) {
+    target = arguments[i];
+    for (key in target) {
+      if (Object.prototype.hasOwnProperty.call(target, key)) {
+        obj[key] = target[key];
+      }
+    }
+  }
+
+  return obj;
+}
+
+function splitCells(tableRow, count) {
+  // ensure that every cell-delimiting pipe has a space
+  // before it to distinguish it from an escaped pipe
+  const row = tableRow.replace(/\|/g, (match, offset, str) => {
+      let escaped = false,
+        curr = offset;
+      while (--curr >= 0 && str[curr] === '\\') escaped = !escaped;
+      if (escaped) {
+        // odd number of slashes means | is escaped
+        // so we leave it alone
+        return '|';
+      } else {
+        // add space before unescaped |
+        return ' |';
+      }
+    }),
+    cells = row.split(/ \|/);
+  let i = 0;
+
+  if (cells.length > count) {
+    cells.splice(count);
+  } else {
+    while (cells.length < count) cells.push('');
+  }
+
+  for (; i < cells.length; i++) {
+    // leading or trailing whitespace is ignored per the gfm spec
+    cells[i] = cells[i].trim().replace(/\\\|/g, '|');
+  }
+  return cells;
+}
+
+// Remove trailing 'c's. Equivalent to str.replace(/c*$/, '').
+// /c*$/ is vulnerable to REDOS.
+// invert: Remove suffix of non-c chars instead. Default falsey.
+function rtrim(str, c, invert) {
+  const l = str.length;
+  if (l === 0) {
+    return '';
+  }
+
+  // Length of suffix matching the invert condition.
+  let suffLen = 0;
+
+  // Step left until we fail to match the invert condition.
+  while (suffLen < l) {
+    const currChar = str.charAt(l - suffLen - 1);
+    if (currChar === c && !invert) {
+      suffLen++;
+    } else if (currChar !== c && invert) {
+      suffLen++;
+    } else {
+      break;
+    }
+  }
+
+  return str.substr(0, l - suffLen);
+}
+
+function findClosingBracket(str, b) {
+  if (str.indexOf(b[1]) === -1) {
+    return -1;
+  }
+  const l = str.length;
+  let level = 0,
+    i = 0;
+  for (; i < l; i++) {
+    if (str[i] === '\\') {
+      i++;
+    } else if (str[i] === b[0]) {
+      level++;
+    } else if (str[i] === b[1]) {
+      level--;
+      if (level < 0) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+function checkSanitizeDeprecation(opt) {
+  if (opt && opt.sanitize && !opt.silent) {
+    console.warn('marked(): sanitize and sanitizer parameters are deprecated since version 0.7.0, should not be used and will be removed in the future. Read more here: https://marked.js.org/#/USING_ADVANCED.md#options');
+  }
+}
+
+var helpers = {
+  escape,
+  unescape,
+  edit,
+  cleanUrl,
+  resolveUrl,
+  noopTest,
+  merge,
+  splitCells,
+  rtrim,
+  findClosingBracket,
+  checkSanitizeDeprecation
+};
+
+const {
+  noopTest: noopTest$1,
+  edit: edit$1,
+  merge: merge$1
+} = helpers;
+
+/**
+ * Block-Level Grammar
+ */
+const block = {
+  newline: /^\n+/,
+  code: /^( {4}[^\n]+\n*)+/,
+  fences: /^ {0,3}(`{3,}(?=[^`\n]*\n)|~{3,})([^\n]*)\n(?:|([\s\S]*?)\n)(?: {0,3}\1[~`]* *(?:\n+|$)|$)/,
+  hr: /^ {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\* *){3,})(?:\n+|$)/,
+  heading: /^ {0,3}(#{1,6}) +([^\n]*?)(?: +#+)? *(?:\n+|$)/,
+  blockquote: /^( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/,
+  list: /^( {0,3})(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+  html: '^ {0,3}(?:' // optional indentation
+    + '<(script|pre|style)[\\s>][\\s\\S]*?(?:</\\1>[^\\n]*\\n+|$)' // (1)
+    + '|comment[^\\n]*(\\n+|$)' // (2)
+    + '|<\\?[\\s\\S]*?\\?>\\n*' // (3)
+    + '|<![A-Z][\\s\\S]*?>\\n*' // (4)
+    + '|<!\\[CDATA\\[[\\s\\S]*?\\]\\]>\\n*' // (5)
+    + '|</?(tag)(?: +|\\n|/?>)[\\s\\S]*?(?:\\n{2,}|$)' // (6)
+    + '|<(?!script|pre|style)([a-z][\\w-]*)(?:attribute)*? */?>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:\\n{2,}|$)' // (7) open tag
+    + '|</(?!script|pre|style)[a-z][\\w-]*\\s*>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:\\n{2,}|$)' // (7) closing tag
+    + ')',
+  def: /^ {0,3}\[(label)\]: *\n? *<?([^\s>]+)>?(?:(?: +\n? *| *\n *)(title))? *(?:\n+|$)/,
+  nptable: noopTest$1,
+  table: noopTest$1,
+  lheading: /^([^\n]+)\n {0,3}(=+|-+) *(?:\n+|$)/,
+  // regex template, placeholders will be replaced according to different paragraph
+  // interruption rules of commonmark and the original markdown spec:
+  _paragraph: /^([^\n]+(?:\n(?!hr|heading|lheading|blockquote|fences|list|html)[^\n]+)*)/,
+  text: /^[^\n]+/
+};
+
+block._label = /(?!\s*\])(?:\\[\[\]]|[^\[\]])+/;
+block._title = /(?:"(?:\\"?|[^"\\])*"|'[^'\n]*(?:\n[^'\n]+)*\n?'|\([^()]*\))/;
+block.def = edit$1(block.def)
+  .replace('label', block._label)
+  .replace('title', block._title)
+  .getRegex();
+
+block.bullet = /(?:[*+-]|\d{1,9}\.)/;
+block.item = /^( *)(bull) ?[^\n]*(?:\n(?!\1bull ?)[^\n]*)*/;
+block.item = edit$1(block.item, 'gm')
+  .replace(/bull/g, block.bullet)
+  .getRegex();
+
+block.list = edit$1(block.list)
+  .replace(/bull/g, block.bullet)
+  .replace('hr', '\\n+(?=\\1?(?:(?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$))')
+  .replace('def', '\\n+(?=' + block.def.source + ')')
+  .getRegex();
+
+block._tag = 'address|article|aside|base|basefont|blockquote|body|caption'
+  + '|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption'
+  + '|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe'
+  + '|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option'
+  + '|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr'
+  + '|track|ul';
+block._comment = /<!--(?!-?>)[\s\S]*?-->/;
+block.html = edit$1(block.html, 'i')
+  .replace('comment', block._comment)
+  .replace('tag', block._tag)
+  .replace('attribute', / +[a-zA-Z:_][\w.:-]*(?: *= *"[^"\n]*"| *= *'[^'\n]*'| *= *[^\s"'=<>`]+)?/)
+  .getRegex();
+
+block.paragraph = edit$1(block._paragraph)
+  .replace('hr', block.hr)
+  .replace('heading', ' {0,3}#{1,6} ')
+  .replace('|lheading', '') // setex headings don't interrupt commonmark paragraphs
+  .replace('blockquote', ' {0,3}>')
+  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
+  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
+  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|!--)')
+  .replace('tag', block._tag) // pars can be interrupted by type (6) html blocks
+  .getRegex();
+
+block.blockquote = edit$1(block.blockquote)
+  .replace('paragraph', block.paragraph)
+  .getRegex();
+
+/**
+ * Normal Block Grammar
+ */
+
+block.normal = merge$1({}, block);
+
+/**
+ * GFM Block Grammar
+ */
+
+block.gfm = merge$1({}, block.normal, {
+  nptable: '^ *([^|\\n ].*\\|.*)\\n' // Header
+    + ' *([-:]+ *\\|[-| :]*)' // Align
+    + '(?:\\n((?:(?!\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)', // Cells
+  table: '^ *\\|(.+)\\n' // Header
+    + ' *\\|?( *[-:]+[-| :]*)' // Align
+    + '(?:\\n *((?:(?!\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)' // Cells
+});
+
+block.gfm.nptable = edit$1(block.gfm.nptable)
+  .replace('hr', block.hr)
+  .replace('heading', ' {0,3}#{1,6} ')
+  .replace('blockquote', ' {0,3}>')
+  .replace('code', ' {4}[^\\n]')
+  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
+  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
+  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|!--)')
+  .replace('tag', block._tag) // tables can be interrupted by type (6) html blocks
+  .getRegex();
+
+block.gfm.table = edit$1(block.gfm.table)
+  .replace('hr', block.hr)
+  .replace('heading', ' {0,3}#{1,6} ')
+  .replace('blockquote', ' {0,3}>')
+  .replace('code', ' {4}[^\\n]')
+  .replace('fences', ' {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n')
+  .replace('list', ' {0,3}(?:[*+-]|1[.)]) ') // only lists starting from 1 can interrupt
+  .replace('html', '</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|!--)')
+  .replace('tag', block._tag) // tables can be interrupted by type (6) html blocks
+  .getRegex();
+
+/**
+ * Pedantic grammar (original John Gruber's loose markdown specification)
+ */
+
+block.pedantic = merge$1({}, block.normal, {
+  html: edit$1(
+    '^ *(?:comment *(?:\\n|\\s*$)'
+    + '|<(tag)[\\s\\S]+?</\\1> *(?:\\n{2,}|\\s*$)' // closed tag
+    + '|<tag(?:"[^"]*"|\'[^\']*\'|\\s[^\'"/>\\s]*)*?/?> *(?:\\n{2,}|\\s*$))')
+    .replace('comment', block._comment)
+    .replace(/tag/g, '(?!(?:'
+      + 'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub'
+      + '|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)'
+      + '\\b)\\w+(?!:|[^\\w\\s@]*@)\\b')
+    .getRegex(),
+  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,
+  heading: /^ *(#{1,6}) *([^\n]+?) *(?:#+ *)?(?:\n+|$)/,
+  fences: noopTest$1, // fences not supported
+  paragraph: edit$1(block.normal._paragraph)
+    .replace('hr', block.hr)
+    .replace('heading', ' *#{1,6} *[^\n]')
+    .replace('lheading', block.lheading)
+    .replace('blockquote', ' {0,3}>')
+    .replace('|fences', '')
+    .replace('|list', '')
+    .replace('|html', '')
+    .getRegex()
+});
+
+/**
+ * Inline-Level Grammar
+ */
+const inline = {
+  escape: /^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/,
+  autolink: /^<(scheme:[^\s\x00-\x1f<>]*|email)>/,
+  url: noopTest$1,
+  tag: '^comment'
+    + '|^</[a-zA-Z][\\w:-]*\\s*>' // self-closing tag
+    + '|^<[a-zA-Z][\\w-]*(?:attribute)*?\\s*/?>' // open tag
+    + '|^<\\?[\\s\\S]*?\\?>' // processing instruction, e.g. <?php ?>
+    + '|^<![a-zA-Z]+\\s[\\s\\S]*?>' // declaration, e.g. <!DOCTYPE html>
+    + '|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>', // CDATA section
+  link: /^!?\[(label)\]\(\s*(href)(?:\s+(title))?\s*\)/,
+  reflink: /^!?\[(label)\]\[(?!\s*\])((?:\\[\[\]]?|[^\[\]\\])+)\]/,
+  nolink: /^!?\[(?!\s*\])((?:\[[^\[\]]*\]|\\[\[\]]|[^\[\]])*)\](?:\[\])?/,
+  strong: /^__([^\s_])__(?!_)|^\*\*([^\s*])\*\*(?!\*)|^__([^\s][\s\S]*?[^\s])__(?!_)|^\*\*([^\s][\s\S]*?[^\s])\*\*(?!\*)/,
+  em: /^_([^\s_])_(?!_)|^\*([^\s*<\[])\*(?!\*)|^_([^\s<][\s\S]*?[^\s_])_(?!_|[^\spunctuation])|^_([^\s_<][\s\S]*?[^\s])_(?!_|[^\spunctuation])|^\*([^\s<"][\s\S]*?[^\s\*])\*(?!\*|[^\spunctuation])|^\*([^\s*"<\[][\s\S]*?[^\s])\*(?!\*)/,
+  code: /^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/,
+  br: /^( {2,}|\\)\n(?!\s*$)/,
+  del: noopTest$1,
+  text: /^(`+|[^`])(?:[\s\S]*?(?:(?=[\\<!\[`*]|\b_|$)|[^ ](?= {2,}\n))|(?= {2,}\n))/
+};
+
+// list of punctuation marks from common mark spec
+// without ` and ] to workaround Rule 17 (inline code blocks/links)
+inline._punctuation = '!"#$%&\'()*+,\\-./:;<=>?@\\[^_{|}~';
+inline.em = edit$1(inline.em).replace(/punctuation/g, inline._punctuation).getRegex();
+
+inline._escapes = /\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/g;
+
+inline._scheme = /[a-zA-Z][a-zA-Z0-9+.-]{1,31}/;
+inline._email = /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/;
+inline.autolink = edit$1(inline.autolink)
+  .replace('scheme', inline._scheme)
+  .replace('email', inline._email)
+  .getRegex();
+
+inline._attribute = /\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/;
+
+inline.tag = edit$1(inline.tag)
+  .replace('comment', block._comment)
+  .replace('attribute', inline._attribute)
+  .getRegex();
+
+inline._label = /(?:\[[^\[\]]*\]|\\.|`[^`]*`|[^\[\]\\`])*?/;
+inline._href = /<(?:\\[<>]?|[^\s<>\\])*>|[^\s\x00-\x1f]*/;
+inline._title = /"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/;
+
+inline.link = edit$1(inline.link)
+  .replace('label', inline._label)
+  .replace('href', inline._href)
+  .replace('title', inline._title)
+  .getRegex();
+
+inline.reflink = edit$1(inline.reflink)
+  .replace('label', inline._label)
+  .getRegex();
+
+/**
+ * Normal Inline Grammar
+ */
+
+inline.normal = merge$1({}, inline);
+
+/**
+ * Pedantic Inline Grammar
+ */
+
+inline.pedantic = merge$1({}, inline.normal, {
+  strong: /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
+  em: /^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/,
+  link: edit$1(/^!?\[(label)\]\((.*?)\)/)
+    .replace('label', inline._label)
+    .getRegex(),
+  reflink: edit$1(/^!?\[(label)\]\s*\[([^\]]*)\]/)
+    .replace('label', inline._label)
+    .getRegex()
+});
+
+/**
+ * GFM Inline Grammar
+ */
+
+inline.gfm = merge$1({}, inline.normal, {
+  escape: edit$1(inline.escape).replace('])', '~|])').getRegex(),
+  _extended_email: /[A-Za-z0-9._+-]+(@)[a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]*[a-zA-Z0-9])+(?![-_])/,
+  url: /^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/,
+  _backpedal: /(?:[^?!.,:;*_~()&]+|\([^)]*\)|&(?![a-zA-Z0-9]+;$)|[?!.,:;*_~)]+(?!$))+/,
+  del: /^~+(?=\S)([\s\S]*?\S)~+/,
+  text: /^(`+|[^`])(?:[\s\S]*?(?:(?=[\\<!\[`*~]|\b_|https?:\/\/|ftp:\/\/|www\.|$)|[^ ](?= {2,}\n)|[^a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-](?=[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@))|(?= {2,}\n|[a-zA-Z0-9.!#$%&'*+\/=?_`{\|}~-]+@))/
+});
+
+inline.gfm.url = edit$1(inline.gfm.url, 'i')
+  .replace('email', inline.gfm._extended_email)
+  .getRegex();
+/**
+ * GFM + Line Breaks Inline Grammar
+ */
+
+inline.breaks = merge$1({}, inline.gfm, {
+  br: edit$1(inline.br).replace('{2,}', '*').getRegex(),
+  text: edit$1(inline.gfm.text)
+    .replace('\\b_', '\\b_| {2,}\\n')
+    .replace(/\{2,\}/g, '*')
+    .getRegex()
+});
+
+var rules = {
+  block,
+  inline
+};
+
+const { defaults: defaults$1 } = defaults;
+const { block: block$1 } = rules;
+const {
+  rtrim: rtrim$1,
+  splitCells: splitCells$1,
+  escape: escape$1
+} = helpers;
+
+/**
+ * Block Lexer
+ */
+var Lexer_1 = class Lexer {
+  constructor(options) {
+    this.tokens = [];
+    this.tokens.links = Object.create(null);
+    this.options = options || defaults$1;
+    this.rules = block$1.normal;
+
+    if (this.options.pedantic) {
+      this.rules = block$1.pedantic;
+    } else if (this.options.gfm) {
+      this.rules = block$1.gfm;
+    }
+  }
+
+  /**
+   * Expose Block Rules
+   */
+  static get rules() {
+    return block$1;
+  }
+
+  /**
+   * Static Lex Method
+   */
+  static lex(src, options) {
+    const lexer = new Lexer(options);
+    return lexer.lex(src);
+  };
+
+  /**
+   * Preprocessing
+   */
+  lex(src) {
+    src = src
+      .replace(/\r\n|\r/g, '\n')
+      .replace(/\t/g, '    ');
+
+    return this.token(src, true);
+  };
+
+  /**
+   * Lexing
+   */
+  token(src, top) {
+    src = src.replace(/^ +$/gm, '');
+    let next,
+      loose,
+      cap,
+      bull,
+      b,
+      item,
+      listStart,
+      listItems,
+      t,
+      space,
+      i,
+      tag,
+      l,
+      isordered,
+      istask,
+      ischecked;
+
+    while (src) {
+      // newline
+      if (cap = this.rules.newline.exec(src)) {
+        src = src.substring(cap[0].length);
+        if (cap[0].length > 1) {
+          this.tokens.push({
+            type: 'space'
+          });
+        }
+      }
+
+      // code
+      if (cap = this.rules.code.exec(src)) {
+        const lastToken = this.tokens[this.tokens.length - 1];
+        src = src.substring(cap[0].length);
+        // An indented code block cannot interrupt a paragraph.
+        if (lastToken && lastToken.type === 'paragraph') {
+          lastToken.text += '\n' + cap[0].trimRight();
+        } else {
+          cap = cap[0].replace(/^ {4}/gm, '');
+          this.tokens.push({
+            type: 'code',
+            codeBlockStyle: 'indented',
+            text: !this.options.pedantic
+              ? rtrim$1(cap, '\n')
+              : cap
+          });
+        }
+        continue;
+      }
+
+      // fences
+      if (cap = this.rules.fences.exec(src)) {
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: 'code',
+          lang: cap[2] ? cap[2].trim() : cap[2],
+          text: cap[3] || ''
+        });
+        continue;
+      }
+
+      // heading
+      if (cap = this.rules.heading.exec(src)) {
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: 'heading',
+          depth: cap[1].length,
+          text: cap[2]
+        });
+        continue;
+      }
+
+      // table no leading pipe (gfm)
+      if (cap = this.rules.nptable.exec(src)) {
+        item = {
+          type: 'table',
+          header: splitCells$1(cap[1].replace(/^ *| *\| *$/g, '')),
+          align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
+          cells: cap[3] ? cap[3].replace(/\n$/, '').split('\n') : []
+        };
+
+        if (item.header.length === item.align.length) {
+          src = src.substring(cap[0].length);
+
+          for (i = 0; i < item.align.length; i++) {
+            if (/^ *-+: *$/.test(item.align[i])) {
+              item.align[i] = 'right';
+            } else if (/^ *:-+: *$/.test(item.align[i])) {
+              item.align[i] = 'center';
+            } else if (/^ *:-+ *$/.test(item.align[i])) {
+              item.align[i] = 'left';
+            } else {
+              item.align[i] = null;
+            }
+          }
+
+          for (i = 0; i < item.cells.length; i++) {
+            item.cells[i] = splitCells$1(item.cells[i], item.header.length);
+          }
+
+          this.tokens.push(item);
+
+          continue;
+        }
+      }
+
+      // hr
+      if (cap = this.rules.hr.exec(src)) {
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: 'hr'
+        });
+        continue;
+      }
+
+      // blockquote
+      if (cap = this.rules.blockquote.exec(src)) {
+        src = src.substring(cap[0].length);
+
+        this.tokens.push({
+          type: 'blockquote_start'
+        });
+
+        cap = cap[0].replace(/^ *> ?/gm, '');
+
+        // Pass `top` to keep the current
+        // "toplevel" state. This is exactly
+        // how markdown.pl works.
+        this.token(cap, top);
+
+        this.tokens.push({
+          type: 'blockquote_end'
+        });
+
+        continue;
+      }
+
+      // list
+      if (cap = this.rules.list.exec(src)) {
+        src = src.substring(cap[0].length);
+        bull = cap[2];
+        isordered = bull.length > 1;
+
+        listStart = {
+          type: 'list_start',
+          ordered: isordered,
+          start: isordered ? +bull : '',
+          loose: false
+        };
+
+        this.tokens.push(listStart);
+
+        // Get each top-level item.
+        cap = cap[0].match(this.rules.item);
+
+        listItems = [];
+        next = false;
+        l = cap.length;
+        i = 0;
+
+        for (; i < l; i++) {
+          item = cap[i];
+
+          // Remove the list item's bullet
+          // so it is seen as the next token.
+          space = item.length;
+          item = item.replace(/^ *([*+-]|\d+\.) */, '');
+
+          // Outdent whatever the
+          // list item contains. Hacky.
+          if (~item.indexOf('\n ')) {
+            space -= item.length;
+            item = !this.options.pedantic
+              ? item.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
+              : item.replace(/^ {1,4}/gm, '');
+          }
+
+          // Determine whether the next list item belongs here.
+          // Backpedal if it does not belong in this list.
+          if (i !== l - 1) {
+            b = block$1.bullet.exec(cap[i + 1])[0];
+            if (bull.length > 1 ? b.length === 1
+              : (b.length > 1 || (this.options.smartLists && b !== bull))) {
+              src = cap.slice(i + 1).join('\n') + src;
+              i = l - 1;
+            }
+          }
+
+          // Determine whether item is loose or not.
+          // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
+          // for discount behavior.
+          loose = next || /\n\n(?!\s*$)/.test(item);
+          if (i !== l - 1) {
+            next = item.charAt(item.length - 1) === '\n';
+            if (!loose) loose = next;
+          }
+
+          if (loose) {
+            listStart.loose = true;
+          }
+
+          // Check for task list items
+          istask = /^\[[ xX]\] /.test(item);
+          ischecked = undefined;
+          if (istask) {
+            ischecked = item[1] !== ' ';
+            item = item.replace(/^\[[ xX]\] +/, '');
+          }
+
+          t = {
+            type: 'list_item_start',
+            task: istask,
+            checked: ischecked,
+            loose: loose
+          };
+
+          listItems.push(t);
+          this.tokens.push(t);
+
+          // Recurse.
+          this.token(item, false);
+
+          this.tokens.push({
+            type: 'list_item_end'
+          });
+        }
+
+        if (listStart.loose) {
+          l = listItems.length;
+          i = 0;
+          for (; i < l; i++) {
+            listItems[i].loose = true;
+          }
+        }
+
+        this.tokens.push({
+          type: 'list_end'
+        });
+
+        continue;
+      }
+
+      // html
+      if (cap = this.rules.html.exec(src)) {
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: this.options.sanitize
+            ? 'paragraph'
+            : 'html',
+          pre: !this.options.sanitizer
+            && (cap[1] === 'pre' || cap[1] === 'script' || cap[1] === 'style'),
+          text: this.options.sanitize ? (this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape$1(cap[0])) : cap[0]
+        });
+        continue;
+      }
+
+      // def
+      if (top && (cap = this.rules.def.exec(src))) {
+        src = src.substring(cap[0].length);
+        if (cap[3]) cap[3] = cap[3].substring(1, cap[3].length - 1);
+        tag = cap[1].toLowerCase().replace(/\s+/g, ' ');
+        if (!this.tokens.links[tag]) {
+          this.tokens.links[tag] = {
+            href: cap[2],
+            title: cap[3]
+          };
+        }
+        continue;
+      }
+
+      // table (gfm)
+      if (cap = this.rules.table.exec(src)) {
+        item = {
+          type: 'table',
+          header: splitCells$1(cap[1].replace(/^ *| *\| *$/g, '')),
+          align: cap[2].replace(/^ *|\| *$/g, '').split(/ *\| */),
+          cells: cap[3] ? cap[3].replace(/\n$/, '').split('\n') : []
+        };
+
+        if (item.header.length === item.align.length) {
+          src = src.substring(cap[0].length);
+
+          for (i = 0; i < item.align.length; i++) {
+            if (/^ *-+: *$/.test(item.align[i])) {
+              item.align[i] = 'right';
+            } else if (/^ *:-+: *$/.test(item.align[i])) {
+              item.align[i] = 'center';
+            } else if (/^ *:-+ *$/.test(item.align[i])) {
+              item.align[i] = 'left';
+            } else {
+              item.align[i] = null;
+            }
+          }
+
+          for (i = 0; i < item.cells.length; i++) {
+            item.cells[i] = splitCells$1(
+              item.cells[i].replace(/^ *\| *| *\| *$/g, ''),
+              item.header.length);
+          }
+
+          this.tokens.push(item);
+
+          continue;
+        }
+      }
+
+      // lheading
+      if (cap = this.rules.lheading.exec(src)) {
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: 'heading',
+          depth: cap[2].charAt(0) === '=' ? 1 : 2,
+          text: cap[1]
+        });
+        continue;
+      }
+
+      // top-level paragraph
+      if (top && (cap = this.rules.paragraph.exec(src))) {
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: 'paragraph',
+          text: cap[1].charAt(cap[1].length - 1) === '\n'
+            ? cap[1].slice(0, -1)
+            : cap[1]
+        });
+        continue;
+      }
+
+      // text
+      if (cap = this.rules.text.exec(src)) {
+        // Top-level should never reach here.
+        src = src.substring(cap[0].length);
+        this.tokens.push({
+          type: 'text',
+          text: cap[0]
+        });
+        continue;
+      }
+
+      if (src) {
+        throw new Error('Infinite loop on byte: ' + src.charCodeAt(0));
+      }
+    }
+
+    return this.tokens;
+  };
+};
+
+const { defaults: defaults$2 } = defaults;
+const {
+  cleanUrl: cleanUrl$1,
+  escape: escape$2
+} = helpers;
+
+/**
+ * Renderer
+ */
+var Renderer_1 = class Renderer {
+  constructor(options) {
+    this.options = options || defaults$2;
+  }
+
+  code(code, infostring, escaped) {
+    const lang = (infostring || '').match(/\S*/)[0];
+    if (this.options.highlight) {
+      const out = this.options.highlight(code, lang);
+      if (out != null && out !== code) {
+        escaped = true;
+        code = out;
+      }
+    }
+
+    if (!lang) {
+      return '<pre><code>'
+        + (escaped ? code : escape$2(code, true))
+        + '</code></pre>';
+    }
+
+    return '<pre><code class="'
+      + this.options.langPrefix
+      + escape$2(lang, true)
+      + '">'
+      + (escaped ? code : escape$2(code, true))
+      + '</code></pre>\n';
+  };
+
+  blockquote(quote) {
+    return '<blockquote>\n' + quote + '</blockquote>\n';
+  };
+
+  html(html) {
+    return html;
+  };
+
+  heading(text, level, raw, slugger) {
+    if (this.options.headerIds) {
+      return '<h'
+        + level
+        + ' id="'
+        + this.options.headerPrefix
+        + slugger.slug(raw)
+        + '">'
+        + text
+        + '</h'
+        + level
+        + '>\n';
+    }
+    // ignore IDs
+    return '<h' + level + '>' + text + '</h' + level + '>\n';
+  };
+
+  hr() {
+    return this.options.xhtml ? '<hr/>\n' : '<hr>\n';
+  };
+
+  list(body, ordered, start) {
+    const type = ordered ? 'ol' : 'ul',
+      startatt = (ordered && start !== 1) ? (' start="' + start + '"') : '';
+    return '<' + type + startatt + '>\n' + body + '</' + type + '>\n';
+  };
+
+  listitem(text) {
+    return '<li>' + text + '</li>\n';
+  };
+
+  checkbox(checked) {
+    return '<input '
+      + (checked ? 'checked="" ' : '')
+      + 'disabled="" type="checkbox"'
+      + (this.options.xhtml ? ' /' : '')
+      + '> ';
+  };
+
+  paragraph(text) {
+    return '<p>' + text + '</p>\n';
+  };
+
+  table(header, body) {
+    if (body) body = '<tbody>' + body + '</tbody>';
+
+    return '<table>\n'
+      + '<thead>\n'
+      + header
+      + '</thead>\n'
+      + body
+      + '</table>\n';
+  };
+
+  tablerow(content) {
+    return '<tr>\n' + content + '</tr>\n';
+  };
+
+  tablecell(content, flags) {
+    const type = flags.header ? 'th' : 'td';
+    const tag = flags.align
+      ? '<' + type + ' align="' + flags.align + '">'
+      : '<' + type + '>';
+    return tag + content + '</' + type + '>\n';
+  };
+
+  // span level renderer
+  strong(text) {
+    return '<strong>' + text + '</strong>';
+  };
+
+  em(text) {
+    return '<em>' + text + '</em>';
+  };
+
+  codespan(text) {
+    return '<code>' + text + '</code>';
+  };
+
+  br() {
+    return this.options.xhtml ? '<br/>' : '<br>';
+  };
+
+  del(text) {
+    return '<del>' + text + '</del>';
+  };
+
+  link(href, title, text) {
+    href = cleanUrl$1(this.options.sanitize, this.options.baseUrl, href);
+    if (href === null) {
+      return text;
+    }
+    let out = '<a href="' + escape$2(href) + '"';
+    if (title) {
+      out += ' title="' + title + '"';
+    }
+    out += '>' + text + '</a>';
+    return out;
+  };
+
+  image(href, title, text) {
+    href = cleanUrl$1(this.options.sanitize, this.options.baseUrl, href);
+    if (href === null) {
+      return text;
+    }
+
+    let out = '<img src="' + href + '" alt="' + text + '"';
+    if (title) {
+      out += ' title="' + title + '"';
+    }
+    out += this.options.xhtml ? '/>' : '>';
+    return out;
+  };
+
+  text(text) {
+    return text;
+  };
+};
+
+/**
+ * Slugger generates header id
+ */
+var Slugger_1 = class Slugger {
+  constructor() {
+    this.seen = {};
+  }
+
+  /**
+   * Convert string to unique id
+   */
+  slug(value) {
+    let slug = value
+      .toLowerCase()
+      .trim()
+      // remove html tags
+      .replace(/<[!\/a-z].*?>/ig, '')
+      // remove unwanted chars
+      .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
+      .replace(/\s/g, '-');
+
+    if (this.seen.hasOwnProperty(slug)) {
+      const originalSlug = slug;
+      do {
+        this.seen[originalSlug]++;
+        slug = originalSlug + '-' + this.seen[originalSlug];
+      } while (this.seen.hasOwnProperty(slug));
+    }
+    this.seen[slug] = 0;
+
+    return slug;
+  };
+};
+
+const { defaults: defaults$3 } = defaults;
+const { inline: inline$1 } = rules;
+const {
+  findClosingBracket: findClosingBracket$1,
+  escape: escape$3
+} = helpers;
+
+/**
+ * Inline Lexer & Compiler
+ */
+var InlineLexer_1 = class InlineLexer {
+  constructor(links, options) {
+    this.options = options || defaults$3;
+    this.links = links;
+    this.rules = inline$1.normal;
+    this.options.renderer = this.options.renderer || new Renderer_1();
+    this.renderer = this.options.renderer;
+    this.renderer.options = this.options;
+
+    if (!this.links) {
+      throw new Error('Tokens array requires a `links` property.');
+    }
+
+    if (this.options.pedantic) {
+      this.rules = inline$1.pedantic;
+    } else if (this.options.gfm) {
+      if (this.options.breaks) {
+        this.rules = inline$1.breaks;
+      } else {
+        this.rules = inline$1.gfm;
+      }
+    }
+  }
+
+  /**
+   * Expose Inline Rules
+   */
+  static get rules() {
+    return inline$1;
+  }
+
+  /**
+   * Static Lexing/Compiling Method
+   */
+  static output(src, links, options) {
+    const inline = new InlineLexer(links, options);
+    return inline.output(src);
+  }
+
+  /**
+   * Lexing/Compiling
+   */
+  output(src) {
+    let out = '',
+      link,
+      text,
+      href,
+      title,
+      cap,
+      prevCapZero;
+
+    while (src) {
+      // escape
+      if (cap = this.rules.escape.exec(src)) {
+        src = src.substring(cap[0].length);
+        out += escape$3(cap[1]);
+        continue;
+      }
+
+      // tag
+      if (cap = this.rules.tag.exec(src)) {
+        if (!this.inLink && /^<a /i.test(cap[0])) {
+          this.inLink = true;
+        } else if (this.inLink && /^<\/a>/i.test(cap[0])) {
+          this.inLink = false;
+        }
+        if (!this.inRawBlock && /^<(pre|code|kbd|script)(\s|>)/i.test(cap[0])) {
+          this.inRawBlock = true;
+        } else if (this.inRawBlock && /^<\/(pre|code|kbd|script)(\s|>)/i.test(cap[0])) {
+          this.inRawBlock = false;
+        }
+
+        src = src.substring(cap[0].length);
+        out += this.renderer.html(this.options.sanitize
+          ? (this.options.sanitizer
+            ? this.options.sanitizer(cap[0])
+            : escape$3(cap[0]))
+          : cap[0]);
+        continue;
+      }
+
+      // link
+      if (cap = this.rules.link.exec(src)) {
+        const lastParenIndex = findClosingBracket$1(cap[2], '()');
+        if (lastParenIndex > -1) {
+          const start = cap[0].indexOf('!') === 0 ? 5 : 4;
+          const linkLen = start + cap[1].length + lastParenIndex;
+          cap[2] = cap[2].substring(0, lastParenIndex);
+          cap[0] = cap[0].substring(0, linkLen).trim();
+          cap[3] = '';
+        }
+        src = src.substring(cap[0].length);
+        this.inLink = true;
+        href = cap[2];
+        if (this.options.pedantic) {
+          link = /^([^'"]*[^\s])\s+(['"])(.*)\2/.exec(href);
+
+          if (link) {
+            href = link[1];
+            title = link[3];
+          } else {
+            title = '';
+          }
+        } else {
+          title = cap[3] ? cap[3].slice(1, -1) : '';
+        }
+        href = href.trim().replace(/^<([\s\S]*)>$/, '$1');
+        out += this.outputLink(cap, {
+          href: InlineLexer.escapes(href),
+          title: InlineLexer.escapes(title)
+        });
+        this.inLink = false;
+        continue;
+      }
+
+      // reflink, nolink
+      if ((cap = this.rules.reflink.exec(src))
+          || (cap = this.rules.nolink.exec(src))) {
+        src = src.substring(cap[0].length);
+        link = (cap[2] || cap[1]).replace(/\s+/g, ' ');
+        link = this.links[link.toLowerCase()];
+        if (!link || !link.href) {
+          out += cap[0].charAt(0);
+          src = cap[0].substring(1) + src;
+          continue;
+        }
+        this.inLink = true;
+        out += this.outputLink(cap, link);
+        this.inLink = false;
+        continue;
+      }
+
+      // strong
+      if (cap = this.rules.strong.exec(src)) {
+        src = src.substring(cap[0].length);
+        out += this.renderer.strong(this.output(cap[4] || cap[3] || cap[2] || cap[1]));
+        continue;
+      }
+
+      // em
+      if (cap = this.rules.em.exec(src)) {
+        src = src.substring(cap[0].length);
+        out += this.renderer.em(this.output(cap[6] || cap[5] || cap[4] || cap[3] || cap[2] || cap[1]));
+        continue;
+      }
+
+      // code
+      if (cap = this.rules.code.exec(src)) {
+        src = src.substring(cap[0].length);
+        out += this.renderer.codespan(escape$3(cap[2].trim(), true));
+        continue;
+      }
+
+      // br
+      if (cap = this.rules.br.exec(src)) {
+        src = src.substring(cap[0].length);
+        out += this.renderer.br();
+        continue;
+      }
+
+      // del (gfm)
+      if (cap = this.rules.del.exec(src)) {
+        src = src.substring(cap[0].length);
+        out += this.renderer.del(this.output(cap[1]));
+        continue;
+      }
+
+      // autolink
+      if (cap = this.rules.autolink.exec(src)) {
+        src = src.substring(cap[0].length);
+        if (cap[2] === '@') {
+          text = escape$3(this.mangle(cap[1]));
+          href = 'mailto:' + text;
+        } else {
+          text = escape$3(cap[1]);
+          href = text;
+        }
+        out += this.renderer.link(href, null, text);
+        continue;
+      }
+
+      // url (gfm)
+      if (!this.inLink && (cap = this.rules.url.exec(src))) {
+        if (cap[2] === '@') {
+          text = escape$3(cap[0]);
+          href = 'mailto:' + text;
+        } else {
+          // do extended autolink path validation
+          do {
+            prevCapZero = cap[0];
+            cap[0] = this.rules._backpedal.exec(cap[0])[0];
+          } while (prevCapZero !== cap[0]);
+          text = escape$3(cap[0]);
+          if (cap[1] === 'www.') {
+            href = 'http://' + text;
+          } else {
+            href = text;
+          }
+        }
+        src = src.substring(cap[0].length);
+        out += this.renderer.link(href, null, text);
+        continue;
+      }
+
+      // text
+      if (cap = this.rules.text.exec(src)) {
+        src = src.substring(cap[0].length);
+        if (this.inRawBlock) {
+          out += this.renderer.text(this.options.sanitize ? (this.options.sanitizer ? this.options.sanitizer(cap[0]) : escape$3(cap[0])) : cap[0]);
+        } else {
+          out += this.renderer.text(escape$3(this.smartypants(cap[0])));
+        }
+        continue;
+      }
+
+      if (src) {
+        throw new Error('Infinite loop on byte: ' + src.charCodeAt(0));
+      }
+    }
+
+    return out;
+  }
+
+  static escapes(text) {
+    return text ? text.replace(InlineLexer.rules._escapes, '$1') : text;
+  }
+
+  /**
+   * Compile Link
+   */
+  outputLink(cap, link) {
+    const href = link.href,
+      title = link.title ? escape$3(link.title) : null;
+
+    return cap[0].charAt(0) !== '!'
+      ? this.renderer.link(href, title, this.output(cap[1]))
+      : this.renderer.image(href, title, escape$3(cap[1]));
+  }
+
+  /**
+   * Smartypants Transformations
+   */
+  smartypants(text) {
+    if (!this.options.smartypants) return text;
+    return text
+      // em-dashes
+      .replace(/---/g, '\u2014')
+      // en-dashes
+      .replace(/--/g, '\u2013')
+      // opening singles
+      .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
+      // closing singles & apostrophes
+      .replace(/'/g, '\u2019')
+      // opening doubles
+      .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
+      // closing doubles
+      .replace(/"/g, '\u201d')
+      // ellipses
+      .replace(/\.{3}/g, '\u2026');
+  }
+
+  /**
+   * Mangle Links
+   */
+  mangle(text) {
+    if (!this.options.mangle) return text;
+    const l = text.length;
+    let out = '',
+      i = 0,
+      ch;
+
+    for (; i < l; i++) {
+      ch = text.charCodeAt(i);
+      if (Math.random() > 0.5) {
+        ch = 'x' + ch.toString(16);
+      }
+      out += '&#' + ch + ';';
+    }
+
+    return out;
+  }
+};
+
+/**
+ * TextRenderer
+ * returns only the textual part of the token
+ */
+var TextRenderer_1 = class TextRenderer {
+  // no need for block level renderers
+  strong(text) {
+    return text;
+  }
+
+  em(text) {
+    return text;
+  }
+
+  codespan(text) {
+    return text;
+  }
+
+  del(text) {
+    return text;
+  }
+
+  html(text) {
+    return text;
+  }
+
+  text(text) {
+    return text;
+  }
+
+  link(href, title, text) {
+    return '' + text;
+  }
+
+  image(href, title, text) {
+    return '' + text;
+  }
+
+  br() {
+    return '';
+  }
+};
+
+const { defaults: defaults$4 } = defaults;
+const {
+  merge: merge$2,
+  unescape: unescape$1
+} = helpers;
+
+/**
+ * Parsing & Compiling
+ */
+var Parser_1 = class Parser {
+  constructor(options) {
+    this.tokens = [];
+    this.token = null;
+    this.options = options || defaults$4;
+    this.options.renderer = this.options.renderer || new Renderer_1();
+    this.renderer = this.options.renderer;
+    this.renderer.options = this.options;
+    this.slugger = new Slugger_1();
+  }
+
+  /**
+   * Static Parse Method
+   */
+  static parse(tokens, options) {
+    const parser = new Parser(options);
+    return parser.parse(tokens);
+  };
+
+  /**
+   * Parse Loop
+   */
+  parse(tokens) {
+    this.inline = new InlineLexer_1(tokens.links, this.options);
+    // use an InlineLexer with a TextRenderer to extract pure text
+    this.inlineText = new InlineLexer_1(
+      tokens.links,
+      merge$2({}, this.options, { renderer: new TextRenderer_1() })
+    );
+    this.tokens = tokens.reverse();
+
+    let out = '';
+    while (this.next()) {
+      out += this.tok();
+    }
+
+    return out;
+  };
+
+  /**
+   * Next Token
+   */
+  next() {
+    this.token = this.tokens.pop();
+    return this.token;
+  };
+
+  /**
+   * Preview Next Token
+   */
+  peek() {
+    return this.tokens[this.tokens.length - 1] || 0;
+  };
+
+  /**
+   * Parse Text Tokens
+   */
+  parseText() {
+    let body = this.token.text;
+
+    while (this.peek().type === 'text') {
+      body += '\n' + this.next().text;
+    }
+
+    return this.inline.output(body);
+  };
+
+  /**
+   * Parse Current Token
+   */
+  tok() {
+    let body = '';
+    switch (this.token.type) {
+      case 'space': {
+        return '';
+      }
+      case 'hr': {
+        return this.renderer.hr();
+      }
+      case 'heading': {
+        return this.renderer.heading(
+          this.inline.output(this.token.text),
+          this.token.depth,
+          unescape$1(this.inlineText.output(this.token.text)),
+          this.slugger);
+      }
+      case 'code': {
+        return this.renderer.code(this.token.text,
+          this.token.lang,
+          this.token.escaped);
+      }
+      case 'table': {
+        let header = '',
+          i,
+          row,
+          cell,
+          j;
+
+        // header
+        cell = '';
+        for (i = 0; i < this.token.header.length; i++) {
+          cell += this.renderer.tablecell(
+            this.inline.output(this.token.header[i]),
+            { header: true, align: this.token.align[i] }
+          );
+        }
+        header += this.renderer.tablerow(cell);
+
+        for (i = 0; i < this.token.cells.length; i++) {
+          row = this.token.cells[i];
+
+          cell = '';
+          for (j = 0; j < row.length; j++) {
+            cell += this.renderer.tablecell(
+              this.inline.output(row[j]),
+              { header: false, align: this.token.align[j] }
+            );
+          }
+
+          body += this.renderer.tablerow(cell);
+        }
+        return this.renderer.table(header, body);
+      }
+      case 'blockquote_start': {
+        body = '';
+
+        while (this.next().type !== 'blockquote_end') {
+          body += this.tok();
+        }
+
+        return this.renderer.blockquote(body);
+      }
+      case 'list_start': {
+        body = '';
+        const ordered = this.token.ordered,
+          start = this.token.start;
+
+        while (this.next().type !== 'list_end') {
+          body += this.tok();
+        }
+
+        return this.renderer.list(body, ordered, start);
+      }
+      case 'list_item_start': {
+        body = '';
+        const loose = this.token.loose;
+        const checked = this.token.checked;
+        const task = this.token.task;
+
+        if (this.token.task) {
+          if (loose) {
+            if (this.peek().type === 'text') {
+              const nextToken = this.peek();
+              nextToken.text = this.renderer.checkbox(checked) + ' ' + nextToken.text;
+            } else {
+              this.tokens.push({
+                type: 'text',
+                text: this.renderer.checkbox(checked)
+              });
+            }
+          } else {
+            body += this.renderer.checkbox(checked);
+          }
+        }
+
+        while (this.next().type !== 'list_item_end') {
+          body += !loose && this.token.type === 'text'
+            ? this.parseText()
+            : this.tok();
+        }
+        return this.renderer.listitem(body, task, checked);
+      }
+      case 'html': {
+        // TODO parse inline content if parameter markdown=1
+        return this.renderer.html(this.token.text);
+      }
+      case 'paragraph': {
+        return this.renderer.paragraph(this.inline.output(this.token.text));
+      }
+      case 'text': {
+        return this.renderer.paragraph(this.parseText());
+      }
+      default: {
+        const errMsg = 'Token with "' + this.token.type + '" type was not found.';
+        if (this.options.silent) {
+          console.log(errMsg);
+        } else {
+          throw new Error(errMsg);
+        }
+      }
+    }
+  };
+};
+
+const {
+  merge: merge$3,
+  checkSanitizeDeprecation: checkSanitizeDeprecation$1,
+  escape: escape$4
+} = helpers;
+const {
+  getDefaults,
+  changeDefaults,
+  defaults: defaults$5
+} = defaults;
+
+/**
+ * Marked
+ */
+function marked(src, opt, callback) {
+  // throw error in case of non string input
+  if (typeof src === 'undefined' || src === null) {
+    throw new Error('marked(): input parameter is undefined or null');
+  }
+  if (typeof src !== 'string') {
+    throw new Error('marked(): input parameter is of type '
+      + Object.prototype.toString.call(src) + ', string expected');
+  }
+
+  if (callback || typeof opt === 'function') {
+    if (!callback) {
+      callback = opt;
+      opt = null;
+    }
+
+    opt = merge$3({}, marked.defaults, opt || {});
+    checkSanitizeDeprecation$1(opt);
+    const highlight = opt.highlight;
+    let tokens,
+      pending,
+      i = 0;
+
+    try {
+      tokens = Lexer_1.lex(src, opt);
+    } catch (e) {
+      return callback(e);
+    }
+
+    pending = tokens.length;
+
+    const done = function(err) {
+      if (err) {
+        opt.highlight = highlight;
+        return callback(err);
+      }
+
+      let out;
+
+      try {
+        out = Parser_1.parse(tokens, opt);
+      } catch (e) {
+        err = e;
+      }
+
+      opt.highlight = highlight;
+
+      return err
+        ? callback(err)
+        : callback(null, out);
+    };
+
+    if (!highlight || highlight.length < 3) {
+      return done();
+    }
+
+    delete opt.highlight;
+
+    if (!pending) return done();
+
+    for (; i < tokens.length; i++) {
+      (function(token) {
+        if (token.type !== 'code') {
+          return --pending || done();
+        }
+        return highlight(token.text, token.lang, function(err, code) {
+          if (err) return done(err);
+          if (code == null || code === token.text) {
+            return --pending || done();
+          }
+          token.text = code;
+          token.escaped = true;
+          --pending || done();
+        });
+      })(tokens[i]);
+    }
+
+    return;
+  }
+  try {
+    opt = merge$3({}, marked.defaults, opt || {});
+    checkSanitizeDeprecation$1(opt);
+    return Parser_1.parse(Lexer_1.lex(src, opt), opt);
+  } catch (e) {
+    e.message += '\nPlease report this to https://github.com/markedjs/marked.';
+    if ((opt || marked.defaults).silent) {
+      return '<p>An error occurred:</p><pre>'
+        + escape$4(e.message + '', true)
+        + '</pre>';
+    }
+    throw e;
+  }
+}
+
+/**
+ * Options
+ */
+
+marked.options =
+marked.setOptions = function(opt) {
+  merge$3(marked.defaults, opt);
+  changeDefaults(marked.defaults);
+  return marked;
+};
+
+marked.getDefaults = getDefaults;
+
+marked.defaults = defaults$5;
+
+/**
+ * Expose
+ */
+
+marked.Parser = Parser_1;
+marked.parser = Parser_1.parse;
+
+marked.Renderer = Renderer_1;
+marked.TextRenderer = TextRenderer_1;
+
+marked.Lexer = Lexer_1;
+marked.lexer = Lexer_1.lex;
+
+marked.InlineLexer = InlineLexer_1;
+marked.inlineLexer = InlineLexer_1.output;
+
+marked.Slugger = Slugger_1;
+
+marked.parse = marked;
+
+var marked_1 = marked;
+
+class OrbitView extends react.PureComponent {
+  static get propTypes() {
+    return {
+      id: propTypes.string,
+      geometry: propTypes.object,
+      width: propTypes.number,
+      height: propTypes.number,
+      position: propTypes.array
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      containerId: `${props.id}/container`
+    };
+  }
+
+  async componentDidMount() {
+    const {
+      containerId
+    } = this.state;
+    const {
+      geometry,
+      position
+    } = this.props;
+    const container = document.getElementById(containerId);
+    const view = {
+      target: [0, 0, 0],
+      position,
+      up: [0, 1, 0]
+    };
+    const page = document.createElement('div');
+    page.id = 'viewer';
+    page.style.height = '100%';
+    await orbitDisplay({
+      view,
+      geometry
+    }, page);
+    /*
+     const geometryPath = path;
+     const readAndUpdate = async () => {
+      const data = await readFile({}, geometryPath);
+      if (data === undefined) {
+        await updateGeometry({ assembly: [] });
+      } else {
+        if (data.buffer) {
+          await updateGeometry(JSON.parse(new TextDecoder('utf8').decode(data)));
+        } else {
+          await updateGeometry(data);
+        }
+      }
+    };
+     await readAndUpdate();
+     const watcher = await watchFile(geometryPath, readAndUpdate);
+     this.setState({ watcher });
+    */
+
+    container.appendChild(page);
+  }
+
+  async componentWillUnmount() {
+    const {
+      containerId,
+      watcher
+    } = this.state;
+    const container = document.getElementById(containerId);
+
+    while (true) {
+      const child = container.firstElementChild;
+
+      if (child) {
+        container.removeChild(child);
+        continue;
+      }
+
+      break;
+    }
+
+    if (watcher) {
+      await unwatchFiles(watcher);
+    }
+  }
+
+  render() {
+    const {
+      containerId
+    } = this.state;
+    const {
+      width,
+      height
+    } = this.props;
+    return react.createElement(ResizableBox, {
+      className: "box",
+      width: width,
+      height: height,
+      style: {
+        borderStyle: 'solid',
+        borderWidth: 'thin',
+        borderColor: 'blue',
+        display: 'inline-block'
+      },
+      onClick: e => e.stopPropagation(),
+      handle: resizeHandle => react.createElement("span", {
+        className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
+        style: {
+          zIndex: 2
+        }
+      })
+    }, react.createElement("div", {
+      id: containerId,
+      style: {
+        borderStyle: 'solid',
+        borderWidth: 'thin'
+      }
+    }));
+  }
+
+}
+class StaticView extends react.PureComponent {
+  static get propTypes() {
+    return {
+      id: propTypes.string,
+      geometry: propTypes.object,
+      width: propTypes.number,
+      height: propTypes.number,
+      position: propTypes.array,
+      onClick: propTypes.func
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  async componentDidMount() {
+    const {
+      geometry,
+      width,
+      height,
+      position
+    } = this.props; // const data = await readFile({}, path);
+
+    const url = await dataUrl(Shape.fromGeometry(geometry), {
+      width,
+      height,
+      position
+    });
+    this.setState({
+      url
+    });
+  }
+
+  render() {
+    const {
+      onClick
+    } = this.props;
+    const {
+      url
+    } = this.state;
+    return react.createElement("div", {
+      style: {
+        display: 'inline-block'
+      }
+    }, react.createElement("img", {
+      src: url,
+      onClick: onClick,
+      style: {
+        borderStyle: 'dotted',
+        borderWidth: 'thin',
+        verticalAlign: 'baseline'
+      }
+    }));
+  }
+
+}
+class GeometryView extends react.PureComponent {
+  static get propTypes() {
+    return {
+      id: propTypes.string,
+      width: propTypes.number,
+      height: propTypes.number,
+      position: propTypes.array,
+      onClick: propTypes.func,
+      mode: propTypes.string,
+      isSelected: propTypes.bool,
+      geometry: propTypes.object
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    const {
+      id,
+      geometry,
+      width,
+      height,
+      position,
+      mode,
+      onClick
+    } = this.props;
+
+    switch (mode) {
+      case 'static':
+        return react.createElement(StaticView, {
+          geometry: geometry,
+          width: width,
+          height: height,
+          position: position,
+          onClick: onClick
+        });
+
+      case 'dynamic':
+        return react.createElement(OrbitView, {
+          id: id,
+          geometry: geometry,
+          width: width,
+          height: height,
+          position: position
+        });
+    }
+  }
+
+}
+class NotebookUi extends Pane {
+  static get propTypes() {
+    return {
+      id: propTypes.string
+    };
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.update = this.update.bind(this);
+  }
+
+  async componentDidMount() {
+    const watcher = await watchFile('notebook', this.update);
+    this.setState({
+      watcher
+    });
+    await this.update();
+  }
+
+  async componentWillUnmount() {
+    const {
+      watcher
+    } = this.state;
+
+    if (watcher) {
+      await unwatchFiles(watcher);
+    }
+  }
+
+  async update() {
+    const notebook = await readFile({}, 'notebook');
+    this.setState({
+      notebook
+    });
+  }
+
+  renderPane() {
+    const {
+      id
+    } = this.props;
+    const {
+      notebook = [],
+      selected = -1
+    } = this.state;
+    const notes = [];
+    let nth = 0;
+
+    for (const note of notebook) {
+      nth += 1;
+
+      if (note.geometry) {
+        const index = nth;
+        const isSelected = index === selected;
+        const {
+          width,
+          height,
+          position,
+          geometry
+        } = note.geometry;
+        const mode = index === selected ? 'dynamic' : 'static';
+
+        const select = e => {
+          e.stopPropagation();
+          this.setState({
+            selected: index
+          });
+        };
+
+        notes.push(react.createElement(GeometryView, {
+          key: nth,
+          width: width,
+          height: height,
+          position: position,
+          geometry: geometry,
+          onClick: select,
+          mode: mode,
+          isSelected: isSelected
+        }));
+      } else if (note.md) {
+        const data = note.md;
+        notes.push(react.createElement("div", {
+          key: nth,
+          dangerouslySetInnerHTML: {
+            __html: marked_1(data)
+          }
+        }));
+      }
+    }
+
+    const unselect = () => this.setState({
+      selected: -1
+    });
+
+    return react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column'
+      }
+    }, react.createElement(Row, {
+      style: {
+        width: '100%',
+        height: '100%',
+        flex: '1 1 auto'
+      }
+    }, react.createElement(Col, {
+      style: {
+        width: '100%',
+        height: '100%',
+        overflow: 'auto'
+      },
+      onClick: unselect
+    }, notes)));
+  }
+
+}
+
 class NothingUi extends Pane {}
 
 var defaultProps$l = {
@@ -84879,14 +88831,13 @@ const defaultPaneViews = [['0', {
   file: 'geometry/preview',
   title: 'View preview'
 }], ['2', {
-  view: 'geometry',
-  file: 'geometry/preview',
-  title: 'View preview'
+  view: 'notebook',
+  title: 'Notebook'
 }], ['3', {
   view: 'log',
   title: 'Log'
 }]];
-const defaultScript = `// Circle(10);`;
+const defaultScript = '// md`# Example`; Circle(10).topView();';
 class SelectProjectUi extends SettingsUi {
   constructor(props) {
     super(props);
@@ -84902,7 +88853,7 @@ class SelectProjectUi extends SettingsUi {
     } = this.state;
 
     if (project.length === 0) {
-      await log({
+      await log$1({
         op: 'text',
         text: `Project name is empty`,
         level: 'serious'
@@ -84913,7 +88864,7 @@ class SelectProjectUi extends SettingsUi {
     const projects = await listFilesystems();
 
     if (projects.includes(project)) {
-      await log({
+      await log$1({
         op: 'text',
         text: `Project ${project} already exists`,
         level: 'serious'
@@ -84935,7 +88886,7 @@ class SelectProjectUi extends SettingsUi {
       await writeFile({
         project
       }, 'ui/paneViews', defaultPaneViews);
-      await log({
+      await log$1({
         op: 'text',
         text: `Project ${project} created`,
         level: 'serious'
@@ -85039,7 +88990,7 @@ class ShareFileUi extends SettingsUi {
       type: 'application/zip'
     });
     FileSaver_min(blob, path);
-    await log({
+    await log$1({
       op: 'text',
       text: `Exporting ${path} to file`,
       level: 'serious'
@@ -85066,7 +89017,7 @@ class ShareFileUi extends SettingsUi {
     reader.onload = async event => {
       const zip = event.target.result;
       await fromZipToFilesystem({}, zip);
-      await log({
+      await log$1({
         op: 'text',
         text: `Imported ${path} from file`,
         level: 'serious'
@@ -85176,7 +89127,7 @@ class ShareGistUi extends SettingsUi {
     });
 
     if (url === undefined) {
-      log({
+      log$1({
         op: 'text',
         text: `Failed to create gist`,
         level: 'serious',
@@ -85185,7 +89136,7 @@ class ShareGistUi extends SettingsUi {
       return;
     }
 
-    log({
+    log$1({
       op: 'text',
       text: `Created gist at ${url}`,
       level: 'serious',
@@ -85213,7 +89164,7 @@ class ShareGistUi extends SettingsUi {
     await readProject$1(gistId, {
       project
     });
-    log({
+    log$1({
       op: 'text',
       text: `Read gist from ${url}`,
       level: 'serious',
@@ -85277,13 +89228,13 @@ class ShareGithubUi extends SettingsUi {
     if (await writeProject(owner, repository, prefix, files, {
       overwrite: false
     })) {
-      await log({
+      await log$1({
         op: 'text',
         text: 'Successfully wrote to github repository',
         level: 'serious'
       });
     } else {
-      await log({
+      await log$1({
         op: 'text',
         text: 'Failed to write to github repository',
         level: 'serious'
@@ -85303,13 +89254,13 @@ class ShareGithubUi extends SettingsUi {
     if (await readProject(owner, repository, prefix, {
       overwrite: false
     })) {
-      await log({
+      await log$1({
         op: 'text',
         text: 'Successfully read from github repository',
         level: 'serious'
       });
     } else {
-      await log({
+      await log$1({
         op: 'text',
         text: 'Failed to read from github repository',
         level: 'serious'
@@ -85389,39 +89340,6 @@ class ShareUi extends SettingsUi {
     })))), toast);
   }
 
-}
-
-function _defineProperty$2(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
-
-function _extends$2() {
-  _extends$2 = Object.assign || function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
-  };
-
-  return _extends$2.apply(this, arguments);
 }
 
 var absSvgPath = absolutize;
@@ -85687,7 +89605,7 @@ class SvgPathEditor extends Pane {
       } = this.props;
       const path = this.generatePath();
       await writeFile({}, file, path);
-      await log({
+      await log$1({
         op: 'text',
         text: 'Saved',
         level: 'serious'
@@ -87558,7 +91476,7 @@ class Ui extends react.PureComponent {
         const {
           entry
         } = question.log;
-        return log(entry);
+        return log$1(entry);
       }
     };
 
@@ -87704,7 +91622,7 @@ class Ui extends react.PureComponent {
         {
           const project = getFilesystem();
           const url = await writeProject$1(project);
-          log({
+          log$1({
             op: 'text',
             text: `Created gist at ${url}`,
             level: 'serious'
@@ -87829,6 +91747,10 @@ class Ui extends react.PureComponent {
     }
 
     views.push({
+      view: 'notebook',
+      viewTitle: 'Notebook'
+    });
+    views.push({
       view: 'files',
       viewTitle: 'Files'
     });
@@ -87905,6 +91827,18 @@ class Ui extends react.PureComponent {
     } = this.state;
 
     switch (view) {
+      case 'notebook':
+        return react.createElement(NotebookUi, {
+          key: `${id}/notebook`,
+          id: id,
+          path: path,
+          createNode: createNode,
+          view: view,
+          viewChoices: viewChoices,
+          viewTitle: 'Notebook',
+          onSelectView: onSelectView
+        });
+
       case 'geometry':
         {
           const fileTitle = file === undefined ? '' : file.substring('geometry/'.length);
@@ -88250,7 +92184,7 @@ const setupUi = async sha => {
   }), document.getElementById('top'));
 };
 
-const defaultScript$1 = `// Circle(10);`;
+const defaultScript$1 = `// Circle(10).topView();`;
 const defaultPaneLayout$1 = {
   direction: 'row',
   first: '0',
@@ -88266,13 +92200,8 @@ const defaultPaneViews$1 = [['0', {
   file: 'source/script.jsxcad',
   title: 'Edit script.jsxcad'
 }], ['1', {
-  view: 'geometry',
-  file: 'geometry/preview',
-  title: 'View preview'
-}], ['2', {
-  view: 'geometry',
-  file: 'geometry/preview',
-  title: 'View preview'
+  view: 'notebook',
+  title: 'Notebook'
 }], ['3', {
   view: 'log',
   title: 'Log'

@@ -19,11 +19,11 @@ const defaultPaneLayout = {
 const defaultPaneViews = [
   ['0', { view: 'editScript', file: 'source/script.jsxcad', title: 'Edit script.jsxcad' }],
   ['1', { view: 'geometry', file: 'geometry/preview', title: 'View preview' }],
-  ['2', { view: 'geometry', file: 'geometry/preview', title: 'View preview' }],
+  ['2', { view: 'notebook', title: 'Notebook' }],
   ['3', { view: 'log', title: 'Log' }]
 ];
 
-const defaultScript = `// Circle(10);`;
+const defaultScript = '// md`# Example`; Circle(10).topView();';
 
 export class SelectProjectUi extends SettingsUi {
   constructor (props) {

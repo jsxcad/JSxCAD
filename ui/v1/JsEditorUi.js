@@ -137,10 +137,7 @@ export class JsEditorUi extends Pane {
     if (script.buffer) {
       script = new TextDecoder('utf8').decode(script);
     }
-    const geometry = await ask({ evaluate: script });
-    if (geometry) {
-      await writeFile({}, 'geometry/preview', geometry);
-    }
+    await ask({ evaluate: script });
   }
 
   async save () {
