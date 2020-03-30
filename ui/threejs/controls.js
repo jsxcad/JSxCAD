@@ -1,11 +1,11 @@
-import * as THREE from 'three';
+// import * as THREE from 'three';
 import * as dat from 'dat.gui';
 
-import OrbitControlsBuilder from 'three-orbit-controls';
+// import OrbitControlsBuilder from 'three-orbit-controls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
   const { target = [0, 0, 0] } = view;
-  const OrbitControls = OrbitControlsBuilder(THREE);
   const trackball = new OrbitControls(camera, viewerElement);
   trackball.keys = [65, 83, 68];
   trackball.addEventListener('change', render);

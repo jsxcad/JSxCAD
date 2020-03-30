@@ -1,14 +1,24 @@
 import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 
-import { Random } from '@jsxcad/api-v1-math';
 import Shape from '@jsxcad/api-v1-shape';
 import { deform } from '@jsxcad/algorithm-bsp-surfaces';
 import { getSolids } from '@jsxcad/geometry-tagged';
+import { makeNoise3D } from 'open-simplex-noise';
 
-export const crumple = (shape, amount = 0.1, { resolution = 1, rng = Random() } = {}) => {
-  const offset = v => v + (rng() - 0.5) * amount * 2;
-  // FIX: Use a smooth noise function, maybe perlin.
-  const perturb = ([x, y, z]) => [offset(x), offset(y), offset(z)];
+const X = 0;
+const Y = 1;
+const Z = 2;
+
+export const crumple = (shape, amount = 0.1, { resolution = 1, seed = 1 } = {}) => {
+  const scale = amount / 2;
+
+  const noiseX = makeNoise3D(seed + 0);
+  const noiseY = makeNoise3D(seed + 1);
+  const noiseZ = makeNoise3D(seed + 2);
+
+  const perturb = (point) => [point[X] + noiseX(...point) * scale,
+                              point[Y] + noiseY(...point) * scale,
+                              point[Z] + noiseZ(...point) * scale];
 
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {

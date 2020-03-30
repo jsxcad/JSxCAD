@@ -17,43 +17,37 @@ const Y = 1;
 const Z = 2;
 
 const walkX = (min, max, resolution) => {
-  if (min[X] + resolution > max[X]) {
-    return inLeaf;
-  }
-  const midX = (min[X] + max[X]) / 2;
+  const midX = Math.floor((min[X] + max[X]) / 2);
+  if (midX === min[X]) { return walkY(min, max, resolution); }
   return {
-    back: walkY(min, [midX, max[Y], max[Z]], resolution),
-    front: walkY([midX, min[Y], min[Z]], max, resolution),
+    back: walkX(min, [midX, max[Y], max[Z]], resolution),
+    front: walkX([midX, min[Y], min[Z]], max, resolution),
     kind: BRANCH,
-    plane: [1, 0, 0, midX],
+    plane: [1, 0, 0, midX * resolution],
     same: []
   };
 };
 
 const walkY = (min, max, resolution) => {
-  if (min[Y] + resolution > max[Y]) {
-    return inLeaf;
-  }
-  const midY = (min[Y] + max[Y]) / 2;
+  const midY = Math.floor((min[Y] + max[Y]) / 2);
+  if (midY === min[Y]) { return walkZ(min, max, resolution); }
   return {
-    back: walkZ(min, [max[X], midY, max[Z]], resolution),
-    front: walkZ([min[X], midY, min[Z]], max, resolution),
+    back: walkY(min, [max[X], midY, max[Z]], resolution),
+    front: walkY([min[X], midY, min[Z]], max, resolution),
     kind: BRANCH,
-    plane: [0, 1, 0, midY],
+    plane: [0, 1, 0, midY * resolution],
     same: []
   };
 };
 
 const walkZ = (min, max, resolution) => {
-  if (min[Z] + resolution > max[Z]) {
-    return inLeaf;
-  }
-  const midZ = (min[Z] + max[Z]) / 2;
+  const midZ = Math.floor((min[Z] + max[Z]) / 2);
+  if (midZ === min[Z]) { return inLeaf; }
   return {
-    back: walkX(min, [max[X], max[Y], midZ], resolution),
-    front: walkX([min[X], min[Y], midZ], max, resolution),
+    back: walkZ(min, [max[X], max[Y], midZ], resolution),
+    front: walkZ([min[X], min[Y], midZ], max, resolution),
     kind: BRANCH,
-    plane: [0, 0, 1, midZ],
+    plane: [0, 0, 1, midZ * resolution],
     same: []
   };
 };
@@ -63,7 +57,10 @@ export const deform = (solid, transform, min, max, resolution) => {
 
   const solidPolygons = toPolygonsFromSolid(alignVertices(solid));
 
-  const bsp = walkX(min, max, resolution);
+  const floor = ([x, y, z]) => [Math.floor(x / resolution), Math.floor(y / resolution), Math.floor(z / resolution)];
+  const ceil = ([x, y, z]) => [Math.ceil(x / resolution), Math.ceil(y / resolution), Math.ceil(z / resolution)];
+
+  const bsp = walkX(floor(min), ceil(max), resolution);
 
   // Classify the solid with it.
   const dividedPolygons = [];
