@@ -5,7 +5,7 @@ import {
 } from './clipper-lib';
 
 import {
-  fromSurface,
+  fromSurfaceAsClosedPaths,
   toSurface
 } from './convert';
 
@@ -17,11 +17,10 @@ import {
 // This reorients the most exterior paths to be ccw.
 
 export const reorient = (surface, normalize = p => p) => {
-  const polygons = fromSurface(fixTJunctions(surface), normalize);
-  if (polygons.length === 0) {
+  const subjectInputs = fromSurfaceAsClosedPaths(fixTJunctions(surface), normalize);
+  if (subjectInputs.length === 0) {
     return [];
   }
-  const subjectInputs = polygons.map(polygon => ({ data: polygon, closed: true }));
   const result = clipper.clipToPaths(
     {
       clipType: ClipType.Union,

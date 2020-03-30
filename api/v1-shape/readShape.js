@@ -8,9 +8,13 @@ export const readShape = async (path, build, { ephemeral = false, src } = {}) =>
     data = await readFile({ sources: [src], ephemeral }, `cache/${path}`);
   }
   if (data === undefined && build !== undefined) {
+    data = await readFile({ ephemeral }, `cache/${path}`);
+    if (data !== undefined) {
+      return Shape.fromGeometry(data);
+    }
     const shape = await build();
     if (!ephemeral) {
-      await cacheShape(shape, `cache/${path}`);
+      await cacheShape(shape, path);
     }
     return shape;
   }
