@@ -53,6 +53,9 @@ const surfaceToThreejsSurface = (surface) => {
 
 export const toThreejsGeometry = (geometry, supertags) => {
   const tags = [...(supertags || []), ...(geometry.tags || [])];
+  if (tags.includes('compose/non-positive')) {
+    return;
+  }
   if (geometry.isThreejsGeometry) {
     return geometry;
   } else if (geometry.assembly) {

@@ -32,7 +32,7 @@ Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = 
   return view(this, { width, height, position });
 };
 
-Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
+Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, -100, 0] } = {}) {
   return view(this, { width, height, position });
 };
 

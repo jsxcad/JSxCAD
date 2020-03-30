@@ -3542,11 +3542,10 @@ const fixTJunctions = (surface) => {
 // This reorients the most exterior paths to be ccw.
 
 const reorient = (surface, normalize = p => p) => {
-  const polygons = fromSurface(fixTJunctions(surface), normalize);
-  if (polygons.length === 0) {
+  const subjectInputs = fromSurfaceAsClosedPaths(fixTJunctions(surface), normalize);
+  if (subjectInputs.length === 0) {
     return [];
   }
-  const subjectInputs = polygons.map(polygon => ({ data: polygon, closed: true }));
   const result = clipper$1.clipToPaths(
     {
       clipType: jsAngusjClipperjsWeb_2.Union,

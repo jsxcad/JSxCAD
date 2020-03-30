@@ -21,6 +21,7 @@ export const findFlatTransforms = (shape) => {
       const [min, max] = flatShape.measureBoundingBox();
       const depth = max[Z] - min[Z];
       if (depth < bestDepth) {
+        bestDepth = depth;
         bestTo = to;
         bestFrom = from;
         bestSurface = surface;

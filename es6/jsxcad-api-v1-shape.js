@@ -789,7 +789,7 @@ Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = 
   return view(this, { width, height, position });
 };
 
-Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
+Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, -100, 0] } = {}) {
   return view(this, { width, height, position });
 };
 
@@ -1004,9 +1004,13 @@ const readShape = async (path, build, { ephemeral = false, src } = {}) => {
     data = await readFile({ sources: [src], ephemeral }, `cache/${path}`);
   }
   if (data === undefined && build !== undefined) {
+    data = await readFile({ ephemeral }, `cache/${path}`);
+    if (data !== undefined) {
+      return Shape.fromGeometry(data);
+    }
     const shape = await build();
     if (!ephemeral) {
-      await cacheShape(shape, `cache/${path}`);
+      await cacheShape(shape, path);
     }
     return shape;
   }
