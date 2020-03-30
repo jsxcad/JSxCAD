@@ -42,7 +42,7 @@ export class OrbitView extends React.PureComponent {
     const { geometry, position } = this.props;
     const container = document.getElementById(containerId);
 
-    const view = { target: [0, 0, 0], position, up: [0, 1, 0] };
+    const view = { target: [0, 0, 0], position, up: [0, 0, 1] };
 
     const page = document.createElement('div');
     page.id = 'viewer';
