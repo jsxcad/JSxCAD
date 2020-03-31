@@ -1,3 +1,5 @@
+/* global Blob */
+
 import {
   dataUrl,
   orbitDisplay
@@ -9,6 +11,8 @@ import {
   watchFile
 } from '@jsxcad/sys';
 
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Pane from './Pane';
@@ -18,6 +22,7 @@ import ResizableBox from './ResizableBox';
 import Row from 'react-bootstrap/Row';
 import Shape from '@jsxcad/api-v1-shape';
 import marked from 'marked';
+import saveAs from 'file-saver';
 
 export class OrbitView extends React.PureComponent {
   static get propTypes () {
@@ -174,6 +179,37 @@ export class GeometryView extends React.PureComponent {
   }
 }
 
+const downloadFile = async (filename, data, type) => {
+  const blob = new Blob([data.buffer], { type });
+  saveAs(blob, filename);
+};
+
+export class DownloadView extends React.PureComponent {
+  static get propTypes () {
+    return {
+      id: PropTypes.string,
+      entries: PropTypes.array
+    };
+  }
+
+  constructor (props) {
+    super(props);
+    this.state = {};
+  }
+
+  render () {
+    const { entries } = this.props;
+
+    const makeDownloadButton = ({ filename, data, type }, index) => {
+      return <Button key={index} variant='outline-primary' onClick={() => downloadFile(filename, data, type)}>
+        {filename}
+      </Button>;
+    };
+
+    return <ButtonGroup>{entries.map(makeDownloadButton)}</ButtonGroup>;
+  }
+}
+
 export class NotebookUi extends Pane {
   static get propTypes () {
     return {
@@ -230,6 +266,11 @@ export class NotebookUi extends Pane {
       } else if (note.md) {
         const data = note.md;
         notes.push(<div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }}/>);
+      } else if (note.download) {
+        const { entries } = note.download;
+        if (entries) {
+          notes.push(<DownloadView key={key} entries={entries}/>);
+        }
       }
     }
     return notes;

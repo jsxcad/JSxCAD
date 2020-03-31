@@ -1,11 +1,11 @@
 import '@jsxcad/api-v1-item';
 
 import { Empty, Layers, Square } from '@jsxcad/api-v1-shapes';
+import { getLeafs, getPlans } from '@jsxcad/geometry-tagged';
 
 import { Hershey } from '@jsxcad/api-v1-font';
 import { Plan } from '@jsxcad/api-v1-plan';
 import Shape from '@jsxcad/api-v1-shape';
-import { getLeafs } from '@jsxcad/geometry-tagged';
 import { max } from '@jsxcad/api-v1-math';
 import { pack } from '@jsxcad/api-v1-layout';
 
@@ -77,3 +77,12 @@ const PageMethod = function (options = {}) { return Page(options, this); };
 Shape.prototype.Page = PageMethod;
 
 export default Page;
+
+export const ensurePages = (geometry) => {
+  const pages = getPlans(geometry).filter(entry => entry.plan.page);
+  if (pages.length === 0) {
+    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry());
+  } else {
+    return pages;
+  }
+};
