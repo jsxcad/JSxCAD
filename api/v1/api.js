@@ -13,7 +13,11 @@ import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-shell';
 import '@jsxcad/api-v1-svg';
 import '@jsxcad/api-v1-stl';
-import '@jsxcad/api-v1-view';
+// import '@jsxcad/api-v1-view';
+
+export {
+  emit
+} from '@jsxcad/sys';
 
 export {
   source

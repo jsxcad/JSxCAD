@@ -1,16 +1,22 @@
+import arch from './arch';
 import crumple from './crumple';
-import thin from './thin';
+import skew from './skew';
+import taper from './taper';
 import twist from './twist';
 
 const api = {
+  arch,
   crumple,
-  thin,
+  skew,
+  taper,
   twist
 };
 
 export {
+  arch,
   crumple,
-  thin,
+  skew,
+  taper,
   twist
 };
 

@@ -1535,7 +1535,7 @@ const fromZipToFilesystem = async (options = {}, zip) => {
     // Cut off the stored fs, and write into the current fs.
     const localPath = path.join('/');
     const data = new Uint8Array(await entry.arrayBuffer());
-    await writeFile({}, localPath, data);
+    await writeFile({ doSerialize: false }, localPath, data);
   }
 };
 
@@ -3544,7 +3544,7 @@ var toArray = files => {
 const toZipFromFilesystem = async ({ filterPath = (a => true), transformPath = (a => a) } = {}) => {
   const entries = [];
   for (const file of await listFiles()) {
-    const data = await readFile({ as: 'bytes' }, file);
+    const data = await readFile({ doSerialize: true }, file);
     const qualifiedPath = qualifyPath(file);
     if (filterPath(qualifiedPath)) {
       const path = transformPath(qualifiedPath);

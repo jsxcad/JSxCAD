@@ -7,9 +7,9 @@ const readDxf = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  let data = await readFile({ as: 'utf8', ...options }, `source/${path}`);
+  let data = await readFile({ doSerialize: false, ...options }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'utf8', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+    data = await readFile({ sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
   }
   return Shape.fromGeometry(await fromDxf(options, data));
 };
@@ -32,8 +32,8 @@ const writeDxf = async (options, shape) => {
   const { path } = options;
   const geometry = shape.toKeptGeometry();
   const dxf = await toDxf({ preview: true, ...options }, geometry);
-  await writeFile({}, `output/${path}`, dxf);
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  await writeFile({ doSerialize: false }, `output/${path}`, dxf);
+  await writeFile({}, `geometry/${path}`, geometry);
 };
 
 const method = function (options = {}) { return writeDxf(options, this); };

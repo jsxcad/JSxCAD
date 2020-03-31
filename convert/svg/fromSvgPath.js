@@ -93,7 +93,7 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
 };
 
 export const fromSvgPath = (svgPath, options = {}) => {
-  const paths = toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(svgPath))));
+  const paths = toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))));
   for (const path of paths) {
     assertGood(path);
   }

@@ -19,11 +19,11 @@ const defaultPaneLayout = {
 const defaultPaneViews = [
   ['0', { view: 'editScript', file: 'source/script.jsxcad', title: 'Edit script.jsxcad' }],
   ['1', { view: 'geometry', file: 'geometry/preview', title: 'View preview' }],
-  ['2', { view: 'geometry', file: 'geometry/preview', title: 'View preview' }],
+  ['2', { view: 'notebook', title: 'Notebook' }],
   ['3', { view: 'log', title: 'Log' }]
 ];
 
-const defaultScript = `// Circle(10);`;
+const defaultScript = '// md`# Example`; Circle(10).topView();';
 
 export class SelectProjectUi extends SettingsUi {
   constructor (props) {
@@ -51,8 +51,8 @@ export class SelectProjectUi extends SettingsUi {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
       await writeFile({ project }, 'source/script.jsxcad', defaultScript);
-      await writeFile({ project }, 'ui/paneLayout', JSON.stringify(defaultPaneLayout));
-      await writeFile({ project }, 'ui/paneViews', JSON.stringify(defaultPaneViews));
+      await writeFile({ project }, 'ui/paneLayout', defaultPaneLayout);
+      await writeFile({ project }, 'ui/paneViews', defaultPaneViews);
       await log({ op: 'text', text: `Project ${project} created`, level: 'serious' });
       if (onSubmit) {
         onSubmit({ project });

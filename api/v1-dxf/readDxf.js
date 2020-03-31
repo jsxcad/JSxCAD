@@ -8,9 +8,9 @@ export const readDxf = async (options) => {
     options = { path: options };
   }
   const { path } = options;
-  let data = await readFile({ as: 'utf8', ...options }, `source/${path}`);
+  let data = await readFile({ doSerialize: false, ...options }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'utf8', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+    data = await readFile({ sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
   }
   return Shape.fromGeometry(await fromDxf(options, data));
 };

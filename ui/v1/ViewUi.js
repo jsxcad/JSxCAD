@@ -54,11 +54,15 @@ export class ViewUi extends Pane {
     const geometryPath = file;
 
     const readAndUpdate = async () => {
-      const json = await readFile({}, geometryPath);
-      if (json === undefined) {
+      const data = await readFile({}, geometryPath);
+      if (data === undefined) {
         await updateGeometry({ assembly: [] });
       } else {
-        await updateGeometry(JSON.parse(json));
+        if (data.buffer) {
+          await updateGeometry(JSON.parse(new TextDecoder('utf8').decode(data)));
+        } else {
+          await updateGeometry(data);
+        }
       }
     };
 

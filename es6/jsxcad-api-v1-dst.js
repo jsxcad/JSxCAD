@@ -30,7 +30,7 @@ const readDst = async (options) => {
   const { path } = options;
   let data = await readFile({ as: 'bytes' }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
+    data = await readFile({ doSerialize: false, sources: getSources(`cache/${path}`), ...options }, `cache/${path}`);
   }
   return Shape.fromGeometry(await fromDst(options, data));
 };

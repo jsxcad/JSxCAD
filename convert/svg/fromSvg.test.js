@@ -9,7 +9,7 @@ const { readFile, writeFile } = fs.promises;
 test.beforeEach(async t => { await boot(); });
 
 test('Rectangle', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
@@ -21,14 +21,15 @@ test('Rectangle', async t => {
                             <rect x="400" y="100" width="400" height="200"
                                   fill="yellow" stroke="navy" stroke-width="10"  />
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.rectangle.pdf', pdf);
-  t.is(pdf, await readFile('test.rectangle.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.rectangle.pdf', { encoding: 'utf8' }));
 });
 
 test('Rounded Rectangle', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
@@ -49,14 +50,15 @@ test('Rounded Rectangle', async t => {
                                       fill="none" stroke="purple" stroke-width="30" />
                               </g>
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.rounded-rectangle.pdf', pdf);
-  t.is(pdf, await readFile('test.rounded-rectangle.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.rounded-rectangle.pdf', { encoding: 'utf8' }));
 });
 
 test('Polyline', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
@@ -74,14 +76,15 @@ test('Polyline', async t => {
                                                 950,375 950,25 1050,25 1050,375
                                                 1150,375" />
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.polyline.pdf', pdf);
-  t.is(pdf, await readFile('test.polyline.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.polyline.pdf', { encoding: 'utf8' }));
 });
 
 test('Circle', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
@@ -93,14 +96,15 @@ test('Circle', async t => {
                               <circle cx="600" cy="200" r="100"
                                     fill="red" stroke="blue" stroke-width="10"  />
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.circle.pdf', pdf);
-  t.is(pdf, await readFile('test.circle.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.circle.pdf', { encoding: 'utf8' }));
 });
 
 test('Ellipse', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
@@ -117,14 +121,15 @@ test('Ellipse', async t => {
                                     rx="250" ry="100"
                                     fill="none" stroke="blue" stroke-width="20"  />
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.ellipse.pdf', pdf);
-  t.is(pdf, await readFile('test.ellipse.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.ellipse.pdf', { encoding: 'utf8' }));
 });
 
 test('Polygon', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="12cm" height="4cm" viewBox="0 0 1200 400"
@@ -141,14 +146,15 @@ test('Polygon', async t => {
                                         points="850,75  958,137.5 958,262.5
                                                 850,325 742,262.6 742,137.5" />
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.polygon.pdf', pdf);
-  t.is(pdf, await readFile('test.polygon.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.polygon.pdf', { encoding: 'utf8' }));
 });
 
 test('Complex', async t => {
-  const assembly = await fromSvg(
+  const assembly = await fromSvg(new TextEncoder('utf8').encode(
     `
                             <?xml version="1.0"?>
                             <svg width="5cm" height="4cm" viewBox="0 0 500 400"
@@ -176,8 +182,9 @@ test('Complex', async t => {
                               <text font-size="22" font-family="Verdana" x="325" y="350"
                                     text-anchor="middle">S400,300 400,200</text>
                             </svg>
-                           `);
+                           `));
   const pdf = await toPdf(assembly);
   await writeFile('out.complex.pdf', pdf);
-  t.is(pdf, await readFile('test.complex.pdf', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(pdf),
+       await readFile('test.complex.pdf', { encoding: 'utf8' }));
 });

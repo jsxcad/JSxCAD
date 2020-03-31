@@ -12,9 +12,9 @@ import { simplifyPath } from '@jsxcad/algorithm-shape';
  **/
 
 export const readPng = async (path, { src }) => {
-  let data = await readFile({ as: 'bytes' }, `source/${path}`);
+  let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined) {
-    data = await readFile({ as: 'bytes', sources: [src] }, `cache/${path}`);
+    data = await readFile({ sources: [src] }, `cache/${path}`);
   }
   const raster = await fromPng(data);
   return raster;

@@ -5,8 +5,8 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-shell.js';
 import './jsxcad-api-v1-svg.js';
 import './jsxcad-api-v1-stl.js';
-import './jsxcad-api-v1-view.js';
-import { addSource, readFile, getSources } from './jsxcad-sys.js';
+import { addSource, emit, readFile, getSources } from './jsxcad-sys.js';
+export { emit } from './jsxcad-sys.js';
 import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
@@ -44,6 +44,7 @@ const source = (path, source) => addSource(`cache/${path}`, source);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  emit: emit,
   source: source,
   Connector: Connector,
   X: X,
@@ -140,6 +141,12 @@ const buildImportModule = (api) =>
     return module;
   };
 
+const md = (strings, ...placeholders) => {
+  const md = strings.reduce((result, string, i) => (result + placeholders[i - 1] + string));
+  emit({ md });
+  return md;
+};
+
 // Bootstrap importModule.
 
 const extendedApi = { ...api };
@@ -182,4 +189,4 @@ registerDynamicModule(module('thread'), './jsxcad-api-v1-thread.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 
-export { importModule, source };
+export { importModule, md, source };
