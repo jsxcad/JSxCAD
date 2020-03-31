@@ -39,6 +39,7 @@ import LogUi from './LogUi';
 import Modal from 'react-bootstrap/Modal';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import NotebookUi from './NotebookUi';
 import NothingUi from './NothingUi';
 import ParametersUi from './ParametersUi';
 import PropTypes from 'prop-types';
@@ -195,8 +196,8 @@ class Ui extends React.PureComponent {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({ fileBase: project });
       await writeFile({}, 'source/script.jsxcad', defaultScript);
-      await writeFile({}, 'ui/paneLayout', JSON.stringify(defaultPaneLayout));
-      await writeFile({}, 'ui/paneViews', JSON.stringify(defaultPaneViews));
+      await writeFile({}, 'ui/paneLayout', defaultPaneLayout);
+      await writeFile({}, 'ui/paneViews', defaultPaneViews);
       await this.selectProject(project);
     }
   };
@@ -208,7 +209,11 @@ class Ui extends React.PureComponent {
     const paneLayoutData = await readFile({}, 'ui/paneLayout');
     let paneLayout;
     if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
-      paneLayout = JSON.parse(paneLayoutData);
+      if (paneLayoutData.buffer) {
+        paneLayout = JSON.parse(new TextDecoder('utf8').decode(paneLayoutData));
+      } else {
+        paneLayout = paneLayoutData;
+      }
     } else {
       paneLayout = '0';
     }
@@ -216,7 +221,11 @@ class Ui extends React.PureComponent {
     const paneViewsData = await readFile({}, 'ui/paneViews');
     let paneViews;
     if (paneViewsData !== undefined) {
-      paneViews = JSON.parse(paneViewsData);
+      if (paneViewsData.buffer) {
+        paneViews = JSON.parse(new TextDecoder('utf8').decode(paneViewsData));
+      } else {
+        paneViews = paneViewsData;
+      }
     } else {
       paneViews = [];
     }
@@ -298,7 +307,7 @@ class Ui extends React.PureComponent {
       paneLayout = '0';
     }
     this.setState({ paneLayout });
-    await writeFile({}, 'ui/paneLayout', JSON.stringify(paneLayout));
+    await writeFile({}, 'ui/paneLayout', paneLayout);
   }
 
   onRelease (paneLayout) {
@@ -319,6 +328,7 @@ class Ui extends React.PureComponent {
       }
     }
 
+    views.push({ view: 'notebook', viewTitle: 'Notebook' });
     views.push({ view: 'files', viewTitle: 'Files' });
     views.push({ view: 'log', viewTitle: 'Log' });
     views.push({ view: 'parameters', viewTitle: 'Parameters' });
@@ -358,7 +368,7 @@ class Ui extends React.PureComponent {
 
     this.setState({ paneViews: newPaneViews, switchView: undefined });
 
-    await writeFile({}, 'ui/paneViews', JSON.stringify(newPaneViews));
+    await writeFile({}, 'ui/paneViews', newPaneViews);
   }
 
   renderPane (views, id, path, createNode, onSelectView, onSelectFile) {
@@ -375,6 +385,18 @@ class Ui extends React.PureComponent {
     const { ask } = this.state;
 
     switch (view) {
+      case 'notebook':
+        return (
+          <NotebookUi
+            key={`${id}/notebook`}
+            id={id}
+            path={path}
+            createNode={createNode}
+            view={view}
+            viewChoices={viewChoices}
+            viewTitle={'Notebook'}
+            onSelectView={onSelectView}
+          />);
       case 'geometry': {
         const fileTitle = file === undefined ? '' : file.substring('geometry/'.length);
         return (
@@ -664,7 +686,7 @@ const setupUi = async (sha) => {
     document.getElementById('top'));
 };
 
-const defaultScript = `// Circle(10);`;
+const defaultScript = `// Circle(10).topView();`;
 
 const defaultPaneLayout =
   {
@@ -685,14 +707,8 @@ const defaultPaneViews = [
     title: 'Edit script.jsxcad'
   }],
   ['1', {
-    view: 'geometry',
-    file: 'geometry/preview',
-    title: 'View preview'
-  }],
-  ['2', {
-    view: 'geometry',
-    file: 'geometry/preview',
-    title: 'View preview'
+    view: 'notebook',
+    title: 'Notebook'
   }],
   ['3', {
     view: 'log',

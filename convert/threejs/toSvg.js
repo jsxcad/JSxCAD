@@ -175,5 +175,5 @@ export const toSvgSync = (options = {}, geometry) => {
   if (includeXmlHeader) {
     svg = header + svg;
   }
-  return svg;
+  return new TextEncoder('utf8').encode(svg);
 };

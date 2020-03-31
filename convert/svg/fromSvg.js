@@ -9,7 +9,7 @@ import { transform } from '@jsxcad/geometry-tagged';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath = (svgPath, options = {}) =>
-  baseFromSvgPath(svgPath, Object.assign({ normalizeCoordinateSystem: false }, options));
+  baseFromSvgPath(new TextEncoder('utf8').encode(svgPath), Object.assign({ normalizeCoordinateSystem: false }, options));
 
 const ELEMENT_NODE = 1;
 const ATTRIBUTE_NODE = 2;
@@ -81,7 +81,8 @@ const applyTransforms = ({ matrix }, transformText) => {
   return { matrix };
 };
 
-export const fromSvg = async (svgString, options = {}) => {
+export const fromSvg = async (input, options = {}) => {
+  const svgString = new TextDecoder('utf8').decode(input);
   const geometry = { assembly: [] };
   const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
 

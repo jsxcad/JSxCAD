@@ -1,6 +1,8 @@
+export { addPending, resolvePending } from './pending';
 export { addSource, getSources } from './source';
 export { ask, setHandleAskUser } from './ask';
 export { boot, onBoot } from './boot';
+export { clearEmitted, emit, getEmitted } from './emit';
 export { getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
 export { listFiles, listFilesystems } from './listFiles';
 export { log, unwatchLog, watchLog } from './log';

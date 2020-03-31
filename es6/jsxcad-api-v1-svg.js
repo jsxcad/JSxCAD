@@ -1,7 +1,8 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg as toSvg$1 } from './jsxcad-convert-svg.js';
-import { readFile, getSources, writeFile } from './jsxcad-sys.js';
+import { readFile, getSources, writeFile, addPending, emit } from './jsxcad-sys.js';
 import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js';
+import { ensurePages } from './jsxcad-api-v1-plans.js';
 
 /**
  *
@@ -20,15 +21,15 @@ import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js'
  **/
 
 const SvgPath = (svgPath, options = {}) =>
-  Shape.fromGeometry(fromSvgPath(svgPath, options));
+  Shape.fromGeometry(fromSvgPath(new TextEncoder('utf8').encode(svgPath), options));
 
 const readSvg = async (path, { src } = {}) => {
-  let data = await readFile({ decode: 'utf8' }, `source/${path}`);
+  let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
     data = await readFile({ decode: 'utf8', sources: [src] }, `cache/${path}`);
   }
   if (data === undefined) {
-    data = await readFile({ decode: 'utf8' }, `output/${path}`);
+    data = await readFile({ doSerialize: false, decode: 'utf8' }, `output/${path}`);
   }
   if (data === undefined) {
     throw Error(`Cannot find ${path}`);
@@ -54,6 +55,23 @@ const readSvgPath = async (options) => {
   return Shape$1.fromGeometry(await fromSvgPath(options, data));
 };
 
+const downloadSvg = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      const op = toSvg$1(leaf, options);
+      addPending(op);
+      entries.push({ data: op, filename: `${name}_${++index}.svg`, type: 'image/svg+xml' });
+    }
+  }
+  emit({ download: { entries } });
+  return shape;
+};
+
+const downloadSvgMethod = function (...args) { return downloadSvg(this, ...args); };
+Shape$1.prototype.downloadSvg = downloadSvgMethod;
+
 const toSvg = async (shape, options = {}) => {
   const pages = [];
   // CHECK: Should this be limited to Page plans?
@@ -71,8 +89,8 @@ const toSvg = async (shape, options = {}) => {
 
 const writeSvg = async (shape, name, options = {}) => {
   for (const { svg, leaf, index } of await toSvg(shape, options)) {
-    await writeFile({}, `output/${name}_${index}.svg`, svg);
-    await writeFile({}, `geometry/${name}_${index}.svg`, JSON.stringify(toKeptGeometry(leaf)));
+    await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
+    await writeFile({}, `geometry/${name}_${index}.svg`, toKeptGeometry(leaf));
   }
 };
 

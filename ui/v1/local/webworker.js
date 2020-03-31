@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log } from './jsxcad-sys.js';
+import { boot, conversation, log, clearEmitted, resolvePending, getEmitted, writeFile } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
@@ -24,6 +24,7 @@ const agent = async ({
     });
 
     if (question.evaluate) {
+      clearEmitted();
       const ecmascript = toEcmascript({}, question.evaluate);
       console.log({
         op: 'text',
@@ -36,7 +37,7 @@ const agent = async ({
       const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
       const constructor = await builder(api);
       const module = await constructor();
-      const shape = await module.main();
+      await module.main();
       await log({
         op: 'text',
         text: 'Evaluation Succeeded',
@@ -45,17 +46,21 @@ const agent = async ({
       await log({
         op: 'evaluate',
         status: 'success'
-      });
+      }); // Wait for any pending operations.
 
-      if (shape !== undefined && shape.toKeptGeometry) {
-        const keptGeometry = shape.toKeptGeometry();
-        await log({
-          op: 'text',
-          text: 'Preview Rendered',
-          level: 'serious'
-        });
-        return keptGeometry;
+      resolvePending(); // Update the notebook.
+
+      const notebook = getEmitted(); // Resolve any promises.
+
+      for (const note of notebook) {
+        if (note.download) {
+          for (const entry of note.download.entries) {
+            entry.data = await entry.data;
+          }
+        }
       }
+
+      await writeFile({}, 'notebook', notebook);
     }
   } catch (error) {
     await log({

@@ -16,5 +16,6 @@ test('Example', async (t) => {
     { assembly: [{ paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]), tags: ['paths'] },
                  { solid: fromPolygons({}, unitGeodesicSphere20Polygons), tags: ['solid'] },
                  { z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]), tags: ['surface'] }] });
-  t.is(svg, await readFile('toThreejsPage.test.svg', { encoding: 'utf8' }));
+  t.is(new TextDecoder('utf8').decode(svg),
+       await readFile('toThreejsPage.test.svg', { encoding: 'utf8' }));
 });

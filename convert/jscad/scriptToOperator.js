@@ -58,14 +58,17 @@ const replaceIncludes = async (ast) => {
   });
   for (const include of includes) {
     const path = include.node.arguments[0].value;
-    include.replace(await replaceIncludes(recast.parse(await readFile({ sources: [path] }, path))));
+    const raw = await readFile({ doSerialize: false, sources: [path] }, path);
+    const src = new TextDecoder('utf8').decode(raw);
+    include.replace(await replaceIncludes(recast.parse(src)));
   }
   return ast;
 };
 
 export const scriptToOperator = async (options = {}, script) => {
   try {
-    const ast = await replaceIncludes(recast.parse(script));
+    const src = new TextDecoder('utf8').decode(script);
+    const ast = await replaceIncludes(recast.parse(src));
     const operator = createJscadFunction(recast.print(ast).code, unpackApi(api));
     return operator;
   } catch (e) {

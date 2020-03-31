@@ -8,8 +8,8 @@ export const writeThreejsPage = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  await writeFile({}, `output/${path}`, toThreejsPage(options, geometry));
-  await writeFile({}, `geometry/${path}`, JSON.stringify(geometry));
+  await writeFile({ doSerialize: false }, `output/${path}`, toThreejsPage(options, geometry));
+  await writeFile({}, `geometry/${path}`, geometry);
 };
 
 const method = function (options = {}) { return writeThreejsPage(options, this); };

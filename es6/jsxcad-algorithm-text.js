@@ -15638,8 +15638,10 @@ function parseBuffer(buffer) {
     return font;
 }
 
-const toFont = (options = {}, bytes) => {
-  const fontData = parseBuffer(bytes.buffer);
+const toFont = (options = {}, data) => {
+  // Unfortunately opentype.js wants a buffer but doesn't take an offset.
+  // Trim the buffer back so that we get one where offset 0 is the start of data.
+  const fontData = parseBuffer(data.buffer.slice(data.byteOffset));
 
   const font = (options, text) => {
     const { emSize = 1, curveSegments = 32, size = 72, kerning = true, features, hinting = false } = options;
@@ -15651,7 +15653,7 @@ const toFont = (options = {}, bytes) => {
                             svgPaths.push(glyph.getPath(x, y, fontSize, options).toPathData());
                           });
     const pathsets = [];
-    for (let { paths } of svgPaths.map(svgPath => fromSvgPath(svgPath, { curveSegments: curveSegments }))) {
+    for (let { paths } of svgPaths.map(svgPath => fromSvgPath(new TextEncoder('utf8').encode(svgPath), { curveSegments: curveSegments }))) {
       // Outlining forces re-orientation.
       pathsets.push(reorient(paths));
     }

@@ -1,8 +1,9 @@
+import { Page, ensurePages } from './Page';
+
 import Apothem from './Apothem';
 import Diameter from './Diameter';
 import Label from './Label';
 import Length from './Length';
-import Page from './Page';
 import Radius from './Radius';
 import Sketch from './Sketch';
 
@@ -23,7 +24,8 @@ export {
   Length,
   Page,
   Radius,
-  Sketch
+  Sketch,
+  ensurePages
 };
 
 export default api;

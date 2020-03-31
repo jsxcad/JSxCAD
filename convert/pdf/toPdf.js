@@ -106,7 +106,8 @@ export const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } =
     }
   }
 
-  return [].concat(header({ scale, width, height, lineWidth }),
-                   lines,
-                   footer).join('\n');
+  const output = [].concat(header({ scale, width, height, lineWidth }),
+                           lines,
+                           footer).join('\n');
+  return new TextEncoder('utf8').encode(output);
 };
