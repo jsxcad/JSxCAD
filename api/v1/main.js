@@ -1,3 +1,5 @@
+import './view';
+
 import * as api from './api';
 
 import { buildImportModule, registerDynamicModule } from './importModule';

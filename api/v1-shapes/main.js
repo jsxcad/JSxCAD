@@ -1,5 +1,3 @@
-import './view';
-
 import Arc from './Arc';
 import Assembly from './Assembly';
 import Circle from './Circle';
