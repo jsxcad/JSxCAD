@@ -30,6 +30,7 @@ export default {
       namedExports: {
         '../../node_modules/bin-packing-es/build/bin-packing.js': ['GrowingPacker', 'Packer'],
         '../../node_modules/opentype.js/dist/opentype.js': ['parse'],
+        '../../node_modules/acorn/dist/acorn.js': ['parse'],
         '../../node_modules/three/build/three.js': [
           'AmbientLight', 'BackSide', 'Box2', 'Box3', 'BufferGeometry', 'Camera', 'Color', 'DirectionalLight',
           'DoubleSide', 'FaceColors', 'Float32BufferAttribute', 'FrontSide', 'Frustum', 'Geometry', 'GridHelper',
@@ -51,6 +52,7 @@ export default {
           'gl': 'const dummy = {}; export default dummy;',
           'node-fetch': 'export default {};',
           'os': '',
+          'v8': '',
           'tty': '',
           '@blueprintjs/core': '',
           '@blueprintjs/icons': '',
