@@ -1,8 +1,26 @@
+import { addPending, emit, writeFile } from '@jsxcad/sys';
 import { getLeafs, getPlans, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { toSvg as convertToSvg } from '@jsxcad/convert-svg';
-import { writeFile } from '@jsxcad/sys';
+import { ensurePages } from '@jsxcad/api-v1-plans';
+
+export const downloadSvg = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      const op = convertToSvg(leaf, options);
+      addPending(op);
+      entries.push({ data: op, filename: `${name}_${++index}.svg`, type: 'image/svg+xml' });
+    }
+  }
+  emit({ download: { entries } });
+  return shape;
+};
+
+const downloadSvgMethod = function (...args) { return downloadSvg(this, ...args); };
+Shape.prototype.downloadSvg = downloadSvgMethod;
 
 export const toSvg = async (shape, options = {}) => {
   const pages = [];

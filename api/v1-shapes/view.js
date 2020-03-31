@@ -1,10 +1,15 @@
-import Shape from './Shape';
+import Shape from '@jsxcad/api-v1-shape';
 import { emit } from '@jsxcad/sys';
+import { ensurePages } from '@jsxcad/api-v1-plans';
+import { getLeafs } from '@jsxcad/geometry-tagged';
 
 // FIX: We shouldn't need to supply a path to this.
 const view = (shape, { width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
-  const geometry = shape.toKeptGeometry();
-  emit({ geometry: { width, height, position, geometry } });
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      emit({ geometry: { width, height, position, geometry: leaf } });
+    }
+  }
   return shape;
 };
 

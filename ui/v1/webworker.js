@@ -24,7 +24,16 @@ const agent = async ({ ask, question }) => {
       // Wait for any pending operations.
       sys.resolvePending();
       // Update the notebook.
-      await sys.writeFile({}, 'notebook', sys.getEmitted());
+      const notebook = sys.getEmitted();
+      // Resolve any promises.
+      for (const note of notebook) {
+        if (note.download) {
+          for (const entry of note.download.entries) {
+            entry.data = await entry.data;
+          }
+        }
+      }
+      await sys.writeFile({}, 'notebook', notebook);
     }
   } catch (error) {
     await sys.log({ op: 'text', text: error.stack, level: 'serious' });

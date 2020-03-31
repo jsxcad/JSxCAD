@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log, clearEmitted, resolvePending, writeFile, getEmitted } from './jsxcad-sys.js';
+import { boot, conversation, log, clearEmitted, resolvePending, getEmitted, writeFile } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
@@ -50,7 +50,17 @@ const agent = async ({
 
       resolvePending(); // Update the notebook.
 
-      await writeFile({}, 'notebook', getEmitted());
+      const notebook = getEmitted(); // Resolve any promises.
+
+      for (const note of notebook) {
+        if (note.download) {
+          for (const entry of note.download.entries) {
+            entry.data = await entry.data;
+          }
+        }
+      }
+
+      await writeFile({}, 'notebook', notebook);
     }
   } catch (error) {
     await log({

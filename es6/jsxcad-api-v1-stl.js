@@ -1,7 +1,8 @@
-import Shape, { log, Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
+import Shape, { Shape as Shape$1, log } from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl as toStl$1 } from './jsxcad-convert-stl.js';
-import { readFile, writeFile } from './jsxcad-sys.js';
+import { readFile, writeFile, addPending, emit } from './jsxcad-sys.js';
 import { toKeptGeometry, getPlans, getLeafs } from './jsxcad-geometry-tagged.js';
+import { ensurePages } from './jsxcad-api-v1-plans.js';
 
 /**
  *
@@ -38,6 +39,24 @@ const readStl = async (path, { src, format = 'ascii' } = {}) => {
  * :::
  *
  **/
+
+const downloadStl = (shape, name, options = {}) => {
+  // CHECK: Should this be limited to Page plans?
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      const op = toStl$1(leaf, options);
+      addPending(op);
+      entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });
+    }
+  }
+  emit({ download: { entries } });
+  return shape;
+};
+
+const downloadStlMethod = function (...args) { return downloadStl(this, ...args); };
+Shape$1.prototype.downloadStl = downloadStlMethod;
 
 const toStl = async (shape, options = {}) => {
   const pages = [];

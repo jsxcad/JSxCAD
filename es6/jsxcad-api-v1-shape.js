@@ -3,8 +3,8 @@ import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { emit, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
+import { log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
 class Shape {
@@ -757,49 +757,6 @@ Shape.prototype.wireframeFaces = wireframeFacesMethod;
 
 const withMethod = function (...shapes) { return assemble(this, ...shapes); };
 Shape.prototype.with = withMethod;
-
-// FIX: We shouldn't need to supply a path to this.
-const view = (shape, { width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
-  const geometry = shape.toKeptGeometry();
-  emit({ geometry: { width, height, position, geometry } });
-  return shape;
-};
-
-Shape.prototype.view = function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.smallView = function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.bigView = function ({ width = 1024, height = 512, position = [100, -100, 100] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.topView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.smallTopView = function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = [0, 0, 100] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, -100, 0] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.smallFrontView = function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) {
-  return view(this, { width, height, position });
-};
-
-Shape.prototype.bigFrontView = function ({ width = 1024, height = 512, position = [0, -100, 0] } = {}) {
-  return view(this, { width, height, position });
-};
 
 const canonicalize = (shape) => Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
 
