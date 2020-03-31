@@ -15,7 +15,6 @@ const agent = async ({ ask, question }) => {
   
   try {
     var { key, values } = question;
-    console.log('Thread doing: ' + key);
     clearCache();
     switch (key) {
       case 'assemble':
@@ -53,24 +52,24 @@ const agent = async ({ ask, question }) => {
           return returnVal;
         }
       case 'layout':
+        console.log("Doing layout");
         const solidToSplit = api.Shape.fromGeometry(values[0]);
-        // Extract shapes
-        let items = solidToSplit.bom();
         
-        console.log("Here:");
-        console.log(items);
+        console.log("Updated 11:29");
         
-        var shapes = [];
-        items.forEach(item => {
-            shapes.push(solidToSplit.keep(item))
-        })
+        var flatItems = [];
+        solidToSplit.items().forEach(item => {
+            flatItems.push(item.flat().to(api.Z(0)));
+        });
         
-        console.log(shapes);
+        console.log(flatItems)
         
-        const sheetX = values[2];
-        const sheetY = values[3];
-        const sheet = api.Layers(...shapes).squash().Page({ size: [2438, 1219] });
-        return sheet.toDisjointGeometry();
+        const laidOut = api.Layers(...flatItems).Page();
+        
+        console.log(laidOut)
+        
+        //return api.Layers(...flatItems).Page().toDisjointGeometry();
+        return laidOut.toDisjointGeometry();
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
       case 'extractTag':
@@ -85,7 +84,6 @@ const agent = async ({ ask, question }) => {
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'Over Cut Inside Corners':
-        console.log('Overcutting corners');
         const overcutShape = api.Shape.fromGeometry(values[0]);
         const overcutSection = overcutShape.section(api.Z());
         const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
@@ -116,7 +114,7 @@ const agent = async ({ ask, question }) => {
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
       case 'svg':
-        const svgString = await toSvg(api.Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
+        const svgString = await toSvg(api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
         return svgString;
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
