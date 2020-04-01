@@ -3,18 +3,18 @@
 import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
-
 import { intersection, union } from '@jsxcad/api-v1-shape';
 
 import { Hull } from '@jsxcad/api-v1-extrude';
 import { clearCache } from '@jsxcad/cache';
+import { Hull } from '@jsxcad/api-v1-extrude';
 import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
-  console.log('This ran');
+  
   try {
     var { key, values } = question;
     clearCache();
@@ -53,16 +53,25 @@ const agent = async ({ ask, question }) => {
         } else {
           return returnVal;
         }
-      case 'getLayoutSvgs':
-        // Extract shapes
-        let items = api.Shape.fromGeometry(values[0]).toItems();
-        const sheetX = values[2];
-        const sheetY = values[3];
-        const [packed, unpacked] = pack({ size: [sheetX, sheetY], margin: values[1] }, ...items.map(
-          x => x.flat().to(api.Z()))
-        );
-        console.log(unpacked);
-        return api.Assembly(...packed).toDisjointGeometry();
+      case 'layout':
+        console.log("Doing layout");
+        const solidToSplit = api.Shape.fromGeometry(values[0]);
+        
+        console.log("Updated 11:29");
+        
+        var flatItems = [];
+        solidToSplit.items().forEach(item => {
+            flatItems.push(item.flat().to(api.Z(0)));
+        });
+        
+        console.log(flatItems)
+        
+        const laidOut = api.Layers(...flatItems).Page();
+        
+        console.log(laidOut)
+        
+        //return api.Layers(...flatItems).Page().toDisjointGeometry();
+        return laidOut.toDisjointGeometry();
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
       case 'extractTag':
@@ -77,7 +86,6 @@ const agent = async ({ ask, question }) => {
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'Over Cut Inside Corners':
-        console.log('Overcutting corners');
         const overcutShape = api.Shape.fromGeometry(values[0]);
         const overcutSection = overcutShape.section(api.Z());
         const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
@@ -89,12 +97,12 @@ const agent = async ({ ask, question }) => {
         if (values[1] === true && values[2] === false) { // Solid, no wireframe
           fromGeo = api.Shape.fromGeometry(values[0]);
         } else if (values[1] === false && values[2] === true) {
-          fromGeo = api.Shape.fromGeometry(values[0]).wireframe();
+          fromGeo = api.Shape.fromGeometry(values[0]).outline();
         } else if (values[1] === true && values[2] === true) {
           const intermediate = api.Shape.fromGeometry(values[0]);
-          fromGeo = intermediate.with(intermediate.wireframe());
+          fromGeo = intermediate.with(intermediate.outline());
         } else {
-          fromGeo = api.Shape.fromGeometry([]); // This should be an empty geometry
+          fromGeo = api.Empty(); // This should be an empty geometry
         }
         return convertThree.toThreejsGeometry(fromGeo.toDisjointGeometry());
       case 'rotate':
@@ -103,12 +111,12 @@ const agent = async ({ ask, question }) => {
         return api.Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry();
       case 'stl':
         const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
-        const stlString = await toStl({}, inflated);
+        const stlString = await toStl(inflated);
         return stlString;
       case 'stretch':
         return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
       case 'svg':
-        const svgString = await toSvg({}, api.Shape.fromGeometry(values[0]).center().section().outline().toKeptGeometry());
+        const svgString = await toSvg(api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
         return svgString;
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
@@ -118,11 +126,11 @@ const agent = async ({ ask, question }) => {
       case 'tag':
         return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
       case 'specify':
-        return api.Shape.fromGeometry(values[0]).specify([values[1]]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
       case 'translate':
         return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();
       case 'getBOM':
-        return api.Shape.fromGeometry(values[0]).toBillOfMaterial();
+        return api.Shape.fromGeometry(values[0]).bom();
       case 'union':
         return union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
       default:
