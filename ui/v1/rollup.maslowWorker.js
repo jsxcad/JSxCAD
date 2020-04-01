@@ -52,6 +52,7 @@ export default {
           'gl': 'const dummy = {}; export default dummy;',
           'node-fetch': 'export default {};',
           'os': '',
+          'v8': '',
           'tty': '',
           '@blueprintjs/core': '',
           '@blueprintjs/icons': '',

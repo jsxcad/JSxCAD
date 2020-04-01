@@ -1,3 +1,10 @@
+import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
+export { Shape, log, make } from './jsxcad-api-v1-shape.js';
+import { emit, addSource, readFile, getSources } from './jsxcad-sys.js';
+export { emit } from './jsxcad-sys.js';
+import { ensurePages, Page } from './jsxcad-api-v1-plans.js';
+export { Page } from './jsxcad-api-v1-plans.js';
+import { getLeafs } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-deform.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
@@ -5,20 +12,14 @@ import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-shell.js';
 import './jsxcad-api-v1-svg.js';
 import './jsxcad-api-v1-stl.js';
-import { addSource, emit, readFile, getSources } from './jsxcad-sys.js';
-export { emit } from './jsxcad-sys.js';
 import { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 export { Connector, X, Y, Z } from './jsxcad-api-v1-connector.js';
 import { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
 export { ChainedHull, Hull, Loop } from './jsxcad-api-v1-extrude.js';
-import { Shape, log, make } from './jsxcad-api-v1-shape.js';
-export { Shape, log, make } from './jsxcad-api-v1-shape.js';
 import { Line2 } from './jsxcad-api-v1-line2.js';
 export { Line2 } from './jsxcad-api-v1-line2.js';
 import { Plan } from './jsxcad-api-v1-plan.js';
 export { Plan } from './jsxcad-api-v1-plan.js';
-import { Page } from './jsxcad-api-v1-plans.js';
-export { Page } from './jsxcad-api-v1-plans.js';
 import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
@@ -30,6 +31,52 @@ export { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './js
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
+
+// FIX: We shouldn't need to supply a path to this.
+const view = (shape, { width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      emit({ geometry: { width, height, position, geometry: leaf } });
+    }
+  }
+  return shape;
+};
+
+Shape.prototype.view = function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.smallView = function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.bigView = function ({ width = 1024, height = 512, position = [100, -100, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.topView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.smallTopView = function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = [0, 0, 100] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, -100, 0] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.smallFrontView = function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) {
+  return view(this, { width, height, position });
+};
+
+Shape.prototype.bigFrontView = function ({ width = 1024, height = 512, position = [0, -100, 0] } = {}) {
+  return view(this, { width, height, position });
+};
 
 const source = (path, source) => addSource(`cache/${path}`, source);
 
@@ -53,7 +100,7 @@ var api = /*#__PURE__*/Object.freeze({
   ChainedHull: ChainedHull,
   Hull: Hull,
   Loop: Loop,
-  Shape: Shape,
+  Shape: Shape$1,
   log: log,
   make: make,
   pack: pack,

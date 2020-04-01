@@ -4,6 +4,8 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 import { intersection, union } from '@jsxcad/api-v1-shape';
+
+import { Hull } from '@jsxcad/api-v1-extrude';
 import { clearCache } from '@jsxcad/cache';
 import { Hull } from '@jsxcad/api-v1-extrude';
 import { pack } from '@jsxcad/api-v1-layout';
