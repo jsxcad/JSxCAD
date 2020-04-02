@@ -12,7 +12,6 @@ import { toSvg } from '@jsxcad/convert-svg';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
-  
   try {
     var { key, values } = question;
     clearCache();
@@ -52,19 +51,16 @@ const agent = async ({ ask, question }) => {
           return returnVal;
         }
       case 'layout':
-        console.log("Doing layout");
+        console.log('Doing layout');
         const solidToSplit = api.Shape.fromGeometry(values[0]);
-        
         var flatItems = [];
         solidToSplit.items().forEach(item => {
-            flatItems.push(item.flat().to(api.Z(0)));
+          flatItems.push(item.flat().to(api.Z(0)));
         });
         
-        console.log(flatItems)
+        console.log(flatItems);
         
         const laidOut = api.Layers(...flatItems).Page();
-        
-        console.log(laidOut)
         
         return laidOut.toDisjointGeometry();
       case 'difference':
