@@ -1,6 +1,6 @@
-import { deduplicate, getEdges } from '@jsxcad/geometry-path';
-
 import { distance } from '@jsxcad/math-vec3';
+import { getEdges } from '@jsxcad/geometry-path';
+import { pushWhenValid } from '@jsxcad/geometry-polygons';
 
 const THRESHOLD = 1e-5;
 
@@ -35,8 +35,7 @@ export const fixTJunctions = (surface) => {
       // Insert into the path.
       watertightPath.push(...colinear);
     }
-    const deduplicated = deduplicate(watertightPath);
-    watertightPaths.push(deduplicated);
+    pushWhenValid(watertightPaths, watertightPath);
   }
 
   return watertightPaths;

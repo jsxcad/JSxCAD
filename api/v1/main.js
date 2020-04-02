@@ -6,7 +6,9 @@ import { buildImportModule, registerDynamicModule } from './importModule';
 
 // Bootstrap importModule.
 
-const extendedApi = { ...api };
+import { toSvg } from '@jsxcad/convert-svg';
+
+const extendedApi = { ...api, toSvg };
 
 const importModule = buildImportModule(extendedApi);
 

@@ -36,10 +36,7 @@ const fromObjectExpression = ({ properties }) => {
   return object;
 };
 
-const nullImport = () => 'return {};';
-
-export const toEcmascript = (script, options = {}) => {
-  const { importer = nullImport } = options;
+export const toEcmascript = (options, script) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
@@ -48,9 +45,14 @@ export const toEcmascript = (script, options = {}) => {
   let ast = parse(script, parseOptions);
 
   const exportNames = [];
+  const expressions = [];
+
   const body = ast.body;
   const out = [];
+  const annotations = { imports: {} };
 
+  // Separate top level exports and expressions.
+  // FIX: This will reorder things unnecessarily when export main is present.
   for (let nth = 0; nth < body.length; nth++) {
     const entry = body[nth];
     if (entry.type === 'ExportNamedDeclaration') {
@@ -76,31 +78,53 @@ export const toEcmascript = (script, options = {}) => {
       //
       // FIX: Handle other variations.
       const { specifiers, source } = entry;
-      const module = importer(source.value, options);
 
-      out.push(parse(`const $module = (() => { ${module} })();`, parseOptions));
-
-      if (specifiers.length > 0) {
+      if (specifiers.length === 0) {
+        out.push(parse(`await importModule('${source.value}');`, parseOptions));
+      } else {
         for (const { imported, local, type } of specifiers) {
           switch (type) {
-            case 'ImportDefaultSpecifier': {
-              out.push(parse(`const ${local.name} = $module.default;`, parseOptions));
+            case 'ImportDefaultSpecifier':
+              out.push(parse(`const ${local.name} = (await importModule('${source.value}')).default;`, parseOptions));
               break;
-            }
-            case 'ImportSpecifier': {
-              out.push(parse(`const { ${imported.name} } = $module;`, parseOptions));
+            case 'ImportSpecifier':
+              out.push(parse(`const { ${imported.name} } = await importModule('${source.value}');`, parseOptions));
               break;
-            }
           }
         }
       }
-    } else {
+    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
+      Object.assign(annotations, fromObjectExpression(entry.expression));
+    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'CallExpression' && entry.expression.callee.name === 'source') {
+      // source('a', 'b') needs to be kept at the top level to support imports and avoid repetition.
       out.push(entry);
+    } else {
+      expressions.push(entry);
     }
   }
 
+  // Set up a main.
+  if (exportNames.length > 0) {
+    // They export something, so assume they know what they're doing.
+    out.push(...expressions);
+  } else {
+    // They don't export a main function, so build one for them.
+    if (expressions.length >= 1) {
+      // Turn any final expression into a return statement.
+      const last = expressions.length - 1;
+      const tail = expressions[last];
+      if (tail.type === 'ExpressionStatement') {
+        expressions[last] = parse(`return ${generate(expressions[last])}`, parseOptions);
+      }
+    }
+    const main = parse(`const main = async () => { ${expressions.map(expression => generate(expression)).join('\n')} };`, parseOptions);
+    out.push(main);
+    exportNames.push('main');
+  }
+
+  // Return the exports as an object.
   out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
-  const result = '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
+  const result = generate(parse(`return async () => { ${out.map(generate).join('\n')} };`, parseOptions));
   return result;
 };

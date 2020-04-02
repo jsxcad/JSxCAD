@@ -27,7 +27,7 @@ var addPathOrPaths = function (clipper, inputDatas, polyType) {
         else {
             // path
             if (!clipper.addPath(pathOrPaths, polyType, closed_1)) {
-                throw new ClipperError_1.ClipperError("invalid path");
+                throw new ClipperError_1.ClipperError(`invalid path: ${JSON.stringify(pathOrPaths)}`);
             }
         }
     }
