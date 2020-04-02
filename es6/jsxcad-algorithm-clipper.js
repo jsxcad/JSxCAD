@@ -3509,7 +3509,7 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return normalized;
 };
 
-const THRESHOLD = 1e-5;
+const THRESHOLD = 1e-5 * RESOLUTION;
 
 // We expect a surface of reconciled triangles.
 
