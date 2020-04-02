@@ -7,14 +7,11 @@ import { intersection, union } from '@jsxcad/api-v1-shape';
 
 import { Hull } from '@jsxcad/api-v1-extrude';
 import { clearCache } from '@jsxcad/cache';
-import { Hull } from '@jsxcad/api-v1-extrude';
-import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => {
-  
   try {
     var { key, values } = question;
     clearCache();
@@ -54,23 +51,23 @@ const agent = async ({ ask, question }) => {
           return returnVal;
         }
       case 'layout':
-        console.log("Doing layout");
+        console.log('Doing layout');
         const solidToSplit = api.Shape.fromGeometry(values[0]);
-        
-        console.log("Updated 11:29");
-        
+
+        console.log('Updated 11:29');
+
         var flatItems = [];
         solidToSplit.items().forEach(item => {
-            flatItems.push(item.flat().to(api.Z(0)));
+          flatItems.push(item.flat().to(api.Z(0)));
         });
-        
-        console.log(flatItems)
-        
+
+        console.log(flatItems);
+
         const laidOut = api.Layers(...flatItems).Page();
-        
-        console.log(laidOut)
-        
-        //return api.Layers(...flatItems).Page().toDisjointGeometry();
+
+        console.log(laidOut);
+
+        // return api.Layers(...flatItems).Page().toDisjointGeometry();
         return laidOut.toDisjointGeometry();
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();

@@ -31,6 +31,7 @@ export { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './js
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
+import { toSvg } from './jsxcad-convert-svg.js';
 
 // FIX: We shouldn't need to supply a path to this.
 const view = (shape, { width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
@@ -194,9 +195,7 @@ const md = (strings, ...placeholders) => {
   return md;
 };
 
-// Bootstrap importModule.
-
-const extendedApi = { ...api };
+const extendedApi = { ...api, toSvg };
 
 const importModule = buildImportModule(extendedApi);
 
