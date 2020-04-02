@@ -1,9 +1,9 @@
-import { RESOLUTION } from './convert';
+// import { RESOLUTION } from './convert';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 
-const THRESHOLD = 1e-5 * RESOLUTION;
+const THRESHOLD = 1e-5; // * RESOLUTION;
 
 // We expect a surface of reconciled triangles.
 
