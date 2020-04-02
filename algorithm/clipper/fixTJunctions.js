@@ -1,11 +1,32 @@
-import { RESOLUTION } from './convert';
-import { distance } from '@jsxcad/math-vec3';
+import { distance, squaredDistance } from '@jsxcad/math-vec3';
+
+// import { RESOLUTION } from './convert';
+import { fromPolygon } from '@jsxcad/math-plane';
 import { getEdges } from '@jsxcad/geometry-path';
-import { pushWhenValid } from '@jsxcad/geometry-polygons';
 
-const THRESHOLD = 1e-5 * RESOLUTION;
+const THRESHOLD = 1e-5; // * RESOLUTION;
+const EPSILON2 = THRESHOLD * THRESHOLD;
 
-// We expect a surface of reconciled triangles.
+export const pushWhenValid = (out, points, expectedPlane) => {
+  const validated = [];
+  const l = points.length;
+  for (let i = 0; i < l; i++) {
+    if (squaredDistance(points[i], points[(i + 1) % l]) > EPSILON2) {
+      validated.push(points[i]);
+    }
+  }
+  if (validated.length < 3) {
+    return;
+  }
+  const plane = fromPolygon(validated);
+  if (plane === undefined) {
+    return;
+  }
+  if (expectedPlane !== undefined) {
+    validated.plane = expectedPlane;
+  }
+  out.push(validated);
+};
 
 export const fixTJunctions = (surface) => {
   const vertices = new Set();

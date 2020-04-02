@@ -109,6 +109,7 @@ export class OrbitView extends React.PureComponent {
         height={height}
         style={{ borderStyle: 'solid', borderWidth: 'thin', borderColor: 'blue', display: 'inline-block' }}
         onClick={(e) => e.stopPropagation()}
+        resizeHandles={['ne', 'nw', 'se', 'sw']}
         handle={(resizeHandle) => <span className={`react-resizable-handle react-resizable-handle-${resizeHandle}`} style={{ zIndex: 2 }} />}>
         <div id={containerId} style={{ borderStyle: 'solid', borderWidth: 'thin' }}></div>
       </ResizableBox>

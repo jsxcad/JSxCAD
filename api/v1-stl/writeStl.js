@@ -23,7 +23,7 @@ export const downloadStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
+    for (let leaf of getLeafs(entry.content, { visualization: false })) {
       const op = convertToStl(leaf, options);
       addPending(op);
       entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });
