@@ -4,10 +4,8 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 import { intersection, union } from '@jsxcad/api-v1-shape';
-
 import { Hull } from '@jsxcad/api-v1-extrude';
 import { clearCache } from '@jsxcad/cache';
-import { Hull } from '@jsxcad/api-v1-extrude';
 import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
@@ -57,8 +55,6 @@ const agent = async ({ ask, question }) => {
         console.log("Doing layout");
         const solidToSplit = api.Shape.fromGeometry(values[0]);
         
-        console.log("Updated 11:29");
-        
         var flatItems = [];
         solidToSplit.items().forEach(item => {
             flatItems.push(item.flat().to(api.Z(0)));
@@ -70,7 +66,6 @@ const agent = async ({ ask, question }) => {
         
         console.log(laidOut)
         
-        //return api.Layers(...flatItems).Page().toDisjointGeometry();
         return laidOut.toDisjointGeometry();
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
