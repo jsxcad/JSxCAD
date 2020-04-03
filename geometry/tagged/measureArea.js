@@ -7,7 +7,7 @@ export const measureArea = (rawGeometry) => {
   let area = 0;
   const op = (geometry, descend) => {
     if (geometry.surface || geometry.z0Surface) {
-      area += measureAreaOfSurface(geometry.surface);
+      area += measureAreaOfSurface(geometry.surface || geometry.z0Surface);
     } else if (geometry.solid) {
       for (const surface of geometry.solid) {
         area += measureAreaOfSurface(surface);
