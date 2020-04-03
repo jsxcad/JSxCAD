@@ -1,6 +1,6 @@
 import Shape from '@jsxcad/api-v1-shape';
-import { rewriteTags } from '@jsxcad/geometry-tagged';
 
+// FIX: This name is confusing wrt Shape.sketch().
 export const Sketch = (shape) => shape.Void().with(shape.sketch());
 
 const SketchMethod = function () { return Sketch(this); };
