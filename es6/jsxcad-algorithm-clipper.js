@@ -2,8 +2,8 @@ import { onBoot } from './jsxcad-sys.js';
 import { deduplicate, isClockwise, isClosed, isOpen, flip, getEdges } from './jsxcad-geometry-path.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
-import { distance } from './jsxcad-math-vec3.js';
-import { pushWhenValid } from './jsxcad-geometry-polygons.js';
+import { distance, squaredDistance } from './jsxcad-math-vec3.js';
+import { fromPolygon } from './jsxcad-math-plane.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3509,9 +3509,29 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return normalized;
 };
 
-const THRESHOLD = 1e-5 * RESOLUTION;
+const THRESHOLD = 1e-5; // * RESOLUTION;
+const EPSILON2 = THRESHOLD * THRESHOLD;
 
-// We expect a surface of reconciled triangles.
+const pushWhenValid = (out, points, expectedPlane) => {
+  const validated = [];
+  const l = points.length;
+  for (let i = 0; i < l; i++) {
+    if (squaredDistance(points[i], points[(i + 1) % l]) > EPSILON2) {
+      validated.push(points[i]);
+    }
+  }
+  if (validated.length < 3) {
+    return;
+  }
+  const plane = fromPolygon(validated);
+  if (plane === undefined) {
+    return;
+  }
+  if (expectedPlane !== undefined) {
+    validated.plane = expectedPlane;
+  }
+  out.push(validated);
+};
 
 const fixTJunctions = (surface) => {
   const vertices = new Set();

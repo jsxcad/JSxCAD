@@ -742,27 +742,29 @@ const selectToDrop = (matchTags, geometryTags) => !selectToKeep(matchTags, geome
 const keepOrDrop = (shape, tags, select) => {
   const matchTags = tags.map(tag => `user/${tag}`);
 
-  const rewritten = rewrite(shape.toKeptGeometry(),
-                            (geometry, descend) => {
-                              if (geometry.solid || geometry.surface || geometry.z0Surface || geometry.points || geometry.paths) {
-                                if (select(matchTags, geometry.tags)) {
-                                  return descend();
-                                } else {
-                                  // Operate on the solid.
-                                  const shape = Shape.fromGeometry(geometry);
-                                  // FIX:
-                                  // If this is in a disjointAssembly we should drop it.
-                                  // If it is in an assembly or layers we should not.
-                                  const dropped = shape.Void().with(shape.sketch()).toGeometry();
-                                  return dropped;
-                                }
-                              } else if (geometry.disjointAssembly) {
-                                // Turn them all back into assemblies to work around the above issue.
-                                return { assembly: geometry.disjointAssembly, tags: geometry.tags };
-                              } else {
-                                return descend();
-                              }
-                            });
+  const op = (geometry, descend) => {
+    // FIX: Need a more reliable way to detect leaf structure.
+    if (geometry.solid || geometry.surface || geometry.z0Surface || geometry.points || geometry.paths || geometry.item) {
+      if (select(matchTags, geometry.tags)) {
+        return descend();
+      } else {
+        // Operate on the shape.
+        const shape = Shape.fromGeometry(geometry);
+        // FIX:
+        // If this is in a disjointAssembly we should drop it.
+        // If it is in an assembly or layers we should not.
+        const dropped = shape.Void().with(shape.sketch()).toGeometry();
+        return dropped;
+      }
+    } else if (geometry.disjointAssembly) {
+      // Turn them all back into assemblies to work around the above issue.
+      return { assembly: geometry.disjointAssembly.map(element => rewrite(element, op)), tags: geometry.tags };
+    } else {
+      return descend();
+    }
+  };
+
+  const rewritten = rewrite(shape.toKeptGeometry(), op);
   return Shape.fromGeometry(rewritten);
 };
 
