@@ -1,11 +1,4 @@
 import {
-  findOpenEdges,
-  isWatertight,
-  makeWatertight,
-  reconcile
-} from './makeWatertight';
-
-import {
   fromScaling,
   fromTranslation,
   fromXRotation,
@@ -13,107 +6,66 @@ import {
   fromZRotation
 } from '@jsxcad/math-mat4';
 
-import {
-  rewrite,
-  visit
-} from './visit';
-
-import { allTags } from './allTags';
-import { assemble } from './assemble';
-import { canonicalize } from './canonicalize';
-import { difference } from './difference';
-import { drop } from './drop';
-import { eachItem } from './eachItem';
-import { eachPoint } from './eachPoint';
-import { flip } from './flip';
-import { fresh } from './fresh';
-import { fromPathToSurface } from './fromPathToSurface';
-import { fromPathToZ0Surface } from './fromPathToZ0Surface';
-import { fromPathsToSurface } from './fromPathsToSurface';
-import { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
-import { fromSurfaceToPaths } from './fromSurfaceToPaths';
-import { getAnySurfaces } from './getAnySurfaces';
-import { getConnections } from './getConnections';
-import { getItems } from './getItems';
-import { getLayers } from './getLayers';
-import { getLeafs } from './getLeafs';
-import { getPaths } from './getPaths';
-import { getPlans } from './getPlans';
-import { getPoints } from './getPoints';
-import { getSolids } from './getSolids';
-import { getSurfaces } from './getSurfaces';
-import { getTags } from './getTags';
-import { getZ0Surfaces } from './getZ0Surfaces';
-import { intersection } from './intersection';
-import { keep } from './keep';
-import { map } from './map';
-import { measureBoundingBox } from './measureBoundingBox';
-import { nonNegative } from './nonNegative';
-import { outline } from './outline';
-import { rewriteTags } from './rewriteTags';
-import { specify } from './specify';
-import { splice } from './splice';
-import { toDisjointGeometry } from './toDisjointGeometry';
-import { toKeptGeometry } from './toKeptGeometry';
-import { toPoints } from './toPoints';
-import { toTransformedGeometry } from './toTransformedGeometry';
 import { transform } from './transform';
-import { union } from './union';
-import { update } from './update';
-
-export {
-  allTags,
-  assemble,
-  canonicalize,
-  difference,
-  drop,
-  eachItem,
-  eachPoint,
-  findOpenEdges,
-  flip,
-  fresh,
-  fromPathToSurface,
-  fromPathToZ0Surface,
-  fromPathsToSurface,
-  fromPathsToZ0Surface,
-  fromSurfaceToPaths,
-  getAnySurfaces,
-  getConnections,
-  getPoints,
-  getItems,
-  getLayers,
-  getLeafs,
-  getPaths,
-  getPlans,
-  getSolids,
-  getSurfaces,
-  getTags,
-  getZ0Surfaces,
-  intersection,
-  isWatertight,
-  keep,
-  map,
-  makeWatertight,
-  measureBoundingBox,
-  nonNegative,
-  outline,
-  reconcile,
-  rewrite,
-  rewriteTags,
-  specify,
-  splice,
-  toDisjointGeometry,
-  toKeptGeometry,
-  toPoints,
-  toTransformedGeometry,
-  transform,
-  update,
-  union,
-  visit
-};
 
 export const rotateX = (angle, assembly) => transform(fromXRotation(angle * Math.PI / 180), assembly);
 export const rotateY = (angle, assembly) => transform(fromYRotation(angle * Math.PI / 180), assembly);
 export const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 180), assembly);
 export const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 export const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
+
+export {
+  findOpenEdges,
+  isWatertight,
+  makeWatertight,
+  reconcile
+} from './makeWatertight';
+
+export {
+  rewrite,
+  visit
+} from './visit';
+
+export { allTags } from './allTags';
+export { assemble } from './assemble';
+export { canonicalize } from './canonicalize';
+export { difference } from './difference';
+export { drop } from './drop';
+export { eachItem } from './eachItem';
+export { eachPoint } from './eachPoint';
+export { flip } from './flip';
+export { fresh } from './fresh';
+export { fromPathToSurface } from './fromPathToSurface';
+export { fromPathToZ0Surface } from './fromPathToZ0Surface';
+export { fromPathsToSurface } from './fromPathsToSurface';
+export { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
+export { fromSurfaceToPaths } from './fromSurfaceToPaths';
+export { getAnySurfaces } from './getAnySurfaces';
+export { getConnections } from './getConnections';
+export { getItems } from './getItems';
+export { getLayers } from './getLayers';
+export { getLeafs } from './getLeafs';
+export { getPaths } from './getPaths';
+export { getPlans } from './getPlans';
+export { getPoints } from './getPoints';
+export { getSolids } from './getSolids';
+export { getSurfaces } from './getSurfaces';
+export { getTags } from './getTags';
+export { getZ0Surfaces } from './getZ0Surfaces';
+export { intersection } from './intersection';
+export { keep } from './keep';
+export { map } from './map';
+export { measureArea } from './measureArea';
+export { measureBoundingBox } from './measureBoundingBox';
+export { nonNegative } from './nonNegative';
+export { outline } from './outline';
+export { rewriteTags } from './rewriteTags';
+export { specify } from './specify';
+export { splice } from './splice';
+export { toDisjointGeometry } from './toDisjointGeometry';
+export { toKeptGeometry } from './toKeptGeometry';
+export { toPoints } from './toPoints';
+export { toTransformedGeometry } from './toTransformedGeometry';
+export { transform } from './transform';
+export { union } from './union';
+export { update } from './update';

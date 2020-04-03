@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
@@ -1269,13 +1269,15 @@ const Y$1 = 1;
 const Z$1 = 2;
 
 const size = (shape) => {
-  const [min, max] = measureBoundingBox(shape);
+  const geometry = shape.toKeptGeometry();
+  const [min, max] = measureBoundingBox$1(geometry);
+  const area = measureArea(geometry);
   const width = max[X$1] - min[X$1];
   const length = max[Y$1] - min[Y$1];
   const height = max[Z$1] - min[Z$1];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
-  return { length, width, height, max, min, center, radius };
+  return { area, length, width, height, max, min, center, radius };
 };
 
 const sizeMethod = function () { return size(this); };
