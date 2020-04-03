@@ -955,8 +955,10 @@ const measureArea = (rawGeometry) => {
   const geometry = toKeptGeometry(rawGeometry);
   let area = 0;
   const op = (geometry, descend) => {
-    if (geometry.surface || geometry.z0Surface) {
+    if (geometry.surface) {
       area += measureArea$1(geometry.surface);
+    } else if (geometry.z0Surface) {
+      area += measureArea$1(geometry.z0Surface);
     } else if (geometry.solid) {
       for (const surface of geometry.solid) {
         area += measureArea$1(surface);
