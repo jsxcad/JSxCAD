@@ -57,6 +57,12 @@ export const toEcmascript = (script, options = {}) => {
 
   const topLevel = new Map();
 
+  const fromIdToSha = (id) => {
+    const entry = topLevel.get(id);
+    if (entry === null) {
+    }
+  }
+
   const declareVariable = (declarator, { doExport = false } = {}) => {
     const id = declarator.id.name;
     const code = strip(declarator);
