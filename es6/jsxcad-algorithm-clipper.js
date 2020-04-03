@@ -3509,8 +3509,14 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return normalized;
 };
 
+<<<<<<< HEAD
 const THRESHOLD = 1e-5; // * RESOLUTION;
 const EPSILON2 = THRESHOLD * THRESHOLD;
+=======
+// import { RESOLUTION } from './convert';
+
+const THRESHOLD = 1e-5; // * RESOLUTION;
+>>>>>>> master
 
 const pushWhenValid = (out, points, expectedPlane) => {
   const validated = [];

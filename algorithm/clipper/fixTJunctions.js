@@ -1,7 +1,3 @@
-import { distance, squaredDistance } from '@jsxcad/math-vec3';
-
-// import { RESOLUTION } from './convert';
-import { fromPolygon } from '@jsxcad/math-plane';
 import { getEdges } from '@jsxcad/geometry-path';
 
 const THRESHOLD = 1e-5; // * RESOLUTION;
