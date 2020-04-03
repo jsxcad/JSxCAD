@@ -11,8 +11,8 @@ test('Wrap and return.', t => {
                                    }`);
   t.is(ecmascript,
 `
-const foo = x => x + 1;
-const main = async () => {
+export const foo = x => x + 1;
+export const main = async () => {
   let a = 10;
   return circle(foo(a));
 };
@@ -68,13 +68,34 @@ return {};
 
 test('Import', t => {
   const ecmascript = toEcmascript('import { foo } from "bar";');
-  t.is(ecmascript, `return async () => {
-  const {foo} = await importModule('bar');
-  const main = async () => {};
-  return {
-    main
-  };
-};
+  t.is(ecmascript, `
+const $module = (() => {
+  return {};
+})();
+const {foo} = $module;
+return {};
+`);
+});
+
+test('Definition', t => {
+  const ecmascript = toEcmascript('const a = 1; const b = () => 2; function c () {}');
+  t.is(ecmascript,
+`
+const a = 1;
+const b = () => 2;
+function c() {}
+return {};
+`);
+});
+
+test('Reference', t => {
+  const ecmascript = toEcmascript('const a = 1; const b = () => a; const c = () => b();');
+  t.is(ecmascript,
+`
+const a = 1;
+const b = () => a;
+const c = () => b();
+return {};
 `);
 });
 

@@ -2,6 +2,8 @@
 
 import { generate } from 'astring';
 import { parse } from 'acorn';
+import { recursive } from 'acorn-walk';
+import hash from 'object-hash';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -51,20 +53,51 @@ export const toEcmascript = (script, options = {}) => {
   const body = ast.body;
   const out = [];
 
+  console.log(`QQ/ast: ${JSON.stringify(strip(ast), null, 2)}`);
+
+  const topLevel = new Map();
+
+  const declareVariable = (declarator, { doExport = false } = {}) => {
+    const id = declarator.id.name;
+    const code = strip(declarator);
+    const dependencies = [];
+
+    const CallExpression = (node, state, c) => {
+      if (node.callee.name) {
+        dependencies.push(node.callee.name);
+      }
+    }
+
+    recursive(declarator, undefined, { CallExpression });
+
+    const dependencyShas = dependencies.map(dependency => topLevel.get(id) || 
+
+    const definition = { code, dependencies, dependencyShas };
+    const sha = hash(definition);
+    const entry = { sha, definition };
+    console.log(`QQ/entry: ${JSON.stringify({ id, entry })}`);
+    topLevel.set(id, entry);
+    if (doExport) {
+      exportNames.push(id);
+    }
+  }
+
   for (let nth = 0; nth < body.length; nth++) {
     const entry = body[nth];
-    if (entry.type === 'ExportNamedDeclaration') {
+    if (entry.type === 'VariableDeclaration') {
+      for (const declarator of entry.declarations) {
+        declareVariable(declarator);
+      }
+      out.push(entry);
+    } else if (entry.type === 'ExportNamedDeclaration') {
       // Note the names and replace the export with the declaration.
       const declaration = entry.declaration;
       if (declaration.type === 'VariableDeclaration') {
         for (const declarator of declaration.declarations) {
-          if (declarator.type === 'VariableDeclarator') {
-            const name = declarator.id.name;
-            exportNames.push(name);
-          }
+          declareVariable(declarator, { doExport: true });
         }
-        out.push(declaration);
       }
+      out.push(entry);
     } else if (entry.type === 'ImportDeclaration') {
       const entry = body[nth];
       // Rewrite
