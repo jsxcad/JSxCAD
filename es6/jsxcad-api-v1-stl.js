@@ -45,7 +45,7 @@ const downloadStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content, { visualization: false })) {
+    for (let leaf of getLeafs(entry.content)) {
       const op = toStl$1(leaf, options);
       addPending(op);
       entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });

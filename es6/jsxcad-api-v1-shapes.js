@@ -584,6 +584,7 @@ const Polyhedron = (...args) => ofPointPaths(...args);
 
 Polyhedron.ofPointPaths = ofPointPaths;
 
+// FIX: This name is confusing wrt Shape.sketch().
 const Sketch = (shape) => shape.Void().with(shape.sketch());
 
 const SketchMethod = function () { return Sketch(this); };
