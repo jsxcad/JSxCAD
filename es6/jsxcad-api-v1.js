@@ -1,7 +1,7 @@
 import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
 export { Shape, log, make } from './jsxcad-api-v1-shape.js';
-import { emit, addSource, readFile, getSources } from './jsxcad-sys.js';
-export { emit } from './jsxcad-sys.js';
+import { emit, addSource, read, write, readFile, getSources } from './jsxcad-sys.js';
+export { emit, read, write } from './jsxcad-sys.js';
 import { ensurePages, Page } from './jsxcad-api-v1-plans.js';
 export { Page } from './jsxcad-api-v1-plans.js';
 import { getLeafs } from './jsxcad-geometry-tagged.js';
@@ -93,6 +93,8 @@ const source = (path, source) => addSource(`cache/${path}`, source);
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
   emit: emit,
+  read: read,
+  write: write,
   source: source,
   Connector: Connector,
   X: X,
@@ -182,11 +184,11 @@ const buildImportModule = (api) =>
       }
       script = await readFile({ path, as: 'utf8', sources }, path);
     }
-    const ecmascript = toEcmascript({}, script);
-    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-    const constructor = await builder(api);
-    const module = await constructor();
-    return module;
+    const ecmascript = await toEcmascript(script);
+    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
+    const module = await builder(api);
+    exports = await module();
+    return exports;
   };
 
 const md = (strings, ...placeholders) => {

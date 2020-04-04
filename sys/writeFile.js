@@ -63,6 +63,14 @@ export const writeFile = async (options, path, data) => {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalProject });
   }
+
+  return true;
 };
 
-export const write = async (path, data, options = {}) => writeFile(options, path, data);
+export const write = async (path, data, options = {}) => {
+  if (typeof data === 'function') {
+    // Always fail to write functions.
+    return undefined;
+  }
+  return writeFile(options, path, data);
+};

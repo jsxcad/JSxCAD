@@ -18,6 +18,35 @@ import { writeFile } from './writeFile';
 const { promises } = fs;
 const { deserialize } = v8;
 
+// Read decoders allow us to turn data back into objects based on structure.
+const readDecoders = [];
+
+export const addReadDecoder = (guard, decoder) => readDecoders.push({ guard, decoder });
+
+// There should be a better way to do this.
+const decode = (data) => {
+  if (typeof data !== 'object') {
+    return data;
+  }
+  for (const { guard, decoder } of readDecoders) {
+    if (guard(data)) {
+      return decoder(data);
+    }
+  }
+  if (Array.isArray(data)) {
+    // We may have arrays of things to decode.
+    for (let i = 0; i < data.length; i++) {
+      data[i] = decode(data[i]);
+    }
+  } else if (data.byteLength === undefined) {
+    // We may have objects of things to decode, but not ArrayBuffers.
+    for (let key of Object.keys(data)) {
+      data[key] = decode(data[key]);
+    }
+  }
+  return data;
+};
+
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
     return window.fetch;
@@ -133,4 +162,7 @@ export const readFile = async (options, path) => {
   return file.data;
 };
 
-export const read = async (path, options = {}) => readFile(options, path);
+export const read = async (path, options = {}) => {
+  const data = await readFile(options, path);
+  return decode(data);
+};

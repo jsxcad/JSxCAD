@@ -22,6 +22,10 @@ import {
 } from '@jsxcad/geometry-tagged';
 
 import {
+  addReadDecoder
+} from '@jsxcad/sys';
+
+import {
   fromPolygons as fromPolygonsToSolid
 } from '@jsxcad/geometry-solid';
 
@@ -139,5 +143,7 @@ Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
 export const toKeptGeometry = (shape) => shape.toKeptGeometry();
+
+addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fromGeometry(data.geometry));
 
 export default Shape;

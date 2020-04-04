@@ -14,12 +14,16 @@ test('Wrap and return.', async t => {
   t.is(ecmascript,
        `
 const foo = x => x + 1;
-(await write('data/def/foo', foo)) && (await write('meta/def/foo', '192ed9e1b9391ebc90f56f726bfafb00e81f9a19'));
+(await write('data/def/foo', foo)) && (await write('meta/def/foo', {
+  sha: '008b1005955db6f5a1a6299423135098172bd4e5'
+}));
 const main = async () => {
   let a = 10;
   return circle(foo(a));
 };
-(await write('data/def/main', main)) && (await write('meta/def/main', '028a01af7d5a755af9fa0c935a84896829cbee10'));
+(await write('data/def/main', main)) && (await write('meta/def/main', {
+  sha: '028a01af7d5a755af9fa0c935a84896829cbee10'
+}));
 return {
   foo,
   main
@@ -32,7 +36,9 @@ test("Don't return declarations.", async t => {
   t.is(ecmascript,
        `
 let a = 10;
-(await write('data/def/a', a)) && (await write('meta/def/a', 'd561d68cbf098ae1553e5e902e9187f6dfea935f'));
+(await write('data/def/a', a)) && (await write('meta/def/a', {
+  sha: 'd561d68cbf098ae1553e5e902e9187f6dfea935f'
+}));
 return {};
 `);
 });
@@ -85,9 +91,13 @@ test('Definition', async t => {
   t.is(ecmascript,
        `
 const a = 1;
-(await write('data/def/a', a)) && (await write('meta/def/a', '7987f4ac835294eae5154cc1854d0b7e62d9497b'));
+(await write('data/def/a', a)) && (await write('meta/def/a', {
+  sha: '7987f4ac835294eae5154cc1854d0b7e62d9497b'
+}));
 const b = () => 2;
-(await write('data/def/b', b)) && (await write('meta/def/b', '246f1adc25377588b0c672533e0c47d197883181'));
+(await write('data/def/b', b)) && (await write('meta/def/b', {
+  sha: '246f1adc25377588b0c672533e0c47d197883181'
+}));
 function c() {}
 return {};
 `);
@@ -98,11 +108,17 @@ test('Reference', async t => {
   t.is(ecmascript,
        `
 const a = 1;
-(await write('data/def/a', a)) && (await write('meta/def/a', { sha: '7987f4ac835294eae5154cc1854d0b7e62d9497b' }));
+(await write('data/def/a', a)) && (await write('meta/def/a', {
+  sha: '7987f4ac835294eae5154cc1854d0b7e62d9497b'
+}));
 const b = () => a;
-(await write('data/def/b', b)) && (await write('meta/def/b', { sha: '0502c9e3e6ab83779de48e2b25adfa3a75fe1657' }));
+(await write('data/def/b', b)) && (await write('meta/def/b', {
+  sha: '73a78c48a7000fd8741be691d9afcaa7d74ca4bc'
+}));
 const c = () => b();
-(await write('data/def/c', c)) && (await write('meta/def/c', { sha: '4ee198293b995cf821d661e29c2b3f8c533914f4' }));
+(await write('data/def/c', c)) && (await write('meta/def/c', {
+  sha: '8255f5c35b450ad7eb08f013a6363bc53399e65a'
+}));
 return {};
 `);
 });

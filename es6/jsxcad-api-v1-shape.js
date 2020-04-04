@@ -1,10 +1,10 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
 import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
 class Shape {
@@ -121,6 +121,8 @@ Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
 const toKeptGeometry = (shape) => shape.toKeptGeometry();
+
+addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fromGeometry(data.geometry));
 
 /**
  *
@@ -481,6 +483,11 @@ const faces = (shape, op = (x => x)) => {
 
 const facesMethod = function (...args) { return faces(this, ...args); };
 Shape.prototype.faces = facesMethod;
+
+const finish = (shape) => Shape.fromGeometry(shape.toKeptGeometry());
+
+const finishMethod = function () { return finish(this); };
+Shape.prototype.finish = finishMethod;
 
 const inSolids = (shape, op = (_ => _)) => {
   let nth = 0;

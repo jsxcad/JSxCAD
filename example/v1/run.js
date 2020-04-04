@@ -10,8 +10,7 @@ export const run = async (target = process.argv[2], base = 'observed') => {
   const start = new Date();
   setupFilesystem({ fileBase: `${base}/${target}` });
   addSource(`cache/${target}.js`, `./${target}.js`);
-  const module = await importModule(`${target}.js`);
-  await module.main();
+  await importModule(`${target}.js`);
   const end = new Date();
   const observedTime = end - start;
   writeFileSync(`jsxcad/observed/${target}/time`, `${observedTime}`);

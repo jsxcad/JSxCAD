@@ -6,6 +6,7 @@ import './clipFrom';
 import './cut';
 import './cutFrom';
 import './faces';
+import './finish';
 import './inSolids';
 import './measureCenter';
 import './op';

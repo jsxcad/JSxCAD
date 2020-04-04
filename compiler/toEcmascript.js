@@ -1,5 +1,3 @@
-// FIX: Is this specific to the v1 api? If so, move it there.
-
 import { generate } from 'astring';
 import hash from 'object-hash';
 import { parse } from 'acorn';

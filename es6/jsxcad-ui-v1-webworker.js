@@ -25,7 +25,7 @@ const agent = async ({
 
     if (question.evaluate) {
       clearEmitted();
-      const ecmascript = toEcmascript({}, question.evaluate);
+      const ecmascript = await toEcmascript(question.evaluate);
       console.log({
         op: 'text',
         text: `QQ/script: ${question.evaluate}`
@@ -34,10 +34,9 @@ const agent = async ({
         op: 'text',
         text: `QQ/ecmascript: ${ecmascript}`
       });
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-      const constructor = await builder(api);
-      const module = await constructor();
-      await module.main();
+      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
+      const module = await builder(api);
+      await module();
       await log({
         op: 'text',
         text: 'Evaluation Succeeded',
