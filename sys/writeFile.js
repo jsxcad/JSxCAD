@@ -64,3 +64,5 @@ export const writeFile = async (options, path, data) => {
     setupFilesystem({ fileBase: originalProject });
   }
 };
+
+export const write = async (path, data, options = {}) => writeFile(options, path, data);

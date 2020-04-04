@@ -1,9 +1,10 @@
 // FIX: Is this specific to the v1 api? If so, move it there.
 
 import { generate } from 'astring';
-import { parse } from 'acorn';
-import { recursive } from 'acorn-walk';
 import hash from 'object-hash';
+import { parse } from 'acorn';
+import { read } from '@jsxcad/sys';
+import { recursive as walk } from 'acorn-walk';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -22,26 +23,7 @@ export const strip = (ast) => {
   }
 };
 
-const fromObjectExpression = ({ properties }) => {
-  const object = {};
-  for (const { key, value } of properties) {
-    if (value.type === 'StringLiteral') {
-      object[key.value] = value.value;
-    } else if (value.type === 'ArrayExpression') {
-      object[key.value] = value.elements.map(element => element.value);
-    } else if (value.type === 'ObjectExpression') {
-      object[key.value] = fromObjectExpression(value);
-    } else {
-      throw Error('die');
-    }
-  }
-  return object;
-};
-
-const nullImport = () => 'return {};';
-
-export const toEcmascript = (script, options = {}) => {
-  const { importer = nullImport } = options;
+export const toEcmascript = async (script, options = {}) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
@@ -50,20 +32,20 @@ export const toEcmascript = (script, options = {}) => {
   let ast = parse(script, parseOptions);
 
   const exportNames = [];
+
   const body = ast.body;
   const out = [];
-
-  console.log(`QQ/ast: ${JSON.stringify(strip(ast), null, 2)}`);
 
   const topLevel = new Map();
 
   const fromIdToSha = (id) => {
     const entry = topLevel.get(id);
-    if (entry === null) {
+    if (entry !== undefined) {
+      return entry.sha;
     }
-  }
+  };
 
-  const declareVariable = (declarator, { doExport = false } = {}) => {
+  const declareVariable = async (declaration, declarator, { doExport = false } = {}) => {
     const id = declarator.id.name;
     const code = strip(declarator);
     const dependencies = [];
@@ -72,39 +54,52 @@ export const toEcmascript = (script, options = {}) => {
       if (node.callee.name) {
         dependencies.push(node.callee.name);
       }
-    }
+    };
 
-    recursive(declarator, undefined, { CallExpression });
+    const Identifier = (node, state, c) => dependencies.push(node.name);
 
-    const dependencyShas = dependencies.map(dependency => topLevel.get(id) || 
+    walk(declarator, undefined, { CallExpression, Identifier });
+
+    const dependencyShas = dependencies.map(fromIdToSha);
 
     const definition = { code, dependencies, dependencyShas };
     const sha = hash(definition);
     const entry = { sha, definition };
-    console.log(`QQ/entry: ${JSON.stringify({ id, entry })}`);
     topLevel.set(id, entry);
     if (doExport) {
       exportNames.push(id);
     }
-  }
+    // Now that we have the sha, we can predict if it can be read from cache.
+    const meta = await read(`meta/def/${id}`);
+    if (meta && meta.sha === sha) {
+      const readCode = strip(parse(`await read('data/def/${id}')`, parseOptions));
+      const readExpression = readCode.body[0].expression;
+      const init = readExpression;
+      out.push({ ...declaration, declarations: [{ ...declarator, init }] });
+    } else {
+      out.push({ ...declaration, declarations: [declarator] });
+      out.push(parse(`await write('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`, parseOptions));
+    }
+  };
 
   for (let nth = 0; nth < body.length; nth++) {
     const entry = body[nth];
     if (entry.type === 'VariableDeclaration') {
       for (const declarator of entry.declarations) {
-        declareVariable(declarator);
+        await declareVariable(entry, declarator);
       }
-      out.push(entry);
+      // out.push(entry);
     } else if (entry.type === 'ExportNamedDeclaration') {
       // Note the names and replace the export with the declaration.
       const declaration = entry.declaration;
       if (declaration.type === 'VariableDeclaration') {
         for (const declarator of declaration.declarations) {
-          declareVariable(declarator, { doExport: true });
+          await declareVariable(entry.declaration, declarator, { doExport: true });
         }
       }
-      out.push(entry);
+      // out.push(entry.declaration);
     } else if (entry.type === 'ImportDeclaration') {
+      // FIX: This works for non-redefinable modules, but not redefinable modules.
       const entry = body[nth];
       // Rewrite
       //   import { foo } from 'bar';
@@ -115,29 +110,29 @@ export const toEcmascript = (script, options = {}) => {
       //
       // FIX: Handle other variations.
       const { specifiers, source } = entry;
-      const module = importer(source.value, options);
 
-      out.push(parse(`const $module = (() => { ${module} })();`, parseOptions));
-
-      if (specifiers.length > 0) {
+      if (specifiers.length === 0) {
+        out.push(parse(`await importModule('${source.value}');`, parseOptions));
+      } else {
         for (const { imported, local, type } of specifiers) {
           switch (type) {
-            case 'ImportDefaultSpecifier': {
-              out.push(parse(`const ${local.name} = $module.default;`, parseOptions));
+            case 'ImportDefaultSpecifier':
+              out.push(parse(`const ${local.name} = (await importModule('${source.value}')).default;`, parseOptions));
               break;
-            }
-            case 'ImportSpecifier': {
-              out.push(parse(`const { ${imported.name} } = $module;`, parseOptions));
+            case 'ImportSpecifier':
+              out.push(parse(`const { ${imported.name} } = await importModule('${source.value}');`, parseOptions));
               break;
-            }
           }
         }
       }
+    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
+      out.push(entry);
     } else {
       out.push(entry);
     }
   }
 
+  // Return the exports as an object.
   out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
   const result = '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));

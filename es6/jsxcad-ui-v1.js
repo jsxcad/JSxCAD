@@ -87817,6 +87817,7 @@ class OrbitView extends react.PureComponent {
         display: 'inline-block'
       },
       onClick: e => e.stopPropagation(),
+      resizeHandles: ['ne', 'nw', 'se', 'sw'],
       handle: resizeHandle => react.createElement("span", {
         className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
         style: {

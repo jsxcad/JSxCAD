@@ -94,6 +94,7 @@ const fetchSources = async (options = {}, sources) => {
   }
 };
 
+// Deprecated
 export const readFile = async (options, path) => {
   const { allowFetch = true, ephemeral } = options;
   if (isWebWorker) {
@@ -131,3 +132,5 @@ export const readFile = async (options, path) => {
   }
   return file.data;
 };
+
+export const read = async (path, options = {}) => readFile(options, path);

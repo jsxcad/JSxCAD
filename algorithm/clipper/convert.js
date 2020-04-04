@@ -28,9 +28,19 @@ export const fromSurface = (surface, normalize) => {
 
 export const fromSurfaceAsClosedPaths = (surface, normalize) => {
   const normalized = surface.map(path => path.map(normalize));
-  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-  const filtered = scaled.filter(path => toPlane(path) !== undefined);
+  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const filtered = integers.filter(path => toPlane(path) !== undefined);
   return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+};
+
+export const fromSurfaceToIntegers = (surface, normalize) => {
+  const normalized = surface.map(path => path.map(normalize));
+  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  return integers;
+};
+
+export const fromIntegersToClosedPaths = (integers) => {
+  return integers.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
 };
 
 export const fromClosedPath = (path, normalize) => {

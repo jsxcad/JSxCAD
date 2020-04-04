@@ -19,8 +19,9 @@ const readPart = async (part, { allowFetch = true } = {}) => {
 };
 
 const loadPart = async (part, { allowFetch = true } = {}) => {
-  let code = [];
-  let source = await readPart(part, { allowFetch });
+  const code = [];
+  const data = await readPart(part, { allowFetch });
+  const source = new TextDecoder('utf8').decode(data);
   for (let line of source.split('\r\n')) {
     let args = line.replace(/^\s+/, '').split(/\s+/);
     code.push(args);

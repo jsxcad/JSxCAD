@@ -3,6 +3,7 @@ import { deduplicate, isClockwise, isClosed, isOpen, flip, getEdges } from './js
 import { toPlane } from './jsxcad-math-poly3.js';
 import { createNormalize2 } from './jsxcad-algorithm-quantize.js';
 import { distance } from './jsxcad-math-vec3.js';
+import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1245,7 +1246,7 @@ var addPathOrPaths = function (clipper, inputDatas, polyType) {
         else {
             // path
             if (!clipper.addPath(pathOrPaths, polyType, closed_1)) {
-                throw new ClipperError_1.ClipperError("invalid path");
+                throw new ClipperError_1.ClipperError(`invalid path: ${JSON.stringify(pathOrPaths)}`);
             }
         }
     }
@@ -2537,9 +2538,19 @@ const fromSurface = (surface, normalize) => {
 
 const fromSurfaceAsClosedPaths = (surface, normalize) => {
   const normalized = surface.map(path => path.map(normalize));
-  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-  const filtered = scaled.filter(path => toPlane(path) !== undefined);
+  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const filtered = integers.filter(path => toPlane(path) !== undefined);
   return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+};
+
+const fromSurfaceToIntegers = (surface, normalize) => {
+  const normalized = surface.map(path => path.map(normalize));
+  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  return integers;
+};
+
+const fromIntegersToClosedPaths = (integers) => {
+  return integers.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
 };
 
 const fromOpenPaths = (paths, normalize) => {
@@ -3498,7 +3509,9 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return normalized;
 };
 
-const THRESHOLD = 1e-5;
+// import { RESOLUTION } from './convert';
+
+const THRESHOLD = 1e-5; // * RESOLUTION;
 
 // We expect a surface of reconciled triangles.
 
@@ -3531,8 +3544,7 @@ const fixTJunctions = (surface) => {
       // Insert into the path.
       watertightPath.push(...colinear);
     }
-    const deduplicated = deduplicate(watertightPath);
-    watertightPaths.push(deduplicated);
+    pushWhenValid(watertightPaths, watertightPath);
   }
 
   return watertightPaths;
@@ -3542,18 +3554,18 @@ const fixTJunctions = (surface) => {
 // This reorients the most exterior paths to be ccw.
 
 const reorient = (surface, normalize = p => p) => {
-  const subjectInputs = fromSurfaceAsClosedPaths(fixTJunctions(surface), normalize);
+  const integers = fromSurfaceToIntegers(surface, normalize);
+  const fixed = fixTJunctions(integers);
+  const subjectInputs = fromIntegersToClosedPaths(fixed);
   if (subjectInputs.length === 0) {
     return [];
   }
-  const result = clipper$1.clipToPaths(
-    {
-      clipType: jsAngusjClipperjsWeb_2.Union,
-      subjectInputs,
-      subjectFillType: jsAngusjClipperjsWeb_8.NonZero
-    });
-  const surfaceResult = toSurface(result, normalize);
-  return surfaceResult;
+  const result = clipper$1.clipToPaths({
+    clipType: jsAngusjClipperjsWeb_2.Union,
+    subjectInputs,
+    subjectFillType: jsAngusjClipperjsWeb_8.NonZero
+  });
+  return toSurface(result, normalize);
 };
 
 /**

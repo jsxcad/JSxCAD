@@ -12,5 +12,5 @@ export { unwatchFileCreation, unwatchFileDeletion, unwatchFiles, watchFileCreati
 export { conversation } from './conversation';
 export { createService } from './service';
 export { deleteFile } from './deleteFile';
-export { readFile } from './readFile';
-export { writeFile } from './writeFile';
+export { read, readFile } from './readFile';
+export { write, writeFile } from './writeFile';
