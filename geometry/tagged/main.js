@@ -53,6 +53,7 @@ export { getSurfaces } from './getSurfaces';
 export { getTags } from './getTags';
 export { getZ0Surfaces } from './getZ0Surfaces';
 export { intersection } from './intersection';
+export { isNotVoid } from './isNotVoid';
 export { keep } from './keep';
 export { map } from './map';
 export { measureArea } from './measureArea';

@@ -5,7 +5,7 @@ import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnySurfaces, getPaths } from './jsxcad-geometry-tagged.js';
+import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnySurfaces, isNotVoid, getPaths } from './jsxcad-geometry-tagged.js';
 import { outline } from './jsxcad-geometry-surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [directive, ...args.map(reallyQuantizeForSpace)];
@@ -3386,7 +3386,7 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`
   ];
 
-  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry)) {
+  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry).filter(isNotVoid)) {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
@@ -3396,7 +3396,7 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }
     svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
-  for (const { paths, tags } of getPaths(geometry)) {
+  for (const { paths, tags } of getPaths(geometry).filter(isNotVoid)) {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {

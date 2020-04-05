@@ -23,16 +23,27 @@ const transformImpl = (matrix, untransformed) => {
 const transform = cacheTransform(transformImpl);
 
 const update = (geometry, updates) => {
+  if (geometry === updates) {
+    return geometry;
+  }
   const updated = {};
   for (const key of Object.keys(geometry)) {
     if (typeof key !== 'symbol') {
       updated[key] = geometry[key];
     }
   }
+  let changed = false;
   for (const key of Object.keys(updates)) {
-    updated[key] = updates[key];
+    if (updates[key] !== updated[key]) {
+      updated[key] = updates[key];
+      changed = true;
+    }
   }
-  return updated;
+  if (changed) {
+    return updated;
+  } else {
+    return geometry;
+  }
 };
 
 const rewrite = (geometry, op) => {
@@ -819,6 +830,8 @@ const intersectionImpl = (geometry, ...geometries) => {
 
 const intersection = cache(intersectionImpl);
 
+const isNotVoid = ({ tags }) => tags === undefined || tags.includes('compose/non-positive') === false;
+
 const keep = (tags, geometry) => rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
 
 const map = (geometry, operation) => {
@@ -842,6 +855,23 @@ const map = (geometry, operation) => {
   return walk(geometry);
 };
 
+const toDisjointGeometry = (geometry) => {
+  const op = (geometry, descend) => {
+    if (geometry.assembly) {
+      const assembly = geometry.assembly.map(toDisjointGeometry);
+      const disjointAssembly = [];
+      for (let i = assembly.length - 1; i >= 0; i--) {
+        disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
+      }
+      return { disjointAssembly };
+    } else {
+      return descend();
+    }
+  };
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
+/*
 const disjointAssembly = Symbol('disjointAssembly');
 
 const toDisjointAssembly = (geometry) => {
@@ -893,7 +923,7 @@ const toDisjointAssembly = (geometry) => {
   }
 };
 
-const toDisjointGeometry = (inputGeometry) => {
+export const toDisjointGeometry = (inputGeometry) => {
   const disjointAssembly = toDisjointAssembly(inputGeometry);
   if (disjointAssembly === undefined) {
     return { disjointAssembly: [] };
@@ -901,12 +931,15 @@ const toDisjointGeometry = (inputGeometry) => {
     return disjointAssembly;
   }
 };
+*/
 
+// DEPRECATED
+const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
+
+/*
 const keptGeometry = Symbol('keptGeometry');
 
-// Produce a disjoint geometry suitable for display.
-
-const toKeptGeometry = (geometry) => {
+export const toKeptGeometry = (geometry) => {
   if (geometry[keptGeometry] === undefined) {
     const disjointGeometry = toDisjointGeometry(geometry);
     const walk = (geometry) => {
@@ -950,6 +983,7 @@ const toKeptGeometry = (geometry) => {
   }
   return geometry[keptGeometry];
 };
+*/
 
 const measureArea = (rawGeometry) => {
   const geometry = toKeptGeometry(rawGeometry);
@@ -1204,4 +1238,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isWatertight, keep, makeWatertight, map, measureArea, measureBoundingBox, nonNegative, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isWatertight, keep, makeWatertight, map, measureArea, measureBoundingBox, nonNegative, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toDisjointGeometry, toKeptGeometry, toPoints, toTransformedGeometry, transform, translate, union, update, visit };

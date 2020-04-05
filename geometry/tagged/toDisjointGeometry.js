@@ -1,6 +1,24 @@
 import { difference } from './difference';
+import { rewrite } from './visit';
 import { toTransformedGeometry } from './toTransformedGeometry';
 
+export const toDisjointGeometry = (geometry) => {
+  const op = (geometry, descend) => {
+    if (geometry.assembly) {
+      const assembly = geometry.assembly.map(toDisjointGeometry);
+      const disjointAssembly = [];
+      for (let i = assembly.length - 1; i >= 0; i--) {
+        disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
+      }
+      return { disjointAssembly };
+    } else {
+      return descend();
+    }
+  };
+  return rewrite(toTransformedGeometry(geometry), op);
+};
+
+/*
 const disjointAssembly = Symbol('disjointAssembly');
 
 const toDisjointAssembly = (geometry) => {
@@ -60,3 +78,4 @@ export const toDisjointGeometry = (inputGeometry) => {
     return disjointAssembly;
   }
 };
+*/

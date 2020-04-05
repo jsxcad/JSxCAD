@@ -1,5 +1,5 @@
 import { canonicalize, toTriangles } from '@jsxcad/geometry-polygons';
-import { getSolids, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { getSolids, isNotVoid, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
 import { makeWatertight } from '@jsxcad/geometry-solid';
 import { toPlane } from '@jsxcad/math-poly3';
@@ -26,7 +26,7 @@ const fromSolidToTriangles = (solid) => {
 
 export const toStl = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(geometry);
-  let solids = getSolids(keptGeometry).map(({ solid }) => solid);
+  let solids = getSolids(keptGeometry).filter(solid => isNotVoid(solid)).map(({ solid }) => solid);
   const triangles = fromSolidToTriangles(union(...solids));
   const output = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
   return new TextEncoder('utf8').encode(output);
