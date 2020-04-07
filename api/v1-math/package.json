@@ -23,6 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/math-vec3": "^0.0.79",
+    "open-simplex-noise": "^2.2.0",
     "prando": "^5.1.2"
   },
   "devDependencies": {
