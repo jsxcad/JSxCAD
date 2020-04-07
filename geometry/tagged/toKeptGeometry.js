@@ -1,8 +1,10 @@
 import { toDisjointGeometry } from './toDisjointGeometry';
 
-const keptGeometry = Symbol('keptGeometry');
+// DEPRECATED
+export const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);
 
-// Produce a disjoint geometry suitable for display.
+/*
+const keptGeometry = Symbol('keptGeometry');
 
 export const toKeptGeometry = (geometry) => {
   if (geometry[keptGeometry] === undefined) {
@@ -48,3 +50,4 @@ export const toKeptGeometry = (geometry) => {
   }
   return geometry[keptGeometry];
 };
+*/

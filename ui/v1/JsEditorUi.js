@@ -99,7 +99,8 @@ export class JsEditorUi extends Pane {
     return {
       ask: PropTypes.func,
       file: PropTypes.string,
-      id: PropTypes.string
+      id: PropTypes.string,
+      workspace: PropTypes.string
     };
   }
 
@@ -129,7 +130,7 @@ export class JsEditorUi extends Pane {
   }
 
   async run () {
-    const { ask, file } = this.props;
+    const { ask, file, workspace } = this.props;
     await this.save();
     await log({ op: 'open' });
     await log({ op: 'text', text: 'Running', level: 'serious' });
@@ -137,7 +138,7 @@ export class JsEditorUi extends Pane {
     if (script.buffer) {
       script = new TextDecoder('utf8').decode(script);
     }
-    await ask({ evaluate: script });
+    await ask({ evaluate: script, workspace });
   }
 
   async save () {

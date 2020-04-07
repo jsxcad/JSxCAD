@@ -153,17 +153,10 @@ vertex -20 -6.01 -0.26
 vertex -20 -6.01 -0.25
 endloop
 endfacet
-facet normal -0.9999999999999999 0 0
-outer loop
-vertex -20 -4 -0.26
-vertex -20 -6.01 -0.25
-vertex -20 -6 -0.25
-endloop
-endfacet
 facet normal -1 0 0
 outer loop
 vertex -20 -4 -0.26
-vertex -20 -6 -0.25
+vertex -20 -6.01 -0.25
 vertex -20 -4 -0.25
 endloop
 endfacet

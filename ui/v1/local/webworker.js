@@ -1,5 +1,5 @@
 import * as api from './jsxcad-api-v1.js';
-import { boot, conversation, log, clearEmitted, resolvePending, getEmitted, writeFile } from './jsxcad-sys.js';
+import { boot, conversation, log, setupFilesystem, clearEmitted, resolvePending, getEmitted, writeFile } from './jsxcad-sys.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 
 /* global postMessage, onmessage:writable, self */
@@ -24,8 +24,11 @@ const agent = async ({
     });
 
     if (question.evaluate) {
+      setupFilesystem({
+        fileBase: question.workspace
+      });
       clearEmitted();
-      const ecmascript = toEcmascript({}, question.evaluate);
+      const ecmascript = await toEcmascript(question.evaluate);
       console.log({
         op: 'text',
         text: `QQ/script: ${question.evaluate}`
@@ -34,10 +37,9 @@ const agent = async ({
         op: 'text',
         text: `QQ/ecmascript: ${ecmascript}`
       });
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-      const constructor = await builder(api);
-      const module = await constructor();
-      await module.main();
+      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
+      const module = await builder(api);
+      await module();
       await log({
         op: 'text',
         text: 'Evaluation Succeeded',
@@ -77,6 +79,7 @@ const agent = async ({
       op: 'evaluate',
       status: 'failure'
     });
+    setupFilesystem();
   }
 };
 

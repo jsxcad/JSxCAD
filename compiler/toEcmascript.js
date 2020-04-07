@@ -1,7 +1,8 @@
-// FIX: Is this specific to the v1 api? If so, move it there.
-
 import { generate } from 'astring';
+import hash from 'object-hash';
 import { parse } from 'acorn';
+import { read } from '@jsxcad/sys';
+import { recursive as walk } from 'acorn-walk';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -20,23 +21,7 @@ export const strip = (ast) => {
   }
 };
 
-const fromObjectExpression = ({ properties }) => {
-  const object = {};
-  for (const { key, value } of properties) {
-    if (value.type === 'StringLiteral') {
-      object[key.value] = value.value;
-    } else if (value.type === 'ArrayExpression') {
-      object[key.value] = value.elements.map(element => element.value);
-    } else if (value.type === 'ObjectExpression') {
-      object[key.value] = fromObjectExpression(value);
-    } else {
-      throw Error('die');
-    }
-  }
-  return object;
-};
-
-export const toEcmascript = (options, script) => {
+export const toEcmascript = async (script, options = {}) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
@@ -45,29 +30,83 @@ export const toEcmascript = (options, script) => {
   let ast = parse(script, parseOptions);
 
   const exportNames = [];
-  const expressions = [];
 
   const body = ast.body;
   const out = [];
-  const annotations = { imports: {} };
 
-  // Separate top level exports and expressions.
-  // FIX: This will reorder things unnecessarily when export main is present.
+  const topLevel = new Map();
+
+  const fromIdToSha = (id) => {
+    const entry = topLevel.get(id);
+    if (entry !== undefined) {
+      return entry.sha;
+    }
+  };
+
+  const declareVariable = async (declaration, declarator, { doExport = false } = {}) => {
+    const id = declarator.id.name;
+    const code = strip(declarator);
+    const dependencies = [];
+
+    const Identifier = (node, state, c) => {
+      dependencies.push(node.name);
+    };
+
+    // walk(declarator, undefined, { CallExpression, Identifier });
+    walk(declarator, undefined, { Identifier });
+
+    const dependencyShas = dependencies.map(fromIdToSha);
+
+    const definition = { code, dependencies, dependencyShas };
+    const sha = hash(definition);
+    const entry = { sha, definition };
+    topLevel.set(id, entry);
+    if (doExport) {
+      exportNames.push(id);
+    }
+
+    if (declarator.init) {
+      if (declarator.init.type === 'ArrowFunctionExpression') {
+        // We can't cache functions.
+        out.push(declaration);
+        return;
+      } else if (declarator.init.type === 'Literal') {
+        // Not much point in caching literals.
+        out.push(declaration);
+        return;
+      }
+    }
+    // Now that we have the sha, we can predict if it can be read from cache.
+    const meta = await read(`meta/def/${id}`);
+    if (meta && meta.sha === sha) {
+      const readCode = strip(parse(`await read('data/def/${id}')`, parseOptions));
+      const readExpression = readCode.body[0].expression;
+      const init = readExpression;
+      out.push({ ...declaration, declarations: [{ ...declarator, init }] });
+    } else {
+      out.push({ ...declaration, declarations: [declarator] });
+      out.push(parse(`await write('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`, parseOptions));
+    }
+  };
+
   for (let nth = 0; nth < body.length; nth++) {
     const entry = body[nth];
-    if (entry.type === 'ExportNamedDeclaration') {
+    if (entry.type === 'VariableDeclaration') {
+      for (const declarator of entry.declarations) {
+        await declareVariable(entry, declarator);
+      }
+      // out.push(entry);
+    } else if (entry.type === 'ExportNamedDeclaration') {
       // Note the names and replace the export with the declaration.
       const declaration = entry.declaration;
       if (declaration.type === 'VariableDeclaration') {
         for (const declarator of declaration.declarations) {
-          if (declarator.type === 'VariableDeclarator') {
-            const name = declarator.id.name;
-            exportNames.push(name);
-          }
+          await declareVariable(entry.declaration, declarator, { doExport: true });
         }
-        out.push(declaration);
       }
+      // out.push(entry.declaration);
     } else if (entry.type === 'ImportDeclaration') {
+      // FIX: This works for non-redefinable modules, but not redefinable modules.
       const entry = body[nth];
       // Rewrite
       //   import { foo } from 'bar';
@@ -94,37 +133,15 @@ export const toEcmascript = (options, script) => {
         }
       }
     } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
-      Object.assign(annotations, fromObjectExpression(entry.expression));
-    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'CallExpression' && entry.expression.callee.name === 'source') {
-      // source('a', 'b') needs to be kept at the top level to support imports and avoid repetition.
       out.push(entry);
     } else {
-      expressions.push(entry);
+      out.push(entry);
     }
-  }
-
-  // Set up a main.
-  if (exportNames.length > 0) {
-    // They export something, so assume they know what they're doing.
-    out.push(...expressions);
-  } else {
-    // They don't export a main function, so build one for them.
-    if (expressions.length >= 1) {
-      // Turn any final expression into a return statement.
-      const last = expressions.length - 1;
-      const tail = expressions[last];
-      if (tail.type === 'ExpressionStatement') {
-        expressions[last] = parse(`return ${generate(expressions[last])}`, parseOptions);
-      }
-    }
-    const main = parse(`const main = async () => { ${expressions.map(expression => generate(expression)).join('\n')} };`, parseOptions);
-    out.push(main);
-    exportNames.push('main');
   }
 
   // Return the exports as an object.
   out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
-  const result = generate(parse(`return async () => { ${out.map(generate).join('\n')} };`, parseOptions));
+  const result = '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
   return result;
 };

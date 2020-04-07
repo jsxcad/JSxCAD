@@ -31,7 +31,7 @@ const main = async () => {
  }
 `
     },
-    { empty: true });
+    { assembly: [] });
   await writeFile('toThreejsPage.test.eval.html', html, { encoding: 'utf8' });
   t.is(new TextDecoder('utf8').decode(html),
        await readFile('toThreejsPage.test.eval.html', { encoding: 'utf8' }));

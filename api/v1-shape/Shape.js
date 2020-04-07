@@ -14,12 +14,14 @@ import {
   isWatertight,
   makeWatertight,
   reconcile,
-  toDisjointGeometry,
   toKeptGeometry as toKeptTaggedGeometry,
   toPoints,
-  toTransformedGeometry as toTransformedTaggedGeometry,
   transform
 } from '@jsxcad/geometry-tagged';
+
+import {
+  addReadDecoder
+} from '@jsxcad/sys';
 
 import {
   fromPolygons as fromPolygonsToSolid
@@ -28,20 +30,20 @@ import {
 export class Shape {
   close () {
     const geometry = this.toKeptGeometry();
-    if (!isSingleOpenPath(geometry)) {
+    if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(closePath(geometry.paths[0]));
+    return Shape.fromClosedPath(closePath(geometry.disjointAssembly[0].paths[0]));
   }
 
   concat (...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
       const geometry = shape.toKeptGeometry();
-      if (!isSingleOpenPath(geometry)) {
-        throw Error('Concatenation requires single open paths.');
+      if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+        throw Error(`Concatenation requires single open paths: ${JSON.stringify(geometry)}`);
       }
-      paths.push(geometry.paths[0]);
+      paths.push(geometry.disjointAssembly[0].paths[0]);
     }
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
@@ -67,10 +69,6 @@ export class Shape {
     return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
 
-  toDisjointGeometry (options = {}) {
-    return toDisjointGeometry(toGeometry(this));
-  }
-
   toKeptGeometry (options = {}) {
     return toKeptTaggedGeometry(toGeometry(this));
   }
@@ -81,10 +79,6 @@ export class Shape {
 
   toGeometry () {
     return this.geometry;
-  }
-
-  toTransformedGeometry () {
-    return toTransformedTaggedGeometry(this.toGeometry());
   }
 
   toPoints () {
@@ -139,5 +133,7 @@ Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();
 export const toKeptGeometry = (shape) => shape.toKeptGeometry();
+
+addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fromGeometry(data.geometry));
 
 export default Shape;

@@ -62,15 +62,10 @@ const keepOrDrop = (shape, tags, select) => {
       } else {
         // Operate on the shape.
         const shape = Shape.fromGeometry(geometry);
-        // FIX:
-        // If this is in a disjointAssembly we should drop it.
-        // If it is in an assembly or layers we should not.
-        const dropped = shape.Void().with(shape.sketch()).toGeometry();
+        // Note that this transform does not violate geometry disjunction.
+        const dropped = shape.Void().layer(shape.sketch()).toGeometry();
         return dropped;
       }
-    } else if (geometry.disjointAssembly) {
-      // Turn them all back into assemblies to work around the above issue.
-      return { assembly: geometry.disjointAssembly.map(element => rewrite(element, op)), tags: geometry.tags };
     } else {
       return descend();
     }

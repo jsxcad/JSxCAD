@@ -50,7 +50,7 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toKeptGeometry().layers) {
+      for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
         plans.push(Plan({
           plan: { page: { size, margin: pageMargin } },
           content: Shape.fromGeometry(layer).center(),

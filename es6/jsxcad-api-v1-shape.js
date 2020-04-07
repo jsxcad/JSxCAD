@@ -1,29 +1,29 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
 class Shape {
   close () {
     const geometry = this.toKeptGeometry();
-    if (!isSingleOpenPath(geometry)) {
+    if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(close(geometry.paths[0]));
+    return Shape.fromClosedPath(close(geometry.disjointAssembly[0].paths[0]));
   }
 
   concat (...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
       const geometry = shape.toKeptGeometry();
-      if (!isSingleOpenPath(geometry)) {
-        throw Error('Concatenation requires single open paths.');
+      if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+        throw Error(`Concatenation requires single open paths: ${JSON.stringify(geometry)}`);
       }
-      paths.push(geometry.paths[0]);
+      paths.push(geometry.disjointAssembly[0].paths[0]);
     }
     return Shape.fromOpenPath(concatenate(...paths));
   }
@@ -49,10 +49,6 @@ class Shape {
     return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
 
-  toDisjointGeometry (options = {}) {
-    return toDisjointGeometry(toGeometry(this));
-  }
-
   toKeptGeometry (options = {}) {
     return toKeptGeometry$1(toGeometry(this));
   }
@@ -63,10 +59,6 @@ class Shape {
 
   toGeometry () {
     return this.geometry;
-  }
-
-  toTransformedGeometry () {
-    return toTransformedGeometry(this.toGeometry());
   }
 
   toPoints () {
@@ -121,6 +113,8 @@ Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
 const toKeptGeometry = (shape) => shape.toKeptGeometry();
+
+addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fromGeometry(data.geometry));
 
 /**
  *
@@ -750,15 +744,10 @@ const keepOrDrop = (shape, tags, select) => {
       } else {
         // Operate on the shape.
         const shape = Shape.fromGeometry(geometry);
-        // FIX:
-        // If this is in a disjointAssembly we should drop it.
-        // If it is in an assembly or layers we should not.
-        const dropped = shape.Void().with(shape.sketch()).toGeometry();
+        // Note that this transform does not violate geometry disjunction.
+        const dropped = shape.Void().layer(shape.sketch()).toGeometry();
         return dropped;
       }
-    } else if (geometry.disjointAssembly) {
-      // Turn them all back into assemblies to work around the above issue.
-      return { assembly: geometry.disjointAssembly.map(element => rewrite(element, op)), tags: geometry.tags };
     } else {
       return descend();
     }

@@ -8,23 +8,52 @@ const resolvePending = async () => {
   }
 };
 
-const sources = new Map();
+var empty = {};
 
-// Note: later additions will be used in preference to earlier additions.
-// This will allow overriding defective or unavailable sources.
-const addSource = (path, source) => {
-  if (sources.has(path)) {
-    sources.get(path).unshift(source);
+var fs = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': empty
+});
+
+var v8 = {};
+
+var v8$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  'default': v8
+});
+
+// When base is undefined the persistent filesystem is disabled.
+let base;
+
+const getBase = () => base;
+
+const qualifyPath = (path = '', project) => {
+  if (project !== undefined) {
+    return `jsxcad/${project}/${path}`;
+  } else if (base !== undefined) {
+    return `jsxcad/${base}${path}`;
   } else {
-    sources.set(path, [source]);
+    return `jsxcad//${path}`;
   }
 };
 
-const getSources = (path) => {
-  if (sources.has(path)) {
-    return sources.get(path);
+const setupFilesystem = ({ fileBase } = {}) => {
+  // A prefix used to partition the persistent filesystem for multiple projects.
+  if (fileBase !== undefined) {
+    if (fileBase.endsWith('/')) {
+      base = fileBase;
+    } else {
+      base = `${fileBase}/`;
+    }
   } else {
-    return [];
+    base = undefined;
+  }
+};
+
+const getFilesystem = () => {
+  if (base !== undefined) {
+    const [filesystem] = base.split('/');
+    return filesystem;
   }
 };
 
@@ -267,159 +296,6 @@ const isWebWorker = (typeof self === 'undefined' ? 'undefined' : _typeof(self)) 
 /* eslint-enable no-restricted-globals */
 
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
-
-/* global self */
-
-let handleAskUser;
-
-const askUser = async (identifier, options) => {
-  if (handleAskUser) {
-    return handleAskUser(identifier, options);
-  } else {
-    return { identifier, value: '', type: 'string' };
-  }
-};
-
-const ask = async (identifier, options = {}) => {
-  if (isWebWorker) {
-    return self.ask({ ask: { identifier, options } });
-  }
-
-  return askUser(identifier, options);
-};
-
-const setHandleAskUser = (handler) => {
-  handleAskUser = handler;
-};
-
-const tasks = [];
-
-// Add task to complete before using system.
-// Note: These are expected to be idempotent.
-const onBoot = (op) => {
-  tasks.push(op);
-};
-
-// Execute tasks to complete before using system.
-const boot = async () => {
-  for (const task of tasks) {
-    await task();
-  }
-};
-
-const emitted = [];
-
-const clearEmitted = () => { emitted.length = 0; };
-
-const emit$1 = (value) => emitted.push(value);
-
-const getEmitted = () => [...emitted];
-
-// When base is undefined the persistent filesystem is disabled.
-let base;
-
-const getBase = () => base;
-
-const qualifyPath = (path = '', project) => {
-  if (project !== undefined) {
-    return `jsxcad/${project}/${path}`;
-  } else if (base !== undefined) {
-    return `jsxcad/${base}${path}`;
-  } else {
-    return `jsxcad//${path}`;
-  }
-};
-
-const setupFilesystem = ({ fileBase }) => {
-  // A prefix used to partition the persistent filesystem for multiple projects.
-  if (fileBase !== undefined) {
-    if (fileBase.endsWith('/')) {
-      base = fileBase;
-    } else {
-      base = `${fileBase}/`;
-    }
-  }
-};
-
-const getFilesystem = () => {
-  if (base !== undefined) {
-    const [filesystem] = base.split('/');
-    return filesystem;
-  }
-};
-
-var empty = {};
-
-var fs = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': empty
-});
-
-const files = new Map();
-const fileCreationWatchers = new Set();
-const fileDeletionWatchers = new Set();
-
-const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
-    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
-  }
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file === undefined) {
-    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
-    files.set(path, file);
-    for (const watcher of fileCreationWatchers) {
-      await watcher(options, file);
-    }
-  }
-  return file;
-};
-
-const listFiles = (set) => {
-  for (const file of files.keys()) {
-    set.add(file);
-  }
-};
-
-const deleteFile = async (options, unqualifiedPath) => {
-  const path = qualifyPath(unqualifiedPath);
-  let file = files.get(path);
-  if (file !== undefined) {
-    files.delete(path);
-  } else {
-    // It might not have been in the cache, but we still need to inform watchers.
-    file = { path: unqualifiedPath, storageKey: path };
-  }
-  for (const watcher of fileDeletionWatchers) {
-    await watcher(options, file);
-  }
-};
-
-const unwatchFiles = async (thunk) => {
-  for (const file of files.values()) {
-    file.watchers.delete(thunk);
-  }
-};
-
-const watchFileCreation = async (thunk) => {
-  fileCreationWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileCreation = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
-
-const watchFileDeletion = async (thunk) => {
-  fileDeletionWatchers.add(thunk);
-  return thunk;
-};
-
-const unwatchFileDeletion = async (thunk) => {
-  fileCreationWatchers.delete(thunk);
-  return thunk;
-};
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3241,216 +3117,71 @@ const db = () => {
   return dbInstance;
 };
 
-const { promises } = fs;
+const files = new Map();
+const fileCreationWatchers = new Set();
+const fileDeletionWatchers = new Set();
 
-const getFileLister = async () => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async () => {
-      const qualifiedPaths = new Set();
-      const walk = async (path) => {
-        for (const file of await promises.readdir(path)) {
-          if (file.startsWith('.') || file === 'node_modules') {
-            continue;
-          }
-          const subpath = `${path}${file}`;
-          const stats = await promises.stat(subpath);
-          if (stats.isDirectory()) {
-            await walk(`${subpath}/`);
-          } else {
-            qualifiedPaths.add(subpath);
-          }
-        }
-      };
-      await walk('jsxcad/');
-      listFiles(qualifiedPaths);
-      return qualifiedPaths;
-    };
-  } else if (isBrowser) {
-    // FIX: Make localstorage optional.
-    return async () => {
-      const qualifiedPaths = new Set(await db().keys());
-      listFiles(qualifiedPaths);
-      return qualifiedPaths;
-    };
+const getFile = async (options, unqualifiedPath) => {
+  if (typeof unqualifiedPath !== 'string') {
+    throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
+  }
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file === undefined) {
+    file = { path: unqualifiedPath, watchers: new Set(), storageKey: path };
+    files.set(path, file);
+    for (const watcher of fileCreationWatchers) {
+      await watcher(options, file);
+    }
+  }
+  return file;
+};
+
+const listFiles = (set) => {
+  for (const file of files.keys()) {
+    set.add(file);
+  }
+};
+
+const deleteFile = async (options, unqualifiedPath) => {
+  const path = qualifyPath(unqualifiedPath);
+  let file = files.get(path);
+  if (file !== undefined) {
+    files.delete(path);
   } else {
-    throw Error('die');
+    // It might not have been in the cache, but we still need to inform watchers.
+    file = { path: unqualifiedPath, storageKey: path };
+  }
+  for (const watcher of fileDeletionWatchers) {
+    await watcher(options, file);
   }
 };
 
-let cachedKeys;
-
-const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
-const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
-
-const getKeys = async () => {
-  if (cachedKeys === undefined) {
-    const listFiles = await getFileLister();
-    cachedKeys = await listFiles();
-    watchFileCreation(updateCachedKeys);
-    watchFileDeletion(deleteCachedKeys);
-  }
-  return cachedKeys;
-};
-
-const listFilesystems = async () => {
-  const keys = await getKeys();
-  const filesystems = new Set();
-  for (const key of keys) {
-    if (key.startsWith('jsxcad/')) {
-      const [, filesystem] = key.split('/');
-      filesystems.add(filesystem);
-    }
-  }
-  return [...filesystems];
-};
-
-const listFiles$1 = async ({ project } = {}) => {
-  if (project === undefined) {
-    project = getFilesystem();
-  }
-  const prefix = qualifyPath('', project);
-  const keys = await getKeys();
-  const files = [];
-  for (const key of keys) {
-    if (key.startsWith(prefix)) {
-      files.push(key.substring(prefix.length));
-    }
-  }
-  return files;
-};
-
-/* global self */
-
-const watchers = new Set();
-
-const log = async (entry) => {
-  if (isWebWorker) {
-    return self.ask({ log: { entry } });
-  }
-
-  for (const watcher of watchers) {
-    watcher(entry);
+const unwatchFiles = async (thunk) => {
+  for (const file of files.values()) {
+    file.watchers.delete(thunk);
   }
 };
 
-const watchLog = (thunk) => {
-  watchers.add(thunk);
+const watchFileCreation = async (thunk) => {
+  fileCreationWatchers.add(thunk);
   return thunk;
 };
 
-const unwatchLog = (thunk) => {
-  watchers.delete(thunk);
+const unwatchFileCreation = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
 };
 
-const watchFile = async (path, thunk) => (await getFile({}, path)).watchers.add(thunk);
-
-const unwatchFile = async (path, thunk) => (await getFile({}, path)).watchers.delete(thunk);
-
-const conversation = ({ agent, say }) => {
-  let id = 0;
-  const openQuestions = {};
-  const ask = (question) => {
-    const promise = new Promise((resolve, reject) => { openQuestions[id] = { resolve, reject }; });
-    say({ id, question });
-    id += 1;
-    return promise;
-  };
-  const hear = async (message) => {
-    const { id, question, answer, error } = message;
-    // Check hasOwnProperty to detect undefined values.
-    if (message.hasOwnProperty('answer')) {
-      const { resolve, reject } = openQuestions[id];
-      if (error) {
-        reject(error);
-      } else {
-        resolve(answer);
-      }
-      delete openQuestions[id];
-    } else if (message.hasOwnProperty('question')) {
-      const answer = await agent({ ask, question });
-      say({ id, answer });
-    } else {
-      throw Error('die');
-    }
-  };
-  return { ask, hear };
+const watchFileDeletion = async (thunk) => {
+  fileDeletionWatchers.add(thunk);
+  return thunk;
 };
 
-/* global Worker */
-
-// Sets up a worker with conversational interface.
-const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
-  if (isNode) {
-    // const { Worker } = await import('worker_threads');
-    const { Worker } = require('worker_threads');
-    const worker = new Worker(nodeWorker);
-    const say = (message) => worker.postMessage(message);
-    const { ask, hear } = conversation({ agent, say });
-    const stop = async () => {
-      return new Promise((resolve, reject) => {
-        worker.terminate((err, exitCode) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(exitCode);
-          }
-        });
-      });
-    };
-    worker.on('message', hear);
-    return { ask, stop };
-  } else if (isBrowser) {
-    let worker;
-    try {
-      worker = new Worker(webWorker, { type: workerType });
-    } catch (e) {
-      log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
-      throw Error('die');
-    }
-    const say = (message) => worker.postMessage(message);
-    const { ask, hear } = conversation({ agent, say });
-    worker.onmessage = ({ data }) => hear(data);
-    return { ask };
-  } else {
-    throw Error('die');
-  }
+const unwatchFileDeletion = async (thunk) => {
+  fileCreationWatchers.delete(thunk);
+  return thunk;
 };
-
-/* global self */
-
-const { promises: promises$1 } = fs;
-
-const getFileDeleter = async () => {
-  if (isNode) {
-    // FIX: Put this through getFile, also.
-    return async (path) => {
-      return promises$1.unlink(qualifyPath(path));
-    };
-  } else if (isBrowser) {
-    return async (path) => {
-      await db().removeItem(qualifyPath(path));
-    };
-  } else {
-    throw Error('die');
-  }
-};
-
-const deleteFile$1 = async (options, path) => {
-  if (isWebWorker) {
-    return self.ask({ deleteFile: { options, path } });
-  }
-  const deleter = await getFileDeleter();
-  await deleter(path);
-  await deleteFile(options, path);
-};
-
-var v8 = {};
-
-var v8$1 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  'default': v8
-});
 
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 
@@ -8156,6 +7887,29 @@ var isUrlHttp = url => {
   }
 };
 
+/* global self */
+
+const watchers = new Set();
+
+const log = async (entry) => {
+  if (isWebWorker) {
+    return self.ask({ log: { entry } });
+  }
+
+  for (const watcher of watchers) {
+    watcher(entry);
+  }
+};
+
+const watchLog = (thunk) => {
+  watchers.add(thunk);
+  return thunk;
+};
+
+const unwatchLog = (thunk) => {
+  watchers.delete(thunk);
+};
+
 var nodeFetch = _ => _;
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -8188,7 +7942,7 @@ function dirname(path) {
 
 /* global self */
 
-const { promises: promises$2 } = fs;
+const { promises } = fs;
 const { serialize } = v8$1;
 
 // FIX Convert data by representation.
@@ -8196,9 +7950,9 @@ const { serialize } = v8$1;
 const writeFile = async (options, path, data) => {
   data = await data;
   // FIX: Should be checking for a proxy fs, not webworker.
-  if (isWebWorker) {
-    return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
-  }
+  // if (false && isWebWorker) {
+  //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
+  // }
 
   const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
   let originalProject = getFilesystem();
@@ -8221,18 +7975,21 @@ const writeFile = async (options, path, data) => {
     const persistentPath = qualifyPath(path);
     if (isNode) {
       try {
-        await promises$2.mkdir(dirname(persistentPath), { recursive: true });
+        await promises.mkdir(dirname(persistentPath), { recursive: true });
       } catch (error) {
       }
       try {
         if (doSerialize) {
           data = serialize(data);
         }
-        await promises$2.writeFile(persistentPath, data);
+        await promises.writeFile(persistentPath, data);
       } catch (error) {
       }
-    } else if (isBrowser) {
+    } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
+      if (isWebWorker) {
+        await self.ask({ touchFile: { path, workspace: project } });
+      }
     }
   }
 
@@ -8240,12 +7997,51 @@ const writeFile = async (options, path, data) => {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalProject });
   }
+
+  return true;
 };
 
-/* global self */
+const write$1 = async (path, data, options = {}) => {
+  if (typeof data === 'function') {
+    // Always fail to write functions.
+    return undefined;
+  }
+  return writeFile(options, path, data);
+};
 
-const { promises: promises$3 } = fs;
+// FIX: Refactor this once we figure it out.
+
+const { promises: promises$1 } = fs;
 const { deserialize } = v8$1;
+
+// Read decoders allow us to turn data back into objects based on structure.
+const readDecoders = [];
+
+const addReadDecoder = (guard, decoder) => readDecoders.push({ guard, decoder });
+
+// There should be a better way to do this.
+const decode = (data) => {
+  if (typeof data !== 'object') {
+    return data;
+  }
+  for (const { guard, decoder } of readDecoders) {
+    if (guard(data)) {
+      return decoder(data);
+    }
+  }
+  if (Array.isArray(data)) {
+    // We may have arrays of things to decode.
+    for (let i = 0; i < data.length; i++) {
+      data[i] = decode(data[i]);
+    }
+  } else if (data.byteLength === undefined) {
+    // We may have objects of things to decode, but not ArrayBuffers.
+    for (let key of Object.keys(data)) {
+      data[key] = decode(data[key]);
+    }
+  }
+  return data;
+};
 
 const getUrlFetcher = async () => {
   if (typeof window !== 'undefined') {
@@ -8259,13 +8055,13 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
   if (isNode) {
     // FIX: Put this through getFile, also.
     return async (path) => {
-      let data = await promises$3.readFile(qualify(path));
+      let data = await promises$1.readFile(qualify(path));
       if (doSerialize) {
         data = deserialize(data);
       }
       return data;
     };
-  } else if (isBrowser) {
+  } else if (isBrowser || isWebWorker) {
     return async (path) => {
       const data = await db().getItem(qualify(path));
       if (data !== null) {
@@ -8323,11 +8119,12 @@ const fetchSources = async (options = {}, sources) => {
   }
 };
 
+// Deprecated
 const readFile = async (options, path) => {
   const { allowFetch = true, ephemeral } = options;
-  if (isWebWorker) {
-    return self.ask({ readFile: { options, path } });
-  }
+  // if (false && isWebWorker) {
+  //  return self.ask({ readFile: { options, path } });
+  // }
   const { sources = [], project = getFilesystem(), useCache = true } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
@@ -8345,7 +8142,7 @@ const readFile = async (options, path) => {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalProject });
   }
-  if (file.data === undefined && allowFetch) {
+  if (file.data === undefined && allowFetch && sources.length > 0) {
     file.data = await fetchSources({}, sources);
     if (!ephemeral && file.data !== undefined) {
       // Update persistent cache.
@@ -8361,4 +8158,277 @@ const readFile = async (options, path) => {
   return file.data;
 };
 
-export { addPending, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, readFile, resolvePending, setHandleAskUser, setupFilesystem, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, writeFile };
+const read$1 = async (path, options = {}) => {
+  const data = await readFile(options, path);
+  return decode(data);
+};
+
+const sources = new Map();
+
+// Note: later additions will be used in preference to earlier additions.
+// This will allow overriding defective or unavailable sources.
+const addSource = (path, source) => {
+  if (sources.has(path)) {
+    sources.get(path).unshift(source);
+  } else {
+    sources.set(path, [source]);
+  }
+};
+
+const getSources = (path) => {
+  if (sources.has(path)) {
+    return sources.get(path);
+  } else {
+    return [];
+  }
+};
+
+/* global self */
+
+let handleAskUser;
+
+const askUser = async (identifier, options) => {
+  if (handleAskUser) {
+    return handleAskUser(identifier, options);
+  } else {
+    return { identifier, value: '', type: 'string' };
+  }
+};
+
+const ask = async (identifier, options = {}) => {
+  if (isWebWorker) {
+    return self.ask({ ask: { identifier, options } });
+  }
+
+  return askUser(identifier, options);
+};
+
+const setHandleAskUser = (handler) => {
+  handleAskUser = handler;
+};
+
+const tasks = [];
+
+// Add task to complete before using system.
+// Note: These are expected to be idempotent.
+const onBoot = (op) => {
+  tasks.push(op);
+};
+
+// Execute tasks to complete before using system.
+const boot = async () => {
+  for (const task of tasks) {
+    await task();
+  }
+};
+
+const emitted = [];
+
+const clearEmitted = () => { emitted.length = 0; };
+
+const emit$1 = (value) => emitted.push(value);
+
+const getEmitted = () => [...emitted];
+
+const { promises: promises$2 } = fs;
+
+const getFileLister = async () => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async () => {
+      const qualifiedPaths = new Set();
+      const walk = async (path) => {
+        for (const file of await promises$2.readdir(path)) {
+          if (file.startsWith('.') || file === 'node_modules') {
+            continue;
+          }
+          const subpath = `${path}${file}`;
+          const stats = await promises$2.stat(subpath);
+          if (stats.isDirectory()) {
+            await walk(`${subpath}/`);
+          } else {
+            qualifiedPaths.add(subpath);
+          }
+        }
+      };
+      await walk('jsxcad/');
+      listFiles(qualifiedPaths);
+      return qualifiedPaths;
+    };
+  } else if (isBrowser) {
+    // FIX: Make localstorage optional.
+    return async () => {
+      const qualifiedPaths = new Set(await db().keys());
+      listFiles(qualifiedPaths);
+      return qualifiedPaths;
+    };
+  } else {
+    throw Error('die');
+  }
+};
+
+let cachedKeys;
+
+const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
+const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
+
+const getKeys = async () => {
+  if (cachedKeys === undefined) {
+    const listFiles = await getFileLister();
+    cachedKeys = await listFiles();
+    watchFileCreation(updateCachedKeys);
+    watchFileDeletion(deleteCachedKeys);
+  }
+  return cachedKeys;
+};
+
+const listFilesystems = async () => {
+  const keys = await getKeys();
+  const filesystems = new Set();
+  for (const key of keys) {
+    if (key.startsWith('jsxcad/')) {
+      const [, filesystem] = key.split('/');
+      filesystems.add(filesystem);
+    }
+  }
+  return [...filesystems];
+};
+
+const listFiles$1 = async ({ project } = {}) => {
+  if (project === undefined) {
+    project = getFilesystem();
+  }
+  const prefix = qualifyPath('', project);
+  const keys = await getKeys();
+  const files = [];
+  for (const key of keys) {
+    if (key.startsWith(prefix)) {
+      files.push(key.substring(prefix.length));
+    }
+  }
+  return files;
+};
+
+const watchFile = async (path, thunk) => (await getFile({}, path)).watchers.add(thunk);
+
+const unwatchFile = async (path, thunk) => (await getFile({}, path)).watchers.delete(thunk);
+
+const conversation = ({ agent, say }) => {
+  let id = 0;
+  const openQuestions = {};
+  const ask = (question) => {
+    const promise = new Promise((resolve, reject) => { openQuestions[id] = { resolve, reject }; });
+    say({ id, question });
+    id += 1;
+    return promise;
+  };
+  const hear = async (message) => {
+    const { id, question, answer, error } = message;
+    // Check hasOwnProperty to detect undefined values.
+    if (message.hasOwnProperty('answer')) {
+      const { resolve, reject } = openQuestions[id];
+      if (error) {
+        reject(error);
+      } else {
+        resolve(answer);
+      }
+      delete openQuestions[id];
+    } else if (message.hasOwnProperty('question')) {
+      const answer = await agent({ ask, question });
+      say({ id, answer });
+    } else {
+      throw Error('die');
+    }
+  };
+  return { ask, hear };
+};
+
+/* global Worker */
+
+// Sets up a worker with conversational interface.
+const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
+  if (isNode) {
+    // const { Worker } = await import('worker_threads');
+    const { Worker } = require('worker_threads');
+    const worker = new Worker(nodeWorker);
+    const say = (message) => worker.postMessage(message);
+    const { ask, hear } = conversation({ agent, say });
+    const stop = async () => {
+      return new Promise((resolve, reject) => {
+        worker.terminate((err, exitCode) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(exitCode);
+          }
+        });
+      });
+    };
+    worker.on('message', hear);
+    return { ask, stop };
+  } else if (isBrowser) {
+    let worker;
+    try {
+      worker = new Worker(webWorker, { type: workerType });
+    } catch (e) {
+      log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+      throw Error('die');
+    }
+    const say = (message) => worker.postMessage(message);
+    const { ask, hear } = conversation({ agent, say });
+    worker.onmessage = ({ data }) => hear(data);
+    return { ask };
+  } else {
+    throw Error('die');
+  }
+};
+
+/* global self */
+
+const { promises: promises$3 } = fs;
+
+const getFileDeleter = async () => {
+  if (isNode) {
+    // FIX: Put this through getFile, also.
+    return async (path) => {
+      return promises$3.unlink(qualifyPath(path));
+    };
+  } else if (isBrowser) {
+    return async (path) => {
+      await db().removeItem(qualifyPath(path));
+    };
+  } else {
+    throw Error('die');
+  }
+};
+
+const deleteFile$1 = async (options, path) => {
+  if (isWebWorker) {
+    return self.ask({ deleteFile: { options, path } });
+  }
+  const deleter = await getFileDeleter();
+  await deleter(path);
+  await deleteFile(options, path);
+};
+
+const touch = async (path, { workspace } = {}) => {
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    // Switch to the source filesystem, if necessary.
+    setupFilesystem({ fileBase: workspace });
+  }
+  const file = await getFile({}, path);
+  if (file !== undefined) {
+    file.data = undefined;
+
+    for (const watcher of file.watchers) {
+      await watcher({}, file);
+    }
+  }
+  if (workspace !== originalWorkspace) {
+    // Switch back to the original filesystem, if necessary.
+    setupFilesystem({ fileBase: originalWorkspace });
+  }
+};
+
+export { addPending, addReadDecoder, addSource, ask, boot, clearEmitted, conversation, createService, deleteFile$1 as deleteFile, emit$1 as emit, getEmitted, getFilesystem, getSources, listFiles$1 as listFiles, listFilesystems, log, onBoot, qualifyPath, read$1 as read, readFile, resolvePending, setHandleAskUser, setupFilesystem, touch, unwatchFile, unwatchFileCreation, unwatchFileDeletion, unwatchFiles, unwatchLog, watchFile, watchFileCreation, watchFileDeletion, watchLog, write$1 as write, writeFile };

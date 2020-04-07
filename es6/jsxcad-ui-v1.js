@@ -1,4 +1,4 @@
-import { readFile, log as log$1, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
+import { readFile, log as log$1, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, read, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
@@ -82609,7 +82609,8 @@ class JsEditorUi extends Pane {
     return {
       ask: propTypes.func,
       file: propTypes.string,
-      id: propTypes.string
+      id: propTypes.string,
+      workspace: propTypes.string
     };
   }
 
@@ -82646,7 +82647,8 @@ class JsEditorUi extends Pane {
   async run() {
     const {
       ask,
-      file
+      file,
+      workspace
     } = this.props;
     await this.save();
     await log$1({
@@ -82664,7 +82666,8 @@ class JsEditorUi extends Pane {
     }
 
     await ask({
-      evaluate: script
+      evaluate: script,
+      workspace
     });
   }
 
@@ -87719,6 +87722,7 @@ class OrbitView extends react.PureComponent {
     return {
       id: propTypes.string,
       geometry: propTypes.object,
+      path: propTypes.string,
       width: propTypes.number,
       height: propTypes.number,
       position: propTypes.array
@@ -87736,8 +87740,9 @@ class OrbitView extends react.PureComponent {
     const {
       containerId
     } = this.state;
-    const {
+    let {
       geometry,
+      path,
       position
     } = this.props;
     const container = document.getElementById(containerId);
@@ -87749,29 +87754,15 @@ class OrbitView extends react.PureComponent {
     const page = document.createElement('div');
     page.id = 'viewer';
     page.style.height = '100%';
+
+    if (path) {
+      geometry = await read(path);
+    }
+
     await orbitDisplay({
       view,
       geometry
     }, page);
-    /*
-     const geometryPath = path;
-     const readAndUpdate = async () => {
-      const data = await readFile({}, geometryPath);
-      if (data === undefined) {
-        await updateGeometry({ assembly: [] });
-      } else {
-        if (data.buffer) {
-          await updateGeometry(JSON.parse(new TextDecoder('utf8').decode(data)));
-        } else {
-          await updateGeometry(data);
-        }
-      }
-    };
-     await readAndUpdate();
-     const watcher = await watchFile(geometryPath, readAndUpdate);
-     this.setState({ watcher });
-    */
-
     container.appendChild(page);
   }
 
@@ -87839,6 +87830,7 @@ class StaticView extends react.PureComponent {
     return {
       id: propTypes.string,
       geometry: propTypes.object,
+      path: propTypes.string,
       width: propTypes.number,
       height: propTypes.number,
       position: propTypes.array,
@@ -87852,12 +87844,17 @@ class StaticView extends react.PureComponent {
   }
 
   async componentDidMount() {
-    const {
+    let {
+      path,
       geometry,
       width,
       height,
       position
-    } = this.props; // const data = await readFile({}, path);
+    } = this.props;
+
+    if (path) {
+      geometry = await read(path);
+    }
 
     const url = await dataUrl(Shape.fromGeometry(geometry), {
       width,
@@ -87902,7 +87899,8 @@ class GeometryView extends react.PureComponent {
       onClick: propTypes.func,
       mode: propTypes.string,
       isSelected: propTypes.bool,
-      geometry: propTypes.object
+      geometry: propTypes.object,
+      path: propTypes.string
     };
   }
 
@@ -87914,6 +87912,7 @@ class GeometryView extends react.PureComponent {
   render() {
     const {
       id,
+      path,
       geometry,
       width,
       height,
@@ -87925,6 +87924,7 @@ class GeometryView extends react.PureComponent {
     switch (mode) {
       case 'static':
         return react.createElement(StaticView, {
+          path: path,
           geometry: geometry,
           width: width,
           height: height,
@@ -87935,6 +87935,7 @@ class GeometryView extends react.PureComponent {
       case 'dynamic':
         return react.createElement(OrbitView, {
           id: id,
+          path: path,
           geometry: geometry,
           width: width,
           height: height,
@@ -88050,6 +88051,7 @@ class NotebookUi extends Pane {
           width,
           height,
           position,
+          path,
           geometry
         } = note.geometry;
         const mode = index === selected ? 'dynamic' : 'static';
@@ -88070,6 +88072,7 @@ class NotebookUi extends Pane {
           width: width,
           height: height,
           position: position,
+          path: path,
           geometry: geometry,
           onClick: select,
           mode: mode,
@@ -91561,6 +91564,14 @@ class Ui extends react.PureComponent {
           entry
         } = question.log;
         return log$1(entry);
+      } else if (question.touchFile) {
+        const {
+          path,
+          workspace
+        } = question.touchFile;
+        return touch(path, {
+          workspace
+        });
       }
     };
 
@@ -91892,6 +91903,9 @@ class Ui extends react.PureComponent {
 
   renderPane(views, id, path, createNode, onSelectView, onSelectFile) {
     const {
+      project
+    } = this.state;
+    const {
       view,
       file
     } = this.getPaneView(id);
@@ -91958,7 +91972,8 @@ class Ui extends react.PureComponent {
             fileChoices: fileChoices,
             fileTitle: fileTitle,
             onSelectFile: onSelectFile,
-            ask: ask
+            ask: ask,
+            workspace: project
           });
         }
 

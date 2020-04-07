@@ -1,3 +1,4 @@
+import { isVoid } from './isNotVoid';
 import { measureArea as measureAreaOfSurface } from '@jsxcad/geometry-surface';
 import { toKeptGeometry } from './toKeptGeometry';
 import { visit } from './visit';
@@ -6,6 +7,9 @@ export const measureArea = (rawGeometry) => {
   const geometry = toKeptGeometry(rawGeometry);
   let area = 0;
   const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
+      return;
+    }
     if (geometry.surface) {
       area += measureAreaOfSurface(geometry.surface);
     } else if (geometry.z0Surface) {

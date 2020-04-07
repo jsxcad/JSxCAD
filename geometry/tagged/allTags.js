@@ -1,16 +1,15 @@
-// FIX: Refactor the geometry walkers.
-
-import { rewriteUp } from './rewrite';
+import { visit } from './visit';
 
 export const allTags = (geometry) => {
   const collectedTags = new Set();
-  const op = ({ tags }) => {
+  const op = ({ tags }, descend) => {
     if (tags !== undefined) {
       for (const tag of tags) {
         collectedTags.add(tag);
       }
     }
+    descend();
   };
-  rewriteUp(geometry, op);
+  visit(geometry, op);
   return collectedTags;
 };
