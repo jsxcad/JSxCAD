@@ -1,5 +1,5 @@
 import {
-  identity,
+  identityMatrix,
   multiply
 } from '@jsxcad/math-mat4';
 
@@ -30,6 +30,11 @@ export const toTransformedGeometry = (geometry) => {
           tags
         };
       } else if (geometry.disjointAssembly) {
+        if (matrix === identityMatrix) {
+          // A disjointAssembly does not contain any untransformed geometry.
+          // If there is no transformation to apply we can stop here.
+          return geometry;
+        }
         return {
           disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
           tags
@@ -92,7 +97,7 @@ export const toTransformedGeometry = (geometry) => {
         throw Error(`die: ${JSON.stringify(geometry)}`);
       }
     };
-    geometry[transformedGeometry] = walk(identity(), geometry);
+    geometry[transformedGeometry] = walk(identityMatrix, geometry);
   }
   return geometry[transformedGeometry];
 };

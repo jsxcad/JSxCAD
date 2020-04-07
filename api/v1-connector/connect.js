@@ -1,4 +1,4 @@
-import { drop, splice, toTransformedGeometry } from '@jsxcad/geometry-tagged';
+import { drop, splice, toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { negate, subtract } from '@jsxcad/math-vec3';
 
 import Shape from '@jsxcad/api-v1-shape';
@@ -46,11 +46,11 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
 export const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
-  const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
+  const aConnector = toKeptGeometry(aConnectorShape.toGeometry());
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
 
-  const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
+  const bConnector = toKeptGeometry(bConnectorShape.flip().toGeometry());
   const bShape = toShape(bConnectorShape);
   const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
 
@@ -62,7 +62,7 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true, do
   // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
-  const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
+  const bFlatConnector = toKeptGeometry(bConnectorShape.transform(bTo).toGeometry());
   const bMarks = bFlatConnector.marks;
 
   // Rotate into alignment.

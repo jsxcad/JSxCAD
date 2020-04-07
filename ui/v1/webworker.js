@@ -11,6 +11,7 @@ const agent = async ({ ask, question }) => {
     await sys.log({ op: 'evaluate', status: 'run' });
     await sys.log({ op: 'text', text: 'Evaluation Started' });
     if (question.evaluate) {
+      sys.setupFilesystem({ fileBase: question.workspace });
       sys.clearEmitted();
       const ecmascript = await toEcmascript(question.evaluate);
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
@@ -39,6 +40,7 @@ const agent = async ({ ask, question }) => {
     await sys.log({ op: 'text', text: error.stack, level: 'serious' });
     await sys.log({ op: 'text', text: 'Evaluation Failed', level: 'serious' });
     await sys.log({ op: 'evaluate', status: 'failure' });
+    sys.setupFilesystem();
   }
 };
 

@@ -14,6 +14,7 @@ import {
   readFile,
   setHandleAskUser,
   setupFilesystem,
+  touch,
   unwatchFileCreation,
   unwatchFileDeletion,
   unwatchLog,
@@ -143,6 +144,9 @@ class Ui extends React.PureComponent {
       } else if (question.log) {
         const { entry } = question.log;
         return log(entry);
+      } else if (question.touchFile) {
+        const { path, workspace } = question.touchFile;
+        return touch(path, { workspace });
       }
     };
 
@@ -372,6 +376,7 @@ class Ui extends React.PureComponent {
   }
 
   renderPane (views, id, path, createNode, onSelectView, onSelectFile) {
+    const { project } = this.state;
     const { view, file } = this.getPaneView(id);
     const fileChoices = views.filter(entry => entry.view === view && entry.file !== file);
     const seenViewChoices = new Set();
@@ -432,6 +437,7 @@ class Ui extends React.PureComponent {
             fileTitle={fileTitle}
             onSelectFile={onSelectFile}
             ask={ask}
+            workspace={project}
           />);
       }
       case 'editSvgPath': {

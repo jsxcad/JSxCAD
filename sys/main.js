@@ -1,4 +1,5 @@
 export { addPending, resolvePending } from './pending';
+export { addReadDecoder, read, readFile } from './readFile';
 export { addSource, getSources } from './source';
 export { ask, setHandleAskUser } from './ask';
 export { boot, onBoot } from './boot';
@@ -12,5 +13,5 @@ export { unwatchFileCreation, unwatchFileDeletion, unwatchFiles, watchFileCreati
 export { conversation } from './conversation';
 export { createService } from './service';
 export { deleteFile } from './deleteFile';
-export { addReadDecoder, read, readFile } from './readFile';
+export { touch } from './touch';
 export { write, writeFile } from './writeFile';

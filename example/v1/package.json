@@ -12,8 +12,8 @@
     "example": "node -r esm run",
     "profile": "node -r esm --prof --logfile=prof.log --no-logfile-per-isolate run",
     "trace": "node -r esm --trace-ic run",
-    "test": "ava",
-    "tests": "ava *.test.js",
+    "test": "ava --timeout 10m",
+    "tests": "ava --timeout 10m *.test.js",
     "version": "node -v"
   },
   "contributors": [

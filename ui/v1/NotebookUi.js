@@ -6,6 +6,7 @@ import {
 } from '@jsxcad/ui-threejs';
 
 import {
+  read,
   readFile,
   unwatchFiles,
   watchFile
@@ -29,6 +30,7 @@ export class OrbitView extends React.PureComponent {
     return {
       id: PropTypes.string,
       geometry: PropTypes.object,
+      path: PropTypes.string,
       width: PropTypes.number,
       height: PropTypes.number,
       position: PropTypes.array
@@ -44,7 +46,7 @@ export class OrbitView extends React.PureComponent {
 
   async componentDidMount () {
     const { containerId } = this.state;
-    const { geometry, position } = this.props;
+    let { geometry, path, position } = this.props;
     const container = document.getElementById(containerId);
 
     const view = { target: [0, 0, 0], position, up: [0, 0, 1] };
@@ -53,31 +55,11 @@ export class OrbitView extends React.PureComponent {
     page.id = 'viewer';
     page.style.height = '100%';
 
+    if (path) {
+      geometry = await read(path);
+    }
+
     await orbitDisplay({ view, geometry }, page);
-
-    /*
-
-    const geometryPath = path;
-
-    const readAndUpdate = async () => {
-      const data = await readFile({}, geometryPath);
-      if (data === undefined) {
-        await updateGeometry({ assembly: [] });
-      } else {
-        if (data.buffer) {
-          await updateGeometry(JSON.parse(new TextDecoder('utf8').decode(data)));
-        } else {
-          await updateGeometry(data);
-        }
-      }
-    };
-
-    await readAndUpdate();
-
-    const watcher = await watchFile(geometryPath, readAndUpdate);
-
-    this.setState({ watcher });
-*/
 
     container.appendChild(page);
   }
@@ -122,6 +104,7 @@ export class StaticView extends React.PureComponent {
     return {
       id: PropTypes.string,
       geometry: PropTypes.object,
+      path: PropTypes.string,
       width: PropTypes.number,
       height: PropTypes.number,
       position: PropTypes.array,
@@ -135,9 +118,12 @@ export class StaticView extends React.PureComponent {
   }
 
   async componentDidMount () {
-    const { geometry, width, height, position } = this.props;
+    let { path, geometry, width, height, position } = this.props;
 
-    // const data = await readFile({}, path);
+    if (path) {
+      geometry = await read(path);
+    }
+
     const url = await dataUrl(Shape.fromGeometry(geometry), { width, height, position });
 
     this.setState({ url });
@@ -160,7 +146,8 @@ export class GeometryView extends React.PureComponent {
       onClick: PropTypes.func,
       mode: PropTypes.string,
       isSelected: PropTypes.bool,
-      geometry: PropTypes.object
+      geometry: PropTypes.object,
+      path: PropTypes.string
     };
   }
 
@@ -170,12 +157,12 @@ export class GeometryView extends React.PureComponent {
   }
 
   render () {
-    const { id, geometry, width, height, position, mode, onClick } = this.props;
+    const { id, path, geometry, width, height, position, mode, onClick } = this.props;
     switch (mode) {
       case 'static':
-        return <StaticView geometry={geometry} width={width} height={height} position={position} onClick={onClick}/>;
+        return <StaticView path={path} geometry={geometry} width={width} height={height} position={position} onClick={onClick}/>;
       case 'dynamic':
-        return <OrbitView id={id} geometry={geometry} width={width} height={height} position={position}/>;
+        return <OrbitView id={id} path={path} geometry={geometry} width={width} height={height} position={position}/>;
     }
   }
 }
@@ -256,14 +243,14 @@ export class NotebookUi extends Pane {
       const key = Math.random(); // nth;
       if (note.geometry) {
         const index = nth;
-        const { width, height, position, geometry } = note.geometry;
+        const { width, height, position, path, geometry } = note.geometry;
         const mode = (index === selected) ? 'dynamic' : 'static';
         const select = (e) => {
           e.stopPropagation();
           const notes = this.buildNotes({ ...this.state, selected: index });
           this.setState({ selected: index, notes });
         };
-        notes.push(<GeometryView key={key} width={width} height={height} position={position} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
+        notes.push(<GeometryView key={key} width={width} height={height} position={position} path={path} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
       } else if (note.md) {
         const data = note.md;
         notes.push(<div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }}/>);

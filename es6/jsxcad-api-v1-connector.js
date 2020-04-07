@@ -1,6 +1,6 @@
 import Shape, { Shape as Shape$1, assemble, log } from './jsxcad-api-v1-shape.js';
 import { add, random, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
-import { getPlans, getConnections, getSolids, getAnySurfaces, getSurfaces, getZ0Surfaces, toTransformedGeometry, drop } from './jsxcad-geometry-tagged.js';
+import { getPlans, getConnections, getSolids, getAnySurfaces, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import Plan from './jsxcad-api-v1-plan.js';
 import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
 import { cut } from './jsxcad-algorithm-bsp-surfaces.js';
@@ -529,11 +529,11 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
 const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
-  const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
+  const aConnector = toKeptGeometry(aConnectorShape.toGeometry());
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
 
-  const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
+  const bConnector = toKeptGeometry(bConnectorShape.flip().toGeometry());
   const bShape = toShape(bConnectorShape);
   const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
 
@@ -545,7 +545,7 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssembl
   // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
-  const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
+  const bFlatConnector = toKeptGeometry(bConnectorShape.transform(bTo).toGeometry());
   const bMarks = bFlatConnector.marks;
 
   // Rotate into alignment.

@@ -1,5 +1,3 @@
-/* global self */
-
 // FIX: Refactor this once we figure it out.
 
 import * as fs from 'fs';
@@ -65,7 +63,7 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
       }
       return data;
     };
-  } else if (isBrowser) {
+  } else if (isBrowser || isWebWorker) {
     return async (path) => {
       const data = await db().getItem(qualify(path));
       if (data !== null) {
@@ -126,9 +124,9 @@ const fetchSources = async (options = {}, sources) => {
 // Deprecated
 export const readFile = async (options, path) => {
   const { allowFetch = true, ephemeral } = options;
-  if (isWebWorker) {
-    return self.ask({ readFile: { options, path } });
-  }
+  // if (false && isWebWorker) {
+  //  return self.ask({ readFile: { options, path } });
+  // }
   const { sources = [], project = getFilesystem(), useCache = true } = options;
   let originalProject = getFilesystem();
   if (project !== originalProject) {
@@ -146,7 +144,7 @@ export const readFile = async (options, path) => {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalProject });
   }
-  if (file.data === undefined && allowFetch) {
+  if (file.data === undefined && allowFetch && sources.length > 0) {
     file.data = await fetchSources({}, sources);
     if (!ephemeral && file.data !== undefined) {
       // Update persistent cache.

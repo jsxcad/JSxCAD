@@ -2,6 +2,16 @@ import { dot, cross, fromValues as fromValues$2 } from './jsxcad-math-vec3.js';
 import { fromValues as fromValues$1 } from './jsxcad-math-vec2.js';
 
 /**
+ * Set a mat4 to the identity matrix
+ *
+ * @returns {mat4} out
+ */
+
+const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+const identity = () => identityMatrix;
+
+/**
  * Adds two mat4's
  *
  * @param {mat4} a the first operand
@@ -25,13 +35,6 @@ const equals = (a, b) => {
          a[8] === b[8] && a[9] === b[9] && a[10] === b[10] && a[11] === b[11] &&
          a[12] === b[12] && a[13] === b[13] && a[14] === b[14] && a[15] === b[15];
 };
-
-/**
- * Set a mat4 to the identity matrix
- *
- * @returns {mat4} out
- */
-const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 const EPSILON = 1e-5;
 
@@ -367,4 +370,4 @@ const subtract = (a, b) => [
   a[14] - b[14],
   a[15] - b[15]];
 
-export { add, equals, fromRotation, fromScaling, fromTranslation, fromValues, fromXRotation, fromYRotation, fromZRotation, identity, isMirroring, mirror, mirrorByPlane, multiply, rightMultiplyVec2, rightMultiplyVec3, subtract };
+export { add, equals, fromRotation, fromScaling, fromTranslation, fromValues, fromXRotation, fromYRotation, fromZRotation, identity, identityMatrix, isMirroring, mirror, mirrorByPlane, multiply, rightMultiplyVec2, rightMultiplyVec3, subtract };

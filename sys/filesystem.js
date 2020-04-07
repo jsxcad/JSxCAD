@@ -13,7 +13,7 @@ export const qualifyPath = (path = '', project) => {
   }
 };
 
-export const setupFilesystem = ({ fileBase }) => {
+export const setupFilesystem = ({ fileBase } = {}) => {
   // A prefix used to partition the persistent filesystem for multiple projects.
   if (fileBase !== undefined) {
     if (fileBase.endsWith('/')) {
@@ -21,6 +21,8 @@ export const setupFilesystem = ({ fileBase }) => {
     } else {
       base = `${fileBase}/`;
     }
+  } else {
+    base = undefined;
   }
 };
 

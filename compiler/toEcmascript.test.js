@@ -14,16 +14,10 @@ test('Wrap and return.', async t => {
   t.is(ecmascript,
        `
 const foo = x => x + 1;
-(await write('data/def/foo', foo)) && (await write('meta/def/foo', {
-  sha: '008b1005955db6f5a1a6299423135098172bd4e5'
-}));
 const main = async () => {
   let a = 10;
   return circle(foo(a));
 };
-(await write('data/def/main', main)) && (await write('meta/def/main', {
-  sha: '028a01af7d5a755af9fa0c935a84896829cbee10'
-}));
 return {
   foo,
   main
@@ -36,9 +30,6 @@ test("Don't return declarations.", async t => {
   t.is(ecmascript,
        `
 let a = 10;
-(await write('data/def/a', a)) && (await write('meta/def/a', {
-  sha: 'd561d68cbf098ae1553e5e902e9187f6dfea935f'
-}));
 return {};
 `);
 });
@@ -91,13 +82,7 @@ test('Definition', async t => {
   t.is(ecmascript,
        `
 const a = 1;
-(await write('data/def/a', a)) && (await write('meta/def/a', {
-  sha: '7987f4ac835294eae5154cc1854d0b7e62d9497b'
-}));
 const b = () => 2;
-(await write('data/def/b', b)) && (await write('meta/def/b', {
-  sha: '246f1adc25377588b0c672533e0c47d197883181'
-}));
 function c() {}
 return {};
 `);
@@ -108,17 +93,8 @@ test('Reference', async t => {
   t.is(ecmascript,
        `
 const a = 1;
-(await write('data/def/a', a)) && (await write('meta/def/a', {
-  sha: '7987f4ac835294eae5154cc1854d0b7e62d9497b'
-}));
 const b = () => a;
-(await write('data/def/b', b)) && (await write('meta/def/b', {
-  sha: '73a78c48a7000fd8741be691d9afcaa7d74ca4bc'
-}));
 const c = () => b();
-(await write('data/def/c', c)) && (await write('meta/def/c', {
-  sha: '8255f5c35b450ad7eb08f013a6363bc53399e65a'
-}));
 return {};
 `);
 });
@@ -142,33 +118,27 @@ return {};
 test('Reuse and Redefine', async t => {
   // Establish
   await write('data/def/A', 1);
-  await write('meta/def/A', { sha: '5b3dfe978f3521c5b9d5fd7fafad931e90a9c8ee' });
+  await write('meta/def/A', { sha: 'da8b2b5ce546b8af68cea7d5a9c27efe2a4fd8e3' });
 
   // Reuse
-  const reuse = await toEcmascript('const A = 1; const B = () => 2; function C () {}');
+  const reuse = await toEcmascript('const A = foo(); const B = () => 2; function C () {}');
   t.is(reuse,
        `
 const A = await read('data/def/A');
 const B = () => 2;
-(await write('data/def/B', B)) && (await write('meta/def/B', {
-  sha: '4d0550a1c1ad778bb112bbb97580d30aecb2a9bc'
-}));
 function C() {}
 return {};
 `);
 
   // Redefine
-  const redefine = await toEcmascript('const A = 2; const B = () => 2; function C () {}');
+  const redefine = await toEcmascript('const A = bar(); const B = () => 2; function C () {}');
   t.is(redefine,
        `
-const A = 2;
+const A = bar();
 (await write('data/def/A', A)) && (await write('meta/def/A', {
-  sha: '232bdd4050e94d6e8881b92239c649f69b29c71f'
+  sha: '8e0d3a8ac5c7a9b2684fa19794087e7e4223cd53'
 }));
 const B = () => 2;
-(await write('data/def/B', B)) && (await write('meta/def/B', {
-  sha: '4d0550a1c1ad778bb112bbb97580d30aecb2a9bc'
-}));
 function C() {}
 return {};
 `);
@@ -177,31 +147,57 @@ return {};
 test('Indirect Redefinition', async t => {
   // Establish
   await write('data/def/D', 1);
-  await write('meta/def/D', { sha: '23a7b70af59f90622aee1405da30440e6f4d423f' });
+  await write('meta/def/D', { sha: 'dbefe81bda93e322be22b4a3ccf53c3c43173192' });
   await write('data/def/E', 1);
   await write('meta/def/E', { sha: '38106474eafb9ef3606469a77c07042e325a4bb0' });
 
   // Demonstrate reuse.
-  const reuse = await toEcmascript('const D = 1; const E = () => D;');
+  const reuse = await toEcmascript('const D = foo(); const E = () => D;');
   t.is(reuse,
        `
 const D = await read('data/def/D');
-const E = await read('data/def/E');
+const E = () => D;
+return {};
+`);
+});
+
+test('Bad Redefinition', async t => {
+  // Demonstrate defined case.
+  await write('meta/def/mountainView', { sha: 'b59f37ba343f2a4a9ddf44b1091190f973b19743' });
+  const define = await toEcmascript(
+    `
+const Mountain = () => foo();
+const mountainView = Mountain().scale(0.5).Page();
+mountainView.frontView({ position: [0, -100, 50] });
+`);
+
+  t.is(define,
+       `
+const Mountain = () => foo();
+const mountainView = await read('data/def/mountainView');
+mountainView.frontView({
+  position: [0, -100, 50]
+});
 return {};
 `);
 
-  // Demonstrate redefinition cascade.
-  const redefine = await toEcmascript('const D = 2; const E = () => D;');
+  const redefine = await toEcmascript(
+    `
+const Mountain = () => bar();
+const mountainView = Mountain().scale(0.5).Page();
+mountainView.frontView({ position: [0, -100, 50] });
+`);
+
   t.is(redefine,
        `
-const D = 2;
-(await write('data/def/D', D)) && (await write('meta/def/D', {
-  sha: 'ca269f8de72bd9bb26cfca68ee6c3319a58fdba0'
+const Mountain = () => bar();
+const mountainView = Mountain().scale(0.5).Page();
+(await write('data/def/mountainView', mountainView)) && (await write('meta/def/mountainView', {
+  sha: 'bdf04f14234eed622dfca3aa405abd88911ea304'
 }));
-const E = () => D;
-(await write('data/def/E', E)) && (await write('meta/def/E', {
-  sha: '9d780ac0f0c57e0de1773d9883e4c386a9332b4e'
-}));
+mountainView.frontView({
+  position: [0, -100, 50]
+});
 return {};
 `);
 });

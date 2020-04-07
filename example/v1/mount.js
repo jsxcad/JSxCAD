@@ -157,7 +157,9 @@ function myBOMTag(shape, tag){
     return shape.Item(tag);
 }
 
+console.log(`QQ/begin`);
 const mount = main();
+console.log(`QQ/end`);
 
-await mount.cloud().writeShape('mount');
-// await mount.Item().Page().writeStl('mount');
+// await mount.cloud().writeShape('mount');
+await mount.Item().Page().writeStl('mount');

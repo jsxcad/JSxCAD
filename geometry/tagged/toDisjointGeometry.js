@@ -2,20 +2,44 @@ import { difference } from './difference';
 import { rewrite } from './visit';
 import { toTransformedGeometry } from './toTransformedGeometry';
 
+const linkDisjointAssembly = Symbol('linkDisjointAssembly');
+
 export const toDisjointGeometry = (geometry) => {
   const op = (geometry, descend) => {
-    if (geometry.assembly) {
-      const assembly = geometry.assembly.map(toDisjointGeometry);
+    if (geometry[linkDisjointAssembly]) {
+      return geometry[linkDisjointAssembly];
+    } else if (geometry.disjointAssembly) {
+      // Everything below this point is disjoint.
+      return geometry;
+    } else if (geometry.matrix) {
+      return rewrite(toTransformedGeometry(geometry), op);
+    } else if (geometry.assembly) {
+      const assembly = geometry.assembly.map(entry => rewrite(entry, op));
       const disjointAssembly = [];
       for (let i = assembly.length - 1; i >= 0; i--) {
         disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
       }
-      return { disjointAssembly };
+      const disjointed = { disjointAssembly };
+      geometry[linkDisjointAssembly] = disjointed;
+      return disjointed;
     } else {
       return descend();
     }
   };
-  return rewrite(toTransformedGeometry(geometry), op);
+  // FIX: Interleave toTransformedGeometry into this rewrite.
+  if (geometry.disjointAssembly) {
+    return geometry;
+  } else {
+    const disjointed = rewrite(geometry, op);
+    if (disjointed.disjointAssembly) {
+      geometry[linkDisjointAssembly] = disjointed;
+      return disjointed;
+    } else {
+      const wrapper = { disjointAssembly: [disjointed] };
+      geometry[linkDisjointAssembly] = wrapper;
+      return wrapper;
+    }
+  }
 };
 
 /*

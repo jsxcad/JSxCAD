@@ -48,15 +48,12 @@ export const toEcmascript = async (script, options = {}) => {
     const code = strip(declarator);
     const dependencies = [];
 
-    const CallExpression = (node, state, c) => {
-      if (node.callee.name) {
-        dependencies.push(node.callee.name);
-      }
+    const Identifier = (node, state, c) => {
+      dependencies.push(node.name);
     };
 
-    const Identifier = (node, state, c) => dependencies.push(node.name);
-
-    walk(declarator, undefined, { CallExpression, Identifier });
+    // walk(declarator, undefined, { CallExpression, Identifier });
+    walk(declarator, undefined, { Identifier });
 
     const dependencyShas = dependencies.map(fromIdToSha);
 
@@ -66,6 +63,18 @@ export const toEcmascript = async (script, options = {}) => {
     topLevel.set(id, entry);
     if (doExport) {
       exportNames.push(id);
+    }
+
+    if (declarator.init) {
+      if (declarator.init.type === 'ArrowFunctionExpression') {
+        // We can't cache functions.
+        out.push(declaration);
+        return;
+      } else if (declarator.init.type === 'Literal') {
+        // Not much point in caching literals.
+        out.push(declaration);
+        return;
+      }
     }
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${id}`);
