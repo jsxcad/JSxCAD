@@ -26,8 +26,8 @@ import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { WoodScrew } from './jsxcad-api-v1-items.js';
 export { WoodScrew } from './jsxcad-api-v1-items.js';
-import { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+export { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
@@ -147,6 +147,7 @@ var api = /*#__PURE__*/Object.freeze({
   Wave: Wave,
   Item: Item,
   WoodScrew: WoodScrew,
+  Noise: Noise,
   Random: Random,
   acos: acos,
   cos: cos,

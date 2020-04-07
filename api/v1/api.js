@@ -100,6 +100,7 @@ export {
 } from '@jsxcad/api-v1-items';
 
 export {
+  Noise,
   Random,
   acos,
   cos,
