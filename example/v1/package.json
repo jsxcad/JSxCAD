@@ -26,8 +26,6 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/api-v1": "^0.0.79",
-    "@jsxcad/api-v1-gear": "^0.0.79",
-    "@jsxcad/api-v1-pdf": "^0.0.79",
     "@jsxcad/compiler": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "argv": "^0.0.2"

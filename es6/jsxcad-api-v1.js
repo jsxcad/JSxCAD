@@ -192,7 +192,6 @@ const buildImportModule = (api) =>
       script = await readFile({ path, as: 'utf8', sources }, path);
     }
     const ecmascript = await toEcmascript(script);
-    console.log(`QQ/ecmascript: ${ecmascript}`);
     const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
     const module = await builder(api);
     exports = await module();

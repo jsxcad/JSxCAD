@@ -161,5 +161,5 @@ console.log(`QQ/begin`);
 const mount = main();
 console.log(`QQ/end`);
 
-// await mount.cloud().writeShape('mount');
+await mount.cloud().writeShape('mount');
 await mount.Item().Page().writeStl('mount');
