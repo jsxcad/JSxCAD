@@ -86396,7 +86396,9 @@ class OrbitView extends react.PureComponent {
     const {
       width,
       height
-    } = this.props;
+    } = this.props; //    width={width}
+    //    height={height}
+
     return react.createElement(ResizableBox, {
       className: "box",
       width: width,
@@ -86405,7 +86407,9 @@ class OrbitView extends react.PureComponent {
         borderStyle: 'solid',
         borderWidth: 'thin',
         borderColor: 'blue',
-        display: 'inline-block'
+        display: 'inline-block',
+        width: '90%',
+        height: '90%'
       },
       onClick: e => e.stopPropagation(),
       resizeHandles: ['ne', 'nw', 'se', 'sw'],
@@ -86666,7 +86670,7 @@ class NotebookUi extends Pane {
           });
         };
 
-        const key = path || object_hash(geometry);
+        const key = object_hash(note.geometry);
         notes.push(react.createElement(GeometryView, {
           key: key,
           width: width,

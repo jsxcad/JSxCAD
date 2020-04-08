@@ -51717,8 +51717,6 @@ Object.defineProperties( OrbitControls.prototype, {
 
 } );
 
-// import * as THREE from 'three';
-
 const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
   const { target = [0, 0, 0] } = view;
   const trackball = new OrbitControls(camera, viewerElement);
@@ -51782,10 +51780,10 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
+  camera.up.set(...up);
   camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.lookAt(...target);
-  camera.up.set(...up);
 
   const scene = new Scene();
   scene.add(camera);
@@ -52222,6 +52220,46 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
   }
 };
 
+const moveToFit = ({ view, camera, controls, scene, fitOffset = 1.2 } = {}) => {
+  const { fit = true } = view;
+
+  if (!fit) {
+    return;
+  }
+
+  const box = new Box3();
+  box.setFromObject(scene);
+  // for( const object of selection ) box.expandByObject( object );
+
+  const center = box.getCenter(new Vector3());
+  const size = box.getSize(new Vector3());
+
+  const maxSize = Math.max(size.x, size.y, size.z);
+  const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+  const fitWidthDistance = fitHeightDistance / (camera.aspect || 1);
+  const zoomOut = 1;
+  const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
+
+  // const target = controls ? controls.target.clone() : center.clone();
+  const target = center;
+
+  const direction =
+    target.clone()
+        .sub(camera.position)
+        .normalize()
+        .multiplyScalar(distance);
+
+  camera.near = distance / 100;
+  camera.far = distance * 100;
+  camera.updateProjectionMatrix();
+
+  camera.position.copy(center).sub(direction);
+
+  if (controls) {
+    controls.update();
+  }
+};
+
 const pointsToThreejsPoints = (points) => points;
 
 const pathsToThreejsSegments = (geometry) => {
@@ -52340,7 +52378,7 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
 
   const render = () => {
     renderer.clear();
@@ -52370,6 +52408,9 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     datasets = [];
 
     await buildMeshes({ datasets, threejsGeometry, scene });
+
+    moveToFit({ view, camera, controls: trackball, scene });
+
     render();
   };
 
@@ -52430,6 +52471,8 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   };
 
   await buildMeshes({ datasets, threejsGeometry, scene });
+
+  moveToFit({ view, camera, scene });
 
   render();
 
