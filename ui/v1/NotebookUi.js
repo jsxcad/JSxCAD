@@ -86,11 +86,13 @@ export class OrbitView extends React.PureComponent {
   render () {
     const { containerId } = this.state;
     const { width, height } = this.props;
+    //    width={width}
+    //    height={height}
     return (
       <ResizableBox className="box"
         width={width}
         height={height}
-        style={{ borderStyle: 'solid', borderWidth: 'thin', borderColor: 'blue', display: 'inline-block' }}
+        style={{ borderStyle: 'solid', borderWidth: 'thin', borderColor: 'blue', display: 'inline-block', width: '90%', height: '90%' }}
         onClick={(e) => e.stopPropagation()}
         resizeHandles={['ne', 'nw', 'se', 'sw']}
         handle={(resizeHandle) => <span className={`react-resizable-handle react-resizable-handle-${resizeHandle}`} style={{ zIndex: 2 }} />}>
@@ -250,7 +252,7 @@ export class NotebookUi extends Pane {
           const notes = this.buildNotes({ ...this.state, selected: index });
           this.setState({ selected: index, notes });
         };
-        const key = path || hash(geometry);
+        const key = hash(note.geometry);
         notes.push(<GeometryView key={key} width={width} height={height} position={position} path={path} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
       } else if (note.md) {
         const data = note.md;

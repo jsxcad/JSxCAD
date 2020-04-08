@@ -4,7 +4,6 @@ import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
 export { Shape, log, make } from './jsxcad-api-v1-shape.js';
 import { ensurePages, Page } from './jsxcad-api-v1-plans.js';
 export { Page } from './jsxcad-api-v1-plans.js';
-import { getLeafs } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-deform.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
@@ -37,14 +36,12 @@ import { toSvg } from './jsxcad-convert-svg.js';
 const view = (shape, { path, width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
   let nth = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      if (path) {
-        const nthPath = `${path}_${nth++}`;
-        addPending(write(nthPath, leaf));
-        emit({ geometry: { width, height, position, path: nthPath } });
-      } else {
-        emit({ geometry: { width, height, position, geometry: leaf } });
-      }
+    if (path) {
+      const nthPath = `${path}_${nth++}`;
+      addPending(write(nthPath, entry));
+      emit({ geometry: { width, height, position, path: nthPath } });
+    } else {
+      emit({ geometry: { width, height, position, geometry: entry } });
     }
   }
   return shape;
@@ -83,6 +80,18 @@ Shape.prototype.smallFrontView = function ({ path, width = 256, height = 128, po
 };
 
 Shape.prototype.bigFrontView = function ({ path, width = 1024, height = 512, position = [0, -100, 0] } = {}) {
+  return view(this, { path, width, height, position });
+};
+
+Shape.prototype.sideView = function ({ path, width = 512, height = 256, position = [100, 0, 0] } = {}) {
+  return view(this, { path, width, height, position });
+};
+
+Shape.prototype.smallSideView = function ({ path, width = 256, height = 128, position = [100, 0, 0] } = {}) {
+  return view(this, { path, width, height, position });
+};
+
+Shape.prototype.bigSideView = function ({ path, width = 1024, height = 512, position = [100, 0, 0] } = {}) {
   return view(this, { path, width, height, position });
 };
 
