@@ -52441,28 +52441,18 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
 /* global document */
 
 const toCanvasFromWebglContext = (webgl) => {
-  // Derived from https://github.com/Jam3/webgl-to-canvas2d
   const { width, height } = webgl.canvas;
-  const inImageData = new Uint8Array(width * height * 4);
-  webgl.readPixels(0, 0, width, height, webgl.RGBA, webgl.UNSIGNED_BYTE, inImageData);
-
   const outCanvas = document.createElement('canvas');
   outCanvas.width = width;
   outCanvas.height = height;
   const outContext = outCanvas.getContext('2d');
-  const outImageData = outContext.getImageData(0, 0, width, height);
-  outImageData.data.set(new Uint8ClampedArray(inImageData));
-
-  outContext.putImageData(outImageData, 0, 0);
-  outContext.translate(0, height);
-  outContext.scale(1, -1);
-  outContext.drawImage(outCanvas, 0, 0);
-  outContext.setTransform(1, 0, 0, 1, 0, 0);
-
+  outContext.scale(-1, -1);
+  outContext.translate(-width, -height);
+  outContext.drawImage(webgl.canvas, 0, 0, width, height);
   return outCanvas;
 };
 
-const staticView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+const staticView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
                                            { offsetWidth: width, offsetHeight: height });
@@ -52481,7 +52471,7 @@ const image = async (...args) => {
   return image;
 };
 
-const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+const orbitView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
 

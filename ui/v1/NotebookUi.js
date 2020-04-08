@@ -22,6 +22,7 @@ import React from 'react';
 import ResizableBox from './ResizableBox';
 import Row from 'react-bootstrap/Row';
 import Shape from '@jsxcad/api-v1-shape';
+import hash from 'object-hash';
 import marked from 'marked';
 import saveAs from 'file-saver';
 
@@ -240,7 +241,6 @@ export class NotebookUi extends Pane {
     for (const note of notebook) {
       nth += 1;
       const isSelected = (nth === selected);
-      const key = Math.random(); // nth;
       if (note.geometry) {
         const index = nth;
         const { width, height, position, path, geometry } = note.geometry;
@@ -250,13 +250,16 @@ export class NotebookUi extends Pane {
           const notes = this.buildNotes({ ...this.state, selected: index });
           this.setState({ selected: index, notes });
         };
+        const key = path || hash(geometry);
         notes.push(<GeometryView key={key} width={width} height={height} position={position} path={path} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
       } else if (note.md) {
         const data = note.md;
+        const key = hash(data);
         notes.push(<div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }}/>);
       } else if (note.download) {
         const { entries } = note.download;
         if (entries) {
+          const key = hash(entries);
           notes.push(<DownloadView key={key} entries={entries}/>);
         }
       }
