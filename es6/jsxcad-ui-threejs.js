@@ -52446,8 +52446,6 @@ const toCanvasFromWebglContext = (webgl) => {
   outCanvas.width = width;
   outCanvas.height = height;
   const outContext = outCanvas.getContext('2d');
-  outContext.scale(-1, -1);
-  outContext.translate(-width, -height);
   outContext.drawImage(webgl.canvas, 0, 0, width, height);
   return outCanvas;
 };
