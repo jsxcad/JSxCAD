@@ -1,5 +1,5 @@
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
-import { makeConvex } from './jsxcad-geometry-surface.js';
+import { makeConvexEarcut } from './jsxcad-geometry-surface.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { toSegments } from './jsxcad-geometry-path.js';
 import { toTriangles } from './jsxcad-geometry-polygons.js';
@@ -52276,7 +52276,7 @@ const solidToThreejsSolid = (solid) => {
   const normals = [];
   const positions = [];
   for (const surface of solid) {
-    for (const triangle of toTriangles({}, surface)) {
+    for (const triangle of toTriangles({}, makeConvexEarcut(surface))) {
       for (const point of triangle) {
         const plane = toPlane(triangle);
         if (plane === undefined) {
@@ -52294,7 +52294,7 @@ const solidToThreejsSolid = (solid) => {
 const surfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
-  for (const triangle of toTriangles({}, makeConvex(surface))) {
+  for (const triangle of toTriangles({}, makeConvexEarcut(surface))) {
     for (const point of triangle) {
       const plane = toPlane(triangle);
       if (plane === undefined) {

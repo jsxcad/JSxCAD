@@ -7,6 +7,7 @@ export { eachPoint } from './eachPoint';
 export { flip } from './flip';
 export { fromPolygons } from './fromPolygons';
 export { makeConvex } from './makeConvex';
+export { makeConvex as makeConvexEarcut } from './makeConvexEarcut';
 export { makeSimple } from './makeSimple';
 export { measureArea } from './measureArea';
 export { measureBoundingBox } from './measureBoundingBox';

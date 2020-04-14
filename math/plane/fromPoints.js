@@ -8,7 +8,10 @@ import { cross, dot, subtract, unit } from '@jsxcad/math-vec3';
  * @param {Vec3} c - 3D point
  * @returns {Vec4} a new plane with properly typed values
  */
+
 export const fromPoints = (a, b, c) => {
+  throw Error('die');
+
   // let n = b.minus(a).cross(c.minus(a)).unit()
   // FIXME optimize later
   const ba = subtract(b, a);

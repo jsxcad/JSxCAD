@@ -36,7 +36,7 @@ export const planeDistance = (plane, point) =>
 
 const pointType = [];
 
-const splitConvex = (normalize, plane, points, polygonPlane, back, front) => {
+const splitConcave = (normalize, plane, points, polygonPlane, back, front) => {
   const buildList = (points) => {
     const nodes = [];
     let head = null;
@@ -92,6 +92,7 @@ const splitConvex = (normalize, plane, points, polygonPlane, back, front) => {
 
   const nodes = buildList(points);
   const spans = buildSpans(nodes[0]);
+  const s = spans.slice();
 
   while (spans.length >= 2) {
     const a = spans.pop();
@@ -123,7 +124,9 @@ const splitConvex = (normalize, plane, points, polygonPlane, back, front) => {
       pushWhenValid(front, points, polygonPlane);
     } else if (type === BACK) {
       pushWhenValid(back, points, polygonPlane);
-    } else {
+    } else if (type !== COPLANAR) {
+      // Coplanar loops are degenerate, so drop them.
+      // Otherwise it's an error.
       throw Error('die');
     }
   }
@@ -219,7 +222,7 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         pushWhenValid(front, frontPoints, polygonPlane);
         pushWhenValid(back, backPoints, polygonPlane);
       } else {
-        splitConvex(normalize, plane, polygon, polygonPlane, back, front);
+        splitConcave(normalize, plane, polygon, polygonPlane, back, front);
       }
       /*
       if ((spans.length % 2) === 0) {

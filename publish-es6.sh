@@ -62,6 +62,7 @@ cp convert/threejs/dist/main.js es6/jsxcad-convert-threejs.js
 cp convert/zip/dist/main.js es6/jsxcad-convert-zip.js
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp doc/dist/main.js es6/jsxcad-doc.js
+cp geometry/halfedge/dist/main.js es6/jsxcad-geometry-halfedge.js
 cp geometry/path/dist/main.js es6/jsxcad-geometry-path.js
 cp geometry/paths/dist/main.js es6/jsxcad-geometry-paths.js
 cp geometry/points/dist/main.js es6/jsxcad-geometry-points.js

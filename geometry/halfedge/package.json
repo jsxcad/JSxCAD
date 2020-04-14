@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/geometry-solid",
+  "name": "@jsxcad/geometry-halfedge",
   "version": "0.0.79",
-  "description": "Operations on polygon arrays for JSxCAD",
+  "description": "Operations on half-edge geometry for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -23,25 +23,18 @@
   "license": "MIT",
   "dependencies": {
     "@jsxcad/algorithm-quantize": "^0.0.79",
-    "@jsxcad/geometry-halfedge": "^0.0.79",
-    "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/geometry-polygons": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79"
+  },
+  "devDependencies": {
+    "ava": "^2.4.0",
+    "depcheck": "^0.9.1",
+    "eslint": "^5.15.0",
+    "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"
-  },
-  "devDependencies": {
-    "@jsxcad/data-shape": "^0.0.79",
-    "ava": "^2.4.0",
-    "depcheck": "^0.9.1",
-    "eslint": "^5.15.0",
-    "esm": "^3.2.10"
   },
   "ava": {
     "require": "esm"

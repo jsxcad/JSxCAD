@@ -1,10 +1,11 @@
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
 import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
+import './jsxcad-geometry-halfedge.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
 
 const THRESHOLD = 1e-5;
 
@@ -87,6 +88,10 @@ const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
         }
         pushWhenValid(watertightPaths, watertightPath);
       }
+      // const mergedPaths = mergeCoplanarPolygons(watertightPaths, normalize, /*noIslands=*/true);
+      // const mergedPaths = watertightPaths;
+      // const convexPaths = makeConvex(mergedPaths, normalize);
+      // watertightSolid.push(convexPaths);
       watertightSolid.push(watertightPaths);
     }
     // At this point we should have the correct structure for assembly into a solid.
@@ -318,6 +323,9 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
       case 'retessellate':
         surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
         break;
+      case 'halfedge':
+        surface = mergeCoplanarPolygons(polygons, normalize3);
+        break;
       case 'none':
       default:
         surface = polygons;
@@ -326,8 +334,8 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
     defragmented.push(surface);
   }
 
-  return defragmented;
-  // return makeWatertight(defragmented, normalize3);
+  // return defragmented;
+  return makeWatertight(defragmented, normalize3);
 };
 
 /** Measure the bounding sphere of the given poly3

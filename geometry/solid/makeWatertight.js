@@ -1,6 +1,8 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
+import { makeConvex as makeConvex } from '@jsxcad/geometry-surface';
+import { mergeCoplanarPolygons } from '@jsxcad/geometry-halfedge';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 
@@ -85,6 +87,10 @@ export const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
         }
         pushWhenValid(watertightPaths, watertightPath);
       }
+      // const mergedPaths = mergeCoplanarPolygons(watertightPaths, normalize, /*noIslands=*/true);
+      // const mergedPaths = watertightPaths;
+      // const convexPaths = makeConvex(mergedPaths, normalize);
+      // watertightSolid.push(convexPaths);
       watertightSolid.push(watertightPaths);
     };
 
