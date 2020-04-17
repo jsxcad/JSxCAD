@@ -2,7 +2,6 @@ import { makeConvex, retessellate } from '@jsxcad/geometry-surface';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export let doCheckOverlap = false;
@@ -49,9 +48,6 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
       case 'retessellate':
         surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
         break;
-      case 'halfedge':
-        surface = mergeCoplanarPolygons(polygons, normalize3);
-        break;
       case 'none':
       default:
         surface = polygons;
@@ -60,6 +56,5 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
     defragmented.push(surface);
   }
 
-  // return defragmented;
-  return makeWatertight(defragmented, normalize3);
+  return defragmented;
 };

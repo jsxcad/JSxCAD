@@ -1,19 +1,12 @@
-import { equals } from '@jsxcad/math-vec3';
-import getEdges from './getEdges';
-import previousEdge from './previousEdge';
-import toDot from './toDot';
-
 // Note that merging produces duplicate points.
 
 export const merge = (loops, noIslands = false) => {
   const merged = [];
   const faces = new Set();
-  const skip = new Set();
-  let done = false;
   for (let loop of loops) {
     let link = loop;
     do {
-      if (link.twin !== undefined && (noIslands == false || link.face !== link.twin.face)) {
+      if (link.twin !== undefined && (noIslands === false || link.face !== link.twin.face)) {
         // Linking a face to itself is the only way to produce a new island.
 
         // Edge collapse produces a duplicate in order to preserve twin edge identity.
@@ -33,7 +26,6 @@ export const merge = (loops, noIslands = false) => {
         twin.twin = undefined;
         // Make sure that the face stays coherent.
         loop = link;
-        done = true;
         if (link.start !== link.next.start) {
           throw Error('die');
         }
@@ -45,12 +37,12 @@ export const merge = (loops, noIslands = false) => {
       link.next.face = link.face;
       link = link.next;
     } while (link !== loop);
-    if (!faces.has(loop.face)) {
+    if (loop.face !== undefined && !faces.has(loop.face)) {
       faces.add(loop.face);
       merged.push(loop);
     }
   }
   return merged;
-}
+};
 
 export default merge;

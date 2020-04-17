@@ -5,7 +5,7 @@ import { equals as equals$1, splitLineSegmentByPlane, signedDistanceToPoint, toX
 import { cacheCut, cacheTransform } from './jsxcad-cache.js';
 import { assertUnique } from './jsxcad-geometry-path.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { makeConvex as makeConvex$2, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
+import { makeConvex as makeConvex$1, retessellate as retessellate$1 } from './jsxcad-geometry-z0surface.js';
 import { union, outline as outline$1 } from './jsxcad-geometry-z0surface-boolean.js';
 
 // export const toPlane = (surface) => toPlaneOfPolygon(surface[0]);
@@ -313,7 +313,7 @@ const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   }
   const [to, from] = toXYPlaneTransforms(plane);
   const z0Surface = transform(to, surface.map(path => path.map(normalize3)));
-  const convexZ0Surface = makeConvex$2(z0Surface);
+  const convexZ0Surface = makeConvex$1(z0Surface);
   const convexSurface = transform(from, convexZ0Surface).map(path => path.map(normalize3));
   return convexSurface;
 };
@@ -1050,7 +1050,7 @@ const selectBuildContour = (plane) => {
   }
 };
 
-const makeConvex$1 = (surface, normalize3 = createNormalize3(), plane) => {
+const makeConvexNoHoles = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
   }
@@ -1184,4 +1184,4 @@ const retessellate = (surface, normalize3 = createNormalize3(), plane) => {
   return transform$1(fromZ0, retessellated).map(path => path.map(normalize3));
 };
 
-export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeConvex$1 as makeConvexEarcut, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };
+export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

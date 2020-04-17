@@ -1,5 +1,5 @@
 import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { unit, dot, cross, subtract, length, random, scale, add, multiply, fromScalar, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { unit, dot, subtract, cross, length, random, scale, add, multiply, fromScalar, transform as transform$1 } from './jsxcad-math-vec3.js';
 import { fromValues, isMirroring } from './jsxcad-math-mat4.js';
 
 const canonicalize = ([x = 0, y = 0, z = 0, w = 0]) => [reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(z), reallyQuantizeForSpace(w)];
@@ -44,8 +44,6 @@ const fromNormalAndPoint = (normal, point) => {
  */
 
 const fromPoints = (a, b, c) => {
-  throw Error('die');
-
   // let n = b.minus(a).cross(c.minus(a)).unit()
   // FIXME optimize later
   const ba = subtract(b, a);
@@ -54,6 +52,7 @@ const fromPoints = (a, b, c) => {
   const normal = unit(cr); // normal part
   //
   const w = dot(normal, a);
+  return [normal[0], normal[1], normal[2], w];
 };
 
 const EPS = 1e-5;

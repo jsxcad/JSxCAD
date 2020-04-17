@@ -85,7 +85,6 @@ const splitConcave = (normalize, plane, points, polygonPlane, back, front) => {
 
   const nodes = buildList(points);
   const spans = buildSpans(nodes[0]);
-  const s = spans.slice();
 
   while (spans.length >= 2) {
     const a = spans.pop();

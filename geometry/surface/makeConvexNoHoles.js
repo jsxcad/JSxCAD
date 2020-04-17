@@ -6,7 +6,6 @@ import {
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { dot } from '@jsxcad/math-vec3';
 import earcut from 'earcut';
-import { flip } from './flip';
 import { toPlane } from './toPlane';
 
 const X = 0;
@@ -60,7 +59,7 @@ const selectBuildContour = (plane) => {
   }
 };
 
-export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
+export const makeConvexNoHoles = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
     throw Error('die');
   }
@@ -108,4 +107,4 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   return convexSurface;
 };
 
-export default makeConvex;
+export default makeConvexNoHoles;

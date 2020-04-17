@@ -10,8 +10,6 @@ import { cross, dot, subtract, unit } from '@jsxcad/math-vec3';
  */
 
 export const fromPoints = (a, b, c) => {
-  throw Error('die');
-
   // let n = b.minus(a).cross(c.minus(a)).unit()
   // FIXME optimize later
   const ba = subtract(b, a);

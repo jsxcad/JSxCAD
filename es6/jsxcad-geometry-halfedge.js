@@ -1,3 +1,4 @@
+import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { length, scale, dot } from './jsxcad-math-vec3.js';
 
 // This produces a half-edge link.
@@ -24,14 +25,14 @@ const getEdges = (loop) => {
 
 let id = 0;
 
-const fromSolid = (solid, normalize) => {
+const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
   const loops = [];
 
   for (const surface of solid) {
     for (const path of surface) {
-      let first = undefined;
-      let last = undefined;
+      let first;
+      let last;
       for (let nth = 0; nth < path.length; nth++) {
         const thisPoint = normalize(path[nth]);
         const nextPoint = normalize(path[(nth + 1) % path.length]);
@@ -77,8 +78,18 @@ const fromSolid = (solid, normalize) => {
         // Find the candidate that starts where we end.
         for (const candidate of candidates) {
           if (candidate.start === link.next.start) {
-            candidate.twin = link;
-            link.twin = candidate;
+            if (candidate.twin === undefined) {
+              candidate.twin = link;
+              link.twin = candidate;
+            } else {
+              // console.log(`QQ/twin: ${JSON.stringify(toPolygons([candidate.twin]))}`);
+              // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
+              // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
+              // throw Error('die');
+              for (const edge of getEdges(link)) {
+                edge.face = undefined;
+              }
+            }
             break;
           }
         }
@@ -87,10 +98,50 @@ const fromSolid = (solid, normalize) => {
     } while (link !== loop);
   }
 
+  if (closed) {
+    for (const loop of loops) {
+      for (const edge of getEdges(loop)) {
+        if (edge.twin === undefined) {
+          // A hole in the 2-manifold.
+          throw Error('die');
+        }
+      }
+    }
+  }
+
   return loops;
 };
 
-const fromSurface = (surface, normalize) => fromSolid([surface], normalize);
+const toPolygons = (loops) => {
+  const polygons = [];
+  for (const loop of loops) {
+    const polygon = [];
+    for (const edge of getEdges(loop)) {
+      if (edge.face !== undefined) {
+        polygon.push(edge.start);
+      }
+    }
+    pushWhenValid(polygons, polygon);
+  }
+  return polygons;
+};
+
+// FIX: Coplanar surface coherence.
+const toSolid = (loops) => {
+  const solid = [];
+  for (const polygon of toPolygons(loops)) {
+    solid.push([polygon]);
+  }
+  return solid;
+};
+
+const cleanSolid = (solid, normalize) => {
+  const loops = fromSolid(solid, normalize);
+  const shell = toSolid(loops);
+  return shell;
+};
+
+const fromSurface = (surface, normalize) => fromSolid([surface], normalize, /* closed= */false);
 
 const fromPolygons = (polygons, normalize) => fromSurface(polygons, normalize);
 
@@ -102,7 +153,7 @@ const merge = (loops, noIslands = false) => {
   for (let loop of loops) {
     let link = loop;
     do {
-      if (link.twin !== undefined && (noIslands == false || link.face !== link.twin.face)) {
+      if (link.twin !== undefined && (noIslands === false || link.face !== link.twin.face)) {
         // Linking a face to itself is the only way to produce a new island.
 
         // Edge collapse produces a duplicate in order to preserve twin edge identity.
@@ -133,31 +184,12 @@ const merge = (loops, noIslands = false) => {
       link.next.face = link.face;
       link = link.next;
     } while (link !== loop);
-    if (!faces.has(loop.face)) {
+    if (loop.face !== undefined && !faces.has(loop.face)) {
       faces.add(loop.face);
       merged.push(loop);
     }
   }
   return merged;
-};
-
-const toPolygons = (loops) => {
-  const polygons = [];
-  for (const loop of loops) {
-    const polygon = [];
-    for (const edge of getEdges(loop)) {
-      if (polygon.length === 0 || polygon[polygon.length - 1] !== edge.start) {
-        polygon.push(edge.start);
-      }
-    }
-    if (polygon[polygon.length - 1] === polygon[0]) {
-      polygon.pop();
-    }
-    if (polygon.length >= 3) {
-      polygons.push(polygon);
-    }
-  }
-  return polygons;
 };
 
 const mergeCoplanarPolygons = (polygons, normalize, noIslands = false) => toPolygons(merge(fromPolygons(polygons, normalize), noIslands));
@@ -195,4 +227,4 @@ const toPlane = (start) => {
   }
 };
 
-export { fromSolid, fromSurface, mergeCoplanarPolygons, toPlane, toPolygons };
+export { cleanSolid, fromSolid, fromSurface, mergeCoplanarPolygons, toPlane, toPolygons, toSolid };

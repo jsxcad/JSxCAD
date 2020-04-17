@@ -252,7 +252,8 @@ export class NotebookUi extends Pane {
           const notes = this.buildNotes({ ...this.state, selected: index });
           this.setState({ selected: index, notes });
         };
-        const key = hash(note.geometry);
+        // const key = hash(note.geometry);
+        const key = Math.random();
         notes.push(<GeometryView key={key} width={width} height={height} position={position} path={path} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
       } else if (note.md) {
         const data = note.md;

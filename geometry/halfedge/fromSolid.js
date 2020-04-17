@@ -1,18 +1,17 @@
 import createEdge from './createEdge';
-import toDot from './toDot';
-
+import getEdges from './getEdges';
 // This produces a half-edge mesh.
 
 let id = 0;
 
-export const fromSolid = (solid, normalize) => {
+export const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
   const loops = [];
 
   for (const surface of solid) {
     for (const path of surface) {
-      let first = undefined;
-      let last = undefined;
+      let first;
+      let last;
       for (let nth = 0; nth < path.length; nth++) {
         const thisPoint = normalize(path[nth]);
         const nextPoint = normalize(path[(nth + 1) % path.length]);
@@ -58,14 +57,35 @@ export const fromSolid = (solid, normalize) => {
         // Find the candidate that starts where we end.
         for (const candidate of candidates) {
           if (candidate.start === link.next.start) {
-            candidate.twin = link;
-            link.twin = candidate;
+            if (candidate.twin === undefined) {
+              candidate.twin = link;
+              link.twin = candidate;
+            } else {
+              // console.log(`QQ/twin: ${JSON.stringify(toPolygons([candidate.twin]))}`);
+              // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
+              // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
+              // throw Error('die');
+              for (const edge of getEdges(link)) {
+                edge.face = undefined;
+              }
+            }
             break;
           }
         }
       }
       link = link.next;
     } while (link !== loop);
+  }
+
+  if (closed) {
+    for (const loop of loops) {
+      for (const edge of getEdges(loop)) {
+        if (edge.twin === undefined) {
+          // A hole in the 2-manifold.
+          throw Error('die');
+        }
+      }
+    }
   }
 
   return loops;
