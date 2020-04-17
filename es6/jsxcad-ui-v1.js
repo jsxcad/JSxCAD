@@ -86668,9 +86668,10 @@ class NotebookUi extends Pane {
             selected: index,
             notes
           });
-        };
+        }; // const key = hash(note.geometry);
 
-        const key = object_hash(note.geometry);
+
+        const key = Math.random();
         notes.push(react.createElement(GeometryView, {
           key: key,
           width: width,

@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/ui-threejs",
+  "name": "@jsxcad/geometry-halfedge",
   "version": "0.0.79",
-  "description": "ThreeJs ui for JSxCAD",
+  "description": "Operations on half-edge geometry for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
@@ -10,7 +10,8 @@
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
-    "tests": "echo ok"
+    "test": "ava",
+    "tests": "ava *.test.js"
   },
   "contributors": [
     {
@@ -21,23 +22,23 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-color": "^0.0.79",
-    "@jsxcad/geometry-path": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/math-poly3": "^0.0.79",
-    "dat.gui": "0.7.6",
-    "three": "^0.104.0"
+    "@jsxcad/algorithm-quantize": "^0.0.79",
+    "@jsxcad/geometry-polygons": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
+    "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-hypothetical-windows-fix": "^2.1.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.2.3"
+  },
+  "ava": {
+    "require": "esm"
   },
   "publishConfig": {
     "access": "public"
