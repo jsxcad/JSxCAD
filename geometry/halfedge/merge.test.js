@@ -16,7 +16,7 @@ test('Simple merge', t => {
                                 [-1, 1, 0], // D
                                 [1, 1, 0] // A (common)
                               ]],
-                             normalize);
+                             normalize, false);
   const merged = merge(loops);
   const polygons = toPolygons(merged);
   t.deepEqual(polygons,

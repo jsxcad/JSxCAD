@@ -1,3 +1,4 @@
+import { cleanSolid } from './jsxcad-geometry-halfedge.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
 import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
@@ -94,12 +95,9 @@ const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       // watertightSolid.push(convexPaths);
       watertightSolid.push(watertightPaths);
     }
-    // const merged = cleanSolid(watertightSolid, normalize);
+    const merged = cleanSolid(watertightSolid, normalize);
 
-    // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure triangulation to support deformation.
-
-    solid[watertight] = watertightSolid;
+    solid[watertight] = merged;
   }
 
   return solid[watertight];
@@ -333,7 +331,7 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
     defragmented.push(surface);
   }
 
-  return defragmented;
+  return makeWatertight(defragmented, normalize3);
 };
 
 /** Measure the bounding sphere of the given poly3

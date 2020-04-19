@@ -1,3 +1,4 @@
+import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
@@ -93,12 +94,9 @@ export const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       watertightSolid.push(watertightPaths);
     };
 
-    // const merged = cleanSolid(watertightSolid, normalize);
+    const merged = cleanSolid(watertightSolid, normalize);
 
-    // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure triangulation to support deformation.
-
-    solid[watertight] = watertightSolid;
+    solid[watertight] = merged;
   }
 
   return solid[watertight];

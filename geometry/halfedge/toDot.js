@@ -6,8 +6,8 @@ export const toDot = (loops) => {
   for (const loop of loops) {
     out.push(`  subgraph cluster_${loop.id} {`);
     for (const edge of getEdges(loop)) {
-      const [x, y] = edge.start;
-      out.push(`    ${edge.id} [pos = "${x},${y}!"];`);
+      const [x, y, z] = edge.start;
+      out.push(`    ${edge.id} [pos = "${x},${y},${z}!"];`);
     }
     out.push(`  }`);
   }

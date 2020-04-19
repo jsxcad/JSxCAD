@@ -1,11 +1,23 @@
 import createEdge from './createEdge';
+import { equals as equalsVec3 } from '@jsxcad/math-vec3';
 import getEdges from './getEdges';
-// This produces a half-edge mesh.
 
 let id = 0;
 
+const X = 0;
+const Y = 1;
+const Z = 2;
+
 export const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
+  const getTwins = (point) => {
+    let twins = twinMap.get(point);
+    if (twins === undefined) {
+      twins = [];
+      twinMap.set(point, twins);
+    }
+    return twins;
+  }
   const loops = [];
 
   for (const surface of solid) {
@@ -18,12 +30,7 @@ export const fromSolid = (solid, normalize, closed = true) => {
         const edge = createEdge(thisPoint);
         edge.id = id++;
         // nextPoint will be the start of the twin.
-        const twins = twinMap.get(nextPoint);
-        if (twins === undefined) {
-          twinMap.set(nextPoint, [edge]);
-        } else {
-          twins.push(edge);
-        }
+        getTwins(nextPoint).push(edge);
         if (first === undefined) {
           first = edge;
         }
@@ -60,6 +67,10 @@ export const fromSolid = (solid, normalize, closed = true) => {
             if (candidate.twin === undefined) {
               candidate.twin = link;
               link.twin = candidate;
+              if (equalsVec3(link.start, [5.01,5.01,10])) {
+console.log(`QQ/link: ${link.start} -> ${link.next.start}`);
+console.log(`QQ/twin: ${link.twin.start} -> ${link.twin.next.start}`);
+              }
             } else {
               // console.log(`QQ/twin: ${JSON.stringify(toPolygons([candidate.twin]))}`);
               // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
@@ -77,16 +88,25 @@ export const fromSolid = (solid, normalize, closed = true) => {
     } while (link !== loop);
   }
 
+  let holeCount = 0;
+  let edgeCount = 0;
+
   if (closed) {
     for (const loop of loops) {
+      if (loop.face === undefined) continue;
       for (const edge of getEdges(loop)) {
+        edgeCount += 1;
         if (edge.twin === undefined) {
           // A hole in the 2-manifold.
-          throw Error('die');
+          holeCount += 1;
+          edge.start[Z] += 1;
         }
       }
     }
   }
+
+  console.log(`QQ/edgeCount: ${edgeCount}`);
+  console.log(`QQ/holeCount: ${holeCount}`);
 
   return loops;
 };
