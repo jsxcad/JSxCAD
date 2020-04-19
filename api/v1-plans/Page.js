@@ -79,10 +79,10 @@ Shape.prototype.Page = PageMethod;
 
 export default Page;
 
-export const ensurePages = (geometry) => {
+export const ensurePages = (geometry, depth = 0) => {
   const pages = getPlans(geometry).filter(entry => entry.plan.page);
-  if (pages.length === 0) {
-    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry());
+  if (pages.length === 0 && depth === 0) {
+    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry(), depth + 1);
   } else {
     return pages;
   }

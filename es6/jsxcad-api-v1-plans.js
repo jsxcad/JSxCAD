@@ -75,10 +75,10 @@ Plan.Page = Page;
 const PageMethod = function (options = {}) { return Page(options, this); };
 Shape.prototype.Page = PageMethod;
 
-const ensurePages = (geometry) => {
+const ensurePages = (geometry, depth = 0) => {
   const pages = getPlans(geometry).filter(entry => entry.plan.page);
-  if (pages.length === 0) {
-    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry());
+  if (pages.length === 0 && depth === 0) {
+    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry(), depth + 1);
   } else {
     return pages;
   }
