@@ -2,7 +2,7 @@ import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
-import { makeConvexNoHoles } from './makeConvexNoHoles';
+// import { makeConvexNoHoles } from './makeConvexNoHoles';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 

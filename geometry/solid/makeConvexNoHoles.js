@@ -6,4 +6,4 @@ export const makeConvexNoHoles = (solid) => {
     convexSolid.push(makeConvexSurfaceNoHoles(surface));
   }
   return convexSolid;
-}
+};
