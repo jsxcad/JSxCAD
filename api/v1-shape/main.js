@@ -7,6 +7,7 @@ import './cut';
 import './cutFrom';
 import './faces';
 import './inSolids';
+import './junctions';
 import './measureCenter';
 import './op';
 import './openEdges';

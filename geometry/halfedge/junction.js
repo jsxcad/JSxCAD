@@ -1,6 +1,4 @@
-import createEdge from './createEdge';
 import { dot } from '@jsxcad/math-vec3';
-import getEdges from './getEdges';
 import { toPlane as toPlaneOfPath } from '@jsxcad/math-poly3';
 
 const THRESHOLD = 0.99999;
@@ -15,7 +13,7 @@ export const equalsPlane = (a, b) => {
   } else {
     return false;
   }
-}
+};
 
 export const junctionSelector = (solid, normalize) => {
   const planesOfPoint = new Map();
@@ -27,7 +25,7 @@ export const junctionSelector = (solid, normalize) => {
       planesOfPoint.set(point, planes);
     }
     return planes;
-  }
+  };
 
   const considerJunction = (point, planeOfPath) => {
     let planes = getPlanesOfPoint(point);

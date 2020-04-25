@@ -3,6 +3,8 @@ import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transfor
 import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
+import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
+import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
@@ -497,6 +499,36 @@ Shape.prototype.inSolids = inSolidsMethod;
 
 inSolids.signature = 'inSolids(shape:Shape, op:function) -> Shapes';
 inSolidsMethod.signature = 'Shape -> inSolids(op:function) -> Shapes';
+
+const junctions = (shape, mode = (n => n)) => {
+  const junctions = [];
+  const points = [];
+  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+    const normalize = createNormalize3();
+    const select = junctionSelector(solid, normalize);
+    for (const surface of solid) {
+      for (const path of surface) {
+        for (const point of path) {
+          points.push(normalize(point));
+        }
+      }
+    }
+    for (const point of points) {
+      if (mode(select(point))) {
+        junctions.push(point);
+      }
+    }
+  }
+  return Shape.fromGeometry({ points: junctions });
+};
+
+const nonJunctions = (shape) => junctions(shape, n => !n);
+
+const junctionsMethod = function () { return junctions(this); };
+Shape.prototype.junctions = junctionsMethod;
+
+const nonJunctionsMethod = function () { return nonJunctions(this); };
+Shape.prototype.nonJunctions = nonJunctionsMethod;
 
 /**
  *

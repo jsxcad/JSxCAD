@@ -1,26 +1,20 @@
-import toPolygons from './toPolygons';
+import eachLink from './eachLink';
+import pushConvexPolygons from './pushConvexPolygons';
 
 const walked = Symbol('walked');
 
 // FIX: Coplanar surface coherence.
-export const toSolid = (loops) => {
+export const toSolid = (loops, selectJunction) => {
   const solid = [];
 
   const walk = (loop) => {
-    if (loop === undefined || loop[walked]) return;
-    let link = loop;
-    do {
-      link[walked] = true;
-      link = link.next;
-    } while (link !== loop);
-    const path = [];
-    do {
-      path.push(link.start);
-      walk(link.twin);
-      link = link.next;
-    } while (link !== loop);
-    solid.push([path]);
-  }
+    if (loop === undefined || loop[walked] || loop.face === undefined) return;
+    eachLink(loop, (link) => { link[walked] = true; });
+    eachLink(loop, (link) => walk(link.twin));
+    const polygons = [];
+    pushConvexPolygons(polygons, loop, selectJunction);
+    solid.push(polygons);
+  };
 
   walk(loops[0]);
 

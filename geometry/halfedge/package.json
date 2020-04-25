@@ -27,7 +27,8 @@
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
-    "@jsxcad/math-vec3": "^0.0.79"
+    "@jsxcad/math-vec3": "^0.0.79",
+    "earcut": "^2.2.2"
   },
   "devDependencies": {
     "ava": "^2.4.0",

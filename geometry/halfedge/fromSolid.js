@@ -1,12 +1,7 @@
 import createEdge from './createEdge';
-import { equals as equalsVec3 } from '@jsxcad/math-vec3';
 import getEdges from './getEdges';
 
 let id = 0;
-
-const X = 0;
-const Y = 1;
-const Z = 2;
 
 export const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
@@ -17,7 +12,7 @@ export const fromSolid = (solid, normalize, closed = true) => {
       twinMap.set(point, twins);
     }
     return twins;
-  }
+  };
   const loops = [];
 
   for (const surface of solid) {
@@ -62,26 +57,30 @@ export const fromSolid = (solid, normalize, closed = true) => {
         }
         // FIX: Assert one or zero twins?
         // Find the candidate that starts where we end.
+        let count = 0;
         for (const candidate of candidates) {
           if (candidate.start === link.next.start) {
+            count += 1;
             if (candidate.twin === undefined) {
               candidate.twin = link;
               link.twin = candidate;
-              if (equalsVec3(link.start, [5.01,5.01,10])) {
-console.log(`QQ/link: ${link.start} -> ${link.next.start}`);
-console.log(`QQ/twin: ${link.twin.start} -> ${link.twin.next.start}`);
-              }
             } else {
               // console.log(`QQ/twin: ${JSON.stringify(toPolygons([candidate.twin]))}`);
               // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
               // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
-              // throw Error('die');
-              for (const edge of getEdges(link)) {
-                edge.face = undefined;
-              }
+              throw Error('die');
+              // for (const edge of getEdges(link)) {
+              //  edge.face = undefined;
+              // }
             }
-            break;
           }
+        }
+        if (count > 1) {
+          console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
+        } else if (count === 0) {
+          console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
+        } else if (count === 1) {
+          console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
         }
       }
       link = link.next;
@@ -99,7 +98,7 @@ console.log(`QQ/twin: ${link.twin.start} -> ${link.twin.next.start}`);
         if (edge.twin === undefined) {
           // A hole in the 2-manifold.
           holeCount += 1;
-          edge.start[Z] += 1;
+          // edge.start[Z] += 1;
         }
       }
     }
