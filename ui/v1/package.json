@@ -41,6 +41,7 @@
     "fast-equals": "^2.0.0",
     "file-saver": "^2.0.2",
     "marked": "^0.8.2",
+    "object-hash": "^2.0.3",
     "parse-svg-path": "^0.1.2",
     "prismjs": "^1.17.1",
     "prop-types": "^15.7.2",

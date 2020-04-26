@@ -1,4 +1,4 @@
-import { addSource, boot, setupFilesystem } from '@jsxcad/sys';
+import { addSource, boot, resolvePending, setupFilesystem } from '@jsxcad/sys';
 import { promises, readFileSync, writeFileSync } from 'fs';
 
 import argv from 'argv';
@@ -10,8 +10,8 @@ export const run = async (target = process.argv[2], base = 'observed') => {
   const start = new Date();
   setupFilesystem({ fileBase: `${base}/${target}` });
   addSource(`cache/${target}.js`, `./${target}.js`);
-  const module = await importModule(`${target}.js`);
-  await module.main();
+  await importModule(`${target}.js`);
+  await resolvePending();
   const end = new Date();
   const observedTime = end - start;
   writeFileSync(`jsxcad/observed/${target}/time`, `${observedTime}`);

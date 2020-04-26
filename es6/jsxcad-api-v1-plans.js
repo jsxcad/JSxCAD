@@ -20,6 +20,7 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
     }
   }
   const r = (v) => Math.floor(v * 100) / 100;
+  const labelScale = 0.0125 * 5;
   if (size) {
     // Content fits to page size.
     const packSize = [];
@@ -27,7 +28,7 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
     const pageWidth = packSize[MAX][X] - packSize[MIN][X];
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     const plans = [];
-    for (const layer of content.toKeptGeometry().layers) {
+    for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
       plans.push(Plan({
         plan: { page: { size, margin: pageMargin } },
         marks: packSize,
@@ -35,7 +36,7 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
         visualization:
                       Square(pageWidth, pageLength)
                           .outline()
-                          .with(Hershey(max(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
+                          .with(Hershey(max(pageWidth, pageLength) * labelScale)(`${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2))
                           .color('red')
       }).Item());
     }
@@ -50,7 +51,7 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toKeptGeometry().layers) {
+      for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
         plans.push(Plan({
           plan: { page: { size, margin: pageMargin } },
           content: Shape.fromGeometry(layer).center(),
@@ -58,7 +59,7 @@ const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
           visualization:
                         Square(pageWidth, pageLength)
                             .outline()
-                            .with(Hershey(max(pageWidth, pageLength) * 0.0125)(`Page ${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * 1.0125) / 2))
+                            .with(Hershey(max(pageWidth, pageLength) * labelScale)(`${r(pageWidth)} x ${r(pageLength)}`).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2))
                             .color('red')
         }).Item());
       }
@@ -74,10 +75,10 @@ Plan.Page = Page;
 const PageMethod = function (options = {}) { return Page(options, this); };
 Shape.prototype.Page = PageMethod;
 
-const ensurePages = (geometry) => {
+const ensurePages = (geometry, depth = 0) => {
   const pages = getPlans(geometry).filter(entry => entry.plan.page);
-  if (pages.length === 0) {
-    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry());
+  if (pages.length === 0 && depth === 0) {
+    return ensurePages(Page({}, Shape.fromGeometry(geometry)).toGeometry(), depth + 1);
   } else {
     return pages;
   }

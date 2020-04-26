@@ -11,6 +11,7 @@ import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface-boolean';
 
 // Union is a little more complex, since it can make violate disjointAssembly invariants.
 
+/*
 const unifySolids = (geometry, ...geometries) => {
   const todo = [];
   for (const geometry of geometries) {
@@ -61,40 +62,59 @@ const unifyPaths = (geometry, ...geometries) => {
   }
   return { paths: pathsUnion(geometry.paths, ...todo), tags: geometry.tags };
 };
+*/
 
 const unionImpl = (geometry, ...geometries) => {
+  // Extract the compositional geometries to add.
+  const pathsets = [];
+  const solids = [];
+  const surfaces = [];
+  const z0Surfaces = [];
+  for (const geometry of geometries) {
+    for (const { surface } of getSurfaces(geometry)) {
+      surfaces.push(surface);
+    }
+    for (const { z0Surface } of getZ0Surfaces(geometry)) {
+      z0Surfaces.push(z0Surface);
+    }
+    for (const { solid } of getSolids(geometry)) {
+      solids.push(solid);
+    }
+    for (const { paths } of getPaths(geometry)) {
+      pathsets.push(paths);
+    }
+  }
+
+  // For assemblies and layers we effectively compose with each element.
+  // This renders disjointAssemblies into assemblies.
+  // TODO: Preserve disjointAssemblies by only composing with the last compatible item.
+
   const op = (geometry, descend) => {
     if (geometry.solid) {
-      return unifySolids(geometry, ...geometries);
+      const { solid, tags } = geometry;
+      return { solid: solidUnion(solid, ...solids), tags };
     } else if (geometry.surface) {
-      return unifySurfaces(geometry, ...geometries);
+      const { surface, tags } = geometry;
+      return { surface: surfaceUnion(surface, ...surfaces, ...z0Surfaces), tags };
     } else if (geometry.z0Surface) {
-      return unifyZ0Surfaces(geometry, ...geometries);
+      const { z0Surface, tags } = geometry;
+      if (surfaces.length === 0) {
+        return { z0Surface: z0SurfaceUnion(z0Surface, ...z0Surfaces), tags };
+      } else {
+        return { surface: surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces), tags };
+      }
     } else if (geometry.paths) {
-      return unifyPaths(geometry, ...geometries);
-    } else if (geometry.assembly || geometry.disjointAssembly) {
-      const payload = geometry.assembly || geometry.disjointAssembly;
-      // We consider assemblies to have an implicit Empty() at the end.
-      return {
-        assembly: [
-          ...payload,
-          unifySolids({ solid: [] }, ...geometries),
-          unifySurfaces({ surface: [] }, ...geometries),
-          unifyPaths({ paths: [] }, ...geometries)
-        ],
-        tags: geometry.tags
-      };
+      const { paths, tags } = geometry;
+      return { paths: pathsUnion(paths, ...pathsets), tags };
+    } else if (geometry.assembly) {
+      const { assembly, tags } = geometry;
+      return { assembly: assembly.map(entry => rewrite(entry, op)), tags };
+    } else if (geometry.disjointAssembly) {
+      const { disjointAssembly, tags } = geometry;
+      return { assembly: disjointAssembly.map(entry => rewrite(entry, op)), tags };
     } else if (geometry.layers) {
-      // We consider layers to have an implicit Empty() at the end.
-      return {
-        layers: [
-          ...geometry.layers,
-          unifySolids({ solid: [] }, ...geometries),
-          unifySurfaces({ surface: [] }, ...geometries),
-          unifyPaths({ paths: [] }, ...geometries)
-        ],
-        tags: geometry.tags
-      };
+      const { layers, tags } = geometry;
+      return { layers: layers.map(entry => rewrite(entry, op)), tags };
     } else {
       return descend();
     }

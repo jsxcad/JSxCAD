@@ -22,9 +22,11 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/sys": "^0.0.79",
     "acorn": "^7.1.0",
     "acorn-walk": "^7.1.1",
-    "astring": "^1.4.3"
+    "astring": "^1.4.3",
+    "object-hash": "^2.0.3"
   },
   "devDependencies": {
     "ava": "^2.4.0",

@@ -17,6 +17,7 @@ import Points from './Points';
 import Polygon from './Polygon';
 import Polyhedron from './Polyhedron';
 import Prism from './Prism';
+import Sketch from './Sketch';
 import Sphere from './Sphere';
 import Spiral from './Spiral';
 import Square from './Square';
@@ -47,6 +48,7 @@ const api = {
   Polygon,
   Polyhedron,
   Prism,
+  Sketch,
   Sphere,
   Spiral,
   Square,
@@ -78,6 +80,7 @@ export {
   Polygon,
   Polyhedron,
   Prism,
+  Sketch,
   Sphere,
   Spiral,
   Square,

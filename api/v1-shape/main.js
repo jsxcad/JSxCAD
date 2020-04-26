@@ -12,10 +12,11 @@ import './op';
 import './openEdges';
 import './solids';
 import './tags';
-import './void';
 import './wireframe';
 import './wireframeFaces';
 import './with';
+
+import { drop, keep } from './keep';
 
 import Shape from './Shape';
 import assemble from './assemble';
@@ -24,9 +25,7 @@ import center from './center';
 import color from './color';
 import colors from './colors';
 import difference from './difference';
-import drop from './drop';
 import intersection from './intersection';
-import keep from './keep';
 import kept from './kept';
 import layer from './layer';
 import log from './log';

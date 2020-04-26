@@ -1,6 +1,7 @@
 import { Layers } from 'three';
 import { buildMeshes } from './mesh';
 import { buildScene } from './scene';
+import { moveToFit } from './moveToFit';
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
@@ -51,6 +52,8 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
   };
 
   await buildMeshes({ datasets, threejsGeometry, scene });
+
+  moveToFit({ view, camera, scene });
 
   render();
 

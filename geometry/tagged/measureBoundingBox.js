@@ -1,6 +1,7 @@
 import { max, min } from '@jsxcad/math-vec3';
 
 import { eachPoint } from './eachPoint';
+import { isVoid } from './isNotVoid';
 import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
 import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
 import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
@@ -29,6 +30,9 @@ export const measureBoundingBox = (rawGeometry) => {
   };
 
   const walk = (item) => {
+    if (isVoid(item)) {
+      return;
+    }
     if (item.assembly) {
       item.assembly.forEach(walk);
     } else if (item.layers) {

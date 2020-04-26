@@ -13,7 +13,7 @@ test('Surface', t => {
   const surface = union({ assembly: [{ z0Surface: [unitSquarePolygon] }] },
                         { z0Surface: scaleSurface([0.8, 0.8, 0.8], rotateSurface(Math.PI / 2, [unitRegularTrianglePolygon])) });
   t.deepEqual(canonicalize(surface),
-              { 'assembly': [{ 'surface': [[[0.5, 0.5, 0], [-0.5, 0.5, 0], [-0.5, -0.5, 0], [0.5, -0.5, 0]]] }, { 'solid': [] }, { 'surface': [[[0, 0.8, 0], [-0.69282, -0.4, 0], [0.69282, -0.4, 0]]] }, { 'paths': [] }] });
+              { 'assembly': [{ 'surface': [[[0.5, -0.4, 0], [0.69282, -0.4, 0], [0.5, -0.06602, 0], [0.5, 0.5, 0], [0.17321, 0.5, 0], [0, 0.8, 0], [-0.17321, 0.5, 0], [-0.5, 0.5, 0], [-0.5, -0.06602, 0], [-0.69282, -0.4, 0], [-0.5, -0.4, 0], [-0.5, -0.5, 0], [0.5, -0.5, 0]]] }] });
 });
 
 test('Solid', t => {

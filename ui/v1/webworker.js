@@ -11,14 +11,15 @@ const agent = async ({ ask, question }) => {
     await sys.log({ op: 'evaluate', status: 'run' });
     await sys.log({ op: 'text', text: 'Evaluation Started' });
     if (question.evaluate) {
+      sys.setupFilesystem({ fileBase: question.workspace });
       sys.clearEmitted();
-      const ecmascript = toEcmascript({}, question.evaluate);
+      const ecmascript = await toEcmascript(question.evaluate);
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-      const constructor = await builder(api);
-      const module = await constructor();
-      await module.main();
+      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`,
+                                   `return async () => { ${ecmascript} };`);
+      const module = await builder(api);
+      await module();
       await sys.log({ op: 'text', text: 'Evaluation Succeeded', level: 'serious' });
       await sys.log({ op: 'evaluate', status: 'success' });
       // Wait for any pending operations.
@@ -39,6 +40,7 @@ const agent = async ({ ask, question }) => {
     await sys.log({ op: 'text', text: error.stack, level: 'serious' });
     await sys.log({ op: 'text', text: 'Evaluation Failed', level: 'serious' });
     await sys.log({ op: 'evaluate', status: 'failure' });
+    sys.setupFilesystem();
   }
 };
 

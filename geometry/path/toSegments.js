@@ -1,4 +1,9 @@
 export const toSegments = (options = {}, path) => {
+  if (path.length < 3 && path[0] === null) {
+    return [];
+  } else if (path.length < 2) {
+    return [];
+  }
   const segments = [];
   if (path[0] !== null) {
     segments.push([path[path.length - 1], path[0]]);

@@ -19,9 +19,9 @@ const { serialize } = v8;
 export const writeFile = async (options, path, data) => {
   data = await data;
   // FIX: Should be checking for a proxy fs, not webworker.
-  if (isWebWorker) {
-    return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
-  }
+  // if (false && isWebWorker) {
+  //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
+  // }
 
   const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
   let originalProject = getFilesystem();
@@ -54,8 +54,11 @@ export const writeFile = async (options, path, data) => {
         await promises.writeFile(persistentPath, data);
       } catch (error) {
       }
-    } else if (isBrowser) {
+    } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
+      if (isWebWorker) {
+        await self.ask({ touchFile: { path, workspace: project } });
+      }
     }
   }
 
@@ -63,4 +66,14 @@ export const writeFile = async (options, path, data) => {
     // Switch back to the original filesystem, if necessary.
     setupFilesystem({ fileBase: originalProject });
   }
+
+  return true;
+};
+
+export const write = async (path, data, options = {}) => {
+  if (typeof data === 'function') {
+    // Always fail to write functions.
+    return undefined;
+  }
+  return writeFile(options, path, data);
 };

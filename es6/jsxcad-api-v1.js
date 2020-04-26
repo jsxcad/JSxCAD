@@ -1,10 +1,9 @@
+import { addPending, write, emit, addSource, read, readFile, getSources } from './jsxcad-sys.js';
+export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
 export { Shape, log, make } from './jsxcad-api-v1-shape.js';
-import { emit, addSource, readFile, getSources } from './jsxcad-sys.js';
-export { emit } from './jsxcad-sys.js';
 import { ensurePages, Page } from './jsxcad-api-v1-plans.js';
 export { Page } from './jsxcad-api-v1-plans.js';
-import { getLeafs } from './jsxcad-geometry-tagged.js';
 import './jsxcad-api-v1-deform.js';
 import { pack } from './jsxcad-api-v1-layout.js';
 export { pack } from './jsxcad-api-v1-layout.js';
@@ -26,57 +25,74 @@ import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
 import { WoodScrew } from './jsxcad-api-v1-items.js';
 export { WoodScrew } from './jsxcad-api-v1-items.js';
-import { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
-export { Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+import { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
+export { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
 export { cm, foot, inch, m, mil, mm, thou, yard } from './jsxcad-api-v1-units.js';
 import { toEcmascript } from './jsxcad-compiler.js';
 import { toSvg } from './jsxcad-convert-svg.js';
 
-// FIX: We shouldn't need to supply a path to this.
-const view = (shape, { width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
+// FIX: Avoid the extra read-write cycle.
+const view = (shape, { path, width = 1024, height = 512, position = [100, -100, 100] } = {}) => {
+  let nth = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      emit({ geometry: { width, height, position, geometry: leaf } });
+    if (path) {
+      const nthPath = `${path}_${nth++}`;
+      addPending(write(nthPath, entry));
+      emit({ geometry: { width, height, position, path: nthPath } });
+    } else {
+      emit({ geometry: { width, height, position, geometry: entry } });
     }
   }
   return shape;
 };
 
-Shape.prototype.view = function ({ width = 512, height = 256, position = [100, -100, 100] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.view = function ({ path, width = 512, height = 256, position = [100, -100, 100] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.smallView = function ({ width = 256, height = 128, position = [100, -100, 100] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.smallView = function ({ path, width = 256, height = 128, position = [100, -100, 100] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.bigView = function ({ width = 1024, height = 512, position = [100, -100, 100] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.bigView = function ({ path, width = 1024, height = 512, position = [100, -100, 100] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.topView = function ({ width = 512, height = 256, position = [0, 0, 100] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.topView = function ({ path, width = 512, height = 256, position = [0, 0, 100] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.smallTopView = function ({ width = 256, height = 128, position = [0, 0, 100] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.smallTopView = function ({ path, width = 256, height = 128, position = [0, 0, 100] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.bigTopView = function ({ width = 1024, height = 512, position = [0, 0, 100] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.bigTopView = function ({ path, width = 1024, height = 512, position = [0, 0, 100] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.frontView = function ({ width = 512, height = 256, position = [0, -100, 0] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.frontView = function ({ path, width = 512, height = 256, position = [0, -100, 0] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.smallFrontView = function ({ width = 256, height = 128, position = [0, -100, 0] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.smallFrontView = function ({ path, width = 256, height = 128, position = [0, -100, 0] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
-Shape.prototype.bigFrontView = function ({ width = 1024, height = 512, position = [0, -100, 0] } = {}) {
-  return view(this, { width, height, position });
+Shape.prototype.bigFrontView = function ({ path, width = 1024, height = 512, position = [0, -100, 0] } = {}) {
+  return view(this, { path, width, height, position });
+};
+
+Shape.prototype.sideView = function ({ path, width = 512, height = 256, position = [100, 0, 0] } = {}) {
+  return view(this, { path, width, height, position });
+};
+
+Shape.prototype.smallSideView = function ({ path, width = 256, height = 128, position = [100, 0, 0] } = {}) {
+  return view(this, { path, width, height, position });
+};
+
+Shape.prototype.bigSideView = function ({ path, width = 1024, height = 512, position = [100, 0, 0] } = {}) {
+  return view(this, { path, width, height, position });
 };
 
 const source = (path, source) => addSource(`cache/${path}`, source);
@@ -93,6 +109,8 @@ const source = (path, source) => addSource(`cache/${path}`, source);
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
   emit: emit,
+  read: read,
+  write: write,
   source: source,
   Connector: Connector,
   X: X,
@@ -138,6 +156,7 @@ var api = /*#__PURE__*/Object.freeze({
   Wave: Wave,
   Item: Item,
   WoodScrew: WoodScrew,
+  Noise: Noise,
   Random: Random,
   acos: acos,
   cos: cos,
@@ -182,11 +201,11 @@ const buildImportModule = (api) =>
       }
       script = await readFile({ path, as: 'utf8', sources }, path);
     }
-    const ecmascript = toEcmascript({}, script);
-    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
-    const constructor = await builder(api);
-    const module = await constructor();
-    return module;
+    const ecmascript = await toEcmascript(script);
+    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
+    const module = await builder(api);
+    exports = await module();
+    return exports;
   };
 
 const md = (strings, ...placeholders) => {

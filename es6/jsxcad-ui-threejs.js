@@ -2,7 +2,6 @@ import { toRgbFromTags } from './jsxcad-algorithm-color.js';
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { toSegments } from './jsxcad-geometry-path.js';
-import { toTriangles } from './jsxcad-geometry-polygons.js';
 
 /**
  * dat-gui JavaScript Controller Library
@@ -51717,8 +51716,6 @@ Object.defineProperties( OrbitControls.prototype, {
 
 } );
 
-// import * as THREE from 'three';
-
 const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
   const { target = [0, 0, 0] } = view;
   const trackball = new OrbitControls(camera, viewerElement);
@@ -51782,10 +51779,10 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
+  camera.up.set(...up);
   camera.layers.enable(1);
   [camera.position.x, camera.position.y, camera.position.z] = position;
   camera.lookAt(...target);
-  camera.up.set(...up);
 
   const scene = new Scene();
   scene.add(camera);
@@ -52222,6 +52219,46 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
   }
 };
 
+const moveToFit = ({ view, camera, controls, scene, fitOffset = 1.2 } = {}) => {
+  const { fit = true } = view;
+
+  if (!fit) {
+    return;
+  }
+
+  const box = new Box3();
+  box.setFromObject(scene);
+  // for( const object of selection ) box.expandByObject( object );
+
+  const center = box.getCenter(new Vector3());
+  const size = box.getSize(new Vector3());
+
+  const maxSize = Math.max(size.x, size.y, size.z);
+  const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+  const fitWidthDistance = fitHeightDistance / (camera.aspect || 1);
+  const zoomOut = 1;
+  const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
+
+  // const target = controls ? controls.target.clone() : center.clone();
+  const target = center;
+
+  const direction =
+    target.clone()
+        .sub(camera.position)
+        .normalize()
+        .multiplyScalar(distance);
+
+  camera.near = distance / 100;
+  camera.far = distance * 100;
+  camera.updateProjectionMatrix();
+
+  camera.position.copy(center).sub(direction);
+
+  if (controls) {
+    controls.update();
+  }
+};
+
 const pointsToThreejsPoints = (points) => points;
 
 const pathsToThreejsSegments = (geometry) => {
@@ -52238,13 +52275,13 @@ const solidToThreejsSolid = (solid) => {
   const normals = [];
   const positions = [];
   for (const surface of solid) {
-    for (const triangle of toTriangles({}, surface)) {
-      for (const point of triangle) {
-        const plane = toPlane(triangle);
-        if (plane === undefined) {
-          continue;
-        }
-        const [x, y, z] = toPlane(triangle);
+    for (const convex of makeConvex(surface)) {
+      const plane = toPlane(convex);
+      if (plane === undefined) {
+        continue;
+      }
+      const [x, y, z] = toPlane(convex);
+      for (const point of convex) {
         normals.push(x, y, z);
         positions.push(...point);
       }
@@ -52256,13 +52293,13 @@ const solidToThreejsSolid = (solid) => {
 const surfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
-  for (const triangle of toTriangles({}, makeConvex(surface))) {
-    for (const point of triangle) {
-      const plane = toPlane(triangle);
-      if (plane === undefined) {
-        continue;
-      }
-      const [x, y, z] = toPlane(triangle);
+  for (const convex of makeConvex(surface)) {
+    const plane = toPlane(convex);
+    if (plane === undefined) {
+      continue;
+    }
+    const [x, y, z] = toPlane(convex);
+    for (const point of convex) {
       normals.push(x, y, z);
       positions.push(...point);
     }
@@ -52340,7 +52377,7 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
 
   const render = () => {
     renderer.clear();
@@ -52370,6 +52407,9 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     datasets = [];
 
     await buildMeshes({ datasets, threejsGeometry, scene });
+
+    moveToFit({ view, camera, controls: trackball, scene });
+
     render();
   };
 
@@ -52431,6 +52471,8 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
 
   await buildMeshes({ datasets, threejsGeometry, scene });
 
+  moveToFit({ view, camera, scene });
+
   render();
 
   await release();
@@ -52441,28 +52483,16 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
 /* global document */
 
 const toCanvasFromWebglContext = (webgl) => {
-  // Derived from https://github.com/Jam3/webgl-to-canvas2d
   const { width, height } = webgl.canvas;
-  const inImageData = new Uint8Array(width * height * 4);
-  webgl.readPixels(0, 0, width, height, webgl.RGBA, webgl.UNSIGNED_BYTE, inImageData);
-
   const outCanvas = document.createElement('canvas');
   outCanvas.width = width;
   outCanvas.height = height;
   const outContext = outCanvas.getContext('2d');
-  const outImageData = outContext.getImageData(0, 0, width, height);
-  outImageData.data.set(new Uint8ClampedArray(inImageData));
-
-  outContext.putImageData(outImageData, 0, 0);
-  outContext.translate(0, height);
-  outContext.scale(1, -1);
-  outContext.drawImage(outCanvas, 0, 0);
-  outContext.setTransform(1, 0, 0, 1, 0, 0);
-
+  outContext.drawImage(webgl.canvas, 0, 0, width, height);
   return outCanvas;
 };
 
-const staticView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+const staticView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
   const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
                                            { offsetWidth: width, offsetHeight: height });
@@ -52481,7 +52511,7 @@ const image = async (...args) => {
   return image;
 };
 
-const orbitView = async (shape, { target, position, up, width = 256, height = 128 } = {}) => {
+const orbitView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
 

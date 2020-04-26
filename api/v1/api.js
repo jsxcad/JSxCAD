@@ -16,7 +16,9 @@ import '@jsxcad/api-v1-stl';
 // import '@jsxcad/api-v1-view';
 
 export {
-  emit
+  emit,
+  read,
+  write
 } from '@jsxcad/sys';
 
 export {
@@ -98,6 +100,7 @@ export {
 } from '@jsxcad/api-v1-items';
 
 export {
+  Noise,
   Random,
   acos,
   cos,

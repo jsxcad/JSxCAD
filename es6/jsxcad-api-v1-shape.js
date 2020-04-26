@@ -1,29 +1,29 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toDisjointGeometry, toKeptGeometry as toKeptGeometry$1, toTransformedGeometry, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, drop as drop$1, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, keep as keep$1, nonNegative } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
 class Shape {
   close () {
     const geometry = this.toKeptGeometry();
-    if (!isSingleOpenPath(geometry)) {
+    if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(close(geometry.paths[0]));
+    return Shape.fromClosedPath(close(geometry.disjointAssembly[0].paths[0]));
   }
 
   concat (...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
       const geometry = shape.toKeptGeometry();
-      if (!isSingleOpenPath(geometry)) {
-        throw Error('Concatenation requires single open paths.');
+      if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+        throw Error(`Concatenation requires single open paths: ${JSON.stringify(geometry)}`);
       }
-      paths.push(geometry.paths[0]);
+      paths.push(geometry.disjointAssembly[0].paths[0]);
     }
     return Shape.fromOpenPath(concatenate(...paths));
   }
@@ -49,10 +49,6 @@ class Shape {
     return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
 
-  toDisjointGeometry (options = {}) {
-    return toDisjointGeometry(toGeometry(this));
-  }
-
   toKeptGeometry (options = {}) {
     return toKeptGeometry$1(toGeometry(this));
   }
@@ -63,10 +59,6 @@ class Shape {
 
   toGeometry () {
     return this.geometry;
-  }
-
-  toTransformedGeometry () {
-    return toTransformedGeometry(this.toGeometry());
   }
 
   toPoints () {
@@ -121,6 +113,8 @@ Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
 const toKeptGeometry = (shape) => shape.toKeptGeometry();
+
+addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fromGeometry(data.geometry));
 
 /**
  *
@@ -602,75 +596,6 @@ const method = function () { return tags(this); };
 
 Shape.prototype.tags = method;
 
-/**
- *
- * # Drop from assembly
- *
- * Generates an assembly from components in an assembly without a tag.
- *
- * If no tag is supplied, the whole shape is dropped.
- *
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .drop('A')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .drop('B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .drop('A', 'B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Cube(10).below(),
- *          Cube(8).below().drop())
- * ```
- * :::
- *
- **/
-
-const drop = (shape, ...tags) => {
-  if (tags.length === 0) {
-    return fromGeometry(rewriteTags(['compose/non-positive'], [], toGeometry(shape)));
-  } else {
-    return fromGeometry(drop$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
-  }
-};
-
-const dropMethod = function (...tags) { return drop(this, ...tags); };
-Shape.prototype.drop = dropMethod;
-
-drop.signature = '(shape:Shape ...tags:string) -> Shape';
-dropMethod.signature = 'Shape -> drop(...tags:string) -> Shape';
-
-/**
- *
- * # shape.void(...shapes)
- *
- **/
-
-const voidMethod = function (...shapes) { return assemble(this, ...shapes.map(drop)); };
-Shape.prototype.void = voidMethod;
-
-voidMethod.signature = 'Shape -> void(...shapes:Shape) -> Shape';
-
 const toWireframeFromSolid = (solid) => {
   const paths = [];
   for (const surface of solid) {
@@ -758,6 +683,89 @@ Shape.prototype.wireframeFaces = wireframeFacesMethod;
 const withMethod = function (...shapes) { return assemble(this, ...shapes); };
 Shape.prototype.with = withMethod;
 
+/**
+ *
+ * # Keep in assembly
+ *
+ * Generates an assembly from components in an assembly with a tag.
+ *
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .keep('A')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .keep('B')
+ * ```
+ * :::
+ * ::: illustration
+ * ```
+ * assemble(Circle(10).as('A'),
+ *          Square(10).as('B'))
+ *   .keep('A', 'B')
+ * ```
+ * :::
+ *
+ **/
+
+const selectToKeep = (matchTags, geometryTags) => {
+  if (geometryTags === undefined) {
+    return false;
+  }
+  for (const geometryTag of geometryTags) {
+    if (matchTags.includes(geometryTag)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const selectToDrop = (matchTags, geometryTags) => !selectToKeep(matchTags, geometryTags);
+
+const keepOrDrop = (shape, tags, select) => {
+  const matchTags = tags.map(tag => `user/${tag}`);
+
+  const op = (geometry, descend) => {
+    // FIX: Need a more reliable way to detect leaf structure.
+    if (geometry.solid || geometry.surface || geometry.z0Surface || geometry.points || geometry.paths || geometry.item) {
+      if (select(matchTags, geometry.tags)) {
+        return descend();
+      } else {
+        // Operate on the shape.
+        const shape = Shape.fromGeometry(geometry);
+        // Note that this transform does not violate geometry disjunction.
+        const dropped = shape.Void().layer(shape.sketch()).toGeometry();
+        return dropped;
+      }
+    } else {
+      return descend();
+    }
+  };
+
+  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  return Shape.fromGeometry(rewritten);
+};
+
+const keep = (shape, tags) => keepOrDrop(shape, tags, selectToKeep);
+const drop = (shape, tags) => keepOrDrop(shape, tags, selectToDrop);
+
+const keepMethod = function (...tags) { return keep(this, tags); };
+Shape.prototype.keep = keepMethod;
+
+const dropMethod = function (...tags) { return drop(this, tags); };
+Shape.prototype.drop = dropMethod;
+
 const canonicalize = (shape) => Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
 
 const canonicalizeMethod = function () { return canonicalize(this); };
@@ -838,50 +846,6 @@ Shape.prototype.colors = colorsMethod;
 
 colors.signature = 'colors(shape:Shape) -> strings';
 colorsMethod.signature = 'Shape -> colors() -> strings';
-
-/**
- *
- * # Keep in assembly
- *
- * Generates an assembly from components in an assembly with a tag.
- *
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('A')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('B')
- * ```
- * :::
- * ::: illustration
- * ```
- * assemble(Circle(10).as('A'),
- *          Square(10).as('B'))
- *   .keep('A', 'B')
- * ```
- * :::
- *
- **/
-
-const keep = (shape, tags) => fromGeometry(keep$1(tags.map(tag => `user/${tag}`), toGeometry(shape)));
-
-const keepMethod = function (...tags) { return keep(this, tags); };
-Shape.prototype.keep = keepMethod;
-
-keep.signature = 'keep(shape:Shape, tags:strings) -> Shape';
-keepMethod.signature = 'Shape -> keep(tags:strings) -> Shape';
 
 /**
  *
@@ -1294,13 +1258,15 @@ const Y$1 = 1;
 const Z$1 = 2;
 
 const size = (shape) => {
-  const [min, max] = measureBoundingBox(shape);
+  const geometry = shape.toKeptGeometry();
+  const [min, max] = measureBoundingBox$1(geometry);
+  const area = measureArea(geometry);
   const width = max[X$1] - min[X$1];
   const length = max[Y$1] - min[Y$1];
   const height = max[Z$1] - min[Z$1];
   const center = scale$1(0.5, add(min, max));
   const radius = distance(center, max);
-  return { length, width, height, max, min, center, radius };
+  return { area, length, width, height, max, min, center, radius };
 };
 
 const sizeMethod = function () { return size(this); };

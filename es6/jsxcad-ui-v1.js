@@ -1,4 +1,4 @@
-import { readFile, log as log$1, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask } from './jsxcad-sys.js';
+import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, read, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import * as api from './jsxcad-api-v1.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
@@ -26,168 +26,6 @@ var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
             typeof window !== "undefined" ? window : {});
 
-// shim for using process in browser
-// based off https://github.com/defunctzombie/node-process/blob/master/browser.js
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-var cachedSetTimeout = defaultSetTimout;
-var cachedClearTimeout = defaultClearTimeout;
-if (typeof global$1.setTimeout === 'function') {
-    cachedSetTimeout = setTimeout;
-}
-if (typeof global$1.clearTimeout === 'function') {
-    cachedClearTimeout = clearTimeout;
-}
-
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-function nextTick(fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-}
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-var title = 'browser';
-var platform = 'browser';
-var browser = true;
-var env = {};
-var argv = [];
-var version = ''; // empty string to avoid regexp issues
-var versions = {};
-var release = {};
-var config = {};
-
-function noop() {}
-
-var on = noop;
-var addListener = noop;
-var once = noop;
-var off = noop;
-var removeListener = noop;
-var removeAllListeners = noop;
-var emit = noop;
-
-function binding(name) {
-    throw new Error('process.binding is not supported');
-}
-
-function cwd () { return '/' }
-function chdir (dir) {
-    throw new Error('process.chdir is not supported');
-}function umask() { return 0; }
-
 // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
 var performance$1 = global$1.performance || {};
 var performanceNow =
@@ -197,56 +35,6 @@ var performanceNow =
   performance$1.oNow       ||
   performance$1.webkitNow  ||
   function(){ return (new Date()).getTime() };
-
-// generate timestamp or delta
-// see http://nodejs.org/api/process.html#process_process_hrtime
-function hrtime(previousTimestamp){
-  var clocktime = performanceNow.call(performance$1)*1e-3;
-  var seconds = Math.floor(clocktime);
-  var nanoseconds = Math.floor((clocktime%1)*1e9);
-  if (previousTimestamp) {
-    seconds = seconds - previousTimestamp[0];
-    nanoseconds = nanoseconds - previousTimestamp[1];
-    if (nanoseconds<0) {
-      seconds--;
-      nanoseconds += 1e9;
-    }
-  }
-  return [seconds,nanoseconds]
-}
-
-var startTime = new Date();
-function uptime() {
-  var currentTime = new Date();
-  var dif = currentTime - startTime;
-  return dif / 1000;
-}
-
-var process = {
-  nextTick: nextTick,
-  title: title,
-  browser: browser,
-  env: env,
-  argv: argv,
-  version: version,
-  versions: versions,
-  on: on,
-  addListener: addListener,
-  once: once,
-  off: off,
-  removeListener: removeListener,
-  removeAllListeners: removeAllListeners,
-  emit: emit,
-  binding: binding,
-  cwd: cwd,
-  chdir: chdir,
-  umask: umask,
-  hrtime: hrtime,
-  platform: platform,
-  release: release,
-  config: config,
-  uptime: uptime
-};
 
 var classnames = createCommonjsModule(function (module) {
 /*!
@@ -6614,6 +6402,17 @@ var discount_lodash_4 = discount_lodash.isObject;
 var discount_lodash_5 = discount_lodash.xor;
 var discount_lodash_6 = discount_lodash.intersection;
 
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
 var invariant = function(condition, format, a, b, c, d, e, f) {
   {
     if (format === undefined) {
@@ -6642,7 +6441,7 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
   }
 };
 
-var invariant_1 = invariant;
+var browser = invariant;
 
 var beginDrag = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6703,17 +6502,17 @@ function createBeginDrag(manager) {
 }
 exports.default = createBeginDrag;
 function verifyInvariants(sourceIds, monitor, registry) {
-    invariant_1(!monitor.isDragging(), 'Cannot call beginDrag while dragging.');
+    browser(!monitor.isDragging(), 'Cannot call beginDrag while dragging.');
     for (var _i = 0, sourceIds_1 = sourceIds; _i < sourceIds_1.length; _i++) {
         var s = sourceIds_1[_i];
-        invariant_1(registry.getSource(s), 'Expected sourceIds to be registered.');
+        browser(registry.getSource(s), 'Expected sourceIds to be registered.');
     }
 }
 function verifyGetSourceClientOffsetIsFunction(getSourceClientOffset) {
-    invariant_1(typeof getSourceClientOffset === 'function', 'When clientOffset is provided, getSourceClientOffset must be a function.');
+    browser(typeof getSourceClientOffset === 'function', 'When clientOffset is provided, getSourceClientOffset must be a function.');
 }
 function verifyItemIsObject(item) {
-    invariant_1(discount_lodash.isObject(item), 'Item must be an object.');
+    browser(discount_lodash.isObject(item), 'Item must be an object.');
 }
 function getDraggableSource(sourceIds, monitor) {
     var sourceId = null;
@@ -6787,16 +6586,16 @@ function createHover(manager) {
 }
 exports.default = createHover;
 function verifyTargetIdsIsArray(targetIdsArg) {
-    invariant_1(Array.isArray(targetIdsArg), 'Expected targetIds to be an array.');
+    browser(Array.isArray(targetIdsArg), 'Expected targetIds to be an array.');
 }
 function checkInvariants(targetIds, monitor, registry) {
-    invariant_1(monitor.isDragging(), 'Cannot call hover while not dragging.');
-    invariant_1(!monitor.didDrop(), 'Cannot call hover after drop.');
+    browser(monitor.isDragging(), 'Cannot call hover while not dragging.');
+    browser(!monitor.didDrop(), 'Cannot call hover after drop.');
     for (var i = 0; i < targetIds.length; i++) {
         var targetId = targetIds[i];
-        invariant_1(targetIds.lastIndexOf(targetId) === i, 'Expected targetIds to be unique in the passed array.');
+        browser(targetIds.lastIndexOf(targetId) === i, 'Expected targetIds to be unique in the passed array.');
         var target = registry.getTarget(targetId);
-        invariant_1(target, 'Expected targetIds to be registered.');
+        browser(target, 'Expected targetIds to be registered.');
     }
 }
 function removeNonMatchingTargetIds(targetIds, registry, draggedItemType) {
@@ -6861,8 +6660,8 @@ function createDrop(manager) {
 }
 exports.default = createDrop;
 function verifyInvariants(monitor) {
-    invariant_1(monitor.isDragging(), 'Cannot call drop while not dragging.');
-    invariant_1(!monitor.didDrop(), 'Cannot call drop twice during one drag operation.');
+    browser(monitor.isDragging(), 'Cannot call drop while not dragging.');
+    browser(!monitor.didDrop(), 'Cannot call drop twice during one drag operation.');
 }
 function determineDropResult(targetId, index, registry, monitor) {
     var target = registry.getTarget(targetId);
@@ -6874,7 +6673,7 @@ function determineDropResult(targetId, index, registry, monitor) {
     return dropResult;
 }
 function verifyDropResultType(dropResult) {
-    invariant_1(typeof dropResult === 'undefined' || discount_lodash.isObject(dropResult), 'Drop result must either be an object or undefined.');
+    browser(typeof dropResult === 'undefined' || discount_lodash.isObject(dropResult), 'Drop result must either be an object or undefined.');
 }
 function getDroppableTargets(monitor) {
     var targetIds = monitor
@@ -6905,7 +6704,7 @@ function createEndDrag(manager) {
 }
 exports.default = createEndDrag;
 function verifyIsDragging(monitor) {
-    invariant_1(monitor.isDragging(), 'Cannot call endDrag while not dragging.');
+    browser(monitor.isDragging(), 'Cannot call endDrag while not dragging.');
 }
 });
 
@@ -7363,8 +7162,8 @@ var DragDropMonitorImpl = /** @class */ (function () {
         var _this = this;
         if (options === void 0) { options = { handlerIds: undefined }; }
         var handlerIds = options.handlerIds;
-        invariant_1(typeof listener === 'function', 'listener must be a function.');
-        invariant_1(typeof handlerIds === 'undefined' || Array.isArray(handlerIds), 'handlerIds, when specified, must be an array of strings.');
+        browser(typeof listener === 'function', 'listener must be a function.');
+        browser(typeof handlerIds === 'undefined' || Array.isArray(handlerIds), 'handlerIds, when specified, must be an array of strings.');
         var prevStateId = this.store.getState().stateId;
         var handleChange = function () {
             var state = _this.store.getState();
@@ -7385,7 +7184,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
     };
     DragDropMonitorImpl.prototype.subscribeToOffsetChange = function (listener) {
         var _this = this;
-        invariant_1(typeof listener === 'function', 'listener must be a function.');
+        browser(typeof listener === 'function', 'listener must be a function.');
         var previousState = this.store.getState().dragOffset;
         var handleChange = function () {
             var nextState = _this.store.getState().dragOffset;
@@ -7402,7 +7201,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
             return false;
         }
         var source = this.registry.getSource(sourceId);
-        invariant_1(source, 'Expected to find a valid source.');
+        browser(source, 'Expected to find a valid source.');
         if (this.isDragging()) {
             return false;
         }
@@ -7414,7 +7213,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
             return false;
         }
         var target = this.registry.getTarget(targetId);
-        invariant_1(target, 'Expected to find a valid target.');
+        browser(target, 'Expected to find a valid target.');
         if (!this.isDragging() || this.didDrop()) {
             return false;
         }
@@ -7431,7 +7230,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
             return false;
         }
         var source = this.registry.getSource(sourceId, true);
-        invariant_1(source, 'Expected to find a valid source.');
+        browser(source, 'Expected to find a valid source.');
         if (!this.isDragging() || !this.isSourcePublic()) {
             return false;
         }
@@ -7527,15 +7326,15 @@ var contracts = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
 function validateSourceContract(source) {
-    invariant_1(typeof source.canDrag === 'function', 'Expected canDrag to be a function.');
-    invariant_1(typeof source.beginDrag === 'function', 'Expected beginDrag to be a function.');
-    invariant_1(typeof source.endDrag === 'function', 'Expected endDrag to be a function.');
+    browser(typeof source.canDrag === 'function', 'Expected canDrag to be a function.');
+    browser(typeof source.beginDrag === 'function', 'Expected beginDrag to be a function.');
+    browser(typeof source.endDrag === 'function', 'Expected endDrag to be a function.');
 }
 exports.validateSourceContract = validateSourceContract;
 function validateTargetContract(target) {
-    invariant_1(typeof target.canDrop === 'function', 'Expected canDrop to be a function.');
-    invariant_1(typeof target.hover === 'function', 'Expected hover to be a function.');
-    invariant_1(typeof target.drop === 'function', 'Expected beginDrag to be a function.');
+    browser(typeof target.canDrop === 'function', 'Expected canDrop to be a function.');
+    browser(typeof target.hover === 'function', 'Expected hover to be a function.');
+    browser(typeof target.drop === 'function', 'Expected beginDrag to be a function.');
 }
 exports.validateTargetContract = validateTargetContract;
 function validateType(type, allowArray) {
@@ -7543,7 +7342,7 @@ function validateType(type, allowArray) {
         type.forEach(function (t) { return validateType(t, false); });
         return;
     }
-    invariant_1(typeof type === 'string' || typeof type === 'symbol', allowArray
+    browser(typeof type === 'string' || typeof type === 'symbol', allowArray
         ? 'Type can only be a string, a symbol, or an array of either.'
         : 'Type can only be a string or a symbol.');
 }
@@ -8132,10 +7931,9 @@ Domain.prototype.enter = Domain.prototype.exit = function() {
   return this
 };
 
-var hasSetImmediate = typeof setImmediate === "function";
-
 // Use the fastest means possible to execute a task in its own turn, with
-// priority over other events including network IO events in Node.js.
+// priority over other events including IO, animation, reflow, and redraw
+// events in browsers.
 //
 // An exception thrown by a task will permanently interrupt the processing of
 // subsequent tasks. The higher level `asap` function ensures that if an
@@ -8143,26 +7941,26 @@ var hasSetImmediate = typeof setImmediate === "function";
 // soon as possible, but if you use `rawAsap` directly, you are responsible to
 // either ensure that no exceptions are thrown from your task, or to manually
 // call `rawAsap.requestFlush` if an exception is thrown.
-var raw = rawAsap;
+var browserRaw = rawAsap;
 function rawAsap(task) {
-    if (!queue$1.length) {
+    if (!queue.length) {
         requestFlush();
-        flushing = true;
     }
-    // Avoids a function call
-    queue$1[queue$1.length] = task;
+    // Equivalent to push, but avoids a function call.
+    queue[queue.length] = task;
 }
 
-var queue$1 = [];
-// Once a flush has been requested, no further calls to `requestFlush` are
-// necessary until the next `flush` completes.
-var flushing = false;
+var queue = [];
+// `requestFlush` is an implementation-specific method that attempts to kick
+// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+// the event queue before yielding to the browser's own event loop.
+var requestFlush;
 // The position of the next task to execute in the task queue. This is
 // preserved between calls to `flush` so that it can be resumed if
 // a task throws an exception.
 var index = 0;
 // If a task schedules additional tasks recursively, the task queue can grow
-// unbounded. To prevent memory excaustion, the task queue will periodically
+// unbounded. To prevent memory exhaustion, the task queue will periodically
 // truncate already-completed tasks.
 var capacity = 1024;
 
@@ -8173,12 +7971,12 @@ var capacity = 1024;
 // However, `flush` does not make any arrangements to be called again if an
 // exception is thrown.
 function flush() {
-    while (index < queue$1.length) {
+    while (index < queue.length) {
         var currentIndex = index;
         // Advance the index before calling the task. This ensures that we will
         // begin flushing on the next task the task throws an error.
         index = index + 1;
-        queue$1[currentIndex].call();
+        queue[currentIndex].call();
         // Prevent leaking memory for long chains of recursive calls to `asap`.
         // If we call `asap` within tasks scheduled by `asap`, the queue will
         // grow, but to avoid an O(n) walk for every task we execute, we don't
@@ -8187,47 +7985,186 @@ function flush() {
         if (index > capacity) {
             // Manually shift all values starting at the index back to the
             // beginning of the queue.
-            for (var scan = 0, newLength = queue$1.length - index; scan < newLength; scan++) {
-                queue$1[scan] = queue$1[scan + index];
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+                queue[scan] = queue[scan + index];
             }
-            queue$1.length -= index;
+            queue.length -= index;
             index = 0;
         }
     }
-    queue$1.length = 0;
+    queue.length = 0;
     index = 0;
-    flushing = false;
 }
 
-rawAsap.requestFlush = requestFlush;
-function requestFlush() {
+// `requestFlush` is implemented using a strategy based on data collected from
+// every available SauceLabs Selenium web driver worker at time of writing.
+// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
 
-    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
-    // cannot handle recursion.
-    // `requestFlush` will only be called recursively from `asap.js`, to resume
-    // flushing after an error is thrown into a domain.
-    // Conveniently, `setImmediate` was introduced in the same version
-    // `process.nextTick` started throwing recursion errors.
-    if (flushing && hasSetImmediate) {
-        setImmediate(flush);
-    } else {
-        nextTick(flush);
+// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+// have WebKitMutationObserver but not un-prefixed MutationObserver.
+// Must use `global` or `self` instead of `window` to work in both frames and web
+// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+
+/* globals self */
+var scope = typeof commonjsGlobal !== "undefined" ? commonjsGlobal : self;
+var BrowserMutationObserver = scope.MutationObserver || scope.WebKitMutationObserver;
+
+// MutationObservers are desirable because they have high priority and work
+// reliably everywhere they are implemented.
+// They are implemented in all modern browsers.
+//
+// - Android 4-4.3
+// - Chrome 26-34
+// - Firefox 14-29
+// - Internet Explorer 11
+// - iPad Safari 6-7.1
+// - iPhone Safari 7-7.1
+// - Safari 6-7
+if (typeof BrowserMutationObserver === "function") {
+    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+// MessageChannels are desirable because they give direct access to the HTML
+// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+// 11-12, and in web workers in many engines.
+// Although message channels yield to any queued rendering and IO tasks, they
+// would be better than imposing the 4ms delay of timers.
+// However, they do not work reliably in Internet Explorer or Safari.
+
+// Internet Explorer 10 is the only browser that has setImmediate but does
+// not have MutationObservers.
+// Although setImmediate yields to the browser's renderer, it would be
+// preferrable to falling back to setTimeout since it does not have
+// the minimum 4ms penalty.
+// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+// Desktop to a lesser extent) that renders both setImmediate and
+// MessageChannel useless for the purposes of ASAP.
+// https://github.com/kriskowal/q/issues/396
+
+// Timers are implemented universally.
+// We fall back to timers in workers in most engines, and in foreground
+// contexts in the following browsers.
+// However, note that even this simple case requires nuances to operate in a
+// broad spectrum of browsers.
+//
+// - Firefox 3-13
+// - Internet Explorer 6-9
+// - iPad Safari 4.3
+// - Lynx 2.8.7
+} else {
+    requestFlush = makeRequestCallFromTimer(flush);
+}
+
+// `requestFlush` requests that the high priority event queue be flushed as
+// soon as possible.
+// This is useful to prevent an error thrown in a task from stalling the event
+// queue if the exception handled by Node.js’s
+// `process.on("uncaughtException")` or by a domain.
+rawAsap.requestFlush = requestFlush;
+
+// To request a high priority event, we induce a mutation observer by toggling
+// the text of a text node between "1" and "-1".
+function makeRequestCallFromMutationObserver(callback) {
+    var toggle = 1;
+    var observer = new BrowserMutationObserver(callback);
+    var node = document.createTextNode("");
+    observer.observe(node, {characterData: true});
+    return function requestCall() {
+        toggle = -toggle;
+        node.data = toggle;
+    };
+}
+
+// The message channel technique was discovered by Malte Ubl and was the
+// original foundation for this library.
+// http://www.nonblocking.io/2011/06/windownexttick.html
+
+// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+// page's first load. Thankfully, this version of Safari supports
+// MutationObservers, so we don't need to fall back in that case.
+
+// function makeRequestCallFromMessageChannel(callback) {
+//     var channel = new MessageChannel();
+//     channel.port1.onmessage = callback;
+//     return function requestCall() {
+//         channel.port2.postMessage(0);
+//     };
+// }
+
+// For reasons explained above, we are also unable to use `setImmediate`
+// under any circumstances.
+// Even if we were, there is another bug in Internet Explorer 10.
+// It is not sufficient to assign `setImmediate` to `requestFlush` because
+// `setImmediate` must be called *by name* and therefore must be wrapped in a
+// closure.
+// Never forget.
+
+// function makeRequestCallFromSetImmediate(callback) {
+//     return function requestCall() {
+//         setImmediate(callback);
+//     };
+// }
+
+// Safari 6.0 has a problem where timers will get lost while the user is
+// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+// mutation observers, so that implementation is used instead.
+// However, if we ever elect to use timers in Safari, the prevalent work-around
+// is to add a scroll event listener that calls for a flush.
+
+// `setTimeout` does not call the passed callback if the delay is less than
+// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+// even then.
+
+function makeRequestCallFromTimer(callback) {
+    return function requestCall() {
+        // We dispatch a timeout with a specified delay of 0 for engines that
+        // can reliably accommodate that request. This will usually be snapped
+        // to a 4 milisecond delay, but once we're flushing, there's no delay
+        // between events.
+        var timeoutHandle = setTimeout(handleTimer, 0);
+        // However, since this timer gets frequently dropped in Firefox
+        // workers, we enlist an interval handle that will try to fire
+        // an event 20 times per second until it succeeds.
+        var intervalHandle = setInterval(handleTimer, 50);
+
+        function handleTimer() {
+            // Whichever timer succeeds will cancel both timers and
+            // execute the callback.
+            clearTimeout(timeoutHandle);
+            clearInterval(intervalHandle);
+            callback();
+        }
+    };
+}
+
+// This is for `asap.js` only.
+// Its name will be periodically randomized to break any code that depends on
+// its existence.
+rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+// rawAsap provides everything we need except exception management.
+
+// RawTasks are recycled to reduce GC churn.
+var freeTasks = [];
+// We queue errors to ensure they are thrown in right order (FIFO).
+// Array-as-queue is good enough here, since we are just dealing with exceptions.
+var pendingErrors = [];
+var requestErrorThrow = browserRaw.makeRequestCallFromTimer(throwFirstError);
+
+function throwFirstError() {
+    if (pendingErrors.length) {
+        throw pendingErrors.shift();
     }
 }
 
-var freeTasks = [];
-
 /**
- * Calls a task as soon as possible after returning, in its own event, with
- * priority over IO events. An exception thrown in a task can be handled by
- * `process.on("uncaughtException") or `domain.on("error")`, but will otherwise
- * crash the process. If the error is handled, all subsequent tasks will
- * resume.
- *
+ * Calls a task as soon as possible after returning, in its own event, with priority
+ * over other events like animation, reflow, and repaint. An error thrown from an
+ * event will not interrupt, nor even substantially slow down the processing of
+ * other events, but will be rather postponed to a lower priority event.
  * @param {{call}} task A callable object, typically a function that takes no
  * arguments.
  */
-var asap_1 = asap;
+var browserAsap = asap;
 function asap(task) {
     var rawTask;
     if (freeTasks.length) {
@@ -8236,44 +8173,36 @@ function asap(task) {
         rawTask = new RawTask();
     }
     rawTask.task = task;
-    rawTask.domain = process.domain;
-    raw(rawTask);
+    browserRaw(rawTask);
 }
 
+// We wrap tasks with recyclable task objects.  A task object implements
+// `call`, just like a function.
 function RawTask() {
     this.task = null;
-    this.domain = null;
 }
 
+// The sole purpose of wrapping the task is to catch the exception and recycle
+// the task object after its single use.
 RawTask.prototype.call = function () {
-    if (this.domain) {
-        this.domain.enter();
-    }
-    var threw = true;
     try {
         this.task.call();
-        threw = false;
-        // If the task throws an exception (presumably) Node.js restores the
-        // domain stack for the next event.
-        if (this.domain) {
-            this.domain.exit();
+    } catch (error) {
+        if (asap.onerror) {
+            // This hook exists purely for testing purposes.
+            // Its name will be periodically randomized to break any code that
+            // depends on its existence.
+            asap.onerror(error);
+        } else {
+            // In a web browser, exceptions are not fatal. However, to avoid
+            // slowing down the queue of pending tasks, we rethrow the error in a
+            // lower priority turn.
+            pendingErrors.push(error);
+            requestErrorThrow();
         }
     } finally {
-        // We use try/finally and a threw flag to avoid messing up stack traces
-        // when we catch and release errors.
-        if (threw) {
-            // In Node.js, uncaught exceptions are considered fatal errors.
-            // Re-throw them to interrupt flushing!
-            // Ensure that flushing continues if an uncaught exception is
-            // suppressed listening process.on("uncaughtException") or
-            // domain.on("error").
-            raw.requestFlush();
-        }
-        // If the task threw an error, we do not want to exit the domain here.
-        // Exiting the domain would prevent the domain from catching the error.
         this.task = null;
-        this.domain = null;
-        freeTasks.push(this);
+        freeTasks[freeTasks.length] = this;
     }
 };
 
@@ -8303,7 +8232,7 @@ function parseRoleFromHandlerId(handlerId) {
         case 'T':
             return interfaces.HandlerRole.TARGET;
         default:
-            invariant_1(false, "Cannot parse handler ID: " + handlerId);
+            browser(false, "Cannot parse handler ID: " + handlerId);
     }
 }
 function mapContainsValue(map, searchValue) {
@@ -8347,21 +8276,21 @@ var HandlerRegistryImpl = /** @class */ (function () {
     };
     HandlerRegistryImpl.prototype.getSource = function (sourceId, includePinned) {
         if (includePinned === void 0) { includePinned = false; }
-        invariant_1(this.isSourceId(sourceId), 'Expected a valid source ID.');
+        browser(this.isSourceId(sourceId), 'Expected a valid source ID.');
         var isPinned = includePinned && sourceId === this.pinnedSourceId;
         var source = isPinned ? this.pinnedSource : this.dragSources.get(sourceId);
         return source;
     };
     HandlerRegistryImpl.prototype.getTarget = function (targetId) {
-        invariant_1(this.isTargetId(targetId), 'Expected a valid target ID.');
+        browser(this.isTargetId(targetId), 'Expected a valid target ID.');
         return this.dropTargets.get(targetId);
     };
     HandlerRegistryImpl.prototype.getSourceType = function (sourceId) {
-        invariant_1(this.isSourceId(sourceId), 'Expected a valid source ID.');
+        browser(this.isSourceId(sourceId), 'Expected a valid source ID.');
         return this.types.get(sourceId);
     };
     HandlerRegistryImpl.prototype.getTargetType = function (targetId) {
-        invariant_1(this.isTargetId(targetId), 'Expected a valid target ID.');
+        browser(this.isTargetId(targetId), 'Expected a valid target ID.');
         return this.types.get(targetId);
     };
     HandlerRegistryImpl.prototype.isSourceId = function (handlerId) {
@@ -8374,27 +8303,27 @@ var HandlerRegistryImpl = /** @class */ (function () {
     };
     HandlerRegistryImpl.prototype.removeSource = function (sourceId) {
         var _this = this;
-        invariant_1(this.getSource(sourceId), 'Expected an existing source.');
+        browser(this.getSource(sourceId), 'Expected an existing source.');
         this.store.dispatch(registry.removeSource(sourceId));
-        asap_1(function () {
+        browserAsap(function () {
             _this.dragSources.delete(sourceId);
             _this.types.delete(sourceId);
         });
     };
     HandlerRegistryImpl.prototype.removeTarget = function (targetId) {
-        invariant_1(this.getTarget(targetId), 'Expected an existing target.');
+        browser(this.getTarget(targetId), 'Expected an existing target.');
         this.store.dispatch(registry.removeTarget(targetId));
         this.dropTargets.delete(targetId);
         this.types.delete(targetId);
     };
     HandlerRegistryImpl.prototype.pinSource = function (sourceId) {
         var source = this.getSource(sourceId);
-        invariant_1(source, 'Expected an existing source.');
+        browser(source, 'Expected an existing source.');
         this.pinnedSourceId = sourceId;
         this.pinnedSource = source;
     };
     HandlerRegistryImpl.prototype.unpinSource = function () {
-        invariant_1(this.pinnedSource, 'No source is pinned at the time.');
+        browser(this.pinnedSource, 'No source is pinned at the time.');
         this.pinnedSourceId = null;
         this.pinnedSource = null;
     };
@@ -9068,7 +8997,7 @@ function DragDropContext(backendFactory, backendContext, debugMode) {
                 return _this;
             }
             DragDropContextContainer.prototype.getDecoratedComponentInstance = function () {
-                invariant_1(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
+                browser(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
                 return this.ref.current;
             };
             DragDropContextContainer.prototype.render = function () {
@@ -9211,8 +9140,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function DragLayer(collect, options) {
     if (options === void 0) { options = {}; }
     checkDecoratorArguments_1.default('DragLayer', 'collect[, options]', collect, options);
-    invariant_1(typeof collect === 'function', 'Expected "collect" provided as the first argument to DragLayer to be a function that collects props to inject into the component. ', 'Instead, received %s. Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-layer', collect);
-    invariant_1(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the second argument to DragLayer to be a plain object when specified. ' +
+    browser(typeof collect === 'function', 'Expected "collect" provided as the first argument to DragLayer to be a function that collects props to inject into the component. ', 'Instead, received %s. Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-layer', collect);
+    browser(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the second argument to DragLayer to be a plain object when specified. ' +
         'Instead, received %s. Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-layer', options);
     return function decorateLayer(DecoratedComponent) {
         var Decorated = DecoratedComponent;
@@ -9236,7 +9165,7 @@ function DragLayer(collect, options) {
                 return _this;
             }
             DragLayerContainer.prototype.getDecoratedComponentInstance = function () {
-                invariant_1(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
+                browser(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
                 return this.ref.current;
             };
             DragLayerContainer.prototype.shouldComponentUpdate = function (nextProps, nextState) {
@@ -9278,7 +9207,7 @@ function DragLayer(collect, options) {
                     return;
                 }
                 this.manager = dragDropManager;
-                invariant_1(typeof dragDropManager === 'object', 'Could not find the drag and drop manager in the context of %s. ' +
+                browser(typeof dragDropManager === 'object', 'Could not find the drag and drop manager in the context of %s. ' +
                     'Make sure to wrap the top-level component of your app with DragDropContext. ' +
                     'Read more: http://react-dnd.github.io/react-dnd/docs/troubleshooting#could-not-find-the-drag-and-drop-manager-in-the-context', displayName, displayName);
                 var monitor = this.manager.getMonitor();
@@ -9563,7 +9492,7 @@ function decorateHandler(_a) {
             return this.handlerId;
         };
         DragDropContainer.prototype.getDecoratedComponentInstance = function () {
-            invariant_1(this.decoratedRef.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
+            browser(this.decoratedRef.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
             return this.decoratedRef.current;
         };
         DragDropContainer.prototype.shouldComponentUpdate = function (nextProps, nextState) {
@@ -9620,7 +9549,7 @@ function decorateHandler(_a) {
             }
             var nextState = collect(this.handlerConnector.hooks, this.handlerMonitor, this.props);
             {
-                invariant_1(discount_lodash$1.isPlainObject(nextState), 'Expected `collect` specified as the second argument to ' +
+                browser(discount_lodash$1.isPlainObject(nextState), 'Expected `collect` specified as the second argument to ' +
                     '%s for %s to return a plain object of props to inject. ' +
                     'Instead, received %s.', containerDisplayName, displayName, nextState);
             }
@@ -9643,7 +9572,7 @@ function decorateHandler(_a) {
             if (this.manager !== undefined) {
                 return;
             }
-            invariant_1(dragDropManager !== undefined, 'Could not find the drag and drop manager in the context of %s. ' +
+            browser(dragDropManager !== undefined, 'Could not find the drag and drop manager in the context of %s. ' +
                 'Make sure to wrap the top-level component of your app with DragDropContext. ' +
                 'Read more: http://react-dnd.github.io/react-dnd/docs/troubleshooting#could-not-find-the-drag-and-drop-manager-in-the-context', displayName, displayName);
             if (dragDropManager === undefined) {
@@ -9718,7 +9647,7 @@ var SourceImpl = /** @class */ (function () {
             }
             var item = _this.spec.beginDrag(_this.props, _this.monitor, _this.ref.current);
             {
-                invariant_1(discount_lodash$1.isPlainObject(item), 'beginDrag() must return a plain object that represents the dragged item. ' +
+                browser(discount_lodash$1.isPlainObject(item), 'beginDrag() must return a plain object that represents the dragged item. ' +
                     'Instead received %s. ' +
                     'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', item);
             }
@@ -9759,16 +9688,16 @@ var SourceImpl = /** @class */ (function () {
 }());
 function createSourceFactory(spec) {
     Object.keys(spec).forEach(function (key) {
-        invariant_1(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drag source specification to only have ' +
+        browser(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drag source specification to only have ' +
             'some of the following keys: %s. ' +
             'Instead received a specification with an unexpected "%s" key. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', ALLOWED_SPEC_METHODS.join(', '), key);
-        invariant_1(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
+        browser(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
             'Instead received a specification with %s: %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', key, key, spec[key]);
     });
     REQUIRED_SPEC_METHODS.forEach(function (key) {
-        invariant_1(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
+        browser(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
             'Instead received a specification with %s: %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', key, key, spec[key]);
     });
@@ -9798,7 +9727,7 @@ var DragSourceMonitorImpl = /** @class */ (function () {
         return this.sourceId;
     };
     DragSourceMonitorImpl.prototype.canDrag = function () {
-        invariant_1(!isCallingCanDrag, 'You may not call monitor.canDrag() inside your canDrag() implementation. ' +
+        browser(!isCallingCanDrag, 'You may not call monitor.canDrag() inside your canDrag() implementation. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source-monitor');
         try {
             isCallingCanDrag = true;
@@ -9812,7 +9741,7 @@ var DragSourceMonitorImpl = /** @class */ (function () {
         if (!this.sourceId) {
             return false;
         }
-        invariant_1(!isCallingIsDragging, 'You may not call monitor.isDragging() inside your isDragging() implementation. ' +
+        browser(!isCallingIsDragging, 'You may not call monitor.isDragging() inside your isDragging() implementation. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source-monitor');
         try {
             isCallingIsDragging = true;
@@ -9897,7 +9826,7 @@ function setRef(ref, node) {
 }
 function cloneWithRef(element, newRef) {
     var previousRef = element.ref;
-    invariant_1(typeof previousRef !== 'string', 'Cannot connect React DnD to an element with an existing string ref. ' +
+    browser(typeof previousRef !== 'string', 'Cannot connect React DnD to an element with an existing string ref. ' +
         'Please convert it to use a callback ref instead, or wrap it into a <span> or <div>. ' +
         'Read more: https://facebook.github.io/react/docs/more-about-refs.html#the-ref-callback-attribute');
     if (!previousRef) {
@@ -10212,21 +10141,21 @@ function DragSource(type, spec, collect, options) {
     checkDecoratorArguments_1.default('DragSource', 'type, spec, collect[, options]', type, spec, collect, options);
     var getType = type;
     if (typeof type !== 'function') {
-        invariant_1(isValidType_1.default(type), 'Expected "type" provided as the first argument to DragSource to be ' +
+        browser(isValidType_1.default(type), 'Expected "type" provided as the first argument to DragSource to be ' +
             'a string, or a function that returns a string given the current props. ' +
             'Instead, received %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', type);
         getType = function () { return type; };
     }
-    invariant_1(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DragSource to be ' +
+    browser(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DragSource to be ' +
         'a plain object. Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', spec);
     var createSource = createSourceFactory_1.default(spec);
-    invariant_1(typeof collect === 'function', 'Expected "collect" provided as the third argument to DragSource to be ' +
+    browser(typeof collect === 'function', 'Expected "collect" provided as the third argument to DragSource to be ' +
         'a function that returns a plain object of props to inject. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', collect);
-    invariant_1(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DragSource to be ' +
+    browser(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DragSource to be ' +
         'a plain object when specified. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', collect);
@@ -10300,7 +10229,7 @@ var TargetImpl = /** @class */ (function () {
         }
         var dropResult = this.spec.drop(this.props, this.monitor, this.ref.current);
         {
-            invariant_1(typeof dropResult === 'undefined' || discount_lodash$1.isPlainObject(dropResult), 'drop() must either return undefined, or an object that represents the drop result. ' +
+            browser(typeof dropResult === 'undefined' || discount_lodash$1.isPlainObject(dropResult), 'drop() must either return undefined, or an object that represents the drop result. ' +
                 'Instead received %s. ' +
                 'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', dropResult);
         }
@@ -10310,11 +10239,11 @@ var TargetImpl = /** @class */ (function () {
 }());
 function createTargetFactory(spec) {
     Object.keys(spec).forEach(function (key) {
-        invariant_1(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drop target specification to only have ' +
+        browser(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drop target specification to only have ' +
             'some of the following keys: %s. ' +
             'Instead received a specification with an unexpected "%s" key. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', ALLOWED_SPEC_METHODS.join(', '), key);
-        invariant_1(typeof spec[key] === 'function', 'Expected %s in the drop target specification to be a function. ' +
+        browser(typeof spec[key] === 'function', 'Expected %s in the drop target specification to be a function. ' +
             'Instead received a specification with %s: %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', key, key, spec[key]);
     });
@@ -10352,7 +10281,7 @@ var DropTargetMonitorImpl = /** @class */ (function () {
         if (!this.targetId) {
             return false;
         }
-        invariant_1(!isCallingCanDrop, 'You may not call monitor.canDrop() inside your canDrop() implementation. ' +
+        browser(!isCallingCanDrop, 'You may not call monitor.canDrop() inside your canDrop() implementation. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target-monitor');
         try {
             isCallingCanDrop = true;
@@ -10523,21 +10452,21 @@ function DropTarget(type, spec, collect, options) {
     checkDecoratorArguments_1.default('DropTarget', 'type, spec, collect[, options]', type, spec, collect, options);
     var getType = type;
     if (typeof type !== 'function') {
-        invariant_1(isValidType_1.default(type, true), 'Expected "type" provided as the first argument to DropTarget to be ' +
+        browser(isValidType_1.default(type, true), 'Expected "type" provided as the first argument to DropTarget to be ' +
             'a string, an array of strings, or a function that returns either given ' +
             'the current props. Instead, received %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', type);
         getType = function () { return type; };
     }
-    invariant_1(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DropTarget to be ' +
+    browser(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DropTarget to be ' +
         'a plain object. Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', spec);
     var createTarget = createTargetFactory_1.default(spec);
-    invariant_1(typeof collect === 'function', 'Expected "collect" provided as the third argument to DropTarget to be ' +
+    browser(typeof collect === 'function', 'Expected "collect" provided as the third argument to DropTarget to be ' +
         'a function that returns a plain object of props to inject. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', collect);
-    invariant_1(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DropTarget to be ' +
+    browser(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DropTarget to be ' +
         'a plain object when specified. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', collect);
@@ -10645,7 +10574,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 function useDragDropManager() {
     var dragDropManager = react.useContext(DragDropContext_1.context).dragDropManager;
-    invariant_1(dragDropManager != null, 'Expected drag drop context');
+    browser(dragDropManager != null, 'Expected drag drop context');
     return dragDropManager;
 }
 exports.useDragDropManager = useDragDropManager;
@@ -10680,7 +10609,7 @@ function useDragHandler(spec, monitor, connector) {
                 var _a = spec.current, begin = _a.begin, item = _a.item;
                 if (begin) {
                     var beginResult = begin(monitor);
-                    invariant_1(beginResult == null || typeof beginResult === 'object', 'dragSpec.begin() must either return an object, undefined, or null');
+                    browser(beginResult == null || typeof beginResult === 'object', 'dragSpec.begin() must either return an object, undefined, or null');
                     return beginResult || item || {};
                 }
                 return item || {};
@@ -10739,8 +10668,8 @@ function useDrag(spec) {
     var specRef = react.useRef(spec);
     specRef.current = spec;
     // TODO: wire options into createSourceConnector
-    invariant_1(spec.item != null, 'item must be defined');
-    invariant_1(spec.item.type != null, 'item type must be defined');
+    browser(spec.item != null, 'item must be defined');
+    browser(spec.item.type != null, 'item type must be defined');
     var _a = drag.useDragSourceMonitor(), monitor = _a[0], connector = _a[1];
     drag.useDragHandler(specRef, monitor, connector);
     var result = useMonitorOutput_1.useMonitorOutput(monitor, specRef.current.collect || (function () { return ({}); }), function () { return connector.reconnect(); });
@@ -10832,7 +10761,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function useDrop(spec) {
     var specRef = react.useRef(spec);
     specRef.current = spec;
-    invariant_1(spec.accept != null, 'accept must be defined');
+    browser(spec.accept != null, 'accept must be defined');
     var _a = drop$1.useDropTargetMonitor(), monitor = _a[0], connector = _a[1];
     drop$1.useDropHandler(specRef, monitor, connector);
     var result = useMonitorOutput_1.useMonitorOutput(monitor, specRef.current.collect || (function () { return ({}); }), function () { return connector.reconnect(); });
@@ -13433,7 +13362,7 @@ var TouchBackend = /** @class */ (function () {
         if (typeof window === 'undefined') {
             return;
         }
-        invariant_1(!TouchBackend.isSetUp, 'Cannot have two Touch backends at the same time.');
+        browser(!TouchBackend.isSetUp, 'Cannot have two Touch backends at the same time.');
         TouchBackend.isSetUp = true;
         this.addEventListener(window, 'start', this.getTopMoveStartHandler());
         this.addEventListener(window, 'start', this.handleTopMoveStartCapture, true);
@@ -13664,21 +13593,12 @@ let rnds = new Array(16);
               return rnds;
             };
 
-var crypto = /*#__PURE__*/Object.freeze({
+var crypto$1 = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	randomBytes: randomBytes
 });
 
-var crypto$1 = getCjsExportFromNamespace(crypto);
-
-// Unique ID creation requires a high quality random # generator.  In node.js
-// this is pretty straight-forward - we use the crypto API.
-
-
-
-var rng = function nodeRNG() {
-  return crypto$1.randomBytes(16);
-};
+getCjsExportFromNamespace(crypto$1);
 
 /**
  * Convert array of 16 byte values to UUID string format of the form:
@@ -13707,6 +13627,43 @@ function bytesToUuid(buf, offset) {
 
 var bytesToUuid_1 = bytesToUuid;
 
+var rngBrowser = createCommonjsModule(function (module) {
+// Unique ID creation requires a high quality random # generator.  In the
+// browser this is a little complicated due to unknown quality of Math.random()
+// and inconsistent support for the `crypto` API.  We do the best we can via
+// feature-detection
+
+// getRandomValues needs to be invoked in a context where "this" is a Crypto
+// implementation. Also, find the complete implementation of crypto on IE11.
+var getRandomValues = (typeof(crypto) != 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto)) ||
+                      (typeof(msCrypto) != 'undefined' && typeof window.msCrypto.getRandomValues == 'function' && msCrypto.getRandomValues.bind(msCrypto));
+
+if (getRandomValues) {
+  // WHATWG crypto RNG - http://wiki.whatwg.org/wiki/Crypto
+  var rnds8 = new Uint8Array(16); // eslint-disable-line no-undef
+
+  module.exports = function whatwgRNG() {
+    getRandomValues(rnds8);
+    return rnds8;
+  };
+} else {
+  // Math.random()-based (RNG)
+  //
+  // If all else fails, use Math.random().  It's fast, but is of unspecified
+  // quality.
+  var rnds = new Array(16);
+
+  module.exports = function mathRNG() {
+    for (var i = 0, r; i < 16; i++) {
+      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+      rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+    }
+
+    return rnds;
+  };
+}
+});
+
 // **`v1()` - Generate time-based UUID**
 //
 // Inspired by https://github.com/LiosK/UUID.js
@@ -13732,7 +13689,7 @@ function v1(options, buf, offset) {
   // specified.  We do this lazily to minimize issues related to insufficient
   // system entropy.  See #189
   if (node == null || clockseq == null) {
-    var seedBytes = rng();
+    var seedBytes = rngBrowser();
     if (node == null) {
       // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
       node = _nodeId = [
@@ -13823,7 +13780,7 @@ function v4(options, buf, offset) {
   }
   options = options || {};
 
-  var rnds = options.random || (options.rng || rng)();
+  var rnds = options.random || (options.rng || rngBrowser)();
 
   // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
   rnds[6] = (rnds[6] & 0x0f) | 0x40;
@@ -15538,11 +15495,11 @@ var MosaicRoot_2 = MosaicRoot_1.MosaicRoot;
  * _.times(2, _.noop);
  * // => [undefined, undefined]
  */
-function noop$1() {
+function noop() {
   // No operation performed.
 }
 
-var noop_1 = noop$1;
+var noop_1 = noop;
 
 
 
@@ -15911,11 +15868,11 @@ var Context = /** @class */ (function () {
         var _this = this;
         var spec = (typeof $spec === 'function') ? { $apply: $spec } : $spec;
         if (!(Array.isArray(object) && Array.isArray(spec))) {
-            invariant_1(!Array.isArray(spec), 'update(): You provided an invalid spec to update(). The spec may ' +
+            browser(!Array.isArray(spec), 'update(): You provided an invalid spec to update(). The spec may ' +
                 'not contain an array except as the value of $set, $push, $unshift, ' +
                 '$splice or any custom command allowing an array value.');
         }
-        invariant_1(typeof spec === 'object' && spec !== null, 'update(): You provided an invalid spec to update(). The spec and ' +
+        browser(typeof spec === 'object' && spec !== null, 'update(): You provided an invalid spec to update(). The spec and ' +
             'every included key path must be plain objects containing one of the ' +
             'following commands: %s.', Object.keys(this.commands).join(', '));
         var nextObject = object;
@@ -16056,34 +16013,34 @@ exports.default = defaultContext.update;
 exports.default.default = module.exports = assign(exports.default, exports);
 // invariants
 function invariantPushAndUnshift(value, spec, command) {
-    invariant_1(Array.isArray(value), 'update(): expected target of %s to be an array; got %s.', command, value);
+    browser(Array.isArray(value), 'update(): expected target of %s to be an array; got %s.', command, value);
     invariantSpecArray(spec[command], command);
 }
 function invariantSpecArray(spec, command) {
-    invariant_1(Array.isArray(spec), 'update(): expected spec of %s to be an array; got %s. ' +
+    browser(Array.isArray(spec), 'update(): expected spec of %s to be an array; got %s. ' +
         'Did you forget to wrap your parameter in an array?', command, spec);
 }
 function invariantSplices(value, spec) {
-    invariant_1(Array.isArray(value), 'Expected $splice target to be an array; got %s', value);
+    browser(Array.isArray(value), 'Expected $splice target to be an array; got %s', value);
     invariantSplice(spec.$splice);
 }
 function invariantSplice(value) {
-    invariant_1(Array.isArray(value), 'update(): expected spec of $splice to be an array of arrays; got %s. ' +
+    browser(Array.isArray(value), 'update(): expected spec of $splice to be an array of arrays; got %s. ' +
         'Did you forget to wrap your parameters in an array?', value);
 }
 function invariantApply(fn) {
-    invariant_1(typeof fn === 'function', 'update(): expected spec of $apply to be a function; got %s.', fn);
+    browser(typeof fn === 'function', 'update(): expected spec of $apply to be a function; got %s.', fn);
 }
 function invariantSet(spec) {
-    invariant_1(Object.keys(spec).length === 1, 'Cannot have more than one key in an object with $set');
+    browser(Object.keys(spec).length === 1, 'Cannot have more than one key in an object with $set');
 }
 function invariantMerge(target, specValue) {
-    invariant_1(specValue && typeof specValue === 'object', 'update(): $merge expects a spec of type \'object\'; got %s', specValue);
-    invariant_1(target && typeof target === 'object', 'update(): $merge expects a target of type \'object\'; got %s', target);
+    browser(specValue && typeof specValue === 'object', 'update(): $merge expects a spec of type \'object\'; got %s', specValue);
+    browser(target && typeof target === 'object', 'update(): $merge expects a target of type \'object\'; got %s', target);
 }
 function invariantMapOrSet(target, command) {
     var typeOfTarget = type(target);
-    invariant_1(typeOfTarget === 'Map' || typeOfTarget === 'Set', 'update(): %s expects a target of type Set or Map; got %s', command, typeOfTarget);
+    browser(typeOfTarget === 'Map' || typeOfTarget === 'Set', 'update(): %s expects a target of type Set or Map; got %s', command, typeOfTarget);
 }
 });
 
@@ -17676,7 +17633,7 @@ const getAccessToken = async service => readFile({
   useCache: false
 }, `auth/${service}/accessToken`);
 const getNewAccessToken = async (service, oldToken = undefined, attempts = 10) => {
-  await log$1({
+  await log({
     op: 'text',
     text: `Re-Authenticating ${service}`,
     level: 'serious'
@@ -44796,7 +44753,7 @@ var reactDom = createCommonjsModule(function (module) {
 });
 var reactDom_1 = reactDom.findDOMNode;
 
-var config$1 = {
+var config = {
   disabled: false
 };
 
@@ -45062,7 +45019,7 @@ function (_React$Component) {
     var enterTimeout = appearing ? timeouts.appear : timeouts.enter; // no enter animation skip right to ENTERED
     // if we are mounting and running this it means appear _must_ be set
 
-    if (!mounting && !enter || config$1.disabled) {
+    if (!mounting && !enter || config.disabled) {
       this.safeSetState({
         status: ENTERED
       }, function () {
@@ -45093,7 +45050,7 @@ function (_React$Component) {
     var exit = this.props.exit;
     var timeouts = this.getTimeouts(); // no exit animation skip right to EXITED
 
-    if (!exit || config$1.disabled) {
+    if (!exit || config.disabled) {
       this.safeSetState({
         status: EXITED
       }, function () {
@@ -45375,7 +45332,7 @@ Transition.propTypes =  {
 
 } ;
 
-function noop$2() {}
+function noop$1() {}
 
 Transition.defaultProps = {
   in: false,
@@ -45384,12 +45341,12 @@ Transition.defaultProps = {
   appear: false,
   enter: true,
   exit: true,
-  onEnter: noop$2,
-  onEntering: noop$2,
-  onEntered: noop$2,
-  onExit: noop$2,
-  onExiting: noop$2,
-  onExited: noop$2
+  onEnter: noop$1,
+  onEntering: noop$1,
+  onEntered: noop$1,
+  onExit: noop$1,
+  onExiting: noop$1,
+  onExited: noop$1
 };
 Transition.UNMOUNTED = 0;
 Transition.EXITED = 1;
@@ -46097,7 +46054,7 @@ var makeEventKey = function makeEventKey(eventKey, href) {
 
 var TabContext = react.createContext(null);
 
-var noop$3 = function noop() {};
+var noop$2 = function noop() {};
 
 var AbstractNav = react.forwardRef(function (_ref, ref) {
   var _ref$as = _ref.as,
@@ -46185,8 +46142,8 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
       role: role,
       // used by NavLink to determine it's role
       activeKey: makeEventKey(activeKey),
-      getControlledId: getControlledId || noop$3,
-      getControllerId: getControllerId || noop$3
+      getControlledId: getControlledId || noop$2,
+      getControllerId: getControllerId || noop$2
     }
   }, react.createElement(Component, _extends({}, props, {
     onKeyDown: handleKeyDown,
@@ -49150,7 +49107,7 @@ function ownerDocument$1 (componentOrElement) {
 
 var escapeKeyCode = 27;
 
-var noop$4 = function noop() {};
+var noop$3 = function noop() {};
 
 function isLeftClickEvent(event) {
   return event.button === 0;
@@ -49180,7 +49137,7 @@ function useRootClose(ref, onRootClose, _temp) {
       clickTrigger = _ref$clickTrigger === void 0 ? 'click' : _ref$clickTrigger;
 
   var preventMouseRootCloseRef = react_7(false);
-  var onClose = onRootClose || noop$4;
+  var onClose = onRootClose || noop$3;
   var handleMouseCapture = react_9(function (e) {
     var currentTarget = ref && ('current' in ref ? ref.current : ref);
     warning_1(!!currentTarget, 'RootClose captured a close event but does not have a ref to compare it to. ' + 'useRootClose(), should be passed a ref that resolves to a DOM node');
@@ -49209,7 +49166,7 @@ function useRootClose(ref, onRootClose, _temp) {
 
     if ('ontouchstart' in doc.documentElement) {
       mobileSafariHackListeners = [].slice.call(doc.body.children).map(function (el) {
-        return listen(el, 'mousemove', noop$4);
+        return listen(el, 'mousemove', noop$3);
       });
     }
 
@@ -49723,7 +49680,7 @@ DropdownItem.defaultProps = defaultProps$c;
 function useWrappedRefWithWarning(ref, componentName) {
 
   var warningRef = react_9(function (refValue) {
-    !(refValue == null || !refValue.isReactComponent) ?  invariant_1(false, componentName + " injected a ref to a provided `as` component that resolved to a component instance instead of a DOM element. " + 'Use `React.forwardRef` to provide the injected ref to the class component as a prop in order to pass it directly to a DOM element')  : void 0;
+    !(refValue == null || !refValue.isReactComponent) ?  browser(false, componentName + " injected a ref to a provided `as` component that resolved to a component instance instead of a DOM element. " + 'Use `React.forwardRef` to provide the injected ref to the class component as a prop in order to pass it directly to a DOM element')  : void 0;
   }, [componentName]); // eslint-disable-next-line react-hooks/rules-of-hooks
 
   return useMergedRefs(warningRef, ref);
@@ -82609,7 +82566,8 @@ class JsEditorUi extends Pane {
     return {
       ask: propTypes.func,
       file: propTypes.string,
-      id: propTypes.string
+      id: propTypes.string,
+      workspace: propTypes.string
     };
   }
 
@@ -82646,13 +82604,14 @@ class JsEditorUi extends Pane {
   async run() {
     const {
       ask,
-      file
+      file,
+      workspace
     } = this.props;
     await this.save();
-    await log$1({
+    await log({
       op: 'open'
     });
-    await log$1({
+    await log({
       op: 'text',
       text: 'Running',
       level: 'serious'
@@ -82664,7 +82623,8 @@ class JsEditorUi extends Pane {
     }
 
     await ask({
-      evaluate: script
+      evaluate: script,
+      workspace
     });
   }
 
@@ -82676,7 +82636,7 @@ class JsEditorUi extends Pane {
       code = ''
     } = this.state;
     await writeFile({}, file, code);
-    await log$1({
+    await log({
       op: 'text',
       text: 'Saved',
       level: 'serious'
@@ -84135,1380 +84095,19 @@ function _extends$2() {
   return _extends$2.apply(this, arguments);
 }
 
-// @credits https://gist.github.com/rogozhnikoff/a43cfed27c41e4e68cdc
-function findInArray(array
-/*: Array<any> | TouchList*/
-, callback
-/*: Function*/
-)
-/*: any*/
-{
-  for (let i = 0, length = array.length; i < length; i++) {
-    if (callback.apply(callback, [array[i], i, array])) return array[i];
-  }
-}
-function isFunction$3(func
-/*: any*/
-)
-/*: boolean*/
-{
-  return typeof func === 'function' || Object.prototype.toString.call(func) === '[object Function]';
-}
-function isNum(num
-/*: any*/
-)
-/*: boolean*/
-{
-  return typeof num === 'number' && !isNaN(num);
-}
-function int(a
-/*: string*/
-)
-/*: number*/
-{
-  return parseInt(a, 10);
-}
-function dontSetMe(props
-/*: Object*/
-, propName
-/*: string*/
-, componentName
-/*: string*/
-) {
-  if (props[propName]) {
-    return new Error(`Invalid prop ${propName} passed to ${componentName} - do not set this, set it on the child.`);
-  }
-}
+var reactDraggable_min = createCommonjsModule(function (module, exports) {
+!function(t,e){module.exports=e(react,reactDom);}(window,function(t,e){return function(t){var e={};function n(r){if(e[r])return e[r].exports;var o=e[r]={i:r,l:!1,exports:{}};return t[r].call(o.exports,o,o.exports,n),o.l=!0,o.exports}return n.m=t,n.c=e,n.d=function(t,e,r){n.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:r});},n.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0});},n.t=function(t,e){if(1&e&&(t=n(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var o in t)n.d(r,o,function(e){return t[e]}.bind(null,o));return r},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},n.p="",n(n.s=4)}([function(t,e,n){t.exports=n(5)();},function(e,n){e.exports=t;},function(t,n){t.exports=e;},function(t,e,n){var r;
+/*!
+  Copyright (c) 2017 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/!function(){var n={}.hasOwnProperty;function o(){for(var t=[],e=0;e<arguments.length;e++){var r=arguments[e];if(r){var a=typeof r;if("string"===a||"number"===a)t.push(r);else if(Array.isArray(r)&&r.length){var i=o.apply(null,r);i&&t.push(i);}else if("object"===a)for(var s in r)n.call(r,s)&&r[s]&&t.push(s);}}return t.join(" ")}t.exports?(o.default=o,t.exports=o):void 0===(r=function(){return o}.apply(e,[]))||(t.exports=r);}();},function(t,e,n){var r=n(7),o=r.default,a=r.DraggableCore;t.exports=o,t.exports.default=o,t.exports.DraggableCore=a;},function(t,e,n){var r=n(6);function o(){}function a(){}a.resetWarningCache=o,t.exports=function(){function t(t,e,n,o,a,i){if(i!==r){var s=new Error("Calling PropTypes validators directly is not supported by the `prop-types` package. Use PropTypes.checkPropTypes() to call them. Read more at http://fb.me/use-check-prop-types");throw s.name="Invariant Violation",s}}function e(){return t}t.isRequired=t;var n={array:t,bool:t,func:t,number:t,object:t,string:t,symbol:t,any:t,arrayOf:e,element:t,elementType:t,instanceOf:e,node:t,objectOf:e,oneOf:e,oneOfType:e,shape:e,exact:e,checkPropTypes:a,resetWarningCache:o};return n.PropTypes=n,n};},function(t,e,n){t.exports="SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED";},function(t,e,n){n.r(e);var r=n(1),o=n.n(r),a=n(0),i=n.n(a),s=n(2),u=n.n(s),c=n(3),l=n.n(c);function f(t,e){for(var n=0,r=t.length;n<r;n++)if(e.apply(e,[t[n],n,t]))return t[n]}function p(t){return "function"==typeof t||"[object Function]"===Object.prototype.toString.call(t)}function d(t){return "number"==typeof t&&!isNaN(t)}function g(t){return parseInt(t,10)}function y(t,e,n){if(t[e])return new Error("Invalid prop ".concat(e," passed to ").concat(n," - do not set this, set it on the child."))}var h=["Moz","Webkit","O","ms"];function b(t,e){return e?"".concat(e).concat(function(t){for(var e="",n=!0,r=0;r<t.length;r++)n?(e+=t[r].toUpperCase(),n=!1):"-"===t[r]?n=!0:e+=t[r];return e}(t)):t}var m=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"transform";if("undefined"==typeof window||void 0===window.document)return "";var e=window.document.documentElement.style;if(t in e)return "";for(var n=0;n<h.length;n++)if(b(t,h[n])in e)return h[n];return ""}();function v(t,e){var n=Object.keys(t);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(t);e&&(r=r.filter(function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable})),n.push.apply(n,r);}return n}function w(t,e,n){return e in t?Object.defineProperty(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}):t[e]=n,t}var O="";function S(t,e){return O||(O=f(["matches","webkitMatchesSelector","mozMatchesSelector","msMatchesSelector","oMatchesSelector"],function(e){return p(t[e])})),!!p(t[O])&&t[O](e)}function D(t,e,n){var r=t;do{if(S(r,e))return !0;if(r===n)return !1;r=r.parentNode;}while(r);return !1}function x(t,e,n){t&&(t.attachEvent?t.attachEvent("on"+e,n):t.addEventListener?t.addEventListener(e,n,!0):t["on"+e]=n);}function P(t,e,n){t&&(t.detachEvent?t.detachEvent("on"+e,n):t.removeEventListener?t.removeEventListener(e,n,!0):t["on"+e]=null);}function j(t){var e=t.clientHeight,n=t.ownerDocument.defaultView.getComputedStyle(t);return e+=g(n.borderTopWidth),e+=g(n.borderBottomWidth)}function E(t){var e=t.clientWidth,n=t.ownerDocument.defaultView.getComputedStyle(t);return e+=g(n.borderLeftWidth),e+=g(n.borderRightWidth)}function T(t){var e=t.clientHeight,n=t.ownerDocument.defaultView.getComputedStyle(t);return e-=g(n.paddingTop),e-=g(n.paddingBottom)}function N(t){var e=t.clientWidth,n=t.ownerDocument.defaultView.getComputedStyle(t);return e-=g(n.paddingLeft),e-=g(n.paddingRight)}function C(t,e,n){var r=t.x,o=t.y,a="translate(".concat(r).concat(n,",").concat(o).concat(n,")");if(e){var i="".concat("string"==typeof e.x?e.x:e.x+n),s="".concat("string"==typeof e.y?e.y:e.y+n);a="translate(".concat(i,", ").concat(s,")")+a;}return a}function M(t){if(t){var e,n,r=t.getElementById("react-draggable-style-el");r||((r=t.createElement("style")).type="text/css",r.id="react-draggable-style-el",r.innerHTML=".react-draggable-transparent-selection *::-moz-selection {all: inherit;}\n",r.innerHTML+=".react-draggable-transparent-selection *::selection {all: inherit;}\n",t.getElementsByTagName("head")[0].appendChild(r)),t.body&&(e=t.body,n="react-draggable-transparent-selection",e.classList?e.classList.add(n):e.className.match(new RegExp("(?:^|\\s)".concat(n,"(?!\\S)")))||(e.className+=" ".concat(n)));}}function k(t){try{t&&t.body&&(e=t.body,n="react-draggable-transparent-selection",e.classList?e.classList.remove(n):e.className=e.className.replace(new RegExp("(?:^|\\s)".concat(n,"(?!\\S)"),"g"),"")),t.selection?t.selection.empty():window.getSelection().removeAllRanges();}catch(t){}var e,n;}function _(){return function(t){for(var e=1;e<arguments.length;e++){var n=null!=arguments[e]?arguments[e]:{};e%2?v(n,!0).forEach(function(e){w(t,e,n[e]);}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(n)):v(n).forEach(function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(n,e));});}return t}({touchAction:"none"},arguments.length>0&&void 0!==arguments[0]?arguments[0]:{})}function X(t){return "both"===t.props.axis||"x"===t.props.axis}function Y(t){return "both"===t.props.axis||"y"===t.props.axis}function L(t,e,n){var r="number"==typeof e?function(t,e){return t.targetTouches&&f(t.targetTouches,function(t){return e===t.identifier})||t.changedTouches&&f(t.changedTouches,function(t){return e===t.identifier})}(t,e):null;if("number"==typeof e&&!r)return null;var o=I(n);return function(t,e,n){var r=e===e.ownerDocument.body?{left:0,top:0}:e.getBoundingClientRect();return {x:(t.clientX+e.scrollLeft-r.left)/n,y:(t.clientY+e.scrollTop-r.top)/n}}(r||t,n.props.offsetParent||o.offsetParent||o.ownerDocument.body,n.props.scale)}function R(t,e,n){var r=t.state,o=!d(r.lastX),a=I(t);return o?{node:a,deltaX:0,deltaY:0,lastX:e,lastY:n,x:e,y:n}:{node:a,deltaX:e-r.lastX,deltaY:n-r.lastY,lastX:r.lastX,lastY:r.lastY,x:e,y:n}}function A(t,e){var n=t.props.scale;return {node:e.node,x:t.state.x+e.deltaX/n,y:t.state.y+e.deltaY/n,deltaX:e.deltaX/n,deltaY:e.deltaY/n,lastX:t.state.x,lastY:t.state.y}}function I(t){var e=u.a.findDOMNode(t);if(!e)throw new Error("<DraggableCore>: Unmounted during event!");return e}function U(t){return (U="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function V(t,e){return function(t){if(Array.isArray(t))return t}(t)||function(t,e){var n=[],r=!0,o=!1,a=void 0;try{for(var i,s=t[Symbol.iterator]();!(r=(i=s.next()).done)&&(n.push(i.value),!e||n.length!==e);r=!0);}catch(t){o=!0,a=t;}finally{try{r||null==s.return||s.return();}finally{if(o)throw a}}return n}(t,e)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance")}()}function W(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r);}}function B(t){return (B=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function H(t){if(void 0===t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function q(t,e){return (q=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}function G(t,e,n){return e in t?Object.defineProperty(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}):t[e]=n,t}var z={touch:{start:"touchstart",move:"touchmove",stop:"touchend"},mouse:{start:"mousedown",move:"mousemove",stop:"mouseup"}},F=z.mouse,J=function(t){function e(){var t,n,r,o;!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,e);for(var a=arguments.length,i=new Array(a),s=0;s<a;s++)i[s]=arguments[s];return r=this,o=(t=B(e)).call.apply(t,[this].concat(i)),n=!o||"object"!==U(o)&&"function"!=typeof o?H(r):o,G(H(n),"state",{dragging:!1,lastX:NaN,lastY:NaN,touchIdentifier:null}),G(H(n),"handleDragStart",function(t){if(n.props.onMouseDown(t),!n.props.allowAnyClick&&"number"==typeof t.button&&0!==t.button)return !1;var e=u.a.findDOMNode(H(n));if(!e||!e.ownerDocument||!e.ownerDocument.body)throw new Error("<DraggableCore> not mounted on DragStart!");var r=e.ownerDocument;if(!(n.props.disabled||!(t.target instanceof r.defaultView.Node)||n.props.handle&&!D(t.target,n.props.handle,e)||n.props.cancel&&D(t.target,n.props.cancel,e))){var o=function(t){return t.targetTouches&&t.targetTouches[0]?t.targetTouches[0].identifier:t.changedTouches&&t.changedTouches[0]?t.changedTouches[0].identifier:void 0}(t);n.setState({touchIdentifier:o});var a=L(t,o,H(n));if(null!=a){var i=a.x,s=a.y,c=R(H(n),i,s);n.props.onStart,!1!==n.props.onStart(t,c)&&(n.props.enableUserSelectHack&&M(r),n.setState({dragging:!0,lastX:i,lastY:s}),x(r,F.move,n.handleDrag),x(r,F.stop,n.handleDragStop));}}}),G(H(n),"handleDrag",function(t){"touchmove"===t.type&&t.preventDefault();var e=L(t,n.state.touchIdentifier,H(n));if(null!=e){var r,o,a,i=e.x,s=e.y;if(Array.isArray(n.props.grid)){var u=i-n.state.lastX,c=s-n.state.lastY,l=V((r=n.props.grid,o=u,a=c,[Math.round(o/r[0])*r[0],Math.round(a/r[1])*r[1]]),2);if(u=l[0],c=l[1],!u&&!c)return;i=n.state.lastX+u,s=n.state.lastY+c;}var f=R(H(n),i,s);if(!1!==n.props.onDrag(t,f))n.setState({lastX:i,lastY:s});else try{n.handleDragStop(new MouseEvent("mouseup"));}catch(t){var p=document.createEvent("MouseEvents");p.initMouseEvent("mouseup",!0,!0,window,0,0,0,0,0,!1,!1,!1,!1,0,null),n.handleDragStop(p);}}}),G(H(n),"handleDragStop",function(t){if(n.state.dragging){var e=L(t,n.state.touchIdentifier,H(n));if(null!=e){var r=e.x,o=e.y,a=R(H(n),r,o),i=u.a.findDOMNode(H(n));i&&n.props.enableUserSelectHack&&k(i.ownerDocument),n.setState({dragging:!1,lastX:NaN,lastY:NaN}),n.props.onStop(t,a),i&&(P(i.ownerDocument,F.move,n.handleDrag),P(i.ownerDocument,F.stop,n.handleDragStop));}}}),G(H(n),"onMouseDown",function(t){return F=z.mouse,n.handleDragStart(t)}),G(H(n),"onMouseUp",function(t){return F=z.mouse,n.handleDragStop(t)}),G(H(n),"onTouchStart",function(t){return F=z.touch,n.handleDragStart(t)}),G(H(n),"onTouchEnd",function(t){return F=z.touch,n.handleDragStop(t)}),n}var n,r;return function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),e&&q(t,e);}(e,o.a.Component),n=e,(r=[{key:"componentWillUnmount",value:function(){var t=u.a.findDOMNode(this);if(t){var e=t.ownerDocument;P(e,z.mouse.move,this.handleDrag),P(e,z.touch.move,this.handleDrag),P(e,z.mouse.stop,this.handleDragStop),P(e,z.touch.stop,this.handleDragStop),this.props.enableUserSelectHack&&k(e);}}},{key:"render",value:function(){return o.a.cloneElement(o.a.Children.only(this.props.children),{style:_(this.props.children.props.style),onMouseDown:this.onMouseDown,onTouchStart:this.onTouchStart,onMouseUp:this.onMouseUp,onTouchEnd:this.onTouchEnd})}}])&&W(n.prototype,r),e}();function K(t){return (K="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function Q(){return (Q=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var r in n)Object.prototype.hasOwnProperty.call(n,r)&&(t[r]=n[r]);}return t}).apply(this,arguments)}function Z(t,e){if(null==t)return {};var n,r,o=function(t,e){if(null==t)return {};var n,r,o={},a=Object.keys(t);for(r=0;r<a.length;r++)n=a[r],e.indexOf(n)>=0||(o[n]=t[n]);return o}(t,e);if(Object.getOwnPropertySymbols){var a=Object.getOwnPropertySymbols(t);for(r=0;r<a.length;r++)n=a[r],e.indexOf(n)>=0||Object.prototype.propertyIsEnumerable.call(t,n)&&(o[n]=t[n]);}return o}function $(t,e){return function(t){if(Array.isArray(t))return t}(t)||function(t,e){var n=[],r=!0,o=!1,a=void 0;try{for(var i,s=t[Symbol.iterator]();!(r=(i=s.next()).done)&&(n.push(i.value),!e||n.length!==e);r=!0);}catch(t){o=!0,a=t;}finally{try{r||null==s.return||s.return();}finally{if(o)throw a}}return n}(t,e)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance")}()}function tt(t,e){var n=Object.keys(t);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(t);e&&(r=r.filter(function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable})),n.push.apply(n,r);}return n}function et(t){for(var e=1;e<arguments.length;e++){var n=null!=arguments[e]?arguments[e]:{};e%2?tt(n,!0).forEach(function(e){st(t,e,n[e]);}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(n)):tt(n).forEach(function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(n,e));});}return t}function nt(t){return (nt=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function rt(t){if(void 0===t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function ot(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r);}}function at(t,e,n){return e&&ot(t.prototype,e),n&&ot(t,n),t}function it(t,e){return (it=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}function st(t,e,n){return e in t?Object.defineProperty(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}):t[e]=n,t}G(J,"displayName","DraggableCore"),G(J,"propTypes",{allowAnyClick:i.a.bool,disabled:i.a.bool,enableUserSelectHack:i.a.bool,offsetParent:function(t,e){if(t[e]&&1!==t[e].nodeType)throw new Error("Draggable's offsetParent must be a DOM Node.")},grid:i.a.arrayOf(i.a.number),handle:i.a.string,cancel:i.a.string,onStart:i.a.func,onDrag:i.a.func,onStop:i.a.func,onMouseDown:i.a.func,scale:i.a.number,className:y,style:y,transform:y}),G(J,"defaultProps",{allowAnyClick:!1,cancel:null,disabled:!1,enableUserSelectHack:!0,offsetParent:null,handle:null,grid:null,transform:null,onStart:function(){},onDrag:function(){},onStop:function(){},onMouseDown:function(){},scale:1}),n.d(e,"default",function(){return ut}),n.d(e,"DraggableCore",function(){return J});var ut=function(t){function e(t){var n,r,o;return function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,e),r=this,o=nt(e).call(this,t),n=!o||"object"!==K(o)&&"function"!=typeof o?rt(r):o,st(rt(n),"onDragStart",function(t,e){if(!1===n.props.onStart(t,A(rt(n),e)))return !1;n.setState({dragging:!0,dragged:!0});}),st(rt(n),"onDrag",function(t,e){if(!n.state.dragging)return !1;var r=A(rt(n),e),o={x:r.x,y:r.y};if(n.props.bounds){var a=o.x,i=o.y;o.x+=n.state.slackX,o.y+=n.state.slackY;var s=$(function(t,e,n){if(!t.props.bounds)return [e,n];var r=t.props.bounds;r="string"==typeof r?r:function(t){return {left:t.left,top:t.top,right:t.right,bottom:t.bottom}}(r);var o=I(t);if("string"==typeof r){var a,i=o.ownerDocument,s=i.defaultView;if(!((a="parent"===r?o.parentNode:i.querySelector(r))instanceof s.HTMLElement))throw new Error('Bounds selector "'+r+'" could not find an element.');var u=s.getComputedStyle(o),c=s.getComputedStyle(a);r={left:-o.offsetLeft+g(c.paddingLeft)+g(u.marginLeft),top:-o.offsetTop+g(c.paddingTop)+g(u.marginTop),right:N(a)-E(o)-o.offsetLeft+g(c.paddingRight)-g(u.marginRight),bottom:T(a)-j(o)-o.offsetTop+g(c.paddingBottom)-g(u.marginBottom)};}return d(r.right)&&(e=Math.min(e,r.right)),d(r.bottom)&&(n=Math.min(n,r.bottom)),d(r.left)&&(e=Math.max(e,r.left)),d(r.top)&&(n=Math.max(n,r.top)),[e,n]}(rt(n),o.x,o.y),2),u=s[0],c=s[1];o.x=u,o.y=c,o.slackX=n.state.slackX+(a-o.x),o.slackY=n.state.slackY+(i-o.y),r.x=o.x,r.y=o.y,r.deltaX=o.x-n.state.x,r.deltaY=o.y-n.state.y;}if(!1===n.props.onDrag(t,r))return !1;n.setState(o);}),st(rt(n),"onDragStop",function(t,e){if(!n.state.dragging)return !1;if(!1===n.props.onStop(t,A(rt(n),e)))return !1;var r={dragging:!1,slackX:0,slackY:0};if(Boolean(n.props.position)){var o=n.props.position,a=o.x,i=o.y;r.x=a,r.y=i;}n.setState(r);}),n.state={dragging:!1,dragged:!1,x:t.position?t.position.x:t.defaultPosition.x,y:t.position?t.position.y:t.defaultPosition.y,prevPropsPosition:et({},t.position),slackX:0,slackY:0,isElementSVG:!1},!t.position||t.onDrag||t.onStop||console.warn("A `position` was applied to this <Draggable>, without drag handlers. This will make this component effectively undraggable. Please attach `onDrag` or `onStop` handlers so you can adjust the `position` of this element."),n}return function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),e&&it(t,e);}(e,o.a.Component),at(e,null,[{key:"getDerivedStateFromProps",value:function(t,e){var n=t.position,r=e.prevPropsPosition;return !n||r&&n.x===r.x&&n.y===r.y?null:{x:n.x,y:n.y,prevPropsPosition:et({},n)}}}]),at(e,[{key:"componentDidMount",value:function(){void 0!==window.SVGElement&&u.a.findDOMNode(this)instanceof window.SVGElement&&this.setState({isElementSVG:!0});}},{key:"componentWillUnmount",value:function(){this.setState({dragging:!1});}},{key:"render",value:function(){var t,e=this.props,n=(e.axis,e.bounds,e.children),r=e.defaultPosition,a=e.defaultClassName,i=e.defaultClassNameDragging,s=e.defaultClassNameDragged,u=e.position,c=e.positionOffset,f=(e.scale,Z(e,["axis","bounds","children","defaultPosition","defaultClassName","defaultClassNameDragging","defaultClassNameDragged","position","positionOffset","scale"])),p={},d=null,g=!Boolean(u)||this.state.dragging,y=u||r,h={x:X(this)&&g?this.state.x:y.x,y:Y(this)&&g?this.state.y:y.y};this.state.isElementSVG?d=function(t,e){return C(t,e,"")}(h,c):p=function(t,e){var n=C(t,e,"px");return w({},b("transform",m),n)}(h,c);var v=l()(n.props.className||"",a,(st(t={},i,this.state.dragging),st(t,s,this.state.dragged),t));return o.a.createElement(J,Q({},f,{onStart:this.onDragStart,onDrag:this.onDrag,onStop:this.onDragStop}),o.a.cloneElement(o.a.Children.only(n),{className:v,style:et({},n.props.style,{},p),transform:d}))}}]),e}();st(ut,"displayName","Draggable"),st(ut,"propTypes",et({},J.propTypes,{axis:i.a.oneOf(["both","x","y","none"]),bounds:i.a.oneOfType([i.a.shape({left:i.a.number,right:i.a.number,top:i.a.number,bottom:i.a.number}),i.a.string,i.a.oneOf([!1])]),defaultClassName:i.a.string,defaultClassNameDragging:i.a.string,defaultClassNameDragged:i.a.string,defaultPosition:i.a.shape({x:i.a.number,y:i.a.number}),positionOffset:i.a.shape({x:i.a.oneOfType([i.a.number,i.a.string]),y:i.a.oneOfType([i.a.number,i.a.string])}),position:i.a.shape({x:i.a.number,y:i.a.number}),className:y,style:y,transform:y})),st(ut,"defaultProps",et({},J.defaultProps,{axis:"both",bounds:!1,defaultClassName:"react-draggable",defaultClassNameDragging:"react-draggable-dragging",defaultClassNameDragged:"react-draggable-dragged",defaultPosition:{x:0,y:0},position:null,scale:1}));}])});
 
-const prefixes = ['Moz', 'Webkit', 'O', 'ms'];
-function getPrefix(prop
-/*: string*/
-= 'transform')
-/*: string*/
-{
-  // Checking specifically for 'window.document' is for pseudo-browser server-side
-  // environments that define 'window' as the global context.
-  // E.g. React-rails (see https://github.com/reactjs/react-rails/pull/84)
-  if (typeof window === 'undefined' || typeof window.document === 'undefined') return '';
-  const style = window.document.documentElement.style;
-  if (prop in style) return '';
-
-  for (let i = 0; i < prefixes.length; i++) {
-    if (browserPrefixToKey(prop, prefixes[i]) in style) return prefixes[i];
-  }
-
-  return '';
-}
-function browserPrefixToKey(prop
-/*: string*/
-, prefix
-/*: string*/
-)
-/*: string*/
-{
-  return prefix ? `${prefix}${kebabToTitleCase(prop)}` : prop;
-}
-
-function kebabToTitleCase(str
-/*: string*/
-)
-/*: string*/
-{
-  let out = '';
-  let shouldCapitalize = true;
-
-  for (let i = 0; i < str.length; i++) {
-    if (shouldCapitalize) {
-      out += str[i].toUpperCase();
-      shouldCapitalize = false;
-    } else if (str[i] === '-') {
-      shouldCapitalize = true;
-    } else {
-      out += str[i];
-    }
-  }
-
-  return out;
-} // Default export is the prefix itself, like 'Moz', 'Webkit', etc
-// Note that you may have to re-test for certain things; for instance, Chrome 50
-// can handle unprefixed `transform`, but not unprefixed `user-select`
-
-
-var browserPrefix = getPrefix();
-
-/*:: import type {ControlPosition, PositionOffsetControlPosition, MouseTouchEvent} from './types';*/
-
-let matchesSelectorFunc = '';
-function matchesSelector(el
-/*: Node*/
-, selector
-/*: string*/
-)
-/*: boolean*/
-{
-  if (!matchesSelectorFunc) {
-    matchesSelectorFunc = findInArray(['matches', 'webkitMatchesSelector', 'mozMatchesSelector', 'msMatchesSelector', 'oMatchesSelector'], function (method) {
-      // $FlowIgnore: Doesn't think elements are indexable
-      return isFunction$3(el[method]);
-    });
-  } // Might not be found entirely (not an Element?) - in that case, bail
-  // $FlowIgnore: Doesn't think elements are indexable
-
-
-  if (!isFunction$3(el[matchesSelectorFunc])) return false; // $FlowIgnore: Doesn't think elements are indexable
-
-  return el[matchesSelectorFunc](selector);
-} // Works up the tree to the draggable itself attempting to match selector.
-
-function matchesSelectorAndParentsTo(el
-/*: Node*/
-, selector
-/*: string*/
-, baseNode
-/*: Node*/
-)
-/*: boolean*/
-{
-  let node = el;
-
-  do {
-    if (matchesSelector(node, selector)) return true;
-    if (node === baseNode) return false;
-    node = node.parentNode;
-  } while (node);
-
-  return false;
-}
-function addEvent(el
-/*: ?Node*/
-, event
-/*: string*/
-, handler
-/*: Function*/
-)
-/*: void*/
-{
-  if (!el) {
-    return;
-  }
-
-  if (el.attachEvent) {
-    el.attachEvent('on' + event, handler);
-  } else if (el.addEventListener) {
-    el.addEventListener(event, handler, true);
-  } else {
-    // $FlowIgnore: Doesn't think elements are indexable
-    el['on' + event] = handler;
-  }
-}
-function removeEvent(el
-/*: ?Node*/
-, event
-/*: string*/
-, handler
-/*: Function*/
-)
-/*: void*/
-{
-  if (!el) {
-    return;
-  }
-
-  if (el.detachEvent) {
-    el.detachEvent('on' + event, handler);
-  } else if (el.removeEventListener) {
-    el.removeEventListener(event, handler, true);
-  } else {
-    // $FlowIgnore: Doesn't think elements are indexable
-    el['on' + event] = null;
-  }
-}
-function outerHeight(node
-/*: HTMLElement*/
-)
-/*: number*/
-{
-  // This is deliberately excluding margin for our calculations, since we are using
-  // offsetTop which is including margin. See getBoundPosition
-  let height = node.clientHeight;
-  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
-  height += int(computedStyle.borderTopWidth);
-  height += int(computedStyle.borderBottomWidth);
-  return height;
-}
-function outerWidth(node
-/*: HTMLElement*/
-)
-/*: number*/
-{
-  // This is deliberately excluding margin for our calculations, since we are using
-  // offsetLeft which is including margin. See getBoundPosition
-  let width = node.clientWidth;
-  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
-  width += int(computedStyle.borderLeftWidth);
-  width += int(computedStyle.borderRightWidth);
-  return width;
-}
-function innerHeight(node
-/*: HTMLElement*/
-)
-/*: number*/
-{
-  let height = node.clientHeight;
-  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
-  height -= int(computedStyle.paddingTop);
-  height -= int(computedStyle.paddingBottom);
-  return height;
-}
-function innerWidth(node
-/*: HTMLElement*/
-)
-/*: number*/
-{
-  let width = node.clientWidth;
-  const computedStyle = node.ownerDocument.defaultView.getComputedStyle(node);
-  width -= int(computedStyle.paddingLeft);
-  width -= int(computedStyle.paddingRight);
-  return width;
-} // Get from offsetParent
-
-function offsetXYFromParent(evt
-/*: {clientX: number, clientY: number}*/
-, offsetParent
-/*: HTMLElement*/
-, scale
-/*: number*/
-)
-/*: ControlPosition*/
-{
-  const isBody = offsetParent === offsetParent.ownerDocument.body;
-  const offsetParentRect = isBody ? {
-    left: 0,
-    top: 0
-  } : offsetParent.getBoundingClientRect();
-  const x = (evt.clientX + offsetParent.scrollLeft - offsetParentRect.left) / scale;
-  const y = (evt.clientY + offsetParent.scrollTop - offsetParentRect.top) / scale;
-  return {
-    x,
-    y
-  };
-}
-function createCSSTransform(controlPos
-/*: ControlPosition*/
-, positionOffset
-/*: PositionOffsetControlPosition*/
-)
-/*: Object*/
-{
-  const translation = getTranslation(controlPos, positionOffset, 'px');
-  return {
-    [browserPrefixToKey('transform', browserPrefix)]: translation
-  };
-}
-function createSVGTransform(controlPos
-/*: ControlPosition*/
-, positionOffset
-/*: PositionOffsetControlPosition*/
-)
-/*: string*/
-{
-  const translation = getTranslation(controlPos, positionOffset, '');
-  return translation;
-}
-function getTranslation({
-  x,
-  y
-}
-/*: ControlPosition*/
-, positionOffset
-/*: PositionOffsetControlPosition*/
-, unitSuffix
-/*: string*/
-)
-/*: string*/
-{
-  let translation = `translate(${x}${unitSuffix},${y}${unitSuffix})`;
-
-  if (positionOffset) {
-    const defaultX = `${typeof positionOffset.x === 'string' ? positionOffset.x : positionOffset.x + unitSuffix}`;
-    const defaultY = `${typeof positionOffset.y === 'string' ? positionOffset.y : positionOffset.y + unitSuffix}`;
-    translation = `translate(${defaultX}, ${defaultY})` + translation;
-  }
-
-  return translation;
-}
-function getTouch(e
-/*: MouseTouchEvent*/
-, identifier
-/*: number*/
-)
-/*: ?{clientX: number, clientY: number}*/
-{
-  return e.targetTouches && findInArray(e.targetTouches, t => identifier === t.identifier) || e.changedTouches && findInArray(e.changedTouches, t => identifier === t.identifier);
-}
-function getTouchIdentifier(e
-/*: MouseTouchEvent*/
-)
-/*: ?number*/
-{
-  if (e.targetTouches && e.targetTouches[0]) return e.targetTouches[0].identifier;
-  if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].identifier;
-} // User-select Hacks:
-//
-// Useful for preventing blue highlights all over everything when dragging.
-// Note we're passing `document` b/c we could be iframed
-
-function addUserSelectStyles(doc
-/*: ?Document*/
-) {
-  if (!doc) return;
-  let styleEl = doc.getElementById('react-draggable-style-el');
-
-  if (!styleEl) {
-    styleEl = doc.createElement('style');
-    styleEl.type = 'text/css';
-    styleEl.id = 'react-draggable-style-el';
-    styleEl.innerHTML = '.react-draggable-transparent-selection *::-moz-selection {all: inherit;}\n';
-    styleEl.innerHTML += '.react-draggable-transparent-selection *::selection {all: inherit;}\n';
-    doc.getElementsByTagName('head')[0].appendChild(styleEl);
-  }
-
-  if (doc.body) addClassName(doc.body, 'react-draggable-transparent-selection');
-}
-function removeUserSelectStyles(doc
-/*: ?Document*/
-) {
-  try {
-    if (doc && doc.body) removeClassName(doc.body, 'react-draggable-transparent-selection'); // $FlowIgnore: IE
-
-    if (doc.selection) {
-      // $FlowIgnore: IE
-      doc.selection.empty();
-    } else {
-      window.getSelection().removeAllRanges(); // remove selection caused by scroll
-    }
-  } catch (e) {// probably IE
-  }
-}
-function styleHacks(childStyle
-/*: Object*/
-= {})
-/*: Object*/
-{
-  // Workaround IE pointer events; see #51
-  // https://github.com/mzabriskie/react-draggable/issues/51#issuecomment-103488278
-  return {
-    touchAction: 'none',
-    ...childStyle
-  };
-}
-function addClassName(el
-/*: HTMLElement*/
-, className
-/*: string*/
-) {
-  if (el.classList) {
-    el.classList.add(className);
-  } else {
-    if (!el.className.match(new RegExp(`(?:^|\\s)${className}(?!\\S)`))) {
-      el.className += ` ${className}`;
-    }
-  }
-}
-function removeClassName(el
-/*: HTMLElement*/
-, className
-/*: string*/
-) {
-  if (el.classList) {
-    el.classList.remove(className);
-  } else {
-    el.className = el.className.replace(new RegExp(`(?:^|\\s)${className}(?!\\S)`, 'g'), '');
-  }
-}
-
-/*:: import type Draggable from '../Draggable';*/
-
-/*:: import type {Bounds, ControlPosition, DraggableData, MouseTouchEvent} from './types';*/
-
-/*:: import type DraggableCore from '../DraggableCore';*/
-
-function getBoundPosition(draggable
-/*: Draggable*/
-, x
-/*: number*/
-, y
-/*: number*/
-)
-/*: [number, number]*/
-{
-  // If no bounds, short-circuit and move on
-  if (!draggable.props.bounds) return [x, y]; // Clone new bounds
-
-  let {
-    bounds
-  } = draggable.props;
-  bounds = typeof bounds === 'string' ? bounds : cloneBounds(bounds);
-  const node = findDOMNode(draggable);
-
-  if (typeof bounds === 'string') {
-    const {
-      ownerDocument
-    } = node;
-    const ownerWindow = ownerDocument.defaultView;
-    let boundNode;
-
-    if (bounds === 'parent') {
-      boundNode = node.parentNode;
-    } else {
-      boundNode = ownerDocument.querySelector(bounds);
-    }
-
-    if (!(boundNode instanceof ownerWindow.HTMLElement)) {
-      throw new Error('Bounds selector "' + bounds + '" could not find an element.');
-    }
-
-    const nodeStyle = ownerWindow.getComputedStyle(node);
-    const boundNodeStyle = ownerWindow.getComputedStyle(boundNode); // Compute bounds. This is a pain with padding and offsets but this gets it exactly right.
-
-    bounds = {
-      left: -node.offsetLeft + int(boundNodeStyle.paddingLeft) + int(nodeStyle.marginLeft),
-      top: -node.offsetTop + int(boundNodeStyle.paddingTop) + int(nodeStyle.marginTop),
-      right: innerWidth(boundNode) - outerWidth(node) - node.offsetLeft + int(boundNodeStyle.paddingRight) - int(nodeStyle.marginRight),
-      bottom: innerHeight(boundNode) - outerHeight(node) - node.offsetTop + int(boundNodeStyle.paddingBottom) - int(nodeStyle.marginBottom)
-    };
-  } // Keep x and y below right and bottom limits...
-
-
-  if (isNum(bounds.right)) x = Math.min(x, bounds.right);
-  if (isNum(bounds.bottom)) y = Math.min(y, bounds.bottom); // But above left and top limits.
-
-  if (isNum(bounds.left)) x = Math.max(x, bounds.left);
-  if (isNum(bounds.top)) y = Math.max(y, bounds.top);
-  return [x, y];
-}
-function snapToGrid(grid
-/*: [number, number]*/
-, pendingX
-/*: number*/
-, pendingY
-/*: number*/
-)
-/*: [number, number]*/
-{
-  const x = Math.round(pendingX / grid[0]) * grid[0];
-  const y = Math.round(pendingY / grid[1]) * grid[1];
-  return [x, y];
-}
-function canDragX(draggable
-/*: Draggable*/
-)
-/*: boolean*/
-{
-  return draggable.props.axis === 'both' || draggable.props.axis === 'x';
-}
-function canDragY(draggable
-/*: Draggable*/
-)
-/*: boolean*/
-{
-  return draggable.props.axis === 'both' || draggable.props.axis === 'y';
-} // Get {x, y} positions from event.
-
-function getControlPosition(e
-/*: MouseTouchEvent*/
-, touchIdentifier
-/*: ?number*/
-, draggableCore
-/*: DraggableCore*/
-)
-/*: ?ControlPosition*/
-{
-  const touchObj = typeof touchIdentifier === 'number' ? getTouch(e, touchIdentifier) : null;
-  if (typeof touchIdentifier === 'number' && !touchObj) return null; // not the right touch
-
-  const node = findDOMNode(draggableCore); // User can provide an offsetParent if desired.
-
-  const offsetParent = draggableCore.props.offsetParent || node.offsetParent || node.ownerDocument.body;
-  return offsetXYFromParent(touchObj || e, offsetParent, draggableCore.props.scale);
-} // Create an data object exposed by <DraggableCore>'s events
-
-function createCoreData(draggable
-/*: DraggableCore*/
-, x
-/*: number*/
-, y
-/*: number*/
-)
-/*: DraggableData*/
-{
-  const state = draggable.state;
-  const isStart = !isNum(state.lastX);
-  const node = findDOMNode(draggable);
-
-  if (isStart) {
-    // If this is our first move, use the x and y as last coords.
-    return {
-      node,
-      deltaX: 0,
-      deltaY: 0,
-      lastX: x,
-      lastY: y,
-      x,
-      y
-    };
-  } else {
-    // Otherwise calculate proper values.
-    return {
-      node,
-      deltaX: x - state.lastX,
-      deltaY: y - state.lastY,
-      lastX: state.lastX,
-      lastY: state.lastY,
-      x,
-      y
-    };
-  }
-} // Create an data exposed by <Draggable>'s events
-
-function createDraggableData(draggable
-/*: Draggable*/
-, coreData
-/*: DraggableData*/
-)
-/*: DraggableData*/
-{
-  const scale = draggable.props.scale;
-  return {
-    node: coreData.node,
-    x: draggable.state.x + coreData.deltaX / scale,
-    y: draggable.state.y + coreData.deltaY / scale,
-    deltaX: coreData.deltaX / scale,
-    deltaY: coreData.deltaY / scale,
-    lastX: draggable.state.x,
-    lastY: draggable.state.y
-  };
-} // A lot faster than stringify/parse
-
-function cloneBounds(bounds
-/*: Bounds*/
-)
-/*: Bounds*/
-{
-  return {
-    left: bounds.left,
-    top: bounds.top,
-    right: bounds.right,
-    bottom: bounds.bottom
-  };
-}
-
-function findDOMNode(draggable
-/*: Draggable | DraggableCore*/
-)
-/*: HTMLElement*/
-{
-  const node = reactDom.findDOMNode(draggable);
-
-  if (!node) {
-    throw new Error('<DraggableCore>: Unmounted during event!');
-  } // $FlowIgnore we can't assert on HTMLElement due to tests... FIXME
-
-
-  return node;
-}
-
-/*eslint no-console:0*/
-function log(...args) {
-}
-
-function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-/*:: import type {EventHandler, MouseTouchEvent} from './utils/types';*/
-
-/*:: import type {Element as ReactElement} from 'react';*/
-
-// Simple abstraction for dragging events names.
-const eventsFor = {
-  touch: {
-    start: 'touchstart',
-    move: 'touchmove',
-    stop: 'touchend'
-  },
-  mouse: {
-    start: 'mousedown',
-    move: 'mousemove',
-    stop: 'mouseup'
-  }
-}; // Default to mouse events.
-
-let dragEventFor = eventsFor.mouse;
-/*:: type DraggableCoreState = {
-  dragging: boolean,
-  lastX: number,
-  lastY: number,
-  touchIdentifier: ?number
-};*/
-
-/*:: export type DraggableBounds = {
-  left: number,
-  right: number,
-  top: number,
-  bottom: number,
-};*/
-
-/*:: export type DraggableData = {
-  node: HTMLElement,
-  x: number, y: number,
-  deltaX: number, deltaY: number,
-  lastX: number, lastY: number,
-};*/
-
-/*:: export type DraggableEventHandler = (e: MouseEvent, data: DraggableData) => void;*/
-
-/*:: export type ControlPosition = {x: number, y: number};*/
-
-/*:: export type PositionOffsetControlPosition = {x: number|string, y: number|string};*/
-
-/*:: export type DraggableCoreProps = {
-  allowAnyClick: boolean,
-  cancel: string,
-  children: ReactElement<any>,
-  disabled: boolean,
-  enableUserSelectHack: boolean,
-  offsetParent: HTMLElement,
-  grid: [number, number],
-  handle: string,
-  onStart: DraggableEventHandler,
-  onDrag: DraggableEventHandler,
-  onStop: DraggableEventHandler,
-  onMouseDown: (e: MouseEvent) => void,
-  scale: number,
-};*/
-
-//
-// Define <DraggableCore>.
-//
-// <DraggableCore> is for advanced usage of <Draggable>. It maintains minimal internal state so it can
-// work well with libraries that require more control over the element.
-//
-class DraggableCore extends react.Component {
-  constructor(...args) {
-    super(...args);
-
-    _defineProperty$3(this, "state", {
-      dragging: false,
-      // Used while dragging to determine deltas.
-      lastX: NaN,
-      lastY: NaN,
-      touchIdentifier: null
-    });
-
-    _defineProperty$3(this, "handleDragStart", e => {
-      // Make it possible to attach event handlers on top of this one.
-      this.props.onMouseDown(e); // Only accept left-clicks.
-
-      if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false; // Get nodes. Be sure to grab relative document (could be iframed)
-
-      const thisNode = reactDom.findDOMNode(this);
-
-      if (!thisNode || !thisNode.ownerDocument || !thisNode.ownerDocument.body) {
-        throw new Error('<DraggableCore> not mounted on DragStart!');
-      }
-
-      const {
-        ownerDocument
-      } = thisNode; // Short circuit if handle or cancel prop was provided and selector doesn't match.
-
-      if (this.props.disabled || !(e.target instanceof ownerDocument.defaultView.Node) || this.props.handle && !matchesSelectorAndParentsTo(e.target, this.props.handle, thisNode) || this.props.cancel && matchesSelectorAndParentsTo(e.target, this.props.cancel, thisNode)) {
-        return;
-      } // Set touch identifier in component state if this is a touch event. This allows us to
-      // distinguish between individual touches on multitouch screens by identifying which
-      // touchpoint was set to this element.
-
-
-      const touchIdentifier = getTouchIdentifier(e);
-      this.setState({
-        touchIdentifier
-      }); // Get the current drag point from the event. This is used as the offset.
-
-      const position = getControlPosition(e, touchIdentifier, this);
-      if (position == null) return; // not possible but satisfies flow
-
-      const {
-        x,
-        y
-      } = position; // Create an event object with all the data parents need to make a decision here.
-
-      const coreEvent = createCoreData(this, x, y);
-
-      log('calling', this.props.onStart);
-      const shouldUpdate = this.props.onStart(e, coreEvent);
-      if (shouldUpdate === false) return; // Add a style to the body to disable user-select. This prevents text from
-      // being selected all over the page.
-
-      if (this.props.enableUserSelectHack) addUserSelectStyles(ownerDocument); // Initiate dragging. Set the current x and y as offsets
-      // so we know how much we've moved during the drag. This allows us
-      // to drag elements around even if they have been moved, without issue.
-
-      this.setState({
-        dragging: true,
-        lastX: x,
-        lastY: y
-      }); // Add events to the document directly so we catch when the user's mouse/touch moves outside of
-      // this element. We use different events depending on whether or not we have detected that this
-      // is a touch-capable device.
-
-      addEvent(ownerDocument, dragEventFor.move, this.handleDrag);
-      addEvent(ownerDocument, dragEventFor.stop, this.handleDragStop);
-    });
-
-    _defineProperty$3(this, "handleDrag", e => {
-      // Prevent scrolling on mobile devices, like ipad/iphone.
-      if (e.type === 'touchmove') e.preventDefault(); // Get the current drag point from the event. This is used as the offset.
-
-      const position = getControlPosition(e, this.state.touchIdentifier, this);
-      if (position == null) return;
-      let {
-        x,
-        y
-      } = position; // Snap to grid if prop has been provided
-
-      if (Array.isArray(this.props.grid)) {
-        let deltaX = x - this.state.lastX,
-            deltaY = y - this.state.lastY;
-        [deltaX, deltaY] = snapToGrid(this.props.grid, deltaX, deltaY);
-        if (!deltaX && !deltaY) return; // skip useless drag
-
-        x = this.state.lastX + deltaX, y = this.state.lastY + deltaY;
-      }
-
-      const coreEvent = createCoreData(this, x, y);
-
-      const shouldUpdate = this.props.onDrag(e, coreEvent);
-
-      if (shouldUpdate === false) {
-        try {
-          // $FlowIgnore
-          this.handleDragStop(new MouseEvent('mouseup'));
-        } catch (err) {
-          // Old browsers
-          const event = ((document.createEvent('MouseEvents')
-          /*: any*/
-          )
-          /*: MouseTouchEvent*/
-          ); // I see why this insanity was deprecated
-          // $FlowIgnore
-
-          event.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-          this.handleDragStop(event);
-        }
-
-        return;
-      }
-
-      this.setState({
-        lastX: x,
-        lastY: y
-      });
-    });
-
-    _defineProperty$3(this, "handleDragStop", e => {
-      if (!this.state.dragging) return;
-      const position = getControlPosition(e, this.state.touchIdentifier, this);
-      if (position == null) return;
-      const {
-        x,
-        y
-      } = position;
-      const coreEvent = createCoreData(this, x, y);
-      const thisNode = reactDom.findDOMNode(this);
-
-      if (thisNode) {
-        // Remove user-select hack
-        if (this.props.enableUserSelectHack) removeUserSelectStyles(thisNode.ownerDocument);
-      }
-
-      this.setState({
-        dragging: false,
-        lastX: NaN,
-        lastY: NaN
-      }); // Call event handler
-
-      this.props.onStop(e, coreEvent);
-
-      if (thisNode) {
-        removeEvent(thisNode.ownerDocument, dragEventFor.move, this.handleDrag);
-        removeEvent(thisNode.ownerDocument, dragEventFor.stop, this.handleDragStop);
-      }
-    });
-
-    _defineProperty$3(this, "onMouseDown", e => {
-      dragEventFor = eventsFor.mouse; // on touchscreen laptops we could switch back to mouse
-
-      return this.handleDragStart(e);
-    });
-
-    _defineProperty$3(this, "onMouseUp", e => {
-      dragEventFor = eventsFor.mouse;
-      return this.handleDragStop(e);
-    });
-
-    _defineProperty$3(this, "onTouchStart", e => {
-      // We're on a touch device now, so change the event handlers
-      dragEventFor = eventsFor.touch;
-      return this.handleDragStart(e);
-    });
-
-    _defineProperty$3(this, "onTouchEnd", e => {
-      // We're on a touch device now, so change the event handlers
-      dragEventFor = eventsFor.touch;
-      return this.handleDragStop(e);
-    });
-  }
-
-  componentWillUnmount() {
-    // Remove any leftover event handlers. Remove both touch and mouse handlers in case
-    // some browser quirk caused a touch event to fire during a mouse move, or vice versa.
-    const thisNode = reactDom.findDOMNode(this);
-
-    if (thisNode) {
-      const {
-        ownerDocument
-      } = thisNode;
-      removeEvent(ownerDocument, eventsFor.mouse.move, this.handleDrag);
-      removeEvent(ownerDocument, eventsFor.touch.move, this.handleDrag);
-      removeEvent(ownerDocument, eventsFor.mouse.stop, this.handleDragStop);
-      removeEvent(ownerDocument, eventsFor.touch.stop, this.handleDragStop);
-      if (this.props.enableUserSelectHack) removeUserSelectStyles(ownerDocument);
-    }
-  }
-
-  render() {
-    // Reuse the child provided
-    // This makes it flexible to use whatever element is wanted (div, ul, etc)
-    return react.cloneElement(react.Children.only(this.props.children), {
-      style: styleHacks(this.props.children.props.style),
-      // Note: mouseMove handler is attached to document so it will still function
-      // when the user drags quickly and leaves the bounds of the element.
-      onMouseDown: this.onMouseDown,
-      onTouchStart: this.onTouchStart,
-      onMouseUp: this.onMouseUp,
-      onTouchEnd: this.onTouchEnd
-    });
-  }
-
-}
-
-_defineProperty$3(DraggableCore, "displayName", 'DraggableCore');
-
-_defineProperty$3(DraggableCore, "propTypes", {
-  /**
-   * `allowAnyClick` allows dragging using any mouse button.
-   * By default, we only accept the left button.
-   *
-   * Defaults to `false`.
-   */
-  allowAnyClick: propTypes.bool,
-
-  /**
-   * `disabled`, if true, stops the <Draggable> from dragging. All handlers,
-   * with the exception of `onMouseDown`, will not fire.
-   */
-  disabled: propTypes.bool,
-
-  /**
-   * By default, we add 'user-select:none' attributes to the document body
-   * to prevent ugly text selection during drag. If this is causing problems
-   * for your app, set this to `false`.
-   */
-  enableUserSelectHack: propTypes.bool,
-
-  /**
-   * `offsetParent`, if set, uses the passed DOM node to compute drag offsets
-   * instead of using the parent node.
-   */
-  offsetParent: function (props
-  /*: DraggableCoreProps*/
-  , propName
-  /*: $Keys<DraggableCoreProps>*/
-  ) {
-    if (props[propName] && props[propName].nodeType !== 1) {
-      throw new Error('Draggable\'s offsetParent must be a DOM Node.');
-    }
-  },
-
-  /**
-   * `grid` specifies the x and y that dragging should snap to.
-   */
-  grid: propTypes.arrayOf(propTypes.number),
-
-  /**
-   * `handle` specifies a selector to be used as the handle that initiates drag.
-   *
-   * Example:
-   *
-   * ```jsx
-   *   let App = React.createClass({
-   *       render: function () {
-   *         return (
-   *            <Draggable handle=".handle">
-   *              <div>
-   *                  <div className="handle">Click me to drag</div>
-   *                  <div>This is some other content</div>
-   *              </div>
-   *           </Draggable>
-   *         );
-   *       }
-   *   });
-   * ```
-   */
-  handle: propTypes.string,
-
-  /**
-   * `cancel` specifies a selector to be used to prevent drag initialization.
-   *
-   * Example:
-   *
-   * ```jsx
-   *   let App = React.createClass({
-   *       render: function () {
-   *           return(
-   *               <Draggable cancel=".cancel">
-   *                   <div>
-   *                     <div className="cancel">You can't drag from here</div>
-   *                     <div>Dragging here works fine</div>
-   *                   </div>
-   *               </Draggable>
-   *           );
-   *       }
-   *   });
-   * ```
-   */
-  cancel: propTypes.string,
-
-  /**
-   * Called when dragging starts.
-   * If this function returns the boolean false, dragging will be canceled.
-   */
-  onStart: propTypes.func,
-
-  /**
-   * Called while dragging.
-   * If this function returns the boolean false, dragging will be canceled.
-   */
-  onDrag: propTypes.func,
-
-  /**
-   * Called when dragging stops.
-   * If this function returns the boolean false, the drag will remain active.
-   */
-  onStop: propTypes.func,
-
-  /**
-   * A workaround option which can be passed if onMouseDown needs to be accessed,
-   * since it'll always be blocked (as there is internal use of onMouseDown)
-   */
-  onMouseDown: propTypes.func,
-
-  /**
-   * `scale`, if set, applies scaling while dragging an element
-   */
-  scale: propTypes.number,
-
-  /**
-   * These properties should be defined on the child, not here.
-   */
-  className: dontSetMe,
-  style: dontSetMe,
-  transform: dontSetMe
 });
 
-_defineProperty$3(DraggableCore, "defaultProps", {
-  allowAnyClick: false,
-  // by default only accept left click
-  cancel: null,
-  disabled: false,
-  enableUserSelectHack: true,
-  offsetParent: null,
-  handle: null,
-  grid: null,
-  transform: null,
-  onStart: function () {},
-  onDrag: function () {},
-  onStop: function () {},
-  onMouseDown: function () {},
-  scale: 1
-});
-
-function _extends$3() { _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$3.apply(this, arguments); }
-
-function _defineProperty$4(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-/*:: import type {DraggableEventHandler} from './utils/types';*/
-
-/*:: import type {Element as ReactElement} from 'react';*/
-
-/*:: type DraggableState = {
-  dragging: boolean,
-  dragged: boolean,
-  x: number, y: number,
-  slackX: number, slackY: number,
-  isElementSVG: boolean,
-  prevPropsPosition: ?ControlPosition,
-};*/
-
-/*:: export type DraggableProps = {
-  ...$Exact<DraggableCoreProps>,
-  axis: 'both' | 'x' | 'y' | 'none',
-  bounds: DraggableBounds | string | false,
-  defaultClassName: string,
-  defaultClassNameDragging: string,
-  defaultClassNameDragged: string,
-  defaultPosition: ControlPosition,
-  positionOffset: PositionOffsetControlPosition,
-  position: ControlPosition,
-  scale: number
-};*/
-
-//
-// Define <Draggable>
-//
-class Draggable extends react.Component {
-  // React 16.3+
-  // Arity (props, state)
-  static getDerivedStateFromProps({
-    position
-  }
-  /*: DraggableProps*/
-  , {
-    prevPropsPosition
-  }
-  /*: DraggableState*/
-  ) {
-    // Set x/y if a new position is provided in props that is different than the previous.
-    if (position && (!prevPropsPosition || position.x !== prevPropsPosition.x || position.y !== prevPropsPosition.y)) {
-      return {
-        x: position.x,
-        y: position.y,
-        prevPropsPosition: { ...position
-        }
-      };
-    }
-
-    return null;
-  }
-
-  constructor(props
-  /*: DraggableProps*/
-  ) {
-    super(props);
-
-    _defineProperty$4(this, "onDragStart", (e, coreData) => {
-
-      const shouldStart = this.props.onStart(e, createDraggableData(this, coreData)); // Kills start event on core as well, so move handlers are never bound.
-
-      if (shouldStart === false) return false;
-      this.setState({
-        dragging: true,
-        dragged: true
-      });
-    });
-
-    _defineProperty$4(this, "onDrag", (e, coreData) => {
-      if (!this.state.dragging) return false;
-      const uiData = createDraggableData(this, coreData);
-      const newState
-      /*: $Shape<DraggableState>*/
-      = {
-        x: uiData.x,
-        y: uiData.y
-      }; // Keep within bounds.
-
-      if (this.props.bounds) {
-        // Save original x and y.
-        const {
-          x,
-          y
-        } = newState; // Add slack to the values used to calculate bound position. This will ensure that if
-        // we start removing slack, the element won't react to it right away until it's been
-        // completely removed.
-
-        newState.x += this.state.slackX;
-        newState.y += this.state.slackY; // Get bound position. This will ceil/floor the x and y within the boundaries.
-
-        const [newStateX, newStateY] = getBoundPosition(this, newState.x, newState.y);
-        newState.x = newStateX;
-        newState.y = newStateY; // Recalculate slack by noting how much was shaved by the boundPosition handler.
-
-        newState.slackX = this.state.slackX + (x - newState.x);
-        newState.slackY = this.state.slackY + (y - newState.y); // Update the event we fire to reflect what really happened after bounds took effect.
-
-        uiData.x = newState.x;
-        uiData.y = newState.y;
-        uiData.deltaX = newState.x - this.state.x;
-        uiData.deltaY = newState.y - this.state.y;
-      } // Short-circuit if user's callback killed it.
-
-
-      const shouldUpdate = this.props.onDrag(e, uiData);
-      if (shouldUpdate === false) return false;
-      this.setState(newState);
-    });
-
-    _defineProperty$4(this, "onDragStop", (e, coreData) => {
-      if (!this.state.dragging) return false; // Short-circuit if user's callback killed it.
-
-      const shouldStop = this.props.onStop(e, createDraggableData(this, coreData));
-      if (shouldStop === false) return false;
-      const newState
-      /*: $Shape<DraggableState>*/
-      = {
-        dragging: false,
-        slackX: 0,
-        slackY: 0
-      }; // If this is a controlled component, the result of this operation will be to
-      // revert back to the old position. We expect a handler on `onDragStop`, at the least.
-
-      const controlled = Boolean(this.props.position);
-
-      if (controlled) {
-        const {
-          x,
-          y
-        } = this.props.position;
-        newState.x = x;
-        newState.y = y;
-      }
-
-      this.setState(newState);
-    });
-
-    this.state = {
-      // Whether or not we are currently dragging.
-      dragging: false,
-      // Whether or not we have been dragged before.
-      dragged: false,
-      // Current transform x and y.
-      x: props.position ? props.position.x : props.defaultPosition.x,
-      y: props.position ? props.position.y : props.defaultPosition.y,
-      prevPropsPosition: { ...props.position
-      },
-      // Used for compensating for out-of-bounds drags
-      slackX: 0,
-      slackY: 0,
-      // Can only determine if SVG after mounting
-      isElementSVG: false
-    };
-
-    if (props.position && !(props.onDrag || props.onStop)) {
-      // eslint-disable-next-line no-console
-      console.warn('A `position` was applied to this <Draggable>, without drag handlers. This will make this ' + 'component effectively undraggable. Please attach `onDrag` or `onStop` handlers so you can adjust the ' + '`position` of this element.');
-    }
-  }
-
-  componentDidMount() {
-    // Check to see if the element passed is an instanceof SVGElement
-    if (typeof window.SVGElement !== 'undefined' && reactDom.findDOMNode(this) instanceof window.SVGElement) {
-      this.setState({
-        isElementSVG: true
-      });
-    }
-  }
-
-  componentWillUnmount() {
-    this.setState({
-      dragging: false
-    }); // prevents invariant if unmounted while dragging
-  }
-
-  render()
-  /*: ReactElement<any>*/
-  {
-    const {
-      axis,
-      bounds,
-      children,
-      defaultPosition,
-      defaultClassName,
-      defaultClassNameDragging,
-      defaultClassNameDragged,
-      position,
-      positionOffset,
-      scale,
-      ...draggableCoreProps
-    } = this.props;
-    let style = {};
-    let svgTransform = null; // If this is controlled, we don't want to move it - unless it's dragging.
-
-    const controlled = Boolean(position);
-    const draggable = !controlled || this.state.dragging;
-    const validPosition = position || defaultPosition;
-    const transformOpts = {
-      // Set left if horizontal drag is enabled
-      x: canDragX(this) && draggable ? this.state.x : validPosition.x,
-      // Set top if vertical drag is enabled
-      y: canDragY(this) && draggable ? this.state.y : validPosition.y
-    }; // If this element was SVG, we use the `transform` attribute.
-
-    if (this.state.isElementSVG) {
-      svgTransform = createSVGTransform(transformOpts, positionOffset);
-    } else {
-      // Add a CSS transform to move the element around. This allows us to move the element around
-      // without worrying about whether or not it is relatively or absolutely positioned.
-      // If the item you are dragging already has a transform set, wrap it in a <span> so <Draggable>
-      // has a clean slate.
-      style = createCSSTransform(transformOpts, positionOffset);
-    } // Mark with class while dragging
-
-
-    const className = classnames(children.props.className || '', defaultClassName, {
-      [defaultClassNameDragging]: this.state.dragging,
-      [defaultClassNameDragged]: this.state.dragged
-    }); // Reuse the child provided
-    // This makes it flexible to use whatever element is wanted (div, ul, etc)
-
-    return react.createElement(DraggableCore, _extends$3({}, draggableCoreProps, {
-      onStart: this.onDragStart,
-      onDrag: this.onDrag,
-      onStop: this.onDragStop
-    }), react.cloneElement(react.Children.only(children), {
-      className: className,
-      style: { ...children.props.style,
-        ...style
-      },
-      transform: svgTransform
-    }));
-  }
-
-}
-
-_defineProperty$4(Draggable, "displayName", 'Draggable');
-
-_defineProperty$4(Draggable, "propTypes", { // Accepts all props <DraggableCore> accepts.
-  ...DraggableCore.propTypes,
-
-  /**
-   * `axis` determines which axis the draggable can move.
-   *
-   *  Note that all callbacks will still return data as normal. This only
-   *  controls flushing to the DOM.
-   *
-   * 'both' allows movement horizontally and vertically.
-   * 'x' limits movement to horizontal axis.
-   * 'y' limits movement to vertical axis.
-   * 'none' limits all movement.
-   *
-   * Defaults to 'both'.
-   */
-  axis: propTypes.oneOf(['both', 'x', 'y', 'none']),
-
-  /**
-   * `bounds` determines the range of movement available to the element.
-   * Available values are:
-   *
-   * 'parent' restricts movement within the Draggable's parent node.
-   *
-   * Alternatively, pass an object with the following properties, all of which are optional:
-   *
-   * {left: LEFT_BOUND, right: RIGHT_BOUND, bottom: BOTTOM_BOUND, top: TOP_BOUND}
-   *
-   * All values are in px.
-   *
-   * Example:
-   *
-   * ```jsx
-   *   let App = React.createClass({
-   *       render: function () {
-   *         return (
-   *            <Draggable bounds={{right: 300, bottom: 300}}>
-   *              <div>Content</div>
-   *           </Draggable>
-   *         );
-   *       }
-   *   });
-   * ```
-   */
-  bounds: propTypes.oneOfType([propTypes.shape({
-    left: propTypes.number,
-    right: propTypes.number,
-    top: propTypes.number,
-    bottom: propTypes.number
-  }), propTypes.string, propTypes.oneOf([false])]),
-  defaultClassName: propTypes.string,
-  defaultClassNameDragging: propTypes.string,
-  defaultClassNameDragged: propTypes.string,
-
-  /**
-   * `defaultPosition` specifies the x and y that the dragged item should start at
-   *
-   * Example:
-   *
-   * ```jsx
-   *      let App = React.createClass({
-   *          render: function () {
-   *              return (
-   *                  <Draggable defaultPosition={{x: 25, y: 25}}>
-   *                      <div>I start with transformX: 25px and transformY: 25px;</div>
-   *                  </Draggable>
-   *              );
-   *          }
-   *      });
-   * ```
-   */
-  defaultPosition: propTypes.shape({
-    x: propTypes.number,
-    y: propTypes.number
-  }),
-  positionOffset: propTypes.shape({
-    x: propTypes.oneOfType([propTypes.number, propTypes.string]),
-    y: propTypes.oneOfType([propTypes.number, propTypes.string])
-  }),
-
-  /**
-   * `position`, if present, defines the current position of the element.
-   *
-   *  This is similar to how form elements in React work - if no `position` is supplied, the component
-   *  is uncontrolled.
-   *
-   * Example:
-   *
-   * ```jsx
-   *      let App = React.createClass({
-   *          render: function () {
-   *              return (
-   *                  <Draggable position={{x: 25, y: 25}}>
-   *                      <div>I start with transformX: 25px and transformY: 25px;</div>
-   *                  </Draggable>
-   *              );
-   *          }
-   *      });
-   * ```
-   */
-  position: propTypes.shape({
-    x: propTypes.number,
-    y: propTypes.number
-  }),
-
-  /**
-   * These properties should be defined on the child, not here.
-   */
-  className: dontSetMe,
-  style: dontSetMe,
-  transform: dontSetMe
-});
-
-_defineProperty$4(Draggable, "defaultProps", { ...DraggableCore.defaultProps,
-  axis: 'both',
-  bounds: false,
-  defaultClassName: 'react-draggable',
-  defaultClassNameDragging: 'react-draggable-dragging',
-  defaultClassNameDragged: 'react-draggable-dragged',
-  defaultPosition: {
-    x: 0,
-    y: 0
-  },
-  position: null,
-  scale: 1
-});
+unwrapExports(reactDraggable_min);
+var reactDraggable_min_1 = reactDraggable_min.DraggableCore;
+var reactDraggable_min_2 = reactDraggable_min.ReactDraggable;
 
 const cloneElement = (element, props) => {
   if (props.style && element.props.style) {
@@ -85701,7 +84300,7 @@ class Resizable extends react.Component {
 
     return cloneElement(children, { ...p,
       className,
-      children: [children.props.children, resizeHandles.map(h => react.createElement(DraggableCore, _extends$2({}, draggableOpts, {
+      children: [children.props.children, resizeHandles.map(h => react.createElement(reactDraggable_min_1, _extends$2({}, draggableOpts, {
         key: `resizableHandle-${h}`,
         onStop: this.resizeHandler('onResizeStop', h),
         onStart: this.resizeHandler('onResizeStart', h),
@@ -85872,6 +84471,10 @@ _defineProperty$2(ResizableBox, "propTypes", {
 
 _defineProperty$2(ResizableBox, "defaultProps", {
   handleSize: [20, 20]
+});
+
+var object_hash = createCommonjsModule(function (module, exports) {
+!function(e){module.exports=e();}(function(){return function o(i,u,a){function s(n,e){if(!u[n]){if(!i[n]){var t="function"==typeof commonjsRequire&&commonjsRequire;if(!e&&t)return t(n,!0);if(f)return f(n,!0);throw new Error("Cannot find module '"+n+"'")}var r=u[n]={exports:{}};i[n][0].call(r.exports,function(e){var t=i[n][1][e];return s(t||e)},r,r.exports,o,i,u,a);}return u[n].exports}for(var f="function"==typeof commonjsRequire&&commonjsRequire,e=0;e<a.length;e++)s(a[e]);return s}({1:[function(w,b,m){(function(e,t,f,n,r,o,i,u,a){var s=w("crypto");function c(e,t){return function(e,t){var n;n="passthrough"!==t.algorithm?s.createHash(t.algorithm):new y;void 0===n.write&&(n.write=n.update,n.end=n.update);g(t,n).dispatch(e),n.update||n.end("");if(n.digest)return n.digest("buffer"===t.encoding?void 0:t.encoding);var r=n.read();return "buffer"!==t.encoding?r.toString(t.encoding):r}(e,t=h(e,t))}(m=b.exports=c).sha1=function(e){return c(e)},m.keys=function(e){return c(e,{excludeValues:!0,algorithm:"sha1",encoding:"hex"})},m.MD5=function(e){return c(e,{algorithm:"md5",encoding:"hex"})},m.keysMD5=function(e){return c(e,{algorithm:"md5",encoding:"hex",excludeValues:!0})};var l=s.getHashes?s.getHashes().slice():["sha1","md5"];l.push("passthrough");var d=["buffer","hex","binary","base64"];function h(e,t){t=t||{};var n={};if(n.algorithm=t.algorithm||"sha1",n.encoding=t.encoding||"hex",n.excludeValues=!!t.excludeValues,n.algorithm=n.algorithm.toLowerCase(),n.encoding=n.encoding.toLowerCase(),n.ignoreUnknown=!0===t.ignoreUnknown,n.respectType=!1!==t.respectType,n.respectFunctionNames=!1!==t.respectFunctionNames,n.respectFunctionProperties=!1!==t.respectFunctionProperties,n.unorderedArrays=!0===t.unorderedArrays,n.unorderedSets=!1!==t.unorderedSets,n.unorderedObjects=!1!==t.unorderedObjects,n.replacer=t.replacer||void 0,n.excludeKeys=t.excludeKeys||void 0,void 0===e)throw new Error("Object argument required.");for(var r=0;r<l.length;++r)l[r].toLowerCase()===n.algorithm.toLowerCase()&&(n.algorithm=l[r]);if(-1===l.indexOf(n.algorithm))throw new Error('Algorithm "'+n.algorithm+'"  not supported. supported values: '+l.join(", "));if(-1===d.indexOf(n.encoding)&&"passthrough"!==n.algorithm)throw new Error('Encoding "'+n.encoding+'"  not supported. supported values: '+d.join(", "));return n}function p(e){if("function"==typeof e){return null!=/^function\s+\w*\s*\(\s*\)\s*{\s+\[native code\]\s+}$/i.exec(Function.prototype.toString.call(e))}}function g(u,t,a){a=a||[];function s(e){return t.update?t.update(e,"utf8"):t.write(e,"utf8")}return {dispatch:function(e){u.replacer&&(e=u.replacer(e));var t=typeof e;return null===e&&(t="null"),this["_"+t](e)},_object:function(t){var e=Object.prototype.toString.call(t),n=/\[object (.*)\]/i.exec(e);n=(n=n?n[1]:"unknown:["+e+"]").toLowerCase();var r;if(0<=(r=a.indexOf(t)))return this.dispatch("[CIRCULAR:"+r+"]");if(a.push(t),void 0!==f&&f.isBuffer&&f.isBuffer(t))return s("buffer:"),s(t);if("object"===n||"function"===n||"asyncfunction"===n){var o=Object.keys(t);u.unorderedObjects&&(o=o.sort()),!1===u.respectType||p(t)||o.splice(0,0,"prototype","__proto__","constructor"),u.excludeKeys&&(o=o.filter(function(e){return !u.excludeKeys(e)})),s("object:"+o.length+":");var i=this;return o.forEach(function(e){i.dispatch(e),s(":"),u.excludeValues||i.dispatch(t[e]),s(",");})}if(!this["_"+n]){if(u.ignoreUnknown)return s("["+n+"]");throw new Error('Unknown object type "'+n+'"')}this["_"+n](t);},_array:function(e,t){t=void 0!==t?t:!1!==u.unorderedArrays;var n=this;if(s("array:"+e.length+":"),!t||e.length<=1)return e.forEach(function(e){return n.dispatch(e)});var r=[],o=e.map(function(e){var t=new y,n=a.slice();return g(u,t,n).dispatch(e),r=r.concat(n.slice(a.length)),t.read().toString()});return a=a.concat(r),o.sort(),this._array(o,!1)},_date:function(e){return s("date:"+e.toJSON())},_symbol:function(e){return s("symbol:"+e.toString())},_error:function(e){return s("error:"+e.toString())},_boolean:function(e){return s("bool:"+e.toString())},_string:function(e){s("string:"+e.length+":"),s(e.toString());},_function:function(e){s("fn:"),p(e)?this.dispatch("[native]"):this.dispatch(e.toString()),!1!==u.respectFunctionNames&&this.dispatch("function-name:"+String(e.name)),u.respectFunctionProperties&&this._object(e);},_number:function(e){return s("number:"+e.toString())},_xml:function(e){return s("xml:"+e.toString())},_null:function(){return s("Null")},_undefined:function(){return s("Undefined")},_regexp:function(e){return s("regex:"+e.toString())},_uint8array:function(e){return s("uint8array:"),this.dispatch(Array.prototype.slice.call(e))},_uint8clampedarray:function(e){return s("uint8clampedarray:"),this.dispatch(Array.prototype.slice.call(e))},_int8array:function(e){return s("uint8array:"),this.dispatch(Array.prototype.slice.call(e))},_uint16array:function(e){return s("uint16array:"),this.dispatch(Array.prototype.slice.call(e))},_int16array:function(e){return s("uint16array:"),this.dispatch(Array.prototype.slice.call(e))},_uint32array:function(e){return s("uint32array:"),this.dispatch(Array.prototype.slice.call(e))},_int32array:function(e){return s("uint32array:"),this.dispatch(Array.prototype.slice.call(e))},_float32array:function(e){return s("float32array:"),this.dispatch(Array.prototype.slice.call(e))},_float64array:function(e){return s("float64array:"),this.dispatch(Array.prototype.slice.call(e))},_arraybuffer:function(e){return s("arraybuffer:"),this.dispatch(new Uint8Array(e))},_url:function(e){return s("url:"+e.toString())},_map:function(e){s("map:");var t=Array.from(e);return this._array(t,!1!==u.unorderedSets)},_set:function(e){s("set:");var t=Array.from(e);return this._array(t,!1!==u.unorderedSets)},_blob:function(){if(u.ignoreUnknown)return s("[blob]");throw Error('Hashing Blob objects is currently not supported\n(see https://github.com/puleos/object-hash/issues/26)\nUse "options.replacer" or "options.ignoreUnknown"\n')},_domwindow:function(){return s("domwindow")},_process:function(){return s("process")},_timer:function(){return s("timer")},_pipe:function(){return s("pipe")},_tcp:function(){return s("tcp")},_udp:function(){return s("udp")},_tty:function(){return s("tty")},_statwatcher:function(){return s("statwatcher")},_securecontext:function(){return s("securecontext")},_connection:function(){return s("connection")},_zlib:function(){return s("zlib")},_context:function(){return s("context")},_nodescript:function(){return s("nodescript")},_httpparser:function(){return s("httpparser")},_dataview:function(){return s("dataview")},_signal:function(){return s("signal")},_fsevent:function(){return s("fsevent")},_tlswrap:function(){return s("tlswrap")}}}function y(){return {buf:"",write:function(e){this.buf+=e;},end:function(e){this.buf+=e;},read:function(){return this.buf}}}m.writeToStream=function(e,t,n){return void 0===n&&(n=t,t={}),g(t=h(e,t),n).dispatch(e)};}).call(this,w("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},w("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_794fcf4d.js","/");},{buffer:3,crypto:5,lYpoI2:10}],2:[function(e,t,f){(function(e,t,n,r,o,i,u,a,s){!function(e){var f="undefined"!=typeof Uint8Array?Uint8Array:Array,n="+".charCodeAt(0),r="/".charCodeAt(0),o="0".charCodeAt(0),i="a".charCodeAt(0),u="A".charCodeAt(0),a="-".charCodeAt(0),s="_".charCodeAt(0);function c(e){var t=e.charCodeAt(0);return t===n||t===a?62:t===r||t===s?63:t<o?-1:t<o+10?t-o+26+26:t<u+26?t-u:t<i+26?t-i+26:void 0}e.toByteArray=function(e){var t,n,r,o,i;if(0<e.length%4)throw new Error("Invalid string. Length must be a multiple of 4");var u=e.length;o="="===e.charAt(u-2)?2:"="===e.charAt(u-1)?1:0,i=new f(3*e.length/4-o),n=0<o?e.length-4:e.length;var a=0;function s(e){i[a++]=e;}for(t=0;t<n;t+=4,0)s((16711680&(r=c(e.charAt(t))<<18|c(e.charAt(t+1))<<12|c(e.charAt(t+2))<<6|c(e.charAt(t+3))))>>16),s((65280&r)>>8),s(255&r);return 2==o?s(255&(r=c(e.charAt(t))<<2|c(e.charAt(t+1))>>4)):1==o&&(s((r=c(e.charAt(t))<<10|c(e.charAt(t+1))<<4|c(e.charAt(t+2))>>2)>>8&255),s(255&r)),i},e.fromByteArray=function(e){var t,n,r,o,i=e.length%3,u="";function a(e){return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(e)}for(t=0,r=e.length-i;t<r;t+=3)n=(e[t]<<16)+(e[t+1]<<8)+e[t+2],u+=a((o=n)>>18&63)+a(o>>12&63)+a(o>>6&63)+a(63&o);switch(i){case 1:u+=a((n=e[e.length-1])>>2),u+=a(n<<4&63),u+="==";break;case 2:u+=a((n=(e[e.length-2]<<8)+e[e.length-1])>>10),u+=a(n>>4&63),u+=a(n<<2&63),u+="=";}return u};}(void 0===f?this.base64js={}:f);}).call(this,e("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},e("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/base64-js/lib/b64.js","/node_modules/gulp-browserify/node_modules/base64-js/lib");},{buffer:3,lYpoI2:10}],3:[function(O,e,H){(function(e,t,h,n,r,o,i,u,a){var s=O("base64-js"),f=O("ieee754");function h(e,t,n){if(!(this instanceof h))return new h(e,t,n);var r,o,i,u,a,s=typeof e;if("base64"===t&&"string"==s)for(e=(r=e).trim?r.trim():r.replace(/^\s+|\s+$/g,"");e.length%4!=0;)e+="=";if("number"==s)o=x(e);else if("string"==s)o=h.byteLength(e,t);else {if("object"!=s)throw new Error("First argument needs to be a number, array or string.");o=x(e.length);}if(h._useTypedArrays?i=h._augment(new Uint8Array(o)):((i=this).length=o,i._isBuffer=!0),h._useTypedArrays&&"number"==typeof e.byteLength)i._set(e);else if(S(a=e)||h.isBuffer(a)||a&&"object"==typeof a&&"number"==typeof a.length)for(u=0;u<o;u++)h.isBuffer(e)?i[u]=e.readUInt8(u):i[u]=e[u];else if("string"==s)i.write(e,0,t);else if("number"==s&&!h._useTypedArrays&&!n)for(u=0;u<o;u++)i[u]=0;return i}function p(e,t,n,r){return h._charsWritten=T(function(e){for(var t=[],n=0;n<e.length;n++)t.push(255&e.charCodeAt(n));return t}(t),e,n,r)}function g(e,t,n,r){return h._charsWritten=T(function(e){for(var t,n,r,o=[],i=0;i<e.length;i++)t=e.charCodeAt(i),n=t>>8,r=t%256,o.push(r),o.push(n);return o}(t),e,n,r)}function c(e,t,n){var r="";n=Math.min(e.length,n);for(var o=t;o<n;o++)r+=String.fromCharCode(e[o]);return r}function l(e,t,n,r){r||(D("boolean"==typeof n,"missing or invalid endian"),D(null!=t,"missing offset"),D(t+1<e.length,"Trying to read beyond buffer length"));var o,i=e.length;if(!(i<=t))return n?(o=e[t],t+1<i&&(o|=e[t+1]<<8)):(o=e[t]<<8,t+1<i&&(o|=e[t+1])),o}function d(e,t,n,r){r||(D("boolean"==typeof n,"missing or invalid endian"),D(null!=t,"missing offset"),D(t+3<e.length,"Trying to read beyond buffer length"));var o,i=e.length;if(!(i<=t))return n?(t+2<i&&(o=e[t+2]<<16),t+1<i&&(o|=e[t+1]<<8),o|=e[t],t+3<i&&(o+=e[t+3]<<24>>>0)):(t+1<i&&(o=e[t+1]<<16),t+2<i&&(o|=e[t+2]<<8),t+3<i&&(o|=e[t+3]),o+=e[t]<<24>>>0),o}function y(e,t,n,r){if(r||(D("boolean"==typeof n,"missing or invalid endian"),D(null!=t,"missing offset"),D(t+1<e.length,"Trying to read beyond buffer length")),!(e.length<=t)){var o=l(e,t,n,!0);return 32768&o?-1*(65535-o+1):o}}function w(e,t,n,r){if(r||(D("boolean"==typeof n,"missing or invalid endian"),D(null!=t,"missing offset"),D(t+3<e.length,"Trying to read beyond buffer length")),!(e.length<=t)){var o=d(e,t,n,!0);return 2147483648&o?-1*(4294967295-o+1):o}}function b(e,t,n,r){return r||(D("boolean"==typeof n,"missing or invalid endian"),D(t+3<e.length,"Trying to read beyond buffer length")),f.read(e,t,n,23,4)}function m(e,t,n,r){return r||(D("boolean"==typeof n,"missing or invalid endian"),D(t+7<e.length,"Trying to read beyond buffer length")),f.read(e,t,n,52,8)}function v(e,t,n,r,o){o||(D(null!=t,"missing value"),D("boolean"==typeof r,"missing or invalid endian"),D(null!=n,"missing offset"),D(n+1<e.length,"trying to write beyond buffer length"),N(t,65535));var i=e.length;if(!(i<=n))for(var u=0,a=Math.min(i-n,2);u<a;u++)e[n+u]=(t&255<<8*(r?u:1-u))>>>8*(r?u:1-u);}function _(e,t,n,r,o){o||(D(null!=t,"missing value"),D("boolean"==typeof r,"missing or invalid endian"),D(null!=n,"missing offset"),D(n+3<e.length,"trying to write beyond buffer length"),N(t,4294967295));var i=e.length;if(!(i<=n))for(var u=0,a=Math.min(i-n,4);u<a;u++)e[n+u]=t>>>8*(r?u:3-u)&255;}function E(e,t,n,r,o){o||(D(null!=t,"missing value"),D("boolean"==typeof r,"missing or invalid endian"),D(null!=n,"missing offset"),D(n+1<e.length,"Trying to write beyond buffer length"),Y(t,32767,-32768)),e.length<=n||v(e,0<=t?t:65535+t+1,n,r,o);}function I(e,t,n,r,o){o||(D(null!=t,"missing value"),D("boolean"==typeof r,"missing or invalid endian"),D(null!=n,"missing offset"),D(n+3<e.length,"Trying to write beyond buffer length"),Y(t,2147483647,-2147483648)),e.length<=n||_(e,0<=t?t:4294967295+t+1,n,r,o);}function A(e,t,n,r,o){o||(D(null!=t,"missing value"),D("boolean"==typeof r,"missing or invalid endian"),D(null!=n,"missing offset"),D(n+3<e.length,"Trying to write beyond buffer length"),F(t,34028234663852886e22,-34028234663852886e22)),e.length<=n||f.write(e,t,n,r,23,4);}function B(e,t,n,r,o){o||(D(null!=t,"missing value"),D("boolean"==typeof r,"missing or invalid endian"),D(null!=n,"missing offset"),D(n+7<e.length,"Trying to write beyond buffer length"),F(t,17976931348623157e292,-17976931348623157e292)),e.length<=n||f.write(e,t,n,r,52,8);}H.Buffer=h,H.SlowBuffer=h,H.INSPECT_MAX_BYTES=50,h.poolSize=8192,h._useTypedArrays=function(){try{var e=new ArrayBuffer(0),t=new Uint8Array(e);return t.foo=function(){return 42},42===t.foo()&&"function"==typeof t.subarray}catch(e){return !1}}(),h.isEncoding=function(e){switch(String(e).toLowerCase()){case"hex":case"utf8":case"utf-8":case"ascii":case"binary":case"base64":case"raw":case"ucs2":case"ucs-2":case"utf16le":case"utf-16le":return !0;default:return !1}},h.isBuffer=function(e){return !(null==e||!e._isBuffer)},h.byteLength=function(e,t){var n;switch(e+="",t||"utf8"){case"hex":n=e.length/2;break;case"utf8":case"utf-8":n=C(e).length;break;case"ascii":case"binary":case"raw":n=e.length;break;case"base64":n=k(e).length;break;case"ucs2":case"ucs-2":case"utf16le":case"utf-16le":n=2*e.length;break;default:throw new Error("Unknown encoding")}return n},h.concat=function(e,t){if(D(S(e),"Usage: Buffer.concat(list, [totalLength])\nlist should be an Array."),0===e.length)return new h(0);if(1===e.length)return e[0];var n;if("number"!=typeof t)for(n=t=0;n<e.length;n++)t+=e[n].length;var r=new h(t),o=0;for(n=0;n<e.length;n++){var i=e[n];i.copy(r,o),o+=i.length;}return r},h.prototype.write=function(e,t,n,r){if(isFinite(t))isFinite(n)||(r=n,n=void 0);else {var o=r;r=t,t=n,n=o;}t=Number(t)||0;var i,u,a,s,f,c,l,d=this.length-t;switch((!n||d<(n=Number(n)))&&(n=d),r=String(r||"utf8").toLowerCase()){case"hex":i=function(e,t,n,r){n=Number(n)||0;var o=e.length-n;(!r||o<(r=Number(r)))&&(r=o);var i=t.length;D(i%2==0,"Invalid hex string"),i/2<r&&(r=i/2);for(var u=0;u<r;u++){var a=parseInt(t.substr(2*u,2),16);D(!isNaN(a),"Invalid hex string"),e[n+u]=a;}return h._charsWritten=2*u,u}(this,e,t,n);break;case"utf8":case"utf-8":f=this,c=t,l=n,i=h._charsWritten=T(C(e),f,c,l);break;case"ascii":i=p(this,e,t,n);break;case"binary":i=p(this,e,t,n);break;case"base64":u=this,a=t,s=n,i=h._charsWritten=T(k(e),u,a,s);break;case"ucs2":case"ucs-2":case"utf16le":case"utf-16le":i=g(this,e,t,n);break;default:throw new Error("Unknown encoding")}return i},h.prototype.toString=function(e,t,n){var r,o,i,u,a=this;if(e=String(e||"utf8").toLowerCase(),t=Number(t)||0,(n=void 0!==n?Number(n):n=a.length)===t)return "";switch(e){case"hex":r=function(e,t,n){var r=e.length;(!t||t<0)&&(t=0);(!n||n<0||r<n)&&(n=r);for(var o="",i=t;i<n;i++)o+=j(e[i]);return o}(a,t,n);break;case"utf8":case"utf-8":r=function(e,t,n){var r="",o="";n=Math.min(e.length,n);for(var i=t;i<n;i++)e[i]<=127?(r+=M(o)+String.fromCharCode(e[i]),o=""):o+="%"+e[i].toString(16);return r+M(o)}(a,t,n);break;case"ascii":r=c(a,t,n);break;case"binary":r=c(a,t,n);break;case"base64":o=a,u=n,r=0===(i=t)&&u===o.length?s.fromByteArray(o):s.fromByteArray(o.slice(i,u));break;case"ucs2":case"ucs-2":case"utf16le":case"utf-16le":r=function(e,t,n){for(var r=e.slice(t,n),o="",i=0;i<r.length;i+=2)o+=String.fromCharCode(r[i]+256*r[i+1]);return o}(a,t,n);break;default:throw new Error("Unknown encoding")}return r},h.prototype.toJSON=function(){return {type:"Buffer",data:Array.prototype.slice.call(this._arr||this,0)}},h.prototype.copy=function(e,t,n,r){if(n=n||0,r||0===r||(r=this.length),t=t||0,r!==n&&0!==e.length&&0!==this.length){D(n<=r,"sourceEnd < sourceStart"),D(0<=t&&t<e.length,"targetStart out of bounds"),D(0<=n&&n<this.length,"sourceStart out of bounds"),D(0<=r&&r<=this.length,"sourceEnd out of bounds"),r>this.length&&(r=this.length),e.length-t<r-n&&(r=e.length-t+n);var o=r-n;if(o<100||!h._useTypedArrays)for(var i=0;i<o;i++)e[i+t]=this[i+n];else e._set(this.subarray(n,n+o),t);}},h.prototype.slice=function(e,t){var n=this.length;if(e=U(e,n,0),t=U(t,n,n),h._useTypedArrays)return h._augment(this.subarray(e,t));for(var r=t-e,o=new h(r,void 0,!0),i=0;i<r;i++)o[i]=this[i+e];return o},h.prototype.get=function(e){return console.log(".get() is deprecated. Access using array indexes instead."),this.readUInt8(e)},h.prototype.set=function(e,t){return console.log(".set() is deprecated. Access using array indexes instead."),this.writeUInt8(e,t)},h.prototype.readUInt8=function(e,t){if(t||(D(null!=e,"missing offset"),D(e<this.length,"Trying to read beyond buffer length")),!(e>=this.length))return this[e]},h.prototype.readUInt16LE=function(e,t){return l(this,e,!0,t)},h.prototype.readUInt16BE=function(e,t){return l(this,e,!1,t)},h.prototype.readUInt32LE=function(e,t){return d(this,e,!0,t)},h.prototype.readUInt32BE=function(e,t){return d(this,e,!1,t)},h.prototype.readInt8=function(e,t){if(t||(D(null!=e,"missing offset"),D(e<this.length,"Trying to read beyond buffer length")),!(e>=this.length))return 128&this[e]?-1*(255-this[e]+1):this[e]},h.prototype.readInt16LE=function(e,t){return y(this,e,!0,t)},h.prototype.readInt16BE=function(e,t){return y(this,e,!1,t)},h.prototype.readInt32LE=function(e,t){return w(this,e,!0,t)},h.prototype.readInt32BE=function(e,t){return w(this,e,!1,t)},h.prototype.readFloatLE=function(e,t){return b(this,e,!0,t)},h.prototype.readFloatBE=function(e,t){return b(this,e,!1,t)},h.prototype.readDoubleLE=function(e,t){return m(this,e,!0,t)},h.prototype.readDoubleBE=function(e,t){return m(this,e,!1,t)},h.prototype.writeUInt8=function(e,t,n){n||(D(null!=e,"missing value"),D(null!=t,"missing offset"),D(t<this.length,"trying to write beyond buffer length"),N(e,255)),t>=this.length||(this[t]=e);},h.prototype.writeUInt16LE=function(e,t,n){v(this,e,t,!0,n);},h.prototype.writeUInt16BE=function(e,t,n){v(this,e,t,!1,n);},h.prototype.writeUInt32LE=function(e,t,n){_(this,e,t,!0,n);},h.prototype.writeUInt32BE=function(e,t,n){_(this,e,t,!1,n);},h.prototype.writeInt8=function(e,t,n){n||(D(null!=e,"missing value"),D(null!=t,"missing offset"),D(t<this.length,"Trying to write beyond buffer length"),Y(e,127,-128)),t>=this.length||(0<=e?this.writeUInt8(e,t,n):this.writeUInt8(255+e+1,t,n));},h.prototype.writeInt16LE=function(e,t,n){E(this,e,t,!0,n);},h.prototype.writeInt16BE=function(e,t,n){E(this,e,t,!1,n);},h.prototype.writeInt32LE=function(e,t,n){I(this,e,t,!0,n);},h.prototype.writeInt32BE=function(e,t,n){I(this,e,t,!1,n);},h.prototype.writeFloatLE=function(e,t,n){A(this,e,t,!0,n);},h.prototype.writeFloatBE=function(e,t,n){A(this,e,t,!1,n);},h.prototype.writeDoubleLE=function(e,t,n){B(this,e,t,!0,n);},h.prototype.writeDoubleBE=function(e,t,n){B(this,e,t,!1,n);},h.prototype.fill=function(e,t,n){if(e=e||0,t=t||0,n=n||this.length,"string"==typeof e&&(e=e.charCodeAt(0)),D("number"==typeof e&&!isNaN(e),"value is not a number"),D(t<=n,"end < start"),n!==t&&0!==this.length){D(0<=t&&t<this.length,"start out of bounds"),D(0<=n&&n<=this.length,"end out of bounds");for(var r=t;r<n;r++)this[r]=e;}},h.prototype.inspect=function(){for(var e=[],t=this.length,n=0;n<t;n++)if(e[n]=j(this[n]),n===H.INSPECT_MAX_BYTES){e[n+1]="...";break}return "<Buffer "+e.join(" ")+">"},h.prototype.toArrayBuffer=function(){if("undefined"==typeof Uint8Array)throw new Error("Buffer.toArrayBuffer not supported in this browser");if(h._useTypedArrays)return new h(this).buffer;for(var e=new Uint8Array(this.length),t=0,n=e.length;t<n;t+=1)e[t]=this[t];return e.buffer};var L=h.prototype;function U(e,t,n){return "number"!=typeof e?n:t<=(e=~~e)?t:0<=e||0<=(e+=t)?e:0}function x(e){return (e=~~Math.ceil(+e))<0?0:e}function S(e){return (Array.isArray||function(e){return "[object Array]"===Object.prototype.toString.call(e)})(e)}function j(e){return e<16?"0"+e.toString(16):e.toString(16)}function C(e){for(var t=[],n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<=127)t.push(e.charCodeAt(n));else {var o=n;55296<=r&&r<=57343&&n++;for(var i=encodeURIComponent(e.slice(o,n+1)).substr(1).split("%"),u=0;u<i.length;u++)t.push(parseInt(i[u],16));}}return t}function k(e){return s.toByteArray(e)}function T(e,t,n,r){for(var o=0;o<r&&!(o+n>=t.length||o>=e.length);o++)t[o+n]=e[o];return o}function M(e){try{return decodeURIComponent(e)}catch(e){return String.fromCharCode(65533)}}function N(e,t){D("number"==typeof e,"cannot write a non-number as a number"),D(0<=e,"specified a negative value for writing an unsigned value"),D(e<=t,"value is larger than maximum value for type"),D(Math.floor(e)===e,"value has a fractional component");}function Y(e,t,n){D("number"==typeof e,"cannot write a non-number as a number"),D(e<=t,"value larger than maximum allowed value"),D(n<=e,"value smaller than minimum allowed value"),D(Math.floor(e)===e,"value has a fractional component");}function F(e,t,n){D("number"==typeof e,"cannot write a non-number as a number"),D(e<=t,"value larger than maximum allowed value"),D(n<=e,"value smaller than minimum allowed value");}function D(e,t){if(!e)throw new Error(t||"Failed assertion")}h._augment=function(e){return e._isBuffer=!0,e._get=e.get,e._set=e.set,e.get=L.get,e.set=L.set,e.write=L.write,e.toString=L.toString,e.toLocaleString=L.toString,e.toJSON=L.toJSON,e.copy=L.copy,e.slice=L.slice,e.readUInt8=L.readUInt8,e.readUInt16LE=L.readUInt16LE,e.readUInt16BE=L.readUInt16BE,e.readUInt32LE=L.readUInt32LE,e.readUInt32BE=L.readUInt32BE,e.readInt8=L.readInt8,e.readInt16LE=L.readInt16LE,e.readInt16BE=L.readInt16BE,e.readInt32LE=L.readInt32LE,e.readInt32BE=L.readInt32BE,e.readFloatLE=L.readFloatLE,e.readFloatBE=L.readFloatBE,e.readDoubleLE=L.readDoubleLE,e.readDoubleBE=L.readDoubleBE,e.writeUInt8=L.writeUInt8,e.writeUInt16LE=L.writeUInt16LE,e.writeUInt16BE=L.writeUInt16BE,e.writeUInt32LE=L.writeUInt32LE,e.writeUInt32BE=L.writeUInt32BE,e.writeInt8=L.writeInt8,e.writeInt16LE=L.writeInt16LE,e.writeInt16BE=L.writeInt16BE,e.writeInt32LE=L.writeInt32LE,e.writeInt32BE=L.writeInt32BE,e.writeFloatLE=L.writeFloatLE,e.writeFloatBE=L.writeFloatBE,e.writeDoubleLE=L.writeDoubleLE,e.writeDoubleBE=L.writeDoubleBE,e.fill=L.fill,e.inspect=L.inspect,e.toArrayBuffer=L.toArrayBuffer,e};}).call(this,O("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},O("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/buffer/index.js","/node_modules/gulp-browserify/node_modules/buffer");},{"base64-js":2,buffer:3,ieee754:11,lYpoI2:10}],4:[function(l,d,e){(function(e,t,u,n,r,o,i,a,s){u=l("buffer").Buffer;var f=4,c=new u(f);c.fill(0);d.exports={hash:function(e,t,n,r){return u.isBuffer(e)||(e=new u(e)),function(e,t,n){for(var r=new u(t),o=n?r.writeInt32BE:r.writeInt32LE,i=0;i<e.length;i++)o.call(r,e[i],4*i,!0);return r}(t(function(e,t){if(e.length%f!=0){var n=e.length+(f-e.length%f);e=u.concat([e,c],n);}for(var r=[],o=t?e.readInt32BE:e.readInt32LE,i=0;i<e.length;i+=f)r.push(o.call(e,i));return r}(e,r),8*e.length),n,r)}};}).call(this,l("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},l("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/crypto-browserify/helpers.js","/node_modules/gulp-browserify/node_modules/crypto-browserify");},{buffer:3,lYpoI2:10}],5:[function(w,e,b){(function(e,t,a,n,r,o,i,u,s){a=w("buffer").Buffer;var f=w("./sha"),c=w("./sha256"),l=w("./rng"),d={sha1:f,sha256:c,md5:w("./md5")},h=64,p=new a(h);function g(e,r){var o=d[e=e||"sha1"],i=[];return o||y("algorithm:",e,"is not yet supported"),{update:function(e){return a.isBuffer(e)||(e=new a(e)),i.push(e),e.length,this},digest:function(e){var t=a.concat(i),n=r?function(e,t,n){a.isBuffer(t)||(t=new a(t)),a.isBuffer(n)||(n=new a(n)),t.length>h?t=e(t):t.length<h&&(t=a.concat([t,p],h));for(var r=new a(h),o=new a(h),i=0;i<h;i++)r[i]=54^t[i],o[i]=92^t[i];var u=e(a.concat([r,n]));return e(a.concat([o,u]))}(o,r,t):o(t);return i=null,e?n.toString(e):n}}}function y(){var e=[].slice.call(arguments).join(" ");throw new Error([e,"we accept pull requests","http://github.com/dominictarr/crypto-browserify"].join("\n"))}p.fill(0),b.createHash=function(e){return g(e)},b.createHmac=function(e,t){return g(e,t)},b.randomBytes=function(e,t){if(!t||!t.call)return new a(l(e));try{t.call(this,void 0,new a(l(e)));}catch(e){t(e);}},function(e,t){for(var n in e)t(e[n],n);}(["createCredentials","createCipher","createCipheriv","createDecipher","createDecipheriv","createSign","createVerify","createDiffieHellman","pbkdf2"],function(e){b[e]=function(){y("sorry,",e,"is not implemented yet");};});}).call(this,w("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},w("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/crypto-browserify/index.js","/node_modules/gulp-browserify/node_modules/crypto-browserify");},{"./md5":6,"./rng":7,"./sha":8,"./sha256":9,buffer:3,lYpoI2:10}],6:[function(w,b,e){(function(e,t,n,r,o,i,u,a,s){var f=w("./helpers");function c(e,t){e[t>>5]|=128<<t%32,e[14+(t+64>>>9<<4)]=t;for(var n=1732584193,r=-271733879,o=-1732584194,i=271733878,u=0;u<e.length;u+=16){var a=n,s=r,f=o,c=i;n=d(n,r,o,i,e[u+0],7,-680876936),i=d(i,n,r,o,e[u+1],12,-389564586),o=d(o,i,n,r,e[u+2],17,606105819),r=d(r,o,i,n,e[u+3],22,-1044525330),n=d(n,r,o,i,e[u+4],7,-176418897),i=d(i,n,r,o,e[u+5],12,1200080426),o=d(o,i,n,r,e[u+6],17,-1473231341),r=d(r,o,i,n,e[u+7],22,-45705983),n=d(n,r,o,i,e[u+8],7,1770035416),i=d(i,n,r,o,e[u+9],12,-1958414417),o=d(o,i,n,r,e[u+10],17,-42063),r=d(r,o,i,n,e[u+11],22,-1990404162),n=d(n,r,o,i,e[u+12],7,1804603682),i=d(i,n,r,o,e[u+13],12,-40341101),o=d(o,i,n,r,e[u+14],17,-1502002290),n=h(n,r=d(r,o,i,n,e[u+15],22,1236535329),o,i,e[u+1],5,-165796510),i=h(i,n,r,o,e[u+6],9,-1069501632),o=h(o,i,n,r,e[u+11],14,643717713),r=h(r,o,i,n,e[u+0],20,-373897302),n=h(n,r,o,i,e[u+5],5,-701558691),i=h(i,n,r,o,e[u+10],9,38016083),o=h(o,i,n,r,e[u+15],14,-660478335),r=h(r,o,i,n,e[u+4],20,-405537848),n=h(n,r,o,i,e[u+9],5,568446438),i=h(i,n,r,o,e[u+14],9,-1019803690),o=h(o,i,n,r,e[u+3],14,-187363961),r=h(r,o,i,n,e[u+8],20,1163531501),n=h(n,r,o,i,e[u+13],5,-1444681467),i=h(i,n,r,o,e[u+2],9,-51403784),o=h(o,i,n,r,e[u+7],14,1735328473),n=p(n,r=h(r,o,i,n,e[u+12],20,-1926607734),o,i,e[u+5],4,-378558),i=p(i,n,r,o,e[u+8],11,-2022574463),o=p(o,i,n,r,e[u+11],16,1839030562),r=p(r,o,i,n,e[u+14],23,-35309556),n=p(n,r,o,i,e[u+1],4,-1530992060),i=p(i,n,r,o,e[u+4],11,1272893353),o=p(o,i,n,r,e[u+7],16,-155497632),r=p(r,o,i,n,e[u+10],23,-1094730640),n=p(n,r,o,i,e[u+13],4,681279174),i=p(i,n,r,o,e[u+0],11,-358537222),o=p(o,i,n,r,e[u+3],16,-722521979),r=p(r,o,i,n,e[u+6],23,76029189),n=p(n,r,o,i,e[u+9],4,-640364487),i=p(i,n,r,o,e[u+12],11,-421815835),o=p(o,i,n,r,e[u+15],16,530742520),n=g(n,r=p(r,o,i,n,e[u+2],23,-995338651),o,i,e[u+0],6,-198630844),i=g(i,n,r,o,e[u+7],10,1126891415),o=g(o,i,n,r,e[u+14],15,-1416354905),r=g(r,o,i,n,e[u+5],21,-57434055),n=g(n,r,o,i,e[u+12],6,1700485571),i=g(i,n,r,o,e[u+3],10,-1894986606),o=g(o,i,n,r,e[u+10],15,-1051523),r=g(r,o,i,n,e[u+1],21,-2054922799),n=g(n,r,o,i,e[u+8],6,1873313359),i=g(i,n,r,o,e[u+15],10,-30611744),o=g(o,i,n,r,e[u+6],15,-1560198380),r=g(r,o,i,n,e[u+13],21,1309151649),n=g(n,r,o,i,e[u+4],6,-145523070),i=g(i,n,r,o,e[u+11],10,-1120210379),o=g(o,i,n,r,e[u+2],15,718787259),r=g(r,o,i,n,e[u+9],21,-343485551),n=y(n,a),r=y(r,s),o=y(o,f),i=y(i,c);}return Array(n,r,o,i)}function l(e,t,n,r,o,i){return y((u=y(y(t,e),y(r,i)))<<(a=o)|u>>>32-a,n);var u,a;}function d(e,t,n,r,o,i,u){return l(t&n|~t&r,e,t,o,i,u)}function h(e,t,n,r,o,i,u){return l(t&r|n&~r,e,t,o,i,u)}function p(e,t,n,r,o,i,u){return l(t^n^r,e,t,o,i,u)}function g(e,t,n,r,o,i,u){return l(n^(t|~r),e,t,o,i,u)}function y(e,t){var n=(65535&e)+(65535&t);return (e>>16)+(t>>16)+(n>>16)<<16|65535&n}b.exports=function(e){return f.hash(e,c,16)};}).call(this,w("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},w("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/crypto-browserify/md5.js","/node_modules/gulp-browserify/node_modules/crypto-browserify");},{"./helpers":4,buffer:3,lYpoI2:10}],7:[function(e,l,t){(function(e,t,n,r,o,i,u,a,s){var f;f=function(e){for(var t,n=new Array(e),r=0;r<e;r++)0==(3&r)&&(t=4294967296*Math.random()),n[r]=t>>>((3&r)<<3)&255;return n},l.exports=f;}).call(this,e("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},e("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/crypto-browserify/rng.js","/node_modules/gulp-browserify/node_modules/crypto-browserify");},{buffer:3,lYpoI2:10}],8:[function(l,d,e){(function(e,t,n,r,o,i,u,a,s){var f=l("./helpers");function c(e,t){e[t>>5]|=128<<24-t%32,e[15+(t+64>>9<<4)]=t;for(var n,r=Array(80),o=1732584193,i=-271733879,u=-1732584194,a=271733878,s=-1009589776,f=0;f<e.length;f+=16){for(var c=o,l=i,d=u,h=a,p=s,g=0;g<80;g++){r[g]=g<16?e[f+g]:m(r[g-3]^r[g-8]^r[g-14]^r[g-16],1);var y=b(b(m(o,5),w(g,i,u,a)),b(b(s,r[g]),(n=g)<20?1518500249:n<40?1859775393:n<60?-1894007588:-899497514));s=a,a=u,u=m(i,30),i=o,o=y;}o=b(o,c),i=b(i,l),u=b(u,d),a=b(a,h),s=b(s,p);}return Array(o,i,u,a,s)}function w(e,t,n,r){return e<20?t&n|~t&r:!(e<40)&&e<60?t&n|t&r|n&r:t^n^r}function b(e,t){var n=(65535&e)+(65535&t);return (e>>16)+(t>>16)+(n>>16)<<16|65535&n}function m(e,t){return e<<t|e>>>32-t}d.exports=function(e){return f.hash(e,c,20,!0)};}).call(this,l("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},l("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/crypto-browserify/sha.js","/node_modules/gulp-browserify/node_modules/crypto-browserify");},{"./helpers":4,buffer:3,lYpoI2:10}],9:[function(l,d,e){(function(e,t,n,r,o,i,u,a,s){function B(e,t){var n=(65535&e)+(65535&t);return (e>>16)+(t>>16)+(n>>16)<<16|65535&n}function L(e,t){return e>>>t|e<<32-t}function U(e,t){return e>>>t}function f(e,t){var n,r,o,i,u,a,s,f,c,l,d,h,p,g,y,w,b,m,v=new Array(1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298),_=new Array(1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225),E=new Array(64);e[t>>5]|=128<<24-t%32,e[15+(t+64>>9<<4)]=t;for(var I=0;I<e.length;I+=16){n=_[0],r=_[1],o=_[2],i=_[3],u=_[4],a=_[5],s=_[6],f=_[7];for(var A=0;A<64;A++)E[A]=A<16?e[A+I]:B(B(B((m=E[A-2],L(m,17)^L(m,19)^U(m,10)),E[A-7]),(b=E[A-15],L(b,7)^L(b,18)^U(b,3))),E[A-16]),c=B(B(B(B(f,L(w=u,6)^L(w,11)^L(w,25)),(y=u)&a^~y&s),v[A]),E[A]),l=B(L(g=n,2)^L(g,13)^L(g,22),(d=n)&(h=r)^d&(p=o)^h&p),f=s,s=a,a=u,u=B(i,c),i=o,o=r,r=n,n=B(c,l);_[0]=B(n,_[0]),_[1]=B(r,_[1]),_[2]=B(o,_[2]),_[3]=B(i,_[3]),_[4]=B(u,_[4]),_[5]=B(a,_[5]),_[6]=B(s,_[6]),_[7]=B(f,_[7]);}return _}var c=l("./helpers");d.exports=function(e){return c.hash(e,f,32,!0)};}).call(this,l("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},l("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/crypto-browserify/sha256.js","/node_modules/gulp-browserify/node_modules/crypto-browserify");},{"./helpers":4,buffer:3,lYpoI2:10}],10:[function(e,c,t){(function(e,t,n,r,o,i,u,a,s){function f(){}(e=c.exports={}).nextTick=function(){var e="undefined"!=typeof window&&window.setImmediate,t="undefined"!=typeof window&&window.postMessage&&window.addEventListener;if(e)return function(e){return window.setImmediate(e)};if(t){var n=[];return window.addEventListener("message",function(e){var t=e.source;t!==window&&null!==t||"process-tick"!==e.data||(e.stopPropagation(),0<n.length&&n.shift()());},!0),function(e){n.push(e),window.postMessage("process-tick","*");}}return function(e){setTimeout(e,0);}}(),e.title="browser",e.browser=!0,e.env={},e.argv=[],e.on=f,e.addListener=f,e.once=f,e.off=f,e.removeListener=f,e.removeAllListeners=f,e.emit=f,e.binding=function(e){throw new Error("process.binding is not supported")},e.cwd=function(){return "/"},e.chdir=function(e){throw new Error("process.chdir is not supported")};}).call(this,e("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},e("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/gulp-browserify/node_modules/process/browser.js","/node_modules/gulp-browserify/node_modules/process");},{buffer:3,lYpoI2:10}],11:[function(e,t,f){(function(e,t,n,r,o,i,u,a,s){f.read=function(e,t,n,r,o){var i,u,a=8*o-r-1,s=(1<<a)-1,f=s>>1,c=-7,l=n?o-1:0,d=n?-1:1,h=e[t+l];for(l+=d,i=h&(1<<-c)-1,h>>=-c,c+=a;0<c;i=256*i+e[t+l],l+=d,c-=8);for(u=i&(1<<-c)-1,i>>=-c,c+=r;0<c;u=256*u+e[t+l],l+=d,c-=8);if(0===i)i=1-f;else {if(i===s)return u?NaN:1/0*(h?-1:1);u+=Math.pow(2,r),i-=f;}return (h?-1:1)*u*Math.pow(2,i-r)},f.write=function(e,t,n,r,o,i){var u,a,s,f=8*i-o-1,c=(1<<f)-1,l=c>>1,d=23===o?Math.pow(2,-24)-Math.pow(2,-77):0,h=r?0:i-1,p=r?1:-1,g=t<0||0===t&&1/t<0?1:0;for(t=Math.abs(t),isNaN(t)||t===1/0?(a=isNaN(t)?1:0,u=c):(u=Math.floor(Math.log(t)/Math.LN2),t*(s=Math.pow(2,-u))<1&&(u--,s*=2),2<=(t+=1<=u+l?d/s:d*Math.pow(2,1-l))*s&&(u++,s/=2),c<=u+l?(a=0,u=c):1<=u+l?(a=(t*s-1)*Math.pow(2,o),u+=l):(a=t*Math.pow(2,l-1)*Math.pow(2,o),u=0));8<=o;e[n+h]=255&a,h+=p,a/=256,o-=8);for(u=u<<o|a,f+=o;0<f;e[n+h]=255&u,h+=p,u/=256,f-=8);e[n+h-p]|=128*g;};}).call(this,e("lYpoI2"),"undefined"!=typeof self?self:"undefined"!=typeof window?window:{},e("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/node_modules/ieee754/index.js","/node_modules/ieee754");},{buffer:3,lYpoI2:10}]},{},[1])(1)});
 });
 
 var defaults = createCommonjsModule(function (module) {
@@ -87719,6 +86322,7 @@ class OrbitView extends react.PureComponent {
     return {
       id: propTypes.string,
       geometry: propTypes.object,
+      path: propTypes.string,
       width: propTypes.number,
       height: propTypes.number,
       position: propTypes.array
@@ -87736,8 +86340,9 @@ class OrbitView extends react.PureComponent {
     const {
       containerId
     } = this.state;
-    const {
+    let {
       geometry,
+      path,
       position
     } = this.props;
     const container = document.getElementById(containerId);
@@ -87749,29 +86354,15 @@ class OrbitView extends react.PureComponent {
     const page = document.createElement('div');
     page.id = 'viewer';
     page.style.height = '100%';
+
+    if (path) {
+      geometry = await read(path);
+    }
+
     await orbitDisplay({
       view,
       geometry
     }, page);
-    /*
-     const geometryPath = path;
-     const readAndUpdate = async () => {
-      const data = await readFile({}, geometryPath);
-      if (data === undefined) {
-        await updateGeometry({ assembly: [] });
-      } else {
-        if (data.buffer) {
-          await updateGeometry(JSON.parse(new TextDecoder('utf8').decode(data)));
-        } else {
-          await updateGeometry(data);
-        }
-      }
-    };
-     await readAndUpdate();
-     const watcher = await watchFile(geometryPath, readAndUpdate);
-     this.setState({ watcher });
-    */
-
     container.appendChild(page);
   }
 
@@ -87805,7 +86396,9 @@ class OrbitView extends react.PureComponent {
     const {
       width,
       height
-    } = this.props;
+    } = this.props; //    width={width}
+    //    height={height}
+
     return react.createElement(ResizableBox, {
       className: "box",
       width: width,
@@ -87814,9 +86407,12 @@ class OrbitView extends react.PureComponent {
         borderStyle: 'solid',
         borderWidth: 'thin',
         borderColor: 'blue',
-        display: 'inline-block'
+        display: 'inline-block',
+        width: '90%',
+        height: '90%'
       },
       onClick: e => e.stopPropagation(),
+      resizeHandles: ['ne', 'nw', 'se', 'sw'],
       handle: resizeHandle => react.createElement("span", {
         className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
         style: {
@@ -87838,6 +86434,7 @@ class StaticView extends react.PureComponent {
     return {
       id: propTypes.string,
       geometry: propTypes.object,
+      path: propTypes.string,
       width: propTypes.number,
       height: propTypes.number,
       position: propTypes.array,
@@ -87851,12 +86448,17 @@ class StaticView extends react.PureComponent {
   }
 
   async componentDidMount() {
-    const {
+    let {
+      path,
       geometry,
       width,
       height,
       position
-    } = this.props; // const data = await readFile({}, path);
+    } = this.props;
+
+    if (path) {
+      geometry = await read(path);
+    }
 
     const url = await dataUrl(Shape.fromGeometry(geometry), {
       width,
@@ -87901,7 +86503,8 @@ class GeometryView extends react.PureComponent {
       onClick: propTypes.func,
       mode: propTypes.string,
       isSelected: propTypes.bool,
-      geometry: propTypes.object
+      geometry: propTypes.object,
+      path: propTypes.string
     };
   }
 
@@ -87913,6 +86516,7 @@ class GeometryView extends react.PureComponent {
   render() {
     const {
       id,
+      path,
       geometry,
       width,
       height,
@@ -87924,6 +86528,7 @@ class GeometryView extends react.PureComponent {
     switch (mode) {
       case 'static':
         return react.createElement(StaticView, {
+          path: path,
           geometry: geometry,
           width: width,
           height: height,
@@ -87934,6 +86539,7 @@ class GeometryView extends react.PureComponent {
       case 'dynamic':
         return react.createElement(OrbitView, {
           id: id,
+          path: path,
           geometry: geometry,
           width: width,
           height: height,
@@ -88041,7 +86647,6 @@ class NotebookUi extends Pane {
     for (const note of notebook) {
       nth += 1;
       const isSelected = nth === selected;
-      const key = Math.random(); // nth;
 
       if (note.geometry) {
         const index = nth;
@@ -88049,6 +86654,7 @@ class NotebookUi extends Pane {
           width,
           height,
           position,
+          path,
           geometry
         } = note.geometry;
         const mode = index === selected ? 'dynamic' : 'static';
@@ -88062,13 +86668,16 @@ class NotebookUi extends Pane {
             selected: index,
             notes
           });
-        };
+        }; // const key = hash(note.geometry);
 
+
+        const key = Math.random();
         notes.push(react.createElement(GeometryView, {
           key: key,
           width: width,
           height: height,
           position: position,
+          path: path,
           geometry: geometry,
           onClick: select,
           mode: mode,
@@ -88076,6 +86685,7 @@ class NotebookUi extends Pane {
         }));
       } else if (note.md) {
         const data = note.md;
+        const key = object_hash(data);
         notes.push(react.createElement("div", {
           key: key,
           dangerouslySetInnerHTML: {
@@ -88088,6 +86698,7 @@ class NotebookUi extends Pane {
         } = note.download;
 
         if (entries) {
+          const key = object_hash(entries);
           notes.push(react.createElement(DownloadView, {
             key: key,
             entries: entries
@@ -88942,7 +87553,7 @@ class SelectProjectUi extends SettingsUi {
     } = this.state;
 
     if (project.length === 0) {
-      await log$1({
+      await log({
         op: 'text',
         text: `Project name is empty`,
         level: 'serious'
@@ -88953,7 +87564,7 @@ class SelectProjectUi extends SettingsUi {
     const projects = await listFilesystems();
 
     if (projects.includes(project)) {
-      await log$1({
+      await log({
         op: 'text',
         text: `Project ${project} already exists`,
         level: 'serious'
@@ -88975,7 +87586,7 @@ class SelectProjectUi extends SettingsUi {
       await writeFile({
         project
       }, 'ui/paneViews', defaultPaneViews);
-      await log$1({
+      await log({
         op: 'text',
         text: `Project ${project} created`,
         level: 'serious'
@@ -89073,7 +87684,7 @@ class ShareFileUi extends SettingsUi {
       type: 'application/zip'
     });
     FileSaver_min(blob, path);
-    await log$1({
+    await log({
       op: 'text',
       text: `Exporting ${path} to file`,
       level: 'serious'
@@ -89100,7 +87711,7 @@ class ShareFileUi extends SettingsUi {
     reader.onload = async event => {
       const zip = event.target.result;
       await fromZipToFilesystem({}, zip);
-      await log$1({
+      await log({
         op: 'text',
         text: `Imported ${path} from file`,
         level: 'serious'
@@ -89210,7 +87821,7 @@ class ShareGistUi extends SettingsUi {
     });
 
     if (url === undefined) {
-      log$1({
+      log({
         op: 'text',
         text: `Failed to create gist`,
         level: 'serious',
@@ -89219,7 +87830,7 @@ class ShareGistUi extends SettingsUi {
       return;
     }
 
-    log$1({
+    log({
       op: 'text',
       text: `Created gist at ${url}`,
       level: 'serious',
@@ -89247,7 +87858,7 @@ class ShareGistUi extends SettingsUi {
     await readProject$1(gistId, {
       project
     });
-    log$1({
+    log({
       op: 'text',
       text: `Read gist from ${url}`,
       level: 'serious',
@@ -89311,13 +87922,13 @@ class ShareGithubUi extends SettingsUi {
     if (await writeProject(owner, repository, prefix, files, {
       overwrite: false
     })) {
-      await log$1({
+      await log({
         op: 'text',
         text: 'Successfully wrote to github repository',
         level: 'serious'
       });
     } else {
-      await log$1({
+      await log({
         op: 'text',
         text: 'Failed to write to github repository',
         level: 'serious'
@@ -89337,13 +87948,13 @@ class ShareGithubUi extends SettingsUi {
     if (await readProject(owner, repository, prefix, {
       overwrite: false
     })) {
-      await log$1({
+      await log({
         op: 'text',
         text: 'Successfully read from github repository',
         level: 'serious'
       });
     } else {
-      await log$1({
+      await log({
         op: 'text',
         text: 'Failed to read from github repository',
         level: 'serious'
@@ -89688,7 +88299,7 @@ class SvgPathEditor extends Pane {
       } = this.props;
       const path = this.generatePath();
       await writeFile({}, file, path);
-      await log$1({
+      await log({
         op: 'text',
         text: 'Saved',
         level: 'serious'
@@ -91021,421 +89632,441 @@ class ViewUi extends Pane {
 
 }
 
-var HAS_WEAKSET_SUPPORT = typeof WeakSet === 'function';
-var keys$1 = Object.keys;
-/**
- * @function addToCache
- *
- * add object to cache if an object
- *
- * @param value the value to potentially add to cache
- * @param cache the cache to add to
- */
-function addToCache(value, cache) {
-    if (value && typeof value === 'object') {
-        cache.add(value);
-    }
-}
-/**
- * @function hasPair
- *
- * @description
- * does the `pairToMatch` exist in the list of `pairs` provided based on the
- * `isEqual` check
- *
- * @param pairs the pairs to compare against
- * @param pairToMatch the pair to match
- * @param isEqual the equality comparator used
- * @param meta the meta provided
- * @returns does the pair exist in the pairs provided
- */
-function hasPair(pairs, pairToMatch, isEqual, meta) {
-    var length = pairs.length;
-    var pair;
-    for (var index = 0; index < length; index++) {
-        pair = pairs[index];
-        if (isEqual(pair[0], pairToMatch[0], meta) &&
-            isEqual(pair[1], pairToMatch[1], meta)) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * @function hasValue
- *
- * @description
- * does the `valueToMatch` exist in the list of `values` provided based on the
- * `isEqual` check
- *
- * @param values the values to compare against
- * @param valueToMatch the value to match
- * @param isEqual the equality comparator used
- * @param meta the meta provided
- * @returns does the value exist in the values provided
- */
-function hasValue(values, valueToMatch, isEqual, meta) {
-    var length = values.length;
-    for (var index = 0; index < length; index++) {
-        if (isEqual(values[index], valueToMatch, meta)) {
-            return true;
-        }
-    }
-    return false;
-}
-/**
- * @function sameValueZeroEqual
- *
- * @description
- * are the values passed strictly equal or both NaN
- *
- * @param a the value to compare against
- * @param b the value to test
- * @returns are the values equal by the SameValueZero principle
- */
-function sameValueZeroEqual(a, b) {
-    return a === b || (a !== a && b !== b);
-}
-/**
- * @function isPlainObject
- *
- * @description
- * is the value a plain object
- *
- * @param value the value to test
- * @returns is the value a plain object
- */
-function isPlainObject$1(value) {
-    return value.constructor === Object || value.constructor == null;
-}
-/**
- * @function isPromiseLike
- *
- * @description
- * is the value promise-like (meaning it is thenable)
- *
- * @param value the value to test
- * @returns is the value promise-like
- */
-function isPromiseLike(value) {
-    return !!value && typeof value.then === 'function';
-}
-/**
- * @function isReactElement
- *
- * @description
- * is the value passed a react element
- *
- * @param value the value to test
- * @returns is the value a react element
- */
-function isReactElement(value) {
-    return !!(value && value.$$typeof);
-}
-/**
- * @function getNewCacheFallback
- *
- * @description
- * in cases where WeakSet is not supported, creates a new custom
- * object that mimics the necessary API aspects for cache purposes
- *
- * @returns the new cache object
- */
-function getNewCacheFallback() {
-    return Object.create({
-        _values: [],
-        add: function (value) {
-            this._values.push(value);
-        },
-        has: function (value) {
-            return this._values.indexOf(value) !== -1;
-        },
-    });
-}
-/**
- * @function getNewCache
- *
- * @description
- * get a new cache object to prevent circular references
- *
- * @returns the new cache object
- */
-var getNewCache = (function (canUseWeakMap) {
-    if (canUseWeakMap) {
-        return function _getNewCache() {
-            return new WeakSet();
-        };
-    }
-    return getNewCacheFallback;
-})(HAS_WEAKSET_SUPPORT);
-/**
- * @function createCircularEqualCreator
- *
- * @description
- * create a custom isEqual handler specific to circular objects
- *
- * @param [isEqual] the isEqual comparator to use instead of isDeepEqual
- * @returns the method to create the `isEqual` function
- */
-function createCircularEqualCreator(isEqual) {
-    return function createCircularEqual(comparator) {
-        var _comparator = isEqual || comparator;
-        return function circularEqual(a, b, cache) {
-            if (cache === void 0) { cache = getNewCache(); }
-            var hasA = cache.has(a);
-            var hasB = cache.has(b);
-            if (hasA || hasB) {
-                return hasA && hasB;
-            }
-            addToCache(a, cache);
-            addToCache(b, cache);
-            return _comparator(a, b, cache);
-        };
-    };
-}
-/**
- * @function toPairs
- *
- * @description
- * convert the map passed into pairs (meaning an array of [key, value] tuples)
- *
- * @param map the map to convert to [key, value] pairs (entries)
- * @returns the [key, value] pairs
- */
-function toPairs(map) {
-    var pairs = new Array(map.size);
-    var index = 0;
-    map.forEach(function (value, key) {
-        pairs[index++] = [key, value];
-    });
-    return pairs;
-}
-/**
- * @function toValues
- *
- * @description
- * convert the set passed into values
- *
- * @param set the set to convert to values
- * @returns the values
- */
-function toValues(set) {
-    var values = new Array(set.size);
-    var index = 0;
-    set.forEach(function (value) {
-        values[index++] = value;
-    });
-    return values;
-}
-/**
- * @function areArraysEqual
- *
- * @description
- * are the arrays equal in value
- *
- * @param a the array to test
- * @param b the array to test against
- * @param isEqual the comparator to determine equality
- * @param meta the meta object to pass through
- * @returns are the arrays equal
- */
-function areArraysEqual(a, b, isEqual, meta) {
-    var length = a.length;
-    if (b.length !== length) {
-        return false;
-    }
-    for (var index = 0; index < length; index++) {
-        if (!isEqual(a[index], b[index], meta)) {
-            return false;
-        }
-    }
-    return true;
-}
-/**
- * @function areMapsEqual
- *
- * @description
- * are the maps equal in value
- *
- * @param a the map to test
- * @param b the map to test against
- * @param isEqual the comparator to determine equality
- * @param meta the meta map to pass through
- * @returns are the maps equal
- */
-function areMapsEqual(a, b, isEqual, meta) {
-    if (a.size !== b.size) {
-        return false;
-    }
-    var pairsA = toPairs(a);
-    var pairsB = toPairs(b);
-    var length = pairsA.length;
-    for (var index = 0; index < length; index++) {
-        if (!hasPair(pairsB, pairsA[index], isEqual, meta) ||
-            !hasPair(pairsA, pairsB[index], isEqual, meta)) {
-            return false;
-        }
-    }
-    return true;
-}
-var OWNER = '_owner';
-var hasOwnProperty$g = Function.prototype.bind.call(Function.prototype.call, Object.prototype.hasOwnProperty);
-/**
- * @function areObjectsEqual
- *
- * @description
- * are the objects equal in value
- *
- * @param a the object to test
- * @param b the object to test against
- * @param isEqual the comparator to determine equality
- * @param meta the meta object to pass through
- * @returns are the objects equal
- */
-function areObjectsEqual(a, b, isEqual, meta) {
-    var keysA = keys$1(a);
-    var length = keysA.length;
-    if (keys$1(b).length !== length) {
-        return false;
-    }
-    var key;
-    for (var index = 0; index < length; index++) {
-        key = keysA[index];
-        if (!hasOwnProperty$g(b, key)) {
-            return false;
-        }
-        if (key === OWNER && isReactElement(a)) {
-            if (!isReactElement(b)) {
-                return false;
-            }
-        }
-        else if (!isEqual(a[key], b[key], meta)) {
-            return false;
-        }
-    }
-    return true;
-}
-/**
- * @function areRegExpsEqual
- *
- * @description
- * are the regExps equal in value
- *
- * @param a the regExp to test
- * @param b the regExp to test agains
- * @returns are the regExps equal
- */
-function areRegExpsEqual(a, b) {
-    return (a.source === b.source &&
-        a.global === b.global &&
-        a.ignoreCase === b.ignoreCase &&
-        a.multiline === b.multiline &&
-        a.unicode === b.unicode &&
-        a.sticky === b.sticky &&
-        a.lastIndex === b.lastIndex);
-}
-/**
- * @function areSetsEqual
- *
- * @description
- * are the sets equal in value
- *
- * @param a the set to test
- * @param b the set to test against
- * @param isEqual the comparator to determine equality
- * @param meta the meta set to pass through
- * @returns are the sets equal
- */
-function areSetsEqual(a, b, isEqual, meta) {
-    if (a.size !== b.size) {
-        return false;
-    }
-    var valuesA = toValues(a);
-    var valuesB = toValues(b);
-    var length = valuesA.length;
-    for (var index = 0; index < length; index++) {
-        if (!hasValue(valuesB, valuesA[index], isEqual, meta) ||
-            !hasValue(valuesA, valuesB[index], isEqual, meta)) {
-            return false;
-        }
-    }
-    return true;
-}
+var fastEquals = createCommonjsModule(function (module, exports) {
+(function (global, factory) {
+   factory(exports) ;
+}(commonjsGlobal, function (exports) {
+  var HAS_WEAKSET_SUPPORT = typeof WeakSet === 'function';
+  var keys = Object.keys;
+  /**
+   * @function addToCache
+   *
+   * add object to cache if an object
+   *
+   * @param value the value to potentially add to cache
+   * @param cache the cache to add to
+   */
+  function addToCache(value, cache) {
+      if (value && typeof value === 'object') {
+          cache.add(value);
+      }
+  }
+  /**
+   * @function hasPair
+   *
+   * @description
+   * does the `pairToMatch` exist in the list of `pairs` provided based on the
+   * `isEqual` check
+   *
+   * @param pairs the pairs to compare against
+   * @param pairToMatch the pair to match
+   * @param isEqual the equality comparator used
+   * @param meta the meta provided
+   * @returns does the pair exist in the pairs provided
+   */
+  function hasPair(pairs, pairToMatch, isEqual, meta) {
+      var length = pairs.length;
+      var pair;
+      for (var index = 0; index < length; index++) {
+          pair = pairs[index];
+          if (isEqual(pair[0], pairToMatch[0], meta) &&
+              isEqual(pair[1], pairToMatch[1], meta)) {
+              return true;
+          }
+      }
+      return false;
+  }
+  /**
+   * @function hasValue
+   *
+   * @description
+   * does the `valueToMatch` exist in the list of `values` provided based on the
+   * `isEqual` check
+   *
+   * @param values the values to compare against
+   * @param valueToMatch the value to match
+   * @param isEqual the equality comparator used
+   * @param meta the meta provided
+   * @returns does the value exist in the values provided
+   */
+  function hasValue(values, valueToMatch, isEqual, meta) {
+      var length = values.length;
+      for (var index = 0; index < length; index++) {
+          if (isEqual(values[index], valueToMatch, meta)) {
+              return true;
+          }
+      }
+      return false;
+  }
+  /**
+   * @function sameValueZeroEqual
+   *
+   * @description
+   * are the values passed strictly equal or both NaN
+   *
+   * @param a the value to compare against
+   * @param b the value to test
+   * @returns are the values equal by the SameValueZero principle
+   */
+  function sameValueZeroEqual(a, b) {
+      return a === b || (a !== a && b !== b);
+  }
+  /**
+   * @function isPlainObject
+   *
+   * @description
+   * is the value a plain object
+   *
+   * @param value the value to test
+   * @returns is the value a plain object
+   */
+  function isPlainObject(value) {
+      return value.constructor === Object || value.constructor == null;
+  }
+  /**
+   * @function isPromiseLike
+   *
+   * @description
+   * is the value promise-like (meaning it is thenable)
+   *
+   * @param value the value to test
+   * @returns is the value promise-like
+   */
+  function isPromiseLike(value) {
+      return !!value && typeof value.then === 'function';
+  }
+  /**
+   * @function isReactElement
+   *
+   * @description
+   * is the value passed a react element
+   *
+   * @param value the value to test
+   * @returns is the value a react element
+   */
+  function isReactElement(value) {
+      return !!(value && value.$$typeof);
+  }
+  /**
+   * @function getNewCacheFallback
+   *
+   * @description
+   * in cases where WeakSet is not supported, creates a new custom
+   * object that mimics the necessary API aspects for cache purposes
+   *
+   * @returns the new cache object
+   */
+  function getNewCacheFallback() {
+      return Object.create({
+          _values: [],
+          add: function (value) {
+              this._values.push(value);
+          },
+          has: function (value) {
+              return this._values.indexOf(value) !== -1;
+          },
+      });
+  }
+  /**
+   * @function getNewCache
+   *
+   * @description
+   * get a new cache object to prevent circular references
+   *
+   * @returns the new cache object
+   */
+  var getNewCache = (function (canUseWeakMap) {
+      if (canUseWeakMap) {
+          return function _getNewCache() {
+              return new WeakSet();
+          };
+      }
+      return getNewCacheFallback;
+  })(HAS_WEAKSET_SUPPORT);
+  /**
+   * @function createCircularEqualCreator
+   *
+   * @description
+   * create a custom isEqual handler specific to circular objects
+   *
+   * @param [isEqual] the isEqual comparator to use instead of isDeepEqual
+   * @returns the method to create the `isEqual` function
+   */
+  function createCircularEqualCreator(isEqual) {
+      return function createCircularEqual(comparator) {
+          var _comparator = isEqual || comparator;
+          return function circularEqual(a, b, cache) {
+              if (cache === void 0) { cache = getNewCache(); }
+              var hasA = cache.has(a);
+              var hasB = cache.has(b);
+              if (hasA || hasB) {
+                  return hasA && hasB;
+              }
+              addToCache(a, cache);
+              addToCache(b, cache);
+              return _comparator(a, b, cache);
+          };
+      };
+  }
+  /**
+   * @function toPairs
+   *
+   * @description
+   * convert the map passed into pairs (meaning an array of [key, value] tuples)
+   *
+   * @param map the map to convert to [key, value] pairs (entries)
+   * @returns the [key, value] pairs
+   */
+  function toPairs(map) {
+      var pairs = new Array(map.size);
+      var index = 0;
+      map.forEach(function (value, key) {
+          pairs[index++] = [key, value];
+      });
+      return pairs;
+  }
+  /**
+   * @function toValues
+   *
+   * @description
+   * convert the set passed into values
+   *
+   * @param set the set to convert to values
+   * @returns the values
+   */
+  function toValues(set) {
+      var values = new Array(set.size);
+      var index = 0;
+      set.forEach(function (value) {
+          values[index++] = value;
+      });
+      return values;
+  }
+  /**
+   * @function areArraysEqual
+   *
+   * @description
+   * are the arrays equal in value
+   *
+   * @param a the array to test
+   * @param b the array to test against
+   * @param isEqual the comparator to determine equality
+   * @param meta the meta object to pass through
+   * @returns are the arrays equal
+   */
+  function areArraysEqual(a, b, isEqual, meta) {
+      var length = a.length;
+      if (b.length !== length) {
+          return false;
+      }
+      for (var index = 0; index < length; index++) {
+          if (!isEqual(a[index], b[index], meta)) {
+              return false;
+          }
+      }
+      return true;
+  }
+  /**
+   * @function areMapsEqual
+   *
+   * @description
+   * are the maps equal in value
+   *
+   * @param a the map to test
+   * @param b the map to test against
+   * @param isEqual the comparator to determine equality
+   * @param meta the meta map to pass through
+   * @returns are the maps equal
+   */
+  function areMapsEqual(a, b, isEqual, meta) {
+      if (a.size !== b.size) {
+          return false;
+      }
+      var pairsA = toPairs(a);
+      var pairsB = toPairs(b);
+      var length = pairsA.length;
+      for (var index = 0; index < length; index++) {
+          if (!hasPair(pairsB, pairsA[index], isEqual, meta) ||
+              !hasPair(pairsA, pairsB[index], isEqual, meta)) {
+              return false;
+          }
+      }
+      return true;
+  }
+  var OWNER = '_owner';
+  var hasOwnProperty = Function.prototype.bind.call(Function.prototype.call, Object.prototype.hasOwnProperty);
+  /**
+   * @function areObjectsEqual
+   *
+   * @description
+   * are the objects equal in value
+   *
+   * @param a the object to test
+   * @param b the object to test against
+   * @param isEqual the comparator to determine equality
+   * @param meta the meta object to pass through
+   * @returns are the objects equal
+   */
+  function areObjectsEqual(a, b, isEqual, meta) {
+      var keysA = keys(a);
+      var length = keysA.length;
+      if (keys(b).length !== length) {
+          return false;
+      }
+      var key;
+      for (var index = 0; index < length; index++) {
+          key = keysA[index];
+          if (!hasOwnProperty(b, key)) {
+              return false;
+          }
+          if (key === OWNER && isReactElement(a)) {
+              if (!isReactElement(b)) {
+                  return false;
+              }
+          }
+          else if (!isEqual(a[key], b[key], meta)) {
+              return false;
+          }
+      }
+      return true;
+  }
+  /**
+   * @function areRegExpsEqual
+   *
+   * @description
+   * are the regExps equal in value
+   *
+   * @param a the regExp to test
+   * @param b the regExp to test agains
+   * @returns are the regExps equal
+   */
+  function areRegExpsEqual(a, b) {
+      return (a.source === b.source &&
+          a.global === b.global &&
+          a.ignoreCase === b.ignoreCase &&
+          a.multiline === b.multiline &&
+          a.unicode === b.unicode &&
+          a.sticky === b.sticky &&
+          a.lastIndex === b.lastIndex);
+  }
+  /**
+   * @function areSetsEqual
+   *
+   * @description
+   * are the sets equal in value
+   *
+   * @param a the set to test
+   * @param b the set to test against
+   * @param isEqual the comparator to determine equality
+   * @param meta the meta set to pass through
+   * @returns are the sets equal
+   */
+  function areSetsEqual(a, b, isEqual, meta) {
+      if (a.size !== b.size) {
+          return false;
+      }
+      var valuesA = toValues(a);
+      var valuesB = toValues(b);
+      var length = valuesA.length;
+      for (var index = 0; index < length; index++) {
+          if (!hasValue(valuesB, valuesA[index], isEqual, meta) ||
+              !hasValue(valuesA, valuesB[index], isEqual, meta)) {
+              return false;
+          }
+      }
+      return true;
+  }
 
-var isArray$2 = Array.isArray;
-var HAS_MAP_SUPPORT = typeof Map === 'function';
-var HAS_SET_SUPPORT = typeof Set === 'function';
-var OBJECT_TYPEOF = 'object';
-function createComparator(createIsEqual) {
-    var isEqual = 
-    /* eslint-disable no-use-before-define */
-    typeof createIsEqual === 'function'
-        ? createIsEqual(comparator)
-        : comparator;
-    /* eslint-enable */
-    /**
-     * @function comparator
-     *
-     * @description
-     * compare the value of the two objects and return true if they are equivalent in values
-     *
-     * @param a the value to test against
-     * @param b the value to test
-     * @param [meta] an optional meta object that is passed through to all equality test calls
-     * @returns are a and b equivalent in value
-     */
-    function comparator(a, b, meta) {
-        if (sameValueZeroEqual(a, b)) {
-            return true;
-        }
-        if (a && b && typeof a === OBJECT_TYPEOF && typeof b === OBJECT_TYPEOF) {
-            if (isPlainObject$1(a) && isPlainObject$1(b)) {
-                return areObjectsEqual(a, b, isEqual, meta);
-            }
-            var arrayA = isArray$2(a);
-            var arrayB = isArray$2(b);
-            if (arrayA || arrayB) {
-                return arrayA === arrayB && areArraysEqual(a, b, isEqual, meta);
-            }
-            var aDate = a instanceof Date;
-            var bDate = b instanceof Date;
-            if (aDate || bDate) {
-                return aDate === bDate && sameValueZeroEqual(a.getTime(), b.getTime());
-            }
-            var aRegExp = a instanceof RegExp;
-            var bRegExp = b instanceof RegExp;
-            if (aRegExp || bRegExp) {
-                return aRegExp === bRegExp && areRegExpsEqual(a, b);
-            }
-            if (isPromiseLike(a) || isPromiseLike(b)) {
-                return a === b;
-            }
-            if (HAS_MAP_SUPPORT) {
-                var aMap = a instanceof Map;
-                var bMap = b instanceof Map;
-                if (aMap || bMap) {
-                    return aMap === bMap && areMapsEqual(a, b, isEqual, meta);
-                }
-            }
-            if (HAS_SET_SUPPORT) {
-                var aSet = a instanceof Set;
-                var bSet = b instanceof Set;
-                if (aSet || bSet) {
-                    return aSet === bSet && areSetsEqual(a, b, isEqual, meta);
-                }
-            }
-            return areObjectsEqual(a, b, isEqual, meta);
-        }
-        return false;
-    }
-    return comparator;
-}
+  var isArray = Array.isArray;
+  var HAS_MAP_SUPPORT = typeof Map === 'function';
+  var HAS_SET_SUPPORT = typeof Set === 'function';
+  var OBJECT_TYPEOF = 'object';
+  function createComparator(createIsEqual) {
+      var isEqual = 
+      /* eslint-disable no-use-before-define */
+      typeof createIsEqual === 'function'
+          ? createIsEqual(comparator)
+          : comparator;
+      /* eslint-enable */
+      /**
+       * @function comparator
+       *
+       * @description
+       * compare the value of the two objects and return true if they are equivalent in values
+       *
+       * @param a the value to test against
+       * @param b the value to test
+       * @param [meta] an optional meta object that is passed through to all equality test calls
+       * @returns are a and b equivalent in value
+       */
+      function comparator(a, b, meta) {
+          if (sameValueZeroEqual(a, b)) {
+              return true;
+          }
+          if (a && b && typeof a === OBJECT_TYPEOF && typeof b === OBJECT_TYPEOF) {
+              if (isPlainObject(a) && isPlainObject(b)) {
+                  return areObjectsEqual(a, b, isEqual, meta);
+              }
+              var arrayA = isArray(a);
+              var arrayB = isArray(b);
+              if (arrayA || arrayB) {
+                  return arrayA === arrayB && areArraysEqual(a, b, isEqual, meta);
+              }
+              var aDate = a instanceof Date;
+              var bDate = b instanceof Date;
+              if (aDate || bDate) {
+                  return aDate === bDate && sameValueZeroEqual(a.getTime(), b.getTime());
+              }
+              var aRegExp = a instanceof RegExp;
+              var bRegExp = b instanceof RegExp;
+              if (aRegExp || bRegExp) {
+                  return aRegExp === bRegExp && areRegExpsEqual(a, b);
+              }
+              if (isPromiseLike(a) || isPromiseLike(b)) {
+                  return a === b;
+              }
+              if (HAS_MAP_SUPPORT) {
+                  var aMap = a instanceof Map;
+                  var bMap = b instanceof Map;
+                  if (aMap || bMap) {
+                      return aMap === bMap && areMapsEqual(a, b, isEqual, meta);
+                  }
+              }
+              if (HAS_SET_SUPPORT) {
+                  var aSet = a instanceof Set;
+                  var bSet = b instanceof Set;
+                  if (aSet || bSet) {
+                      return aSet === bSet && areSetsEqual(a, b, isEqual, meta);
+                  }
+              }
+              return areObjectsEqual(a, b, isEqual, meta);
+          }
+          return false;
+      }
+      return comparator;
+  }
 
-// comparator
-var deepEqual = createComparator();
-var shallowEqual = createComparator(function () { return sameValueZeroEqual; });
-var circularDeepEqual = createComparator(createCircularEqualCreator());
-var circularShallowEqual = createComparator(createCircularEqualCreator(sameValueZeroEqual));
+  // comparator
+  var deepEqual = createComparator();
+  var shallowEqual = createComparator(function () { return sameValueZeroEqual; });
+  var circularDeepEqual = createComparator(createCircularEqualCreator());
+  var circularShallowEqual = createComparator(createCircularEqualCreator(sameValueZeroEqual));
+
+  exports.circularDeepEqual = circularDeepEqual;
+  exports.circularShallowEqual = circularShallowEqual;
+  exports.createCustomEqual = createComparator;
+  exports.deepEqual = deepEqual;
+  exports.sameValueZeroEqual = sameValueZeroEqual;
+  exports.shallowEqual = shallowEqual;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+}));
+
+});
+
+unwrapExports(fastEquals);
+var fastEquals_1 = fastEquals.deepEqual;
 
 /* global history, location, window */
 
@@ -91559,7 +90190,15 @@ class Ui extends react.PureComponent {
         const {
           entry
         } = question.log;
-        return log$1(entry);
+        return log(entry);
+      } else if (question.touchFile) {
+        const {
+          path,
+          workspace
+        } = question.touchFile;
+        return touch(path, {
+          workspace
+        });
       }
     };
 
@@ -91705,7 +90344,7 @@ class Ui extends react.PureComponent {
         {
           const project = getFilesystem();
           const url = await writeProject$1(project);
-          log$1({
+          log({
             op: 'text',
             text: `Created gist at ${url}`,
             level: 'serious'
@@ -91891,6 +90530,9 @@ class Ui extends react.PureComponent {
 
   renderPane(views, id, path, createNode, onSelectView, onSelectFile) {
     const {
+      project
+    } = this.state;
+    const {
       view,
       file
     } = this.getPaneView(id);
@@ -91957,7 +90599,8 @@ class Ui extends react.PureComponent {
             fileChoices: fileChoices,
             fileTitle: fileTitle,
             onSelectFile: onSelectFile,
-            ask: ask
+            ask: ask,
+            workspace: project
           });
         }
 
@@ -92143,7 +90786,7 @@ class Ui extends react.PureComponent {
       }, views.map((viewOption, index) => react.createElement(Button, {
         key: `switch/${index}`,
         variant: "outline-primary",
-        active: deepEqual(paneView, viewOption),
+        active: fastEquals_1(paneView, viewOption),
         onClick: () => this.setPaneView(switchView, viewOption)
       }, viewOption.title))))))));
     };

@@ -1,14 +1,15 @@
 {
-  "name": "@jsxcad/algorithm-flatten-boolean",
+  "name": "@jsxcad/geometry-halfedge",
   "version": "0.0.79",
-  "description": "Operations on surfaces in the orthonormal z = 0 plane for JSxCAD",
+  "description": "Operations on half-edge geometry for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
-  "module": "main.js",
+  "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
+    "rollup": "rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js"
   },
@@ -21,18 +22,20 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@flatten-js/boolean-op": "^1.1.4",
-    "@flatten-js/core": "^1.0.15",
+    "@jsxcad/algorithm-quantize": "^0.0.79",
+    "@jsxcad/geometry-polygons": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79"
   },
   "devDependencies": {
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/math-mat4": "^0.0.79",
-    "@jsxcad/math-utils": "^0.0.79",
     "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "esm": "^3.2.10"
+    "esm": "^3.2.10",
+    "rollup": "^1.11.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"

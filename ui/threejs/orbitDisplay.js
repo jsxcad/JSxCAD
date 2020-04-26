@@ -5,6 +5,7 @@ import { buildScene, createResizer } from './scene';
 import { Layers } from 'three';
 import { buildMeshes } from './mesh';
 import { buildTrackballControls } from './controls';
+import { moveToFit } from './moveToFit';
 import { toThreejsGeometry } from './toThreejsGeometry';
 
 const GEOMETRY_LAYER = 0;
@@ -21,7 +22,7 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
 
   const render = () => {
     renderer.clear();
@@ -51,6 +52,9 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     datasets = [];
 
     await buildMeshes({ datasets, threejsGeometry, scene });
+
+    moveToFit({ view, camera, controls: trackball, scene });
+
     render();
   };
 

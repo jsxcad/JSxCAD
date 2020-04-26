@@ -1,6 +1,6 @@
 import Shape, { Shape as Shape$1, assemble, log } from './jsxcad-api-v1-shape.js';
 import { add, random, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
-import { getPlans, getConnections, getSolids, getAnySurfaces, getSurfaces, getZ0Surfaces, toTransformedGeometry, drop } from './jsxcad-geometry-tagged.js';
+import { getPlans, getConnections, getSolids, getAnySurfaces, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import Plan from './jsxcad-api-v1-plan.js';
 import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
 import { cut } from './jsxcad-algorithm-bsp-surfaces.js';
@@ -529,23 +529,23 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
 const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
-  const aConnector = toTransformedGeometry(aConnectorShape.toGeometry());
+  const aConnector = toKeptGeometry(aConnectorShape.toGeometry()).disjointAssembly[0];
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
 
-  const bConnector = toTransformedGeometry(bConnectorShape.flip().toGeometry());
+  const bConnector = toKeptGeometry(bConnectorShape.flip().toGeometry()).disjointAssembly[0];
   const bShape = toShape(bConnectorShape);
   const [bTo, bFrom] = toXYPlaneTransforms(bConnector.planes[0], subtract(bConnector.marks[RIGHT], bConnector.marks[CENTER]));
 
   // Flatten a.
   const aFlatShape = aShape.transform(aTo);
   const aFlatConnector = aConnectorShape.transform(aTo);
-  const aMarks = aFlatConnector.toKeptGeometry().marks;
+  const aMarks = aFlatConnector.toKeptGeometry().disjointAssembly[0].marks;
   const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
   // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
-  const bFlatConnector = toTransformedGeometry(bConnectorShape.transform(bTo).toGeometry());
+  const bFlatConnector = toKeptGeometry(bConnectorShape.transform(bTo).toGeometry()).disjointAssembly[0];
   const bMarks = bFlatConnector.marks;
 
   // Rotate into alignment.
@@ -578,7 +578,7 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssembl
     return Shape.fromGeometry(
       {
         connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-        connectors: [aMovedConnector.toKeptGeometry(), bConnector],
+        connectors: [aMovedConnector.toKeptGeometry().disjointAssembly[0], bConnector],
         geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
             .concat(bShape === undefined
               ? []
@@ -615,12 +615,12 @@ const joinLeft = (leftArm, joinId, leftArmConnectorId, rightJointConnectorId, jo
   const result = Shape.fromGeometry(
     {
       connection: joinId,
-      connectors: [leftArmConnector.toKeptGeometry(),
-                   joinedJointConnector.toKeptGeometry(),
-                   joinedRightConnector.toKeptGeometry()],
-      geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry(),
-                   joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry(),
-                   joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()],
+      connectors: [leftArmConnector.toKeptGeometry().disjointAssembly[0],
+                   joinedJointConnector.toKeptGeometry().disjointAssembly[0],
+                   joinedRightConnector.toKeptGeometry().disjointAssembly[0]],
+      geometries: [leftArm.dropConnector(leftArmConnectorId).toKeptGeometry().disjointAssembly[0],
+                   joinedJointShape.dropConnector(rightJointConnectorId, leftJointConnectorId).toKeptGeometry().disjointAssembly[0],
+                   joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry().disjointAssembly[0]],
       tags: [`joinLeft/${joinId}`]
     });
   return result;

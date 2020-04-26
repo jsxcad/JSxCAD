@@ -19,7 +19,7 @@ export default {
     builtins(),
     commonjs(),
     globals(),
-    nodeResolve({ preferBuiltins: true }),
+    nodeResolve({ preferBuiltins: true, browser: true }),
     { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } },
     sizes()
   ]

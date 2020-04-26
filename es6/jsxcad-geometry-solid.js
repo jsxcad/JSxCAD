@@ -87,8 +87,15 @@ const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
         }
         pushWhenValid(watertightPaths, watertightPath);
       }
+      // const mergedPaths = watertightPaths;
+      // const mergedPaths = mergeCoplanarPolygons(watertightPaths, normalize, /*noIslands=*/true);
+      // const convexPaths = mergedPaths;
+      // const convexPaths = makeConvexNoHoles(mergedPaths, normalize);
+      // watertightSolid.push(convexPaths);
       watertightSolid.push(watertightPaths);
     }
+    // const merged = cleanSolid(watertightSolid, normalize);
+
     // At this point we should have the correct structure for assembly into a solid.
     // We just need to ensure triangulation to support deformation.
 
@@ -327,7 +334,6 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
   }
 
   return defragmented;
-  // return makeWatertight(defragmented, normalize3);
 };
 
 /** Measure the bounding sphere of the given poly3

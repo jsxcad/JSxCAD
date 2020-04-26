@@ -584,6 +584,12 @@ const Polyhedron = (...args) => ofPointPaths(...args);
 
 Polyhedron.ofPointPaths = ofPointPaths;
 
+// FIX: This name is confusing wrt Shape.sketch().
+const Sketch = (shape) => shape.Void().with(shape.sketch());
+
+const SketchMethod = function () { return Sketch(this); };
+Shape.prototype.Sketch = SketchMethod;
+
 /**
  *
  * # Sphere
@@ -894,6 +900,7 @@ const api = {
   Polygon,
   Polyhedron,
   Prism,
+  Sketch,
   Sphere,
   Spiral,
   Square,
@@ -906,4 +913,4 @@ const api = {
 };
 
 export default api;
-export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave };
+export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sketch, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave };

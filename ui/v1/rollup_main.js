@@ -46,15 +46,10 @@ export default {
           'Children', 'Component', 'PropTypes', 'createElement', 'cloneElement', 'createContext',
           'useRef', 'useState', 'useCallback', 'useEffect', 'useMemo', 'useContext', 'useReducer'
         ],
-        '../../node_modules/react-dom/index.js': [
-          'findDOMNode'
-        ],
-        '../../node_modules/react-recollect/index.js': [
-          'collect'
-        ]
-        // '../../node_modules/ace-builds/src-noconflict/ext-language_tools': [
-        //   'addCompleter', 'setCompleters', 'snippetManager',
-        // ]
+        '../../node_modules/react-dom/index.js': ['findDOMNode'],
+        '../../node_modules/react-recollect/index.js': ['collect'],
+        '../../node_modules/fast-equals/dist/fast-equals.js': ['deepEqual'],
+        '../../node_modules/react-draggable/build/web/react-draggable.min.js': ['DraggableCore']
       }
     }),
     globals(),
@@ -85,7 +80,7 @@ export default {
         }
       }),
     builtins(),
-    nodeResolve({ preferBuiltins: true }),
+    nodeResolve({ preferBuiltins: true, browser: true }),
     json(),
     sizes(),
     { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
