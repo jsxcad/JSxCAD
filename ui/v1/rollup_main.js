@@ -46,7 +46,7 @@ export default {
           'Children', 'Component', 'PropTypes', 'createElement', 'cloneElement',
           'createContext', 'forwardRef', 'isFragment',
           'useCallback', 'useEffect', 'useImperativeHandle', 'useMemo', 'useContext',
-          'useReducer', 'useRef', 'useState',
+          'useReducer', 'useRef', 'useState'
         ],
         '../../node_modules/react-dom/index.js': ['findDOMNode'],
         '../../node_modules/react-recollect/index.js': ['collect'],
