@@ -44,7 +44,7 @@ export default {
       namedExports: {
         '../../node_modules/react/index.js': [
           'Children', 'Component', 'PropTypes', 'createElement', 'cloneElement',
-          'createContext', 'forwardRef', 'isFragment', 'useRef', 'useState',
+          'createContext', 'forwardRef', 'isFragment',
           'useCallback', 'useEffect', 'useImperativeHandle', 'useMemo', 'useContext',
           'useReducer', 'useRef', 'useState',
         ],
