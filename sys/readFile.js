@@ -1,3 +1,4 @@
+/* global Window, self */
 // FIX: Refactor this once we figure it out.
 
 import * as fs from 'fs';
@@ -8,7 +9,6 @@ import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { db } from './db';
 import { getFile } from './files';
-import isUrlHttp from 'is-url-http';
 import { log } from './log';
 import nodeFetch from 'node-fetch';
 import { writeFile } from './writeFile';
@@ -46,11 +46,16 @@ const decode = (data) => {
 };
 
 const getUrlFetcher = async () => {
-  if (typeof window !== 'undefined') {
-    return window.fetch;
-  } else {
+  if (isBrowser) {
+    return Window.fetch;
+  }
+  if (isWebWorker) {
+    return self.fetch;
+  }
+  if (isNode) {
     return nodeFetch;
   }
+  throw Error('die');
 };
 
 const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
@@ -100,7 +105,7 @@ const fetchSources = async (options = {}, sources) => {
   for (const source of sources) {
     if (typeof source === 'string') {
       try {
-        if (isUrlHttp(source)) {
+        if (source.startsWith('http:') || source.startsWith('https:')) {
           log({ op: 'text', text: `# Fetching ${source}` });
           const response = await fetchUrl(source);
           if (response.ok) {
