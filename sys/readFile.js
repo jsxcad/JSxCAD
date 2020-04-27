@@ -34,7 +34,9 @@ const decode = (data) => {
   if (Array.isArray(data)) {
     // We may have arrays of things to decode.
     for (let i = 0; i < data.length; i++) {
-      data[i] = decode(data[i]);
+      if (typeof data[i] === 'object') {
+        data[i] = decode(data[i]);
+      }
     }
   } else if (data.byteLength === undefined) {
     // We may have objects of things to decode, but not ArrayBuffers.

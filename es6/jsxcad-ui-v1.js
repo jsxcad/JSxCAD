@@ -5561,17 +5561,19 @@ var react = createCommonjsModule(function (module) {
 });
 var react_1 = react.Children;
 var react_2 = react.Component;
-var react_3 = react.PropTypes;
-var react_4 = react.createElement;
-var react_5 = react.cloneElement;
-var react_6 = react.createContext;
-var react_7 = react.useRef;
-var react_8 = react.useState;
-var react_9 = react.useCallback;
-var react_10 = react.useEffect;
-var react_11 = react.useMemo;
-var react_12 = react.useContext;
-var react_13 = react.useReducer;
+var react_3 = react.ForwardRef;
+var react_4 = react.PropTypes;
+var react_5 = react.createElement;
+var react_6 = react.cloneElement;
+var react_7 = react.createContext;
+var react_8 = react.isFragment;
+var react_9 = react.useRef;
+var react_10 = react.useState;
+var react_11 = react.useCallback;
+var react_12 = react.useEffect;
+var react_13 = react.useMemo;
+var react_14 = react.useContext;
+var react_15 = react.useReducer;
 
 var interfaces = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17988,9 +17990,9 @@ function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typ
 function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
 function useUncontrolledProp(propValue, defaultValue, handler) {
-  var wasPropRef = react_7(propValue !== undefined);
+  var wasPropRef = react_9(propValue !== undefined);
 
-  var _useState = react_8(defaultValue),
+  var _useState = react_10(defaultValue),
       stateValue = _useState[0],
       setState = _useState[1];
 
@@ -18006,7 +18008,7 @@ function useUncontrolledProp(propValue, defaultValue, handler) {
     setState(defaultValue);
   }
 
-  return [isProp ? propValue : stateValue, react_9(function (value) {
+  return [isProp ? propValue : stateValue, react_11(function (value) {
     for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
     }
@@ -18051,8 +18053,8 @@ function _inheritsLoose(subClass, superClass) {
  */
 
 function useCommittedRef(value) {
-  var ref = react_7(value);
-  react_10(function () {
+  var ref = react_9(value);
+  react_12(function () {
     ref.current = value;
   }, [value]);
   return ref;
@@ -18060,7 +18062,7 @@ function useCommittedRef(value) {
 
 function useEventCallback(fn) {
   var ref = useCommittedRef(fn);
-  return react_9(function () {
+  return react_11(function () {
     return ref.current && ref.current.apply(ref, arguments);
   }, [ref]);
 }
@@ -18111,7 +18113,7 @@ var Consumer = ThemeContext.Consumer,
     Provider = ThemeContext.Provider;
 
 function useBootstrapPrefix(prefix, defaultPrefix) {
-  var prefixes = react_12(ThemeContext);
+  var prefixes = react_14(ThemeContext);
   return prefix || prefixes[defaultPrefix] || defaultPrefix;
 }
 
@@ -45374,7 +45376,7 @@ var Fade = react.forwardRef(function (_ref, ref) {
       children = _ref.children,
       props = _objectWithoutPropertiesLoose(_ref, ["className", "children"]);
 
-  var handleEnter = react_9(function (node) {
+  var handleEnter = react_11(function (node) {
     triggerBrowserReflow(node);
     if (props.onEnter) props.onEnter(node);
   }, [props]);
@@ -45797,7 +45799,7 @@ var FormControl = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'input' : _ref$as,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "as"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_14(FormContext),
       controlId = _useContext.controlId;
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
@@ -45999,7 +46001,7 @@ function qsa(element, selector) {
 function useForceUpdate() {
   // The toggling state value is designed to defeat React optimizations for skipping
   // updates when they are stricting equal to the last state value
-  var _useReducer = react_13(function (state) {
+  var _useReducer = react_15(function (state) {
     return !state;
   }, false),
       dispatch = _useReducer[1];
@@ -46039,7 +46041,7 @@ function mergeRefs(refA, refB) {
  */
 
 function useMergedRefs(refA, refB) {
-  return react_11(function () {
+  return react_13(function () {
     return mergeRefs(refA, refB);
   }, [refA, refB]);
 }
@@ -46068,9 +46070,9 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
   // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
   // and don't want to reset the set in the effect
   var forceUpdate = useForceUpdate();
-  var needsRefocusRef = react_7(false);
-  var parentOnSelect = react_12(SelectableContext);
-  var tabContext = react_12(TabContext);
+  var needsRefocusRef = react_9(false);
+  var parentOnSelect = react_14(SelectableContext);
+  var tabContext = react_14(TabContext);
   var getControlledId, getControllerId;
 
   if (tabContext) {
@@ -46080,7 +46082,7 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
     getControllerId = tabContext.getControllerId;
   }
 
-  var listNode = react_7(null);
+  var listNode = react_9(null);
 
   var getNextActiveChild = function getNextActiveChild(offset) {
     if (!listNode.current) return null;
@@ -46126,7 +46128,7 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
     forceUpdate();
   };
 
-  react_10(function () {
+  react_12(function () {
     if (listNode.current && needsRefocusRef.current) {
       var activeChild = listNode.current.querySelector('[data-rb-event-key].active');
       if (activeChild) activeChild.focus();
@@ -46183,8 +46185,8 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["active", "className", "tabIndex", "eventKey", "onSelect", "onClick", "as"]);
 
   var navKey = makeEventKey(eventKey, props.href);
-  var parentOnSelect = react_12(SelectableContext);
-  var navContext = react_12(NavContext);
+  var parentOnSelect = react_14(SelectableContext);
+  var navContext = react_14(NavContext);
   var isActive = active;
 
   if (navContext) {
@@ -46266,8 +46268,8 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'nav');
   var navbarBsPrefix, cardHeaderBsPrefix;
-  var navbarContext = react_12(NavbarContext);
-  var cardContext = react_12(CardContext);
+  var navbarContext = react_14(NavbarContext);
+  var cardContext = react_14(CardContext);
 
   if (navbarContext) {
     navbarBsPrefix = navbarContext.bsPrefix;
@@ -46321,8 +46323,8 @@ function matches(node, selector) {
  */
 
 function usePrevious(value) {
-  var ref = react_7(null);
-  react_10(function () {
+  var ref = react_9(null);
+  react_12(function () {
     ref.current = value;
   });
   return ref.current;
@@ -46354,7 +46356,7 @@ function usePrevious(value) {
  */
 
 function useCallbackRef() {
-  return react_8(null);
+  return react_10(null);
 }
 
 var DropdownContext = react.createContext({
@@ -49015,15 +49017,15 @@ function usePopper(referenceElement, popperElement, _temp) {
       _ref$modifiers = _ref.modifiers,
       modifiers = _ref$modifiers === void 0 ? {} : _ref$modifiers;
 
-  var popperInstanceRef = react_7();
+  var popperInstanceRef = react_9();
   var hasArrow = !!(modifiers.arrow && modifiers.arrow.element);
-  var scheduleUpdate = react_9(function () {
+  var scheduleUpdate = react_11(function () {
     if (popperInstanceRef.current) {
       popperInstanceRef.current.scheduleUpdate();
     }
   }, []);
 
-  var _useState = react_8({
+  var _useState = react_10({
     placement: placement,
     scheduleUpdate: scheduleUpdate,
     outOfBoundaries: false,
@@ -49037,18 +49039,18 @@ function usePopper(referenceElement, popperElement, _temp) {
   // a size change it will result in a misaligned popper. So we schedule an update to be sure.
 
 
-  react_10(function () {
+  react_12(function () {
     scheduleUpdate();
   }, [state.placement, scheduleUpdate]);
   /** Toggle Events */
 
-  react_10(function () {
+  react_12(function () {
     if (popperInstanceRef.current) {
       // eslint-disable-next-line no-unused-expressions
       eventsEnabled ? popperInstanceRef.current.enableEventListeners() : popperInstanceRef.current.disableEventListeners();
     }
   }, [eventsEnabled]);
-  react_10(function () {
+  react_12(function () {
     if (!enabled || referenceElement == null || popperElement == null) {
       return undefined;
     }
@@ -49136,9 +49138,9 @@ function useRootClose(ref, onRootClose, _temp) {
       _ref$clickTrigger = _ref.clickTrigger,
       clickTrigger = _ref$clickTrigger === void 0 ? 'click' : _ref$clickTrigger;
 
-  var preventMouseRootCloseRef = react_7(false);
+  var preventMouseRootCloseRef = react_9(false);
   var onClose = onRootClose || noop$3;
-  var handleMouseCapture = react_9(function (e) {
+  var handleMouseCapture = react_11(function (e) {
     var currentTarget = ref && ('current' in ref ? ref.current : ref);
     warning_1(!!currentTarget, 'RootClose captured a close event but does not have a ref to compare it to. ' + 'useRootClose(), should be passed a ref that resolves to a DOM node');
     preventMouseRootCloseRef.current = !currentTarget || isModifiedEvent(e) || !isLeftClickEvent(e) || contains(currentTarget, e.target);
@@ -49153,7 +49155,7 @@ function useRootClose(ref, onRootClose, _temp) {
       onClose(e);
     }
   });
-  react_10(function () {
+  react_12(function () {
     if (disabled || ref == null) return undefined;
     var doc = ownerDocument$1(ref.current); // Use capture for this listener so it fires before React's listener, to
     // avoid false positives in the contains() check below if the target DOM
@@ -49186,13 +49188,13 @@ function useDropdownMenu(options) {
     options = {};
   }
 
-  var context = react_12(DropdownContext);
+  var context = react_14(DropdownContext);
 
   var _useCallbackRef = useCallbackRef(),
       arrowElement = _useCallbackRef[0],
       attachArrowRef = _useCallbackRef[1];
 
-  var hasShownRef = react_7(false);
+  var hasShownRef = react_9(false);
   var _options = options,
       flip = _options.flip,
       rootCloseEvent = _options.rootCloseEvent,
@@ -49345,7 +49347,7 @@ DropdownMenu.defaultProps = defaultProps$a;
  */
 
 function useDropdownToggle() {
-  var _useContext = react_12(DropdownContext),
+  var _useContext = react_14(DropdownContext),
       show = _useContext.show,
       toggle = _useContext.toggle,
       setToggle = _useContext.setToggle;
@@ -49507,20 +49509,20 @@ function Dropdown(_ref) {
   // may run before the state value is set
 
 
-  var menuRef = react_7();
+  var menuRef = react_9();
   var menuElement = menuRef.current;
-  var setMenu = react_9(function (ref) {
+  var setMenu = react_11(function (ref) {
     menuRef.current = ref; // ensure that a menu set triggers an update for consumers
 
     forceUpdate();
   }, [forceUpdate]);
   var lastShow = usePrevious(show);
-  var lastSourceEvent = react_7(null);
-  var focusInDropdown = react_7(false);
-  var toggle = react_9(function (event) {
+  var lastSourceEvent = react_9(null);
+  var focusInDropdown = react_9(false);
+  var toggle = react_11(function (event) {
     onToggle(!show, event);
   }, [onToggle, show]);
-  var context = react_11(function () {
+  var context = react_13(function () {
     return {
       toggle: toggle,
       drop: drop,
@@ -49557,13 +49559,13 @@ function Dropdown(_ref) {
     var first = qsa(menuRef.current, itemSelector)[0];
     if (first && first.focus) first.focus();
   });
-  react_10(function () {
+  react_12(function () {
     if (show) maybeFocusFirst();else if (focusInDropdown.current) {
       focusInDropdown.current = false;
       focusToggle();
     } // only `show` should be changing
   }, [show, focusInDropdown, focusToggle, maybeFocusFirst]);
-  react_10(function () {
+  react_12(function () {
     lastSourceEvent.current = null;
   });
 
@@ -49650,8 +49652,8 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "eventKey", "disabled", "href", "onClick", "onSelect", "active", "as"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown-item');
-  var onSelectCtx = react_12(SelectableContext);
-  var navContext = react_12(NavContext);
+  var onSelectCtx = react_14(SelectableContext);
+  var navContext = react_14(NavContext);
 
   var _ref2 = navContext || {},
       activeKey = _ref2.activeKey;
@@ -49679,7 +49681,7 @@ DropdownItem.defaultProps = defaultProps$c;
 
 function useWrappedRefWithWarning(ref, componentName) {
 
-  var warningRef = react_9(function (refValue) {
+  var warningRef = react_11(function (refValue) {
     !(refValue == null || !refValue.isReactComponent) ?  browser(false, componentName + " injected a ref to a provided `as` component that resolved to a component instance instead of a DOM element. " + 'Use `React.forwardRef` to provide the injected ref to the class component as a prop in order to pass it directly to a DOM element')  : void 0;
   }, [componentName]); // eslint-disable-next-line react-hooks/rules-of-hooks
 
@@ -49702,7 +49704,7 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'div' : _ref$as,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "alignRight", "rootCloseEvent", "flip", "popperConfig", "show", "as"]);
 
-  var isNavbar = react_12(NavbarContext);
+  var isNavbar = react_14(NavbarContext);
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown-menu');
 
   var _useDropdownMenu = useDropdownMenu({
@@ -49823,7 +49825,7 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
       _4 = _useUncontrolled.navbar,
       props = _objectWithoutPropertiesLoose(_useUncontrolled, ["bsPrefix", "drop", "show", "className", "alignRight", "onSelect", "onToggle", "focusFirstItemOnShow", "as", "navbar"]);
 
-  var onSelectCtx = react_12(SelectableContext);
+  var onSelectCtx = react_14(SelectableContext);
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown');
   var handleToggle = useEventCallback(function (nextShow, event, source) {
     if (source === void 0) {
@@ -50107,7 +50109,7 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar-toggler');
 
-  var _ref2 = react_12(NavbarContext) || {},
+  var _ref2 = react_14(NavbarContext) || {},
       onToggle = _ref2.onToggle,
       expanded = _ref2.expanded;
 
@@ -50158,7 +50160,7 @@ var Navbar = react.forwardRef(function (props, ref) {
       controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, ["bsPrefix", "expand", "variant", "bg", "fixed", "sticky", "className", "children", "as", "expanded", "onToggle", "onSelect", "collapseOnSelect"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar');
-  var handleCollapse = react_9(function () {
+  var handleCollapse = react_11(function () {
     if (onSelect) onSelect.apply(void 0, arguments);
 
     if (collapseOnSelect && expanded) {
@@ -50174,7 +50176,7 @@ var Navbar = react.forwardRef(function (props, ref) {
 
   var expandClass = bsPrefix + "-expand";
   if (typeof expand === 'string') expandClass = expandClass + "-" + expand;
-  var navbarContext = react_11(function () {
+  var navbarContext = react_13(function () {
     return {
       onToggle: function onToggle() {
         return _onToggle(!expanded);
@@ -83145,7 +83147,7 @@ var resolveRef = function resolveRef(ref) {
 };
 
 function useWaitForDOMRef(ref, onResolved) {
-  var _useState = react_8(function () {
+  var _useState = react_10(function () {
     return resolveRef(ref);
   }),
       resolvedRef = _useState[0],
@@ -83156,12 +83158,12 @@ function useWaitForDOMRef(ref, onResolved) {
     if (earlyRef) setRef(earlyRef);
   }
 
-  react_10(function () {
+  react_12(function () {
     if (onResolved && resolvedRef) {
       onResolved(resolvedRef);
     }
   }, [onResolved, resolvedRef]);
-  react_10(function () {
+  react_12(function () {
     var nextRef = resolveRef(ref);
 
     if (nextRef !== resolvedRef) {
@@ -83795,7 +83797,7 @@ var ModalHeader = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "closeLabel", "closeButton", "onHide", "className", "children"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'modal-header');
-  var context = react_12(ModalContext);
+  var context = react_14(ModalContext);
   var handleClick = useEventCallback(function () {
     if (context) context.onHide();
     if (onHide) onHide();
@@ -86774,7 +86776,7 @@ var FormCheckInput = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'input' : _ref$as,
       props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_14(FormContext),
       controlId = _useContext.controlId,
       custom = _useContext.custom;
 
@@ -86795,7 +86797,7 @@ var FormCheckLabel = react.forwardRef(function (_ref, ref) {
       htmlFor = _ref.htmlFor,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_14(FormContext),
       controlId = _useContext.controlId,
       custom = _useContext.custom;
 
@@ -86839,10 +86841,10 @@ var FormCheck = react.forwardRef(function (_ref, ref) {
   var custom = type === 'switch' ? true : propCustom;
   bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_14(FormContext),
       controlId = _useContext.controlId;
 
-  var innerFormContext = react_11(function () {
+  var innerFormContext = react_13(function () {
     return {
       controlId: id || controlId,
       custom: custom
@@ -86884,7 +86886,7 @@ var FormGroup = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
-  var context = react_11(function () {
+  var context = react_13(function () {
     return {
       controlId: controlId
     };
@@ -86910,7 +86912,7 @@ var FormLabel = react.forwardRef(function (_ref, ref) {
       htmlFor = _ref.htmlFor,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_14(FormContext),
       controlId = _useContext.controlId;
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
@@ -87148,7 +87150,7 @@ var Card = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card');
-  var cardContext = react_11(function () {
+  var cardContext = react_13(function () {
     return {
       cardHeaderBsPrefix: prefix + "-header"
     };
@@ -87273,12 +87275,12 @@ var TabContainer = function TabContainer(props) {
       unmountOnExit = _useUncontrolled.unmountOnExit,
       children = _useUncontrolled.children;
 
-  var generateChildId = react_11(function () {
+  var generateChildId = react_13(function () {
     return generateCustomChildId || function (key, type) {
       return id ? id + "-" + type + "-" + key : null;
     };
   }, [id, generateCustomChildId]);
-  var tabContext = react_11(function () {
+  var tabContext = react_13(function () {
     return {
       onSelect: onSelect,
       activeKey: activeKey,
@@ -87316,7 +87318,7 @@ var TabContent = react.forwardRef(function (_ref, ref) {
 });
 
 function useTabContext(props) {
-  var context = react_12(TabContext);
+  var context = react_14(TabContext);
   if (!context) return props;
 
   var activeKey = context.activeKey,
@@ -89273,11 +89275,11 @@ function Range(props) {
  */
 
 function useMounted() {
-  var mounted = react_7(true);
-  var isMounted = react_7(function () {
+  var mounted = react_9(true);
+  var isMounted = react_9(function () {
     return mounted.current;
   });
-  react_10(function () {
+  react_12(function () {
     return function () {
       mounted.current = false;
     };
@@ -89293,7 +89295,7 @@ function useMounted() {
  */
 
 function useUpdatedRef(value) {
-  var valueRef = react_7(value);
+  var valueRef = react_9(value);
   valueRef.current = value;
   return valueRef;
 }
@@ -89307,7 +89309,7 @@ function useUpdatedRef(value) {
 
 function useWillUnmount(fn) {
   var onUnmount = useUpdatedRef(fn);
-  react_10(function () {
+  react_12(function () {
     return function () {
       return onUnmount.current();
     };
@@ -89340,11 +89342,11 @@ function setChainedTimeout(handleRef, fn, timeoutAtMs) {
 function useTimeout() {
   var isMounted = useMounted(); // types are confused between node and web here IDK
 
-  var handleRef = react_7();
+  var handleRef = react_9();
   useWillUnmount(function () {
     return clearTimeout(handleRef.current);
   });
-  return react_11(function () {
+  return react_13(function () {
     var clear = function clear() {
       return clearTimeout(handleRef.current);
     };
@@ -89389,7 +89391,7 @@ var ToastHeader = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "closeLabel", "closeButton", "className", "children"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'toast-header');
-  var context = react_12(ToastContext);
+  var context = react_14(ToastContext);
   var handleClick = useEventCallback(function () {
     if (context) {
       context.onClose();
@@ -89431,16 +89433,16 @@ var Toast = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "transition", "show", "animation", "delay", "autohide", "onClose"]);
 
   bsPrefix = useBootstrapPrefix('toast');
-  var delayRef = react_7(delay);
-  var onCloseRef = react_7(onClose);
-  react_10(function () {
+  var delayRef = react_9(delay);
+  var onCloseRef = react_9(onClose);
+  react_12(function () {
     // We use refs for these, because we don't want to restart the autohide
     // timer in case these values change.
     delayRef.current = delay;
     onCloseRef.current = onClose;
   }, [delay, onClose]);
   var autohideTimeout = useTimeout();
-  var autohideFunc = react_9(function () {
+  var autohideFunc = react_11(function () {
     if (!(autohide && show)) {
       return;
     }
@@ -89448,7 +89450,7 @@ var Toast = react.forwardRef(function (_ref, ref) {
     onCloseRef.current();
   }, [autohide, show]);
   autohideTimeout.set(autohideFunc, delayRef.current);
-  var useAnimation = react_11(function () {
+  var useAnimation = react_13(function () {
     return Transition && animation;
   }, [Transition, animation]);
   var toast = react.createElement("div", _extends({}, props, {
