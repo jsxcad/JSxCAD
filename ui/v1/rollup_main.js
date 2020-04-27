@@ -43,8 +43,9 @@ export default {
     commonjs({
       namedExports: {
         '../../node_modules/react/index.js': [
-          'Children', 'Component', 'PropTypes', 'createElement', 'cloneElement', 'createContext',
-          'useRef', 'useState', 'useCallback', 'useEffect', 'useMemo', 'useContext', 'useReducer'
+          'Children', 'Component', 'ForwardRef', 'PropTypes', 'createElement', 'cloneElement',
+          'createContext', 'isFragment', 'useRef', 'useState', 'useCallback', 'useEffect',
+          'useMemo', 'useContext', 'useReducer'
         ],
         '../../node_modules/react-dom/index.js': ['findDOMNode'],
         '../../node_modules/react-recollect/index.js': ['collect'],
