@@ -1,6 +1,7 @@
+import { merge, split } from './merge';
+
 import fromSolid from './fromSolid';
-// import { junctionSelector } from './junction';
-import merge from './merge';
+import { junctionSelector } from './junction';
 import toSolid from './toSolid';
 
 export const cleanSolid = (solid, normalize) => {
@@ -9,10 +10,11 @@ export const cleanSolid = (solid, normalize) => {
   }
   const loops = fromSolid(solid, normalize, /* closed= */true);
   console.log(`QQ/loops/length: ${loops.length}`);
-  // const selectJunction = junctionSelector(solid, normalize);
+  const selectJunction = junctionSelector(solid, normalize);
   const merged = merge(loops);
-  // return toSolid(merged, selectJunction);
-  return toSolid(merged, n => true);
+  const splitted = split(merged);
+  return toSolid(splitted, selectJunction);
+  // return toSolid(merged, n => true);
 };
 
 export default cleanSolid;

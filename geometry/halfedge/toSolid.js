@@ -3,6 +3,14 @@ import pushConvexPolygons from './pushConvexPolygons';
 
 const walked = Symbol('walked');
 
+/*
+const pushPolygon = (polygons, loop) => {
+  const polygon = [];
+  eachLink(loop, link => polygon.push(link.start));
+  polygons.push(polygon);
+};
+*/
+
 // FIX: Coplanar surface coherence.
 export const toSolid = (loops, selectJunction) => {
   const solid = [];
@@ -13,6 +21,7 @@ export const toSolid = (loops, selectJunction) => {
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
     pushConvexPolygons(polygons, loop, selectJunction);
+    // pushPolygon(polygons, loop);
     solid.push(polygons);
   };
 

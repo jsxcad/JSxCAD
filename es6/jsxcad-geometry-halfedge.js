@@ -2,6 +2,251 @@ import { dot, length, scale } from './jsxcad-math-vec3.js';
 import { toPlane as toPlane$1, flip } from './jsxcad-math-poly3.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 
+const eachLink = (loop, thunk) => {
+  let link = loop;
+  do {
+    thunk(link);
+    if (link.dead === true) { throw Error('die/dead'); }
+    if (link.next === undefined) { throw Error('die/next'); }
+    link = link.next;
+  } while (link !== loop);
+};
+
+const THRESHOLD = 0.99999;
+
+const equalsPlane = (a, b) => {
+  if (a === undefined || b === undefined) {
+    return false;
+  }
+  const t = dot(a, b);
+  if (t >= THRESHOLD) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const junctionSelector = (solid, normalize) => {
+  const planesOfPoint = new Map();
+
+  const getPlanesOfPoint = (point) => {
+    let planes = planesOfPoint.get(point);
+    if (planes === undefined) {
+      planes = [];
+      planesOfPoint.set(point, planes);
+    }
+    return planes;
+  };
+
+  const considerJunction = (point, planeOfPath) => {
+    let planes = getPlanesOfPoint(point);
+    for (const plane of planes) {
+      if (equalsPlane(plane, planeOfPath)) {
+        return;
+      }
+    }
+    planes.push(planeOfPath);
+  };
+
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const point of path) {
+        considerJunction(normalize(point), toPlane$1(path));
+      }
+    }
+  }
+
+  // A corner is defined as a point of intersection of three distinct planes.
+  const select = (point) => getPlanesOfPoint(point).length >= 3;
+
+  return select;
+};
+
+const X = 0;
+const Y = 1;
+const Z = 2;
+const W = 3;
+
+const toPlane = (loop, recompute = false) => {
+  if (loop.face.plane === undefined || recompute) {
+    loop.face.plane = toPlaneFromLoop(loop.face);
+  }
+  return loop.face.plane;
+};
+
+// Newell's method for computing the plane of a polygon.
+const toPlaneFromLoop = (start) => {
+  const normal = [0, 0, 0];
+  const reference = [0, 0, 0];
+  // Run around the ring.
+  let size = 0;
+  let link = start;
+  do {
+    const lastPoint = link.start;
+    const thisPoint = link.next.start;
+    if (lastPoint !== thisPoint) {
+      normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
+      normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
+      normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
+      reference[X] += lastPoint[X];
+      reference[Y] += lastPoint[Y];
+      reference[Z] += lastPoint[Z];
+      size += 1;
+    }
+    link = link.next;
+  } while (link !== start);
+  const factor = 1 / length(normal);
+  const plane = scale(factor, normal);
+  plane[W] = dot(reference, normal) * factor / size;
+  if (isNaN(plane[X])) {
+    return undefined;
+  } else {
+    return plane;
+  }
+};
+
+// Note that merging produces duplicate points.
+
+const merged = Symbol('merged');
+
+const merge = (loops) => {
+  const walk = (loop) => {
+    console.log(`QQ/walk/loop: ${loop.start}`);
+    if (loop[merged] || loop.next === undefined) return;
+    eachLink(loop, link => { link[merged] = true; console.log(link.start); });
+    let link = loop;
+    do {
+      console.log(`QQ/walk/link: ${link.start}`);
+      if (link.twin && link.twin.face !== link.face) {
+        const twin = link.twin;
+        console.log(`QQ/walk/twin: ${link.twin.start}`);
+        if (twin.twin !== link) throw Error('die');
+        const linkPlane = toPlane(link);
+        const twinPlane = toPlane(twin);
+        if (equalsPlane(linkPlane, twinPlane)) {
+          const linkNext = link.next;
+          const twinNext = twin.next;
+          const spurLinkage = (twin === linkNext);
+          loop = link;
+          if (linkNext.dead) throw Error('die');
+          if (twinNext.dead) throw Error('die');
+          link.twin = undefined;
+          Object.assign(link, twinNext);
+          twin.twin = undefined;
+          if (!spurLinkage) {
+            Object.assign(twin, linkNext);
+          } else {
+            link.spurLinkage = true;
+          }
+          if (link.twin) { link.twin.twin = link; }
+          if (twin.twin) { twin.twin.twin = twin; }
+          if (twin.next === twin) throw Error('die');
+          linkNext.next = undefined;
+          linkNext.twin = undefined;
+          linkNext.dead = true;
+          if (!spurLinkage) {
+            twinNext.next = undefined;
+            twinNext.twin = undefined;
+            twinNext.dead = true;
+          }
+          if (spurLinkage) ; else {
+            // Two separate loops were merged, update face affinity.
+            link.plane = undefined;
+            eachLink(link, edge => { edge.face = link; });
+          }
+        }
+      }
+      if (link.next === undefined) { throw Error('die'); }
+      link = link.next;
+    } while (link !== loop);
+    eachLink(loop, link => { if (link.twin) { walk(link.twin); } });
+    return loop;
+  };
+  return loops.map(walk).filter(loop => loop && loop.next);
+};
+
+const splitted = Symbol('splitted');
+
+const split = (loops) => {
+  const walk = (loop) => {
+    console.log(`QQ/walk/loop: ${loop.start}`);
+    if (loop[splitted] || loop.next === undefined) return;
+    eachLink(loop, link => { link[splitted] = true; console.log(link.start); });
+    let link = loop;
+    do {
+      if (link.twin && link.twin.face === link.face) {
+        // Found a self-linkage.
+        const twin = link.twin;
+        console.log(`QQ/walk/twin: ${link.twin.start}`);
+        if (twin.twin !== link) throw Error('die');
+        const linkPlane = toPlane(link);
+        const linkNext = link.next;
+        const twinNext = twin.next;
+        const spurLinkage = (twin === linkNext);
+        loop = link;
+        if (linkNext.dead) throw Error('die');
+        if (twinNext.dead) throw Error('die');
+        link.twin = undefined;
+        Object.assign(link, twinNext);
+        twin.twin = undefined;
+        if (!spurLinkage) {
+          Object.assign(twin, linkNext);
+        } else {
+          link.spurLinkage = true;
+        }
+        if (link.twin) { link.twin.twin = link; }
+        if (twin.twin) { twin.twin.twin = twin; }
+        if (twin.next === twin) throw Error('die');
+        linkNext.next = undefined;
+        linkNext.twin = undefined;
+        linkNext.dead = true;
+        if (!spurLinkage) {
+          twinNext.next = undefined;
+          twinNext.twin = undefined;
+          twinNext.dead = true;
+        }
+        if (spurLinkage) ; else {
+          // One loop was merged with itself, producing a hole.
+          twin.face = undefined;
+          eachLink(link, edge => { edge.face = link.face; });
+
+          const holes = link.face.holes || [];
+          // The loop was split into a ring with an island inside.
+          // But we're not sure which loop is which or which side the loop face ended up on.
+          // Elect new faces.
+          eachLink(link, edge => { edge.face = link; });
+          eachLink(twin, edge => { edge.face = twin; });
+          const newLinkPlane = toPlane(link, /* recompute= */true);
+          const newTwinPlane = toPlane(twin, /* recompute= */true);
+          // Extend and assign the holes.
+          if (equalsPlane(linkPlane, newLinkPlane)) {
+            // The twin loop is the island.
+            if (equalsPlane(linkPlane, newTwinPlane)) {
+              throw Error('die');
+            }
+            holes.push(twin);
+            link.holes = holes;
+            twin.holes = undefined;
+          } else {
+            // The link loop is the island.
+            if (equalsPlane(linkPlane, newLinkPlane)) {
+              throw Error('die');
+            }
+            holes.push(link);
+            twin.holes = holes;
+            link.holes = undefined;
+          }
+        }
+      }
+      if (link.next === undefined) { throw Error('die'); }
+      link = link.next;
+    } while (link !== loop);
+    eachLink(loop, link => { if (link.twin) { walk(link.twin); } });
+    return loop;
+  };
+  return loops.map(walk).filter(loop => loop && loop.next);
+};
+
 // This produces a half-edge link.
 
 const createEdge = (start = [0, 0, 0], face = undefined, next = undefined, twin = undefined) => ({ start, face, next, twin });
@@ -89,10 +334,10 @@ const fromSolid = (solid, normalize, closed = true) => {
               // console.log(`QQ/twin: ${JSON.stringify(toPolygons([candidate.twin]))}`);
               // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
               // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
-              // throw Error('die');
-              for (const edge of getEdges(link)) {
-                edge.face = undefined;
-              }
+              throw Error('die');
+              // for (const edge of getEdges(link)) {
+              //  edge.face = undefined;
+              // }
             }
           }
         }
@@ -100,6 +345,8 @@ const fromSolid = (solid, normalize, closed = true) => {
           console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
         } else if (count === 0) {
           console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
+        } else if (count === 1) {
+          console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
         }
       }
       link = link.next;
@@ -127,212 +374,6 @@ const fromSolid = (solid, normalize, closed = true) => {
   console.log(`QQ/holeCount: ${holeCount}`);
 
   return loops;
-};
-
-const THRESHOLD = 0.99999;
-
-const equalsPlane = (a, b) => {
-  if (a === undefined || b === undefined) {
-    return false;
-  }
-  const t = dot(a, b);
-  if (t >= THRESHOLD) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const junctionSelector = (solid, normalize) => {
-  const planesOfPoint = new Map();
-
-  const getPlanesOfPoint = (point) => {
-    let planes = planesOfPoint.get(point);
-    if (planes === undefined) {
-      planes = [];
-      planesOfPoint.set(point, planes);
-    }
-    return planes;
-  };
-
-  const considerJunction = (point, planeOfPath) => {
-    let planes = getPlanesOfPoint(point);
-    for (const plane of planes) {
-      if (equalsPlane(plane, planeOfPath)) {
-        return;
-      }
-    }
-    planes.push(planeOfPath);
-  };
-
-  for (const surface of solid) {
-    for (const path of surface) {
-      for (const point of path) {
-        considerJunction(normalize(point), toPlane$1(path));
-      }
-    }
-  }
-
-  // A corner is defined as a point of intersection of three distinct planes.
-  const select = (point) => getPlanesOfPoint(point).length >= 3;
-
-  return select;
-};
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-const W = 3;
-
-const toPlane = (loop, recompute = false) => {
-  if (loop.face.plane === undefined || recompute || true) {
-    loop.face.plane = toPlaneFromLoop(loop.face);
-  }
-  return loop.face.plane;
-};
-
-// Newell's method for computing the plane of a polygon.
-const toPlaneFromLoop = (start) => {
-  const normal = [0, 0, 0];
-  const reference = [0, 0, 0];
-  // Run around the ring.
-  let size = 0;
-  let link = start;
-  do {
-    const lastPoint = link.start;
-    const thisPoint = link.next.start;
-    if (lastPoint !== thisPoint) {
-      normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
-      normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
-      normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
-      reference[X] += lastPoint[X];
-      reference[Y] += lastPoint[Y];
-      reference[Z] += lastPoint[Z];
-      size += 1;
-    }
-    link = link.next;
-  } while (link !== start);
-  const factor = 1 / length(normal);
-  const plane = scale(factor, normal);
-  plane[W] = dot(reference, normal) * factor / size;
-  if (isNaN(plane[X])) {
-    return undefined;
-  } else {
-    return plane;
-  }
-};
-
-// Note that merging produces duplicate points.
-
-const setFace = (loop, face, plane) => {
-  let cursor = loop;
-  do {
-    if (face === undefined && cursor.twin !== undefined && cursor.twin.face !== undefined) {
-      throw Error('die');
-    }
-    cursor.face = face;
-    cursor.plane = plane;
-    cursor = cursor.next;
-  } while (cursor !== loop);
-};
-
-const merge = (loops) => {
-  // console.log(`QQ/merge/dot: ${toDot(loops)}`);
-  const merged = [];
-  const faces = new Set();
-  for (let loop of loops) {
-    if (loop.face === undefined) continue;
-    let link = loop;
-    do {
-      if (link.face !== undefined && link.twin !== undefined && link.twin.face !== undefined) {
-        const linkPlane = toPlane(link);
-        const twinPlane = toPlane(link.twin);
-        if (equalsPlane(linkPlane, twinPlane)) {
-          // console.log(`QQ/link/before`); console.log(toDot([link]));
-          // Linking a face to itself is the only way to produce a new island.
-
-          // Edge collapse produces a duplicate in order to preserve twin edge identity.
-          const twin = link.twin;
-          // console.log(`QQ/twin/before`); console.log(toDot([twin]));
-          const linkNext = link.next;
-          const twinNext = twin.next;
-          if (twin.start !== link.next.start) {
-            throw Error('die');
-          }
-          if (twin.next.start !== link.start) {
-            throw Error('die');
-          }
-          link.next = twinNext;
-          twin.next = linkNext;
-          // The collapsed edges do not have twins.
-          link.twin = undefined;
-          twin.twin = undefined;
-          // Make sure that the face stays coherent.
-          if (link.start !== link.next.start) {
-            throw Error('die');
-          }
-          if (twin.start !== twin.next.start) {
-            throw Error('die');
-          }
-          if (link.face === twin.face) {
-            // The loop was split.
-            // Was a hole was formed?
-            // CHECK: Is this condition sufficient?
-            const newLinkPlane = toPlane(link, /* recompute= */true);
-            const newTwinPlane = toPlane(twin, /* recompute= */true);
-            if (newLinkPlane === undefined && newTwinPlane === undefined) {
-              setFace(link, undefined, toPlane(link, true));
-              setFace(link, undefined, /* plane= */undefined);
-              setFace(twin, undefined, /* plane= */undefined);
-            } else if (newLinkPlane === undefined) {
-              setFace(link, undefined, /* plane= */undefined);
-              setFace(twin, twin, /* plane= */newTwinPlane);
-            } else if (newTwinPlane === undefined) {
-              setFace(twin, undefined, /* plane= */undefined);
-              setFace(link, link, /* plane= */newLinkPlane);
-            } else {
-              const linkEqual = equalsPlane(newLinkPlane, linkPlane);
-              const twinEqual = equalsPlane(newTwinPlane, linkPlane);
-              if (linkEqual && twinEqual) {
-                // Neither are holes
-                // throw Error('die');
-                setFace(link, link, newLinkPlane);
-                setFace(twin, twin, newTwinPlane);
-              } else if (!linkEqual && !twinEqual) {
-                // Both are holes
-                throw Error('die');
-              } else if (linkEqual) {
-                // Twin is hole.
-                setFace(link, link, newLinkPlane);
-                link.face.hole = twin;
-              } else if (twinEqual) {
-                // Link is hole.
-                setFace(twin, twin, newTwinPlane);
-                twin.face.hole = link;
-              }
-            }
-          } else {
-            // Two loops were merged -- unify the face.
-            setFace(loop, loop);
-          }
-        }
-      }
-      link = link.next;
-    } while (link !== loop);
-    if (loop.face !== undefined && !faces.has(loop.face)) {
-      faces.add(loop.face);
-      merged.push(loop);
-    }
-  }
-  return merged;
-};
-
-const eachLink = (loop, thunk) => {
-  let link = loop;
-  do {
-    thunk(link);
-    link = link.next;
-  } while (link !== loop);
 };
 
 var earcut_1 = earcut;
@@ -1087,12 +1128,14 @@ const pushConvexPolygons = (polygons, loop, selectJunction) => {
   const contour = [];
   buildContour(points, contour, loop, selectJunction);
   const holes = [];
-  eachLink(loop,
-           (link) => {
-             if (link.hole) {
-               holes.push(buildContour(points, contour, link, selectJunction));
-             }
-           });
+  if (loop.face.holes) {
+    for (const hole of loop.face.holes) {
+      const index = buildContour(points, contour, hole, selectJunction);
+      if (index !== contour.length >>> 1) {
+        holes.push(index);
+      }
+    }
+  }
   const triangles = earcut_1(contour, holes);
   for (let i = 0; i < triangles.length; i += 3) {
     const a = triangles[i + 0];
@@ -1114,6 +1157,14 @@ const pushConvexPolygons = (polygons, loop, selectJunction) => {
 
 const walked = Symbol('walked');
 
+/*
+const pushPolygon = (polygons, loop) => {
+  const polygon = [];
+  eachLink(loop, link => polygon.push(link.start));
+  polygons.push(polygon);
+};
+*/
+
 // FIX: Coplanar surface coherence.
 const toSolid = (loops, selectJunction) => {
   const solid = [];
@@ -1124,6 +1175,7 @@ const toSolid = (loops, selectJunction) => {
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
     pushConvexPolygons(polygons, loop, selectJunction);
+    // pushPolygon(polygons, loop);
     solid.push(polygons);
   };
 
@@ -1140,9 +1192,9 @@ const cleanSolid = (solid, normalize) => {
   console.log(`QQ/loops/length: ${loops.length}`);
   const selectJunction = junctionSelector(solid, normalize);
   const merged = merge(loops);
-  // const merged = loops;
-  // return toSolid(merged, selectJunction);
-  return toSolid(merged, n => true);
+  const splitted = split(merged);
+  return toSolid(splitted, selectJunction);
+  // return toSolid(merged, n => true);
 };
 
 const fromSurface = (surface, normalize) => fromSolid([surface], normalize, /* closed= */false);

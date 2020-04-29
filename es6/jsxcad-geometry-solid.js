@@ -2,10 +2,10 @@ import { cleanSolid } from './jsxcad-geometry-halfedge.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
 import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
 
 const THRESHOLD = 1e-5;
 

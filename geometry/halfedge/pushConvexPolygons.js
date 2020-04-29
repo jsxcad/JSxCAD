@@ -4,7 +4,6 @@ import {
 } from '@jsxcad/math-poly3';
 
 import { dot } from '@jsxcad/math-vec3';
-import eachLink from './eachLink';
 import earcut from 'earcut';
 import { toPlane } from './toPlane';
 
@@ -81,12 +80,14 @@ export const pushConvexPolygons = (polygons, loop, selectJunction) => {
   const contour = [];
   buildContour(points, contour, loop, selectJunction);
   const holes = [];
-  eachLink(loop,
-           (link) => {
-             if (link.hole) {
-               holes.push(buildContour(points, contour, link, selectJunction));
-             }
-           });
+  if (loop.face.holes) {
+    for (const hole of loop.face.holes) {
+      const index = buildContour(points, contour, hole, selectJunction);
+      if (index !== contour.length >>> 1) {
+        holes.push(index);
+      }
+    }
+  }
   const triangles = earcut(contour, holes);
   for (let i = 0; i < triangles.length; i += 3) {
     const a = triangles[i + 0];
