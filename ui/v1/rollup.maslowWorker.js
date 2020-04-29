@@ -7,14 +7,6 @@ import json from 'rollup-plugin-json';
 import loadz0r from 'rollup-plugin-loadz0r';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
-export const watcher = {
-  transform (code, id) {
-    console.log(id);
-    console.log(code);
-    // not returning anything, so doesn't affect bundle
-  }
-};
-
 export default {
   input: 'maslowWorker.js',
   output: {
@@ -23,20 +15,30 @@ export default {
   },
   external: [],
   plugins: [
-    // watcher,
     loadz0r(),
     builtins(),
     commonjs({
       namedExports: {
-        '../../node_modules/bin-packing-es/build/bin-packing.js': ['GrowingPacker', 'Packer'],
+        '../../node_modules/react-dom/index.js': ['findDOMNode'],
+        '../../node_modules/react-recollect/index.js': ['collect'],
+        '../../node_modules/fast-equals/dist/fast-equals.js': ['deepEqual'],
+        '../../node_modules/react-draggable/build/web/react-draggable.min.js': ['DraggableCore'],
         '../../node_modules/opentype.js/dist/opentype.js': ['parse'],
+        '../../node_modules/bin-packing-es/build/bin-packing.js': ['GrowingPacker', 'Packer'],
         '../../node_modules/acorn/dist/acorn.js': ['parse'],
+        '../../node_modules/acorn-walk/dist/walk.js': ['recursive'],
         '../../node_modules/three/build/three.js': [
           'AmbientLight', 'BackSide', 'Box2', 'Box3', 'BufferGeometry', 'Camera', 'Color', 'DirectionalLight',
           'DoubleSide', 'FaceColors', 'Float32BufferAttribute', 'FrontSide', 'Frustum', 'Geometry', 'GridHelper',
           'Object3D', 'Light', 'Line', 'LineBasicMaterial', 'LineSegments', 'Matrix3', 'Matrix4', 'Mesh',
           'MeshNormalMaterial', 'PerspectiveCamera', 'Points', 'PointsMaterial', 'Scene', 'Sprite', 'Vector2',
           'Vector3', 'Vector4', 'VertexColors'
+        ],
+        '../../node_modules/react/index.js': [
+          'Children', 'Component', 'PropTypes', 'createElement', 'cloneElement',
+          'createContext', 'forwardRef', 'isFragment',
+          'useCallback', 'useEffect', 'useImperativeHandle', 'useMemo', 'useContext',
+          'useReducer', 'useRef', 'useState'
         ]
       }
     }),
@@ -69,6 +71,6 @@ export default {
             }`
         }
       }),
-    nodeResolve({ mainFields: ['main'], preferBuiltins: true })
+    nodeResolve({ mainFields: ['main'], preferBuiltins: true, browser: true })
   ]
 };
