@@ -159,16 +159,16 @@ const merge = (loops) => {
       if (link.next === undefined) { throw Error('die'); }
       link = link.next;
     } while (link !== loop);
-    eachLink(loop, link => { if (link.twin) { walk(link.twin); } });
-    return loop;
+    while (link !== link.face) link = link.face;
+    return link;
   };
-  return loops.map(walk).filter(loop => loop && loop.next);
+  return loops.map(walk).filter(loop => loop && loop.next && !loop.dead);
 };
 
 const splitted = Symbol('splitted');
 
 const split = (loops) => {
-  const walk = (loop) => {
+  const walk = (loop, nth) => {
     console.log(`QQ/walk/loop: ${loop.start}`);
     if (loop[splitted] || loop.next === undefined) return;
     eachLink(loop, link => { link[splitted] = true; console.log(link.start); });
@@ -241,10 +241,10 @@ const split = (loops) => {
       if (link.next === undefined) { throw Error('die'); }
       link = link.next;
     } while (link !== loop);
-    eachLink(loop, link => { if (link.twin) { walk(link.twin); } });
-    return loop;
+    while (link !== link.face) link = link.face;
+    return link;
   };
-  return loops.map(walk).filter(loop => loop && loop.next);
+  return loops.map(walk);
 };
 
 // This produces a half-edge link.
