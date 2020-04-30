@@ -5565,13 +5565,16 @@ var react_3 = react.PropTypes;
 var react_4 = react.createElement;
 var react_5 = react.cloneElement;
 var react_6 = react.createContext;
-var react_7 = react.useRef;
-var react_8 = react.useState;
+var react_7 = react.forwardRef;
+var react_8 = react.isFragment;
 var react_9 = react.useCallback;
 var react_10 = react.useEffect;
-var react_11 = react.useMemo;
-var react_12 = react.useContext;
-var react_13 = react.useReducer;
+var react_11 = react.useImperativeHandle;
+var react_12 = react.useMemo;
+var react_13 = react.useContext;
+var react_14 = react.useReducer;
+var react_15 = react.useRef;
+var react_16 = react.useState;
 
 var interfaces = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17988,9 +17991,9 @@ function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typ
 function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
 function useUncontrolledProp(propValue, defaultValue, handler) {
-  var wasPropRef = react_7(propValue !== undefined);
+  var wasPropRef = react_15(propValue !== undefined);
 
-  var _useState = react_8(defaultValue),
+  var _useState = react_16(defaultValue),
       stateValue = _useState[0],
       setState = _useState[1];
 
@@ -18051,7 +18054,7 @@ function _inheritsLoose(subClass, superClass) {
  */
 
 function useCommittedRef(value) {
-  var ref = react_7(value);
+  var ref = react_15(value);
   react_10(function () {
     ref.current = value;
   }, [value]);
@@ -18111,7 +18114,7 @@ var Consumer = ThemeContext.Consumer,
     Provider = ThemeContext.Provider;
 
 function useBootstrapPrefix(prefix, defaultPrefix) {
-  var prefixes = react_12(ThemeContext);
+  var prefixes = react_13(ThemeContext);
   return prefix || prefixes[defaultPrefix] || defaultPrefix;
 }
 
@@ -45797,7 +45800,7 @@ var FormControl = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'input' : _ref$as,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "as"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
@@ -45999,7 +46002,7 @@ function qsa(element, selector) {
 function useForceUpdate() {
   // The toggling state value is designed to defeat React optimizations for skipping
   // updates when they are stricting equal to the last state value
-  var _useReducer = react_13(function (state) {
+  var _useReducer = react_14(function (state) {
     return !state;
   }, false),
       dispatch = _useReducer[1];
@@ -46039,7 +46042,7 @@ function mergeRefs(refA, refB) {
  */
 
 function useMergedRefs(refA, refB) {
-  return react_11(function () {
+  return react_12(function () {
     return mergeRefs(refA, refB);
   }, [refA, refB]);
 }
@@ -46068,9 +46071,9 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
   // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
   // and don't want to reset the set in the effect
   var forceUpdate = useForceUpdate();
-  var needsRefocusRef = react_7(false);
-  var parentOnSelect = react_12(SelectableContext);
-  var tabContext = react_12(TabContext);
+  var needsRefocusRef = react_15(false);
+  var parentOnSelect = react_13(SelectableContext);
+  var tabContext = react_13(TabContext);
   var getControlledId, getControllerId;
 
   if (tabContext) {
@@ -46080,7 +46083,7 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
     getControllerId = tabContext.getControllerId;
   }
 
-  var listNode = react_7(null);
+  var listNode = react_15(null);
 
   var getNextActiveChild = function getNextActiveChild(offset) {
     if (!listNode.current) return null;
@@ -46183,8 +46186,8 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["active", "className", "tabIndex", "eventKey", "onSelect", "onClick", "as"]);
 
   var navKey = makeEventKey(eventKey, props.href);
-  var parentOnSelect = react_12(SelectableContext);
-  var navContext = react_12(NavContext);
+  var parentOnSelect = react_13(SelectableContext);
+  var navContext = react_13(NavContext);
   var isActive = active;
 
   if (navContext) {
@@ -46266,8 +46269,8 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'nav');
   var navbarBsPrefix, cardHeaderBsPrefix;
-  var navbarContext = react_12(NavbarContext);
-  var cardContext = react_12(CardContext);
+  var navbarContext = react_13(NavbarContext);
+  var cardContext = react_13(CardContext);
 
   if (navbarContext) {
     navbarBsPrefix = navbarContext.bsPrefix;
@@ -46321,7 +46324,7 @@ function matches(node, selector) {
  */
 
 function usePrevious(value) {
-  var ref = react_7(null);
+  var ref = react_15(null);
   react_10(function () {
     ref.current = value;
   });
@@ -46354,7 +46357,7 @@ function usePrevious(value) {
  */
 
 function useCallbackRef() {
-  return react_8(null);
+  return react_16(null);
 }
 
 var DropdownContext = react.createContext({
@@ -49015,7 +49018,7 @@ function usePopper(referenceElement, popperElement, _temp) {
       _ref$modifiers = _ref.modifiers,
       modifiers = _ref$modifiers === void 0 ? {} : _ref$modifiers;
 
-  var popperInstanceRef = react_7();
+  var popperInstanceRef = react_15();
   var hasArrow = !!(modifiers.arrow && modifiers.arrow.element);
   var scheduleUpdate = react_9(function () {
     if (popperInstanceRef.current) {
@@ -49023,7 +49026,7 @@ function usePopper(referenceElement, popperElement, _temp) {
     }
   }, []);
 
-  var _useState = react_8({
+  var _useState = react_16({
     placement: placement,
     scheduleUpdate: scheduleUpdate,
     outOfBoundaries: false,
@@ -49136,7 +49139,7 @@ function useRootClose(ref, onRootClose, _temp) {
       _ref$clickTrigger = _ref.clickTrigger,
       clickTrigger = _ref$clickTrigger === void 0 ? 'click' : _ref$clickTrigger;
 
-  var preventMouseRootCloseRef = react_7(false);
+  var preventMouseRootCloseRef = react_15(false);
   var onClose = onRootClose || noop$3;
   var handleMouseCapture = react_9(function (e) {
     var currentTarget = ref && ('current' in ref ? ref.current : ref);
@@ -49186,13 +49189,13 @@ function useDropdownMenu(options) {
     options = {};
   }
 
-  var context = react_12(DropdownContext);
+  var context = react_13(DropdownContext);
 
   var _useCallbackRef = useCallbackRef(),
       arrowElement = _useCallbackRef[0],
       attachArrowRef = _useCallbackRef[1];
 
-  var hasShownRef = react_7(false);
+  var hasShownRef = react_15(false);
   var _options = options,
       flip = _options.flip,
       rootCloseEvent = _options.rootCloseEvent,
@@ -49345,7 +49348,7 @@ DropdownMenu.defaultProps = defaultProps$a;
  */
 
 function useDropdownToggle() {
-  var _useContext = react_12(DropdownContext),
+  var _useContext = react_13(DropdownContext),
       show = _useContext.show,
       toggle = _useContext.toggle,
       setToggle = _useContext.setToggle;
@@ -49507,7 +49510,7 @@ function Dropdown(_ref) {
   // may run before the state value is set
 
 
-  var menuRef = react_7();
+  var menuRef = react_15();
   var menuElement = menuRef.current;
   var setMenu = react_9(function (ref) {
     menuRef.current = ref; // ensure that a menu set triggers an update for consumers
@@ -49515,12 +49518,12 @@ function Dropdown(_ref) {
     forceUpdate();
   }, [forceUpdate]);
   var lastShow = usePrevious(show);
-  var lastSourceEvent = react_7(null);
-  var focusInDropdown = react_7(false);
+  var lastSourceEvent = react_15(null);
+  var focusInDropdown = react_15(false);
   var toggle = react_9(function (event) {
     onToggle(!show, event);
   }, [onToggle, show]);
-  var context = react_11(function () {
+  var context = react_12(function () {
     return {
       toggle: toggle,
       drop: drop,
@@ -49650,8 +49653,8 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "eventKey", "disabled", "href", "onClick", "onSelect", "active", "as"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown-item');
-  var onSelectCtx = react_12(SelectableContext);
-  var navContext = react_12(NavContext);
+  var onSelectCtx = react_13(SelectableContext);
+  var navContext = react_13(NavContext);
 
   var _ref2 = navContext || {},
       activeKey = _ref2.activeKey;
@@ -49702,7 +49705,7 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'div' : _ref$as,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "alignRight", "rootCloseEvent", "flip", "popperConfig", "show", "as"]);
 
-  var isNavbar = react_12(NavbarContext);
+  var isNavbar = react_13(NavbarContext);
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown-menu');
 
   var _useDropdownMenu = useDropdownMenu({
@@ -49823,7 +49826,7 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
       _4 = _useUncontrolled.navbar,
       props = _objectWithoutPropertiesLoose(_useUncontrolled, ["bsPrefix", "drop", "show", "className", "alignRight", "onSelect", "onToggle", "focusFirstItemOnShow", "as", "navbar"]);
 
-  var onSelectCtx = react_12(SelectableContext);
+  var onSelectCtx = react_13(SelectableContext);
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown');
   var handleToggle = useEventCallback(function (nextShow, event, source) {
     if (source === void 0) {
@@ -50107,7 +50110,7 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar-toggler');
 
-  var _ref2 = react_12(NavbarContext) || {},
+  var _ref2 = react_13(NavbarContext) || {},
       onToggle = _ref2.onToggle,
       expanded = _ref2.expanded;
 
@@ -50174,7 +50177,7 @@ var Navbar = react.forwardRef(function (props, ref) {
 
   var expandClass = bsPrefix + "-expand";
   if (typeof expand === 'string') expandClass = expandClass + "-" + expand;
-  var navbarContext = react_11(function () {
+  var navbarContext = react_12(function () {
     return {
       onToggle: function onToggle() {
         return _onToggle(!expanded);
@@ -83145,7 +83148,7 @@ var resolveRef = function resolveRef(ref) {
 };
 
 function useWaitForDOMRef(ref, onResolved) {
-  var _useState = react_8(function () {
+  var _useState = react_16(function () {
     return resolveRef(ref);
   }),
       resolvedRef = _useState[0],
@@ -83795,7 +83798,7 @@ var ModalHeader = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "closeLabel", "closeButton", "onHide", "className", "children"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'modal-header');
-  var context = react_12(ModalContext);
+  var context = react_13(ModalContext);
   var handleClick = useEventCallback(function () {
     if (context) context.onHide();
     if (onHide) onHide();
@@ -86774,7 +86777,7 @@ var FormCheckInput = react.forwardRef(function (_ref, ref) {
       Component = _ref$as === void 0 ? 'input' : _ref$as,
       props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_13(FormContext),
       controlId = _useContext.controlId,
       custom = _useContext.custom;
 
@@ -86795,7 +86798,7 @@ var FormCheckLabel = react.forwardRef(function (_ref, ref) {
       htmlFor = _ref.htmlFor,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_13(FormContext),
       controlId = _useContext.controlId,
       custom = _useContext.custom;
 
@@ -86839,10 +86842,10 @@ var FormCheck = react.forwardRef(function (_ref, ref) {
   var custom = type === 'switch' ? true : propCustom;
   bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
 
-  var innerFormContext = react_11(function () {
+  var innerFormContext = react_12(function () {
     return {
       controlId: id || controlId,
       custom: custom
@@ -86884,7 +86887,7 @@ var FormGroup = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
-  var context = react_11(function () {
+  var context = react_12(function () {
     return {
       controlId: controlId
     };
@@ -86910,7 +86913,7 @@ var FormLabel = react.forwardRef(function (_ref, ref) {
       htmlFor = _ref.htmlFor,
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
 
-  var _useContext = react_12(FormContext),
+  var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
@@ -87148,7 +87151,7 @@ var Card = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "bg", "text", "border", "body", "children", "as"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card');
-  var cardContext = react_11(function () {
+  var cardContext = react_12(function () {
     return {
       cardHeaderBsPrefix: prefix + "-header"
     };
@@ -87273,12 +87276,12 @@ var TabContainer = function TabContainer(props) {
       unmountOnExit = _useUncontrolled.unmountOnExit,
       children = _useUncontrolled.children;
 
-  var generateChildId = react_11(function () {
+  var generateChildId = react_12(function () {
     return generateCustomChildId || function (key, type) {
       return id ? id + "-" + type + "-" + key : null;
     };
   }, [id, generateCustomChildId]);
-  var tabContext = react_11(function () {
+  var tabContext = react_12(function () {
     return {
       onSelect: onSelect,
       activeKey: activeKey,
@@ -87316,7 +87319,7 @@ var TabContent = react.forwardRef(function (_ref, ref) {
 });
 
 function useTabContext(props) {
-  var context = react_12(TabContext);
+  var context = react_13(TabContext);
   if (!context) return props;
 
   var activeKey = context.activeKey,
@@ -89273,8 +89276,8 @@ function Range(props) {
  */
 
 function useMounted() {
-  var mounted = react_7(true);
-  var isMounted = react_7(function () {
+  var mounted = react_15(true);
+  var isMounted = react_15(function () {
     return mounted.current;
   });
   react_10(function () {
@@ -89293,7 +89296,7 @@ function useMounted() {
  */
 
 function useUpdatedRef(value) {
-  var valueRef = react_7(value);
+  var valueRef = react_15(value);
   valueRef.current = value;
   return valueRef;
 }
@@ -89340,11 +89343,11 @@ function setChainedTimeout(handleRef, fn, timeoutAtMs) {
 function useTimeout() {
   var isMounted = useMounted(); // types are confused between node and web here IDK
 
-  var handleRef = react_7();
+  var handleRef = react_15();
   useWillUnmount(function () {
     return clearTimeout(handleRef.current);
   });
-  return react_11(function () {
+  return react_12(function () {
     var clear = function clear() {
       return clearTimeout(handleRef.current);
     };
@@ -89389,7 +89392,7 @@ var ToastHeader = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "closeLabel", "closeButton", "className", "children"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'toast-header');
-  var context = react_12(ToastContext);
+  var context = react_13(ToastContext);
   var handleClick = useEventCallback(function () {
     if (context) {
       context.onClose();
@@ -89431,8 +89434,8 @@ var Toast = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "transition", "show", "animation", "delay", "autohide", "onClose"]);
 
   bsPrefix = useBootstrapPrefix('toast');
-  var delayRef = react_7(delay);
-  var onCloseRef = react_7(onClose);
+  var delayRef = react_15(delay);
+  var onCloseRef = react_15(onClose);
   react_10(function () {
     // We use refs for these, because we don't want to restart the autohide
     // timer in case these values change.
@@ -89448,7 +89451,7 @@ var Toast = react.forwardRef(function (_ref, ref) {
     onCloseRef.current();
   }, [autohide, show]);
   autohideTimeout.set(autohideFunc, delayRef.current);
-  var useAnimation = react_11(function () {
+  var useAnimation = react_12(function () {
     return Transition && animation;
   }, [Transition, animation]);
   var toast = react.createElement("div", _extends({}, props, {

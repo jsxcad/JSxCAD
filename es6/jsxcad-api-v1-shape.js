@@ -587,6 +587,22 @@ Shape.prototype.measureCenter = measureCenterMethod;
 measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
 measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 
+const noPlan = (shape, tags, select) => {
+  const op = (geometry, descend) => {
+    if (geometry.plan) {
+      return { layers: [] };
+    } else {
+      return descend();
+    }
+  };
+
+  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  return Shape.fromGeometry(rewritten);
+};
+
+const noPlanMethod = function (...tags) { return noPlan(this); };
+Shape.prototype.noPlan = noPlanMethod;
+
 const opMethod = function (op, ...args) { return op(this, ...args); };
 const withOpMethod = function (op, ...args) { return assemble(this, op(this, ...args)); };
 

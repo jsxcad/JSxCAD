@@ -4,9 +4,9 @@ import * as api from '@jsxcad/api-v1';
 import * as convertThree from '@jsxcad/convert-threejs';
 import * as sys from '@jsxcad/sys';
 import { intersection, union } from '@jsxcad/api-v1-shape';
-
 import { Hull } from '@jsxcad/api-v1-extrude';
 import { clearCache } from '@jsxcad/cache';
+// import { pack } from '@jsxcad/api-v1-layout';
 import { toStl } from '@jsxcad/convert-stl';
 import { toSvg } from '@jsxcad/convert-svg';
 
@@ -18,11 +18,7 @@ const agent = async ({ ask, question }) => {
     switch (key) {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
-        if (values[1]) {
-          return api.Assembly(...inputs).drop('cutAway').toKeptGeometry();
-        } else {
-          return api.Assembly(...inputs).toDisjointGeometry();
-        }
+        return api.Assembly(...inputs).toDisjointGeometry();
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
@@ -53,9 +49,6 @@ const agent = async ({ ask, question }) => {
       case 'layout':
         console.log('Doing layout');
         const solidToSplit = api.Shape.fromGeometry(values[0]);
-
-        console.log('Updated 11:29');
-
         var flatItems = [];
         solidToSplit.items().forEach(item => {
           flatItems.push(item.flat().to(api.Z(0)));
@@ -63,11 +56,8 @@ const agent = async ({ ask, question }) => {
 
         console.log(flatItems);
 
-        const laidOut = api.Layers(...flatItems).Page();
+        const laidOut = api.Layers(...flatItems).Page({ itemMargin: values[1] });
 
-        console.log(laidOut);
-
-        // return api.Layers(...flatItems).Page().toDisjointGeometry();
         return laidOut.toDisjointGeometry();
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
@@ -115,11 +105,61 @@ const agent = async ({ ask, question }) => {
       case 'svg':
         const svgString = await toSvg(api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
         return svgString;
+      case 'stackedOutline':
+        const gcodeShape = api.Shape.fromGeometry(values[0]);
+        const thickness = gcodeShape.size().height;
+        const toolSize = values[1];
+        const numberOfPasses = values[2];
+        // const speed = values[3];
+        // const tabs = values[4];
+        const safeHeight = values[5];
+
+        const distPerPass = -1 * thickness / numberOfPasses;
+
+        var oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
+
+        console.log(oneProfile.geometry.paths);
+
+        // Split each path into it's layers
+        oneProfile.geometry.paths.forEach((path, index) => {
+          var newPath = [];
+          var i = 1;
+          while (i <= numberOfPasses) {
+            newPath.push([path[0][0], path[0][1], safeHeight]); // Move to the starting position before plunging
+            path.forEach(point => {
+              newPath.push([point[0], point[1], point[2] + i * distPerPass]);
+            });
+            newPath.push([path[0][0], path[0][1], path[0][2] + i * distPerPass]); // Add the first point again to close the path
+            i++;
+          }
+          const lastIndex = newPath.length - 1;
+          newPath.push([newPath[lastIndex][0], newPath[lastIndex][1], safeHeight]); // Retract back to safe height after finishing move
+          oneProfile.geometry.paths[index] = newPath;
+        });
+
+        // Join all the layers into a single continuous path
+        var completePath = [[0, 0, safeHeight]];
+        oneProfile.geometry.paths.forEach(path => {
+          completePath = completePath.concat(path);
+        });
+
+        console.log('Complete path');
+        console.log(completePath);
+
+        oneProfile.geometry.paths = [completePath];
+
+        return oneProfile.toKeptGeometry();
+      case 'gcode':
+        return 'G0 would be here';
+      case 'outline':
+        return api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry();
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
         const bounds = shape.measureBoundingBox();
         const cameraDistance = 6 * Math.max(...bounds[1]);
         return convertThree.toSvg({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+      case 'size':
+        return api.Shape.fromGeometry(values[0]).size();
       case 'tag':
         return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
       case 'specify':
