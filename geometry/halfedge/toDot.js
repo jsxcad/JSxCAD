@@ -1,5 +1,10 @@
 import getEdges from './getEdges';
 
+/**
+ * toDot
+ *
+ * @param loops
+ */
 export const toDot = (loops) => {
   const out = [];
   out.push(`digraph {`);

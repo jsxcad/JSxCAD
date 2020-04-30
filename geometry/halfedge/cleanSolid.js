@@ -4,6 +4,17 @@ import fromSolid from './fromSolid';
 import { junctionSelector } from './junction';
 import toSolid from './toSolid';
 
+/**
+ * @typedef {Array} Solid
+ */
+
+/**
+ * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.
+ *
+ * @param {Solid} solid
+ * @param {Function} normalize
+ * @returns {Solid}
+ */
 export const cleanSolid = (solid, normalize) => {
   for (const surface of solid) {
     console.log(`QQ/surface/length: ${surface.length}`);

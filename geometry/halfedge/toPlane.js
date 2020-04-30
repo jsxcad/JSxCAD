@@ -5,6 +5,12 @@ const Y = 1;
 const Z = 2;
 const W = 3;
 
+/**
+ * toPlane
+ *
+ * @param loop
+ * @param recompute
+ */
 export const toPlane = (loop, recompute = false) => {
   if (loop.face.plane === undefined || recompute) {
     loop.face.plane = toPlaneFromLoop(loop.face);
@@ -12,7 +18,13 @@ export const toPlane = (loop, recompute = false) => {
   return loop.face.plane;
 };
 
-// Newell's method for computing the plane of a polygon.
+/**
+ * toPlaneFromLoop
+ *
+ * Newell's method for computing the plane of a polygon.
+ *
+ * @param start
+ */
 export const toPlaneFromLoop = (start) => {
   const normal = [0, 0, 0];
   const reference = [0, 0, 0];

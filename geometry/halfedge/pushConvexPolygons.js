@@ -11,6 +11,14 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+/**
+ * buildContourXy
+ *
+ * @param points
+ * @param contour
+ * @param loop
+ * @param selectJunction
+ */
 const buildContourXy = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
   let link = loop;
@@ -24,6 +32,14 @@ const buildContourXy = (points, contour, loop, selectJunction) => {
   return index;
 };
 
+/**
+ * buildContourXz
+ *
+ * @param points
+ * @param contour
+ * @param loop
+ * @param selectJunction
+ */
 const buildContourXz = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
   let link = loop;
@@ -37,6 +53,14 @@ const buildContourXz = (points, contour, loop, selectJunction) => {
   return index;
 };
 
+/**
+ * buildContourYz
+ *
+ * @param points
+ * @param contour
+ * @param loop
+ * @param selectJunction
+ */
 const buildContourYz = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
   let link = loop;
@@ -50,6 +74,11 @@ const buildContourYz = (points, contour, loop, selectJunction) => {
   return index;
 };
 
+/**
+ * selectBuildContour
+ *
+ * @param plane
+ */
 const selectBuildContour = (plane) => {
   const tZ = dot(plane, [0, 0, 1, 0]);
   if (tZ >= 0.5) {
@@ -73,6 +102,13 @@ const selectBuildContour = (plane) => {
   }
 };
 
+/**
+ * pushConvexPolygons
+ *
+ * @param polygons
+ * @param loop
+ * @param selectJunction
+ */
 export const pushConvexPolygons = (polygons, loop, selectJunction) => {
   const plane = toPlane(loop);
   const buildContour = selectBuildContour(plane);

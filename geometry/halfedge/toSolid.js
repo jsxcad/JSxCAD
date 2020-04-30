@@ -12,9 +12,20 @@ const pushPolygon = (polygons, loop) => {
 */
 
 // FIX: Coplanar surface coherence.
+/**
+ * toSolid
+ *
+ * @param loops
+ * @param selectJunction
+ */
 export const toSolid = (loops, selectJunction) => {
   const solid = [];
 
+  /**
+   * walk
+   *
+   * @param loop
+   */
   const walk = (loop) => {
     if (loop === undefined || loop[walked] || loop.face === undefined) return;
     eachLink(loop, (link) => { link[walked] = true; });

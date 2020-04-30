@@ -1,3 +1,8 @@
+/**
+ * removeEdge
+ *
+ * @param edge
+ */
 export const removeEdge = (edge) => {
   const next = edge.next;
   if (edge.twin) {

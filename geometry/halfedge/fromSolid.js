@@ -3,8 +3,21 @@ import getEdges from './getEdges';
 
 let id = 0;
 
+/**
+ * fromSolid
+ *
+ * @param solid
+ * @param normalize
+ * @param point
+ * @param closed
+ */
 export const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
+  /**
+   * getTwins
+   *
+   * @param point
+   */
   const getTwins = (point) => {
     let twins = twinMap.get(point);
     if (twins === undefined) {

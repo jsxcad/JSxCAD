@@ -3,6 +3,11 @@ import cleanSolid from './cleanSolid';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import test from 'ava';
 
+/**
+ * canonicalize
+ *
+ * @param solid
+ */
 export const canonicalize = (solid) => solid.map(canonicalizeSurface);
 
 /*

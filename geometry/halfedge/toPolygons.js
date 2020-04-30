@@ -1,6 +1,11 @@
 import getEdges from './getEdges';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 
+/**
+ * toPolygons
+ *
+ * @param loops
+ */
 export const toPolygons = (loops) => {
   const polygons = [];
   for (const loop of loops) {

@@ -6,7 +6,19 @@ import { toPlane } from './toPlane';
 
 const merged = Symbol('merged');
 
+/**
+ * merge
+ *
+ * @param loop
+ * @param loops
+ * eeeeeeeeeeeeeeeeeeeee
+ */
 export const merge = (loops) => {
+  /**
+   * walk
+   *
+   * @param {Loop} loop
+   */
   const walk = (loop) => {
     console.log(`QQ/walk/loop: ${loop.start}`);
     if (loop[merged] || loop.next === undefined) return;
@@ -47,9 +59,9 @@ export const merge = (loops) => {
             twinNext.dead = true;
           }
           if (spurLinkage) {
-            // No more to do -- the half-linkage above was sufficient. Carry on.
+          // No more to do -- the half-linkage above was sufficient. Carry on.
           } else {
-            // Two separate loops were merged, update face affinity.
+          // Two separate loops were merged, update face affinity.
             link.plane = undefined;
             eachLink(link, edge => { edge.face = link; });
           }
@@ -66,7 +78,20 @@ export const merge = (loops) => {
 
 const splitted = Symbol('splitted');
 
+/**
+ * split
+ *
+ * @param loops
+ * @param loop
+ */
 export const split = (loops) => {
+  /**
+   * nth
+   *
+   * @param nth
+   * @param loop
+   * @param loops
+   */
   const walk = (loop, nth) => {
     console.log(`QQ/walk/loop: ${loop.start}`);
     if (loop[splitted] || loop.next === undefined) return;
@@ -74,7 +99,7 @@ export const split = (loops) => {
     let link = loop;
     do {
       if (link.twin && link.twin.face === link.face) {
-        // Found a self-linkage.
+      // Found a self-linkage.
         const twin = link.twin;
         console.log(`QQ/walk/twin: ${link.twin.start}`);
         if (twin.twin !== link) throw Error('die');
@@ -105,9 +130,9 @@ export const split = (loops) => {
           twinNext.dead = true;
         }
         if (spurLinkage) {
-          // No more to do -- the half-linkage above was sufficient. Carry on.
+        // No more to do -- the half-linkage above was sufficient. Carry on.
         } else {
-          // One loop was merged with itself, producing a hole.
+        // One loop was merged with itself, producing a hole.
           twin.face = undefined;
           eachLink(link, edge => { edge.face = link.face; });
 
@@ -121,7 +146,7 @@ export const split = (loops) => {
           const newTwinPlane = toPlane(twin, /* recompute= */true);
           // Extend and assign the holes.
           if (equalsPlane(linkPlane, newLinkPlane)) {
-            // The twin loop is the island.
+          // The twin loop is the island.
             if (equalsPlane(linkPlane, newTwinPlane)) {
               throw Error('die');
             }
@@ -129,7 +154,7 @@ export const split = (loops) => {
             link.holes = holes;
             twin.holes = undefined;
           } else {
-            // The link loop is the island.
+          // The link loop is the island.
             if (equalsPlane(linkPlane, newLinkPlane)) {
               throw Error('die');
             }

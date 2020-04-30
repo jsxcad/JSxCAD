@@ -1,3 +1,9 @@
+/**
+ * eachLink
+ *
+ * @param loop
+ * @param thunk
+ */
 export const eachLink = (loop, thunk) => {
   let link = loop;
   do {

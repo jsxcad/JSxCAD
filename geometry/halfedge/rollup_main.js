@@ -11,6 +11,11 @@ export default {
     dir: 'dist',
     format: 'module'
   },
+  /**
+   * external
+   *
+   * @param id
+   */
   external (id) {
     return id.startsWith('./jsxcad-');
   },
@@ -19,6 +24,14 @@ export default {
     commonjs(),
     globals(),
     nodeResolve({ preferBuiltins: true }),
-    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
+    {
+      /**
+       * transform
+       *
+       * @param code
+       * @param id
+       */
+      transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); }
+    }
   ]
 };

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "downlevelIteration": true,
+    "emitDeclarationOnly": true
+  },
+  "files": [
+    "cleanSolid.js"
+  ]
+}
