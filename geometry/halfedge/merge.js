@@ -1,5 +1,7 @@
 // Note that merging produces duplicate points.
 
+import { Edge, Loops } from './types';
+
 import { eachLink } from './eachLink';
 import { equalsPlane } from './junction';
 import { toPlane } from './toPlane';
@@ -9,15 +11,15 @@ const merged = Symbol('merged');
 /**
  * merge
  *
- * @param loop
- * @param loops
- * eeeeeeeeeeeeeeeeeeeee
+ * @param {Loops} loops
+ * @returns {Loops}
  */
 export const merge = (loops) => {
   /**
    * walk
    *
-   * @param {Loop} loop
+   * @param {Edge} loop
+   * @returns {Edge}
    */
   const walk = (loop) => {
     console.log(`QQ/walk/loop: ${loop.start}`);
@@ -81,16 +83,16 @@ const splitted = Symbol('splitted');
 /**
  * split
  *
- * @param loops
- * @param loop
+ * @param {Loops} loops
+ * @returns {Loops}
  */
 export const split = (loops) => {
   /**
-   * nth
+   * walk
    *
-   * @param nth
-   * @param loop
-   * @param loops
+   * @param {Edge} loop
+   * @param {number} nth
+   * @returns {Edge}
    */
   const walk = (loop, nth) => {
     console.log(`QQ/walk/loop: ${loop.start}`);

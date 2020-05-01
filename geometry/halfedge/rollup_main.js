@@ -14,7 +14,8 @@ export default {
   /**
    * external
    *
-   * @param id
+   * @param {string} id
+   * @returns {boolean}
    */
   external (id) {
     return id.startsWith('./jsxcad-');
@@ -28,8 +29,9 @@ export default {
       /**
        * transform
        *
-       * @param code
-       * @param id
+       * @param {string} code
+       * @param {string} id
+       * @returns {string}
        */
       transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); }
     }

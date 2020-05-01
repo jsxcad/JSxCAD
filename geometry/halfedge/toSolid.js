@@ -1,3 +1,5 @@
+import { Edge, Loops, PointSelector, Solid } from './types';
+
 import eachLink from './eachLink';
 import pushConvexPolygons from './pushConvexPolygons';
 
@@ -15,8 +17,9 @@ const pushPolygon = (polygons, loop) => {
 /**
  * toSolid
  *
- * @param loops
- * @param selectJunction
+ * @param {Loops} loops
+ * @param {PointSelector} selectJunction
+ * @returns {Solid}
  */
 export const toSolid = (loops, selectJunction) => {
   const solid = [];
@@ -24,7 +27,8 @@ export const toSolid = (loops, selectJunction) => {
   /**
    * walk
    *
-   * @param loop
+   * @param {Edge} loop
+   * @returns {undefined}
    */
   const walk = (loop) => {
     if (loop === undefined || loop[walked] || loop.face === undefined) return;

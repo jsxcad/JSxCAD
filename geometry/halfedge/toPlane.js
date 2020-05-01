@@ -1,3 +1,5 @@
+import { Edge, Plane } from './types';
+
 import { dot, length, scale } from '@jsxcad/math-vec3';
 
 const X = 0;
@@ -8,8 +10,9 @@ const W = 3;
 /**
  * toPlane
  *
- * @param loop
- * @param recompute
+ * @param {Edge} loop
+ * @param {boolean} recompute
+ * @returns {Plane}
  */
 export const toPlane = (loop, recompute = false) => {
   if (loop.face.plane === undefined || recompute) {
@@ -23,7 +26,8 @@ export const toPlane = (loop, recompute = false) => {
  *
  * Newell's method for computing the plane of a polygon.
  *
- * @param start
+ * @param {Edge} start
+ * @returns {Plane}
  */
 export const toPlaneFromLoop = (start) => {
   const normal = [0, 0, 0];

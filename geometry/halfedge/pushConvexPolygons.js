@@ -1,3 +1,5 @@
+import { Edge, Path, Plane, PointSelector, Polygons } from './types';
+
 import {
   flip as flipPolygon,
   toPlane as toPlaneOfPolygon
@@ -14,10 +16,11 @@ const Z = 2;
 /**
  * buildContourXy
  *
- * @param points
- * @param contour
- * @param loop
- * @param selectJunction
+ * @param {Path} points
+ * @param {Array<number>} contour
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {number}
  */
 const buildContourXy = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
@@ -35,10 +38,11 @@ const buildContourXy = (points, contour, loop, selectJunction) => {
 /**
  * buildContourXz
  *
- * @param points
- * @param contour
- * @param loop
- * @param selectJunction
+ * @param {Path} points
+ * @param {Array<number>} contour
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {number}
  */
 const buildContourXz = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
@@ -56,10 +60,11 @@ const buildContourXz = (points, contour, loop, selectJunction) => {
 /**
  * buildContourYz
  *
- * @param points
- * @param contour
- * @param loop
- * @param selectJunction
+ * @param {Path} points
+ * @param {Array<number>} contour
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {number}
  */
 const buildContourYz = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
@@ -77,7 +82,8 @@ const buildContourYz = (points, contour, loop, selectJunction) => {
 /**
  * selectBuildContour
  *
- * @param plane
+ * @param {Plane} plane
+ * @returns {Function}
  */
 const selectBuildContour = (plane) => {
   const tZ = dot(plane, [0, 0, 1, 0]);
@@ -105,9 +111,10 @@ const selectBuildContour = (plane) => {
 /**
  * pushConvexPolygons
  *
- * @param polygons
- * @param loop
- * @param selectJunction
+ * @param {Polygons} polygons
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {void}
  */
 export const pushConvexPolygons = (polygons, loop, selectJunction) => {
   const plane = toPlane(loop);

@@ -1,28 +1,32 @@
-import getEdges from './getEdges';
+import { Loops } from './types';
+import eachLink from './eachLink';
 
 /**
  * toDot
  *
- * @param loops
+ * @param {Loops} loops
+ * @returns {string}
  */
 export const toDot = (loops) => {
   const out = [];
   out.push(`digraph {`);
   for (const loop of loops) {
     out.push(`  subgraph cluster_${loop.id} {`);
-    for (const edge of getEdges(loop)) {
-      const [x, y, z] = edge.start;
-      out.push(`    ${edge.id} [pos = "${x},${y},${z}!"];`);
-    }
+    eachLink(loop,
+             edge => {
+               const [x, y, z] = edge.start;
+               out.push(`    ${edge.id} [pos = "${x},${y},${z}!"];`);
+             });
     out.push(`  }`);
   }
   for (const loop of loops) {
-    for (const edge of getEdges(loop)) {
-      out.push(`  ${edge.id} -> ${edge.next.id};`);
-      if (edge.twin) {
-        out.push(`  ${edge.id} -> ${edge.twin.id} [style="dotted"];`);
-      }
-    }
+    eachLink(loop,
+             edge => {
+               out.push(`  ${edge.id} -> ${edge.next.id};`);
+               if (edge.twin) {
+                 out.push(`  ${edge.id} -> ${edge.twin.id} [style="dotted"];`);
+               }
+             });
   }
   out.push(`}`);
   return out.join('\n');

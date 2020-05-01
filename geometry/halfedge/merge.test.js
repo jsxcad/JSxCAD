@@ -6,17 +6,18 @@ import toPolygons from './toPolygons';
 
 test('Simple merge', t => {
   const normalize = createNormalize3();
-  const loops = fromPolygons([[
-    [1, 1, 0], // A (common)
-    [1, -1, 0], // B
-    [-1, -1, 0] // C (common)
-  ],
-                              [
-                                [-1, -1, 0], // C (common)
-                                [-1, 1, 0], // D
-                                [1, 1, 0] // A (common)
-                              ]],
-                             normalize, false);
+  const loops = fromPolygons(
+    [[
+      [1, 1, 0], // A (common)
+      [1, -1, 0], // B
+      [-1, -1, 0] // C (common)
+    ],
+     [
+       [-1, -1, 0], // C (common)
+       [-1, 1, 0], // D
+       [1, 1, 0] // A (common)
+     ]],
+    normalize);
   const merged = merge(loops);
   const polygons = toPolygons(merged);
   t.deepEqual(polygons,
@@ -30,19 +31,20 @@ test('Simple merge', t => {
 
 test('Double-edge merge', t => {
   const normalize = createNormalize3();
-  const loops = fromPolygons([[
-    [1, 1, 0], // A (common)
-    [1, -1, 0], // B
-    [-1, -1, 0], // C (common)
-    [0, 0, 0] // E (common interstitial)
-  ],
-                              [
-                                [-1, -1, 0], // C (common)
-                                [-1, 1, 0], // D
-                                [1, 1, 0], // A (common)
-                                [0, 0, 0] // E (common interstitial)
-                              ]],
-                             normalize);
+  const loops = fromPolygons(
+    [[
+      [1, 1, 0], // A (common)
+      [1, -1, 0], // B
+      [-1, -1, 0], // C (common)
+      [0, 0, 0] // E (common interstitial)
+    ],
+     [
+       [-1, -1, 0], // C (common)
+       [-1, 1, 0], // D
+       [1, 1, 0], // A (common)
+       [0, 0, 0] // E (common interstitial)
+     ]],
+    normalize);
   const merged = merge(loops);
   const polygons = toPolygons(merged);
   t.deepEqual(polygons,
@@ -56,21 +58,22 @@ test('Double-edge merge', t => {
 
 test('Triple-edge merge', t => {
   const normalize = createNormalize3();
-  const loops = fromPolygons([[
-    [1, 1, 0], // A (common)
-    [1, -1, 0], // B
-    [-1, -1, 0], // C (common)
-    [0, 0, 0], // E (common interstitial)
-    [0.5, 0.5, 0] // F (common interstitial)
-  ],
-                              [
-                                [-1, -1, 0], // C (common)
-                                [-1, 1, 0], // D
-                                [1, 1, 0], // A (common)
-                                [0.5, 0.5, 0], // F (common interstitial)
-                                [0, 0, 0] // E (common interstitial)
-                              ]],
-                             normalize);
+  const loops = fromPolygons(
+    [[
+      [1, 1, 0], // A (common)
+      [1, -1, 0], // B
+      [-1, -1, 0], // C (common)
+      [0, 0, 0], // E (common interstitial)
+      [0.5, 0.5, 0] // F (common interstitial)
+    ],
+     [
+       [-1, -1, 0], // C (common)
+       [-1, 1, 0], // D
+       [1, 1, 0], // A (common)
+       [0.5, 0.5, 0], // F (common interstitial)
+       [0, 0, 0] // E (common interstitial)
+     ]],
+    normalize);
   const merged = merge(loops);
   const polygons = toPolygons(merged);
   t.deepEqual(polygons,
@@ -115,17 +118,18 @@ test('Bad', t => {
 
 test('Hole', t => {
   const normalize = createNormalize3();
-  const loops = fromPolygons([
-    [[-5, 5.000000000000001, 0], [-5.000000000000001, -4.999999999999998, 0], [-2.500000000000001, -2.499999999999999, 0]],
-    [[2.5000000000072755, -2.5, 0], [-2.500000000000001, -2.499999999999999, 0], [-5.000000000000001, -4.999999999999998, 0]],
-    [[-5, 5.000000000000001, 0], [-2.500000000000001, -2.499999999999999, 0], [-2.5, 2.500000000000001, 0]],
-    [[2.5000000000072755, -2.5, 0], [-5.000000000000001, -4.999999999999998, 0], [4.999999999999998, -5, 0]],
-    [[5, 5, 0], [-5, 5.000000000000001, 0], [-2.5, 2.500000000000001, 0]],
-    [[2.500000000007276, 2.5, 0], [2.5000000000072755, -2.5, 0], [4.999999999999998, -5, 0]],
-    [[5, 5, 0], [-2.5, 2.500000000000001, 0], [2.500000000007276, 2.5, 0]],
-    [[2.500000000007276, 2.5, 0], [4.999999999999998, -5, 0], [5, 5, 0]]
-  ],
-                             normalize);
+  const loops = fromPolygons(
+    [
+      [[-5, 5.000000000000001, 0], [-5.000000000000001, -4.999999999999998, 0], [-2.500000000000001, -2.499999999999999, 0]],
+      [[2.5000000000072755, -2.5, 0], [-2.500000000000001, -2.499999999999999, 0], [-5.000000000000001, -4.999999999999998, 0]],
+      [[-5, 5.000000000000001, 0], [-2.500000000000001, -2.499999999999999, 0], [-2.5, 2.500000000000001, 0]],
+      [[2.5000000000072755, -2.5, 0], [-5.000000000000001, -4.999999999999998, 0], [4.999999999999998, -5, 0]],
+      [[5, 5, 0], [-5, 5.000000000000001, 0], [-2.5, 2.500000000000001, 0]],
+      [[2.500000000007276, 2.5, 0], [2.5000000000072755, -2.5, 0], [4.999999999999998, -5, 0]],
+      [[5, 5, 0], [-2.5, 2.500000000000001, 0], [2.500000000007276, 2.5, 0]],
+      [[2.500000000007276, 2.5, 0], [4.999999999999998, -5, 0], [5, 5, 0]]
+    ],
+    normalize);
   const merged = merge(loops);
   const polygons = toPolygons(merged);
   t.deepEqual(polygons,

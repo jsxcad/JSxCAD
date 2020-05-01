@@ -30,6 +30,9 @@ module.exports = {
         }],
         // "jsdoc/require-file-overview": ["error"],
         "jsdoc/require-param": ["error"],
+        "jsdoc/require-param-description": ["no"],
+        "jsdoc/require-property-description": ["no"],
+        "jsdoc/require-returns-description": ["no"],
         "jsdoc/require-jsdoc": ["error",
                                 {
                                   require: {

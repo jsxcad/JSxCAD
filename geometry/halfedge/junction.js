@@ -1,3 +1,5 @@
+import { Normalizer, Plane, Point, PointSelector, Solid } from './types';
+
 import { dot } from '@jsxcad/math-vec3';
 import { toPlane as toPlaneOfPath } from '@jsxcad/math-poly3';
 
@@ -6,8 +8,9 @@ const THRESHOLD = 0.99999;
 /**
  * equalsPlane
  *
- * @param a
- * @param b
+ * @param {Plane} a
+ * @param {Plane} b
+ * @returns {boolean} b
  */
 export const equalsPlane = (a, b) => {
   if (a === undefined || b === undefined) {
@@ -24,8 +27,9 @@ export const equalsPlane = (a, b) => {
 /**
  * junctionSelector
  *
- * @param solid
- * @param normalize
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {PointSelector}
  */
 export const junctionSelector = (solid, normalize) => {
   const planesOfPoint = new Map();
@@ -33,7 +37,8 @@ export const junctionSelector = (solid, normalize) => {
   /**
    * getPlanesOfPoint
    *
-   * @param point
+   * @param {Point} point
+   * @returns {Array<Plane>}
    */
   const getPlanesOfPoint = (point) => {
     let planes = planesOfPoint.get(point);
@@ -47,8 +52,9 @@ export const junctionSelector = (solid, normalize) => {
   /**
    * considerJunction
    *
-   * @param point
-   * @param planeOfPath
+   * @param {Point} point
+   * @param {Plane} planeOfPath
+   * @returns {undefined}
    */
   const considerJunction = (point, planeOfPath) => {
     let planes = getPlanesOfPoint(point);
@@ -69,11 +75,7 @@ export const junctionSelector = (solid, normalize) => {
   }
 
   // A corner is defined as a point of intersection of three distinct planes.
-  /**
-   * select
-   *
-   * @param point
-   */
+  /** @type {PointSelector} */
   const select = (point) => getPlanesOfPoint(point).length >= 3;
 
   return select;

@@ -1,3 +1,4 @@
+import { Solid } from './types';
 import { canonicalize as canonicalizeSurface } from '@jsxcad/geometry-surface';
 import cleanSolid from './cleanSolid';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -6,7 +7,8 @@ import test from 'ava';
 /**
  * canonicalize
  *
- * @param solid
+ * @param {Solid} solid
+ * @returns {Solid}
  */
 export const canonicalize = (solid) => solid.map(canonicalizeSurface);
 

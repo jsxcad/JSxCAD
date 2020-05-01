@@ -1,22 +1,25 @@
+import { Edge, Loops, Normalizer, Point, Solid } from './types';
+
 import createEdge from './createEdge';
-import getEdges from './getEdges';
+import eachLink from './eachLink';
 
 let id = 0;
 
 /**
  * fromSolid
  *
- * @param solid
- * @param normalize
- * @param point
- * @param closed
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @param {boolean} closed
+ * @returns {Loops}
  */
 export const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
   /**
    * getTwins
    *
-   * @param point
+   * @param {Point} point
+   * @returns {Array<Edge>}
    */
   const getTwins = (point) => {
     let twins = twinMap.get(point);
@@ -82,9 +85,6 @@ export const fromSolid = (solid, normalize, closed = true) => {
               // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
               // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
               throw Error('die');
-              // for (const edge of getEdges(link)) {
-              //  edge.face = undefined;
-              // }
             }
           }
         }
@@ -106,14 +106,14 @@ export const fromSolid = (solid, normalize, closed = true) => {
   if (closed) {
     for (const loop of loops) {
       if (loop.face === undefined) continue;
-      for (const edge of getEdges(loop)) {
-        edgeCount += 1;
-        if (edge.twin === undefined) {
-          // A hole in the 2-manifold.
-          holeCount += 1;
-          // edge.start[Z] += 1;
-        }
-      }
+      eachLink(loop,
+               edge => {
+                 edgeCount += 1;
+                 if (edge.twin === undefined) {
+                   // A hole in the 2-manifold.
+                   holeCount += 1;
+                 }
+               });
     }
   }
 

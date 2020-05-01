@@ -1,8 +1,17 @@
+import { Edge } from './types';
+
+/**
+ * @callback Thunk
+ * @param {Edge} edge
+ * @returns {undefined}
+ */
+
 /**
  * eachLink
  *
- * @param loop
- * @param thunk
+ * @param {Edge} loop
+ * @param {(link: Edge) => void} thunk
+ * @returns {void}
  */
 export const eachLink = (loop, thunk) => {
   let link = loop;
