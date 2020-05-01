@@ -7,13 +7,15 @@
   "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
+    "docs": "jsdoc --configure jsdoc.json *.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc --project tsconfig.json"
   },
+  "typings": "types",
   "contributors": [
     {
       "name": "Brian Spilsbury",
@@ -37,6 +39,8 @@
     "eslint": "^5.15.0",
     "eslint-plugin-jsdoc": "^24.0.0",
     "esm": "^3.2.10",
+    "jsdoc": "^3.6.4",
+    "jsdoc-plugin-typescript": "^2.0.5",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",

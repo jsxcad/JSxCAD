@@ -1,3 +1,5 @@
+/* @module */
+
 import { Edge, Loops, PointSelector, Solid } from './types';
 
 import eachLink from './eachLink';
@@ -28,7 +30,7 @@ export const toSolid = (loops, selectJunction) => {
    * walk
    *
    * @param {Edge} loop
-   * @returns {undefined}
+   * @returns {void}
    */
   const walk = (loop) => {
     if (loop === undefined || loop[walked] || loop.face === undefined) return;

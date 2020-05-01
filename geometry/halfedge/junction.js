@@ -1,3 +1,5 @@
+/* @module */
+
 import { Normalizer, Plane, Point, PointSelector, Solid } from './types';
 
 import { dot } from '@jsxcad/math-vec3';

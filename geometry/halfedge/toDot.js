@@ -1,3 +1,5 @@
+/* @module */
+
 import { Loops } from './types';
 import eachLink from './eachLink';
 

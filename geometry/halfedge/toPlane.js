@@ -1,3 +1,5 @@
+/* @module */
+
 import { Edge, Plane } from './types';
 
 import { dot, length, scale } from '@jsxcad/math-vec3';

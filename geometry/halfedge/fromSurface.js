@@ -1,3 +1,5 @@
+/* @module */
+
 import { Loops, Normalizer, Surface } from './types';
 
 import fromSolid from './fromSolid';

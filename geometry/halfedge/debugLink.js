@@ -1,3 +1,5 @@
+/* @module */
+
 import { Edge } from './types';
 
 /**

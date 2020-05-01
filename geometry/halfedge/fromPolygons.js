@@ -1,3 +1,5 @@
+/* @module */
+
 import { Loops, Normalizer, Polygons } from './types';
 
 import fromSurface from './fromSurface';

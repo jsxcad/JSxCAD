@@ -1,3 +1,5 @@
+/* @module */
+
 import { Edge, Path, Plane, PointSelector, Polygons } from './types';
 
 import {

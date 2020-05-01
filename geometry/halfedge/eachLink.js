@@ -1,16 +1,19 @@
+/* @module */
+
 import { Edge } from './types';
 
 /**
- * @callback Thunk
- * @param {Edge} edge
- * @returns {undefined}
+ * @typedef {function(Edge): void} Thunk
+ * @returns {void}
  */
+
+/* @type {function(Edge, Thunk): void} */
 
 /**
  * eachLink
- *
+ * @method
  * @param {Edge} loop
- * @param {(link: Edge) => void} thunk
+ * @param {Thunk} thunk
  * @returns {void}
  */
 export const eachLink = (loop, thunk) => {

@@ -1,3 +1,5 @@
+/* @module */
+
 import { Loops, Polygons } from './types';
 
 import eachLink from './eachLink';

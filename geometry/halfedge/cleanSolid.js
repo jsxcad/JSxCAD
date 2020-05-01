@@ -1,3 +1,5 @@
+/* @module */
+
 import { Normalizer, Solid } from './types';
 import { merge, split } from './merge';
 

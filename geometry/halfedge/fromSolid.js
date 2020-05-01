@@ -1,3 +1,5 @@
+/* @module */
+
 import { Edge, Loops, Normalizer, Point, Solid } from './types';
 
 import createEdge from './createEdge';

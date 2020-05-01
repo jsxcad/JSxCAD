@@ -1,3 +1,5 @@
+/* @module */
+
 // This produces a half-edge link.
 
 import { Edge, Plane, Point } from './types';

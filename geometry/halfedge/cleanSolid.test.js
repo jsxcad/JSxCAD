@@ -1,3 +1,5 @@
+/* @module */
+
 import { Solid } from './types';
 import { canonicalize as canonicalizeSurface } from '@jsxcad/geometry-surface';
 import cleanSolid from './cleanSolid';

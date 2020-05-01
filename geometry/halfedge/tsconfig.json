@@ -1,12 +1,26 @@
 {
   "compilerOptions": {
+    "target": "es6",
     "allowJs": true,
     "checkJs": true,
     "declaration": true,
     "downlevelIteration": true,
     "emitDeclarationOnly": true,
-    "outDir": "types"
+    "outDir": "types",
+    "moduleResolution": "node"
   },
-  "include": ["*.js"],
-  "exclude": ["types/*"]
+  "include": [
+    "*.js",
+    "!types/*.d.ts"
+  ],
+  "exclude": [
+    "../../node_modules/**",
+    "**/node_modules/*",
+    "**/*.d.ts",
+    "**/*.test.js",
+    "rollup_main.js",
+    "../../node_modules/@types/react/index.d.ts",
+    "types/*.d.ts",
+    "types"
+  ]
 }

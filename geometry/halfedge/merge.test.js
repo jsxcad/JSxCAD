@@ -1,3 +1,5 @@
+/* @module */
+
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import fromPolygons from './fromPolygons';
 import merge from './merge';

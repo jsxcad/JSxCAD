@@ -1,3 +1,5 @@
+/* @module */
+
 // Note that merging produces duplicate points.
 
 import { Edge, Loops } from './types';
