@@ -1,6 +1,12 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/junction */
 
-import { Normalizer, Plane, Point, PointSelector, Solid } from './types';
+/**
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").Point} Point
+ * @typedef {import("./types").PointSelector} PointSelector
+ * @typedef {import("./types").Normalizer} Normalizer
+ * @typedef {import("./types").Solid} Solid
+ */
 
 import { dot } from '@jsxcad/math-vec3';
 import { toPlane as toPlaneOfPath } from '@jsxcad/math-poly3';
@@ -10,6 +16,7 @@ const THRESHOLD = 0.99999;
 /**
  * equalsPlane
  *
+ * @function
  * @param {Plane} a
  * @param {Plane} b
  * @returns {boolean} b
@@ -29,6 +36,7 @@ export const equalsPlane = (a, b) => {
 /**
  * junctionSelector
  *
+ * @function
  * @param {Solid} solid
  * @param {Normalizer} normalize
  * @returns {PointSelector}

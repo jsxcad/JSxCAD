@@ -1,5 +1,3 @@
-/* @module */
-
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import fromSolid from './fromSolid';
 import test from 'ava';

@@ -1,12 +1,17 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/createEdge */
+
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").Point} Point
+ */
 
 // This produces a half-edge link.
-
-import { Edge, Plane, Point } from './types';
 
 /**
  * createEdge
  *
+ * @function
  * @param {Point=} start
  * @param {Edge=} face
  * @param {Edge=} next

@@ -1,5 +1,3 @@
-/* @module */
-
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import eachLink from './eachLink';
 import fromSolid from './fromSolid';

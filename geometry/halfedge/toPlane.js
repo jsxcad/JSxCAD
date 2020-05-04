@@ -1,6 +1,9 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/toPlane */
 
-import { Edge, Plane } from './types';
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Plane} Plane
+ */
 
 import { dot, length, scale } from '@jsxcad/math-vec3';
 
@@ -12,6 +15,7 @@ const W = 3;
 /**
  * toPlane
  *
+ * @function
  * @param {Edge} loop
  * @param {boolean} recompute
  * @returns {Plane}
@@ -24,10 +28,9 @@ export const toPlane = (loop, recompute = false) => {
 };
 
 /**
- * toPlaneFromLoop
- *
  * Newell's method for computing the plane of a polygon.
  *
+ * @function
  * @param {Edge} start
  * @returns {Plane}
  */

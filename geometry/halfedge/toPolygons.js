@@ -1,6 +1,9 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/toPolygons */
 
-import { Loops, Polygons } from './types';
+/**
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").Polygons} Polygons
+ */
 
 import eachLink from './eachLink';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
@@ -8,6 +11,7 @@ import { pushWhenValid } from '@jsxcad/geometry-polygons';
 /**
  * toPolygons
  *
+ * @function
  * @param {Loops} loops
  * @returns {Polygons}
  */

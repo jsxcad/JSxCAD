@@ -1,4 +1,4 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/fromPolygons */
 
 import { Loops, Normalizer, Polygons } from './types';
 
@@ -7,6 +7,7 @@ import fromSurface from './fromSurface';
 /**
  * fromPolygons
  *
+ * @function
  * @param {Polygons} polygons
  * @param {Normalizer} normalize
  * @returns {Loops}

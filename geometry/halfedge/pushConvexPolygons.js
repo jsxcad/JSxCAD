@@ -1,6 +1,14 @@
-/* @module */
+/**
+ * @module @jsxcad/geometry-halfedge/pushConvexPolygons
+ */
 
-import { Edge, Path, Plane, PointSelector, Polygons } from './types';
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Path} Path
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").PointSelector} PointSelector
+ * @typedef {import("./types").Polygons} Polygons
+ */
 
 import {
   flip as flipPolygon,
@@ -18,6 +26,7 @@ const Z = 2;
 /**
  * buildContourXy
  *
+ * @function
  * @param {Path} points
  * @param {Array<number>} contour
  * @param {Edge} loop
@@ -40,6 +49,7 @@ const buildContourXy = (points, contour, loop, selectJunction) => {
 /**
  * buildContourXz
  *
+ * @function
  * @param {Path} points
  * @param {Array<number>} contour
  * @param {Edge} loop
@@ -62,6 +72,7 @@ const buildContourXz = (points, contour, loop, selectJunction) => {
 /**
  * buildContourYz
  *
+ * @function
  * @param {Path} points
  * @param {Array<number>} contour
  * @param {Edge} loop
@@ -84,6 +95,7 @@ const buildContourYz = (points, contour, loop, selectJunction) => {
 /**
  * selectBuildContour
  *
+ * @function
  * @param {Plane} plane
  * @returns {Function}
  */
@@ -113,6 +125,7 @@ const selectBuildContour = (plane) => {
 /**
  * pushConvexPolygons
  *
+ * @function
  * @param {Polygons} polygons
  * @param {Edge} loop
  * @param {PointSelector} selectJunction

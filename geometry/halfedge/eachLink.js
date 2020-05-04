@@ -1,6 +1,8 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/eachLink */
 
-import { Edge } from './types';
+/**
+ * @typedef {import("./types").Edge} Edge
+ */
 
 /**
  * @typedef {function(Edge): void} Thunk
@@ -11,7 +13,8 @@ import { Edge } from './types';
 
 /**
  * eachLink
- * @method
+ *
+ * @function
  * @param {Edge} loop
  * @param {Thunk} thunk
  * @returns {void}

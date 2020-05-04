@@ -1,15 +1,19 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/toDot */
 
-import { Loops } from './types';
+/**
+ * @typedef {import("./types").Loops} Loops
+ */
+
 import eachLink from './eachLink';
 
 /**
  * toDot
  *
+ * @function
  * @param {Loops} loops
  * @returns {string}
  */
-export const toDot = (loops) => {
+export const toDot = (loops, { doTwin = true } = {}) => {
   const out = [];
   out.push(`digraph {`);
   for (const loop of loops) {
@@ -25,7 +29,7 @@ export const toDot = (loops) => {
     eachLink(loop,
              edge => {
                out.push(`  ${edge.id} -> ${edge.next.id};`);
-               if (edge.twin) {
+               if (doTwin && edge.twin) {
                  out.push(`  ${edge.id} -> ${edge.twin.id} [style="dotted"];`);
                }
              });

@@ -2,6 +2,23 @@ import { dot, length, scale } from './jsxcad-math-vec3.js';
 import { toPlane as toPlane$1, flip } from './jsxcad-math-poly3.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 
+/** @module @jsxcad/geometry-halfedge/eachLink */
+
+/**
+ * @typedef {function(Edge): void} Thunk
+ * @returns {void}
+ */
+
+/* @type {function(Edge, Thunk): void} */
+
+/**
+ * eachLink
+ *
+ * @function
+ * @param {Edge} loop
+ * @param {Thunk} thunk
+ * @returns {void}
+ */
 const eachLink = (loop, thunk) => {
   let link = loop;
   do {
@@ -12,8 +29,18 @@ const eachLink = (loop, thunk) => {
   } while (link !== loop);
 };
 
+/** @module @jsxcad/geometry-halfedge/junction */
+
 const THRESHOLD = 0.99999;
 
+/**
+ * equalsPlane
+ *
+ * @function
+ * @param {Plane} a
+ * @param {Plane} b
+ * @returns {boolean} b
+ */
 const equalsPlane = (a, b) => {
   if (a === undefined || b === undefined) {
     return false;
@@ -26,9 +53,23 @@ const equalsPlane = (a, b) => {
   }
 };
 
+/**
+ * junctionSelector
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {PointSelector}
+ */
 const junctionSelector = (solid, normalize) => {
   const planesOfPoint = new Map();
 
+  /**
+   * getPlanesOfPoint
+   *
+   * @param {Point} point
+   * @returns {Array<Plane>}
+   */
   const getPlanesOfPoint = (point) => {
     let planes = planesOfPoint.get(point);
     if (planes === undefined) {
@@ -38,6 +79,13 @@ const junctionSelector = (solid, normalize) => {
     return planes;
   };
 
+  /**
+   * considerJunction
+   *
+   * @param {Point} point
+   * @param {Plane} planeOfPath
+   * @returns {undefined}
+   */
   const considerJunction = (point, planeOfPath) => {
     let planes = getPlanesOfPoint(point);
     for (const plane of planes) {
@@ -57,16 +105,27 @@ const junctionSelector = (solid, normalize) => {
   }
 
   // A corner is defined as a point of intersection of three distinct planes.
+  /** @type {PointSelector} */
   const select = (point) => getPlanesOfPoint(point).length >= 3;
 
   return select;
 };
+
+/** @module @jsxcad/geometry-halfedge/toPlane */
 
 const X = 0;
 const Y = 1;
 const Z = 2;
 const W = 3;
 
+/**
+ * toPlane
+ *
+ * @function
+ * @param {Edge} loop
+ * @param {boolean} recompute
+ * @returns {Plane}
+ */
 const toPlane = (loop, recompute = false) => {
   if (loop.face.plane === undefined || recompute) {
     loop.face.plane = toPlaneFromLoop(loop.face);
@@ -74,7 +133,13 @@ const toPlane = (loop, recompute = false) => {
   return loop.face.plane;
 };
 
-// Newell's method for computing the plane of a polygon.
+/**
+ * Newell's method for computing the plane of a polygon.
+ *
+ * @function
+ * @param {Edge} start
+ * @returns {Plane}
+ */
 const toPlaneFromLoop = (start) => {
   const normal = [0, 0, 0];
   const reference = [0, 0, 0];
@@ -105,11 +170,24 @@ const toPlaneFromLoop = (start) => {
   }
 };
 
-// Note that merging produces duplicate points.
+/** @module @jsxcad/geometry-halfedge/merge */
 
 const merged = Symbol('merged');
 
+/**
+ * merge
+ *
+ * @function
+ * @param {Loops} loops
+ * @returns {Loops}
+ */
 const merge = (loops) => {
+  /**
+   * walk
+   *
+   * @param {Edge} loop
+   * @returns {Edge}
+   */
   const walk = (loop) => {
     console.log(`QQ/walk/loop: ${loop.start}`);
     if (loop[merged] || loop.next === undefined) return;
@@ -150,7 +228,7 @@ const merge = (loops) => {
             twinNext.dead = true;
           }
           if (spurLinkage) ; else {
-            // Two separate loops were merged, update face affinity.
+          // Two separate loops were merged, update face affinity.
             link.plane = undefined;
             eachLink(link, edge => { edge.face = link; });
           }
@@ -167,7 +245,21 @@ const merge = (loops) => {
 
 const splitted = Symbol('splitted');
 
+/**
+ * split
+ *
+ * @function
+ * @param {Loops} loops
+ * @returns {Loops}
+ */
 const split = (loops) => {
+  /**
+   * walk
+   *
+   * @param {Edge} loop
+   * @param {number} nth
+   * @returns {Edge}
+   */
   const walk = (loop, nth) => {
     console.log(`QQ/walk/loop: ${loop.start}`);
     if (loop[splitted] || loop.next === undefined) return;
@@ -175,7 +267,7 @@ const split = (loops) => {
     let link = loop;
     do {
       if (link.twin && link.twin.face === link.face) {
-        // Found a self-linkage.
+      // Found a self-linkage.
         const twin = link.twin;
         console.log(`QQ/walk/twin: ${link.twin.start}`);
         if (twin.twin !== link) throw Error('die');
@@ -206,7 +298,7 @@ const split = (loops) => {
           twinNext.dead = true;
         }
         if (spurLinkage) ; else {
-          // One loop was merged with itself, producing a hole.
+        // One loop was merged with itself, producing a hole.
           twin.face = undefined;
           eachLink(link, edge => { edge.face = link.face; });
 
@@ -220,7 +312,7 @@ const split = (loops) => {
           const newTwinPlane = toPlane(twin, /* recompute= */true);
           // Extend and assign the holes.
           if (equalsPlane(linkPlane, newLinkPlane)) {
-            // The twin loop is the island.
+          // The twin loop is the island.
             if (equalsPlane(linkPlane, newTwinPlane)) {
               throw Error('die');
             }
@@ -228,7 +320,7 @@ const split = (loops) => {
             link.holes = holes;
             twin.holes = undefined;
           } else {
-            // The link loop is the island.
+          // The link loop is the island.
             if (equalsPlane(linkPlane, newLinkPlane)) {
               throw Error('die');
             }
@@ -247,30 +339,54 @@ const split = (loops) => {
   return loops.map(walk);
 };
 
+/** @module @jsxcad/geometry-halfedge/createEdge */
+
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").Point} Point
+ */
+
 // This produces a half-edge link.
 
-const createEdge = (start = [0, 0, 0], face = undefined, next = undefined, twin = undefined) => ({ start, face, next, twin });
+/**
+ * createEdge
+ *
+ * @function
+ * @param {Point=} start
+ * @param {Edge=} face
+ * @param {Edge=} next
+ * @param {Edge=} twin
+ * @param {Array<Edge>=} holes
+ * @param {Plane=} plane
+ * @param {number=} id
+ * @param {boolean=} dead
+ * @param {boolean=} spurLinkage
+ * @returns {Edge}
+ */
+const createEdge = (start = [0, 0, 0], face, next, twin, holes, plane, id, dead, spurLinkage) => ({ start, face, next, twin, holes, plane, id, dead, spurLinkage });
 
-const getEdges = (loop) => {
-  let value = loop;
-  let done = false;
-  return {
-    next: () => {
-      const result = { value, done };
-      value = value.next;
-      if (value === loop) {
-        done = true;
-      }
-      return result;
-    },
-    [Symbol.iterator]: function () { return this; }
-  };
-};
+/** @module @jsxcad/geometry-halfedge/fromSolid */
 
 let id = 0;
 
+/**
+ * fromSolid
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @param {boolean} closed
+ * @returns {Loops}
+ */
 const fromSolid = (solid, normalize, closed = true) => {
   const twinMap = new Map();
+  /**
+   * getTwins
+   *
+   * @param {Point} point
+   * @returns {Array<Edge>}
+   */
   const getTwins = (point) => {
     let twins = twinMap.get(point);
     if (twins === undefined) {
@@ -335,9 +451,6 @@ const fromSolid = (solid, normalize, closed = true) => {
               // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
               // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
               throw Error('die');
-              // for (const edge of getEdges(link)) {
-              //  edge.face = undefined;
-              // }
             }
           }
         }
@@ -359,14 +472,14 @@ const fromSolid = (solid, normalize, closed = true) => {
   if (closed) {
     for (const loop of loops) {
       if (loop.face === undefined) continue;
-      for (const edge of getEdges(loop)) {
-        edgeCount += 1;
-        if (edge.twin === undefined) {
-          // A hole in the 2-manifold.
-          holeCount += 1;
-          // edge.start[Z] += 1;
-        }
-      }
+      eachLink(loop,
+               edge => {
+                 edgeCount += 1;
+                 if (edge.twin === undefined) {
+                   // A hole in the 2-manifold.
+                   holeCount += 1;
+                 }
+               });
     }
   }
 
@@ -1055,10 +1168,24 @@ earcut.flatten = function (data) {
 };
 earcut_1.default = default_1;
 
+/**
+ * @module @jsxcad/geometry-halfedge/pushConvexPolygons
+ */
+
 const X$1 = 0;
 const Y$1 = 1;
 const Z$1 = 2;
 
+/**
+ * buildContourXy
+ *
+ * @function
+ * @param {Path} points
+ * @param {Array<number>} contour
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {number}
+ */
 const buildContourXy = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
   let link = loop;
@@ -1072,6 +1199,16 @@ const buildContourXy = (points, contour, loop, selectJunction) => {
   return index;
 };
 
+/**
+ * buildContourXz
+ *
+ * @function
+ * @param {Path} points
+ * @param {Array<number>} contour
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {number}
+ */
 const buildContourXz = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
   let link = loop;
@@ -1085,6 +1222,16 @@ const buildContourXz = (points, contour, loop, selectJunction) => {
   return index;
 };
 
+/**
+ * buildContourYz
+ *
+ * @function
+ * @param {Path} points
+ * @param {Array<number>} contour
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {number}
+ */
 const buildContourYz = (points, contour, loop, selectJunction) => {
   const index = contour.length >>> 1;
   let link = loop;
@@ -1098,6 +1245,13 @@ const buildContourYz = (points, contour, loop, selectJunction) => {
   return index;
 };
 
+/**
+ * selectBuildContour
+ *
+ * @function
+ * @param {Plane} plane
+ * @returns {Function}
+ */
 const selectBuildContour = (plane) => {
   const tZ = dot(plane, [0, 0, 1, 0]);
   if (tZ >= 0.5) {
@@ -1121,6 +1275,15 @@ const selectBuildContour = (plane) => {
   }
 };
 
+/**
+ * pushConvexPolygons
+ *
+ * @function
+ * @param {Polygons} polygons
+ * @param {Edge} loop
+ * @param {PointSelector} selectJunction
+ * @returns {void}
+ */
 const pushConvexPolygons = (polygons, loop, selectJunction) => {
   const plane = toPlane(loop);
   const buildContour = selectBuildContour(plane);
@@ -1155,6 +1318,8 @@ const pushConvexPolygons = (polygons, loop, selectJunction) => {
   }
 };
 
+/** @module @jsxcad/geometry-halfedge/toSolid */
+
 const walked = Symbol('walked');
 
 /*
@@ -1166,9 +1331,23 @@ const pushPolygon = (polygons, loop) => {
 */
 
 // FIX: Coplanar surface coherence.
+/**
+ * toSolid
+ *
+ * @function
+ * @param {Loops} loops
+ * @param {PointSelector} selectJunction
+ * @returns {Solid}
+ */
 const toSolid = (loops, selectJunction) => {
   const solid = [];
 
+  /**
+   * walk
+   *
+   * @param {Edge} loop
+   * @returns {void}
+   */
   const walk = (loop) => {
     if (loop === undefined || loop[walked] || loop.face === undefined) return;
     eachLink(loop, (link) => { link[walked] = true; });
@@ -1184,6 +1363,16 @@ const toSolid = (loops, selectJunction) => {
   return solid;
 };
 
+/** @module @jsxcad/geometry-halfedge/cleanSolid */
+
+/**
+ * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {Solid}
+ */
 const cleanSolid = (solid, normalize) => {
   for (const surface of solid) {
     console.log(`QQ/surface/length: ${surface.length}`);
@@ -1197,24 +1386,40 @@ const cleanSolid = (solid, normalize) => {
   // return toSolid(merged, n => true);
 };
 
+/** @module @jsxcad/geometry-halfedge/fromSurface */
+
+/**
+ * fromSurface
+ *
+ * @function
+ * @param {Surface} surface
+ * @param {Normalizer} normalize
+ * @returns {Loops}
+ */
 const fromSurface = (surface, normalize) => fromSolid([surface], normalize, /* closed= */false);
 
-const fromPolygons = (polygons, normalize) => fromSurface(polygons, normalize);
+/** @module @jsxcad/geometry-halfedge/toPolygons */
 
+/**
+ * toPolygons
+ *
+ * @function
+ * @param {Loops} loops
+ * @returns {Polygons}
+ */
 const toPolygons = (loops) => {
   const polygons = [];
   for (const loop of loops) {
     const polygon = [];
-    for (const edge of getEdges(loop)) {
-      if (edge.face !== undefined) {
-        polygon.push(edge.start);
-      }
-    }
+    eachLink(loop,
+             edge => {
+               if (edge.face !== undefined) {
+                 polygon.push(edge.start);
+               }
+             });
     pushWhenValid(polygons, polygon);
   }
   return polygons;
 };
 
-const mergeCoplanarPolygons = (polygons, normalize, noIslands = false) => toPolygons(merge(fromPolygons(polygons, normalize)));
-
-export { cleanSolid, fromSolid, fromSurface, junctionSelector, mergeCoplanarPolygons, toPlane, toPolygons, toSolid };
+export { cleanSolid, fromSolid, fromSurface, junctionSelector, toPlane, toPolygons, toSolid };

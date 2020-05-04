@@ -1,6 +1,12 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/fromSolid */
 
-import { Edge, Loops, Normalizer, Point, Solid } from './types';
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").Normalizer} Normalizer
+ * @typedef {import("./types").Point} Point
+ * @typedef {import("./types").Solid} Solid
+ */
 
 import createEdge from './createEdge';
 import eachLink from './eachLink';
@@ -10,6 +16,7 @@ let id = 0;
 /**
  * fromSolid
  *
+ * @function
  * @param {Solid} solid
  * @param {Normalizer} normalize
  * @param {boolean} closed

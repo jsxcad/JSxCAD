@@ -5,12 +5,12 @@
     "checkJs": true,
     "declaration": true,
     "downlevelIteration": true,
-    "emitDeclarationOnly": true,
+    "noEmit": true,
     "outDir": "types",
     "moduleResolution": "node"
   },
   "include": [
-    "*.js",
+    "main.js",
     "!types/*.d.ts"
   ],
   "exclude": [

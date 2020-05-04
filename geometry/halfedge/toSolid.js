@@ -1,6 +1,11 @@
-/* @module */
+/** @module @jsxcad/geometry-halfedge/toSolid */
 
-import { Edge, Loops, PointSelector, Solid } from './types';
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").PointSelector} PointSelector
+ * @typedef {import("./types").Solid} Solid
+ */
 
 import eachLink from './eachLink';
 import pushConvexPolygons from './pushConvexPolygons';
@@ -19,6 +24,7 @@ const pushPolygon = (polygons, loop) => {
 /**
  * toSolid
  *
+ * @function
  * @param {Loops} loops
  * @param {PointSelector} selectJunction
  * @returns {Solid}
