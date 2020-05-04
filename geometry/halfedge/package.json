@@ -7,7 +7,7 @@
   "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
-    "docs": "jsdoc --configure jsdoc.json *.js",
+    "docs": "jsdoc --destination docs --configure jsdoc.json *.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
