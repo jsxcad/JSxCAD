@@ -8,6 +8,7 @@ import './cutFrom';
 import './faces';
 import './inSolids';
 import './measureCenter';
+import './noPlan';
 import './op';
 import './openEdges';
 import './solids';
