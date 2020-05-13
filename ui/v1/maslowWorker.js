@@ -18,16 +18,16 @@ const agent = async ({ ask, question }) => {
     switch (key) {
       case 'assemble':
         var inputs = values[0].map(api.Shape.fromGeometry);
-        return api.Assembly(...inputs).toDisjointGeometry();
+        return api.Assembly(...inputs).toKeptGeometry();
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
-        return api.Circle.ofDiameter(values[0], { sides: values[1] }).toDisjointGeometry();// {center: true, sides: values[1] }).toDisjointGeometry();
+        return api.Circle.ofDiameter(values[0], { sides: values[1] }).toKeptGeometry();// {center: true, sides: values[1] }).toKeptGeometry();
       case 'color':
         if (values[1] === 'Keep Out') {
-          return api.Shape.fromGeometry(values[0]).color('Red').material('keepout').toDisjointGeometry();
+          return api.Shape.fromGeometry(values[0]).color('Red').material('keepout').toKeptGeometry();
         } else {
-          return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+          return api.Shape.fromGeometry(values[0]).color(values[1]).toKeptGeometry();
         }
       case 'code':
         inputs = {};
@@ -42,7 +42,7 @@ const agent = async ({ ask, question }) => {
         const foo = new Function(signature, values[0]);
         const returnVal = foo({ ...api, ...inputs });
         if (typeof returnVal === 'object') {
-          return returnVal.toDisjointGeometry();
+          return returnVal.toKeptGeometry();
         } else {
           return returnVal;
         }
@@ -58,27 +58,27 @@ const agent = async ({ ask, question }) => {
 
         const laidOut = api.Layers(...flatItems).Page({ itemMargin: values[1] });
 
-        return laidOut.toDisjointGeometry();
+        return laidOut.toKeptGeometry();
       case 'difference':
-        return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toKeptGeometry();
       case 'extractTag':
         return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
       case 'extrude':
-        return api.Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).extrude(values[1]).toKeptGeometry();
       case 'hull':
         values = values.map(api.Shape.fromGeometry);
-        return Hull(...values).toDisjointGeometry();
+        return Hull(...values).toKeptGeometry();
       case 'intersection':
-        return intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toKeptGeometry();
       case 'rectangle':
-        return api.Square(values[0], values[1]).toDisjointGeometry();
+        return api.Square(values[0], values[1]).toKeptGeometry();
       case 'Over Cut Inside Corners':
         const overcutShape = api.Shape.fromGeometry(values[0]);
         const overcutSection = overcutShape.section(api.Z());
         const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
         const height = overcutShape.size().height;
         const sweep = toolpath.sweep(api.Circle(values[1])).extrude(height);
-        return overcutShape.cut(sweep).toDisjointGeometry();
+        return overcutShape.cut(sweep).toKeptGeometry();
       case 'render':
         var fromGeo = null;
         if (values[1] === true && values[2] === false) { // Solid, no wireframe
@@ -91,17 +91,17 @@ const agent = async ({ ask, question }) => {
         } else {
           fromGeo = api.Empty(); // This should be an empty geometry
         }
-        return convertThree.toThreejsGeometry(fromGeo.toDisjointGeometry());
+        return convertThree.toThreejsGeometry(fromGeo.toKeptGeometry());
       case 'rotate':
-        return api.Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toKeptGeometry();
       case 'scale':
-        return api.Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).scale(values[1]).toKeptGeometry();
       case 'stl':
         const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
         const stlString = await toStl(inflated);
         return stlString;
       case 'stretch':
-        return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toKeptGeometry();
       case 'svg':
         const svgString = await toSvg(api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
         return svgString;
@@ -157,19 +157,19 @@ const agent = async ({ ask, question }) => {
         const shape = api.Shape.fromGeometry(values[0]).center();
         const bounds = shape.measureBoundingBox();
         const cameraDistance = 6 * Math.max(...bounds[1]);
-        return convertThree.toSvg({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+        return convertThree.toSvg({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toKeptGeometry());
       case 'size':
         return api.Shape.fromGeometry(values[0]).size();
       case 'tag':
-        return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).as(values[1]).toKeptGeometry();
       case 'specify':
-        return api.Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).Item(values[1]).toKeptGeometry();
       case 'translate':
-        return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toKeptGeometry();
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).bom();
       case 'union':
-        return union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toKeptGeometry();
       default:
         return -1;
     }
