@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/eachLink */
-
 /**
  * @typedef {import("./types").Edge} Edge
  */

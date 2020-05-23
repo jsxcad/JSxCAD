@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/toSolid */
-
 /**
  * @typedef {import("./types").Edge} Edge
  * @typedef {import("./types").Loops} Loops

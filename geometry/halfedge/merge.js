@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/merge */
-
 /**
  * @typedef {import("./types").Edge} Edge
  * @typedef {import("./types").Loops} Loops
@@ -79,6 +77,20 @@ export const merge = (loops) => {
     while (link !== link.face) link = link.face;
     return link;
   };
+
+  for (const loop of loops) {
+    let link = loop;
+    do {
+      if (link.twin) {
+        if (link.twin.start !== link.next.start) throw Error('die');
+        if (link.twin.next.start !== link.start) throw Error('die');
+      }
+      if (link.dead) {
+        throw Error('die');
+      }
+      link = link.next;
+    } while (link !== loop);
+  }
   return loops.map(walk).filter(loop => loop && loop.next && !loop.dead);
 };
 

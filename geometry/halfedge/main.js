@@ -1,7 +1,6 @@
 /**
  * half-edge geometry
  *
- * @module @jsxcad/geometry-halfedge
  */
 
 export {

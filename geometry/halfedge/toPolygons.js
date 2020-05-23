@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/toPolygons */
-
 /**
  * @typedef {import("./types").Loops} Loops
  * @typedef {import("./types").Polygons} Polygons

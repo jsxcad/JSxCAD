@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/fromSolid */
-
 /**
  * @typedef {import("./types").Edge} Edge
  * @typedef {import("./types").Loops} Loops
@@ -102,7 +100,7 @@ export const fromSolid = (solid, normalize, closed = true) => {
         } else if (count === 0) {
           console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
         } else if (count === 1) {
-          console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
+          // console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
         }
       }
       link = link.next;

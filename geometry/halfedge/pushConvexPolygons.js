@@ -1,8 +1,4 @@
 /**
- * @module @jsxcad/geometry-halfedge/pushConvexPolygons
- */
-
-/**
  * @typedef {import("./types").Edge} Edge
  * @typedef {import("./types").Path} Path
  * @typedef {import("./types").Plane} Plane

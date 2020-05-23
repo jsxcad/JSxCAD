@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/junction */
-
 /**
  * @typedef {import("./types").Plane} Plane
  * @typedef {import("./types").Point} Point

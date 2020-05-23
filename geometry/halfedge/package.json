@@ -41,6 +41,7 @@
     "esm": "^3.2.10",
     "jsdoc": "^3.6.4",
     "jsdoc-plugin-typescript": "^2.0.5",
+    "minami": "^1.2.3",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",

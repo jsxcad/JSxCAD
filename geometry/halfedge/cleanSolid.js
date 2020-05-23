@@ -1,10 +1,9 @@
-/** @module @jsxcad/geometry-halfedge/cleanSolid */
-
 /**
  * @typedef {import("./types").Normalizer} Normalizer
  * @typedef {import("./types").Solid} Solid
  */
 
+import clean from './clean';
 import fromSolid from './fromSolid';
 import { junctionSelector } from './junction';
 import merge from './merge';
@@ -26,10 +25,12 @@ export const cleanSolid = (solid, normalize) => {
   const loops = fromSolid(solid, normalize, /* closed= */true);
   console.log(`QQ/loops/length: ${loops.length}`);
   const selectJunction = junctionSelector(solid, normalize);
-  const merged = merge(loops);
+  const mergedLoops = merge(loops);
   // const splitted = split(merged.slice(4, 5));
-  const splitted = split([merged[4]]);
-  return toSolid(splitted, selectJunction);
+  // const splitted = split([merged[4]]);
+  const cleanedLoops = clean(mergedLoops);
+  const splitLoops = split(cleanedLoops);
+  return toSolid(splitLoops, selectJunction);
   // return toSolid(merged, n => true);
 };
 

@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/debugLink */
-
 import { Edge } from './types';
 
 /**

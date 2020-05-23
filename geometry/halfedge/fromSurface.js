@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/fromSurface */
-
 /**
  * @typedef {import("./types").Loops} Loops
  * @typedef {import("./types").Normalizer} Normalizer

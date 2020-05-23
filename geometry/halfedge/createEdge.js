@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/createEdge */
-
 /**
  * @typedef {import("./types").Edge} Edge
  * @typedef {import("./types").Plane} Plane

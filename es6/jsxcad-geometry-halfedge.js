@@ -2,7 +2,34 @@ import { dot, length, scale } from './jsxcad-math-vec3.js';
 import { toPlane as toPlane$1, flip } from './jsxcad-math-poly3.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 
-/** @module @jsxcad/geometry-halfedge/eachLink */
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").Point} Point
+ */
+
+// This produces a half-edge link.
+
+/**
+ * createEdge
+ *
+ * @function
+ * @param {Point=} start
+ * @param {Edge=} face
+ * @param {Edge=} next
+ * @param {Edge=} twin
+ * @param {Array<Edge>=} holes
+ * @param {Plane=} plane
+ * @param {number=} id
+ * @param {boolean=} dead
+ * @param {boolean=} spurLinkage
+ * @returns {Edge}
+ */
+const createEdge = (start = [0, 0, 0], face, next, twin, holes, plane, id, dead, spurLinkage) => ({ start, face, next, twin, holes, plane, id, dead, spurLinkage });
+
+/**
+ * @typedef {import("./types").Edge} Edge
+ */
 
 /**
  * @typedef {function(Edge): void} Thunk
@@ -29,344 +56,13 @@ const eachLink = (loop, thunk) => {
   } while (link !== loop);
 };
 
-/** @module @jsxcad/geometry-halfedge/junction */
-
-const THRESHOLD = 0.99999;
-
-/**
- * equalsPlane
- *
- * @function
- * @param {Plane} a
- * @param {Plane} b
- * @returns {boolean} b
- */
-const equalsPlane = (a, b) => {
-  if (a === undefined || b === undefined) {
-    return false;
-  }
-  const t = dot(a, b);
-  if (t >= THRESHOLD) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-/**
- * junctionSelector
- *
- * @function
- * @param {Solid} solid
- * @param {Normalizer} normalize
- * @returns {PointSelector}
- */
-const junctionSelector = (solid, normalize) => {
-  const planesOfPoint = new Map();
-
-  /**
-   * getPlanesOfPoint
-   *
-   * @param {Point} point
-   * @returns {Array<Plane>}
-   */
-  const getPlanesOfPoint = (point) => {
-    let planes = planesOfPoint.get(point);
-    if (planes === undefined) {
-      planes = [];
-      planesOfPoint.set(point, planes);
-    }
-    return planes;
-  };
-
-  /**
-   * considerJunction
-   *
-   * @param {Point} point
-   * @param {Plane} planeOfPath
-   * @returns {undefined}
-   */
-  const considerJunction = (point, planeOfPath) => {
-    let planes = getPlanesOfPoint(point);
-    for (const plane of planes) {
-      if (equalsPlane(plane, planeOfPath)) {
-        return;
-      }
-    }
-    planes.push(planeOfPath);
-  };
-
-  for (const surface of solid) {
-    for (const path of surface) {
-      for (const point of path) {
-        considerJunction(normalize(point), toPlane$1(path));
-      }
-    }
-  }
-
-  // A corner is defined as a point of intersection of three distinct planes.
-  /** @type {PointSelector} */
-  const select = (point) => getPlanesOfPoint(point).length >= 3;
-
-  return select;
-};
-
-/** @module @jsxcad/geometry-halfedge/toPlane */
-
-const X = 0;
-const Y = 1;
-const Z = 2;
-const W = 3;
-
-/**
- * toPlane
- *
- * @function
- * @param {Edge} loop
- * @param {boolean} recompute
- * @returns {Plane}
- */
-const toPlane = (loop, recompute = false) => {
-  if (loop.face.plane === undefined || recompute) {
-    loop.face.plane = toPlaneFromLoop(loop.face);
-  }
-  return loop.face.plane;
-};
-
-/**
- * Newell's method for computing the plane of a polygon.
- *
- * @function
- * @param {Edge} start
- * @returns {Plane}
- */
-const toPlaneFromLoop = (start) => {
-  const normal = [0, 0, 0];
-  const reference = [0, 0, 0];
-  // Run around the ring.
-  let size = 0;
-  let link = start;
-  do {
-    const lastPoint = link.start;
-    const thisPoint = link.next.start;
-    if (lastPoint !== thisPoint) {
-      normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
-      normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
-      normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
-      reference[X] += lastPoint[X];
-      reference[Y] += lastPoint[Y];
-      reference[Z] += lastPoint[Z];
-      size += 1;
-    }
-    link = link.next;
-  } while (link !== start);
-  const factor = 1 / length(normal);
-  const plane = scale(factor, normal);
-  plane[W] = dot(reference, normal) * factor / size;
-  if (isNaN(plane[X])) {
-    return undefined;
-  } else {
-    return plane;
-  }
-};
-
-/** @module @jsxcad/geometry-halfedge/merge */
-
-const merged = Symbol('merged');
-
-/**
- * merge
- *
- * @function
- * @param {Loops} loops
- * @returns {Loops}
- */
-const merge = (loops) => {
-  /**
-   * walk
-   *
-   * @param {Edge} loop
-   * @returns {Edge}
-   */
-  const walk = (loop) => {
-    console.log(`QQ/walk/loop: ${loop.start}`);
-    if (loop[merged] || loop.next === undefined) return;
-    eachLink(loop, link => { link[merged] = true; console.log(link.start); });
-    let link = loop;
-    do {
-      console.log(`QQ/walk/link: ${link.start}`);
-      if (link.twin && link.twin.face !== link.face) {
-        const twin = link.twin;
-        console.log(`QQ/walk/twin: ${link.twin.start}`);
-        if (twin.twin !== link) throw Error('die');
-        const linkPlane = toPlane(link);
-        const twinPlane = toPlane(twin);
-        if (equalsPlane(linkPlane, twinPlane)) {
-          const linkNext = link.next;
-          const twinNext = twin.next;
-          const spurLinkage = (twin === linkNext);
-          loop = link;
-          if (linkNext.dead) throw Error('die');
-          if (twinNext.dead) throw Error('die');
-          link.twin = undefined;
-          Object.assign(link, twinNext);
-          twin.twin = undefined;
-          if (!spurLinkage) {
-            Object.assign(twin, linkNext);
-          } else {
-            link.spurLinkage = true;
-          }
-          if (link.twin) { link.twin.twin = link; }
-          if (twin.twin) { twin.twin.twin = twin; }
-          if (twin.next === twin) throw Error('die');
-          linkNext.next = undefined;
-          linkNext.twin = undefined;
-          linkNext.dead = true;
-          if (!spurLinkage) {
-            twinNext.next = undefined;
-            twinNext.twin = undefined;
-            twinNext.dead = true;
-          }
-          if (spurLinkage) ; else {
-          // Two separate loops were merged, update face affinity.
-            link.plane = undefined;
-            eachLink(link, edge => { edge.face = link; });
-          }
-        }
-      }
-      if (link.next === undefined) { throw Error('die'); }
-      link = link.next;
-    } while (link !== loop);
-    while (link !== link.face) link = link.face;
-    return link;
-  };
-  return loops.map(walk).filter(loop => loop && loop.next && !loop.dead);
-};
-
-const splitted = Symbol('splitted');
-
-/**
- * split
- *
- * @function
- * @param {Loops} loops
- * @returns {Loops}
- */
-const split = (loops) => {
-  /**
-   * walk
-   *
-   * @param {Edge} loop
-   * @param {number} nth
-   * @returns {Edge}
-   */
-  const walk = (loop, nth) => {
-    console.log(`QQ/walk/loop: ${loop.start}`);
-    if (loop[splitted] || loop.next === undefined) return;
-    eachLink(loop, link => { link[splitted] = true; console.log(link.start); });
-    let link = loop;
-    do {
-      if (link.twin && link.twin.face === link.face) {
-      // Found a self-linkage.
-        const twin = link.twin;
-        console.log(`QQ/walk/twin: ${link.twin.start}`);
-        if (twin.twin !== link) throw Error('die');
-        const linkPlane = toPlane(link);
-        const linkNext = link.next;
-        const twinNext = twin.next;
-        const spurLinkage = (twin === linkNext);
-        loop = link;
-        if (linkNext.dead) throw Error('die');
-        if (twinNext.dead) throw Error('die');
-        link.twin = undefined;
-        Object.assign(link, twinNext);
-        twin.twin = undefined;
-        if (!spurLinkage) {
-          Object.assign(twin, linkNext);
-        } else {
-          link.spurLinkage = true;
-        }
-        if (link.twin) { link.twin.twin = link; }
-        if (twin.twin) { twin.twin.twin = twin; }
-        if (twin.next === twin) throw Error('die');
-        linkNext.next = undefined;
-        linkNext.twin = undefined;
-        linkNext.dead = true;
-        if (!spurLinkage) {
-          twinNext.next = undefined;
-          twinNext.twin = undefined;
-          twinNext.dead = true;
-        }
-        if (spurLinkage) ; else {
-        // One loop was merged with itself, producing a hole.
-          twin.face = undefined;
-          eachLink(link, edge => { edge.face = link.face; });
-
-          const holes = link.face.holes || [];
-          // The loop was split into a ring with an island inside.
-          // But we're not sure which loop is which or which side the loop face ended up on.
-          // Elect new faces.
-          eachLink(link, edge => { edge.face = link; });
-          eachLink(twin, edge => { edge.face = twin; });
-          const newLinkPlane = toPlane(link, /* recompute= */true);
-          const newTwinPlane = toPlane(twin, /* recompute= */true);
-          // Extend and assign the holes.
-          if (equalsPlane(linkPlane, newLinkPlane)) {
-          // The twin loop is the island.
-            if (equalsPlane(linkPlane, newTwinPlane)) {
-              throw Error('die');
-            }
-            holes.push(twin);
-            link.holes = holes;
-            twin.holes = undefined;
-          } else {
-          // The link loop is the island.
-            if (equalsPlane(linkPlane, newLinkPlane)) {
-              throw Error('die');
-            }
-            holes.push(link);
-            twin.holes = holes;
-            link.holes = undefined;
-          }
-        }
-      }
-      if (link.next === undefined) { throw Error('die'); }
-      link = link.next;
-    } while (link !== loop);
-    while (link !== link.face) link = link.face;
-    return link;
-  };
-  return loops.map(walk);
-};
-
-/** @module @jsxcad/geometry-halfedge/createEdge */
-
 /**
  * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").Normalizer} Normalizer
  * @typedef {import("./types").Point} Point
+ * @typedef {import("./types").Solid} Solid
  */
-
-// This produces a half-edge link.
-
-/**
- * createEdge
- *
- * @function
- * @param {Point=} start
- * @param {Edge=} face
- * @param {Edge=} next
- * @param {Edge=} twin
- * @param {Array<Edge>=} holes
- * @param {Plane=} plane
- * @param {number=} id
- * @param {boolean=} dead
- * @param {boolean=} spurLinkage
- * @returns {Edge}
- */
-const createEdge = (start = [0, 0, 0], face, next, twin, holes, plane, id, dead, spurLinkage) => ({ start, face, next, twin, holes, plane, id, dead, spurLinkage });
-
-/** @module @jsxcad/geometry-halfedge/fromSolid */
 
 let id = 0;
 
@@ -458,8 +154,6 @@ const fromSolid = (solid, normalize, closed = true) => {
           console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
         } else if (count === 0) {
           console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
-        } else if (count === 1) {
-          console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
         }
       }
       link = link.next;
@@ -487,6 +181,473 @@ const fromSolid = (solid, normalize, closed = true) => {
   console.log(`QQ/holeCount: ${holeCount}`);
 
   return loops;
+};
+
+/**
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").Point} Point
+ * @typedef {import("./types").PointSelector} PointSelector
+ * @typedef {import("./types").Normalizer} Normalizer
+ * @typedef {import("./types").Solid} Solid
+ */
+
+const THRESHOLD = 0.99999;
+
+/**
+ * equalsPlane
+ *
+ * @function
+ * @param {Plane} a
+ * @param {Plane} b
+ * @returns {boolean} b
+ */
+const equalsPlane = (a, b) => {
+  if (a === undefined || b === undefined) {
+    return false;
+  }
+  const t = dot(a, b);
+  if (t >= THRESHOLD) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+/**
+ * junctionSelector
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {PointSelector}
+ */
+const junctionSelector = (solid, normalize) => {
+  const planesOfPoint = new Map();
+
+  /**
+   * getPlanesOfPoint
+   *
+   * @param {Point} point
+   * @returns {Array<Plane>}
+   */
+  const getPlanesOfPoint = (point) => {
+    let planes = planesOfPoint.get(point);
+    if (planes === undefined) {
+      planes = [];
+      planesOfPoint.set(point, planes);
+    }
+    return planes;
+  };
+
+  /**
+   * considerJunction
+   *
+   * @param {Point} point
+   * @param {Plane} planeOfPath
+   * @returns {undefined}
+   */
+  const considerJunction = (point, planeOfPath) => {
+    let planes = getPlanesOfPoint(point);
+    for (const plane of planes) {
+      if (equalsPlane(plane, planeOfPath)) {
+        return;
+      }
+    }
+    planes.push(planeOfPath);
+  };
+
+  for (const surface of solid) {
+    for (const path of surface) {
+      for (const point of path) {
+        considerJunction(normalize(point), toPlane$1(path));
+      }
+    }
+  }
+
+  // A corner is defined as a point of intersection of three distinct planes.
+  /** @type {PointSelector} */
+  const select = (point) => getPlanesOfPoint(point).length >= 3;
+
+  return select;
+};
+
+/**
+ * @typedef {import("./types").Loops} Loops
+ */
+
+/**
+ * toDot
+ *
+ * @function
+ * @param {Loops} loops
+ * @returns {string}
+ */
+const toDot = (loops, { doTwin = true } = {}) => {
+  const out = [];
+  out.push(`digraph {`);
+  for (const loop of loops) {
+    out.push(`  subgraph cluster_${loop.id} {`);
+    eachLink(loop,
+             edge => {
+               const [x, y, z] = edge.start;
+               out.push(`    ${edge.id} [pos = "${x},${y},${z}!"];`);
+             });
+    out.push(`  }`);
+  }
+  for (const loop of loops) {
+    eachLink(loop,
+             edge => {
+               out.push(`  ${edge.id} -> ${edge.next.id};`);
+               if (doTwin && edge.twin) {
+                 out.push(`  ${edge.id} -> ${edge.twin.id} [style="dotted"];`);
+               }
+             });
+  }
+  out.push(`}`);
+  return out.join('\n');
+};
+
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Plane} Plane
+ */
+
+const X = 0;
+const Y = 1;
+const Z = 2;
+const W = 3;
+
+/**
+ * toPlane
+ *
+ * @function
+ * @param {Edge} loop
+ * @param {boolean} recompute
+ * @returns {Plane}
+ */
+const toPlane = (loop, recompute = false) => {
+  if (loop.face.plane === undefined || recompute) {
+    loop.face.plane = toPlaneFromLoop(loop.face);
+  }
+  return loop.face.plane;
+};
+
+/**
+ * Newell's method for computing the plane of a polygon.
+ *
+ * @function
+ * @param {Edge} start
+ * @returns {Plane}
+ */
+const toPlaneFromLoop = (start) => {
+  const normal = [0, 0, 0];
+  const reference = [0, 0, 0];
+  // Run around the ring.
+  let size = 0;
+  let link = start;
+  do {
+    const lastPoint = link.start;
+    const thisPoint = link.next.start;
+    if (lastPoint !== thisPoint) {
+      normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
+      normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
+      normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
+      reference[X] += lastPoint[X];
+      reference[Y] += lastPoint[Y];
+      reference[Z] += lastPoint[Z];
+      size += 1;
+    }
+    link = link.next;
+  } while (link !== start);
+  const factor = 1 / length(normal);
+  const plane = scale(factor, normal);
+  plane[W] = dot(reference, normal) * factor / size;
+  if (isNaN(plane[X])) {
+    return undefined;
+  } else {
+    return plane;
+  }
+};
+
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Loops} Loops
+ */
+
+const merged = Symbol('merged');
+
+/**
+ * merge
+ *
+ * @function
+ * @param {Loops} loops
+ * @returns {Loops}
+ */
+const merge = (loops) => {
+  /**
+   * walk
+   *
+   * @param {Edge} loop
+   * @returns {Edge}
+   */
+  const walk = (loop) => {
+    if (loop[merged] || loop.next === undefined) return;
+    eachLink(loop, link => { link[merged] = true; });
+    let link = loop;
+    do {
+      if (link.twin && link.twin.face !== link.face) {
+        const twin = link.twin;
+        if (twin.twin !== link) throw Error('die');
+        const linkPlane = toPlane(link);
+        const twinPlane = toPlane(twin);
+        if (equalsPlane(linkPlane, twinPlane)) {
+          const linkNext = link.next;
+          const twinNext = twin.next;
+          const spurLinkage = (twin === linkNext);
+          loop = link;
+          if (linkNext.dead) throw Error('die');
+          if (twinNext.dead) throw Error('die');
+          link.twin = undefined;
+          Object.assign(link, twinNext);
+          twin.twin = undefined;
+          if (!spurLinkage) {
+            Object.assign(twin, linkNext);
+          } else {
+            link.spurLinkage = true;
+          }
+          if (link.twin) { link.twin.twin = link; }
+          if (twin.twin) { twin.twin.twin = twin; }
+          if (twin.next === twin) throw Error('die');
+          linkNext.next = undefined;
+          linkNext.twin = undefined;
+          linkNext.dead = true;
+          if (!spurLinkage) {
+            twinNext.next = undefined;
+            twinNext.twin = undefined;
+            twinNext.dead = true;
+          }
+          if (spurLinkage) ; else {
+          // Two separate loops were merged, update face affinity.
+            link.plane = undefined;
+            eachLink(link, edge => { edge.face = link; });
+          }
+        }
+      }
+      if (link.next === undefined) { throw Error('die'); }
+      link = link.next;
+    } while (link !== loop);
+    while (link !== link.face) link = link.face;
+    return link;
+  };
+
+  for (const loop of loops) {
+    let link = loop;
+    do {
+      if (link.twin) {
+        if (link.twin.start !== link.next.start) throw Error('die');
+        if (link.twin.next.start !== link.start) throw Error('die');
+      }
+      if (link.dead) {
+        throw Error('die');
+      }
+      link = link.next;
+    } while (link !== loop);
+  }
+  return loops.map(walk).filter(loop => loop && loop.next && !loop.dead);
+};
+
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Loops} Loops
+ */
+
+const splitted = Symbol('splitted');
+
+const assertGood = (loop) => {
+  let link = loop;
+  let nth = 0;
+  do {
+    if (link.twin) {
+      if (link.twin.start !== link.next.start) throw Error('die');
+      if (link.twin.next.start !== link.start) throw Error('die');
+      if (link.twin.face.holes) {
+        for (const hole of link.twin.face.holes) {
+          if (hole.dead) {
+            // throw Error('die');
+            console.log(`QQ/link.twin.face.holes[].dead`);
+          }
+        }
+      }
+    }
+    if (link.dead) {
+      throw Error(`die: ${nth}`);
+    }
+    if (link.holes) {
+      for (const hole of link.holes) {
+        if (hole.dead) throw Error('die');
+      }
+    }
+    if (link.face.holes) {
+      for (const hole of link.face.holes) {
+        if (hole.dead) throw Error('die');
+      }
+    }
+    link = link.next;
+    nth += 1;
+  } while (link !== loop);
+};
+
+/**
+ * split
+ *
+ * @function
+ * @param {Loops} loops
+ * @returns {Loops}
+ */
+const split = (loops) => {
+  // console.log(`QQ/split`);
+  // console.log(toDot(loops));
+  /**
+   * walk
+   *
+   * @param {Edge} loop
+   * @param {number} nth
+   * @returns {Edge}
+   */
+  const walk = (loop, nth) => {
+    // console.log(`QQ/walk/loop: ${loop.start}`);
+    // console.log(`QQ/walk/nth: ${nth}`);
+    if (loop[splitted] || loop.next === undefined) return;
+    eachLink(loop, link => { link[splitted] = true; console.log([link.id, link.start]); });
+    let link = loop;
+    do {
+      assertGood(link);
+      console.log(`QQ/id: ${link.id} face ${link.face.id}`);
+      const twin = link.twin;
+      if (twin === undefined || twin.face !== link.face) ; else if (twin.next.next === link.next) ; else {
+        assertGood(link);
+        // Found a self-linkage.
+        // console.log(`QQ/walk/twin: ${link.twin.start}`);
+        if (link.twin === link) throw Error('die');
+        if (twin.twin !== link) throw Error('die');
+        const linkPlane = toPlane(link);
+        const linkNext = link.next;
+        const twinNext = twin.next;
+        // if (linkNext === twin) throw Error('die: linkNext === twin');
+        if (twinNext.next === linkNext) throw Error('die: twinNext === linkNext');
+        const spurLinkage = (twin === linkNext);
+        loop = link;
+        if (linkNext.dead) throw Error('die');
+        if (twinNext.dead) throw Error('die');
+        link.twin = undefined;
+        Object.assign(link, twinNext);
+        if (twinNext === linkNext) throw Error('die');
+        if (link.next === linkNext) throw Error('die');
+        twin.twin = undefined;
+        assertGood(link);
+        if (!spurLinkage) {
+// console.log(`QQ/spur/no`);
+          Object.assign(twin, linkNext);
+        } else {
+// console.log(`QQ/spur/yes`);
+          link.spurLinkage = true;
+        }
+        if (link.twin) { link.twin.twin = link; }
+        if (twin.twin) { twin.twin.twin = twin; }
+        if (twin.next === twin) throw Error('die');
+        linkNext.next = undefined;
+        linkNext.twin = undefined;
+        linkNext.dead = true;
+        if (link.next === linkNext) throw Error('die');
+        // twinNext.next = undefined;
+        // twinNext.twin = undefined;
+        // twinNext.dead = true;
+        if (spurLinkage) {
+console.log(`QQ/spur`);
+          twin.twin = undefined;
+          assertGood(link);
+        // No more to do -- the half-linkage above was sufficient. Carry on.
+        } else {
+          assertGood(link);
+console.log(`QQ/hole/yes`);
+        // One loop was merged with itself, producing a hole.
+          twin.face = undefined;
+          assertGood(link);
+          eachLink(link, edge => { edge.face = link.face; });
+
+          const holes = link.face.holes || [];
+          // The loop was split into a ring with an island inside.
+          // But we're not sure which loop is which or which side the loop face ended up on.
+          // Elect new faces.
+console.log(`QQ/elect/link: ${link.id}`);
+          eachLink(link, edge => { edge.face = link; });
+console.log(`QQ/elect/twin: ${twin.id}`);
+          eachLink(twin, edge => { edge.face = twin; });
+          const newLinkPlane = toPlane(link, /* recompute= */true);
+          const newTwinPlane = toPlane(twin, /* recompute= */true);
+          // CHECK: Are these sufficient to detect a spur collapse?
+          if (newLinkPlane === undefined) {
+console.log(`QQ/degenerate/link`);
+            // Discard the current loop and switch to the twin.
+            loop = twin;
+            link = twin;
+          } else if (newTwinPlane === undefined) {
+console.log(`QQ/degenerate/twin`);
+            // Nothing to do -- discard it.
+          // Extend and assign the holes.
+          } else if (equalsPlane(linkPlane, newLinkPlane)) {
+            assertGood(link);
+console.log(`QQ/island/twin`);
+          // The twin loop is the island.
+            if (equalsPlane(linkPlane, newTwinPlane)) {
+              throw Error('die');
+            }
+            if (twin.dead) throw Error('die');
+            // holes.push(twin); // RESTORE
+            link.holes = holes;
+            twin.holes = undefined;
+          } else {
+            assertGood(link);
+console.log(`QQ/island/link`);
+          // The link loop is the island.
+            if (equalsPlane(linkPlane, newLinkPlane)) {
+              console.log(`QQ/link`);
+              console.log(toDot(link));
+              console.log(`QQ/twin`);
+              console.log(toDot(twin));
+              throw Error('die');
+            }
+            if (link.dead) throw Error('die');
+            // holes.push(link); // RESTORE
+            twin.holes = holes;
+            link.holes = undefined;
+          }
+          // TODO: Prove there are no twins in the hole, and continue traversing the non-hole.
+        }
+      }
+      assertGood(link);
+      if (link.next === undefined) { throw Error('die'); }
+      link = link.next;
+      // console.log(toDot(loops));
+    } while (link !== loop);
+    while (link !== link.face) link = link.face;
+    return link;
+  };
+
+  for (const loop of loops) {
+    assertGood(loop);
+  }
+
+  const splitLoops = loops.map(walk);
+
+  for (const loop of splitLoops) {
+    if (loop && !loop.dead) {
+      assertGood(loop);
+    }
+  }
+
+  const filteredLoops = splitLoops.filter(loop => loop && loop.next && !loop.dead);
+  return filteredLoops;
 };
 
 var earcut_1 = earcut;
@@ -1169,7 +1330,11 @@ earcut.flatten = function (data) {
 earcut_1.default = default_1;
 
 /**
- * @module @jsxcad/geometry-halfedge/pushConvexPolygons
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Path} Path
+ * @typedef {import("./types").Plane} Plane
+ * @typedef {import("./types").PointSelector} PointSelector
+ * @typedef {import("./types").Polygons} Polygons
  */
 
 const X$1 = 0;
@@ -1318,7 +1483,12 @@ const pushConvexPolygons = (polygons, loop, selectJunction) => {
   }
 };
 
-/** @module @jsxcad/geometry-halfedge/toSolid */
+/**
+ * @typedef {import("./types").Edge} Edge
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").PointSelector} PointSelector
+ * @typedef {import("./types").Solid} Solid
+ */
 
 const walked = Symbol('walked');
 
@@ -1363,7 +1533,10 @@ const toSolid = (loops, selectJunction) => {
   return solid;
 };
 
-/** @module @jsxcad/geometry-halfedge/cleanSolid */
+/**
+ * @typedef {import("./types").Normalizer} Normalizer
+ * @typedef {import("./types").Solid} Solid
+ */
 
 /**
  * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.
@@ -1380,13 +1553,19 @@ const cleanSolid = (solid, normalize) => {
   const loops = fromSolid(solid, normalize, /* closed= */true);
   console.log(`QQ/loops/length: ${loops.length}`);
   const selectJunction = junctionSelector(solid, normalize);
-  const merged = merge(loops);
-  const splitted = split(merged);
-  return toSolid(splitted, selectJunction);
+  const mergedLoops = merge(loops);
+  // const splitted = split(merged.slice(4, 5));
+  // const splitted = split([merged[4]]);
+  const splitLoops = split(mergedLoops);
+  return toSolid(splitLoops, selectJunction);
   // return toSolid(merged, n => true);
 };
 
-/** @module @jsxcad/geometry-halfedge/fromSurface */
+/**
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").Normalizer} Normalizer
+ * @typedef {import("./types").Surface} Surface
+ */
 
 /**
  * fromSurface
@@ -1398,7 +1577,10 @@ const cleanSolid = (solid, normalize) => {
  */
 const fromSurface = (surface, normalize) => fromSolid([surface], normalize, /* closed= */false);
 
-/** @module @jsxcad/geometry-halfedge/toPolygons */
+/**
+ * @typedef {import("./types").Loops} Loops
+ * @typedef {import("./types").Polygons} Polygons
+ */
 
 /**
  * toPolygons

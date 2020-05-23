@@ -1,18 +1,28 @@
 {
-    "plugins": [],
-    "recurseDepth": 10,
-    "source": {
-        "includePattern": ".+\\.js",
-        "exclude": ["rollup_main.js"],
-        "excludePattern": ".+\\.test.js"
-    },
-    "sourceType": "module",
     "tags": {
         "allowUnknownTags": true,
-        "dictionaries": ["jsdoc","closure"]
+        "dictionaries": ["jsdoc", "closure"]
     },
+    "source": {
+        "include": ["package.json", "README.md"],
+        "includePattern": ".js$",
+        "excludePattern": "(node_modules/|docs)"
+    },
+    "sourceType": "module",
+    "plugins": [
+        "plugins/markdown"
+    ],
     "templates": {
         "cleverLinks": false,
-        "monospaceLinks": false
+        "monospaceLinks": true,
+        "useLongnameInNav": false,
+        "showInheritedInNav": true
+    },
+    "opts": {
+        "destination": "./docs/",
+        "encoding": "utf8",
+        "private": true,
+        "recurse": true,
+        "template": "../../node_modules/minami"
     }
 }

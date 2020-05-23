@@ -1,5 +1,3 @@
-/** @module @jsxcad/geometry-halfedge/toDot */
-
 /**
  * @typedef {import("./types").Loops} Loops
  */
