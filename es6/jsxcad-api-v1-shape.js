@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
 import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
@@ -570,6 +570,22 @@ const noPlan = (shape, tags, select) => {
 
 const noPlanMethod = function (...tags) { return noPlan(this); };
 Shape.prototype.noPlan = noPlanMethod;
+
+const noVoid = (shape, tags, select) => {
+  const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
+      return { layers: [] };
+    } else {
+      return descend();
+    }
+  };
+
+  const rewritten = rewrite(shape.toKeptGeometry(), op);
+  return Shape.fromGeometry(rewritten);
+};
+
+const noVoidMethod = function (...tags) { return noVoid(this); };
+Shape.prototype.noVoid = noVoidMethod;
 
 const opMethod = function (op, ...args) { return op(this, ...args); };
 const withOpMethod = function (op, ...args) { return assemble(this, op(this, ...args)); };
