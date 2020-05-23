@@ -9,6 +9,7 @@ import './faces';
 import './inSolids';
 import './measureCenter';
 import './noPlan';
+import './noVoid';
 import './op';
 import './openEdges';
 import './solids';

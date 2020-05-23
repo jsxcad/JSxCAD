@@ -22,6 +22,11 @@ export {
 } from './makeWatertight';
 
 export {
+  isNotVoid,
+  isVoid
+} from './isNotVoid';
+
+export {
   rewrite,
   visit
 } from './visit';
@@ -53,7 +58,6 @@ export { getSurfaces } from './getSurfaces';
 export { getTags } from './getTags';
 export { getZ0Surfaces } from './getZ0Surfaces';
 export { intersection } from './intersection';
-export { isNotVoid } from './isNotVoid';
 export { keep } from './keep';
 export { map } from './map';
 export { measureArea } from './measureArea';
@@ -63,10 +67,8 @@ export { outline } from './outline';
 export { rewriteTags } from './rewriteTags';
 export { specify } from './specify';
 export { splice } from './splice';
-// export { toDisjointGeometry } from './toDisjointGeometry';
 export { toKeptGeometry } from './toKeptGeometry';
 export { toPoints } from './toPoints';
-// export { toTransformedGeometry } from './toTransformedGeometry';
 export { transform } from './transform';
 export { union } from './union';
 export { update } from './update';
