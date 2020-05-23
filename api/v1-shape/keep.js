@@ -75,8 +75,23 @@ const keepOrDrop = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-export const keep = (shape, tags) => keepOrDrop(shape, tags, selectToKeep);
-export const drop = (shape, tags) => keepOrDrop(shape, tags, selectToDrop);
+export const keep = (shape, tags) => {
+  if (tags === undefined) {
+    // Dropping no tags is an unconditional keep.
+    return keepOrDrop(shape, [], selectToDrop);
+  } else {
+    return keepOrDrop(shape, tags, selectToKeep);
+  }
+};
+
+export const drop = (shape, tags) => {
+  if (tags === undefined) {
+    // Keeping no tags is an unconditional drop.
+    return keepOrDrop(shape, [], selectToKeep);
+  } else {
+    return keepOrDrop(shape, tags, selectToDrop);
+  }
+};
 
 const keepMethod = function (...tags) { return keep(this, tags); };
 Shape.prototype.keep = keepMethod;
