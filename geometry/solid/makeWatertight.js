@@ -95,8 +95,9 @@ export const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       watertightSolid.push(watertightPaths);
     };
 
-    const mergedSolid = cleanSolid(watertightSolid, normalize);
-    const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
+    // const mergedSolid = cleanSolid(watertightSolid, normalize);
+    // const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
+    const convexSolid = watertightSolid;
 
     solid[watertight] = convexSolid;
   }

@@ -26,12 +26,11 @@ export const cleanSolid = (solid, normalize) => {
   console.log(`QQ/loops/length: ${loops.length}`);
   const selectJunction = junctionSelector(solid, normalize);
   const mergedLoops = merge(loops);
-  // const splitted = split(merged.slice(4, 5));
-  // const splitted = split([merged[4]]);
-  const cleanedLoops = clean(mergedLoops);
-  const splitLoops = split(cleanedLoops);
-  return toSolid(splitLoops, selectJunction);
-  // return toSolid(merged, n => true);
+  // const cleanedLoops = clean(mergedLoops);
+  // const splitLoops = split(cleanedLoops);
+  return toSolid(mergedLoops, selectJunction);
+  // return toSolid(mergedLoops, p => true, false);
+  // return solid;
 };
 
 export default cleanSolid;

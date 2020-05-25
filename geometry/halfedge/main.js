@@ -13,6 +13,14 @@ export {
 
 export {
   /**
+   * @see module:@jsxcad/geometry-halfedge/outlineSurface.outlineSurface
+   * <outlineSurface/>
+   */
+  outlineSurface
+} from './outlineSurface';
+
+export {
+  /**
    * @see module:@jsxcad/geometry-halfedge/fromSolid.fromSolid
    */
   fromSolid

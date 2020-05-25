@@ -7,6 +7,7 @@
 
 import eachLink from './eachLink';
 import pushConvexPolygons from './pushConvexPolygons';
+import { toPolygons } from './toPolygons';
 
 const walked = Symbol('walked');
 
@@ -40,13 +41,22 @@ export const toSolid = (loops, selectJunction) => {
     if (loop === undefined || loop[walked] || loop.face === undefined) return;
     eachLink(loop, (link) => { link[walked] = true; });
     eachLink(loop, (link) => walk(link.twin));
+    const polygons = toPolygons([loop]);
+/*
     const polygons = [];
     pushConvexPolygons(polygons, loop, selectJunction);
+    if (polygons.length === 0) {
+      console.log(`QQ/toSolid/polygons/none`);
+      pushConvexPolygons(polygons, loop, selectJunction);
+    }
     // pushPolygon(polygons, loop);
+*/
     solid.push(polygons);
   };
 
-  walk(loops[0]);
+  for (const loop of loops) {
+    walk(loop);
+  }
 
   return solid;
 };

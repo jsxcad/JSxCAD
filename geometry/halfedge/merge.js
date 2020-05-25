@@ -27,55 +27,87 @@ export const merge = (loops) => {
    * @returns {Edge}
    */
   const walk = (loop) => {
+console.log(``);
+console.log(`QQ/merge/walk`);
     if (loop[merged] || loop.next === undefined) return;
     eachLink(loop, link => { link[merged] = true; });
     let link = loop;
     do {
-      if (link.twin && link.twin.face !== link.face) {
-        const twin = link.twin;
+      if (link.face !== link.next.face) {
+        throw Error('die');
+      }
+      const twin = link.twin;
+      // Ensure face cohesion.
+      if (twin === undefined) {
+console.log(`QQ/merge/twin/no: ${link.id}`);
+        // Do nothing.
+      } else if (twin.face === link.face) {
+console.log(`QQ/merge/twin/self: ${link.id}`);
+        // Do nothing.
+      } else if (link.next === twin) {
+console.log(`QQ/merge/twin/spur: ${link.id}`);
+        // Do nothing.
+      } else if (equalsPlane(toPlane(link), toPlane(twin))) {
+console.log(`QQ/Merge: ${link.id} face: ${loop.face.id} twin.face: ${twin.face.id}`);
+        // Merge the loops.
+        const linkNext = link.next;
+        const twinNext = twin.next;
+
+        if (linkNext.dead) throw Error('die');
+        if (twinNext.dead) throw Error('die');
         if (twin.twin !== link) throw Error('die');
-        const linkPlane = toPlane(link);
-        const twinPlane = toPlane(twin);
-        if (equalsPlane(linkPlane, twinPlane)) {
-          const linkNext = link.next;
-          const twinNext = twin.next;
-          const spurLinkage = (twin === linkNext);
-          loop = link;
-          if (linkNext.dead) throw Error('die');
-          if (twinNext.dead) throw Error('die');
-          link.twin = undefined;
-          Object.assign(link, twinNext);
-          twin.twin = undefined;
-          if (!spurLinkage) {
-            Object.assign(twin, linkNext);
-          } else {
-            link.spurLinkage = true;
-          }
-          if (link.twin) { link.twin.twin = link; }
-          if (twin.twin) { twin.twin.twin = twin; }
-          if (twin.next === twin) throw Error('die');
-          linkNext.next = undefined;
-          linkNext.twin = undefined;
-          linkNext.dead = true;
-          if (!spurLinkage) {
-            twinNext.next = undefined;
-            twinNext.twin = undefined;
-            twinNext.dead = true;
-          }
-          if (spurLinkage) {
-          // No more to do -- the half-linkage above was sufficient. Carry on.
-          } else {
-          // Two separate loops were merged, update face affinity.
-            link.plane = undefined;
-            eachLink(link, edge => { edge.face = link; });
-          }
+
+        if (twinNext === link) throw Error('die');
+        if (linkNext === twin) throw Error('die');
+
+        link.twin = undefined;
+        twin.twin = undefined;
+
+        Object.assign(link, twinNext);
+        link.from = twinNext;
+        twinNext.to = link;
+
+        Object.assign(twin, linkNext);
+        twin.from = linkNext;
+        linkNext.to = twin;
+
+        if (link.twin) {
+          link.twin.twin = link;
         }
+
+        if (twin.twin) {
+          twin.twin.twin = twin;
+        }
+
+        if (twin.next === twin) throw Error('die');
+
+        linkNext.face = undefined;
+        linkNext.next = undefined;
+        linkNext.twin = undefined;
+        linkNext.dead = true;
+        linkNext.id -= 1000000;
+
+        twinNext.face = undefined;
+        twinNext.next = undefined;
+        twinNext.twin = undefined;
+        twinNext.dead = true;
+        twinNext.id -= 1000000;
+
+        // Ensure we do a complete pass over the merged loop.
+        loop = link;
+
+        // Update face affinity to detect self-merging.
+        do {
+          link.face = loop;
+          link = link.next;
+        } while (link !== loop);
       }
       if (link.next === undefined) { throw Error('die'); }
       link = link.next;
+      if (link.to !== undefined) { throw Error('die'); }
     } while (link !== loop);
     while (link !== link.face) link = link.face;
-    return link;
+    return link.face;
   };
 
   for (const loop of loops) {
@@ -91,7 +123,29 @@ export const merge = (loops) => {
       link = link.next;
     } while (link !== loop);
   }
-  return loops.map(walk).filter(loop => loop && loop.next && !loop.dead);
+
+  const seen = new Set();
+  const filtered = [];
+  for (const loop of loops.map(walk)) {
+    if (loop === undefined) continue;
+    if (loop.next === undefined) continue;
+    if (loop.face === undefined) continue;
+    if (loop.dead !== undefined) continue;
+    let link = loop;
+    do {
+      if (link.face.id !== loop.face.id) throw Error('die');
+      link = link.next;
+    } while (link !== loop);
+    if (seen.has(loop.face)) {
+      // faces aren't loop-unique.
+      // throw Error('die');
+    } else {
+      seen.add(loop.face);
+      // We're getting the wrong ones in here, sometimes.
+      filtered.push(loop);
+    }
+  }
+  return filtered;
 };
 
 export default merge;

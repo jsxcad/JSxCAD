@@ -74,10 +74,7 @@ export const split = (loops) => {
       if (twin === undefined || twin.face !== link.face) {
         // Nothing to do.
       } else if (twin.next.next === link.next) {
-        // Do nothing for now.
-        //
-        // We started in the middle of a spur, leave it to be fixed when we
-        // roll around to the start of the spur.
+        throw Error('die');
       } else {
         assertGood(link);
         // Found a self-linkage.
@@ -90,6 +87,7 @@ export const split = (loops) => {
         // if (linkNext === twin) throw Error('die: linkNext === twin');
         if (twinNext.next === linkNext) throw Error('die: twinNext === linkNext');
         const spurLinkage = (twin === linkNext);
+        if (spurLinkage) throw Error('die');
         loop = link;
         if (linkNext.dead) throw Error('die');
         if (twinNext.dead) throw Error('die');
@@ -99,13 +97,8 @@ export const split = (loops) => {
         if (link.next === linkNext) throw Error('die');
         twin.twin = undefined;
         assertGood(link);
-        if (!spurLinkage) {
 // console.log(`QQ/spur/no`);
-          Object.assign(twin, linkNext);
-        } else {
-// console.log(`QQ/spur/yes`);
-          link.spurLinkage = true;
-        }
+        Object.assign(twin, linkNext);
         if (link.twin) { link.twin.twin = link; }
         if (twin.twin) { twin.twin.twin = twin; }
         if (twin.next === twin) throw Error('die');
@@ -116,68 +109,55 @@ export const split = (loops) => {
         // twinNext.next = undefined;
         // twinNext.twin = undefined;
         // twinNext.dead = true;
-        if (spurLinkage) {
-console.log(`QQ/spur`);
-          twin.twin = undefined;
-          assertGood(link);
-        // No more to do -- the half-linkage above was sufficient. Carry on.
-        } else {
-          assertGood(link);
+        assertGood(link);
 console.log(`QQ/hole/yes`);
         // One loop was merged with itself, producing a hole.
-          twin.face = undefined;
-          assertGood(link);
-          eachLink(link, edge => { edge.face = link.face; });
+        twin.face = undefined;
+        assertGood(link);
+        eachLink(link, edge => { edge.face = link.face; });
 
-          const holes = link.face.holes || [];
-          // The loop was split into a ring with an island inside.
-          // But we're not sure which loop is which or which side the loop face ended up on.
-          // Elect new faces.
+        // The loop was split into a ring with an island inside.
+        // But we're not sure which loop is which or which side the loop face ended up on.
+        // Elect new faces.
 console.log(`QQ/elect/link: ${link.id}`);
-          eachLink(link, edge => { edge.face = link; });
+        eachLink(link, edge => { edge.face = link; });
 console.log(`QQ/elect/twin: ${twin.id}`);
-          eachLink(twin, edge => { edge.face = twin; });
-          const newLinkPlane = toPlane(link, /* recompute= */true);
-          const newTwinPlane = toPlane(twin, /* recompute= */true);
-          // CHECK: Are these sufficient to detect a spur collapse?
-          if (newLinkPlane === undefined) {
-console.log(`QQ/degenerate/link`);
-            // Discard the current loop and switch to the twin.
-            loop = twin;
-            link = twin;
-          } else if (newTwinPlane === undefined) {
-console.log(`QQ/degenerate/twin`);
-            // Nothing to do -- discard it.
-          // Extend and assign the holes.
-          } else if (equalsPlane(linkPlane, newLinkPlane)) {
-            assertGood(link);
+        eachLink(twin, edge => { edge.face = twin; });
+        const newLinkPlane = toPlane(link, /* recompute= */true);
+        const newTwinPlane = toPlane(twin, /* recompute= */true);
+        // CHECK: Are these sufficient to detect a spur collapse?
+        if (newLinkPlane === undefined) {
+          throw Error('die');
+        } else if (newTwinPlane === undefined) {
+          throw Error('die');
+        // Extend and assign the holes.
+        } else if (equalsPlane(linkPlane, newLinkPlane)) {
+          assertGood(link);
 console.log(`QQ/island/twin`);
-          // The twin loop is the island.
-            if (equalsPlane(linkPlane, newTwinPlane)) {
-              throw Error('die');
-            }
-            if (twin.dead) throw Error('die');
-            // holes.push(twin); // RESTORE
-            link.holes = holes;
-            twin.holes = undefined;
-          } else {
-            assertGood(link);
-console.log(`QQ/island/link`);
-          // The link loop is the island.
-            if (equalsPlane(linkPlane, newLinkPlane)) {
-              console.log(`QQ/link`);
-              console.log(toDot(link));
-              console.log(`QQ/twin`);
-              console.log(toDot(twin));
-              throw Error('die');
-            }
-            if (link.dead) throw Error('die');
-            // holes.push(link); // RESTORE
-            twin.holes = holes;
-            link.holes = undefined;
+        // The twin loop is the island.
+          if (equalsPlane(linkPlane, newTwinPlane)) {
+            throw Error('die');
           }
-          // TODO: Prove there are no twins in the hole, and continue traversing the non-hole.
+          if (twin.dead) throw Error('die');
+          if (link.face.holes === undefined) { link.face.holes = []; }
+          link.face.holes.push(twin); // RESTORE
+        } else {
+          assertGood(link);
+console.log(`QQ/island/link`);
+        // The link loop is the island.
+          if (equalsPlane(linkPlane, newLinkPlane)) {
+            console.log(`QQ/link`);
+            console.log(toDot(link));
+            console.log(`QQ/twin`);
+            console.log(toDot(twin));
+            throw Error('die');
+          }
+          if (link.dead) throw Error('die');
+          if (twin.face.holes === undefined) { twin.face.holes = []; }
+          twin.face.holes.push(link); // RESTORE
+          loop = link = twin;
         }
+        // TODO: Prove there are no twins in the hole, and continue traversing the non-hole.
       }
       assertGood(link);
       if (link.next === undefined) { throw Error('die'); }
@@ -185,7 +165,7 @@ console.log(`QQ/island/link`);
       // console.log(toDot(loops));
     } while (link !== loop);
     while (link !== link.face) link = link.face;
-    return link;
+    return link.face;
   };
 
   for (const loop of loops) {

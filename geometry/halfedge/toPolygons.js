@@ -15,9 +15,17 @@ import { pushWhenValid } from '@jsxcad/geometry-polygons';
  */
 export const toPolygons = (loops) => {
   const polygons = [];
+  const faces = [];
   for (const loop of loops) {
+    faces.push(loop.face);
+    if (loop.face.holes) {
+      console.log(`QQ/toPolygons/holes`);
+      faces.push(...loop.face.holes);
+    }
+  }
+  for (const face of faces) {
     const polygon = [];
-    eachLink(loop,
+    eachLink(face,
              edge => {
                if (edge.face !== undefined) {
                  polygon.push(edge.start);

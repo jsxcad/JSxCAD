@@ -1,4 +1,4 @@
-import { cleanSolid } from './jsxcad-geometry-halfedge.js';
+import './jsxcad-geometry-halfedge.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
 import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
@@ -95,8 +95,9 @@ const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       // watertightSolid.push(convexPaths);
       watertightSolid.push(watertightPaths);
     }
-    const mergedSolid = cleanSolid(watertightSolid, normalize);
-    const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
+    // const mergedSolid = cleanSolid(watertightSolid, normalize);
+    // const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
+    const convexSolid = watertightSolid;
 
     solid[watertight] = convexSolid;
   }
