@@ -7,15 +7,12 @@
   "module": "dist/main.js",
   "scripts": {
     "depcheck": "depcheck",
-    "docs": "jsdoc --destination docs --configure jsdoc.json *.js",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
-    "tests": "ava *.test.js",
-    "typecheck": "tsc --project tsconfig.json"
+    "tests": "ava *.test.js"
   },
-  "typings": "types",
   "contributors": [
     {
       "name": "Brian Spilsbury",
@@ -27,8 +24,6 @@
   "dependencies": {
     "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-polygons": "^0.0.79",
-    "@jsxcad/geometry-surface": "^0.0.79",
-    "@jsxcad/math-plane": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79",
     "earcut": "^2.2.2"
@@ -37,17 +32,12 @@
     "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "eslint-plugin-jsdoc": "^24.0.0",
     "esm": "^3.2.10",
-    "jsdoc": "^3.6.4",
-    "jsdoc-plugin-typescript": "^2.0.5",
-    "minami": "^1.2.3",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "typescript": "^3.8.3"
+    "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
     "require": "esm"

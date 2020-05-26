@@ -7,7 +7,6 @@
 
 import { eachLink } from './eachLink';
 import { equalsPlane } from './junction';
-import { toDot } from './toDot';
 import { toPlane } from './toPlane';
 
 const merged = Symbol('merged');
@@ -27,8 +26,6 @@ export const merge = (loops) => {
    * @returns {Edge}
    */
   const walk = (loop) => {
-console.log(``);
-console.log(`QQ/merge/walk`);
     if (loop[merged] || loop.next === undefined) return;
     eachLink(loop, link => { link[merged] = true; });
     let link = loop;
@@ -39,16 +36,12 @@ console.log(`QQ/merge/walk`);
       const twin = link.twin;
       // Ensure face cohesion.
       if (twin === undefined) {
-console.log(`QQ/merge/twin/no: ${link.id}`);
         // Do nothing.
       } else if (twin.face === link.face) {
-console.log(`QQ/merge/twin/self: ${link.id}`);
         // Do nothing.
       } else if (link.next === twin) {
-console.log(`QQ/merge/twin/spur: ${link.id}`);
         // Do nothing.
       } else if (equalsPlane(toPlane(link), toPlane(twin))) {
-console.log(`QQ/Merge: ${link.id} face: ${loop.face.id} twin.face: ${twin.face.id}`);
         // Merge the loops.
         const linkNext = link.next;
         const twinNext = twin.next;
@@ -71,13 +64,8 @@ console.log(`QQ/Merge: ${link.id} face: ${loop.face.id} twin.face: ${twin.face.i
         twin.from = linkNext;
         linkNext.to = twin;
 
-        if (link.twin) {
-          link.twin.twin = link;
-        }
-
-        if (twin.twin) {
-          twin.twin.twin = twin;
-        }
+        if (link.twin) { link.twin.twin = link; }
+        if (twin.twin) { twin.twin.twin = twin; }
 
         if (twin.next === twin) throw Error('die');
 

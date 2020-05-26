@@ -9,6 +9,7 @@ export { fromPolygons } from './fromPolygons';
 export { makeConvex } from './makeConvex';
 export { makeConvexNoHoles } from './makeConvexNoHoles';
 export { makeSimple } from './makeSimple';
+export { makeWatertight } from './makeWatertight';
 export { measureArea } from './measureArea';
 export { measureBoundingBox } from './measureBoundingBox';
 export { measureBoundingSphere } from './measureBoundingSphere';

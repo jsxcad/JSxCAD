@@ -5,7 +5,7 @@ import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
 import { outline as outlineSolid } from '@jsxcad/geometry-solid';
 // import { outline as outlineSurface } from '@jsxcad/geometry-surface';
-import { outlineSurface as outlineSurface } from '@jsxcad/geometry-halfedge';
+import { outlineSurface } from '@jsxcad/geometry-halfedge';
 import { outline as outlineZ0Surface } from '@jsxcad/geometry-z0surface-boolean';
 import { toKeptGeometry } from './toKeptGeometry';
 

@@ -5,7 +5,6 @@
 
 import clean from './clean';
 import fromSurface from './fromSurface';
-import { junctionSelector } from './junction';
 import merge from './merge';
 import split from './split';
 import toPolygons from './toPolygons';
@@ -20,10 +19,15 @@ import toPolygons from './toPolygons';
  */
 export const outlineSurface = (surface, normalize) => {
   const loops = fromSurface(surface, normalize);
-  console.log(`QQ/loops/length: ${loops.length}`);
   const mergedLoops = merge(loops);
+  // console.log(`mergedLoops`);
+  // console.log(toDot(mergedLoops));
   const cleanedLoops = clean(mergedLoops);
+  // console.log(`cleanedLoops`);
+  // console.log(toDot(cleanedLoops));
   const splitLoops = split(cleanedLoops);
+  // console.log(`splitLoops`);
+  // console.log(toDot(splitLoops));
   return toPolygons(splitLoops);
 };
 

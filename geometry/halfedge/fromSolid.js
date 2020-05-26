@@ -20,7 +20,7 @@ let id = 0;
  * @param {boolean} closed
  * @returns {Loops}
  */
-export const fromSolid = (solid, normalize, closed = true) => {
+export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   const twinMap = new Map();
   /**
    * getTwins
@@ -88,17 +88,14 @@ export const fromSolid = (solid, normalize, closed = true) => {
               candidate.twin = link;
               link.twin = candidate;
             } else {
-              // console.log(`QQ/twin: ${JSON.stringify(toPolygons([candidate.twin]))}`);
-              // console.log(`QQ/candidate: ${JSON.stringify(toPolygons([candidate]))}`);
-              // console.log(`QQ/link: ${JSON.stringify(toPolygons([link]))}`);
               throw Error('die');
             }
           }
         }
         if (count > 1) {
-          console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
+          // console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
         } else if (count === 0) {
-          console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
+          // console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
         } else if (count === 1) {
           // console.log(`QQ/fromSolid/twins: one ${link.start} -> ${link.next.start} ${link.face.id} to ${link.twin.start} -> ${link.twin.next.start} ${link.twin.face.id}`);
         }
@@ -124,8 +121,10 @@ export const fromSolid = (solid, normalize, closed = true) => {
     }
   }
 
-  console.log(`QQ/edgeCount: ${edgeCount}`);
-  console.log(`QQ/holeCount: ${holeCount}`);
+  if (verbose && holeCount > 0) {
+    console.log(`QQ/halfedge/fromSolid/holeCount: ${holeCount}`);
+    console.log(`QQ/halfedge/fromSolid/edgeCount: ${edgeCount}`);
+  }
 
   return loops;
 };

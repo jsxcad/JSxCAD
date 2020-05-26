@@ -5,44 +5,84 @@
 
 import { eachLink } from './eachLink';
 import { equalsPlane } from './junction';
-import { toDot } from './toDot';
 import { toPlane } from './toPlane';
 
-const splitted = Symbol('splitted');
-
-const assertGood = (loop) => {
+/**
+ * walk
+ *
+ * @param {Edge} loop
+ * @param holes
+ * @returns {Edge}
+ */
+export const splitHole = (loop, holes) => {
+  if (loop.face.holes) { throw Error('die'); }
   let link = loop;
-  let nth = 0;
   do {
-    if (link.twin) {
-      if (link.twin.start !== link.next.start) throw Error('die');
-      if (link.twin.next.start !== link.start) throw Error('die');
-      if (link.twin.face.holes) {
-        for (const hole of link.twin.face.holes) {
-          if (hole.dead) {
-            // throw Error('die');
-            console.log(`QQ/link.twin.face.holes[].dead`);
-          }
+    if (link.holes) { throw Error('die'); }
+    const twin = link.twin;
+    if (twin === undefined || twin.face !== link.face) {
+      // Nothing to do.
+    } else if (twin.next.next === link.next) {
+      throw Error('die');
+    } else if (twin === link.next) {
+      // Spur
+      throw Error('die');
+    } else {
+      // Found a self-linkage.
+      if (twin === link) throw Error('die');
+      if (twin.twin !== link) throw Error('die');
+      const linkPlane = toPlane(link);
+      const linkNext = link.next;
+      const twinNext = twin.next;
+      link.twin = undefined;
+      Object.assign(link, twinNext);
+      twin.twin = undefined;
+      Object.assign(twin, linkNext);
+
+      if (link.twin) { link.twin.twin = link; }
+      if (twin.twin) { twin.twin.twin = twin; }
+
+      // One loop was merged with itself, producing a new hole.
+      // But we're not sure which loop is the hole and which is the loop around the hole.
+
+      // Elect new faces.
+      eachLink(link, edge => { edge.face = link; });
+      eachLink(twin, edge => { edge.face = twin; });
+
+      // Check the orientations to see which is the hole.
+      const newLinkPlane = toPlane(link, /* recompute= */true);
+      const newTwinPlane = toPlane(twin, /* recompute= */true);
+
+      if (newLinkPlane === undefined) {
+        throw Error('die');
+      } else if (newTwinPlane === undefined) {
+        throw Error('die');
+      } else if (equalsPlane(linkPlane, newLinkPlane)) {
+      // The twin loop is the hole.
+        if (!equalsPlane(linkPlane, newTwinPlane)) {
+          // But they have the same orientation, which means that it isn't a bridge,
+          throw Error('die');
         }
+        splitHole(link, holes);
+        splitHole(twin, holes);
+      } else {
+      // The link loop is the hole.
+        if (!equalsPlane(linkPlane, newLinkPlane)) {
+          // But they have the same orientation, which means that it isn't a hole,
+          // but a region connected by a degenerate bridge.
+          throw Error('die');
+        }
+        splitHole(link, holes);
+        splitHole(twin, holes);
       }
-    }
-    if (link.dead) {
-      throw Error(`die: ${nth}`);
-    }
-    if (link.holes) {
-      for (const hole of link.holes) {
-        if (hole.dead) throw Error('die');
-      }
-    }
-    if (link.face.holes) {
-      for (const hole of link.face.holes) {
-        if (hole.dead) throw Error('die');
-      }
+      // We've delegated hole collection.
+      return;
     }
     link = link.next;
-    nth += 1;
   } while (link !== loop);
-}
+
+  holes.push(link.face);
+};
 
 /**
  * split
@@ -52,136 +92,89 @@ const assertGood = (loop) => {
  * @returns {Loops}
  */
 export const split = (loops) => {
-  // console.log(`QQ/split`);
-  // console.log(toDot(loops));
   /**
    * walk
    *
    * @param {Edge} loop
-   * @param {number} nth
+   * @param isHole
    * @returns {Edge}
    */
-  const walk = (loop, nth) => {
-    // console.log(`QQ/walk/loop: ${loop.start}`);
-    // console.log(`QQ/walk/nth: ${nth}`);
-    if (loop[splitted] || loop.next === undefined) return;
-    eachLink(loop, link => { link[splitted] = true; console.log([link.id, link.start]); });
+  const walk = (loop, isHole = false) => {
     let link = loop;
     do {
-      assertGood(link);
-      console.log(`QQ/id: ${link.id} face ${link.face.id}`);
       const twin = link.twin;
       if (twin === undefined || twin.face !== link.face) {
         // Nothing to do.
       } else if (twin.next.next === link.next) {
         throw Error('die');
+      } else if (twin === link.next) {
+        // Spur
+        throw Error('die');
       } else {
-        assertGood(link);
+        // Remember any existing holes, when the face migrates.
+        const holes = link.face.holes || [];
+        link.face.holes = undefined;
+
         // Found a self-linkage.
-        // console.log(`QQ/walk/twin: ${link.twin.start}`);
-        if (link.twin === link) throw Error('die');
+        if (twin === link) throw Error('die');
         if (twin.twin !== link) throw Error('die');
         const linkPlane = toPlane(link);
         const linkNext = link.next;
         const twinNext = twin.next;
-        // if (linkNext === twin) throw Error('die: linkNext === twin');
-        if (twinNext.next === linkNext) throw Error('die: twinNext === linkNext');
-        const spurLinkage = (twin === linkNext);
-        if (spurLinkage) throw Error('die');
-        loop = link;
-        if (linkNext.dead) throw Error('die');
-        if (twinNext.dead) throw Error('die');
         link.twin = undefined;
         Object.assign(link, twinNext);
-        if (twinNext === linkNext) throw Error('die');
-        if (link.next === linkNext) throw Error('die');
         twin.twin = undefined;
-        assertGood(link);
-// console.log(`QQ/spur/no`);
         Object.assign(twin, linkNext);
+
         if (link.twin) { link.twin.twin = link; }
         if (twin.twin) { twin.twin.twin = twin; }
-        if (twin.next === twin) throw Error('die');
-        linkNext.next = undefined;
-        linkNext.twin = undefined;
-        linkNext.dead = true;
-        if (link.next === linkNext) throw Error('die');
-        // twinNext.next = undefined;
-        // twinNext.twin = undefined;
-        // twinNext.dead = true;
-        assertGood(link);
-console.log(`QQ/hole/yes`);
-        // One loop was merged with itself, producing a hole.
-        twin.face = undefined;
-        assertGood(link);
-        eachLink(link, edge => { edge.face = link.face; });
 
-        // The loop was split into a ring with an island inside.
-        // But we're not sure which loop is which or which side the loop face ended up on.
+        // One loop was merged with itself, producing a new hole.
+        // But we're not sure which loop is the hole and which is the loop around the hole.
+
         // Elect new faces.
-console.log(`QQ/elect/link: ${link.id}`);
         eachLink(link, edge => { edge.face = link; });
-console.log(`QQ/elect/twin: ${twin.id}`);
         eachLink(twin, edge => { edge.face = twin; });
+
+        // Check the orientations to see which is the hole.
         const newLinkPlane = toPlane(link, /* recompute= */true);
         const newTwinPlane = toPlane(twin, /* recompute= */true);
-        // CHECK: Are these sufficient to detect a spur collapse?
+
         if (newLinkPlane === undefined) {
           throw Error('die');
         } else if (newTwinPlane === undefined) {
           throw Error('die');
-        // Extend and assign the holes.
         } else if (equalsPlane(linkPlane, newLinkPlane)) {
-          assertGood(link);
-console.log(`QQ/island/twin`);
-        // The twin loop is the island.
+        // The twin loop is the hole.
           if (equalsPlane(linkPlane, newTwinPlane)) {
+            // But they have the same orientation, which means that it isn't a hole,
+            // but a region connected by a degenerate bridge.
             throw Error('die');
           }
-          if (twin.dead) throw Error('die');
-          if (link.face.holes === undefined) { link.face.holes = []; }
-          link.face.holes.push(twin); // RESTORE
+          splitHole(twin, holes);
+          link.face.holes = holes;
+          loop = link;
         } else {
-          assertGood(link);
-console.log(`QQ/island/link`);
-        // The link loop is the island.
+        // The link loop is the hole.
           if (equalsPlane(linkPlane, newLinkPlane)) {
-            console.log(`QQ/link`);
-            console.log(toDot(link));
-            console.log(`QQ/twin`);
-            console.log(toDot(twin));
+            // But they have the same orientation, which means that it isn't a hole,
+            // but a region connected by a degenerate bridge.
             throw Error('die');
           }
-          if (link.dead) throw Error('die');
-          if (twin.face.holes === undefined) { twin.face.holes = []; }
-          twin.face.holes.push(link); // RESTORE
+          splitHole(link, holes);
+          twin.face.holes = holes;
+          // Switch to traversing the non-hole portion of the loop.
           loop = link = twin;
         }
-        // TODO: Prove there are no twins in the hole, and continue traversing the non-hole.
       }
-      assertGood(link);
-      if (link.next === undefined) { throw Error('die'); }
       link = link.next;
-      // console.log(toDot(loops));
     } while (link !== loop);
-    while (link !== link.face) link = link.face;
     return link.face;
   };
 
-  for (const loop of loops) {
-    assertGood(loop);
-  }
-
   const splitLoops = loops.map(walk);
 
-  for (const loop of splitLoops) {
-    if (loop && !loop.dead) {
-      assertGood(loop);
-    }
-  }
-
-  const filteredLoops = splitLoops.filter(loop => loop && loop.next && !loop.dead);
-  return filteredLoops;
+  return splitLoops;
 };
 
 export default split;

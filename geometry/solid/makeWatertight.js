@@ -1,4 +1,4 @@
-import { cleanSolid } from '@jsxcad/geometry-halfedge';
+// import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';

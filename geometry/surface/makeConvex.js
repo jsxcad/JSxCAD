@@ -1,6 +1,7 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { isConvex } from '@jsxcad/math-poly3';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
+import { makeWatertight } from './makeWatertight';
 import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './ops';
@@ -42,5 +43,5 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   const z0Surface = transform(to, surface.map(path => path.map(normalize3)));
   const convexZ0Surface = makeConvexZ0Surface(z0Surface);
   const convexSurface = transform(from, convexZ0Surface).map(path => path.map(normalize3));
-  return convexSurface;
+  return makeWatertight(convexSurface);
 };

@@ -19,18 +19,12 @@ import toSolid from './toSolid';
  * @returns {Solid}
  */
 export const cleanSolid = (solid, normalize) => {
-  for (const surface of solid) {
-    console.log(`QQ/surface/length: ${surface.length}`);
-  }
   const loops = fromSolid(solid, normalize, /* closed= */true);
-  console.log(`QQ/loops/length: ${loops.length}`);
   const selectJunction = junctionSelector(solid, normalize);
   const mergedLoops = merge(loops);
-  // const cleanedLoops = clean(mergedLoops);
-  // const splitLoops = split(cleanedLoops);
-  return toSolid(mergedLoops, selectJunction);
-  // return toSolid(mergedLoops, p => true, false);
-  // return solid;
+  const cleanedLoops = clean(mergedLoops);
+  const splitLoops = split(cleanedLoops);
+  return toSolid(splitLoops, selectJunction);
 };
 
 export default cleanSolid;

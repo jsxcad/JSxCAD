@@ -19,7 +19,6 @@ export const toPolygons = (loops) => {
   for (const loop of loops) {
     faces.push(loop.face);
     if (loop.face.holes) {
-      console.log(`QQ/toPolygons/holes`);
       faces.push(...loop.face.holes);
     }
   }
