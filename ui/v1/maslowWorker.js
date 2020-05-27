@@ -62,7 +62,7 @@ const agent = async ({ ask, question }) => {
       case 'difference':
         return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toKeptGeometry();
       case 'extractTag':
-        return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
+        return api.Shape.fromGeometry(values[0]).keep(values[1]).noVoid().noPlan().toKeptGeometry();
       case 'extrude':
         return api.Shape.fromGeometry(values[0]).extrude(values[1]).toKeptGeometry();
       case 'hull':
