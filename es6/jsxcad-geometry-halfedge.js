@@ -123,7 +123,7 @@ let id = 0;
  * @param {boolean} closed
  * @returns {Loops}
  */
-const fromSolid = (solid, normalize, closed = true) => {
+const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   const twinMap = new Map();
   /**
    * getTwins
@@ -181,12 +181,8 @@ const fromSolid = (solid, normalize, closed = true) => {
         if (candidates === undefined) {
           throw Error('die');
         }
-        // FIX: Assert one or zero twins?
-        // Find the candidate that starts where we end.
-        let count = 0;
         for (const candidate of candidates) {
           if (candidate.start === link.next.start) {
-            count += 1;
             if (candidate.twin === undefined) {
               candidate.twin = link;
               link.twin = candidate;
@@ -194,11 +190,6 @@ const fromSolid = (solid, normalize, closed = true) => {
               throw Error('die');
             }
           }
-        }
-        if (count > 1) {
-          console.log(`QQ/fromSolid/twins: multiple ${link.start} -> ${link.next.start}`);
-        } else if (count === 0) {
-          console.log(`QQ/fromSolid/twins: none ${link.start} -> ${link.next.start} ${link.face.id}`);
         }
       }
       link = link.next;
@@ -222,7 +213,7 @@ const fromSolid = (solid, normalize, closed = true) => {
     }
   }
 
-  if (holeCount > 0) {
+  if (verbose && holeCount > 0) {
     console.log(`QQ/halfedge/fromSolid/holeCount: ${holeCount}`);
     console.log(`QQ/halfedge/fromSolid/edgeCount: ${edgeCount}`);
   }
@@ -1577,7 +1568,7 @@ const cleanSolid = (solid, normalize) => {
   const mergedLoops = merge(loops);
   const cleanedLoops = clean(mergedLoops);
   const splitLoops = split(cleanedLoops);
-  toSolid(splitLoops, selectJunction);
+  return toSolid(splitLoops, selectJunction);
 };
 
 /**
@@ -1646,14 +1637,14 @@ const toPolygons = (loops) => {
 const outlineSurface = (surface, normalize) => {
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);
-// console.log(`mergedLoops`);
-// console.log(toDot(mergedLoops));
+  // console.log(`mergedLoops`);
+  // console.log(toDot(mergedLoops));
   const cleanedLoops = clean(mergedLoops);
-// console.log(`cleanedLoops`);
-// console.log(toDot(cleanedLoops));
+  // console.log(`cleanedLoops`);
+  // console.log(toDot(cleanedLoops));
   const splitLoops = split(cleanedLoops);
-// console.log(`splitLoops`);
-// console.log(toDot(splitLoops));
+  // console.log(`splitLoops`);
+  // console.log(toDot(splitLoops));
   return toPolygons(splitLoops);
 };
 
