@@ -6,6 +6,8 @@ import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
 import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
 
+// import { cleanSolid } from './jsxcad-geometry-halfedge.js';
+
 const THRESHOLD = 1e-5;
 
 // We expect a solid of reconciled triangles.
@@ -94,12 +96,11 @@ const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       // watertightSolid.push(convexPaths);
       watertightSolid.push(watertightPaths);
     }
-    // const merged = cleanSolid(watertightSolid, normalize);
+    // const mergedSolid = cleanSolid(watertightSolid, normalize);
+    // const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
+    const convexSolid = watertightSolid;
 
-    // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure triangulation to support deformation.
-
-    solid[watertight] = watertightSolid;
+    solid[watertight] = convexSolid;
   }
 
   return solid[watertight];

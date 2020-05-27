@@ -1,6 +1,8 @@
+// import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
+// import { makeConvexNoHoles } from './makeConvexNoHoles';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 import { toPlane } from '@jsxcad/math-poly3';
 
@@ -93,12 +95,11 @@ export const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       watertightSolid.push(watertightPaths);
     };
 
-    // const merged = cleanSolid(watertightSolid, normalize);
+    // const mergedSolid = cleanSolid(watertightSolid, normalize);
+    // const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
+    const convexSolid = watertightSolid;
 
-    // At this point we should have the correct structure for assembly into a solid.
-    // We just need to ensure triangulation to support deformation.
-
-    solid[watertight] = watertightSolid;
+    solid[watertight] = convexSolid;
   }
 
   return solid[watertight];
