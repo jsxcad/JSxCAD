@@ -25,7 +25,7 @@
     "@jsxcad/algorithm-quantize": "^0.0.79",
     "@jsxcad/geometry-path": "^0.0.79",
     "clipper-lib": "^6.4.2",
-    "earcut": "^2.2.1"
+    "earcut": "^2.2.2"
   },
   "devDependencies": {
     "@jsxcad/geometry-paths": "^0.0.79",
