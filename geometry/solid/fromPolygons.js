@@ -2,7 +2,7 @@ import { makeConvex, retessellate } from '@jsxcad/geometry-surface';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
-// import { makeWatertight } from './makeWatertight';
+import { makeWatertight } from './makeWatertight';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export let doCheckOverlap = false;
@@ -57,5 +57,5 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
     defragmented.push(surface);
   }
 
-  return defragmented;
+  return makeWatertight(defragmented, normalize3);
 };

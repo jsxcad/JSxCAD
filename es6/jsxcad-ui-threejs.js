@@ -51760,13 +51760,10 @@ const buildGuiControls = ({ datasets, gui }) => {
 
 const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
   const resize = () => {
-    // const width = viewerElement.clientWidth - 10;
-    // const height = viewerElement.clientHeight - 5;
     const width = viewerElement.clientWidth;
     const height = viewerElement.clientHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    // trackball.handleResize();
     trackball.update();
     renderer.setSize(width, height);
     return { width, height };

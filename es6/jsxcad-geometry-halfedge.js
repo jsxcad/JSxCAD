@@ -1637,15 +1637,30 @@ const toPolygons = (loops) => {
 const outlineSurface = (surface, normalize) => {
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);
-  // console.log(`mergedLoops`);
-  // console.log(toDot(mergedLoops));
   const cleanedLoops = clean(mergedLoops);
-  // console.log(`cleanedLoops`);
-  // console.log(toDot(cleanedLoops));
   const splitLoops = split(cleanedLoops);
-  // console.log(`splitLoops`);
-  // console.log(toDot(splitLoops));
   return toPolygons(splitLoops);
 };
 
-export { cleanSolid, fromSolid, fromSurface, junctionSelector, outlineSurface, toPlane, toPolygons, toSolid };
+/**
+ * @typedef {import("./types").Normalizer} Normalizer
+ * @typedef {import("./types").Solid} Solid
+ */
+
+/**
+ * Produces the outline of a solid.
+ *
+ * @function
+ * @param {Surface} surface
+ * @param {Normalizer} normalize
+ * @returns {Surface}
+ */
+const outlineSolid = (surface, normalize) => {
+  const loops = fromSolid(surface, normalize);
+  const mergedLoops = merge(loops);
+  const cleanedLoops = clean(mergedLoops);
+  const splitLoops = split(cleanedLoops);
+  return toPolygons(splitLoops);
+};
+
+export { cleanSolid, fromSolid, fromSurface, junctionSelector, outlineSolid, outlineSurface, toPlane, toPolygons, toSolid };
