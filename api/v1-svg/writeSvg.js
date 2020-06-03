@@ -1,5 +1,5 @@
 import { addPending, emit, writeFile } from '@jsxcad/sys';
-import { getLeafs, getPlans, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { getLeafs, getPlans } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { toSvg as convertToSvg } from '@jsxcad/convert-svg';
@@ -37,10 +37,22 @@ export const toSvg = async (shape, options = {}) => {
   return pages;
 };
 
+/*
 export const writeSvg = async (shape, name, options = {}) => {
   for (const { svg, leaf, index } of await toSvg(shape, options)) {
     await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
     await writeFile({}, `geometry/${name}_${index}.svg`, toKeptGeometry(leaf));
+  }
+};
+*/
+
+export const writeSvg = async (shape, name, options = {}) => {
+  let index = 0;
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      const svg = await convertToSvg(leaf, options);
+      await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
+    }
   }
 };
 

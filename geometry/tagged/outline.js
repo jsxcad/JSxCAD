@@ -1,11 +1,15 @@
+import {
+  outlineSolid,
+  outlineSurface
+} from '@jsxcad/geometry-halfedge';
+
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { getSolids } from './getSolids';
 import { getSurfaces } from './getSurfaces';
 import { getZ0Surfaces } from './getZ0Surfaces';
-import { outline as outlineSolid } from '@jsxcad/geometry-solid';
+// import { outline as outlineSolid } from '@jsxcad/geometry-solid';
 // import { outline as outlineSurface } from '@jsxcad/geometry-surface';
-import { outlineSurface } from '@jsxcad/geometry-halfedge';
 import { outline as outlineZ0Surface } from '@jsxcad/geometry-z0surface-boolean';
 import { toKeptGeometry } from './toKeptGeometry';
 

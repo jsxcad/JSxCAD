@@ -21,6 +21,14 @@ export {
 
 export {
   /**
+   * @see module:@jsxcad/geometry-halfedge/outlineSolid.outlineSolid
+   * <outlineSolid/>
+   */
+  outlineSolid
+} from './outlineSolid';
+
+export {
+  /**
    * @see module:@jsxcad/geometry-halfedge/fromSolid.fromSolid
    */
   fromSolid

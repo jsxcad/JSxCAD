@@ -1,3 +1,4 @@
+import { canonicalize } from './canonicalize';
 import { keep } from './keep';
 import test from 'ava';
 import { toKeptGeometry } from './toKeptGeometry';
@@ -24,6 +25,6 @@ test('With Keep', t => {
     };
   const selectedGeometry = keep(['user/cylinder'], geometry);
   const keptGeometry = toKeptGeometry(selectedGeometry);
-  t.deepEqual(keptGeometry,
+  t.deepEqual(canonicalize(keptGeometry),
               { 'disjointAssembly': [{ 'solid': [], 'tags': ['compose/non-positive', 'user/cube'] }, { 'solid': [], 'tags': ['user/cylinder'] }] });
 });

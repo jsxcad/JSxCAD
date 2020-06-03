@@ -22,7 +22,7 @@ export const cleanSolid = (solid, normalize) => {
   const loops = fromSolid(solid, normalize, /* closed= */true);
   const selectJunction = junctionSelector(solid, normalize);
   const mergedLoops = merge(loops);
-  const cleanedLoops = clean(mergedLoops);
+  const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
   return toSolid(splitLoops, selectJunction);
 };
