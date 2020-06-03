@@ -11,43 +11,52 @@ import { pushWhenValid } from './jsxcad-geometry-polygons.js';
  * clean
  *
  * @function
- * @param {Loops} loops
- * @returns {Loops}
+ * @param {Loop} loop
+ * @returns {Loop | void}
  */
-const clean = (loops) => {
-  /**
-   * walk
-   *
-   * @param {Edge} loop
-   * @param {number} nth
-   * @returns {Edge}
-   */
-  const walk = (loop, nth) => {
-    let link = loop;
-    do {
-      if (link.next === undefined) {
-        throw Error(`die: ${link.id} ${link.dead}`);
+const clean = (loop) => {
+  let link = loop;
+  do {
+    if (link.next === undefined) {
+      throw Error(`die: ${link.id} ${link.dead}`);
+    }
+    if (link.to !== undefined) {
+      throw Error(`die: to`);
+    }
+    // else if (twin.next.next === link.next)
+    if (link.next.twin === link.next.next) {
+      if (link.next === link.next.next.next) {
+        // The loop is degenerate.
+        return undefined;
       }
-      if (link.to !== undefined) {
-        throw Error(`die: to`);
-      }
-      if (link.next.twin === link.next.next) {
-        // We have found a degenerate spur -- trim it off.
-        link.next.cleaned = true;
-        link.next.next.cleaned = true;
-        link.next = link.next.next.next;
-        // Make sure we walk around the loop to this point again,
-        // in case this exposed another spur.
-        loop = link;
-      }
-      link.face = loop;
-      link = link.next;
-    } while (link !== loop);
-    return link;
-  };
+      // We have found a degenerate spur -- trim it off.
+      link.next.cleaned = true;
+      link.next.next.cleaned = true;
+      link.next = link.next.next.next;
+      // Make sure we walk around the loop to this point again,
+      // in case this exposed another spur.
+      loop = link;
+    }
+    link = link.next;
+    link.face = loop;
+  } while (link !== loop);
 
-  const cleanedLoops = loops.map(walk);
-  return cleanedLoops;
+  // Check that the spurs are gone.
+  let violations = 0;
+  do {
+    const twin = link.twin;
+    if (twin === undefined || twin.face !== link.face) ; else if (twin.next.next === link.next) {
+      // The twin links backward along a spur.
+      // These should have been removed in the cleaning phase.
+      violations += 1;
+    }
+    link = link.next;
+  } while (link !== loop);
+
+  if (violations > 0) {
+    throw Error(`die: ${violations}`);
+  }
+  return link.face;
 };
 
 /**
@@ -506,15 +515,19 @@ const merge = (loops) => {
  * @param holes
  * @returns {Edge}
  */
-const splitHole = (loop, holes) => {
+const splitBridges = (uncleanedLoop, holes) => {
+  const loop = clean(uncleanedLoop);
   if (loop.face.holes) { throw Error('die'); }
   let link = loop;
   do {
     if (link.holes) { throw Error('die'); }
     const twin = link.twin;
     if (twin === undefined || twin.face !== link.face) ; else if (twin.next.next === link.next) {
-      throw Error('die');
-    } else if (twin === link.next) {
+      // The twin links backward along a spur.
+      // These should have been removed in the cleaning phase.
+      // throw Error(`die: ${toDot([link])}`);
+      throw Error(`die: ${link.face.id}`);
+    } else if (link.next === twin) {
       // Spur
       throw Error('die');
     } else {
@@ -553,8 +566,8 @@ const splitHole = (loop, holes) => {
           // But they have the same orientation, which means that it isn't a bridge,
           throw Error('die');
         }
-        splitHole(link, holes);
-        splitHole(twin, holes);
+        splitBridges(link, holes);
+        splitBridges(twin, holes);
       } else {
       // The link loop is the hole.
         if (!equalsPlane(linkPlane, newLinkPlane)) {
@@ -562,8 +575,8 @@ const splitHole = (loop, holes) => {
           // but a region connected by a degenerate bridge.
           throw Error('die');
         }
-        splitHole(link, holes);
-        splitHole(twin, holes);
+        splitBridges(link, holes);
+        splitBridges(twin, holes);
       }
       // We've delegated hole collection.
       return;
@@ -598,6 +611,9 @@ const split = (loops) => {
       } else if (twin === link.next) {
         // Spur
         throw Error('die');
+      } else if (twin.next === link) {
+        // Spur
+        throw Error('die');
       } else {
         // Remember any existing holes, when the face migrates.
         const holes = link.face.holes || [];
@@ -629,9 +645,15 @@ const split = (loops) => {
         const newTwinPlane = toPlane(twin, /* recompute= */true);
 
         if (newLinkPlane === undefined) {
-          throw Error('die');
+          // The link loop is a degenerate hole.
+          // This is probably nibbling away at the end of a canal.
+          twin.face.holes = holes;
+          loop = link = twin;
         } else if (newTwinPlane === undefined) {
-          throw Error('die');
+          // The twin loop is a degenerate hole.
+          // This is probably nibbling away at the end of a canal.
+          link.face.holes = holes;
+          loop = link;
         } else if (equalsPlane(linkPlane, newLinkPlane)) {
         // The twin loop is the hole.
           if (equalsPlane(linkPlane, newTwinPlane)) {
@@ -639,7 +661,7 @@ const split = (loops) => {
             // but a region connected by a degenerate bridge.
             throw Error('die');
           }
-          splitHole(twin, holes);
+          splitBridges(twin, holes);
           link.face.holes = holes;
           loop = link;
         } else {
@@ -649,7 +671,7 @@ const split = (loops) => {
             // but a region connected by a degenerate bridge.
             throw Error('die');
           }
-          splitHole(link, holes);
+          splitBridges(link, holes);
           twin.face.holes = holes;
           // Switch to traversing the non-hole portion of the loop.
           loop = link = twin;
@@ -1566,7 +1588,7 @@ const cleanSolid = (solid, normalize) => {
   const loops = fromSolid(solid, normalize, /* closed= */true);
   const selectJunction = junctionSelector(solid, normalize);
   const mergedLoops = merge(loops);
-  const cleanedLoops = clean(mergedLoops);
+  const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
   return toSolid(splitLoops, selectJunction);
 };
@@ -1637,7 +1659,7 @@ const toPolygons = (loops) => {
 const outlineSurface = (surface, normalize) => {
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);
-  const cleanedLoops = clean(mergedLoops);
+  const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
   return toPolygons(splitLoops);
 };
@@ -1655,10 +1677,10 @@ const outlineSurface = (surface, normalize) => {
  * @param {Normalizer} normalize
  * @returns {Surface}
  */
-const outlineSolid = (surface, normalize) => {
-  const loops = fromSolid(surface, normalize);
+const outlineSolid = (solid, normalize) => {
+  const loops = fromSolid(solid, normalize);
   const mergedLoops = merge(loops);
-  const cleanedLoops = clean(mergedLoops);
+  const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
   return toPolygons(splitLoops);
 };

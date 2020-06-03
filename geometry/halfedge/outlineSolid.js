@@ -18,7 +18,6 @@ import toPolygons from './toPolygons';
  * @returns {Surface}
  */
 export const outlineSolid = (solid, normalize) => {
-console.log(`QQ/outlineSolid/solid: ${JSON.stringify(solid)}`);
   const loops = fromSolid(solid, normalize);
   const mergedLoops = merge(loops);
   const cleanedLoops = mergedLoops.map(clean);

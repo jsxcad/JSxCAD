@@ -3,9 +3,6 @@
  * @typedef {import("./types").Loops} Loops
  */
 
-import toPolygons from './toPolygons';
-import toDot from './toDot';
-
 /**
  * clean
  *
@@ -16,7 +13,6 @@ import toDot from './toDot';
 export const clean = (loop) => {
   let link = loop;
   do {
-    // console.log(`QQ/clean/walk: ${link.id}`);
     if (link.next === undefined) {
       throw Error(`die: ${link.id} ${link.dead}`);
     }
@@ -27,10 +23,8 @@ export const clean = (loop) => {
     if (link.next.twin === link.next.next) {
       if (link.next === link.next.next.next) {
         // The loop is degenerate.
-console.log(`QQ/clean/degenerate: ${link.face.id}`);
         return undefined;
       }
-console.log(`QQ/clean/spur: ${link.id}`);
       // We have found a degenerate spur -- trim it off.
       link.next.cleaned = true;
       link.next.next.cleaned = true;
@@ -43,9 +37,6 @@ console.log(`QQ/clean/spur: ${link.id}`);
     link.face = loop;
   } while (link !== loop);
 
-// console.log(`QQ/cleaned: ${link.id}`);
-// console.log(`QQ/cleaned: ${toDot([loop])}`);
-
   // Check that the spurs are gone.
   let violations = 0;
   do {
@@ -55,7 +46,6 @@ console.log(`QQ/clean/spur: ${link.id}`);
     } else if (twin.next.next === link.next) {
       // The twin links backward along a spur.
       // These should have been removed in the cleaning phase.
-      // throw Error(`die: ${toDot([link])}`);
       violations += 1;
     }
     link = link.next;
@@ -64,7 +54,6 @@ console.log(`QQ/clean/spur: ${link.id}`);
   if (violations > 0) {
     throw Error(`die: ${violations}`);
   }
-console.log(`QQ/clean/face: ${link.face.id}`);
   return link.face;
 };
 

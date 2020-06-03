@@ -1,5 +1,5 @@
 import { addPending, emit, writeFile } from '@jsxcad/sys';
-import { getLeafs, getPlans, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { getLeafs, getPlans } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { toPdf as convertToPdf } from '@jsxcad/convert-pdf';
@@ -42,10 +42,23 @@ export const toPdf = async (shape, { lineWidth = 0.096 } = {}) => {
   return pages;
 };
 
+/*
 export const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
   for (const { pdf, leaf, index } of await toPdf(shape, { lineWidth })) {
     await writeFile({ doSerialize: false }, `output/${name}_${index}.pdf`, pdf);
     await writeFile({}, `geometry/${name}_${index}.pdf`, toKeptGeometry(leaf));
+  }
+};
+*/
+
+export const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
+  let index = 0;
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    const { size } = entry.plan.page;
+    for (let leaf of getLeafs(entry.content)) {
+      const pdf = await convertToPdf(leaf, { lineWidth, size });
+      await writeFile({ doSerialize: false }, `output/${name}_${index}.pdf`, pdf);
+    }
   }
 };
 
