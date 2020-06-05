@@ -22,6 +22,7 @@ const downloadPdf = (shape, name, { lineWidth = 0.096 } = {}) => {
 
 const downloadPdfMethod = function (...args) { return downloadPdf(this, ...args); };
 Shape.prototype.downloadPdf = downloadPdfMethod;
+Shape.prototype.pdf = downloadPdfMethod;
 
 // FIX: Support multi-page pdf, and multi-page preview.
 

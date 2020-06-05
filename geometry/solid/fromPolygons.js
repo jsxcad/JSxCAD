@@ -1,5 +1,4 @@
-import { makeConvex, retessellate } from '@jsxcad/geometry-surface';
-
+import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { createNormalize4 } from './createNormalize4';
 import { makeWatertight } from './makeWatertight';
@@ -37,25 +36,11 @@ export const fromPolygons = (options = {}, polygons, normalize3 = createNormaliz
   }
 
   // The solid is a list of surfaces, which are lists of coplanar polygons.
-  const defragmented = [];
-
-  // Possibly erase substructure and make convex.
-  for (const polygons of coplanarGroups.values()) {
-    let surface;
-    switch (doDefragment) {
-      case 'makeConvex':
-        surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
-        break;
-      case 'retessellate':
-        surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
-        break;
-      case 'none':
-      default:
-        surface = polygons;
-        break;
-    }
-    defragmented.push(surface);
+  const solid = [];
+  for (const surface of coplanarGroups.values()) {
+    solid.push(surface);
   }
-
-  return makeWatertight(defragmented, normalize3);
+  const watertightSolid = makeWatertight(solid, normalize3);
+  const cleanedSolid = cleanSolid(watertightSolid, normalize3);
+  return cleanedSolid;
 };

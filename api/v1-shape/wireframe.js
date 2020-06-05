@@ -1,4 +1,4 @@
-import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import { getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
@@ -15,34 +15,15 @@ const toWireframeFromSurface = (surface) => {
   return Shape.fromPaths(surface);
 };
 
-/**
- *
- * # Wireframe
- *
- * Generates a set of paths outlining a solid.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).wireframe()
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Sphere(10).wireframe()
- * ```
- * :::
- *
- **/
-
 export const wireframe = (options = {}, shape) => {
   const pieces = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid } of getNonVoidSolids(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSolid(solid));
   }
-  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+  for (const { surface } of getNonVoidSurfaces(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSurface(surface));
   }
-  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+  for (const { z0Surface } of getNonVoidZ0Surfaces(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSurface(z0Surface));
   }
   return assemble(...pieces);

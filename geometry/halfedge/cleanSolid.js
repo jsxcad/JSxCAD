@@ -24,7 +24,8 @@ export const cleanSolid = (solid, normalize) => {
   const mergedLoops = merge(loops);
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  return toSolid(splitLoops, selectJunction);
+  const cleanedSolid = toSolid(splitLoops, selectJunction);
+  return cleanedSolid;
 };
 
 export default cleanSolid;

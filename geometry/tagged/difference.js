@@ -20,6 +20,7 @@ const differenceImpl = (geometry, ...geometries) => {
       }
       return { solid: solidDifference(geometry.solid, ...todo), tags: geometry.tags };
     } else if (geometry.surface) {
+      // FIX: Solids should cut surfaces
       const todo = [];
       for (const geometry of geometries) {
         for (const { surface } of getSurfaces(geometry)) {
@@ -31,6 +32,7 @@ const differenceImpl = (geometry, ...geometries) => {
       }
       return { surface: surfaceDifference(geometry.surface, ...todo), tags: geometry.tags };
     } else if (geometry.z0Surface) {
+      // FIX: Solids should cut surfaces
       const todoSurfaces = [];
       const todoZ0Surfaces = [];
       for (const geometry of geometries) {
