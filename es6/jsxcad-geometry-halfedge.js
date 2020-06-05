@@ -605,15 +605,16 @@ const split = (loops) => {
   const walk = (loop, isHole = false) => {
     let link = loop;
     do {
-      const twin = link.twin;
+      let twin = link.twin;
       if (twin === undefined || twin.face !== link.face) ; else if (twin.next.next === link.next) {
-        throw Error('die');
+        // The bridge is going backward -- catch it on the next cycle.
+        loop = link;
       } else if (twin === link.next) {
         // Spur
-        throw Error('die');
+        throw Error('die/spur1');
       } else if (twin.next === link) {
         // Spur
-        throw Error('die');
+        throw Error('die/spur2');
       } else {
         // Remember any existing holes, when the face migrates.
         const holes = link.face.holes || [];
@@ -639,6 +640,10 @@ const split = (loops) => {
         // Elect new faces.
         eachLink(link, edge => { edge.face = link; });
         eachLink(twin, edge => { edge.face = twin; });
+
+        // Now that the loops are separated, clean up any residual canals.
+        link = clean(link);
+        twin = clean(twin);
 
         // Check the orientations to see which is the hole.
         const newLinkPlane = toPlane(link, /* recompute= */true);
@@ -1549,6 +1554,17 @@ const pushPolygon = (polygons, loop) => {
 const toSolid = (loops, selectJunction) => {
   const solid = [];
 
+  // Note holes so that we don't try to render them.
+  // FIX: Remove this tracking.
+  const holes = new Set();
+  for (const loop of loops) {
+    if (loop.face.holes) {
+      for (const hole of loop.face.holes) {
+        holes.add(hole.face);
+      }
+    }
+  }
+
   /**
    * walk
    *
@@ -1557,6 +1573,7 @@ const toSolid = (loops, selectJunction) => {
    */
   const walk = (loop) => {
     if (loop === undefined || loop[walked] || loop.face === undefined) return;
+    if (holes.has(loop.face)) return;
     eachLink(loop, (link) => { link[walked] = true; });
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
@@ -1590,7 +1607,8 @@ const cleanSolid = (solid, normalize) => {
   const mergedLoops = merge(loops);
   const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  return toSolid(splitLoops, selectJunction);
+  const cleanedSolid = toSolid(splitLoops, selectJunction);
+  return cleanedSolid;
 };
 
 /**

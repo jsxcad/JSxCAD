@@ -107,17 +107,18 @@ export const split = (loops) => {
   const walk = (loop, isHole = false) => {
     let link = loop;
     do {
-      const twin = link.twin;
+      let twin = link.twin;
       if (twin === undefined || twin.face !== link.face) {
         // Nothing to do.
       } else if (twin.next.next === link.next) {
-        throw Error('die');
+        // The bridge is going backward -- catch it on the next cycle.
+        loop = link;
       } else if (twin === link.next) {
         // Spur
-        throw Error('die');
+        throw Error('die/spur1');
       } else if (twin.next === link) {
         // Spur
-        throw Error('die');
+        throw Error('die/spur2');
       } else {
         // Remember any existing holes, when the face migrates.
         const holes = link.face.holes || [];
@@ -143,6 +144,10 @@ export const split = (loops) => {
         // Elect new faces.
         eachLink(link, edge => { edge.face = link; });
         eachLink(twin, edge => { edge.face = twin; });
+
+        // Now that the loops are separated, clean up any residual canals.
+        link = clean(link);
+        twin = clean(twin);
 
         // Check the orientations to see which is the hole.
         const newLinkPlane = toPlane(link, /* recompute= */true);

@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, allTags, getSurfaces, getZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
 import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
@@ -672,34 +672,15 @@ const toWireframeFromSurface = (surface) => {
   return Shape.fromPaths(surface);
 };
 
-/**
- *
- * # Wireframe
- *
- * Generates a set of paths outlining a solid.
- *
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Cube(10).wireframe()
- * ```
- * :::
- * ::: illustration { "view": { "position": [-40, -40, 40] } }
- * ```
- * Sphere(10).wireframe()
- * ```
- * :::
- *
- **/
-
 const wireframe = (options = {}, shape) => {
   const pieces = [];
-  for (const { solid } of getSolids(shape.toKeptGeometry())) {
+  for (const { solid } of getNonVoidSolids(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSolid(solid));
   }
-  for (const { surface } of getSurfaces(shape.toKeptGeometry())) {
+  for (const { surface } of getNonVoidSurfaces(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSurface(surface));
   }
-  for (const { z0Surface } of getZ0Surfaces(shape.toKeptGeometry())) {
+  for (const { z0Surface } of getNonVoidZ0Surfaces(shape.toKeptGeometry())) {
     pieces.push(toWireframeFromSurface(z0Surface));
   }
   return assemble(...pieces);

@@ -55,7 +55,7 @@ export const Page = ({ size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infi
       const plans = [];
       for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
         plans.push(Plan({
-          plan: { page: { size, margin: pageMargin } },
+          plan: { page: { size: [pageWidth, pageLength], margin: pageMargin } },
           content: Shape.fromGeometry(layer).center(),
           marks: packSize,
           visualization:

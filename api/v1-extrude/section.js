@@ -63,15 +63,12 @@ export const section = (solidShape, ...connectors) => {
   const planeSurfaces = planes.map(toSurface);
   const shapes = [];
   const normalize = createNormalize3();
-  for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+  for (const { solid, tags } of getSolids(solidShape.toKeptGeometry())) {
     const sections = bspSection(solid, planeSurfaces, normalize);
     const surfaces = sections.map(section => makeConvex(section, normalize));
-    // const surfaces = sections.map(section => outlineSurface(section, normalize));
-    // const surfaces = sections.map(section => section);
-    // const surfaces = sections;
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
-      shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+      shapes.push(Shape.fromGeometry({ surface: surfaces[i], tags }));
     }
   }
   return layer(...shapes);

@@ -4,15 +4,12 @@ import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, retessellate, makeConvex, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
-
-// import { cleanSolid } from './jsxcad-geometry-halfedge.js';
+import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
+import { cleanSolid } from './jsxcad-geometry-halfedge.js';
 
 const THRESHOLD = 1e-5;
 
 // We expect a solid of reconciled triangles.
-
-const watertight = Symbol('watertight');
 
 const X = 0;
 const Y = 1;
@@ -28,82 +25,63 @@ const orderVertices = (a, b) => {
 };
 
 const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
-  if (!solid[watertight]) {
-    if (isWatertight(solid)) {
-      solid[watertight] = solid;
-    }
+  if (normalize === undefined) {
+    normalize = createNormalize3(1 / threshold);
   }
 
-  if (!solid[watertight]) {
-    if (normalize === undefined) {
-      normalize = createNormalize3(1 / threshold);
-    }
+  const vertices = new Set();
 
-    const vertices = new Set();
-
-    const reconciledSolid = [];
-    for (const surface of solid) {
-      const reconciledSurface = [];
-      for (const path of surface) {
-        const reconciledPath = [];
-        for (const point of path) {
-          const reconciledPoint = normalize(point);
-          reconciledPath.push(reconciledPoint);
-          vertices.add(reconciledPoint);
-        }
-        if (toPlane(reconciledPath) !== undefined) {
-          // Filter degenerates.
-          reconciledSurface.push(reconciledPath);
-        }
+  const reconciledSolid = [];
+  for (const surface of solid) {
+    const reconciledSurface = [];
+    for (const path of surface) {
+      const reconciledPath = [];
+      for (const point of path) {
+        const reconciledPoint = normalize(point);
+        reconciledPath.push(reconciledPoint);
+        vertices.add(reconciledPoint);
       }
-      reconciledSolid.push(reconciledSurface);
+      if (toPlane(reconciledPath) !== undefined) {
+        // Filter degenerates.
+        reconciledSurface.push(reconciledPath);
+      }
     }
+    reconciledSolid.push(reconciledSurface);
+  }
 
-    const orderedVertices = [...vertices];
-    orderedVertices.sort(orderVertices);
-    for (let i = 0; i < orderedVertices.length; i++) {
-      orderedVertices[i].index = i;
-    }
+  const orderedVertices = [...vertices];
+  orderedVertices.sort(orderVertices);
+  for (let i = 0; i < orderedVertices.length; i++) {
+    orderedVertices[i].index = i;
+  }
 
-    const watertightSolid = [];
-    for (const surface of reconciledSolid) {
-      const watertightPaths = [];
-      for (const path of surface) {
-        const watertightPath = [];
-        for (const [start, end] of getEdges(path)) {
-          watertightPath.push(start);
-          const span = distance(start, end);
-          const colinear = [];
-          let limit = Math.max(start.index, end.index);
-          for (let i = Math.min(start.index, end.index); i < limit; i++) {
-            const vertex = orderedVertices[i];
-            // FIX: Threshold
-            if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
-              colinear.push(vertex);
-            }
+  const watertightSolid = [];
+  for (const surface of reconciledSolid) {
+    const watertightPaths = [];
+    for (const path of surface) {
+      const watertightPath = [];
+      for (const [start, end] of getEdges(path)) {
+        watertightPath.push(start);
+        const span = distance(start, end);
+        const colinear = [];
+        let limit = Math.max(start.index, end.index);
+        for (let i = Math.min(start.index, end.index); i < limit; i++) {
+          const vertex = orderedVertices[i];
+          // FIX: Threshold
+          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+            colinear.push(vertex);
           }
-          // Arrange by distance from start.
-          colinear.sort((a, b) => distance(start, a) - distance(start, b));
-          // Insert into the path.
-          watertightPath.push(...colinear);
         }
-        pushWhenValid(watertightPaths, watertightPath);
+        // Arrange by distance from start.
+        colinear.sort((a, b) => distance(start, a) - distance(start, b));
+        // Insert into the path.
+        watertightPath.push(...colinear);
       }
-      // const mergedPaths = watertightPaths;
-      // const mergedPaths = mergeCoplanarPolygons(watertightPaths, normalize, /*noIslands=*/true);
-      // const convexPaths = mergedPaths;
-      // const convexPaths = makeConvexNoHoles(mergedPaths, normalize);
-      // watertightSolid.push(convexPaths);
-      watertightSolid.push(watertightPaths);
+      pushWhenValid(watertightPaths, watertightPath);
     }
-    // const mergedSolid = cleanSolid(watertightSolid, normalize);
-    // const convexSolid = mergedSolid; // makeConvexNoHoles(mergedSolid);
-    const convexSolid = watertightSolid;
-
-    solid[watertight] = convexSolid;
+    watertightSolid.push(watertightPaths);
   }
-
-  return solid[watertight];
+  return watertightSolid;
 };
 
 const isWatertight = (solid) => {
@@ -283,8 +261,6 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-let doDefragment = 'none';
-
 const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
@@ -314,27 +290,13 @@ const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) =
   }
 
   // The solid is a list of surfaces, which are lists of coplanar polygons.
-  const defragmented = [];
-
-  // Possibly erase substructure and make convex.
-  for (const polygons of coplanarGroups.values()) {
-    let surface;
-    switch (doDefragment) {
-      case 'makeConvex':
-        surface = makeConvex(polygons, normalize3, toPlane(polygons[0]));
-        break;
-      case 'retessellate':
-        surface = retessellate(polygons, normalize3, toPlane(polygons[0]));
-        break;
-      case 'none':
-      default:
-        surface = polygons;
-        break;
-    }
-    defragmented.push(surface);
+  const solid = [];
+  for (const surface of coplanarGroups.values()) {
+    solid.push(surface);
   }
-
-  return makeWatertight(defragmented, normalize3);
+  const watertightSolid = makeWatertight(solid, normalize3);
+  const cleanedSolid = cleanSolid(watertightSolid, normalize3);
+  return cleanedSolid;
 };
 
 /** Measure the bounding sphere of the given poly3

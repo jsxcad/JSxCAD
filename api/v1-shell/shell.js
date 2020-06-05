@@ -39,6 +39,7 @@ export const shell = (shape, radius = 1, resolution = 8) => {
   }
   assembly.push(union(...shells));
 
+  const faces = [];
   // Handle surface aspects.
   for (const geometry of getAnySurfaces(keptGeometry)) {
     const anySurface = geometry.surface || geometry.z0Surface;
@@ -56,13 +57,20 @@ export const shell = (shape, radius = 1, resolution = 8) => {
         }
       }
     }
-    assembly.push(assemble(...pieces.map(piece => piece.transform(from))).as(...(geometry.tags || [])));
+    faces.push(union(...pieces.map(piece => piece.transform(from))).as(...(geometry.tags || [])));
   }
+  assembly.push(union(...faces));
 
   return assemble(...assembly);
 };
 
-const method = function (radius, resolution) { return shell(this, radius, resolution); };
-Shape.prototype.shell = method;
+const shellMethod = function (radius, resolution) { return shell(this, radius, resolution); };
+Shape.prototype.shell = shellMethod;
+
+const outerShellMethod = function (radius, resolution) { return shell(this, radius, resolution).cut(this); };
+Shape.prototype.outerShell = outerShellMethod;
+
+const innerShellMethod = function (radius, resolution) { return shell(this, radius, resolution).clip(this); };
+Shape.prototype.innerShell = innerShellMethod;
 
 export default shell;

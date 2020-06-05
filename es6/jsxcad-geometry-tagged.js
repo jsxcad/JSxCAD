@@ -9,7 +9,7 @@ import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as 
 import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
 import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
 import { difference as difference$2, intersection as intersection$2, union as union$2 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$3, intersection as intersection$3, outline as outline$1, union as union$3 } from './jsxcad-geometry-z0surface-boolean.js';
+import { difference as difference$3, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-z0surface-boolean.js';
 import { min, max } from './jsxcad-math-vec3.js';
 import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
 import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
@@ -374,6 +374,7 @@ const differenceImpl = (geometry, ...geometries) => {
       }
       return { solid: difference$1(geometry.solid, ...todo), tags: geometry.tags };
     } else if (geometry.surface) {
+      // FIX: Solids should cut surfaces
       const todo = [];
       for (const geometry of geometries) {
         for (const { surface } of getSurfaces(geometry)) {
@@ -385,6 +386,7 @@ const differenceImpl = (geometry, ...geometries) => {
       }
       return { surface: difference$2(geometry.surface, ...todo), tags: geometry.tags };
     } else if (geometry.z0Surface) {
+      // FIX: Solids should cut surfaces
       const todoSurfaces = [];
       const todoZ0Surfaces = [];
       for (const geometry of geometries) {
@@ -685,6 +687,30 @@ const fromSurfaceToPathsImpl = (surface) => {
 
 const fromSurfaceToPaths = cache(fromSurfaceToPathsImpl);
 
+const eachNonVoidItem = (geometry, op) => {
+  const walk = (geometry, descend) => {
+    if (isNotVoid(geometry)) {
+      op(geometry);
+      descend();
+    }
+  };
+  visit(geometry, walk);
+};
+
+const getAnyNonVoidSurfaces = (geometry) => {
+  const surfaces = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.surface) {
+                      surfaces.push(item);
+                    }
+                    if (item.z0Surface) {
+                      surfaces.push(item);
+                    }
+                  });
+  return surfaces;
+};
+
 const getAnySurfaces = (geometry) => {
   const surfaces = [];
   eachItem(geometry,
@@ -752,6 +778,72 @@ const getLeafs = (geometry) => {
   };
   visit(geometry, op);
   return leafs;
+};
+
+const getNonVoidPaths = (geometry) => {
+  const pathsets = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.paths) {
+                      pathsets.push(item);
+                    }
+                  });
+  return pathsets;
+};
+
+const getNonVoidPlans = (geometry) => {
+  const plans = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.plan) {
+                      plans.push(item);
+                    }
+                  });
+  return plans;
+};
+
+const getNonVoidPoints = (geometry) => {
+  const pointsets = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.points) {
+                      pointsets.push(item);
+                    }
+                  });
+  return pointsets;
+};
+
+const getNonVoidSolids = (geometry) => {
+  const solids = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.solid) {
+                      solids.push(item);
+                    }
+                  });
+  return solids;
+};
+
+const getNonVoidSurfaces = (geometry) => {
+  const surfaces = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.surface) {
+                      surfaces.push(item);
+                    }
+                  });
+  return surfaces;
+};
+
+const getNonVoidZ0Surfaces = (geometry) => {
+  const z0Surfaces = [];
+  eachNonVoidItem(geometry,
+                  item => {
+                    if (item.z0Surface) {
+                      z0Surfaces.push(item);
+                    }
+                  });
+  return z0Surfaces;
 };
 
 const getPlans = (geometry) => {
@@ -1103,14 +1195,11 @@ const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
-  for (const { solid } of getSolids(keptGeometry)) {
+  for (const { solid } of getNonVoidSolids(keptGeometry)) {
     outlines.push(outlineSolid(solid, normalize));
   }
-  for (const { surface } of getSurfaces(keptGeometry)) {
-    outlines.push(outlineSurface(surface, normalize));
-  }
-  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    outlines.push(outline$1(z0Surface, normalize));
+  for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
+    outlines.push(outlineSurface(surface || z0Surface, normalize));
   }
   return outlines.map(outline => ({ paths: outline }));
 };
@@ -1295,4 +1384,4 @@ const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 1
 const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, map, measureArea, measureBoundingBox, nonNegative, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toKeptGeometry, toPoints, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, map, measureArea, measureBoundingBox, nonNegative, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toKeptGeometry, toPoints, transform, translate, union, update, visit };
