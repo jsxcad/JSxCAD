@@ -1,7 +1,7 @@
 import { CONFLICT, CREATED, OK, eq, request as githubRequest } from './githubRequest';
 
 import { toByteArray as toByteArrayFromBase64 } from 'base64-js';
-import { writeFile } from '@jsxcad/sys';
+import { write } from '@jsxcad/sys';
 
 const FILE = '100644';
 
@@ -47,7 +47,7 @@ const getState = async (owner, repository, { overwrite = false }) => {
   return { lastCommitSha, baseTree, oldTree };
 };
 
-export const readProject = async (owner, repository, prefix, { overwrite = false }) => {
+export const readWorkspace = async (owner, repository, prefix, { overwrite = false }) => {
   const { oldTree } = await getState(owner, repository, { overwrite });
   const queue = [];
   for (const { path, sha, type } of oldTree.tree) {
@@ -59,12 +59,12 @@ export const readProject = async (owner, repository, prefix, { overwrite = false
   }
   for (const { relativePath, entry } of queue) {
     const data = toByteArrayFromBase64(entry.content.replace(/\n/gm, ''));
-    await writeFile({ as: 'bytes' }, relativePath, data);
+    await write(relativePath, data, { as: 'bytes' });
   }
   return true;
 };
 
-export const writeProject = async (owner, repository, prefix, files, { overwrite = false }) => {
+export const writeWorkspace = async (owner, repository, prefix, files, { overwrite = false }) => {
   await ensureRepository(repository);
   const { lastCommitSha, baseTree, oldTree } = await getState(owner, repository, { overwrite });
   if (oldTree === undefined) return;

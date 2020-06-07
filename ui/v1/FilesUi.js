@@ -7,7 +7,7 @@ import {
   unwatchFileDeletion,
   watchFileCreation,
   watchFileDeletion,
-  writeFile
+  write
 } from '@jsxcad/sys';
 
 import Button from 'react-bootstrap/Button';
@@ -53,7 +53,7 @@ export class FilesUi extends Pane {
     const file = document.getElementById('source/add/name').value;
     if (file.length > 0) {
       // FIX: Prevent this from overwriting existing files.
-      await writeFile({}, `source/${file}`, '');
+      await write(`source/${file}`, '');
     }
   };
 
@@ -65,7 +65,7 @@ export class FilesUi extends Pane {
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
-      writeFile({}, `source/${name}`, new Uint8Array(data));
+      write(`source/${name}`, new Uint8Array(data));
     };
     reader.readAsArrayBuffer(file);
   };

@@ -27,9 +27,9 @@ let base;
 
 const getBase = () => base;
 
-const qualifyPath = (path = '', project) => {
-  if (project !== undefined) {
-    return `jsxcad/${project}/${path}`;
+const qualifyPath = (path = '', workspace) => {
+  if (workspace !== undefined) {
+    return `jsxcad/${workspace}/${path}`;
   } else if (base !== undefined) {
     return `jsxcad/${base}${path}`;
   } else {
@@ -38,7 +38,7 @@ const qualifyPath = (path = '', project) => {
 };
 
 const setupFilesystem = ({ fileBase } = {}) => {
-  // A prefix used to partition the persistent filesystem for multiple projects.
+  // A prefix used to partition the persistent filesystem for multiple workspaces.
   if (fileBase !== undefined) {
     if (fileBase.endsWith('/')) {
       base = fileBase;
@@ -3250,12 +3250,12 @@ const writeFile = async (options, path, data) => {
   //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   // }
 
-  const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
-  let originalProject = getFilesystem();
-  if (project !== originalProject) {
-    log({ op: 'text', text: `Write ${path} of ${project}` });
+  const { doSerialize = true, ephemeral, workspace = getFilesystem() } = options;
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    log({ op: 'text', text: `Write ${path} of ${workspace}` });
     // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: project });
+    setupFilesystem({ fileBase: workspace });
   }
 
   await log({ op: 'text', text: `Write ${path}` });
@@ -3284,14 +3284,14 @@ const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {
-        await self.ask({ touchFile: { path, workspace: project } });
+        await self.ask({ touchFile: { path, workspace: workspace } });
       }
     }
   }
 
-  if (project !== originalProject) {
+  if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalProject });
+    setupFilesystem({ fileBase: originalWorkspace });
   }
 
   return true;
@@ -3305,7 +3305,7 @@ const write = async (path, data, options = {}) => {
   return writeFile(options, path, data);
 };
 
-/* global Window, self */
+/* global self, window */
 
 const { promises: promises$1 } = fs;
 const { deserialize } = v8$1;
@@ -3343,7 +3343,7 @@ const decode = (data) => {
 
 const getUrlFetcher = async () => {
   if (isBrowser) {
-    return Window.fetch;
+    return window.fetch;
   }
   if (isWebWorker) {
     return self.fetch;
@@ -3428,12 +3428,12 @@ const readFile = async (options, path) => {
   // if (false && isWebWorker) {
   //  return self.ask({ readFile: { options, path } });
   // }
-  const { sources = [], project = getFilesystem(), useCache = true } = options;
-  let originalProject = getFilesystem();
-  if (project !== originalProject) {
-    log({ op: 'text', text: `Read ${path} of ${project}` });
+  const { sources = [], workspace = getFilesystem(), useCache = true } = options;
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    log({ op: 'text', text: `Read ${path} of ${workspace}` });
     // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: project });
+    setupFilesystem({ fileBase: workspace });
   } else {
     log({ op: 'text', text: `Read ${path}` });
   }
@@ -3441,9 +3441,9 @@ const readFile = async (options, path) => {
   if (file.data === undefined || useCache === false) {
     file.data = await fetchPersistent(path, true);
   }
-  if (project !== originalProject) {
+  if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalProject });
+    setupFilesystem({ fileBase: originalWorkspace });
   }
   if (file.data === undefined && allowFetch && sources.length > 0) {
     file.data = await fetchSources({}, sources);
@@ -3597,11 +3597,11 @@ const listFilesystems = async () => {
   return [...filesystems];
 };
 
-const listFiles$1 = async ({ project } = {}) => {
-  if (project === undefined) {
-    project = getFilesystem();
+const listFiles$1 = async ({ workspace } = {}) => {
+  if (workspace === undefined) {
+    workspace = getFilesystem();
   }
-  const prefix = qualifyPath('', project);
+  const prefix = qualifyPath('', workspace);
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {

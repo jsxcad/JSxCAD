@@ -1,5 +1,5 @@
-import { getFilesystem, listFiles, log, readFile } from '@jsxcad/sys';
-import { readProject, writeProject } from './github';
+import { getFilesystem, listFiles, log, read } from '@jsxcad/sys';
+import { readWorkspace, writeWorkspace } from './github';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -25,10 +25,10 @@ export class ShareGithubUi extends SettingsUi {
     const files = [];
     for (const file of await listFiles()) {
       if (file.startsWith('source/')) {
-        files.push([file, await readFile({}, file)]);
+        files.push([file, await read(file)]);
       }
     }
-    if (await writeProject(owner, repository, prefix, files, { overwrite: false })) {
+    if (await writeWorkspace(owner, repository, prefix, files, { overwrite: false })) {
       await log({ op: 'text', text: 'Successfully wrote to github repository', level: 'serious' });
     } else {
       await log({ op: 'text', text: 'Failed to write to github repository', level: 'serious' });
@@ -38,7 +38,7 @@ export class ShareGithubUi extends SettingsUi {
 
   async doImport (event, payload) {
     const { owner, repository, prefix } = this.state;
-    if (await readProject(owner, repository, prefix, { overwrite: false })) {
+    if (await readWorkspace(owner, repository, prefix, { overwrite: false })) {
       await log({ op: 'text', text: 'Successfully read from github repository', level: 'serious' });
     } else {
       await log({ op: 'text', text: 'Failed to read from github repository', level: 'serious' });

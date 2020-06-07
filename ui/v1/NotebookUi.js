@@ -6,7 +6,6 @@ import {
 } from '@jsxcad/ui-threejs';
 
 import {
-  read,
   readFile,
   unwatchFiles,
   watchFile
@@ -57,7 +56,7 @@ export class OrbitView extends React.PureComponent {
     page.style.height = '100%';
 
     if (path) {
-      geometry = await read(path);
+      geometry = await readFile({}, path);
     }
 
     await orbitDisplay({ view, geometry }, page);
@@ -124,7 +123,7 @@ export class StaticView extends React.PureComponent {
     let { path, geometry, width, height, position } = this.props;
 
     if (path) {
-      geometry = await read(path);
+      geometry = await readFile({}, path);
     }
 
     const url = await dataUrl(Shape.fromGeometry(geometry), { width, height, position });
@@ -210,12 +209,12 @@ export class NotebookUi extends Pane {
 
   constructor (props) {
     super(props);
-    this.state = {};
     this.update = this.update.bind(this);
   }
 
   async componentDidMount () {
-    const watcher = await watchFile('notebook', this.update);
+    const { file } = this.props;
+    const watcher = await watchFile(`notebook/${file}`, this.update);
     this.setState({ watcher });
     await this.update();
   }
@@ -229,9 +228,10 @@ export class NotebookUi extends Pane {
   }
 
   async update () {
+    const { file } = this.props;
     const { selected = -1 } = this.state;
 
-    const notebook = await readFile({}, 'notebook');
+    const notebook = await readFile({}, `notebook/${file}`);
     const notes = this.buildNotes({ notebook, selected });
 
     this.setState({ notebook, notes });
@@ -268,6 +268,10 @@ export class NotebookUi extends Pane {
       }
     }
     return notes;
+  }
+
+  renderToolbar () {
+    return super.renderToolbar();
   }
 
   renderPane () {

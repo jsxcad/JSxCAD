@@ -1,5 +1,4 @@
-import { readFile, log, writeFile, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, read, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
-import * as api from './jsxcad-api-v1.js';
+import { read, log, write, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, readFile, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
@@ -17631,10 +17630,10 @@ var lib_30 = lib$3.DEFAULT_CONTROLS_WITHOUT_CREATION;
 
 const sleep = duration => new Promise((resolve, reject) => setTimeout(resolve, duration));
 
-const getAccessToken = async service => readFile({
-  project: '.system',
+const getAccessToken = async service => read(`auth/${service}/accessToken`, {
+  workspace: '.system',
   useCache: false
-}, `auth/${service}/accessToken`);
+});
 const getNewAccessToken = async (service, oldToken = undefined, attempts = 10) => {
   await log({
     op: 'text',
@@ -17644,10 +17643,10 @@ const getNewAccessToken = async (service, oldToken = undefined, attempts = 10) =
   window.open(`http://167.99.163.104:3000/auth/${service}?${service}Callback=${window.location.href}`);
 
   while (--attempts > 0) {
-    const token = await readFile({
-      project: '.system',
+    const token = await read(`auth/${service}/accessToken`, {
+      workspace: '.system',
       useCache: false
-    }, `auth/${service}/accessToken`);
+    });
 
     if (token === undefined || token === oldToken) {
       await sleep(1000);
@@ -17868,7 +17867,7 @@ const getState = async (owner, repository, {
   };
 };
 
-const readProject = async (owner, repository, prefix, {
+const readWorkspace = async (owner, repository, prefix, {
   overwrite = false
 }) => {
   const {
@@ -17898,14 +17897,14 @@ const readProject = async (owner, repository, prefix, {
     entry
   } of queue) {
     const data = toByteArray_1(entry.content.replace(/\n/gm, ''));
-    await writeFile({
+    await write(relativePath, data, {
       as: 'bytes'
-    }, relativePath, data);
+    });
   }
 
   return true;
 };
-const writeProject = async (owner, repository, prefix, files, {
+const writeWorkspace = async (owner, repository, prefix, files, {
   overwrite = false
 }) => {
   await ensureRepository(repository);
@@ -45880,417 +45879,6 @@ InputGroup.Checkbox = InputGroupCheckbox;
 InputGroup.Append = InputGroupAppend;
 InputGroup.Prepend = InputGroupPrepend;
 
-var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = createChainableTypeChecker;
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-// Mostly taken from ReactPropTypes.
-
-function createChainableTypeChecker(validate) {
-  function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    var componentNameSafe = componentName || '<<anonymous>>';
-    var propFullNameSafe = propFullName || propName;
-
-    if (props[propName] == null) {
-      if (isRequired) {
-        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
-      }
-
-      return null;
-    }
-
-    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
-      args[_key - 6] = arguments[_key];
-    }
-
-    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
-  }
-
-  var chainedCheckType = checkType.bind(null, false);
-  chainedCheckType.isRequired = checkType.bind(null, true);
-
-  return chainedCheckType;
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(createChainableTypeChecker_1);
-
-var all_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = all;
-
-
-
-var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function all() {
-  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
-    validators[_key] = arguments[_key];
-  }
-
-  function allPropTypes() {
-    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    var error = null;
-
-    validators.forEach(function (validator) {
-      if (error != null) {
-        return;
-      }
-
-      var result = validator.apply(undefined, args);
-      if (result != null) {
-        error = result;
-      }
-    });
-
-    return error;
-  }
-
-  return (0, _createChainableTypeChecker2.default)(allPropTypes);
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(all_1);
-
-var NavbarContext = react.createContext(null);
-
-var CardContext = react.createContext(null);
-
-var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
-function qsa(element, selector) {
-  return toArray(element.querySelectorAll(selector));
-}
-
-/**
- * Returns a function that triggers a component update. the hook equivalent to
- * `this.forceUpdate()` in a class component. In most cases using a state value directly
- * is preferable but may be required in some advanced usages of refs for interop or
- * when direct DOM manipulation is required.
- *
- * ```ts
- * const forceUpdate = useForceUpdate();
- *
- * const updateOnClick = useCallback(() => {
- *  forceUpdate()
- * }, [forceUpdate])
- *
- * return <button type="button" onClick={updateOnClick}>Hi there</button>
- * ```
- */
-
-function useForceUpdate() {
-  // The toggling state value is designed to defeat React optimizations for skipping
-  // updates when they are stricting equal to the last state value
-  var _useReducer = react_14(function (state) {
-    return !state;
-  }, false),
-      dispatch = _useReducer[1];
-
-  return dispatch;
-}
-
-var toFnRef = function toFnRef(ref) {
-  return !ref || typeof ref === 'function' ? ref : function (value) {
-    ref.current = value;
-  };
-};
-
-function mergeRefs(refA, refB) {
-  var a = toFnRef(refA);
-  var b = toFnRef(refB);
-  return function (value) {
-    if (a) a(value);
-    if (b) b(value);
-  };
-}
-/**
- * Create and returns a single callback ref composed from two other Refs.
- *
- * ```tsx
- * const Button = React.forwardRef((props, ref) => {
- *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
- *   const mergedRef = useMergedRefs(ref, attachRef);
- *
- *   return <button ref={mergedRef} {...props}/>
- * })
- * ```
- *
- * @param refA A Callback or mutable Ref
- * @param refB A Callback or mutable Ref
- * @category refs
- */
-
-function useMergedRefs(refA, refB) {
-  return react_12(function () {
-    return mergeRefs(refA, refB);
-  }, [refA, refB]);
-}
-
-var NavContext = react.createContext(null);
-
-var SelectableContext = react.createContext();
-var makeEventKey = function makeEventKey(eventKey, href) {
-  if (eventKey != null) return String(eventKey);
-  return href || null;
-};
-
-var TabContext = react.createContext(null);
-
-var noop$2 = function noop() {};
-
-var AbstractNav = react.forwardRef(function (_ref, ref) {
-  var _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'ul' : _ref$as,
-      onSelect = _ref.onSelect,
-      activeKey = _ref.activeKey,
-      role = _ref.role,
-      onKeyDown = _ref.onKeyDown,
-      props = _objectWithoutPropertiesLoose(_ref, ["as", "onSelect", "activeKey", "role", "onKeyDown"]);
-
-  // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
-  // and don't want to reset the set in the effect
-  var forceUpdate = useForceUpdate();
-  var needsRefocusRef = react_15(false);
-  var parentOnSelect = react_13(SelectableContext);
-  var tabContext = react_13(TabContext);
-  var getControlledId, getControllerId;
-
-  if (tabContext) {
-    role = role || 'tablist';
-    activeKey = tabContext.activeKey;
-    getControlledId = tabContext.getControlledId;
-    getControllerId = tabContext.getControllerId;
-  }
-
-  var listNode = react_15(null);
-
-  var getNextActiveChild = function getNextActiveChild(offset) {
-    if (!listNode.current) return null;
-    var items = qsa(listNode.current, '[data-rb-event-key]:not(.disabled)');
-    var activeChild = listNode.current.querySelector('.active');
-    var index = items.indexOf(activeChild);
-    if (index === -1) return null;
-    var nextIndex = index + offset;
-    if (nextIndex >= items.length) nextIndex = 0;
-    if (nextIndex < 0) nextIndex = items.length - 1;
-    return items[nextIndex];
-  };
-
-  var handleSelect = function handleSelect(key, event) {
-    if (key == null) return;
-    if (onSelect) onSelect(key, event);
-    if (parentOnSelect) parentOnSelect(key, event);
-  };
-
-  var handleKeyDown = function handleKeyDown(event) {
-    if (onKeyDown) onKeyDown(event);
-    var nextActiveChild;
-
-    switch (event.key) {
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        nextActiveChild = getNextActiveChild(-1);
-        break;
-
-      case 'ArrowRight':
-      case 'ArrowDown':
-        nextActiveChild = getNextActiveChild(1);
-        break;
-
-      default:
-        return;
-    }
-
-    if (!nextActiveChild) return;
-    event.preventDefault();
-    handleSelect(nextActiveChild.dataset.rbEventKey, event);
-    needsRefocusRef.current = true;
-    forceUpdate();
-  };
-
-  react_10(function () {
-    if (listNode.current && needsRefocusRef.current) {
-      var activeChild = listNode.current.querySelector('[data-rb-event-key].active');
-      if (activeChild) activeChild.focus();
-    }
-
-    needsRefocusRef.current = false;
-  });
-  var mergedRef = useMergedRefs(ref, listNode);
-  return react.createElement(SelectableContext.Provider, {
-    value: handleSelect
-  }, react.createElement(NavContext.Provider, {
-    value: {
-      role: role,
-      // used by NavLink to determine it's role
-      activeKey: makeEventKey(activeKey),
-      getControlledId: getControlledId || noop$2,
-      getControllerId: getControllerId || noop$2
-    }
-  }, react.createElement(Component, _extends({}, props, {
-    onKeyDown: handleKeyDown,
-    ref: mergedRef,
-    role: role
-  }))));
-});
-
-var NavItem = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      children = _ref.children,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav-item');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, bsPrefix)
-  }), children);
-});
-NavItem.displayName = 'NavItem';
-
-var defaultProps$7 = {
-  disabled: false
-};
-var AbstractNavItem = react.forwardRef(function (_ref, ref) {
-  var active = _ref.active,
-      className = _ref.className,
-      tabIndex = _ref.tabIndex,
-      eventKey = _ref.eventKey,
-      onSelect = _ref.onSelect,
-      onClick = _ref.onClick,
-      Component = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, ["active", "className", "tabIndex", "eventKey", "onSelect", "onClick", "as"]);
-
-  var navKey = makeEventKey(eventKey, props.href);
-  var parentOnSelect = react_13(SelectableContext);
-  var navContext = react_13(NavContext);
-  var isActive = active;
-
-  if (navContext) {
-    if (!props.role && navContext.role === 'tablist') props.role = 'tab';
-    props['data-rb-event-key'] = navKey;
-    props.id = navContext.getControllerId(navKey);
-    props['aria-controls'] = navContext.getControlledId(navKey);
-    isActive = active == null && navKey != null ? navContext.activeKey === navKey : active;
-  }
-
-  if (props.role === 'tab') {
-    props.tabIndex = isActive ? tabIndex : -1;
-    props['aria-selected'] = isActive;
-  }
-
-  var handleOnclick = useEventCallback(function (e) {
-    if (onClick) onClick(e);
-    if (navKey == null) return;
-    if (onSelect) onSelect(navKey, e);
-    if (parentOnSelect) parentOnSelect(navKey, e);
-  });
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    onClick: handleOnclick,
-    className: classnames(className, isActive && 'active')
-  }));
-});
-AbstractNavItem.defaultProps = defaultProps$7;
-
-var defaultProps$8 = {
-  disabled: false,
-  as: SafeAnchor
-};
-var NavLink = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      disabled = _ref.disabled,
-      className = _ref.className,
-      href = _ref.href,
-      eventKey = _ref.eventKey,
-      onSelect = _ref.onSelect,
-      as = _ref.as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "disabled", "className", "href", "eventKey", "onSelect", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav-link');
-  return react.createElement(AbstractNavItem, _extends({}, props, {
-    href: href,
-    ref: ref,
-    eventKey: eventKey,
-    as: as,
-    disabled: disabled,
-    onSelect: onSelect,
-    className: classnames(className, bsPrefix, disabled && 'disabled')
-  }));
-});
-NavLink.displayName = 'NavLink';
-NavLink.defaultProps = defaultProps$8;
-
-var defaultProps$9 = {
-  justify: false,
-  fill: false
-};
-var Nav = react.forwardRef(function (uncontrolledProps, ref) {
-  var _classNames;
-
-  var _useUncontrolled = useUncontrolled(uncontrolledProps, {
-    activeKey: 'onSelect'
-  }),
-      _useUncontrolled$as = _useUncontrolled.as,
-      as = _useUncontrolled$as === void 0 ? 'div' : _useUncontrolled$as,
-      bsPrefix = _useUncontrolled.bsPrefix,
-      variant = _useUncontrolled.variant,
-      fill = _useUncontrolled.fill,
-      justify = _useUncontrolled.justify,
-      navbar = _useUncontrolled.navbar,
-      className = _useUncontrolled.className,
-      children = _useUncontrolled.children,
-      activeKey = _useUncontrolled.activeKey,
-      props = _objectWithoutPropertiesLoose(_useUncontrolled, ["as", "bsPrefix", "variant", "fill", "justify", "navbar", "className", "children", "activeKey"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav');
-  var navbarBsPrefix, cardHeaderBsPrefix;
-  var navbarContext = react_13(NavbarContext);
-  var cardContext = react_13(CardContext);
-
-  if (navbarContext) {
-    navbarBsPrefix = navbarContext.bsPrefix;
-    navbar = navbar == null ? true : navbar;
-  } else if (cardContext) {
-    cardHeaderBsPrefix = cardContext.cardHeaderBsPrefix;
-  }
-
-  return react.createElement(AbstractNav, _extends({
-    as: as,
-    ref: ref,
-    activeKey: activeKey,
-    className: classnames(className, (_classNames = {}, _classNames[bsPrefix] = !navbar, _classNames[navbarBsPrefix + "-nav"] = navbar, _classNames[cardHeaderBsPrefix + "-" + variant] = !!cardHeaderBsPrefix, _classNames[bsPrefix + "-" + variant] = !!variant, _classNames[bsPrefix + "-fill"] = fill, _classNames[bsPrefix + "-justified"] = justify, _classNames))
-  }, props), children);
-});
-Nav.displayName = 'Nav';
-Nav.defaultProps = defaultProps$9;
-Nav.Item = NavItem;
-Nav.Link = NavLink;
-
 var matchesImpl;
 function matches(node, selector) {
   if (!matchesImpl) {
@@ -46303,6 +45891,11 @@ function matches(node, selector) {
   }
 
   return matchesImpl(node, selector);
+}
+
+var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
+function qsa(element, selector) {
+  return toArray(element.querySelectorAll(selector));
 }
 
 /**
@@ -46358,6 +45951,34 @@ function usePrevious(value) {
 
 function useCallbackRef() {
   return react_16(null);
+}
+
+/**
+ * Returns a function that triggers a component update. the hook equivalent to
+ * `this.forceUpdate()` in a class component. In most cases using a state value directly
+ * is preferable but may be required in some advanced usages of refs for interop or
+ * when direct DOM manipulation is required.
+ *
+ * ```ts
+ * const forceUpdate = useForceUpdate();
+ *
+ * const updateOnClick = useCallback(() => {
+ *  forceUpdate()
+ * }, [forceUpdate])
+ *
+ * return <button type="button" onClick={updateOnClick}>Hi there</button>
+ * ```
+ */
+
+function useForceUpdate() {
+  // The toggling state value is designed to defeat React optimizations for skipping
+  // updates when they are stricting equal to the last state value
+  var _useReducer = react_14(function (state) {
+    return !state;
+  }, false),
+      dispatch = _useReducer[1];
+
+  return dispatch;
 }
 
 var DropdownContext = react.createContext({
@@ -49110,7 +48731,7 @@ function ownerDocument$1 (componentOrElement) {
 
 var escapeKeyCode = 27;
 
-var noop$3 = function noop() {};
+var noop$2 = function noop() {};
 
 function isLeftClickEvent(event) {
   return event.button === 0;
@@ -49140,7 +48761,7 @@ function useRootClose(ref, onRootClose, _temp) {
       clickTrigger = _ref$clickTrigger === void 0 ? 'click' : _ref$clickTrigger;
 
   var preventMouseRootCloseRef = react_15(false);
-  var onClose = onRootClose || noop$3;
+  var onClose = onRootClose || noop$2;
   var handleMouseCapture = react_9(function (e) {
     var currentTarget = ref && ('current' in ref ? ref.current : ref);
     warning_1(!!currentTarget, 'RootClose captured a close event but does not have a ref to compare it to. ' + 'useRootClose(), should be passed a ref that resolves to a DOM node');
@@ -49169,7 +48790,7 @@ function useRootClose(ref, onRootClose, _temp) {
 
     if ('ontouchstart' in doc.documentElement) {
       mobileSafariHackListeners = [].slice.call(doc.body.children).map(function (el) {
-        return listen(el, 'mousemove', noop$3);
+        return listen(el, 'mousemove', noop$2);
       });
     }
 
@@ -49326,7 +48947,7 @@ var propTypes$3 = {
    */
   rootCloseEvent: propTypes.string
 };
-var defaultProps$a = {
+var defaultProps$7 = {
   usePopper: true
 };
 
@@ -49340,7 +48961,7 @@ function DropdownMenu(_ref) {
 
 DropdownMenu.displayName = 'ReactOverlaysDropdownMenu';
 DropdownMenu.propTypes = propTypes$3;
-DropdownMenu.defaultProps = defaultProps$a;
+DropdownMenu.defaultProps = defaultProps$7;
 
 /**
  * Wires up Dropdown toggle functinality, returning a set a props to attach
@@ -49468,7 +49089,7 @@ var propTypes$5 = {
    */
   onToggle: propTypes.func
 };
-var defaultProps$b = {
+var defaultProps$8 = {
   itemSelector: '* > *'
 };
 /**
@@ -49631,11 +49252,19 @@ function Dropdown(_ref) {
 
 Dropdown.displayName = 'ReactOverlaysDropdown';
 Dropdown.propTypes = propTypes$5;
-Dropdown.defaultProps = defaultProps$b;
+Dropdown.defaultProps = defaultProps$8;
 Dropdown.Menu = DropdownMenu;
 Dropdown.Toggle = DropdownToggle;
 
-var defaultProps$c = {
+var SelectableContext = react.createContext();
+var makeEventKey = function makeEventKey(eventKey, href) {
+  if (eventKey != null) return String(eventKey);
+  return href || null;
+};
+
+var NavContext = react.createContext(null);
+
+var defaultProps$9 = {
   as: SafeAnchor,
   disabled: false
 };
@@ -49678,7 +49307,46 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
   }), children);
 });
 DropdownItem.displayName = 'DropdownItem';
-DropdownItem.defaultProps = defaultProps$c;
+DropdownItem.defaultProps = defaultProps$9;
+
+var toFnRef = function toFnRef(ref) {
+  return !ref || typeof ref === 'function' ? ref : function (value) {
+    ref.current = value;
+  };
+};
+
+function mergeRefs(refA, refB) {
+  var a = toFnRef(refA);
+  var b = toFnRef(refB);
+  return function (value) {
+    if (a) a(value);
+    if (b) b(value);
+  };
+}
+/**
+ * Create and returns a single callback ref composed from two other Refs.
+ *
+ * ```tsx
+ * const Button = React.forwardRef((props, ref) => {
+ *   const [element, attachRef] = useCallbackRef<HTMLButtonElement>();
+ *   const mergedRef = useMergedRefs(ref, attachRef);
+ *
+ *   return <button ref={mergedRef} {...props}/>
+ * })
+ * ```
+ *
+ * @param refA A Callback or mutable Ref
+ * @param refB A Callback or mutable Ref
+ * @category refs
+ */
+
+function useMergedRefs(refA, refB) {
+  return react_12(function () {
+    return mergeRefs(refA, refB);
+  }, [refA, refB]);
+}
+
+var NavbarContext = react.createContext(null);
 
 function useWrappedRefWithWarning(ref, componentName) {
 
@@ -49689,7 +49357,7 @@ function useWrappedRefWithWarning(ref, componentName) {
   return useMergedRefs(warningRef, ref);
 }
 
-var defaultProps$d = {
+var defaultProps$a = {
   alignRight: false,
   flip: true
 };
@@ -49747,7 +49415,7 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
   }));
 });
 DropdownMenu$1.displayName = 'DropdownMenu';
-DropdownMenu$1.defaultProps = defaultProps$d;
+DropdownMenu$1.defaultProps = defaultProps$a;
 
 var isRequiredForA11y_1 = createCommonjsModule(function (module, exports) {
 
@@ -49806,7 +49474,7 @@ var DropdownToggle$1 = react.forwardRef(function (_ref, ref) {
 });
 DropdownToggle$1.displayName = 'DropdownToggle';
 
-var defaultProps$e = {
+var defaultProps$b = {
   navbar: false
 };
 var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
@@ -49861,7 +49529,7 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
   }));
 });
 Dropdown$1.displayName = 'Dropdown';
-Dropdown$1.defaultProps = defaultProps$e;
+Dropdown$1.defaultProps = defaultProps$b;
 Dropdown$1.Toggle = DropdownToggle$1;
 Dropdown$1.Menu = DropdownMenu$1;
 Dropdown$1.Item = DropdownItem;
@@ -49875,6 +49543,568 @@ Dropdown$1.Divider = createWithBsPrefix('dropdown-divider', {
     role: 'separator'
   }
 });
+
+var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createChainableTypeChecker;
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+// Mostly taken from ReactPropTypes.
+
+function createChainableTypeChecker(validate) {
+  function checkType(isRequired, props, propName, componentName, location, propFullName) {
+    var componentNameSafe = componentName || '<<anonymous>>';
+    var propFullNameSafe = propFullName || propName;
+
+    if (props[propName] == null) {
+      if (isRequired) {
+        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
+      }
+
+      return null;
+    }
+
+    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
+      args[_key - 6] = arguments[_key];
+    }
+
+    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
+  }
+
+  var chainedCheckType = checkType.bind(null, false);
+  chainedCheckType.isRequired = checkType.bind(null, true);
+
+  return chainedCheckType;
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(createChainableTypeChecker_1);
+
+var all_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = all;
+
+
+
+var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function all() {
+  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
+    validators[_key] = arguments[_key];
+  }
+
+  function allPropTypes() {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    var error = null;
+
+    validators.forEach(function (validator) {
+      if (error != null) {
+        return;
+      }
+
+      var result = validator.apply(undefined, args);
+      if (result != null) {
+        error = result;
+      }
+    });
+
+    return error;
+  }
+
+  return (0, _createChainableTypeChecker2.default)(allPropTypes);
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(all_1);
+
+var defaultProps$c = {
+  type: 'checkbox'
+};
+var FormCheckInput = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      isStatic = _ref.isStatic,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-input') : useBootstrapPrefix(bsPrefix, 'form-check-input');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    id: id || controlId,
+    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
+  }));
+});
+FormCheckInput.displayName = 'FormCheckInput';
+FormCheckInput.defaultProps = defaultProps$c;
+
+var FormCheckLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-label') : useBootstrapPrefix(bsPrefix, 'form-check-label');
+  return react.createElement("label", _extends({}, props, {
+    ref: ref,
+    htmlFor: htmlFor || controlId,
+    className: classnames(className, bsPrefix)
+  }));
+});
+FormCheckLabel.displayName = 'FormCheckLabel';
+
+var defaultProps$d = {
+  type: 'checkbox',
+  inline: false,
+  disabled: false,
+  isValid: false,
+  isInvalid: false,
+  title: ''
+};
+var FormCheck = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      inline = _ref.inline,
+      disabled = _ref.disabled,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      feedback = _ref.feedback,
+      className = _ref.className,
+      style = _ref.style,
+      title = _ref.title,
+      type = _ref.type,
+      label = _ref.label,
+      children = _ref.children,
+      propCustom = _ref.custom,
+      _ref$as = _ref.as,
+      as = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
+
+  var custom = type === 'switch' ? true : propCustom;
+  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  var innerFormContext = react_12(function () {
+    return {
+      controlId: id || controlId,
+      custom: custom
+    };
+  }, [controlId, custom, id]);
+  var hasLabel = label != null && label !== false && !children;
+  var input = react.createElement(FormCheckInput, _extends({}, props, {
+    type: type === 'switch' ? 'checkbox' : type,
+    ref: ref,
+    isValid: isValid,
+    isInvalid: isInvalid,
+    isStatic: !hasLabel,
+    disabled: disabled,
+    as: as
+  }));
+  return react.createElement(FormContext.Provider, {
+    value: innerFormContext
+  }, react.createElement("div", {
+    style: style,
+    className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
+  }, children || react.createElement(react.Fragment, null, input, hasLabel && react.createElement(FormCheckLabel, {
+    title: title
+  }, label), (isValid || isInvalid) && react.createElement(Feedback, {
+    type: isValid ? 'valid' : 'invalid'
+  }, feedback))));
+});
+FormCheck.displayName = 'FormCheck';
+FormCheck.defaultProps = defaultProps$d;
+FormCheck.Input = FormCheckInput;
+FormCheck.Label = FormCheckLabel;
+
+var FormGroup = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      children = _ref.children,
+      controlId = _ref.controlId,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
+  var context = react_12(function () {
+    return {
+      controlId: controlId
+    };
+  }, [controlId]);
+  return react.createElement(FormContext.Provider, {
+    value: context
+  }, react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix)
+  }), children));
+});
+FormGroup.displayName = 'FormGroup';
+
+var defaultProps$e = {
+  column: false,
+  srOnly: false
+};
+var FormLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      column = _ref.column,
+      srOnly = _ref.srOnly,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
+  var columnClass = 'col-form-label';
+  if (typeof column === 'string') columnClass = columnClass + "-" + column;
+  var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
+   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
+  htmlFor = htmlFor || controlId;
+  if (column) return react.createElement(Col, _extends({
+    as: "label",
+    className: classes,
+    htmlFor: htmlFor
+  }, props));
+  return (// eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
+    react.createElement("label", _extends({
+      ref: ref,
+      className: classes,
+      htmlFor: htmlFor
+    }, props))
+  );
+});
+FormLabel.displayName = 'FormLabel';
+FormLabel.defaultProps = defaultProps$e;
+
+var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'small' : _ref$as,
+      muted = _ref.muted,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix, muted && 'text-muted')
+  }));
+});
+FormText.displayName = 'FormText';
+
+var Switch = react.forwardRef(function (props, ref) {
+  return react.createElement(FormCheck, _extends({}, props, {
+    ref: ref,
+    type: "switch"
+  }));
+});
+Switch.displayName = 'Switch';
+Switch.Input = FormCheck.Input;
+Switch.Label = FormCheck.Label;
+
+var defaultProps$f = {
+  inline: false
+};
+var Form = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      inline = _ref.inline,
+      className = _ref.className,
+      validated = _ref.validated,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'form' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
+  }));
+});
+Form.displayName = 'Form';
+Form.defaultProps = defaultProps$f;
+Form.Row = createWithBsPrefix('form-row');
+Form.Group = FormGroup;
+Form.Control = FormControl;
+Form.Check = FormCheck;
+Form.Switch = Switch;
+Form.Label = FormLabel;
+Form.Text = FormText;
+
+var CardContext = react.createContext(null);
+
+var TabContext = react.createContext(null);
+
+var noop$3 = function noop() {};
+
+var AbstractNav = react.forwardRef(function (_ref, ref) {
+  var _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'ul' : _ref$as,
+      onSelect = _ref.onSelect,
+      activeKey = _ref.activeKey,
+      role = _ref.role,
+      onKeyDown = _ref.onKeyDown,
+      props = _objectWithoutPropertiesLoose(_ref, ["as", "onSelect", "activeKey", "role", "onKeyDown"]);
+
+  // A ref and forceUpdate for refocus, b/c we only want to trigger when needed
+  // and don't want to reset the set in the effect
+  var forceUpdate = useForceUpdate();
+  var needsRefocusRef = react_15(false);
+  var parentOnSelect = react_13(SelectableContext);
+  var tabContext = react_13(TabContext);
+  var getControlledId, getControllerId;
+
+  if (tabContext) {
+    role = role || 'tablist';
+    activeKey = tabContext.activeKey;
+    getControlledId = tabContext.getControlledId;
+    getControllerId = tabContext.getControllerId;
+  }
+
+  var listNode = react_15(null);
+
+  var getNextActiveChild = function getNextActiveChild(offset) {
+    if (!listNode.current) return null;
+    var items = qsa(listNode.current, '[data-rb-event-key]:not(.disabled)');
+    var activeChild = listNode.current.querySelector('.active');
+    var index = items.indexOf(activeChild);
+    if (index === -1) return null;
+    var nextIndex = index + offset;
+    if (nextIndex >= items.length) nextIndex = 0;
+    if (nextIndex < 0) nextIndex = items.length - 1;
+    return items[nextIndex];
+  };
+
+  var handleSelect = function handleSelect(key, event) {
+    if (key == null) return;
+    if (onSelect) onSelect(key, event);
+    if (parentOnSelect) parentOnSelect(key, event);
+  };
+
+  var handleKeyDown = function handleKeyDown(event) {
+    if (onKeyDown) onKeyDown(event);
+    var nextActiveChild;
+
+    switch (event.key) {
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextActiveChild = getNextActiveChild(-1);
+        break;
+
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextActiveChild = getNextActiveChild(1);
+        break;
+
+      default:
+        return;
+    }
+
+    if (!nextActiveChild) return;
+    event.preventDefault();
+    handleSelect(nextActiveChild.dataset.rbEventKey, event);
+    needsRefocusRef.current = true;
+    forceUpdate();
+  };
+
+  react_10(function () {
+    if (listNode.current && needsRefocusRef.current) {
+      var activeChild = listNode.current.querySelector('[data-rb-event-key].active');
+      if (activeChild) activeChild.focus();
+    }
+
+    needsRefocusRef.current = false;
+  });
+  var mergedRef = useMergedRefs(ref, listNode);
+  return react.createElement(SelectableContext.Provider, {
+    value: handleSelect
+  }, react.createElement(NavContext.Provider, {
+    value: {
+      role: role,
+      // used by NavLink to determine it's role
+      activeKey: makeEventKey(activeKey),
+      getControlledId: getControlledId || noop$3,
+      getControllerId: getControllerId || noop$3
+    }
+  }, react.createElement(Component, _extends({}, props, {
+    onKeyDown: handleKeyDown,
+    ref: mergedRef,
+    role: role
+  }))));
+});
+
+var NavItem = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
+function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      children = _ref.children,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav-item');
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    className: classnames(className, bsPrefix)
+  }), children);
+});
+NavItem.displayName = 'NavItem';
+
+var defaultProps$g = {
+  disabled: false
+};
+var AbstractNavItem = react.forwardRef(function (_ref, ref) {
+  var active = _ref.active,
+      className = _ref.className,
+      tabIndex = _ref.tabIndex,
+      eventKey = _ref.eventKey,
+      onSelect = _ref.onSelect,
+      onClick = _ref.onClick,
+      Component = _ref.as,
+      props = _objectWithoutPropertiesLoose(_ref, ["active", "className", "tabIndex", "eventKey", "onSelect", "onClick", "as"]);
+
+  var navKey = makeEventKey(eventKey, props.href);
+  var parentOnSelect = react_13(SelectableContext);
+  var navContext = react_13(NavContext);
+  var isActive = active;
+
+  if (navContext) {
+    if (!props.role && navContext.role === 'tablist') props.role = 'tab';
+    props['data-rb-event-key'] = navKey;
+    props.id = navContext.getControllerId(navKey);
+    props['aria-controls'] = navContext.getControlledId(navKey);
+    isActive = active == null && navKey != null ? navContext.activeKey === navKey : active;
+  }
+
+  if (props.role === 'tab') {
+    props.tabIndex = isActive ? tabIndex : -1;
+    props['aria-selected'] = isActive;
+  }
+
+  var handleOnclick = useEventCallback(function (e) {
+    if (onClick) onClick(e);
+    if (navKey == null) return;
+    if (onSelect) onSelect(navKey, e);
+    if (parentOnSelect) parentOnSelect(navKey, e);
+  });
+  return react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    onClick: handleOnclick,
+    className: classnames(className, isActive && 'active')
+  }));
+});
+AbstractNavItem.defaultProps = defaultProps$g;
+
+var defaultProps$h = {
+  disabled: false,
+  as: SafeAnchor
+};
+var NavLink = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      disabled = _ref.disabled,
+      className = _ref.className,
+      href = _ref.href,
+      eventKey = _ref.eventKey,
+      onSelect = _ref.onSelect,
+      as = _ref.as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "disabled", "className", "href", "eventKey", "onSelect", "as"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav-link');
+  return react.createElement(AbstractNavItem, _extends({}, props, {
+    href: href,
+    ref: ref,
+    eventKey: eventKey,
+    as: as,
+    disabled: disabled,
+    onSelect: onSelect,
+    className: classnames(className, bsPrefix, disabled && 'disabled')
+  }));
+});
+NavLink.displayName = 'NavLink';
+NavLink.defaultProps = defaultProps$h;
+
+var defaultProps$i = {
+  justify: false,
+  fill: false
+};
+var Nav = react.forwardRef(function (uncontrolledProps, ref) {
+  var _classNames;
+
+  var _useUncontrolled = useUncontrolled(uncontrolledProps, {
+    activeKey: 'onSelect'
+  }),
+      _useUncontrolled$as = _useUncontrolled.as,
+      as = _useUncontrolled$as === void 0 ? 'div' : _useUncontrolled$as,
+      bsPrefix = _useUncontrolled.bsPrefix,
+      variant = _useUncontrolled.variant,
+      fill = _useUncontrolled.fill,
+      justify = _useUncontrolled.justify,
+      navbar = _useUncontrolled.navbar,
+      className = _useUncontrolled.className,
+      children = _useUncontrolled.children,
+      activeKey = _useUncontrolled.activeKey,
+      props = _objectWithoutPropertiesLoose(_useUncontrolled, ["as", "bsPrefix", "variant", "fill", "justify", "navbar", "className", "children", "activeKey"]);
+
+  bsPrefix = useBootstrapPrefix(bsPrefix, 'nav');
+  var navbarBsPrefix, cardHeaderBsPrefix;
+  var navbarContext = react_13(NavbarContext);
+  var cardContext = react_13(CardContext);
+
+  if (navbarContext) {
+    navbarBsPrefix = navbarContext.bsPrefix;
+    navbar = navbar == null ? true : navbar;
+  } else if (cardContext) {
+    cardHeaderBsPrefix = cardContext.cardHeaderBsPrefix;
+  }
+
+  return react.createElement(AbstractNav, _extends({
+    as: as,
+    ref: ref,
+    activeKey: activeKey,
+    className: classnames(className, (_classNames = {}, _classNames[bsPrefix] = !navbar, _classNames[navbarBsPrefix + "-nav"] = navbar, _classNames[cardHeaderBsPrefix + "-" + variant] = !!cardHeaderBsPrefix, _classNames[bsPrefix + "-" + variant] = !!variant, _classNames[bsPrefix + "-fill"] = fill, _classNames[bsPrefix + "-justified"] = justify, _classNames))
+  }, props), children);
+});
+Nav.displayName = 'Nav';
+Nav.defaultProps = defaultProps$i;
+Nav.Item = NavItem;
+Nav.Link = NavLink;
 
 var propTypes$6 = {
   /**
@@ -49971,7 +50201,7 @@ function getDimensionValue(dimension, elem) {
 }
 
 var collapseStyles = (_collapseStyles = {}, _collapseStyles[EXITED] = 'collapse', _collapseStyles[EXITING] = 'collapsing', _collapseStyles[ENTERING] = 'collapsing', _collapseStyles[ENTERED] = 'collapse show', _collapseStyles);
-var defaultProps$f = {
+var defaultProps$j = {
   in: false,
   timeout: 300,
   mountOnEnter: false,
@@ -50076,7 +50306,7 @@ function (_React$Component) {
   return Collapse;
 }(react.Component);
 
-Collapse.defaultProps = defaultProps$f;
+Collapse.defaultProps = defaultProps$j;
 
 var NavbarCollapse = react.forwardRef(function (_ref, ref) {
   var children = _ref.children,
@@ -50095,7 +50325,7 @@ var NavbarCollapse = react.forwardRef(function (_ref, ref) {
 });
 NavbarCollapse.displayName = 'NavbarCollapse';
 
-var defaultProps$g = {
+var defaultProps$k = {
   label: 'Toggle navigation'
 };
 var NavbarToggle = react.forwardRef(function (_ref, ref) {
@@ -50133,9 +50363,9 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
   }));
 });
 NavbarToggle.displayName = 'NavbarToggle';
-NavbarToggle.defaultProps = defaultProps$g;
+NavbarToggle.defaultProps = defaultProps$k;
 
-var defaultProps$h = {
+var defaultProps$l = {
   expand: true,
   variant: 'light',
   collapseOnSelect: false
@@ -50196,7 +50426,7 @@ var Navbar = react.forwardRef(function (props, ref) {
     className: classnames(className, bsPrefix, expand && expandClass, variant && bsPrefix + "-" + variant, bg && "bg-" + bg, sticky && "sticky-" + sticky, fixed && "fixed-" + fixed)
   }), children)));
 });
-Navbar.defaultProps = defaultProps$h;
+Navbar.defaultProps = defaultProps$l;
 Navbar.displayName = 'Navbar';
 Navbar.Brand = NavbarBrand;
 Navbar.Toggle = NavbarToggle;
@@ -50224,21 +50454,37 @@ class Pane extends react.PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      fileTitle: props.fileTitle
+    };
   }
 
   renderToolbar(extra = []) {
     const {
       id,
-      file,
       fileChoices = [],
-      fileTitle = '',
       onSelectView,
       onSelectFile,
       view,
       viewChoices,
       viewTitle
     } = this.props;
+    const {
+      fileTitle = ''
+    } = this.state;
+
+    const openFileTitle = e => {
+      if (e.key === 'Enter') {
+        let src = fileTitle; // FIX: Put this somewhere sensible.
+
+        if (src.startsWith('https://github.com/')) {
+          src = `https://raw.githubusercontent.com/${src.substr(19)}`;
+        }
+
+        onSelectFile(id, `source/${fileTitle}`, [src]);
+      }
+    };
+
     return react.createElement("div", {
       style: {
         width: '100%'
@@ -50270,15 +50516,25 @@ class Pane extends react.PureComponent {
       style: {
         color: 'black'
       }
-    }, viewTitle)), fileChoices.length > 0 ? react.createElement(NavDropdown, {
-      title: file === undefined ? 'Select' : fileTitle
-    }, fileChoices.map(({
+    }, viewTitle)), react.createElement(Dropdown$1, {
+      as: ButtonGroup
+    }, react.createElement(Form.Control, {
+      value: fileTitle,
+      onKeyPress: openFileTitle,
+      onChange: e => this.setState({
+        fileTitle: e.target.value
+      })
+    }), react.createElement(Dropdown$1.Toggle, {
+      split: true,
+      variant: "outline-primary",
+      id: "file-selector"
+    }), react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
       file,
       fileTitle
-    }, index) => react.createElement(NavDropdown.Item, {
+    }, index) => react.createElement(Dropdown$1.Item, {
       key: index,
       onClick: () => onSelectFile(id, file)
-    }, fileTitle))) : file === undefined ? fileTitle : react.createElement(Nav.Item, null, react.createElement(Nav.Link, null, fileTitle)), extra), react.createElement(Nav, {
+    }, fileTitle)))), extra), react.createElement(Nav, {
       key: "tools"
     }, react.createElement(lib_5.Consumer, {
       key: `${id}/toolbar`
@@ -50300,14 +50556,14 @@ class Pane extends react.PureComponent {
   }
 
   render() {
-    const project = getFilesystem();
+    const workspace = getFilesystem();
     const {
       createNode,
       id,
       path
     } = this.props;
     return react.createElement(lib_21, {
-      key: `window/${project}/${id}`,
+      key: `window/${workspace}/${id}`,
       createNode: createNode,
       renderToolbar: () => this.renderToolbar(),
       path: path
@@ -50316,7 +50572,7 @@ class Pane extends react.PureComponent {
 
 }
 
-var defaultProps$i = {
+var defaultProps$m = {
   noGutters: false
 };
 var Row = react.forwardRef(function (props, ref) {
@@ -50335,7 +50591,7 @@ var Row = react.forwardRef(function (props, ref) {
   }));
 });
 Row.displayName = 'Row';
-Row.defaultProps = defaultProps$i;
+Row.defaultProps = defaultProps$m;
 
 /* global FileReader */
 class FilesUi extends Pane {
@@ -50382,7 +50638,7 @@ class FilesUi extends Pane {
 
     if (file.length > 0) {
       // FIX: Prevent this from overwriting existing files.
-      await writeFile({}, `source/${file}`, '');
+      await write(`source/${file}`, '');
     }
   }
 
@@ -50396,7 +50652,7 @@ class FilesUi extends Pane {
 
     reader.onload = e => {
       const data = e.target.result;
-      writeFile({}, `source/${name}`, new Uint8Array(data));
+      write(`source/${name}`, new Uint8Array(data));
     };
 
     reader.readAsArrayBuffer(file);
@@ -50468,166 +50724,6 @@ class FilesUi extends Pane {
   }
 
 }
-
-// FIX: Consider using a proper grammar.
-const toSignature = string => {
-  // "Shape -> Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape"
-  const [, prefix, body, suffix] = string.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
-  const [, inputType, inputOp] = prefix.match(/([^ ]*) -> ([^ ]*)/) || [];
-  const operation = inputOp || prefix;
-  const [, restArgs, options, rest] = body.match(/([^{]*)[{]([^}]*)[}][, ]*(.*)/) || [];
-  const args = restArgs === undefined ? body : restArgs;
-  const [,, outputType] = suffix.match(/([^ ]*) -> ([^ ]*)/) || [];
-  let restSpec;
-  const argSpecs = [];
-
-  for (const arg of args.split(',')) {
-    const [, initializedDeclaration, value] = arg.match(/ *([^=]*) *= *([^ ]*)/) || [];
-    const declaration = initializedDeclaration || arg;
-    const [, typedDeclaration, type] = declaration.match(/ *([^:]*):([^ ]*)/) || [];
-    const name = typedDeclaration || declaration;
-
-    if (name.match(/^ *$/) === null) {
-      const argSpec = {};
-      if (type) argSpec.type = type;
-      if (value) argSpec.value = value;
-
-      if (name) {
-        if (name.startsWith('...')) {
-          argSpec.name = name.substring(3);
-          restSpec = argSpec;
-        } else {
-          argSpec.name = name;
-          argSpecs.push(argSpec);
-        }
-      }
-    }
-  }
-
-  const optionSpecs = [];
-
-  if (options !== undefined) {
-    for (const option of options.split(',')) {
-      const [, initializedDeclaration, value] = option.match(/ *([^=]*) *= *([^ ]*)/) || [];
-      const declaration = initializedDeclaration || option;
-      const [, typedDeclaration, type] = declaration.match(/ *([^:]*):([^ ]*)/) || [];
-      const name = typedDeclaration || declaration;
-
-      if (name.match(/^ *$/) === null) {
-        const optionSpec = {};
-        if (name) optionSpec.name = name;
-        if (type) optionSpec.type = type;
-        if (value) optionSpec.value = value;
-        optionSpecs.push(optionSpec);
-      }
-    }
-  }
-
-  if (rest) {
-    const [, name, type] = rest.match(/ *([^:]*):([^ ]*)/) || [];
-
-    if (name.match(/^ *$/) === null && name.startsWith('...')) {
-      restSpec = {
-        name: name.substring(3),
-        type
-      };
-    }
-  } // Decode the operation
-
-
-  let operationSpec;
-  {
-    const [, namespace, name] = operation.match(/([^.]*)(.*)/) || [];
-
-    if (namespace && name) {
-      operationSpec = {
-        namespace,
-        name: name.substring(1)
-      };
-    } else if (!namespace && name.startsWith('.')) {
-      operationSpec = {
-        name: name.substring(1),
-        isMethod: true
-      };
-    } else if (namespace) {
-      operationSpec = {
-        name: namespace
-      };
-    }
-  }
-  const spec = {};
-  if (inputType) spec.inputType = inputType;
-  if (operationSpec) spec.operation = operationSpec;
-  if (argSpecs && argSpecs.length > 0) spec.args = argSpecs;
-  if (optionSpecs && optionSpecs.length > 0) spec.options = optionSpecs;
-  if (restSpec) spec.rest = restSpec;
-  if (outputType) spec.outputType = outputType;
-  spec.string = string;
-  return spec;
-};
-
-const startsWithUpperCase = string => {
-  const first = string[0];
-
-  if (first === undefined) {
-    // ""
-    return false;
-  }
-
-  if (first === first.toLowerCase()) {
-    // 'i', '5'
-    return false;
-  }
-
-  if (first !== first.toUpperCase()) {
-    return false;
-  }
-
-  return true;
-};
-
-const toSnippet = ({
-  inputType,
-  operation,
-  args,
-  options,
-  rest,
-  outputType,
-  string
-}) => {
-  const {
-    name,
-    namespace
-  } = operation;
-  const snippet = {};
-
-  if (inputType) {
-    snippet.meta = `${inputType} method`;
-    snippet.isMethod = true;
-    snippet.name = `.${name}`;
-    snippet.trigger = `${name}`;
-    snippet.content = `${name}(${'$'}${1})`;
-  } else if (namespace) {
-    snippet.meta = `${namespace} constructor`;
-    snippet.name = `${namespace}.${name}`;
-    snippet.trigger = `${namespace}.${name}`;
-    snippet.content = `${namespace}.${name}(${'$'}{1})`;
-  } else if (startsWithUpperCase(name)) {
-    snippet.meta = `constructor`;
-    snippet.name = name;
-    snippet.trigger = name;
-    snippet.content = `${name}(${'$'}{1})`;
-  } else {
-    snippet.meta = `function`;
-    snippet.name = name;
-    snippet.trigger = name;
-    snippet.content = `${name}(${'$'}{1})`;
-  }
-
-  snippet.type = 'snippet';
-  snippet.docHTML = string;
-  return snippet;
-};
 
 var lodash_isequal = createCommonjsModule(function (module, exports) {
 /**
@@ -82474,6 +82570,7 @@ if (Prism.languages.markup) {
 
 Prism.languages.js = Prism.languages.javascript;
 
+// import * as api from './jsxcad-api-v1.js';
 const snippetCompleter = {
   getCompletions: function (editor, session, position, prefix, callback) {
     const {
@@ -82525,45 +82622,39 @@ const snippetCompleter = {
     callback(null, completions);
   }
 };
-
-const getSignatures = api => {
+/*
+const getSignatures = (api) => {
   const signatures = [];
-
   for (const name of Object.keys(api)) {
     const value = api[name];
     const string = value.signature;
-
     if (string !== undefined) {
       signatures.push(toSignature(string));
     }
-
     for (const name of Object.keys(value)) {
       const property = value[name];
       const string = property.signature;
-
       if (string !== undefined) {
         signatures.push(toSignature(string));
       }
     }
-
     if (value.prototype !== undefined) {
       for (const name of Object.keys(value.prototype)) {
         const property = value.prototype[name];
         const string = property.signature;
-
         if (string !== undefined) {
           signatures.push(toSignature(string));
         }
       }
     }
   }
-
   return signatures;
 };
+*/
+// const snippets = getSignatures(api).map(toSnippet);
 
-const snippets = getSignatures(api).map(toSnippet);
-aceEditorCompleter.setCompleters([snippetCompleter]);
-aceEditorSnippetManager.register(snippets, 'JSxCAD');
+aceEditorCompleter.setCompleters([snippetCompleter]); // aceEditorSnippetManager.register(snippets, 'JSxCAD');
+
 class JsEditorUi extends Pane {
   static get propTypes() {
     return {
@@ -82619,7 +82710,7 @@ class JsEditorUi extends Pane {
       text: 'Running',
       level: 'serious'
     });
-    let script = await readFile({}, file);
+    let script = await read(file);
 
     if (script.buffer) {
       script = new TextDecoder('utf8').decode(script);
@@ -82627,7 +82718,8 @@ class JsEditorUi extends Pane {
 
     await ask({
       evaluate: script,
-      workspace
+      workspace,
+      path: file
     });
   }
 
@@ -82638,7 +82730,7 @@ class JsEditorUi extends Pane {
     const {
       code = ''
     } = this.state;
-    await writeFile({}, file, code);
+    await write(file, code);
     await log({
       op: 'text',
       text: 'Saved',
@@ -82652,7 +82744,7 @@ class JsEditorUi extends Pane {
     } = this.props;
 
     if (file !== undefined) {
-      let code = await readFile({}, file);
+      let code = await read(file);
 
       if (code.buffer) {
         code = new TextDecoder('utf8').decode(code);
@@ -82751,6 +82843,7 @@ class JsEditorUi extends Pane {
       id
     } = this.props;
     const {
+      modal,
       code = ''
     } = this.state;
     return react.createElement(Container, {
@@ -82772,7 +82865,7 @@ class JsEditorUi extends Pane {
         overflow: 'auto'
       },
       onKeyDown: this.onKeyDown
-    }, react.createElement(AceEditor, {
+    }, modal, react.createElement(AceEditor, {
       commands: [this.runShortcut(), this.saveShortcut()],
       editorProps: {
         $blockScrolling: true
@@ -83784,7 +83877,7 @@ ModalDialog.displayName = 'ModalDialog';
 
 var Footer = createWithBsPrefix('modal-footer');
 
-var defaultProps$j = {
+var defaultProps$n = {
   closeLabel: 'Close',
   closeButton: false
 };
@@ -83813,7 +83906,7 @@ var ModalHeader = react.forwardRef(function (_ref, ref) {
   }));
 });
 ModalHeader.displayName = 'ModalHeader';
-ModalHeader.defaultProps = defaultProps$j;
+ModalHeader.defaultProps = defaultProps$n;
 
 var DivStyledAsH4$1 = divWithClassName('h4');
 var Title = createWithBsPrefix('modal-title', {
@@ -83821,7 +83914,7 @@ var Title = createWithBsPrefix('modal-title', {
 });
 
 var manager$1;
-var defaultProps$k = {
+var defaultProps$o = {
   show: false,
   backdrop: true,
   keyboard: true,
@@ -84055,7 +84148,7 @@ function (_React$Component) {
   return Modal;
 }(react.Component);
 
-Modal$1.defaultProps = defaultProps$k;
+Modal$1.defaultProps = defaultProps$o;
 var DecoratedModal = createBootstrapComponent(Modal$1, 'modal');
 DecoratedModal.Body = Body;
 DecoratedModal.Header = ModalHeader;
@@ -86359,7 +86452,7 @@ class OrbitView extends react.PureComponent {
     page.style.height = '100%';
 
     if (path) {
-      geometry = await read(path);
+      geometry = await readFile({}, path);
     }
 
     await orbitDisplay({
@@ -86460,7 +86553,7 @@ class StaticView extends react.PureComponent {
     } = this.props;
 
     if (path) {
-      geometry = await read(path);
+      geometry = await readFile({}, path);
     }
 
     const url = await dataUrl(Shape.fromGeometry(geometry), {
@@ -86603,12 +86696,14 @@ class NotebookUi extends Pane {
 
   constructor(props) {
     super(props);
-    this.state = {};
     this.update = this.update.bind(this);
   }
 
   async componentDidMount() {
-    const watcher = await watchFile('notebook', this.update);
+    const {
+      file
+    } = this.props;
+    const watcher = await watchFile(`notebook/${file}`, this.update);
     this.setState({
       watcher
     });
@@ -86627,9 +86722,12 @@ class NotebookUi extends Pane {
 
   async update() {
     const {
+      file
+    } = this.props;
+    const {
       selected = -1
     } = this.state;
-    const notebook = await readFile({}, 'notebook');
+    const notebook = await readFile({}, `notebook/${file}`);
     const notes = this.buildNotes({
       notebook,
       selected
@@ -86713,6 +86811,10 @@ class NotebookUi extends Pane {
     return notes;
   }
 
+  renderToolbar() {
+    return super.renderToolbar();
+  }
+
   renderPane() {
     const {
       id
@@ -86761,355 +86863,6 @@ class NotebookUi extends Pane {
 }
 
 class NothingUi extends Pane {}
-
-var defaultProps$l = {
-  type: 'checkbox'
-};
-var FormCheckInput = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      isStatic = _ref.isStatic,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "isStatic", "as"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-input') : useBootstrapPrefix(bsPrefix, 'form-check-input');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    id: id || controlId,
-    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
-  }));
-});
-FormCheckInput.displayName = 'FormCheckInput';
-FormCheckInput.defaultProps = defaultProps$l;
-
-var FormCheckLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId,
-      custom = _useContext.custom;
-
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-label') : useBootstrapPrefix(bsPrefix, 'form-check-label');
-  return react.createElement("label", _extends({}, props, {
-    ref: ref,
-    htmlFor: htmlFor || controlId,
-    className: classnames(className, bsPrefix)
-  }));
-});
-FormCheckLabel.displayName = 'FormCheckLabel';
-
-var defaultProps$m = {
-  type: 'checkbox',
-  inline: false,
-  disabled: false,
-  isValid: false,
-  isInvalid: false,
-  title: ''
-};
-var FormCheck = react.forwardRef(function (_ref, ref) {
-  var id = _ref.id,
-      bsPrefix = _ref.bsPrefix,
-      bsCustomPrefix = _ref.bsCustomPrefix,
-      inline = _ref.inline,
-      disabled = _ref.disabled,
-      isValid = _ref.isValid,
-      isInvalid = _ref.isInvalid,
-      feedback = _ref.feedback,
-      className = _ref.className,
-      style = _ref.style,
-      title = _ref.title,
-      type = _ref.type,
-      label = _ref.label,
-      children = _ref.children,
-      propCustom = _ref.custom,
-      _ref$as = _ref.as,
-      as = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
-
-  var custom = type === 'switch' ? true : propCustom;
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId;
-
-  var innerFormContext = react_12(function () {
-    return {
-      controlId: id || controlId,
-      custom: custom
-    };
-  }, [controlId, custom, id]);
-  var hasLabel = label != null && label !== false && !children;
-  var input = react.createElement(FormCheckInput, _extends({}, props, {
-    type: type === 'switch' ? 'checkbox' : type,
-    ref: ref,
-    isValid: isValid,
-    isInvalid: isInvalid,
-    isStatic: !hasLabel,
-    disabled: disabled,
-    as: as
-  }));
-  return react.createElement(FormContext.Provider, {
-    value: innerFormContext
-  }, react.createElement("div", {
-    style: style,
-    className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
-  }, children || react.createElement(react.Fragment, null, input, hasLabel && react.createElement(FormCheckLabel, {
-    title: title
-  }, label), (isValid || isInvalid) && react.createElement(Feedback, {
-    type: isValid ? 'valid' : 'invalid'
-  }, feedback))));
-});
-FormCheck.displayName = 'FormCheck';
-FormCheck.defaultProps = defaultProps$m;
-FormCheck.Input = FormCheckInput;
-FormCheck.Label = FormCheckLabel;
-
-var FormGroup = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      children = _ref.children,
-      controlId = _ref.controlId,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "controlId", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-group');
-  var context = react_12(function () {
-    return {
-      controlId: controlId
-    };
-  }, [controlId]);
-  return react.createElement(FormContext.Provider, {
-    value: context
-  }, react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, bsPrefix)
-  }), children));
-});
-FormGroup.displayName = 'FormGroup';
-
-var defaultProps$n = {
-  column: false,
-  srOnly: false
-};
-var FormLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      column = _ref.column,
-      srOnly = _ref.srOnly,
-      className = _ref.className,
-      htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
-
-  var _useContext = react_13(FormContext),
-      controlId = _useContext.controlId;
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-label');
-  var columnClass = 'col-form-label';
-  if (typeof column === 'string') columnClass = columnClass + "-" + column;
-  var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
-   warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
-  htmlFor = htmlFor || controlId;
-  if (column) return react.createElement(Col, _extends({
-    as: "label",
-    className: classes,
-    htmlFor: htmlFor
-  }, props));
-  return (// eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    react.createElement("label", _extends({
-      ref: ref,
-      className: classes,
-      htmlFor: htmlFor
-    }, props))
-  );
-});
-FormLabel.displayName = 'FormLabel';
-FormLabel.defaultProps = defaultProps$n;
-
-var FormText = react.forwardRef( // Need to define the default "as" during prop destructuring to be compatible with styled-components github.com/react-bootstrap/react-bootstrap/issues/3595
-function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      className = _ref.className,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'small' : _ref$as,
-      muted = _ref.muted,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, bsPrefix, muted && 'text-muted')
-  }));
-});
-FormText.displayName = 'FormText';
-
-var Switch = react.forwardRef(function (props, ref) {
-  return react.createElement(FormCheck, _extends({}, props, {
-    ref: ref,
-    type: "switch"
-  }));
-});
-Switch.displayName = 'Switch';
-Switch.Input = FormCheck.Input;
-Switch.Label = FormCheck.Label;
-
-var defaultProps$o = {
-  inline: false
-};
-var Form = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
-      inline = _ref.inline,
-      className = _ref.className,
-      validated = _ref.validated,
-      _ref$as = _ref.as,
-      Component = _ref$as === void 0 ? 'form' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
-
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
-  return react.createElement(Component, _extends({}, props, {
-    ref: ref,
-    className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
-  }));
-});
-Form.displayName = 'Form';
-Form.defaultProps = defaultProps$o;
-Form.Row = createWithBsPrefix('form-row');
-Form.Group = FormGroup;
-Form.Control = FormControl;
-Form.Check = FormCheck;
-Form.Switch = Switch;
-Form.Label = FormLabel;
-Form.Text = FormText;
-
-class ParametersUi extends react.PureComponent {
-  static get propTypes() {
-    return {
-      id: propTypes.string,
-      onChange: propTypes.func,
-      parameters: propTypes.array,
-      project: propTypes.string
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.renderParameter = this.renderParameter.bind(this);
-    this.updateParameterValue = this.updateParameterValue.bind(this);
-  }
-
-  updateParameterValue(newParameter, event) {
-    const {
-      onChange,
-      parameters
-    } = this.props;
-    const value = event.target.checked === undefined ? event.target.value : event.target.checked;
-    const updated = [];
-
-    for (const oldParameter of parameters) {
-      if (oldParameter.identifier === newParameter.identifier) {
-        updated.push({ ...oldParameter,
-          value
-        });
-      } else {
-        updated.push(oldParameter);
-      }
-    }
-
-    if (onChange) {
-      onChange(updated);
-    }
-  }
-
-  renderParameter(parameter) {
-    const {
-      identifier,
-      prompt,
-      value = '',
-      options = {}
-    } = parameter;
-    const {
-      choices
-    } = options;
-    const {
-      project
-    } = this.props;
-    const label = prompt || identifier;
-    const id = `parameter/${project}/${identifier}`;
-
-    const onChange = event => this.updateParameterValue(parameter, event);
-
-    if (choices !== undefined) {
-      if (choices.every(choice => [true, false].includes(choice))) {
-        return react.createElement(InputGroup, {
-          key: id
-        }, react.createElement(Form.Check, {
-          type: "checkbox",
-          key: id,
-          label: label,
-          onChange: onChange
-        }));
-      } else {
-        return react.createElement(InputGroup, {
-          key: id
-        }, react.createElement(InputGroup.Prepend, null, react.createElement(InputGroup.Text, null, label)), react.createElement(FormControl, {
-          key: id,
-          as: "select",
-          defaultValue: choices[0],
-          onChange: onChange
-        }, choices.map((choice, index) => react.createElement("option", {
-          key: index
-        }, choice))));
-      }
-    } else {
-      return react.createElement(InputGroup, {
-        key: id
-      }, react.createElement(InputGroup.Prepend, null, react.createElement(InputGroup.Text, null, label)), react.createElement(FormControl, {
-        key: id,
-        id: id,
-        defaultValue: value,
-        onChange: onChange
-      }));
-    }
-  }
-
-  render() {
-    const {
-      id,
-      parameters
-    } = this.props;
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column',
-        padding: '4px',
-        border: '1px solid rgba(0,0,0,.125)',
-        borderRadius: '.25rem'
-      }
-    }, react.createElement(Row, {
-      style: {
-        width: '100%',
-        height: '100%',
-        flex: '1 1 auto'
-      }
-    }, react.createElement(Col, null, react.createElement(InputGroup, null, parameters.map(this.renderParameter)))));
-  }
-
-}
 
 var defaultProps$p = {
   variant: null
@@ -87205,7 +86958,7 @@ class SettingsUi extends react.PureComponent {
     const {
       storage
     } = this.props;
-    const state = await readFile({}, `settings/${storage}`);
+    const state = await read(`settings/${storage}`);
 
     if (state !== undefined) {
       if (state.buffer) {
@@ -87255,7 +87008,7 @@ class SettingsUi extends react.PureComponent {
     } = this.props;
 
     if (storage) {
-      await writeFile({}, `settings/${storage}`, this.state);
+      await write(`settings/${storage}`, this.state);
     }
   }
 
@@ -87541,7 +87294,7 @@ const defaultPaneViews = [['0', {
   title: 'Log'
 }]];
 const defaultScript = '// md`# Example`; Circle(10).topView();';
-class SelectProjectUi extends SettingsUi {
+class SelectWorkspaceUi extends SettingsUi {
   constructor(props) {
     super(props);
     this.state = {};
@@ -87552,52 +87305,46 @@ class SelectProjectUi extends SettingsUi {
       onSubmit
     } = this.props;
     const {
-      project
+      workspace
     } = this.state;
 
-    if (project.length === 0) {
+    if (workspace.length === 0) {
       await log({
         op: 'text',
-        text: `Project name is empty`,
+        text: `Workspace name is empty`,
         level: 'serious'
       });
       return;
     }
 
-    const projects = await listFilesystems();
+    const workspaces = await listFilesystems();
 
-    if (projects.includes(project)) {
+    if (workspaces.includes(workspace)) {
       await log({
         op: 'text',
-        text: `Project ${project} already exists`,
+        text: `Workspace ${workspace} already exists`,
         level: 'serious'
       });
       return;
     }
 
-    if (project.length > 0) {
+    if (workspace.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({
-        fileBase: project
+        fileBase: workspace
       });
-      await writeFile({
-        project
-      }, 'source/script.jsxcad', defaultScript);
-      await writeFile({
-        project
-      }, 'ui/paneLayout', defaultPaneLayout);
-      await writeFile({
-        project
-      }, 'ui/paneViews', defaultPaneViews);
+      await write('source/script.jsxcad', defaultScript);
+      await write('ui/paneLayout', defaultPaneLayout);
+      await write('ui/paneViews', defaultPaneViews);
       await log({
         op: 'text',
-        text: `Project ${project} created`,
+        text: `Workspace ${workspace} created`,
         level: 'serious'
       });
 
       if (onSubmit) {
         onSubmit({
-          project
+          workspace
         });
       }
 
@@ -87607,16 +87354,16 @@ class SelectProjectUi extends SettingsUi {
 
   render() {
     const {
-      projects,
+      workspaces,
       toast
     } = this.props;
     const {
-      project = ''
+      workspace = ''
     } = this.state;
     const rows = [];
 
-    for (let i = 0; i < projects.length; i += 5) {
-      rows.push(projects.slice(i, i + 5));
+    for (let i = 0; i < workspaces.length; i += 5) {
+      rows.push(workspaces.slice(i, i + 5));
     }
 
     return react.createElement(DecoratedModal, {
@@ -87626,7 +87373,7 @@ class SelectProjectUi extends SettingsUi {
       scrollable: true
     }, react.createElement(DecoratedModal.Header, {
       closeButton: true
-    }, react.createElement(DecoratedModal.Title, null, "Project")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
+    }, react.createElement(DecoratedModal.Title, null, "Workspace")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
       defaultActiveKey: "local",
       style: {
         display: 'flex'
@@ -87640,7 +87387,7 @@ class SelectProjectUi extends SettingsUi {
         flexDirection: 'row',
         flexWrap: 'wrap'
       }
-    }, projects.map((project, index) => react.createElement(Card, {
+    }, workspaces.map((workspace, index) => react.createElement(Card, {
       tag: "a",
       key: index,
       style: {
@@ -87648,24 +87395,24 @@ class SelectProjectUi extends SettingsUi {
         height: '128'
       },
       onClick: e => this.doSubmit(e, {
-        action: 'selectProject',
-        project
+        action: 'selectWorkspace',
+        workspace
       })
-    }, react.createElement(Card.Body, null, react.createElement(Card.Title, null, project)))))), react.createElement(Tab, {
+    }, react.createElement(Card.Body, null, react.createElement(Card.Title, null, workspace)))))), react.createElement(Tab, {
       eventKey: "search",
       title: "Search"
     }), react.createElement(Tab, {
       eventKey: "create",
       title: "Create"
-    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Project Name"), react.createElement(Form.Control, {
-      name: "project",
-      value: project,
+    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Workspace Name"), react.createElement(Form.Control, {
+      name: "workspace",
+      value: workspace,
       onChange: this.doUpdate
     })), react.createElement(ButtonGroup, null, react.createElement(Button, {
       name: "create",
       variant: "outline-primary",
       onClick: () => this.create()
-    }, "Create Project"))))), toast));
+    }, "Create Workspace"))))), toast));
   }
 
 }
@@ -87753,8 +87500,8 @@ const request$2 = (isOk, path, method, body, options) => request(isOk, path, met
 
 const get$3 = async (isOk, path, options) => request$2(isOk, path, 'GET', undefined, options);
 const post$1 = async (isOk, path, body, options) => request$2(isOk, path, 'POST', body, options);
-const readProject$1 = async (gistId, {
-  project
+const readWorkspace$1 = async (gistId, {
+  workspace
 }) => {
   const gist = await get$3(eq$1(OK), `gists/${gistId}`);
   if (gist === undefined) return;
@@ -87767,36 +87514,36 @@ const readProject$1 = async (gistId, {
     const file = files[path]; // FIX: An oversize file will have file.content === '' and be silently ignored.
 
     if (file && file.content) {
-      await writeFile({
-        project
-      }, `source/${path}`, file.content);
+      await write(`source/${path}`, file.content, {
+        workspace
+      });
     }
   }
 
   return true;
 };
-const writeProject$1 = async ({
-  project,
+const writeWorkspace$1 = async ({
+  workspace,
   isPublic = true
 }) => {
   const files = {};
   const prefix = `source/`;
 
   for (const path of await listFiles({
-    project
+    workspace
   })) {
     if (path.startsWith(prefix)) {
       const name = path.substring(prefix.length);
       files[name] = {
-        content: await readFile({
-          project
-        }, path)
+        content: await read(path, {
+          workspace
+        })
       };
     }
   }
 
   const gist = await post$1(eq$1(CREATED), `gists`, {
-    description: `${project} #jsxcad`,
+    description: `${workspace} #jsxcad`,
     public: isPublic,
     files
   });
@@ -87817,9 +87564,9 @@ class ShareGistUi extends SettingsUi {
     const {
       isPublic = true
     } = this.state;
-    const project = getFilesystem();
-    const url = await writeProject$1({
-      project,
+    const workspace = getFilesystem();
+    const url = await writeWorkspace$1({
+      workspace,
       isPublic
     });
 
@@ -87849,7 +87596,7 @@ class ShareGistUi extends SettingsUi {
     const {
       url
     } = this.state;
-    const project = getFilesystem(); // url = "https://gist.github.com/1d149ad00efd67c5b362b5cd97d2c86d"
+    const workspace = getFilesystem(); // url = "https://gist.github.com/1d149ad00efd67c5b362b5cd97d2c86d"
 
     const match = url.match(/https:\/\/gist.github.com\/(.*)/);
 
@@ -87858,8 +87605,8 @@ class ShareGistUi extends SettingsUi {
     }
 
     const gistId = match[1];
-    await readProject$1(gistId, {
-      project
+    await readWorkspace$1(gistId, {
+      workspace
     });
     log({
       op: 'text',
@@ -87918,11 +87665,11 @@ class ShareGithubUi extends SettingsUi {
 
     for (const file of await listFiles()) {
       if (file.startsWith('source/')) {
-        files.push([file, await readFile({}, file)]);
+        files.push([file, await read(file)]);
       }
     }
 
-    if (await writeProject(owner, repository, prefix, files, {
+    if (await writeWorkspace(owner, repository, prefix, files, {
       overwrite: false
     })) {
       await log({
@@ -87948,7 +87695,7 @@ class ShareGithubUi extends SettingsUi {
       prefix
     } = this.state;
 
-    if (await readProject(owner, repository, prefix, {
+    if (await readWorkspace(owner, repository, prefix, {
       overwrite: false
     })) {
       await log({
@@ -88301,7 +88048,7 @@ class SvgPathEditor extends Pane {
         file
       } = this.props;
       const path = this.generatePath();
-      await writeFile({}, file, path);
+      await write(file, path);
       await log({
         op: 'text',
         text: 'Saved',
@@ -88615,7 +88362,7 @@ class SvgPathEditor extends Pane {
     const {
       file
     } = this.props;
-    const svgPath = await readFile({}, file);
+    const svgPath = await read(file);
     const {
       points,
       closePath
@@ -89475,166 +89222,6 @@ Toast.displayName = 'Toast';
 Toast.Body = Body$1;
 Toast.Header = ToastHeader;
 
-/* global Blob */
-
-const downloadFile$1 = async path => {
-  const data = await readFile({
-    as: 'bytes'
-  }, path);
-  const blob = new Blob([data.buffer], {
-    type: 'application/octet-stream'
-  });
-  FileSaver_min(blob, path.split('/').pop());
-};
-
-class ViewUi extends Pane {
-  static get propTypes() {
-    return {
-      file: propTypes.string,
-      id: propTypes.string
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      file: props.file,
-      containerId: `${props.id}/container/${props.file}`
-    };
-  }
-
-  async componentDidMount() {
-    const {
-      containerId,
-      file
-    } = this.state;
-    const container = document.getElementById(containerId);
-    const view = {
-      target: [0, 0, 0],
-      position: [0, -200, 0],
-      up: [0, 1, 0]
-    };
-    const page = document.createElement('div');
-    page.id = 'viewer';
-    page.style.height = '100%';
-    const {
-      updateGeometry
-    } = await orbitDisplay({
-      view,
-      geometry: {
-        assembly: []
-      }
-    }, page);
-    const geometryPath = file;
-
-    const readAndUpdate = async () => {
-      const data = await readFile({}, geometryPath);
-
-      if (data === undefined) {
-        await updateGeometry({
-          assembly: []
-        });
-      } else {
-        if (data.buffer) {
-          await updateGeometry(JSON.parse(new TextDecoder('utf8').decode(data)));
-        } else {
-          await updateGeometry(data);
-        }
-      }
-    };
-
-    await readAndUpdate();
-    const watcher = await watchFile(geometryPath, readAndUpdate);
-    this.setState({
-      watcher
-    });
-    container.appendChild(page);
-  }
-
-  async componentWillUnmount() {
-    const {
-      containerId,
-      watcher
-    } = this.state;
-    const container = document.getElementById(containerId);
-
-    while (true) {
-      const child = container.firstElementChild;
-
-      if (child) {
-        container.removeChild(child);
-        continue;
-      }
-
-      break;
-    }
-
-    if (watcher) {
-      await unwatchFiles(watcher);
-    }
-  }
-
-  renderToolbarActions() {
-    const {
-      file
-    } = this.state;
-
-    if (file === undefined || file === 'geometry/preview') {
-      return [];
-    }
-
-    const filePath = `output/${file.substring(9)}`;
-    return react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      onClick: () => downloadFile$1(filePath),
-      style: {
-        color: 'blue'
-      }
-    }, "Download"));
-  }
-
-  renderToolbar() {
-    return super.renderToolbar(this.renderToolbarActions());
-  }
-
-  renderPane() {
-    const {
-      id
-    } = this.props;
-    const {
-      file,
-      containerId
-    } = this.state;
-
-    if (file === undefined) {
-      return [];
-    }
-
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column'
-      }
-    }, react.createElement(Row, {
-      style: {
-        width: '100%',
-        height: '100%',
-        flex: '1 1 auto'
-      }
-    }, react.createElement(Col, {
-      style: {
-        width: '100%',
-        height: '100%',
-        overflow: 'auto'
-      }
-    }, react.createElement("div", {
-      id: containerId
-    }))));
-  }
-
-}
-
 var fastEquals = createCommonjsModule(function (module, exports) {
 (function (global, factory) {
    factory(exports) ;
@@ -90076,8 +89663,8 @@ var fastEquals_1 = fastEquals.deepEqual;
 class Ui extends react.PureComponent {
   static get propTypes() {
     return {
-      project: propTypes.string,
-      projects: propTypes.array,
+      workspace: propTypes.string,
+      workspaces: propTypes.array,
       sha: propTypes.string
     };
   }
@@ -90086,13 +89673,12 @@ class Ui extends react.PureComponent {
     super(props);
     this.state = {
       isLogOpen: false,
-      isParametersOpen: false,
       log: [],
       parameters: [],
-      projects: this.props.projects,
+      workspaces: this.props.workspaces,
       layout: [],
       panes: [],
-      project: this.props.project,
+      workspace: this.props.workspace,
       files: [],
       build: 0,
       paneLayout: '0',
@@ -90100,29 +89686,28 @@ class Ui extends react.PureComponent {
       toast: []
     };
     this.askUser = this.askUser.bind(this);
-    this.addProject = this.addProject.bind(this);
+    this.addWorkspace = this.addWorkspace.bind(this);
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
     this.openLog = this.openLog.bind(this);
-    this.openParameters = this.openParameters.bind(this);
     this.updateParameters = this.updateParameters.bind(this);
     this.doGithub = this.doGithub.bind(this);
-    this.doSelectProject = this.doSelectProject.bind(this);
+    this.doSelectWorkspace = this.doSelectWorkspace.bind(this);
     this.doNav = this.doNav.bind(this);
-    this.switchingProjects = false;
+    this.switchingWorkspaces = false;
   }
 
   async componentDidMount() {
     const {
-      project
+      workspace
     } = this.state;
     const {
       sha
     } = this.props;
 
     const fileUpdater = async () => this.setState({
-      projects: await listFilesystems(),
+      workspaces: await listFilesystems(),
       files: await listFiles()
     });
 
@@ -90175,14 +89760,14 @@ class Ui extends react.PureComponent {
           options,
           path
         } = question.readFile;
-        return readFile(options, path);
+        return read(path, options);
       } else if (question.writeFile) {
         const {
           options,
           path,
           data
         } = question.writeFile;
-        return writeFile(options, path, data);
+        return write(path, data, options);
       } else if (question.deleteFile) {
         const {
           options,
@@ -90221,8 +89806,8 @@ class Ui extends react.PureComponent {
     });
     setHandleAskUser(this.askUser);
 
-    if (project) {
-      await this.selectProject(project);
+    if (workspace) {
+      await this.selectWorkspace(workspace);
     }
   }
 
@@ -90273,28 +89858,28 @@ class Ui extends react.PureComponent {
     });
   }
 
-  async addProject() {
-    const project = document.getElementById('project/add/name').value;
+  async addWorkspace() {
+    const workspace = document.getElementById('workspace/add/name').value;
 
-    if (project.length > 0) {
+    if (workspace.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
       setupFilesystem({
-        fileBase: project
+        fileBase: workspace
       });
-      await writeFile({}, 'source/script.jsxcad', defaultScript$1);
-      await writeFile({}, 'ui/paneLayout', defaultPaneLayout$1);
-      await writeFile({}, 'ui/paneViews', defaultPaneViews$1);
-      await this.selectProject(project);
+      await write('source/script.jsxcad', defaultScript$1);
+      await write('ui/paneLayout', defaultPaneLayout$1);
+      await write('ui/paneViews', defaultPaneViews$1);
+      await this.selectWorkspace(workspace);
     }
   }
 
-  async selectProject(project) {
+  async selectWorkspace(workspace) {
     setupFilesystem({
-      fileBase: project
+      fileBase: workspace
     });
-    const encodedProject = encodeURIComponent(project);
-    history.pushState(null, null, `#${encodedProject}`);
-    const paneLayoutData = await readFile({}, 'ui/paneLayout');
+    const encodedWorkspace = encodeURIComponent(workspace);
+    history.pushState(null, null, `#${encodedWorkspace}`);
+    const paneLayoutData = await read('ui/paneLayout');
     let paneLayout;
 
     if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
@@ -90307,7 +89892,7 @@ class Ui extends react.PureComponent {
       paneLayout = '0';
     }
 
-    const paneViewsData = await readFile({}, 'ui/paneViews');
+    const paneViewsData = await read('ui/paneViews');
     let paneViews;
 
     if (paneViewsData !== undefined) {
@@ -90320,20 +89905,20 @@ class Ui extends react.PureComponent {
       paneViews = [];
     }
 
-    this.switchingProjects = true;
+    this.switchingWorkspaces = true;
     const files = [...(await listFiles())];
     this.setState({
       paneLayout,
       paneViews,
-      project,
+      workspace,
       files
     });
-    this.switchingProjects = false;
+    this.switchingWorkspaces = false;
   }
 
-  closeProject() {
+  closeWorkspace() {
     this.setState({
-      project: ''
+      workspace: ''
     });
   }
 
@@ -90345,8 +89930,8 @@ class Ui extends react.PureComponent {
     switch (action) {
       case 'gistExport':
         {
-          const project = getFilesystem();
-          const url = await writeProject$1(project);
+          const workspace = getFilesystem();
+          const url = await writeWorkspace$1(workspace);
           log({
             op: 'text',
             text: `Created gist at ${url}`,
@@ -90366,11 +89951,11 @@ class Ui extends react.PureComponent {
 
           for (const file of await listFiles()) {
             if (file.startsWith('source/')) {
-              files.push([file, await readFile({}, file)]);
+              files.push([file, await read(file)]);
             }
           }
 
-          return writeProject(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, files, {
+          return writeWorkspace(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, files, {
             overwrite: false
           });
         }
@@ -90382,17 +89967,17 @@ class Ui extends react.PureComponent {
             githubRepositoryRepository,
             githubRepositoryPrefix
           } = options;
-          return readProject(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, {
+          return readWorkspace(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, {
             overwrite: false
           });
         }
     }
   }
 
-  async doSelectProject({
-    project
+  async doSelectWorkspace({
+    workspace
   }) {
-    return this.selectProject(project);
+    return this.selectWorkspace(workspace);
   }
 
   createNode() {
@@ -90434,7 +90019,7 @@ class Ui extends react.PureComponent {
     this.setState({
       paneLayout
     });
-    await writeFile({}, 'ui/paneLayout', paneLayout);
+    await write('ui/paneLayout', paneLayout);
   }
 
   onRelease(paneLayout) {}
@@ -90443,19 +90028,16 @@ class Ui extends react.PureComponent {
     const views = [];
 
     for (const file of files) {
-      if (file.startsWith('geometry/')) {
-        views.push({
-          view: 'geometry',
-          viewTitle: 'View',
-          file,
-          fileTitle: `${file.substring(9)}`
-        });
-      }
-
-      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
+      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx') || file.endsWith('.js'))) {
         views.push({
           view: 'editScript',
           viewTitle: 'Edit Script',
+          file,
+          fileTitle: `${file.substring(7)}`
+        });
+        views.push({
+          view: 'notebook',
+          viewTitle: 'Notebook',
           file,
           fileTitle: `${file.substring(7)}`
         });
@@ -90472,20 +90054,12 @@ class Ui extends react.PureComponent {
     }
 
     views.push({
-      view: 'notebook',
-      viewTitle: 'Notebook'
-    });
-    views.push({
       view: 'files',
       viewTitle: 'Files'
     });
     views.push({
       view: 'log',
       viewTitle: 'Log'
-    });
-    views.push({
-      view: 'parameters',
-      viewTitle: 'Parameters'
     });
     return views;
   }
@@ -90528,12 +90102,12 @@ class Ui extends react.PureComponent {
       paneViews: newPaneViews,
       switchView: undefined
     });
-    await writeFile({}, 'ui/paneViews', newPaneViews);
+    await write('ui/paneViews', newPaneViews);
   }
 
   renderPane(views, id, path, createNode, onSelectView, onSelectFile) {
     const {
-      project
+      workspace
     } = this.state;
     const {
       view,
@@ -90556,33 +90130,22 @@ class Ui extends react.PureComponent {
 
     switch (view) {
       case 'notebook':
-        return react.createElement(NotebookUi, {
-          key: `${id}/notebook`,
-          id: id,
-          path: path,
-          createNode: createNode,
-          view: view,
-          viewChoices: viewChoices,
-          viewTitle: 'Notebook',
-          onSelectView: onSelectView
-        });
-
-      case 'geometry':
         {
-          const fileTitle = file === undefined ? '' : file.substring('geometry/'.length);
-          return react.createElement(ViewUi, {
-            key: `${id}/geometry/${file}`,
+          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
+          return react.createElement(NotebookUi, {
+            key: `${id}/notebook/${file}`,
             id: id,
             path: path,
             createNode: createNode,
             view: view,
             viewChoices: viewChoices,
-            viewTitle: 'View',
+            viewTitle: 'Notebook',
             onSelectView: onSelectView,
             file: file,
             fileChoices: fileChoices,
             fileTitle: fileTitle,
-            onSelectFile: onSelectFile
+            onSelectFile: onSelectFile,
+            workspace: workspace
           });
         }
 
@@ -90603,7 +90166,7 @@ class Ui extends react.PureComponent {
             fileTitle: fileTitle,
             onSelectFile: onSelectFile,
             ask: ask,
-            workspace: project
+            workspace: workspace
           });
         }
 
@@ -90637,25 +90200,6 @@ class Ui extends react.PureComponent {
           viewTitle: 'Files',
           onSelectView: onSelectView
         });
-
-      case 'parameters':
-        {
-          const {
-            parameters
-          } = this.state;
-          return react.createElement(ParametersUi, {
-            key: id,
-            id: id,
-            path: path,
-            createNode: createNode,
-            view: view,
-            viewChoices: viewChoices,
-            viewTitle: 'Parameters',
-            onSelectView: onSelectView,
-            parameters: parameters,
-            onChange: this.updateParameters
-          });
-        }
 
       case 'log':
         {
@@ -90696,12 +90240,6 @@ class Ui extends react.PureComponent {
     });
   }
 
-  openParameters() {
-    this.setState({
-      isParametersOpen: true
-    });
-  }
-
   doNav(to) {
     switch (to) {
       case 'io':
@@ -90718,10 +90256,10 @@ class Ui extends react.PureComponent {
           break;
         }
 
-      case 'selectProject':
+      case 'selectWorkspace':
         {
           this.setState({
-            showSelectProjectUi: true
+            showSelectWorkspaceUi: true
           });
           break;
         }
@@ -90730,7 +90268,7 @@ class Ui extends react.PureComponent {
 
   render() {
     const {
-      project,
+      workspace,
       files,
       toast
     } = this.state;
@@ -90796,10 +90334,10 @@ class Ui extends react.PureComponent {
 
     const {
       showShareUi = false,
-      showSelectProjectUi = false
+      showSelectWorkspaceUi = false
     } = this.state;
     const {
-      projects = []
+      workspaces = []
     } = this.state;
 
     const buildModal = () => {
@@ -90814,16 +90352,16 @@ class Ui extends react.PureComponent {
             showShareUi: false
           })
         });
-      } else if (showSelectProjectUi || project === '') {
-        return react.createElement(SelectProjectUi, {
-          key: "selectProjectUi",
+      } else if (showSelectWorkspaceUi || workspace === '') {
+        return react.createElement(SelectWorkspaceUi, {
+          key: "selectWorkspaceUi",
           show: true,
-          projects: projects,
-          storage: "selectProject",
+          workspaces: workspaces,
+          storage: "selectWorkspace",
           toast: toastDiv,
-          onSubmit: this.doSelectProject,
+          onSubmit: this.doSelectWorkspace,
           onHide: () => this.setState({
-            showSelectProjectUi: false
+            showSelectWorkspaceUi: false
           })
         });
       } else {
@@ -90833,14 +90371,29 @@ class Ui extends react.PureComponent {
 
     const modal = buildModal();
 
-    const selectFile = async (id, file) => this.setPaneView(id, { ...this.getPaneView(id),
-      file
-    });
+    const selectView = async (id, view) => {
+      this.setPaneView(id, { ...this.getPaneView(id),
+        view,
+        file: undefined
+      });
+    };
 
-    const selectView = async (id, view) => this.setPaneView(id, { ...this.getPaneView(id),
-      view,
-      file: undefined
-    });
+    const selectFile = async (id, file, sources = []) => {
+      // Ensure the file exists.
+      // TODO: Handle a transform from file to source so that things github can be used sensibly.
+      const content = await read(`${file}`, {
+        sources
+      });
+
+      if (content === undefined) {
+        // If we couldn't find it, create it as an empty file.
+        await write(`${file}`, '');
+      }
+
+      this.setPaneView(id, { ...this.getPaneView(id),
+        file
+      });
+    };
 
     return react.createElement("div", {
       style: {
@@ -90863,8 +90416,8 @@ class Ui extends react.PureComponent {
       className: "mr-auto",
       onSelect: this.doNav
     }, react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      eventKey: "selectProject"
-    }, "Project", project === '' ? '' : ` (${project})`)), project !== '' && react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
+      eventKey: "selectWorkspace"
+    }, "Workspace", workspace === '' ? '' : ` (${workspace})`)), workspace !== '' && react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
       eventKey: "io"
     }, "Share")), react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
       eventKey: "reference"
@@ -90873,7 +90426,7 @@ class Ui extends react.PureComponent {
         flex: '1 1 auto',
         background: '#e6ebf0'
       },
-      key: `mosaic/${project}`,
+      key: `mosaic/${workspace}`,
       renderTile: (id, path) => {
         const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
         return pane;
@@ -90893,11 +90446,28 @@ class Ui extends react.PureComponent {
 const setupUi = async sha => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
-  const [encodedProject] = hash.split('@');
-  const project = decodeURIComponent(encodedProject);
+  const [encodedWorkspace, encodedPath] = hash.split('@');
+  const workspace = decodeURIComponent(encodedWorkspace);
+  let path;
+
+  if (encodedPath !== undefined) {
+    path = decodeURIComponent(encodedPath);
+    const content = await read(`source/${path}`, {
+      sources: [path],
+      workspace
+    });
+
+    if (content === undefined) {
+      await write(`source/${path}`, '', {
+        workspace
+      });
+    }
+  }
+
   reactDom.render(react.createElement(Ui, {
-    projects: [...filesystems],
-    project: project,
+    workspaces: [...filesystems],
+    workspace: workspace,
+    path: path,
     sha: sha,
     width: "100%",
     height: "100%",
@@ -90937,14 +90507,14 @@ const defaultPaneViews$1 = [['0', {
 }]];
 const installUi = async ({
   document,
-  project,
+  workspace,
   sha
 }) => {
   await boot();
 
-  if (project !== '') {
+  if (workspace !== '') {
     await setupFilesystem({
-      fileBase: project
+      fileBase: workspace
     });
   }
 
