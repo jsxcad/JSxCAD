@@ -34,7 +34,7 @@ const agent = async ({ ask, question }) => {
           }
         }
       }
-      await sys.writeFile({}, 'notebook', notebook);
+      await sys.write(`notebook/${question.path}`, notebook);
     }
   } catch (error) {
     await sys.log({ op: 'text', text: error.stack, level: 'serious' });

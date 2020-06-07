@@ -1,5 +1,8 @@
 import { MosaicContext, MosaicWindow, MosaicWindowContext } from 'react-mosaic-component';
 
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
+import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
@@ -27,11 +30,22 @@ export class Pane extends React.PureComponent {
 
   constructor (props) {
     super(props);
-    this.state = {};
+    this.state = { fileTitle: props.fileTitle };
   }
 
   renderToolbar (extra = []) {
-    const { id, file, fileChoices = [], fileTitle = '', onSelectView, onSelectFile, view, viewChoices, viewTitle } = this.props;
+    const { id, fileChoices = [], onSelectView, onSelectFile, view, viewChoices, viewTitle } = this.props;
+    const { fileTitle = '' } = this.state;
+    const openFileTitle = (e) => {
+      if (e.key === 'Enter') {
+        let src = fileTitle;
+        // FIX: Put this somewhere sensible.
+        if (src.startsWith('https://github.com/')) {
+          src = `https://raw.githubusercontent.com/${src.substr(19)}`;
+        }
+        onSelectFile(id, `source/${fileTitle}`, [src]);
+      }
+    };
     return (
       <div style={{ width: '100%' }}>
         <Navbar key="navbar" bg="light" expand="sm" style={{ flex: '0 0 auto', height: '30px' }}>
@@ -47,17 +61,15 @@ export class Pane extends React.PureComponent {
               : view === undefined
                 ? viewTitle
                 : <Nav.Item><Nav.Link style={{ color: 'black' }}>{viewTitle}</Nav.Link></Nav.Item>}
-            {fileChoices.length > 0
-              ? <NavDropdown title={file === undefined ? 'Select' : fileTitle }>
+            <Dropdown as={ButtonGroup}>
+              <Form.Control value={fileTitle} onKeyPress={openFileTitle} onChange={e => this.setState({ fileTitle: e.target.value })}/>
+              <Dropdown.Toggle split variant="outline-primary" id="file-selector" />
+              <Dropdown.Menu>
                 {fileChoices.map(({ file, fileTitle }, index) =>
-                  <NavDropdown.Item key={index} onClick={() => onSelectFile(id, file)}>
-                    {fileTitle}
-                  </NavDropdown.Item>
+                  <Dropdown.Item key={index} onClick={() => onSelectFile(id, file)}>{fileTitle}</Dropdown.Item>
                 )}
-              </NavDropdown>
-              : file === undefined
-                ? fileTitle
-                : <Nav.Item><Nav.Link>{fileTitle}</Nav.Link></Nav.Item>}
+              </Dropdown.Menu>
+            </Dropdown>
             {extra}
           </Nav>
           <Nav key="tools">
@@ -96,11 +108,11 @@ export class Pane extends React.PureComponent {
   }
 
   render () {
-    const project = getFilesystem();
+    const workspace = getFilesystem();
     const { createNode, id, path } = this.props;
 
     return (<MosaicWindow
-      key={`window/${project}/${id}`}
+      key={`window/${workspace}/${id}`}
       createNode={createNode}
       renderToolbar={() => this.renderToolbar()}
       path={path}>

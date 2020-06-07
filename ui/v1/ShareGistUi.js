@@ -1,5 +1,5 @@
 import { getFilesystem, log } from '@jsxcad/sys';
-import { readProject, writeProject } from './gist';
+import { readWorkspace, writeWorkspace } from './gist';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -18,8 +18,8 @@ export class ShareGistUi extends SettingsUi {
 
   async export () {
     const { isPublic = true } = this.state;
-    const project = getFilesystem();
-    const url = await writeProject({ project, isPublic });
+    const workspace = getFilesystem();
+    const url = await writeWorkspace({ workspace, isPublic });
     if (url === undefined) {
       log({ op: 'text', text: `Failed to create gist`, level: 'serious', duration: 1000 });
       return;
@@ -31,14 +31,14 @@ export class ShareGistUi extends SettingsUi {
 
   async import () {
     const { url } = this.state;
-    const project = getFilesystem();
+    const workspace = getFilesystem();
     // url = "https://gist.github.com/1d149ad00efd67c5b362b5cd97d2c86d"
     const match = url.match(/https:\/\/gist.github.com\/(.*)/);
     if (!match || !match[1]) {
       return;
     }
     const gistId = match[1];
-    await readProject(gistId, { project });
+    await readWorkspace(gistId, { workspace });
     log({ op: 'text', text: `Read gist from ${url}`, level: 'serious', duration: 1000 });
   }
 

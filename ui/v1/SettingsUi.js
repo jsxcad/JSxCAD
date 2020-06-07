@@ -1,4 +1,4 @@
-import { readFile, writeFile } from '@jsxcad/sys';
+import { read, write } from '@jsxcad/sys';
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -22,7 +22,7 @@ export class SettingsUi extends React.PureComponent {
 
   async componentDidMount () {
     const { storage } = this.props;
-    const state = await readFile({}, `settings/${storage}`);
+    const state = await read(`settings/${storage}`);
     if (state !== undefined) {
       if (state.buffer) {
         this.setState(JSON.parse(new TextDecoder('utf8').decode(state)));
@@ -59,7 +59,7 @@ export class SettingsUi extends React.PureComponent {
   async save () {
     const { storage } = this.props;
     if (storage) {
-      await writeFile({}, `settings/${storage}`, this.state);
+      await write(`settings/${storage}`, this.state);
     }
   }
 }

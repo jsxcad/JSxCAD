@@ -1,7 +1,7 @@
 /* global document */
 // Originally from https://codepen.io/anthonydugois/pen/mewdyZ by Anthony Dugois.
 
-import { log, readFile, writeFile } from '@jsxcad/sys';
+import { log, read, write } from '@jsxcad/sys';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -61,7 +61,7 @@ class SvgPathEditor extends Pane {
 
   async componentDidMount () {
     const { file } = this.props;
-    const svgPath = await readFile({}, file);
+    const svgPath = await read(file);
     const { points, closePath } = toPoints(svgPath);
     this.setState({ closePath, points });
   }
@@ -128,7 +128,7 @@ class SvgPathEditor extends Pane {
     save = async (e) => {
       const { file } = this.props;
       const path = this.generatePath();
-      await writeFile({}, file, path);
+      await write(file, path);
       await log({ op: 'text', text: 'Saved', level: 'serious' });
     };
 

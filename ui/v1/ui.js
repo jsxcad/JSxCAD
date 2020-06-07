@@ -11,7 +11,7 @@ import {
   listFiles,
   listFilesystems,
   log,
-  readFile,
+  read,
   setHandleAskUser,
   setupFilesystem,
   touch,
@@ -21,12 +21,12 @@ import {
   watchFileCreation,
   watchFileDeletion,
   watchLog,
-  writeFile
+  write
 } from '@jsxcad/sys';
 
 import {
-  readProject as readProjectFromGithub,
-  writeProject as writeProjectToGithub
+  readWorkspace as readWorkspaceFromGithub,
+  writeWorkspace as writeWorkspaceToGithub
 } from './github';
 
 import Alert from 'react-bootstrap/Alert';
@@ -42,24 +42,22 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NotebookUi from './NotebookUi';
 import NothingUi from './NothingUi';
-import ParametersUi from './ParametersUi';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Row from 'react-bootstrap/Row';
-import SelectProjectUi from './SelectProjectUi';
+import SelectWorkspaceUi from './SelectWorkspaceUi';
 import ShareUi from './ShareUi';
 import SvgPathEditor from './SvgPathEditor';
 import Toast from 'react-bootstrap/Toast';
-import ViewUi from './ViewUi';
 import { deepEqual } from 'fast-equals';
-import { writeProject as writeProjectToGist } from './gist';
+import { writeWorkspace as writeWorkspaceToGist } from './gist';
 
 class Ui extends React.PureComponent {
   static get propTypes () {
     return {
-      project: PropTypes.string,
-      projects: PropTypes.array,
+      workspace: PropTypes.string,
+      workspaces: PropTypes.array,
       sha: PropTypes.string
     };
   }
@@ -69,13 +67,12 @@ class Ui extends React.PureComponent {
 
     this.state = {
       isLogOpen: false,
-      isParametersOpen: false,
       log: [],
       parameters: [],
-      projects: this.props.projects,
+      workspaces: this.props.workspaces,
       layout: [],
       panes: [],
-      project: this.props.project,
+      workspace: this.props.workspace,
       files: [],
       build: 0,
       paneLayout: '0',
@@ -84,26 +81,25 @@ class Ui extends React.PureComponent {
     };
 
     this.askUser = this.askUser.bind(this);
-    this.addProject = this.addProject.bind(this);
+    this.addWorkspace = this.addWorkspace.bind(this);
     this.createNode = this.createNode.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onRelease = this.onRelease.bind(this);
     this.openLog = this.openLog.bind(this);
-    this.openParameters = this.openParameters.bind(this);
     this.updateParameters = this.updateParameters.bind(this);
     this.doGithub = this.doGithub.bind(this);
-    this.doSelectProject = this.doSelectProject.bind(this);
+    this.doSelectWorkspace = this.doSelectWorkspace.bind(this);
     this.doNav = this.doNav.bind(this);
 
-    this.switchingProjects = false;
+    this.switchingWorkspaces = false;
   }
 
   async componentDidMount () {
-    const { project } = this.state;
+    const { workspace } = this.state;
     const { sha } = this.props;
 
     const fileUpdater = async () => this.setState({
-      projects: await listFilesystems(),
+      workspaces: await listFilesystems(),
       files: await listFiles()
     });
     const creationWatcher = await watchFileCreation(fileUpdater);
@@ -134,10 +130,10 @@ class Ui extends React.PureComponent {
         return askSys(identifier, options);
       } else if (question.readFile) {
         const { options, path } = question.readFile;
-        return readFile(options, path);
+        return read(path, options);
       } else if (question.writeFile) {
         const { options, path, data } = question.writeFile;
-        return writeFile(options, path, data);
+        return write(path, data, options);
       } else if (question.deleteFile) {
         const { options, path } = question.deleteFile;
         return deleteFile(options, path);
@@ -155,8 +151,8 @@ class Ui extends React.PureComponent {
     this.setState({ ask, creationWatcher, deletionWatcher, logWatcher });
     setHandleAskUser(this.askUser);
 
-    if (project) {
-      await this.selectProject(project);
+    if (workspace) {
+      await this.selectWorkspace(workspace);
     }
   }
 
@@ -194,23 +190,23 @@ class Ui extends React.PureComponent {
     this.setState({ parameters });
   }
 
-  async addProject () {
-    const project = document.getElementById('project/add/name').value;
-    if (project.length > 0) {
+  async addWorkspace () {
+    const workspace = document.getElementById('workspace/add/name').value;
+    if (workspace.length > 0) {
       // FIX: Prevent this from overwriting existing filesystems.
-      setupFilesystem({ fileBase: project });
-      await writeFile({}, 'source/script.jsxcad', defaultScript);
-      await writeFile({}, 'ui/paneLayout', defaultPaneLayout);
-      await writeFile({}, 'ui/paneViews', defaultPaneViews);
-      await this.selectProject(project);
+      setupFilesystem({ fileBase: workspace });
+      await write('source/script.jsxcad', defaultScript);
+      await write('ui/paneLayout', defaultPaneLayout);
+      await write('ui/paneViews', defaultPaneViews);
+      await this.selectWorkspace(workspace);
     }
   };
 
-  async selectProject (project) {
-    setupFilesystem({ fileBase: project });
-    const encodedProject = encodeURIComponent(project);
-    history.pushState(null, null, `#${encodedProject}`);
-    const paneLayoutData = await readFile({}, 'ui/paneLayout');
+  async selectWorkspace (workspace) {
+    setupFilesystem({ fileBase: workspace });
+    const encodedWorkspace = encodeURIComponent(workspace);
+    history.pushState(null, null, `#${encodedWorkspace}`);
+    const paneLayoutData = await read('ui/paneLayout');
     let paneLayout;
     if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
       if (paneLayoutData.buffer) {
@@ -222,7 +218,7 @@ class Ui extends React.PureComponent {
       paneLayout = '0';
     }
 
-    const paneViewsData = await readFile({}, 'ui/paneViews');
+    const paneViewsData = await read('ui/paneViews');
     let paneViews;
     if (paneViewsData !== undefined) {
       if (paneViewsData.buffer) {
@@ -234,14 +230,14 @@ class Ui extends React.PureComponent {
       paneViews = [];
     }
 
-    this.switchingProjects = true;
+    this.switchingWorkspaces = true;
     const files = [...await listFiles()];
-    this.setState({ paneLayout, paneViews, project, files });
-    this.switchingProjects = false;
+    this.setState({ paneLayout, paneViews, workspace, files });
+    this.switchingWorkspaces = false;
   };
 
-  closeProject () {
-    this.setState({ project: '' });
+  closeWorkspace () {
+    this.setState({ workspace: '' });
   }
 
   async doGithub (options = {}) {
@@ -249,8 +245,8 @@ class Ui extends React.PureComponent {
     switch (action) {
       case 'gistExport': {
         const { gistIsPublic = true } = options;
-        const project = getFilesystem();
-        const url = await writeProjectToGist(project, { gistIsPublic });
+        const workspace = getFilesystem();
+        const url = await writeWorkspaceToGist(workspace, { gistIsPublic });
         log({ op: 'text', text: `Created gist at ${url}`, level: 'serious' });
         return;
       }
@@ -259,22 +255,22 @@ class Ui extends React.PureComponent {
         const files = [];
         for (const file of await listFiles()) {
           if (file.startsWith('source/')) {
-            files.push([file, await readFile({}, file)]);
+            files.push([file, await read(file)]);
           }
         }
-        return writeProjectToGithub(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, files,
-                                    { overwrite: false });
+        return writeWorkspaceToGithub(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix, files,
+                                      { overwrite: false });
       }
       case 'githubRepositoryImport': {
         const { githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix } = options;
-        return readProjectFromGithub(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix,
-                                     { overwrite: false });
+        return readWorkspaceFromGithub(githubRepositoryOwner, githubRepositoryRepository, githubRepositoryPrefix,
+                                       { overwrite: false });
       }
     }
   };
 
-  async doSelectProject ({ project }) {
-    return this.selectProject(project);
+  async doSelectWorkspace ({ workspace }) {
+    return this.selectWorkspace(workspace);
   }
 
   createNode () {
@@ -311,7 +307,7 @@ class Ui extends React.PureComponent {
       paneLayout = '0';
     }
     this.setState({ paneLayout });
-    await writeFile({}, 'ui/paneLayout', paneLayout);
+    await write('ui/paneLayout', paneLayout);
   }
 
   onRelease (paneLayout) {
@@ -321,21 +317,17 @@ class Ui extends React.PureComponent {
     const views = [];
 
     for (const file of files) {
-      if (file.startsWith('geometry/')) {
-        views.push({ view: 'geometry', viewTitle: 'View', file, fileTitle: `${file.substring(9)}` });
-      }
-      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx'))) {
+      if (file.startsWith('source/') && (file.endsWith('.jsxcad') || file.endsWith('.jsx') || file.endsWith('.js'))) {
         views.push({ view: 'editScript', viewTitle: 'Edit Script', file, fileTitle: `${file.substring(7)}` });
+        views.push({ view: 'notebook', viewTitle: 'Notebook', file, fileTitle: `${file.substring(7)}` });
       }
       if (file.startsWith('source/') && (file.endsWith('.svp') || file.endsWith('.svgpath'))) {
         views.push({ view: 'editSvgPath', viewTitle: 'Edit SVG Path', file, fileTitle: `${file.substring(7)}` });
       }
     }
 
-    views.push({ view: 'notebook', viewTitle: 'Notebook' });
     views.push({ view: 'files', viewTitle: 'Files' });
     views.push({ view: 'log', viewTitle: 'Log' });
-    views.push({ view: 'parameters', viewTitle: 'Parameters' });
 
     return views;
   }
@@ -372,11 +364,11 @@ class Ui extends React.PureComponent {
 
     this.setState({ paneViews: newPaneViews, switchView: undefined });
 
-    await writeFile({}, 'ui/paneViews', newPaneViews);
+    await write('ui/paneViews', newPaneViews);
   }
 
   renderPane (views, id, path, createNode, onSelectView, onSelectFile) {
-    const { project } = this.state;
+    const { workspace } = this.state;
     const { view, file } = this.getPaneView(id);
     const fileChoices = views.filter(entry => entry.view === view && entry.file !== file);
     const seenViewChoices = new Set();
@@ -390,10 +382,11 @@ class Ui extends React.PureComponent {
     const { ask } = this.state;
 
     switch (view) {
-      case 'notebook':
+      case 'notebook': {
+        const fileTitle = file === undefined ? '' : file.substring('source/'.length);
         return (
           <NotebookUi
-            key={`${id}/notebook`}
+            key={`${id}/notebook/${file}`}
             id={id}
             path={path}
             createNode={createNode}
@@ -401,23 +394,11 @@ class Ui extends React.PureComponent {
             viewChoices={viewChoices}
             viewTitle={'Notebook'}
             onSelectView={onSelectView}
-          />);
-      case 'geometry': {
-        const fileTitle = file === undefined ? '' : file.substring('geometry/'.length);
-        return (
-          <ViewUi
-            key={`${id}/geometry/${file}`}
-            id={id}
-            path={path}
-            createNode={createNode}
-            view={view}
-            viewChoices={viewChoices}
-            viewTitle={'View'}
-            onSelectView={onSelectView}
             file={file}
             fileChoices={fileChoices}
             fileTitle={fileTitle}
             onSelectFile={onSelectFile}
+            workspace={workspace}
           />);
       }
       case 'editScript': {
@@ -437,7 +418,7 @@ class Ui extends React.PureComponent {
             fileTitle={fileTitle}
             onSelectFile={onSelectFile}
             ask={ask}
-            workspace={project}
+            workspace={workspace}
           />);
       }
       case 'editSvgPath': {
@@ -470,22 +451,6 @@ class Ui extends React.PureComponent {
             viewTitle={'Files'}
             onSelectView={onSelectView}
           />);
-      case 'parameters': {
-        const { parameters } = this.state;
-        return (
-          <ParametersUi
-            key={id}
-            id={id}
-            path={path}
-            createNode={createNode}
-            view={view}
-            viewChoices={viewChoices}
-            viewTitle={'Parameters'}
-            onSelectView={onSelectView}
-            parameters={parameters}
-            onChange={this.updateParameters}
-          />);
-      }
       case 'log': {
         const { log } = this.state;
         if (log !== undefined) {
@@ -520,10 +485,6 @@ class Ui extends React.PureComponent {
     this.setState({ isLogOpen: true });
   }
 
-  openParameters () {
-    this.setState({ isParametersOpen: true });
-  }
-
   doNav (to) {
     switch (to) {
       case 'io': {
@@ -534,15 +495,15 @@ class Ui extends React.PureComponent {
         window.open(`https://github.com/jsxcad/JSxCAD/wiki/Reference`);
         break;
       }
-      case 'selectProject': {
-        this.setState({ showSelectProjectUi: true });
+      case 'selectWorkspace': {
+        this.setState({ showSelectWorkspaceUi: true });
         break;
       }
     }
   }
 
   render () {
-    const { project, files, toast } = this.state;
+    const { workspace, files, toast } = this.state;
     const views = this.buildViews(files);
 
     const toasts = toast.map((entry, index) => {
@@ -604,8 +565,8 @@ class Ui extends React.PureComponent {
       );
     };
 
-    const { showShareUi = false, showSelectProjectUi = false } = this.state;
-    const { projects = [] } = this.state;
+    const { showShareUi = false, showSelectWorkspaceUi = false } = this.state;
+    const { workspaces = [] } = this.state;
 
     const buildModal = () => {
       if (showShareUi) {
@@ -617,15 +578,15 @@ class Ui extends React.PureComponent {
           onSubmit={this.doGithub}
           onHide={() => this.setState({ showShareUi: false })}
         />;
-      } else if (showSelectProjectUi || project === '') {
-        return <SelectProjectUi
-          key='selectProjectUi'
+      } else if (showSelectWorkspaceUi || workspace === '') {
+        return <SelectWorkspaceUi
+          key='selectWorkspaceUi'
           show={true}
-          projects={projects}
-          storage='selectProject'
+          workspaces={workspaces}
+          storage='selectWorkspace'
           toast={toastDiv}
-          onSubmit={this.doSelectProject}
-          onHide={() => this.setState({ showSelectProjectUi: false })}
+          onSubmit={this.doSelectWorkspace}
+          onHide={() => this.setState({ showSelectWorkspaceUi: false })}
         />;
       } else {
         return switchViewModal();
@@ -634,8 +595,20 @@ class Ui extends React.PureComponent {
 
     const modal = buildModal();
 
-    const selectFile = async (id, file) => this.setPaneView(id, { ...this.getPaneView(id), file });
-    const selectView = async (id, view) => this.setPaneView(id, { ...this.getPaneView(id), view, file: undefined });
+    const selectView = async (id, view) => {
+      this.setPaneView(id, { ...this.getPaneView(id), view, file: undefined });
+    };
+
+    const selectFile = async (id, file, sources = []) => {
+      // Ensure the file exists.
+      // TODO: Handle a transform from file to source so that things github can be used sensibly.
+      const content = await read(`${file}`, { sources });
+      if (content === undefined) {
+        // If we couldn't find it, create it as an empty file.
+        await write(`${file}`, '');
+      }
+      this.setPaneView(id, { ...this.getPaneView(id), file });
+    };
 
     return (
       <div style={{ height: '100%', width: '100%', display: 'flex', flexFlow: 'column' }}>
@@ -647,18 +620,18 @@ class Ui extends React.PureComponent {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto" onSelect={this.doNav}>
               <Nav.Item>
-                <Nav.Link eventKey='selectProject'>
-                  Project{project === '' ? '' : ` (${project})`}
+                <Nav.Link eventKey='selectWorkspace'>
+                  Workspace{workspace === '' ? '' : ` (${workspace})`}
                 </Nav.Link>
               </Nav.Item>
-              {(project !== '') && <Nav.Item><Nav.Link eventKey='io'>Share</Nav.Link></Nav.Item>}
+              {(workspace !== '') && <Nav.Item><Nav.Link eventKey='io'>Share</Nav.Link></Nav.Item>}
               <Nav.Item><Nav.Link eventKey='reference'>Reference</Nav.Link></Nav.Item>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
         <Mosaic
           style={{ flex: '1 1 auto', background: '#e6ebf0' }}
-          key={`mosaic/${project}`}
+          key={`mosaic/${workspace}`}
           renderTile={(id, path) => {
             const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
             return pane;
@@ -677,11 +650,20 @@ class Ui extends React.PureComponent {
 const setupUi = async (sha) => {
   const filesystems = await listFilesystems();
   const hash = location.hash.substring(1);
-  const [encodedProject] = hash.split('@');
-  const project = decodeURIComponent(encodedProject);
+  const [encodedWorkspace, encodedPath] = hash.split('@');
+  const workspace = decodeURIComponent(encodedWorkspace);
+  let path;
+  if (encodedPath !== undefined) {
+    path = decodeURIComponent(encodedPath);
+    const content = await read(`source/${path}`, { sources: [path], workspace });
+    if (content === undefined) {
+      await write(`source/${path}`, '', { workspace });
+    }
+  }
   ReactDOM.render(
-    <Ui projects={[...filesystems]}
-      project={project}
+    <Ui workspaces={[...filesystems]}
+      workspace={workspace}
+      path={path}
       sha={sha}
       width="100%"
       height="100%"
@@ -722,10 +704,10 @@ const defaultPaneViews = [
   }]
 ];
 
-export const installUi = async ({ document, project, sha }) => {
+export const installUi = async ({ document, workspace, sha }) => {
   await boot();
-  if (project !== '') {
-    await setupFilesystem({ fileBase: project });
+  if (workspace !== '') {
+    await setupFilesystem({ fileBase: workspace });
   }
   await setupUi(sha);
 };

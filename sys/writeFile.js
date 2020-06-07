@@ -23,12 +23,12 @@ export const writeFile = async (options, path, data) => {
   //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   // }
 
-  const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
-  let originalProject = getFilesystem();
-  if (project !== originalProject) {
-    log({ op: 'text', text: `Write ${path} of ${project}` });
+  const { doSerialize = true, ephemeral, workspace = getFilesystem() } = options;
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    log({ op: 'text', text: `Write ${path} of ${workspace}` });
     // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: project });
+    setupFilesystem({ fileBase: workspace });
   }
 
   await log({ op: 'text', text: `Write ${path}` });
@@ -57,14 +57,14 @@ export const writeFile = async (options, path, data) => {
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {
-        await self.ask({ touchFile: { path, workspace: project } });
+        await self.ask({ touchFile: { path, workspace: workspace } });
       }
     }
   }
 
-  if (project !== originalProject) {
+  if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalProject });
+    setupFilesystem({ fileBase: originalWorkspace });
   }
 
   return true;

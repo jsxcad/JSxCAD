@@ -1,5 +1,5 @@
 import { CREATED, OK, eq, request as githubRequest } from './githubRequest';
-import { listFiles, readFile, writeFile } from '@jsxcad/sys';
+import { listFiles, read, write } from '@jsxcad/sys';
 
 const request = (isOk, path, method, body, options) =>
   githubRequest(isOk, path, method, body, { ...options, service: 'gist' });
@@ -8,7 +8,7 @@ export const get = async (isOk, path, options) => request(isOk, path, 'GET', und
 export const post = async (isOk, path, body, options) => request(isOk, path, 'POST', body, options);
 export const patch = async (isOk, path, body, options) => request(isOk, path, 'PATCH', body, options);
 
-export const readProject = async (gistId, { project }) => {
+export const readWorkspace = async (gistId, { workspace }) => {
   const gist = await get(eq(OK), `gists/${gistId}`);
   if (gist === undefined) return;
   const { files } = gist;
@@ -17,25 +17,25 @@ export const readProject = async (gistId, { project }) => {
     const file = files[path];
     // FIX: An oversize file will have file.content === '' and be silently ignored.
     if (file && file.content) {
-      await writeFile({ project }, `source/${path}`, file.content);
+      await write(`source/${path}`, file.content, { workspace });
     }
   }
   return true;
 };
 
-export const writeProject = async ({ project, isPublic = true }) => {
+export const writeWorkspace = async ({ workspace, isPublic = true }) => {
   const files = {};
   const prefix = `source/`;
-  for (const path of await listFiles({ project })) {
+  for (const path of await listFiles({ workspace })) {
     if (path.startsWith(prefix)) {
       const name = path.substring(prefix.length);
-      files[name] = { content: await readFile({ project }, path) };
+      files[name] = { content: await read(path, { workspace }) };
     }
   }
   const gist = await post(eq(CREATED),
                           `gists`,
                           {
-                            description: `${project} #jsxcad`,
+                            description: `${workspace} #jsxcad`,
                             public: isPublic,
                             files
                           });
