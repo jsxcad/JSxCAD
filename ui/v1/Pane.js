@@ -38,12 +38,7 @@ export class Pane extends React.PureComponent {
     const { fileTitle = '' } = this.state;
     const openFileTitle = (e) => {
       if (e.key === 'Enter') {
-        let src = fileTitle;
-        // FIX: Put this somewhere sensible.
-        if (src.startsWith('https://github.com/')) {
-          src = `https://raw.githubusercontent.com/${src.substr(19)}`;
-        }
-        onSelectFile(id, `source/${fileTitle}`, [src]);
+        onSelectFile(id, `source/${fileTitle}`, fileTitle);
       }
     };
     return (
