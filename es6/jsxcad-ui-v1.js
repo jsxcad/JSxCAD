@@ -1,4 +1,4 @@
-import { read, log, write, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, readFile, unwatchFiles, watchFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
+import { read, log, write, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
@@ -82738,6 +82738,20 @@ class JsEditorUi extends Pane {
     } = this.props;
 
     if (file !== undefined) {
+      const watcher = await watchFile(`source/${file}`, this.update);
+      this.setState({
+        watcher
+      });
+      await this.update();
+    }
+  }
+
+  async update() {
+    const {
+      file
+    } = this.props;
+
+    if (file !== undefined) {
       let code = await read(file);
 
       if (code.buffer) {
@@ -82747,6 +82761,16 @@ class JsEditorUi extends Pane {
       this.setState({
         code
       });
+    }
+  }
+
+  async componentWillUnmount() {
+    const {
+      watcher
+    } = this.state;
+
+    if (watcher) {
+      await unwatchFiles(watcher);
     }
   }
 
