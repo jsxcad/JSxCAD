@@ -29,6 +29,6 @@ export const buildImportModule = (api) =>
     const ecmascript = await toEcmascript(script);
     const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
     const module = await builder(api);
-    exports = await module();
+    const exports = await module();
     return exports;
   };

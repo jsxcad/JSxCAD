@@ -113,6 +113,7 @@ export class JsEditorUi extends Pane {
     this.onValueChange = this.onValueChange.bind(this);
     this.run = this.run.bind(this);
     this.save = this.save.bind(this);
+    this.update = this.update.bind(this);
   }
 
   saveShortcut () {
