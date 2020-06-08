@@ -1,6 +1,6 @@
 // import * as api from '@jsxcad/api-v1';
 
-import { log, read, write } from '@jsxcad/sys';
+import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
 // import { toSignature, toSnippet } from './signature';
 
 import AceEditor from 'react-ace';
@@ -153,11 +153,28 @@ export class JsEditorUi extends Pane {
   async componentDidMount () {
     const { file } = this.props;
     if (file !== undefined) {
+      const watcher = await watchFile(`source/${file}`, this.update);
+      this.setState({ watcher });
+      await this.update();
+    }
+  }
+
+  async update () {
+    const { file } = this.props;
+    if (file !== undefined) {
       let code = await read(file);
       if (code.buffer) {
         code = new TextDecoder('utf8').decode(code);
       }
       this.setState({ code });
+    }
+  }
+
+  async componentWillUnmount () {
+    const { watcher } = this.state;
+
+    if (watcher) {
+      await unwatchFiles(watcher);
     }
   }
 
