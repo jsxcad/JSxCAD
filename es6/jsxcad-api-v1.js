@@ -95,6 +95,12 @@ Shape.prototype.bigSideView = function ({ path, width = 1024, height = 512, posi
   return view(this, { path, width, height, position });
 };
 
+const md = (strings, ...placeholders) => {
+  const md = strings.reduce((result, string, i) => (result + placeholders[i - 1] + string));
+  emit({ md });
+  return md;
+};
+
 const source = (path, source) => addSource(`cache/${path}`, source);
 
 /**
@@ -108,10 +114,11 @@ const source = (path, source) => addSource(`cache/${path}`, source);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  md: md,
+  source: source,
   emit: emit,
   read: read,
   write: write,
-  source: source,
   Connector: Connector,
   X: X,
   Y: Y,
@@ -204,15 +211,9 @@ const buildImportModule = (api) =>
     const ecmascript = await toEcmascript(script);
     const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, `return async () => { ${ecmascript} };`);
     const module = await builder(api);
-    exports = await module();
+    const exports = await module();
     return exports;
   };
-
-const md = (strings, ...placeholders) => {
-  const md = strings.reduce((result, string, i) => (result + placeholders[i - 1] + string));
-  emit({ md });
-  return md;
-};
 
 const extendedApi = { ...api, toSvg };
 
