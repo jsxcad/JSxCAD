@@ -53,6 +53,24 @@ import Toast from 'react-bootstrap/Toast';
 import { deepEqual } from 'fast-equals';
 import { writeWorkspace as writeWorkspaceToGist } from './gist';
 
+const ensureFile = async (file, url, { workspace } = {}) => {
+  const sources = [];
+  if (url !== undefined) {
+    if (url.startsWith('https://github.com/')) {
+      url = `https://raw.githubusercontent.com/${url.substr(19)}`;
+      url = url.replace('/blob/', '/');
+    }
+    sources.push(url);
+  }
+  // Ensure the file exists.
+  // TODO: Handle a transform from file to source so that things github can be used sensibly.
+  const content = await read(`${file}`, { workspace, sources });
+  if (content === undefined) {
+    // If we couldn't find it, create it as an empty file.
+    await write(`${file}`, '', { workspace });
+  }
+};
+
 class Ui extends React.PureComponent {
   static get propTypes () {
     return {
@@ -599,14 +617,8 @@ class Ui extends React.PureComponent {
       this.setPaneView(id, { ...this.getPaneView(id), view, file: undefined });
     };
 
-    const selectFile = async (id, file, sources = []) => {
-      // Ensure the file exists.
-      // TODO: Handle a transform from file to source so that things github can be used sensibly.
-      const content = await read(`${file}`, { sources });
-      if (content === undefined) {
-        // If we couldn't find it, create it as an empty file.
-        await write(`${file}`, '');
-      }
+    const selectFile = async (id, file, url) => {
+      await ensureFile(file, url);
       this.setPaneView(id, { ...this.getPaneView(id), file });
     };
 
@@ -655,10 +667,7 @@ const setupUi = async (sha) => {
   let path;
   if (encodedPath !== undefined) {
     path = decodeURIComponent(encodedPath);
-    const content = await read(`source/${path}`, { sources: [path], workspace });
-    if (content === undefined) {
-      await write(`source/${path}`, '', { workspace });
-    }
+    await ensureFile(`source/${path}`, path, { workspace });
   }
   ReactDOM.render(
     <Ui workspaces={[...filesystems]}

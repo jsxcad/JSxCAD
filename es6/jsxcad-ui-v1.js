@@ -50475,13 +50475,7 @@ class Pane extends react.PureComponent {
 
     const openFileTitle = e => {
       if (e.key === 'Enter') {
-        let src = fileTitle; // FIX: Put this somewhere sensible.
-
-        if (src.startsWith('https://github.com/')) {
-          src = `https://raw.githubusercontent.com/${src.substr(19)}`;
-        }
-
-        onSelectFile(id, `source/${fileTitle}`, [src]);
+        onSelectFile(id, `source/${fileTitle}`, fileTitle);
       }
     };
 
@@ -89660,6 +89654,35 @@ var fastEquals_1 = fastEquals.deepEqual;
 
 /* global history, location, window */
 
+const ensureFile = async (file, url, {
+  workspace
+} = {}) => {
+  const sources = [];
+
+  if (url !== undefined) {
+    if (url.startsWith('https://github.com/')) {
+      url = `https://raw.githubusercontent.com/${url.substr(19)}`;
+      url = url.replace('/blob/', '/');
+    }
+
+    sources.push(url);
+  } // Ensure the file exists.
+  // TODO: Handle a transform from file to source so that things github can be used sensibly.
+
+
+  const content = await read(`${file}`, {
+    workspace,
+    sources
+  });
+
+  if (content === undefined) {
+    // If we couldn't find it, create it as an empty file.
+    await write(`${file}`, '', {
+      workspace
+    });
+  }
+};
+
 class Ui extends react.PureComponent {
   static get propTypes() {
     return {
@@ -90378,18 +90401,8 @@ class Ui extends react.PureComponent {
       });
     };
 
-    const selectFile = async (id, file, sources = []) => {
-      // Ensure the file exists.
-      // TODO: Handle a transform from file to source so that things github can be used sensibly.
-      const content = await read(`${file}`, {
-        sources
-      });
-
-      if (content === undefined) {
-        // If we couldn't find it, create it as an empty file.
-        await write(`${file}`, '');
-      }
-
+    const selectFile = async (id, file, url) => {
+      await ensureFile(file, url);
       this.setPaneView(id, { ...this.getPaneView(id),
         file
       });
@@ -90452,16 +90465,9 @@ const setupUi = async sha => {
 
   if (encodedPath !== undefined) {
     path = decodeURIComponent(encodedPath);
-    const content = await read(`source/${path}`, {
-      sources: [path],
+    await ensureFile(`source/${path}`, path, {
       workspace
     });
-
-    if (content === undefined) {
-      await write(`source/${path}`, '', {
-        workspace
-      });
-    }
   }
 
   reactDom.render(react.createElement(Ui, {
