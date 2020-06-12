@@ -3,9 +3,9 @@ import { eachItem } from './eachItem';
 export const getConnections = (geometry) => {
   const connections = [];
   eachItem(geometry,
-           item => {
-             if (item.connection) {
-               connections.push(item);
+           geometry => {
+             if (geometry.connection) {
+               connections.push(geometry);
              }
            });
   return connections;

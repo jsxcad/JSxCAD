@@ -45,7 +45,7 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
-export const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
+export const connect = (aConnectorShape, bConnectorShape, { doConnect = false, doAssemble = true } = {}) => {
   const aConnector = toKeptGeometry(aConnectorShape.toGeometry()).disjointAssembly[0];
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
@@ -91,17 +91,6 @@ export const connect = (aConnectorShape, bConnectorShape, { doConnect = true, do
           .layer(dropConnector(bShape, bConnector.plan.connector))
           .Item();
     }
-    /*
-    return Shape.fromGeometry(
-      {
-        connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-        connectors: [aMovedConnector.toKeptGeometry().disjointAssembly[0], bConnector],
-        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
-            .concat(bShape === undefined
-              ? []
-              : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
-      });
-    */
   } else {
     return aMovedShape;
   }

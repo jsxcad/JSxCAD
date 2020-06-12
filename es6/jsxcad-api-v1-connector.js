@@ -1,6 +1,6 @@
 import Shape, { Shape as Shape$1, assemble, log } from './jsxcad-api-v1-shape.js';
 import { add, random, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
-import { getPlans, getConnections, getSolids, getAnySurfaces, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
+import { visit, getConnections, getSolids, getAnySurfaces, getPlans, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import Plan from './jsxcad-api-v1-plan.js';
 import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
 import { cut } from './jsxcad-algorithm-bsp-surfaces.js';
@@ -65,6 +65,7 @@ Shape.prototype.toConnector = toConnectorMethod;
  * # connectors
  *
  * Returns the set of connectors in an assembly by tag.
+ * Note that connectors inside Items are not visible.
  * See connect().
  *
  * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
@@ -79,11 +80,14 @@ Shape.prototype.toConnector = toConnectorMethod;
 
 const connectors = (shape) => {
   const connectors = [];
-  for (const entry of getPlans(shape.toKeptGeometry())) {
-    if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-      connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
+  const walk = (geometry, descend) => {
+    if (geometry.item) ; else if (geometry.plan && geometry.plan.connector) {
+      connectors.push(Shape.fromGeometry(geometry, { [shapeToConnect]: shape }));
+    } else {
+      descend();
     }
-  }
+  };
+  visit(shape.toKeptGeometry(), walk);
   return connectors;
 };
 
@@ -369,7 +373,7 @@ Shape.prototype.left = leftMethod;
 left.signature = 'left(shape:Shape) -> Shape';
 leftMethod.signature = 'Shape -> left() -> Shape';
 
-const on = (above, below, op = _ => _) => above.bottom().from(below.top().op(op));
+const on = (above, below, op = _ => _) => above.bottom().to(below.top().op(op));
 const onMethod = function (below, op) { return on(this, below, op); };
 
 Shape.prototype.on = onMethod;
@@ -528,7 +532,7 @@ const measureAngle = ([aX, aY], [bX, bY]) => {
 
 // FIX: Separate the doConnect dispatched interfaces.
 // Connect two shapes at the specified connector.
-const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssemble = true } = {}) => {
+const connect = (aConnectorShape, bConnectorShape, { doConnect = false, doAssemble = true } = {}) => {
   const aConnector = toKeptGeometry(aConnectorShape.toGeometry()).disjointAssembly[0];
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(aConnector.planes[0], subtract(aConnector.marks[RIGHT], aConnector.marks[CENTER]));
@@ -574,17 +578,6 @@ const connect = (aConnectorShape, bConnectorShape, { doConnect = true, doAssembl
           .layer(dropConnector(bShape, bConnector.plan.connector))
           .Item();
     }
-    /*
-    return Shape.fromGeometry(
-      {
-        connection: `${aConnector.plan.connector}-${bConnector.plan.connector}`,
-        connectors: [aMovedConnector.toKeptGeometry().disjointAssembly[0], bConnector],
-        geometries: [dropConnector(aMovedShape, aConnector.plan.connector).toGeometry()]
-            .concat(bShape === undefined
-              ? []
-              : [dropConnector(bShape, bConnector.plan.connector).toGeometry()])
-      });
-    */
   } else {
     return aMovedShape;
   }
