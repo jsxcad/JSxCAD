@@ -1,6 +1,7 @@
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { toPlane } from '@jsxcad/math-poly3';
 import { toSegments } from '@jsxcad/geometry-path';
+import { toTriangles } from '@jsxcad/geometry-polygons';
 
 const pointsToThreejsPoints = (points) => points;
 
@@ -18,15 +19,16 @@ const solidToThreejsSolid = (solid) => {
   const normals = [];
   const positions = [];
   for (const surface of solid) {
-    for (const convex of makeConvex(surface)) {
-      const plane = toPlane(convex);
+    // for (const convex of makeConvex(surface)) {
+    for (const triangle of toTriangles({}, surface)) {
+      const plane = toPlane(triangle);
       if (plane === undefined) {
         continue;
       }
-      const [x, y, z] = toPlane(convex);
-      for (const point of convex) {
-        normals.push(x, y, z);
-        positions.push(...point);
+      const [px, py, pz] = toPlane(triangle);
+      for (const [x = 0, y = 0, z = 0] of triangle) {
+        normals.push(px, py, pz);
+        positions.push(x, y, z);
       }
     }
   }
