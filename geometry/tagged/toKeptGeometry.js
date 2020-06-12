@@ -1,4 +1,4 @@
-import { toDisjointGeometry } from './toDisjointGeometry';
+import { toDisjointGeometry } from "./toDisjointGeometry";
 
 // DEPRECATED
 export const toKeptGeometry = (geometry) => toDisjointGeometry(geometry);

@@ -1,4 +1,4 @@
-import { makeConvexNoHoles as makeConvexSurfaceNoHoles } from '@jsxcad/geometry-surface';
+import { makeConvexNoHoles as makeConvexSurfaceNoHoles } from "@jsxcad/geometry-surface";
 
 export const makeConvexNoHoles = (solid) => {
   const convexSolid = [];

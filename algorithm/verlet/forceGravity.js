@@ -1,4 +1,4 @@
-import { add } from '@jsxcad/math-vec3';
+import { add } from "@jsxcad/math-vec3";
 
 export const force = ({ forces }, vector) => {
   const applyGravity = ({ particle }) => {

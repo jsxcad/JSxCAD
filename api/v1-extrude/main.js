@@ -1,17 +1,17 @@
-import ChainedHull from './ChainedHull';
-import Hull from './Hull';
-import Loop from './Loop';
-import extrude from './extrude';
-import fill from './fill';
-import interior from './interior';
-import minkowski from './minkowski';
-import outline from './outline';
-import section from './section';
-import squash from './squash';
-import stretch from './stretch';
-import sweep from './sweep';
-import toolpath from './toolpath';
-import voxels from './voxels';
+import ChainedHull from "./ChainedHull";
+import Hull from "./Hull";
+import Loop from "./Loop";
+import extrude from "./extrude";
+import fill from "./fill";
+import interior from "./interior";
+import minkowski from "./minkowski";
+import outline from "./outline";
+import section from "./section";
+import squash from "./squash";
+import stretch from "./stretch";
+import sweep from "./sweep";
+import toolpath from "./toolpath";
+import voxels from "./voxels";
 
 const api = {
   ChainedHull,
@@ -27,7 +27,7 @@ const api = {
   stretch,
   sweep,
   toolpath,
-  voxels
+  voxels,
 };
 
 export {
@@ -44,7 +44,7 @@ export {
   stretch,
   sweep,
   toolpath,
-  voxels
+  voxels,
 };
 
 export default api;

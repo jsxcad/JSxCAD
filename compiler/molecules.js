@@ -26,28 +26,28 @@
 */
 
 const toSocketNameFromDescription = (description) => {
-  if (description.startsWith('3D')) return 'shape';
-  if (description === 'Equation') return 'equation';
-  if (description === 'Project ID') return 'project';
-  if (description === 'BOM Item') return 'bomItem';
-  if (description === 'Name') return 'name';
-  if (description === 'result') return 'result';
-  if (description === 'number') return 'number';
-  if (description === 'diameter') return 'diameter';
-  if (description === 'x-axis degrees') return 'x';
-  if (description === 'y-axis degrees') return 'y';
-  if (description === 'z-axis degrees') return 'z';
-  if (description === 'height') return 'height';
-  if (description === 'M') return 'm'; // what is this?
-  if (description === 'x length') return 'length';
-  if (description === 'y length') return 'width';
-  if (description === 'z length') return 'height';
-  if (description === 'xDist') return 'x';
-  if (description === 'yDist') return 'y';
-  if (description === 'zDist') return 'z';
-  if (description === 'geometry') return 'shape';
-  if (description === 'Geometry') return 'shape';
-  if (description === 'number or geometry') return 'value';
+  if (description.startsWith("3D")) return "shape";
+  if (description === "Equation") return "equation";
+  if (description === "Project ID") return "project";
+  if (description === "BOM Item") return "bomItem";
+  if (description === "Name") return "name";
+  if (description === "result") return "result";
+  if (description === "number") return "number";
+  if (description === "diameter") return "diameter";
+  if (description === "x-axis degrees") return "x";
+  if (description === "y-axis degrees") return "y";
+  if (description === "z-axis degrees") return "z";
+  if (description === "height") return "height";
+  if (description === "M") return "m"; // what is this?
+  if (description === "x length") return "length";
+  if (description === "y length") return "width";
+  if (description === "z length") return "height";
+  if (description === "xDist") return "x";
+  if (description === "yDist") return "y";
+  if (description === "zDist") return "z";
+  if (description === "geometry") return "shape";
+  if (description === "Geometry") return "shape";
+  if (description === "number or geometry") return "value";
 
   throw Error(`QQ/Unknown socket description: [${description}]`);
 };
@@ -58,7 +58,12 @@ export const toFlows = (data) => {
   let nextId = 0;
   for (const moleculeDefinition of molecules) {
     const { allAtoms, allConnectors, name, uniqueID } = moleculeDefinition;
-    const flow = { nodes: [], connections: [], flowId: uniqueID, flowName: name };
+    const flow = {
+      nodes: [],
+      connections: [],
+      flowId: uniqueID,
+      flowName: name,
+    };
 
     const nodeIdByMoleculeId = new Map();
     const toNodeId = (moleculeId) => {
@@ -87,13 +92,13 @@ export const toFlows = (data) => {
         atomFingerprints.add(fingerprint);
       }
 
-      const nodeId = getNextId('node');
+      const nodeId = getNextId("node");
       if (uniqueID === undefined) {
-        if (atomType === 'Output') {
+        if (atomType === "Output") {
           // Why is this missing?
-          uniqueID = 'Output';
+          uniqueID = "Output";
         } else {
-          throw Error('die');
+          throw Error("die");
         }
       }
       nodeIdByMoleculeId.set(uniqueID, nodeId);
@@ -105,47 +110,86 @@ export const toFlows = (data) => {
         legacyId,
         input: { sockets: [] },
         output: { sockets: [] },
-        metadata: { projectID, x, y }
+        metadata: { projectID, x, y },
       };
       switch (atom.atomType) {
-        case 'Add BOM Tag': {
+        case "Add BOM Tag": {
           const ioValue = atom.BOMitem;
-          const description = 'BOM Item';
-          const socketId = getNextId('socket');
+          const description = "BOM Item";
+          const socketId = getNextId("socket");
           const socketName = toSocketNameFromDescription(description);
-          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          node.input.sockets.push({
+            socketId,
+            socketName,
+            description,
+            pendingIoValue: ioValue,
+          });
           break;
         }
-        case 'Color': {
-          const ioValue = ['Powder blue', 'White', 'Red', 'Steel blue', 'Yellow', 'Brown', 'Cyan', 'Green', 'Pink', 'Blue', 'Silver', 'Black', 'Keep Out'][atom.selectedColorIndex];
-          const description = 'Name';
-          const socketId = getNextId('socket');
+        case "Color": {
+          const ioValue = [
+            "Powder blue",
+            "White",
+            "Red",
+            "Steel blue",
+            "Yellow",
+            "Brown",
+            "Cyan",
+            "Green",
+            "Pink",
+            "Blue",
+            "Silver",
+            "Black",
+            "Keep Out",
+          ][atom.selectedColorIndex];
+          const description = "Name";
+          const socketId = getNextId("socket");
           const socketName = toSocketNameFromDescription(description);
-          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          node.input.sockets.push({
+            socketId,
+            socketName,
+            description,
+            pendingIoValue: ioValue,
+          });
           break;
         }
-        case 'GitHubMolecule': {
+        case "GitHubMolecule": {
           const ioValue = atom.projectID;
-          const description = 'Project ID';
-          const socketId = getNextId('socket');
+          const description = "Project ID";
+          const socketId = getNextId("socket");
           const socketName = toSocketNameFromDescription(description);
-          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          node.input.sockets.push({
+            socketId,
+            socketName,
+            description,
+            pendingIoValue: ioValue,
+          });
           break;
         }
-        case 'Equation': {
+        case "Equation": {
           const ioValue = atom.currentEquation;
-          const description = 'Equation';
-          const socketId = getNextId('socket');
+          const description = "Equation";
+          const socketId = getNextId("socket");
           const socketName = toSocketNameFromDescription(description);
-          node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+          node.input.sockets.push({
+            socketId,
+            socketName,
+            description,
+            pendingIoValue: ioValue,
+          });
           break;
         }
       }
       for (const { name, ioValue } of ioValues) {
         const description = name;
-        const socketId = getNextId('socket');
+        const socketId = getNextId("socket");
         const socketName = toSocketNameFromDescription(description);
-        node.input.sockets.push({ socketId, socketName, description, pendingIoValue: ioValue });
+        node.input.sockets.push({
+          socketId,
+          socketName,
+          description,
+          pendingIoValue: ioValue,
+        });
       }
       nodeById.set(nodeId, node);
       flow.nodes.push(node);
@@ -155,30 +199,47 @@ export const toFlows = (data) => {
     const connectorFingerprints = new Set();
 
     const emitConnector = (connector) => {
-      let { ap1ID, ap1Name, ap1Primary = true, ap2ID, ap2Name, ap2Primary = false } = connector;
+      let {
+        ap1ID,
+        ap1Name,
+        ap1Primary = true,
+        ap2ID,
+        ap2Name,
+        ap2Primary = false,
+      } = connector;
       if (ap2ID === undefined) {
         // Assume this goes to the magical Output node.
-        ap2ID = 'Output';
+        ap2ID = "Output";
       }
       if (ap1ID === undefined || ap2ID === undefined) {
-        throw Error('die');
+        throw Error("die");
       }
 
       // Deduplicate connectors
-      const fingerprint = [ap1ID, ap1Name, ap1Primary, ap2ID, ap2Name, ap2Primary].join('/');
+      const fingerprint = [
+        ap1ID,
+        ap1Name,
+        ap1Primary,
+        ap2ID,
+        ap2Name,
+        ap2Primary,
+      ].join("/");
       if (connectorFingerprints.has(fingerprint)) {
         return;
       } else {
         connectorFingerprints.add(fingerprint);
       }
 
-      const connectionId = getNextId('connection');
-      const [inputNode, outputNode] = [toNode(toNodeId(ap1ID)), toNode(toNodeId(ap2ID))];
-      const inputSocketId = getNextId('socket');
+      const connectionId = getNextId("connection");
+      const [inputNode, outputNode] = [
+        toNode(toNodeId(ap1ID)),
+        toNode(toNodeId(ap2ID)),
+      ];
+      const inputSocketId = getNextId("socket");
       inputNode.output.sockets.push({
         socketId: inputSocketId,
-        socketName: ap1Primary ? '' : toSocketNameFromDescription(ap1Name),
-        description: ap1Name
+        socketName: ap1Primary ? "" : toSocketNameFromDescription(ap1Name),
+        description: ap1Name,
       });
 
       let outputSocketId;
@@ -194,23 +255,23 @@ export const toFlows = (data) => {
       }
       if (outputSocketId === undefined) {
         // Didn't fuse; add a new input.
-        outputSocketId = getNextId('socket');
+        outputSocketId = getNextId("socket");
         outputNode.input.sockets.push({
           socketId: outputSocketId,
-          socketName: ap2Primary ? '' : toSocketNameFromDescription(ap2Name),
-          description: ap2Name
+          socketName: ap2Primary ? "" : toSocketNameFromDescription(ap2Name),
+          description: ap2Name,
         });
       }
       const connection = {
         connectionId,
         input: {
           nodeId: inputNode.nodeId,
-          socketId: inputSocketId
+          socketId: inputSocketId,
         },
         output: {
           nodeId: outputNode.nodeId,
-          socketId: outputSocketId
-        }
+          socketId: outputSocketId,
+        },
       };
       flow.connections.push(connection);
     };
@@ -222,39 +283,41 @@ export const toFlows = (data) => {
         if (pendingIoValue !== undefined) {
           delete socket.pendingIoValue;
           // FIX: Assumes numeric constant.
-          const constantNodeId = getNextId('node');
-          const constantSocketId = getNextId('socket');
+          const constantNodeId = getNextId("node");
+          const constantSocketId = getNextId("socket");
           const constantNode = {
             op: {
-              opId: 'Constant',
-              parameters: { value: pendingIoValue }
+              opId: "Constant",
+              parameters: { value: pendingIoValue },
             },
             name: pendingIoValue,
             nodeId: constantNodeId,
             input: {
-              sockets: []
+              sockets: [],
             },
             output: {
-              sockets: [{
-                socketId: constantSocketId,
-                socketName: 'number',
-                description: pendingIoValue
-              }]
-            }
+              sockets: [
+                {
+                  socketId: constantSocketId,
+                  socketName: "number",
+                  description: pendingIoValue,
+                },
+              ],
+            },
           };
           nodeById.set(constantNodeId, constantNode);
           flow.nodes.push(constantNode);
-          const connectionId = getNextId('connection');
+          const connectionId = getNextId("connection");
           flow.connections.push({
             connectionId,
             input: {
               nodeId: constantNodeId,
-              socketId: constantSocketId
+              socketId: constantSocketId,
             },
             output: {
               nodeId,
-              socketId
-            }
+              socketId,
+            },
           });
         }
       }
@@ -285,20 +348,20 @@ export const toDotFromFlows = (flows) => {
     dot.push(`    label = "${flowName}\n(${flowId})";`);
 
     const emitInputSocket = (node, socket) => {
-      const { socketId, socketName = '' } = socket;
+      const { socketId, socketName = "" } = socket;
       const { nodeId } = node;
       dot.push(`    ${socketId} [label="" shape=point];`);
       dot.push(`    ${socketId} -> ${nodeId} [label="${socketName}"];`);
-      if (socketId === undefined) throw Error('die');
-      if (nodeId === undefined) throw Error('die');
+      if (socketId === undefined) throw Error("die");
+      if (nodeId === undefined) throw Error("die");
     };
     const emitOutputSocket = (node, socket) => {
-      const { socketId, socketName = '' } = socket;
+      const { socketId, socketName = "" } = socket;
       const { nodeId } = node;
       dot.push(`    ${socketId} [label="" shape=point];`);
       dot.push(`    ${nodeId} -> ${socketId} [label="${socketName}"];`);
-      if (socketId === undefined) throw Error('die');
-      if (nodeId === undefined) throw Error('die');
+      if (socketId === undefined) throw Error("die");
+      if (nodeId === undefined) throw Error("die");
     };
     const emitNode = (node) => {
       const { nodeId, name, op, input, output, legacyId } = node;
@@ -306,7 +369,9 @@ export const toDotFromFlows = (flows) => {
       for (const socket of input.sockets) {
         emitInputSocket(node, socket);
       }
-      dot.push(`    ${nodeId} [label="${name}\n(${opId}\n${nodeId}\n${legacyId})"];`);
+      dot.push(
+        `    ${nodeId} [label="${name}\n(${opId}\n${nodeId}\n${legacyId})"];`
+      );
       for (const socket of output.sockets) {
         emitOutputSocket(node, socket);
       }
@@ -314,13 +379,13 @@ export const toDotFromFlows = (flows) => {
     const emitConnection = (connection) => {
       const { input, output } = connection;
       dot.push(`    ${input.socketId} -> ${output.socketId} [label = ""];`);
-      if (input.socketId === undefined) throw Error('die');
-      if (output.socketId === undefined) throw Error('die');
+      if (input.socketId === undefined) throw Error("die");
+      if (output.socketId === undefined) throw Error("die");
     };
     flow.nodes.forEach(emitNode);
     flow.connections.forEach(emitConnection);
     dot.push(`  }`);
   }
   dot.push(`}`);
-  return dot.join('\n');
+  return dot.join("\n");
 };

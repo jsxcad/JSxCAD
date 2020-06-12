@@ -1,7 +1,4 @@
-import { isWatertightPolygons } from './isWatertightPolygons';
-import { makeWatertight } from './makeWatertight';
+import { isWatertightPolygons } from "./isWatertightPolygons";
+import { makeWatertight } from "./makeWatertight";
 
-export {
-  isWatertightPolygons,
-  makeWatertight
-};
+export { isWatertightPolygons, makeWatertight };

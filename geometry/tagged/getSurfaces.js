@@ -1,12 +1,11 @@
-import { eachItem } from './eachItem';
+import { eachItem } from "./eachItem";
 
 export const getSurfaces = (geometry) => {
   const surfaces = [];
-  eachItem(geometry,
-           item => {
-             if (item.surface) {
-               surfaces.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.surface) {
+      surfaces.push(item);
+    }
+  });
   return surfaces;
 };

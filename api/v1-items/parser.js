@@ -1,4 +1,4 @@
-import Parsimon from 'parsimmon';
+import Parsimon from "parsimmon";
 
 const { alt, regexp, seq, string } = Parsimon;
 

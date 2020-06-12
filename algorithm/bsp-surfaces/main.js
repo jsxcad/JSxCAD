@@ -1,12 +1,12 @@
-import { cut, cutOpen } from './cut';
+import { cut, cutOpen } from "./cut";
 
-import { containsPoint } from './containsPoint';
-import { deform } from './deform';
-import { difference } from './difference';
-import { fromSolid } from './bsp';
-import { intersection } from './intersection';
-import { section } from './section';
-import { union } from './union';
+import { containsPoint } from "./containsPoint";
+import { deform } from "./deform";
+import { difference } from "./difference";
+import { fromSolid } from "./bsp";
+import { intersection } from "./intersection";
+import { section } from "./section";
+import { union } from "./union";
 
 export {
   containsPoint,
@@ -17,5 +17,5 @@ export {
   fromSolid,
   intersection,
   section,
-  union
+  union,
 };

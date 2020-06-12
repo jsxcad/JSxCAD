@@ -1,6 +1,6 @@
-import { readFile, getSources } from './jsxcad-sys.js';
-import Shape from './jsxcad-api-v1-shape.js';
-import { scriptToOperator } from './jsxcad-convert-jscad.js';
+import { readFile, getSources } from "./jsxcad-sys.js";
+import Shape from "./jsxcad-api-v1-shape.js";
+import { scriptToOperator } from "./jsxcad-convert-jscad.js";
 
 /**
  *
@@ -18,19 +18,28 @@ import { scriptToOperator } from './jsxcad-convert-jscad.js';
  **/
 
 const readJscad = async (options = {}) => {
-  if (typeof options === 'string') {
+  if (typeof options === "string") {
     options = { path: options };
   }
   let { path, script } = options;
   if (script === undefined) {
     if (path !== undefined) {
-      script = await readFile({ doSerialize: false, ...options }, `source/${path}`);
+      script = await readFile(
+        { doSerialize: false, ...options },
+        `source/${path}`
+      );
       if (script === undefined) {
-        script = await readFile({ sources: getSources(`cache/${path}`), options }, `cache/${path}`);
+        script = await readFile(
+          { sources: getSources(`cache/${path}`), options },
+          `cache/${path}`
+        );
       }
     }
   }
-  const { getGeometry, getParameterDefinitions } = await scriptToOperator({}, script);
+  const { getGeometry, getParameterDefinitions } = await scriptToOperator(
+    {},
+    script
+  );
   const jscadOp = (parameters) => {
     return Shape.fromGeometry(getGeometry(parameters));
   };

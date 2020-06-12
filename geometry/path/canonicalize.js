@@ -1,8 +1,8 @@
-import { canonicalize as canonicalizeOfVec3 } from '@jsxcad/math-vec3';
+import { canonicalize as canonicalizeOfVec3 } from "@jsxcad/math-vec3";
 
 const canonicalizePoint = (point, index) => {
   if (point === null) {
-    if (index !== 0) throw Error('Path has null not at head');
+    if (index !== 0) throw Error("Path has null not at head");
     return point;
   } else {
     return canonicalizeOfVec3(point);

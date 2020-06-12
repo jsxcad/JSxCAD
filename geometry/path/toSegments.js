@@ -12,8 +12,8 @@ export const toSegments = (options = {}, path) => {
   for (let nth = 2; nth < path.length; nth++) {
     segments.push([path[nth - 1], path[nth]]);
   }
-  if (segments.some(segment => segment[1] === undefined)) {
-    throw Error('die');
+  if (segments.some((segment) => segment[1] === undefined)) {
+    throw Error("die");
   }
   return segments;
 };

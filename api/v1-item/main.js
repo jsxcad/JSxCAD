@@ -1,12 +1,12 @@
-import { fromDesignator, registerDesignator } from './designator';
+import { fromDesignator, registerDesignator } from "./designator";
 
-import Item from './Item';
-import bom from './bom';
-import fuse from './fuse';
-import inItems from './inItems';
-import items from './items';
-import leafs from './leafs';
-import toBillOfMaterial from './toBillOfMaterial';
+import Item from "./Item";
+import bom from "./bom";
+import fuse from "./fuse";
+import inItems from "./inItems";
+import items from "./items";
+import leafs from "./leafs";
+import toBillOfMaterial from "./toBillOfMaterial";
 
 const api = {
   Item,
@@ -17,7 +17,7 @@ const api = {
   items,
   leafs,
   registerDesignator,
-  toBillOfMaterial
+  toBillOfMaterial,
 };
 
 export {
@@ -29,7 +29,7 @@ export {
   items,
   leafs,
   registerDesignator,
-  toBillOfMaterial
+  toBillOfMaterial,
 };
 
 export default api;

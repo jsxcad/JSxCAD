@@ -1,11 +1,11 @@
-import { qualifyPath } from './filesystem';
+import { qualifyPath } from "./filesystem";
 
 const files = new Map();
 const fileCreationWatchers = new Set();
 const fileDeletionWatchers = new Set();
 
 export const getFile = async (options, unqualifiedPath) => {
-  if (typeof unqualifiedPath !== 'string') {
+  if (typeof unqualifiedPath !== "string") {
     throw Error(`die: ${JSON.stringify(unqualifiedPath)}`);
   }
   const path = qualifyPath(unqualifiedPath);

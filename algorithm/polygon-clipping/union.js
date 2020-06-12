@@ -1,7 +1,7 @@
-import { fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from "./convert";
 
-import { doesNotOverlapOrAbut } from './doesNotOverlap';
-import polygonClipping from './polygon-clipping.esm.js';
+import { doesNotOverlapOrAbut } from "./doesNotOverlap";
+import polygonClipping from "./polygon-clipping.esm.js";
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -23,7 +23,9 @@ export const union = (...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
-      z0Surfaces.push(toSurface(polygonClipping.union(fromSurface(a), fromSurface(b))));
+      z0Surfaces.push(
+        toSurface(polygonClipping.union(fromSurface(a), fromSurface(b)))
+      );
     }
   }
   return z0Surfaces[0];

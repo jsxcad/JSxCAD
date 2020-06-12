@@ -1,6 +1,6 @@
-import { fromGeometry, toKeptGeometry } from './Shape';
+import { fromGeometry, toKeptGeometry } from "./Shape";
 
-import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
+import { intersection as intersectionGeometry } from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -66,6 +66,6 @@ export const intersection = (...shapes) => {
   }
 };
 
-intersection.signature = 'intersection(shape:Shape, ...to:Shape) -> Shape';
+intersection.signature = "intersection(shape:Shape, ...to:Shape) -> Shape";
 
 export default intersection;

@@ -1,16 +1,19 @@
-import { fromPolygons } from '@jsxcad/geometry-solid';
-import parseStlAscii from 'parse-stl-ascii';
-import { parse as parseStlBinary } from './parseStlBinary';
+import { fromPolygons } from "@jsxcad/geometry-solid";
+import parseStlAscii from "parse-stl-ascii";
+import { parse as parseStlBinary } from "./parseStlBinary";
 
 const toParser = (format) => {
   switch (format) {
-    case 'ascii': return parseStlAscii;
-    case 'binary': return parseStlBinary;
-    default: throw Error('die');
+    case "ascii":
+      return parseStlAscii;
+    case "binary":
+      return parseStlBinary;
+    default:
+      throw Error("die");
   }
 };
 
-export const fromStl = async (stl, { format = 'ascii' } = {}) => {
+export const fromStl = async (stl, { format = "ascii" } = {}) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];

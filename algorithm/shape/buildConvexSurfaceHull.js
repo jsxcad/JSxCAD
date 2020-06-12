@@ -1,5 +1,5 @@
-import ConvexHull2d from 'monotone-convex-hull-2d';
-import { cache } from '@jsxcad/cache';
+import ConvexHull2d from "monotone-convex-hull-2d";
+import { cache } from "@jsxcad/cache";
 
 const buildConvexSurfaceHullImpl = (points) => {
   const hull = [];

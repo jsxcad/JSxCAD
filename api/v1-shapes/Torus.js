@@ -1,4 +1,4 @@
-import { Circle } from './Circle';
+import { Circle } from "./Circle";
 
 /**
  *
@@ -28,11 +28,15 @@ import { Circle } from './Circle';
  *
  **/
 
-export const Torus = (radius = 1, height = 1, { segments = 32, sides = 32, rotation = 0 } = {}) =>
+export const Torus = (
+  radius = 1,
+  height = 1,
+  { segments = 32, sides = 32, rotation = 0 } = {}
+) =>
   Circle(height / 2, { sides })
-      .rotateZ(rotation)
-      .moveY(radius)
-      .Loop(360, { sides: segments })
-      .rotateY(90);
+    .rotateZ(rotation)
+    .moveY(radius)
+    .Loop(360, { sides: segments })
+    .rotateY(90);
 
 export default Torus;

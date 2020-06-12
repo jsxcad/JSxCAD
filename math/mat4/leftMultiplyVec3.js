@@ -1,4 +1,4 @@
-import { fromValues } from '@jsxcad/math-vec3';
+import { fromValues } from "@jsxcad/math-vec3";
 
 /**
  * Multiply the input matrix by a Vector3 (interpreted as 3 column, 1 row)

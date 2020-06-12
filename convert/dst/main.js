@@ -1,5 +1,3 @@
-import { fromDst } from './fromDst';
+import { fromDst } from "./fromDst";
 
-export {
-  fromDst
-};
+export { fromDst };

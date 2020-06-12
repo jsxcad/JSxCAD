@@ -1,6 +1,6 @@
-import { Shape, fromGeometry, toGeometry } from './Shape';
+import { Shape, fromGeometry, toGeometry } from "./Shape";
 
-import { nonNegative } from '@jsxcad/geometry-tagged';
+import { nonNegative } from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -8,12 +8,20 @@ import { nonNegative } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const nocut = (shape, ...tags) => fromGeometry(nonNegative(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+export const nocut = (shape, ...tags) =>
+  fromGeometry(
+    nonNegative(
+      tags.map((tag) => `user/${tag}`),
+      toGeometry(shape)
+    )
+  );
 
-const nocutMethod = function (...tags) { return nocut(this, tags); };
+const nocutMethod = function (...tags) {
+  return nocut(this, tags);
+};
 Shape.prototype.nocut = nocutMethod;
 
 export default nocut;
 
-nocut.signature = 'nocut(shape:Shape, ...tag:string) -> Shape';
-nocutMethod.signature = 'Shape -> nocut(...tag:string) -> Shape';
+nocut.signature = "nocut(shape:Shape, ...tag:string) -> Shape";
+nocutMethod.signature = "Shape -> nocut(...tag:string) -> Shape";

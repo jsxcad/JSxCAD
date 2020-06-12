@@ -1,6 +1,6 @@
-import { cross, dot, negate, normalize, subtract } from '@jsxcad/math-vec3';
+import { cross, dot, negate, normalize, subtract } from "@jsxcad/math-vec3";
 
-import { Shape } from './Shape';
+import { Shape } from "./Shape";
 
 /**
  *
@@ -20,23 +20,28 @@ import { Shape } from './Shape';
  * :::
  **/
 
-export const orient = (shape, { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }) => {
+export const orient = (
+  shape,
+  { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }
+) => {
   const normalizedFacing = normalize(facing);
   const normalizedAt = normalize(subtract(at, from));
 
-  const angle = Math.acos(dot(normalizedFacing, normalizedAt)) * 180 / Math.PI;
+  const angle =
+    (Math.acos(dot(normalizedFacing, normalizedAt)) * 180) / Math.PI;
   const axis = normalize(cross(normalizedFacing, normalizedAt));
 
-  return shape
-      .move(negate(center))
-      .rotate(angle, axis)
-      .move(from);
+  return shape.move(negate(center)).rotate(angle, axis).move(from);
 };
 
-const orientMethod = function (...args) { return orient(this, ...args); };
+const orientMethod = function (...args) {
+  return orient(this, ...args);
+};
 Shape.prototype.orient = orientMethod;
 
-orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
+orient.signature =
+  "orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape";
+orientMethod.signature =
+  "Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape";
 
 export default orient;

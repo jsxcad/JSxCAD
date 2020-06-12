@@ -1,4 +1,4 @@
-import { add, dot, scale, subtract } from '@jsxcad/math-vec3';
+import { add, dot, scale, subtract } from "@jsxcad/math-vec3";
 
 /**
  * Determine the closest point on the given line to the given point.

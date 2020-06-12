@@ -1,9 +1,9 @@
-import { create } from './create';
-import { fromPoints } from './fromPoints';
-import { origin } from './origin';
-import test from 'ava';
+import { create } from "./create";
+import { fromPoints } from "./fromPoints";
+import { origin } from "./origin";
+import test from "ava";
 
-test('line3: origin() should return proper origins', (t) => {
+test("line3: origin() should return proper origins", (t) => {
   const line1 = create();
   const org1 = origin(line1);
   t.deepEqual(org1, [0, 0, 0]);

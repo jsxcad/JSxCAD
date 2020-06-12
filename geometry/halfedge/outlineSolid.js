@@ -3,11 +3,11 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import clean from './clean';
-import fromSolid from './fromSolid';
-import merge from './merge';
-import split from './split';
-import toPolygons from './toPolygons';
+import clean from "./clean";
+import fromSolid from "./fromSolid";
+import merge from "./merge";
+import split from "./split";
+import toPolygons from "./toPolygons";
 
 /**
  * Produces the outline of a solid.

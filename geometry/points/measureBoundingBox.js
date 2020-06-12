@@ -1,15 +1,14 @@
-import { max as maxOfVec3, min as minOfVec3 } from '@jsxcad/math-vec3';
+import { max as maxOfVec3, min as minOfVec3 } from "@jsxcad/math-vec3";
 
-import { eachPoint } from './eachPoint';
+import { eachPoint } from "./eachPoint";
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 export const measureBoundingBox = (points) => {
   let max = points[0];
   let min = points[0];
-  eachPoint(point => {
+  eachPoint((point) => {
     max = maxOfVec3(max, point);
     min = minOfVec3(min, point);
-  },
-            points);
+  }, points);
   return [min, max];
 };

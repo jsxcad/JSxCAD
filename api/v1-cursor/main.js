@@ -1,4 +1,4 @@
-import Cursor from './Cursor';
+import Cursor from "./Cursor";
 
-export { Cursor } from './Cursor';
+export { Cursor } from "./Cursor";
 export default Cursor;

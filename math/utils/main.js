@@ -1,9 +1,9 @@
-import { clamp } from './clamp';
-import { degToRad } from './degToRad';
-import { quantizeForSpace } from './quantizeForSpace';
-import { radToDeg } from './radToDeg';
-import { reallyQuantizeForSpace } from './reallyQuantizeForSpace';
-import { solve2Linear } from './solve2Linear';
+import { clamp } from "./clamp";
+import { degToRad } from "./degToRad";
+import { quantizeForSpace } from "./quantizeForSpace";
+import { radToDeg } from "./radToDeg";
+import { reallyQuantizeForSpace } from "./reallyQuantizeForSpace";
+import { solve2Linear } from "./solve2Linear";
 
 export {
   clamp,
@@ -11,5 +11,5 @@ export {
   quantizeForSpace,
   radToDeg,
   reallyQuantizeForSpace,
-  solve2Linear
+  solve2Linear,
 };

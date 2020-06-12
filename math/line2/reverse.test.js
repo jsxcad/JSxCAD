@@ -1,10 +1,10 @@
-import { canonicalize } from './canonicalize';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import { reverse } from './reverse';
-import test from 'ava';
+import { canonicalize } from "./canonicalize";
+import { fromPoints } from "./fromPoints";
+import { fromValues } from "./fromValues";
+import { reverse } from "./reverse";
+import test from "ava";
 
-test('line2: reverse() should return proper lines', (t) => {
+test("line2: reverse() should return proper lines", (t) => {
   const line1 = fromValues();
   const rev1 = reverse(line1);
   t.deepEqual(canonicalize(rev1), [-0, -1, -0]);

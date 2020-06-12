@@ -1,4 +1,4 @@
-import { dot, length, scale } from '@jsxcad/math-vec3';
+import { dot, length, scale } from "@jsxcad/math-vec3";
 
 const X = 0;
 const Y = 1;
@@ -21,7 +21,7 @@ export const fromPolygon = (polygon) => {
   }
   const factor = 1 / length(normal);
   const plane = scale(factor, normal);
-  plane[W] = dot(reference, normal) * factor / polygon.length;
+  plane[W] = (dot(reference, normal) * factor) / polygon.length;
   if (isNaN(plane[X])) {
     return undefined;
   } else {

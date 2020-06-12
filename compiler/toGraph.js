@@ -1,7 +1,7 @@
 // FIX: Is this specific to the v1 api? If so, move it there.
 
-import { generate } from 'astring';
-import { parse } from 'acorn';
+import { generate } from "astring";
+import { parse } from "acorn";
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -9,7 +9,7 @@ export const strip = (ast) => {
   } else if (ast instanceof Object) {
     const stripped = {};
     for (const key of Object.keys(ast)) {
-      if (['end', 'loc', 'start'].includes(key)) {
+      if (["end", "loc", "start"].includes(key)) {
         continue;
       }
       stripped[key] = strip(ast[key]);
@@ -21,13 +21,11 @@ export const strip = (ast) => {
 };
 
 export const toGraph = ({ includeSource = false }, script) => {
-  let ast = parse(script,
-                  {
-                    allowAwaitOutsideFunction: true,
-                    allowReturnOutsideFunction: true,
-                    sourceType: 'module'
-                  }
-  );
+  let ast = parse(script, {
+    allowAwaitOutsideFunction: true,
+    allowReturnOutsideFunction: true,
+    sourceType: "module",
+  });
 
   const strippedAst = strip(ast);
 
@@ -56,38 +54,41 @@ export const toGraph = ({ includeSource = false }, script) => {
   const walkExpression = (expression) => {
     const { type } = expression;
     switch (type) {
-      case 'CallExpression': {
+      case "CallExpression": {
         return allocateNode({
           call: walkExpression(expression.callee),
           arguments: expression.arguments.map(walkExpression),
-          source: includeSource ? expression : undefined
+          source: includeSource ? expression : undefined,
         });
       }
-      case 'MemberExpression': {
+      case "MemberExpression": {
         const { object, property, computed } = expression;
         return allocateNode({
           object: walkExpression(object),
           member: walkExpression(property),
           computed,
-          source: includeSource ? expression : undefined
+          source: includeSource ? expression : undefined,
         });
       }
-      case 'NumericLiteral': {
+      case "NumericLiteral": {
         const { value } = expression;
         return allocateNode({
           number: value,
-          source: includeSource ? expression : undefined
+          source: includeSource ? expression : undefined,
         });
       }
-      case 'Identifier': {
+      case "Identifier": {
         const { name } = expression;
         const identifier = findIdentifier(name);
         if (identifier === undefined) {
           // Undeclared identifier.
-          return addIdentifier(name, allocateNode({
-            identifier: name,
-            source: includeSource ? expression : undefined
-          }));
+          return addIdentifier(
+            name,
+            allocateNode({
+              identifier: name,
+              source: includeSource ? expression : undefined,
+            })
+          );
         } else {
           return identifier;
         }
@@ -96,7 +97,7 @@ export const toGraph = ({ includeSource = false }, script) => {
   };
 
   const walkStatement = (entry) => {
-    if (entry.type === 'ExpressionStatement') {
+    if (entry.type === "ExpressionStatement") {
       walkExpression(entry.expression);
     }
   };
@@ -144,5 +145,5 @@ export const toDot = ({ nodes, edges }) => {
     }
   }
   dot.push(`}`);
-  return dot.join('\n');
+  return dot.join("\n");
 };

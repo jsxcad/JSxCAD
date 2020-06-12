@@ -1,8 +1,8 @@
-import { add, transform } from '@jsxcad/math-vec3';
-import { fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
+import { add, transform } from "@jsxcad/math-vec3";
+import { fromZRotation, identity, multiply } from "@jsxcad/math-mat4";
 
-import Shape from '@jsxcad/api-v1-shape';
-import { close } from '@jsxcad/geometry-path';
+import Shape from "@jsxcad/api-v1-shape";
+import { close } from "@jsxcad/geometry-path";
 
 // Normalize (1, 2, 3) and ([1, 2, 3]).
 const normalizeVector = (...params) => {
@@ -43,32 +43,32 @@ const normalizeVector = (...params) => {
  **/
 
 export class Cursor {
-  constructor ({ matrix = identity(), path = [null, [0, 0, 0]] } = {}) {
+  constructor({ matrix = identity(), path = [null, [0, 0, 0]] } = {}) {
     this.matrix = matrix;
     this.path = path.slice();
   }
 
-  close () {
+  close() {
     return new Cursor({ matrix: this.matrix, path: close(this.path) });
   }
 
-  interior () {
+  interior() {
     return this.close().toShape().interior();
   }
 
-  move (...params) {
+  move(...params) {
     return this.translate(...params);
   }
 
-  outline () {
+  outline() {
     return this.close().toShape();
   }
 
-  rotateZ (angle) {
-    return this.transform(fromZRotation(angle * Math.PI * 2 / 360));
+  rotateZ(angle) {
+    return this.transform(fromZRotation((angle * Math.PI * 2) / 360));
   }
 
-  toPoint () {
+  toPoint() {
     const last = this.path[this.path.length - 1];
     if (last === null) {
       return [0, 0, 0];
@@ -77,38 +77,41 @@ export class Cursor {
     }
   }
 
-  toPath () {
+  toPath() {
     return this.path;
   }
 
-  toShape () {
+  toShape() {
     return Shape.fromPath(this.toPath());
   }
 
-  transform (matrix) {
-    return new Cursor({ matrix: multiply(matrix, this.matrix), path: this.path });
+  transform(matrix) {
+    return new Cursor({
+      matrix: multiply(matrix, this.matrix),
+      path: this.path,
+    });
   }
 
-  translate (...params) {
+  translate(...params) {
     const [x, y, z] = normalizeVector(params);
     const path = this.path.slice();
     path.push(add(this.toPoint(), transform(this.matrix, [x, y, z])));
     return new Cursor({ matrix: this.matrix, path });
   }
 
-  turn (angle) {
+  turn(angle) {
     return this.rotateZ(angle);
   }
 
-  left (angle) {
+  left(angle) {
     return this.turn(angle);
   }
 
-  right (angle) {
+  right(angle) {
     return this.turn(-angle);
   }
 
-  forward (distance) {
+  forward(distance) {
     return this.move(distance);
   }
 }
@@ -116,6 +119,6 @@ export class Cursor {
 export const fromOrigin = () => new Cursor();
 Cursor.fromOrigin = fromOrigin;
 
-Cursor.signature = 'Cursor.fromOrigin() -> Cursor';
+Cursor.signature = "Cursor.fromOrigin() -> Cursor";
 
 export default Cursor;

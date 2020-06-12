@@ -1,8 +1,8 @@
-import { fromDesignator, registerDesignator } from './designator';
-import { rewriteTags, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { fromDesignator, registerDesignator } from "./designator";
+import { rewriteTags, toKeptGeometry } from "@jsxcad/geometry-tagged";
 
-import { Connector } from '@jsxcad/api-v1-connector';
-import Shape from '@jsxcad/api-v1-shape';
+import { Connector } from "@jsxcad/api-v1-connector";
+import Shape from "@jsxcad/api-v1-shape";
 
 /**
  *
@@ -14,7 +14,7 @@ import Shape from '@jsxcad/api-v1-shape';
 
 // Constructs an item from the designator.
 export const Item = (designator) => {
-  if (typeof designator === 'string') {
+  if (typeof designator === "string") {
     return fromDesignator(designator);
   } else if (designator instanceof Array) {
     return fromDesignator(...designator);
@@ -23,17 +23,21 @@ export const Item = (designator) => {
 
 // Turns the current shape into an item.
 const itemMethod = function (id) {
-  const shape = Shape.fromGeometry(toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() })))
-      .with(Connector('center'));
+  const shape = Shape.fromGeometry(
+    toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }))
+  ).with(Connector("center"));
   // Register the designator for re-use.
-  registerDesignator(d => (d === id), () => shape);
+  registerDesignator(
+    (d) => d === id,
+    () => shape
+  );
   return shape;
 };
 
 Shape.prototype.Item = itemMethod;
 Shape.prototype.toItem = itemMethod;
 
-Item.signature = 'Item(shape:Shape, id:string) -> Shape';
-itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
+Item.signature = "Item(shape:Shape, id:string) -> Shape";
+itemMethod.signature = "Shape -> toItem(id:string) -> Shape";
 
 export default Item;

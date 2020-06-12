@@ -1,8 +1,8 @@
 import {
   alignVertices,
   toPolygons as toPolygonsFromSolid,
-  fromPolygons as toSolidFromPolygons
-} from '@jsxcad/geometry-solid';
+  fromPolygons as toSolidFromPolygons,
+} from "@jsxcad/geometry-solid";
 
 import {
   clean,
@@ -11,18 +11,15 @@ import {
   outLeaf,
   removeInteriorPolygonsForUnionDroppingOverlap,
   removeInteriorPolygonsForUnionKeepingOverlap,
-  fromPolygons as toBspFromPolygons
-} from './bsp';
+  fromPolygons as toBspFromPolygons,
+} from "./bsp";
 
-import {
-  doesNotOverlap,
-  measureBoundingBox
-} from '@jsxcad/geometry-polygons';
+import { doesNotOverlap, measureBoundingBox } from "@jsxcad/geometry-polygons";
 
-import { containsPoint } from './containsPoint';
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { max } from '@jsxcad/math-vec3';
-import partition from './partition';
+import { containsPoint } from "./containsPoint";
+import { createNormalize3 } from "@jsxcad/algorithm-quantize";
+import { max } from "@jsxcad/math-vec3";
+import partition from "./partition";
 
 const MIN = 0;
 
@@ -35,7 +32,9 @@ export const union = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map(solid => toPolygonsFromSolid(alignVertices(solid, normalize)));
+  const s = solids.map((solid) =>
+    toPolygonsFromSolid(alignVertices(solid, normalize))
+  );
   while (s.length >= 2) {
     const a = s.shift();
     const b = s.shift();
@@ -76,8 +75,16 @@ export const union = (...solids) => {
         s.push([...a, ...b]);
       }
     } else {
-      const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(bBsp, aIn, normalize);
-      const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(aBsp, bIn, normalize);
+      const aTrimmed = removeInteriorPolygonsForUnionKeepingOverlap(
+        bBsp,
+        aIn,
+        normalize
+      );
+      const bTrimmed = removeInteriorPolygonsForUnionDroppingOverlap(
+        aBsp,
+        bIn,
+        normalize
+      );
 
       s.push(clean([...aOut, ...bTrimmed, ...bOut, ...aTrimmed]));
     }

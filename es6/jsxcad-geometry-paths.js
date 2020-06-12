@@ -1,6 +1,14 @@
-import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { canonicalize as canonicalize$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon, transform as transform$1 } from './jsxcad-geometry-path.js';
-import { fromPoint, min, max } from './jsxcad-math-vec3.js';
+import { fromScaling, fromTranslation } from "./jsxcad-math-mat4.js";
+import {
+  canonicalize as canonicalize$1,
+  getEdges,
+  flip as flip$1,
+  toGeneric as toGeneric$1,
+  toPolygon,
+  toZ0Polygon,
+  transform as transform$1,
+} from "./jsxcad-geometry-path.js";
+import { fromPoint, min, max } from "./jsxcad-math-vec3.js";
 
 const butLast = (paths) => paths.slice(0, paths.length - 1);
 
@@ -30,7 +38,7 @@ const eachPoint = (thunk, paths) => {
 // Expects aligned vertices.
 
 const findOpenEdges = (paths, isOpen) => {
-  const test = (closed) => isOpen ? !closed : closed;
+  const test = (closed) => (isOpen ? !closed : closed);
 
   const edges = new Set();
 
@@ -57,17 +65,22 @@ const flip = (paths) => paths.map(flip$1);
 
 const intersection = (pathset, ...pathsets) => pathset;
 
-const last = (paths) => paths.length >= 1 ? paths[paths.length - 1] : [null];
+const last = (paths) => (paths.length >= 1 ? paths[paths.length - 1] : [null]);
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 const measureBoundingBox = (paths) => {
   let minPoint;
   let maxPoint;
-  eachPoint(point => {
-    minPoint = (minPoint === undefined) ? fromPoint(point) : min(minPoint, fromPoint(point));
-    maxPoint = (maxPoint === undefined) ? fromPoint(point) : max(maxPoint, fromPoint(point));
-  },
-            paths);
+  eachPoint((point) => {
+    minPoint =
+      minPoint === undefined
+        ? fromPoint(point)
+        : min(minPoint, fromPoint(point));
+    maxPoint =
+      maxPoint === undefined
+        ? fromPoint(point)
+        : max(maxPoint, fromPoint(point));
+  }, paths);
   return [minPoint, maxPoint];
 };
 
@@ -83,17 +96,17 @@ const map = (original, transform) => {
     original = [];
   }
   if (transform === undefined) {
-    transform = _ => _;
+    transform = (_) => _;
   }
   // FIX: Consider optimizing this to return the original if all transforms are identity transforms.
-  return original.map(path => transform(path));
+  return original.map((path) => transform(path));
 };
 
 const toGeneric = (paths) => map(paths, toGeneric$1);
 
 const toPoints = (paths) => {
   const points = [];
-  eachPoint(point => points.push(point), paths);
+  eachPoint((point) => points.push(point), paths);
   return points;
 };
 
@@ -113,13 +126,34 @@ const toZ0Polygons = (paths) => {
   return paths;
 };
 
-const transform = (matrix, paths) => paths.map(path => transform$1(matrix, path));
+const transform = (matrix, paths) =>
+  paths.map((path) => transform$1(matrix, path));
 
 // FIX: Deduplication.
 
 const union = (...pathsets) => [].concat(...pathsets);
 
-const scale = ([x = 1, y = 1, z = 1], paths) => transform(fromScaling([x, y, z]), paths);
-const translate = ([x = 0, y = 0, z = 0], paths) => transform(fromTranslation([x, y, z]), paths);
+const scale = ([x = 1, y = 1, z = 1], paths) =>
+  transform(fromScaling([x, y, z]), paths);
+const translate = ([x = 0, y = 0, z = 0], paths) =>
+  transform(fromTranslation([x, y, z]), paths);
 
-export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
+export {
+  butLast,
+  canonicalize,
+  difference,
+  eachPoint,
+  findOpenEdges,
+  flip,
+  intersection,
+  last,
+  measureBoundingBox,
+  scale,
+  toGeneric,
+  toPoints,
+  toPolygons,
+  toZ0Polygons,
+  transform,
+  translate,
+  union,
+};

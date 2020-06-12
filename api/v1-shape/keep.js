@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { rewrite } from '@jsxcad/geometry-tagged';
+import { Shape } from "./Shape";
+import { rewrite } from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -49,14 +49,22 @@ const selectToKeep = (matchTags, geometryTags) => {
   return false;
 };
 
-const selectToDrop = (matchTags, geometryTags) => !selectToKeep(matchTags, geometryTags);
+const selectToDrop = (matchTags, geometryTags) =>
+  !selectToKeep(matchTags, geometryTags);
 
 const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map(tag => `user/${tag}`);
+  const matchTags = tags.map((tag) => `user/${tag}`);
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.
-    if (geometry.solid || geometry.surface || geometry.z0Surface || geometry.points || geometry.paths || geometry.item) {
+    if (
+      geometry.solid ||
+      geometry.surface ||
+      geometry.z0Surface ||
+      geometry.points ||
+      geometry.paths ||
+      geometry.item
+    ) {
       if (select(matchTags, geometry.tags)) {
         return descend();
       } else {
@@ -93,8 +101,12 @@ export const drop = (shape, tags) => {
   }
 };
 
-const keepMethod = function (...tags) { return keep(this, tags); };
+const keepMethod = function (...tags) {
+  return keep(this, tags);
+};
 Shape.prototype.keep = keepMethod;
 
-const dropMethod = function (...tags) { return drop(this, tags); };
+const dropMethod = function (...tags) {
+  return drop(this, tags);
+};
 Shape.prototype.drop = dropMethod;

@@ -1,5 +1,5 @@
-import Shape from '@jsxcad/api-v1-shape';
-import { getPlans } from '@jsxcad/geometry-tagged';
+import Shape from "@jsxcad/api-v1-shape";
+import { getPlans } from "@jsxcad/geometry-tagged";
 
 const labels = (geometry) => {
   const labels = {};
@@ -11,5 +11,7 @@ const labels = (geometry) => {
   return labels;
 };
 
-const labelsMethod = function () { return labels(this.toKeptGeometry()); };
+const labelsMethod = function () {
+  return labels(this.toKeptGeometry());
+};
 Shape.prototype.labels = labelsMethod;

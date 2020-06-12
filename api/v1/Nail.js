@@ -1,6 +1,6 @@
-import { Cylinder } from './Cylinder';
-import { assertNumber } from './assert';
-import { dispatch } from './dispatch';
+import { Cylinder } from "./Cylinder";
+import { assertNumber } from "./assert";
+import { dispatch } from "./dispatch";
 
 /**
  *
@@ -8,11 +8,8 @@ import { dispatch } from './dispatch';
  *
  **/
 
-export const Nail = dispatch(
-  'Nail',
-  (radius, height) => {
-    assertNumber(radius);
-    assertNumber(height);
-    return () => Cylinder(radius, height, 3)
-        .move(0, 0, height / -2);
-  });
+export const Nail = dispatch("Nail", (radius, height) => {
+  assertNumber(radius);
+  assertNumber(height);
+  return () => Cylinder(radius, height, 3).move(0, 0, height / -2);
+});

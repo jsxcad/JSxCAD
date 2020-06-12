@@ -1,19 +1,19 @@
-import Modal from 'react-bootstrap/Modal';
-import React from 'react';
-import SettingsUi from './SettingsUi';
-import ShareFileUi from './ShareFileUi';
-import ShareGistUi from './ShareGistUi';
-import ShareGithubUi from './ShareGithubUi';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
+import Modal from "react-bootstrap/Modal";
+import React from "react";
+import SettingsUi from "./SettingsUi";
+import ShareFileUi from "./ShareFileUi";
+import ShareGistUi from "./ShareGistUi";
+import ShareGithubUi from "./ShareGithubUi";
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
 
 export class ShareUi extends SettingsUi {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {};
   }
 
-  render () {
+  render() {
     const { toast } = this.props;
     return (
       <Modal show={this.props.show} onHide={this.doHide}>

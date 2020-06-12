@@ -1,12 +1,12 @@
 /* global self */
 
-import * as fs from 'fs';
+import * as fs from "fs";
 
-import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+import { isBrowser, isNode, isWebWorker } from "./browserOrNode";
 
-import { db } from './db';
-import { deleteFile as deleteCachedFile } from './files';
-import { qualifyPath } from './filesystem';
+import { db } from "./db";
+import { deleteFile as deleteCachedFile } from "./files";
+import { qualifyPath } from "./filesystem";
 
 const { promises } = fs;
 
@@ -21,7 +21,7 @@ const getFileDeleter = async () => {
       await db().removeItem(qualifyPath(path));
     };
   } else {
-    throw Error('die');
+    throw Error("die");
   }
 };
 

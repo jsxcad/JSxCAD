@@ -1,4 +1,4 @@
-import { negate, normal } from '@jsxcad/math-vec2';
+import { negate, normal } from "@jsxcad/math-vec2";
 
 /**
  * Return the direction of the given line.

@@ -1,11 +1,9 @@
 import {
   NativeClipperLibRequestedFormat,
-  loadNativeClipperLibInstanceAsync
-} from './js-angusj-clipperjs-web/index.js';
+  loadNativeClipperLibInstanceAsync,
+} from "./js-angusj-clipperjs-web/index.js";
 
-import {
-  onBoot
-} from '@jsxcad/sys';
+import { onBoot } from "@jsxcad/sys";
 
 export let clipper;
 
@@ -21,11 +19,15 @@ export const setup = async () => {
   }
 };
 
-export function IntPoint (x, y) {
+export function IntPoint(x, y) {
   this.x = x;
   this.y = y;
-};
+}
 
-export { ClipType, PolyFillType, PolyTree } from './js-angusj-clipperjs-web/index.js';
+export {
+  ClipType,
+  PolyFillType,
+  PolyTree,
+} from "./js-angusj-clipperjs-web/index.js";
 
 onBoot(setup);

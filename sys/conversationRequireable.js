@@ -1,1 +1,1 @@
-module.exports = require('esm')(module)('./conversation.js');
+module.exports = require("esm")(module)("./conversation.js");

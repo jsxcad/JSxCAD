@@ -1,17 +1,22 @@
 /* global self, window */
 // FIX: Refactor this once we figure it out.
 
-import * as fs from 'fs';
-import * as v8 from 'v8';
+import * as fs from "fs";
+import * as v8 from "v8";
 
-import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
-import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+import {
+  getBase,
+  getFilesystem,
+  qualifyPath,
+  setupFilesystem,
+} from "./filesystem";
+import { isBrowser, isNode, isWebWorker } from "./browserOrNode";
 
-import { db } from './db';
-import { getFile } from './files';
-import { log } from './log';
-import nodeFetch from 'node-fetch';
-import { writeFile } from './writeFile';
+import { db } from "./db";
+import { getFile } from "./files";
+import { log } from "./log";
+import nodeFetch from "node-fetch";
+import { writeFile } from "./writeFile";
 
 const { promises } = fs;
 const { deserialize } = v8;
@@ -19,11 +24,12 @@ const { deserialize } = v8;
 // Read decoders allow us to turn data back into objects based on structure.
 const readDecoders = [];
 
-export const addReadDecoder = (guard, decoder) => readDecoders.push({ guard, decoder });
+export const addReadDecoder = (guard, decoder) =>
+  readDecoders.push({ guard, decoder });
 
 // There should be a better way to do this.
 const decode = (data) => {
-  if (typeof data !== 'object') {
+  if (typeof data !== "object") {
     return data;
   }
   for (const { guard, decoder } of readDecoders) {
@@ -34,7 +40,7 @@ const decode = (data) => {
   if (Array.isArray(data)) {
     // We may have arrays of things to decode.
     for (let i = 0; i < data.length; i++) {
-      if (typeof data[i] === 'object') {
+      if (typeof data[i] === "object") {
         data[i] = decode(data[i]);
       }
     }
@@ -57,7 +63,7 @@ const getUrlFetcher = async () => {
   if (isNode) {
     return nodeFetch;
   }
-  throw Error('die');
+  throw Error("die");
 };
 
 const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
@@ -78,7 +84,7 @@ const getFileFetcher = async (qualify = qualifyPath, doSerialize = true) => {
       }
     };
   } else {
-    throw Error('die');
+    throw Error("die");
   }
 };
 
@@ -92,7 +98,7 @@ const fetchPersistent = async (path, doSerialize) => {
       return data;
     }
   } catch (e) {
-    if (e.code && e.code === 'ENOENT') {
+    if (e.code && e.code === "ENOENT") {
       return;
     }
     console.log(e);
@@ -102,13 +108,13 @@ const fetchPersistent = async (path, doSerialize) => {
 // Fetch from external sources.
 const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher(path => path, false);
+  const fetchFile = await getFileFetcher((path) => path, false);
   // Try to load the data from a source.
   for (const source of sources) {
-    if (typeof source === 'string') {
+    if (typeof source === "string") {
       try {
-        if (source.startsWith('http:') || source.startsWith('https:')) {
-          log({ op: 'text', text: `# Fetching ${source}` });
+        if (source.startsWith("http:") || source.startsWith("https:")) {
+          log({ op: "text", text: `# Fetching ${source}` });
           const response = await fetchUrl(source);
           if (response.ok) {
             return new Uint8Array(await response.arrayBuffer());
@@ -120,10 +126,9 @@ const fetchSources = async (options = {}, sources) => {
             return data;
           }
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     } else {
-      throw Error('die');
+      throw Error("die");
     }
   }
 };
@@ -134,14 +139,18 @@ export const readFile = async (options, path) => {
   // if (false && isWebWorker) {
   //  return self.ask({ readFile: { options, path } });
   // }
-  const { sources = [], workspace = getFilesystem(), useCache = true } = options;
+  const {
+    sources = [],
+    workspace = getFilesystem(),
+    useCache = true,
+  } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
-    log({ op: 'text', text: `Read ${path} of ${workspace}` });
+    log({ op: "text", text: `Read ${path} of ${workspace}` });
     // Switch to the source filesystem, if necessary.
     setupFilesystem({ fileBase: workspace });
   } else {
-    log({ op: 'text', text: `Read ${path}` });
+    log({ op: "text", text: `Read ${path}` });
   }
   const file = await getFile(options, path);
   if (file.data === undefined || useCache === false) {

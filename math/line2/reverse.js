@@ -1,5 +1,5 @@
-import { fromValues } from './fromValues';
-import { negate } from '@jsxcad/math-vec2';
+import { fromValues } from "./fromValues";
+import { negate } from "@jsxcad/math-vec2";
 
 // TODO: Call this flip?
 /**

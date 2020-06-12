@@ -1,7 +1,7 @@
 import {
   outline as outlineSurface,
-  toPlane as toPlaneFromSurface
-} from '@jsxcad/geometry-surface';
+  toPlane as toPlaneFromSurface,
+} from "@jsxcad/geometry-surface";
 
 export const outline = (solid, normalize) => {
   const polygons = [];

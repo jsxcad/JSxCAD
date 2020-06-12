@@ -1,8 +1,8 @@
-import { ClipType, PolyFillType, clipper } from './clipper-lib';
-import { fromSurface, toSurface } from './convert';
+import { ClipType, PolyFillType, clipper } from "./clipper-lib";
+import { fromSurface, toSurface } from "./convert";
 
-import { createNormalize2 } from '@jsxcad/algorithm-quantize';
-import { doesNotOverlapOrAbut } from './doesNotOverlap';
+import { createNormalize2 } from "@jsxcad/algorithm-quantize";
+import { doesNotOverlapOrAbut } from "./doesNotOverlap";
 
 /**
  * Produces a surface that is the union of all provided surfaces.
@@ -29,13 +29,12 @@ export const union = (...z0Surfaces) => {
       } else if (bPolygons.length === 0) {
         z0Surfaces.push(a);
       } else {
-        const result = clipper.clipToPaths(
-          {
-            clipType: ClipType.Union,
-            subjectInputs: [{ data: aPolygons, closed: true }],
-            clipInputs: [{ data: bPolygons, closed: true }],
-            subjectFillType: PolyFillType.Positive
-          });
+        const result = clipper.clipToPaths({
+          clipType: ClipType.Union,
+          subjectInputs: [{ data: aPolygons, closed: true }],
+          clipInputs: [{ data: bPolygons, closed: true }],
+          subjectFillType: PolyFillType.Positive,
+        });
         z0Surfaces.push(toSurface(result, normalize));
       }
     }

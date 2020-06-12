@@ -1,7 +1,7 @@
-import { Layers } from 'three';
-import { buildMeshes } from './mesh';
-import { buildScene } from './scene';
-import { moveToFit } from './moveToFit';
+import { Layers } from "three";
+import { buildMeshes } from "./mesh";
+import { buildScene } from "./scene";
+import { moveToFit } from "./moveToFit";
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
@@ -26,7 +26,10 @@ const release = async () => {
   }
 };
 
-export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
+export const staticDisplay = async (
+  { view = {}, threejsGeometry } = {},
+  page
+) => {
   if (locked === true) await acquire();
   locked = true;
 
@@ -40,7 +43,14 @@ export const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) =
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
+  const { camera, canvas, renderer, scene } = buildScene({
+    width,
+    height,
+    view,
+    geometryLayers,
+    planLayers,
+    withAxes: false,
+  });
 
   const render = () => {
     renderer.clear();

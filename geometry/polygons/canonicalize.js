@@ -1,5 +1,5 @@
-import { canonicalize as canonicalizeOfPoly3 } from '@jsxcad/math-poly3';
-import { equals } from '@jsxcad/math-vec3';
+import { canonicalize as canonicalizeOfPoly3 } from "@jsxcad/math-poly3";
+import { equals } from "@jsxcad/math-vec3";
 
 const isDegenerate = (polygon) => {
   for (let nth = 0; nth < polygon.length; nth++) {

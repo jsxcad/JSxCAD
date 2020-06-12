@@ -1,14 +1,11 @@
-import readStl from './readStl';
-import writeStl from './writeStl';
+import readStl from "./readStl";
+import writeStl from "./writeStl";
 
 const api = {
   readStl,
-  writeStl
+  writeStl,
 };
 
-export {
-  readStl,
-  writeStl
-};
+export { readStl, writeStl };
 
 export default api;

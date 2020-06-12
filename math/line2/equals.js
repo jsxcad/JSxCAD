@@ -1,4 +1,4 @@
-import { equals as equalsVec2 } from '@jsxcad/math-vec2';
+import { equals as equalsVec2 } from "@jsxcad/math-vec2";
 
 const EPS = 1e-5;
 const W = 2;

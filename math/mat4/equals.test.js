@@ -1,7 +1,7 @@
-import { equals } from './equals';
-import test from 'ava';
+import { equals } from "./equals";
+import test from "ava";
 
-test('vec3: equals() should return correct booleans', (t) => {
+test("vec3: equals() should return correct booleans", (t) => {
   const veca = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   const vecb = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   t.true(equals(veca, vecb));

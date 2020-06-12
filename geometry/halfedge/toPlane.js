@@ -3,7 +3,7 @@
  * @typedef {import("./types").Plane} Plane
  */
 
-import { dot, length, scale } from '@jsxcad/math-vec3';
+import { dot, length, scale } from "@jsxcad/math-vec3";
 
 const X = 0;
 const Y = 1;
@@ -42,9 +42,12 @@ export const toPlaneFromLoop = (start) => {
     const lastPoint = link.start;
     const thisPoint = link.next.start;
     if (lastPoint !== thisPoint) {
-      normal[X] += (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
-      normal[Y] += (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
-      normal[Z] += (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
+      normal[X] +=
+        (lastPoint[Y] - thisPoint[Y]) * (lastPoint[Z] + thisPoint[Z]);
+      normal[Y] +=
+        (lastPoint[Z] - thisPoint[Z]) * (lastPoint[X] + thisPoint[X]);
+      normal[Z] +=
+        (lastPoint[X] - thisPoint[X]) * (lastPoint[Y] + thisPoint[Y]);
       reference[X] += lastPoint[X];
       reference[Y] += lastPoint[Y];
       reference[Z] += lastPoint[Z];
@@ -54,7 +57,7 @@ export const toPlaneFromLoop = (start) => {
   } while (link !== start);
   const factor = 1 / length(normal);
   const plane = scale(factor, normal);
-  plane[W] = dot(reference, normal) * factor / size;
+  plane[W] = (dot(reference, normal) * factor) / size;
   if (isNaN(plane[X])) {
     return undefined;
   } else {

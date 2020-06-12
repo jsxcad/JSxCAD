@@ -1,5 +1,15 @@
-import { fromTranslation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { equals, canonicalize as canonicalize$1, transform as transform$1 } from './jsxcad-math-vec3.js';
+import {
+  fromTranslation,
+  fromXRotation,
+  fromYRotation,
+  fromZRotation,
+  fromScaling,
+} from "./jsxcad-math-mat4.js";
+import {
+  equals,
+  canonicalize as canonicalize$1,
+  transform as transform$1,
+} from "./jsxcad-math-vec3.js";
 
 const assertUnique = (path) => {
   let last = null;
@@ -20,7 +30,7 @@ const assertGood = (path) => {
 
 const canonicalizePoint = (point, index) => {
   if (point === null) {
-    if (index !== 0) throw Error('Path has null not at head');
+    if (index !== 0) throw Error("Path has null not at head");
     return point;
   } else {
     return canonicalize$1(point);
@@ -29,9 +39,9 @@ const canonicalizePoint = (point, index) => {
 
 const canonicalize = (path) => path.map(canonicalizePoint);
 
-const isClosed = (path) => (path.length === 0) || (path[0] !== null);
+const isClosed = (path) => path.length === 0 || path[0] !== null;
 
-const close = (path) => isClosed(path) ? path : path.slice(1);
+const close = (path) => (isClosed(path) ? path : path.slice(1));
 
 const concatenate = (...paths) => {
   const result = [null, ...[].concat(...paths.map(close))];
@@ -87,10 +97,11 @@ const Y = 1;
  */
 const measureArea = (path) => {
   let last = path.length - 1;
-  let current = (path[0] === null) ? 1 : 0;
+  let current = path[0] === null ? 1 : 0;
   let twiceArea = 0;
   for (; current < path.length; last = current++) {
-    twiceArea += path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
+    twiceArea +=
+      path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
   }
   return twiceArea / 2;
 };
@@ -99,14 +110,14 @@ const isClockwise = (path) => measureArea(path) < 0;
 
 const isCounterClockwise = (path) => measureArea(path) > 0;
 
-const open = (path) => isClosed(path) ? [null, ...path] : path;
+const open = (path) => (isClosed(path) ? [null, ...path] : path);
 
 const toGeneric = (path) => [...path];
 
 const toPolygon = (path) => {
   if (path.isPolygon !== true) {
-    if (path.length < 3) throw Error('Path would form degenerate polygon.');
-    if (path[0] === null) throw Error('Only closed paths can be polygons.');
+    if (path.length < 3) throw Error("Path would form degenerate polygon.");
+    if (path[0] === null) throw Error("Only closed paths can be polygons.");
     // FIX: Check for coplanarity.
     path.isPolygon = true;
   }
@@ -127,26 +138,31 @@ const toSegments = (options = {}, path) => {
   for (let nth = 2; nth < path.length; nth++) {
     segments.push([path[nth - 1], path[nth]]);
   }
-  if (segments.some(segment => segment[1] === undefined)) {
-    throw Error('die');
+  if (segments.some((segment) => segment[1] === undefined)) {
+    throw Error("die");
   }
   return segments;
 };
 
-const isZ0Point = ([x = 0, y = 0, z = 0]) => (z === 0);
+const isZ0Point = ([x = 0, y = 0, z = 0]) => z === 0;
 
 const toZ0Polygon = (path) => {
   if (path.isZ0Polygon !== true) {
-    if (path.length < 3) throw Error('Path would form degenerate polygon.');
-    if (path[0] === null) throw Error('Only closed paths can be polygons.');
-    if (!path.every(isZ0Point)) throw Error(`z != 0: ${JSON.stringify(path.filter(path => !isZ0Point(path)))}`);
+    if (path.length < 3) throw Error("Path would form degenerate polygon.");
+    if (path[0] === null) throw Error("Only closed paths can be polygons.");
+    if (!path.every(isZ0Point))
+      throw Error(
+        `z != 0: ${JSON.stringify(path.filter((path) => !isZ0Point(path)))}`
+      );
     path.isZ0Polygon = true;
   }
   return path;
 };
 
 const transform = (matrix, path) =>
-  path.map((point, index) => (point === null) ? null : transform$1(matrix, point));
+  path.map((point, index) =>
+    point === null ? null : transform$1(matrix, point)
+  );
 
 const isOpen = (path) => !isClosed(path);
 
@@ -156,4 +172,29 @@ const rotateY = (radians, path) => transform(fromYRotation(radians), path);
 const rotateZ = (radians, path) => transform(fromZRotation(radians), path);
 const scale = (vector, path) => transform(fromScaling(vector), path);
 
-export { assertGood, assertUnique, canonicalize, close, concatenate, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, isOpen, measureArea, open, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };
+export {
+  assertGood,
+  assertUnique,
+  canonicalize,
+  close,
+  concatenate,
+  deduplicate,
+  flip,
+  getEdges,
+  isClockwise,
+  isClosed,
+  isCounterClockwise,
+  isOpen,
+  measureArea,
+  open,
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  toGeneric,
+  toPolygon,
+  toSegments,
+  toZ0Polygon,
+  transform,
+  translate,
+};

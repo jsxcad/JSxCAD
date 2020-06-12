@@ -1,6 +1,6 @@
-import { buildConvexHull } from './buildConvexHull';
-import { cache } from '@jsxcad/cache';
-import { translate } from '@jsxcad/geometry-points';
+import { buildConvexHull } from "./buildConvexHull";
+import { cache } from "@jsxcad/cache";
+import { translate } from "@jsxcad/geometry-points";
 
 const buildConvexMinkowskiSumImpl = (aPoints, bPoints) => {
   const summedPoints = [];

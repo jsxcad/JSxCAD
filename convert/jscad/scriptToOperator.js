@@ -1,9 +1,9 @@
-import api from './dist/api';
+import api from "./dist/api";
 
-import { fromPolygons } from '@jsxcad/geometry-solid';
-import { readFile } from '@jsxcad/sys';
-import recast from 'recast';
-import types from 'ast-types';
+import { fromPolygons } from "@jsxcad/geometry-solid";
+import { readFile } from "@jsxcad/sys";
+import recast from "recast";
+import types from "ast-types";
 
 const unpackApi = (api) => {
   const operators = {};
@@ -16,12 +16,19 @@ const unpackApi = (api) => {
 };
 
 const csgToSolid = (csg) =>
-  fromPolygons({}, csg.polygons.map(polygon =>
-    polygon.vertices.map(vertex =>
-      [vertex.pos.x, vertex.pos.y, vertex.pos.z])));
+  fromPolygons(
+    {},
+    csg.polygons.map((polygon) =>
+      polygon.vertices.map((vertex) => [
+        vertex.pos.x,
+        vertex.pos.y,
+        vertex.pos.z,
+      ])
+    )
+  );
 
 const createJscadFunction = (script, api) => {
-  const parameter = `{ ${Object.keys(api).join(', ')} }`;
+  const parameter = `{ ${Object.keys(api).join(", ")} }`;
   const body = `
                  function getParameterDefinitions () { return []; }
                  ${script};
@@ -47,19 +54,19 @@ const replaceIncludes = async (ast) => {
       const { node } = path;
       const { callee } = node;
       const { name } = callee;
-      if (name === 'include' && node.arguments.length >= 1) {
+      if (name === "include" && node.arguments.length >= 1) {
         const { type } = node.arguments[0];
-        if (type === 'Literal') {
+        if (type === "Literal") {
           includes.push(path);
         }
       }
       this.traverse(path);
-    }
+    },
   });
   for (const include of includes) {
     const path = include.node.arguments[0].value;
     const raw = await readFile({ doSerialize: false, sources: [path] }, path);
-    const src = new TextDecoder('utf8').decode(raw);
+    const src = new TextDecoder("utf8").decode(raw);
     include.replace(await replaceIncludes(recast.parse(src)));
   }
   return ast;
@@ -67,9 +74,12 @@ const replaceIncludes = async (ast) => {
 
 export const scriptToOperator = async (options = {}, script) => {
   try {
-    const src = new TextDecoder('utf8').decode(script);
+    const src = new TextDecoder("utf8").decode(script);
     const ast = await replaceIncludes(recast.parse(src));
-    const operator = createJscadFunction(recast.print(ast).code, unpackApi(api));
+    const operator = createJscadFunction(
+      recast.print(ast).code,
+      unpackApi(api)
+    );
     return operator;
   } catch (e) {
     console.log(e);

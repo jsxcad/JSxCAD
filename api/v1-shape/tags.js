@@ -1,12 +1,14 @@
-import { Shape } from './Shape';
+import { Shape } from "./Shape";
 
-import { allTags } from '@jsxcad/geometry-tagged';
+import { allTags } from "@jsxcad/geometry-tagged";
 
 export const tags = (shape) =>
   [...allTags(shape.toGeometry())]
-      .filter(tag => tag.startsWith('user/'))
-      .map(tag => tag.substring(5));
+    .filter((tag) => tag.startsWith("user/"))
+    .map((tag) => tag.substring(5));
 
-const method = function () { return tags(this); };
+const method = function () {
+  return tags(this);
+};
 
 Shape.prototype.tags = method;

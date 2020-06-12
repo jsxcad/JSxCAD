@@ -1,14 +1,23 @@
-import { normalize, subtract, rotateZ, scale, add } from './jsxcad-math-vec3.js';
-import { intersectPointOfLines, fromPoints } from './jsxcad-math-line2.js';
-import { getEdges } from './jsxcad-geometry-path.js';
-import { getPaths } from './jsxcad-geometry-tagged.js';
+import {
+  normalize,
+  subtract,
+  rotateZ,
+  scale,
+  add,
+} from "./jsxcad-math-vec3.js";
+import { intersectPointOfLines, fromPoints } from "./jsxcad-math-line2.js";
+import { getEdges } from "./jsxcad-geometry-path.js";
+import { getPaths } from "./jsxcad-geometry-tagged.js";
 
 const intersectionPoints = (cuts, overcut = 0) => {
   cuts.push(cuts[0]);
   var intersectionPointsList = [];
   var i = 0;
   while (i < cuts.length - 1) {
-    const point = intersectPointOfLines(fromPoints(...cuts[i]), fromPoints(...cuts[i + 1]));
+    const point = intersectPointOfLines(
+      fromPoints(...cuts[i]),
+      fromPoints(...cuts[i + 1])
+    );
     point.push(cuts[i][0][2]);
     if (overcut) {
       intersectionPointsList.push(cuts[i][1]);

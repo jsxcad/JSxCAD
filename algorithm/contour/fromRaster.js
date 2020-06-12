@@ -1,7 +1,7 @@
-import { QuadTree, isoBands } from 'marchingsquares';
+import { QuadTree, isoBands } from "marchingsquares";
 
-import { deduplicate, isClockwise, translate } from '@jsxcad/geometry-path';
-import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
+import { deduplicate, isClockwise, translate } from "@jsxcad/geometry-path";
+import { fromPolygon as toPlaneFromPolygon } from "@jsxcad/math-plane";
 
 export const fromRaster = async (raster, bands) => {
   const preprocessedData = new QuadTree(raster);

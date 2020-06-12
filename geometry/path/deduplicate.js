@@ -1,4 +1,4 @@
-import { equals } from '@jsxcad/math-vec3';
+import { equals } from "@jsxcad/math-vec3";
 
 export const deduplicate = (path) => {
   const unique = [];

@@ -1,4 +1,4 @@
-import { difference } from '@jsxcad/api-v1-shape';
+import { difference } from "@jsxcad/api-v1-shape";
 
 export const Difference = (...args) => difference(...args);
 

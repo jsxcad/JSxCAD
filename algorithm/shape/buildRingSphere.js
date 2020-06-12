@@ -1,13 +1,24 @@
-import { assertGood, deduplicate, scale, translate } from '@jsxcad/geometry-path';
+import {
+  assertGood,
+  deduplicate,
+  scale,
+  translate,
+} from "@jsxcad/geometry-path";
 
-import { buildRegularPolygon } from './buildRegularPolygon';
-import { cache } from '@jsxcad/cache';
-import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
+import { buildRegularPolygon } from "./buildRegularPolygon";
+import { cache } from "@jsxcad/cache";
+import { fromPolygons as toSolidFromPolygons } from "@jsxcad/geometry-solid";
 
 const buildWalls = (polygons, floor, roof) => {
-  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
     // Remember that we are walking CCW.
-    polygons.push(deduplicate([floor[start], floor[end], roof[end], roof[start]]));
+    polygons.push(
+      deduplicate([floor[start], floor[end], roof[end], roof[start]])
+    );
   }
 };
 
@@ -22,7 +33,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   // Trace out latitudinal rings.
   const ring = buildRegularPolygon(longitudinalResolution);
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
-    let angle = Math.PI * 1.0 * slice / latitudinalResolution;
+    let angle = (Math.PI * 1.0 * slice) / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
     const points = ring.z0Surface[0]; // FIX: Make this less fragile.

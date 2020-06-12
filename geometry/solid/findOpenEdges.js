@@ -1,9 +1,9 @@
-import { getEdges } from '@jsxcad/geometry-path';
+import { getEdges } from "@jsxcad/geometry-path";
 
 // Expects aligned vertices.
 
 export const findOpenEdges = (solid, isOpen = true) => {
-  const test = (closed) => isOpen ? !closed : closed;
+  const test = (closed) => (isOpen ? !closed : closed);
 
   const edges = new Set();
   for (const surface of solid) {

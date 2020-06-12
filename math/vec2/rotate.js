@@ -8,6 +8,5 @@
 export const rotate = (angle, [x, y]) => {
   const c = Math.cos(angle);
   const s = Math.sin(angle);
-  return [x * c - y * s,
-          x * s + y * c];
+  return [x * c - y * s, x * s + y * c];
 };

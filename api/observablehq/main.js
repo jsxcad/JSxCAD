@@ -7,12 +7,12 @@
  * the api uses.
  */
 
-import './view';
+import "./view";
 
-import * as v1 from '@jsxcad/api-v1';
+import * as v1 from "@jsxcad/api-v1";
 
-import { boot } from '@jsxcad/sys';
-import downloadAsZip from './download';
+import { boot } from "@jsxcad/sys";
+import downloadAsZip from "./download";
 
 export const api = async () => {
   await boot();

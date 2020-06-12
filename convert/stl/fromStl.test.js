@@ -1,13 +1,87 @@
-import { boot } from '@jsxcad/sys';
-import { canonicalize } from '@jsxcad/geometry-tagged';
-import { fromStl } from './fromStl';
-import { readFileSync } from 'fs';
-import test from 'ava';
+import { boot } from "@jsxcad/sys";
+import { canonicalize } from "@jsxcad/geometry-tagged";
+import { fromStl } from "./fromStl";
+import { readFileSync } from "fs";
+import test from "ava";
 
-test('Read example', async t => {
+test("Read example", async (t) => {
   await boot();
-  const stl = readFileSync('fromStl.test.box.stl');
+  const stl = readFileSync("fromStl.test.box.stl");
   const geometry = await fromStl(stl);
-  t.deepEqual(canonicalize(geometry),
-              { 'solid': [[[[5, 5, 5], [5, -5, 5], [5, -5, -5]], [[5, -5, -5], [5, 5, -5], [5, 5, 5]]], [[[5, 5, -5], [5, -5, -5], [-5, -5, -5]], [[-5, -5, -5], [-5, 5, -5], [5, 5, -5]]], [[[-5, -5, -5], [5, -5, -5], [5, -5, 5]], [[5, -5, 5], [-5, -5, 5], [-5, -5, -5]]], [[[-5, -5, 5], [5, -5, 5], [5, 5, 5]], [[5, 5, 5], [-5, 5, 5], [-5, -5, 5]]], [[[5, 5, -5], [-5, 5, -5], [-5, 5, 5]], [[-5, 5, 5], [5, 5, 5], [5, 5, -5]]], [[[-5, -5, 5], [-5, 5, 5], [-5, 5, -5]], [[-5, 5, -5], [-5, -5, -5], [-5, -5, 5]]]] });
+  t.deepEqual(canonicalize(geometry), {
+    solid: [
+      [
+        [
+          [5, 5, 5],
+          [5, -5, 5],
+          [5, -5, -5],
+        ],
+        [
+          [5, -5, -5],
+          [5, 5, -5],
+          [5, 5, 5],
+        ],
+      ],
+      [
+        [
+          [5, 5, -5],
+          [5, -5, -5],
+          [-5, -5, -5],
+        ],
+        [
+          [-5, -5, -5],
+          [-5, 5, -5],
+          [5, 5, -5],
+        ],
+      ],
+      [
+        [
+          [-5, -5, -5],
+          [5, -5, -5],
+          [5, -5, 5],
+        ],
+        [
+          [5, -5, 5],
+          [-5, -5, 5],
+          [-5, -5, -5],
+        ],
+      ],
+      [
+        [
+          [-5, -5, 5],
+          [5, -5, 5],
+          [5, 5, 5],
+        ],
+        [
+          [5, 5, 5],
+          [-5, 5, 5],
+          [-5, -5, 5],
+        ],
+      ],
+      [
+        [
+          [5, 5, -5],
+          [-5, 5, -5],
+          [-5, 5, 5],
+        ],
+        [
+          [-5, 5, 5],
+          [5, 5, 5],
+          [5, 5, -5],
+        ],
+      ],
+      [
+        [
+          [-5, -5, 5],
+          [-5, 5, 5],
+          [-5, 5, -5],
+        ],
+        [
+          [-5, 5, -5],
+          [-5, -5, -5],
+          [-5, -5, 5],
+        ],
+      ],
+    ],
+  });
 });

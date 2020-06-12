@@ -1,5 +1,3 @@
-import { overcut } from './overcut';
+import { overcut } from "./overcut";
 
-export {
-  overcut
-};
+export { overcut };

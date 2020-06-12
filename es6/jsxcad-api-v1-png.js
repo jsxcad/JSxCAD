@@ -1,9 +1,9 @@
-import Shape from './jsxcad-api-v1-shape.js';
-import { fromPng } from './jsxcad-convert-png.js';
-import { fromRaster } from './jsxcad-algorithm-contour.js';
-import { numbers } from './jsxcad-api-v1-math.js';
-import { readFile } from './jsxcad-sys.js';
-import { simplifyPath } from './jsxcad-algorithm-shape.js';
+import Shape from "./jsxcad-api-v1-shape.js";
+import { fromPng } from "./jsxcad-convert-png.js";
+import { fromRaster } from "./jsxcad-algorithm-contour.js";
+import { numbers } from "./jsxcad-api-v1-math.js";
+import { readFile } from "./jsxcad-sys.js";
+import { simplifyPath } from "./jsxcad-algorithm-shape.js";
 
 /**
  *
@@ -20,7 +20,10 @@ const readPng = async (path, { src }) => {
   return raster;
 };
 
-const readPngAsContours = async (path, { src, by = 10, tolerance = 5 } = {}) => {
+const readPngAsContours = async (
+  path,
+  { src, by = 10, tolerance = 5 } = {}
+) => {
   const { width, height, pixels } = await readPng(path, { src });
   // FIX: This uses the red channel for the value.
   const getPixel = (x, y) => pixels[(y * width + x) << 2];
@@ -31,11 +34,13 @@ const readPngAsContours = async (path, { src, by = 10, tolerance = 5 } = {}) => 
       data[y][x] = getPixel(x, y);
     }
   }
-  const bands = numbers(a => a, { to: 256, by });
+  const bands = numbers((a) => a, { to: 256, by });
   const contours = await fromRaster(data, bands);
   const geometry = { assembly: [] };
   for (const contour of contours) {
-    const simplifiedContour = contour.map(path => simplifyPath(path, tolerance));
+    const simplifiedContour = contour.map((path) =>
+      simplifyPath(path, tolerance)
+    );
     geometry.assembly.push({ paths: simplifiedContour });
   }
   return Shape.fromGeometry(geometry);

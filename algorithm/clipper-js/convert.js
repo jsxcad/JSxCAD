@@ -1,6 +1,6 @@
-import { isClosed, isOpen } from '@jsxcad/geometry-path';
+import { isClosed, isOpen } from "@jsxcad/geometry-path";
 
-import ClipperLib from 'clipper-lib';
+import ClipperLib from "clipper-lib";
 
 const { Clipper, IntPoint, PolyFillType, PolyTree } = ClipperLib;
 
@@ -15,7 +15,12 @@ const toFloat = (integer) => integer / RESOLUTION;
 export const fillType = PolyFillType.pftNonZero;
 
 export const fromSurface = (surface, normalize) =>
-  surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
+  surface.map((path) =>
+    path.map((point) => {
+      const [X, Y] = normalize(point);
+      return new IntPoint(toInt(X), toInt(Y));
+    })
+  );
 
 export const fromOpenPaths = (paths, normalize) => {
   const openPaths = [];
@@ -69,9 +74,16 @@ export const toPaths = (clipper, op, normalize) => {
   for (const entry of result.m_AllPolys) {
     if (entry.m_polygon.length > 0) {
       if (entry.IsOpen) {
-        paths.push([null, ...entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)]))]);
+        paths.push([
+          null,
+          ...entry.m_polygon.map(({ X, Y }) =>
+            normalize([toFloat(X), toFloat(Y)])
+          ),
+        ]);
       } else {
-        paths.push(entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)])));
+        paths.push(
+          entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)]))
+        );
       }
     }
   }

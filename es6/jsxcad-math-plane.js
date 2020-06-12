@@ -1,18 +1,32 @@
-import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
-import { unit, dot, subtract, cross, length, random, scale, add, multiply, fromScalar, transform as transform$1 } from './jsxcad-math-vec3.js';
-import { fromValues, isMirroring } from './jsxcad-math-mat4.js';
+import { reallyQuantizeForSpace } from "./jsxcad-math-utils.js";
+import {
+  unit,
+  dot,
+  subtract,
+  cross,
+  length,
+  random,
+  scale,
+  add,
+  multiply,
+  fromScalar,
+  transform as transform$1,
+} from "./jsxcad-math-vec3.js";
+import { fromValues, isMirroring } from "./jsxcad-math-mat4.js";
 
-const canonicalize = ([x = 0, y = 0, z = 0, w = 0]) => [reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(z), reallyQuantizeForSpace(w)];
+const canonicalize = ([x = 0, y = 0, z = 0, w = 0]) => [
+  reallyQuantizeForSpace(x),
+  reallyQuantizeForSpace(y),
+  reallyQuantizeForSpace(z),
+  reallyQuantizeForSpace(w),
+];
 
 /**
  * Compare the given planes for equality
  * @return {boolean} true if planes are equal
  */
 const equals = (a, b) =>
-  (a[0] === b[0]) &&
-  (a[1] === b[1]) &&
-  (a[2] === b[2]) &&
-  (a[3] === b[3]);
+  a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
 
 /**
  * Flip the given plane (vec4)
@@ -105,7 +119,7 @@ const fromPolygon = (polygon) => {
   }
   const factor = 1 / length(normal);
   const plane = scale(factor, normal);
-  plane[W] = dot(reference, normal) * factor / polygon.length;
+  plane[W] = (dot(reference, normal) * factor) / polygon.length;
   if (isNaN(plane[X])) {
     return undefined;
   } else {
@@ -142,7 +156,7 @@ const W$2 = 3;
 
 const toXYPlaneTransforms = (plane, rightVector) => {
   if (plane === undefined) {
-    throw Error('die');
+    throw Error("die");
   }
   if (rightVector === undefined) {
     rightVector = random(plane);
@@ -152,15 +166,43 @@ const toXYPlaneTransforms = (plane, rightVector) => {
   const u = cross(v, plane);
   const p = multiply(plane, fromScalar(plane[W$2]));
 
-  const to = fromValues(u[X$1], v[X$1], plane[X$1], 0,
-                        u[Y$1], v[Y$1], plane[Y$1], 0,
-                        u[Z$1], v[Z$1], plane[Z$1], 0,
-                        0, 0, -plane[W$2], 1);
+  const to = fromValues(
+    u[X$1],
+    v[X$1],
+    plane[X$1],
+    0,
+    u[Y$1],
+    v[Y$1],
+    plane[Y$1],
+    0,
+    u[Z$1],
+    v[Z$1],
+    plane[Z$1],
+    0,
+    0,
+    0,
+    -plane[W$2],
+    1
+  );
 
-  const from = fromValues(u[X$1], u[Y$1], u[Z$1], 0,
-                          v[X$1], v[Y$1], v[Z$1], 0,
-                          plane[X$1], plane[Y$1], plane[Z$1], 0,
-                          p[X$1], p[Y$1], p[Z$1], 1);
+  const from = fromValues(
+    u[X$1],
+    u[Y$1],
+    u[Z$1],
+    0,
+    v[X$1],
+    v[Y$1],
+    v[Z$1],
+    0,
+    plane[X$1],
+    plane[Y$1],
+    plane[Z$1],
+    0,
+    p[X$1],
+    p[Y$1],
+    p[Z$1],
+    1
+  );
 
   return [to, from];
 };
@@ -192,4 +234,16 @@ const transform = (matrix, plane) => {
   return newplane;
 };
 
-export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsRandom, fromPolygon, signedDistanceToPoint, splitLineSegmentByPlane, toXYPlaneTransforms, transform };
+export {
+  canonicalize,
+  equals,
+  flip,
+  fromNormalAndPoint,
+  fromPoints,
+  fromPointsRandom,
+  fromPolygon,
+  signedDistanceToPoint,
+  splitLineSegmentByPlane,
+  toXYPlaneTransforms,
+  transform,
+};

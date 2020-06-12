@@ -1,4 +1,4 @@
-import { cache } from '@jsxcad/cache';
+import { cache } from "@jsxcad/cache";
 
 const fromPathToZ0SurfaceImpl = (path) => {
   return { z0Surface: [path] };

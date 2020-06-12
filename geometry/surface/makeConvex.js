@@ -1,10 +1,10 @@
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { isConvex } from '@jsxcad/math-poly3';
-import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
-import { makeWatertight } from './makeWatertight';
-import { toPlane } from './toPlane';
-import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from './ops';
+import { createNormalize3 } from "@jsxcad/algorithm-quantize";
+import { isConvex } from "@jsxcad/math-poly3";
+import { makeConvex as makeConvexZ0Surface } from "@jsxcad/geometry-z0surface";
+import { makeWatertight } from "./makeWatertight";
+import { toPlane } from "./toPlane";
+import { toXYPlaneTransforms } from "@jsxcad/math-plane";
+import { transform } from "./ops";
 
 // Cut the corners to produce triangles.
 const triangulateConvexPolygon = (polygon) => {
@@ -17,7 +17,7 @@ const triangulateConvexPolygon = (polygon) => {
 
 export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
   if (surface.length === undefined) {
-    throw Error('die');
+    throw Error("die");
   }
   if (surface.length === 0) {
     // An empty surface is not non-convex.
@@ -40,8 +40,13 @@ export const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
     }
   }
   const [to, from] = toXYPlaneTransforms(plane);
-  const z0Surface = transform(to, surface.map(path => path.map(normalize3)));
+  const z0Surface = transform(
+    to,
+    surface.map((path) => path.map(normalize3))
+  );
   const convexZ0Surface = makeConvexZ0Surface(z0Surface);
-  const convexSurface = transform(from, convexZ0Surface).map(path => path.map(normalize3));
+  const convexSurface = transform(from, convexZ0Surface).map((path) =>
+    path.map(normalize3)
+  );
   return makeWatertight(convexSurface);
 };

@@ -1,7 +1,7 @@
-import { add } from './add';
-import test from 'ava';
+import { add } from "./add";
+import test from "ava";
 
-test('vec2: add() called with two paramerters should return a vec2 with correct values', (t) => {
+test("vec2: add() called with two paramerters should return a vec2 with correct values", (t) => {
   const obs1 = add([0, 0], [0, 0]);
   t.deepEqual(obs1, [0, 0]);
 

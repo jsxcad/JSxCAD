@@ -1,3 +1,6 @@
-import { reallyQuantizeForSpace } from '@jsxcad/math-utils';
+import { reallyQuantizeForSpace } from "@jsxcad/math-utils";
 
-export const canonicalize = (polygons) => polygons.map(polygon => polygon.map(point => point.map(value => reallyQuantizeForSpace(value))));
+export const canonicalize = (polygons) =>
+  polygons.map((polygon) =>
+    polygon.map((point) => point.map((value) => reallyQuantizeForSpace(value)))
+  );

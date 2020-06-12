@@ -1,6 +1,6 @@
-import { fromGeometry, toKeptGeometry } from './Shape';
+import { fromGeometry, toKeptGeometry } from "./Shape";
 
-import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
+import { difference as differenceGeometry } from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -48,4 +48,4 @@ export const difference = (...shapes) => {
 
 export default difference;
 
-difference.signature = 'difference(shape:Shape, ...shapes:Shape) -> Shape';
+difference.signature = "difference(shape:Shape, ...shapes:Shape) -> Shape";

@@ -1,4 +1,12 @@
-import { verlet, addInertia, createAngleConstraint, createDistanceConstraint, createPinnedConstraint, solve, positions } from './jsxcad-algorithm-verlet.js';
+import {
+  verlet,
+  addInertia,
+  createAngleConstraint,
+  createDistanceConstraint,
+  createPinnedConstraint,
+  solve,
+  positions,
+} from "./jsxcad-algorithm-verlet.js";
 
 /**
  *
@@ -40,11 +48,11 @@ const Armature = () => {
     compute,
     distance,
     isSolved,
-    pinned
+    pinned,
   };
 };
 
-Armature.signature = 'Armature() -> armature';
+Armature.signature = "Armature() -> armature";
 
 const api = { Armature };
 

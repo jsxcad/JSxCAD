@@ -1,4 +1,4 @@
-import { add, scale } from '@jsxcad/math-vec3';
+import { add, scale } from "@jsxcad/math-vec3";
 
 //      0
 //     /\
@@ -14,8 +14,10 @@ export const subdivideTriangle = (triangle) => {
   const t20 = scale(1 / 2, add(t2, t0));
   const t21 = scale(1 / 2, add(t2, t1));
   // Turning CCW.
-  return [[t0, t10, t20],
-          [t10, t1, t21],
-          [t20, t21, t2],
-          [t10, t21, t20]];
+  return [
+    [t0, t10, t20],
+    [t10, t1, t21],
+    [t20, t21, t2],
+    [t10, t21, t20],
+  ];
 };

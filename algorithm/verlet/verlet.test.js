@@ -1,23 +1,23 @@
-import { positions, solve, verlet } from './verlet';
+import { positions, solve, verlet } from "./verlet";
 
-import { canonicalize } from '@jsxcad/math-vec3';
-import { create as createDistanceConstraint } from './constrainDistance';
-import { create as createPinnedConstraint } from './constrainPinned';
-import test from 'ava';
+import { canonicalize } from "@jsxcad/math-vec3";
+import { create as createDistanceConstraint } from "./constrainDistance";
+import { create as createPinnedConstraint } from "./constrainPinned";
+import test from "ava";
 
-test('Simple case', t => {
+test("Simple case", (t) => {
   const constraints = verlet();
   const distance = createDistanceConstraint(constraints);
   const pinned = createPinnedConstraint(constraints);
 
   // Set up a problem that can only be solved by completing a square.
 
-  distance('A', 'D', 1);
-  distance('B', 'D', 1);
-  distance('C', 'D', Math.sqrt(2));
-  pinned('A', [1, 0, 0]);
-  pinned('B', [0, 1, 0]);
-  pinned('C', [0, 0, 0]);
+  distance("A", "D", 1);
+  distance("B", "D", 1);
+  distance("C", "D", Math.sqrt(2));
+  pinned("A", [1, 0, 0]);
+  pinned("B", [0, 1, 0]);
+  pinned("C", [0, 0, 0]);
 
   solve(constraints);
 

@@ -1,20 +1,19 @@
-import { max, min } from '@jsxcad/math-vec3';
+import { max, min } from "@jsxcad/math-vec3";
 
-import { eachPoint } from './eachPoint';
-import { isVoid } from './isNotVoid';
-import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometry-solid';
-import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
-import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
-import { toKeptGeometry } from './toKeptGeometry';
+import { eachPoint } from "./eachPoint";
+import { isVoid } from "./isNotVoid";
+import { measureBoundingBox as measureBoundingBoxOfSolid } from "@jsxcad/geometry-solid";
+import { measureBoundingBox as measureBoundingBoxOfSurface } from "@jsxcad/geometry-surface";
+import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from "@jsxcad/geometry-z0surface";
+import { toKeptGeometry } from "./toKeptGeometry";
 
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  eachPoint(point => {
+  eachPoint((point) => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-  },
-            geometry);
+  }, geometry);
   return [minPoint, maxPoint];
 };
 

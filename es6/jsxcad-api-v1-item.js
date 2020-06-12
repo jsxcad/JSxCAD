@@ -1,6 +1,14 @@
-import { toKeptGeometry, rewriteTags, visit, rewrite, update, getItems, getLeafs } from './jsxcad-geometry-tagged.js';
-import { Connector } from './jsxcad-api-v1-connector.js';
-import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
+import {
+  toKeptGeometry,
+  rewriteTags,
+  visit,
+  rewrite,
+  update,
+  getItems,
+  getLeafs,
+} from "./jsxcad-geometry-tagged.js";
+import { Connector } from "./jsxcad-api-v1-connector.js";
+import Shape, { Shape as Shape$1 } from "./jsxcad-api-v1-shape.js";
 
 const registry = [];
 
@@ -13,7 +21,7 @@ const fromDesignator = (designator) => {
       return constructor(spec);
     }
   }
-  throw Error('die');
+  throw Error("die");
 };
 
 // Later definitions override earlier definitions.
@@ -30,7 +38,7 @@ const registerDesignator = (parser, constructor) =>
 
 // Constructs an item from the designator.
 const Item = (designator) => {
-  if (typeof designator === 'string') {
+  if (typeof designator === "string") {
     return fromDesignator(designator);
   } else if (designator instanceof Array) {
     return fromDesignator(...designator);
@@ -39,18 +47,22 @@ const Item = (designator) => {
 
 // Turns the current shape into an item.
 const itemMethod = function (id) {
-  const shape = Shape.fromGeometry(toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() })))
-      .with(Connector('center'));
+  const shape = Shape.fromGeometry(
+    toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }))
+  ).with(Connector("center"));
   // Register the designator for re-use.
-  registerDesignator(d => (d === id), () => shape);
+  registerDesignator(
+    (d) => d === id,
+    () => shape
+  );
   return shape;
 };
 
 Shape.prototype.Item = itemMethod;
 Shape.prototype.toItem = itemMethod;
 
-Item.signature = 'Item(shape:Shape, id:string) -> Shape';
-itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
+Item.signature = "Item(shape:Shape, id:string) -> Shape";
+itemMethod.signature = "Shape -> toItem(id:string) -> Shape";
 
 /**
  *
@@ -60,60 +72,68 @@ itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
 
 const bom = (shape) => {
   const bom = [];
-  visit(shape.toKeptGeometry(),
-        (geometry, descend) => {
-          if (geometry.item) {
-            bom.push(geometry.tags.filter(tag => tag.startsWith('item/'))
-                .map(tag => tag.substring(5)));
-          }
-          descend();
-        });
+  visit(shape.toKeptGeometry(), (geometry, descend) => {
+    if (geometry.item) {
+      bom.push(
+        geometry.tags
+          .filter((tag) => tag.startsWith("item/"))
+          .map((tag) => tag.substring(5))
+      );
+    }
+    descend();
+  });
   return bom;
 };
 
-const bomMethod = function (...args) { return bom(this); };
+const bomMethod = function (...args) {
+  return bom(this);
+};
 Shape.prototype.bom = bomMethod;
 
-bomMethod.signature = 'Shape -> bom() -> string';
+bomMethod.signature = "Shape -> bom() -> string";
 
-const fuse = (shape, op = (_ => _)) =>
-  Shape.fromGeometry(rewrite(shape.toKeptGeometry(),
-                             (geometry, descend, walk) => {
-                               if (geometry.item) {
-                                 return walk(geometry.item);
-                               } else {
-                                 return descend();
-                               }
-                             }));
+const fuse = (shape, op = (_) => _) =>
+  Shape.fromGeometry(
+    rewrite(shape.toKeptGeometry(), (geometry, descend, walk) => {
+      if (geometry.item) {
+        return walk(geometry.item);
+      } else {
+        return descend();
+      }
+    })
+  );
 
-const fuseMethod = function (...args) { return fuse(this, ...args); };
+const fuseMethod = function (...args) {
+  return fuse(this, ...args);
+};
 Shape.prototype.fuse = fuseMethod;
 
-fuse.signature = 'fuse(shape:Shape, op:function) -> Shapes';
-fuseMethod.signature = 'Shape -> fuse(op:function) -> Shapes';
+fuse.signature = "fuse(shape:Shape, op:function) -> Shapes";
+fuseMethod.signature = "Shape -> fuse(op:function) -> Shapes";
 
-const inItems = (shape, op = (_ => _)) => {
-  const rewritten = rewrite(shape.toKeptGeometry(),
-                            (geometry, descend) => {
-                              if (geometry.item) {
-                                // Operate on the interior of the items.
-                                const item = op(Shape.fromGeometry(geometry.item));
-                                // Reassemble as an item equivalent to the original.
-                                return update(geometry, { item: item.toGeometry() });
-                              } else {
-                                return descend();
-                              }
-                            });
+const inItems = (shape, op = (_) => _) => {
+  const rewritten = rewrite(shape.toKeptGeometry(), (geometry, descend) => {
+    if (geometry.item) {
+      // Operate on the interior of the items.
+      const item = op(Shape.fromGeometry(geometry.item));
+      // Reassemble as an item equivalent to the original.
+      return update(geometry, { item: item.toGeometry() });
+    } else {
+      return descend();
+    }
+  });
   return Shape.fromGeometry(rewritten);
 };
 
-const inItemsMethod = function (...args) { return inItems(this, ...args); };
+const inItemsMethod = function (...args) {
+  return inItems(this, ...args);
+};
 Shape.prototype.inItems = inItemsMethod;
 
-inItems.signature = 'inItems(shape:Shape, op:function) -> Shapes';
-inItemsMethod.signature = 'Shape -> inItems(op:function) -> Shapes';
+inItems.signature = "inItems(shape:Shape, op:function) -> Shapes";
+inItemsMethod.signature = "Shape -> inItems(op:function) -> Shapes";
 
-const items = (shape, op = (_ => _)) => {
+const items = (shape, op = (_) => _) => {
   const items = [];
   for (const item of getItems(shape.toKeptGeometry())) {
     items.push(op(Shape.fromGeometry(item)));
@@ -121,13 +141,15 @@ const items = (shape, op = (_ => _)) => {
   return items;
 };
 
-const itemsMethod = function (...args) { return items(this, ...args); };
+const itemsMethod = function (...args) {
+  return items(this, ...args);
+};
 Shape.prototype.items = itemsMethod;
 
-items.signature = 'items(shape:Shape, op:function) -> Shapes';
-itemsMethod.signature = 'Shape -> items(op:function) -> Shapes';
+items.signature = "items(shape:Shape, op:function) -> Shapes";
+itemsMethod.signature = "Shape -> items(op:function) -> Shapes";
 
-const leafs = (shape, op = (_ => _)) => {
+const leafs = (shape, op = (_) => _) => {
   const leafs = [];
   for (const leaf of getLeafs(shape.toKeptGeometry())) {
     leafs.push(op(Shape.fromGeometry(leaf)));
@@ -135,17 +157,19 @@ const leafs = (shape, op = (_ => _)) => {
   return leafs;
 };
 
-const leafsMethod = function (...args) { return leafs(this, ...args); };
+const leafsMethod = function (...args) {
+  return leafs(this, ...args);
+};
 Shape.prototype.leafs = leafsMethod;
 
-leafs.signature = 'leafs(shape:Shape, op:function) -> Shapes';
-leafsMethod.signature = 'Shape -> leafs(op:function) -> Shapes';
+leafs.signature = "leafs(shape:Shape, op:function) -> Shapes";
+leafsMethod.signature = "Shape -> leafs(op:function) -> Shapes";
 
 const toBillOfMaterial = (shape) => {
   const specifications = [];
   for (const { tags } of getItems(shape.toKeptGeometry())) {
     for (const tag of tags) {
-      if (tag.startsWith('item/')) {
+      if (tag.startsWith("item/")) {
         const specification = tag.substring(5);
         specifications.push(specification);
       }
@@ -154,7 +178,9 @@ const toBillOfMaterial = (shape) => {
   return specifications;
 };
 
-const toBillOfMaterialMethod = function (options = {}) { return toBillOfMaterial(this); };
+const toBillOfMaterialMethod = function (options = {}) {
+  return toBillOfMaterial(this);
+};
 
 Shape$1.prototype.toBillOfMaterial = toBillOfMaterialMethod;
 
@@ -167,8 +193,18 @@ const api = {
   items,
   leafs,
   registerDesignator,
-  toBillOfMaterial: toBillOfMaterialMethod
+  toBillOfMaterial: toBillOfMaterialMethod,
 };
 
 export default api;
-export { Item, bom, fromDesignator, fuse, inItems, items, leafs, registerDesignator, toBillOfMaterialMethod as toBillOfMaterial };
+export {
+  Item,
+  bom,
+  fromDesignator,
+  fuse,
+  inItems,
+  items,
+  leafs,
+  registerDesignator,
+  toBillOfMaterialMethod as toBillOfMaterial,
+};

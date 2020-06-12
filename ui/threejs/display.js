@@ -1,10 +1,10 @@
 /* global ResizeObserver */
 
-import { buildGui, buildGuiControls, buildTrackballControls } from './controls';
-import { buildScene, createResizer } from './scene';
+import { buildGui, buildGuiControls, buildTrackballControls } from "./controls";
+import { buildScene, createResizer } from "./scene";
 
-import { Layers } from 'three';
-import { buildMeshes } from './mesh';
+import { Layers } from "three";
+import { buildMeshes } from "./mesh";
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
@@ -20,7 +20,13 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({
+    width,
+    height,
+    view,
+    geometryLayers,
+    planLayers,
+  });
 
   const { gui } = buildGui({ viewerElement });
   const render = () => {
@@ -31,17 +37,27 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
     renderer.render(scene, camera);
   };
   const updateHud = () => {
-    const ctx = hudCanvas.getContext('2d');
+    const ctx = hudCanvas.getContext("2d");
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = '#FF0000';
-    ctx.fillText('HUD', 50, 50);
+    ctx.fillStyle = "#FF0000";
+    ctx.fillText("HUD", 50, 50);
   };
 
   const container = document.body;
   container.appendChild(viewerElement);
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
-  const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
+  const { trackball } = buildTrackballControls({
+    camera,
+    render,
+    view,
+    viewerElement,
+  });
+  const { resize } = createResizer({
+    camera,
+    trackball,
+    renderer,
+    viewerElement,
+  });
 
   resize();
   new ResizeObserver(resize).observe(container);

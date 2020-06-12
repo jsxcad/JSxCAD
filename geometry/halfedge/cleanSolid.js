@@ -3,12 +3,12 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import clean from './clean';
-import fromSolid from './fromSolid';
-import { junctionSelector } from './junction';
-import merge from './merge';
-import split from './split';
-import toSolid from './toSolid';
+import clean from "./clean";
+import fromSolid from "./fromSolid";
+import { junctionSelector } from "./junction";
+import merge from "./merge";
+import split from "./split";
+import toSolid from "./toSolid";
 
 /**
  * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.
@@ -22,7 +22,7 @@ export const cleanSolid = (solid, normalize) => {
   // This is currently a best-effort operation, to support solids that are not
   // properly 2-manifold.
   try {
-    const loops = fromSolid(solid, normalize, /* closed= */true);
+    const loops = fromSolid(solid, normalize, /* closed= */ true);
     const selectJunction = junctionSelector(solid, normalize);
     const mergedLoops = merge(loops);
     const cleanedLoops = mergedLoops.map(clean);

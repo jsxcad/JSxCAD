@@ -1,13 +1,10 @@
-import {
-  outlineSolid,
-  outlineSurface
-} from '@jsxcad/geometry-halfedge';
+import { outlineSolid, outlineSurface } from "@jsxcad/geometry-halfedge";
 
-import { cache } from '@jsxcad/cache';
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces';
-import { getNonVoidSolids } from './getNonVoidSolids';
-import { toKeptGeometry } from './toKeptGeometry';
+import { cache } from "@jsxcad/cache";
+import { createNormalize3 } from "@jsxcad/algorithm-quantize";
+import { getAnyNonVoidSurfaces } from "./getAnyNonVoidSurfaces";
+import { getNonVoidSolids } from "./getNonVoidSolids";
+import { toKeptGeometry } from "./toKeptGeometry";
 
 const outlineImpl = (geometry) => {
   const normalize = createNormalize3();
@@ -21,7 +18,7 @@ const outlineImpl = (geometry) => {
   for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
     outlines.push(outlineSurface(surface || z0Surface, normalize));
   }
-  return outlines.map(outline => ({ paths: outline }));
+  return outlines.map((outline) => ({ paths: outline }));
 };
 
 export const outline = cache(outlineImpl);

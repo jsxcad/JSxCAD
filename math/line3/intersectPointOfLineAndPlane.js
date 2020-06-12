@@ -1,4 +1,4 @@
-import { add, dot, scale } from '@jsxcad/math-vec3';
+import { add, dot, scale } from "@jsxcad/math-vec3";
 
 const W = 3;
 

@@ -1,11 +1,26 @@
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { distance, scale as scale$1, add } from './jsxcad-math-vec3.js';
-import { getEdges, deduplicate } from './jsxcad-geometry-path.js';
-import { pushWhenValid } from './jsxcad-geometry-polygons.js';
-import { toPlane } from './jsxcad-math-poly3.js';
-import { fromXRotation, fromYRotation, fromZRotation, fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { transform as transform$1, assertGood as assertGood$1, canonicalize as canonicalize$1, measureBoundingBox as measureBoundingBox$1, eachPoint as eachPoint$1, flip as flip$1, toPlane as toPlane$1, outline as outline$1 } from './jsxcad-geometry-surface.js';
-import { cleanSolid } from './jsxcad-geometry-halfedge.js';
+import { createNormalize3 } from "./jsxcad-algorithm-quantize.js";
+import { distance, scale as scale$1, add } from "./jsxcad-math-vec3.js";
+import { getEdges, deduplicate } from "./jsxcad-geometry-path.js";
+import { pushWhenValid } from "./jsxcad-geometry-polygons.js";
+import { toPlane } from "./jsxcad-math-poly3.js";
+import {
+  fromXRotation,
+  fromYRotation,
+  fromZRotation,
+  fromScaling,
+  fromTranslation,
+} from "./jsxcad-math-mat4.js";
+import {
+  transform as transform$1,
+  assertGood as assertGood$1,
+  canonicalize as canonicalize$1,
+  measureBoundingBox as measureBoundingBox$1,
+  eachPoint as eachPoint$1,
+  flip as flip$1,
+  toPlane as toPlane$1,
+  outline as outline$1,
+} from "./jsxcad-geometry-surface.js";
+import { cleanSolid } from "./jsxcad-geometry-halfedge.js";
 
 const THRESHOLD = 1e-5;
 
@@ -69,7 +84,10 @@ const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
         for (let i = 0; i < orderedVertices.length; i++) {
           const vertex = orderedVertices[i];
           // FIX: Threshold
-          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+          if (
+            Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+            threshold
+          ) {
             colinear.push(vertex);
           }
         }
@@ -106,7 +124,8 @@ const isWatertight = (solid) => {
   return true;
 };
 
-const transform = (matrix, solid) => solid.map(surface => transform$1(matrix, surface));
+const transform = (matrix, solid) =>
+  solid.map((surface) => transform$1(matrix, surface));
 
 const rotateX = (radians, solid) => transform(fromXRotation(radians), solid);
 const rotateY = (radians, solid) => transform(fromYRotation(radians), solid);
@@ -115,10 +134,12 @@ const scale = (vector, solid) => transform(fromScaling(vector), solid);
 const translate = (vector, solid) => transform(fromTranslation(vector), solid);
 
 const alignVertices = (solid, normalize3 = createNormalize3()) => {
-  const aligned = solid.map(surface =>
-    surface.map(polygon => deduplicate(polygon.map(normalize3)))
-        .filter(polygon => polygon.length >= 3)
-        .filter(polygon => toPlane(polygon) !== undefined));
+  const aligned = solid.map((surface) =>
+    surface
+      .map((polygon) => deduplicate(polygon.map(normalize3)))
+      .filter((polygon) => polygon.length >= 3)
+      .filter((polygon) => toPlane(polygon) !== undefined)
+  );
   return aligned;
 };
 
@@ -161,12 +182,24 @@ const doesNotOverlap = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X$1] <= minB[X$1] + iota) { return true; }
-  if (maxA[Y$1] <= minB[Y$1] + iota) { return true; }
-  if (maxA[Z$1] <= minB[Z$1] + iota) { return true; }
-  if (maxB[X$1] <= minA[X$1] + iota) { return true; }
-  if (maxB[Y$1] <= minA[Y$1] + iota) { return true; }
-  if (maxB[Z$1] <= minA[Z$1] + iota) { return true; }
+  if (maxA[X$1] <= minB[X$1] + iota) {
+    return true;
+  }
+  if (maxA[Y$1] <= minB[Y$1] + iota) {
+    return true;
+  }
+  if (maxA[Z$1] <= minB[Z$1] + iota) {
+    return true;
+  }
+  if (maxB[X$1] <= minA[X$1] + iota) {
+    return true;
+  }
+  if (maxB[Y$1] <= minA[Y$1] + iota) {
+    return true;
+  }
+  if (maxB[Z$1] <= minA[Z$1] + iota) {
+    return true;
+  }
   return false;
 };
 
@@ -179,7 +212,7 @@ const eachPoint = (thunk, solid) => {
 // Expects aligned vertices.
 
 const findOpenEdges = (solid, isOpen = true) => {
-  const test = (closed) => isOpen ? !closed : closed;
+  const test = (closed) => (isOpen ? !closed : closed);
 
   const edges = new Set();
   for (const surface of solid) {
@@ -202,7 +235,7 @@ const findOpenEdges = (solid, isOpen = true) => {
   return openEdges;
 };
 
-const flip = (solid) => solid.map(surface => flip$1(surface));
+const flip = (solid) => solid.map((surface) => flip$1(surface));
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -262,7 +295,11 @@ const createNormalize4 = () => {
   return normalize4;
 };
 
-const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
+const fromPolygons = (
+  options = {},
+  polygons,
+  normalize3 = createNormalize3()
+) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 
@@ -329,7 +366,10 @@ const outline = (solid, normalize) => {
 const reconcile = (solid, normalize = createNormalize3()) =>
   alignVertices(solid, normalize);
 
-const toGeneric = (solid) => solid.map(surface => surface.map(polygon => polygon.map(point => [...point])));
+const toGeneric = (solid) =>
+  solid.map((surface) =>
+    surface.map((polygon) => polygon.map((point) => [...point]))
+  );
 
 const toOutlinedSolid = (solid, normalize) => {
   const outlines = [];
@@ -341,7 +381,7 @@ const toOutlinedSolid = (solid, normalize) => {
 
 const toPoints = (solid) => {
   const points = [];
-  eachPoint(point => points.push(point), solid);
+  eachPoint((point) => points.push(point), solid);
   return points;
 };
 
@@ -354,4 +394,29 @@ const toPolygons = (solid) => {
   return polygons;
 };
 
-export { alignVertices, assertGood, canonicalize, doesNotOverlap, eachPoint, findOpenEdges, flip, fromPolygons, isWatertight, makeWatertight, measureBoundingBox, measureBoundingSphere, outline, reconcile, rotateX, rotateY, rotateZ, scale, toGeneric, toOutlinedSolid, toPoints, toPolygons, transform, translate };
+export {
+  alignVertices,
+  assertGood,
+  canonicalize,
+  doesNotOverlap,
+  eachPoint,
+  findOpenEdges,
+  flip,
+  fromPolygons,
+  isWatertight,
+  makeWatertight,
+  measureBoundingBox,
+  measureBoundingSphere,
+  outline,
+  reconcile,
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  toGeneric,
+  toOutlinedSolid,
+  toPoints,
+  toPolygons,
+  transform,
+  translate,
+};

@@ -1,5 +1,5 @@
 // move to tagged
-import { cache } from '@jsxcad/cache';
+import { cache } from "@jsxcad/cache";
 
 const fromPathImpl = (path) => [path];
 

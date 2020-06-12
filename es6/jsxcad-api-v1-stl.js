@@ -1,8 +1,8 @@
-import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
-import { fromStl, toStl } from './jsxcad-convert-stl.js';
-import { readFile, writeFile, addPending, emit } from './jsxcad-sys.js';
-import { getLeafs } from './jsxcad-geometry-tagged.js';
-import { ensurePages } from './jsxcad-api-v1-plans.js';
+import Shape, { Shape as Shape$1 } from "./jsxcad-api-v1-shape.js";
+import { fromStl, toStl } from "./jsxcad-convert-stl.js";
+import { readFile, writeFile, addPending, emit } from "./jsxcad-sys.js";
+import { getLeafs } from "./jsxcad-geometry-tagged.js";
+import { ensurePages } from "./jsxcad-api-v1-plans.js";
 
 /**
  *
@@ -19,7 +19,7 @@ import { ensurePages } from './jsxcad-api-v1-plans.js';
  *
  **/
 
-const readStl = async (path, { src, format = 'ascii' } = {}) => {
+const readStl = async (path, { src, format = "ascii" } = {}) => {
   let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
     data = await readFile({ sources: [src] }, `cache/${path}`);
@@ -48,14 +48,20 @@ const downloadStl = (shape, name, options = {}) => {
     for (let leaf of getLeafs(entry.content)) {
       const op = toStl(leaf, options);
       addPending(op);
-      entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });
+      entries.push({
+        data: op,
+        filename: `${name}_${++index}.stl`,
+        type: "application/sla",
+      });
     }
   }
   emit({ download: { entries } });
   return shape;
 };
 
-const downloadStlMethod = function (...args) { return downloadStl(this, ...args); };
+const downloadStlMethod = function (...args) {
+  return downloadStl(this, ...args);
+};
 Shape$1.prototype.downloadStl = downloadStlMethod;
 
 const writeStl = async (shape, name, options = {}) => {
@@ -63,17 +69,23 @@ const writeStl = async (shape, name, options = {}) => {
   for (const entry of ensurePages(shape.toKeptGeometry())) {
     for (let leaf of getLeafs(entry.content)) {
       const stl = await toStl(leaf, options);
-      await writeFile({ doSerialize: false }, `output/${name}_${index}.stl`, stl);
+      await writeFile(
+        { doSerialize: false },
+        `output/${name}_${index}.stl`,
+        stl
+      );
     }
   }
 };
 
-const method = function (...args) { return writeStl(this, ...args); };
+const method = function (...args) {
+  return writeStl(this, ...args);
+};
 Shape$1.prototype.writeStl = method;
 
 const api = {
   readStl,
-  writeStl
+  writeStl,
 };
 
 export default api;

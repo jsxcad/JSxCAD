@@ -1,8 +1,8 @@
-import { add, random, scale } from '@jsxcad/math-vec3';
+import { add, random, scale } from "@jsxcad/math-vec3";
 
-import Connector from './Connector';
-import { getSolids } from '@jsxcad/geometry-tagged';
-import { toPlane } from '@jsxcad/geometry-surface';
+import Connector from "./Connector";
+import { getSolids } from "@jsxcad/geometry-tagged";
+import { toPlane } from "@jsxcad/geometry-surface";
 
 // FIX:
 // This will produce the average position, but that's probably not what we
@@ -51,7 +51,13 @@ export const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
 
   // FIX: We should have a consistent rule for deciding the rotational position of the connector.
   const plane = toPlane(bestSurface);
-  return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
+  return shape.toConnector(
+    Connector(id, {
+      plane,
+      center: bestPosition,
+      right: add(bestPosition, random(plane)),
+    })
+  );
 };
 
 export const toConnector = (shape, surface, id) => {

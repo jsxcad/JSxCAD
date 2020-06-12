@@ -1,4 +1,4 @@
-import { makeNoise3D } from 'open-simplex-noise';
+import { makeNoise3D } from "open-simplex-noise";
 
 export const Noise = (seed = 0) => {
   const generator = makeNoise3D(seed);

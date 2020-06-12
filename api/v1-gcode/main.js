@@ -1,4 +1,4 @@
-import writeGcode from './writeGcode';
+import writeGcode from "./writeGcode";
 
 const api = { writeGcode };
 export { writeGcode };

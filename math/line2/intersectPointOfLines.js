@@ -1,4 +1,4 @@
-import { solve2Linear } from '@jsxcad/math-utils';
+import { solve2Linear } from "@jsxcad/math-utils";
 
 /**
  * Return the point of intersection between the given lines.

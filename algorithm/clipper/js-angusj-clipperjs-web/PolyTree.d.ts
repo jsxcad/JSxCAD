@@ -17,22 +17,26 @@ import { PolyNode } from "./PolyNode";
  * open and closed paths from a polytree - openPathsFromPolyTree and closedPathsFromPolyTree.
  */
 export declare class PolyTree extends PolyNode {
-    protected _total: number;
-    /**
-     * Returns the total number of PolyNodes (polygons) contained within the PolyTree. This value is not to be confused with childs.length which returns the
-     * number of immediate children only (Childs) contained by PolyTree.
-     */
-    readonly total: number;
-    /**
-     * This method returns the first outer polygon contour if any, otherwise undefined.
-     *
-     * This function is equivalent to calling childs[0].
-     */
-    getFirst(): PolyNode | undefined;
-    protected constructor();
-    /**
-     * Internal use.
-     * Constructs a PolyTree from a native PolyTree.
-     */
-    static fromNativePolyTree(nativeLib: NativeClipperLibInstance, nativePolyTree: NativePolyTree, freeNativePolyTree: boolean): PolyTree;
+  protected _total: number;
+  /**
+   * Returns the total number of PolyNodes (polygons) contained within the PolyTree. This value is not to be confused with childs.length which returns the
+   * number of immediate children only (Childs) contained by PolyTree.
+   */
+  readonly total: number;
+  /**
+   * This method returns the first outer polygon contour if any, otherwise undefined.
+   *
+   * This function is equivalent to calling childs[0].
+   */
+  getFirst(): PolyNode | undefined;
+  protected constructor();
+  /**
+   * Internal use.
+   * Constructs a PolyTree from a native PolyTree.
+   */
+  static fromNativePolyTree(
+    nativeLib: NativeClipperLibInstance,
+    nativePolyTree: NativePolyTree,
+    freeNativePolyTree: boolean
+  ): PolyTree;
 }

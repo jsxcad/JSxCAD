@@ -7,16 +7,16 @@ const m = 1000;
 const thou = 0.0254;
 const yard = 914.4;
 
-var api = /*#__PURE__*/Object.freeze({
-	__proto__: null,
-	foot: foot,
-	inch: inch,
-	mm: mm,
-	mil: mil,
-	cm: cm,
-	m: m,
-	thou: thou,
-	yard: yard
+var api = /*#__PURE__*/ Object.freeze({
+  __proto__: null,
+  foot: foot,
+  inch: inch,
+  mm: mm,
+  mil: mil,
+  cm: cm,
+  m: m,
+  thou: thou,
+  yard: yard,
 });
 
 export default api;

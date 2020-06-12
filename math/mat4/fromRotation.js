@@ -1,4 +1,4 @@
-import { identity } from './identity';
+import { identity } from "./identity";
 
 const EPSILON = 1e-5;
 
@@ -31,20 +31,22 @@ export const fromRotation = (rad, [x, y, z]) => {
   const t = 1 - c;
 
   // Perform rotation-specific matrix multiplication
-  return [x * x * t + c,
-          y * x * t + z * s,
-          z * x * t - y * s,
-          0,
-          x * y * t - z * s,
-          y * y * t + c,
-          z * y * t + x * s,
-          0,
-          x * z * t + y * s,
-          y * z * t - x * s,
-          z * z * t + c,
-          0,
-          0,
-          0,
-          0,
-          1];
+  return [
+    x * x * t + c,
+    y * x * t + z * s,
+    z * x * t - y * s,
+    0,
+    x * y * t - z * s,
+    y * y * t + c,
+    z * y * t + x * s,
+    0,
+    x * z * t + y * s,
+    y * z * t - x * s,
+    z * z * t + c,
+    0,
+    0,
+    0,
+    0,
+    1,
+  ];
 };

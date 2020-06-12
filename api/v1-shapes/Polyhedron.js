@@ -1,4 +1,4 @@
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from "@jsxcad/api-v1-shape";
 
 /**
  *
@@ -16,7 +16,7 @@ import Shape from '@jsxcad/api-v1-shape';
 export const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(path.map(point => points[point]));
+    polygons.push(path.map((point) => points[point]));
   }
   return Shape.fromPolygonsToSolid(polygons);
 };

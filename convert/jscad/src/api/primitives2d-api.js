@@ -1,5 +1,5 @@
-const {CAG} = require('../../csg')// we have to import from top level otherwise prototypes are not complete..
-const {fromPoints} = require('../core/CAGFactories')
+const { CAG } = require("../../csg"); // we have to import from top level otherwise prototypes are not complete..
+const { fromPoints } = require("../core/CAGFactories");
 
 /** Construct a square/rectangle
  * @param {Object} [options] - options for construction
@@ -12,23 +12,23 @@ const {fromPoints} = require('../core/CAGFactories')
  *   size: 10
  * })
  */
-function square () {
-  let v = [1, 1]
-  let off
-  let a = arguments
-  let params = a[0]
+function square() {
+  let v = [1, 1];
+  let off;
+  let a = arguments;
+  let params = a[0];
 
-  if (params && Number.isFinite(params)) v = [params, params]
+  if (params && Number.isFinite(params)) v = [params, params];
   if (params && params.length) {
-    v = a[0]
-    params = a[1]
+    v = a[0];
+    params = a[1];
   }
-  if (params && params.size && params.size.length) v = params.size
+  if (params && params.size && params.size.length) v = params.size;
 
-  off = [v[0] / 2, v[1] / 2]
-  if (params && params.center === true) off = [0, 0]
+  off = [v[0] / 2, v[1] / 2];
+  if (params && params.center === true) off = [0, 0];
 
-  return CAG.rectangle({center: off, radius: [v[0] / 2, v[1] / 2]})
+  return CAG.rectangle({ center: off, radius: [v[0] / 2, v[1] / 2] });
 }
 
 /** Construct a circle
@@ -43,16 +43,16 @@ function square () {
  *   r: 10
  * })
  */
-function circle (params) {
+function circle(params) {
   const defaults = {
     r: 1,
     fn: 32,
-    center: false
-  }
-  let {r, fn, center} = Object.assign({}, defaults, params)
-  if (params && !params.r && !params.fn && !params.center) r = params
-  let offset = center === true ? [0, 0] : [r, r]
-  return CAG.circle({center: offset, radius: r, resolution: fn})
+    center: false,
+  };
+  let { r, fn, center } = Object.assign({}, defaults, params);
+  if (params && !params.r && !params.fn && !params.center) r = params;
+  let offset = center === true ? [0, 0] : [r, r];
+  return CAG.circle({ center: offset, radius: r, resolution: fn });
 }
 
 /** Construct a polygon either from arrays of paths and points,
@@ -80,26 +80,31 @@ function circle (params) {
  * or
  * let poly = polygon({ points: roof.concat(wall), paths: [[0, 1, 2], [3, 4, 5], [3, 6, 5]] })
  */
-function polygon (params) { // array of po(ints) and pa(ths)
-  let points = []
-  if (params.paths && params.paths.length && params.paths[0].length) { // pa(th): [[0,1,2],[2,3,1]] (two paths)
-    if (typeof params.points[0][0] !== 'number') { // flatten points array
-      params.points = params.points.reduce((a, b) => a.concat(b))
+function polygon(params) {
+  // array of po(ints) and pa(ths)
+  let points = [];
+  if (params.paths && params.paths.length && params.paths[0].length) {
+    // pa(th): [[0,1,2],[2,3,1]] (two paths)
+    if (typeof params.points[0][0] !== "number") {
+      // flatten points array
+      params.points = params.points.reduce((a, b) => a.concat(b));
     }
     params.paths.forEach((path, i) => {
-      points.push([])
-      path.forEach(j => points[i].push(params.points[j]))
-    })
-  } else if (params.paths && params.paths.length) { // pa(th): [0,1,2,3,4] (single path)
-    params.paths.forEach(i => points.push(params.points[i]))
-  } else { // pa(th) = po(ints)
+      points.push([]);
+      path.forEach((j) => points[i].push(params.points[j]));
+    });
+  } else if (params.paths && params.paths.length) {
+    // pa(th): [0,1,2,3,4] (single path)
+    params.paths.forEach((i) => points.push(params.points[i]));
+  } else {
+    // pa(th) = po(ints)
     if (params.length) {
-      points = params
+      points = params;
     } else {
-      points = params.points
+      points = params.points;
     }
   }
-  return fromPoints(points)
+  return fromPoints(points);
 }
 
 // FIXME: errr this is kinda just a special case of a polygon , why do we need it ?
@@ -111,15 +116,15 @@ function polygon (params) { // array of po(ints) and pa(ths)
  *   length: 10
  * })
  */
-function triangle () {
-  let a = arguments
-  if (a[0] && a[0].length) a = a[0]
-  return fromPoints(a)
+function triangle() {
+  let a = arguments;
+  if (a[0] && a[0].length) a = a[0];
+  return fromPoints(a);
 }
 
 module.exports = {
   circle,
   square,
   polygon,
-  triangle
-}
+  triangle,
+};

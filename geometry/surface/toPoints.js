@@ -1,7 +1,7 @@
-import { eachPoint } from './eachPoint';
+import { eachPoint } from "./eachPoint";
 
 export const toPoints = (surface) => {
   const points = [];
-  eachPoint(point => points.push(point), surface);
+  eachPoint((point) => points.push(point), surface);
   return points;
 };

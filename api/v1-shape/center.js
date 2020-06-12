@@ -1,7 +1,7 @@
-import { add, negate, scale } from '@jsxcad/math-vec3';
+import { add, negate, scale } from "@jsxcad/math-vec3";
 
-import Shape from './Shape';
-import measureBoundingBox from './measureBoundingBox';
+import Shape from "./Shape";
+import measureBoundingBox from "./measureBoundingBox";
 
 /**
  *
@@ -31,10 +31,12 @@ export const center = (shape) => {
   return moved;
 };
 
-const centerMethod = function (...params) { return center(this, ...params); };
+const centerMethod = function (...params) {
+  return center(this, ...params);
+};
 Shape.prototype.center = centerMethod;
 
 export default center;
 
-center.signature = 'center(shape:Shape) -> Shape';
-centerMethod.signature = 'Shape -> center() -> Shape';
+center.signature = "center(shape:Shape) -> Shape";
+centerMethod.signature = "Shape -> center() -> Shape";

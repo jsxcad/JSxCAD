@@ -1,8 +1,8 @@
-import { canonicalize } from '@jsxcad/math-vec3';
-import { fromPoints } from './fromPoints';
-import test from 'ava';
+import { canonicalize } from "@jsxcad/math-vec3";
+import { fromPoints } from "./fromPoints";
+import test from "ava";
 
-test('line3: fromPoints() should return a new line3 with correct values', (t) => {
+test("line3: fromPoints() should return a new line3 with correct values", (t) => {
   let obs = fromPoints([0, 0, 0], [1, 0, 0]);
   let pnt = obs[0];
   let dir = obs[1];

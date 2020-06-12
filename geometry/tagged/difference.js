@@ -1,13 +1,13 @@
-import { cache } from '@jsxcad/cache';
-import { getPaths } from './getPaths';
-import { getSolids } from './getSolids';
-import { getSurfaces } from './getSurfaces';
-import { getZ0Surfaces } from './getZ0Surfaces';
-import { difference as pathsDifference } from '@jsxcad/geometry-paths';
-import { rewrite } from './visit';
-import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
-import { difference as surfaceDifference } from '@jsxcad/geometry-surface-boolean';
-import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface-boolean';
+import { cache } from "@jsxcad/cache";
+import { getPaths } from "./getPaths";
+import { getSolids } from "./getSolids";
+import { getSurfaces } from "./getSurfaces";
+import { getZ0Surfaces } from "./getZ0Surfaces";
+import { difference as pathsDifference } from "@jsxcad/geometry-paths";
+import { rewrite } from "./visit";
+import { difference as solidDifference } from "@jsxcad/geometry-solid-boolean";
+import { difference as surfaceDifference } from "@jsxcad/geometry-surface-boolean";
+import { difference as z0SurfaceDifference } from "@jsxcad/geometry-z0surface-boolean";
 
 const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
@@ -18,7 +18,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(solid);
         }
       }
-      return { solid: solidDifference(geometry.solid, ...todo), tags: geometry.tags };
+      return {
+        solid: solidDifference(geometry.solid, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.surface) {
       // FIX: Solids should cut surfaces
       const todo = [];
@@ -30,7 +33,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(z0Surface);
         }
       }
-      return { surface: surfaceDifference(geometry.surface, ...todo), tags: geometry.tags };
+      return {
+        surface: surfaceDifference(geometry.surface, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.z0Surface) {
       // FIX: Solids should cut surfaces
       const todoSurfaces = [];
@@ -44,9 +50,19 @@ const differenceImpl = (geometry, ...geometries) => {
         }
       }
       if (todoSurfaces.length > 0) {
-        return { surface: surfaceDifference(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: surfaceDifference(
+            geometry.z0Surface,
+            ...todoSurfaces,
+            ...todoZ0Surfaces
+          ),
+          tags: geometry.tags,
+        };
       } else {
-        return { surface: z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces),
+          tags: geometry.tags,
+        };
       }
     } else if (geometry.paths) {
       const todo = [];
@@ -55,7 +71,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(paths);
         }
       }
-      return { paths: pathsDifference(geometry.paths, ...todo), tags: geometry.tags };
+      return {
+        paths: pathsDifference(geometry.paths, ...todo),
+        tags: geometry.tags,
+      };
     } else {
       return descend();
     }

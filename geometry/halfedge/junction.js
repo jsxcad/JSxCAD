@@ -6,8 +6,8 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import { dot } from '@jsxcad/math-vec3';
-import { toPlane as toPlaneOfPath } from '@jsxcad/math-poly3';
+import { dot } from "@jsxcad/math-vec3";
+import { toPlane as toPlaneOfPath } from "@jsxcad/math-poly3";
 
 const THRESHOLD = 0.99999;
 
@@ -65,7 +65,7 @@ export const computeJunctions = (solid, normalize) => {
     }
     planes.push(planeOfPath);
     if (planes.length > 3) {
-      throw Error('die: non-manifold');
+      throw Error("die: non-manifold");
     }
   };
 

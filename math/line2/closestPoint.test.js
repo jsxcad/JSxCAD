@@ -1,10 +1,10 @@
-import { canonicalize } from '@jsxcad/math-vec2';
-import { closestPoint } from './closestPoint';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import test from 'ava';
+import { canonicalize } from "@jsxcad/math-vec2";
+import { closestPoint } from "./closestPoint";
+import { fromPoints } from "./fromPoints";
+import { fromValues } from "./fromValues";
+import test from "ava";
 
-test('line2: closestPoint() should return proper values', (t) => {
+test("line2: closestPoint() should return proper values", (t) => {
   const line1 = fromValues();
   const x1 = closestPoint([0, 0], line1);
   t.deepEqual(canonicalize(x1), [-0, 0]);

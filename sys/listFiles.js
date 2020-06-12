@@ -1,22 +1,16 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 
-import {
-  getFilesystem,
-  qualifyPath
-} from './filesystem';
+import { getFilesystem, qualifyPath } from "./filesystem";
 
-import {
-  isBrowser,
-  isNode
-} from './browserOrNode';
+import { isBrowser, isNode } from "./browserOrNode";
 
 import {
   listFiles as listEphemeralFiles,
   watchFileCreation,
-  watchFileDeletion
-} from './files';
+  watchFileDeletion,
+} from "./files";
 
-import { db } from './db';
+import { db } from "./db";
 
 const { promises } = fs;
 
@@ -27,7 +21,7 @@ const getFileLister = async () => {
       const qualifiedPaths = new Set();
       const walk = async (path) => {
         for (const file of await promises.readdir(path)) {
-          if (file.startsWith('.') || file === 'node_modules') {
+          if (file.startsWith(".") || file === "node_modules") {
             continue;
           }
           const subpath = `${path}${file}`;
@@ -39,7 +33,7 @@ const getFileLister = async () => {
           }
         }
       };
-      await walk('jsxcad/');
+      await walk("jsxcad/");
       listEphemeralFiles(qualifiedPaths);
       return qualifiedPaths;
     };
@@ -51,14 +45,16 @@ const getFileLister = async () => {
       return qualifiedPaths;
     };
   } else {
-    throw Error('die');
+    throw Error("die");
   }
 };
 
 let cachedKeys;
 
-const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
-const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
+const updateCachedKeys = (options = {}, file) =>
+  cachedKeys.add(file.storageKey);
+const deleteCachedKeys = (options = {}, file) =>
+  cachedKeys.delete(file.storageKey);
 
 const getKeys = async () => {
   if (cachedKeys === undefined) {
@@ -74,8 +70,8 @@ export const listFilesystems = async () => {
   const keys = await getKeys();
   const filesystems = new Set();
   for (const key of keys) {
-    if (key.startsWith('jsxcad/')) {
-      const [, filesystem] = key.split('/');
+    if (key.startsWith("jsxcad/")) {
+      const [, filesystem] = key.split("/");
       filesystems.add(filesystem);
     }
   }
@@ -86,7 +82,7 @@ export const listFiles = async ({ workspace } = {}) => {
   if (workspace === undefined) {
     workspace = getFilesystem();
   }
-  const prefix = qualifyPath('', workspace);
+  const prefix = qualifyPath("", workspace);
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {

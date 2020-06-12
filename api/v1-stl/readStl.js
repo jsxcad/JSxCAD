@@ -1,6 +1,6 @@
-import Shape from '@jsxcad/api-v1-shape';
-import { fromStl } from '@jsxcad/convert-stl';
-import { readFile } from '@jsxcad/sys';
+import Shape from "@jsxcad/api-v1-shape";
+import { fromStl } from "@jsxcad/convert-stl";
+import { readFile } from "@jsxcad/sys";
 
 /**
  *
@@ -17,7 +17,7 @@ import { readFile } from '@jsxcad/sys';
  *
  **/
 
-export const readStl = async (path, { src, format = 'ascii' } = {}) => {
+export const readStl = async (path, { src, format = "ascii" } = {}) => {
   let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
     data = await readFile({ sources: [src] }, `cache/${path}`);

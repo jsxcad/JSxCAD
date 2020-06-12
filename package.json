@@ -8,7 +8,7 @@
     "depcheck": "lerna run depcheck",
     "lint": "lerna run lint",
     "lintfix": "lerna run lintfix",
-    "prettier": "prettier",
+    "prettier": "prettier --write",
     "publish-npm": "lerna publish",
     "rollup": "lerna run rollup",
     "test": "lerna run tests",

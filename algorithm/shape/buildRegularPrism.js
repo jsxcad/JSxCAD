@@ -1,7 +1,7 @@
-import { buildRegularPolygon } from './buildRegularPolygon';
-import { cache } from '@jsxcad/cache';
-import { extrude } from './extrude';
-import { translate } from '@jsxcad/geometry-tagged';
+import { buildRegularPolygon } from "./buildRegularPolygon";
+import { cache } from "@jsxcad/cache";
+import { extrude } from "./extrude";
+import { translate } from "@jsxcad/geometry-tagged";
 
 /**
  * Construct a regular unit prism of a given edge count.

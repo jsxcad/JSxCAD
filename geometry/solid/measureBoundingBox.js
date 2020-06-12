@@ -1,4 +1,4 @@
-import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
+import { measureBoundingBox as measureBoundingBoxOfSurface } from "@jsxcad/geometry-surface";
 
 // returns an array of two Vector3Ds (minimum coordinates and maximum coordinates)
 export const measureBoundingBox = (solid) => {

@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { fromZRotation } from '@jsxcad/math-mat4';
+import { Shape } from "./Shape";
+import { fromZRotation } from "@jsxcad/math-mat4";
 
 /**
  *
@@ -19,9 +19,12 @@ import { fromZRotation } from '@jsxcad/math-mat4';
  * :::
  **/
 
-export const rotateZ = (shape, angle) => shape.transform(fromZRotation(angle * 0.017453292519943295));
+export const rotateZ = (shape, angle) =>
+  shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-const rotateZMethod = function (angle) { return rotateZ(this, angle); };
+const rotateZMethod = function (angle) {
+  return rotateZ(this, angle);
+};
 Shape.prototype.rotateZ = rotateZMethod;
 
 export default rotateZ;

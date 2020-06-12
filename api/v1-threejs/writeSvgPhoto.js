@@ -1,6 +1,6 @@
-import Shape from '@jsxcad/api-v1-shape';
-import { toSvg } from '@jsxcad/convert-threejs';
-import { writeFile } from '@jsxcad/sys';
+import Shape from "@jsxcad/api-v1-shape";
+import { toSvg } from "@jsxcad/convert-threejs";
+import { writeFile } from "@jsxcad/sys";
 
 /**
  *
@@ -21,16 +21,22 @@ import { writeFile } from '@jsxcad/sys';
  **/
 
 export const writeSvgPhoto = async (options, shape) => {
-  if (typeof options === 'string') {
+  if (typeof options === "string") {
     options = { path: options };
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  await writeFile({ doSerialize: false }, `output/${path}`, toSvg(options, geometry));
+  await writeFile(
+    { doSerialize: false },
+    `output/${path}`,
+    toSvg(options, geometry)
+  );
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const method = function (options = {}) { return writeSvgPhoto(options, this); };
+const method = function (options = {}) {
+  return writeSvgPhoto(options, this);
+};
 
 Shape.prototype.writeSvgPhoto = method;
 

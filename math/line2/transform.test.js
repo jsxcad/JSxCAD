@@ -1,20 +1,15 @@
-import { canonicalize } from './canonicalize';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import test from 'ava';
-import { transform } from './transform';
+import { canonicalize } from "./canonicalize";
+import { fromPoints } from "./fromPoints";
+import { fromValues } from "./fromValues";
+import test from "ava";
+import { transform } from "./transform";
 
-test('line2: transform() called with two paramerters should return a line2 with correct values', (t) => {
+test("line2: transform() called with two paramerters should return a line2 with correct values", (t) => {
   const line1 = fromValues();
   const line2 = fromPoints([0, 0], [0, 1]);
   const line3 = fromPoints([-3, -3], [3, 3]);
 
-  const identityMatrix = [
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
-  ];
+  const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
   let obs1 = transform(identityMatrix, line1);
   t.deepEqual(canonicalize(obs1), [0, 1, 0]);
@@ -26,12 +21,7 @@ test('line2: transform() called with two paramerters should return a line2 with 
   const x = 1;
   const y = 5;
   const z = 7;
-  const translationMatrix = [
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    x, y, z, 1
-  ];
+  const translationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
 
   let obs2 = transform(translationMatrix, line1);
   t.deepEqual(canonicalize(obs2), [0, 1, 5]);
@@ -43,12 +33,7 @@ test('line2: transform() called with two paramerters should return a line2 with 
   const w = 1;
   const h = 3;
   const d = 5;
-  const scaleMatrix = [
-    w, 0, 0, 0,
-    0, h, 0, 0,
-    0, 0, d, 0,
-    0, 0, 0, 1
-  ];
+  const scaleMatrix = [w, 0, 0, 0, 0, h, 0, 0, 0, 0, d, 0, 0, 0, 0, 1];
 
   let obs3 = transform(scaleMatrix, line1);
   // rounding t.deepEqual(obs3, [0, 1, 0])
@@ -57,12 +42,24 @@ test('line2: transform() called with two paramerters should return a line2 with 
   obs3 = transform(scaleMatrix, line3);
   t.deepEqual(canonicalize(obs3), [-0.94868, 0.31623, 0]);
 
-  const r = (90 * 0.017453292519943295);
+  const r = 90 * 0.017453292519943295;
   const rotateZMatrix = [
-    Math.cos(r), Math.sin(r), 0, 0,
-    -Math.sin(r), Math.cos(r), 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
+    Math.cos(r),
+    Math.sin(r),
+    0,
+    0,
+    -Math.sin(r),
+    Math.cos(r),
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
   ];
 
   let obs4 = transform(rotateZMatrix, line1);

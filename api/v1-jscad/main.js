@@ -1,4 +1,4 @@
-import readJscad from './readJscad';
+import readJscad from "./readJscad";
 
 const api = { readJscad };
 export { readJscad };

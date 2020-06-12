@@ -1,13 +1,17 @@
-import { cleanSolid } from '@jsxcad/geometry-halfedge';
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { createNormalize4 } from './createNormalize4';
-import { makeWatertight } from './makeWatertight';
-import { toPlane } from '@jsxcad/math-poly3';
+import { cleanSolid } from "@jsxcad/geometry-halfedge";
+import { createNormalize3 } from "@jsxcad/algorithm-quantize";
+import { createNormalize4 } from "./createNormalize4";
+import { makeWatertight } from "./makeWatertight";
+import { toPlane } from "@jsxcad/math-poly3";
 
 export let doCheckOverlap = false;
-export let doDefragment = 'none';
+export let doDefragment = "none";
 
-export const fromPolygons = (options = {}, polygons, normalize3 = createNormalize3()) => {
+export const fromPolygons = (
+  options = {},
+  polygons,
+  normalize3 = createNormalize3()
+) => {
   const normalize4 = createNormalize4();
   const coplanarGroups = new Map();
 

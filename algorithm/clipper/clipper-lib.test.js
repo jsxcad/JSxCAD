@@ -21,6 +21,6 @@ test('strictlySimple fails', async t => {
 });
 */
 
-import test from 'ava';
+import test from "ava";
 
-test('dummy', t => t.true(true));
+test("dummy", (t) => t.true(true));

@@ -1,22 +1,77 @@
-import { multiply, identityMatrix, fromXRotation, fromYRotation, fromZRotation, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { cacheTransform, cache, cacheRewriteTags } from './jsxcad-cache.js';
-import { reconcile as reconcile$1, makeWatertight as makeWatertight$1, isWatertight as isWatertight$1, findOpenEdges as findOpenEdges$1, transform as transform$4, canonicalize as canonicalize$5, eachPoint as eachPoint$3, flip as flip$4, measureBoundingBox as measureBoundingBox$1 } from './jsxcad-geometry-solid.js';
-import { close } from './jsxcad-geometry-path.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { transform as transform$1, canonicalize as canonicalize$2, difference as difference$4, eachPoint as eachPoint$2, flip as flip$2, intersection as intersection$4, union as union$4 } from './jsxcad-geometry-paths.js';
-import { transform as transform$3, canonicalize as canonicalize$3, flip as flip$5 } from './jsxcad-math-plane.js';
-import { transform as transform$2, canonicalize as canonicalize$1, eachPoint as eachPoint$1, flip as flip$1 } from './jsxcad-geometry-points.js';
-import { transform as transform$5, canonicalize as canonicalize$4, eachPoint as eachPoint$4, flip as flip$3, makeConvex, measureArea as measureArea$1, measureBoundingBox as measureBoundingBox$2 } from './jsxcad-geometry-surface.js';
-import { difference as difference$1, intersection as intersection$1, union as union$1 } from './jsxcad-geometry-solid-boolean.js';
-import { difference as difference$2, intersection as intersection$2, union as union$2 } from './jsxcad-geometry-surface-boolean.js';
-import { difference as difference$3, intersection as intersection$3, union as union$3 } from './jsxcad-geometry-z0surface-boolean.js';
-import { min, max } from './jsxcad-math-vec3.js';
-import { measureBoundingBox as measureBoundingBox$3 } from './jsxcad-geometry-z0surface.js';
-import { outlineSolid, outlineSurface } from './jsxcad-geometry-halfedge.js';
+import {
+  multiply,
+  identityMatrix,
+  fromXRotation,
+  fromYRotation,
+  fromZRotation,
+  fromTranslation,
+  fromScaling,
+} from "./jsxcad-math-mat4.js";
+import { cacheTransform, cache, cacheRewriteTags } from "./jsxcad-cache.js";
+import {
+  reconcile as reconcile$1,
+  makeWatertight as makeWatertight$1,
+  isWatertight as isWatertight$1,
+  findOpenEdges as findOpenEdges$1,
+  transform as transform$4,
+  canonicalize as canonicalize$5,
+  eachPoint as eachPoint$3,
+  flip as flip$4,
+  measureBoundingBox as measureBoundingBox$1,
+} from "./jsxcad-geometry-solid.js";
+import { close } from "./jsxcad-geometry-path.js";
+import { createNormalize3 } from "./jsxcad-algorithm-quantize.js";
+import {
+  transform as transform$1,
+  canonicalize as canonicalize$2,
+  difference as difference$4,
+  eachPoint as eachPoint$2,
+  flip as flip$2,
+  intersection as intersection$4,
+  union as union$4,
+} from "./jsxcad-geometry-paths.js";
+import {
+  transform as transform$3,
+  canonicalize as canonicalize$3,
+  flip as flip$5,
+} from "./jsxcad-math-plane.js";
+import {
+  transform as transform$2,
+  canonicalize as canonicalize$1,
+  eachPoint as eachPoint$1,
+  flip as flip$1,
+} from "./jsxcad-geometry-points.js";
+import {
+  transform as transform$5,
+  canonicalize as canonicalize$4,
+  eachPoint as eachPoint$4,
+  flip as flip$3,
+  makeConvex,
+  measureArea as measureArea$1,
+  measureBoundingBox as measureBoundingBox$2,
+} from "./jsxcad-geometry-surface.js";
+import {
+  difference as difference$1,
+  intersection as intersection$1,
+  union as union$1,
+} from "./jsxcad-geometry-solid-boolean.js";
+import {
+  difference as difference$2,
+  intersection as intersection$2,
+  union as union$2,
+} from "./jsxcad-geometry-surface-boolean.js";
+import {
+  difference as difference$3,
+  intersection as intersection$3,
+  union as union$3,
+} from "./jsxcad-geometry-z0surface-boolean.js";
+import { min, max } from "./jsxcad-math-vec3.js";
+import { measureBoundingBox as measureBoundingBox$3 } from "./jsxcad-geometry-z0surface.js";
+import { outlineSolid, outlineSurface } from "./jsxcad-geometry-halfedge.js";
 
 const transformImpl = (matrix, untransformed) => {
-  if (matrix.some(value => typeof value !== 'number' || isNaN(value))) {
-    throw Error('die');
+  if (matrix.some((value) => typeof value !== "number" || isNaN(value))) {
+    throw Error("die");
   }
   return { matrix, untransformed, tags: untransformed.tags };
 };
@@ -29,7 +84,7 @@ const update = (geometry, updates) => {
   }
   const updated = {};
   for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
+    if (typeof key !== "symbol") {
       updated[key] = geometry[key];
     }
   }
@@ -50,33 +105,67 @@ const update = (geometry, updates) => {
 const rewrite = (geometry, op) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
-      return op(geometry, _ => update(geometry, { assembly: geometry.assembly.map(walk) }), walk);
+      return op(
+        geometry,
+        (_) => update(geometry, { assembly: geometry.assembly.map(walk) }),
+        walk
+      );
     } else if (geometry.disjointAssembly) {
-      return op(geometry, _ => update(geometry, { disjointAssembly: geometry.disjointAssembly.map(walk) }), walk);
+      return op(
+        geometry,
+        (_) =>
+          update(geometry, {
+            disjointAssembly: geometry.disjointAssembly.map(walk),
+          }),
+        walk
+      );
     } else if (geometry.layers) {
-      return op(geometry, _ => update(geometry, { layers: geometry.layers.map(walk) }), walk);
+      return op(
+        geometry,
+        (_) => update(geometry, { layers: geometry.layers.map(walk) }),
+        walk
+      );
     } else if (geometry.connection) {
-      return op(geometry,
-                _ => update(geometry, { geometries: geometry.geometries.map(walk), connectors: geometry.connectors.map(walk) }),
-                walk);
+      return op(
+        geometry,
+        (_) =>
+          update(geometry, {
+            geometries: geometry.geometries.map(walk),
+            connectors: geometry.connectors.map(walk),
+          }),
+        walk
+      );
     } else if (geometry.item) {
-      return op(geometry, _ => update(geometry, { item: walk(geometry.item) }), walk);
+      return op(
+        geometry,
+        (_) => update(geometry, { item: walk(geometry.item) }),
+        walk
+      );
     } else if (geometry.paths) {
-      return op(geometry, _ => geometry, walk);
+      return op(geometry, (_) => geometry, walk);
     } else if (geometry.plan) {
-      return op(geometry, _ => update(geometry, { content: walk(geometry.content) }), walk);
+      return op(
+        geometry,
+        (_) => update(geometry, { content: walk(geometry.content) }),
+        walk
+      );
     } else if (geometry.points) {
-      return op(geometry, _ => geometry, walk);
+      return op(geometry, (_) => geometry, walk);
     } else if (geometry.solid) {
-      return op(geometry, _ => geometry, walk);
+      return op(geometry, (_) => geometry, walk);
     } else if (geometry.surface) {
-      return op(geometry, _ => geometry, walk);
+      return op(geometry, (_) => geometry, walk);
     } else if (geometry.untransformed) {
-      return op(geometry, _ => update(geometry, { untransformed: walk(geometry.untransformed) }), walk);
+      return op(
+        geometry,
+        (_) =>
+          update(geometry, { untransformed: walk(geometry.untransformed) }),
+        walk
+      );
     } else if (geometry.z0Surface) {
-      return op(geometry, _ => geometry, walk);
+      return op(geometry, (_) => geometry, walk);
     } else {
-      throw Error('die: Unknown geometry');
+      throw Error("die: Unknown geometry");
     }
   };
   return walk(geometry);
@@ -85,87 +174,89 @@ const rewrite = (geometry, op) => {
 const visit = (geometry, op) => {
   const walk = (geometry) => {
     if (geometry.assembly) {
-      op(geometry, _ => geometry.assembly.forEach(walk));
+      op(geometry, (_) => geometry.assembly.forEach(walk));
     } else if (geometry.disjointAssembly) {
-      op(geometry, _ => geometry.disjointAssembly.forEach(walk));
+      op(geometry, (_) => geometry.disjointAssembly.forEach(walk));
     } else if (geometry.layers) {
-      op(geometry, _ => geometry.layers.forEach(walk));
+      op(geometry, (_) => geometry.layers.forEach(walk));
     } else if (geometry.connection) {
-      op(geometry, _ => { geometry.geometries.forEach(walk); geometry.connectors.forEach(walk); });
+      op(geometry, (_) => {
+        geometry.geometries.forEach(walk);
+        geometry.connectors.forEach(walk);
+      });
     } else if (geometry.item) {
-      op(geometry, _ => walk(geometry.item));
+      op(geometry, (_) => walk(geometry.item));
     } else if (geometry.paths) {
-      op(geometry, _ => undefined);
+      op(geometry, (_) => undefined);
     } else if (geometry.plan) {
-      op(geometry, _ => { walk(geometry.content); });
+      op(geometry, (_) => {
+        walk(geometry.content);
+      });
     } else if (geometry.points) {
-      op(geometry, _ => undefined);
+      op(geometry, (_) => undefined);
     } else if (geometry.solid) {
-      op(geometry, _ => undefined);
+      op(geometry, (_) => undefined);
     } else if (geometry.surface) {
-      op(geometry, _ => undefined);
+      op(geometry, (_) => undefined);
     } else if (geometry.untransformed) {
-      op(geometry, _ => walk(geometry.untransformed));
+      op(geometry, (_) => walk(geometry.untransformed));
     } else if (geometry.z0Surface) {
-      op(geometry, _ => undefined);
+      op(geometry, (_) => undefined);
     } else {
-      throw Error('die: Unknown geometry');
+      throw Error("die: Unknown geometry");
     }
   };
   walk(geometry);
 };
 
 const reconcile = (geometry, normalize = createNormalize3()) =>
-  rewrite(geometry,
-          (geometry, descend) => {
-            if (geometry.solid) {
-              return {
-                solid: reconcile$1(geometry.solid, normalize),
-                tags: geometry.tags
-              };
-            } else {
-              return descend();
-            }
-          });
+  rewrite(geometry, (geometry, descend) => {
+    if (geometry.solid) {
+      return {
+        solid: reconcile$1(geometry.solid, normalize),
+        tags: geometry.tags,
+      };
+    } else {
+      return descend();
+    }
+  });
 
 const makeWatertight = (geometry, normalize = createNormalize3(), onFixed) =>
-  rewrite(geometry,
-          (geometry, descend) => {
-            if (geometry.solid) {
-              return {
-                solid: makeWatertight$1(geometry.solid, normalize, onFixed),
-                tags: geometry.tags
-              };
-            } else {
-              return descend();
-            }
-          });
+  rewrite(geometry, (geometry, descend) => {
+    if (geometry.solid) {
+      return {
+        solid: makeWatertight$1(geometry.solid, normalize, onFixed),
+        tags: geometry.tags,
+      };
+    } else {
+      return descend();
+    }
+  });
 
 const isWatertight = (geometry) => {
   let watertight = true;
-  visit(geometry,
-        (geometry, descend) => {
-          if (geometry.solid && !isWatertight$1(geometry.solid)) {
-            watertight = false;
-          }
-          return descend();
-        });
+  visit(geometry, (geometry, descend) => {
+    if (geometry.solid && !isWatertight$1(geometry.solid)) {
+      watertight = false;
+    }
+    return descend();
+  });
   return watertight;
 };
 
 const findOpenEdges = (geometry) => {
   const openEdges = [];
-  visit(geometry,
-        (geometry, descend) => {
-          if (geometry.solid) {
-            openEdges.push(...findOpenEdges$1(geometry.solid).map(close));
-          }
-          return descend();
-        });
+  visit(geometry, (geometry, descend) => {
+    if (geometry.solid) {
+      openEdges.push(...findOpenEdges$1(geometry.solid).map(close));
+    }
+    return descend();
+  });
   return { paths: openEdges };
 };
 
-const isNotVoid = ({ tags }) => tags === undefined || tags.includes('compose/non-positive') === false;
+const isNotVoid = ({ tags }) =>
+  tags === undefined || tags.includes("compose/non-positive") === false;
 
 const isVoid = (geometry) => !isNotVoid(geometry);
 
@@ -187,7 +278,7 @@ const assembleImpl = (...taggedGeometries) => ({ assembly: taggedGeometries });
 
 const assemble = cache(assembleImpl);
 
-const transformedGeometry = Symbol('transformedGeometry');
+const transformedGeometry = Symbol("transformedGeometry");
 
 const toTransformedGeometry = (geometry) => {
   if (geometry[transformedGeometry] === undefined) {
@@ -196,12 +287,11 @@ const toTransformedGeometry = (geometry) => {
       if (geometry.matrix) {
         // Preserve any tags applied to the untransformed geometry.
         // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
-        return walk(multiply(matrix, geometry.matrix),
-                    geometry.untransformed);
+        return walk(multiply(matrix, geometry.matrix), geometry.untransformed);
       } else if (geometry.assembly) {
         return {
-          assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
-          tags
+          assembly: geometry.assembly.map((geometry) => walk(matrix, geometry)),
+          tags,
         };
       } else if (geometry.disjointAssembly) {
         if (matrix === identityMatrix) {
@@ -210,62 +300,68 @@ const toTransformedGeometry = (geometry) => {
           return geometry;
         }
         return {
-          disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
-          tags
+          disjointAssembly: geometry.disjointAssembly.map((geometry) =>
+            walk(matrix, geometry)
+          ),
+          tags,
         };
       } else if (geometry.layers) {
         return {
-          layers: geometry.layers.map(geometry => walk(matrix, geometry)),
-          tags
+          layers: geometry.layers.map((geometry) => walk(matrix, geometry)),
+          tags,
         };
       } else if (geometry.item) {
         return {
           item: walk(matrix, geometry.item),
-          tags
+          tags,
         };
       } else if (geometry.connection) {
         return {
           // A connection is a list of geometry with connections (connectors that have been connected)
           // The join can be released, to yield the geometry with the disconnected connections reconnected.
           connection: geometry.connection,
-          geometries: geometry.geometries.map(geometry => walk(matrix, geometry)),
-          connectors: geometry.connectors.map(connector => walk(matrix, connector)),
-          tags
+          geometries: geometry.geometries.map((geometry) =>
+            walk(matrix, geometry)
+          ),
+          connectors: geometry.connectors.map((connector) =>
+            walk(matrix, connector)
+          ),
+          tags,
         };
       } else if (geometry.paths) {
         return {
           paths: transform$1(matrix, geometry.paths),
-          tags
+          tags,
         };
       } else if (geometry.plan) {
         return {
           plan: geometry.plan,
           marks: transform$2(matrix, geometry.marks),
-          planes: geometry.planes.map(plane => transform$3(matrix, plane)),
+          planes: geometry.planes.map((plane) => transform$3(matrix, plane)),
           content: walk(matrix, geometry.content),
           visualization: walk(matrix, geometry.visualization),
-          tags
+          tags,
         };
       } else if (geometry.points) {
         return {
           points: transform$2(matrix, geometry.points),
-          tags
+          tags,
         };
       } else if (geometry.solid) {
         return {
           solid: transform$4(matrix, reconcile$1(geometry.solid)),
-          tags
+          tags,
         };
       } else if (geometry.surface) {
         return {
           surface: transform$5(matrix, geometry.surface),
-          tags
+          tags,
         };
       } else if (geometry.z0Surface) {
         // FIX: Consider transforms that preserve z0.
         return {
           surface: transform$5(matrix, geometry.z0Surface),
-          tags
+          tags,
         };
       } else {
         throw Error(`die: ${JSON.stringify(geometry)}`);
@@ -291,7 +387,9 @@ const canonicalize = (rawGeometry) => {
     canonicalized.content = canonicalize(geometry.content);
   } else if (geometry.connection) {
     canonicalized.connection = geometry.connection;
-    canonicalized.geometries = geometry.geometries.map(canonicalize);    canonicalized.connectors = geometry.connectors.map(canonicalize);  } else if (geometry.surface !== undefined) {
+    canonicalized.geometries = geometry.geometries.map(canonicalize);
+    canonicalized.connectors = geometry.connectors.map(canonicalize);
+  } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalize$4(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {
     canonicalized.z0Surface = canonicalize$4(geometry.z0Surface);
@@ -302,11 +400,13 @@ const canonicalize = (rawGeometry) => {
   } else if (geometry.layers !== undefined) {
     canonicalized.layers = geometry.layers.map(canonicalize);
   } else if (geometry.disjointAssembly !== undefined) {
-    canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize);
+    canonicalized.disjointAssembly = geometry.disjointAssembly.map(
+      canonicalize
+    );
   } else if (geometry.item !== undefined) {
     canonicalized.item = canonicalize(geometry.item);
   } else {
-    throw Error('die');
+    throw Error("die");
   }
   if (geometry.tags !== undefined) {
     canonicalized.tags = geometry.tags;
@@ -315,51 +415,50 @@ const canonicalize = (rawGeometry) => {
 };
 
 const eachItem = (geometry, op) => {
-  const walk = (geometry, descend) => { op(geometry); descend(); };
+  const walk = (geometry, descend) => {
+    op(geometry);
+    descend();
+  };
   visit(geometry, walk);
 };
 
 const getPaths = (geometry) => {
   const pathsets = [];
-  eachItem(geometry,
-           item => {
-             if (item.paths) {
-               pathsets.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.paths) {
+      pathsets.push(item);
+    }
+  });
   return pathsets;
 };
 
 const getSolids = (geometry) => {
   const solids = [];
-  eachItem(geometry,
-           item => {
-             if (item.solid) {
-               solids.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.solid) {
+      solids.push(item);
+    }
+  });
   return solids;
 };
 
 const getSurfaces = (geometry) => {
   const surfaces = [];
-  eachItem(geometry,
-           item => {
-             if (item.surface) {
-               surfaces.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.surface) {
+      surfaces.push(item);
+    }
+  });
   return surfaces;
 };
 
 const getZ0Surfaces = (geometry) => {
   const z0Surfaces = [];
-  eachItem(geometry,
-           item => {
-             if (item.z0Surface) {
-               z0Surfaces.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.z0Surface) {
+      z0Surfaces.push(item);
+    }
+  });
   return z0Surfaces;
 };
 
@@ -372,7 +471,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(solid);
         }
       }
-      return { solid: difference$1(geometry.solid, ...todo), tags: geometry.tags };
+      return {
+        solid: difference$1(geometry.solid, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.surface) {
       // FIX: Solids should cut surfaces
       const todo = [];
@@ -384,7 +486,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(z0Surface);
         }
       }
-      return { surface: difference$2(geometry.surface, ...todo), tags: geometry.tags };
+      return {
+        surface: difference$2(geometry.surface, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.z0Surface) {
       // FIX: Solids should cut surfaces
       const todoSurfaces = [];
@@ -398,9 +503,19 @@ const differenceImpl = (geometry, ...geometries) => {
         }
       }
       if (todoSurfaces.length > 0) {
-        return { surface: difference$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: difference$2(
+            geometry.z0Surface,
+            ...todoSurfaces,
+            ...todoZ0Surfaces
+          ),
+          tags: geometry.tags,
+        };
       } else {
-        return { surface: difference$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: difference$3(geometry.z0Surface, ...todoZ0Surfaces),
+          tags: geometry.tags,
+        };
       }
     } else if (geometry.paths) {
       const todo = [];
@@ -409,7 +524,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(paths);
         }
       }
-      return { paths: difference$4(geometry.paths, ...todo), tags: geometry.tags };
+      return {
+        paths: difference$4(geometry.paths, ...todo),
+        tags: geometry.tags,
+      };
     } else {
       return descend();
     }
@@ -423,7 +541,7 @@ const difference = cache(differenceImpl);
 const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
   if (set === undefined) {
     return whenSetUndefined;
-  } else if (tags !== undefined && tags.some(tag => set.includes(tag))) {
+  } else if (tags !== undefined && tags.some((tag) => set.includes(tag))) {
     return true;
   } else {
     return false;
@@ -434,7 +552,7 @@ const hasMatchingTag = (set, tags, whenSetUndefined = false) => {
 const fresh = (geometry) => {
   const fresh = {};
   for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
+    if (typeof key !== "symbol") {
       fresh[key] = geometry[key];
     }
   }
@@ -442,8 +560,8 @@ const fresh = (geometry) => {
 };
 
 const shallowEq = (a, b) => {
-  if (a === undefined) throw Error('die');
-  if (b === undefined) throw Error('die');
+  if (a === undefined) throw Error("die");
+  if (b === undefined) throw Error("die");
   if (a.length !== b.length) {
     return false;
   }
@@ -493,8 +611,10 @@ const rewriteUp = (geometry, op) => {
     } else if (geometry.connection) {
       const geometries = geometry.geometries.map(walk);
       const connectors = geometry.connectors.map(walk);
-      if (shallowEq(geometries, geometry.geometries) &&
-          shallowEq(connectors, geometry.connectors)) {
+      if (
+        shallowEq(geometries, geometry.geometries) &&
+        shallowEq(connectors, geometry.connectors)
+      ) {
         return q(op(geometry));
       } else {
         return q(op({ ...geometry, geometries, connectors }));
@@ -505,7 +625,8 @@ const rewriteUp = (geometry, op) => {
         return q(op(geometry));
       } else {
         return q(op({ ...geometry, item }));
-      }    } else if (geometry.paths) {
+      }
+    } else if (geometry.paths) {
       return q(op(geometry));
     } else if (geometry.plan) {
       const content = walk(geometry.content);
@@ -530,7 +651,7 @@ const rewriteUp = (geometry, op) => {
     } else if (geometry.z0Surface) {
       return q(op(geometry));
     } else {
-      throw Error('die: Unknown geometry');
+      throw Error("die: Unknown geometry");
     }
   };
 
@@ -539,23 +660,29 @@ const rewriteUp = (geometry, op) => {
 
 const buildCondition = (conditionTags, conditionSpec) => {
   switch (conditionSpec) {
-    case 'has':
+    case "has":
       return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
+    case "has not":
       return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
     default:
       return undefined;
   }
 };
 
-const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
+const rewriteTagsImpl = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
   const condition = buildCondition(conditionTags, conditionSpec);
   const composeTags = (geometryTags) => {
     if (condition === undefined || condition(geometryTags)) {
       if (geometryTags === undefined) {
-        return add.filter(tag => !remove.includes(tag));
+        return add.filter((tag) => !remove.includes(tag));
       } else {
-        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
       }
     } else {
       return geometryTags;
@@ -572,7 +699,8 @@ const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) =>
       const copy = { ...geometry };
       delete copy.tags;
       return copy;
-    } if (composedTags === geometry.tags) {
+    }
+    if (composedTags === geometry.tags) {
       return geometry;
     } else {
       return { ...geometry, tags: composedTags };
@@ -586,7 +714,8 @@ const rewriteTags = cacheRewriteTags(rewriteTagsImpl);
 
 // Dropped elements displace as usual, but are not included in positive output.
 
-const drop = (tags, geometry) => rewriteTags(['compose/non-positive'], [], geometry, tags, 'has');
+const drop = (tags, geometry) =>
+  rewriteTags(["compose/non-positive"], [], geometry, tags, "has");
 
 const eachPoint = (operation, geometry) => {
   const walk = (geometry) => {
@@ -645,7 +774,7 @@ const flip = (geometry) => {
       return {
         ...geometry,
         geometries: geometry.geometries.map(flip),
-        connectors: geometry.connectors.map(flip)
+        connectors: geometry.connectors.map(flip),
       };
     } else if (geometry.item) {
       // FIX: How should items deal with flip?
@@ -699,40 +828,37 @@ const eachNonVoidItem = (geometry, op) => {
 
 const getAnyNonVoidSurfaces = (geometry) => {
   const surfaces = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.surface) {
-                      surfaces.push(item);
-                    }
-                    if (item.z0Surface) {
-                      surfaces.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.surface) {
+      surfaces.push(item);
+    }
+    if (item.z0Surface) {
+      surfaces.push(item);
+    }
+  });
   return surfaces;
 };
 
 const getAnySurfaces = (geometry) => {
   const surfaces = [];
-  eachItem(geometry,
-           item => {
-             if (item.surface) {
-               surfaces.push(item);
-             }
-             if (item.z0Surface) {
-               surfaces.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.surface) {
+      surfaces.push(item);
+    }
+    if (item.z0Surface) {
+      surfaces.push(item);
+    }
+  });
   return surfaces;
 };
 
 const getConnections = (geometry) => {
   const connections = [];
-  eachItem(geometry,
-           geometry => {
-             if (geometry.connection) {
-               connections.push(geometry);
-             }
-           });
+  eachItem(geometry, (geometry) => {
+    if (geometry.connection) {
+      connections.push(geometry);
+    }
+  });
   return connections;
 };
 
@@ -755,7 +881,7 @@ const getLayers = (geometry) => {
   const layers = [];
   const op = (geometry, descend, walk) => {
     if (geometry.layers) {
-      geometry.layers.forEach(layer => layers.unshift(walk(layer)));
+      geometry.layers.forEach((layer) => layers.unshift(walk(layer)));
       return { assembly: [] };
     } else {
       return descend();
@@ -770,7 +896,12 @@ const getLayers = (geometry) => {
 const getLeafs = (geometry) => {
   const leafs = [];
   const op = (geometry, descend) => {
-    if (geometry.assembly || geometry.disjointAssembly || geometry.layers || geometry.content) {
+    if (
+      geometry.assembly ||
+      geometry.disjointAssembly ||
+      geometry.layers ||
+      geometry.content
+    ) {
       descend();
     } else {
       leafs.push(geometry);
@@ -782,89 +913,81 @@ const getLeafs = (geometry) => {
 
 const getNonVoidPaths = (geometry) => {
   const pathsets = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.paths) {
-                      pathsets.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.paths) {
+      pathsets.push(item);
+    }
+  });
   return pathsets;
 };
 
 const getNonVoidPlans = (geometry) => {
   const plans = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.plan) {
-                      plans.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.plan) {
+      plans.push(item);
+    }
+  });
   return plans;
 };
 
 const getNonVoidPoints = (geometry) => {
   const pointsets = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.points) {
-                      pointsets.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.points) {
+      pointsets.push(item);
+    }
+  });
   return pointsets;
 };
 
 const getNonVoidSolids = (geometry) => {
   const solids = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.solid) {
-                      solids.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.solid) {
+      solids.push(item);
+    }
+  });
   return solids;
 };
 
 const getNonVoidSurfaces = (geometry) => {
   const surfaces = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.surface) {
-                      surfaces.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.surface) {
+      surfaces.push(item);
+    }
+  });
   return surfaces;
 };
 
 const getNonVoidZ0Surfaces = (geometry) => {
   const z0Surfaces = [];
-  eachNonVoidItem(geometry,
-                  item => {
-                    if (item.z0Surface) {
-                      z0Surfaces.push(item);
-                    }
-                  });
+  eachNonVoidItem(geometry, (item) => {
+    if (item.z0Surface) {
+      z0Surfaces.push(item);
+    }
+  });
   return z0Surfaces;
 };
 
 const getPlans = (geometry) => {
   const plans = [];
-  eachItem(geometry,
-           item => {
-             if (item.plan) {
-               plans.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.plan) {
+      plans.push(item);
+    }
+  });
   return plans;
 };
 
 const getPoints = (geometry) => {
   const pointsets = [];
-  eachItem(geometry,
-           item => {
-             if (item.points) {
-               pointsets.push(item);
-             }
-           });
+  eachItem(geometry, (item) => {
+    if (item.points) {
+      pointsets.push(item);
+    }
+  });
   return pointsets;
 };
 
@@ -885,7 +1008,10 @@ const intersectionImpl = (geometry, ...geometries) => {
           todo.push(solid);
         }
       }
-      return { solid: intersection$1(geometry.solid, ...todo), tags: geometry.tags };
+      return {
+        solid: intersection$1(geometry.solid, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.surface) {
       const todo = [];
       for (const geometry of geometries) {
@@ -896,7 +1022,10 @@ const intersectionImpl = (geometry, ...geometries) => {
           todo.push(z0Surface);
         }
       }
-      return { surface: intersection$2(geometry.surface, ...todo), tags: geometry.tags };
+      return {
+        surface: intersection$2(geometry.surface, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.z0Surface) {
       const todoSurfaces = [];
       const todoZ0Surfaces = [];
@@ -909,9 +1038,19 @@ const intersectionImpl = (geometry, ...geometries) => {
         }
       }
       if (todoSurfaces.length > 0) {
-        return { surface: intersection$2(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: intersection$2(
+            geometry.z0Surface,
+            ...todoSurfaces,
+            ...todoZ0Surfaces
+          ),
+          tags: geometry.tags,
+        };
       } else {
-        return { surface: intersection$3(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: intersection$3(geometry.z0Surface, ...todoZ0Surfaces),
+          tags: geometry.tags,
+        };
       }
     } else if (geometry.paths) {
       const todo = [];
@@ -920,7 +1059,10 @@ const intersectionImpl = (geometry, ...geometries) => {
           todo.push(paths);
         }
       }
-      return { paths: intersection$4(geometry.paths, ...todo), tags: geometry.tags };
+      return {
+        paths: intersection$4(geometry.paths, ...todo),
+        tags: geometry.tags,
+      };
     } else {
       return descend();
     }
@@ -931,10 +1073,11 @@ const intersectionImpl = (geometry, ...geometries) => {
 
 const intersection = cache(intersectionImpl);
 
-const keep = (tags, geometry) => rewriteTags(['compose/non-positive'], [], geometry, tags, 'has not');
+const keep = (tags, geometry) =>
+  rewriteTags(["compose/non-positive"], [], geometry, tags, "has not");
 
 const map = (geometry, operation) => {
-  const present = item => item !== undefined;
+  const present = (item) => item !== undefined;
   const walk = (geometry) => {
     if (geometry.assembly) {
       // CHECK: When can items not be present?
@@ -945,7 +1088,9 @@ const map = (geometry, operation) => {
       return operation({ layers, tags: geometry.tags });
     } else if (geometry.disjointAssembly) {
       // FIX: Consider the case where the operation does not preserve disjoinedness.
-      const disjointAssembly = geometry.disjointAssembly.map(walk).filter(present);
+      const disjointAssembly = geometry.disjointAssembly
+        .map(walk)
+        .filter(present);
       return operation({ disjointAssembly, tags: geometry.tags });
     } else {
       return operation(geometry);
@@ -954,7 +1099,7 @@ const map = (geometry, operation) => {
   return walk(geometry);
 };
 
-const linkDisjointAssembly = Symbol('linkDisjointAssembly');
+const linkDisjointAssembly = Symbol("linkDisjointAssembly");
 
 const toDisjointGeometry = (geometry) => {
   const op = (geometry, descend) => {
@@ -966,7 +1111,7 @@ const toDisjointGeometry = (geometry) => {
     } else if (geometry.matrix) {
       return rewrite(toTransformedGeometry(geometry), op);
     } else if (geometry.assembly) {
-      const assembly = geometry.assembly.map(entry => rewrite(entry, op));
+      const assembly = geometry.assembly.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
       for (let i = assembly.length - 1; i >= 0; i--) {
         disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
@@ -1133,11 +1278,10 @@ const measureArea = (rawGeometry) => {
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  eachPoint(point => {
+  eachPoint((point) => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-  },
-            geometry);
+  }, geometry);
   return [minPoint, maxPoint];
 };
 
@@ -1187,7 +1331,8 @@ const measureBoundingBox = (rawGeometry) => {
   return [minPoint, maxPoint];
 };
 
-const nonNegative = (tags, geometry) => rewriteTags(['compose/non-negative'], [], geometry, tags, 'has');
+const nonNegative = (tags, geometry) =>
+  rewriteTags(["compose/non-negative"], [], geometry, tags, "has");
 
 const outlineImpl = (geometry) => {
   const normalize = createNormalize3();
@@ -1201,7 +1346,7 @@ const outlineImpl = (geometry) => {
   for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
     outlines.push(outlineSurface(surface || z0Surface, normalize));
   }
-  return outlines.map(outline => ({ paths: outline }));
+  return outlines.map((outline) => ({ paths: outline }));
 };
 
 const outline = cache(outlineImpl);
@@ -1209,7 +1354,9 @@ const outline = cache(outlineImpl);
 const specify = (geometry) => ({ item: geometry });
 
 const splice = (geometry, find, replace) =>
-  rewriteUp(geometry, geometry => geometry.connection === find.connection ? replace : geometry);
+  rewriteUp(geometry, (geometry) =>
+    geometry.connection === find.connection ? replace : geometry
+  );
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -1258,7 +1405,7 @@ const createPointNormalizer = () => {
 const toPoints = (geometry) => {
   const normalize = createPointNormalizer();
   const points = new Set();
-  eachPoint(point => points.add(normalize(point)), geometry);
+  eachPoint((point) => points.add(normalize(point)), geometry);
   return { points: [...points] };
 };
 
@@ -1354,20 +1501,26 @@ const unionImpl = (geometry, ...geometries) => {
       if (surfaces.length === 0) {
         return { z0Surface: union$3(z0Surface, ...z0Surfaces), tags };
       } else {
-        return { surface: union$2(z0Surface, ...surfaces, ...z0Surfaces), tags };
+        return {
+          surface: union$2(z0Surface, ...surfaces, ...z0Surfaces),
+          tags,
+        };
       }
     } else if (geometry.paths) {
       const { paths, tags } = geometry;
       return { paths: union$4(paths, ...pathsets), tags };
     } else if (geometry.assembly) {
       const { assembly, tags } = geometry;
-      return { assembly: assembly.map(entry => rewrite(entry, op)), tags };
+      return { assembly: assembly.map((entry) => rewrite(entry, op)), tags };
     } else if (geometry.disjointAssembly) {
       const { disjointAssembly, tags } = geometry;
-      return { assembly: disjointAssembly.map(entry => rewrite(entry, op)), tags };
+      return {
+        assembly: disjointAssembly.map((entry) => rewrite(entry, op)),
+        tags,
+      };
     } else if (geometry.layers) {
       const { layers, tags } = geometry;
-      return { layers: layers.map(entry => rewrite(entry, op)), tags };
+      return { layers: layers.map((entry) => rewrite(entry, op)), tags };
     } else {
       return descend();
     }
@@ -1378,10 +1531,76 @@ const unionImpl = (geometry, ...geometries) => {
 
 const union = cache(unionImpl);
 
-const rotateX = (angle, assembly) => transform(fromXRotation(angle * Math.PI / 180), assembly);
-const rotateY = (angle, assembly) => transform(fromYRotation(angle * Math.PI / 180), assembly);
-const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 180), assembly);
-const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
+const rotateX = (angle, assembly) =>
+  transform(fromXRotation((angle * Math.PI) / 180), assembly);
+const rotateY = (angle, assembly) =>
+  transform(fromYRotation((angle * Math.PI) / 180), assembly);
+const rotateZ = (angle, assembly) =>
+  transform(fromZRotation((angle * Math.PI) / 180), assembly);
+const translate = (vector, assembly) =>
+  transform(fromTranslation(vector), assembly);
 const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getConnections, getItems, getLayers, getLeafs, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, map, measureArea, measureBoundingBox, nonNegative, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, specify, splice, toKeptGeometry, toPoints, transform, translate, union, update, visit };
+export {
+  allTags,
+  assemble,
+  canonicalize,
+  difference,
+  drop,
+  eachItem,
+  eachPoint,
+  findOpenEdges,
+  flip,
+  fresh,
+  fromPathToSurface,
+  fromPathToZ0Surface,
+  fromPathsToSurface,
+  fromPathsToZ0Surface,
+  fromSurfaceToPaths,
+  getAnyNonVoidSurfaces,
+  getAnySurfaces,
+  getConnections,
+  getItems,
+  getLayers,
+  getLeafs,
+  getNonVoidPaths,
+  getNonVoidPlans,
+  getNonVoidPoints,
+  getNonVoidSolids,
+  getNonVoidSurfaces,
+  getNonVoidZ0Surfaces,
+  getPaths,
+  getPlans,
+  getPoints,
+  getSolids,
+  getSurfaces,
+  getTags,
+  getZ0Surfaces,
+  intersection,
+  isNotVoid,
+  isVoid,
+  isWatertight,
+  keep,
+  makeWatertight,
+  map,
+  measureArea,
+  measureBoundingBox,
+  nonNegative,
+  outline,
+  reconcile,
+  rewrite,
+  rewriteTags,
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  specify,
+  splice,
+  toKeptGeometry,
+  toPoints,
+  transform,
+  translate,
+  union,
+  update,
+  visit,
+};

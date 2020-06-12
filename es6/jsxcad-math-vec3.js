@@ -1,4 +1,4 @@
-import { reallyQuantizeForSpace } from './jsxcad-math-utils.js';
+import { reallyQuantizeForSpace } from "./jsxcad-math-utils.js";
 
 /**
  * Calculates the absolute value of the give vector
@@ -16,7 +16,11 @@ const abs = ([x, y, z]) => [Math.abs(x), Math.abs(y), Math.abs(z)];
  * @param {vec3} b the second vector to add
  * @returns {vec3} the added vectors
  */
-const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [(ax + bx), (ay + by), (az + bz)];
+const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [
+  ax + bx,
+  ay + by,
+  az + bz,
+];
 
 /**
  * Calculates the dot product of two vec3's
@@ -25,7 +29,7 @@ const add = ([ax = 0, ay = 0, az = 0], [bx = 0, by = 0, bz = 0]) => [(ax + bx), 
  * @param {vec3} b the second operand
  * @returns {Number} dot product of a and b
  */
-const dot = ([ax, ay, az], [bx, by, bz]) => (ax * bx) + (ay * by) + (az * bz);
+const dot = ([ax, ay, az], [bx, by, bz]) => ax * bx + ay * by + az * bz;
 
 /**
  * Scales a vec3 by a scalar number
@@ -34,7 +38,11 @@ const dot = ([ax, ay, az], [bx, by, bz]) => (ax * bx) + (ay * by) + (az * bz);
  * @param {vec3} vector the vector to scale
  * @returns {vec3} out
  */
-const scale = (amount, [x = 0, y = 0, z = 0]) => [(x * amount), (y * amount), (z * amount)];
+const scale = (amount, [x = 0, y = 0, z = 0]) => [
+  x * amount,
+  y * amount,
+  z * amount,
+];
 
 /**
  * Normalize a vec3
@@ -44,7 +52,7 @@ const scale = (amount, [x = 0, y = 0, z = 0]) => [(x * amount), (y * amount), (z
  */
 const normalize = (a) => {
   const [x, y, z] = a;
-  const len = (x * x) + (y * y) + (z * z);
+  const len = x * x + y * y + z * z;
   if (len > 0) {
     // TODO: evaluate use of glm_invsqrt here?
     return scale(1 / Math.sqrt(len), a);
@@ -65,9 +73,13 @@ const angle = (a, b) => {
 };
 
 // Normalize negative zero to positive zero.
-const f = (v) => v === 0 ? 0 : v;
+const f = (v) => (v === 0 ? 0 : v);
 
-const canonicalize = ([x = 0, y = 0, z = 0]) => [f(reallyQuantizeForSpace(x)), f(reallyQuantizeForSpace(y)), f(reallyQuantizeForSpace(z))];
+const canonicalize = ([x = 0, y = 0, z = 0]) => [
+  f(reallyQuantizeForSpace(x)),
+  f(reallyQuantizeForSpace(y)),
+  f(reallyQuantizeForSpace(z)),
+];
 
 /**
  * Computes the cross product of two vec3's
@@ -76,9 +88,11 @@ const canonicalize = ([x = 0, y = 0, z = 0]) => [f(reallyQuantizeForSpace(x)), f
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const cross = ([ax, ay, az], [bx, by, bz]) => [ay * bz - az * by,
-                                                      az * bx - ax * bz,
-                                                      ax * by - ay * bx];
+const cross = ([ax, ay, az], [bx, by, bz]) => [
+  ay * bz - az * by,
+  az * bx - ax * bz,
+  ax * by - ay * bx,
+];
 
 /**
  * Calculates the euclidian distance between two vec3's
@@ -101,11 +115,10 @@ const distance = ([ax, ay, az], [bx, by, bz]) => {
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const divide = ([ax, ay, az], [bx, by, bz]) => [ax / bx,
-                                                       ay / by,
-                                                       az / bz];
+const divide = ([ax, ay, az], [bx, by, bz]) => [ax / bx, ay / by, az / bz];
 
-const equals = ([ax, ay, az], [bx, by, bz]) => (ax === bx) && (ay === by) && (az === bz);
+const equals = ([ax, ay, az], [bx, by, bz]) =>
+  ax === bx && ay === by && az === bz;
 
 /**
  * Creates a new vec3 from the point given.
@@ -145,7 +158,7 @@ const fromVec2 = ([x = 0, y = 0], z = 0) => [x, y, z];
  * @param {vec3} a vector to calculate length of
  * @returns {Number} length of a
  */
-const length = ([x = 0, y = 0, z = 0]) => Math.sqrt((x * x) + (y * y) + (z * z));
+const length = ([x = 0, y = 0, z = 0]) => Math.sqrt(x * x + y * y + z * z);
 
 /**
  * Performs a linear interpolation between two vec3's
@@ -155,9 +168,11 @@ const length = ([x = 0, y = 0, z = 0]) => Math.sqrt((x * x) + (y * y) + (z * z))
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const lerp = (t, [ax, ay, az], [bx, by, bz]) => [ax + t * (bx - ax),
-                                                        ay + t * (by - ay),
-                                                        az + t * (bz - az)];
+const lerp = (t, [ax, ay, az], [bx, by, bz]) => [
+  ax + t * (bx - ax),
+  ay + t * (by - ay),
+  az + t * (bz - az),
+];
 
 /**
  * Returns the maximum of two vec3's
@@ -166,9 +181,11 @@ const lerp = (t, [ax, ay, az], [bx, by, bz]) => [ax + t * (bx - ax),
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const max = ([ax, ay, az], [bx, by, bz]) => [Math.max(ax, bx),
-                                                    Math.max(ay, by),
-                                                    Math.max(az, bz)];
+const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];
 
 /**
  * Returns the minimum of two vec3's
@@ -177,9 +194,11 @@ const max = ([ax, ay, az], [bx, by, bz]) => [Math.max(ax, bx),
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const min = ([ax, ay, az], [bx, by, bz]) => [Math.min(ax, bx),
-                                                    Math.min(ay, by),
-                                                    Math.min(az, bz)];
+const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];
 
 /**
  * Multiplies two vec3's
@@ -188,7 +207,7 @@ const min = ([ax, ay, az], [bx, by, bz]) => [Math.min(ax, bx),
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const multiply = ([ax, ay, az], [bx, by, bz]) => [(ax * bx), (ay * by), (az * bz)];
+const multiply = ([ax, ay, az], [bx, by, bz]) => [ax * bx, ay * by, az * bz];
 
 /**
  * Negates the components of a vec3
@@ -201,29 +220,32 @@ const negate = ([x, y, z]) => [-x, -y, -z];
 // find a vector that is somewhat perpendicular to this one
 const random = (vec) => {
   const temp = abs(vec);
-  if ((temp[0] <= temp[1]) && (temp[0] <= temp[2])) {
+  if (temp[0] <= temp[1] && temp[0] <= temp[2]) {
     return [1, 0, 0];
-  } else if ((temp[1] <= temp[0]) && (temp[1] <= temp[2])) {
+  } else if (temp[1] <= temp[0] && temp[1] <= temp[2]) {
     return [0, 1, 0];
   } else {
     return [0, 0, 1];
   }
 };
 
-const rotateX = ([x, y, z], angle) =>
-  [x,
-   y * Math.cos(angle) - z * Math.sin(angle),
-   y * Math.sin(angle) + z * Math.cos(angle)];
+const rotateX = ([x, y, z], angle) => [
+  x,
+  y * Math.cos(angle) - z * Math.sin(angle),
+  y * Math.sin(angle) + z * Math.cos(angle),
+];
 
-const rotateY = ([x, y, z], angle) =>
-  [z * Math.sin(angle) + x * Math.cos(angle),
-   y,
-   z * Math.cos(angle) - x * Math.sin(angle)];
+const rotateY = ([x, y, z], angle) => [
+  z * Math.sin(angle) + x * Math.cos(angle),
+  y,
+  z * Math.cos(angle) - x * Math.sin(angle),
+];
 
-const rotateZ = ([x, y, z], angle) =>
-  [x * Math.cos(angle) - y * Math.sin(angle),
-   x * Math.sin(angle) + y * Math.cos(angle),
-   z];
+const rotateZ = ([x, y, z], angle) => [
+  x * Math.cos(angle) - y * Math.sin(angle),
+  x * Math.sin(angle) + y * Math.cos(angle),
+  z,
+];
 
 /**
  * Calculates the squared euclidian distance between two vec3's
@@ -236,7 +258,7 @@ const squaredDistance = ([ax, ay, az], [bx, by, bz]) => {
   const x = bx - ax;
   const y = by - ay;
   const z = bz - az;
-  return (x * x) + (y * y) + (z * z);
+  return x * x + y * y + z * z;
 };
 
 /**
@@ -245,7 +267,7 @@ const squaredDistance = ([ax, ay, az], [bx, by, bz]) => {
  * @param {vec3} a vector to calculate squared length of
  * @returns {Number} squared length of a
  */
-const squaredLength = ([x, y, z]) => (x * x) + (y * y) + (z * z);
+const squaredLength = ([x, y, z]) => x * x + y * y + z * z;
 
 /**
  * Subtracts vector b from vector a
@@ -254,7 +276,7 @@ const squaredLength = ([x, y, z]) => (x * x) + (y * y) + (z * z);
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-const subtract = ([ax, ay, az], [bx, by, bz]) => [(ax - bx), (ay - by), (az - bz)];
+const subtract = ([ax, ay, az], [bx, by, bz]) => [ax - bx, ay - by, az - bz];
 
 /**
  * Transforms the vec3 with a mat4.
@@ -267,9 +289,11 @@ const subtract = ([ax, ay, az], [bx, by, bz]) => [(ax - bx), (ay - by), (az - bz
 const transform = (matrix, [x = 0, y = 0, z = 0]) => {
   let w = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
   w = w || 1.0;
-  return [(matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
-          (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
-          (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w];
+  return [
+    (matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12]) / w,
+    (matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13]) / w,
+    (matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14]) / w,
+  ];
 };
 
 /**
@@ -282,9 +306,11 @@ const transform = (matrix, [x = 0, y = 0, z = 0]) => {
 const turnX = (angle, origin, vector) => {
   const p = subtract(vector, origin);
   // rotate
-  const r = [p[0],
-             p[1] * Math.cos(angle) - p[2] * Math.sin(angle),
-             p[1] * Math.sin(angle) + p[2] * Math.cos(angle)];
+  const r = [
+    p[0],
+    p[1] * Math.cos(angle) - p[2] * Math.sin(angle),
+    p[1] * Math.sin(angle) + p[2] * Math.cos(angle),
+  ];
   // translate
   return add(r, origin);
 };
@@ -299,9 +325,11 @@ const turnX = (angle, origin, vector) => {
 const turnY = (angle, origin, vector) => {
   const p = subtract(vector, origin);
   // turn
-  const r = [p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
-             p[1],
-             p[2] * Math.cos(angle) - p[0] * Math.sin(angle)];
+  const r = [
+    p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
+    p[1],
+    p[2] * Math.cos(angle) - p[0] * Math.sin(angle),
+  ];
   // translate
   return add(r, origin);
 };
@@ -316,9 +344,11 @@ const turnY = (angle, origin, vector) => {
 const turnZ = (angle, origin, vector) => {
   const p = subtract(vector, origin);
   // turn
-  const r = [p[0] * Math.cos(angle) - p[1] * Math.sin(angle),
-             p[0] * Math.sin(angle) + p[1] * Math.cos(angle),
-             p[2]];
+  const r = [
+    p[0] * Math.cos(angle) - p[1] * Math.sin(angle),
+    p[0] * Math.sin(angle) + p[1] * Math.cos(angle),
+    p[2],
+  ];
   // translate
   return add(r, origin);
 };
@@ -332,9 +362,41 @@ const turnZ = (angle, origin, vector) => {
 const unit = (vector) => {
   const [x, y, z] = vector;
   const magnitude = length(vector);
-  return [x / magnitude,
-          y / magnitude,
-          z / magnitude];
+  return [x / magnitude, y / magnitude, z / magnitude];
 };
 
-export { abs, add, angle, canonicalize, cross, distance, divide, dot, equals, fromPoint, fromScalar, fromValues, fromVec2, length, lerp, max, min, multiply, negate, normalize, random, rotateX, rotateY, rotateZ, scale, squaredDistance, squaredLength, subtract, transform, turnX, turnY, turnZ, unit };
+export {
+  abs,
+  add,
+  angle,
+  canonicalize,
+  cross,
+  distance,
+  divide,
+  dot,
+  equals,
+  fromPoint,
+  fromScalar,
+  fromValues,
+  fromVec2,
+  length,
+  lerp,
+  max,
+  min,
+  multiply,
+  negate,
+  normalize,
+  random,
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  squaredDistance,
+  squaredLength,
+  subtract,
+  transform,
+  turnX,
+  turnY,
+  turnZ,
+  unit,
+};

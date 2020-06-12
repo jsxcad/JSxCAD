@@ -1,4 +1,4 @@
-import LanguageTools from 'ace-builds/src-noconflict/ext-language_tools';
+import LanguageTools from "ace-builds/src-noconflict/ext-language_tools";
 // import { setCompleters, snippetManager } from 'ace-builds/src-noconflict/ext-language_tools';
 
 const { setCompleters } = LanguageTools;

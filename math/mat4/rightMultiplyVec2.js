@@ -1,4 +1,4 @@
-import { fromValues } from '@jsxcad/math-vec2';
+import { fromValues } from "@jsxcad/math-vec2";
 
 /**
  * Multiply the input matrix by a Vector2 (interpreted as 2 row, 1 column)
@@ -13,7 +13,8 @@ export const rightMultiplyVec2 = ([v0, v1], matrix) => {
   const v3 = 1;
   let x = v0 * matrix[0] + v1 * matrix[1] + v2 * matrix[2] + v3 * matrix[3];
   let y = v0 * matrix[4] + v1 * matrix[5] + v2 * matrix[6] + v3 * matrix[7];
-  const w = v0 * matrix[12] + v1 * matrix[13] + v2 * matrix[14] + v3 * matrix[15];
+  const w =
+    v0 * matrix[12] + v1 * matrix[13] + v2 * matrix[14] + v3 * matrix[15];
 
   // scale such that fourth element becomes 1:
   if (w !== 1) {

@@ -1,16 +1,28 @@
-import { equals } from '@jsxcad/math-vec3';
+import { equals } from "@jsxcad/math-vec3";
 
 // Edge Properties.
 const START = 0;
 const END = 1;
 
 const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
-  if (aX < bX) { return -1; }
-  if (aX > bX) { return 1; }
-  if (aY < bY) { return -1; }
-  if (aY > bY) { return 1; }
-  if (aZ < bZ) { return -1; }
-  if (aZ > bZ) { return 1; }
+  if (aX < bX) {
+    return -1;
+  }
+  if (aX > bX) {
+    return 1;
+  }
+  if (aY < bY) {
+    return -1;
+  }
+  if (aY > bY) {
+    return 1;
+  }
+  if (aZ < bZ) {
+    return -1;
+  }
+  if (aZ > bZ) {
+    return 1;
+  }
   return 0;
 };
 
@@ -25,7 +37,7 @@ export const toLoops = ({ allowOpenPaths = false }, edges) => {
       }
     }
     // Given manifold geometry, there must always be a successor.
-    throw Error('Non-manifold');
+    throw Error("Non-manifold");
   };
 
   // Sort the edges so that deduplication is efficient.

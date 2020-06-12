@@ -5,5 +5,5 @@ export {
   makeConvex,
   outline,
   reorient,
-  union
-} from '@jsxcad/algorithm-clipper';
+  union,
+} from "@jsxcad/algorithm-clipper";

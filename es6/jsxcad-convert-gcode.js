@@ -1,5 +1,5 @@
-import { toKeptGeometry, getPaths } from './jsxcad-geometry-tagged.js';
-import { getEdges } from './jsxcad-geometry-path.js';
+import { toKeptGeometry, getPaths } from "./jsxcad-geometry-tagged.js";
+import { getEdges } from "./jsxcad-geometry-path.js";
 
 // Runs each axis at maximum velocity until matches, so may make dog-legs.
 const rapidPositioningTo = ([x = 0, y = 0, z = 0]) => `G0 X${x} Y${y} Z${z}`;
@@ -22,7 +22,7 @@ const toGcode = async (options = {}, geometry) => {
     }
   }
   codes.push(``);
-  return new TextEncoder('utf8').encode(codes.join('\n'));
+  return new TextEncoder("utf8").encode(codes.join("\n"));
 };
 
 export { toGcode };

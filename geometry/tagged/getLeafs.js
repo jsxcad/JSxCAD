@@ -1,11 +1,16 @@
-import { visit } from './visit';
+import { visit } from "./visit";
 
 // Retrieve leaf geometry.
 
 export const getLeafs = (geometry) => {
   const leafs = [];
   const op = (geometry, descend) => {
-    if (geometry.assembly || geometry.disjointAssembly || geometry.layers || geometry.content) {
+    if (
+      geometry.assembly ||
+      geometry.disjointAssembly ||
+      geometry.layers ||
+      geometry.content
+    ) {
       descend();
     } else {
       leafs.push(geometry);

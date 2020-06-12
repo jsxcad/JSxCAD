@@ -1,7 +1,7 @@
-import '@jsxcad/api-v1-pdf';
-import '@jsxcad/api-v1-svg';
+import "@jsxcad/api-v1-pdf";
+import "@jsxcad/api-v1-svg";
 
-const ring = Circle(20).cut(Circle(10)).color('green');
+const ring = Circle(20).cut(Circle(10)).color("green");
 
-await ring.Page().writePdf('ring');
-await ring.Page().writeSvg('ring');
+await ring.Page().writePdf("ring");
+await ring.Page().writeSvg("ring");

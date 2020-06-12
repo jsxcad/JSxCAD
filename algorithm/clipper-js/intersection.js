@@ -1,8 +1,8 @@
-import { fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from "./convert";
 
-import ClipperLib from 'clipper-lib';
-import { createNormalize2 } from '@jsxcad/algorithm-quantize';
-import { doesNotOverlapOrAbut } from './doesNotOverlap';
+import ClipperLib from "clipper-lib";
+import { createNormalize2 } from "@jsxcad/algorithm-quantize";
+import { doesNotOverlapOrAbut } from "./doesNotOverlap";
 
 const { Clipper, ClipType, PolyType } = ClipperLib;
 

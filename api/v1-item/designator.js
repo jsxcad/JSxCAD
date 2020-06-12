@@ -9,7 +9,7 @@ export const fromDesignator = (designator) => {
       return constructor(spec);
     }
   }
-  throw Error('die');
+  throw Error("die");
 };
 
 // Later definitions override earlier definitions.

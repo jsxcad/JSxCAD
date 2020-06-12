@@ -1,10 +1,10 @@
-import MarkdownIt from 'markdown-it';
-import MarkdownItContainer from 'markdown-it-container';
-import { fromByteArray } from 'base64-js';
-import fs from 'fs';
-import jsdocExtractor from 'jsdoc-extractor';
-import { toEcmascript } from '@jsxcad/compiler';
-import { toPng } from '@jsxcad/convert-threejs';
+import MarkdownIt from "markdown-it";
+import MarkdownItContainer from "markdown-it-container";
+import { fromByteArray } from "base64-js";
+import fs from "fs";
+import jsdocExtractor from "jsdoc-extractor";
+import { toEcmascript } from "@jsxcad/compiler";
+import { toPng } from "@jsxcad/convert-threejs";
 
 const { readFile } = fs.promises;
 
@@ -15,7 +15,10 @@ const toOperator = async ({ api }, script) => {
   let ecmascript;
   try {
     ecmascript = toEcmascript({}, script);
-    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+    const builder = new Function(
+      `{ ${Object.keys(api).join(", ")} }`,
+      ecmascript
+    );
     const constructor = await builder(api);
     const module = await constructor();
     return module.main;
@@ -28,16 +31,16 @@ const toOperator = async ({ api }, script) => {
 };
 
 const toMarkdown = (comment) => {
-  const lines = comment.split('\n');
+  const lines = comment.split("\n");
   if (lines.length <= 4) {
     return;
   }
-  if (lines[0] !== '/**' || lines[lines.length - 1] !== ' **/') {
+  if (lines[0] !== "/**" || lines[lines.length - 1] !== " **/") {
     return;
   }
   for (let nth = 1; nth < lines.length - 1; nth++) {
     const line = lines[nth];
-    if (line !== ' *' && !line.startsWith(' * ')) {
+    if (line !== " *" && !line.startsWith(" * ")) {
       return;
     }
   }
@@ -47,36 +50,43 @@ const toMarkdown = (comment) => {
     // Remove the leading ' * '
     markdown.push(lines[nth].substring(3));
   }
-  return markdown.join('\n');
+  return markdown.join("\n");
 };
 
 export const toUserGuide = async ({ api, paths, root }) => {
   const markdowns = [];
   for (const path of paths) {
     for (const [buffer] of jsdocExtractor(await readFile(path))) {
-      const entry = buffer.toString('utf8');
+      const entry = buffer.toString("utf8");
       const extraction = toMarkdown(entry);
       if (extraction !== undefined) {
         markdowns.push(extraction);
       }
     }
   }
-  const markdown = markdowns.join('\n');
+  const markdown = markdowns.join("\n");
   const md = new MarkdownIt({ html: true });
   const patches = [];
   const render = (tokens, idx) => {
     switch (tokens[idx].type) {
-      case 'container_illustration_close':
+      case "container_illustration_close":
         return `</td></tr></table>`;
-      case 'container_illustration_open': {
+      case "container_illustration_open": {
         const start = idx;
         let end = idx;
-        while (end < tokens.length && tokens[end].type !== 'container_illustration_close') {
+        while (
+          end < tokens.length &&
+          tokens[end].type !== "container_illustration_close"
+        ) {
           end += 1;
         }
-        const defaults = { view: { position: [0, 0, 60] }, pageSize: [128, 128], grid: true };
+        const defaults = {
+          view: { position: [0, 0, 60] },
+          pageSize: [128, 128],
+          grid: true,
+        };
         let options = {};
-        const prefix = ' illustration ';
+        const prefix = " illustration ";
         if (tokens[start].info.startsWith(prefix)) {
           const json = tokens[start].info.substring(prefix.length);
           const provided = JSON.parse(json);
@@ -87,17 +97,17 @@ export const toUserGuide = async ({ api, paths, root }) => {
         const chunks = [];
         for (let idx = start; idx < end; idx++) {
           const token = tokens[idx];
-          if (token.content !== null && token.content !== '') {
+          if (token.content !== null && token.content !== "") {
             chunks.push(token.content);
           } else if (token.children !== null) {
             for (const child of token.children) {
-              if (child.type === 'text') {
+              if (child.type === "text") {
                 chunks.push(child.content);
               }
             }
           }
         }
-        const text = chunks.join('\n');
+        const text = chunks.join("\n");
         // Place the geometry very slightly above the grid.
         const patch = `<<<${patches.length}>>>`;
         patches.push({ patch, options, text });
@@ -105,16 +115,21 @@ export const toUserGuide = async ({ api, paths, root }) => {
       }
     }
   };
-  md.use(MarkdownItContainer, 'illustration', { render });
+  md.use(MarkdownItContainer, "illustration", { render });
   let markdownHtml = md.render(markdown);
   for (const { patch, options, text } of patches) {
     console.log(`QQ/text: ${text}`);
     console.log(`QQ/toOperator: ${toOperator}`);
     const main = await toOperator({ api }, text);
     const geometry = await main();
-    const png = await toPng({ includeXmlHeader: false, ...options },
-                            geometry.toDisjointGeometry());
-    markdownHtml = markdownHtml.replace(patch, `<img src="data:image/png;base64,${fromByteArray(png)}">`);
+    const png = await toPng(
+      { includeXmlHeader: false, ...options },
+      geometry.toDisjointGeometry()
+    );
+    markdownHtml = markdownHtml.replace(
+      patch,
+      `<img src="data:image/png;base64,${fromByteArray(png)}">`
+    );
   }
   const html = `
 <html>

@@ -1,7 +1,10 @@
-import { toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { toThreejsGeometry } from './toThreejsGeometry';
+import { toKeptGeometry } from "@jsxcad/geometry-tagged";
+import { toThreejsGeometry } from "./toThreejsGeometry";
 
-export const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry) => {
+export const toThreejsPage = async (
+  { view, title = "JSxCAD Viewer" },
+  geometry
+) => {
   const keptGeometry = toKeptGeometry(geometry);
   const threejsGeometry = toThreejsGeometry(keptGeometry);
   const html = `
@@ -31,7 +34,10 @@ export const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry)
  </head>
  <body>
   <script type="text/javascript" src="https://unpkg.com/@jsxcad/convert-threejs/dist/display.js"></script>
-  <script type="text/javascript">JSxCAD = ${JSON.stringify({ threejsGeometry, view })};</script>
+  <script type="text/javascript">JSxCAD = ${JSON.stringify({
+    threejsGeometry,
+    view,
+  })};</script>
   <script>
    document.onreadystatechange = () => {
      if (document.readyState === 'complete') {
@@ -41,5 +47,5 @@ export const toThreejsPage = async ({ view, title = 'JSxCAD Viewer' }, geometry)
   </script>
  </body>
 </html>`;
-  return new TextEncoder('utf8').encode(html);
+  return new TextEncoder("utf8").encode(html);
 };

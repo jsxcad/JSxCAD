@@ -1,4 +1,4 @@
-import { toPlane as toPlaneOfPolygon } from '@jsxcad/math-poly3';
+import { toPlane as toPlaneOfPolygon } from "@jsxcad/math-poly3";
 
 export const toPlane = (surface) => {
   if (surface.plane !== undefined) {

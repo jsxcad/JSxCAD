@@ -1,4 +1,4 @@
-import { add, dot, scale, subtract } from '@jsxcad/math-vec3';
+import { add, dot, scale, subtract } from "@jsxcad/math-vec3";
 
 /**
  * Split the given line by the given plane.

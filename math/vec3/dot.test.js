@@ -1,7 +1,7 @@
-import { dot } from './dot';
-import test from 'ava';
+import { dot } from "./dot";
+import test from "ava";
 
-test('vec3: dot() should return correct values', (t) => {
+test("vec3: dot() should return correct values", (t) => {
   t.is(dot([0, 0, 0], [0, 0, 0]), 0);
   t.is(dot([1, 1, 1], [-1, -1, -1]), -3);
   t.is(dot([5, 5, 5], [-5, -5, -5]), -75);

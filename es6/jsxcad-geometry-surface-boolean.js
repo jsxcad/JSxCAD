@@ -1,8 +1,16 @@
-import { difference as difference$1, intersection as intersection$1, outline as outline$1, union as union$1 } from './jsxcad-geometry-z0surface-boolean.js';
-import { distance } from './jsxcad-math-vec3.js';
-import { measureBoundingSphere } from './jsxcad-geometry-surface.js';
-import { toPlane as toPlane$1, transform as transform$1 } from './jsxcad-math-poly3.js';
-import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
+import {
+  difference as difference$1,
+  intersection as intersection$1,
+  outline as outline$1,
+  union as union$1,
+} from "./jsxcad-geometry-z0surface-boolean.js";
+import { distance } from "./jsxcad-math-vec3.js";
+import { measureBoundingSphere } from "./jsxcad-geometry-surface.js";
+import {
+  toPlane as toPlane$1,
+  transform as transform$1,
+} from "./jsxcad-math-poly3.js";
+import { toXYPlaneTransforms } from "./jsxcad-math-plane.js";
 
 // The resolution is 1 / multiplier.
 const multiplier = 1e5;
@@ -83,9 +91,11 @@ const toPlane = (surface) => {
   }
 };
 
-const transform = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
+const transform = (matrix, polygons) =>
+  polygons.map((polygon) => transform$1(matrix, polygon));
 
-const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) => distance(centerA, centerB) < radiusA + radiusB;
+const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) =>
+  distance(centerA, centerB) < radiusA + radiusB;
 
 const difference = (baseSurface, ...surfaces) => {
   if (baseSurface.length === 0) {
@@ -93,9 +103,12 @@ const difference = (baseSurface, ...surfaces) => {
     return [];
   }
   const baseBounds = measureBoundingSphere(baseSurface);
-  surfaces = surfaces.filter(surface => surface.length > 0 &&
-                                        equals(toPlane(baseSurface), toPlane(surface)) &&
-                                        mayOverlap(baseBounds, measureBoundingSphere(surface)));
+  surfaces = surfaces.filter(
+    (surface) =>
+      surface.length > 0 &&
+      equals(toPlane(baseSurface), toPlane(surface)) &&
+      mayOverlap(baseBounds, measureBoundingSphere(surface))
+  );
   if (surfaces.length === 0) {
     // Nothing to be removed.
     return baseSurface;
@@ -103,7 +116,7 @@ const difference = (baseSurface, ...surfaces) => {
   // FIX: Detect when the surfaces aren't in the same plane.
   const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(baseSurface));
   const z0Surface = transform(toZ0, baseSurface);
-  const z0Surfaces = surfaces.map(surface => transform(toZ0, surface));
+  const z0Surfaces = surfaces.map((surface) => transform(toZ0, surface));
   const z0Difference = difference$1(z0Surface, ...z0Surfaces);
   return transform(fromZ0, z0Difference);
 };
@@ -113,13 +126,18 @@ const intersection = (...surfaces) => {
     return [];
   }
   for (const surface of surfaces) {
-    if (surface.length === 0 || !equals(toPlane(surfaces[0]), toPlane(surface))) {
+    if (
+      surface.length === 0 ||
+      !equals(toPlane(surfaces[0]), toPlane(surface))
+    ) {
       return [];
     }
   }
   // FIX: Detect when the surfaces aren't in the same plane.
   const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(surfaces[0]));
-  const z0Surface = intersection$1(...surfaces.map(surface => transform(toZ0, surface)));
+  const z0Surface = intersection$1(
+    ...surfaces.map((surface) => transform(toZ0, surface))
+  );
   return transform(fromZ0, z0Surface);
 };
 
@@ -142,14 +160,18 @@ const union = (...surfaces) => {
   // (But then, are these really the right semantics?)
   const baseSurface = surfaces.shift();
   const basePlane = toPlane(baseSurface);
-  surfaces = surfaces.filter(surface => surface.length >= 1 &&
-                             (equals(toPlane(baseSurface), toPlane(surface))));
+  surfaces = surfaces.filter(
+    (surface) =>
+      surface.length >= 1 && equals(toPlane(baseSurface), toPlane(surface))
+  );
   if (surfaces.length === 0) {
     return baseSurface;
   }
   const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
-  const z0Surface = union$1(transform(toZ0, baseSurface),
-                                    ...surfaces.map(surface => transform(toZ0, surface)));
+  const z0Surface = union$1(
+    transform(toZ0, baseSurface),
+    ...surfaces.map((surface) => transform(toZ0, surface))
+  );
   return transform(fromZ0, z0Surface);
 };
 

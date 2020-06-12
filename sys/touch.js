@@ -1,6 +1,6 @@
-import { getFilesystem, setupFilesystem } from './filesystem';
+import { getFilesystem, setupFilesystem } from "./filesystem";
 
-import { getFile } from './files';
+import { getFile } from "./files";
 
 export const touch = async (path, { workspace } = {}) => {
   let originalWorkspace = getFilesystem();

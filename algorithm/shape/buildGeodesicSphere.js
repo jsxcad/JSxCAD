@@ -1,6 +1,6 @@
-import { buildRegularIcosahedron } from './buildRegularIcosahedron';
-import { subdivideTriangularMesh } from './subdivideTriangularMesh';
-import { unit } from '@jsxcad/math-vec3';
+import { buildRegularIcosahedron } from "./buildRegularIcosahedron";
+import { subdivideTriangularMesh } from "./subdivideTriangularMesh";
+import { unit } from "@jsxcad/math-vec3";
 
 /**
  *
@@ -12,5 +12,5 @@ export const buildGeodesicSphere = ({ faces = 20 }) => {
   while (mesh.length < faces) {
     mesh = subdivideTriangularMesh(mesh);
   }
-  return mesh.map(triangle => triangle.map(unit));
+  return mesh.map((triangle) => triangle.map(unit));
 };

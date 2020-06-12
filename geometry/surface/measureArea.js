@@ -1,4 +1,4 @@
-import { measureArea as measureAreaOfPolygon } from '@jsxcad/math-poly3';
+import { measureArea as measureAreaOfPolygon } from "@jsxcad/math-poly3";
 
 export const measureArea = (surface) => {
   // CHECK: That this handles negative area properly.

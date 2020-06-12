@@ -1,17 +1,19 @@
 <html>
- <head>
- </head>
- <body>
-  <script type="module">
-   import { createService } from './service.js';
+  <head> </head>
+  <body>
+    <script type="module">
+      import { createService } from "./service.js";
 
-   const run = async () => {
-     const agent = async ({ ask, question }) => `Secret ${question}`;
-     const { ask } = await createService({ webWorker: './service.test.webWorker.loadable.js', agent });
-     console.log(`Answer ${await ask('Hello')}`);
-   }
+      const run = async () => {
+        const agent = async ({ ask, question }) => `Secret ${question}`;
+        const { ask } = await createService({
+          webWorker: "./service.test.webWorker.loadable.js",
+          agent,
+        });
+        console.log(`Answer ${await ask("Hello")}`);
+      };
 
-   run().then(_ => console.log("Done"));
-  </script>
- </body>
+      run().then((_) => console.log("Done"));
+    </script>
+  </body>
 </html>

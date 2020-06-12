@@ -1,4 +1,4 @@
 export interface NativeDeletable {
-    isDeleted(): boolean;
-    delete(): void;
+  isDeleted(): boolean;
+  delete(): void;
 }

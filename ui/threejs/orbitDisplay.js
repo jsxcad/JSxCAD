@@ -1,12 +1,12 @@
 /* global ResizeObserver */
 
-import { buildScene, createResizer } from './scene';
+import { buildScene, createResizer } from "./scene";
 
-import { Layers } from 'three';
-import { buildMeshes } from './mesh';
-import { buildTrackballControls } from './controls';
-import { moveToFit } from './moveToFit';
-import { toThreejsGeometry } from './toThreejsGeometry';
+import { Layers } from "three";
+import { buildMeshes } from "./mesh";
+import { buildTrackballControls } from "./controls";
+import { moveToFit } from "./moveToFit";
+import { toThreejsGeometry } from "./toThreejsGeometry";
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
@@ -22,7 +22,14 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
+  const { camera, canvas, renderer, scene } = buildScene({
+    width,
+    height,
+    view,
+    geometryLayers,
+    planLayers,
+    withAxes: false,
+  });
 
   const render = () => {
     renderer.clear();
@@ -35,10 +42,23 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
 
   page.appendChild(canvas);
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
-  const { resize } = createResizer({ camera, trackball, renderer, viewerElement: page });
+  const { trackball } = buildTrackballControls({
+    camera,
+    render,
+    view,
+    viewerElement: canvas,
+  });
+  const { resize } = createResizer({
+    camera,
+    trackball,
+    renderer,
+    viewerElement: page,
+  });
 
-  new ResizeObserver(() => { resize(); render(); }).observe(page);
+  new ResizeObserver(() => {
+    resize();
+    render();
+  }).observe(page);
 
   const updateGeometry = async (geometry) => {
     // Delete any previous dataset in the window.

@@ -1,14 +1,19 @@
-import { deduplicate, isClockwise, isClosed, isOpen } from '@jsxcad/geometry-path';
+import {
+  deduplicate,
+  isClockwise,
+  isClosed,
+  isOpen,
+} from "@jsxcad/geometry-path";
 
-import { IntPoint } from './clipper-lib';
-import { toPlane } from '@jsxcad/math-poly3';
+import { IntPoint } from "./clipper-lib";
+import { toPlane } from "@jsxcad/math-poly3";
 
 // CHECK: Should this be sqrt(2)?
 export const CLEAN_DISTANCE = 1;
 
 export const RESOLUTION = 1e6;
 
-const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+const clockOrder = (a) => (isClockwise(a) ? 1 : 0);
 
 // Reorder in-place such that counterclockwise paths preceed clockwise paths.
 const clockSort = (surface) => {
@@ -20,27 +25,39 @@ const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
 
 export const fromSurface = (surface, normalize) => {
-  const normalized = surface.map(path => path.map(normalize));
-  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-  const filtered = scaled.filter(path => toPlane(path) !== undefined);
-  return filtered.map(path => path.map(([X, Y]) => new IntPoint(X, Y)));
+  const normalized = surface.map((path) => path.map(normalize));
+  const scaled = normalized.map((path) =>
+    path.map(([X, Y]) => [toInt(X), toInt(Y), 0])
+  );
+  const filtered = scaled.filter((path) => toPlane(path) !== undefined);
+  return filtered.map((path) => path.map(([X, Y]) => new IntPoint(X, Y)));
 };
 
 export const fromSurfaceAsClosedPaths = (surface, normalize) => {
-  const normalized = surface.map(path => path.map(normalize));
-  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-  const filtered = integers.filter(path => toPlane(path) !== undefined);
-  return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+  const normalized = surface.map((path) => path.map(normalize));
+  const integers = normalized.map((path) =>
+    path.map(([X, Y]) => [toInt(X), toInt(Y), 0])
+  );
+  const filtered = integers.filter((path) => toPlane(path) !== undefined);
+  return filtered.map((path) => ({
+    data: path.map(([X, Y]) => new IntPoint(X, Y)),
+    closed: true,
+  }));
 };
 
 export const fromSurfaceToIntegers = (surface, normalize) => {
-  const normalized = surface.map(path => path.map(normalize));
-  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const normalized = surface.map((path) => path.map(normalize));
+  const integers = normalized.map((path) =>
+    path.map(([X, Y]) => [toInt(X), toInt(Y), 0])
+  );
   return integers;
 };
 
 export const fromIntegersToClosedPaths = (integers) => {
-  return integers.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+  return integers.map((path) => ({
+    data: path.map(([X, Y]) => new IntPoint(X, Y)),
+    closed: true,
+  }));
 };
 
 export const fromClosedPath = (path, normalize) => {
@@ -97,12 +114,21 @@ export const fromClosedPaths = (paths, normalize) => {
 };
 
 export const toSurface = (clipperPaths, normalize) =>
-  clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
+  clockSort(
+    clipperPaths.map((clipperPath) =>
+      deduplicate(
+        clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))
+      )
+    )
+  );
 
 export const toPaths = (clipper, polytree, normalize) => {
   const paths = [];
   for (const path of clipper.openPathsFromPolyTree(polytree)) {
-    paths.push([null, ...path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))]);
+    paths.push([
+      null,
+      ...path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])),
+    ]);
   }
   for (const path of clipper.closedPathsFromPolyTree(polytree)) {
     paths.push(path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));

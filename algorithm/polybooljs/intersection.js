@@ -1,7 +1,7 @@
-import { fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from "./convert";
 
-import { doesNotOverlap } from './doesNotOverlap';
-import polybooljs from './polybooljs/index.js';
+import { doesNotOverlap } from "./doesNotOverlap";
+import polybooljs from "./polybooljs/index.js";
 
 /**
  * Produce a surface that is the intersection of all provided surfaces.

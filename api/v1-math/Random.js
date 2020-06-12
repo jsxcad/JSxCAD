@@ -1,4 +1,4 @@
-import Prando from 'prando';
+import Prando from "prando";
 
 const makeTo = (g) => (to) => g() * to;
 const makeIn = (g) => (from, to) => g() * (to - from) + from;

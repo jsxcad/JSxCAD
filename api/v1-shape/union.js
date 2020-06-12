@@ -1,6 +1,6 @@
-import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { Shape, fromGeometry, toKeptGeometry } from "./Shape";
 
-import { union as unionGeometry } from '@jsxcad/geometry-tagged';
+import { union as unionGeometry } from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -67,10 +67,12 @@ export const union = (...shapes) => {
   }
 };
 
-const unionMethod = function (...shapes) { return union(this, ...shapes); };
+const unionMethod = function (...shapes) {
+  return union(this, ...shapes);
+};
 Shape.prototype.union = unionMethod;
 
 export default union;
 
-union.signature = 'union(shape:Shape, ...shapes:Shape) -> Shape';
-unionMethod.signature = 'Shape -> union(...shapes:Shape) -> Shape';
+union.signature = "union(shape:Shape, ...shapes:Shape) -> Shape";
+unionMethod.signature = "Shape -> union(...shapes:Shape) -> Shape";

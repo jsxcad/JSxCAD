@@ -1,15 +1,15 @@
-import builtins from 'rollup-plugin-node-builtins';
-import commonjs from 'rollup-plugin-commonjs';
-import globals from 'rollup-plugin-node-globals';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import builtins from "rollup-plugin-node-builtins";
+import commonjs from "rollup-plugin-commonjs";
+import globals from "rollup-plugin-node-globals";
+import nodeResolve from "rollup-plugin-node-resolve";
 
 Error.stackTraceLimit = Infinity;
 
 export default {
-  input: 'main.js',
+  input: "main.js",
   output: {
-    dir: 'dist',
-    format: 'module'
+    dir: "dist",
+    format: "module",
   },
   /**
    * external
@@ -17,8 +17,8 @@ export default {
    * @param {string} id
    * @returns {boolean}
    */
-  external (id) {
-    return id.startsWith('./jsxcad-');
+  external(id) {
+    return id.startsWith("./jsxcad-");
   },
   plugins: [
     builtins(),
@@ -33,7 +33,9 @@ export default {
        * @param {string} id
        * @returns {string}
        */
-      transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); }
-    }
-  ]
+      transform(code, id) {
+        return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
+      },
+    },
+  ],
 };

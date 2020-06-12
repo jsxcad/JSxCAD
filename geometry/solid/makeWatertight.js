@@ -1,8 +1,8 @@
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { distance } from '@jsxcad/math-vec3';
-import { getEdges } from '@jsxcad/geometry-path';
-import { pushWhenValid } from '@jsxcad/geometry-polygons';
-import { toPlane } from '@jsxcad/math-poly3';
+import { createNormalize3 } from "@jsxcad/algorithm-quantize";
+import { distance } from "@jsxcad/math-vec3";
+import { getEdges } from "@jsxcad/geometry-path";
+import { pushWhenValid } from "@jsxcad/geometry-polygons";
+import { toPlane } from "@jsxcad/math-poly3";
 
 const THRESHOLD = 1e-5;
 
@@ -66,7 +66,10 @@ export const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
         for (let i = 0; i < orderedVertices.length; i++) {
           const vertex = orderedVertices[i];
           // FIX: Threshold
-          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+          if (
+            Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+            threshold
+          ) {
             colinear.push(vertex);
           }
         }
@@ -78,7 +81,7 @@ export const makeWatertight = (solid, normalize, threshold = THRESHOLD) => {
       pushWhenValid(watertightPaths, watertightPath);
     }
     watertightSolid.push(watertightPaths);
-  };
+  }
 
   return watertightSolid;
 };

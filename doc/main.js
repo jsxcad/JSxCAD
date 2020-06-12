@@ -1,5 +1,3 @@
-import { toUserGuide } from './toUserGuide';
+import { toUserGuide } from "./toUserGuide";
 
-export {
-  toUserGuide
-};
+export { toUserGuide };

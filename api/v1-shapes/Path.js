@@ -1,6 +1,7 @@
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from "@jsxcad/api-v1-shape";
 
-export const fromPoints = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+export const fromPoints = (...points) =>
+  Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
  *
@@ -20,7 +21,7 @@ export const fromPoints = (...points) => Shape.fromOpenPath(points.map(([x = 0, 
 export const Path = (...points) => fromPoints(...points);
 Path.fromPoints = fromPoints;
 
-Path.signature = 'Path(...points:Point) -> Shape';
-Path.fromPoints.signature = 'Path.fromPoints(...points:Point) -> Shape';
+Path.signature = "Path(...points:Point) -> Shape";
+Path.fromPoints.signature = "Path.fromPoints(...points:Point) -> Shape";
 
 export default Path;

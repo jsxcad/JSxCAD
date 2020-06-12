@@ -5,6 +5,8 @@
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-export const min = ([ax, ay, az], [bx, by, bz]) => [Math.min(ax, bx),
-                                                    Math.min(ay, by),
-                                                    Math.min(az, bz)];
+export const min = ([ax, ay, az], [bx, by, bz]) => [
+  Math.min(ax, bx),
+  Math.min(ay, by),
+  Math.min(az, bz),
+];

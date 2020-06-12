@@ -1,5 +1,5 @@
-import { cross, dot, length, random, subtract, unit } from '@jsxcad/math-vec3';
-import { fromValues } from '@jsxcad/math-mat4';
+import { cross, dot, length, random, subtract, unit } from "@jsxcad/math-vec3";
+import { fromValues } from "@jsxcad/math-mat4";
 
 const EPS = 1e-5;
 

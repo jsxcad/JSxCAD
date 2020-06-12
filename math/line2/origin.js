@@ -1,4 +1,4 @@
-import { scale } from '@jsxcad/math-vec2';
+import { scale } from "@jsxcad/math-vec2";
 
 /**
  * Return the origin of the given line.

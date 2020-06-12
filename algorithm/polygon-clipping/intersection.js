@@ -1,7 +1,7 @@
-import { fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from "./convert";
 
-import { doesNotOverlap } from './doesNotOverlap';
-import polygonClipping from 'polygon-clipping';
+import { doesNotOverlap } from "./doesNotOverlap";
+import polygonClipping from "polygon-clipping";
 
 /**
  * Produce a surface that is the intersection of all provided surfaces.
@@ -34,7 +34,9 @@ export const intersection = (...z0Surfaces) => {
     if (doesNotOverlap(a, b)) {
       return [];
     } else {
-      z0Surfaces.push(toSurface(polygonClipping.intersection(fromSurface(a), fromSurface(b))));
+      z0Surfaces.push(
+        toSurface(polygonClipping.intersection(fromSurface(a), fromSurface(b)))
+      );
     }
   }
   return z0Surfaces[0];

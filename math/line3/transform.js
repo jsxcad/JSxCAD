@@ -1,6 +1,6 @@
-import { add, subtract, transform as transformVec3 } from '@jsxcad/math-vec3';
+import { add, subtract, transform as transformVec3 } from "@jsxcad/math-vec3";
 
-import { fromPointAndDirection } from './fromPointAndDirection';
+import { fromPointAndDirection } from "./fromPointAndDirection";
 
 /**
  * Transforms the given 3D line using the given matrix.

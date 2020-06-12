@@ -1,14 +1,14 @@
-import localForage from 'localforage';
+import localForage from "localforage";
 
 let dbInstance;
 
 export const db = () => {
   if (dbInstance === undefined) {
     dbInstance = localForage.createInstance({
-      name: 'jsxcad',
+      name: "jsxcad",
       driver: localForage.INDEXEDDB,
-      storeName: 'jsxcad',
-      description: 'jsxcad local filesystem'
+      storeName: "jsxcad",
+      description: "jsxcad local filesystem",
     });
   }
   return dbInstance;

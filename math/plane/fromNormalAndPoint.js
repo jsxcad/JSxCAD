@@ -1,4 +1,4 @@
-import { dot, unit } from '@jsxcad/math-vec3';
+import { dot, unit } from "@jsxcad/math-vec3";
 
 /**
  * Create a new plane from the given normal and point values

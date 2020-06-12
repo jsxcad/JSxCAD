@@ -1,9 +1,9 @@
-const Matrix4 = require('../core/math/Matrix4')
-const Plane = require('../core/math/Plane')
-const Vector3 = require('../core/math/Vector3')
-const { union } = require('./ops-booleans')
-const { fromPoints } = require('../core/CAGFactories')
-const { isCAG } = require('../core/utils')
+const Matrix4 = require("../core/math/Matrix4");
+const Plane = require("../core/math/Plane");
+const Vector3 = require("../core/math/Vector3");
+const { union } = require("./ops-booleans");
+const { fromPoints } = require("../core/CAGFactories");
+const { isCAG } = require("../core/utils");
 // -- 3D transformations (OpenSCAD like notion)
 
 /** translate an object in 2D/3D space
@@ -14,17 +14,20 @@ const { isCAG } = require('../core/utils')
  * @example
  * let movedSphere = translate([10,2,0], sphere())
  */
-function translate (vector, ...objects) {      // v, obj or array
+function translate(vector, ...objects) {
+  // v, obj or array
   // workaround needed to determine if we are dealing with an array of objects
-  const _objects = (objects.length >= 1 && objects[0].length) ? objects[0] : objects
-  let object = _objects[0]
+  const _objects =
+    objects.length >= 1 && objects[0].length ? objects[0] : objects;
+  let object = _objects[0];
 
   if (_objects.length > 1) {
-    for (let i = 1; i < _objects.length; i++) { // FIXME/ why is union really needed ??
-      object = object.union(_objects[i])
+    for (let i = 1; i < _objects.length; i++) {
+      // FIXME/ why is union really needed ??
+      object = object.union(_objects[i]);
     }
   }
-  return object.translate(vector)
+  return object.translate(vector);
 }
 
 /** scale an object in 2D/3D space
@@ -35,16 +38,19 @@ function translate (vector, ...objects) {      // v, obj or array
  * @example
  * let scaledSphere = scale([0.2,15,1], sphere())
  */
-function scale (scale, ...objects) {         // v, obj or array
-  const _objects = (objects.length >= 1 && objects[0].length) ? objects[0] : objects
-  let object = _objects[0]
+function scale(scale, ...objects) {
+  // v, obj or array
+  const _objects =
+    objects.length >= 1 && objects[0].length ? objects[0] : objects;
+  let object = _objects[0];
 
   if (_objects.length > 1) {
-    for (let i = 1; i < _objects.length; i++) { // FIXME/ why is union really needed ??
-      object = object.union(_objects[i])
+    for (let i = 1; i < _objects.length; i++) {
+      // FIXME/ why is union really needed ??
+      object = object.union(_objects[i]);
     }
   }
-  return object.scale(scale)
+  return object.scale(scale);
 }
 
 /** rotate an object in 2D/3D space
@@ -55,29 +61,37 @@ function scale (scale, ...objects) {         // v, obj or array
  * @example
  * let rotatedSphere = rotate([0.2,15,1], sphere())
  */
-function rotate () {
-  let o
-  let i
-  let v
-  let r = 1
-  let a = arguments
-  if (!a[0].length) {        // rotate(r,[x,y,z],o)
-    r = a[0]
-    v = a[1]
-    i = 2
-    if (a[2].length) { a = a[2]; i = 0 }
-  } else {                   // rotate([x,y,z],o)
-    v = a[0]
-    i = 1
-    if (a[1].length) { a = a[1]; i = 0 }
+function rotate() {
+  let o;
+  let i;
+  let v;
+  let r = 1;
+  let a = arguments;
+  if (!a[0].length) {
+    // rotate(r,[x,y,z],o)
+    r = a[0];
+    v = a[1];
+    i = 2;
+    if (a[2].length) {
+      a = a[2];
+      i = 0;
+    }
+  } else {
+    // rotate([x,y,z],o)
+    v = a[0];
+    i = 1;
+    if (a[1].length) {
+      a = a[1];
+      i = 0;
+    }
   }
   for (o = a[i++]; i < a.length; i++) {
-    o = o.union(a[i])
+    o = o.union(a[i]);
   }
   if (r !== 1) {
-    return o.rotate([0, 0, 0], v, r)
+    return o.rotate([0, 0, 0], v, r);
   } else {
-    return o.rotateX(v[0]).rotateY(v[1]).rotateZ(v[2])
+    return o.rotateX(v[0]).rotateY(v[1]).rotateZ(v[2]);
   }
 }
 
@@ -95,29 +109,33 @@ function rotate () {
  * 0,           0, 0,  1
  * ], sphere())
  */
-function transform (matrix, ...objects) { // v, obj or array
-  const _objects = (objects.length >= 1 && objects[0].length) ? objects[0] : objects
-  let object = _objects[0]
+function transform(matrix, ...objects) {
+  // v, obj or array
+  const _objects =
+    objects.length >= 1 && objects[0].length ? objects[0] : objects;
+  let object = _objects[0];
 
   if (_objects.length > 1) {
-    for (let i = 1; i < _objects.length; i++) { // FIXME/ why is union really needed ??
-      object = object.union(_objects[i])
+    for (let i = 1; i < _objects.length; i++) {
+      // FIXME/ why is union really needed ??
+      object = object.union(_objects[i]);
     }
   }
 
-  let transformationMatrix
+  let transformationMatrix;
   if (!Array.isArray(matrix)) {
-    throw new Error('Matrix needs to be an array')
+    throw new Error("Matrix needs to be an array");
   }
-  matrix.forEach(element => {
+  matrix.forEach((element) => {
     if (!Number.isFinite(element)) {
-      throw new Error('you can only use a flat array of valid, finite numbers (float and integers)')
+      throw new Error(
+        "you can only use a flat array of valid, finite numbers (float and integers)"
+      );
     }
-  })
-  transformationMatrix = new Matrix4(matrix)
-  return object.transform(transformationMatrix)
+  });
+  transformationMatrix = new Matrix4(matrix);
+  return object.transform(transformationMatrix);
 }
-
 
 /**
  * Center the given object(s) about the given axes
@@ -128,19 +146,21 @@ function transform (matrix, ...objects) { // v, obj or array
  * @example
  * let csg = center([true,false,false], sphere()) // center about the X axis
  */
-function center (axes, ...objects) {
-  const _objects = (objects.length >= 1 && objects[0].length) ? objects[0] : objects
-  let object = _objects[0]
+function center(axes, ...objects) {
+  const _objects =
+    objects.length >= 1 && objects[0].length ? objects[0] : objects;
+  let object = _objects[0];
 
   if (_objects.length > 1) {
-    for (let i = 1; i < _objects.length; i++) { // FIXME/ why is union really needed ??
-      object = object.union(_objects[i])
+    for (let i = 1; i < _objects.length; i++) {
+      // FIXME/ why is union really needed ??
+      object = object.union(_objects[i]);
     }
   }
-  if (! Array.isArray(axes)) {
-    axes = [axes,axes,axes]
+  if (!Array.isArray(axes)) {
+    axes = [axes, axes, axes];
   }
-  return object.center(axes)
+  return object.center(axes);
 }
 
 /** mirror an object in 2D/3D space
@@ -151,17 +171,22 @@ function center (axes, ...objects) {
  * @example
  * let rotatedSphere = mirror([0.2,15,1], sphere())
  */
-function mirror (vector, ...objects) {
-  const _objects = (objects.length >= 1 && objects[0].length) ? objects[0] : objects
-  let object = _objects[0]
+function mirror(vector, ...objects) {
+  const _objects =
+    objects.length >= 1 && objects[0].length ? objects[0] : objects;
+  let object = _objects[0];
 
   if (_objects.length > 1) {
-    for (let i = 1; i < _objects.length; i++) { // FIXME/ why is union really needed ??
-      object = object.union(_objects[i])
+    for (let i = 1; i < _objects.length; i++) {
+      // FIXME/ why is union really needed ??
+      object = object.union(_objects[i]);
     }
   }
-  const plane = new Plane(new Vector3(vector[0], vector[1], vector[2]).unit(), 0)
-  return object.mirrored(plane)
+  const plane = new Plane(
+    new Vector3(vector[0], vector[1], vector[2]).unit(),
+    0
+  );
+  return object.mirrored(plane);
 }
 
 /** expand an object in 2D/3D space
@@ -172,8 +197,8 @@ function mirror (vector, ...objects) {
  * @example
  * let expanededShape = expand([0.2,15,1], sphere())
  */
-function expand (radius, n, object) {
-  return object.expand(radius, n)
+function expand(radius, n, object) {
+  return object.expand(radius, n);
 }
 
 /** contract an object(s) in 2D/3D space
@@ -184,8 +209,8 @@ function expand (radius, n, object) {
  * @example
  * let contractedShape = contract([0.2,15,1], sphere())
  */
-function contract (radius, n, object) {
-  return object.contract(radius, n)
+function contract(radius, n, object) {
+  return object.contract(radius, n);
 }
 
 /** create a minkowski sum of the given shapes
@@ -195,8 +220,8 @@ function contract (radius, n, object) {
  * @example
  * let hulled = hull(rect(), circle())
  */
-function minkowski () {
-  console.log('minkowski() not yet implemented')
+function minkowski() {
+  console.log("minkowski() not yet implemented");
 }
 
 /** create a convex hull of the given shapes
@@ -206,168 +231,181 @@ function minkowski () {
  * @example
  * let hulled = hull(rect(), circle())
  */
-function hull () {
-  let pts = []
+function hull() {
+  let pts = [];
 
-  let a = arguments
-  if (a[0].length) a = a[0]
-  let done = []
+  let a = arguments;
+  if (a[0].length) a = a[0];
+  let done = [];
 
-  for (let i = 0; i < a.length; i++) {              // extract all points of the CAG in the argument list
-    let cag = a[i]
+  for (let i = 0; i < a.length; i++) {
+    // extract all points of the CAG in the argument list
+    let cag = a[i];
     if (!isCAG(cag)) {
-      throw new Error('ERROR: hull() accepts only 2D forms / CAG')
+      throw new Error("ERROR: hull() accepts only 2D forms / CAG");
     }
     for (let j = 0; j < cag.sides.length; j++) {
-      let x = cag.sides[j].vertex0.pos.x
-      let y = cag.sides[j].vertex0.pos.y
+      let x = cag.sides[j].vertex0.pos.x;
+      let y = cag.sides[j].vertex0.pos.y;
       // avoid some coord to appear multiple times
-      if (done['' + x + ',' + y]) {
-        continue
+      if (done["" + x + "," + y]) {
+        continue;
       }
-      pts.push({ x: x, y: y })
-      done['' + x + ',' + y]++
-         // echo(x,y);
+      pts.push({ x: x, y: y });
+      done["" + x + "," + y]++;
+      // echo(x,y);
     }
   }
-   // echo(pts.length+" points in",pts);
+  // echo(pts.length+" points in",pts);
 
-   // from http://www.psychedelicdevelopment.com/grahamscan/
-   //    see also at https://github.com/bkiers/GrahamScan/blob/master/src/main/cg/GrahamScan.java
+  // from http://www.psychedelicdevelopment.com/grahamscan/
+  //    see also at https://github.com/bkiers/GrahamScan/blob/master/src/main/cg/GrahamScan.java
   let ConvexHullPoint = function (i, a, d) {
-    this.index = i
-    this.angle = a
-    this.distance = d
+    this.index = i;
+    this.angle = a;
+    this.distance = d;
 
     this.compare = function (p) {
       if (this.angle < p.angle) {
-        return -1
+        return -1;
       } else if (this.angle > p.angle) {
-        return 1
+        return 1;
       } else {
         if (this.distance < p.distance) {
-          return -1
+          return -1;
         } else if (this.distance > p.distance) {
-          return 1
+          return 1;
         }
       }
-      return 0
-    }
-  }
+      return 0;
+    };
+  };
 
   let ConvexHull = function () {
-    this.points = null
-    this.indices = null
+    this.points = null;
+    this.indices = null;
 
     this.getIndices = function () {
-      return this.indices
-    }
+      return this.indices;
+    };
 
     this.clear = function () {
-      this.indices = null
-      this.points = null
-    }
+      this.indices = null;
+      this.points = null;
+    };
 
     this.ccw = function (p1, p2, p3) {
-      let ccw = (this.points[p2].x - this.points[p1].x) * (this.points[p3].y - this.points[p1].y) -
-                   (this.points[p2].y - this.points[p1].y) * (this.points[p3].x - this.points[p1].x)
+      let ccw =
+        (this.points[p2].x - this.points[p1].x) *
+          (this.points[p3].y - this.points[p1].y) -
+        (this.points[p2].y - this.points[p1].y) *
+          (this.points[p3].x - this.points[p1].x);
       // we need this, otherwise sorting never ends, see https://github.com/Spiritdude/OpenJSCAD.org/issues/18
       if (ccw < 1e-5) {
-        return 0
+        return 0;
       }
-      return ccw
-    }
+      return ccw;
+    };
 
     this.angle = function (o, a) {
-         // return Math.atan((this.points[a].y-this.points[o].y) / (this.points[a].x - this.points[o].x));
-      return Math.atan2((this.points[a].y - this.points[o].y), (this.points[a].x - this.points[o].x))
-    }
+      // return Math.atan((this.points[a].y-this.points[o].y) / (this.points[a].x - this.points[o].x));
+      return Math.atan2(
+        this.points[a].y - this.points[o].y,
+        this.points[a].x - this.points[o].x
+      );
+    };
 
     this.distance = function (a, b) {
-      return ((this.points[b].x - this.points[a].x) * (this.points[b].x - this.points[a].x) +
-                 (this.points[b].y - this.points[a].y) * (this.points[b].y - this.points[a].y))
-    }
+      return (
+        (this.points[b].x - this.points[a].x) *
+          (this.points[b].x - this.points[a].x) +
+        (this.points[b].y - this.points[a].y) *
+          (this.points[b].y - this.points[a].y)
+      );
+    };
 
     this.compute = function (_points) {
-      this.indices = null
+      this.indices = null;
       if (_points.length < 3) {
-        return
+        return;
       }
-      this.points = _points
+      this.points = _points;
 
-         // Find the lowest point
-      let min = 0
+      // Find the lowest point
+      let min = 0;
       for (let i = 1; i < this.points.length; i++) {
         if (this.points[i].y === this.points[min].y) {
           if (this.points[i].x < this.points[min].x) {
-            min = i
+            min = i;
           }
         } else if (this.points[i].y < this.points[min].y) {
-          min = i
+          min = i;
         }
       }
 
-         // Calculate angle and distance from base
-      let al = []
-      let ang = 0.0
-      let dist = 0.0
+      // Calculate angle and distance from base
+      let al = [];
+      let ang = 0.0;
+      let dist = 0.0;
       for (let i = 0; i < this.points.length; i++) {
         if (i === min) {
-          continue
+          continue;
         }
-        ang = this.angle(min, i)
+        ang = this.angle(min, i);
         if (ang < 0) {
-          ang += Math.PI
+          ang += Math.PI;
         }
-        dist = this.distance(min, i)
-        al.push(new ConvexHullPoint(i, ang, dist))
+        dist = this.distance(min, i);
+        al.push(new ConvexHullPoint(i, ang, dist));
       }
 
-      al.sort(function (a, b) { return a.compare(b) })
+      al.sort(function (a, b) {
+        return a.compare(b);
+      });
 
-         // Create stack
-      let stack = new Array(this.points.length + 1)
-      let j = 2
+      // Create stack
+      let stack = new Array(this.points.length + 1);
+      let j = 2;
       for (let i = 0; i < this.points.length; i++) {
         if (i === min) {
-          continue
+          continue;
         }
-        stack[j] = al[j - 2].index
-        j++
+        stack[j] = al[j - 2].index;
+        j++;
       }
-      stack[0] = stack[this.points.length]
-      stack[1] = min
+      stack[0] = stack[this.points.length];
+      stack[1] = min;
 
-      let tmp
-      let M = 2
+      let tmp;
+      let M = 2;
       for (let i = 3; i <= this.points.length; i++) {
         while (this.ccw(stack[M - 1], stack[M], stack[i]) <= 0) {
-          M--
+          M--;
         }
-        M++
-        tmp = stack[i]
-        stack[i] = stack[M]
-        stack[M] = tmp
+        M++;
+        tmp = stack[i];
+        stack[i] = stack[M];
+        stack[M] = tmp;
       }
 
-      this.indices = new Array(M)
+      this.indices = new Array(M);
       for (let i = 0; i < M; i++) {
-        this.indices[i] = stack[i + 1]
+        this.indices[i] = stack[i + 1];
       }
-    }
-  }
+    };
+  };
 
-  let hull = new ConvexHull()
+  let hull = new ConvexHull();
 
-  hull.compute(pts)
-  let indices = hull.getIndices()
+  hull.compute(pts);
+  let indices = hull.getIndices();
 
   if (indices && indices.length > 0) {
-    let ch = []
+    let ch = [];
     for (let i = 0; i < indices.length; i++) {
-      ch.push(pts[indices[i]])
+      ch.push(pts[indices[i]]);
     }
-    return fromPoints(ch)
+    return fromPoints(ch);
   }
 }
 
@@ -381,28 +419,30 @@ function hull () {
  * @example
  * let hulled = chain_hull(rect(), circle())
  */
-function chain_hull (params, objects) {
+function chain_hull(params, objects) {
   /*
   const defaults = {
     closed: false
   }
   const closed = Object.assign({}, defaults, params) */
-  let a = arguments
-  let closed = false
-  let j = 0
+  let a = arguments;
+  let closed = false;
+  let j = 0;
 
   if (a[j].closed !== undefined) {
-    closed = a[j++].closed
+    closed = a[j++].closed;
   }
 
-  if (a[j].length) { a = a[j] }
+  if (a[j].length) {
+    a = a[j];
+  }
 
-  let hulls = []
-  let hullsAmount = a.length - (closed ? 0 : 1)
+  let hulls = [];
+  let hullsAmount = a.length - (closed ? 0 : 1);
   for (let i = 0; i < hullsAmount; i++) {
-    hulls.push(hull(a[i], a[(i + 1) % a.length]))
+    hulls.push(hull(a[i], a[(i + 1) % a.length]));
   }
-  return union(hulls)
+  return union(hulls);
 }
 
 module.exports = {
@@ -416,5 +456,5 @@ module.exports = {
   contract,
   minkowski,
   hull,
-  chain_hull
-}
+  chain_hull,
+};

@@ -1,10 +1,23 @@
-import { multiply, fromTranslation, fromScaling } from './jsxcad-math-mat4.js';
-import { toKeptGeometry, transform, getSurfaces, isNotVoid, getZ0Surfaces, getPaths } from './jsxcad-geometry-tagged.js';
-import { outline } from './jsxcad-geometry-surface.js';
-import { toRgbFromTags } from './jsxcad-algorithm-color.js';
+import { multiply, fromTranslation, fromScaling } from "./jsxcad-math-mat4.js";
+import {
+  toKeptGeometry,
+  transform,
+  getSurfaces,
+  isNotVoid,
+  getZ0Surfaces,
+  getPaths,
+} from "./jsxcad-geometry-tagged.js";
+import { outline } from "./jsxcad-geometry-surface.js";
+import { toRgbFromTags } from "./jsxcad-algorithm-color.js";
 
-const toFillColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} rg`;
-const toStrokeColor = (rgb) => `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(rgb[2] / 255).toFixed(9)} RG`;
+const toFillColor = (rgb) =>
+  `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(
+    rgb[2] / 255
+  ).toFixed(9)} rg`;
+const toStrokeColor = (rgb) =>
+  `${(rgb[0] / 255).toFixed(9)} ${(rgb[1] / 255).toFixed(9)} ${(
+    rgb[2] / 255
+  ).toFixed(9)} RG`;
 
 const black = [0, 0, 0];
 
@@ -12,7 +25,13 @@ const black = [0, 0, 0];
 // cases.
 
 // Width and height are in post-script points.
-const header = ({ scale = 1, width = 210, height = 297, trim = 5, lineWidth = 0.096 }) => {
+const header = ({
+  scale = 1,
+  width = 210,
+  height = 297,
+  trim = 5,
+  lineWidth = 0.096,
+}) => {
   const mediaX1 = 0 * scale;
   const mediaY1 = 0 * scale;
   const mediaX2 = width * scale;
@@ -27,25 +46,33 @@ const header = ({ scale = 1, width = 210, height = 297, trim = 5, lineWidth = 0.
     `2 0 obj << /Count 1 /Kids [ 3 0 R ] /Type /Pages >> endobj`,
     `3 0 obj <<`,
     `  /Contents 4 0 R`,
-    `  /MediaBox [ ${mediaX1.toFixed(9)} ${mediaY1.toFixed(9)} ${mediaX2.toFixed(9)} ${mediaY2.toFixed(9)} ]`,
-    `  /TrimBox [ ${trimX1.toFixed(9)} ${trimY1.toFixed(9)} ${trimX2.toFixed(9)} ${trimY2.toFixed(9)} ]`,
+    `  /MediaBox [ ${mediaX1.toFixed(9)} ${mediaY1.toFixed(
+      9
+    )} ${mediaX2.toFixed(9)} ${mediaY2.toFixed(9)} ]`,
+    `  /TrimBox [ ${trimX1.toFixed(9)} ${trimY1.toFixed(9)} ${trimX2.toFixed(
+      9
+    )} ${trimY2.toFixed(9)} ]`,
     `  /Parent 2 0 R`,
     `  /Type /Page`,
     `>>`,
     `endobj`,
     `4 0 obj << >>`,
     `stream`,
-    `${lineWidth.toFixed(9)} w`
+    `${lineWidth.toFixed(9)} w`,
   ];
 };
 
-const footer =
-   [`endstream`,
-    `endobj`,
-    `trailer << /Root 1 0 R /Size 4 >>`,
-    `%%EOF`];
+const footer = [
+  `endstream`,
+  `endobj`,
+  `trailer << /Root 1 0 R /Size 4 >>`,
+  `%%EOF`,
+];
 
-const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) => {
+const toPdf = async (
+  geometry,
+  { lineWidth = 0.096, size = [210, 297] } = {}
+) => {
   geometry = await geometry;
 
   // This is the size of a post-script point in mm.
@@ -53,14 +80,16 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
   const scale = 1 / pointSize;
   const [width, height] = size;
   const lines = [];
-  const matrix = multiply(fromTranslation([width * scale / 2, height * scale / 2, 0]),
-                          fromScaling([scale, scale, scale]));
+  const matrix = multiply(
+    fromTranslation([(width * scale) / 2, (height * scale) / 2, 0]),
+    fromScaling([scale, scale, scale])
+  );
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
   for (const { tags, surface } of getSurfaces(keptGeometry).filter(isNotVoid)) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of outline(surface)) {
-      let nth = (path[0] === null) ? 1 : 0;
+      let nth = path[0] === null ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
       for (nth++; nth < path.length; nth++) {
@@ -71,12 +100,14 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
     }
     lines.push(`f`); // Surface paths are always filled.
   }
-  for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry).filter(isNotVoid)) {
+  for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry).filter(
+    isNotVoid
+  )) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     // FIX: Avoid making the surface convex.
     for (const path of outline(z0Surface)) {
-      let nth = (path[0] === null) ? 1 : 0;
+      let nth = path[0] === null ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
       for (nth++; nth < path.length; nth++) {
@@ -90,7 +121,7 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
   for (const { tags, paths } of getPaths(keptGeometry).filter(isNotVoid)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of paths) {
-      let nth = (path[0] === null) ? 1 : 0;
+      let nth = path[0] === null ? 1 : 0;
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
       for (nth++; nth < path.length; nth++) {
@@ -105,10 +136,10 @@ const toPdf = async (geometry, { lineWidth = 0.096, size = [210, 297] } = {}) =>
     }
   }
 
-  const output = [].concat(header({ scale, width, height, lineWidth }),
-                           lines,
-                           footer).join('\n');
-  return new TextEncoder('utf8').encode(output);
+  const output = []
+    .concat(header({ scale, width, height, lineWidth }), lines, footer)
+    .join("\n");
+  return new TextEncoder("utf8").encode(output);
 };
 
 export { toPdf };

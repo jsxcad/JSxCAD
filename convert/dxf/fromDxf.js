@@ -1,8 +1,8 @@
-import { scale, translate } from '@jsxcad/geometry-tagged';
+import { scale, translate } from "@jsxcad/geometry-tagged";
 
-import DxfParser from 'dxf-parser';
-import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
-import { toTagFromRgbInt } from '@jsxcad/algorithm-color';
+import DxfParser from "dxf-parser";
+import { buildRegularPolygon } from "@jsxcad/algorithm-shape";
+import { toTagFromRgbInt } from "@jsxcad/algorithm-color";
 
 export const fromDxf = async (options = {}, data) => {
   const parser = new DxfParser();
@@ -25,9 +25,9 @@ export const fromDxf = async (options = {}, data) => {
     }
     if (tags.length === 0) tags = undefined;
     switch (entity.type) {
-      case 'LINE':
-      case 'LWPOLYLINE':
-      case 'POLYLINE': {
+      case "LINE":
+      case "LWPOLYLINE":
+      case "POLYLINE": {
         const { shape, vertices } = entity;
         const path = vertices.map(({ x = 0, y = 0, z = 0 }) => [x, y, z]);
         if (shape !== true) {
@@ -37,15 +37,23 @@ export const fromDxf = async (options = {}, data) => {
         assembly.push({ paths: [path], tags });
         break;
       }
-      case 'INSERT': {
+      case "INSERT": {
         // const { x = 0, y = 0, z = 0 } = entity.position;
         // const { xScale, rotation } = entity;
         break;
       }
-      case 'CIRCLE': {
+      case "CIRCLE": {
         const { x = 0, y = 0, z = 0 } = entity.center;
         const { radius = 1 } = entity;
-        assembly.push(translate([x, y, z], scale([radius, radius, radius], { ...buildRegularPolygon(32), tags })));
+        assembly.push(
+          translate(
+            [x, y, z],
+            scale([radius, radius, radius], {
+              ...buildRegularPolygon(32),
+              tags,
+            })
+          )
+        );
         break;
       }
       default:

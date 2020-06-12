@@ -1,4 +1,4 @@
-import fromSurface from './fromSurface';
+import fromSurface from "./fromSurface";
 
 /**
  * fromPolygons
@@ -8,6 +8,7 @@ import fromSurface from './fromSurface';
  * @param {Normalizer} normalize
  * @returns {Loops}
  */
-export const fromPolygons = (polygons, normalize) => fromSurface(polygons, normalize);
+export const fromPolygons = (polygons, normalize) =>
+  fromSurface(polygons, normalize);
 
 export default fromPolygons;

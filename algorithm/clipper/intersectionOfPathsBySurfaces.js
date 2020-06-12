@@ -1,8 +1,8 @@
-import { ClipType, PolyFillType, clipper } from './clipper-lib';
-import { fromPaths, fromSurfaceAsClosedPaths, toPaths } from './convert';
+import { ClipType, PolyFillType, clipper } from "./clipper-lib";
+import { fromPaths, fromSurfaceAsClosedPaths, toPaths } from "./convert";
 
-import { createNormalize2 } from '@jsxcad/algorithm-quantize';
-import { doesNotOverlapOrAbut } from './doesNotOverlap';
+import { createNormalize2 } from "@jsxcad/algorithm-quantize";
+import { doesNotOverlapOrAbut } from "./doesNotOverlap";
 
 /**
  * Produces a surface that is the intersection of all provided surfaces.
@@ -29,13 +29,12 @@ export const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
       if (clipInputs.length === 0) {
         return [];
       }
-      const result = clipper.clipToPolyTree(
-        {
-          clipType: ClipType.Intersection,
-          subjectInputs,
-          clipInputs,
-          subjectFillType: PolyFillType.Positive
-        });
+      const result = clipper.clipToPolyTree({
+        clipType: ClipType.Intersection,
+        subjectInputs,
+        clipInputs,
+        subjectFillType: PolyFillType.Positive,
+      });
       a = toPaths(clipper, result, normalize);
     }
   }

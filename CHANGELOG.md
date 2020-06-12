@@ -1,3 +1,3 @@
 ### Forked
 
-* Forked from OpenJSCAD in February 2019.
+- Forked from OpenJSCAD in February 2019.

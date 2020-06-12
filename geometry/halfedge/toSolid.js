@@ -5,10 +5,10 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import eachLink from './eachLink';
-import pushConvexPolygons from './pushConvexPolygons';
+import eachLink from "./eachLink";
+import pushConvexPolygons from "./pushConvexPolygons";
 
-const walked = Symbol('walked');
+const walked = Symbol("walked");
 
 /*
 const pushPolygon = (polygons, loop) => {
@@ -50,9 +50,17 @@ export const toSolid = (loops, selectJunction) => {
    * @returns {void}
    */
   const walk = (loop) => {
-    if (loop === undefined || loop.dead || loop[walked] || loop.face === undefined) return;
+    if (
+      loop === undefined ||
+      loop.dead ||
+      loop[walked] ||
+      loop.face === undefined
+    )
+      return;
     if (holes.has(loop.face)) return;
-    eachLink(loop, (link) => { link[walked] = true; });
+    eachLink(loop, (link) => {
+      link[walked] = true;
+    });
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
     const concavePolygons = [];

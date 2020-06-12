@@ -1,4 +1,4 @@
-import * as vec from './jsxcad-math-vec3.js';
+import * as vec from "./jsxcad-math-vec3.js";
 export { vec };
 
 /**
@@ -12,9 +12,9 @@ export { vec };
  *
  **/
 
-const ease = (start = 0.00, end = 1.00, op = t => 1) => {
-  const compose = (next = t => 1) => {
-    const fn = t => {
+const ease = (start = 0.0, end = 1.0, op = (t) => 1) => {
+  const compose = (next = (t) => 1) => {
+    const fn = (t) => {
       if (t >= start && t <= end) {
         return op((t - start) / (end - start));
       } else {
@@ -26,149 +26,152 @@ const ease = (start = 0.00, end = 1.00, op = t => 1) => {
   return compose;
 };
 
-const linear = (start, end) => t => start + t * (end - start);
+const linear = (start, end) => (t) => start + t * (end - start);
 ease.linear = linear;
 
-ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
-linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
+ease.signature =
+  "ease(start:number = 0, end:number = 1, op:function) -> function";
+linear.signature = "linear(start:number = 0, end:number = 1) -> function";
 
-function unwrapExports (x) {
-	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+function unwrapExports(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default")
+    ? x["default"]
+    : x;
 }
 
 function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
+  return (module = { exports: {} }), fn(module, module.exports), module.exports;
 }
 
 var constants = createCommonjsModule(function (module, exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NORM_2D = 1.0 / 47.0;
-exports.NORM_3D = 1.0 / 103.0;
-exports.NORM_4D = 1.0 / 30.0;
-exports.SQUISH_2D = (Math.sqrt(2 + 1) - 1) / 2;
-exports.SQUISH_3D = (Math.sqrt(3 + 1) - 1) / 3;
-exports.SQUISH_4D = (Math.sqrt(4 + 1) - 1) / 4;
-exports.STRETCH_2D = (1 / Math.sqrt(2 + 1) - 1) / 2;
-exports.STRETCH_3D = (1 / Math.sqrt(3 + 1) - 1) / 3;
-exports.STRETCH_4D = (1 / Math.sqrt(4 + 1) - 1) / 4;
-exports.base2D = [
+  Object.defineProperty(exports, "__esModule", { value: true });
+  exports.NORM_2D = 1.0 / 47.0;
+  exports.NORM_3D = 1.0 / 103.0;
+  exports.NORM_4D = 1.0 / 30.0;
+  exports.SQUISH_2D = (Math.sqrt(2 + 1) - 1) / 2;
+  exports.SQUISH_3D = (Math.sqrt(3 + 1) - 1) / 3;
+  exports.SQUISH_4D = (Math.sqrt(4 + 1) - 1) / 4;
+  exports.STRETCH_2D = (1 / Math.sqrt(2 + 1) - 1) / 2;
+  exports.STRETCH_3D = (1 / Math.sqrt(3 + 1) - 1) / 3;
+  exports.STRETCH_4D = (1 / Math.sqrt(4 + 1) - 1) / 4;
+  exports.base2D = [
     [1, 1, 0, 1, 0, 1, 0, 0, 0],
-    [1, 1, 0, 1, 0, 1, 2, 1, 1]
-];
-exports.base3D = [
+    [1, 1, 0, 1, 0, 1, 2, 1, 1],
+  ];
+  exports.base3D = [
     [0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1],
     [2, 1, 1, 0, 2, 1, 0, 1, 2, 0, 1, 1, 3, 1, 1, 1],
-    [1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 2, 1, 1, 0, 2, 1, 0, 1, 2, 0, 1, 1]
-];
-exports.base4D = [
+    [1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 2, 1, 1, 0, 2, 1, 0, 1, 2, 0, 1, 1],
+  ];
+  exports.base4D = [
     [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
     [3, 1, 1, 1, 0, 3, 1, 1, 0, 1, 3, 1, 0, 1, 1, 3, 0, 1, 1, 1, 4, 1, 1, 1, 1],
     [
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        0,
-        1,
-        0,
-        1,
-        0,
-        0,
-        0,
-        1,
-        2,
-        1,
-        1,
-        0,
-        0,
-        2,
-        1,
-        0,
-        1,
-        0,
-        2,
-        1,
-        0,
-        0,
-        1,
-        2,
-        0,
-        1,
-        1,
-        0,
-        2,
-        0,
-        1,
-        0,
-        1,
-        2,
-        0,
-        0,
-        1,
-        1
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      2,
+      1,
+      1,
+      0,
+      0,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2,
+      1,
+      0,
+      0,
+      1,
+      2,
+      0,
+      1,
+      1,
+      0,
+      2,
+      0,
+      1,
+      0,
+      1,
+      2,
+      0,
+      0,
+      1,
+      1,
     ],
     [
-        3,
-        1,
-        1,
-        1,
-        0,
-        3,
-        1,
-        1,
-        0,
-        1,
-        3,
-        1,
-        0,
-        1,
-        1,
-        3,
-        0,
-        1,
-        1,
-        1,
-        2,
-        1,
-        1,
-        0,
-        0,
-        2,
-        1,
-        0,
-        1,
-        0,
-        2,
-        1,
-        0,
-        0,
-        1,
-        2,
-        0,
-        1,
-        1,
-        0,
-        2,
-        0,
-        1,
-        0,
-        1,
-        2,
-        0,
-        0,
-        1,
-        1
-    ]
-];
-exports.gradients2D = [
+      3,
+      1,
+      1,
+      1,
+      0,
+      3,
+      1,
+      1,
+      0,
+      1,
+      3,
+      1,
+      0,
+      1,
+      1,
+      3,
+      0,
+      1,
+      1,
+      1,
+      2,
+      1,
+      1,
+      0,
+      0,
+      2,
+      1,
+      0,
+      1,
+      0,
+      2,
+      1,
+      0,
+      0,
+      1,
+      2,
+      0,
+      1,
+      1,
+      0,
+      2,
+      0,
+      1,
+      0,
+      1,
+      2,
+      0,
+      0,
+      1,
+      1,
+    ],
+  ];
+  exports.gradients2D = [
     5,
     2,
     2,
@@ -184,9 +187,9 @@ exports.gradients2D = [
     -5,
     -2,
     -2,
-    -5
-];
-exports.gradients3D = [
+    -5,
+  ];
+  exports.gradients3D = [
     -11,
     4,
     4,
@@ -258,9 +261,9 @@ exports.gradients3D = [
     -4,
     4,
     -4,
-    -11
-];
-exports.gradients4D = [
+    -11,
+  ];
+  exports.gradients4D = [
     3,
     1,
     1,
@@ -516,9 +519,9 @@ exports.gradients4D = [
     -1,
     -1,
     -1,
-    -3
-];
-exports.lookupPairs2D = [
+    -3,
+  ];
+  exports.lookupPairs2D = [
     0,
     1,
     1,
@@ -542,9 +545,9 @@ exports.lookupPairs2D = [
     42,
     4,
     43,
-    3
-];
-exports.lookupPairs3D = [
+    3,
+  ];
+  exports.lookupPairs3D = [
     0,
     2,
     1,
@@ -688,9 +691,9 @@ exports.lookupPairs3D = [
     2038,
     7,
     2039,
-    6
-];
-exports.lookupPairs4D = [
+    6,
+  ];
+  exports.lookupPairs4D = [
     0,
     3,
     1,
@@ -1810,9 +1813,9 @@ exports.lookupPairs4D = [
     599294,
     11,
     599295,
-    10
-];
-exports.p2D = [
+    10,
+  ];
+  exports.p2D = [
     0,
     0,
     1,
@@ -1836,9 +1839,9 @@ exports.p2D = [
     1,
     0,
     0,
-    0
-];
-exports.p3D = [
+    0,
+  ];
+  exports.p3D = [
     0,
     0,
     1,
@@ -2054,9 +2057,9 @@ exports.p3D = [
     2,
     0,
     2,
-    0
-];
-exports.p4D = [
+    0,
+  ];
+  exports.p4D = [
     0,
     0,
     1,
@@ -3336,8 +3339,8 @@ exports.p4D = [
     -1,
     1,
     1,
-    1
-];
+    1,
+  ];
 });
 
 unwrapExports(constants);
@@ -3364,298 +3367,339 @@ var constants_20 = constants.p3D;
 var constants_21 = constants.p4D;
 
 var lib = createCommonjsModule(function (module, exports) {
-Object.defineProperty(exports, "__esModule", { value: true });
+  Object.defineProperty(exports, "__esModule", { value: true });
 
-function contribution2D(multiplier, xsb, ysb) {
+  function contribution2D(multiplier, xsb, ysb) {
     return {
-        dx: -xsb - multiplier * constants.SQUISH_2D,
-        dy: -ysb - multiplier * constants.SQUISH_2D,
-        xsb: xsb,
-        ysb: ysb
+      dx: -xsb - multiplier * constants.SQUISH_2D,
+      dy: -ysb - multiplier * constants.SQUISH_2D,
+      xsb: xsb,
+      ysb: ysb,
     };
-}
-function contribution3D(multiplier, xsb, ysb, zsb) {
+  }
+  function contribution3D(multiplier, xsb, ysb, zsb) {
     return {
-        dx: -xsb - multiplier * constants.SQUISH_3D,
-        dy: -ysb - multiplier * constants.SQUISH_3D,
-        dz: -zsb - multiplier * constants.SQUISH_3D,
-        xsb: xsb,
-        ysb: ysb,
-        zsb: zsb
+      dx: -xsb - multiplier * constants.SQUISH_3D,
+      dy: -ysb - multiplier * constants.SQUISH_3D,
+      dz: -zsb - multiplier * constants.SQUISH_3D,
+      xsb: xsb,
+      ysb: ysb,
+      zsb: zsb,
     };
-}
-function contribution4D(multiplier, xsb, ysb, zsb, wsb) {
+  }
+  function contribution4D(multiplier, xsb, ysb, zsb, wsb) {
     return {
-        dx: -xsb - multiplier * constants.SQUISH_4D,
-        dy: -ysb - multiplier * constants.SQUISH_4D,
-        dz: -zsb - multiplier * constants.SQUISH_4D,
-        dw: -wsb - multiplier * constants.SQUISH_4D,
-        xsb: xsb,
-        ysb: ysb,
-        zsb: zsb,
-        wsb: wsb
+      dx: -xsb - multiplier * constants.SQUISH_4D,
+      dy: -ysb - multiplier * constants.SQUISH_4D,
+      dz: -zsb - multiplier * constants.SQUISH_4D,
+      dw: -wsb - multiplier * constants.SQUISH_4D,
+      xsb: xsb,
+      ysb: ysb,
+      zsb: zsb,
+      wsb: wsb,
     };
-}
-function makeNoise2D(clientSeed) {
+  }
+  function makeNoise2D(clientSeed) {
     var contributions = [];
     for (var i = 0; i < constants.p2D.length; i += 4) {
-        var baseSet = constants.base2D[constants.p2D[i]];
-        var previous = null;
-        var current = null;
-        for (var k = 0; k < baseSet.length; k += 3) {
-            current = contribution2D(baseSet[k], baseSet[k + 1], baseSet[k + 2]);
-            if (previous === null)
-                contributions[i / 4] = current;
-            else
-                previous.next = current;
-            previous = current;
-        }
-        current.next = contribution2D(constants.p2D[i + 1], constants.p2D[i + 2], constants.p2D[i + 3]);
+      var baseSet = constants.base2D[constants.p2D[i]];
+      var previous = null;
+      var current = null;
+      for (var k = 0; k < baseSet.length; k += 3) {
+        current = contribution2D(baseSet[k], baseSet[k + 1], baseSet[k + 2]);
+        if (previous === null) contributions[i / 4] = current;
+        else previous.next = current;
+        previous = current;
+      }
+      current.next = contribution2D(
+        constants.p2D[i + 1],
+        constants.p2D[i + 2],
+        constants.p2D[i + 3]
+      );
     }
     var lookup = [];
     for (var i = 0; i < constants.lookupPairs2D.length; i += 2) {
-        lookup[constants.lookupPairs2D[i]] = contributions[constants.lookupPairs2D[i + 1]];
+      lookup[constants.lookupPairs2D[i]] =
+        contributions[constants.lookupPairs2D[i + 1]];
     }
     var perm = new Uint8Array(256);
     var perm2D = new Uint8Array(256);
     var source = new Uint8Array(256);
-    for (var i = 0; i < 256; i++)
-        source[i] = i;
+    for (var i = 0; i < 256; i++) source[i] = i;
     var seed = new Uint32Array(1);
     seed[0] = clientSeed;
     seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
     for (var i = 255; i >= 0; i--) {
-        seed = shuffleSeed(seed);
-        var r = new Uint32Array(1);
-        r[0] = (seed[0] + 31) % (i + 1);
-        if (r[0] < 0)
-            r[0] += i + 1;
-        perm[i] = source[r[0]];
-        perm2D[i] = perm[i] & 0x0e;
-        source[r[0]] = source[i];
+      seed = shuffleSeed(seed);
+      var r = new Uint32Array(1);
+      r[0] = (seed[0] + 31) % (i + 1);
+      if (r[0] < 0) r[0] += i + 1;
+      perm[i] = source[r[0]];
+      perm2D[i] = perm[i] & 0x0e;
+      source[r[0]] = source[i];
     }
     return function (x, y) {
-        var stretchOffset = (x + y) * constants.STRETCH_2D;
-        var xs = x + stretchOffset;
-        var ys = y + stretchOffset;
-        var xsb = Math.floor(xs);
-        var ysb = Math.floor(ys);
-        var squishOffset = (xsb + ysb) * constants.SQUISH_2D;
-        var dx0 = x - (xsb + squishOffset);
-        var dy0 = y - (ysb + squishOffset);
-        var xins = xs - xsb;
-        var yins = ys - ysb;
-        var inSum = xins + yins;
-        var hash = (xins - yins + 1) |
-            (inSum << 1) |
-            ((inSum + yins) << 2) |
-            ((inSum + xins) << 4);
-        var value = 0;
-        for (var c = lookup[hash]; c !== undefined; c = c.next) {
-            var dx = dx0 + c.dx;
-            var dy = dy0 + c.dy;
-            var attn = 2 - dx * dx - dy * dy;
-            if (attn > 0) {
-                var px = xsb + c.xsb;
-                var py = ysb + c.ysb;
-                var indexPartA = perm[px & 0xff];
-                var index = perm2D[(indexPartA + py) & 0xff];
-                var valuePart = constants.gradients2D[index] * dx + constants.gradients2D[index + 1] * dy;
-                value += attn * attn * attn * attn * valuePart;
-            }
+      var stretchOffset = (x + y) * constants.STRETCH_2D;
+      var xs = x + stretchOffset;
+      var ys = y + stretchOffset;
+      var xsb = Math.floor(xs);
+      var ysb = Math.floor(ys);
+      var squishOffset = (xsb + ysb) * constants.SQUISH_2D;
+      var dx0 = x - (xsb + squishOffset);
+      var dy0 = y - (ysb + squishOffset);
+      var xins = xs - xsb;
+      var yins = ys - ysb;
+      var inSum = xins + yins;
+      var hash =
+        (xins - yins + 1) |
+        (inSum << 1) |
+        ((inSum + yins) << 2) |
+        ((inSum + xins) << 4);
+      var value = 0;
+      for (var c = lookup[hash]; c !== undefined; c = c.next) {
+        var dx = dx0 + c.dx;
+        var dy = dy0 + c.dy;
+        var attn = 2 - dx * dx - dy * dy;
+        if (attn > 0) {
+          var px = xsb + c.xsb;
+          var py = ysb + c.ysb;
+          var indexPartA = perm[px & 0xff];
+          var index = perm2D[(indexPartA + py) & 0xff];
+          var valuePart =
+            constants.gradients2D[index] * dx +
+            constants.gradients2D[index + 1] * dy;
+          value += attn * attn * attn * attn * valuePart;
         }
-        return value * constants.NORM_2D;
+      }
+      return value * constants.NORM_2D;
     };
-}
-exports.makeNoise2D = makeNoise2D;
-function makeNoise3D(clientSeed) {
+  }
+  exports.makeNoise2D = makeNoise2D;
+  function makeNoise3D(clientSeed) {
     var contributions = [];
     for (var i = 0; i < constants.p3D.length; i += 9) {
-        var baseSet = constants.base3D[constants.p3D[i]];
-        var previous = null;
-        var current = null;
-        for (var k = 0; k < baseSet.length; k += 4) {
-            current = contribution3D(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3]);
-            if (previous === null)
-                contributions[i / 9] = current;
-            else
-                previous.next = current;
-            previous = current;
-        }
-        current.next = contribution3D(constants.p3D[i + 1], constants.p3D[i + 2], constants.p3D[i + 3], constants.p3D[i + 4]);
-        current.next.next = contribution3D(constants.p3D[i + 5], constants.p3D[i + 6], constants.p3D[i + 7], constants.p3D[i + 8]);
+      var baseSet = constants.base3D[constants.p3D[i]];
+      var previous = null;
+      var current = null;
+      for (var k = 0; k < baseSet.length; k += 4) {
+        current = contribution3D(
+          baseSet[k],
+          baseSet[k + 1],
+          baseSet[k + 2],
+          baseSet[k + 3]
+        );
+        if (previous === null) contributions[i / 9] = current;
+        else previous.next = current;
+        previous = current;
+      }
+      current.next = contribution3D(
+        constants.p3D[i + 1],
+        constants.p3D[i + 2],
+        constants.p3D[i + 3],
+        constants.p3D[i + 4]
+      );
+      current.next.next = contribution3D(
+        constants.p3D[i + 5],
+        constants.p3D[i + 6],
+        constants.p3D[i + 7],
+        constants.p3D[i + 8]
+      );
     }
     var lookup = [];
     for (var i = 0; i < constants.lookupPairs3D.length; i += 2) {
-        lookup[constants.lookupPairs3D[i]] = contributions[constants.lookupPairs3D[i + 1]];
+      lookup[constants.lookupPairs3D[i]] =
+        contributions[constants.lookupPairs3D[i + 1]];
     }
     var perm = new Uint8Array(256);
     var perm3D = new Uint8Array(256);
     var source = new Uint8Array(256);
-    for (var i = 0; i < 256; i++)
-        source[i] = i;
+    for (var i = 0; i < 256; i++) source[i] = i;
     var seed = new Uint32Array(1);
     seed[0] = clientSeed;
     seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
     for (var i = 255; i >= 0; i--) {
-        seed = shuffleSeed(seed);
-        var r = new Uint32Array(1);
-        r[0] = (seed[0] + 31) % (i + 1);
-        if (r[0] < 0)
-            r[0] += i + 1;
-        perm[i] = source[r[0]];
-        perm3D[i] = (perm[i] % 24) * 3;
-        source[r[0]] = source[i];
+      seed = shuffleSeed(seed);
+      var r = new Uint32Array(1);
+      r[0] = (seed[0] + 31) % (i + 1);
+      if (r[0] < 0) r[0] += i + 1;
+      perm[i] = source[r[0]];
+      perm3D[i] = (perm[i] % 24) * 3;
+      source[r[0]] = source[i];
     }
     return function (x, y, z) {
-        var stretchOffset = (x + y + z) * constants.STRETCH_3D;
-        var xs = x + stretchOffset;
-        var ys = y + stretchOffset;
-        var zs = z + stretchOffset;
-        var xsb = Math.floor(xs);
-        var ysb = Math.floor(ys);
-        var zsb = Math.floor(zs);
-        var squishOffset = (xsb + ysb + zsb) * constants.SQUISH_3D;
-        var dx0 = x - (xsb + squishOffset);
-        var dy0 = y - (ysb + squishOffset);
-        var dz0 = z - (zsb + squishOffset);
-        var xins = xs - xsb;
-        var yins = ys - ysb;
-        var zins = zs - zsb;
-        var inSum = xins + yins + zins;
-        var hash = (yins - zins + 1) |
-            ((xins - yins + 1) << 1) |
-            ((xins - zins + 1) << 2) |
-            (inSum << 3) |
-            ((inSum + zins) << 5) |
-            ((inSum + yins) << 7) |
-            ((inSum + xins) << 9);
-        var value = 0;
-        for (var c = lookup[hash]; c !== undefined; c = c.next) {
-            var dx = dx0 + c.dx;
-            var dy = dy0 + c.dy;
-            var dz = dz0 + c.dz;
-            var attn = 2 - dx * dx - dy * dy - dz * dz;
-            if (attn > 0) {
-                var px = xsb + c.xsb;
-                var py = ysb + c.ysb;
-                var pz = zsb + c.zsb;
-                var indexPartA = perm[px & 0xff];
-                var indexPartB = perm[(indexPartA + py) & 0xff];
-                var index = perm3D[(indexPartB + pz) & 0xff];
-                var valuePart = constants.gradients3D[index] * dx +
-                    constants.gradients3D[index + 1] * dy +
-                    constants.gradients3D[index + 2] * dz;
-                value += attn * attn * attn * attn * valuePart;
-            }
+      var stretchOffset = (x + y + z) * constants.STRETCH_3D;
+      var xs = x + stretchOffset;
+      var ys = y + stretchOffset;
+      var zs = z + stretchOffset;
+      var xsb = Math.floor(xs);
+      var ysb = Math.floor(ys);
+      var zsb = Math.floor(zs);
+      var squishOffset = (xsb + ysb + zsb) * constants.SQUISH_3D;
+      var dx0 = x - (xsb + squishOffset);
+      var dy0 = y - (ysb + squishOffset);
+      var dz0 = z - (zsb + squishOffset);
+      var xins = xs - xsb;
+      var yins = ys - ysb;
+      var zins = zs - zsb;
+      var inSum = xins + yins + zins;
+      var hash =
+        (yins - zins + 1) |
+        ((xins - yins + 1) << 1) |
+        ((xins - zins + 1) << 2) |
+        (inSum << 3) |
+        ((inSum + zins) << 5) |
+        ((inSum + yins) << 7) |
+        ((inSum + xins) << 9);
+      var value = 0;
+      for (var c = lookup[hash]; c !== undefined; c = c.next) {
+        var dx = dx0 + c.dx;
+        var dy = dy0 + c.dy;
+        var dz = dz0 + c.dz;
+        var attn = 2 - dx * dx - dy * dy - dz * dz;
+        if (attn > 0) {
+          var px = xsb + c.xsb;
+          var py = ysb + c.ysb;
+          var pz = zsb + c.zsb;
+          var indexPartA = perm[px & 0xff];
+          var indexPartB = perm[(indexPartA + py) & 0xff];
+          var index = perm3D[(indexPartB + pz) & 0xff];
+          var valuePart =
+            constants.gradients3D[index] * dx +
+            constants.gradients3D[index + 1] * dy +
+            constants.gradients3D[index + 2] * dz;
+          value += attn * attn * attn * attn * valuePart;
         }
-        return value * constants.NORM_3D;
+      }
+      return value * constants.NORM_3D;
     };
-}
-exports.makeNoise3D = makeNoise3D;
-function makeNoise4D(clientSeed) {
+  }
+  exports.makeNoise3D = makeNoise3D;
+  function makeNoise4D(clientSeed) {
     var contributions = [];
     for (var i = 0; i < constants.p4D.length; i += 16) {
-        var baseSet = constants.base4D[constants.p4D[i]];
-        var previous = null;
-        var current = null;
-        for (var k = 0; k < baseSet.length; k += 5) {
-            current = contribution4D(baseSet[k], baseSet[k + 1], baseSet[k + 2], baseSet[k + 3], baseSet[k + 4]);
-            if (previous === null)
-                contributions[i / 16] = current;
-            else
-                previous.next = current;
-            previous = current;
-        }
-        current.next = contribution4D(constants.p4D[i + 1], constants.p4D[i + 2], constants.p4D[i + 3], constants.p4D[i + 4], constants.p4D[i + 5]);
-        current.next.next = contribution4D(constants.p4D[i + 6], constants.p4D[i + 7], constants.p4D[i + 8], constants.p4D[i + 9], constants.p4D[i + 10]);
-        current.next.next.next = contribution4D(constants.p4D[i + 11], constants.p4D[i + 12], constants.p4D[i + 13], constants.p4D[i + 14], constants.p4D[i + 15]);
+      var baseSet = constants.base4D[constants.p4D[i]];
+      var previous = null;
+      var current = null;
+      for (var k = 0; k < baseSet.length; k += 5) {
+        current = contribution4D(
+          baseSet[k],
+          baseSet[k + 1],
+          baseSet[k + 2],
+          baseSet[k + 3],
+          baseSet[k + 4]
+        );
+        if (previous === null) contributions[i / 16] = current;
+        else previous.next = current;
+        previous = current;
+      }
+      current.next = contribution4D(
+        constants.p4D[i + 1],
+        constants.p4D[i + 2],
+        constants.p4D[i + 3],
+        constants.p4D[i + 4],
+        constants.p4D[i + 5]
+      );
+      current.next.next = contribution4D(
+        constants.p4D[i + 6],
+        constants.p4D[i + 7],
+        constants.p4D[i + 8],
+        constants.p4D[i + 9],
+        constants.p4D[i + 10]
+      );
+      current.next.next.next = contribution4D(
+        constants.p4D[i + 11],
+        constants.p4D[i + 12],
+        constants.p4D[i + 13],
+        constants.p4D[i + 14],
+        constants.p4D[i + 15]
+      );
     }
     var lookup = [];
     for (var i = 0; i < constants.lookupPairs4D.length; i += 2) {
-        lookup[constants.lookupPairs4D[i]] = contributions[constants.lookupPairs4D[i + 1]];
+      lookup[constants.lookupPairs4D[i]] =
+        contributions[constants.lookupPairs4D[i + 1]];
     }
     var perm = new Uint8Array(256);
     var perm4D = new Uint8Array(256);
     var source = new Uint8Array(256);
-    for (var i = 0; i < 256; i++)
-        source[i] = i;
+    for (var i = 0; i < 256; i++) source[i] = i;
     var seed = new Uint32Array(1);
     seed[0] = clientSeed;
     seed = shuffleSeed(shuffleSeed(shuffleSeed(seed)));
     for (var i = 255; i >= 0; i--) {
-        seed = shuffleSeed(seed);
-        var r = new Uint32Array(1);
-        r[0] = (seed[0] + 31) % (i + 1);
-        if (r[0] < 0)
-            r[0] += i + 1;
-        perm[i] = source[r[0]];
-        perm4D[i] = perm[i] & 0xfc;
-        source[r[0]] = source[i];
+      seed = shuffleSeed(seed);
+      var r = new Uint32Array(1);
+      r[0] = (seed[0] + 31) % (i + 1);
+      if (r[0] < 0) r[0] += i + 1;
+      perm[i] = source[r[0]];
+      perm4D[i] = perm[i] & 0xfc;
+      source[r[0]] = source[i];
     }
     return function (x, y, z, w) {
-        var stretchOffset = (x + y + z + w) * constants.STRETCH_4D;
-        var xs = x + stretchOffset;
-        var ys = y + stretchOffset;
-        var zs = z + stretchOffset;
-        var ws = w + stretchOffset;
-        var xsb = Math.floor(xs);
-        var ysb = Math.floor(ys);
-        var zsb = Math.floor(zs);
-        var wsb = Math.floor(ws);
-        var squishOffset = (xsb + ysb + zsb + wsb) * constants.SQUISH_4D;
-        var dx0 = x - (xsb + squishOffset);
-        var dy0 = y - (ysb + squishOffset);
-        var dz0 = z - (zsb + squishOffset);
-        var dw0 = w - (wsb + squishOffset);
-        var xins = xs - xsb;
-        var yins = ys - ysb;
-        var zins = zs - zsb;
-        var wins = ws - wsb;
-        var inSum = xins + yins + zins + wins;
-        var hash = (zins - wins + 1) |
-            ((yins - zins + 1) << 1) |
-            ((yins - wins + 1) << 2) |
-            ((xins - yins + 1) << 3) |
-            ((xins - zins + 1) << 4) |
-            ((xins - wins + 1) << 5) |
-            (inSum << 6) |
-            ((inSum + wins) << 8) |
-            ((inSum + zins) << 11) |
-            ((inSum + yins) << 14) |
-            ((inSum + xins) << 17);
-        var value = 0;
-        for (var c = lookup[hash]; c !== undefined; c = c.next) {
-            var dx = dx0 + c.dx;
-            var dy = dy0 + c.dy;
-            var dz = dz0 + c.dz;
-            var dw = dw0 + c.dw;
-            var attn = 2 - dx * dx - dy * dy - dz * dz - dw * dw;
-            if (attn > 0) {
-                var px = xsb + c.xsb;
-                var py = ysb + c.ysb;
-                var pz = zsb + c.zsb;
-                var pw = wsb + c.wsb;
-                var indexPartA = perm[px & 0xff];
-                var indexPartB = perm[(indexPartA + py) & 0xff];
-                var indexPartC = perm[(indexPartB + pz) & 0xff];
-                var index = perm4D[(indexPartC + pw) & 0xff];
-                var valuePart = constants.gradients4D[index] * dx +
-                    constants.gradients4D[index + 1] * dy +
-                    constants.gradients4D[index + 2] * dz +
-                    constants.gradients4D[index + 3] * dw;
-                value += attn * attn * attn * attn * valuePart;
-            }
+      var stretchOffset = (x + y + z + w) * constants.STRETCH_4D;
+      var xs = x + stretchOffset;
+      var ys = y + stretchOffset;
+      var zs = z + stretchOffset;
+      var ws = w + stretchOffset;
+      var xsb = Math.floor(xs);
+      var ysb = Math.floor(ys);
+      var zsb = Math.floor(zs);
+      var wsb = Math.floor(ws);
+      var squishOffset = (xsb + ysb + zsb + wsb) * constants.SQUISH_4D;
+      var dx0 = x - (xsb + squishOffset);
+      var dy0 = y - (ysb + squishOffset);
+      var dz0 = z - (zsb + squishOffset);
+      var dw0 = w - (wsb + squishOffset);
+      var xins = xs - xsb;
+      var yins = ys - ysb;
+      var zins = zs - zsb;
+      var wins = ws - wsb;
+      var inSum = xins + yins + zins + wins;
+      var hash =
+        (zins - wins + 1) |
+        ((yins - zins + 1) << 1) |
+        ((yins - wins + 1) << 2) |
+        ((xins - yins + 1) << 3) |
+        ((xins - zins + 1) << 4) |
+        ((xins - wins + 1) << 5) |
+        (inSum << 6) |
+        ((inSum + wins) << 8) |
+        ((inSum + zins) << 11) |
+        ((inSum + yins) << 14) |
+        ((inSum + xins) << 17);
+      var value = 0;
+      for (var c = lookup[hash]; c !== undefined; c = c.next) {
+        var dx = dx0 + c.dx;
+        var dy = dy0 + c.dy;
+        var dz = dz0 + c.dz;
+        var dw = dw0 + c.dw;
+        var attn = 2 - dx * dx - dy * dy - dz * dz - dw * dw;
+        if (attn > 0) {
+          var px = xsb + c.xsb;
+          var py = ysb + c.ysb;
+          var pz = zsb + c.zsb;
+          var pw = wsb + c.wsb;
+          var indexPartA = perm[px & 0xff];
+          var indexPartB = perm[(indexPartA + py) & 0xff];
+          var indexPartC = perm[(indexPartB + pz) & 0xff];
+          var index = perm4D[(indexPartC + pw) & 0xff];
+          var valuePart =
+            constants.gradients4D[index] * dx +
+            constants.gradients4D[index + 1] * dy +
+            constants.gradients4D[index + 2] * dz +
+            constants.gradients4D[index + 3] * dw;
+          value += attn * attn * attn * attn * valuePart;
         }
-        return value * constants.NORM_4D;
+      }
+      return value * constants.NORM_4D;
     };
-}
-exports.makeNoise4D = makeNoise4D;
-function shuffleSeed(seed) {
+  }
+  exports.makeNoise4D = makeNoise4D;
+  function shuffleSeed(seed) {
     var newSeed = new Uint32Array(1);
     newSeed[0] = seed[0] * 1664525 + 1013904223;
     return newSeed;
-}
+  }
 });
 
 unwrapExports(lib);
@@ -3670,178 +3714,195 @@ const Noise = (seed = 0) => {
 };
 
 var Prando = /** @class */ (function () {
-    // ================================================================================================================
-    // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
-    /**
-     * Generate a new Prando pseudo-random number generator.
-     *
-     * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
-     */
-    function Prando(seed) {
-        this._value = NaN;
-        if (typeof (seed) === "string") {
-            // String seed
-            this._seed = this.hashCode(seed);
-        }
-        else if (typeof (seed) === "number") {
-            // Numeric seed
-            this._seed = this.getSafeSeed(seed);
-        }
-        else {
-            // Pseudo-random seed
-            this._seed = this.getSafeSeed(Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random()));
-        }
-        this.reset();
+  // ================================================================================================================
+  // CONSTRUCTOR ----------------------------------------------------------------------------------------------------
+  /**
+   * Generate a new Prando pseudo-random number generator.
+   *
+   * @param seed - A number or string seed that determines which pseudo-random number sequence will be created. Defaults to current time.
+   */
+  function Prando(seed) {
+    this._value = NaN;
+    if (typeof seed === "string") {
+      // String seed
+      this._seed = this.hashCode(seed);
+    } else if (typeof seed === "number") {
+      // Numeric seed
+      this._seed = this.getSafeSeed(seed);
+    } else {
+      // Pseudo-random seed
+      this._seed = this.getSafeSeed(
+        Prando.MIN + Math.floor((Prando.MAX - Prando.MIN) * Math.random())
+      );
     }
-    // ================================================================================================================
-    // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
-    /**
-     * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
-     *
-     * @param min - The minimum number that can be randomly generated.
-     * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
-     * @return The generated pseudo-random number.
-     */
-    Prando.prototype.next = function (min, pseudoMax) {
-        if (min === void 0) { min = 0; }
-        if (pseudoMax === void 0) { pseudoMax = 1; }
-        this.recalculate();
-        return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
-    };
-    /**
-     * Generates a pseudo-random integer number in a range (inclusive).
-     *
-     * @param min - The minimum number that can be randomly generated.
-     * @param max - The maximum number that can be randomly generated.
-     * @return The generated pseudo-random number.
-     */
-    Prando.prototype.nextInt = function (min, max) {
-        if (min === void 0) { min = 10; }
-        if (max === void 0) { max = 100; }
-        this.recalculate();
-        return Math.floor(this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1));
-    };
-    /**
-     * Generates a pseudo-random string sequence of a particular length from a specific character range.
-     *
-     * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
-     * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
-     * pre-existing ids, or employ a robust GUID/UUID generator.
-     *
-     * @param length - Length of the strting to be generated.
-     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
-     * @return The generated string sequence.
-     */
-    Prando.prototype.nextString = function (length, chars) {
-        if (length === void 0) { length = 16; }
-        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
-        var str = "";
-        while (str.length < length) {
-            str += this.nextChar(chars);
-        }
-        return str;
-    };
-    /**
-     * Generates a pseudo-random string of 1 character specific character range.
-     *
-     * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
-     * @return The generated character.
-     */
-    Prando.prototype.nextChar = function (chars) {
-        if (chars === void 0) { chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; }
-        this.recalculate();
-        return chars.substr(this.nextInt(0, chars.length - 1), 1);
-    };
-    /**
-     * Picks a pseudo-random item from an array. The array is left unmodified.
-     *
-     * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
-     * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
-     * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
-     * apply a *shuffle* transformation to the array instead, then read it linearly.
-     *
-     * @param array - Array of any type containing one or more candidates for random picking.
-     * @return An item from the array.
-     */
-    Prando.prototype.nextArrayItem = function (array) {
-        this.recalculate();
-        return array[this.nextInt(0, array.length - 1)];
-    };
-    /**
-     * Generates a pseudo-random boolean.
-     *
-     * @return A value of true or false.
-     */
-    Prando.prototype.nextBoolean = function () {
-        this.recalculate();
-        return this._value > 0.5;
-    };
-    /**
-     * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
-     * calling next() a specified number of times, but faster since it doesn't need to map the
-     * new random numbers to a range and return it.
-     *
-     * @param iterations - The number of items to skip ahead.
-     */
-    Prando.prototype.skip = function (iterations) {
-        if (iterations === void 0) { iterations = 1; }
-        while (iterations-- > 0) {
-            this.recalculate();
-        }
-    };
-    /**
-     * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
-     * will then produce the same sequence of numbers it had produced before. This is equivalent to
-     * creating a new Prando instance with the same seed as another Prando instance.
-     *
-     * Example:
-     * let rng = new Prando(12345678);
-     * console.log(rng.next()); // 0.6177754114889017
-     * console.log(rng.next()); // 0.5784605181725837
-     * rng.reset();
-     * console.log(rng.next()); // 0.6177754114889017 again
-     * console.log(rng.next()); // 0.5784605181725837 again
-     */
-    Prando.prototype.reset = function () {
-        this._value = this._seed;
-    };
-    // ================================================================================================================
-    // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
-    Prando.prototype.recalculate = function () {
-        this._value = this.xorshift(this._value);
-    };
-    Prando.prototype.xorshift = function (value) {
-        // Xorshift*32
-        // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
-        value ^= value << 13;
-        value ^= value >> 17;
-        value ^= value << 5;
-        return value;
-    };
-    Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
-        return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
-    };
-    Prando.prototype.hashCode = function (str) {
-        var hash = 0;
-        if (str) {
-            var l = str.length;
-            for (var i = 0; i < l; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0;
-                hash = this.xorshift(hash);
-            }
-        }
-        return this.getSafeSeed(hash);
-    };
-    Prando.prototype.getSafeSeed = function (seed) {
-        if (seed === 0)
-            return 1;
-        return seed;
-    };
-    Prando.MIN = -2147483648; // Int32 min
-    Prando.MAX = 2147483647; // Int32 max
-    return Prando;
-}());
+    this.reset();
+  }
+  // ================================================================================================================
+  // PUBLIC INTERFACE -----------------------------------------------------------------------------------------------
+  /**
+   * Generates a pseudo-random number between a lower (inclusive) and a higher (exclusive) bounds.
+   *
+   * @param min - The minimum number that can be randomly generated.
+   * @param pseudoMax - The maximum number that can be randomly generated (exclusive).
+   * @return The generated pseudo-random number.
+   */
+  Prando.prototype.next = function (min, pseudoMax) {
+    if (min === void 0) {
+      min = 0;
+    }
+    if (pseudoMax === void 0) {
+      pseudoMax = 1;
+    }
+    this.recalculate();
+    return this.map(this._value, Prando.MIN, Prando.MAX, min, pseudoMax);
+  };
+  /**
+   * Generates a pseudo-random integer number in a range (inclusive).
+   *
+   * @param min - The minimum number that can be randomly generated.
+   * @param max - The maximum number that can be randomly generated.
+   * @return The generated pseudo-random number.
+   */
+  Prando.prototype.nextInt = function (min, max) {
+    if (min === void 0) {
+      min = 10;
+    }
+    if (max === void 0) {
+      max = 100;
+    }
+    this.recalculate();
+    return Math.floor(
+      this.map(this._value, Prando.MIN, Prando.MAX, min, max + 1)
+    );
+  };
+  /**
+   * Generates a pseudo-random string sequence of a particular length from a specific character range.
+   *
+   * Note: keep in mind that creating a random string sequence does not guarantee uniqueness; there is always a
+   * 1 in (char_length^string_length) chance of collision. For real unique string ids, always check for
+   * pre-existing ids, or employ a robust GUID/UUID generator.
+   *
+   * @param length - Length of the strting to be generated.
+   * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+   * @return The generated string sequence.
+   */
+  Prando.prototype.nextString = function (length, chars) {
+    if (length === void 0) {
+      length = 16;
+    }
+    if (chars === void 0) {
+      chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    }
+    var str = "";
+    while (str.length < length) {
+      str += this.nextChar(chars);
+    }
+    return str;
+  };
+  /**
+   * Generates a pseudo-random string of 1 character specific character range.
+   *
+   * @param chars - Characters that are used when creating the random string. Defaults to all alphanumeric chars (A-Z, a-z, 0-9).
+   * @return The generated character.
+   */
+  Prando.prototype.nextChar = function (chars) {
+    if (chars === void 0) {
+      chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    }
+    this.recalculate();
+    return chars.substr(this.nextInt(0, chars.length - 1), 1);
+  };
+  /**
+   * Picks a pseudo-random item from an array. The array is left unmodified.
+   *
+   * Note: keep in mind that while the returned item will be random enough, picking one item from the array at a time
+   * does not guarantee nor imply that a sequence of random non-repeating items will be picked. If you want to
+   * *pick items in a random order* from an array, instead of *pick one random item from an array*, it's best to
+   * apply a *shuffle* transformation to the array instead, then read it linearly.
+   *
+   * @param array - Array of any type containing one or more candidates for random picking.
+   * @return An item from the array.
+   */
+  Prando.prototype.nextArrayItem = function (array) {
+    this.recalculate();
+    return array[this.nextInt(0, array.length - 1)];
+  };
+  /**
+   * Generates a pseudo-random boolean.
+   *
+   * @return A value of true or false.
+   */
+  Prando.prototype.nextBoolean = function () {
+    this.recalculate();
+    return this._value > 0.5;
+  };
+  /**
+   * Skips ahead in the sequence of numbers that are being generated. This is equivalent to
+   * calling next() a specified number of times, but faster since it doesn't need to map the
+   * new random numbers to a range and return it.
+   *
+   * @param iterations - The number of items to skip ahead.
+   */
+  Prando.prototype.skip = function (iterations) {
+    if (iterations === void 0) {
+      iterations = 1;
+    }
+    while (iterations-- > 0) {
+      this.recalculate();
+    }
+  };
+  /**
+   * Reset the pseudo-random number sequence back to its starting seed. Further calls to next()
+   * will then produce the same sequence of numbers it had produced before. This is equivalent to
+   * creating a new Prando instance with the same seed as another Prando instance.
+   *
+   * Example:
+   * let rng = new Prando(12345678);
+   * console.log(rng.next()); // 0.6177754114889017
+   * console.log(rng.next()); // 0.5784605181725837
+   * rng.reset();
+   * console.log(rng.next()); // 0.6177754114889017 again
+   * console.log(rng.next()); // 0.5784605181725837 again
+   */
+  Prando.prototype.reset = function () {
+    this._value = this._seed;
+  };
+  // ================================================================================================================
+  // PRIVATE INTERFACE ----------------------------------------------------------------------------------------------
+  Prando.prototype.recalculate = function () {
+    this._value = this.xorshift(this._value);
+  };
+  Prando.prototype.xorshift = function (value) {
+    // Xorshift*32
+    // Based on George Marsaglia's work: http://www.jstatsoft.org/v08/i14/paper
+    value ^= value << 13;
+    value ^= value >> 17;
+    value ^= value << 5;
+    return value;
+  };
+  Prando.prototype.map = function (val, minFrom, maxFrom, minTo, maxTo) {
+    return ((val - minFrom) / (maxFrom - minFrom)) * (maxTo - minTo) + minTo;
+  };
+  Prando.prototype.hashCode = function (str) {
+    var hash = 0;
+    if (str) {
+      var l = str.length;
+      for (var i = 0; i < l; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+        hash = this.xorshift(hash);
+      }
+    }
+    return this.getSafeSeed(hash);
+  };
+  Prando.prototype.getSafeSeed = function (seed) {
+    if (seed === 0) return 1;
+    return seed;
+  };
+  Prando.MIN = -2147483648; // Int32 min
+  Prando.MAX = 2147483647; // Int32 max
+  return Prando;
+})();
 
 const makeTo = (g) => (to) => g() * to;
 const makeIn = (g) => (from, to) => g() * (to - from) + from;
@@ -3873,8 +3934,8 @@ const Random = (seed = 0) => {
  *
  **/
 
-const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
-acos.signature = 'acos(angle:number) -> number';
+const acos = (a) => (Math.acos(a) / (Math.PI * 2)) * 360;
+acos.signature = "acos(angle:number) -> number";
 
 /**
  *
@@ -3891,9 +3952,9 @@ acos.signature = 'acos(angle:number) -> number';
  *
  **/
 
-const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
+const cos = (a) => Math.cos((a / 360) * Math.PI * 2);
 
-cos.signature = 'cos(angle:number) -> number';
+cos.signature = "cos(angle:number) -> number";
 
 /**
  *
@@ -3909,7 +3970,7 @@ cos.signature = 'cos(angle:number) -> number';
 
 const max = Math.max;
 
-max.signature = 'max(...values:number) -> number';
+max.signature = "max(...values:number) -> number";
 
 /**
  *
@@ -3925,7 +3986,7 @@ max.signature = 'max(...values:number) -> number';
 
 const min = Math.min;
 
-min.signature = 'min(...values:number) -> number';
+min.signature = "min(...values:number) -> number";
 
 /**
  *
@@ -3942,7 +4003,10 @@ min.signature = 'min(...values:number) -> number';
 
 const EPSILON = 1e-5;
 
-const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
+const numbers = (
+  thunk = (n) => n,
+  { from = 0, to, upto, by, resolution } = {}
+) => {
   const numbers = [];
   if (by === undefined) {
     if (resolution !== undefined) {
@@ -3958,19 +4022,27 @@ const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) 
 
   if (upto !== undefined) {
     // Exclusive
-    for (let number = from, nth = 0; number < to - EPSILON; number += by, nth++) {
+    for (
+      let number = from, nth = 0;
+      number < to - EPSILON;
+      number += by, nth++
+    ) {
       numbers.push(thunk(number, nth));
     }
   } else if (to !== undefined) {
     // Inclusive
-    for (let number = from, nth = 0; number <= to + EPSILON; number += by, nth++) {
+    for (
+      let number = from, nth = 0;
+      number <= to + EPSILON;
+      number += by, nth++
+    ) {
       numbers.push(thunk(number, nth));
     }
   }
   return numbers;
 };
 
-numbers.signature = 'numbers(spec) -> numbers';
+numbers.signature = "numbers(spec) -> numbers";
 
 /**
  *
@@ -3987,7 +4059,7 @@ numbers.signature = 'numbers(spec) -> numbers';
  *
  **/
 
-const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
 
 /**
  *
@@ -4018,7 +4090,7 @@ const api = {
   numbers,
   sin,
   sqrt,
-  vec
+  vec,
 };
 
 export default api;

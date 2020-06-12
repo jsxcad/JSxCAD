@@ -4,15 +4,15 @@
 // description: example001.scad ported to OpenJSCAD.org
 // file       : example001.jscad
 
-function radiusFromDiameter (d) {
+function radiusFromDiameter(d) {
   return d / 2;
 }
 
-function rotcy (rot, r, h) {
+function rotcy(rot, r, h) {
   return rotate(rot, Cylinder(r, h));
 }
 
-function example001 () {
+function example001() {
   var size = 50;
   var hole = 25;
   var radius = radiusFromDiameter(hole);
@@ -27,5 +27,8 @@ function example001 () {
 }
 
 const solid = example001();
-solid.writeStl('tmp/example001.stl');
-solid.writeThreejsPage({ cameraPosition: [0, 0, 120], path: 'tmp/example001.html' });
+solid.writeStl("tmp/example001.stl");
+solid.writeThreejsPage({
+  cameraPosition: [0, 0, 120],
+  path: "tmp/example001.html",
+});

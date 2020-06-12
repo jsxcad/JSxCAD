@@ -3,7 +3,7 @@ let base;
 
 export const getBase = () => base;
 
-export const qualifyPath = (path = '', workspace) => {
+export const qualifyPath = (path = "", workspace) => {
   if (workspace !== undefined) {
     return `jsxcad/${workspace}/${path}`;
   } else if (base !== undefined) {
@@ -16,7 +16,7 @@ export const qualifyPath = (path = '', workspace) => {
 export const setupFilesystem = ({ fileBase } = {}) => {
   // A prefix used to partition the persistent filesystem for multiple workspaces.
   if (fileBase !== undefined) {
-    if (fileBase.endsWith('/')) {
+    if (fileBase.endsWith("/")) {
       base = fileBase;
     } else {
       base = `${fileBase}/`;
@@ -28,7 +28,7 @@ export const setupFilesystem = ({ fileBase } = {}) => {
 
 export const getFilesystem = () => {
   if (base !== undefined) {
-    const [filesystem] = base.split('/');
+    const [filesystem] = base.split("/");
     return filesystem;
   }
 };

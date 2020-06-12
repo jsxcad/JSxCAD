@@ -1,4 +1,4 @@
-import readShapefile from './readShapefile';
+import readShapefile from "./readShapefile";
 
 const api = { readShapefile };
 export { readShapefile };

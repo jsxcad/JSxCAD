@@ -1,4 +1,4 @@
-import { unit } from '@jsxcad/math-vec3';
+import { unit } from "@jsxcad/math-vec3";
 
 /**
  * Create a line in 3D space from the given data.
@@ -11,4 +11,7 @@ import { unit } from '@jsxcad/math-vec3';
  * @param {vec3} direction direction of the line segment
  * @returns {line3} a new unbounded 3D line
  */
-export const fromPointAndDirection = (point, direction) => [point, unit(direction)];
+export const fromPointAndDirection = (point, direction) => [
+  point,
+  unit(direction),
+];

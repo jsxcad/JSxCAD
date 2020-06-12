@@ -1,9 +1,9 @@
-import { canonicalize as canonicalizePaths } from '@jsxcad/geometry-paths';
-import { canonicalize as canonicalizePlane } from '@jsxcad/math-plane';
-import { canonicalize as canonicalizePoints } from '@jsxcad/geometry-points';
-import { canonicalize as canonicalizeSolid } from '@jsxcad/geometry-solid';
-import { canonicalize as canonicalizeSurface } from '@jsxcad/geometry-surface';
-import { toTransformedGeometry } from './toTransformedGeometry';
+import { canonicalize as canonicalizePaths } from "@jsxcad/geometry-paths";
+import { canonicalize as canonicalizePlane } from "@jsxcad/math-plane";
+import { canonicalize as canonicalizePoints } from "@jsxcad/geometry-points";
+import { canonicalize as canonicalizeSolid } from "@jsxcad/geometry-solid";
+import { canonicalize as canonicalizeSurface } from "@jsxcad/geometry-surface";
+import { toTransformedGeometry } from "./toTransformedGeometry";
 
 export const canonicalize = (rawGeometry) => {
   const geometry = toTransformedGeometry(rawGeometry);
@@ -20,8 +20,8 @@ export const canonicalize = (rawGeometry) => {
     canonicalized.content = canonicalize(geometry.content);
   } else if (geometry.connection) {
     canonicalized.connection = geometry.connection;
-    canonicalized.geometries = geometry.geometries.map(canonicalize); ;
-    canonicalized.connectors = geometry.connectors.map(canonicalize); ;
+    canonicalized.geometries = geometry.geometries.map(canonicalize);
+    canonicalized.connectors = geometry.connectors.map(canonicalize);
   } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalizeSurface(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {
@@ -33,11 +33,13 @@ export const canonicalize = (rawGeometry) => {
   } else if (geometry.layers !== undefined) {
     canonicalized.layers = geometry.layers.map(canonicalize);
   } else if (geometry.disjointAssembly !== undefined) {
-    canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize);
+    canonicalized.disjointAssembly = geometry.disjointAssembly.map(
+      canonicalize
+    );
   } else if (geometry.item !== undefined) {
     canonicalized.item = canonicalize(geometry.item);
   } else {
-    throw Error('die');
+    throw Error("die");
   }
   if (geometry.tags !== undefined) {
     canonicalized.tags = geometry.tags;

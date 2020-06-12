@@ -1,11 +1,6 @@
-import { toSvg, toSvgSync } from './toSvg';
+import { toSvg, toSvgSync } from "./toSvg";
 
-import { toThreejsGeometry } from './toThreejsGeometry';
-import { toThreejsPage } from './toThreejsPage';
+import { toThreejsGeometry } from "./toThreejsGeometry";
+import { toThreejsPage } from "./toThreejsPage";
 
-export {
-  toSvg,
-  toSvgSync,
-  toThreejsGeometry,
-  toThreejsPage
-};
+export { toSvg, toSvgSync, toThreejsGeometry, toThreejsPage };

@@ -1,5 +1,3 @@
-import { fromShapefile } from './fromShapefile';
+import { fromShapefile } from "./fromShapefile";
 
-export {
-  fromShapefile
-};
+export { fromShapefile };

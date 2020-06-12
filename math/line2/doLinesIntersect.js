@@ -1,6 +1,13 @@
-import { add, cross, equals, length, normalize, subtract } from '@jsxcad/math-vec2';
+import {
+  add,
+  cross,
+  equals,
+  length,
+  normalize,
+  subtract,
+} from "@jsxcad/math-vec2";
 
-import { solve2Linear } from '@jsxcad/math-utils';
+import { solve2Linear } from "@jsxcad/math-utils";
 
 const EPS = 1e-5;
 
@@ -25,8 +32,21 @@ export const doLinesIntersect = function (p0start, p0end, p1start, p1end) {
     const d1 = subtract(p1end, p1start);
     // FIXME These epsilons need review and testing
     if (Math.abs(cross(d0, d1)) < 1e-9) return false; // lines are parallel
-    let alphas = solve2Linear(-d0[0], d1[0], -d0[1], d1[1], p0start[0] - p1start[0], p0start[1] - p1start[1]);
-    if ((alphas[0] > 1e-6) && (alphas[0] < 0.999999) && (alphas[1] > 1e-5) && (alphas[1] < 0.999999)) return true;
+    let alphas = solve2Linear(
+      -d0[0],
+      d1[0],
+      -d0[1],
+      d1[1],
+      p0start[0] - p1start[0],
+      p0start[1] - p1start[1]
+    );
+    if (
+      alphas[0] > 1e-6 &&
+      alphas[0] < 0.999999 &&
+      alphas[1] > 1e-5 &&
+      alphas[1] < 0.999999
+    )
+      return true;
   }
   return false;
 };

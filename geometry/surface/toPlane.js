@@ -1,4 +1,4 @@
-import { toPlane as toPlaneOfPolygon } from '@jsxcad/math-poly3';
+import { toPlane as toPlaneOfPolygon } from "@jsxcad/math-poly3";
 
 // FIX: This is incorrect, since it assumes the first non-degenerate polygon is representative.
 

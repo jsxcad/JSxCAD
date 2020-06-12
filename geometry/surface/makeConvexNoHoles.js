@@ -1,12 +1,12 @@
 import {
   flip as flipPolygon,
-  toPlane as toPlaneOfPolygon
-} from '@jsxcad/math-poly3';
+  toPlane as toPlaneOfPolygon,
+} from "@jsxcad/math-poly3";
 
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { dot } from '@jsxcad/math-vec3';
-import earcut from 'earcut';
-import { toPlane } from './toPlane';
+import { createNormalize3 } from "@jsxcad/algorithm-quantize";
+import { dot } from "@jsxcad/math-vec3";
+import earcut from "earcut";
+import { toPlane } from "./toPlane";
 
 const X = 0;
 const Y = 1;
@@ -59,9 +59,13 @@ const selectBuildContour = (plane) => {
   }
 };
 
-export const makeConvexNoHoles = (surface, normalize3 = createNormalize3(), plane) => {
+export const makeConvexNoHoles = (
+  surface,
+  normalize3 = createNormalize3(),
+  plane
+) => {
   if (surface.length === undefined) {
-    throw Error('die');
+    throw Error("die");
   }
   if (surface.length === 0) {
     // An empty surface is not non-convex.

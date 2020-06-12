@@ -1,4 +1,4 @@
-import { eachEdge } from './eachEdge';
+import { eachEdge } from "./eachEdge";
 
 /**
  * Converts the polygon to an ordered list of edges.

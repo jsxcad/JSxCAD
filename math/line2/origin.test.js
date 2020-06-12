@@ -1,10 +1,10 @@
-import { canonicalize } from '@jsxcad/math-vec2';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import { origin } from './origin';
-import test from 'ava';
+import { canonicalize } from "@jsxcad/math-vec2";
+import { fromPoints } from "./fromPoints";
+import { fromValues } from "./fromValues";
+import { origin } from "./origin";
+import test from "ava";
 
-test('line2: origin() should return proper origins', (t) => {
+test("line2: origin() should return proper origins", (t) => {
   const line1 = fromValues();
   const org1 = origin(line1);
   t.deepEqual(canonicalize(org1), [0, 0]);

@@ -1,4 +1,4 @@
-import { Cylinder } from '@jsxcad/api-v1-shapes';
+import { Cylinder } from "@jsxcad/api-v1-shapes";
 
 // TODO: Support designation decoding.
 
@@ -7,7 +7,7 @@ import { Cylinder } from '@jsxcad/api-v1-shapes';
 
 export const Rod = (radius = 1, height = 1) =>
   Cylinder(radius, height)
-      .op(s => s.with(s.top(), s.bottom()))
-      .Item(`Rod ${radius}x${height}`);
+    .op((s) => s.with(s.top(), s.bottom()))
+    .Item(`Rod ${radius}x${height}`);
 
 export default Rod;

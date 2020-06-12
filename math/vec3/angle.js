@@ -1,6 +1,6 @@
-import { dot } from './dot';
-import { normalize } from './normalize';
-import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
+import { dot } from "./dot";
+import { normalize } from "./normalize";
+import { reallyQuantizeForSpace as q } from "@jsxcad/math-utils";
 
 /**
  * Get the angle between two 3D vectors

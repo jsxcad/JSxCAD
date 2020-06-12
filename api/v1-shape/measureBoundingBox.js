@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geometry-tagged';
+import { Shape } from "./Shape";
+import { measureBoundingBox as measureBoundingBoxOfGeometry } from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -20,12 +20,16 @@ import { measureBoundingBox as measureBoundingBoxOfGeometry } from '@jsxcad/geom
  * :::
  **/
 
-export const measureBoundingBox = (shape) => measureBoundingBoxOfGeometry(shape.toGeometry());
+export const measureBoundingBox = (shape) =>
+  measureBoundingBoxOfGeometry(shape.toGeometry());
 
-const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
+const measureBoundingBoxMethod = function () {
+  return measureBoundingBox(this);
+};
 Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
 
 export default measureBoundingBox;
 
-measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
-measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
+measureBoundingBox.signature = "measureBoundingBox(shape:Shape) -> BoundingBox";
+measureBoundingBoxMethod.signature =
+  "Shape -> measureBoundingBox() -> BoundingBox";

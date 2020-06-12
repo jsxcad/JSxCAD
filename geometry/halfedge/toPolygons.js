@@ -3,8 +3,8 @@
  * @typedef {import("./types").Polygons} Polygons
  */
 
-import eachLink from './eachLink';
-import { pushWhenValid } from '@jsxcad/geometry-polygons';
+import eachLink from "./eachLink";
+import { pushWhenValid } from "@jsxcad/geometry-polygons";
 
 /**
  * toPolygons
@@ -24,12 +24,11 @@ export const toPolygons = (loops) => {
   }
   for (const face of faces) {
     const polygon = [];
-    eachLink(face,
-             edge => {
-               if (edge.face !== undefined) {
-                 polygon.push(edge.start);
-               }
-             });
+    eachLink(face, (edge) => {
+      if (edge.face !== undefined) {
+        polygon.push(edge.start);
+      }
+    });
     pushWhenValid(polygons, polygon);
   }
   return polygons;

@@ -6,8 +6,8 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import createEdge from './createEdge';
-import eachLink from './eachLink';
+import createEdge from "./createEdge";
+import eachLink from "./eachLink";
 
 let id = 0;
 
@@ -76,7 +76,7 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
       if (link.twin === undefined) {
         const candidates = twinMap.get(link.start);
         if (candidates === undefined) {
-          throw Error('die');
+          throw Error("die");
         }
         // FIX: Assert one or zero twins?
         // Find the candidate that starts where we end.
@@ -88,7 +88,7 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
               candidate.twin = link;
               link.twin = candidate;
             } else {
-              throw Error('die');
+              throw Error("die");
             }
           }
         }
@@ -110,14 +110,13 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   if (closed) {
     for (const loop of loops) {
       if (loop.face === undefined) continue;
-      eachLink(loop,
-               edge => {
-                 edgeCount += 1;
-                 if (edge.twin === undefined) {
-                   // A hole in the 2-manifold.
-                   holeCount += 1;
-                 }
-               });
+      eachLink(loop, (edge) => {
+        edgeCount += 1;
+        if (edge.twin === undefined) {
+          // A hole in the 2-manifold.
+          holeCount += 1;
+        }
+      });
     }
   }
 

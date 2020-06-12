@@ -1,7 +1,7 @@
-import { isVoid } from './isNotVoid';
-import { measureArea as measureAreaOfSurface } from '@jsxcad/geometry-surface';
-import { toKeptGeometry } from './toKeptGeometry';
-import { visit } from './visit';
+import { isVoid } from "./isNotVoid";
+import { measureArea as measureAreaOfSurface } from "@jsxcad/geometry-surface";
+import { toKeptGeometry } from "./toKeptGeometry";
+import { visit } from "./visit";
 
 export const measureArea = (rawGeometry) => {
   const geometry = toKeptGeometry(rawGeometry);

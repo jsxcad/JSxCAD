@@ -14,18 +14,18 @@ Boolean operations on polygons (union, intersection, difference, xor).
 
 # Resources
 
-* [Demo + Animation](https://rawgit.com/voidqk/polybooljs/master/dist/demo.html)
-* [Companion Tutorial](http://syntheti.cc/article/polygon-clipping-pt2/)
-* Based somewhat on the F. Martinez (2008) algorithm:
-  [Paper](http://www.cs.ucr.edu/~vbz/cs230papers/martinez_boolean.pdf),
-  [Code](https://github.com/akavel/martinez-src)
+-   [Demo + Animation](https://rawgit.com/voidqk/polybooljs/master/dist/demo.html)
+-   [Companion Tutorial](http://syntheti.cc/article/polygon-clipping-pt2/)
+-   Based somewhat on the F. Martinez (2008) algorithm:
+    [Paper](http://www.cs.ucr.edu/~vbz/cs230papers/martinez_boolean.pdf),
+    [Code](https://github.com/akavel/martinez-src)
 
 # Installing
 
 `npm install polybooljs`
 
 Or, for the browser, look in the [`dist/`](https://github.com/voidqk/polybooljs/tree/master/dist)
-directory for a single file build.  When included on a page, it will expose the global `PolyBool`.
+directory for a single file build. When included on a page, it will expose the global `PolyBool`.
 
 # Example
 
@@ -59,11 +59,11 @@ PolyBool.intersect({
 ## Basic Usage
 
 ```javascript
-var poly = PolyBool.union        (poly1, poly2);
-var poly = PolyBool.intersect    (poly1, poly2);
-var poly = PolyBool.difference   (poly1, poly2); // poly1 - poly2
+var poly = PolyBool.union(poly1, poly2);
+var poly = PolyBool.intersect(poly1, poly2);
+var poly = PolyBool.difference(poly1, poly2); // poly1 - poly2
 var poly = PolyBool.differenceRev(poly1, poly2); // poly2 - poly1
-var poly = PolyBool.xor          (poly1, poly2);
+var poly = PolyBool.xor(poly1, poly2);
 ```
 
 Where `poly1`, `poly2`, and the return value are Polygon objects, in the format of:
@@ -87,14 +87,14 @@ There are also functions for converting between the native polygon format and
 
 Note: These functions are currently **experimental**, and I'm hoping users can provide feedback.
 Please comment in [this issue on GitHub](https://github.com/voidqk/polybooljs/issues/7) -- including
-letting me know if it's working as expected.  I don't use GeoJSON, but I thought I would take a
+letting me know if it's working as expected. I don't use GeoJSON, but I thought I would take a
 crack at conversion functions.
 
 Use the following functions:
 
 ```javascript
 var geojson = PolyBool.polygonToGeoJSON(poly);
-var poly    = PolyBool.polygonFromGeoJSON(geojson);
+var poly = PolyBool.polygonFromGeoJSON(geojson);
 ```
 
 Only `"Polygon"` and `"MultiPolygon"` types are supported.
@@ -109,11 +109,11 @@ var segments = PolyBool.selectIntersect(combined);
 var segments = PolyBool.selectDifference(combined);
 var segments = PolyBool.selectDifferenceRev(combined);
 var segments = PolyBool.selectXor(combined);
-var polygon  = PolyBool.polygon(segments);
+var polygon = PolyBool.polygon(segments);
 ```
 
 Depending on your needs, it might be more efficient to construct your own sequence of operations
-using the lower-level API.  Note that `PolyBool.union`, `PolyBool.intersect`, etc, are just thin
+using the lower-level API. Note that `PolyBool.union`, `PolyBool.intersect`, etc, are just thin
 wrappers for convenience.
 
 There are three types of objects you will encounter in the core API:
@@ -131,23 +131,23 @@ You start by converting Polygons to Segments using `PolyBool.segments(poly)`.
 You convert Segments to Combined Segments using `PolyBool.combine(seg1, seg2)`.
 
 You select the resulting Segments from the Combined Segments using one of the selection operators
-`PolyBool.selectUnion(combined)`, `PolyBool.selectIntersect(combined)`, etc.  These selection
+`PolyBool.selectUnion(combined)`, `PolyBool.selectIntersect(combined)`, etc. These selection
 functions return Segments.
 
 Once you're done, you convert the Segments back to Polygons using `PolyBool.polygon(segments)`.
 
-Each transition is costly, so you want to navigate wisely.  The selection transition is the least
+Each transition is costly, so you want to navigate wisely. The selection transition is the least
 costly.
 
 ## Advanced Example 1
 
-Suppose you wanted to union a list of polygons together.  The naive way to do it would be:
+Suppose you wanted to union a list of polygons together. The naive way to do it would be:
 
 ```javascript
 // works but not efficient
 var result = polygons[0];
 for (var i = 1; i < polygons.length; i++)
-  result = PolyBool.union(result, polygons[i]);
+	result = PolyBool.union(result, polygons[i]);
 return result;
 ```
 
@@ -156,26 +156,26 @@ Instead, it's more efficient to use the core API directly, like this:
 ```javascript
 // works AND efficient
 var segments = PolyBool.segments(polygons[0]);
-for (var i = 1; i < polygons.length; i++){
-  var seg2 = PolyBool.segments(polygons[i]);
-  var comb = PolyBool.combine(segments, seg2);
-  segments = PolyBool.selectUnion(comb);
+for (var i = 1; i < polygons.length; i++) {
+	var seg2 = PolyBool.segments(polygons[i]);
+	var comb = PolyBool.combine(segments, seg2);
+	segments = PolyBool.selectUnion(comb);
 }
 return PolyBool.polygon(segments);
 ```
 
 ## Advanced Example 2
 
-Suppose you want to calculate all operations on two polygons.  The naive way to do it would be:
+Suppose you want to calculate all operations on two polygons. The naive way to do it would be:
 
 ```javascript
 // works but not efficient
 return {
-  union        : PolyBool.union        (poly1, poly2),
-  intersect    : PolyBool.intersect    (poly1, poly2),
-  difference   : PolyBool.difference   (poly1, poly2),
-  differenceRev: PolyBool.differenceRev(poly1, poly2),
-  xor          : PolyBool.xor          (poly1, poly2)
+	union: PolyBool.union(poly1, poly2),
+	intersect: PolyBool.intersect(poly1, poly2),
+	difference: PolyBool.difference(poly1, poly2),
+	differenceRev: PolyBool.differenceRev(poly1, poly2),
+	xor: PolyBool.xor(poly1, poly2),
 };
 ```
 
@@ -187,11 +187,11 @@ var seg1 = PolyBool.segments(poly1);
 var seg2 = PolyBool.segments(poly2);
 var comb = PolyBool.combine(seg1, seg2);
 return {
-  union        : PolyBool.polygon(PolyBool.selectUnion        (comb)),
-  intersect    : PolyBool.polygon(PolyBool.selectIntersect    (comb)),
-  difference   : PolyBool.polygon(PolyBool.selectDifference   (comb)),
-  differenceRev: PolyBool.polygon(PolyBool.selectDifferenceRev(comb)),
-  xor          : PolyBool.polygon(PolyBool.selectXor          (comb))
+	union: PolyBool.polygon(PolyBool.selectUnion(comb)),
+	intersect: PolyBool.polygon(PolyBool.selectIntersect(comb)),
+	difference: PolyBool.polygon(PolyBool.selectDifference(comb)),
+	differenceRev: PolyBool.polygon(PolyBool.selectDifferenceRev(comb)),
+	xor: PolyBool.polygon(PolyBool.selectXor(comb)),
 };
 ```
 
@@ -200,7 +200,7 @@ return {
 As an added bonus, just going from Polygon to Segments and back performs simplification on the
 polygon.
 
-Suppose you have garbage polygon data and just want to clean it up.  The naive way to do it would
+Suppose you have garbage polygon data and just want to clean it up. The naive way to do it would
 be:
 
 ```javascript
@@ -225,19 +225,23 @@ exactly the same.
 Normally you would expect this to work:
 
 ```javascript
-if (A === B)
-  /* A and B are equal */;
-else
-  /* A and B are not equal */;
+if (
+	A === B
+	/* A and B are equal */
+	/* A and B are not equal */
+);
+else;
 ```
 
 But for inexact floating point math, instead we use:
 
 ```javascript
-if (Math.abs(A - B) < epsilon)
-  /* A and B are equal */;
-else
-  /* A and B are not equal */;
+if (
+	Math.abs(A - B) < epsilon
+	/* A and B are equal */
+	/* A and B are not equal */
+);
+else;
 ```
 
 You can set the epsilon value using:
@@ -261,10 +265,10 @@ PolyBool: Zero-length segment detected; your epsilon is probably too small or to
 
 # Build Log
 
-The library also has an option for tracking execution of the internal algorithms.  This is useful
+The library also has an option for tracking execution of the internal algorithms. This is useful
 for debugging or creating the animation on the demo page.
 
-By default, the logging is disabled.  But you can enable or reset it via:
+By default, the logging is disabled. But you can enable or reset it via:
 
 `var buildLog = PolyBool.buildLog(true);`
 
@@ -273,8 +277,8 @@ The return value is an empty list that will have log entries added to it as more
 You can inspect the log by looking in the values:
 
 ```javascript
-buildLog.forEach(function(logEntry){
-  console.log(logEntry.type, logEntry.data);
+buildLog.forEach(function (logEntry) {
+	console.log(logEntry.type, logEntry.data);
 });
 ```
 

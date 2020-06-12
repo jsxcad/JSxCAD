@@ -1,26 +1,32 @@
-import { cacheRewriteTags } from '@jsxcad/cache';
-import { hasMatchingTag } from './hasMatchingTag';
-import { rewriteUp } from './rewrite';
+import { cacheRewriteTags } from "@jsxcad/cache";
+import { hasMatchingTag } from "./hasMatchingTag";
+import { rewriteUp } from "./rewrite";
 
 const buildCondition = (conditionTags, conditionSpec) => {
   switch (conditionSpec) {
-    case 'has':
+    case "has":
       return (geometryTags) => hasMatchingTag(geometryTags, conditionTags);
-    case 'has not':
+    case "has not":
       return (geometryTags) => !hasMatchingTag(geometryTags, conditionTags);
     default:
       return undefined;
   }
 };
 
-const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
+const rewriteTagsImpl = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
   const condition = buildCondition(conditionTags, conditionSpec);
   const composeTags = (geometryTags) => {
     if (condition === undefined || condition(geometryTags)) {
       if (geometryTags === undefined) {
-        return add.filter(tag => !remove.includes(tag));
+        return add.filter((tag) => !remove.includes(tag));
       } else {
-        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
       }
     } else {
       return geometryTags;
@@ -37,7 +43,8 @@ const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) =>
       const copy = { ...geometry };
       delete copy.tags;
       return copy;
-    } if (composedTags === geometry.tags) {
+    }
+    if (composedTags === geometry.tags) {
       return geometry;
     } else {
       return { ...geometry, tags: composedTags };

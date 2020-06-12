@@ -1,6 +1,6 @@
-import Shape from './jsxcad-api-v1-shape.js';
-import { toGcode } from './jsxcad-convert-gcode.js';
-import { writeFile } from './jsxcad-sys.js';
+import Shape from "./jsxcad-api-v1-shape.js";
+import { toGcode } from "./jsxcad-convert-gcode.js";
+import { writeFile } from "./jsxcad-sys.js";
 
 /**
  *
@@ -13,7 +13,7 @@ import { writeFile } from './jsxcad-sys.js';
  **/
 
 const writeGcode = async (options, shape) => {
-  if (typeof options === 'string') {
+  if (typeof options === "string") {
     // Support writeGcode('foo', bar);
     options = { path: options };
   }
@@ -24,7 +24,9 @@ const writeGcode = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const method = function (options = {}) { return writeGcode(options, this); };
+const method = function (options = {}) {
+  return writeGcode(options, this);
+};
 Shape.prototype.writeGcode = method;
 
 const api = { writeGcode };

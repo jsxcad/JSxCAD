@@ -1,6 +1,9 @@
-import { buildConvexHull, buildConvexSurfaceHull } from '@jsxcad/algorithm-shape';
+import {
+  buildConvexHull,
+  buildConvexSurfaceHull,
+} from "@jsxcad/algorithm-shape";
 
-import { Shape } from '@jsxcad/api-v1-shape';
+import { Shape } from "@jsxcad/api-v1-shape";
 
 /**
  *
@@ -39,19 +42,21 @@ const Z = 2;
 
 export const Hull = (...shapes) => {
   const points = [];
-  shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
+  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
   // FIX: Detect planar hulls properly.
-  if (points.every(point => point[Z] === 0)) {
+  if (points.every((point) => point[Z] === 0)) {
     return Shape.fromGeometry(buildConvexSurfaceHull(points));
   } else {
     return Shape.fromGeometry(buildConvexHull(points));
   }
 };
 
-const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
+const HullMethod = function (...shapes) {
+  return Hull(this, ...shapes);
+};
 Shape.prototype.Hull = HullMethod;
 
-Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
-HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
+Hull.signature = "Hull(shape:Shape, ...shapes:Shape) -> Shape";
+HullMethod.signature = "Shape -> Hull(...shapes:Shape) -> Shape";
 
 export default Hull;

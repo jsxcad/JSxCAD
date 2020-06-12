@@ -4,7 +4,7 @@ export const update = (geometry, updates) => {
   }
   const updated = {};
   for (const key of Object.keys(geometry)) {
-    if (typeof key !== 'symbol') {
+    if (typeof key !== "symbol") {
       updated[key] = geometry[key];
     }
   }

@@ -1,5 +1,8 @@
-import { Shape, toGeometry } from './Shape';
-import { rewriteTags, specify as specifyGeometry } from '@jsxcad/geometry-tagged';
+import { Shape, toGeometry } from "./Shape";
+import {
+  rewriteTags,
+  specify as specifyGeometry,
+} from "@jsxcad/geometry-tagged";
 
 /**
  *
@@ -11,7 +14,7 @@ import { rewriteTags, specify as specifyGeometry } from '@jsxcad/geometry-tagged
 
 // DEPRECATED: See 'Item'.
 export const specify = (specification, ...shapes) => {
-  shapes = shapes.filter(shape => shape !== undefined);
+  shapes = shapes.filter((shape) => shape !== undefined);
   let geometry;
   switch (shapes.length) {
     case 0: {
@@ -27,10 +30,14 @@ export const specify = (specification, ...shapes) => {
       break;
     }
   }
-  return Shape.fromGeometry(rewriteTags([`item/${JSON.stringify(specification)}`], [], geometry));
+  return Shape.fromGeometry(
+    rewriteTags([`item/${JSON.stringify(specification)}`], [], geometry)
+  );
 };
 
-const method = function (specification) { return specify(specification, this); };
+const method = function (specification) {
+  return specify(specification, this);
+};
 Shape.prototype.specify = method;
 
 export default specify;

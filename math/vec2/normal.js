@@ -1,4 +1,4 @@
-import { rotate } from './rotate';
+import { rotate } from "./rotate";
 
 /**
  * Calculates the normal value of the give vector

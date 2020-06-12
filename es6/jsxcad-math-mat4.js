@@ -1,5 +1,5 @@
-import { dot, cross, fromValues as fromValues$2 } from './jsxcad-math-vec3.js';
-import { fromValues as fromValues$1 } from './jsxcad-math-vec2.js';
+import { dot, cross, fromValues as fromValues$2 } from "./jsxcad-math-vec3.js";
+import { fromValues as fromValues$1 } from "./jsxcad-math-vec2.js";
 
 /**
  * Set a mat4 to the identity matrix
@@ -18,9 +18,24 @@ const identity = () => identityMatrix;
  * @param {mat4} b the second operand
  * @returns {mat4} out
  */
-const add = (a, b) =>
-  [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3], a[4] + b[4], a[5] + b[5], a[6] + b[6], a[7] + b[7], a[8] + b[8],
-   a[9] + b[9], a[10] + b[10], a[11] + b[11], a[12] + b[12], a[13] + b[13], a[14] + b[14], a[15] + b[15]];
+const add = (a, b) => [
+  a[0] + b[0],
+  a[1] + b[1],
+  a[2] + b[2],
+  a[3] + b[3],
+  a[4] + b[4],
+  a[5] + b[5],
+  a[6] + b[6],
+  a[7] + b[7],
+  a[8] + b[8],
+  a[9] + b[9],
+  a[10] + b[10],
+  a[11] + b[11],
+  a[12] + b[12],
+  a[13] + b[13],
+  a[14] + b[14],
+  a[15] + b[15],
+];
 
 /**
  * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
@@ -30,10 +45,24 @@ const add = (a, b) =>
  * @returns {Boolean} True if the matrices are equal, false otherwise.
  */
 const equals = (a, b) => {
-  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3] &&
-         a[4] === b[4] && a[5] === b[5] && a[6] === b[6] && a[7] === b[7] &&
-         a[8] === b[8] && a[9] === b[9] && a[10] === b[10] && a[11] === b[11] &&
-         a[12] === b[12] && a[13] === b[13] && a[14] === b[14] && a[15] === b[15];
+  return (
+    a[0] === b[0] &&
+    a[1] === b[1] &&
+    a[2] === b[2] &&
+    a[3] === b[3] &&
+    a[4] === b[4] &&
+    a[5] === b[5] &&
+    a[6] === b[6] &&
+    a[7] === b[7] &&
+    a[8] === b[8] &&
+    a[9] === b[9] &&
+    a[10] === b[10] &&
+    a[11] === b[11] &&
+    a[12] === b[12] &&
+    a[13] === b[13] &&
+    a[14] === b[14] &&
+    a[15] === b[15]
+  );
 };
 
 const EPSILON = 1e-5;
@@ -67,22 +96,24 @@ const fromRotation = (rad, [x, y, z]) => {
   const t = 1 - c;
 
   // Perform rotation-specific matrix multiplication
-  return [x * x * t + c,
-          y * x * t + z * s,
-          z * x * t - y * s,
-          0,
-          x * y * t - z * s,
-          y * y * t + c,
-          z * y * t + x * s,
-          0,
-          x * z * t + y * s,
-          y * z * t - x * s,
-          z * z * t + c,
-          0,
-          0,
-          0,
-          0,
-          1];
+  return [
+    x * x * t + c,
+    y * x * t + z * s,
+    z * x * t - y * s,
+    0,
+    x * y * t - z * s,
+    y * y * t + c,
+    z * y * t + x * s,
+    0,
+    x * z * t + y * s,
+    y * z * t - x * s,
+    z * z * t + c,
+    0,
+    0,
+    0,
+    0,
+    1,
+  ];
 };
 
 /**
@@ -95,7 +126,24 @@ const fromRotation = (rad, [x, y, z]) => {
  * @param {vec3} v Scaling vector
  * @returns {mat4} out
  */
-const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
+const fromScaling = ([x = 1, y = 1, z = 1]) => [
+  x,
+  0,
+  0,
+  0,
+  0,
+  y,
+  0,
+  0,
+  0,
+  0,
+  z,
+  0,
+  0,
+  0,
+  0,
+  1,
+];
 
 /**
  * Creates a matrix from a vector translation
@@ -108,7 +156,24 @@ const fromScaling = ([x = 1, y = 1, z = 1]) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z,
  * @param {vec3} v Translation vector
  * @returns {mat4} out
  */
-const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+const fromTranslation = ([x = 0, y = 0, z = 0]) => [
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  x,
+  y,
+  z,
+  1,
+];
 
 /**
  * Create a new mat4 with the given values
@@ -131,8 +196,41 @@ const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0
  * @param {Number} m33 Component in column 3, row 3 position (index 15)
  * @returns {mat4} A new mat4
  */
-const fromValues = (m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) =>
-  [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33];
+const fromValues = (
+  m00,
+  m01,
+  m02,
+  m03,
+  m10,
+  m11,
+  m12,
+  m13,
+  m20,
+  m21,
+  m22,
+  m23,
+  m30,
+  m31,
+  m32,
+  m33
+) => [
+  m00,
+  m01,
+  m02,
+  m03,
+  m10,
+  m11,
+  m12,
+  m13,
+  m20,
+  m21,
+  m22,
+  m23,
+  m30,
+  m31,
+  m32,
+  m33,
+];
 
 /**
  * Creates a matrix from the given angle around the X axis
@@ -200,7 +298,7 @@ const isMirroring = (mat) => {
   // for a true orthogonal, non-mirrored base, u.cross(v) == w
   // If they have an opposite direction then we are mirroring
   const mirrorvalue = dot(cross(u, v), w);
-  const ismirror = (mirrorvalue < 0);
+  const ismirror = mirrorvalue < 0;
   return ismirror;
 };
 
@@ -213,10 +311,23 @@ const isMirroring = (mat) => {
  * @returns {mat4} out
  */
 const mirror = ([x, y, z], a) => [
-  a[0] * x, a[1] * x, a[2] * x, a[3] * x,
-  a[4] * y, a[5] * y, a[6] * y, a[7] * y,
-  a[8] * z, a[9] * z, a[10] * z, a[11] * z,
-  a[12], a[13], a[14], a[15]];
+  a[0] * x,
+  a[1] * x,
+  a[2] * x,
+  a[3] * x,
+  a[4] * y,
+  a[5] * y,
+  a[6] * y,
+  a[7] * y,
+  a[8] * z,
+  a[9] * z,
+  a[10] * z,
+  a[11] * z,
+  a[12],
+  a[13],
+  a[14],
+  a[15],
+];
 
 /**
  * Create an affine matrix for mirroring onto an arbitrary plane
@@ -225,10 +336,23 @@ const mirror = ([x, y, z], a) => [
  * @returns {mat4} out
  */
 const mirrorByPlane = ([nx, ny, nz, w]) => [
-  (1.0 - 2.0 * nx * nx), (-2.0 * ny * nx), (-2.0 * nz * nx), 0,
-  (-2.0 * nx * ny), (1.0 - 2.0 * ny * ny), (-2.0 * nz * ny), 0,
-  (-2.0 * nx * nz), (-2.0 * ny * nz), (1.0 - 2.0 * nz * nz), 0,
-  (2.0 * nx * w), (2.0 * ny * w), (2.0 * nz * w), 1];
+  1.0 - 2.0 * nx * nx,
+  -2.0 * ny * nx,
+  -2.0 * nz * nx,
+  0,
+  -2.0 * nx * ny,
+  1.0 - 2.0 * ny * ny,
+  -2.0 * nz * ny,
+  0,
+  -2.0 * nx * nz,
+  -2.0 * ny * nz,
+  1.0 - 2.0 * nz * nz,
+  0,
+  2.0 * nx * w,
+  2.0 * ny * w,
+  2.0 * nz * w,
+  1,
+];
 
 /**
  * Multiplies two mat4's
@@ -308,7 +432,8 @@ const rightMultiplyVec2 = ([v0, v1], matrix) => {
   const v3 = 1;
   let x = v0 * matrix[0] + v1 * matrix[1] + v2 * matrix[2] + v3 * matrix[3];
   let y = v0 * matrix[4] + v1 * matrix[5] + v2 * matrix[6] + v3 * matrix[7];
-  const w = v0 * matrix[12] + v1 * matrix[13] + v2 * matrix[14] + v3 * matrix[15];
+  const w =
+    v0 * matrix[12] + v1 * matrix[13] + v2 * matrix[14] + v3 * matrix[15];
 
   // scale such that fourth element becomes 1:
   if (w !== 1) {
@@ -332,7 +457,8 @@ const rightMultiplyVec3 = ([v0, v1, v2], matrix) => {
   let x = v0 * matrix[0] + v1 * matrix[1] + v2 * matrix[2] + v3 * matrix[3];
   let y = v0 * matrix[4] + v1 * matrix[5] + v2 * matrix[6] + v3 * matrix[7];
   let z = v0 * matrix[8] + v1 * matrix[9] + v2 * matrix[10] + v3 * matrix[11];
-  const w = v0 * matrix[12] + v1 * matrix[13] + v2 * matrix[14] + v3 * matrix[15];
+  const w =
+    v0 * matrix[12] + v1 * matrix[13] + v2 * matrix[14] + v3 * matrix[15];
 
   // scale such that fourth element becomes 1:
   if (w !== 1) {
@@ -368,6 +494,26 @@ const subtract = (a, b) => [
   a[12] - b[12],
   a[13] - b[13],
   a[14] - b[14],
-  a[15] - b[15]];
+  a[15] - b[15],
+];
 
-export { add, equals, fromRotation, fromScaling, fromTranslation, fromValues, fromXRotation, fromYRotation, fromZRotation, identity, identityMatrix, isMirroring, mirror, mirrorByPlane, multiply, rightMultiplyVec2, rightMultiplyVec3, subtract };
+export {
+  add,
+  equals,
+  fromRotation,
+  fromScaling,
+  fromTranslation,
+  fromValues,
+  fromXRotation,
+  fromYRotation,
+  fromZRotation,
+  identity,
+  identityMatrix,
+  isMirroring,
+  mirror,
+  mirrorByPlane,
+  multiply,
+  rightMultiplyVec2,
+  rightMultiplyVec3,
+  subtract,
+};

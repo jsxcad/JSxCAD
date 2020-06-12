@@ -1,9 +1,9 @@
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import test from 'ava';
-import { xAtY } from './xAtY';
+import { fromPoints } from "./fromPoints";
+import { fromValues } from "./fromValues";
+import test from "ava";
+import { xAtY } from "./xAtY";
 
-test('line2: xAtY() should return proper values', (t) => {
+test("line2: xAtY() should return proper values", (t) => {
   const line1 = fromValues();
 
   const x1 = xAtY(0, line1);

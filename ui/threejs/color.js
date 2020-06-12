@@ -1,4 +1,4 @@
-import { toRgbFromTags } from '@jsxcad/algorithm-color';
+import { toRgbFromTags } from "@jsxcad/algorithm-color";
 
 export const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
   let rgb = toRgbFromTags(tags, null);

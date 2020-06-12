@@ -1,4 +1,4 @@
-import { cross, dot } from '@jsxcad/math-vec3';
+import { cross, dot } from "@jsxcad/math-vec3";
 
 /*
  * Measure the signed volume of the given polygon, which must be convex.

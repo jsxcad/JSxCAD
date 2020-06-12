@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { writeFile } from '@jsxcad/sys';
+import { Shape } from "./Shape";
+import { writeFile } from "@jsxcad/sys";
 
 /**
  *
@@ -23,11 +23,17 @@ export const cacheShape = async (shape, path) => {
 
 export const writeShape = async (shape, path) => {
   const geometry = shape.toGeometry();
-  await writeFile({ doSerialize: false }, `output/${path}`, JSON.stringify(geometry));
+  await writeFile(
+    { doSerialize: false },
+    `output/${path}`,
+    JSON.stringify(geometry)
+  );
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
+const writeShapeMethod = function (...args) {
+  return writeShape(this, ...args);
+};
 Shape.prototype.writeShape = writeShapeMethod;
 
 export default writeShape;

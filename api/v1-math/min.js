@@ -12,6 +12,6 @@
 
 export const min = Math.min;
 
-min.signature = 'min(...values:number) -> number';
+min.signature = "min(...values:number) -> number";
 
 export default min;

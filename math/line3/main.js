@@ -1,15 +1,15 @@
-import { canonicalize } from './canonicalize';
-import { closestPoint } from './closestPoint';
-import { direction } from './direction';
-import { distanceToPoint } from './distanceToPoint';
-import { equals } from './equals';
-import { fromPlanes } from './fromPlanes';
-import { fromPointAndDirection } from './fromPointAndDirection';
-import { fromPoints } from './fromPoints';
-import { intersectPointOfLineAndPlane } from './intersectPointOfLineAndPlane';
-import { origin } from './origin';
-import { reverse } from './reverse';
-import { transform } from './transform';
+import { canonicalize } from "./canonicalize";
+import { closestPoint } from "./closestPoint";
+import { direction } from "./direction";
+import { distanceToPoint } from "./distanceToPoint";
+import { equals } from "./equals";
+import { fromPlanes } from "./fromPlanes";
+import { fromPointAndDirection } from "./fromPointAndDirection";
+import { fromPoints } from "./fromPoints";
+import { intersectPointOfLineAndPlane } from "./intersectPointOfLineAndPlane";
+import { origin } from "./origin";
+import { reverse } from "./reverse";
+import { transform } from "./transform";
 
 export {
   canonicalize,
@@ -23,5 +23,5 @@ export {
   intersectPointOfLineAndPlane,
   origin,
   reverse,
-  transform
+  transform,
 };

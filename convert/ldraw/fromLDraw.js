@@ -1,30 +1,43 @@
-import { flip, isStrictlyCoplanar } from '@jsxcad/math-poly3';
-import { fromPolygons, rotateX, scale } from '@jsxcad/geometry-solid';
+import { flip, isStrictlyCoplanar } from "@jsxcad/math-poly3";
+import { fromPolygons, rotateX, scale } from "@jsxcad/geometry-solid";
 
-import { fromValues as fromValuesToMatrix } from '@jsxcad/math-mat4';
-import { readFile } from '@jsxcad/sys';
-import { transform } from '@jsxcad/geometry-polygons';
+import { fromValues as fromValuesToMatrix } from "@jsxcad/math-mat4";
+import { readFile } from "@jsxcad/sys";
+import { transform } from "@jsxcad/geometry-polygons";
 
 const RESOLUTION = 10000;
 
-const URL_PREFIX = 'https://jsxcad.js.org/ldraw/ldraw';
+const URL_PREFIX = "https://jsxcad.js.org/ldraw/ldraw";
 
 const readPart = async (part, { allowFetch = true } = {}) => {
-  const sources = [`${URL_PREFIX}/parts/${part}`, `${URL_PREFIX}/p/48/${part}`, `${URL_PREFIX}/p/${part}`];
+  const sources = [
+    `${URL_PREFIX}/parts/${part}`,
+    `${URL_PREFIX}/p/48/${part}`,
+    `${URL_PREFIX}/p/${part}`,
+  ];
   if (!allowFetch) sources.length = 0;
-  part = part.toLowerCase().replace(/\\/, '/');
-  const parts = await readFile({ allowFetch, ephemeral: true, sources, decode: 'utf8' }, `cache/ldraw/parts/${part}`);
-  const p48 = await readFile({ allowFetch, ephemeral: true, sources, decode: 'utf8' }, `cache/ldraw/p48/${part}`);
-  const p = await readFile({ allowFetch, ephemeral: true, sources, decode: 'utf8' }, `cache/ldraw/p/${part}`);
+  part = part.toLowerCase().replace(/\\/, "/");
+  const parts = await readFile(
+    { allowFetch, ephemeral: true, sources, decode: "utf8" },
+    `cache/ldraw/parts/${part}`
+  );
+  const p48 = await readFile(
+    { allowFetch, ephemeral: true, sources, decode: "utf8" },
+    `cache/ldraw/p48/${part}`
+  );
+  const p = await readFile(
+    { allowFetch, ephemeral: true, sources, decode: "utf8" },
+    `cache/ldraw/p/${part}`
+  );
   return parts || p48 || p;
 };
 
 const loadPart = async (part, { allowFetch = true } = {}) => {
   const code = [];
   const data = await readPart(part, { allowFetch });
-  const source = new TextDecoder('utf8').decode(data);
-  for (let line of source.split('\r\n')) {
-    let args = line.replace(/^\s+/, '').split(/\s+/);
+  const source = new TextDecoder("utf8").decode(data);
+  for (let line of source.split("\r\n")) {
+    let args = line.replace(/^\s+/, "").split(/\s+/);
     code.push(args);
   }
   return { type: source.type, code: code, name: source.name };
@@ -33,15 +46,18 @@ const loadPart = async (part, { allowFetch = true } = {}) => {
 const flt = (text) => parseFloat(text);
 const ldu = (text) => Math.round(flt(text) * RESOLUTION) / RESOLUTION;
 
-const fromPartToPolygons = async (part, { allowFetch = true, invert = false, stack = [] }) => {
+const fromPartToPolygons = async (
+  part,
+  { allowFetch = true, invert = false, stack = [] }
+) => {
   let code = await loadPart(part, { allowFetch });
   let polygons = [];
-  let direction = 'CCW';
+  let direction = "CCW";
   let invertNext = 0;
 
-  function Direction () {
+  function Direction() {
     if (invert) {
-      return { CCW: 'CW', CW: 'CCW' }[direction];
+      return { CCW: "CW", CW: "CCW" }[direction];
     } else {
       return direction;
     }
@@ -49,24 +65,25 @@ const fromPartToPolygons = async (part, { allowFetch = true, invert = false, sta
 
   for (let args of code.code) {
     switch (parseInt(args[0])) {
-      case 0: { // meta
+      case 0: {
+        // meta
         switch (args[1]) {
-          case 'BFC':
+          case "BFC":
             switch (args[2]) {
-              case 'CERTIFY': {
+              case "CERTIFY": {
                 switch (args[3]) {
-                  case 'CW': {
-                    direction = 'CW';
+                  case "CW": {
+                    direction = "CW";
                     break;
                   }
-                  case 'CCW': {
-                    direction = 'CCW';
+                  case "CCW": {
+                    direction = "CCW";
                     break;
                   }
                 }
                 break;
               }
-              case 'INVERTNEXT': {
+              case "INVERTNEXT": {
                 invertNext = 2;
                 break;
               }
@@ -75,44 +92,75 @@ const fromPartToPolygons = async (part, { allowFetch = true, invert = false, sta
         }
         break;
       }
-      case 1: { // sub-part
+      case 1: {
+        // sub-part
         let [, , x, y, z, a, b, c, d, e, f, g, h, i, subPart] = args;
         let subInvert = invert;
         if (invertNext > 0) {
           subInvert = !subInvert;
         }
         stack.push(subPart);
-        let matrix = fromValuesToMatrix(flt(a), flt(d), flt(g), 0.0,
-                                        flt(b), flt(e), flt(h), 0.0,
-                                        flt(c), flt(f), flt(i), 0.0,
-                                        ldu(x), ldu(y), ldu(z), 1.0);
-        polygons.push(...transform(matrix, await fromPartToPolygons(subPart, { invert: subInvert, stack, allowFetch })));
+        let matrix = fromValuesToMatrix(
+          flt(a),
+          flt(d),
+          flt(g),
+          0.0,
+          flt(b),
+          flt(e),
+          flt(h),
+          0.0,
+          flt(c),
+          flt(f),
+          flt(i),
+          0.0,
+          ldu(x),
+          ldu(y),
+          ldu(z),
+          1.0
+        );
+        polygons.push(
+          ...transform(
+            matrix,
+            await fromPartToPolygons(subPart, {
+              invert: subInvert,
+              stack,
+              allowFetch,
+            })
+          )
+        );
         stack.pop();
         break;
       }
-      case 2: { // display line
+      case 2: {
+        // display line
         break;
       }
-      case 3: { // triangle
+      case 3: {
+        // triangle
         let [, , x1, y1, z1, x2, y2, z2, x3, y3, z3] = args;
-        let polygon = [[ldu(x1), ldu(y1), ldu(z1)],
-                       [ldu(x2), ldu(y2), ldu(z2)],
-                       [ldu(x3), ldu(y3), ldu(z3)]];
-        if (!isStrictlyCoplanar(polygon)) throw Error('die');
-        if (Direction() === 'CW') {
+        let polygon = [
+          [ldu(x1), ldu(y1), ldu(z1)],
+          [ldu(x2), ldu(y2), ldu(z2)],
+          [ldu(x3), ldu(y3), ldu(z3)],
+        ];
+        if (!isStrictlyCoplanar(polygon)) throw Error("die");
+        if (Direction() === "CW") {
           polygons.push(flip(polygon));
         } else {
           polygons.push(polygon);
         }
         break;
       }
-      case 4: { // quad
+      case 4: {
+        // quad
         let [, , x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4] = args;
-        let p = [[ldu(x1), ldu(y1), ldu(z1)],
-                 [ldu(x2), ldu(y2), ldu(z2)],
-                 [ldu(x3), ldu(y3), ldu(z3)],
-                 [ldu(x4), ldu(y4), ldu(z4)]];
-        if (Direction() === 'CW') {
+        let p = [
+          [ldu(x1), ldu(y1), ldu(z1)],
+          [ldu(x2), ldu(y2), ldu(z2)],
+          [ldu(x3), ldu(y3), ldu(z3)],
+          [ldu(x4), ldu(y4), ldu(z4)],
+        ];
+        if (Direction() === "CW") {
           if (isStrictlyCoplanar(p)) {
             polygons.push(flip(p));
           } else {
@@ -129,7 +177,8 @@ const fromPartToPolygons = async (part, { allowFetch = true, invert = false, sta
         }
         break;
       }
-      case 5: { // optional line
+      case 5: {
+        // optional line
         break;
       }
     }
@@ -140,9 +189,12 @@ const fromPartToPolygons = async (part, { allowFetch = true, invert = false, sta
   return polygons;
 };
 
-export const fromLDraw = async (part, { allowFetch = true } = {}) =>
-  ({
-    solid: rotateX(-90 * Math.PI / 180,
-                   scale([0.4, 0.4, 0.4],
-                         fromPolygons({}, await fromPartToPolygons(`${part}.dat`, { allowFetch }))))
-  });
+export const fromLDraw = async (part, { allowFetch = true } = {}) => ({
+  solid: rotateX(
+    (-90 * Math.PI) / 180,
+    scale(
+      [0.4, 0.4, 0.4],
+      fromPolygons({}, await fromPartToPolygons(`${part}.dat`, { allowFetch }))
+    )
+  ),
+});

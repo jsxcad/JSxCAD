@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import move from './move';
+import Shape from "./Shape";
+import move from "./move";
 
 /**
  *
@@ -11,10 +11,12 @@ import move from './move';
 
 export const moveY = (shape, y = 0) => move(shape, 0, y);
 
-const moveYMethod = function (y) { return moveY(this, y); };
+const moveYMethod = function (y) {
+  return moveY(this, y);
+};
 Shape.prototype.moveY = moveYMethod;
 
 export default moveY;
 
-moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
-moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
+moveY.signature = "moveY(shape:Shape, y:number = 0) -> Shape";
+moveYMethod.signature = "Shape -> moveY(y:number = 0) -> Shape";

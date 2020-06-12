@@ -1,122 +1,192 @@
-import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
-import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
-import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
-import { outline } from './jsxcad-geometry-surface.js';
-import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
-import { junctionSelector } from './jsxcad-geometry-halfedge.js';
-import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { toTagFromName } from './jsxcad-algorithm-color.js';
-import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
+import { close, concatenate, open } from "./jsxcad-geometry-path.js";
+import {
+  eachPoint,
+  flip,
+  toKeptGeometry as toKeptGeometry$1,
+  toPoints,
+  transform,
+  reconcile,
+  isWatertight,
+  makeWatertight,
+  fromPathToSurface,
+  fromPathToZ0Surface,
+  fromPathsToSurface,
+  fromPathsToZ0Surface,
+  rewriteTags,
+  union as union$1,
+  intersection as intersection$1,
+  difference as difference$1,
+  assemble as assemble$1,
+  getSolids,
+  rewrite,
+  measureBoundingBox as measureBoundingBox$1,
+  isVoid,
+  allTags,
+  getNonVoidSolids,
+  getNonVoidSurfaces,
+  getNonVoidZ0Surfaces,
+  canonicalize as canonicalize$1,
+  nonNegative,
+  measureArea,
+} from "./jsxcad-geometry-tagged.js";
+import {
+  addReadDecoder,
+  log as log$1,
+  writeFile,
+  readFile,
+} from "./jsxcad-sys.js";
+import { fromPolygons, findOpenEdges } from "./jsxcad-geometry-solid.js";
+import { outline } from "./jsxcad-geometry-surface.js";
+import { createNormalize3 } from "./jsxcad-algorithm-quantize.js";
+import { junctionSelector } from "./jsxcad-geometry-halfedge.js";
+import {
+  scale as scale$1,
+  add,
+  negate,
+  normalize,
+  subtract,
+  dot,
+  cross,
+  distance,
+} from "./jsxcad-math-vec3.js";
+import { toTagFromName } from "./jsxcad-algorithm-color.js";
+import {
+  fromTranslation,
+  fromRotation,
+  fromXRotation,
+  fromYRotation,
+  fromZRotation,
+  fromScaling,
+} from "./jsxcad-math-mat4.js";
 
 class Shape {
-  close () {
+  close() {
     const geometry = this.toKeptGeometry();
     if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
-      throw Error('Close requires a single open path.');
+      throw Error("Close requires a single open path.");
     }
     return Shape.fromClosedPath(close(geometry.disjointAssembly[0].paths[0]));
   }
 
-  concat (...shapes) {
+  concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
       const geometry = shape.toKeptGeometry();
       if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
-        throw Error(`Concatenation requires single open paths: ${JSON.stringify(geometry)}`);
+        throw Error(
+          `Concatenation requires single open paths: ${JSON.stringify(
+            geometry
+          )}`
+        );
       }
       paths.push(geometry.disjointAssembly[0].paths[0]);
     }
     return Shape.fromOpenPath(concatenate(...paths));
   }
 
-  constructor (geometry = { assembly: [] },
-               context) {
+  constructor(geometry = { assembly: [] }, context) {
     if (geometry.geometry) {
-      throw Error('die: { geometry: ... } is not valid geometry.');
+      throw Error("die: { geometry: ... } is not valid geometry.");
     }
     this.geometry = geometry;
     this.context = context;
   }
 
-  eachPoint (operation) {
+  eachPoint(operation) {
     eachPoint(operation, this.toKeptGeometry());
   }
 
-  flip () {
+  flip() {
     return fromGeometry(flip(toKeptGeometry(this)), this.context);
   }
 
-  setTags (tags) {
+  setTags(tags) {
     return fromGeometry({ ...toGeometry(this), tags }, this.context);
   }
 
-  toKeptGeometry (options = {}) {
+  toKeptGeometry(options = {}) {
     return toKeptGeometry$1(toGeometry(this));
   }
 
-  getContext (symbol) {
+  getContext(symbol) {
     return this.context[symbol];
   }
 
-  toGeometry () {
+  toGeometry() {
     return this.geometry;
   }
 
-  toPoints () {
+  toPoints() {
     return toPoints(this.toKeptGeometry()).points;
   }
 
-  transform (matrix) {
-    if (matrix.some(item => typeof item !== 'number' || isNaN(item))) {
-      throw Error('die: matrix is malformed');
+  transform(matrix) {
+    if (matrix.some((item) => typeof item !== "number" || isNaN(item))) {
+      throw Error("die: matrix is malformed");
     }
     return fromGeometry(transform(matrix, this.toGeometry()), this.context);
   }
 
-  reconcile () {
+  reconcile() {
     return fromGeometry(reconcile(this.toKeptGeometry()));
   }
 
-  assertWatertight () {
+  assertWatertight() {
     if (!this.isWatertight()) {
-      throw Error('not watertight');
+      throw Error("not watertight");
     }
     return this;
   }
 
-  isWatertight () {
+  isWatertight() {
     return isWatertight(this.toKeptGeometry());
   }
 
-  makeWatertight (threshold) {
-    return fromGeometry(makeWatertight(this.toKeptGeometry(), undefined, undefined, threshold));
+  makeWatertight(threshold) {
+    return fromGeometry(
+      makeWatertight(this.toKeptGeometry(), undefined, undefined, threshold)
+    );
   }
 }
 
-const isSingleOpenPath = ({ paths }) => (paths !== undefined) && (paths.length === 1) && (paths[0][0] === null);
+const isSingleOpenPath = ({ paths }) =>
+  paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
-Shape.fromClosedPath = (path, context) => fromGeometry({ paths: [close(path)] }, context);
+Shape.fromClosedPath = (path, context) =>
+  fromGeometry({ paths: [close(path)] }, context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
-Shape.fromOpenPath = (path, context) => fromGeometry({ paths: [open(path)] }, context);
+Shape.fromOpenPath = (path, context) =>
+  fromGeometry({ paths: [open(path)] }, context);
 Shape.fromPath = (path, context) => fromGeometry({ paths: [path] }, context);
 Shape.fromPaths = (paths, context) => fromGeometry({ paths: paths }, context);
-Shape.fromPathToSurface = (path, context) => fromGeometry(fromPathToSurface(path), context);
-Shape.fromPathToZ0Surface = (path, context) => fromGeometry(fromPathToZ0Surface(path), context);
-Shape.fromPathsToSurface = (paths, context) => fromGeometry(fromPathsToSurface(paths), context);
-Shape.fromPathsToZ0Surface = (paths, context) => fromGeometry(fromPathsToZ0Surface(paths), context);
-Shape.fromPoint = (point, context) => fromGeometry({ points: [point] }, context);
-Shape.fromPoints = (points, context) => fromGeometry({ points: points }, context);
-Shape.fromPolygonsToSolid = (polygons, context) => fromGeometry({ solid: fromPolygons({}, polygons) }, context);
-Shape.fromPolygonsToZ0Surface = (polygons, context) => fromGeometry({ z0Surface: polygons }, context);
-Shape.fromSurfaces = (surfaces, context) => fromGeometry({ solid: surfaces }, context);
+Shape.fromPathToSurface = (path, context) =>
+  fromGeometry(fromPathToSurface(path), context);
+Shape.fromPathToZ0Surface = (path, context) =>
+  fromGeometry(fromPathToZ0Surface(path), context);
+Shape.fromPathsToSurface = (paths, context) =>
+  fromGeometry(fromPathsToSurface(paths), context);
+Shape.fromPathsToZ0Surface = (paths, context) =>
+  fromGeometry(fromPathsToZ0Surface(paths), context);
+Shape.fromPoint = (point, context) =>
+  fromGeometry({ points: [point] }, context);
+Shape.fromPoints = (points, context) =>
+  fromGeometry({ points: points }, context);
+Shape.fromPolygonsToSolid = (polygons, context) =>
+  fromGeometry({ solid: fromPolygons({}, polygons) }, context);
+Shape.fromPolygonsToZ0Surface = (polygons, context) =>
+  fromGeometry({ z0Surface: polygons }, context);
+Shape.fromSurfaces = (surfaces, context) =>
+  fromGeometry({ solid: surfaces }, context);
 Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
 const toKeptGeometry = (shape) => shape.toKeptGeometry();
 
-addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fromGeometry(data.geometry));
+addReadDecoder(
+  (data) => data && data.geometry !== undefined,
+  (data) => Shape.fromGeometry(data.geometry)
+);
 
 /**
  *
@@ -133,19 +203,35 @@ addReadDecoder((data) => data && data.geometry !== undefined, (data) => Shape.fr
  **/
 
 const as = (shape, tags) =>
-  Shape.fromGeometry(rewriteTags(tags.map(tag => `user/${tag}`), [], shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags(
+      tags.map((tag) => `user/${tag}`),
+      [],
+      shape.toGeometry()
+    )
+  );
 
 const notAs = (shape, tags) =>
-  Shape.fromGeometry(rewriteTags([], tags.map(tag => `user/${tag}`), shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags(
+      [],
+      tags.map((tag) => `user/${tag}`),
+      shape.toGeometry()
+    )
+  );
 
-const asMethod = function (...tags) { return as(this, tags); };
-const notAsMethod = function (...tags) { return notAs(this, tags); };
+const asMethod = function (...tags) {
+  return as(this, tags);
+};
+const notAsMethod = function (...tags) {
+  return notAs(this, tags);
+};
 
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;
 
-asMethod.signature = 'Shape -> as(...tags:string) -> Shape';
-notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
+asMethod.signature = "Shape -> as(...tags:string) -> Shape";
+notAsMethod.signature = "Shape -> as(...tags:string) -> Shape";
 
 /**
  *
@@ -212,11 +298,13 @@ const union = (...shapes) => {
   }
 };
 
-const unionMethod = function (...shapes) { return union(this, ...shapes); };
+const unionMethod = function (...shapes) {
+  return union(this, ...shapes);
+};
 Shape.prototype.union = unionMethod;
 
-union.signature = 'union(shape:Shape, ...shapes:Shape) -> Shape';
-unionMethod.signature = 'Shape -> union(...shapes:Shape) -> Shape';
+union.signature = "union(shape:Shape, ...shapes:Shape) -> Shape";
+unionMethod.signature = "Shape -> union(...shapes:Shape) -> Shape";
 
 /**
  *
@@ -234,17 +322,21 @@ unionMethod.signature = 'Shape -> union(...shapes:Shape) -> Shape';
  *
  **/
 
-const addMethod = function (...shapes) { return union(this, ...shapes); };
+const addMethod = function (...shapes) {
+  return union(this, ...shapes);
+};
 Shape.prototype.add = addMethod;
 
-addMethod.signature = 'Shape -> (...Shapes) -> Shape';
+addMethod.signature = "Shape -> (...Shapes) -> Shape";
 
 // x.addTo(y) === y.add(x)
 
-const addToMethod = function (shape) { return union(shape, this); };
+const addToMethod = function (shape) {
+  return union(shape, this);
+};
 Shape.prototype.addTo = addToMethod;
 
-addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
+addToMethod.signature = "Shape -> (...Shapes) -> Shape";
 
 /**
  *
@@ -310,17 +402,21 @@ const intersection = (...shapes) => {
   }
 };
 
-intersection.signature = 'intersection(shape:Shape, ...to:Shape) -> Shape';
+intersection.signature = "intersection(shape:Shape, ...to:Shape) -> Shape";
 
-const clipMethod = function (...shapes) { return intersection(this, ...shapes); };
+const clipMethod = function (...shapes) {
+  return intersection(this, ...shapes);
+};
 Shape.prototype.clip = clipMethod;
 
-clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
+clipMethod.signature = "Shape -> clip(...to:Shape) -> Shape";
 
-const clipFromMethod = function (shape) { return intersection(shape, this); };
+const clipFromMethod = function (shape) {
+  return intersection(shape, this);
+};
 Shape.prototype.clipFrom = clipFromMethod;
 
-clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
+clipFromMethod.signature = "Shape -> clipFrom(...to:Shape) -> Shape";
 
 /**
  *
@@ -366,7 +462,7 @@ const difference = (...shapes) => {
   }
 };
 
-difference.signature = 'difference(shape:Shape, ...shapes:Shape) -> Shape';
+difference.signature = "difference(shape:Shape, ...shapes:Shape) -> Shape";
 
 /**
  *
@@ -384,17 +480,21 @@ difference.signature = 'difference(shape:Shape, ...shapes:Shape) -> Shape';
  *
  **/
 
-const cutMethod = function (...shapes) { return difference(this, ...shapes); };
+const cutMethod = function (...shapes) {
+  return difference(this, ...shapes);
+};
 Shape.prototype.cut = cutMethod;
 
-cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';
+cutMethod.signature = "Shape -> cut(...shapes:Shape) -> Shape";
 
 // a.cut(b) === b.cutFrom(a)
 
-const cutFromMethod = function (shape) { return difference(shape, this); };
+const cutFromMethod = function (shape) {
+  return difference(shape, this);
+};
 Shape.prototype.cutFrom = cutFromMethod;
 
-cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
+cutFromMethod.signature = "Shape -> cutFrom(...shapes:Shape) -> Shape";
 
 /**
  *
@@ -449,7 +549,7 @@ cutFromMethod.signature = 'Shape -> cutFrom(...shapes:Shape) -> Shape';
  **/
 
 const assemble = (...shapes) => {
-  shapes = shapes.filter(shape => shape !== undefined);
+  shapes = shapes.filter((shape) => shape !== undefined);
   switch (shapes.length) {
     case 0: {
       return Shape.fromGeometry({ assembly: [] });
@@ -463,44 +563,49 @@ const assemble = (...shapes) => {
   }
 };
 
-assemble.signature = 'assemble(...shapes:Shape) -> Shape';
+assemble.signature = "assemble(...shapes:Shape) -> Shape";
 
-const faces = (shape, op = (x => x)) => {
+const faces = (shape, op = (x) => x) => {
   const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     for (const surface of solid) {
-      faces.push(op(Shape.fromGeometry({ paths: outline(surface) }), faces.length));
+      faces.push(
+        op(Shape.fromGeometry({ paths: outline(surface) }), faces.length)
+      );
     }
   }
   return assemble(...faces);
 };
 
-const facesMethod = function (...args) { return faces(this, ...args); };
+const facesMethod = function (...args) {
+  return faces(this, ...args);
+};
 Shape.prototype.faces = facesMethod;
 
-const inSolids = (shape, op = (_ => _)) => {
+const inSolids = (shape, op = (_) => _) => {
   let nth = 0;
-  const rewritten = rewrite(shape.toKeptGeometry(),
-                            (geometry, descend) => {
-                              if (geometry.solid) {
-                                // Operate on the solid.
-                                const solid = op(Shape.fromGeometry(geometry), nth++);
-                                // Replace the solid with the result (which might not be a solid).
-                                return solid.toGeometry();
-                              } else {
-                                return descend();
-                              }
-                            });
+  const rewritten = rewrite(shape.toKeptGeometry(), (geometry, descend) => {
+    if (geometry.solid) {
+      // Operate on the solid.
+      const solid = op(Shape.fromGeometry(geometry), nth++);
+      // Replace the solid with the result (which might not be a solid).
+      return solid.toGeometry();
+    } else {
+      return descend();
+    }
+  });
   return Shape.fromGeometry(rewritten);
 };
 
-const inSolidsMethod = function (...args) { return inSolids(this, ...args); };
+const inSolidsMethod = function (...args) {
+  return inSolids(this, ...args);
+};
 Shape.prototype.inSolids = inSolidsMethod;
 
-inSolids.signature = 'inSolids(shape:Shape, op:function) -> Shapes';
-inSolidsMethod.signature = 'Shape -> inSolids(op:function) -> Shapes';
+inSolids.signature = "inSolids(shape:Shape, op:function) -> Shapes";
+inSolidsMethod.signature = "Shape -> inSolids(op:function) -> Shapes";
 
-const junctions = (shape, mode = (n => n)) => {
+const junctions = (shape, mode = (n) => n) => {
   const junctions = [];
   const points = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
@@ -522,12 +627,16 @@ const junctions = (shape, mode = (n => n)) => {
   return Shape.fromGeometry({ points: junctions });
 };
 
-const nonJunctions = (shape) => junctions(shape, n => !n);
+const nonJunctions = (shape) => junctions(shape, (n) => !n);
 
-const junctionsMethod = function () { return junctions(this); };
+const junctionsMethod = function () {
+  return junctions(this);
+};
 Shape.prototype.junctions = junctionsMethod;
 
-const nonJunctionsMethod = function () { return nonJunctions(this); };
+const nonJunctionsMethod = function () {
+  return nonJunctions(this);
+};
 Shape.prototype.nonJunctions = nonJunctionsMethod;
 
 /**
@@ -551,11 +660,14 @@ Shape.prototype.nonJunctions = nonJunctionsMethod;
 
 const measureBoundingBox = (shape) => measureBoundingBox$1(shape.toGeometry());
 
-const measureBoundingBoxMethod = function () { return measureBoundingBox(this); };
+const measureBoundingBoxMethod = function () {
+  return measureBoundingBox(this);
+};
 Shape.prototype.measureBoundingBox = measureBoundingBoxMethod;
 
-measureBoundingBox.signature = 'measureBoundingBox(shape:Shape) -> BoundingBox';
-measureBoundingBoxMethod.signature = 'Shape -> measureBoundingBox() -> BoundingBox';
+measureBoundingBox.signature = "measureBoundingBox(shape:Shape) -> BoundingBox";
+measureBoundingBoxMethod.signature =
+  "Shape -> measureBoundingBox() -> BoundingBox";
 
 /**
  *
@@ -581,11 +693,13 @@ const measureCenter = (shape) => {
   return scale$1(0.5, add(high, low));
 };
 
-const measureCenterMethod = function () { return measureCenter(this); };
+const measureCenterMethod = function () {
+  return measureCenter(this);
+};
 Shape.prototype.measureCenter = measureCenterMethod;
 
-measureCenter.signature = 'measureCenter(shape:Shape) -> vector';
-measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
+measureCenter.signature = "measureCenter(shape:Shape) -> vector";
+measureCenterMethod.signature = "Shape -> measureCenter() -> vector";
 
 const noPlan = (shape, tags, select) => {
   const op = (geometry, descend) => {
@@ -600,7 +714,9 @@ const noPlan = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const noPlanMethod = function (...tags) { return noPlan(this); };
+const noPlanMethod = function (...tags) {
+  return noPlan(this);
+};
 Shape.prototype.noPlan = noPlanMethod;
 
 const noVoid = (shape, tags, select) => {
@@ -616,11 +732,17 @@ const noVoid = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const noVoidMethod = function (...tags) { return noVoid(this); };
+const noVoidMethod = function (...tags) {
+  return noVoid(this);
+};
 Shape.prototype.noVoid = noVoidMethod;
 
-const opMethod = function (op, ...args) { return op(this, ...args); };
-const withOpMethod = function (op, ...args) { return assemble(this, op(this, ...args)); };
+const opMethod = function (op, ...args) {
+  return op(this, ...args);
+};
+const withOpMethod = function (op, ...args) {
+  return assemble(this, op(this, ...args));
+};
 
 Shape.prototype.op = opMethod;
 Shape.prototype.withOp = withOpMethod;
@@ -631,16 +753,22 @@ const openEdges = (shape, { isOpen = true } = {}) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     paths.push(...findOpenEdges(solid, isOpen));
   }
-  return Shape.fromGeometry({ paths: paths.map(path => path.map(([x, y, z]) => [r(x), r(y), r(z)])) });
+  return Shape.fromGeometry({
+    paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
+  });
 };
 
-const openEdgesMethod = function (...args) { return openEdges(this, ...args); };
+const openEdgesMethod = function (...args) {
+  return openEdges(this, ...args);
+};
 Shape.prototype.openEdges = openEdgesMethod;
 
-const withOpenEdgesMethod = function (...args) { return assemble(this, openEdges(this, ...args)); };
+const withOpenEdgesMethod = function (...args) {
+  return assemble(this, openEdges(this, ...args));
+};
 Shape.prototype.withOpenEdges = withOpenEdgesMethod;
 
-const solids = (shape, xform = (_ => _)) => {
+const solids = (shape, xform = (_) => _) => {
   const solids = [];
   for (const solid of getSolids(shape.toKeptGeometry())) {
     solids.push(xform(Shape.fromGeometry(solid)));
@@ -648,15 +776,19 @@ const solids = (shape, xform = (_ => _)) => {
   return solids;
 };
 
-const solidsMethod = function (...args) { return solids(this, ...args); };
+const solidsMethod = function (...args) {
+  return solids(this, ...args);
+};
 Shape.prototype.solids = solidsMethod;
 
 const tags = (shape) =>
   [...allTags(shape.toGeometry())]
-      .filter(tag => tag.startsWith('user/'))
-      .map(tag => tag.substring(5));
+    .filter((tag) => tag.startsWith("user/"))
+    .map((tag) => tag.substring(5));
 
-const method = function () { return tags(this); };
+const method = function () {
+  return tags(this);
+};
 
 Shape.prototype.tags = method;
 
@@ -686,12 +818,16 @@ const wireframe = (options = {}, shape) => {
   return assemble(...pieces);
 };
 
-const method$1 = function (options) { return wireframe(options, this); };
+const method$1 = function (options) {
+  return wireframe(options, this);
+};
 
 Shape.prototype.wireframe = method$1;
-Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
+Shape.prototype.withWireframe = function (options) {
+  return assemble(this, wireframe(options, this));
+};
 
-const wireframeFaces = (shape, op = (x => x)) => {
+const wireframeFaces = (shape, op = (x) => x) => {
   const faces = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     for (const surface of solid) {
@@ -703,7 +839,9 @@ const wireframeFaces = (shape, op = (x => x)) => {
   return assemble(...faces);
 };
 
-const wireframeFacesMethod = function (...args) { return wireframeFaces(this, ...args); };
+const wireframeFacesMethod = function (...args) {
+  return wireframeFaces(this, ...args);
+};
 Shape.prototype.wireframeFaces = wireframeFacesMethod;
 
 /**
@@ -725,7 +863,9 @@ Shape.prototype.wireframeFaces = wireframeFacesMethod;
  *
  **/
 
-const withMethod = function (...shapes) { return assemble(this, ...shapes); };
+const withMethod = function (...shapes) {
+  return assemble(this, ...shapes);
+};
 Shape.prototype.with = withMethod;
 
 /**
@@ -776,14 +916,22 @@ const selectToKeep = (matchTags, geometryTags) => {
   return false;
 };
 
-const selectToDrop = (matchTags, geometryTags) => !selectToKeep(matchTags, geometryTags);
+const selectToDrop = (matchTags, geometryTags) =>
+  !selectToKeep(matchTags, geometryTags);
 
 const keepOrDrop = (shape, tags, select) => {
-  const matchTags = tags.map(tag => `user/${tag}`);
+  const matchTags = tags.map((tag) => `user/${tag}`);
 
   const op = (geometry, descend) => {
     // FIX: Need a more reliable way to detect leaf structure.
-    if (geometry.solid || geometry.surface || geometry.z0Surface || geometry.points || geometry.paths || geometry.item) {
+    if (
+      geometry.solid ||
+      geometry.surface ||
+      geometry.z0Surface ||
+      geometry.points ||
+      geometry.paths ||
+      geometry.item
+    ) {
       if (select(matchTags, geometry.tags)) {
         return descend();
       } else {
@@ -820,15 +968,22 @@ const drop = (shape, tags) => {
   }
 };
 
-const keepMethod = function (...tags) { return keep(this, tags); };
+const keepMethod = function (...tags) {
+  return keep(this, tags);
+};
 Shape.prototype.keep = keepMethod;
 
-const dropMethod = function (...tags) { return drop(this, tags); };
+const dropMethod = function (...tags) {
+  return drop(this, tags);
+};
 Shape.prototype.drop = dropMethod;
 
-const canonicalize = (shape) => Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
+const canonicalize = (shape) =>
+  Shape.fromGeometry(canonicalize$1(shape.toGeometry()));
 
-const canonicalizeMethod = function () { return canonicalize(this); };
+const canonicalizeMethod = function () {
+  return canonicalize(this);
+};
 Shape.prototype.canonicalize = canonicalizeMethod;
 
 /**
@@ -859,11 +1014,13 @@ const center = (shape) => {
   return moved;
 };
 
-const centerMethod = function (...params) { return center(this); };
+const centerMethod = function (...params) {
+  return center(this);
+};
 Shape.prototype.center = centerMethod;
 
-center.signature = 'center(shape:Shape) -> Shape';
-centerMethod.signature = 'Shape -> center() -> Shape';
+center.signature = "center(shape:Shape) -> Shape";
+centerMethod.signature = "Shape -> center() -> Shape";
 
 /**
  *
@@ -886,26 +1043,32 @@ centerMethod.signature = 'Shape -> center() -> Shape';
  **/
 
 const fromName = (shape, name) =>
-  Shape.fromGeometry(rewriteTags([toTagFromName(name)], [], shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
+  );
 
 const color = (...args) => fromName(...args);
 
-const colorMethod = function (...args) { return color(this, ...args); };
+const colorMethod = function (...args) {
+  return color(this, ...args);
+};
 Shape.prototype.color = colorMethod;
 
-color.signature = 'color(shape:Shape, color:string) -> Shape';
-colorMethod.signature = 'Shape -> color(color:string) -> Shape';
+color.signature = "color(shape:Shape, color:string) -> Shape";
+colorMethod.signature = "Shape -> color(color:string) -> Shape";
 
 const colors = (shape) =>
   [...allTags(shape.toGeometry())]
-      .filter(tag => tag.startsWith('color/'))
-      .map(tag => tag.substring(6));
+    .filter((tag) => tag.startsWith("color/"))
+    .map((tag) => tag.substring(6));
 
-const colorsMethod = function () { return colors(this); };
+const colorsMethod = function () {
+  return colors(this);
+};
 Shape.prototype.colors = colorsMethod;
 
-colors.signature = 'colors(shape:Shape) -> strings';
-colorsMethod.signature = 'Shape -> colors() -> strings';
+colors.signature = "colors(shape:Shape) -> strings";
+colorsMethod.signature = "Shape -> colors() -> strings";
 
 /**
  *
@@ -917,15 +1080,20 @@ colorsMethod.signature = 'Shape -> colors() -> strings';
 
 const kept = (shape) => Shape.fromGeometry(toKeptGeometry(shape));
 
-const keptMethod = function () { return kept(this); };
+const keptMethod = function () {
+  return kept(this);
+};
 Shape.prototype.kept = keptMethod;
 
-kept.signature = 'kept(shape:Shape) -> Shape';
-keptMethod.signature = 'Shape -> kept() -> Shape';
+kept.signature = "kept(shape:Shape) -> Shape";
+keptMethod.signature = "Shape -> kept() -> Shape";
 
-const layer = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
+const layer = (...shapes) =>
+  Shape.fromGeometry({ layers: shapes.map((shape) => shape.toGeometry()) });
 
-const layerMethod = function (...shapes) { return layer(this, ...shapes); };
+const layerMethod = function (...shapes) {
+  return layer(this, ...shapes);
+};
 Shape.prototype.layer = layerMethod;
 Shape.prototype.and = layerMethod;
 
@@ -941,14 +1109,19 @@ Shape.prototype.and = layerMethod;
  *
  **/
 
-const log = (text, level) => log$1({ op: 'text', text: String(text), level });
+const log = (text, level) => log$1({ op: "text", text: String(text), level });
 
-const logOp = (shape, op) => log$1({ op: 'text', text: String(op(shape)) });
+const logOp = (shape, op) => log$1({ op: "text", text: String(op(shape)) });
 
-const logMethod = function (op = (shape => JSON.stringify(shape.toKeptGeometry()))) { logOp(this, op); return this; };
+const logMethod = function (
+  op = (shape) => JSON.stringify(shape.toKeptGeometry())
+) {
+  logOp(this, op);
+  return this;
+};
 Shape.prototype.log = logMethod;
 
-log.signature = 'log(op:function)';
+log.signature = "log(op:function)";
 
 /**
  *
@@ -972,11 +1145,17 @@ const cacheShape = async (shape, path) => {
 
 const writeShape = async (shape, path) => {
   const geometry = shape.toGeometry();
-  await writeFile({ doSerialize: false }, `output/${path}`, JSON.stringify(geometry));
+  await writeFile(
+    { doSerialize: false },
+    `output/${path}`,
+    JSON.stringify(geometry)
+  );
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const writeShapeMethod = function (...args) { return writeShape(this, ...args); };
+const writeShapeMethod = function (...args) {
+  return writeShape(this, ...args);
+};
 Shape.prototype.writeShape = writeShapeMethod;
 
 const readShape = async (path, build, { ephemeral = false, src } = {}) => {
@@ -1017,13 +1196,21 @@ const make = (path, builder) => readShape(path, builder);
  **/
 
 const material = (shape, ...tags) =>
-  Shape.fromGeometry(rewriteTags(tags.map(tag => `material/${tag}`), [], shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags(
+      tags.map((tag) => `material/${tag}`),
+      [],
+      shape.toGeometry()
+    )
+  );
 
-const materialMethod = function (...tags) { return material(this, ...tags); };
+const materialMethod = function (...tags) {
+  return material(this, ...tags);
+};
 Shape.prototype.material = materialMethod;
 
-material.signature = 'material(shape:Shape) -> Shape';
-materialMethod.signature = 'Shape -> material() -> Shape';
+material.signature = "material(shape:Shape) -> Shape";
+materialMethod.signature = "Shape -> material() -> Shape";
 
 /**
  *
@@ -1061,9 +1248,12 @@ materialMethod.signature = 'Shape -> material() -> Shape';
  *
  **/
 
-const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
+const translate = (shape, x = 0, y = 0, z = 0) =>
+  shape.transform(fromTranslation([x, y, z]));
 
-const method$2 = function (...args) { return translate(this, ...args); };
+const method$2 = function (...args) {
+  return translate(this, ...args);
+};
 Shape.prototype.translate = method$2;
 
 /**
@@ -1076,11 +1266,15 @@ Shape.prototype.translate = method$2;
 
 const move = (...args) => translate(...args);
 
-const moveMethod = function (...params) { return translate(this, ...params); };
+const moveMethod = function (...params) {
+  return translate(this, ...params);
+};
 Shape.prototype.move = moveMethod;
 
-move.signature = 'move(shape:Shape, x:number = 0, y:number = 0, z:number = 0) -> Shape';
-moveMethod.signature = 'Shape -> move(x:number = 0, y:number = 0, z:number = 0) -> Shape';
+move.signature =
+  "move(shape:Shape, x:number = 0, y:number = 0, z:number = 0) -> Shape";
+moveMethod.signature =
+  "Shape -> move(x:number = 0, y:number = 0, z:number = 0) -> Shape";
 
 /**
  *
@@ -1092,11 +1286,13 @@ moveMethod.signature = 'Shape -> move(x:number = 0, y:number = 0, z:number = 0) 
 
 const moveX = (shape, x = 0) => move(shape, x);
 
-const moveXMethod = function (x) { return moveX(this, x); };
+const moveXMethod = function (x) {
+  return moveX(this, x);
+};
 Shape.prototype.moveX = moveXMethod;
 
-moveX.signature = 'moveX(shape:Shape, x:number = 0) -> Shape';
-moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';
+moveX.signature = "moveX(shape:Shape, x:number = 0) -> Shape";
+moveXMethod.signature = "Shape -> moveX(x:number = 0) -> Shape";
 
 /**
  *
@@ -1108,11 +1304,13 @@ moveXMethod.signature = 'Shape -> moveX(x:number = 0) -> Shape';
 
 const moveY = (shape, y = 0) => move(shape, 0, y);
 
-const moveYMethod = function (y) { return moveY(this, y); };
+const moveYMethod = function (y) {
+  return moveY(this, y);
+};
 Shape.prototype.moveY = moveYMethod;
 
-moveY.signature = 'moveY(shape:Shape, y:number = 0) -> Shape';
-moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
+moveY.signature = "moveY(shape:Shape, y:number = 0) -> Shape";
+moveYMethod.signature = "Shape -> moveY(y:number = 0) -> Shape";
 
 /**
  *
@@ -1124,11 +1322,13 @@ moveYMethod.signature = 'Shape -> moveY(y:number = 0) -> Shape';
 
 const moveZ = (shape, z = 0) => move(shape, 0, 0, z);
 
-const moveZMethod = function (z) { return moveZ(this, z); };
+const moveZMethod = function (z) {
+  return moveZ(this, z);
+};
 Shape.prototype.moveZ = moveZMethod;
 
-moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
-moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
+moveZ.signature = "moveZ(shape:Shape, z:number = 0) -> Shape";
+moveZMethod.signature = "Shape -> moveZ(z:number = 0) -> Shape";
 
 /**
  *
@@ -1136,13 +1336,21 @@ moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
  *
  **/
 
-const nocut = (shape, ...tags) => fromGeometry(nonNegative(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+const nocut = (shape, ...tags) =>
+  fromGeometry(
+    nonNegative(
+      tags.map((tag) => `user/${tag}`),
+      toGeometry(shape)
+    )
+  );
 
-const nocutMethod = function (...tags) { return nocut(this, tags); };
+const nocutMethod = function (...tags) {
+  return nocut(this, tags);
+};
 Shape.prototype.nocut = nocutMethod;
 
-nocut.signature = 'nocut(shape:Shape, ...tag:string) -> Shape';
-nocutMethod.signature = 'Shape -> nocut(...tag:string) -> Shape';
+nocut.signature = "nocut(shape:Shape, ...tag:string) -> Shape";
+nocutMethod.signature = "Shape -> nocut(...tag:string) -> Shape";
 
 /**
  *
@@ -1162,24 +1370,29 @@ nocutMethod.signature = 'Shape -> nocut(...tag:string) -> Shape';
  * :::
  **/
 
-const orient = (shape, { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }) => {
+const orient = (
+  shape,
+  { center = [0, 0, 0], facing = [0, 0, 1], at = [0, 0, 0], from = [0, 0, 0] }
+) => {
   const normalizedFacing = normalize(facing);
   const normalizedAt = normalize(subtract(at, from));
 
-  const angle = Math.acos(dot(normalizedFacing, normalizedAt)) * 180 / Math.PI;
+  const angle =
+    (Math.acos(dot(normalizedFacing, normalizedAt)) * 180) / Math.PI;
   const axis = normalize(cross(normalizedFacing, normalizedAt));
 
-  return shape
-      .move(negate(center))
-      .rotate(angle, axis)
-      .move(from);
+  return shape.move(negate(center)).rotate(angle, axis).move(from);
 };
 
-const orientMethod = function (...args) { return orient(this, ...args); };
+const orientMethod = function (...args) {
+  return orient(this, ...args);
+};
 Shape.prototype.orient = orientMethod;
 
-orient.signature = 'orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
-orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape';
+orient.signature =
+  "orient(Shape:shape, { center:Point, facing:Vector, at:Point, from:Point }) -> Shape";
+orientMethod.signature =
+  "Shape -> orient({ center:Point, facing:Vector, at:Point, from:Point }) -> Shape";
 
 /**
  *
@@ -1204,9 +1417,12 @@ orientMethod.signature = 'Shape -> orient({ center:Point, facing:Vector, at:Poin
  * :::
  **/
 
-const rotate = (shape, angle = 0, axis = [0, 0, 1]) => shape.transform(fromRotation(angle * 0.017453292519943295, axis));
+const rotate = (shape, angle = 0, axis = [0, 0, 1]) =>
+  shape.transform(fromRotation(angle * 0.017453292519943295, axis));
 
-const rotateMethod = function (...args) { return rotate(this, ...args); };
+const rotateMethod = function (...args) {
+  return rotate(this, ...args);
+};
 Shape.prototype.rotate = rotateMethod;
 
 /**
@@ -1227,9 +1443,12 @@ Shape.prototype.rotate = rotateMethod;
  * :::
  **/
 
-const rotateX = (shape, angle) => shape.transform(fromXRotation(angle * 0.017453292519943295));
+const rotateX = (shape, angle) =>
+  shape.transform(fromXRotation(angle * 0.017453292519943295));
 
-const rotateXMethod = function (angle) { return rotateX(this, angle); };
+const rotateXMethod = function (angle) {
+  return rotateX(this, angle);
+};
 Shape.prototype.rotateX = rotateXMethod;
 
 /**
@@ -1250,9 +1469,12 @@ Shape.prototype.rotateX = rotateXMethod;
  * :::
  **/
 
-const rotateY = (shape, angle) => shape.transform(fromYRotation(angle * 0.017453292519943295));
+const rotateY = (shape, angle) =>
+  shape.transform(fromYRotation(angle * 0.017453292519943295));
 
-const rotateYMethod = function (angle) { return rotateY(this, angle); };
+const rotateYMethod = function (angle) {
+  return rotateY(this, angle);
+};
 Shape.prototype.rotateY = rotateYMethod;
 
 /**
@@ -1273,9 +1495,12 @@ Shape.prototype.rotateY = rotateYMethod;
  * :::
  **/
 
-const rotateZ = (shape, angle) => shape.transform(fromZRotation(angle * 0.017453292519943295));
+const rotateZ = (shape, angle) =>
+  shape.transform(fromZRotation(angle * 0.017453292519943295));
 
-const rotateZMethod = function (angle) { return rotateZ(this, angle); };
+const rotateZMethod = function (angle) {
+  return rotateZ(this, angle);
+};
 Shape.prototype.rotateZ = rotateZMethod;
 
 /**
@@ -1310,7 +1535,9 @@ const scale = (factor, shape) => {
   }
 };
 
-const scaleMethod = function (factor) { return scale(factor, this); };
+const scaleMethod = function (factor) {
+  return scale(factor, this);
+};
 Shape.prototype.scale = scaleMethod;
 
 const X$1 = 0;
@@ -1329,11 +1556,13 @@ const size = (shape) => {
   return { area, length, width, height, max, min, center, radius };
 };
 
-const sizeMethod = function () { return size(this); };
+const sizeMethod = function () {
+  return size(this);
+};
 Shape.prototype.size = sizeMethod;
 
-size.signature = 'size(shape:Shape) -> Size';
-sizeMethod.signature = 'Shape -> size() -> Size';
+size.signature = "size(shape:Shape) -> Size";
+sizeMethod.signature = "Shape -> size() -> Size";
 
 /**
  *
@@ -1360,43 +1589,91 @@ sizeMethod.signature = 'Shape -> size() -> Size';
 
 const turn = (shape, axis, angle) => {
   const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotate(axis, angle)
-      .move(...center);
+  return shape
+    .move(...negate(center))
+    .rotate(axis, angle)
+    .move(...center);
 };
 
-const turnMethod = function (angle, axis) { return turn(this, axis, angle); };
+const turnMethod = function (angle, axis) {
+  return turn(this, axis, angle);
+};
 Shape.prototype.turn = turnMethod;
 
 const turnX = (shape, angle) => {
   const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotateX(angle)
-      .move(...center);
+  return shape
+    .move(...negate(center))
+    .rotateX(angle)
+    .move(...center);
 };
 
-const turnXMethod = function (angle) { return turnX(this, angle); };
+const turnXMethod = function (angle) {
+  return turnX(this, angle);
+};
 Shape.prototype.turnX = turnXMethod;
 
 const turnY = (shape, angle) => {
   const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotateY(angle)
-      .move(...center);
+  return shape
+    .move(...negate(center))
+    .rotateY(angle)
+    .move(...center);
 };
 
-const turnYMethod = function (angle) { return turnY(this, angle); };
+const turnYMethod = function (angle) {
+  return turnY(this, angle);
+};
 Shape.prototype.turnY = turnYMethod;
 
 const turnZ = (shape, angle) => {
   const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotateZ(angle)
-      .move(...center);
+  return shape
+    .move(...negate(center))
+    .rotateZ(angle)
+    .move(...center);
 };
 
-const turnZMethod = function (angle) { return turnZ(this, angle); };
+const turnZMethod = function (angle) {
+  return turnZ(this, angle);
+};
 Shape.prototype.turnZ = turnZMethod;
 
 export default Shape;
-export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, make, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
+export {
+  Shape,
+  assemble,
+  canonicalize,
+  center,
+  color,
+  colors,
+  difference,
+  drop,
+  intersection,
+  keep,
+  kept,
+  layer,
+  log,
+  make,
+  material,
+  move,
+  moveX,
+  moveY,
+  moveZ,
+  nocut,
+  orient,
+  readShape,
+  rotate,
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  size,
+  translate,
+  turn,
+  turnX,
+  turnY,
+  turnZ,
+  union,
+  writeShape,
+};

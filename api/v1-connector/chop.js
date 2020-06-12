@@ -1,11 +1,11 @@
-import { Shape, assemble } from '@jsxcad/api-v1-shape';
-import { getAnySurfaces, getPlans, getSolids } from '@jsxcad/geometry-tagged';
+import { Shape, assemble } from "@jsxcad/api-v1-shape";
+import { getAnySurfaces, getPlans, getSolids } from "@jsxcad/geometry-tagged";
 
-import Z from './Z';
-import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
-import { cut as surfaceCut } from '@jsxcad/geometry-surface';
-import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from '@jsxcad/geometry-path';
+import Z from "./Z";
+import { cut as bspCut } from "@jsxcad/algorithm-bsp-surfaces";
+import { cut as surfaceCut } from "@jsxcad/geometry-surface";
+import { toXYPlaneTransforms } from "@jsxcad/math-plane";
+import { transform } from "@jsxcad/geometry-path";
 
 /**
  *
@@ -38,7 +38,12 @@ const toSurface = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
-  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const path = [
+    [max, max, 0],
+    [min, max, 0],
+    [min, min, 0],
+    [max, min, 0],
+  ];
   const polygon = transform(from, path);
   return [polygon];
 };
@@ -50,7 +55,9 @@ export const chop = (shape, connector = Z()) => {
     const cutResult = bspCut(solid, planeSurface);
     cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
   }
-  for (const { surface, z0Surface, tags } of getAnySurfaces(shape.toKeptGeometry())) {
+  for (const { surface, z0Surface, tags } of getAnySurfaces(
+    shape.toKeptGeometry()
+  )) {
     const cutSurface = surface || z0Surface;
     const cutResult = surfaceCut(planeSurface, cutSurface);
     cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
@@ -59,10 +66,12 @@ export const chop = (shape, connector = Z()) => {
   return assemble(...cuts);
 };
 
-const chopMethod = function (surface) { return chop(this, surface); };
+const chopMethod = function (surface) {
+  return chop(this, surface);
+};
 Shape.prototype.chop = chopMethod;
 
-chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
-chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
+chop.signature = "chop(shape:Shape, surface:Shape) -> Shape";
+chopMethod.signature = "Shape -> chop(surface:Shape) -> Shape";
 
 export default chop;

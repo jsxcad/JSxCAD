@@ -1,5 +1,5 @@
-import { add } from './add';
-import { subtract } from './subtract';
+import { add } from "./add";
+import { subtract } from "./subtract";
 
 /**
  * Rotate vector 3D vector around the x-axis
@@ -11,9 +11,11 @@ import { subtract } from './subtract';
 export const turnX = (angle, origin, vector) => {
   const p = subtract(vector, origin);
   // rotate
-  const r = [p[0],
-             p[1] * Math.cos(angle) - p[2] * Math.sin(angle),
-             p[1] * Math.sin(angle) + p[2] * Math.cos(angle)];
+  const r = [
+    p[0],
+    p[1] * Math.cos(angle) - p[2] * Math.sin(angle),
+    p[1] * Math.sin(angle) + p[2] * Math.cos(angle),
+  ];
   // translate
   return add(r, origin);
 };

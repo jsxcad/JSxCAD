@@ -1,5 +1,5 @@
-import { equals } from '@jsxcad/math-plane';
-import { toPlane } from './toPlane';
+import { equals } from "@jsxcad/math-plane";
+import { toPlane } from "./toPlane";
 
 export const isStrictlyCoplanar = (polygon) => {
   const plane = toPlane(polygon);

@@ -1,5 +1,5 @@
-import { map } from './map';
-import { toPolygon } from '@jsxcad/geometry-path';
+import { map } from "./map";
+import { toPolygon } from "@jsxcad/geometry-path";
 
 export const toPolygons = (paths) => {
   if (paths.isPolygons !== true) {

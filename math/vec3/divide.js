@@ -5,6 +5,8 @@
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-export const divide = ([ax, ay, az], [bx, by, bz]) => [ax / bx,
-                                                       ay / by,
-                                                       az / bz];
+export const divide = ([ax, ay, az], [bx, by, bz]) => [
+  ax / bx,
+  ay / by,
+  az / bz,
+];

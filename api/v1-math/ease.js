@@ -9,9 +9,9 @@
  *
  **/
 
-export const ease = (start = 0.00, end = 1.00, op = t => 1) => {
-  const compose = (next = t => 1) => {
-    const fn = t => {
+export const ease = (start = 0.0, end = 1.0, op = (t) => 1) => {
+  const compose = (next = (t) => 1) => {
+    const fn = (t) => {
       if (t >= start && t <= end) {
         return op((t - start) / (end - start));
       } else {
@@ -23,10 +23,11 @@ export const ease = (start = 0.00, end = 1.00, op = t => 1) => {
   return compose;
 };
 
-export const linear = (start, end) => t => start + t * (end - start);
+export const linear = (start, end) => (t) => start + t * (end - start);
 ease.linear = linear;
 
-ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
-linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
+ease.signature =
+  "ease(start:number = 0, end:number = 1, op:function) -> function";
+linear.signature = "linear(start:number = 0, end:number = 1) -> function";
 
 export default ease;

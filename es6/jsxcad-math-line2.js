@@ -1,5 +1,18 @@
-import { reallyQuantizeForSpace, solve2Linear } from './jsxcad-math-utils.js';
-import { negate, normal, scale, fromValues as fromValues$1, dot, equals as equals$1, normalize, subtract, length, add, cross, transform as transform$1 } from './jsxcad-math-vec2.js';
+import { reallyQuantizeForSpace, solve2Linear } from "./jsxcad-math-utils.js";
+import {
+  negate,
+  normal,
+  scale,
+  fromValues as fromValues$1,
+  dot,
+  equals as equals$1,
+  normalize,
+  subtract,
+  length,
+  add,
+  cross,
+  transform as transform$1,
+} from "./jsxcad-math-vec2.js";
 
 /**
  * Creates a new unbounded 2D line initialized with the given values.
@@ -13,7 +26,12 @@ import { negate, normal, scale, fromValues as fromValues$1, dot, equals as equal
  */
 const fromValues = (x = 0, y = 1, w = 0) => [x, y, w];
 
-const canonicalize = ([x = 0, y = 0, w = 0]) => fromValues(reallyQuantizeForSpace(x), reallyQuantizeForSpace(y), reallyQuantizeForSpace(w));
+const canonicalize = ([x = 0, y = 0, w = 0]) =>
+  fromValues(
+    reallyQuantizeForSpace(x),
+    reallyQuantizeForSpace(y),
+    reallyQuantizeForSpace(w)
+  );
 
 /**
  * Return the direction of the given line.
@@ -88,8 +106,21 @@ const doLinesIntersect = function (p0start, p0end, p1start, p1end) {
     const d1 = subtract(p1end, p1start);
     // FIXME These epsilons need review and testing
     if (Math.abs(cross(d0, d1)) < 1e-9) return false; // lines are parallel
-    let alphas = solve2Linear(-d0[0], d1[0], -d0[1], d1[1], p0start[0] - p1start[0], p0start[1] - p1start[1]);
-    if ((alphas[0] > 1e-6) && (alphas[0] < 0.999999) && (alphas[1] > 1e-5) && (alphas[1] < 0.999999)) return true;
+    let alphas = solve2Linear(
+      -d0[0],
+      d1[0],
+      -d0[1],
+      d1[1],
+      p0start[0] - p1start[0],
+      p0start[1] - p1start[1]
+    );
+    if (
+      alphas[0] > 1e-6 &&
+      alphas[0] < 0.999999 &&
+      alphas[1] > 1e-5 &&
+      alphas[1] < 0.999999
+    )
+      return true;
   }
   return false;
 };
@@ -159,8 +190,11 @@ const reverse = (line) => {
  * @param {line2} line the 2D line to transform
  * @returns {line2} a new unbounded 2D line
  */
-const transform = (matrix, line) => fromPoints(transform$1(matrix, origin(line)),
-                                                      transform$1(matrix, direction(line)));
+const transform = (matrix, line) =>
+  fromPoints(
+    transform$1(matrix, origin(line)),
+    transform$1(matrix, direction(line))
+  );
 
 /**
  * Determine the X coordinate of the given line at the Y coordinate.
@@ -173,7 +207,7 @@ const transform = (matrix, line) => fromPoints(transform$1(matrix, origin(line))
  */
 const xAtY = (y, line) => {
   // px = (distance - normal.y * y) / normal.x
-  let x = (line[2] - (line[1] * y)) / line[0];
+  let x = (line[2] - line[1] * y) / line[0];
   if (Number.isNaN(x)) {
     const org = origin(line);
     x = org[0];
@@ -181,4 +215,18 @@ const xAtY = (y, line) => {
   return x;
 };
 
-export { canonicalize, closestPoint, direction, distanceToPoint, doLinesIntersect, equals, fromPoints, fromValues, intersectPointOfLines, origin, reverse, transform, xAtY };
+export {
+  canonicalize,
+  closestPoint,
+  direction,
+  distanceToPoint,
+  doLinesIntersect,
+  equals,
+  fromPoints,
+  fromValues,
+  intersectPointOfLines,
+  origin,
+  reverse,
+  transform,
+  xAtY,
+};

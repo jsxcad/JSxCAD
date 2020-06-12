@@ -1,4 +1,4 @@
 export interface IntPoint {
-    x: number;
-    y: number;
+  x: number;
+  y: number;
 }

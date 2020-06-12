@@ -1,10 +1,10 @@
 // import clean from './clean';
 // import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 // import fromSurface from './fromSurface';
-import test from 'ava';
+import test from "ava";
 // import toPolygons from './toPolygons';
 
-test('Null', t => t.true(true));
+test("Null", (t) => t.true(true));
 
 /*
 test('Degenerate', t => {

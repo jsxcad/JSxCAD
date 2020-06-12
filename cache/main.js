@@ -1,4 +1,11 @@
-import { cache, cacheCut, cachePoints, cacheRewriteTags, cacheTransform, clearCache } from './cache';
+import {
+  cache,
+  cacheCut,
+  cachePoints,
+  cacheRewriteTags,
+  cacheTransform,
+  clearCache,
+} from "./cache";
 
 export {
   cache,
@@ -6,5 +13,5 @@ export {
   cachePoints,
   cacheRewriteTags,
   cacheTransform,
-  clearCache
+  clearCache,
 };

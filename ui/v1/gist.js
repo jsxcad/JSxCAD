@@ -1,12 +1,15 @@
-import { CREATED, OK, eq, request as githubRequest } from './githubRequest';
-import { listFiles, read, write } from '@jsxcad/sys';
+import { CREATED, OK, eq, request as githubRequest } from "./githubRequest";
+import { listFiles, read, write } from "@jsxcad/sys";
 
 const request = (isOk, path, method, body, options) =>
-  githubRequest(isOk, path, method, body, { ...options, service: 'gist' });
+  githubRequest(isOk, path, method, body, { ...options, service: "gist" });
 
-export const get = async (isOk, path, options) => request(isOk, path, 'GET', undefined, options);
-export const post = async (isOk, path, body, options) => request(isOk, path, 'POST', body, options);
-export const patch = async (isOk, path, body, options) => request(isOk, path, 'PATCH', body, options);
+export const get = async (isOk, path, options) =>
+  request(isOk, path, "GET", undefined, options);
+export const post = async (isOk, path, body, options) =>
+  request(isOk, path, "POST", body, options);
+export const patch = async (isOk, path, body, options) =>
+  request(isOk, path, "PATCH", body, options);
 
 export const readWorkspace = async (gistId, { workspace }) => {
   const gist = await get(eq(OK), `gists/${gistId}`);
@@ -32,13 +35,11 @@ export const writeWorkspace = async ({ workspace, isPublic = true }) => {
       files[name] = { content: await read(path, { workspace }) };
     }
   }
-  const gist = await post(eq(CREATED),
-                          `gists`,
-                          {
-                            description: `${workspace} #jsxcad`,
-                            public: isPublic,
-                            files
-                          });
+  const gist = await post(eq(CREATED), `gists`, {
+    description: `${workspace} #jsxcad`,
+    public: isPublic,
+    files,
+  });
   if (gist === undefined) return;
   return gist.html_url;
 };

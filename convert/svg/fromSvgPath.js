@@ -1,13 +1,13 @@
-import { assertGood, canonicalize, isClosed } from '@jsxcad/geometry-path';
+import { assertGood, canonicalize, isClosed } from "@jsxcad/geometry-path";
 
-import absolutifySvgPath from 'abs-svg-path';
-import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
-import curvifySvgPath from './curvify-svg-path/index.js';
-import { equals } from '@jsxcad/math-vec2';
-import { fromScaling } from '@jsxcad/math-mat4';
-import parseSvgPath from 'parse-svg-path';
-import simplifyPath from 'simplify-path';
-import { transform } from '@jsxcad/geometry-paths';
+import absolutifySvgPath from "abs-svg-path";
+import { buildAdaptiveCubicBezierCurve } from "@jsxcad/algorithm-shape";
+import curvifySvgPath from "./curvify-svg-path/index.js";
+import { equals } from "@jsxcad/math-vec2";
+import { fromScaling } from "@jsxcad/math-mat4";
+import parseSvgPath from "parse-svg-path";
+import simplifyPath from "simplify-path";
+import { transform } from "@jsxcad/geometry-paths";
 
 const simplify = (path, tolerance) => {
   if (isClosed(path)) {
@@ -29,7 +29,10 @@ const removeRepeatedPoints = (path) => {
   return unrepeated;
 };
 
-const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
+const toPaths = (
+  { curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 },
+  svgPath
+) => {
   const paths = [];
   let path = [null];
 
@@ -59,18 +62,25 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
   for (const segment of svgPath) {
     const [directive, ...args] = segment;
     switch (directive) {
-      case 'M': {
+      case "M": {
         maybeClosePath();
         newPath();
         const [x, y] = args;
         path.push([x, y]);
         break;
       }
-      case 'C': {
+      case "C": {
         const [x1, y1, x2, y2, x, y] = args;
         const start = path[path.length - 1];
-        const [xStart, yStart] = (start === null) ? [0, 0] : start;
-        path = path.concat(buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
+        const [xStart, yStart] = start === null ? [0, 0] : start;
+        path = path.concat(
+          buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [
+            [xStart, yStart],
+            [x1, y1],
+            [x2, y2],
+            [x, y],
+          ])
+        );
         break;
       }
       default: {
@@ -82,7 +92,7 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
   maybeClosePath();
   newPath();
 
-  const simplifiedPaths = paths.map(path => simplify(path, tolerance));
+  const simplifiedPaths = paths.map((path) => simplify(path, tolerance));
 
   if (normalizeCoordinateSystem) {
     // Turn it upside down.
@@ -93,7 +103,12 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
 };
 
 export const fromSvgPath = (svgPath, options = {}) => {
-  const paths = toPaths(options, curvifySvgPath(absolutifySvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))));
+  const paths = toPaths(
+    options,
+    curvifySvgPath(
+      absolutifySvgPath(parseSvgPath(new TextDecoder("utf8").decode(svgPath)))
+    )
+  );
   for (const path of paths) {
     assertGood(path);
   }

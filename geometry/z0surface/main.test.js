@@ -1,5 +1,5 @@
-import test from 'ava';
+import test from "ava";
 
-test('null', t => {
+test("null", (t) => {
   t.true(true);
 });

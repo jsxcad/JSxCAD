@@ -21,10 +21,10 @@ import {
   Y_SUB_27,
   Y_SUB_3,
   Y_SUB_81,
-  Y_SUB_9
-} from './dst';
+  Y_SUB_9,
+} from "./dst";
 
-import { scale } from '@jsxcad/geometry-paths';
+import { scale } from "@jsxcad/geometry-paths";
 
 export const createByteFetcher = (bytes) => {
   const bytesLength = bytes.length;
@@ -39,14 +39,14 @@ export const createByteFetcher = (bytes) => {
 };
 
 export const fetchHeader = (options = {}, fetchBytes) => {
-  function readBytes (prefix, field, converter, start, length, flag) {
+  function readBytes(prefix, field, converter, start, length, flag) {
     let bytes = fetchBytes(length);
-    if (field !== '') {
+    if (field !== "") {
       options[field] = converter(prefix, bytes);
     }
   }
 
-  function asString (prefix, bytes) {
+  function asString(prefix, bytes) {
     return Buffer.from(bytes).toString().slice(prefix.length).trim();
   }
 
@@ -59,20 +59,20 @@ export const fetchHeader = (options = {}, fetchBytes) => {
     }
   };
 
-  readBytes('LA:', 'label', asString, 0, 20); // Label
-  readBytes('ST:', 'stitchCount', asNumber, 20, 11);
-  readBytes('CO:', 'colorCount', asNumber, 31, 7);
-  readBytes('+X:', 'positiveX', asNumber, 38, 9);
-  readBytes('-X:', 'negativeX', asNumber, 47, 9);
-  readBytes('+Y:', 'positiveY', asNumber, 56, 9);
-  readBytes('-Y:', 'negativeY', asNumber, 65, 9);
-  readBytes('AX:', 'deltaX', asNumber, 74, 10, 'sign');
-  readBytes('AY:', 'deltaY', asNumber, 84, 10, 'sign');
-  readBytes('MX:', 'previousX', asNumber, 94, 10, 'sign');
-  readBytes('MY:', 'previousY', asNumber, 104, 10, 'sign');
-  readBytes('PD:', 'previousFile', asNumber, 114, 10);
-  readBytes('\x1a   ', '', '', 124, 4); // end of header
-  readBytes('', '', '', 128, 384); // block padding
+  readBytes("LA:", "label", asString, 0, 20); // Label
+  readBytes("ST:", "stitchCount", asNumber, 20, 11);
+  readBytes("CO:", "colorCount", asNumber, 31, 7);
+  readBytes("+X:", "positiveX", asNumber, 38, 9);
+  readBytes("-X:", "negativeX", asNumber, 47, 9);
+  readBytes("+Y:", "positiveY", asNumber, 56, 9);
+  readBytes("-Y:", "negativeY", asNumber, 65, 9);
+  readBytes("AX:", "deltaX", asNumber, 74, 10, "sign");
+  readBytes("AY:", "deltaY", asNumber, 84, 10, "sign");
+  readBytes("MX:", "previousX", asNumber, 94, 10, "sign");
+  readBytes("MY:", "previousY", asNumber, 104, 10, "sign");
+  readBytes("PD:", "previousFile", asNumber, 114, 10);
+  readBytes("\x1a   ", "", "", 124, 4); // end of header
+  readBytes("", "", "", 128, 384); // block padding
 
   return options;
 };
@@ -83,7 +83,7 @@ const fetchStitch = (fetchBytes) => {
   if (bytes.length === 3) {
     r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
   } else {
-    r = (END | JUMP_STITCH | PAUSE);
+    r = END | JUMP_STITCH | PAUSE;
   }
 
   let x = 0;
@@ -112,13 +112,13 @@ const fetchStitch = (fetchBytes) => {
 
   let flag;
   if ((r & (END | JUMP_STITCH | PAUSE)) === (END | JUMP_STITCH | PAUSE)) {
-    flag = 'end';
+    flag = "end";
   } else if ((r & (JUMP_STITCH | PAUSE)) === (JUMP_STITCH | PAUSE)) {
-    flag = 'color_change';
+    flag = "color_change";
   } else if (r & JUMP_STITCH) {
-    flag = 'jump';
+    flag = "jump";
   } else {
-    flag = 'stitch';
+    flag = "stitch";
   }
   return [x, y, flag];
 };
@@ -145,20 +145,20 @@ export const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
 
     switch (flag) {
       default:
-      case 'end': {
+      case "end": {
         finishPath();
         return paths;
       }
-      case 'color_change': {
+      case "color_change": {
         finishPath();
         path.push([x, y]);
         break;
       }
-      case 'jump': {
+      case "jump": {
         finishPath();
         break;
       }
-      case 'stitch': {
+      case "stitch": {
         path.push([x, y]);
       }
     }

@@ -1,4 +1,4 @@
-import { createService } from '@jsxcad/sys';
+import { createService } from "@jsxcad/sys";
 
 window.bootstrap = async () => {
   const agent = async ({ ask, question }) => {
@@ -6,18 +6,21 @@ window.bootstrap = async () => {
     console.log(`Was asked: ${JSON.stringify(question)}`);
   };
 
-  const { ask } = await createService({ webWorker: './maslowWorker.js', agent });
+  const { ask } = await createService({
+    webWorker: "./maslowWorker.js",
+    agent,
+  });
 
   const result = await ask({
     values: [10, 10],
-    key: 'rectangle'
+    key: "rectangle",
   });
 
   console.log(JSON.stringify(result));
 };
 
 document.onreadystatechange = () => {
-  if (document.readyState === 'complete') {
+  if (document.readyState === "complete") {
     window.bootstrap();
   }
 };

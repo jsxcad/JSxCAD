@@ -1,15 +1,18 @@
-import { add, normalize, rotateZ, scale, subtract } from '@jsxcad/math-vec3';
-import { fromPoints, intersectPointOfLines } from '@jsxcad/math-line2';
+import { add, normalize, rotateZ, scale, subtract } from "@jsxcad/math-vec3";
+import { fromPoints, intersectPointOfLines } from "@jsxcad/math-line2";
 
-import { getEdges } from '@jsxcad/geometry-path';
-import { getPaths } from '@jsxcad/geometry-tagged';
+import { getEdges } from "@jsxcad/geometry-path";
+import { getPaths } from "@jsxcad/geometry-tagged";
 
 const intersectionPoints = (cuts, overcut = 0) => {
   cuts.push(cuts[0]);
   var intersectionPointsList = [];
   var i = 0;
   while (i < cuts.length - 1) {
-    const point = intersectPointOfLines(fromPoints(...cuts[i]), fromPoints(...cuts[i + 1]));
+    const point = intersectPointOfLines(
+      fromPoints(...cuts[i]),
+      fromPoints(...cuts[i + 1])
+    );
     point.push(cuts[i][0][2]);
     if (overcut) {
       intersectionPointsList.push(cuts[i][1]);
@@ -20,7 +23,12 @@ const intersectionPoints = (cuts, overcut = 0) => {
   return intersectionPointsList;
 };
 
-export const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
+export const overcutPathEdges = (
+  path,
+  radius = 1,
+  overcut = 0,
+  joinPaths = false
+) => {
   var cuts = [];
   for (const [start, end] of getEdges(path)) {
     const direction = normalize(subtract(start, end));
@@ -39,7 +47,12 @@ export const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = fals
   return cuts;
 };
 
-export const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
+export const overcut = (
+  geometry,
+  radius = 1,
+  overcut = 0,
+  joinPaths = false
+) => {
   const cuts = [];
   for (const { paths } of getPaths(geometry)) {
     for (const path of paths) {

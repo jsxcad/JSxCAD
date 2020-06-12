@@ -1,4 +1,4 @@
-import { ask as askSys } from '@jsxcad/sys';
+import { ask as askSys } from "@jsxcad/sys";
 
 /**
  *
@@ -21,12 +21,15 @@ const askForString = async (identifier, value, options = {}) => {
 };
 
 const askForBool = async (identifier, value = false, options = {}) => {
-  return askForString(identifier, value, { ...options, choices: [true, false] });
+  return askForString(identifier, value, {
+    ...options,
+    choices: [true, false],
+  });
 };
 
 export const askForNumber = async (identifier, value = 0, options = {}) => {
   const result = await askForString(identifier, value, options);
-  if (typeof result === 'string') {
+  if (typeof result === "string") {
     try {
       return Number(result);
     } catch (e) {
@@ -45,7 +48,8 @@ ask.forBool = askForBool;
 
 export default ask;
 
-ask.signature = 'ask(parameter:string) -> number';
-ask.forNumber.signature = 'ask(parameter:string, value:number = 0) -> number';
-ask.forString.signature = 'ask(parameter:string, value) -> string';
-ask.forBool.signature = 'ask(parameter:string, value:boolean = false) -> boolean';
+ask.signature = "ask(parameter:string) -> number";
+ask.forNumber.signature = "ask(parameter:string, value:number = 0) -> number";
+ask.forString.signature = "ask(parameter:string, value) -> string";
+ask.forBool.signature =
+  "ask(parameter:string, value:boolean = false) -> boolean";

@@ -1,6 +1,6 @@
 /* global self */
 
-import { isWebWorker } from './browserOrNode';
+import { isWebWorker } from "./browserOrNode";
 
 let handleAskUser;
 
@@ -8,7 +8,7 @@ const askUser = async (identifier, options) => {
   if (handleAskUser) {
     return handleAskUser(identifier, options);
   } else {
-    return { identifier, value: '', type: 'string' };
+    return { identifier, value: "", type: "string" };
   }
 };
 

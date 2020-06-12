@@ -1,5 +1,3 @@
-import { toPdf } from './toPdf';
+import { toPdf } from "./toPdf";
 
-export {
-  toPdf
-};
+export { toPdf };

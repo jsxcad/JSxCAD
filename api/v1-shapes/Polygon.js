@@ -2,21 +2,28 @@ import {
   buildPolygonFromPoints,
   buildRegularPolygon,
   regularPolygonEdgeLengthToRadius,
-  toRadiusFromApothem
-} from '@jsxcad/algorithm-shape';
+  toRadiusFromApothem,
+} from "@jsxcad/algorithm-shape";
 
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from "@jsxcad/api-v1-shape";
 
-const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
+const unitPolygon = (sides = 16) =>
+  Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
-const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+const toRadiusFromEdge = (edge, sides) =>
+  edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-export const ofRadius = (radius, { sides = 16 } = {}) => unitPolygon(sides).scale(radius);
-export const ofEdge = (edge, { sides = 16 }) => ofRadius(toRadiusFromEdge(edge, sides), { sides });
-export const ofApothem = (apothem, { sides = 16 }) => ofRadius(toRadiusFromApothem(apothem, sides), { sides });
-export const ofDiameter = (diameter, ...args) => ofRadius(diameter / 2, ...args);
-export const ofPoints = (points) => Shape.fromGeometry(buildPolygonFromPoints(points));
+export const ofRadius = (radius, { sides = 16 } = {}) =>
+  unitPolygon(sides).scale(radius);
+export const ofEdge = (edge, { sides = 16 }) =>
+  ofRadius(toRadiusFromEdge(edge, sides), { sides });
+export const ofApothem = (apothem, { sides = 16 }) =>
+  ofRadius(toRadiusFromApothem(apothem, sides), { sides });
+export const ofDiameter = (diameter, ...args) =>
+  ofRadius(diameter / 2, ...args);
+export const ofPoints = (points) =>
+  Shape.fromGeometry(buildPolygonFromPoints(points));
 
 /**
  *

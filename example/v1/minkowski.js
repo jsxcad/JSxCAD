@@ -1,3 +1,3 @@
-await minkowski(Cube().front().right().above(),
-                Sphere())
-        .writeStl('stl/minkowski.stl');
+await minkowski(Cube().front().right().above(), Sphere()).writeStl(
+  "stl/minkowski.stl"
+);

@@ -1,4 +1,4 @@
-import { canonicalize as canonicalizePath } from '@jsxcad/geometry-path';
+import { canonicalize as canonicalizePath } from "@jsxcad/geometry-path";
 
 export const canonicalize = (paths) => {
   let canonicalized = paths.map(canonicalizePath);

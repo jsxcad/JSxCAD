@@ -1,7 +1,7 @@
-import { getPaths, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { getPaths, toKeptGeometry } from "@jsxcad/geometry-tagged";
 
-import Drawing from 'dxf-writer';
-import { getEdges } from '@jsxcad/geometry-path';
+import Drawing from "dxf-writer";
+import { getEdges } from "@jsxcad/geometry-path";
 
 export const toDxf = async (options = {}, geometry) => {
   const drawing = new Drawing();

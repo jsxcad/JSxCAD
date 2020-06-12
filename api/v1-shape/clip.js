@@ -1,7 +1,9 @@
-import { Shape } from './Shape';
-import { intersection } from './intersection';
+import { Shape } from "./Shape";
+import { intersection } from "./intersection";
 
-const clipMethod = function (...shapes) { return intersection(this, ...shapes); };
+const clipMethod = function (...shapes) {
+  return intersection(this, ...shapes);
+};
 Shape.prototype.clip = clipMethod;
 
-clipMethod.signature = 'Shape -> clip(...to:Shape) -> Shape';
+clipMethod.signature = "Shape -> clip(...to:Shape) -> Shape";

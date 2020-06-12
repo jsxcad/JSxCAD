@@ -1,7 +1,7 @@
-import Font from './Font';
+import Font from "./Font";
 
-export * from './Font';
+export * from "./Font";
 
-export { readFont } from './readFont';
+export { readFont } from "./readFont";
 
 export default Font;

@@ -17,33 +17,38 @@ Examples:
 #4 x 7/8" Phillips Flat Head Wood Screw, Zinc Plated (because zinc plating usually means that the fastener is made of steel, the word "steel" is often omitted in the description)
 */
 
-import { foot, inch } from '@jsxcad/api-v1-units';
+import { foot, inch } from "@jsxcad/api-v1-units";
 
-import { Cylinder } from '@jsxcad/api-v1-shapes';
-import WoodScrewDesignator from './WoodScrewDesignator';
-import { registerDesignator } from '@jsxcad/api-v1-item';
+import { Cylinder } from "@jsxcad/api-v1-shapes";
+import WoodScrewDesignator from "./WoodScrewDesignator";
+import { registerDesignator } from "@jsxcad/api-v1-item";
 
 const decode = (designator) => {
-  return WoodScrewDesignator
-      .tryParse(designator.toLowerCase())
-      .reduce((value, object) => ({ ...object, ...value, designator }), {});
+  return WoodScrewDesignator.tryParse(designator.toLowerCase()).reduce(
+    (value, object) => ({ ...object, ...value, designator }),
+    {}
+  );
 };
 
 export const WoodScrew = ({
-  fastenerName = 'wood screw',
+  fastenerName = "wood screw",
   headType,
   driveStyle,
   inchDiameter,
   feetLength,
-  material = 'steel',
+  material = "steel",
   mmDiameter,
   mmLength,
   protectiveFinish,
-  designator
+  designator,
 }) => {
-  if (feetLength) { mmLength = feetLength * foot; }
-  if (inchDiameter) { mmDiameter = inchDiameter * inch; }
-  return Cylinder(mmDiameter, mmLength).material('thread').Item(designator);
+  if (feetLength) {
+    mmLength = feetLength * foot;
+  }
+  if (inchDiameter) {
+    mmDiameter = inchDiameter * inch;
+  }
+  return Cylinder(mmDiameter, mmLength).material("thread").Item(designator);
 };
 export default WoodScrew;
 

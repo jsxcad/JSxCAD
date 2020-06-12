@@ -5,11 +5,11 @@
 
 // Note that merging produces duplicate points.
 
-import { eachLink } from './eachLink';
-import { equalsPlane } from './junction';
-import { toPlane } from './toPlane';
+import { eachLink } from "./eachLink";
+import { equalsPlane } from "./junction";
+import { toPlane } from "./toPlane";
 
-const merged = Symbol('merged');
+const merged = Symbol("merged");
 
 /**
  * merge
@@ -31,11 +31,13 @@ export const merge = (loops) => {
    */
   const walk = (loop) => {
     if (loop[merged] || loop.next === undefined) return;
-    eachLink(loop, link => { link[merged] = true; });
+    eachLink(loop, (link) => {
+      link[merged] = true;
+    });
     let link = loop;
     do {
       if (link.face !== link.next.face) {
-        throw Error('die');
+        throw Error("die");
       }
       const twin = link.twin;
       if (twin === undefined) {
@@ -51,12 +53,12 @@ export const merge = (loops) => {
         const linkNext = link.next;
         const twinNext = twin.next;
 
-        if (linkNext.dead) throw Error('die');
-        if (twinNext.dead) throw Error('die');
-        if (twin.twin !== link) throw Error('die');
+        if (linkNext.dead) throw Error("die");
+        if (twinNext.dead) throw Error("die");
+        if (twin.twin !== link) throw Error("die");
 
-        if (twinNext === link) throw Error('die');
-        if (linkNext === twin) throw Error('die');
+        if (twinNext === link) throw Error("die");
+        if (linkNext === twin) throw Error("die");
 
         link.twin = undefined;
         twin.twin = undefined;
@@ -69,10 +71,14 @@ export const merge = (loops) => {
         twin.from = linkNext;
         linkNext.to = twin;
 
-        if (link.twin) { link.twin.twin = link; }
-        if (twin.twin) { twin.twin.twin = twin; }
+        if (link.twin) {
+          link.twin.twin = link;
+        }
+        if (twin.twin) {
+          twin.twin.twin = twin;
+        }
 
-        if (twin.next === twin) throw Error('die');
+        if (twin.next === twin) throw Error("die");
 
         linkNext.face = undefined;
         linkNext.next = undefined;
@@ -90,7 +96,7 @@ export const merge = (loops) => {
         loop = link;
 
         if (faces.has(loop)) {
-          throw Error('die');
+          throw Error("die");
         }
         faces.add(loop);
 
@@ -100,9 +106,13 @@ export const merge = (loops) => {
           link = link.next;
         } while (link !== loop);
       }
-      if (link.next === undefined) { throw Error('die'); }
+      if (link.next === undefined) {
+        throw Error("die");
+      }
       link = link.next;
-      if (link.to !== undefined) { throw Error('die'); }
+      if (link.to !== undefined) {
+        throw Error("die");
+      }
     } while (link !== loop);
     while (link !== link.face) link = link.face;
     return link.face;
@@ -115,11 +125,11 @@ export const merge = (loops) => {
     let containsFace = false;
     do {
       if (link.twin) {
-        if (link.twin.start !== link.next.start) throw Error('die');
-        if (link.twin.next.start !== link.start) throw Error('die');
+        if (link.twin.start !== link.next.start) throw Error("die");
+        if (link.twin.next.start !== link.start) throw Error("die");
       }
       if (link.dead) {
-        throw Error('die');
+        throw Error("die");
       }
       if (link === face) {
         containsFace = true;
@@ -127,7 +137,7 @@ export const merge = (loops) => {
       link = link.next;
     } while (link !== loop);
     if (containsFace === false) {
-      throw Error('die: Does not contain face');
+      throw Error("die: Does not contain face");
     }
   }
 
@@ -141,7 +151,7 @@ export const merge = (loops) => {
     // Test postconditions.
     let link = loop;
     do {
-      if (link.face.id !== loop.face.id) throw Error('die');
+      if (link.face.id !== loop.face.id) throw Error("die");
       link = link.next;
     } while (link !== loop);
     if (seen.has(loop.face)) {

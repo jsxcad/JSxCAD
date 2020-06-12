@@ -1,7 +1,7 @@
-import { add, distance, scale } from '@jsxcad/math-vec3';
-import { measureArea, measureBoundingBox } from '@jsxcad/geometry-tagged';
+import { add, distance, scale } from "@jsxcad/math-vec3";
+import { measureArea, measureBoundingBox } from "@jsxcad/geometry-tagged";
 
-import Shape from './Shape';
+import Shape from "./Shape";
 
 const X = 0;
 const Y = 1;
@@ -19,10 +19,12 @@ export const size = (shape) => {
   return { area, length, width, height, max, min, center, radius };
 };
 
-const sizeMethod = function () { return size(this); };
+const sizeMethod = function () {
+  return size(this);
+};
 Shape.prototype.size = sizeMethod;
 
 export default size;
 
-size.signature = 'size(shape:Shape) -> Size';
-sizeMethod.signature = 'Shape -> size() -> Size';
+size.signature = "size(shape:Shape) -> Size";
+sizeMethod.signature = "Shape -> size() -> Size";

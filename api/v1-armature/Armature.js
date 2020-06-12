@@ -5,8 +5,8 @@ import {
   createPinnedConstraint,
   positions,
   solve,
-  verlet
-} from '@jsxcad/algorithm-verlet';
+  verlet,
+} from "@jsxcad/algorithm-verlet";
 
 /**
  *
@@ -48,10 +48,10 @@ export const Armature = () => {
     compute,
     distance,
     isSolved,
-    pinned
+    pinned,
   };
 };
 
-Armature.signature = 'Armature() -> armature';
+Armature.signature = "Armature() -> armature";
 
 export default Armature;

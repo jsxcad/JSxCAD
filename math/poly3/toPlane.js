@@ -1,4 +1,4 @@
-import { fromPolygon } from '@jsxcad/math-plane';
+import { fromPolygon } from "@jsxcad/math-plane";
 
 export const toPlane = (polygon) => {
   if (polygon.plane === undefined) {

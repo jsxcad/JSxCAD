@@ -1,9 +1,9 @@
-import { equals } from './equals';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import test from 'ava';
+import { equals } from "./equals";
+import { fromPoints } from "./fromPoints";
+import { fromValues } from "./fromValues";
+import test from "ava";
 
-test('equals() should return correct booleans', (t) => {
+test("equals() should return correct booleans", (t) => {
   const line0 = fromValues(0, 0, 0);
   const line1 = fromValues(0, 0, 0);
   t.true(equals(line0, line1));
@@ -27,7 +27,7 @@ test('equals() should return correct booleans', (t) => {
   t.false(equals(line0, line7));
 });
 
-test('equals() should work on lines formed from colinear points', (t) => {
+test("equals() should work on lines formed from colinear points", (t) => {
   const a = [0, 0];
   const b = [1, 1];
   const ab = fromPoints(a, b);

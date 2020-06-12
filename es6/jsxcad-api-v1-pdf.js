@@ -1,8 +1,8 @@
-import { writeFile, addPending, emit } from './jsxcad-sys.js';
-import { getPlans, getLeafs } from './jsxcad-geometry-tagged.js';
-import Shape from './jsxcad-api-v1-shape.js';
-import { toPdf as toPdf$1 } from './jsxcad-convert-pdf.js';
-import { ensurePages } from './jsxcad-api-v1-plans.js';
+import { writeFile, addPending, emit } from "./jsxcad-sys.js";
+import { getPlans, getLeafs } from "./jsxcad-geometry-tagged.js";
+import Shape from "./jsxcad-api-v1-shape.js";
+import { toPdf as toPdf$1 } from "./jsxcad-convert-pdf.js";
+import { ensurePages } from "./jsxcad-api-v1-plans.js";
 
 const downloadPdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   // CHECK: Should this be limited to Page plans?
@@ -13,14 +13,20 @@ const downloadPdf = (shape, name, { lineWidth = 0.096 } = {}) => {
     for (let leaf of getLeafs(entry.content)) {
       const op = toPdf$1(leaf, { lineWidth, size });
       addPending(op);
-      entries.push({ data: op, filename: `${name}_${++index}.pdf`, type: 'application/pdf' });
+      entries.push({
+        data: op,
+        filename: `${name}_${++index}.pdf`,
+        type: "application/pdf",
+      });
     }
   }
   emit({ download: { entries } });
   return shape;
 };
 
-const downloadPdfMethod = function (...args) { return downloadPdf(this, ...args); };
+const downloadPdfMethod = function (...args) {
+  return downloadPdf(this, ...args);
+};
 Shape.prototype.downloadPdf = downloadPdfMethod;
 Shape.prototype.pdf = downloadPdfMethod;
 
@@ -35,7 +41,11 @@ const toPdf = async (shape, { lineWidth = 0.096 } = {}) => {
       const { size } = entry.plan.page;
       for (let leaf of getLeafs(entry.content)) {
         const pdf = await toPdf$1(leaf, { lineWidth, size });
-        pages.push({ pdf, leaf: { ...entry, content: leaf }, index: pages.length });
+        pages.push({
+          pdf,
+          leaf: { ...entry, content: leaf },
+          index: pages.length,
+        });
       }
     }
   }
@@ -57,12 +67,18 @@ const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
     const { size } = entry.plan.page;
     for (let leaf of getLeafs(entry.content)) {
       const pdf = await toPdf$1(leaf, { lineWidth, size });
-      await writeFile({ doSerialize: false }, `output/${name}_${index}.pdf`, pdf);
+      await writeFile(
+        { doSerialize: false },
+        `output/${name}_${index}.pdf`,
+        pdf
+      );
     }
   }
 };
 
-const writePdfMethod = function (...args) { return writePdf(this, ...args); };
+const writePdfMethod = function (...args) {
+  return writePdf(this, ...args);
+};
 Shape.prototype.writePdf = writePdfMethod;
 
 const api = { toPdf, writePdf };

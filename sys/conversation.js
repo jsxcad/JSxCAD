@@ -2,7 +2,9 @@ export const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = {};
   const ask = (question) => {
-    const promise = new Promise((resolve, reject) => { openQuestions[id] = { resolve, reject }; });
+    const promise = new Promise((resolve, reject) => {
+      openQuestions[id] = { resolve, reject };
+    });
     say({ id, question });
     id += 1;
     return promise;
@@ -10,7 +12,7 @@ export const conversation = ({ agent, say }) => {
   const hear = async (message) => {
     const { id, question, answer, error } = message;
     // Check hasOwnProperty to detect undefined values.
-    if (message.hasOwnProperty('answer')) {
+    if (message.hasOwnProperty("answer")) {
       const { resolve, reject } = openQuestions[id];
       if (error) {
         reject(error);
@@ -18,11 +20,11 @@ export const conversation = ({ agent, say }) => {
         resolve(answer);
       }
       delete openQuestions[id];
-    } else if (message.hasOwnProperty('question')) {
+    } else if (message.hasOwnProperty("question")) {
       const answer = await agent({ ask, question });
       say({ id, answer });
     } else {
-      throw Error('die');
+      throw Error("die");
     }
   };
   return { ask, hear };

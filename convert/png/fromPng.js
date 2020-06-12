@@ -1,4 +1,4 @@
-import UPNG from 'upng-js';
+import UPNG from "upng-js";
 
 export const fromPng = async (data) => {
   const img = UPNG.decode(data);

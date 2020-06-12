@@ -1,5 +1,5 @@
-import colors from './colors';
-import { proximity } from './proximity';
+import colors from "./colors";
+import { proximity } from "./proximity";
 
 const toEntryFromRgbInt = (rgbInt) => {
   const rgb = toArrayFromRgbInt(rgbInt);
@@ -19,7 +19,7 @@ const toRgbIntFromName = (name, defaultRgbInt = 0) => {
   let rgbInt;
   // Handle '#00ffbb'.
   if (rgbInt === undefined) {
-    if (name.startsWith('#')) {
+    if (name.startsWith("#")) {
       rgbInt = parseInt(name.substring(1), 16);
     }
   }
@@ -39,13 +39,16 @@ const toRgbIntFromName = (name, defaultRgbInt = 0) => {
   return rgbInt;
 };
 
-export const toArrayFromRgbInt = (rgbInt) =>
-  [(rgbInt >> 16) & 0xFF, (rgbInt >> 8) & 0xFF, (rgbInt >> 0) & 0xFF];
+export const toArrayFromRgbInt = (rgbInt) => [
+  (rgbInt >> 16) & 0xff,
+  (rgbInt >> 8) & 0xff,
+  (rgbInt >> 0) & 0xff,
+];
 
 export const toRgbIntFromTags = (tags = [], defaultRgb = [0, 0, 0]) => {
   let rgb = defaultRgb;
   for (const tag of tags) {
-    if (tag.startsWith('color/')) {
+    if (tag.startsWith("color/")) {
       let entry = toRgbIntFromName(tag.substring(6));
       if (entry !== undefined) {
         return entry;
@@ -63,12 +66,13 @@ export const toTagFromName = (name) => {
   return `color/unknown`;
 };
 
-export const toTagFromRgbInt = (rgbInt, defaultTag = 'color/black') =>
-  toTagFromName(`#${rgbInt.toString(16).padStart(6, '0')}`);
+export const toTagFromRgbInt = (rgbInt, defaultTag = "color/black") =>
+  toTagFromName(`#${rgbInt.toString(16).padStart(6, "0")}`);
 
 export const toTagsFromName = (name) => [toTagFromName(name)];
 
-export const toRgbFromName = (name) => toArrayFromRgbInt(toRgbIntFromName(name));
+export const toRgbFromName = (name) =>
+  toArrayFromRgbInt(toRgbIntFromName(name));
 
 export const toRgbFromTags = (tags, defaultRgb) => {
   const rgbInt = toRgbIntFromTags(tags, null);

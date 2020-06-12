@@ -1,7 +1,7 @@
-import { fromSurface, toSurface } from './convert';
+import { fromSurface, toSurface } from "./convert";
 
-import { doesNotOverlap } from './doesNotOverlap';
-import polygonClipping from 'polygon-clipping';
+import { doesNotOverlap } from "./doesNotOverlap";
+import polygonClipping from "polygon-clipping";
 
 /**
  * Return a surface representing the difference between the first surface
@@ -34,7 +34,9 @@ export const difference = (minuend, ...subtrahends) => {
     if (doesNotOverlap(minuend, subtrahend)) {
       continue;
     }
-    minuend = toSurface(polygonClipping.difference(fromSurface(minuend), fromSurface(subtrahend)));
+    minuend = toSurface(
+      polygonClipping.difference(fromSurface(minuend), fromSurface(subtrahend))
+    );
   }
   return minuend;
 };

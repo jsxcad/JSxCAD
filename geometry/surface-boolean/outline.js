@@ -1,8 +1,8 @@
-import { outline as outlineZ0Surface } from '@jsxcad/geometry-z0surface-boolean';
+import { outline as outlineZ0Surface } from "@jsxcad/geometry-z0surface-boolean";
 
-import { toPlane } from './toPlane';
-import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from './transform';
+import { toPlane } from "./toPlane";
+import { toXYPlaneTransforms } from "@jsxcad/math-plane";
+import { transform } from "./transform";
 
 export const outline = (surface) => {
   // FIX: Detect when the surfaces aren't in the same plane.

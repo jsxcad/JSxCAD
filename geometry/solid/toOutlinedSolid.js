@@ -1,4 +1,4 @@
-import { outline as outlineSurface } from '@jsxcad/geometry-surface';
+import { outline as outlineSurface } from "@jsxcad/geometry-surface";
 
 export const toOutlinedSolid = (solid, normalize) => {
   const outlines = [];

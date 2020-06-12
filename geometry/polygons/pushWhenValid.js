@@ -1,5 +1,5 @@
-import { fromPolygon } from '@jsxcad/math-plane';
-import { squaredDistance } from '@jsxcad/math-vec3';
+import { fromPolygon } from "@jsxcad/math-plane";
+import { squaredDistance } from "@jsxcad/math-vec3";
 
 // const EPSILON = 1e-5;
 const EPSILON2 = 1e-10;

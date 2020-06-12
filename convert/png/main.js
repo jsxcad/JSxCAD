@@ -1,5 +1,3 @@
-import { fromPng } from './fromPng';
+import { fromPng } from "./fromPng";
 
-export {
-  fromPng
-};
+export { fromPng };

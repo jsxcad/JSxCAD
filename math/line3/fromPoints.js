@@ -1,5 +1,5 @@
-import { fromPointAndDirection } from './fromPointAndDirection';
-import { subtract } from '@jsxcad/math-vec3';
+import { fromPointAndDirection } from "./fromPointAndDirection";
+import { subtract } from "@jsxcad/math-vec3";
 
 /**
  * Creates a new 3D line that passes through the given points.

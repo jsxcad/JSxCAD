@@ -1,5 +1,5 @@
-import { isNotVoid } from './isNotVoid';
-import { visit } from './visit';
+import { isNotVoid } from "./isNotVoid";
+import { visit } from "./visit";
 
 export const eachNonVoidItem = (geometry, op) => {
   const walk = (geometry, descend) => {

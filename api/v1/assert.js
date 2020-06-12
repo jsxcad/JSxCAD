@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from "./Shape";
 
 export const assert = (value, message, pass) => {
   if (pass !== true) {
@@ -8,7 +8,7 @@ export const assert = (value, message, pass) => {
 };
 
 export const assertBoolean = (value) => {
-  if (typeof value !== 'boolean') {
+  if (typeof value !== "boolean") {
     throw Error(`Not a boolean: ${value}`);
   }
   return true;
@@ -25,7 +25,7 @@ export const assertEmpty = (value) => {
 };
 
 export const assertFunction = (value) => {
-  if (typeof value !== 'function') {
+  if (typeof value !== "function") {
     throw Error(`Is not function: ${value}`);
   }
   return true;
@@ -39,7 +39,7 @@ export const assertShape = (value) => {
 };
 
 export const assertString = (value) => {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return true;
   }
   throw Error(`Is not string: ${value}`);
@@ -53,7 +53,10 @@ export const assertEquals = (value, match) => {
 };
 
 export const assertStrings = (value) => {
-  if (value instanceof Array && value.every(item => typeof item === 'string')) {
+  if (
+    value instanceof Array &&
+    value.every((item) => typeof item === "string")
+  ) {
     return true;
   }
   throw Error(`Is not a list of strings: ${value}`);
@@ -90,7 +93,7 @@ export const assertPoints = (value) => {
 
 export const assertNonZeroNumber = (...values) => {
   for (const value of values) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw Error(`Not a number: ${value}`);
     }
     if (value === 0) {
@@ -102,7 +105,7 @@ export const assertNonZeroNumber = (...values) => {
 
 export const assertNumber = (...values) => {
   for (const value of values) {
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       throw Error(`Not a number: ${value}`);
     }
   }

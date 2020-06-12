@@ -2,12 +2,7 @@ import {
   toRgbFromTags,
   toTagFromName,
   toTagFromRgbInt,
-  toTagsFromName
-} from './color';
+  toTagsFromName,
+} from "./color";
 
-export {
-  toRgbFromTags,
-  toTagFromName,
-  toTagFromRgbInt,
-  toTagsFromName
-};
+export { toRgbFromTags, toTagFromName, toTagFromRgbInt, toTagsFromName };

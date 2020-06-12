@@ -5,4 +5,5 @@
  * @param {vec4} b the second vec4
  * @returns {Number} dot product of a and b
  */
-export const dot = ([ax, ay, az, aw], [bx, by, bz, bw]) => (ax * bx) + (ay * by) + (az * bz) + (aw * bw);
+export const dot = ([ax, ay, az, aw], [bx, by, bz, bw]) =>
+  ax * bx + ay * by + az * bz + aw * bw;

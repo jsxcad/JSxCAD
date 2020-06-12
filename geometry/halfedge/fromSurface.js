@@ -4,7 +4,7 @@
  * @typedef {import("./types").Surface} Surface
  */
 
-import fromSolid from './fromSolid';
+import fromSolid from "./fromSolid";
 
 /**
  * fromSurface
@@ -14,6 +14,7 @@ import fromSolid from './fromSolid';
  * @param {Normalizer} normalize
  * @returns {Loops}
  */
-export const fromSurface = (surface, normalize) => fromSolid([surface], normalize, /* closed= */false);
+export const fromSurface = (surface, normalize) =>
+  fromSolid([surface], normalize, /* closed= */ false);
 
 export default fromSurface;

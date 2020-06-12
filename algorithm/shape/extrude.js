@@ -1,29 +1,20 @@
 import {
   flip as flipPath,
-  translate as translatePath
-} from '@jsxcad/geometry-path';
+  translate as translatePath,
+} from "@jsxcad/geometry-path";
 
 import {
   flip as flipSurface,
-  translate as translateSurface
-} from '@jsxcad/geometry-surface';
+  translate as translateSurface,
+} from "@jsxcad/geometry-surface";
 
-import {
-  makeConvex,
-  outline
-} from '@jsxcad/geometry-z0surface-boolean';
+import { makeConvex, outline } from "@jsxcad/geometry-z0surface-boolean";
 
-import {
-  cache
-} from '@jsxcad/cache';
+import { cache } from "@jsxcad/cache";
 
-import {
-  createNormalize2
-} from '@jsxcad/algorithm-quantize';
+import { createNormalize2 } from "@jsxcad/algorithm-quantize";
 
-import {
-  fromPolygons as toSolidFromPolygons
-} from '@jsxcad/geometry-solid';
+import { fromPolygons as toSolidFromPolygons } from "@jsxcad/geometry-solid";
 
 const extrudeImpl = (z0Surface, height = 1, depth = 0, cap = true) => {
   const normalize = createNormalize2();

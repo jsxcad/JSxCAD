@@ -5,6 +5,8 @@
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-export const max = ([ax, ay, az], [bx, by, bz]) => [Math.max(ax, bx),
-                                                    Math.max(ay, by),
-                                                    Math.max(az, bz)];
+export const max = ([ax, ay, az], [bx, by, bz]) => [
+  Math.max(ax, bx),
+  Math.max(ay, by),
+  Math.max(az, bz),
+];

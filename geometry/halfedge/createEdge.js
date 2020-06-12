@@ -21,6 +21,16 @@
  * @param {boolean=} spurLinkage
  * @returns {Edge}
  */
-export const createEdge = (start = [0, 0, 0], face, next, twin, holes, plane, id, dead, spurLinkage) => ({ start, face, next, twin, holes, plane, id, dead, spurLinkage });
+export const createEdge = (
+  start = [0, 0, 0],
+  face,
+  next,
+  twin,
+  holes,
+  plane,
+  id,
+  dead,
+  spurLinkage
+) => ({ start, face, next, twin, holes, plane, id, dead, spurLinkage });
 
 export default createEdge;

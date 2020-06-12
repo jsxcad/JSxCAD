@@ -1,11 +1,15 @@
-import { fromPolygons, makeWatertight } from './jsxcad-geometry-solid.js';
-import { canonicalize, toTriangles } from './jsxcad-geometry-polygons.js';
-import { toKeptGeometry, getSolids, isNotVoid } from './jsxcad-geometry-tagged.js';
-import { toPlane } from './jsxcad-math-poly3.js';
-import { union } from './jsxcad-geometry-solid-boolean.js';
+import { fromPolygons, makeWatertight } from "./jsxcad-geometry-solid.js";
+import { canonicalize, toTriangles } from "./jsxcad-geometry-polygons.js";
+import {
+  toKeptGeometry,
+  getSolids,
+  isNotVoid,
+} from "./jsxcad-geometry-tagged.js";
+import { toPlane } from "./jsxcad-math-poly3.js";
+import { union } from "./jsxcad-geometry-solid-boolean.js";
 
 function parse(str) {
-  if(typeof str !== 'string') {
+  if (typeof str !== "string") {
     str = str.toString();
   }
 
@@ -14,35 +18,34 @@ function parse(str) {
   var faceNormals = [];
   var name = null;
 
-  var lines = str.split('\n');
+  var lines = str.split("\n");
   var cell = [];
 
-  for(var i=0; i<lines.length; i++) {
-
+  for (var i = 0; i < lines.length; i++) {
     var parts = lines[i]
       .trim()
-      .split(' ')
-      .filter(function(part) {
-        return part !== '';
+      .split(" ")
+      .filter(function (part) {
+        return part !== "";
       });
 
-    switch(parts[0]) {
-      case 'solid':
-        name = parts.slice(1).join(' ');
+    switch (parts[0]) {
+      case "solid":
+        name = parts.slice(1).join(" ");
         break;
-      case 'facet':
+      case "facet":
         var normal = parts.slice(2).map(Number);
         faceNormals.push(normal);
         break;
-      case 'vertex':
+      case "vertex":
         var position = parts.slice(1).map(Number);
         cell.push(positions.length);
         positions.push(position);
         break;
-      case 'endfacet':
+      case "endfacet":
         cells.push(cell);
         cell = [];
-        // skip
+      // skip
     }
   }
 
@@ -50,7 +53,7 @@ function parse(str) {
     positions: positions,
     cells: cells,
     faceNormals: faceNormals,
-    name: name
+    name: name,
   };
 }
 
@@ -60,9 +63,11 @@ var parseStlAscii = parse;
 
 const LITTLE_ENDIAN = true;
 
-const readVector = (view, off) => [view.getFloat32(off + 0, LITTLE_ENDIAN),
-                                   view.getFloat32(off + 4, LITTLE_ENDIAN),
-                                   view.getFloat32(off + 8, LITTLE_ENDIAN)];
+const readVector = (view, off) => [
+  view.getFloat32(off + 0, LITTLE_ENDIAN),
+  view.getFloat32(off + 4, LITTLE_ENDIAN),
+  view.getFloat32(off + 8, LITTLE_ENDIAN),
+];
 
 const parse$1 = (data) => {
   const view = new DataView(data.buffer);
@@ -96,19 +101,22 @@ const parse$1 = (data) => {
   return {
     positions: positions,
     cells: cells,
-    faceNormals: faceNormals
+    faceNormals: faceNormals,
   };
 };
 
 const toParser = (format) => {
   switch (format) {
-    case 'ascii': return parseStlAscii;
-    case 'binary': return parse$1;
-    default: throw Error('die');
+    case "ascii":
+      return parseStlAscii;
+    case "binary":
+      return parse$1;
+    default:
+      throw Error("die");
   }
 };
 
-const fromStl = async (stl, { format = 'ascii' } = {}) => {
+const fromStl = async (stl, { format = "ascii" } = {}) => {
   const parse = toParser(format);
   const { positions, cells } = parse(stl);
   const polygons = [];
@@ -139,31 +147,39 @@ const fromSolidToTriangles = (solid) => {
 
 const toStl = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(geometry);
-  let solids = getSolids(keptGeometry).filter(solid => isNotVoid(solid)).map(({ solid }) => solid);
+  let solids = getSolids(keptGeometry)
+    .filter((solid) => isNotVoid(solid))
+    .map(({ solid }) => solid);
   const triangles = fromSolidToTriangles(union(...solids));
-  const output = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
-  return new TextEncoder('utf8').encode(output);
+  const output = `solid JSxCAD\n${convertToFacets(
+    options,
+    canonicalize(triangles)
+  )}\nendsolid JSxCAD\n`;
+  return new TextEncoder("utf8").encode(output);
 };
 
 const convertToFacets = (options, polygons) =>
-  polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
+  polygons
+    .map(convertToFacet)
+    .filter((facet) => facet !== undefined)
+    .join("\n");
 
-const toStlVector = vector =>
-  `${vector[0]} ${vector[1]} ${vector[2]}`;
+const toStlVector = (vector) => `${vector[0]} ${vector[1]} ${vector[2]}`;
 
-const toStlVertex = vertex =>
-  `vertex ${toStlVector(vertex)}`;
+const toStlVertex = (vertex) => `vertex ${toStlVector(vertex)}`;
 
 const convertToFacet = (polygon) => {
   const plane = toPlane(polygon);
   if (plane !== undefined) {
-    return `facet normal ${toStlVector(toPlane(polygon))}\n` +
-           `outer loop\n` +
-           `${toStlVertex(polygon[0])}\n` +
-           `${toStlVertex(polygon[1])}\n` +
-           `${toStlVertex(polygon[2])}\n` +
-           `endloop\n` +
-           `endfacet`;
+    return (
+      `facet normal ${toStlVector(toPlane(polygon))}\n` +
+      `outer loop\n` +
+      `${toStlVertex(polygon[0])}\n` +
+      `${toStlVertex(polygon[1])}\n` +
+      `${toStlVertex(polygon[2])}\n` +
+      `endloop\n` +
+      `endfacet`
+    );
   }
 };
 

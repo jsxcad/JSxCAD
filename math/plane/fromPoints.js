@@ -1,4 +1,4 @@
-import { cross, dot, subtract, unit } from '@jsxcad/math-vec3';
+import { cross, dot, subtract, unit } from "@jsxcad/math-vec3";
 
 /**
  * Create a new plane from the given points

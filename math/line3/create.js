@@ -1,5 +1,5 @@
-import { fromPointAndDirection } from './fromPointAndDirection';
-import { fromValues } from '@jsxcad/math-vec3';
+import { fromPointAndDirection } from "./fromPointAndDirection";
+import { fromValues } from "@jsxcad/math-vec3";
 
 /**
  * Create an unbounded 3D line, positioned at 0,0,0 and lying on the X axis.
