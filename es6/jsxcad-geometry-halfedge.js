@@ -261,30 +261,22 @@ const equalsPlane = (a, b) => {
 };
 
 /**
- * junctionSelector
+ * getPlanesOfPoint
  *
- * @function
- * @param {Solid} solid
- * @param {Normalizer} normalize
- * @returns {PointSelector}
+ * @param {Point} point
+ * @returns {Array<Plane>}
  */
-const junctionSelector = (solid, normalize) => {
-  const planesOfPoint = new Map();
+const getPlanesOfPoint = (planesOfPoint, point) => {
+  let planes = planesOfPoint.get(point);
+  if (planes === undefined) {
+    planes = [];
+    planesOfPoint.set(point, planes);
+  }
+  return planes;
+};
 
-  /**
-   * getPlanesOfPoint
-   *
-   * @param {Point} point
-   * @returns {Array<Plane>}
-   */
-  const getPlanesOfPoint = (point) => {
-    let planes = planesOfPoint.get(point);
-    if (planes === undefined) {
-      planes = [];
-      planesOfPoint.set(point, planes);
-    }
-    return planes;
-  };
+const computeJunctions = (solid, normalize) => {
+  const planesOfPoint = new Map();
 
   /**
    * considerJunction
@@ -294,13 +286,16 @@ const junctionSelector = (solid, normalize) => {
    * @returns {undefined}
    */
   const considerJunction = (point, planeOfPath) => {
-    let planes = getPlanesOfPoint(point);
+    let planes = getPlanesOfPoint(planesOfPoint, point);
     for (const plane of planes) {
       if (equalsPlane(plane, planeOfPath)) {
         return;
       }
     }
     planes.push(planeOfPath);
+    if (planes.length > 3) {
+      throw Error('die: non-manifold');
+    }
   };
 
   for (const surface of solid) {
@@ -311,9 +306,21 @@ const junctionSelector = (solid, normalize) => {
     }
   }
 
-  // A corner is defined as a point of intersection of three distinct planes.
-  /** @type {PointSelector} */
-  const select = (point) => getPlanesOfPoint(point).length >= 3;
+  return planesOfPoint;
+};
+
+/**
+ * junctionSelector
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {PointSelector}
+ */
+const junctionSelector = (solid, normalize) => {
+  const planesOfPoint = computeJunctions(solid, normalize);
+
+  const select = (point) => getPlanesOfPoint(planesOfPoint, point).length === 3;
 
   return select;
 };
@@ -395,6 +402,10 @@ const merged = Symbol('merged');
  * @returns {Loops}
  */
 const merge = (loops) => {
+  const faces = new Set();
+  for (const loop of loops) {
+    faces.add(loop.face);
+  }
   /**
    * walk
    *
@@ -410,8 +421,9 @@ const merge = (loops) => {
         throw Error('die');
       }
       const twin = link.twin;
-      // Ensure face cohesion.
       if (twin === undefined) ; else if (twin.face === link.face) ; else if (link.next === twin) ; else if (equalsPlane(toPlane(link), toPlane(twin))) {
+        faces.delete(link.face);
+        faces.delete(twin.face);
         // Merge the loops.
         const linkNext = link.next;
         const twinNext = twin.next;
@@ -454,6 +466,11 @@ const merge = (loops) => {
         // Ensure we do a complete pass over the merged loop.
         loop = link;
 
+        if (faces.has(loop)) {
+          throw Error('die');
+        }
+        faces.add(loop);
+
         // Update face affinity to detect self-merging.
         do {
           link.face = loop;
@@ -468,8 +485,11 @@ const merge = (loops) => {
     return link.face;
   };
 
+  // Test preconditions.
   for (const loop of loops) {
     let link = loop;
+    let face = link.face;
+    let containsFace = false;
     do {
       if (link.twin) {
         if (link.twin.start !== link.next.start) throw Error('die');
@@ -478,8 +498,14 @@ const merge = (loops) => {
       if (link.dead) {
         throw Error('die');
       }
+      if (link === face) {
+        containsFace = true;
+      }
       link = link.next;
     } while (link !== loop);
+    if (containsFace === false) {
+      throw Error('die: Does not contain face');
+    }
   }
 
   const seen = new Set();
@@ -489,6 +515,7 @@ const merge = (loops) => {
     if (loop.next === undefined) continue;
     if (loop.face === undefined) continue;
     if (loop.dead !== undefined) continue;
+    // Test postconditions.
     let link = loop;
     do {
       if (link.face.id !== loop.face.id) throw Error('die');
@@ -1491,12 +1518,13 @@ const selectBuildContour = (plane) => {
  * @param {PointSelector} selectJunction
  * @returns {void}
  */
-const pushConvexPolygons = (polygons, loop, selectJunction) => {
+const pushConvexPolygons = (polygons, loop, selectJunction, concavePolygons) => {
   const plane = toPlane(loop);
   const buildContour = selectBuildContour(plane);
   const points = [];
   const contour = [];
   buildContour(points, contour, loop, selectJunction);
+  concavePolygons.push(...points);
   const holes = [];
   if (loop.face.holes) {
     for (const hole of loop.face.holes) {
@@ -1558,6 +1586,7 @@ const toSolid = (loops, selectJunction) => {
   // FIX: Remove this tracking.
   const holes = new Set();
   for (const loop of loops) {
+    if (loop === undefined || loop.dead || loop.face === undefined) continue;
     if (loop.face.holes) {
       for (const hole of loop.face.holes) {
         holes.add(hole.face);
@@ -1572,12 +1601,13 @@ const toSolid = (loops, selectJunction) => {
    * @returns {void}
    */
   const walk = (loop) => {
-    if (loop === undefined || loop[walked] || loop.face === undefined) return;
+    if (loop === undefined || loop.dead || loop[walked] || loop.face === undefined) return;
     if (holes.has(loop.face)) return;
     eachLink(loop, (link) => { link[walked] = true; });
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
-    pushConvexPolygons(polygons, loop, selectJunction);
+    const concavePolygons = [];
+    pushConvexPolygons(polygons, loop, selectJunction, concavePolygons);
     solid.push(polygons);
   };
 
@@ -1602,13 +1632,19 @@ const toSolid = (loops, selectJunction) => {
  * @returns {Solid}
  */
 const cleanSolid = (solid, normalize) => {
-  const loops = fromSolid(solid, normalize, /* closed= */true);
-  const selectJunction = junctionSelector(solid, normalize);
-  const mergedLoops = merge(loops);
-  const cleanedLoops = mergedLoops.map(clean);
-  const splitLoops = split(cleanedLoops);
-  const cleanedSolid = toSolid(splitLoops, selectJunction);
-  return cleanedSolid;
+  // This is currently a best-effort operation, to support solids that are not
+  // properly 2-manifold.
+  try {
+    const loops = fromSolid(solid, normalize, /* closed= */true);
+    const selectJunction = junctionSelector(solid, normalize);
+    const mergedLoops = merge(loops);
+    const cleanedLoops = mergedLoops.map(clean);
+    const splitLoops = split(cleanedLoops);
+    const cleanedSolid = toSolid(splitLoops, selectJunction);
+    return cleanedSolid;
+  } catch (e) {
+    return solid;
+  }
 };
 
 /**

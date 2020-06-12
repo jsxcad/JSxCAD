@@ -29,11 +29,13 @@ const pushPolygon = (polygons, loop) => {
  */
 export const toSolid = (loops, selectJunction) => {
   const solid = [];
+  const concaveSolid = [];
 
   // Note holes so that we don't try to render them.
   // FIX: Remove this tracking.
   const holes = new Set();
   for (const loop of loops) {
+    if (loop === undefined || loop.dead || loop.face === undefined) continue;
     if (loop.face.holes) {
       for (const hole of loop.face.holes) {
         holes.add(hole.face);
@@ -48,13 +50,15 @@ export const toSolid = (loops, selectJunction) => {
    * @returns {void}
    */
   const walk = (loop) => {
-    if (loop === undefined || loop[walked] || loop.face === undefined) return;
+    if (loop === undefined || loop.dead || loop[walked] || loop.face === undefined) return;
     if (holes.has(loop.face)) return;
     eachLink(loop, (link) => { link[walked] = true; });
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
-    pushConvexPolygons(polygons, loop, selectJunction);
+    const concavePolygons = [];
+    pushConvexPolygons(polygons, loop, selectJunction, concavePolygons);
     solid.push(polygons);
+    concaveSolid.push(concavePolygons);
   };
 
   for (const loop of loops) {

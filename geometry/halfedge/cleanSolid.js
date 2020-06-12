@@ -19,13 +19,19 @@ import toSolid from './toSolid';
  * @returns {Solid}
  */
 export const cleanSolid = (solid, normalize) => {
-  const loops = fromSolid(solid, normalize, /* closed= */true);
-  const selectJunction = junctionSelector(solid, normalize);
-  const mergedLoops = merge(loops);
-  const cleanedLoops = mergedLoops.map(clean);
-  const splitLoops = split(cleanedLoops);
-  const cleanedSolid = toSolid(splitLoops, selectJunction);
-  return cleanedSolid;
+  // This is currently a best-effort operation, to support solids that are not
+  // properly 2-manifold.
+  try {
+    const loops = fromSolid(solid, normalize, /* closed= */true);
+    const selectJunction = junctionSelector(solid, normalize);
+    const mergedLoops = merge(loops);
+    const cleanedLoops = mergedLoops.map(clean);
+    const splitLoops = split(cleanedLoops);
+    const cleanedSolid = toSolid(splitLoops, selectJunction);
+    return cleanedSolid;
+  } catch (e) {
+    return solid;
+  }
 };
 
 export default cleanSolid;
