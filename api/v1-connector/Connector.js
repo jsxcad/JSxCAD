@@ -1,4 +1,4 @@
-import { getConnections, getPlans } from '@jsxcad/geometry-tagged';
+import { getConnections, visit } from '@jsxcad/geometry-tagged';
 
 import Plan from '@jsxcad/api-v1-plan';
 import Shape from '@jsxcad/api-v1-shape';
@@ -63,6 +63,7 @@ Shape.prototype.toConnector = toConnectorMethod;
  * # connectors
  *
  * Returns the set of connectors in an assembly by tag.
+ * Note that connectors inside Items are not visible.
  * See connect().
  *
  * ::: illustration { "view": { "position": [60, -60, 60], "target": [0, 0, 0] } }
@@ -77,11 +78,16 @@ Shape.prototype.toConnector = toConnectorMethod;
 
 export const connectors = (shape) => {
   const connectors = [];
-  for (const entry of getPlans(shape.toKeptGeometry())) {
-    if (entry.plan.connector && (entry.tags === undefined || !entry.tags.includes('compose/non-positive'))) {
-      connectors.push(Shape.fromGeometry(entry, { [shapeToConnect]: shape }));
+  const walk = (geometry, descend) => {
+    if (geometry.item) {
+
+    } else if (geometry.plan && geometry.plan.connector) {
+      connectors.push(Shape.fromGeometry(geometry, { [shapeToConnect]: shape }));
+    } else {
+      descend();
     }
-  }
+  };
+  visit(shape.toKeptGeometry(), walk);
   return connectors;
 };
 

@@ -22,6 +22,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "@jsxcad/api-v1-connector": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
     "@jsxcad/geometry-tagged": "^0.0.79"
   },
