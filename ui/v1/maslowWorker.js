@@ -80,28 +80,29 @@ const agent = async ({ ask, question }) => {
         const sweep = toolpath.sweep(api.Circle(values[1])).extrude(height);
         return overcutShape.cut(sweep).toKeptGeometry();
       case 'render':
-        var fromGeo = null;
-        if (values[1] === true && values[2] === false) { // Solid, no wireframe
-          fromGeo = api.Shape.fromGeometry(values[0]);
-        } else if (values[1] === false && values[2] === true) {
-          fromGeo = api.Shape.fromGeometry(values[0]).outline();
-        } else if (values[1] === true && values[2] === true) {
-          const intermediate = api.Shape.fromGeometry(values[0]);
-          fromGeo = intermediate.with(intermediate.outline());
-        } else {
-          fromGeo = api.Empty(); // This should be an empty geometry
+        var fromGeo = api.Empty(); // This should be an empty geometry;
+        
+        try{
+            if (values[1] === true && values[2] === false) { // Solid, no wireframe
+              fromGeo = api.Shape.fromGeometry(values[0]);
+            } else if (values[1] === false && values[2] === true) {
+              fromGeo = api.Shape.fromGeometry(values[0]).outline();
+            } else if (values[1] === true && values[2] === true) {
+              const intermediate = api.Shape.fromGeometry(values[0]);
+              fromGeo = intermediate.with(intermediate.outline());
+            }
+        }
+        catch(err){
+            console.log("Can't display in worker thread");
+            console.log(err);
         }
         return convertThree.toThreejsGeometry(fromGeo.toKeptGeometry());
       case 'rotate':
         return api.Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toKeptGeometry();
-      case 'scale':
-        return api.Shape.fromGeometry(values[0]).scale(values[1]).toKeptGeometry();
       case 'stl':
         const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
         const stlString = await toStl(inflated);
         return stlString;
-      case 'stretch':
-        return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toKeptGeometry();
       case 'svg':
         const svgString = await toSvg(api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
         return svgString;
@@ -142,9 +143,6 @@ const agent = async ({ ask, question }) => {
         oneProfile.geometry.paths.forEach(path => {
           completePath = completePath.concat(path);
         });
-
-        console.log('Complete path');
-        console.log(completePath);
 
         oneProfile.geometry.paths = [completePath];
 
