@@ -3,7 +3,12 @@
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
-import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
+import {
+  getBase,
+  getFilesystem,
+  qualifyPath,
+  setupFilesystem,
+} from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { db } from './db';
@@ -23,7 +28,11 @@ export const writeFile = async (options, path, data) => {
   //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   // }
 
-  const { doSerialize = true, ephemeral, workspace = getFilesystem() } = options;
+  const {
+    doSerialize = true,
+    ephemeral,
+    workspace = getFilesystem(),
+  } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
     log({ op: 'text', text: `Write ${path} of ${workspace}` });
@@ -45,15 +54,13 @@ export const writeFile = async (options, path, data) => {
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
-      } catch (error) {
-      }
+      } catch (error) {}
       try {
         if (doSerialize) {
           data = serialize(data);
         }
         await promises.writeFile(persistentPath, data);
-      } catch (error) {
-      }
+      } catch (error) {}
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {

@@ -40,7 +40,7 @@ const Armature = () => {
     compute,
     distance,
     isSolved,
-    pinned
+    pinned,
   };
 };
 

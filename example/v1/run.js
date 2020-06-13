@@ -18,16 +18,20 @@ export const run = async (target = process.argv[2], base = 'observed') => {
   console.log(`Observed Time: ${observedTime}`);
   const expectedTime = parseInt(readFileSync(`expected/${target}/time`));
   console.log(`Expected Time: ${expectedTime}`);
-  console.log(`Change in Time: ${(observedTime / expectedTime * 100).toFixed(2)}%`);
+  console.log(
+    `Change in Time: ${((observedTime / expectedTime) * 100).toFixed(2)}%`
+  );
 };
 
 export const isExpected = (t, path) => {
-  t.is(readFileSync(`jsxcad/observed/${path}`, { encoding: 'utf8' }),
-       readFileSync(`expected/${path}`, { encoding: 'utf8' }));
+  t.is(
+    readFileSync(`jsxcad/observed/${path}`, { encoding: 'utf8' }),
+    readFileSync(`expected/${path}`, { encoding: 'utf8' })
+  );
 };
 
 if (process.mainModule.filename === __filename) {
-  run().catch(e => {
+  run().catch((e) => {
     console.log(e.toString());
     console.log(e.stack);
   });

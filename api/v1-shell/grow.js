@@ -15,14 +15,18 @@ import shell from './shell';
  **/
 
 export const grow = (shape, amount = 1, { resolution = 16 } = {}) =>
-  (amount >= 0)
+  amount >= 0
     ? shape.union(shell(shape, amount, resolution))
     : shape.cut(shell(shape, -amount, resolution));
 
-const growMethod = function (...args) { return grow(this, ...args); };
+const growMethod = function (...args) {
+  return grow(this, ...args);
+};
 Shape.prototype.grow = growMethod;
 
 export default grow;
 
-grow.signature = 'grow(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-growMethod.signature = 'Shape -> grow(amount:number = 1, { resolution:number = 16 }) -> Shape';
+grow.signature =
+  'grow(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+growMethod.signature =
+  'Shape -> grow(amount:number = 1, { resolution:number = 16 }) -> Shape';

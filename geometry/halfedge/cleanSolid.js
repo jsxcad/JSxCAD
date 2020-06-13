@@ -22,7 +22,7 @@ export const cleanSolid = (solid, normalize) => {
   // This is currently a best-effort operation, to support solids that are not
   // properly 2-manifold.
   try {
-    const loops = fromSolid(solid, normalize, /* closed= */true);
+    const loops = fromSolid(solid, normalize, /* closed= */ true);
     const selectJunction = junctionSelector(solid, normalize);
     const mergedLoops = merge(loops);
     const cleanedLoops = mergedLoops.map(clean);

@@ -24,7 +24,9 @@ const writeGcode = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const method = function (options = {}) { return writeGcode(options, this); };
+const method = function (options = {}) {
+  return writeGcode(options, this);
+};
 Shape.prototype.writeGcode = method;
 
 const api = { writeGcode };

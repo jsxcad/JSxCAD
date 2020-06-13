@@ -7,4 +7,5 @@ import { negate } from '@jsxcad/math-vec3';
  * @param {line3} line the 3D line to reverse
  * @returns {line3} a new unbounded 3D line
  */
-export const reverse = ([point, unitDirection]) => fromPointAndDirection(point, negate(unitDirection));
+export const reverse = ([point, unitDirection]) =>
+  fromPointAndDirection(point, negate(unitDirection));

@@ -15,7 +15,7 @@ test('line3: distanceToPoint() should return proper values', (t) => {
 
   const line2 = fromPoints([-5, -5, -4], [5, 5, 6]);
   const dis4 = distanceToPoint([0, 0, 0], line2);
-  t.is(q(dis4), 0.81650);
+  t.is(q(dis4), 0.8165);
   const dis5 = distanceToPoint([1, 0, 0], line2);
   t.is(q(dis5), 1.41421);
   const dis6 = distanceToPoint([2, 0, 0], line2);

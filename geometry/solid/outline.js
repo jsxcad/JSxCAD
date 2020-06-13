@@ -1,6 +1,6 @@
 import {
   outline as outlineSurface,
-  toPlane as toPlaneFromSurface
+  toPlane as toPlaneFromSurface,
 } from '@jsxcad/geometry-surface';
 
 export const outline = (solid, normalize) => {

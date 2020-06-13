@@ -30,7 +30,10 @@ export const difference = (baseZ0Surface, ...z0Surfaces) => {
     if (doesNotOverlap(z0Surface, baseZ0Surface)) {
       continue;
     }
-    const result = polybooljs.difference(fromSurface(baseZ0Surface), fromSurface(z0Surface));
+    const result = polybooljs.difference(
+      fromSurface(baseZ0Surface),
+      fromSurface(z0Surface)
+    );
     baseZ0Surface = toSurface(result);
   }
   return baseZ0Surface;

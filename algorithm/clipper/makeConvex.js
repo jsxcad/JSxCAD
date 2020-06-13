@@ -1,4 +1,8 @@
-import { CLEAN_DISTANCE, RESOLUTION, fromSurfaceAsClosedPaths } from './convert';
+import {
+  CLEAN_DISTANCE,
+  RESOLUTION,
+  fromSurfaceAsClosedPaths,
+} from './convert';
 import { ClipType, PolyFillType, clipper } from './clipper-lib';
 import { flip, isClockwise } from '@jsxcad/geometry-path';
 
@@ -14,12 +18,11 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
   if (subjectInputs.length === 0) {
     return [];
   }
-  const request =
-    {
-      clipType: ClipType.Union,
-      subjectInputs,
-      subjectFillType: PolyFillType.Positive
-    };
+  const request = {
+    clipType: ClipType.Union,
+    subjectInputs,
+    subjectFillType: PolyFillType.Positive,
+  };
   const result = clipper.clipToPolyTree(request);
   const convexSurface = [];
 
@@ -39,9 +42,23 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [normalize([earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0]),
-                        normalize([earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0]),
-                        normalize([earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0])];
+      const triangle = [
+        normalize([
+          earContour[a * 2 + 0] / RESOLUTION,
+          earContour[a * 2 + 1] / RESOLUTION,
+          0,
+        ]),
+        normalize([
+          earContour[b * 2 + 0] / RESOLUTION,
+          earContour[b * 2 + 1] / RESOLUTION,
+          0,
+        ]),
+        normalize([
+          earContour[c * 2 + 0] / RESOLUTION,
+          earContour[c * 2 + 1] / RESOLUTION,
+          0,
+        ]),
+      ];
       convexSurface.push(triangle);
     }
   };
@@ -65,7 +82,9 @@ export const makeConvex = (surface, normalize = createNormalize2()) => {
     walkContour(child);
   }
 
-  const normalized = convexSurface.map(path => path.map(normalize)).filter(path => toPlane(path) !== undefined);
+  const normalized = convexSurface
+    .map((path) => path.map(normalize))
+    .filter((path) => toPlane(path) !== undefined);
   const rectified = [];
   for (const polygon of normalized) {
     if (isClockwise(polygon)) {

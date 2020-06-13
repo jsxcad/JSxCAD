@@ -7,8 +7,8 @@ export const Length = (length) => {
   return Plan({
     plan: { length },
     visualization: Path([0, 0, 0], [0, length, 0])
-        .add(Hershey(length / 10)(`L${dp2(length)}`).moveY(length / 2))
-        .color('red')
+      .add(Hershey(length / 10)(`L${dp2(length)}`).moveY(length / 2))
+      .color('red'),
   });
 };
 Plan.Length = Length;

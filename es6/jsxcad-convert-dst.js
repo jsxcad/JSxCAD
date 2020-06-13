@@ -1987,7 +1987,7 @@ const Y_ADD_81 = 1 << 5;
 const Y_SUB_81 = 1 << 4;
 const X_SUB_81 = 1 << 3;
 const X_ADD_81 = 1 << 2;
-const END = (Y_ADD_81 | Y_SUB_81);
+const END = Y_ADD_81 | Y_SUB_81;
 
 const createByteFetcher = (bytes) => {
   const bytesLength = bytes.length;
@@ -2002,14 +2002,14 @@ const createByteFetcher = (bytes) => {
 };
 
 const fetchHeader = (options = {}, fetchBytes) => {
-  function readBytes (prefix, field, converter, start, length, flag) {
+  function readBytes(prefix, field, converter, start, length, flag) {
     let bytes = fetchBytes(length);
     if (field !== '') {
       options[field] = converter(prefix, bytes);
     }
   }
 
-  function asString (prefix, bytes) {
+  function asString(prefix, bytes) {
     return Buffer.from(bytes).toString().slice(prefix.length).trim();
   }
 
@@ -2046,7 +2046,7 @@ const fetchStitch = (fetchBytes) => {
   if (bytes.length === 3) {
     r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
   } else {
-    r = (END | JUMP_STITCH | PAUSE);
+    r = END | JUMP_STITCH | PAUSE;
   }
 
   let x = 0;

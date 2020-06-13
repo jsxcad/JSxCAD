@@ -24,13 +24,12 @@ export const difference = (a, ...z0Surfaces) => {
       if (bPolygons.length === 0) {
         continue;
       }
-      const result = clipper.clipToPaths(
-        {
-          clipType: ClipType.Difference,
-          subjectInputs: [{ data: aPolygons, closed: true }],
-          clipInputs: [{ data: bPolygons, closed: true }],
-          subjectFillType: PolyFillType.Positive
-        });
+      const result = clipper.clipToPaths({
+        clipType: ClipType.Difference,
+        subjectInputs: [{ data: aPolygons, closed: true }],
+        clipInputs: [{ data: bPolygons, closed: true }],
+        subjectFillType: PolyFillType.Positive,
+      });
       a = toSurface(result, normalize);
     }
   }

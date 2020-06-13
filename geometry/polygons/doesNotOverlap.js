@@ -12,11 +12,23 @@ export const doesNotOverlap = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] <= minB[X] - iota * 10) { return true; }
-  if (maxA[Y] <= minB[Y] - iota * 10) { return true; }
-  if (maxA[Z] <= minB[Z] - iota * 10) { return true; }
-  if (maxB[X] <= minA[X] - iota * 10) { return true; }
-  if (maxB[Y] <= minA[Y] - iota * 10) { return true; }
-  if (maxB[Z] <= minA[Z] - iota * 10) { return true; }
+  if (maxA[X] <= minB[X] - iota * 10) {
+    return true;
+  }
+  if (maxA[Y] <= minB[Y] - iota * 10) {
+    return true;
+  }
+  if (maxA[Z] <= minB[Z] - iota * 10) {
+    return true;
+  }
+  if (maxB[X] <= minA[X] - iota * 10) {
+    return true;
+  }
+  if (maxB[Y] <= minA[Y] - iota * 10) {
+    return true;
+  }
+  if (maxB[Z] <= minA[Z] - iota * 10) {
+    return true;
+  }
   return false;
 };

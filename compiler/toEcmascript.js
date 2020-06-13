@@ -25,7 +25,7 @@ export const toEcmascript = async (script, options = {}) => {
   const parseOptions = {
     allowAwaitOutsideFunction: true,
     allowReturnOutsideFunction: true,
-    sourceType: 'module'
+    sourceType: 'module',
   };
   let ast = parse(script, parseOptions);
 
@@ -43,7 +43,11 @@ export const toEcmascript = async (script, options = {}) => {
     }
   };
 
-  const declareVariable = async (declaration, declarator, { doExport = false } = {}) => {
+  const declareVariable = async (
+    declaration,
+    declarator,
+    { doExport = false } = {}
+  ) => {
     const id = declarator.id.name;
     const code = strip(declarator);
     const dependencies = [];
@@ -79,13 +83,20 @@ export const toEcmascript = async (script, options = {}) => {
     // Now that we have the sha, we can predict if it can be read from cache.
     const meta = await read(`meta/def/${id}`);
     if (meta && meta.sha === sha) {
-      const readCode = strip(parse(`await read('data/def/${id}')`, parseOptions));
+      const readCode = strip(
+        parse(`await read('data/def/${id}')`, parseOptions)
+      );
       const readExpression = readCode.body[0].expression;
       const init = readExpression;
       out.push({ ...declaration, declarations: [{ ...declarator, init }] });
     } else {
       out.push({ ...declaration, declarations: [declarator] });
-      out.push(parse(`await write('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`, parseOptions));
+      out.push(
+        parse(
+          `await write('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
+          parseOptions
+        )
+      );
     }
   };
 
@@ -101,7 +112,9 @@ export const toEcmascript = async (script, options = {}) => {
       const declaration = entry.declaration;
       if (declaration.type === 'VariableDeclaration') {
         for (const declarator of declaration.declarations) {
-          await declareVariable(entry.declaration, declarator, { doExport: true });
+          await declareVariable(entry.declaration, declarator, {
+            doExport: true,
+          });
         }
       }
       // out.push(entry.declaration);
@@ -124,15 +137,28 @@ export const toEcmascript = async (script, options = {}) => {
         for (const { imported, local, type } of specifiers) {
           switch (type) {
             case 'ImportDefaultSpecifier':
-              out.push(parse(`const ${local.name} = (await importModule('${source.value}')).default;`, parseOptions));
+              out.push(
+                parse(
+                  `const ${local.name} = (await importModule('${source.value}')).default;`,
+                  parseOptions
+                )
+              );
               break;
             case 'ImportSpecifier':
-              out.push(parse(`const { ${imported.name} } = await importModule('${source.value}');`, parseOptions));
+              out.push(
+                parse(
+                  `const { ${imported.name} } = await importModule('${source.value}');`,
+                  parseOptions
+                )
+              );
               break;
           }
         }
       }
-    } else if (entry.type === 'ExpressionStatement' && entry.expression.type === 'ObjectExpression') {
+    } else if (
+      entry.type === 'ExpressionStatement' &&
+      entry.expression.type === 'ObjectExpression'
+    ) {
       out.push(entry);
     } else {
       out.push(entry);
@@ -142,6 +168,7 @@ export const toEcmascript = async (script, options = {}) => {
   // Return the exports as an object.
   out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
-  const result = '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
+  const result =
+    '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
   return result;
 };

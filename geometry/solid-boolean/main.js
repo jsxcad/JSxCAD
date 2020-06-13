@@ -1,7 +1,7 @@
-import { difference, intersection, union } from '@jsxcad/algorithm-bsp-surfaces';
-
-export {
+import {
   difference,
   intersection,
-  union
-};
+  union,
+} from '@jsxcad/algorithm-bsp-surfaces';
+
+export { difference, intersection, union };

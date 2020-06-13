@@ -1,4 +1,7 @@
-import { equals as equalsPlane, splitLineSegmentByPlane } from '@jsxcad/math-plane';
+import {
+  equals as equalsPlane,
+  splitLineSegmentByPlane,
+} from '@jsxcad/math-plane';
 // import { equals as equalsPoint, subtract } from '@jsxcad/math-vec3';
 
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
@@ -41,7 +44,13 @@ const splitConcave = (normalize, plane, points, polygonPlane, back, front) => {
     const nodes = [];
     let head = null;
     let tail = null;
-    const addLink = (point, type, next = null, link = null, visited = false) => {
+    const addLink = (
+      point,
+      type,
+      next = null,
+      link = null,
+      visited = false
+    ) => {
       const node = { point, type, next, link, visited };
       if (head === null) {
         head = node;
@@ -76,11 +85,21 @@ const splitConcave = (normalize, plane, points, polygonPlane, back, front) => {
     let node = head;
     do {
       const next = node.next;
-      if ((node.type === FRONT && next.type !== FRONT) ||
-          (node.type !== FRONT && next.type === FRONT)) {
+      if (
+        (node.type === FRONT && next.type !== FRONT) ||
+        (node.type !== FRONT && next.type === FRONT)
+      ) {
         // Interpolate a span-point.
-        const spanPoint = normalize(splitLineSegmentByPlane(plane, node.point, next.point));
-        const span = { point: spanPoint, type: COPLANAR, next, link: null, visited: true };
+        const spanPoint = normalize(
+          splitLineSegmentByPlane(plane, node.point, next.point)
+        );
+        const span = {
+          point: spanPoint,
+          type: COPLANAR,
+          next,
+          link: null,
+          visited: true,
+        };
         node.next = span;
         // Remember the split for ordering.
         spans.push(span);
@@ -131,7 +150,15 @@ const splitConcave = (normalize, plane, points, polygonPlane, back, front) => {
   }
 };
 
-const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, front) => {
+const splitPolygon = (
+  normalize,
+  plane,
+  polygon,
+  back,
+  abutting,
+  overlapping,
+  front
+) => {
   /*
     // This slows things down on average, probably due to not having the bounding sphere computed.
     // Check for non-intersection due to distance from the plane.
@@ -156,7 +183,11 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
       // const type = toType(plane, polygon[nth]);
       // const t = planeDistance(plane, point);
       const point = polygon[nth];
-      const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+      const t =
+        plane[0] * point[0] +
+        plane[1] * point[1] +
+        plane[2] * point[2] -
+        plane[3];
       if (t < -EPSILON) {
         polygonType |= BACK;
         pointType[nth] = BACK;
@@ -209,7 +240,9 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
         if ((startType | endType) === SPANNING) {
           // This should exclude COPLANAR points.
           // Compute the point that touches the splitting plane.
-          const spanPoint = normalize(splitLineSegmentByPlane(plane, startPoint, endPoint));
+          const spanPoint = normalize(
+            splitLineSegmentByPlane(plane, startPoint, endPoint)
+          );
           frontPoints.push(spanPoint);
           backPoints.push(spanPoint);
           spanPoints.push(spanPoint);
@@ -277,11 +310,4 @@ const splitPolygon = (normalize, plane, polygon, back, abutting, overlapping, fr
   }
 };
 
-export {
-  BACK,
-  COPLANAR_BACK,
-  COPLANAR_FRONT,
-  EPSILON,
-  FRONT,
-  splitPolygon
-};
+export { BACK, COPLANAR_BACK, COPLANAR_FRONT, EPSILON, FRONT, splitPolygon };

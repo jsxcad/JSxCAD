@@ -23,7 +23,9 @@ export const union = (...z0Surfaces) => {
     if (doesNotOverlapOrAbut(a, b)) {
       z0Surfaces.push([].concat(a, b));
     } else {
-      z0Surfaces.push(toSurface(polygonClipping.union(fromSurface(a), fromSurface(b))));
+      z0Surfaces.push(
+        toSurface(polygonClipping.union(fromSurface(a), fromSurface(b)))
+      );
     }
   }
   return z0Surfaces[0];

@@ -6,7 +6,11 @@ import { fromPolygon as toPlaneFromPolygon } from '@jsxcad/math-plane';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 const buildWalls = (polygons, floor, roof) => {
-  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
     // Remember that we are walking CCW.
     const a = deduplicate([floor[start], floor[end], roof[start]]);
     const b = deduplicate([floor[end], roof[end], roof[start]]);

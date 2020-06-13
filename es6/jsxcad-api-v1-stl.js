@@ -48,14 +48,20 @@ const downloadStl = (shape, name, options = {}) => {
     for (let leaf of getLeafs(entry.content)) {
       const op = toStl(leaf, options);
       addPending(op);
-      entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });
+      entries.push({
+        data: op,
+        filename: `${name}_${++index}.stl`,
+        type: 'application/sla',
+      });
     }
   }
   emit({ download: { entries } });
   return shape;
 };
 
-const downloadStlMethod = function (...args) { return downloadStl(this, ...args); };
+const downloadStlMethod = function (...args) {
+  return downloadStl(this, ...args);
+};
 Shape$1.prototype.downloadStl = downloadStlMethod;
 
 const writeStl = async (shape, name, options = {}) => {
@@ -63,17 +69,23 @@ const writeStl = async (shape, name, options = {}) => {
   for (const entry of ensurePages(shape.toKeptGeometry())) {
     for (let leaf of getLeafs(entry.content)) {
       const stl = await toStl(leaf, options);
-      await writeFile({ doSerialize: false }, `output/${name}_${index}.stl`, stl);
+      await writeFile(
+        { doSerialize: false },
+        `output/${name}_${index}.stl`,
+        stl
+      );
     }
   }
 };
 
-const method = function (...args) { return writeStl(this, ...args); };
+const method = function (...args) {
+  return writeStl(this, ...args);
+};
 Shape$1.prototype.writeStl = method;
 
 const api = {
   readStl,
-  writeStl
+  writeStl,
 };
 
 export default api;

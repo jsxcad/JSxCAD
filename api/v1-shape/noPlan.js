@@ -14,5 +14,7 @@ const noPlan = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const noPlanMethod = function (...tags) { return noPlan(this, tags); };
+const noPlanMethod = function (...tags) {
+  return noPlan(this, tags);
+};
 Shape.prototype.noPlan = noPlanMethod;

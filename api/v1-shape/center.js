@@ -31,7 +31,9 @@ export const center = (shape) => {
   return moved;
 };
 
-const centerMethod = function (...params) { return center(this, ...params); };
+const centerMethod = function (...params) {
+  return center(this, ...params);
+};
 Shape.prototype.center = centerMethod;
 
 export default center;

@@ -17,5 +17,5 @@ export {
   fromSolid,
   intersection,
   section,
-  union
+  union,
 };

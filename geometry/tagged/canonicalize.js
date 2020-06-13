@@ -20,8 +20,8 @@ export const canonicalize = (rawGeometry) => {
     canonicalized.content = canonicalize(geometry.content);
   } else if (geometry.connection) {
     canonicalized.connection = geometry.connection;
-    canonicalized.geometries = geometry.geometries.map(canonicalize); ;
-    canonicalized.connectors = geometry.connectors.map(canonicalize); ;
+    canonicalized.geometries = geometry.geometries.map(canonicalize);
+    canonicalized.connectors = geometry.connectors.map(canonicalize);
   } else if (geometry.surface !== undefined) {
     canonicalized.surface = canonicalizeSurface(geometry.surface);
   } else if (geometry.z0Surface !== undefined) {
@@ -33,7 +33,9 @@ export const canonicalize = (rawGeometry) => {
   } else if (geometry.layers !== undefined) {
     canonicalized.layers = geometry.layers.map(canonicalize);
   } else if (geometry.disjointAssembly !== undefined) {
-    canonicalized.disjointAssembly = geometry.disjointAssembly.map(canonicalize);
+    canonicalized.disjointAssembly = geometry.disjointAssembly.map(
+      canonicalize
+    );
   } else if (geometry.item !== undefined) {
     canonicalized.item = canonicalize(geometry.item);
   } else {

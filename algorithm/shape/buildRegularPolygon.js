@@ -19,7 +19,7 @@ import { fromAngleRadians } from '@jsxcad/math-vec2';
 const buildRegularPolygonImpl = (sides = 32) => {
   let points = [];
   for (let i = 0; i < sides; i++) {
-    let radians = 2 * Math.PI * i / sides;
+    let radians = (2 * Math.PI * i) / sides;
     let [x, y] = fromAngleRadians(radians);
     points.push([x, y, 0]);
   }

@@ -9,9 +9,9 @@ export default {
   input: 'dist/api.js',
   output: {
     file: 'dist/main.js',
-    format: 'module'
+    format: 'module',
   },
-  external (id) {
+  external(id) {
     return id.startsWith('./jsxcad-');
   },
   plugins: [
@@ -19,6 +19,10 @@ export default {
     commonjs(),
     globals(),
     nodeResolve({ preferBuiltins: true }),
-    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
-  ]
+    {
+      transform(code, id) {
+        return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
+      },
+    },
+  ],
 };

@@ -7641,7 +7641,12 @@ const toFloat = (integer) => integer / RESOLUTION;
 const fillType = PolyFillType.pftNonZero;
 
 const fromSurface = (surface, normalize) =>
-  surface.map(path => path.map(point => { const [X, Y] = normalize(point); return new IntPoint(toInt(X), toInt(Y)); }));
+  surface.map((path) =>
+    path.map((point) => {
+      const [X, Y] = normalize(point);
+      return new IntPoint(toInt(X), toInt(Y));
+    })
+  );
 
 const fromOpenPaths = (paths, normalize) => {
   const openPaths = [];
@@ -7695,9 +7700,16 @@ const toPaths = (clipper, op, normalize) => {
   for (const entry of result.m_AllPolys) {
     if (entry.m_polygon.length > 0) {
       if (entry.IsOpen) {
-        paths.push([null, ...entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)]))]);
+        paths.push([
+          null,
+          ...entry.m_polygon.map(({ X, Y }) =>
+            normalize([toFloat(X), toFloat(Y)])
+          ),
+        ]);
       } else {
-        paths.push(entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)])));
+        paths.push(
+          entry.m_polygon.map(({ X, Y }) => normalize([toFloat(X), toFloat(Y)]))
+        );
       }
     }
   }
@@ -7737,10 +7749,18 @@ const doesNotOverlapOrAbut = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] < minB[X] - iota) { return true; }
-  if (maxA[Y] < minB[Y] - iota) { return true; }
-  if (maxB[X] < minA[X] - iota) { return true; }
-  if (maxB[Y] < minA[Y] - iota) { return true; }
+  if (maxA[X] < minB[X] - iota) {
+    return true;
+  }
+  if (maxA[Y] < minB[Y] - iota) {
+    return true;
+  }
+  if (maxB[X] < minA[X] - iota) {
+    return true;
+  }
+  if (maxB[Y] < minA[Y] - iota) {
+    return true;
+  }
   return false;
 };
 
@@ -8512,7 +8532,7 @@ earcut_1.default = default_1;
 
 const { Clipper: Clipper$4, ClipType: ClipType$3, PolyTree: PolyTree$1, PolyType: PolyType$3 } = clipper;
 
-const makeConvex = (surface, normalize = p => p) => {
+const makeConvex = (surface, normalize = (p) => p) => {
   const clipper = new Clipper$4();
   clipper.AddPaths(fromSurface(surface, normalize), PolyType$3.ptSubject, true);
   const result = new PolyTree$1();
@@ -8536,9 +8556,11 @@ const makeConvex = (surface, normalize = p => p) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[contour[a * 2 + 0] / RESOLUTION, contour[a * 2 + 1] / RESOLUTION, 0],
-                        [contour[b * 2 + 0] / RESOLUTION, contour[b * 2 + 1] / RESOLUTION, 0],
-                        [contour[c * 2 + 0] / RESOLUTION, contour[c * 2 + 1] / RESOLUTION, 0]];
+      const triangle = [
+        [contour[a * 2 + 0] / RESOLUTION, contour[a * 2 + 1] / RESOLUTION, 0],
+        [contour[b * 2 + 0] / RESOLUTION, contour[b * 2 + 1] / RESOLUTION, 0],
+        [contour[c * 2 + 0] / RESOLUTION, contour[c * 2 + 1] / RESOLUTION, 0],
+      ];
       if (isClockwise(triangle)) {
         triangle.reverse();
       }

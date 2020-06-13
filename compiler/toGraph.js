@@ -21,13 +21,11 @@ export const strip = (ast) => {
 };
 
 export const toGraph = ({ includeSource = false }, script) => {
-  let ast = parse(script,
-                  {
-                    allowAwaitOutsideFunction: true,
-                    allowReturnOutsideFunction: true,
-                    sourceType: 'module'
-                  }
-  );
+  let ast = parse(script, {
+    allowAwaitOutsideFunction: true,
+    allowReturnOutsideFunction: true,
+    sourceType: 'module',
+  });
 
   const strippedAst = strip(ast);
 
@@ -60,7 +58,7 @@ export const toGraph = ({ includeSource = false }, script) => {
         return allocateNode({
           call: walkExpression(expression.callee),
           arguments: expression.arguments.map(walkExpression),
-          source: includeSource ? expression : undefined
+          source: includeSource ? expression : undefined,
         });
       }
       case 'MemberExpression': {
@@ -69,14 +67,14 @@ export const toGraph = ({ includeSource = false }, script) => {
           object: walkExpression(object),
           member: walkExpression(property),
           computed,
-          source: includeSource ? expression : undefined
+          source: includeSource ? expression : undefined,
         });
       }
       case 'NumericLiteral': {
         const { value } = expression;
         return allocateNode({
           number: value,
-          source: includeSource ? expression : undefined
+          source: includeSource ? expression : undefined,
         });
       }
       case 'Identifier': {
@@ -84,10 +82,13 @@ export const toGraph = ({ includeSource = false }, script) => {
         const identifier = findIdentifier(name);
         if (identifier === undefined) {
           // Undeclared identifier.
-          return addIdentifier(name, allocateNode({
-            identifier: name,
-            source: includeSource ? expression : undefined
-          }));
+          return addIdentifier(
+            name,
+            allocateNode({
+              identifier: name,
+              source: includeSource ? expression : undefined,
+            })
+          );
         } else {
           return identifier;
         }

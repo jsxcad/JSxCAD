@@ -9,15 +9,9 @@ const api = {
   crumple,
   skew,
   taper,
-  twist
+  twist,
 };
 
-export {
-  arch,
-  crumple,
-  skew,
-  taper,
-  twist
-};
+export { arch, crumple, skew, taper, twist };
 
 export default api;

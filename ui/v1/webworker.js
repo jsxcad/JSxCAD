@@ -16,11 +16,17 @@ const agent = async ({ ask, question }) => {
       const ecmascript = await toEcmascript(question.evaluate);
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`,
-                                   `return async () => { ${ecmascript} };`);
+      const builder = new Function(
+        `{ ${Object.keys(api).join(', ')} }`,
+        `return async () => { ${ecmascript} };`
+      );
       const module = await builder(api);
       await module();
-      await sys.log({ op: 'text', text: 'Evaluation Succeeded', level: 'serious' });
+      await sys.log({
+        op: 'text',
+        text: 'Evaluation Succeeded',
+        level: 'serious',
+      });
       await sys.log({ op: 'evaluate', status: 'success' });
       // Wait for any pending operations.
       sys.resolvePending();

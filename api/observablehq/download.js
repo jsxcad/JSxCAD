@@ -6,14 +6,18 @@ import { toZipFromFilesystem } from '@jsxcad/convert-zip';
 
 const doDownload = async (filename) => {
   const prefix = `${qualifyPath('output')}/`;
-  const filterPath = path => path.startsWith(prefix);
-  const transformPath = path => `${filename}/${path.substring(prefix.length)}`;
+  const filterPath = (path) => path.startsWith(prefix);
+  const transformPath = (path) =>
+    `${filename}/${path.substring(prefix.length)}`;
   const zip = await toZipFromFilesystem({ filterPath, transformPath });
   const blob = new Blob([zip.buffer], { type: 'application/zip' });
   saveAs(blob, `${filename}.zip`);
 };
 
-export const downloadAsZip = (filename = 'project.zip', { title = 'Download' } = {}) => {
+export const downloadAsZip = (
+  filename = 'project.zip',
+  { title = 'Download' } = {}
+) => {
   const button = document.createElement('button');
   button.textContent = title;
   button.onclick = () => doDownload(filename);

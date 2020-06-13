@@ -27,7 +27,7 @@ const api = {
   stretch,
   sweep,
   toolpath,
-  voxels
+  voxels,
 };
 
 export {
@@ -44,7 +44,7 @@ export {
   stretch,
   sweep,
   toolpath,
-  voxels
+  voxels,
 };
 
 export default api;

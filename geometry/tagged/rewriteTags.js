@@ -13,14 +13,20 @@ const buildCondition = (conditionTags, conditionSpec) => {
   }
 };
 
-const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) => {
+const rewriteTagsImpl = (
+  add,
+  remove,
+  geometry,
+  conditionTags,
+  conditionSpec
+) => {
   const condition = buildCondition(conditionTags, conditionSpec);
   const composeTags = (geometryTags) => {
     if (condition === undefined || condition(geometryTags)) {
       if (geometryTags === undefined) {
-        return add.filter(tag => !remove.includes(tag));
+        return add.filter((tag) => !remove.includes(tag));
       } else {
-        return [...add, ...geometryTags].filter(tag => !remove.includes(tag));
+        return [...add, ...geometryTags].filter((tag) => !remove.includes(tag));
       }
     } else {
       return geometryTags;
@@ -37,7 +43,8 @@ const rewriteTagsImpl = (add, remove, geometry, conditionTags, conditionSpec) =>
       const copy = { ...geometry };
       delete copy.tags;
       return copy;
-    } if (composedTags === geometry.tags) {
+    }
+    if (composedTags === geometry.tags) {
       return geometry;
     } else {
       return { ...geometry, tags: composedTags };

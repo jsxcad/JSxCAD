@@ -51717,7 +51717,12 @@ Object.defineProperties( OrbitControls.prototype, {
 
 } );
 
-const buildTrackballControls = ({ camera, render, viewerElement, view = {} }) => {
+const buildTrackballControls = ({
+  camera,
+  render,
+  viewerElement,
+  view = {},
+}) => {
   const { target = [0, 0, 0] } = view;
   const trackball = new OrbitControls(camera, viewerElement);
   trackball.keys = [65, 83, 68];
@@ -51739,18 +51744,20 @@ const buildGuiControls = ({ datasets, gui }) => {
   let count = 0;
   const controllers = {};
   for (const dataset of datasets) {
-    if (dataset.name === undefined) { continue; }
+    if (dataset.name === undefined) {
+      continue;
+    }
     let controller = controllers[dataset.name];
     if (controller === undefined) {
       const ui = gui.add({ visible: true }, 'visible').name(`${dataset.name}`);
       count += 1;
       controller = { ui, datasets: [] };
       controllers[dataset.name] = controller;
-      controller.ui.listen()
-          .onChange((value) =>
-            controller.datasets.forEach(dataset => {
-              dataset.mesh.visible = value;
-            }));
+      controller.ui.listen().onChange((value) =>
+        controller.datasets.forEach((dataset) => {
+          dataset.mesh.visible = value;
+        })
+      );
     }
     controller.datasets.push(dataset);
     dataset.controller = controller;
@@ -51759,7 +51766,12 @@ const buildGuiControls = ({ datasets, gui }) => {
   return count;
 };
 
-const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
+const createResizer = ({
+  camera,
+  renderer,
+  trackball,
+  viewerElement,
+}) => {
   const resize = () => {
     const width = viewerElement.clientWidth;
     const height = viewerElement.clientHeight;
@@ -51773,7 +51785,14 @@ const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
   return { resize };
 };
 
-const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
+const buildScene = ({
+  width,
+  height,
+  view,
+  withGrid = false,
+  withAxes = true,
+  renderer,
+}) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
@@ -51798,11 +51817,11 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
     scene.add(grid);
   }
 
-  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.50);
+  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
   hemiLight.position.set(0, 0, 300);
   scene.add(hemiLight);
 
-  const light = new DirectionalLight(0xffffff, 0.50);
+  const light = new DirectionalLight(0xffffff, 0.5);
   light.position.set(1, 1, 1);
   light.layers.set(0);
   camera.add(light);
@@ -51811,12 +51830,13 @@ const buildScene = ({ width, height, view, withGrid = false, withAxes = true, re
     renderer = new WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
     renderer.setSize(width, height);
-    renderer.setClearColor(0xFFFFFF);
+    renderer.setClearColor(0xffffff);
     renderer.antiAlias = false;
     renderer.inputGamma = true;
     renderer.outputGamma = true;
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+    renderer.domElement.style =
+      'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   }
   const canvas = renderer.domElement;
 
@@ -51851,7 +51871,12 @@ const loadTexture = (url) =>
 const basic = { metalness: 0.0, roughness: 0.5, reflectivity: 0.5 };
 const metal = { metalness: 0.0, roughness: 0.5, reflectivity: 0.8 };
 const transparent = { opacity: 0.5, transparent: true };
-const glass = { ...transparent, metalness: 0.0, clearCoat: 1, clearCoatRoughness: 0 };
+const glass = {
+  ...transparent,
+  metalness: 0.0,
+  clearCoat: 1,
+  clearCoatRoughness: 0,
+};
 
 const materialProperties = {
   basic,
@@ -51862,76 +51887,76 @@ const materialProperties = {
     metalness: 0.0,
     roughness: 0.9,
     reflectivity: 0.1,
-    emissiveIntensity: 0.25
+    emissiveIntensity: 0.25,
   },
   cardboard: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/cardboard.png'
+    map: 'https://jsxcad.js.org/texture/cardboard.png',
   },
   paper: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/paper.png'
+    map: 'https://jsxcad.js.org/texture/paper.png',
   },
   wood: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/wood.png'
+    map: 'https://jsxcad.js.org/texture/wood.png',
   },
   plastic: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/plastic.png'
+    map: 'https://jsxcad.js.org/texture/plastic.png',
   },
   leaves: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/leaves.png'
+    map: 'https://jsxcad.js.org/texture/leaves.png',
   },
   water: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/water.png'
+    map: 'https://jsxcad.js.org/texture/water.png',
   },
   grass: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/grass.png'
+    map: 'https://jsxcad.js.org/texture/grass.png',
   },
   brick: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/brick.png'
+    map: 'https://jsxcad.js.org/texture/brick.png',
   },
   circuit: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/circuit.png'
+    map: 'https://jsxcad.js.org/texture/circuit.png',
   },
   rock: {
     ...basic,
-    map: 'https://jsxcad.js.org/texture/rock.png'
+    map: 'https://jsxcad.js.org/texture/rock.png',
   },
   steel: {
     ...metal,
-    map: 'https://jsxcad.js.org/texture/sheet-metal.png'
+    map: 'https://jsxcad.js.org/texture/sheet-metal.png',
   },
   'zinc-steel': {
     ...metal,
-    map: 'https://jsxcad.js.org/texture/zinc-steel.png'
+    map: 'https://jsxcad.js.org/texture/zinc-steel.png',
   },
   thread: {
     ...metal,
-    map: 'https://jsxcad.js.org/texture/thread.png'
+    map: 'https://jsxcad.js.org/texture/thread.png',
   },
   aluminium: {
     ...metal,
-    map: 'https://jsxcad.js.org/texture/aluminium.png'
+    map: 'https://jsxcad.js.org/texture/aluminium.png',
   },
   brass: {
     ...metal,
-    map: 'https://jsxcad.js.org/texture/brass.png'
+    map: 'https://jsxcad.js.org/texture/brass.png',
   },
   copper: {
     ...metal,
-    map: 'https://jsxcad.js.org/texture/copper.png'
+    map: 'https://jsxcad.js.org/texture/copper.png',
   },
   'wet-glass': {
     ...glass,
-    map: 'https://jsxcad.js.org/texture/wet-glass.png'
-  }
+    map: 'https://jsxcad.js.org/texture/wet-glass.png',
+  },
 };
 
 const merge = async (properties, parameters) => {
@@ -51988,7 +52013,7 @@ const toName = (threejsGeometry) => {
 // FIX: Found it somewhere -- attribute.
 const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   const coords = [];
-  coords.length = 2 * geom.attributes.position.array.length / 3;
+  coords.length = (2 * geom.attributes.position.array.length) / 3;
 
   if (geom.attributes.uv === undefined) {
     geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
@@ -52023,8 +52048,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
 
       uv2.x = (v2.x - bbox.min.x) / bboxMaxSize;
       uv2.y = (bbox.max.z - v2.z) / bboxMaxSize;
-    } else
-    if (n.x > n.y && n.x > n.z) {
+    } else if (n.x > n.y && n.x > n.z) {
       uv0.x = (v0.z - bbox.min.z) / bboxMaxSize;
       uv0.y = (v0.y - bbox.min.y) / bboxMaxSize;
 
@@ -52033,8 +52057,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
 
       uv2.x = (v2.z - bbox.min.z) / bboxMaxSize;
       uv2.y = (v2.y - bbox.min.y) / bboxMaxSize;
-    } else
-    if (n.z > n.y && n.z > n.x) {
+    } else if (n.z > n.y && n.z > n.x) {
       uv0.x = (v0.x - bbox.min.x) / bboxMaxSize;
       uv0.y = (v0.y - bbox.min.y) / bboxMaxSize;
 
@@ -52048,7 +52071,8 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
     return { uv0, uv1, uv2 };
   };
 
-  if (geom.index) { // is it indexed buffer geometry?
+  if (geom.index) {
+    // is it indexed buffer geometry?
     for (let vi = 0; vi < geom.index.array.length; vi += 3) {
       const idx0 = geom.index.array[vi];
       const idx1 = geom.index.array[vi + 1];
@@ -52136,8 +52160,10 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
     boxSize = Math.max(bboxSizeX, bboxSizeY, bboxSizeZ);
   }
 
-  const uvBbox = new Box3(new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
-                          new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
+  const uvBbox = new Box3(
+    new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
+    new Vector3(boxSize / 2, boxSize / 2, boxSize / 2)
+  );
 
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
@@ -52145,24 +52171,44 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+const buildMeshes = async ({
+  datasets,
+  threejsGeometry,
+  scene,
+  layer = GEOMETRY_LAYER,
+}) => {
   if (threejsGeometry === undefined) {
     return;
   }
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     for (const subGeometry of threejsGeometry.assembly) {
-      await buildMeshes({ datasets, threejsGeometry: subGeometry, scene, layer });
+      await buildMeshes({
+        datasets,
+        threejsGeometry: subGeometry,
+        scene,
+        layer,
+      });
     }
   } else if (threejsGeometry.item) {
-    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
+    await buildMeshes({
+      datasets,
+      threejsGeometry: threejsGeometry.item,
+      scene,
+    });
   } else if (threejsGeometry.threejsSegments) {
     const segments = threejsGeometry.threejsSegments;
     const dataset = {};
     const geometry = new Geometry();
-    const material = new LineBasicMaterial({ color: 0xffffff, vertexColors: VertexColors });
+    const material = new LineBasicMaterial({
+      color: 0xffffff,
+      vertexColors: VertexColors,
+    });
     const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
-    for (const [[aX = 0, aY = 0, aZ = 0], [bX = 0, bY = 0, bZ = 0]] of segments) {
+    for (const [
+      [aX = 0, aY = 0, aZ = 0],
+      [bX = 0, bY = 0, bZ = 0],
+    ] of segments) {
       geometry.colors.push(color, color);
       geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
     }
@@ -52175,7 +52221,10 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
     const points = threejsGeometry.threejsPoints;
     const dataset = {};
     const geometry = new Geometry();
-    const material = new PointsMaterial({ color: setColor(tags, {}, [0, 0, 0]).color, size: 0.5 });
+    const material = new PointsMaterial({
+      color: setColor(tags, {}, [0, 0, 0]).color,
+      size: 0.5,
+    });
     for (const [aX = 0, aY = 0, aZ = 0] of points) {
       // geometry.colors.push(color, color);
       geometry.vertices.push(new Vector3(aX, aY, aZ));
@@ -52212,12 +52261,28 @@ const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_
     scene.add(dataset.mesh);
     datasets.push(dataset);
   } else if (threejsGeometry.threejsPlan) {
-    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
-    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
+    await buildMeshes({
+      datasets,
+      threejsGeometry: threejsGeometry.threejsVisualization,
+      scene,
+      layer: PLAN_LAYER,
+    });
+    await buildMeshes({
+      datasets,
+      threejsGeometry: threejsGeometry.threejsContent,
+      scene,
+      layer: GEOMETRY_LAYER,
+    });
   }
 };
 
-const moveToFit = ({ view, camera, controls, scene, fitOffset = 1.2 } = {}) => {
+const moveToFit = ({
+  view,
+  camera,
+  controls,
+  scene,
+  fitOffset = 1.2,
+} = {}) => {
   const { fit = true } = view;
 
   if (!fit) {
@@ -52232,19 +52297,21 @@ const moveToFit = ({ view, camera, controls, scene, fitOffset = 1.2 } = {}) => {
   const size = box.getSize(new Vector3());
 
   const maxSize = Math.max(size.x, size.y, size.z);
-  const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+  const fitHeightDistance =
+    maxSize / (2 * Math.atan((Math.PI * camera.fov) / 360));
   const fitWidthDistance = fitHeightDistance / (camera.aspect || 1);
   const zoomOut = 1;
-  const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
+  const distance =
+    fitOffset * Math.max(fitHeightDistance, fitWidthDistance) * zoomOut;
 
   // const target = controls ? controls.target.clone() : center.clone();
   const target = center;
 
-  const direction =
-    target.clone()
-        .sub(camera.position)
-        .normalize()
-        .multiplyScalar(distance);
+  const direction = target
+    .clone()
+    .sub(camera.position)
+    .normalize()
+    .multiplyScalar(distance);
 
   camera.near = distance / 100;
   camera.far = distance * 100;
@@ -52315,31 +52382,35 @@ const toThreejsGeometry = (geometry, supertags) => {
     return geometry;
   } else if (geometry.assembly) {
     return {
-      assembly: geometry.assembly.map(item => toThreejsGeometry(item, tags)),
+      assembly: geometry.assembly.map((item) => toThreejsGeometry(item, tags)),
       tags,
-      isThreejsGeometry: true
+      isThreejsGeometry: true,
     };
   } else if (geometry.disjointAssembly) {
     const items = geometry.disjointAssembly;
     return {
-      assembly: items.map(item => toThreejsGeometry(item, tags)),
+      assembly: items.map((item) => toThreejsGeometry(item, tags)),
       tags,
-      isThreejsGeometry: true
+      isThreejsGeometry: true,
     };
   } else if (geometry.layers) {
     return {
-      assembly: geometry.layers.map(item => toThreejsGeometry(item, tags)),
+      assembly: geometry.layers.map((item) => toThreejsGeometry(item, tags)),
       tags,
-      isThreejsGeometry: true
+      isThreejsGeometry: true,
     };
   } else if (geometry.item) {
     return {
       item: toThreejsGeometry(geometry.item, tags),
       tags,
-      isThreejsGeometry: true
+      isThreejsGeometry: true,
     };
   } else if (geometry.paths) {
-    return { threejsSegments: pathsToThreejsSegments(geometry.paths), tags, isThreejsGeometry: true };
+    return {
+      threejsSegments: pathsToThreejsSegments(geometry.paths),
+      tags,
+      isThreejsGeometry: true,
+    };
   } else if (geometry.plan) {
     return {
       threejsPlan: geometry.plan,
@@ -52347,16 +52418,32 @@ const toThreejsGeometry = (geometry, supertags) => {
       threejsVisualization: toThreejsGeometry(geometry.visualization),
       threejsContent: toThreejsGeometry(geometry.content),
       tags,
-      isThreejsGeometry: true
+      isThreejsGeometry: true,
     };
   } else if (geometry.points) {
-    return { threejsPoints: pointsToThreejsPoints(geometry.points), tags, isThreejsGeometry: true };
+    return {
+      threejsPoints: pointsToThreejsPoints(geometry.points),
+      tags,
+      isThreejsGeometry: true,
+    };
   } else if (geometry.solid) {
-    return { threejsSolid: solidToThreejsSolid(geometry.solid), tags, isThreejsGeometry: true };
+    return {
+      threejsSolid: solidToThreejsSolid(geometry.solid),
+      tags,
+      isThreejsGeometry: true,
+    };
   } else if (geometry.surface) {
-    return { threejsSurface: surfaceToThreejsSurface(geometry.surface), tags, isThreejsGeometry: true };
+    return {
+      threejsSurface: surfaceToThreejsSurface(geometry.surface),
+      tags,
+      isThreejsGeometry: true,
+    };
   } else if (geometry.z0Surface) {
-    return { threejsSurface: surfaceToThreejsSurface(geometry.z0Surface), tags, isThreejsGeometry: true };
+    return {
+      threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
+      tags,
+      isThreejsGeometry: true,
+    };
   }
 };
 
@@ -52376,7 +52463,14 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$1);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
+  const { camera, canvas, renderer, scene } = buildScene({
+    width,
+    height,
+    view,
+    geometryLayers,
+    planLayers,
+    withAxes: false,
+  });
 
   const render = () => {
     renderer.clear();
@@ -52389,10 +52483,23 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
 
   page.appendChild(canvas);
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement: canvas });
-  const { resize } = createResizer({ camera, trackball, renderer, viewerElement: page });
+  const { trackball } = buildTrackballControls({
+    camera,
+    render,
+    view,
+    viewerElement: canvas,
+  });
+  const { resize } = createResizer({
+    camera,
+    trackball,
+    renderer,
+    viewerElement: page,
+  });
 
-  new ResizeObserver(() => { resize(); render(); }).observe(page);
+  new ResizeObserver(() => {
+    resize();
+    render();
+  }).observe(page);
 
   const updateGeometry = async (geometry) => {
     // Delete any previous dataset in the window.
@@ -52443,7 +52550,10 @@ const release = async () => {
   }
 };
 
-const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
+const staticDisplay = async (
+  { view = {}, threejsGeometry } = {},
+  page
+) => {
   if (locked === true) await acquire();
   locked = true;
 
@@ -52457,7 +52567,14 @@ const staticDisplay = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER$2);
 
-  const { camera, canvas, renderer, scene } = buildScene({ width, height, view, geometryLayers, planLayers, withAxes: false });
+  const { camera, canvas, renderer, scene } = buildScene({
+    width,
+    height,
+    view,
+    geometryLayers,
+    planLayers,
+    withAxes: false,
+  });
 
   const render = () => {
     renderer.clear();
@@ -52491,17 +52608,23 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-const staticView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
+const staticView = async (
+  shape,
+  { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}
+) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
-  const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
-                                           { offsetWidth: width, offsetHeight: height });
+  const { renderer } = await staticDisplay(
+    { view: { target, position, up }, threejsGeometry },
+    { offsetWidth: width, offsetHeight: height }
+  );
   const canvas = toCanvasFromWebglContext(renderer.getContext());
   canvas.style = `width: ${width}px; height: ${height}px`;
   renderer.forceContextLoss();
   return canvas;
 };
 
-const dataUrl = async (...args) => (await staticView(...args)).toDataURL('png');
+const dataUrl = async (...args) =>
+  (await staticView(...args)).toDataURL('png');
 
 const image = async (...args) => {
   const image = document.createElement('img');
@@ -52510,7 +52633,10 @@ const image = async (...args) => {
   return image;
 };
 
-const orbitView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
+const orbitView = async (
+  shape,
+  { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}
+) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
 

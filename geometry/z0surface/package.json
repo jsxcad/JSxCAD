@@ -28,7 +28,6 @@
     "@jsxcad/math-poly3": "^0.0.79",
     "@jsxcad/math-vec2": "^0.0.79",
     "@jsxcad/math-vec3": "^0.0.79"
-
   },
   "devDependencies": {
     "@jsxcad/math-mat4": "^0.0.79",

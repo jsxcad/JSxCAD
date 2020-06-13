@@ -21,5 +21,5 @@ export {
   signedDistanceToPoint,
   splitLineSegmentByPlane,
   toXYPlaneTransforms,
-  transform
+  transform,
 };

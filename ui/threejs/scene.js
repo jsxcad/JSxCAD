@@ -5,10 +5,15 @@ import {
   HemisphereLight,
   PerspectiveCamera,
   Scene,
-  WebGLRenderer
+  WebGLRenderer,
 } from 'three';
 
-export const createResizer = ({ camera, renderer, trackball, viewerElement }) => {
+export const createResizer = ({
+  camera,
+  renderer,
+  trackball,
+  viewerElement,
+}) => {
   const resize = () => {
     const width = viewerElement.clientWidth;
     const height = viewerElement.clientHeight;
@@ -22,7 +27,14 @@ export const createResizer = ({ camera, renderer, trackball, viewerElement }) =>
   return { resize };
 };
 
-export const buildScene = ({ width, height, view, withGrid = false, withAxes = true, renderer }) => {
+export const buildScene = ({
+  width,
+  height,
+  view,
+  withGrid = false,
+  withAxes = true,
+  renderer,
+}) => {
   const { target = [0, 0, 0], position = [40, 40, 40], up = [0, 0, 1] } = view;
 
   const camera = new PerspectiveCamera(27, width / height, 1, 1000000);
@@ -47,11 +59,11 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     scene.add(grid);
   }
 
-  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.50);
+  var hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5);
   hemiLight.position.set(0, 0, 300);
   scene.add(hemiLight);
 
-  const light = new DirectionalLight(0xffffff, 0.50);
+  const light = new DirectionalLight(0xffffff, 0.5);
   light.position.set(1, 1, 1);
   light.layers.set(0);
   camera.add(light);
@@ -60,12 +72,13 @@ export const buildScene = ({ width, height, view, withGrid = false, withAxes = t
     renderer = new WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
     renderer.setSize(width, height);
-    renderer.setClearColor(0xFFFFFF);
+    renderer.setClearColor(0xffffff);
     renderer.antiAlias = false;
     renderer.inputGamma = true;
     renderer.outputGamma = true;
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.domElement.style = 'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
+    renderer.domElement.style =
+      'padding-left: 5px; padding-right: 5px; padding-bottom: 5px; position: absolute; z-index: 1';
   }
   const canvas = renderer.domElement;
 

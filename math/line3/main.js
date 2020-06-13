@@ -23,5 +23,5 @@ export {
   intersectPointOfLineAndPlane,
   origin,
   reverse,
-  transform
+  transform,
 };

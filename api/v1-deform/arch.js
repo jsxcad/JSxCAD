@@ -14,15 +14,20 @@ export const arch = (shape, factor, { resolution = 1 } = {}) => {
     const maxZ = max[Z];
     const minZ = min[Z];
     const height = maxZ - minZ;
-    const liftAt = z => factor * Math.sin((z - minZ) / height * Math.PI);
+    const liftAt = (z) => factor * Math.sin(((z - minZ) / height) * Math.PI);
     const lift = ([x, y, z]) => [x + liftAt(z), y, z];
-    assembly.push({ solid: deform(makeWatertight(solid), lift, min, max, resolution), tags });
+    assembly.push({
+      solid: deform(makeWatertight(solid), lift, min, max, resolution),
+      tags,
+    });
   }
 
   return Shape.fromGeometry({ assembly });
 };
 
-const archMethod = function (...args) { return arch(this, ...args); };
+const archMethod = function (...args) {
+  return arch(this, ...args);
+};
 Shape.prototype.arch = archMethod;
 
 export default arch;

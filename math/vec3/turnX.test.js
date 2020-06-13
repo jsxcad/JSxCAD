@@ -1,7 +1,7 @@
 import test from 'ava';
 import { turnX } from './turnX';
 
-const radians = 90 * Math.PI / 180;
+const radians = (90 * Math.PI) / 180;
 
 test('vec3: turnX() called with two paramerters should return a vec3 with correct values', (t) => {
   t.deepEqual(turnX(0, [0, 0, 0], [0, 0, 0]), [0, 0, 0]);

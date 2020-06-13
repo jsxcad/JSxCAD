@@ -29,13 +29,12 @@ export const union = (...z0Surfaces) => {
       } else if (bPolygons.length === 0) {
         z0Surfaces.push(a);
       } else {
-        const result = clipper.clipToPaths(
-          {
-            clipType: ClipType.Union,
-            subjectInputs: [{ data: aPolygons, closed: true }],
-            clipInputs: [{ data: bPolygons, closed: true }],
-            subjectFillType: PolyFillType.Positive
-          });
+        const result = clipper.clipToPaths({
+          clipType: ClipType.Union,
+          subjectInputs: [{ data: aPolygons, closed: true }],
+          clipInputs: [{ data: bPolygons, closed: true }],
+          subjectFillType: PolyFillType.Positive,
+        });
         z0Surfaces.push(toSurface(result, normalize));
       }
     }

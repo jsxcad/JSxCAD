@@ -90,7 +90,7 @@ export {
   turnY,
   turnZ,
   union,
-  writeShape
+  writeShape,
 };
 
 export default Shape;

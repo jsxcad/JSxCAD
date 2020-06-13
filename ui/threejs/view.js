@@ -14,17 +14,23 @@ const toCanvasFromWebglContext = (webgl) => {
   return outCanvas;
 };
 
-export const staticView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
+export const staticView = async (
+  shape,
+  { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}
+) => {
   const threejsGeometry = toThreejsGeometry(shape.toKeptGeometry());
-  const { renderer } = await staticDisplay({ view: { target, position, up }, threejsGeometry },
-                                           { offsetWidth: width, offsetHeight: height });
+  const { renderer } = await staticDisplay(
+    { view: { target, position, up }, threejsGeometry },
+    { offsetWidth: width, offsetHeight: height }
+  );
   const canvas = toCanvasFromWebglContext(renderer.getContext());
   canvas.style = `width: ${width}px; height: ${height}px`;
   renderer.forceContextLoss();
   return canvas;
 };
 
-export const dataUrl = async (...args) => (await staticView(...args)).toDataURL('png');
+export const dataUrl = async (...args) =>
+  (await staticView(...args)).toDataURL('png');
 
 export const image = async (...args) => {
   const image = document.createElement('img');
@@ -33,7 +39,10 @@ export const image = async (...args) => {
   return image;
 };
 
-export const orbitView = async (shape, { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}) => {
+export const orbitView = async (
+  shape,
+  { target, position, up = [0, 0, 1], width = 256, height = 128 } = {}
+) => {
   const container = document.createElement('div');
   container.style = `width: ${width}px; height: ${height}px`;
 

@@ -88,16 +88,16 @@
   display: block;
 }
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.left {
-  right: calc(100% -  10px );
+  right: calc(100% - 10px);
 }
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.right {
-  left: calc(100% -  10px );
+  left: calc(100% - 10px);
 }
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.bottom {
-  top: calc(100% -  10px );
+  top: calc(100% - 10px);
 }
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.top {
-  bottom: calc(100% -  10px );
+  bottom: calc(100% - 10px);
 }
 .mosaic-drop-target .drop-target-container {
   position: absolute;
@@ -122,31 +122,35 @@
   z-index: 5;
 }
 .mosaic-drop-target .drop-target-container .drop-target.left {
-  right: calc(100% -  30% );
+  right: calc(100% - 30%);
 }
 .mosaic-drop-target .drop-target-container .drop-target.right {
-  left: calc(100% -  30% );
+  left: calc(100% - 30%);
 }
 .mosaic-drop-target .drop-target-container .drop-target.bottom {
-  top: calc(100% -  30% );
+  top: calc(100% - 30%);
 }
 .mosaic-drop-target .drop-target-container .drop-target.top {
-  bottom: calc(100% -  30% );
+  bottom: calc(100% - 30%);
 }
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover {
   opacity: 1;
 }
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.left {
-  right: calc(100% -  50% );
+  right: calc(100% - 50%);
 }
-.mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.right {
-  left: calc(100% -  50% );
+.mosaic-drop-target
+  .drop-target-container
+  .drop-target.drop-target-hover.right {
+  left: calc(100% - 50%);
 }
-.mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.bottom {
-  top: calc(100% -  50% );
+.mosaic-drop-target
+  .drop-target-container
+  .drop-target.drop-target-hover.bottom {
+  top: calc(100% - 50%);
 }
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.top {
-  bottom: calc(100% -  50% );
+  bottom: calc(100% - 50%);
 }
 .mosaic-window,
 .mosaic-preview {
@@ -155,7 +159,7 @@
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-          flex-direction: column;
+  flex-direction: column;
   overflow: hidden;
   box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
 }
@@ -165,9 +169,9 @@
   display: -webkit-box;
   display: flex;
   -webkit-box-pack: justify;
-          justify-content: space-between;
+  justify-content: space-between;
   -webkit-box-align: center;
-          align-items: center;
+  align-items: center;
   flex-shrink: 0;
   height: 30px;
   background: white;
@@ -181,7 +185,7 @@
 .mosaic-preview .mosaic-window-title {
   padding-left: 15px;
   -webkit-box-flex: 1;
-          flex: 1;
+  flex: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -203,7 +207,7 @@
 .mosaic-preview .mosaic-window-body {
   position: relative;
   -webkit-box-flex: 1;
-          flex: 1;
+  flex: 1;
   height: 0;
   background: white;
   z-index: 1;
@@ -220,7 +224,7 @@
   overflow: hidden;
   background: white;
   -webkit-box-pack: end;
-          justify-content: flex-end;
+  justify-content: flex-end;
   display: -webkit-box;
   display: flex;
   z-index: 3;
@@ -268,26 +272,30 @@
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-          flex-direction: column;
+  flex-direction: column;
   -webkit-box-align: center;
-          align-items: center;
+  align-items: center;
   -webkit-box-pack: center;
-          justify-content: center;
+  justify-content: center;
 }
 .mosaic-window .mosaic-preview h4,
 .mosaic-preview .mosaic-preview h4 {
   margin-bottom: 10px;
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.close-button:before {
+.mosaic:not(.mosaic-blueprint-theme)
+  .mosaic-default-control.close-button:before {
   content: 'Close';
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.split-button:before {
+.mosaic:not(.mosaic-blueprint-theme)
+  .mosaic-default-control.split-button:before {
   content: 'Split';
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.replace-button:before {
+.mosaic:not(.mosaic-blueprint-theme)
+  .mosaic-default-control.replace-button:before {
   content: 'Replace';
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.expand-button:before {
+.mosaic:not(.mosaic-blueprint-theme)
+  .mosaic-default-control.expand-button:before {
   content: 'Expand';
 }
 .mosaic.mosaic-blueprint-theme {
@@ -296,7 +304,8 @@
 .mosaic.mosaic-blueprint-theme .mosaic-zero-state {
   background: #e1e8ed;
   border-radius: 3px;
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.15), 0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.15), 0 0 0 rgba(16, 22, 26, 0),
+    0 0 0 rgba(16, 22, 26, 0);
 }
 .mosaic.mosaic-blueprint-theme .mosaic-split:hover {
   background: none;
@@ -304,8 +313,13 @@
 .mosaic.mosaic-blueprint-theme .mosaic-split:hover .mosaic-split-line {
   box-shadow: 0 0 0 1px #2b95d6;
 }
-.mosaic.mosaic-blueprint-theme.mosaic-drop-target .drop-target-container .drop-target,
-.mosaic.mosaic-blueprint-theme .mosaic-drop-target .drop-target-container .drop-target {
+.mosaic.mosaic-blueprint-theme.mosaic-drop-target
+  .drop-target-container
+  .drop-target,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-drop-target
+  .drop-target-container
+  .drop-target {
   background: rgba(72, 175, 240, 0.2);
   border: 2px solid #2b95d6;
   -webkit-transition: opacity 100ms;
@@ -314,7 +328,8 @@
 }
 .mosaic.mosaic-blueprint-theme .mosaic-window,
 .mosaic.mosaic-blueprint-theme .mosaic-preview {
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.15), 0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.15), 0 0 0 rgba(16, 22, 26, 0),
+    0 0 0 rgba(16, 22, 26, 0);
   border-radius: 3px;
 }
 .mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-toolbar,
@@ -323,13 +338,29 @@
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-toolbar.draggable:hover,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-toolbar.draggable:hover {
-  background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f5f8fa));
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-toolbar.draggable:hover,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-toolbar.draggable:hover {
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(#ffffff),
+    to(#f5f8fa)
+  );
   background: linear-gradient(to bottom, #ffffff, #f5f8fa);
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-toolbar.draggable:hover .mosaic-window-title,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-toolbar.draggable:hover .mosaic-window-title {
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-toolbar.draggable:hover
+  .mosaic-window-title,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-toolbar.draggable:hover
+  .mosaic-window-title {
   color: #10161a;
 }
 .mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-title,
@@ -337,14 +368,32 @@
   font-weight: 600;
   color: #394b59;
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-controls .separator,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-controls .separator {
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-controls
+  .separator,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-controls
+  .separator {
   border-left: 1px solid #d8e1e8;
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-controls .bp3-button,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-controls .bp3-button,
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-controls .bp3-button:before,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-controls .bp3-button:before {
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-controls
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-controls
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-controls
+  .bp3-button:before,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-controls
+  .bp3-button:before {
   color: #738694;
 }
 .mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-body,
@@ -354,21 +403,42 @@
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-additional-actions-bar,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-additional-actions-bar {
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-additional-actions-bar,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-additional-actions-bar {
   -webkit-transition: height 250ms;
   transition: height 250ms;
   box-shadow: 0 1px 1px rgba(16, 22, 26, 0.15);
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-additional-actions-bar .bp3-button,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-additional-actions-bar .bp3-button,
-.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-additional-actions-bar .bp3-button:before,
-.mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-window-additional-actions-bar .bp3-button:before {
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-additional-actions-bar
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-additional-actions-bar
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window
+  .mosaic-window-additional-actions-bar
+  .bp3-button:before,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview
+  .mosaic-window-additional-actions-bar
+  .bp3-button:before {
   color: #738694;
 }
-.mosaic.mosaic-blueprint-theme .mosaic-window.additional-controls-open .mosaic-window-toolbar,
-.mosaic.mosaic-blueprint-theme .mosaic-preview.additional-controls-open .mosaic-window-toolbar {
-  box-shadow: 0 1px 0 0 0 0 1px rgba(16, 22, 26, 0.15), 0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
+.mosaic.mosaic-blueprint-theme
+  .mosaic-window.additional-controls-open
+  .mosaic-window-toolbar,
+.mosaic.mosaic-blueprint-theme
+  .mosaic-preview.additional-controls-open
+  .mosaic-window-toolbar {
+  box-shadow: 0 1px 0 0 0 0 1px rgba(16, 22, 26, 0.15),
+    0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
 }
 .mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-preview,
 .mosaic.mosaic-blueprint-theme .mosaic-preview .mosaic-preview {
@@ -383,13 +453,19 @@
 }
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-zero-state {
   background: #30404d;
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0),
+    0 0 0 rgba(16, 22, 26, 0);
 }
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-split:hover .mosaic-split-line {
   box-shadow: 0 0 0 1px #137cbd;
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark.mosaic-drop-target .drop-target-container .drop-target,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-drop-target .drop-target-container .drop-target {
+.mosaic.mosaic-blueprint-theme.bp3-dark.mosaic-drop-target
+  .drop-target-container
+  .drop-target,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-drop-target
+  .drop-target-container
+  .drop-target {
   background: rgba(16, 107, 163, 0.2);
   border-color: #137cbd;
 }
@@ -400,44 +476,96 @@
 }
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window,
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview {
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0),
+    0 0 0 rgba(16, 22, 26, 0);
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-toolbar.draggable:hover,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-toolbar.draggable:hover {
-  background: -webkit-gradient(linear, left top, left bottom, from(#394b59), to(#30404d));
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-toolbar.draggable:hover,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-toolbar.draggable:hover {
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(#394b59),
+    to(#30404d)
+  );
   background: linear-gradient(to bottom, #394b59, #30404d);
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-toolbar.draggable:hover .mosaic-window-title,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-toolbar.draggable:hover .mosaic-window-title {
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-toolbar.draggable:hover
+  .mosaic-window-title,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-toolbar.draggable:hover
+  .mosaic-window-title {
   color: #ffffff;
 }
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-title,
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-title {
   color: #d8e1e8;
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-controls .separator,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-controls .separator {
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-controls
+  .separator,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-controls
+  .separator {
   border-color: #5c7080;
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-controls .bp3-button,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-controls .bp3-button,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-controls .bp3-button:before,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-controls .bp3-button:before {
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-controls
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-controls
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-controls
+  .bp3-button:before,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-controls
+  .bp3-button:before {
   color: #a7b6c2;
 }
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-body,
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-body {
   background: #293742;
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-additional-actions-bar .bp3-button,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-additional-actions-bar .bp3-button,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-window-additional-actions-bar .bp3-button:before,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-window-additional-actions-bar .bp3-button:before {
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-additional-actions-bar
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-additional-actions-bar
+  .bp3-button,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window
+  .mosaic-window-additional-actions-bar
+  .bp3-button:before,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview
+  .mosaic-window-additional-actions-bar
+  .bp3-button:before {
   color: #bfccd6;
 }
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window.additional-controls-open .mosaic-window-toolbar,
-.mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview.additional-controls-open .mosaic-window-toolbar {
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0), 0 0 0 rgba(16, 22, 26, 0);
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-window.additional-controls-open
+  .mosaic-window-toolbar,
+.mosaic.mosaic-blueprint-theme.bp3-dark
+  .mosaic-preview.additional-controls-open
+  .mosaic-window-toolbar {
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.4), 0 0 0 rgba(16, 22, 26, 0),
+    0 0 0 rgba(16, 22, 26, 0);
 }
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-window .mosaic-preview,
 .mosaic.mosaic-blueprint-theme.bp3-dark .mosaic-preview .mosaic-preview {

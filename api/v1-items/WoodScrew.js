@@ -24,9 +24,10 @@ import WoodScrewDesignator from './WoodScrewDesignator';
 import { registerDesignator } from '@jsxcad/api-v1-item';
 
 const decode = (designator) => {
-  return WoodScrewDesignator
-      .tryParse(designator.toLowerCase())
-      .reduce((value, object) => ({ ...object, ...value, designator }), {});
+  return WoodScrewDesignator.tryParse(designator.toLowerCase()).reduce(
+    (value, object) => ({ ...object, ...value, designator }),
+    {}
+  );
 };
 
 export const WoodScrew = ({
@@ -39,10 +40,14 @@ export const WoodScrew = ({
   mmDiameter,
   mmLength,
   protectiveFinish,
-  designator
+  designator,
 }) => {
-  if (feetLength) { mmLength = feetLength * foot; }
-  if (inchDiameter) { mmDiameter = inchDiameter * inch; }
+  if (feetLength) {
+    mmLength = feetLength * foot;
+  }
+  if (inchDiameter) {
+    mmDiameter = inchDiameter * inch;
+  }
   return Cylinder(mmDiameter, mmLength).material('thread').Item(designator);
 };
 export default WoodScrew;

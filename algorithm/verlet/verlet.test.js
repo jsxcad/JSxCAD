@@ -5,7 +5,7 @@ import { create as createDistanceConstraint } from './constrainDistance';
 import { create as createPinnedConstraint } from './constrainPinned';
 import test from 'ava';
 
-test('Simple case', t => {
+test('Simple case', (t) => {
   const constraints = verlet();
   const distance = createDistanceConstraint(constraints);
   const pinned = createPinnedConstraint(constraints);

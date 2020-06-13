@@ -15,13 +15,17 @@ export const union = (...surfaces) => {
   // (But then, are these really the right semantics?)
   const baseSurface = surfaces.shift();
   const basePlane = toPlane(baseSurface);
-  surfaces = surfaces.filter(surface => surface.length >= 1 &&
-                             (equals(toPlane(baseSurface), toPlane(surface))));
+  surfaces = surfaces.filter(
+    (surface) =>
+      surface.length >= 1 && equals(toPlane(baseSurface), toPlane(surface))
+  );
   if (surfaces.length === 0) {
     return baseSurface;
   }
   const [toZ0, fromZ0] = toXYPlaneTransforms(basePlane);
-  const z0Surface = unionZ0Surfaces(transform(toZ0, baseSurface),
-                                    ...surfaces.map(surface => transform(toZ0, surface)));
+  const z0Surface = unionZ0Surfaces(
+    transform(toZ0, baseSurface),
+    ...surfaces.map((surface) => transform(toZ0, surface))
+  );
   return transform(fromZ0, z0Surface);
 };

@@ -50,7 +50,9 @@ export const flat = (shape) => {
   return withConnector(shape, bestSurface, 'flat');
 };
 
-const flatMethod = function () { return flat(this); };
+const flatMethod = function () {
+  return flat(this);
+};
 Shape.prototype.flat = flatMethod;
 
 flat.signature = 'flat(shape:Shape) -> Connector';
@@ -64,5 +66,7 @@ export const inFlat = (shape, op) => {
   return op(shape.transform(to)).transform(from);
 };
 
-const inFlatMethod = function (op = (_ => _)) { return inFlat(this, op); };
+const inFlatMethod = function (op = (_) => _) {
+  return inFlat(this, op);
+};
 Shape.prototype.inFlat = inFlatMethod;

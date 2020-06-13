@@ -35,7 +35,7 @@ export const flip = (geometry) => {
       return {
         ...geometry,
         geometries: geometry.geometries.map(flip),
-        connectors: geometry.connectors.map(flip)
+        connectors: geometry.connectors.map(flip),
       };
     } else if (geometry.item) {
       // FIX: How should items deal with flip?

@@ -8,5 +8,5 @@
 export const squaredDistance = ([ax, ay], [bx, by]) => {
   const x = bx - ax;
   const y = by - ay;
-  return (x * x) + (y * y);
+  return x * x + y * y;
 };

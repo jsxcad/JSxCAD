@@ -45,7 +45,15 @@ export const fromDxf = async (options = {}, data) => {
       case 'CIRCLE': {
         const { x = 0, y = 0, z = 0 } = entity.center;
         const { radius = 1 } = entity;
-        assembly.push(translate([x, y, z], scale([radius, radius, radius], { ...buildRegularPolygon(32), tags })));
+        assembly.push(
+          translate(
+            [x, y, z],
+            scale([radius, radius, radius], {
+              ...buildRegularPolygon(32),
+              tags,
+            })
+          )
+        );
         break;
       }
       default:

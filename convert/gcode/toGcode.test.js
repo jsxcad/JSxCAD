@@ -5,8 +5,10 @@ import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
 const { readFile } = fs.promises;
 
-test('Simple Triangle', async t => {
+test('Simple Triangle', async (t) => {
   const code = await toGcode({}, { paths: [unitRegularTrianglePolygon] });
-  const expected = await readFile('simple_triangle.gcode', { encoding: 'utf8' });
+  const expected = await readFile('simple_triangle.gcode', {
+    encoding: 'utf8',
+  });
   t.deepEqual(new TextDecoder('utf8').decode(code), expected);
 });

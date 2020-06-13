@@ -22,12 +22,19 @@ const agent = async ({ ask, question }) => {
       case 'bounding box':
         return api.Shape.fromGeometry(values[0]).measureBoundingBox();
       case 'circle':
-        return api.Circle.ofDiameter(values[0], { sides: values[1] }).toDisjointGeometry();// {center: true, sides: values[1] }).toDisjointGeometry();
+        return api.Circle.ofDiameter(values[0], {
+          sides: values[1],
+        }).toDisjointGeometry(); // {center: true, sides: values[1] }).toDisjointGeometry();
       case 'color':
         if (values[1] === 'Keep Out') {
-          return api.Shape.fromGeometry(values[0]).color('Red').material('keepout').toDisjointGeometry();
+          return api.Shape.fromGeometry(values[0])
+            .color('Red')
+            .material('keepout')
+            .toDisjointGeometry();
         } else {
-          return api.Shape.fromGeometry(values[0]).color(values[1]).toDisjointGeometry();
+          return api.Shape.fromGeometry(values[0])
+            .color(values[1])
+            .toDisjointGeometry();
         }
       case 'code':
         inputs = {};
@@ -38,7 +45,12 @@ const agent = async ({ ask, question }) => {
             inputs[key] = values[1][key];
           }
         }
-        const signature = '{ ' + Object.keys(api).join(', ') + ', ' + Object.keys(inputs).join(', ') + ' }';
+        const signature =
+          '{ ' +
+          Object.keys(api).join(', ') +
+          ', ' +
+          Object.keys(inputs).join(', ') +
+          ' }';
         const foo = new Function(signature, values[0]);
         const returnVal = foo({ ...api, ...inputs });
         if (typeof returnVal === 'object') {
@@ -50,38 +62,54 @@ const agent = async ({ ask, question }) => {
         console.log('Doing layout');
         const solidToSplit = api.Shape.fromGeometry(values[0]);
         var flatItems = [];
-        solidToSplit.items().forEach(item => {
+        solidToSplit.items().forEach((item) => {
           flatItems.push(item.flat().to(api.Z(0)));
         });
 
         console.log(flatItems);
 
-        const laidOut = api.Layers(...flatItems).Page({ itemMargin: values[1] });
+        const laidOut = api
+          .Layers(...flatItems)
+          .Page({ itemMargin: values[1] });
 
         return laidOut.toDisjointGeometry();
       case 'difference':
-        return api.Shape.fromGeometry(values[0]).cut(api.Shape.fromGeometry(values[1])).kept().toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .cut(api.Shape.fromGeometry(values[1]))
+          .kept()
+          .toDisjointGeometry();
       case 'extractTag':
-        return api.Shape.fromGeometry(values[0]).keep(values[1]).toKeptGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .keep(values[1])
+          .toKeptGeometry();
       case 'extrude':
-        return api.Shape.fromGeometry(values[0]).extrude(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .extrude(values[1])
+          .toDisjointGeometry();
       case 'hull':
         values = values.map(api.Shape.fromGeometry);
         return Hull(...values).toDisjointGeometry();
       case 'intersection':
-        return intersection(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return intersection(
+          api.Shape.fromGeometry(values[0]),
+          api.Shape.fromGeometry(values[1])
+        ).toDisjointGeometry();
       case 'rectangle':
         return api.Square(values[0], values[1]).toDisjointGeometry();
       case 'Over Cut Inside Corners':
         const overcutShape = api.Shape.fromGeometry(values[0]);
         const overcutSection = overcutShape.section(api.Z());
-        const toolpath = overcutSection.toolpath(values[1], { overcut: true, joinPaths: true });
+        const toolpath = overcutSection.toolpath(values[1], {
+          overcut: true,
+          joinPaths: true,
+        });
         const height = overcutShape.size().height;
         const sweep = toolpath.sweep(api.Circle(values[1])).extrude(height);
         return overcutShape.cut(sweep).toDisjointGeometry();
       case 'render':
         var fromGeo = null;
-        if (values[1] === true && values[2] === false) { // Solid, no wireframe
+        if (values[1] === true && values[2] === false) {
+          // Solid, no wireframe
           fromGeo = api.Shape.fromGeometry(values[0]);
         } else if (values[1] === false && values[2] === true) {
           fromGeo = api.Shape.fromGeometry(values[0]).outline();
@@ -93,17 +121,32 @@ const agent = async ({ ask, question }) => {
         }
         return convertThree.toThreejsGeometry(fromGeo.toDisjointGeometry());
       case 'rotate':
-        return api.Shape.fromGeometry(values[0]).rotateX(values[1]).rotateY(values[2]).rotateZ(values[3]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .rotateX(values[1])
+          .rotateY(values[2])
+          .rotateZ(values[3])
+          .toDisjointGeometry();
       case 'scale':
-        return api.Shape.fromGeometry(values[0]).scale(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .scale(values[1])
+          .toDisjointGeometry();
       case 'stl':
         const inflated = api.Shape.fromGeometry(values[0]).toKeptGeometry();
         const stlString = await toStl(inflated);
         return stlString;
       case 'stretch':
-        return api.Shape.fromGeometry(values[0]).scale([values[1], values[2], values[3]]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .scale([values[1], values[2], values[3]])
+          .toDisjointGeometry();
       case 'svg':
-        const svgString = await toSvg(api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry());
+        const svgString = await toSvg(
+          api.Shape.fromGeometry(values[0])
+            .Union()
+            .center()
+            .section()
+            .outline()
+            .toKeptGeometry()
+        );
         return svgString;
       case 'stackedOutline':
         const gcodeShape = api.Shape.fromGeometry(values[0]);
@@ -114,9 +157,13 @@ const agent = async ({ ask, question }) => {
         // const tabs = values[4];
         const safeHeight = values[5];
 
-        const distPerPass = -1 * thickness / numberOfPasses;
+        const distPerPass = (-1 * thickness) / numberOfPasses;
 
-        var oneProfile = gcodeShape.Union().center().section().toolpath(toolSize, { joinPaths: true });
+        var oneProfile = gcodeShape
+          .Union()
+          .center()
+          .section()
+          .toolpath(toolSize, { joinPaths: true });
 
         console.log(oneProfile.geometry.paths);
 
@@ -126,20 +173,28 @@ const agent = async ({ ask, question }) => {
           var i = 1;
           while (i <= numberOfPasses) {
             newPath.push([path[0][0], path[0][1], safeHeight]); // Move to the starting position before plunging
-            path.forEach(point => {
+            path.forEach((point) => {
               newPath.push([point[0], point[1], point[2] + i * distPerPass]);
             });
-            newPath.push([path[0][0], path[0][1], path[0][2] + i * distPerPass]); // Add the first point again to close the path
+            newPath.push([
+              path[0][0],
+              path[0][1],
+              path[0][2] + i * distPerPass,
+            ]); // Add the first point again to close the path
             i++;
           }
           const lastIndex = newPath.length - 1;
-          newPath.push([newPath[lastIndex][0], newPath[lastIndex][1], safeHeight]); // Retract back to safe height after finishing move
+          newPath.push([
+            newPath[lastIndex][0],
+            newPath[lastIndex][1],
+            safeHeight,
+          ]); // Retract back to safe height after finishing move
           oneProfile.geometry.paths[index] = newPath;
         });
 
         // Join all the layers into a single continuous path
         var completePath = [[0, 0, safeHeight]];
-        oneProfile.geometry.paths.forEach(path => {
+        oneProfile.geometry.paths.forEach((path) => {
           completePath = completePath.concat(path);
         });
 
@@ -152,24 +207,41 @@ const agent = async ({ ask, question }) => {
       case 'gcode':
         return 'G0 would be here';
       case 'outline':
-        return api.Shape.fromGeometry(values[0]).Union().center().section().outline().toKeptGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .Union()
+          .center()
+          .section()
+          .outline()
+          .toKeptGeometry();
       case 'SVG Picture':
         const shape = api.Shape.fromGeometry(values[0]).center();
         const bounds = shape.measureBoundingBox();
         const cameraDistance = 6 * Math.max(...bounds[1]);
-        return convertThree.toSvg({ view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } }, shape.rotateX(20).rotateY(-45).toDisjointGeometry());
+        return convertThree.toSvg(
+          { view: { position: [0, 0, cameraDistance], near: 1, far: 10000 } },
+          shape.rotateX(20).rotateY(-45).toDisjointGeometry()
+        );
       case 'size':
         return api.Shape.fromGeometry(values[0]).size();
       case 'tag':
-        return api.Shape.fromGeometry(values[0]).as(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .as(values[1])
+          .toDisjointGeometry();
       case 'specify':
-        return api.Shape.fromGeometry(values[0]).Item(values[1]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .Item(values[1])
+          .toDisjointGeometry();
       case 'translate':
-        return api.Shape.fromGeometry(values[0]).move(values[1], values[2], values[3]).toDisjointGeometry();
+        return api.Shape.fromGeometry(values[0])
+          .move(values[1], values[2], values[3])
+          .toDisjointGeometry();
       case 'getBOM':
         return api.Shape.fromGeometry(values[0]).bom();
       case 'union':
-        return union(api.Shape.fromGeometry(values[0]), api.Shape.fromGeometry(values[1])).toDisjointGeometry();
+        return union(
+          api.Shape.fromGeometry(values[0]),
+          api.Shape.fromGeometry(values[1])
+        ).toDisjointGeometry();
       default:
         return -1;
     }

@@ -50,9 +50,18 @@ export const toSolid = (loops, selectJunction) => {
    * @returns {void}
    */
   const walk = (loop) => {
-    if (loop === undefined || loop.dead || loop[walked] || loop.face === undefined) return;
+    if (
+      loop === undefined ||
+      loop.dead ||
+      loop[walked] ||
+      loop.face === undefined
+    ) {
+      return;
+    }
     if (holes.has(loop.face)) return;
-    eachLink(loop, (link) => { link[walked] = true; });
+    eachLink(loop, (link) => {
+      link[walked] = true;
+    });
     eachLink(loop, (link) => walk(link.twin));
     const polygons = [];
     const concavePolygons = [];

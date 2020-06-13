@@ -8,7 +8,10 @@ import { toTagsFromName } from './jsxcad-algorithm-color.js';
 import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnySurfaces, isNotVoid, getPaths } from './jsxcad-geometry-tagged.js';
 import { outline } from './jsxcad-geometry-surface.js';
 
-const canonicalizeSegment = ([directive, ...args]) => [directive, ...args.map(reallyQuantizeForSpace)];
+const canonicalizeSegment = ([directive, ...args]) => [
+  directive,
+  ...args.map(reallyQuantizeForSpace),
+];
 
 const canonicalize = (svgPath) => svgPath.map(canonicalizeSegment);
 
@@ -2221,41 +2224,51 @@ var τ = Math.PI * 2;
 
 var arcToCurves = curves;
 
-function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
-  if (rx === 0 || ry === 0) return []
+function curves(px, py, cx, cy, rx, ry, xrot, large, sweep) {
+  if (rx === 0 || ry === 0) return [];
 
   xrot = xrot || 0;
   large = large || 0;
   sweep = sweep || 0;
 
-  var sinphi = sin(xrot * τ / 360);
-  var cosphi = cos(xrot * τ / 360);
+  var sinphi = sin((xrot * τ) / 360);
+  var cosphi = cos((xrot * τ) / 360);
 
-  var pxp = cosphi * (px - cx) / 2 + sinphi * (py - cy) / 2;
-  var pyp = -sinphi * (px - cx) / 2 + cosphi * (py - cy) / 2;
-  if (pxp === 0 && pyp === 0) return []
+  var pxp = (cosphi * (px - cx)) / 2 + (sinphi * (py - cy)) / 2;
+  var pyp = (-sinphi * (px - cx)) / 2 + (cosphi * (py - cy)) / 2;
+  if (pxp === 0 && pyp === 0) return [];
 
   rx = abs(rx);
   ry = abs(ry);
 
-  var lambda = (
-    pow(pxp, 2) / pow(rx, 2) +
-    pow(pyp, 2) / pow(ry, 2)
-  );
+  var lambda = pow(pxp, 2) / pow(rx, 2) + pow(pyp, 2) / pow(ry, 2);
 
   if (lambda > 1) {
     rx *= sqrt(lambda);
     ry *= sqrt(lambda);
   }
 
-  var centre = getArcCentre(px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp);
+  var centre = getArcCentre(
+    px,
+    py,
+    cx,
+    cy,
+    rx,
+    ry,
+    large,
+    sweep,
+    sinphi,
+    cosphi,
+    pxp,
+    pyp
+  );
   var centrex = centre[0];
   var centrey = centre[1];
   var ang1 = centre[2];
   var ang2 = centre[3];
 
   var segments = max(ceil(abs(ang2) / (τ / 4)), 1);
-  if (!segments) return []
+  if (!segments) return [];
 
   var curves = [];
   ang2 /= segments;
@@ -2266,7 +2279,8 @@ function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
 
   var result = [];
   var curve, a, b, c;
-  var i = 0, l = curves.length;
+  var i = 0,
+    l = curves.length;
 
   while (i < l) {
     curve = curves[i++];
@@ -2276,21 +2290,21 @@ function curves (px, py, cx, cy, rx, ry, xrot, large, sweep) {
     result[result.length] = [a[0], a[1], b[0], b[1], c[0], c[1]];
   }
 
-  return result
+  return result;
 }
 
-function mapToEllipse (curve, rx, ry, cosphi, sinphi, centrex, centrey) {
+function mapToEllipse(curve, rx, ry, cosphi, sinphi, centrex, centrey) {
   var x = curve[0] * rx;
   var y = curve[1] * ry;
 
   var xp = cosphi * x - sinphi * y;
   var yp = sinphi * x + cosphi * y;
 
-  return [xp + centrex, yp + centrey]
+  return [xp + centrex, yp + centrey];
 }
 
-function approxUnitArc (ang1, ang2) {
-  var a = 4 / 3 * tan(ang2 / 4);
+function approxUnitArc(ang1, ang2) {
+  var a = (4 / 3) * tan(ang2 / 4);
 
   var x1 = cos(ang1);
   var y1 = sin(ang1);
@@ -2298,26 +2312,39 @@ function approxUnitArc (ang1, ang2) {
   var y2 = sin(ang1 + ang2);
 
   return [
-    [x1 - y1 * a, y1 + x1 * a ],
+    [x1 - y1 * a, y1 + x1 * a],
     [x2 + y2 * a, y2 - x2 * a],
-    [x2, y2]
-  ]
+    [x2, y2],
+  ];
 }
 
-function getArcCentre (px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp, pyp) {
+function getArcCentre(
+  px,
+  py,
+  cx,
+  cy,
+  rx,
+  ry,
+  large,
+  sweep,
+  sinphi,
+  cosphi,
+  pxp,
+  pyp
+) {
   var rxsq = pow(rx, 2);
   var rysq = pow(ry, 2);
   var pxpsq = pow(pxp, 2);
   var pypsq = pow(pyp, 2);
 
-  var radicant = (rxsq * rysq) - (rxsq * pypsq) - (rysq * pxpsq);
+  var radicant = rxsq * rysq - rxsq * pypsq - rysq * pxpsq;
 
   if (radicant < 0) radicant = 0;
-  radicant /= (rxsq * pypsq) + (rysq * pxpsq);
+  radicant /= rxsq * pypsq + rysq * pxpsq;
   radicant = sqrt(radicant) * (large === sweep ? -1 : 1);
 
-  var centrexp = radicant * rx / ry * pyp;
-  var centreyp = radicant * -ry / rx * pxp;
+  var centrexp = ((radicant * rx) / ry) * pyp;
+  var centreyp = ((radicant * -ry) / rx) * pxp;
   var centrex = cosphi * centrexp - sinphi * centreyp + (px + cx) / 2;
   var centrey = sinphi * centrexp + cosphi * centreyp + (py + cy) / 2;
 
@@ -2332,11 +2359,11 @@ function getArcCentre (px, py, cx, cy, rx, ry, large, sweep, sinphi, cosphi, pxp
   if (sweep === 0 && ang2 > 0) ang2 -= τ;
   if (sweep === 1 && ang2 < 0) ang2 += τ;
 
-  return [centrex, centrey, ang1, ang2]
+  return [centrex, centrey, ang1, ang2];
 }
 
-function vectorAngle (ux, uy, vx, vy) {
-  var sign = (ux * vy - uy * vx < 0) ? -1 : 1;
+function vectorAngle(ux, uy, vx, vy) {
+  var sign = ux * vy - uy * vx < 0 ? -1 : 1;
   var umag = sqrt(ux * ux + uy * uy);
   var vmag = sqrt(ux * ux + uy * uy);
   var dot = ux * vx + uy * vy;
@@ -2345,40 +2372,51 @@ function vectorAngle (ux, uy, vx, vy) {
   if (div > 1) div = 1;
   if (div < -1) div = -1;
 
-  return sign * acos(div)
+  return sign * acos(div);
 }
 
 var curvifySvgPath = curvify;
 
-function curvify (path) {
+function curvify(path) {
   var result = [];
   var cmd, prev, curves;
-  var x = 0, y = 0;
-  var bx = 0, by = 0;
-  var sx = 0, sy = 0;
+  var x = 0,
+    y = 0;
+  var bx = 0,
+    by = 0;
+  var sx = 0,
+    sy = 0;
   var qx, qy, cx, cy;
-  var i = 0, j, m, sl;
+  var i = 0,
+    j,
+    m,
+    sl;
   var l = path.length;
   var c, seg;
 
   while (i < l) {
-    seg = path[i++], cmd = seg[0];
+    (seg = path[i++]), (cmd = seg[0]);
 
-    if (cmd == 'M') sx = seg[1], sy = seg[2];
+    if (cmd == 'M') (sx = seg[1]), (sy = seg[2]);
     else if (cmd == 'L') seg = line(x, y, seg[1], seg[2]);
     else if (cmd == 'H') seg = line(x, y, seg[1], y);
     else if (cmd == 'V') seg = line(x, y, x, seg[1]);
     else if (cmd == 'Z') seg = line(x, y, sx, sy);
-
     else if (cmd == 'A') {
       curves = arcToCurves(
-        x, y, seg[6], seg[7],
-        seg[1], seg[2], seg[3],
-        seg[4], seg[5]
+        x,
+        y,
+        seg[6],
+        seg[7],
+        seg[1],
+        seg[2],
+        seg[3],
+        seg[4],
+        seg[5]
       );
 
       m = curves.length;
-      if (!m) continue
+      if (!m) continue;
       j = 0;
 
       while (j < m) {
@@ -2386,52 +2424,48 @@ function curvify (path) {
         seg = ['C', c[0], c[1], c[2], c[3], c[4], c[5]];
         if (j < m) result[result.length] = seg;
       }
-    }
-
-    else if (cmd == 'S') {
-      cx = x, cy = y;
+    } else if (cmd == 'S') {
+      (cx = x), (cy = y);
       if (prev == 'C' || prev == 'S') {
-        cx += cx - bx,
-        cy += cy - by;
+        (cx += cx - bx), (cy += cy - by);
       }
       seg = ['C', cx, cy, seg[1], seg[2], seg[3], seg[4]];
-    }
-
-    else if (cmd == 'T') {
+    } else if (cmd == 'T') {
       if (prev == 'Q' || prev == 'T') {
-        qx = x * 2 - qx, qy = y * 2 - qy;
-      }
-      else qx = x, qy = y;
+        (qx = x * 2 - qx), (qy = y * 2 - qy);
+      } else (qx = x), (qy = y);
       seg = quadratic(x, y, qx, qy, seg[1], seg[2]);
-    }
-
-    else if (cmd == 'Q') {
-      qx = seg[1], qy = seg[2];
+    } else if (cmd == 'Q') {
+      (qx = seg[1]), (qy = seg[2]);
       seg = quadratic(x, y, seg[1], seg[2], seg[3], seg[4]);
     }
 
     sl = seg.length;
-    x = seg[sl - 2], y = seg[sl - 1];
-    if (sl > 4) bx = seg[sl - 4], by = seg[sl - 3];
-    else bx = x, by = y;
+    (x = seg[sl - 2]), (y = seg[sl - 1]);
+    if (sl > 4) (bx = seg[sl - 4]), (by = seg[sl - 3]);
+    else (bx = x), (by = y);
     prev = cmd;
 
     result[result.length] = seg;
   }
 
-  return result
+  return result;
 }
 
-function line (x1, y1, x2, y2) {
-  return ['C', x1, y1, x2, y2, x2, y2]
+function line(x1, y1, x2, y2) {
+  return ['C', x1, y1, x2, y2, x2, y2];
 }
 
-function quadratic (x1, y1, cx, cy, x2, y2) {
-  return ['C',
-    x1 / 3 + (2 / 3) * cx, y1 / 3 + (2 / 3) * cy,
-    x2 / 3 + (2 / 3) * cx, y2 / 3 + (2 / 3) * cy,
-    x2, y2
-  ]
+function quadratic(x1, y1, cx, cy, x2, y2) {
+  return [
+    'C',
+    x1 / 3 + (2 / 3) * cx,
+    y1 / 3 + (2 / 3) * cy,
+    x2 / 3 + (2 / 3) * cx,
+    y2 / 3 + (2 / 3) * cy,
+    x2,
+    y2,
+  ];
 }
 
 var parseSvgPath = parse$1;
@@ -2618,7 +2652,10 @@ const removeRepeatedPoints = (path) => {
   return unrepeated;
 };
 
-const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 }, svgPath) => {
+const toPaths = (
+  { curveSegments, normalizeCoordinateSystem = true, tolerance = 0.01 },
+  svgPath
+) => {
   const paths = [];
   let path = [null];
 
@@ -2658,8 +2695,15 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
       case 'C': {
         const [x1, y1, x2, y2, x, y] = args;
         const start = path[path.length - 1];
-        const [xStart, yStart] = (start === null) ? [0, 0] : start;
-        path = path.concat(buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [[xStart, yStart], [x1, y1], [x2, y2], [x, y]]));
+        const [xStart, yStart] = start === null ? [0, 0] : start;
+        path = path.concat(
+          buildAdaptiveCubicBezierCurve({ segments: curveSegments }, [
+            [xStart, yStart],
+            [x1, y1],
+            [x2, y2],
+            [x, y],
+          ])
+        );
         break;
       }
       default: {
@@ -2671,7 +2715,7 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
   maybeClosePath();
   newPath();
 
-  const simplifiedPaths = paths.map(path => simplify(path, tolerance));
+  const simplifiedPaths = paths.map((path) => simplify(path, tolerance));
 
   if (normalizeCoordinateSystem) {
     // Turn it upside down.
@@ -2682,7 +2726,12 @@ const toPaths = ({ curveSegments, normalizeCoordinateSystem = true, tolerance = 
 };
 
 const fromSvgPath = (svgPath, options = {}) => {
-  const paths = toPaths(options, curvifySvgPath(absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))));
+  const paths = toPaths(
+    options,
+    curvifySvgPath(
+      absSvgPath(parseSvgPath(new TextDecoder('utf8').decode(svgPath)))
+    )
+  );
   for (const path of paths) {
     assertGood(path);
   }
@@ -3191,7 +3240,10 @@ var toPath = function toPath(s) {
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath$1 = (svgPath, options = {}) =>
-  fromSvgPath(new TextEncoder('utf8').encode(svgPath), Object.assign({ normalizeCoordinateSystem: false }, options));
+  fromSvgPath(
+    new TextEncoder('utf8').encode(svgPath),
+    Object.assign({ normalizeCoordinateSystem: false }, options)
+  );
 
 const ELEMENT_NODE$1 = 1;
 
@@ -3199,15 +3251,34 @@ const applyTransforms = ({ matrix }, transformText) => {
   const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
   if (match) {
     const [operator, operandText, rest] = match.slice(1);
-    const operands = operandText.split(/ +/).map(operand => parseFloat(operand));
-    if (operands.some(operand => isNaN(operand))) {
+    const operands = operandText
+      .split(/ +/)
+      .map((operand) => parseFloat(operand));
+    if (operands.some((operand) => isNaN(operand))) {
       throw Error(`die: Bad operand in ${transformText}.`);
     }
     switch (operator.trim()) {
       case 'matrix': {
         // a b c
         const [a, b, c, d, tx, ty] = operands;
-        matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+        matrix = multiply(matrix, [
+          a,
+          b,
+          0,
+          0,
+          c,
+          d,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          tx,
+          ty,
+          0,
+          1,
+        ]);
         break;
       }
       case 'translate': {
@@ -3223,22 +3294,70 @@ const applyTransforms = ({ matrix }, transformText) => {
       case 'rotate': {
         const [degrees = 0, x = 0, y = 0, z = 0] = operands;
         matrix = multiply(matrix, fromTranslation([x, y, z]));
-        matrix = multiply(matrix, fromZRotation(degrees * Math.PI / 180));
+        matrix = multiply(matrix, fromZRotation((degrees * Math.PI) / 180));
         matrix = multiply(matrix, fromTranslation([-x, -y, -z]));
         break;
       }
       case 'skewX': {
         // TODO: Move to math-mat4.
         const [degrees = 0] = operands;
-        const [a, b, c, d, tx, ty] = [1, 0, Math.tan(degrees * Math.PI / 180), 1, 0, 0];
-        matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+        const [a, b, c, d, tx, ty] = [
+          1,
+          0,
+          Math.tan((degrees * Math.PI) / 180),
+          1,
+          0,
+          0,
+        ];
+        matrix = multiply(matrix, [
+          a,
+          b,
+          0,
+          0,
+          c,
+          d,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          tx,
+          ty,
+          0,
+          1,
+        ]);
         break;
       }
       case 'skewY': {
         // TODO: Move to math-mat4.
         const [degrees = 0] = operands;
-        const [a, b, c, d, tx, ty] = [1, Math.tan(degrees * Math.PI / 180), 0, 1, 0, 0];
-        matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+        const [a, b, c, d, tx, ty] = [
+          1,
+          Math.tan((degrees * Math.PI) / 180),
+          0,
+          1,
+          0,
+          0,
+        ];
+        matrix = multiply(matrix, [
+          a,
+          b,
+          0,
+          0,
+          c,
+          d,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          tx,
+          ty,
+          0,
+          1,
+        ]);
         break;
       }
       default: {
@@ -3270,8 +3389,13 @@ const fromSvg = async (input, options = {}) => {
     // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.
     const width = parseFloat(getAttribute(node, 'width', '1')) * 10;
     const height = parseFloat(getAttribute(node, 'height', '1')) * 10;
-    const [minX, minY, maxX, maxY] = getAttribute(node, 'viewBox', `0 0 ${width} ${height}`)
-        .split(/ +/).map(text => parseFloat(text));
+    const [minX, minY, maxX, maxY] = getAttribute(
+      node,
+      'viewBox',
+      `0 0 ${width} ${height}`
+    )
+      .split(/ +/)
+      .map((text) => parseFloat(text));
     const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];
     return scaling;
   };
@@ -3280,7 +3404,7 @@ const fromSvg = async (input, options = {}) => {
   const scale = (matrix) => multiply(fromScaling(scaling), matrix);
 
   const walk = ({ matrix }, node) => {
-    if (matrix.some(element => isNaN(element))) {
+    if (matrix.some((element) => isNaN(element))) {
       throw Error(`die: Bad element in matrix ${matrix}.`);
     }
     const buildShape = (...attrs) => {
@@ -3305,9 +3429,12 @@ const fromSvg = async (input, options = {}) => {
     };
     switch (node.nodeType) {
       case ELEMENT_NODE$1: {
-        ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
+        ({ matrix } = applyTransforms(
+          { matrix },
+          node.getAttribute('transform')
+        ));
 
-        if (matrix.some(element => isNaN(element))) {
+        if (matrix.some((element) => isNaN(element))) {
           throw Error(`die: Bad element in matrix ${matrix}.`);
         }
 
@@ -3317,31 +3444,49 @@ const fromSvg = async (input, options = {}) => {
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
-            geometry.assembly.push(transform$1(scale(matrix), { z0Surface: close(paths), tags }));
+            geometry.assembly.push(
+              transform$1(scale(matrix), { z0Surface: close(paths), tags })
+            );
           }
           const stroke = node.getAttribute('stroke');
           if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
-            if (matrix.some(element => isNaN(element))) {
+            if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const scaledMatrix = scale(matrix);
-            if (scaledMatrix.some(element => isNaN(element))) {
+            if (scaledMatrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const tags = toTagsFromName(stroke);
-            geometry.assembly.push(transform$1(scaledMatrix, { paths: paths, tags }));
+            geometry.assembly.push(
+              transform$1(scaledMatrix, { paths: paths, tags })
+            );
           }
         };
 
         // FIX: Should output a path given a stroke, should output a surface given a fill.
         switch (node.tagName) {
-          case 'path': output(node.getAttribute('d')); break;
-          case 'circle': output(toPath(buildShape('cx', 'cy', 'r'))); break;
-          case 'ellipse': output(toPath(buildShape('cx', 'cy', 'rx', 'ry'))); break;
-          case 'line': output(toPath(buildShape('x1', 'x2', 'y1', 'y2'))); break;
-          case 'polygon': output(toPath(buildShape('points'))); break;
-          case 'polyline': output(toPath(buildShape('points'))); break;
-          case 'rect': output(toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry'))); break;
+          case 'path':
+            output(node.getAttribute('d'));
+            break;
+          case 'circle':
+            output(toPath(buildShape('cx', 'cy', 'r')));
+            break;
+          case 'ellipse':
+            output(toPath(buildShape('cx', 'cy', 'rx', 'ry')));
+            break;
+          case 'line':
+            output(toPath(buildShape('x1', 'x2', 'y1', 'y2')));
+            break;
+          case 'polygon':
+            output(toPath(buildShape('points')));
+            break;
+          case 'polyline':
+            output(toPath(buildShape('points')));
+            break;
+          case 'rect':
+            output(toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry')));
+            break;
         }
         break;
       }
@@ -3383,16 +3528,29 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     `<?xml version="1.0" encoding="UTF-8"?>`,
     `<!-- Generated by jsxcad -->`,
     `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">`,
-    `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${-padding} ${-padding} ${width + 2 * padding} ${height + 2 * padding}" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`
+    `<svg baseProfile="tiny" height="${height}mm" width="${width}mm" viewBox="${-padding} ${-padding} ${
+      width + 2 * padding
+    } ${
+      height + 2 * padding
+    }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry).filter(isNotVoid)) {
+  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry).filter(
+    isNotVoid
+  )) {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
     const paths = [];
     for (const polygon of outline(anySurface)) {
-      paths.push(`${polygon.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z`);
+      paths.push(
+        `${polygon
+          .map(
+            (point, index) =>
+              `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+          )
+          .join(' ')} z`
+      );
     }
     svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
@@ -3400,9 +3558,24 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {
-        svg.push(`<path stroke="${color}" fill="none" d="${path.slice(1).map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')}"/>`);
+        svg.push(
+          `<path stroke="${color}" fill="none" d="${path
+            .slice(1)
+            .map(
+              (point, index) =>
+                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+            )
+            .join(' ')}"/>`
+        );
       } else {
-        svg.push(`<path stroke="${color}" fill="none" d="${path.map((point, index) => `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`).join(' ')} z"/>`);
+        svg.push(
+          `<path stroke="${color}" fill="none" d="${path
+            .map(
+              (point, index) =>
+                `${index === 0 ? 'M' : 'L'}${point[0]} ${point[1]}`
+            )
+            .join(' ')} z"/>`
+        );
       }
     }
   }

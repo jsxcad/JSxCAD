@@ -33,7 +33,9 @@ export const scale = (factor, shape) => {
   }
 };
 
-const scaleMethod = function (factor) { return scale(factor, this); };
+const scaleMethod = function (factor) {
+  return scale(factor, this);
+};
 Shape.prototype.scale = scaleMethod;
 
 export default scale;

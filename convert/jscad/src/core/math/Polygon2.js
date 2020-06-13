@@ -1,5 +1,5 @@
-const CAG = require('../CAG')
-const {fromPoints} = require('../CAGFactories')
+const CAG = require('../CAG');
+const { fromPoints } = require('../CAGFactories');
 
 /*
 2D polygons are now supported through the CAG class.
@@ -10,11 +10,11 @@ With many improvements (see documentation):
 
 But we'll keep CSG.Polygon2D as a stub for backwards compatibility
 */
-function Polygon2D (points) {
-  const cag = fromPoints(points)
-  this.sides = cag.sides
+function Polygon2D(points) {
+  const cag = fromPoints(points);
+  this.sides = cag.sides;
 }
 
-Polygon2D.prototype = CAG.prototype
+Polygon2D.prototype = CAG.prototype;
 
-module.exports = Polygon2D
+module.exports = Polygon2D;

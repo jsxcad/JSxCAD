@@ -11,5 +11,5 @@ export {
   quantizeForSpace,
   radToDeg,
   reallyQuantizeForSpace,
-  solve2Linear
+  solve2Linear,
 };

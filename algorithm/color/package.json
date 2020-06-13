@@ -21,8 +21,7 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "ava": "^2.4.0",
     "depcheck": "^0.9.1",

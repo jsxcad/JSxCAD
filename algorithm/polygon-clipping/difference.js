@@ -34,7 +34,9 @@ export const difference = (minuend, ...subtrahends) => {
     if (doesNotOverlap(minuend, subtrahend)) {
       continue;
     }
-    minuend = toSurface(polygonClipping.difference(fromSurface(minuend), fromSurface(subtrahend)));
+    minuend = toSurface(
+      polygonClipping.difference(fromSurface(minuend), fromSurface(subtrahend))
+    );
   }
   return minuend;
 };

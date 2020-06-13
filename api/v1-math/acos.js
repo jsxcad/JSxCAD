@@ -13,7 +13,7 @@
  *
  **/
 
-export const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+export const acos = (a) => (Math.acos(a) / (Math.PI * 2)) * 360;
 acos.signature = 'acos(angle:number) -> number';
 
 export default acos;

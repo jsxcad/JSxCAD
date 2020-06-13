@@ -8,7 +8,10 @@ const intersectionPoints = (cuts, overcut = 0) => {
   var intersectionPointsList = [];
   var i = 0;
   while (i < cuts.length - 1) {
-    const point = intersectPointOfLines(fromPoints(...cuts[i]), fromPoints(...cuts[i + 1]));
+    const point = intersectPointOfLines(
+      fromPoints(...cuts[i]),
+      fromPoints(...cuts[i + 1])
+    );
     point.push(cuts[i][0][2]);
     if (overcut) {
       intersectionPointsList.push(cuts[i][1]);
@@ -19,7 +22,12 @@ const intersectionPoints = (cuts, overcut = 0) => {
   return intersectionPointsList;
 };
 
-const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
+const overcutPathEdges = (
+  path,
+  radius = 1,
+  overcut = 0,
+  joinPaths = false
+) => {
   var cuts = [];
   for (const [start, end] of getEdges(path)) {
     const direction = normalize(subtract(start, end));
@@ -38,7 +46,12 @@ const overcutPathEdges = (path, radius = 1, overcut = 0, joinPaths = false) => {
   return cuts;
 };
 
-const overcut = (geometry, radius = 1, overcut = 0, joinPaths = false) => {
+const overcut = (
+  geometry,
+  radius = 1,
+  overcut = 0,
+  joinPaths = false
+) => {
   const cuts = [];
   for (const { paths } of getPaths(geometry)) {
     for (const path of paths) {

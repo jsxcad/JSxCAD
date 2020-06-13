@@ -14,6 +14,6 @@ export const isMirroring = (mat) => {
   // for a true orthogonal, non-mirrored base, u.cross(v) == w
   // If they have an opposite direction then we are mirroring
   const mirrorvalue = dot(cross(u, v), w);
-  const ismirror = (mirrorvalue < 0);
+  const ismirror = mirrorvalue < 0;
   return ismirror;
 };

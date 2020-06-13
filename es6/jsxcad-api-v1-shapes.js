@@ -26,13 +26,16 @@ import { getAnySurfaces, getPaths, rewriteTags } from './jsxcad-geometry-tagged.
  * :::
  **/
 
-const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by, resolution } = {}) => {
+const Spiral = (
+  toPathFromAngle = (angle) => [[angle]],
+  { from = 0, to = 360, by, resolution } = {}
+) => {
   if (by === undefined && resolution === undefined) {
     by = 1;
   }
   let path = [null];
-  for (const angle of numbers(angle => angle, { from, to, by, resolution })) {
-    const radians = angle * Math.PI / 180;
+  for (const angle of numbers((angle) => angle, { from, to, by, resolution })) {
+    const radians = (angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
   }
@@ -40,23 +43,35 @@ const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by
 };
 
 const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
-  Spiral(a => [[radius]], { from: start, to: start + angle, resolution: sides });
+  Spiral((a) => [[radius]], {
+    from: start,
+    to: start + angle,
+    resolution: sides,
+  });
 
 const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
-const Assembly = (...shapes) => Shape.fromGeometry({ assembly: shapes.map(shape => shape.toGeometry()) });
+const Assembly = (...shapes) =>
+  Shape.fromGeometry({ assembly: shapes.map((shape) => shape.toGeometry()) });
 
-const unitPolygon = (sides = 16) => Shape.fromGeometry(buildRegularPolygon(sides));
+const unitPolygon = (sides = 16) =>
+  Shape.fromGeometry(buildRegularPolygon(sides));
 
 // Note: radius here is circumradius.
-const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+const toRadiusFromEdge = (edge, sides) =>
+  edge * regularPolygonEdgeLengthToRadius(1, sides);
 
-const ofRadius$1 = (radius, { sides = 16 } = {}) => unitPolygon(sides).scale(radius);
-const ofEdge = (edge, { sides = 16 }) => ofRadius$1(toRadiusFromEdge(edge, sides), { sides });
-const ofApothem = (apothem, { sides = 16 }) => ofRadius$1(toRadiusFromApothem$1(apothem, sides), { sides });
-const ofDiameter = (diameter, ...args) => ofRadius$1(diameter / 2, ...args);
-const ofPoints = (points) => Shape.fromGeometry(buildPolygonFromPoints(points));
+const ofRadius$1 = (radius, { sides = 16 } = {}) =>
+  unitPolygon(sides).scale(radius);
+const ofEdge = (edge, { sides = 16 }) =>
+  ofRadius$1(toRadiusFromEdge(edge, sides), { sides });
+const ofApothem = (apothem, { sides = 16 }) =>
+  ofRadius$1(toRadiusFromApothem$1(apothem, sides), { sides });
+const ofDiameter = (diameter, ...args) =>
+  ofRadius$1(diameter / 2, ...args);
+const ofPoints = (points) =>
+  Shape.fromGeometry(buildPolygonFromPoints(points));
 
 /**
  *
@@ -154,13 +169,17 @@ Polygon.toRadiusFromApothem = toRadiusFromApothem$1;
  * :::
  **/
 
-const ofEdge$1 = (edge = 1, { sides = 32 } = {}) => Polygon.ofEdge(edge, { sides });
+const ofEdge$1 = (edge = 1, { sides = 32 } = {}) =>
+  Polygon.ofEdge(edge, { sides });
 
-const ofRadius$2 = (radius = 1, { sides = 32 } = {}) => Polygon.ofRadius(radius, { sides });
+const ofRadius$2 = (radius = 1, { sides = 32 } = {}) =>
+  Polygon.ofRadius(radius, { sides });
 
-const ofApothem$1 = (apothem = 1, { sides = 32 } = {}) => Polygon.ofApothem(apothem, { sides });
+const ofApothem$1 = (apothem = 1, { sides = 32 } = {}) =>
+  Polygon.ofApothem(apothem, { sides });
 
-const ofDiameter$1 = (diameter = 1, { sides = 32 } = {}) => Polygon.ofDiameter(diameter, { sides });
+const ofDiameter$1 = (diameter = 1, { sides = 32 } = {}) =>
+  Polygon.ofDiameter(diameter, { sides });
 
 const Circle = (...args) => ofRadius$2(...args);
 
@@ -168,13 +187,18 @@ Circle.ofEdge = ofEdge$1;
 Circle.ofApothem = ofApothem$1;
 Circle.ofRadius = ofRadius$2;
 Circle.ofDiameter = ofDiameter$1;
-Circle.toRadiusFromApothem = (radius = 1, sides = 32) => Polygon.toRadiusFromApothem(radius, sides);
+Circle.toRadiusFromApothem = (radius = 1, sides = 32) =>
+  Polygon.toRadiusFromApothem(radius, sides);
 
 Circle.signature = 'Circle(radius:number = 1, { sides:number = 32 }) -> Shape';
-ofEdge$1.signature = 'Circle.ofEdge(edge:number = 1, { sides:number = 32 }) -> Shape';
-ofRadius$2.signature = 'Circle.ofRadius(radius:number = 1, { sides:number = 32 }) -> Shape';
-ofApothem$1.signature = 'Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape';
-ofDiameter$1.signature = 'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
+ofEdge$1.signature =
+  'Circle.ofEdge(edge:number = 1, { sides:number = 32 }) -> Shape';
+ofRadius$2.signature =
+  'Circle.ofRadius(radius:number = 1, { sides:number = 32 }) -> Shape';
+ofApothem$1.signature =
+  'Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape';
+ofDiameter$1.signature =
+  'Circle.ofDiameter(diameter:number = 1, { sides:number = 32 }) -> Shape';
 
 const buildPrism = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
@@ -193,8 +217,10 @@ const buildPrism = (radius = 1, height = 1, sides = 32) =>
  *
  **/
 
-const ofRadius$3 = (radius = 1, height = 1, { sides = 3 } = {}) => buildPrism(radius, height, sides);
-const ofDiameter$2 = (diameter = 1, ...args) => ofRadius$3(diameter / 2, ...args);
+const ofRadius$3 = (radius = 1, height = 1, { sides = 3 } = {}) =>
+  buildPrism(radius, height, sides);
+const ofDiameter$2 = (diameter = 1, ...args) =>
+  ofRadius$3(diameter / 2, ...args);
 
 const toPathFromSurface = (shape) => {
   for (const { surface, z0Surface } of getAnySurfaces(shape.toKeptGeometry())) {
@@ -210,7 +236,9 @@ const ofFunction = (op, { resolution, cap = true, context } = {}) =>
   Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
 
 const ofSlices = (op, { slices = 2, cap = true } = {}) =>
-  Shape.fromGeometry(buildFromSlices(t => toPathFromSurface(op(t)), slices, cap));
+  Shape.fromGeometry(
+    buildFromSlices((t) => toPathFromSurface(op(t)), slices, cap)
+  );
 
 const Prism = (...args) => ofRadius$3(...args);
 
@@ -221,11 +249,15 @@ Prism.ofSlices = ofSlices;
 
 const ofRadius$4 = (radius = 1, height = 1, { sides = 32 } = {}) => {
   const fn = linear(radius, 0);
-  return Prism.ofSlices(t => Circle(fn(t) * radius, { sides }).moveZ(t * height));
+  return Prism.ofSlices((t) =>
+    Circle(fn(t) * radius, { sides }).moveZ(t * height)
+  );
 };
 
-const ofDiameter$3 = (diameter, ...args) => ofRadius$4(diameter / 2, ...args);
-const ofApothem$2 = (apothem, ...args) => ofRadius$4(toRadiusFromApothem$1(apothem), ...args);
+const ofDiameter$3 = (diameter, ...args) =>
+  ofRadius$4(diameter / 2, ...args);
+const ofApothem$2 = (apothem, ...args) =>
+  ofRadius$4(toRadiusFromApothem$1(apothem), ...args);
 
 const Cone = (...args) => ofRadius$4(...args);
 
@@ -233,10 +265,14 @@ Cone.ofRadius = ofRadius$4;
 Cone.ofDiameter = ofDiameter$3;
 Cone.ofApothem = ofApothem$2;
 
-Cone.signature = 'Cone(radius:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofRadius.signature = 'Cone.ofRadius(radius:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofDiameter.signature = 'Cone.ofDiameter(diameter:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofApothem.signature = 'Cone.ofApothem(apothem:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.signature =
+  'Cone(radius:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofRadius.signature =
+  'Cone.ofRadius(radius:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofDiameter.signature =
+  'Cone.ofDiameter(diameter:number, height:number, { sides:number = 32 }) -> Shape';
+Cone.ofApothem.signature =
+  'Cone.ofApothem(apothem:number, height:number, { sides:number = 32 }) -> Shape';
 
 /**
  *
@@ -286,18 +322,22 @@ Cone.ofApothem.signature = 'Cone.ofApothem(apothem:number, height:number, { side
 
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
 
-const unitCube = () => Shape.fromGeometry(buildRegularPrism(4))
+const unitCube = () =>
+  Shape.fromGeometry(buildRegularPrism(4))
     .rotateZ(45)
     .scale([edgeScale, edgeScale, 1]);
 
 // Cube Interfaces.
 
 const ofSize = (width = 1, length, height) =>
-  unitCube().scale([width,
-                    length === undefined ? width : length,
-                    height === undefined ? width : height]);
+  unitCube().scale([
+    width,
+    length === undefined ? width : length,
+    height === undefined ? width : height,
+  ]);
 
-const ofRadius$5 = (radius) => Shape.fromGeometry(buildRegularPrism(4))
+const ofRadius$5 = (radius) =>
+  Shape.fromGeometry(buildRegularPrism(4))
     .rotateZ(45)
     .scale([radius, radius, radius / edgeScale]);
 
@@ -312,7 +352,9 @@ const fromCorners = (corner1, corner2) => {
   const width = c2y - c1y;
   const height = c2z - c1z;
   const center = [(c1x + c2x) / 2, (c1y + c2y) / 2, (c1z + c2z) / 2];
-  return unitCube().scale([length, width, height]).move(...center);
+  return unitCube()
+    .scale([length, width, height])
+    .move(...center);
 };
 
 const Cube = (...args) => ofSize(...args);
@@ -324,11 +366,13 @@ Cube.ofDiameter = ofDiameter$4;
 Cube.fromCorners = fromCorners;
 
 Cube.signature = 'Cube(size:number = 1) -> Shape';
-Cube.ofSize.signature = 'Cube.ofSize(width:number = 1, length:number = 1, height:number = 1) -> Shape';
+Cube.ofSize.signature =
+  'Cube.ofSize(width:number = 1, length:number = 1, height:number = 1) -> Shape';
 Cube.ofRadius.signature = 'Cube.ofRadius(radius:number = 1) -> Shape';
 Cube.ofApothem.signature = 'Cube.ofApothem(apothem:number = 1) -> Shape';
 Cube.ofDiameter.signature = 'Cube.ofDiameter(diameter:number = 1) -> Shape';
-Cube.fromCorners.signature = 'Cube.fromCorners(corner1:point, corner2:point) -> Shape';
+Cube.fromCorners.signature =
+  'Cube.fromCorners(corner1:point, corner2:point) -> Shape';
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
@@ -367,9 +411,12 @@ const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
  *
  **/
 
-const ofRadius$6 = (radius = 1, height = 1, { sides = 32 } = {}) => buildPrism$1(radius, height, sides);
-const ofApothem$4 = (apothem = 1, height = 1, { sides = 32 } = {}) => ofRadius$6(toRadiusFromApothem$1(apothem, sides), height, { sides });
-const ofDiameter$5 = (diameter = 1, ...args) => ofRadius$6(diameter / 2, ...args);
+const ofRadius$6 = (radius = 1, height = 1, { sides = 32 } = {}) =>
+  buildPrism$1(radius, height, sides);
+const ofApothem$4 = (apothem = 1, height = 1, { sides = 32 } = {}) =>
+  ofRadius$6(toRadiusFromApothem$1(apothem, sides), height, { sides });
+const ofDiameter$5 = (diameter = 1, ...args) =>
+  ofRadius$6(diameter / 2, ...args);
 
 const toPathFromShape = (shape) => {
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
@@ -384,7 +431,9 @@ const ofFunction$1 = (op, { resolution, cap = true, context } = {}) =>
   Shape.fromGeometry(buildFromFunction(op, resolution, cap, context));
 
 const ofSlices$1 = (op, { slices = 2, cap = true } = {}) =>
-  Shape.fromGeometry(buildFromSlices(slice => toPathFromShape(op(slice)), slices, cap));
+  Shape.fromGeometry(
+    buildFromSlices((slice) => toPathFromShape(op(slice)), slices, cap)
+  );
 
 const Cylinder = (...args) => ofRadius$6(...args);
 
@@ -394,16 +443,25 @@ Cylinder.ofDiameter = ofDiameter$5;
 Cylinder.ofFunction = ofFunction$1;
 Cylinder.ofSlices = ofSlices$1;
 
-Cylinder.signature = 'Cylinder(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofRadius.signature = 'Cylinder.ofRadius(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofDiameter.signature = 'Cylinder.ofDiameter(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofApothem.signature = 'Cylinder.ofApothem(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
-Cylinder.ofSlices.signature = 'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
-Cylinder.ofFunction.signature = 'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
+Cylinder.signature =
+  'Cylinder(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofRadius.signature =
+  'Cylinder.ofRadius(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofDiameter.signature =
+  'Cylinder.ofDiameter(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofApothem.signature =
+  'Cylinder.ofApothem(radius:number = 1, height:number = 1, { sides:number = 32 }) -> Shape';
+Cylinder.ofSlices.signature =
+  'Cylinder.ofSlices(op:function, { slices:number = 2, cap:boolean = true }) -> Shape';
+Cylinder.ofFunction.signature =
+  'Cylinder.ofFunction(op:function, { resolution:number, cap:boolean = true, context:Object }) -> Shape';
 
 const Difference = (...args) => difference(...args);
 
-const Empty = (...shapes) => Shape.fromGeometry({ disjointAssembly: [{ solid: [] }, { surface: [] }, { paths: [] }] });
+const Empty = (...shapes) =>
+  Shape.fromGeometry({
+    disjointAssembly: [{ solid: [] }, { surface: [] }, { paths: [] }],
+  });
 
 /**
  *
@@ -422,9 +480,11 @@ const Empty = (...shapes) => Shape.fromGeometry({ disjointAssembly: [{ solid: []
  **/
 
 const ofEdge$2 = (edge = 1) => Polygon.ofEdge(edge, { sides: 6 });
-const ofApothem$5 = (apothem = 1) => Polygon.ofApothem(apothem, { sides: 6 });
+const ofApothem$5 = (apothem = 1) =>
+  Polygon.ofApothem(apothem, { sides: 6 });
 const ofRadius$7 = (radius = 1) => Polygon.ofRadius(radius, { sides: 6 });
-const ofDiameter$6 = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 6 });
+const ofDiameter$6 = (diameter = 1) =>
+  Polygon.ofDiameter(diameter, { sides: 6 });
 
 const Hexagon = (...args) => ofRadius$7(...args);
 
@@ -436,7 +496,8 @@ Hexagon.ofDiameter = ofDiameter$6;
 
 Hexagon.signature = 'Hexagon(radius:number = 1) -> Shape';
 Hexagon.ofRadius.signature = 'Hexagon.ofRadius(radius:number = 1) -> Shape';
-Hexagon.ofDiameter.signature = 'Hexagon.ofDiameter(diameter:number = 1) -> Shape';
+Hexagon.ofDiameter.signature =
+  'Hexagon.ofDiameter(diameter:number = 1) -> Shape';
 Hexagon.ofApothem.signature = 'Hexagon.ofApothem(apothem:number = 1) -> Shape';
 Hexagon.ofEdge.signature = 'Hexagon.ofEdge(edge:number = 1) -> Shape';
 
@@ -469,24 +530,30 @@ Hexagon.ofEdge.signature = 'Hexagon.ofEdge(edge:number = 1) -> Shape';
  *
  **/
 
-const unitIcosahedron = () => Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
+const unitIcosahedron = () =>
+  Shape.fromPolygonsToSolid(buildRegularIcosahedron({}));
 
 const ofRadius$8 = (radius = 1) => unitIcosahedron().scale(radius);
-const ofDiameter$7 = (diameter = 1) => unitIcosahedron().scale(diameter / 2);
+const ofDiameter$7 = (diameter = 1) =>
+  unitIcosahedron().scale(diameter / 2);
 const Icosahedron = (...args) => ofRadius$8(...args);
 
 Icosahedron.ofRadius = ofRadius$8;
 Icosahedron.ofDiameter = ofDiameter$7;
 
 Icosahedron.signature = 'Icosahedron(radius:number = 1) -> Shape';
-Icosahedron.ofRadius.signature = 'Icosahedron.ofRadius(radius:number = 1) -> Shape';
-Icosahedron.ofDiameter.signature = 'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
+Icosahedron.ofRadius.signature =
+  'Icosahedron.ofRadius(radius:number = 1) -> Shape';
+Icosahedron.ofDiameter.signature =
+  'Icosahedron.ofDiameter(diameter:number = 1) -> Shape';
 
 const Intersection = (...args) => intersection(...args);
 
-const Layers = (...shapes) => Shape.fromGeometry({ layers: shapes.map(shape => shape.toGeometry()) });
+const Layers = (...shapes) =>
+  Shape.fromGeometry({ layers: shapes.map((shape) => shape.toGeometry()) });
 
-const fromPoints = (...points) => Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
+const fromPoints = (...points) =>
+  Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));
 
 /**
  *
@@ -575,7 +642,7 @@ Points.fromPoints = fromPoints$1;
 const ofPointPaths = (points = [], paths = []) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(path.map(point => points[point]));
+    polygons.push(path.map((point) => points[point]));
   }
   return Shape.fromPolygonsToSolid(polygons);
 };
@@ -587,7 +654,9 @@ Polyhedron.ofPointPaths = ofPointPaths;
 // FIX: This name is confusing wrt Shape.sketch().
 const Sketch = (shape) => shape.Void().with(shape.sketch());
 
-const SketchMethod = function () { return Sketch(this); };
+const SketchMethod = function () {
+  return Sketch(this);
+};
 Shape.prototype.Sketch = SketchMethod;
 
 /**
@@ -626,9 +695,12 @@ const unitSphere = (resolution = 16) => {
   return shape;
 };
 
-const ofRadius$9 = (radius = 1, { resolution = 16 } = {}) => unitSphere(resolution).scale(radius);
-const ofApothem$6 = (apothem = 1, { resolution = 16 } = {}) => ofRadius$9(toRadiusFromApothem$1(apothem), { resolution });
-const ofDiameter$8 = (diameter = 1, { resolution = 16 } = {}) => ofRadius$9(diameter / 2, { resolution });
+const ofRadius$9 = (radius = 1, { resolution = 16 } = {}) =>
+  unitSphere(resolution).scale(radius);
+const ofApothem$6 = (apothem = 1, { resolution = 16 } = {}) =>
+  ofRadius$9(toRadiusFromApothem$1(apothem), { resolution });
+const ofDiameter$8 = (diameter = 1, { resolution = 16 } = {}) =>
+  ofRadius$9(diameter / 2, { resolution });
 
 const Sphere = (...args) => ofRadius$9(...args);
 
@@ -685,10 +757,13 @@ Sphere.ofDiameter = ofDiameter$8;
 const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 
 const edgeScale$1 = regularPolygonEdgeLengthToRadius(1, 4);
-const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale$1);
+const unitSquare = () =>
+  Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale$1);
 
-const ofSize$1 = (width = 1, length) => unitSquare().scale([width, length === undefined ? width : length, 1]);
-const ofRadius$a = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
+const ofSize$1 = (width = 1, length) =>
+  unitSquare().scale([width, length === undefined ? width : length, 1]);
+const ofRadius$a = (radius) =>
+  Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
 const ofApothem$7 = (apothem) => ofRadius$a(toRadiusFromApothem(apothem));
 const ofDiameter$9 = (diameter) => ofRadius$a(diameter / 2);
 
@@ -714,7 +789,8 @@ Square.ofApothem.signature = 'Square(apothem:number) -> Surface';
 Square.ofDiameter.signature = 'Square(diameter:number) -> Surface';
 Square.ofRadius.signature = 'Square(radius:number) -> Surface';
 Square.ofSize.signature = 'Square(edge:number) -> Surface';
-Square.fromCorners.signature = 'Square(corner1:Point, corner2:Point) -> Surface';
+Square.fromCorners.signature =
+  'Square(corner1:Point, corner2:Point) -> Surface';
 
 /**
  *
@@ -748,7 +824,8 @@ Square.fromCorners.signature = 'Square(corner1:Point, corner2:Point) -> Surface'
 const unitTetrahedron = () => Shape.fromGeometry(buildRegularTetrahedron({}));
 
 const ofRadius$b = (radius = 1) => unitTetrahedron().scale(radius);
-const ofDiameter$a = (diameter = 1) => unitTetrahedron().scale(diameter / 2);
+const ofDiameter$a = (diameter = 1) =>
+  unitTetrahedron().scale(diameter / 2);
 
 const Tetrahedron = (...args) => ofRadius$b(...args);
 
@@ -783,12 +860,16 @@ Tetrahedron.ofDiameter = ofDiameter$a;
  *
  **/
 
-const Torus = (radius = 1, height = 1, { segments = 32, sides = 32, rotation = 0 } = {}) =>
+const Torus = (
+  radius = 1,
+  height = 1,
+  { segments = 32, sides = 32, rotation = 0 } = {}
+) =>
   Circle(height / 2, { sides })
-      .rotateZ(rotation)
-      .moveY(radius)
-      .Loop(360, { sides: segments })
-      .rotateY(90);
+    .rotateZ(rotation)
+    .moveY(radius)
+    .Loop(360, { sides: segments })
+    .rotateY(90);
 
 /**
  *
@@ -833,9 +914,11 @@ const Torus = (radius = 1, height = 1, { segments = 32, sides = 32, rotation = 0
  **/
 
 const ofEdge$3 = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
-const ofApothem$8 = (apothem = 1) => Polygon.ofApothem(apothem, { sides: 3 });
+const ofApothem$8 = (apothem = 1) =>
+  Polygon.ofApothem(apothem, { sides: 3 });
 const ofRadius$c = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
-const ofDiameter$b = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 3 });
+const ofDiameter$b = (diameter = 1) =>
+  Polygon.ofDiameter(diameter, { sides: 3 });
 
 const Triangle = (...args) => ofEdge$3(...args);
 
@@ -846,12 +929,19 @@ Triangle.ofDiameter = ofDiameter$b;
 
 const Union = (...args) => Empty().add(...args);
 
-const UnionMethod = function (...args) { return Union(this, ...args); };
+const UnionMethod = function (...args) {
+  return Union(this, ...args);
+};
 Shape.prototype.Union = UnionMethod;
 
-const Void = (shape) => Shape.fromGeometry(rewriteTags(['compose/non-positive'], [], shape.toGeometry()));
+const Void = (shape) =>
+  Shape.fromGeometry(
+    rewriteTags(['compose/non-positive'], [], shape.toGeometry())
+  );
 
-const VoidMethod = function () { return Void(this); };
+const VoidMethod = function () {
+  return Void(this);
+};
 Shape.prototype.Void = VoidMethod;
 
 /**
@@ -868,12 +958,15 @@ Shape.prototype.Void = VoidMethod;
  * :::
  **/
 
-const Wave = (toPathFromXDistance = (xDistance) => [[0]], { from = 0, to = 360, by, resolution } = {}) => {
+const Wave = (
+  toPathFromXDistance = (xDistance) => [[0]],
+  { from = 0, to = 360, by, resolution } = {}
+) => {
   if (by === undefined && resolution === undefined) {
     by = 1;
   }
   let path = [null];
-  for (const xDistance of numbers(distance => distance, { from, to, by })) {
+  for (const xDistance of numbers((distance) => distance, { from, to, by })) {
     const subpath = toPathFromXDistance(xDistance);
     path = concatenate(path, translate([xDistance, 0, 0], subpath));
   }
@@ -909,7 +1002,7 @@ const api = {
   Triangle,
   Union,
   Void,
-  Wave
+  Wave,
 };
 
 export default api;

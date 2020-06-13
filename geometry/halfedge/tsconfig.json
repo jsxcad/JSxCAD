@@ -9,10 +9,7 @@
     "outDir": "types",
     "moduleResolution": "node"
   },
-  "include": [
-    "main.js",
-    "!types/*.d.ts"
-  ],
+  "include": ["main.js", "!types/*.d.ts"],
   "exclude": [
     "../../node_modules/**",
     "**/node_modules/*",

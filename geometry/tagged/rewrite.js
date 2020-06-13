@@ -52,8 +52,10 @@ export const rewriteUp = (geometry, op) => {
     } else if (geometry.connection) {
       const geometries = geometry.geometries.map(walk);
       const connectors = geometry.connectors.map(walk);
-      if (shallowEq(geometries, geometry.geometries) &&
-          shallowEq(connectors, geometry.connectors)) {
+      if (
+        shallowEq(geometries, geometry.geometries) &&
+        shallowEq(connectors, geometry.connectors)
+      ) {
         return q(op(geometry));
       } else {
         return q(op({ ...geometry, geometries, connectors }));
@@ -64,7 +66,7 @@ export const rewriteUp = (geometry, op) => {
         return q(op(geometry));
       } else {
         return q(op({ ...geometry, item }));
-      };
+      }
     } else if (geometry.paths) {
       return q(op(geometry));
     } else if (geometry.plan) {

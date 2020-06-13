@@ -67,7 +67,10 @@ export const makeWatertight = (surface, normalize, threshold = THRESHOLD) => {
         for (let i = 0; i < orderedVertices.length; i++) {
           const vertex = orderedVertices[i];
           // FIX: Threshold
-          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+          if (
+            Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+            threshold
+          ) {
             colinear.push(vertex);
           }
         }
@@ -77,7 +80,7 @@ export const makeWatertight = (surface, normalize, threshold = THRESHOLD) => {
         watertightPath.push(...colinear);
       }
       pushWhenValid(watertightPaths, watertightPath);
-    };
+    }
 
     surface[watertight] = watertightPaths;
   }

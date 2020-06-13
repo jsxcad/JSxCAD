@@ -67,7 +67,9 @@ export const union = (...shapes) => {
   }
 };
 
-const unionMethod = function (...shapes) { return union(this, ...shapes); };
+const unionMethod = function (...shapes) {
+  return union(this, ...shapes);
+};
 Shape.prototype.union = unionMethod;
 
 export default union;

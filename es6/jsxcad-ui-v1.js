@@ -1,4 +1,4 @@
-import { read, log, write, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
+import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
@@ -25,6 +25,168 @@ var global$1 = (typeof global !== "undefined" ? global :
             typeof self !== "undefined" ? self :
             typeof window !== "undefined" ? window : {});
 
+// shim for using process in browser
+// based off https://github.com/defunctzombie/node-process/blob/master/browser.js
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+var cachedSetTimeout = defaultSetTimout;
+var cachedClearTimeout = defaultClearTimeout;
+if (typeof global$1.setTimeout === 'function') {
+    cachedSetTimeout = setTimeout;
+}
+if (typeof global$1.clearTimeout === 'function') {
+    cachedClearTimeout = clearTimeout;
+}
+
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+function nextTick(fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+}
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+var title = 'browser';
+var platform = 'browser';
+var browser = true;
+var env = {};
+var argv = [];
+var version = ''; // empty string to avoid regexp issues
+var versions = {};
+var release = {};
+var config = {};
+
+function noop() {}
+
+var on = noop;
+var addListener = noop;
+var once = noop;
+var off = noop;
+var removeListener = noop;
+var removeAllListeners = noop;
+var emit = noop;
+
+function binding(name) {
+    throw new Error('process.binding is not supported');
+}
+
+function cwd () { return '/' }
+function chdir (dir) {
+    throw new Error('process.chdir is not supported');
+}function umask() { return 0; }
+
 // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
 var performance$1 = global$1.performance || {};
 var performanceNow =
@@ -34,6 +196,56 @@ var performanceNow =
   performance$1.oNow       ||
   performance$1.webkitNow  ||
   function(){ return (new Date()).getTime() };
+
+// generate timestamp or delta
+// see http://nodejs.org/api/process.html#process_process_hrtime
+function hrtime(previousTimestamp){
+  var clocktime = performanceNow.call(performance$1)*1e-3;
+  var seconds = Math.floor(clocktime);
+  var nanoseconds = Math.floor((clocktime%1)*1e9);
+  if (previousTimestamp) {
+    seconds = seconds - previousTimestamp[0];
+    nanoseconds = nanoseconds - previousTimestamp[1];
+    if (nanoseconds<0) {
+      seconds--;
+      nanoseconds += 1e9;
+    }
+  }
+  return [seconds,nanoseconds]
+}
+
+var startTime = new Date();
+function uptime() {
+  var currentTime = new Date();
+  var dif = currentTime - startTime;
+  return dif / 1000;
+}
+
+var process = {
+  nextTick: nextTick,
+  title: title,
+  browser: browser,
+  env: env,
+  argv: argv,
+  version: version,
+  versions: versions,
+  on: on,
+  addListener: addListener,
+  once: once,
+  off: off,
+  removeListener: removeListener,
+  removeAllListeners: removeAllListeners,
+  emit: emit,
+  binding: binding,
+  cwd: cwd,
+  chdir: chdir,
+  umask: umask,
+  hrtime: hrtime,
+  platform: platform,
+  release: release,
+  config: config,
+  uptime: uptime
+};
 
 var classnames = createCommonjsModule(function (module) {
 /*!
@@ -3630,7 +3842,7 @@ var react_development = createCommonjsModule(function (module, exports) {
 var _assign = objectAssign;
 var checkPropTypes = checkPropTypes_1;
 
-var ReactVersion = '16.13.0';
+var ReactVersion = '16.13.1';
 
 // The Symbol used to tag the ReactElement-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
@@ -6443,7 +6655,7 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
   }
 };
 
-var browser = invariant;
+var browser$1 = invariant;
 
 var beginDrag = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -6504,17 +6716,17 @@ function createBeginDrag(manager) {
 }
 exports.default = createBeginDrag;
 function verifyInvariants(sourceIds, monitor, registry) {
-    browser(!monitor.isDragging(), 'Cannot call beginDrag while dragging.');
+    browser$1(!monitor.isDragging(), 'Cannot call beginDrag while dragging.');
     for (var _i = 0, sourceIds_1 = sourceIds; _i < sourceIds_1.length; _i++) {
         var s = sourceIds_1[_i];
-        browser(registry.getSource(s), 'Expected sourceIds to be registered.');
+        browser$1(registry.getSource(s), 'Expected sourceIds to be registered.');
     }
 }
 function verifyGetSourceClientOffsetIsFunction(getSourceClientOffset) {
-    browser(typeof getSourceClientOffset === 'function', 'When clientOffset is provided, getSourceClientOffset must be a function.');
+    browser$1(typeof getSourceClientOffset === 'function', 'When clientOffset is provided, getSourceClientOffset must be a function.');
 }
 function verifyItemIsObject(item) {
-    browser(discount_lodash.isObject(item), 'Item must be an object.');
+    browser$1(discount_lodash.isObject(item), 'Item must be an object.');
 }
 function getDraggableSource(sourceIds, monitor) {
     var sourceId = null;
@@ -6588,16 +6800,16 @@ function createHover(manager) {
 }
 exports.default = createHover;
 function verifyTargetIdsIsArray(targetIdsArg) {
-    browser(Array.isArray(targetIdsArg), 'Expected targetIds to be an array.');
+    browser$1(Array.isArray(targetIdsArg), 'Expected targetIds to be an array.');
 }
 function checkInvariants(targetIds, monitor, registry) {
-    browser(monitor.isDragging(), 'Cannot call hover while not dragging.');
-    browser(!monitor.didDrop(), 'Cannot call hover after drop.');
+    browser$1(monitor.isDragging(), 'Cannot call hover while not dragging.');
+    browser$1(!monitor.didDrop(), 'Cannot call hover after drop.');
     for (var i = 0; i < targetIds.length; i++) {
         var targetId = targetIds[i];
-        browser(targetIds.lastIndexOf(targetId) === i, 'Expected targetIds to be unique in the passed array.');
+        browser$1(targetIds.lastIndexOf(targetId) === i, 'Expected targetIds to be unique in the passed array.');
         var target = registry.getTarget(targetId);
-        browser(target, 'Expected targetIds to be registered.');
+        browser$1(target, 'Expected targetIds to be registered.');
     }
 }
 function removeNonMatchingTargetIds(targetIds, registry, draggedItemType) {
@@ -6662,8 +6874,8 @@ function createDrop(manager) {
 }
 exports.default = createDrop;
 function verifyInvariants(monitor) {
-    browser(monitor.isDragging(), 'Cannot call drop while not dragging.');
-    browser(!monitor.didDrop(), 'Cannot call drop twice during one drag operation.');
+    browser$1(monitor.isDragging(), 'Cannot call drop while not dragging.');
+    browser$1(!monitor.didDrop(), 'Cannot call drop twice during one drag operation.');
 }
 function determineDropResult(targetId, index, registry, monitor) {
     var target = registry.getTarget(targetId);
@@ -6675,7 +6887,7 @@ function determineDropResult(targetId, index, registry, monitor) {
     return dropResult;
 }
 function verifyDropResultType(dropResult) {
-    browser(typeof dropResult === 'undefined' || discount_lodash.isObject(dropResult), 'Drop result must either be an object or undefined.');
+    browser$1(typeof dropResult === 'undefined' || discount_lodash.isObject(dropResult), 'Drop result must either be an object or undefined.');
 }
 function getDroppableTargets(monitor) {
     var targetIds = monitor
@@ -6706,7 +6918,7 @@ function createEndDrag(manager) {
 }
 exports.default = createEndDrag;
 function verifyIsDragging(monitor) {
-    browser(monitor.isDragging(), 'Cannot call endDrag while not dragging.');
+    browser$1(monitor.isDragging(), 'Cannot call endDrag while not dragging.');
 }
 });
 
@@ -7164,8 +7376,8 @@ var DragDropMonitorImpl = /** @class */ (function () {
         var _this = this;
         if (options === void 0) { options = { handlerIds: undefined }; }
         var handlerIds = options.handlerIds;
-        browser(typeof listener === 'function', 'listener must be a function.');
-        browser(typeof handlerIds === 'undefined' || Array.isArray(handlerIds), 'handlerIds, when specified, must be an array of strings.');
+        browser$1(typeof listener === 'function', 'listener must be a function.');
+        browser$1(typeof handlerIds === 'undefined' || Array.isArray(handlerIds), 'handlerIds, when specified, must be an array of strings.');
         var prevStateId = this.store.getState().stateId;
         var handleChange = function () {
             var state = _this.store.getState();
@@ -7186,7 +7398,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
     };
     DragDropMonitorImpl.prototype.subscribeToOffsetChange = function (listener) {
         var _this = this;
-        browser(typeof listener === 'function', 'listener must be a function.');
+        browser$1(typeof listener === 'function', 'listener must be a function.');
         var previousState = this.store.getState().dragOffset;
         var handleChange = function () {
             var nextState = _this.store.getState().dragOffset;
@@ -7203,7 +7415,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
             return false;
         }
         var source = this.registry.getSource(sourceId);
-        browser(source, 'Expected to find a valid source.');
+        browser$1(source, 'Expected to find a valid source.');
         if (this.isDragging()) {
             return false;
         }
@@ -7215,7 +7427,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
             return false;
         }
         var target = this.registry.getTarget(targetId);
-        browser(target, 'Expected to find a valid target.');
+        browser$1(target, 'Expected to find a valid target.');
         if (!this.isDragging() || this.didDrop()) {
             return false;
         }
@@ -7232,7 +7444,7 @@ var DragDropMonitorImpl = /** @class */ (function () {
             return false;
         }
         var source = this.registry.getSource(sourceId, true);
-        browser(source, 'Expected to find a valid source.');
+        browser$1(source, 'Expected to find a valid source.');
         if (!this.isDragging() || !this.isSourcePublic()) {
             return false;
         }
@@ -7328,15 +7540,15 @@ var contracts = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 
 function validateSourceContract(source) {
-    browser(typeof source.canDrag === 'function', 'Expected canDrag to be a function.');
-    browser(typeof source.beginDrag === 'function', 'Expected beginDrag to be a function.');
-    browser(typeof source.endDrag === 'function', 'Expected endDrag to be a function.');
+    browser$1(typeof source.canDrag === 'function', 'Expected canDrag to be a function.');
+    browser$1(typeof source.beginDrag === 'function', 'Expected beginDrag to be a function.');
+    browser$1(typeof source.endDrag === 'function', 'Expected endDrag to be a function.');
 }
 exports.validateSourceContract = validateSourceContract;
 function validateTargetContract(target) {
-    browser(typeof target.canDrop === 'function', 'Expected canDrop to be a function.');
-    browser(typeof target.hover === 'function', 'Expected hover to be a function.');
-    browser(typeof target.drop === 'function', 'Expected beginDrag to be a function.');
+    browser$1(typeof target.canDrop === 'function', 'Expected canDrop to be a function.');
+    browser$1(typeof target.hover === 'function', 'Expected hover to be a function.');
+    browser$1(typeof target.drop === 'function', 'Expected beginDrag to be a function.');
 }
 exports.validateTargetContract = validateTargetContract;
 function validateType(type, allowArray) {
@@ -7344,7 +7556,7 @@ function validateType(type, allowArray) {
         type.forEach(function (t) { return validateType(t, false); });
         return;
     }
-    browser(typeof type === 'string' || typeof type === 'symbol', allowArray
+    browser$1(typeof type === 'string' || typeof type === 'symbol', allowArray
         ? 'Type can only be a string, a symbol, or an array of either.'
         : 'Type can only be a string or a symbol.');
 }
@@ -7945,14 +8157,14 @@ Domain.prototype.enter = Domain.prototype.exit = function() {
 // call `rawAsap.requestFlush` if an exception is thrown.
 var browserRaw = rawAsap;
 function rawAsap(task) {
-    if (!queue.length) {
+    if (!queue$1.length) {
         requestFlush();
     }
     // Equivalent to push, but avoids a function call.
-    queue[queue.length] = task;
+    queue$1[queue$1.length] = task;
 }
 
-var queue = [];
+var queue$1 = [];
 // `requestFlush` is an implementation-specific method that attempts to kick
 // off a `flush` event as quickly as possible. `flush` will attempt to exhaust
 // the event queue before yielding to the browser's own event loop.
@@ -7973,12 +8185,12 @@ var capacity = 1024;
 // However, `flush` does not make any arrangements to be called again if an
 // exception is thrown.
 function flush() {
-    while (index < queue.length) {
+    while (index < queue$1.length) {
         var currentIndex = index;
         // Advance the index before calling the task. This ensures that we will
         // begin flushing on the next task the task throws an error.
         index = index + 1;
-        queue[currentIndex].call();
+        queue$1[currentIndex].call();
         // Prevent leaking memory for long chains of recursive calls to `asap`.
         // If we call `asap` within tasks scheduled by `asap`, the queue will
         // grow, but to avoid an O(n) walk for every task we execute, we don't
@@ -7987,14 +8199,14 @@ function flush() {
         if (index > capacity) {
             // Manually shift all values starting at the index back to the
             // beginning of the queue.
-            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
-                queue[scan] = queue[scan + index];
+            for (var scan = 0, newLength = queue$1.length - index; scan < newLength; scan++) {
+                queue$1[scan] = queue$1[scan + index];
             }
-            queue.length -= index;
+            queue$1.length -= index;
             index = 0;
         }
     }
-    queue.length = 0;
+    queue$1.length = 0;
     index = 0;
 }
 
@@ -8234,7 +8446,7 @@ function parseRoleFromHandlerId(handlerId) {
         case 'T':
             return interfaces.HandlerRole.TARGET;
         default:
-            browser(false, "Cannot parse handler ID: " + handlerId);
+            browser$1(false, "Cannot parse handler ID: " + handlerId);
     }
 }
 function mapContainsValue(map, searchValue) {
@@ -8278,21 +8490,21 @@ var HandlerRegistryImpl = /** @class */ (function () {
     };
     HandlerRegistryImpl.prototype.getSource = function (sourceId, includePinned) {
         if (includePinned === void 0) { includePinned = false; }
-        browser(this.isSourceId(sourceId), 'Expected a valid source ID.');
+        browser$1(this.isSourceId(sourceId), 'Expected a valid source ID.');
         var isPinned = includePinned && sourceId === this.pinnedSourceId;
         var source = isPinned ? this.pinnedSource : this.dragSources.get(sourceId);
         return source;
     };
     HandlerRegistryImpl.prototype.getTarget = function (targetId) {
-        browser(this.isTargetId(targetId), 'Expected a valid target ID.');
+        browser$1(this.isTargetId(targetId), 'Expected a valid target ID.');
         return this.dropTargets.get(targetId);
     };
     HandlerRegistryImpl.prototype.getSourceType = function (sourceId) {
-        browser(this.isSourceId(sourceId), 'Expected a valid source ID.');
+        browser$1(this.isSourceId(sourceId), 'Expected a valid source ID.');
         return this.types.get(sourceId);
     };
     HandlerRegistryImpl.prototype.getTargetType = function (targetId) {
-        browser(this.isTargetId(targetId), 'Expected a valid target ID.');
+        browser$1(this.isTargetId(targetId), 'Expected a valid target ID.');
         return this.types.get(targetId);
     };
     HandlerRegistryImpl.prototype.isSourceId = function (handlerId) {
@@ -8305,7 +8517,7 @@ var HandlerRegistryImpl = /** @class */ (function () {
     };
     HandlerRegistryImpl.prototype.removeSource = function (sourceId) {
         var _this = this;
-        browser(this.getSource(sourceId), 'Expected an existing source.');
+        browser$1(this.getSource(sourceId), 'Expected an existing source.');
         this.store.dispatch(registry.removeSource(sourceId));
         browserAsap(function () {
             _this.dragSources.delete(sourceId);
@@ -8313,19 +8525,19 @@ var HandlerRegistryImpl = /** @class */ (function () {
         });
     };
     HandlerRegistryImpl.prototype.removeTarget = function (targetId) {
-        browser(this.getTarget(targetId), 'Expected an existing target.');
+        browser$1(this.getTarget(targetId), 'Expected an existing target.');
         this.store.dispatch(registry.removeTarget(targetId));
         this.dropTargets.delete(targetId);
         this.types.delete(targetId);
     };
     HandlerRegistryImpl.prototype.pinSource = function (sourceId) {
         var source = this.getSource(sourceId);
-        browser(source, 'Expected an existing source.');
+        browser$1(source, 'Expected an existing source.');
         this.pinnedSourceId = sourceId;
         this.pinnedSource = source;
     };
     HandlerRegistryImpl.prototype.unpinSource = function () {
-        browser(this.pinnedSource, 'No source is pinned at the time.');
+        browser$1(this.pinnedSource, 'No source is pinned at the time.');
         this.pinnedSourceId = null;
         this.pinnedSource = null;
     };
@@ -8999,7 +9211,7 @@ function DragDropContext(backendFactory, backendContext, debugMode) {
                 return _this;
             }
             DragDropContextContainer.prototype.getDecoratedComponentInstance = function () {
-                browser(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
+                browser$1(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
                 return this.ref.current;
             };
             DragDropContextContainer.prototype.render = function () {
@@ -9142,8 +9354,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function DragLayer(collect, options) {
     if (options === void 0) { options = {}; }
     checkDecoratorArguments_1.default('DragLayer', 'collect[, options]', collect, options);
-    browser(typeof collect === 'function', 'Expected "collect" provided as the first argument to DragLayer to be a function that collects props to inject into the component. ', 'Instead, received %s. Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-layer', collect);
-    browser(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the second argument to DragLayer to be a plain object when specified. ' +
+    browser$1(typeof collect === 'function', 'Expected "collect" provided as the first argument to DragLayer to be a function that collects props to inject into the component. ', 'Instead, received %s. Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-layer', collect);
+    browser$1(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the second argument to DragLayer to be a plain object when specified. ' +
         'Instead, received %s. Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-layer', options);
     return function decorateLayer(DecoratedComponent) {
         var Decorated = DecoratedComponent;
@@ -9167,7 +9379,7 @@ function DragLayer(collect, options) {
                 return _this;
             }
             DragLayerContainer.prototype.getDecoratedComponentInstance = function () {
-                browser(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
+                browser$1(this.ref.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
                 return this.ref.current;
             };
             DragLayerContainer.prototype.shouldComponentUpdate = function (nextProps, nextState) {
@@ -9209,7 +9421,7 @@ function DragLayer(collect, options) {
                     return;
                 }
                 this.manager = dragDropManager;
-                browser(typeof dragDropManager === 'object', 'Could not find the drag and drop manager in the context of %s. ' +
+                browser$1(typeof dragDropManager === 'object', 'Could not find the drag and drop manager in the context of %s. ' +
                     'Make sure to wrap the top-level component of your app with DragDropContext. ' +
                     'Read more: http://react-dnd.github.io/react-dnd/docs/troubleshooting#could-not-find-the-drag-and-drop-manager-in-the-context', displayName, displayName);
                 var monitor = this.manager.getMonitor();
@@ -9494,7 +9706,7 @@ function decorateHandler(_a) {
             return this.handlerId;
         };
         DragDropContainer.prototype.getDecoratedComponentInstance = function () {
-            browser(this.decoratedRef.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
+            browser$1(this.decoratedRef.current, 'In order to access an instance of the decorated component, it must either be a class component or use React.forwardRef()');
             return this.decoratedRef.current;
         };
         DragDropContainer.prototype.shouldComponentUpdate = function (nextProps, nextState) {
@@ -9551,7 +9763,7 @@ function decorateHandler(_a) {
             }
             var nextState = collect(this.handlerConnector.hooks, this.handlerMonitor, this.props);
             {
-                browser(discount_lodash$1.isPlainObject(nextState), 'Expected `collect` specified as the second argument to ' +
+                browser$1(discount_lodash$1.isPlainObject(nextState), 'Expected `collect` specified as the second argument to ' +
                     '%s for %s to return a plain object of props to inject. ' +
                     'Instead, received %s.', containerDisplayName, displayName, nextState);
             }
@@ -9574,7 +9786,7 @@ function decorateHandler(_a) {
             if (this.manager !== undefined) {
                 return;
             }
-            browser(dragDropManager !== undefined, 'Could not find the drag and drop manager in the context of %s. ' +
+            browser$1(dragDropManager !== undefined, 'Could not find the drag and drop manager in the context of %s. ' +
                 'Make sure to wrap the top-level component of your app with DragDropContext. ' +
                 'Read more: http://react-dnd.github.io/react-dnd/docs/troubleshooting#could-not-find-the-drag-and-drop-manager-in-the-context', displayName, displayName);
             if (dragDropManager === undefined) {
@@ -9649,7 +9861,7 @@ var SourceImpl = /** @class */ (function () {
             }
             var item = _this.spec.beginDrag(_this.props, _this.monitor, _this.ref.current);
             {
-                browser(discount_lodash$1.isPlainObject(item), 'beginDrag() must return a plain object that represents the dragged item. ' +
+                browser$1(discount_lodash$1.isPlainObject(item), 'beginDrag() must return a plain object that represents the dragged item. ' +
                     'Instead received %s. ' +
                     'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', item);
             }
@@ -9690,16 +9902,16 @@ var SourceImpl = /** @class */ (function () {
 }());
 function createSourceFactory(spec) {
     Object.keys(spec).forEach(function (key) {
-        browser(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drag source specification to only have ' +
+        browser$1(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drag source specification to only have ' +
             'some of the following keys: %s. ' +
             'Instead received a specification with an unexpected "%s" key. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', ALLOWED_SPEC_METHODS.join(', '), key);
-        browser(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
+        browser$1(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
             'Instead received a specification with %s: %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', key, key, spec[key]);
     });
     REQUIRED_SPEC_METHODS.forEach(function (key) {
-        browser(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
+        browser$1(typeof spec[key] === 'function', 'Expected %s in the drag source specification to be a function. ' +
             'Instead received a specification with %s: %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', key, key, spec[key]);
     });
@@ -9729,7 +9941,7 @@ var DragSourceMonitorImpl = /** @class */ (function () {
         return this.sourceId;
     };
     DragSourceMonitorImpl.prototype.canDrag = function () {
-        browser(!isCallingCanDrag, 'You may not call monitor.canDrag() inside your canDrag() implementation. ' +
+        browser$1(!isCallingCanDrag, 'You may not call monitor.canDrag() inside your canDrag() implementation. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source-monitor');
         try {
             isCallingCanDrag = true;
@@ -9743,7 +9955,7 @@ var DragSourceMonitorImpl = /** @class */ (function () {
         if (!this.sourceId) {
             return false;
         }
-        browser(!isCallingIsDragging, 'You may not call monitor.isDragging() inside your isDragging() implementation. ' +
+        browser$1(!isCallingIsDragging, 'You may not call monitor.isDragging() inside your isDragging() implementation. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source-monitor');
         try {
             isCallingIsDragging = true;
@@ -9828,7 +10040,7 @@ function setRef(ref, node) {
 }
 function cloneWithRef(element, newRef) {
     var previousRef = element.ref;
-    browser(typeof previousRef !== 'string', 'Cannot connect React DnD to an element with an existing string ref. ' +
+    browser$1(typeof previousRef !== 'string', 'Cannot connect React DnD to an element with an existing string ref. ' +
         'Please convert it to use a callback ref instead, or wrap it into a <span> or <div>. ' +
         'Read more: https://facebook.github.io/react/docs/more-about-refs.html#the-ref-callback-attribute');
     if (!previousRef) {
@@ -10143,21 +10355,21 @@ function DragSource(type, spec, collect, options) {
     checkDecoratorArguments_1.default('DragSource', 'type, spec, collect[, options]', type, spec, collect, options);
     var getType = type;
     if (typeof type !== 'function') {
-        browser(isValidType_1.default(type), 'Expected "type" provided as the first argument to DragSource to be ' +
+        browser$1(isValidType_1.default(type), 'Expected "type" provided as the first argument to DragSource to be ' +
             'a string, or a function that returns a string given the current props. ' +
             'Instead, received %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', type);
         getType = function () { return type; };
     }
-    browser(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DragSource to be ' +
+    browser$1(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DragSource to be ' +
         'a plain object. Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', spec);
     var createSource = createSourceFactory_1.default(spec);
-    browser(typeof collect === 'function', 'Expected "collect" provided as the third argument to DragSource to be ' +
+    browser$1(typeof collect === 'function', 'Expected "collect" provided as the third argument to DragSource to be ' +
         'a function that returns a plain object of props to inject. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', collect);
-    browser(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DragSource to be ' +
+    browser$1(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DragSource to be ' +
         'a plain object when specified. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drag-source', collect);
@@ -10231,7 +10443,7 @@ var TargetImpl = /** @class */ (function () {
         }
         var dropResult = this.spec.drop(this.props, this.monitor, this.ref.current);
         {
-            browser(typeof dropResult === 'undefined' || discount_lodash$1.isPlainObject(dropResult), 'drop() must either return undefined, or an object that represents the drop result. ' +
+            browser$1(typeof dropResult === 'undefined' || discount_lodash$1.isPlainObject(dropResult), 'drop() must either return undefined, or an object that represents the drop result. ' +
                 'Instead received %s. ' +
                 'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', dropResult);
         }
@@ -10241,11 +10453,11 @@ var TargetImpl = /** @class */ (function () {
 }());
 function createTargetFactory(spec) {
     Object.keys(spec).forEach(function (key) {
-        browser(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drop target specification to only have ' +
+        browser$1(ALLOWED_SPEC_METHODS.indexOf(key) > -1, 'Expected the drop target specification to only have ' +
             'some of the following keys: %s. ' +
             'Instead received a specification with an unexpected "%s" key. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', ALLOWED_SPEC_METHODS.join(', '), key);
-        browser(typeof spec[key] === 'function', 'Expected %s in the drop target specification to be a function. ' +
+        browser$1(typeof spec[key] === 'function', 'Expected %s in the drop target specification to be a function. ' +
             'Instead received a specification with %s: %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', key, key, spec[key]);
     });
@@ -10283,7 +10495,7 @@ var DropTargetMonitorImpl = /** @class */ (function () {
         if (!this.targetId) {
             return false;
         }
-        browser(!isCallingCanDrop, 'You may not call monitor.canDrop() inside your canDrop() implementation. ' +
+        browser$1(!isCallingCanDrop, 'You may not call monitor.canDrop() inside your canDrop() implementation. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target-monitor');
         try {
             isCallingCanDrop = true;
@@ -10454,21 +10666,21 @@ function DropTarget(type, spec, collect, options) {
     checkDecoratorArguments_1.default('DropTarget', 'type, spec, collect[, options]', type, spec, collect, options);
     var getType = type;
     if (typeof type !== 'function') {
-        browser(isValidType_1.default(type, true), 'Expected "type" provided as the first argument to DropTarget to be ' +
+        browser$1(isValidType_1.default(type, true), 'Expected "type" provided as the first argument to DropTarget to be ' +
             'a string, an array of strings, or a function that returns either given ' +
             'the current props. Instead, received %s. ' +
             'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', type);
         getType = function () { return type; };
     }
-    browser(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DropTarget to be ' +
+    browser$1(discount_lodash$1.isPlainObject(spec), 'Expected "spec" provided as the second argument to DropTarget to be ' +
         'a plain object. Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', spec);
     var createTarget = createTargetFactory_1.default(spec);
-    browser(typeof collect === 'function', 'Expected "collect" provided as the third argument to DropTarget to be ' +
+    browser$1(typeof collect === 'function', 'Expected "collect" provided as the third argument to DropTarget to be ' +
         'a function that returns a plain object of props to inject. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', collect);
-    browser(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DropTarget to be ' +
+    browser$1(discount_lodash$1.isPlainObject(options), 'Expected "options" provided as the fourth argument to DropTarget to be ' +
         'a plain object when specified. ' +
         'Instead, received %s. ' +
         'Read more: http://react-dnd.github.io/react-dnd/docs/api/drop-target', collect);
@@ -10576,7 +10788,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 function useDragDropManager() {
     var dragDropManager = react.useContext(DragDropContext_1.context).dragDropManager;
-    browser(dragDropManager != null, 'Expected drag drop context');
+    browser$1(dragDropManager != null, 'Expected drag drop context');
     return dragDropManager;
 }
 exports.useDragDropManager = useDragDropManager;
@@ -10611,7 +10823,7 @@ function useDragHandler(spec, monitor, connector) {
                 var _a = spec.current, begin = _a.begin, item = _a.item;
                 if (begin) {
                     var beginResult = begin(monitor);
-                    browser(beginResult == null || typeof beginResult === 'object', 'dragSpec.begin() must either return an object, undefined, or null');
+                    browser$1(beginResult == null || typeof beginResult === 'object', 'dragSpec.begin() must either return an object, undefined, or null');
                     return beginResult || item || {};
                 }
                 return item || {};
@@ -10670,8 +10882,8 @@ function useDrag(spec) {
     var specRef = react.useRef(spec);
     specRef.current = spec;
     // TODO: wire options into createSourceConnector
-    browser(spec.item != null, 'item must be defined');
-    browser(spec.item.type != null, 'item type must be defined');
+    browser$1(spec.item != null, 'item must be defined');
+    browser$1(spec.item.type != null, 'item type must be defined');
     var _a = drag.useDragSourceMonitor(), monitor = _a[0], connector = _a[1];
     drag.useDragHandler(specRef, monitor, connector);
     var result = useMonitorOutput_1.useMonitorOutput(monitor, specRef.current.collect || (function () { return ({}); }), function () { return connector.reconnect(); });
@@ -10763,7 +10975,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function useDrop(spec) {
     var specRef = react.useRef(spec);
     specRef.current = spec;
-    browser(spec.accept != null, 'accept must be defined');
+    browser$1(spec.accept != null, 'accept must be defined');
     var _a = drop$1.useDropTargetMonitor(), monitor = _a[0], connector = _a[1];
     drop$1.useDropHandler(specRef, monitor, connector);
     var result = useMonitorOutput_1.useMonitorOutput(monitor, specRef.current.collect || (function () { return ({}); }), function () { return connector.reconnect(); });
@@ -13364,7 +13576,7 @@ var TouchBackend = /** @class */ (function () {
         if (typeof window === 'undefined') {
             return;
         }
-        browser(!TouchBackend.isSetUp, 'Cannot have two Touch backends at the same time.');
+        browser$1(!TouchBackend.isSetUp, 'Cannot have two Touch backends at the same time.');
         TouchBackend.isSetUp = true;
         this.addEventListener(window, 'start', this.getTopMoveStartHandler());
         this.addEventListener(window, 'start', this.handleTopMoveStartCapture, true);
@@ -15497,11 +15709,11 @@ var MosaicRoot_2 = MosaicRoot_1.MosaicRoot;
  * _.times(2, _.noop);
  * // => [undefined, undefined]
  */
-function noop() {
+function noop$1() {
   // No operation performed.
 }
 
-var noop_1 = noop;
+var noop_1 = noop$1;
 
 
 
@@ -15813,7 +16025,24 @@ var RootDropTargets_1 = RootDropTargets.RootDropTargets;
 
 var immutabilityHelper = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
-
+function stringifiable(obj) {
+    // Safely stringify Object.create(null)
+    /* istanbul ignore next */
+    return typeof obj === 'object' && !('toString' in obj) ?
+        Object.prototype.toString.call(obj).slice(8, -1) :
+        obj;
+}
+var isProduction = typeof process === 'object' && process.env.NODE_ENV === 'production';
+function invariant(condition, message) {
+    if (!condition) {
+        /* istanbul ignore next */
+        if (isProduction) {
+            throw new Error('Invariant failed');
+        }
+        throw new Error(message());
+    }
+}
+exports.invariant = invariant;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var splice = Array.prototype.splice;
 var toString = Object.prototype.toString;
@@ -15870,13 +16099,13 @@ var Context = /** @class */ (function () {
         var _this = this;
         var spec = (typeof $spec === 'function') ? { $apply: $spec } : $spec;
         if (!(Array.isArray(object) && Array.isArray(spec))) {
-            browser(!Array.isArray(spec), 'update(): You provided an invalid spec to update(). The spec may ' +
-                'not contain an array except as the value of $set, $push, $unshift, ' +
-                '$splice or any custom command allowing an array value.');
+            invariant(!Array.isArray(spec), function () { return "update(): You provided an invalid spec to update(). The spec may " +
+                "not contain an array except as the value of $set, $push, $unshift, " +
+                "$splice or any custom command allowing an array value."; });
         }
-        browser(typeof spec === 'object' && spec !== null, 'update(): You provided an invalid spec to update(). The spec and ' +
-            'every included key path must be plain objects containing one of the ' +
-            'following commands: %s.', Object.keys(this.commands).join(', '));
+        invariant(typeof spec === 'object' && spec !== null, function () { return "update(): You provided an invalid spec to update(). The spec and " +
+            "every included key path must be plain objects containing one of the " +
+            ("following commands: " + Object.keys(_this.commands).join(', ') + "."); });
         var nextObject = object;
         getAllKeys(spec).forEach(function (key) {
             if (hasOwnProperty.call(_this.commands, key)) {
@@ -16015,41 +16244,42 @@ exports.default = defaultContext.update;
 exports.default.default = module.exports = assign(exports.default, exports);
 // invariants
 function invariantPushAndUnshift(value, spec, command) {
-    browser(Array.isArray(value), 'update(): expected target of %s to be an array; got %s.', command, value);
+    invariant(Array.isArray(value), function () { return "update(): expected target of " + stringifiable(command) + " to be an array; got " + stringifiable(value) + "."; });
     invariantSpecArray(spec[command], command);
 }
 function invariantSpecArray(spec, command) {
-    browser(Array.isArray(spec), 'update(): expected spec of %s to be an array; got %s. ' +
-        'Did you forget to wrap your parameter in an array?', command, spec);
+    invariant(Array.isArray(spec), function () { return "update(): expected spec of " + stringifiable(command) + " to be an array; got " + stringifiable(spec) + ". " +
+        "Did you forget to wrap your parameter in an array?"; });
 }
 function invariantSplices(value, spec) {
-    browser(Array.isArray(value), 'Expected $splice target to be an array; got %s', value);
+    invariant(Array.isArray(value), function () { return "Expected $splice target to be an array; got " + stringifiable(value); });
     invariantSplice(spec.$splice);
 }
 function invariantSplice(value) {
-    browser(Array.isArray(value), 'update(): expected spec of $splice to be an array of arrays; got %s. ' +
-        'Did you forget to wrap your parameters in an array?', value);
+    invariant(Array.isArray(value), function () { return "update(): expected spec of $splice to be an array of arrays; got " + stringifiable(value) + ". " +
+        "Did you forget to wrap your parameters in an array?"; });
 }
 function invariantApply(fn) {
-    browser(typeof fn === 'function', 'update(): expected spec of $apply to be a function; got %s.', fn);
+    invariant(typeof fn === 'function', function () { return "update(): expected spec of $apply to be a function; got " + stringifiable(fn) + "."; });
 }
 function invariantSet(spec) {
-    browser(Object.keys(spec).length === 1, 'Cannot have more than one key in an object with $set');
+    invariant(Object.keys(spec).length === 1, function () { return "Cannot have more than one key in an object with $set"; });
 }
 function invariantMerge(target, specValue) {
-    browser(specValue && typeof specValue === 'object', 'update(): $merge expects a spec of type \'object\'; got %s', specValue);
-    browser(target && typeof target === 'object', 'update(): $merge expects a target of type \'object\'; got %s', target);
+    invariant(specValue && typeof specValue === 'object', function () { return "update(): $merge expects a spec of type 'object'; got " + stringifiable(specValue); });
+    invariant(target && typeof target === 'object', function () { return "update(): $merge expects a target of type 'object'; got " + stringifiable(target); });
 }
 function invariantMapOrSet(target, command) {
     var typeOfTarget = type(target);
-    browser(typeOfTarget === 'Map' || typeOfTarget === 'Set', 'update(): %s expects a target of type Set or Map; got %s', command, typeOfTarget);
+    invariant(typeOfTarget === 'Map' || typeOfTarget === 'Set', function () { return "update(): " + stringifiable(command) + " expects a target of type Set or Map; got " + stringifiable(typeOfTarget); });
 }
 });
 
 unwrapExports(immutabilityHelper);
-var immutabilityHelper_1 = immutabilityHelper.Context;
-var immutabilityHelper_2 = immutabilityHelper.isEquals;
-var immutabilityHelper_3 = immutabilityHelper.extend;
+var immutabilityHelper_1 = immutabilityHelper.invariant;
+var immutabilityHelper_2 = immutabilityHelper.Context;
+var immutabilityHelper_3 = immutabilityHelper.isEquals;
+var immutabilityHelper_4 = immutabilityHelper.extend;
 
 /**
  * The base implementation of `_.slice` without an iteratee call guard.
@@ -17630,7 +17860,7 @@ var lib_30 = lib$3.DEFAULT_CONTROLS_WITHOUT_CREATION;
 
 const sleep = duration => new Promise((resolve, reject) => setTimeout(resolve, duration));
 
-const getAccessToken = async service => read(`auth/${service}/accessToken`, {
+const getAccessToken = async service => read$1(`auth/${service}/accessToken`, {
   workspace: '.system',
   useCache: false
 });
@@ -17643,7 +17873,7 @@ const getNewAccessToken = async (service, oldToken = undefined, attempts = 10) =
   window.open(`http://167.99.163.104:3000/auth/${service}?${service}Callback=${window.location.href}`);
 
   while (--attempts > 0) {
-    const token = await read(`auth/${service}/accessToken`, {
+    const token = await read$1(`auth/${service}/accessToken`, {
       workspace: '.system',
       useCache: false
     });
@@ -17669,10 +17899,10 @@ const request = async (isOk, path, method, body, {
 } = {}) => {
   let token = await getAccessToken(service);
   const headers = {
-    'Accept': 'application/vnd.github.v3+json',
+    Accept: 'application/vnd.github.v3+json',
     'Content-Type': 'application/json',
     'User-Agent': 'JSxCAD v0.0.79',
-    'Authorization': `token ${token}`
+    Authorization: `token ${token}`
   };
 
   if (body !== undefined) {
@@ -17897,7 +18127,7 @@ const readWorkspace = async (owner, repository, prefix, {
     entry
   } of queue) {
     const data = toByteArray_1(entry.content.replace(/\n/gm, ''));
-    await write(relativePath, data, {
+    await write$1(relativePath, data, {
       as: 'bytes'
     });
   }
@@ -18133,7 +18363,7 @@ function createBootstrapComponent(Component, opts) {
     props[forwardRefAs] = ref; // eslint-disable-next-line react/prop-types
 
     var bsPrefix = useBootstrapPrefix(props.bsPrefix, prefix);
-    return react.createElement(Component, _extends({}, props, {
+    return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
       bsPrefix: bsPrefix
     }));
   }, {
@@ -18162,7 +18392,7 @@ function createWithBsPrefix(prefix, _temp) {
         props = _objectWithoutPropertiesLoose(_ref2, ["className", "bsPrefix", "as"]);
 
     var resolvedPrefix = useBootstrapPrefix(bsPrefix, prefix);
-    return react.createElement(Tag, _extends({
+    return /*#__PURE__*/react.createElement(Tag, _extends({
       ref: ref,
       className: classnames(className, resolvedPrefix)
     }, props));
@@ -18174,7 +18404,7 @@ function createWithBsPrefix(prefix, _temp) {
 
 var divWithClassName = (function (className) {
   return react.forwardRef(function (p, ref) {
-    return react.createElement("div", _extends({}, p, {
+    return /*#__PURE__*/react.createElement("div", _extends({}, p, {
       ref: ref,
       className: classnames(p.className, className)
     }));
@@ -18308,7 +18538,6 @@ function listen(node, eventName, handler, options) {
   };
 }
 
-var TRANSITION_SUPPORTED = canUseDOM && 'ontransitionend' in window;
 function parseDuration(node) {
   var str = style(node, 'transitionDuration') || '';
   var mult = str.indexOf('ms') === -1 ? 1000 : 1;
@@ -18342,13 +18571,13 @@ function emulateTransitionEnd(element, duration, padding) {
 }
 
 function transitionEnd(element, handler, duration) {
-  if (!TRANSITION_SUPPORTED) {
-    return emulateTransitionEnd(element, 0, 0);
-  }
-
   if (duration == null) duration = parseDuration(element) || 0;
-  emulateTransitionEnd(element, duration);
-  return listen(element, 'transitionend', handler);
+  var removeEmulate = emulateTransitionEnd(element, duration);
+  var remove = listen(element, 'transitionend', handler);
+  return function () {
+    removeEmulate();
+    remove();
+  };
 }
 
 var scheduler_production_min = createCommonjsModule(function (module, exports) {
@@ -19263,36 +19492,35 @@ var scheduler = createCommonjsModule(function (module) {
 
 function u(a){for(var b="https://reactjs.org/docs/error-decoder.html?invariant="+a,c=1;c<arguments.length;c++)b+="&args[]="+encodeURIComponent(arguments[c]);return "Minified React error #"+a+"; visit "+b+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings."}if(!react)throw Error(u(227));
 function ba(a,b,c,d,e,f,g,h,k){var l=Array.prototype.slice.call(arguments,3);try{b.apply(c,l);}catch(m){this.onError(m);}}var da=!1,ea=null,fa=!1,ha=null,ia={onError:function(a){da=!0;ea=a;}};function ja(a,b,c,d,e,f,g,h,k){da=!1;ea=null;ba.apply(ia,arguments);}function ka(a,b,c,d,e,f,g,h,k){ja.apply(this,arguments);if(da){if(da){var l=ea;da=!1;ea=null;}else throw Error(u(198));fa||(fa=!0,ha=l);}}var la=null,ma=null,na=null;
-function oa(a,b,c){var d=a.type||"unknown-event";a.currentTarget=na(c);ka(d,b,void 0,a);a.currentTarget=null;}var pa=react.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;pa.hasOwnProperty("ReactCurrentDispatcher")||(pa.ReactCurrentDispatcher={current:null});pa.hasOwnProperty("ReactCurrentBatchConfig")||(pa.ReactCurrentBatchConfig={suspense:null});
-var Ka=null,La={};
-function Ma(){if(Ka)for(var a in La){var b=La[a],c=Ka.indexOf(a);if(!(-1<c))throw Error(u(96,a));if(!Na[c]){if(!b.extractEvents)throw Error(u(97,a));Na[c]=b;c=b.eventTypes;for(var d in c){var e=void 0;var f=c[d],g=b,h=d;if(Oa.hasOwnProperty(h))throw Error(u(99,h));Oa[h]=f;var k=f.phasedRegistrationNames;if(k){for(e in k)k.hasOwnProperty(e)&&Pa(k[e],g,h);e=!0;}else f.registrationName?(Pa(f.registrationName,g,h),e=!0):e=!1;if(!e)throw Error(u(98,d,a));}}}}
-function Pa(a,b,c){if(Qa[a])throw Error(u(100,a));Qa[a]=b;Ra[a]=b.eventTypes[c].dependencies;}var Na=[],Oa={},Qa={},Ra={};function Sa(a){var b=!1,c;for(c in a)if(a.hasOwnProperty(c)){var d=a[c];if(!La.hasOwnProperty(c)||La[c]!==d){if(La[c])throw Error(u(102,c));La[c]=d;b=!0;}}b&&Ma();}var Ta=!("undefined"===typeof window||"undefined"===typeof window.document||"undefined"===typeof window.document.createElement),Ua=null,Va=null,Wa=null;
-function Xa(a){if(a=ma(a)){if("function"!==typeof Ua)throw Error(u(280));var b=a.stateNode;b&&(b=la(b),Ua(a.stateNode,a.type,b));}}function Ya(a){Va?Wa?Wa.push(a):Wa=[a]:Va=a;}function Za(){if(Va){var a=Va,b=Wa;Wa=Va=null;Xa(a);if(b)for(a=0;a<b.length;a++)Xa(b[a]);}}function $a(a,b){return a(b)}function bb(){}var db=!1;function fb(){if(null!==Va||null!==Wa)bb(),Za();}
-var hb=/^[:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*$/,ib=Object.prototype.hasOwnProperty,jb={},kb={};
-function lb(a){if(ib.call(kb,a))return !0;if(ib.call(jb,a))return !1;if(hb.test(a))return kb[a]=!0;jb[a]=!0;return !1}function mb(a,b,c,d){if(null!==c&&0===c.type)return !1;switch(typeof b){case "function":case "symbol":return !0;case "boolean":if(d)return !1;if(null!==c)return !c.acceptsBooleans;a=a.toLowerCase().slice(0,5);return "data-"!==a&&"aria-"!==a;default:return !1}}
-function nb(a,b,c,d){if(null===b||"undefined"===typeof b||mb(a,b,c,d))return !0;if(d)return !1;if(null!==c)switch(c.type){case 3:return !b;case 4:return !1===b;case 5:return isNaN(b);case 6:return isNaN(b)||1>b}return !1}function C$1(a,b,c,d,e,f){this.acceptsBooleans=2===b||3===b||4===b;this.attributeName=d;this.attributeNamespace=e;this.mustUseProperty=c;this.propertyName=a;this.type=b;this.sanitizeURL=f;}var E$1={};
-"children dangerouslySetInnerHTML defaultValue defaultChecked innerHTML suppressContentEditableWarning suppressHydrationWarning style".split(" ").forEach(function(a){E$1[a]=new C$1(a,0,!1,a,null,!1);});[["acceptCharset","accept-charset"],["className","class"],["htmlFor","for"],["httpEquiv","http-equiv"]].forEach(function(a){var b=a[0];E$1[b]=new C$1(b,1,!1,a[1],null,!1);});["contentEditable","draggable","spellCheck","value"].forEach(function(a){E$1[a]=new C$1(a,2,!1,a.toLowerCase(),null,!1);});
-["autoReverse","externalResourcesRequired","focusable","preserveAlpha"].forEach(function(a){E$1[a]=new C$1(a,2,!1,a,null,!1);});"allowFullScreen async autoFocus autoPlay controls default defer disabled disablePictureInPicture formNoValidate hidden loop noModule noValidate open playsInline readOnly required reversed scoped seamless itemScope".split(" ").forEach(function(a){E$1[a]=new C$1(a,3,!1,a.toLowerCase(),null,!1);});
-["checked","multiple","muted","selected"].forEach(function(a){E$1[a]=new C$1(a,3,!0,a,null,!1);});["capture","download"].forEach(function(a){E$1[a]=new C$1(a,4,!1,a,null,!1);});["cols","rows","size","span"].forEach(function(a){E$1[a]=new C$1(a,6,!1,a,null,!1);});["rowSpan","start"].forEach(function(a){E$1[a]=new C$1(a,5,!1,a.toLowerCase(),null,!1);});var ob=/[\-:]([a-z])/g;function pb(a){return a[1].toUpperCase()}
-"accent-height alignment-baseline arabic-form baseline-shift cap-height clip-path clip-rule color-interpolation color-interpolation-filters color-profile color-rendering dominant-baseline enable-background fill-opacity fill-rule flood-color flood-opacity font-family font-size font-size-adjust font-stretch font-style font-variant font-weight glyph-name glyph-orientation-horizontal glyph-orientation-vertical horiz-adv-x horiz-origin-x image-rendering letter-spacing lighting-color marker-end marker-mid marker-start overline-position overline-thickness paint-order panose-1 pointer-events rendering-intent shape-rendering stop-color stop-opacity strikethrough-position strikethrough-thickness stroke-dasharray stroke-dashoffset stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor text-decoration text-rendering underline-position underline-thickness unicode-bidi unicode-range units-per-em v-alphabetic v-hanging v-ideographic v-mathematical vector-effect vert-adv-y vert-origin-x vert-origin-y word-spacing writing-mode xmlns:xlink x-height".split(" ").forEach(function(a){var b=a.replace(ob,
-pb);E$1[b]=new C$1(b,1,!1,a,null,!1);});"xlink:actuate xlink:arcrole xlink:role xlink:show xlink:title xlink:type".split(" ").forEach(function(a){var b=a.replace(ob,pb);E$1[b]=new C$1(b,1,!1,a,"http://www.w3.org/1999/xlink",!1);});["xml:base","xml:lang","xml:space"].forEach(function(a){var b=a.replace(ob,pb);E$1[b]=new C$1(b,1,!1,a,"http://www.w3.org/XML/1998/namespace",!1);});["tabIndex","crossOrigin"].forEach(function(a){E$1[a]=new C$1(a,1,!1,a.toLowerCase(),null,!1);});
-E$1.xlinkHref=new C$1("xlinkHref",1,!1,"xlink:href","http://www.w3.org/1999/xlink",!0);["src","href","action","formAction"].forEach(function(a){E$1[a]=new C$1(a,1,!1,a.toLowerCase(),null,!0);});
-function qb(a,b,c,d){var e=E$1.hasOwnProperty(b)?E$1[b]:null;var f=null!==e?0===e.type:d?!1:!(2<b.length)||"o"!==b[0]&&"O"!==b[0]||"n"!==b[1]&&"N"!==b[1]?!1:!0;f||(nb(b,c,e,d)&&(c=null),d||null===e?lb(b)&&(null===c?a.removeAttribute(b):a.setAttribute(b,""+c)):e.mustUseProperty?a[e.propertyName]=null===c?3===e.type?!1:"":c:(b=e.attributeName,d=e.attributeNamespace,null===c?a.removeAttribute(b):(e=e.type,c=3===e||4===e&&!0===c?"":""+c,d?a.setAttributeNS(d,b,c):a.setAttribute(b,c))));}
+function oa(a,b,c){var d=a.type||"unknown-event";a.currentTarget=na(c);ka(d,b,void 0,a);a.currentTarget=null;}var pa=null,qa={};
+function ra(){if(pa)for(var a in qa){var b=qa[a],c=pa.indexOf(a);if(!(-1<c))throw Error(u(96,a));if(!sa[c]){if(!b.extractEvents)throw Error(u(97,a));sa[c]=b;c=b.eventTypes;for(var d in c){var e=void 0;var f=c[d],g=b,h=d;if(ta.hasOwnProperty(h))throw Error(u(99,h));ta[h]=f;var k=f.phasedRegistrationNames;if(k){for(e in k)k.hasOwnProperty(e)&&ua(k[e],g,h);e=!0;}else f.registrationName?(ua(f.registrationName,g,h),e=!0):e=!1;if(!e)throw Error(u(98,d,a));}}}}
+function ua(a,b,c){if(va[a])throw Error(u(100,a));va[a]=b;wa[a]=b.eventTypes[c].dependencies;}var sa=[],ta={},va={},wa={};function xa(a){var b=!1,c;for(c in a)if(a.hasOwnProperty(c)){var d=a[c];if(!qa.hasOwnProperty(c)||qa[c]!==d){if(qa[c])throw Error(u(102,c));qa[c]=d;b=!0;}}b&&ra();}var ya=!("undefined"===typeof window||"undefined"===typeof window.document||"undefined"===typeof window.document.createElement),za=null,Aa=null,Ba=null;
+function Ca(a){if(a=ma(a)){if("function"!==typeof za)throw Error(u(280));var b=a.stateNode;b&&(b=la(b),za(a.stateNode,a.type,b));}}function Da(a){Aa?Ba?Ba.push(a):Ba=[a]:Aa=a;}function Ea(){if(Aa){var a=Aa,b=Ba;Ba=Aa=null;Ca(a);if(b)for(a=0;a<b.length;a++)Ca(b[a]);}}function Fa(a,b){return a(b)}function Ha(){}var Ja=!1;function La(){if(null!==Aa||null!==Ba)Ha(),Ea();}
+var Na=/^[:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][:A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*$/,Oa=Object.prototype.hasOwnProperty,Pa={},Qa={};
+function Ra(a){if(Oa.call(Qa,a))return !0;if(Oa.call(Pa,a))return !1;if(Na.test(a))return Qa[a]=!0;Pa[a]=!0;return !1}function Sa(a,b,c,d){if(null!==c&&0===c.type)return !1;switch(typeof b){case "function":case "symbol":return !0;case "boolean":if(d)return !1;if(null!==c)return !c.acceptsBooleans;a=a.toLowerCase().slice(0,5);return "data-"!==a&&"aria-"!==a;default:return !1}}
+function Ta(a,b,c,d){if(null===b||"undefined"===typeof b||Sa(a,b,c,d))return !0;if(d)return !1;if(null!==c)switch(c.type){case 3:return !b;case 4:return !1===b;case 5:return isNaN(b);case 6:return isNaN(b)||1>b}return !1}function v(a,b,c,d,e,f){this.acceptsBooleans=2===b||3===b||4===b;this.attributeName=d;this.attributeNamespace=e;this.mustUseProperty=c;this.propertyName=a;this.type=b;this.sanitizeURL=f;}var C$1={};
+"children dangerouslySetInnerHTML defaultValue defaultChecked innerHTML suppressContentEditableWarning suppressHydrationWarning style".split(" ").forEach(function(a){C$1[a]=new v(a,0,!1,a,null,!1);});[["acceptCharset","accept-charset"],["className","class"],["htmlFor","for"],["httpEquiv","http-equiv"]].forEach(function(a){var b=a[0];C$1[b]=new v(b,1,!1,a[1],null,!1);});["contentEditable","draggable","spellCheck","value"].forEach(function(a){C$1[a]=new v(a,2,!1,a.toLowerCase(),null,!1);});
+["autoReverse","externalResourcesRequired","focusable","preserveAlpha"].forEach(function(a){C$1[a]=new v(a,2,!1,a,null,!1);});"allowFullScreen async autoFocus autoPlay controls default defer disabled disablePictureInPicture formNoValidate hidden loop noModule noValidate open playsInline readOnly required reversed scoped seamless itemScope".split(" ").forEach(function(a){C$1[a]=new v(a,3,!1,a.toLowerCase(),null,!1);});
+["checked","multiple","muted","selected"].forEach(function(a){C$1[a]=new v(a,3,!0,a,null,!1);});["capture","download"].forEach(function(a){C$1[a]=new v(a,4,!1,a,null,!1);});["cols","rows","size","span"].forEach(function(a){C$1[a]=new v(a,6,!1,a,null,!1);});["rowSpan","start"].forEach(function(a){C$1[a]=new v(a,5,!1,a.toLowerCase(),null,!1);});var Ua=/[\-:]([a-z])/g;function Va(a){return a[1].toUpperCase()}
+"accent-height alignment-baseline arabic-form baseline-shift cap-height clip-path clip-rule color-interpolation color-interpolation-filters color-profile color-rendering dominant-baseline enable-background fill-opacity fill-rule flood-color flood-opacity font-family font-size font-size-adjust font-stretch font-style font-variant font-weight glyph-name glyph-orientation-horizontal glyph-orientation-vertical horiz-adv-x horiz-origin-x image-rendering letter-spacing lighting-color marker-end marker-mid marker-start overline-position overline-thickness paint-order panose-1 pointer-events rendering-intent shape-rendering stop-color stop-opacity strikethrough-position strikethrough-thickness stroke-dasharray stroke-dashoffset stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor text-decoration text-rendering underline-position underline-thickness unicode-bidi unicode-range units-per-em v-alphabetic v-hanging v-ideographic v-mathematical vector-effect vert-adv-y vert-origin-x vert-origin-y word-spacing writing-mode xmlns:xlink x-height".split(" ").forEach(function(a){var b=a.replace(Ua,
+Va);C$1[b]=new v(b,1,!1,a,null,!1);});"xlink:actuate xlink:arcrole xlink:role xlink:show xlink:title xlink:type".split(" ").forEach(function(a){var b=a.replace(Ua,Va);C$1[b]=new v(b,1,!1,a,"http://www.w3.org/1999/xlink",!1);});["xml:base","xml:lang","xml:space"].forEach(function(a){var b=a.replace(Ua,Va);C$1[b]=new v(b,1,!1,a,"http://www.w3.org/XML/1998/namespace",!1);});["tabIndex","crossOrigin"].forEach(function(a){C$1[a]=new v(a,1,!1,a.toLowerCase(),null,!1);});
+C$1.xlinkHref=new v("xlinkHref",1,!1,"xlink:href","http://www.w3.org/1999/xlink",!0);["src","href","action","formAction"].forEach(function(a){C$1[a]=new v(a,1,!1,a.toLowerCase(),null,!0);});var Wa=react.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;Wa.hasOwnProperty("ReactCurrentDispatcher")||(Wa.ReactCurrentDispatcher={current:null});Wa.hasOwnProperty("ReactCurrentBatchConfig")||(Wa.ReactCurrentBatchConfig={suspense:null});
+function Xa(a,b,c,d){var e=C$1.hasOwnProperty(b)?C$1[b]:null;var f=null!==e?0===e.type:d?!1:!(2<b.length)||"o"!==b[0]&&"O"!==b[0]||"n"!==b[1]&&"N"!==b[1]?!1:!0;f||(Ta(b,c,e,d)&&(c=null),d||null===e?Ra(b)&&(null===c?a.removeAttribute(b):a.setAttribute(b,""+c)):e.mustUseProperty?a[e.propertyName]=null===c?3===e.type?!1:"":c:(b=e.attributeName,d=e.attributeNamespace,null===c?a.removeAttribute(b):(e=e.type,c=3===e||4===e&&!0===c?"":""+c,d?a.setAttributeNS(d,b,c):a.setAttribute(b,c))));}
 function rb(a){switch(typeof a){case "boolean":case "number":case "object":case "string":case "undefined":return a;default:return ""}}function sb(a){var b=a.type;return (a=a.nodeName)&&"input"===a.toLowerCase()&&("checkbox"===b||"radio"===b)}
-function yb(a){if(!a)return !1;var b=a._valueTracker;if(!b)return !0;var c=b.getValue();var d="";a&&(d=sb(a)?a.checked?"true":"false":a.value);a=d;return a!==c?(b.setValue(a),!0):!1}function Bb(a,b){b=b.checked;null!=b&&qb(a,"checked",b,!1);}
+function yb(a){if(!a)return !1;var b=a._valueTracker;if(!b)return !0;var c=b.getValue();var d="";a&&(d=sb(a)?a.checked?"true":"false":a.value);a=d;return a!==c?(b.setValue(a),!0):!1}function Bb(a,b){b=b.checked;null!=b&&Xa(a,"checked",b,!1);}
 function Cb(a,b){Bb(a,b);var c=rb(b.value),d=b.type;if(null!=c)if("number"===d){if(0===c&&""===a.value||a.value!=c)a.value=""+c;}else a.value!==""+c&&(a.value=""+c);else if("submit"===d||"reset"===d){a.removeAttribute("value");return}b.hasOwnProperty("value")?Db(a,b.type,c):b.hasOwnProperty("defaultValue")&&Db(a,b.type,rb(b.defaultValue));null==b.checked&&null!=b.defaultChecked&&(a.defaultChecked=!!b.defaultChecked);}
 function Db(a,b,c){if("number"!==b||a.ownerDocument.activeElement!==a)null==c?a.defaultValue=""+a._wrapperState.initialValue:a.defaultValue!==""+c&&(a.defaultValue=""+c);}function Hb(a,b,c,d){a=a.options;if(b){b={};for(var e=0;e<c.length;e++)b["$"+c[e]]=!0;for(c=0;c<a.length;c++)e=b.hasOwnProperty("$"+a[c].value),a[c].selected!==e&&(a[c].selected=e),e&&d&&(a[c].defaultSelected=!0);}else {c=""+rb(c);b=null;for(e=0;e<a.length;e++){if(a[e].value===c){a[e].selected=!0;d&&(a[e].defaultSelected=!0);return}null!==b||a[e].disabled||(b=a[e]);}null!==b&&(b.selected=!0);}}
 function Kb(a,b){var c=rb(b.value),d=rb(b.defaultValue);null!=c&&(c=""+c,c!==a.value&&(a.value=c),null==b.defaultValue&&a.defaultValue!==c&&(a.defaultValue=c));null!=d&&(a.defaultValue=""+d);}var Mb={html:"http://www.w3.org/1999/xhtml",mathml:"http://www.w3.org/1998/Math/MathML",svg:"http://www.w3.org/2000/svg"};
 var Pb,Qb=function(a){return "undefined"!==typeof MSApp&&MSApp.execUnsafeLocalFunction?function(b,c,d,e){MSApp.execUnsafeLocalFunction(function(){return a(b,c,d,e)});}:a}(function(a,b){if(a.namespaceURI!==Mb.svg||"innerHTML"in a)a.innerHTML=b;else {Pb=Pb||document.createElement("div");Pb.innerHTML="<svg>"+b.valueOf().toString()+"</svg>";for(b=Pb.firstChild;a.firstChild;)a.removeChild(a.firstChild);for(;b.firstChild;)a.appendChild(b.firstChild);}});
 function Sb(a,b){var c={};c[a.toLowerCase()]=b.toLowerCase();c["Webkit"+a]="webkit"+b;c["Moz"+a]="moz"+b;return c}var Tb={animationend:Sb("Animation","AnimationEnd"),animationiteration:Sb("Animation","AnimationIteration"),animationstart:Sb("Animation","AnimationStart"),transitionend:Sb("Transition","TransitionEnd")},Ub={},Vb={};
-Ta&&(Vb=document.createElement("div").style,"AnimationEvent"in window||(delete Tb.animationend.animation,delete Tb.animationiteration.animation,delete Tb.animationstart.animation),"TransitionEvent"in window||delete Tb.transitionend.transition);function Wb(a){if(Ub[a])return Ub[a];if(!Tb[a])return a;var b=Tb[a],c;for(c in b)if(b.hasOwnProperty(c)&&c in Vb)return Ub[a]=b[c];return a}
+ya&&(Vb=document.createElement("div").style,"AnimationEvent"in window||(delete Tb.animationend.animation,delete Tb.animationiteration.animation,delete Tb.animationstart.animation),"TransitionEvent"in window||delete Tb.transitionend.transition);function Wb(a){if(Ub[a])return Ub[a];if(!Tb[a])return a;var b=Tb[a],c;for(c in b)if(b.hasOwnProperty(c)&&c in Vb)return Ub[a]=b[c];return a}
 var Xb=Wb("animationend"),Yb=Wb("animationiteration"),Zb=Wb("animationstart"),$b=Wb("transitionend"),bc=new ("function"===typeof WeakMap?WeakMap:Map);function cc(a){var b=bc.get(a);void 0===b&&(b=new Map,bc.set(a,b));return b}
 function dc(a){var b=a,c=a;if(a.alternate)for(;b.return;)b=b.return;else {a=b;do b=a,0!==(b.effectTag&1026)&&(c=b.return),a=b.return;while(a)}return 3===b.tag?c:null}function fc(a){if(dc(a)!==a)throw Error(u(188));}
 function gc(a){var b=a.alternate;if(!b){b=dc(a);if(null===b)throw Error(u(188));return b!==a?null:a}for(var c=a,d=b;;){var e=c.return;if(null===e)break;var f=e.alternate;if(null===f){d=e.return;if(null!==d){c=d;continue}break}if(e.child===f.child){for(f=e.child;f;){if(f===c)return fc(e),a;if(f===d)return fc(e),b;f=f.sibling;}throw Error(u(188));}if(c.return!==d.return)c=e,d=f;else {for(var g=!1,h=e.child;h;){if(h===c){g=!0;c=e;d=f;break}if(h===d){g=!0;d=e;c=f;break}h=h.sibling;}if(!g){for(h=f.child;h;){if(h===
 c){g=!0;c=f;d=e;break}if(h===d){g=!0;d=f;c=e;break}h=h.sibling;}if(!g)throw Error(u(189));}}if(c.alternate!==d)throw Error(u(190));}if(3!==c.tag)throw Error(u(188));return c.stateNode.current===c?a:b}function hc(a){a=gc(a);if(!a)return null;for(var b=a;;){if(5===b.tag||6===b.tag)return b;if(b.child)b.child.return=b,b=b.child;else {if(b===a)break;for(;!b.sibling;){if(!b.return||b.return===a)return null;b=b.return;}b.sibling.return=b.return;b=b.sibling;}}return null}
 function ic(a,b){if(null==b)throw Error(u(30));if(null==a)return b;if(Array.isArray(a)){if(Array.isArray(b))return a.push.apply(a,b),a;a.push(b);return a}return Array.isArray(b)?[a].concat(b):[a,b]}function jc(a,b,c){Array.isArray(a)?a.forEach(b,c):a&&b.call(c,a);}var kc=null;
 function lc(a){if(a){var b=a._dispatchListeners,c=a._dispatchInstances;if(Array.isArray(b))for(var d=0;d<b.length&&!a.isPropagationStopped();d++)oa(a,b[d],c[d]);else b&&oa(a,b,c);a._dispatchListeners=null;a._dispatchInstances=null;a.isPersistent()||a.constructor.release(a);}}function mc(a){null!==a&&(kc=ic(kc,a));a=kc;kc=null;if(a){jc(a,lc);if(kc)throw Error(u(95));if(fa)throw a=ha,fa=!1,ha=null,a;}}
-function nc(a){a=a.target||a.srcElement||window;a.correspondingUseElement&&(a=a.correspondingUseElement);return 3===a.nodeType?a.parentNode:a}function oc(a){if(!Ta)return !1;a="on"+a;var b=a in document;b||(b=document.createElement("div"),b.setAttribute(a,"return;"),b="function"===typeof b[a]);return b}var Wc={},Yc=new Map,Zc=new Map,$c=["abort","abort",Xb,"animationEnd",Yb,"animationIteration",Zb,"animationStart","canplay","canPlay","canplaythrough","canPlayThrough","durationchange","durationChange","emptied","emptied","encrypted","encrypted","ended","ended","error","error","gotpointercapture","gotPointerCapture","load","load","loadeddata","loadedData","loadedmetadata","loadedMetadata","loadstart","loadStart","lostpointercapture","lostPointerCapture","playing","playing","progress","progress","seeking",
+function nc(a){a=a.target||a.srcElement||window;a.correspondingUseElement&&(a=a.correspondingUseElement);return 3===a.nodeType?a.parentNode:a}function oc(a){if(!ya)return !1;a="on"+a;var b=a in document;b||(b=document.createElement("div"),b.setAttribute(a,"return;"),b="function"===typeof b[a]);return b}var Wc={},Yc=new Map,Zc=new Map,$c=["abort","abort",Xb,"animationEnd",Yb,"animationIteration",Zb,"animationStart","canplay","canPlay","canplaythrough","canPlayThrough","durationchange","durationChange","emptied","emptied","encrypted","encrypted","ended","ended","error","error","gotpointercapture","gotPointerCapture","load","load","loadeddata","loadedData","loadedmetadata","loadedMetadata","loadstart","loadStart","lostpointercapture","lostPointerCapture","playing","playing","progress","progress","seeking",
 "seeking","stalled","stalled","suspend","suspend","timeupdate","timeUpdate",$b,"transitionEnd","waiting","waiting"];function ad(a,b){for(var c=0;c<a.length;c+=2){var d=a[c],e=a[c+1],f="on"+(e[0].toUpperCase()+e.slice(1));f={phasedRegistrationNames:{bubbled:f,captured:f+"Capture"},dependencies:[d],eventPriority:b};Zc.set(d,b);Yc.set(d,f);Wc[e]=f;}}
 ad("blur blur cancel cancel click click close close contextmenu contextMenu copy copy cut cut auxclick auxClick dblclick doubleClick dragend dragEnd dragstart dragStart drop drop focus focus input input invalid invalid keydown keyDown keypress keyPress keyup keyUp mousedown mouseDown mouseup mouseUp paste paste pause pause play play pointercancel pointerCancel pointerdown pointerDown pointerup pointerUp ratechange rateChange reset reset seeked seeked submit submit touchcancel touchCancel touchend touchEnd touchstart touchStart volumechange volumeChange".split(" "),0);
 ad("drag drag dragenter dragEnter dragexit dragExit dragleave dragLeave dragover dragOver mousemove mouseMove mouseout mouseOut mouseover mouseOver pointermove pointerMove pointerout pointerOut pointerover pointerOver scroll scroll toggle toggle touchmove touchMove wheel wheel".split(" "),1);ad($c,2);for(var bd="change selectionchange textInput compositionstart compositionend compositionupdate".split(" "),cd=0;cd<bd.length;cd++)Zc.set(bd[cd],0);
@@ -19309,15 +19537,15 @@ function G$1(a,b,c,d){this.dispatchConfig=a;this._targetInst=b;this.nativeEvent=
 objectAssign(G$1.prototype,{preventDefault:function(){this.defaultPrevented=!0;var a=this.nativeEvent;a&&(a.preventDefault?a.preventDefault():"unknown"!==typeof a.returnValue&&(a.returnValue=!1),this.isDefaultPrevented=be);},stopPropagation:function(){var a=this.nativeEvent;a&&(a.stopPropagation?a.stopPropagation():"unknown"!==typeof a.cancelBubble&&(a.cancelBubble=!0),this.isPropagationStopped=be);},persist:function(){this.isPersistent=be;},isPersistent:ce,destructor:function(){var a=this.constructor.Interface,
 b;for(b in a)this[b]=null;this.nativeEvent=this._targetInst=this.dispatchConfig=null;this.isPropagationStopped=this.isDefaultPrevented=ce;this._dispatchInstances=this._dispatchListeners=null;}});G$1.Interface={type:null,target:null,currentTarget:function(){return null},eventPhase:null,bubbles:null,cancelable:null,timeStamp:function(a){return a.timeStamp||Date.now()},defaultPrevented:null,isTrusted:null};
 G$1.extend=function(a){function b(){}function c(){return d.apply(this,arguments)}var d=this;b.prototype=d.prototype;var e=new b;objectAssign(e,c.prototype);c.prototype=e;c.prototype.constructor=c;c.Interface=objectAssign({},d.Interface,a);c.extend=d.extend;de(c);return c};de(G$1);function ee(a,b,c,d){if(this.eventPool.length){var e=this.eventPool.pop();this.call(e,a,b,c,d);return e}return new this(a,b,c,d)}
-function fe(a){if(!(a instanceof this))throw Error(u(279));a.destructor();10>this.eventPool.length&&this.eventPool.push(a);}function de(a){a.eventPool=[];a.getPooled=ee;a.release=fe;}var ge=G$1.extend({data:null}),he=G$1.extend({data:null}),ie=[9,13,27,32],je=Ta&&"CompositionEvent"in window,ke=null;Ta&&"documentMode"in document&&(ke=document.documentMode);
-var le=Ta&&"TextEvent"in window&&!ke,me=Ta&&(!je||ke&&8<ke&&11>=ke),ne=String.fromCharCode(32),oe={beforeInput:{phasedRegistrationNames:{bubbled:"onBeforeInput",captured:"onBeforeInputCapture"},dependencies:["compositionend","keypress","textInput","paste"]},compositionEnd:{phasedRegistrationNames:{bubbled:"onCompositionEnd",captured:"onCompositionEndCapture"},dependencies:"blur compositionend keydown keypress keyup mousedown".split(" ")},compositionStart:{phasedRegistrationNames:{bubbled:"onCompositionStart",
+function fe(a){if(!(a instanceof this))throw Error(u(279));a.destructor();10>this.eventPool.length&&this.eventPool.push(a);}function de(a){a.eventPool=[];a.getPooled=ee;a.release=fe;}var ge=G$1.extend({data:null}),he=G$1.extend({data:null}),ie=[9,13,27,32],je=ya&&"CompositionEvent"in window,ke=null;ya&&"documentMode"in document&&(ke=document.documentMode);
+var le=ya&&"TextEvent"in window&&!ke,me=ya&&(!je||ke&&8<ke&&11>=ke),ne=String.fromCharCode(32),oe={beforeInput:{phasedRegistrationNames:{bubbled:"onBeforeInput",captured:"onBeforeInputCapture"},dependencies:["compositionend","keypress","textInput","paste"]},compositionEnd:{phasedRegistrationNames:{bubbled:"onCompositionEnd",captured:"onCompositionEndCapture"},dependencies:"blur compositionend keydown keypress keyup mousedown".split(" ")},compositionStart:{phasedRegistrationNames:{bubbled:"onCompositionStart",
 captured:"onCompositionStartCapture"},dependencies:"blur compositionstart keydown keypress keyup mousedown".split(" ")},compositionUpdate:{phasedRegistrationNames:{bubbled:"onCompositionUpdate",captured:"onCompositionUpdateCapture"},dependencies:"blur compositionupdate keydown keypress keyup mousedown".split(" ")}},pe=!1;
 function qe(a,b){switch(a){case "keyup":return -1!==ie.indexOf(b.keyCode);case "keydown":return 229!==b.keyCode;case "keypress":case "mousedown":case "blur":return !0;default:return !1}}function re(a){a=a.detail;return "object"===typeof a&&"data"in a?a.data:null}var se=!1;function te(a,b){switch(a){case "compositionend":return re(b);case "keypress":if(32!==b.which)return null;pe=!0;return ne;case "textInput":return a=b.data,a===ne&&pe?null:a;default:return null}}
 function ue(a,b){if(se)return "compositionend"===a||!je&&qe(a,b)?(a=ae(),$d=Zd=Yd=null,se=!1,a):null;switch(a){case "paste":return null;case "keypress":if(!(b.ctrlKey||b.altKey||b.metaKey)||b.ctrlKey&&b.altKey){if(b.char&&1<b.char.length)return b.char;if(b.which)return String.fromCharCode(b.which)}return null;case "compositionend":return me&&"ko"!==b.locale?null:b.data;default:return null}}
 var ve={eventTypes:oe,extractEvents:function(a,b,c,d){var e;if(je)b:{switch(a){case "compositionstart":var f=oe.compositionStart;break b;case "compositionend":f=oe.compositionEnd;break b;case "compositionupdate":f=oe.compositionUpdate;break b}f=void 0;}else se?qe(a,c)&&(f=oe.compositionEnd):"keydown"===a&&229===c.keyCode&&(f=oe.compositionStart);f?(me&&"ko"!==c.locale&&(se||f!==oe.compositionStart?f===oe.compositionEnd&&se&&(e=ae()):(Yd=d,Zd="value"in Yd?Yd.value:Yd.textContent,se=!0)),f=ge.getPooled(f,
 b,c,d),e?f.data=e:(e=re(c),null!==e&&(f.data=e)),Xd(f),e=f):e=null;(a=le?te(a,c):ue(a,c))?(b=he.getPooled(oe.beforeInput,b,c,d),b.data=a,Xd(b)):b=null;return null===e?b:null===b?e:[e,b]}},we={color:!0,date:!0,datetime:!0,"datetime-local":!0,email:!0,month:!0,number:!0,password:!0,range:!0,search:!0,tel:!0,text:!0,time:!0,url:!0,week:!0};function xe(a){var b=a&&a.nodeName&&a.nodeName.toLowerCase();return "input"===b?!!we[a.type]:"textarea"===b?!0:!1}
-var ye={change:{phasedRegistrationNames:{bubbled:"onChange",captured:"onChangeCapture"},dependencies:"blur change click focus input keydown keyup selectionchange".split(" ")}};function ze(a,b,c){a=G$1.getPooled(ye.change,a,b,c);a.type="change";Ya(c);Xd(a);return a}var Ae=null,Be=null;function Ce(a){mc(a);}function De(a){var b=Pd(a);if(yb(b))return a}function Ee(a,b){if("change"===a)return b}var Fe=!1;Ta&&(Fe=oc("input")&&(!document.documentMode||9<document.documentMode));
-function Ge(){Ae&&(Ae.detachEvent("onpropertychange",He),Be=Ae=null);}function He(a){if("value"===a.propertyName&&De(Be))if(a=ze(Be,a,nc(a)),db)mc(a);else {db=!0;try{$a(Ce,a);}finally{db=!1,fb();}}}function Ie(a,b,c){"focus"===a?(Ge(),Ae=b,Be=c,Ae.attachEvent("onpropertychange",He)):"blur"===a&&Ge();}function Je(a){if("selectionchange"===a||"keyup"===a||"keydown"===a)return De(Be)}function Ke(a,b){if("click"===a)return De(b)}function Le(a,b){if("input"===a||"change"===a)return De(b)}
+var ye={change:{phasedRegistrationNames:{bubbled:"onChange",captured:"onChangeCapture"},dependencies:"blur change click focus input keydown keyup selectionchange".split(" ")}};function ze(a,b,c){a=G$1.getPooled(ye.change,a,b,c);a.type="change";Da(c);Xd(a);return a}var Ae=null,Be=null;function Ce(a){mc(a);}function De(a){var b=Pd(a);if(yb(b))return a}function Ee(a,b){if("change"===a)return b}var Fe=!1;ya&&(Fe=oc("input")&&(!document.documentMode||9<document.documentMode));
+function Ge(){Ae&&(Ae.detachEvent("onpropertychange",He),Be=Ae=null);}function He(a){if("value"===a.propertyName&&De(Be))if(a=ze(Be,a,nc(a)),Ja)mc(a);else {Ja=!0;try{Fa(Ce,a);}finally{Ja=!1,La();}}}function Ie(a,b,c){"focus"===a?(Ge(),Ae=b,Be=c,Ae.attachEvent("onpropertychange",He)):"blur"===a&&Ge();}function Je(a){if("selectionchange"===a||"keyup"===a||"keydown"===a)return De(Be)}function Ke(a,b){if("click"===a)return De(b)}function Le(a,b){if("input"===a||"change"===a)return De(b)}
 var Me={eventTypes:ye,_isInputEventSupported:Fe,extractEvents:function(a,b,c,d){var e=b?Pd(b):window,f=e.nodeName&&e.nodeName.toLowerCase();if("select"===f||"input"===f&&"file"===e.type)var g=Ee;else if(xe(e))if(Fe)g=Le;else {g=Je;var h=Ie;}else (f=e.nodeName)&&"input"===f.toLowerCase()&&("checkbox"===e.type||"radio"===e.type)&&(g=Ke);if(g&&(g=g(a,b)))return ze(g,c,d);h&&h(a,e,b);"blur"===a&&(a=e._wrapperState)&&a.controlled&&"number"===e.type&&Db(e,"number",e.value);}},Ne=G$1.extend({view:null,detail:null}),
 Oe={Alt:"altKey",Control:"ctrlKey",Meta:"metaKey",Shift:"shiftKey"};function Pe(a){var b=this.nativeEvent;return b.getModifierState?b.getModifierState(a):(a=Oe[a])?!!b[a]:!1}function Qe(){return Pe}
 var Re=0,Se=0,Te=!1,Ue=!1,Ve=Ne.extend({screenX:null,screenY:null,clientX:null,clientY:null,pageX:null,pageY:null,ctrlKey:null,shiftKey:null,altKey:null,metaKey:null,getModifierState:Qe,button:null,buttons:null,relatedTarget:function(a){return a.relatedTarget||(a.fromElement===a.srcElement?a.toElement:a.fromElement)},movementX:function(a){if("movementX"in a)return a.movementX;var b=Re;Re=a.screenX;return Te?"mousemove"===a.type?a.screenX-b:0:(Te=!0,0)},movementY:function(a){if("movementY"in a)return a.movementY;
@@ -19326,19 +19554,19 @@ dependencies:["pointerout","pointerover"]}},Ye={eventTypes:Xe,extractEvents:func
 a){var k=Ve;var l=Xe.mouseLeave;var m=Xe.mouseEnter;var p="mouse";}else if("pointerout"===a||"pointerover"===a)k=We,l=Xe.pointerLeave,m=Xe.pointerEnter,p="pointer";a=null==g?f:Pd(g);f=null==b?f:Pd(b);l=k.getPooled(l,g,c,d);l.type=p+"leave";l.target=a;l.relatedTarget=f;c=k.getPooled(m,b,c,d);c.type=p+"enter";c.target=f;c.relatedTarget=a;d=g;p=b;if(d&&p)a:{k=d;m=p;g=0;for(a=k;a;a=Rd(a))g++;a=0;for(b=m;b;b=Rd(b))a++;for(;0<g-a;)k=Rd(k),g--;for(;0<a-g;)m=Rd(m),a--;for(;g--;){if(k===m||k===m.alternate)break a;
 k=Rd(k);m=Rd(m);}k=null;}else k=null;m=k;for(k=[];d&&d!==m;){g=d.alternate;if(null!==g&&g===m)break;k.push(d);d=Rd(d);}for(d=[];p&&p!==m;){g=p.alternate;if(null!==g&&g===m)break;d.push(p);p=Rd(p);}for(p=0;p<k.length;p++)Vd(k[p],"bubbled",l);for(p=d.length;0<p--;)Vd(d[p],"captured",c);return 0===(e&64)?[l]:[l,c]}};function Ze(a,b){return a===b&&(0!==a||1/a===1/b)||a!==a&&b!==b}var $e="function"===typeof Object.is?Object.is:Ze,af=Object.prototype.hasOwnProperty;
 function bf(a,b){if($e(a,b))return !0;if("object"!==typeof a||null===a||"object"!==typeof b||null===b)return !1;var c=Object.keys(a),d=Object.keys(b);if(c.length!==d.length)return !1;for(d=0;d<c.length;d++)if(!af.call(b,c[d])||!$e(a[c[d]],b[c[d]]))return !1;return !0}
-var cf=Ta&&"documentMode"in document&&11>=document.documentMode,df={select:{phasedRegistrationNames:{bubbled:"onSelect",captured:"onSelectCapture"},dependencies:"blur contextmenu dragend focus keydown keyup mousedown mouseup selectionchange".split(" ")}},ef=null,ff=null,gf=null,hf=!1;
+var cf=ya&&"documentMode"in document&&11>=document.documentMode,df={select:{phasedRegistrationNames:{bubbled:"onSelect",captured:"onSelectCapture"},dependencies:"blur contextmenu dragend focus keydown keyup mousedown mouseup selectionchange".split(" ")}},ef=null,ff=null,gf=null,hf=!1;
 function jf(a,b){var c=b.window===b?b.document:9===b.nodeType?b:b.ownerDocument;if(hf||null==ef||ef!==td(c))return null;c=ef;"selectionStart"in c&&yd(c)?c={start:c.selectionStart,end:c.selectionEnd}:(c=(c.ownerDocument&&c.ownerDocument.defaultView||window).getSelection(),c={anchorNode:c.anchorNode,anchorOffset:c.anchorOffset,focusNode:c.focusNode,focusOffset:c.focusOffset});return gf&&bf(gf,c)?null:(gf=c,a=G$1.getPooled(df.select,ff,a,b),a.type="select",a.target=ef,Xd(a),a)}
-var kf={eventTypes:df,extractEvents:function(a,b,c,d,e,f){e=f||(d.window===d?d.document:9===d.nodeType?d:d.ownerDocument);if(!(f=!e)){a:{e=cc(e);f=Ra.onSelect;for(var g=0;g<f.length;g++)if(!e.has(f[g])){e=!1;break a}e=!0;}f=!e;}if(f)return null;e=b?Pd(b):window;switch(a){case "focus":if(xe(e)||"true"===e.contentEditable)ef=e,ff=b,gf=null;break;case "blur":gf=ff=ef=null;break;case "mousedown":hf=!0;break;case "contextmenu":case "mouseup":case "dragend":return hf=!1,jf(c,d);case "selectionchange":if(cf)break;
+var kf={eventTypes:df,extractEvents:function(a,b,c,d,e,f){e=f||(d.window===d?d.document:9===d.nodeType?d:d.ownerDocument);if(!(f=!e)){a:{e=cc(e);f=wa.onSelect;for(var g=0;g<f.length;g++)if(!e.has(f[g])){e=!1;break a}e=!0;}f=!e;}if(f)return null;e=b?Pd(b):window;switch(a){case "focus":if(xe(e)||"true"===e.contentEditable)ef=e,ff=b,gf=null;break;case "blur":gf=ff=ef=null;break;case "mousedown":hf=!0;break;case "contextmenu":case "mouseup":case "dragend":return hf=!1,jf(c,d);case "selectionchange":if(cf)break;
 case "keydown":case "keyup":return jf(c,d)}return null}},lf=G$1.extend({animationName:null,elapsedTime:null,pseudoElement:null}),mf=G$1.extend({clipboardData:function(a){return "clipboardData"in a?a.clipboardData:window.clipboardData}}),nf=Ne.extend({relatedTarget:null});function of(a){var b=a.keyCode;"charCode"in a?(a=a.charCode,0===a&&13===b&&(a=13)):a=b;10===a&&(a=13);return 32<=a||13===a?a:0}
 var pf={Esc:"Escape",Spacebar:" ",Left:"ArrowLeft",Up:"ArrowUp",Right:"ArrowRight",Down:"ArrowDown",Del:"Delete",Win:"OS",Menu:"ContextMenu",Apps:"ContextMenu",Scroll:"ScrollLock",MozPrintableKey:"Unidentified"},qf={8:"Backspace",9:"Tab",12:"Clear",13:"Enter",16:"Shift",17:"Control",18:"Alt",19:"Pause",20:"CapsLock",27:"Escape",32:" ",33:"PageUp",34:"PageDown",35:"End",36:"Home",37:"ArrowLeft",38:"ArrowUp",39:"ArrowRight",40:"ArrowDown",45:"Insert",46:"Delete",112:"F1",113:"F2",114:"F3",115:"F4",
 116:"F5",117:"F6",118:"F7",119:"F8",120:"F9",121:"F10",122:"F11",123:"F12",144:"NumLock",145:"ScrollLock",224:"Meta"},rf=Ne.extend({key:function(a){if(a.key){var b=pf[a.key]||a.key;if("Unidentified"!==b)return b}return "keypress"===a.type?(a=of(a),13===a?"Enter":String.fromCharCode(a)):"keydown"===a.type||"keyup"===a.type?qf[a.keyCode]||"Unidentified":""},location:null,ctrlKey:null,shiftKey:null,altKey:null,metaKey:null,repeat:null,locale:null,getModifierState:Qe,charCode:function(a){return "keypress"===
 a.type?of(a):0},keyCode:function(a){return "keydown"===a.type||"keyup"===a.type?a.keyCode:0},which:function(a){return "keypress"===a.type?of(a):"keydown"===a.type||"keyup"===a.type?a.keyCode:0}}),sf=Ve.extend({dataTransfer:null}),tf=Ne.extend({touches:null,targetTouches:null,changedTouches:null,altKey:null,metaKey:null,ctrlKey:null,shiftKey:null,getModifierState:Qe}),uf=G$1.extend({propertyName:null,elapsedTime:null,pseudoElement:null}),vf=Ve.extend({deltaX:function(a){return "deltaX"in a?a.deltaX:"wheelDeltaX"in
 a?-a.wheelDeltaX:0},deltaY:function(a){return "deltaY"in a?a.deltaY:"wheelDeltaY"in a?-a.wheelDeltaY:"wheelDelta"in a?-a.wheelDelta:0},deltaZ:null,deltaMode:null}),wf={eventTypes:Wc,extractEvents:function(a,b,c,d){var e=Yc.get(a);if(!e)return null;switch(a){case "keypress":if(0===of(c))return null;case "keydown":case "keyup":a=rf;break;case "blur":case "focus":a=nf;break;case "click":if(2===c.button)return null;case "auxclick":case "dblclick":case "mousedown":case "mousemove":case "mouseup":case "mouseout":case "mouseover":case "contextmenu":a=
 Ve;break;case "drag":case "dragend":case "dragenter":case "dragexit":case "dragleave":case "dragover":case "dragstart":case "drop":a=sf;break;case "touchcancel":case "touchend":case "touchmove":case "touchstart":a=tf;break;case Xb:case Yb:case Zb:a=lf;break;case $b:a=uf;break;case "scroll":a=Ne;break;case "wheel":a=vf;break;case "copy":case "cut":case "paste":a=mf;break;case "gotpointercapture":case "lostpointercapture":case "pointercancel":case "pointerdown":case "pointermove":case "pointerout":case "pointerover":case "pointerup":a=
-We;break;default:a=G$1;}b=a.getPooled(e,b,c,d);Xd(b);return b}};if(Ka)throw Error(u(101));Ka=Array.prototype.slice.call("ResponderEventPlugin SimpleEventPlugin EnterLeaveEventPlugin ChangeEventPlugin SelectEventPlugin BeforeInputEventPlugin".split(" "));Ma();var xf=Nc;la=Qd;ma=xf;na=Pd;Sa({SimpleEventPlugin:wf,EnterLeaveEventPlugin:Ye,ChangeEventPlugin:Me,SelectEventPlugin:kf,BeforeInputEventPlugin:ve});var If=scheduler.unstable_runWithPriority,Jf=scheduler.unstable_scheduleCallback,Kf=scheduler.unstable_cancelCallback,Lf=scheduler.unstable_requestPaint,Mf=scheduler.unstable_now,Nf=scheduler.unstable_getCurrentPriorityLevel,Of=scheduler.unstable_ImmediatePriority,Pf=scheduler.unstable_UserBlockingPriority,Qf=scheduler.unstable_NormalPriority,Rf=scheduler.unstable_LowPriority,Sf=scheduler.unstable_IdlePriority,Uf=scheduler.unstable_shouldYield,Zf=Mf();
-var Dg=pa.ReactCurrentBatchConfig,Eg=(new react.Component).refs;var jh=pa.ReactCurrentDispatcher,kh=pa.ReactCurrentBatchConfig;var Yh=pa.ReactCurrentOwner;var cj=pa.ReactCurrentDispatcher,dj=pa.ReactCurrentOwner;function Mj(a,b){try{return a(b)}finally{}}var Uj=null,Li=null;function Yj(a){if("undefined"===typeof __REACT_DEVTOOLS_GLOBAL_HOOK__)return !1;var b=__REACT_DEVTOOLS_GLOBAL_HOOK__;if(b.isDisabled||!b.supportsFiber)return !0;try{var c=b.inject(a);Uj=function(a){try{b.onCommitFiberRoot(c,a,void 0,64===(a.current.effectTag&64));}catch(e){}};Li=function(a){try{b.onCommitFiberUnmount(c,a);}catch(e){}};}catch(d){}return !0}
-Ua=function(a,b,c){switch(b){case "input":Cb(a,c);b=c.name;if("radio"===c.type&&null!=b){for(c=a;c.parentNode;)c=c.parentNode;c=c.querySelectorAll("input[name="+JSON.stringify(""+b)+'][type="radio"]');for(b=0;b<c.length;b++){var d=c[b];if(d!==a&&d.form===a.form){var e=Qd(d);if(!e)throw Error(u(90));yb(d);Cb(d,e);}}}break;case "textarea":Kb(a,c);break;case "select":b=c.value,null!=b&&Hb(a,!!c.multiple,b,!1);}};$a=Mj;
-bb=function(){};(function(a){var b=a.findFiberByHostInstance;return Yj(objectAssign({},a,{overrideHookState:null,overrideProps:null,setSuspenseHandler:null,scheduleUpdate:null,currentDispatcherRef:pa.ReactCurrentDispatcher,findHostInstanceByFiber:function(a){a=hc(a);return null===a?null:a.stateNode},findFiberByHostInstance:function(a){return b?b(a):null},findHostInstancesForRefresh:null,scheduleRefresh:null,scheduleRoot:null,setRefreshHandler:null,getCurrentFiber:null}))})({findFiberByHostInstance:tc,bundleType:0,version:"16.13.0",
+We;break;default:a=G$1;}b=a.getPooled(e,b,c,d);Xd(b);return b}};if(pa)throw Error(u(101));pa=Array.prototype.slice.call("ResponderEventPlugin SimpleEventPlugin EnterLeaveEventPlugin ChangeEventPlugin SelectEventPlugin BeforeInputEventPlugin".split(" "));ra();var xf=Nc;la=Qd;ma=xf;na=Pd;xa({SimpleEventPlugin:wf,EnterLeaveEventPlugin:Ye,ChangeEventPlugin:Me,SelectEventPlugin:kf,BeforeInputEventPlugin:ve});var If=scheduler.unstable_runWithPriority,Jf=scheduler.unstable_scheduleCallback,Kf=scheduler.unstable_cancelCallback,Lf=scheduler.unstable_requestPaint,Mf=scheduler.unstable_now,Nf=scheduler.unstable_getCurrentPriorityLevel,Of=scheduler.unstable_ImmediatePriority,Pf=scheduler.unstable_UserBlockingPriority,Qf=scheduler.unstable_NormalPriority,Rf=scheduler.unstable_LowPriority,Sf=scheduler.unstable_IdlePriority,Uf=scheduler.unstable_shouldYield,Zf=Mf();
+var Dg=Wa.ReactCurrentBatchConfig,Eg=(new react.Component).refs;var jh=Wa.ReactCurrentDispatcher,kh=Wa.ReactCurrentBatchConfig;var Yh=Wa.ReactCurrentOwner;var cj=Wa.ReactCurrentDispatcher,dj=Wa.ReactCurrentOwner;function Mj(a,b){try{return a(b)}finally{}}var Uj=null,Li=null;function Yj(a){if("undefined"===typeof __REACT_DEVTOOLS_GLOBAL_HOOK__)return !1;var b=__REACT_DEVTOOLS_GLOBAL_HOOK__;if(b.isDisabled||!b.supportsFiber)return !0;try{var c=b.inject(a);Uj=function(a){try{b.onCommitFiberRoot(c,a,void 0,64===(a.current.effectTag&64));}catch(e){}};Li=function(a){try{b.onCommitFiberUnmount(c,a);}catch(e){}};}catch(d){}return !0}
+za=function(a,b,c){switch(b){case "input":Cb(a,c);b=c.name;if("radio"===c.type&&null!=b){for(c=a;c.parentNode;)c=c.parentNode;c=c.querySelectorAll("input[name="+JSON.stringify(""+b)+'][type="radio"]');for(b=0;b<c.length;b++){var d=c[b];if(d!==a&&d.form===a.form){var e=Qd(d);if(!e)throw Error(u(90));yb(d);Cb(d,e);}}}break;case "textarea":Kb(a,c);break;case "select":b=c.value,null!=b&&Hb(a,!!c.multiple,b,!1);}};Fa=Mj;
+Ha=function(){};(function(a){var b=a.findFiberByHostInstance;return Yj(objectAssign({},a,{overrideHookState:null,overrideProps:null,setSuspenseHandler:null,scheduleUpdate:null,currentDispatcherRef:Wa.ReactCurrentDispatcher,findHostInstanceByFiber:function(a){a=hc(a);return null===a?null:a.stateNode},findFiberByHostInstance:function(a){return b?b(a):null},findHostInstancesForRefresh:null,scheduleRefresh:null,scheduleRoot:null,setRefreshHandler:null,getCurrentFiber:null}))})({findFiberByHostInstance:tc,bundleType:0,version:"16.13.1",
 rendererPackageName:"react-dom"});
 
 var schedulerTracing_development = createCommonjsModule(function (module, exports) {
@@ -20135,271 +20363,6 @@ var FundamentalComponent = 20;
 var ScopeComponent = 21;
 var Block = 22;
 
-var BEFORE_SLASH_RE = /^(.*)[\\\/]/;
-function describeComponentFrame (name, source, ownerName) {
-  var sourceInfo = '';
-
-  if (source) {
-    var path = source.fileName;
-    var fileName = path.replace(BEFORE_SLASH_RE, '');
-
-    {
-      // In DEV, include code for a common special case:
-      // prefer "folder/index.js" instead of just "index.js".
-      if (/^index\./.test(fileName)) {
-        var match = path.match(BEFORE_SLASH_RE);
-
-        if (match) {
-          var pathBeforeSlash = match[1];
-
-          if (pathBeforeSlash) {
-            var folderName = pathBeforeSlash.replace(BEFORE_SLASH_RE, '');
-            fileName = folderName + '/' + fileName;
-          }
-        }
-      }
-    }
-
-    sourceInfo = ' (at ' + fileName + ':' + source.lineNumber + ')';
-  } else if (ownerName) {
-    sourceInfo = ' (created by ' + ownerName + ')';
-  }
-
-  return '\n    in ' + (name || 'Unknown') + sourceInfo;
-}
-
-// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
-// nor polyfill, then a plain number is used for performance.
-var hasSymbol = typeof Symbol === 'function' && Symbol.for;
-var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
-var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
-var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
-var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
-var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
-var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
-var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace; // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
-var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
-var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
-var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
-var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
-var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
-var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
-var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for('react.block') : 0xead9;
-var MAYBE_ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
-var FAUX_ITERATOR_SYMBOL = '@@iterator';
-function getIteratorFn(maybeIterable) {
-  if (maybeIterable === null || typeof maybeIterable !== 'object') {
-    return null;
-  }
-
-  var maybeIterator = MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL];
-
-  if (typeof maybeIterator === 'function') {
-    return maybeIterator;
-  }
-
-  return null;
-}
-
-var Uninitialized = -1;
-var Pending = 0;
-var Resolved = 1;
-var Rejected = 2;
-function refineResolvedLazyComponent(lazyComponent) {
-  return lazyComponent._status === Resolved ? lazyComponent._result : null;
-}
-function initializeLazyComponentType(lazyComponent) {
-  if (lazyComponent._status === Uninitialized) {
-    lazyComponent._status = Pending;
-    var ctor = lazyComponent._ctor;
-    var thenable = ctor();
-    lazyComponent._result = thenable;
-    thenable.then(function (moduleObject) {
-      if (lazyComponent._status === Pending) {
-        var defaultExport = moduleObject.default;
-
-        {
-          if (defaultExport === undefined) {
-            error('lazy: Expected the result of a dynamic import() call. ' + 'Instead received: %s\n\nYour code should look like: \n  ' + "const MyComponent = lazy(() => import('./MyComponent'))", moduleObject);
-          }
-        }
-
-        lazyComponent._status = Resolved;
-        lazyComponent._result = defaultExport;
-      }
-    }, function (error) {
-      if (lazyComponent._status === Pending) {
-        lazyComponent._status = Rejected;
-        lazyComponent._result = error;
-      }
-    });
-  }
-}
-
-function getWrappedName(outerType, innerType, wrapperName) {
-  var functionName = innerType.displayName || innerType.name || '';
-  return outerType.displayName || (functionName !== '' ? wrapperName + "(" + functionName + ")" : wrapperName);
-}
-
-function getComponentName(type) {
-  if (type == null) {
-    // Host root, text node or just invalid type.
-    return null;
-  }
-
-  {
-    if (typeof type.tag === 'number') {
-      error('Received an unexpected object in getComponentName(). ' + 'This is likely a bug in React. Please file an issue.');
-    }
-  }
-
-  if (typeof type === 'function') {
-    return type.displayName || type.name || null;
-  }
-
-  if (typeof type === 'string') {
-    return type;
-  }
-
-  switch (type) {
-    case REACT_FRAGMENT_TYPE:
-      return 'Fragment';
-
-    case REACT_PORTAL_TYPE:
-      return 'Portal';
-
-    case REACT_PROFILER_TYPE:
-      return "Profiler";
-
-    case REACT_STRICT_MODE_TYPE:
-      return 'StrictMode';
-
-    case REACT_SUSPENSE_TYPE:
-      return 'Suspense';
-
-    case REACT_SUSPENSE_LIST_TYPE:
-      return 'SuspenseList';
-  }
-
-  if (typeof type === 'object') {
-    switch (type.$$typeof) {
-      case REACT_CONTEXT_TYPE:
-        return 'Context.Consumer';
-
-      case REACT_PROVIDER_TYPE:
-        return 'Context.Provider';
-
-      case REACT_FORWARD_REF_TYPE:
-        return getWrappedName(type, type.render, 'ForwardRef');
-
-      case REACT_MEMO_TYPE:
-        return getComponentName(type.type);
-
-      case REACT_BLOCK_TYPE:
-        return getComponentName(type.render);
-
-      case REACT_LAZY_TYPE:
-        {
-          var thenable = type;
-          var resolvedThenable = refineResolvedLazyComponent(thenable);
-
-          if (resolvedThenable) {
-            return getComponentName(resolvedThenable);
-          }
-
-          break;
-        }
-    }
-  }
-
-  return null;
-}
-
-var ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
-
-function describeFiber(fiber) {
-  switch (fiber.tag) {
-    case HostRoot:
-    case HostPortal:
-    case HostText:
-    case Fragment:
-    case ContextProvider:
-    case ContextConsumer:
-      return '';
-
-    default:
-      var owner = fiber._debugOwner;
-      var source = fiber._debugSource;
-      var name = getComponentName(fiber.type);
-      var ownerName = null;
-
-      if (owner) {
-        ownerName = getComponentName(owner.type);
-      }
-
-      return describeComponentFrame(name, source, ownerName);
-  }
-}
-
-function getStackByFiberInDevAndProd(workInProgress) {
-  var info = '';
-  var node = workInProgress;
-
-  do {
-    info += describeFiber(node);
-    node = node.return;
-  } while (node);
-
-  return info;
-}
-var current = null;
-var phase = null;
-function getCurrentFiberOwnerNameInDevOrNull() {
-  {
-    if (current === null) {
-      return null;
-    }
-
-    var owner = current._debugOwner;
-
-    if (owner !== null && typeof owner !== 'undefined') {
-      return getComponentName(owner.type);
-    }
-  }
-
-  return null;
-}
-function getCurrentFiberStackInDev() {
-  {
-    if (current === null) {
-      return '';
-    } // Safe because if current fiber exists, we are reconciling,
-    // and it is guaranteed to be the work-in-progress version.
-
-
-    return getStackByFiberInDevAndProd(current);
-  }
-}
-function resetCurrentFiber() {
-  {
-    ReactDebugCurrentFrame.getCurrentStack = null;
-    current = null;
-    phase = null;
-  }
-}
-function setCurrentFiber(fiber) {
-  {
-    ReactDebugCurrentFrame.getCurrentStack = getCurrentFiberStackInDev;
-    current = fiber;
-    phase = null;
-  }
-}
-function setCurrentPhase(lifeCyclePhase) {
-  {
-    phase = lifeCyclePhase;
-  }
-}
-
 /**
  * Injectable ordering of event plugins.
  */
@@ -21099,10 +21062,10 @@ properties[xlinkHref] = new PropertyInfoRecord('xlinkHref', STRING, false, // mu
   true);
 });
 
-var ReactDebugCurrentFrame$1 = null;
+var ReactDebugCurrentFrame = null;
 
 {
-  ReactDebugCurrentFrame$1 = ReactSharedInternals.ReactDebugCurrentFrame;
+  ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
 } // A javascript: URL can contain leading C0 control or \u0020 SPACE,
 // and any newline or tab are filtered out as if they're not part of the URL.
 // https://url.spec.whatwg.org/#url-parsing
@@ -21304,6 +21267,271 @@ function setValueForProperty(node, name, value, isCustomComponentTag) {
     } else {
       node.setAttribute(attributeName, attributeValue);
     }
+  }
+}
+
+var BEFORE_SLASH_RE = /^(.*)[\\\/]/;
+function describeComponentFrame (name, source, ownerName) {
+  var sourceInfo = '';
+
+  if (source) {
+    var path = source.fileName;
+    var fileName = path.replace(BEFORE_SLASH_RE, '');
+
+    {
+      // In DEV, include code for a common special case:
+      // prefer "folder/index.js" instead of just "index.js".
+      if (/^index\./.test(fileName)) {
+        var match = path.match(BEFORE_SLASH_RE);
+
+        if (match) {
+          var pathBeforeSlash = match[1];
+
+          if (pathBeforeSlash) {
+            var folderName = pathBeforeSlash.replace(BEFORE_SLASH_RE, '');
+            fileName = folderName + '/' + fileName;
+          }
+        }
+      }
+    }
+
+    sourceInfo = ' (at ' + fileName + ':' + source.lineNumber + ')';
+  } else if (ownerName) {
+    sourceInfo = ' (created by ' + ownerName + ')';
+  }
+
+  return '\n    in ' + (name || 'Unknown') + sourceInfo;
+}
+
+// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+var hasSymbol = typeof Symbol === 'function' && Symbol.for;
+var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace; // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
+var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
+var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
+var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
+var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for('react.block') : 0xead9;
+var MAYBE_ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+var FAUX_ITERATOR_SYMBOL = '@@iterator';
+function getIteratorFn(maybeIterable) {
+  if (maybeIterable === null || typeof maybeIterable !== 'object') {
+    return null;
+  }
+
+  var maybeIterator = MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL];
+
+  if (typeof maybeIterator === 'function') {
+    return maybeIterator;
+  }
+
+  return null;
+}
+
+var Uninitialized = -1;
+var Pending = 0;
+var Resolved = 1;
+var Rejected = 2;
+function refineResolvedLazyComponent(lazyComponent) {
+  return lazyComponent._status === Resolved ? lazyComponent._result : null;
+}
+function initializeLazyComponentType(lazyComponent) {
+  if (lazyComponent._status === Uninitialized) {
+    lazyComponent._status = Pending;
+    var ctor = lazyComponent._ctor;
+    var thenable = ctor();
+    lazyComponent._result = thenable;
+    thenable.then(function (moduleObject) {
+      if (lazyComponent._status === Pending) {
+        var defaultExport = moduleObject.default;
+
+        {
+          if (defaultExport === undefined) {
+            error('lazy: Expected the result of a dynamic import() call. ' + 'Instead received: %s\n\nYour code should look like: \n  ' + "const MyComponent = lazy(() => import('./MyComponent'))", moduleObject);
+          }
+        }
+
+        lazyComponent._status = Resolved;
+        lazyComponent._result = defaultExport;
+      }
+    }, function (error) {
+      if (lazyComponent._status === Pending) {
+        lazyComponent._status = Rejected;
+        lazyComponent._result = error;
+      }
+    });
+  }
+}
+
+function getWrappedName(outerType, innerType, wrapperName) {
+  var functionName = innerType.displayName || innerType.name || '';
+  return outerType.displayName || (functionName !== '' ? wrapperName + "(" + functionName + ")" : wrapperName);
+}
+
+function getComponentName(type) {
+  if (type == null) {
+    // Host root, text node or just invalid type.
+    return null;
+  }
+
+  {
+    if (typeof type.tag === 'number') {
+      error('Received an unexpected object in getComponentName(). ' + 'This is likely a bug in React. Please file an issue.');
+    }
+  }
+
+  if (typeof type === 'function') {
+    return type.displayName || type.name || null;
+  }
+
+  if (typeof type === 'string') {
+    return type;
+  }
+
+  switch (type) {
+    case REACT_FRAGMENT_TYPE:
+      return 'Fragment';
+
+    case REACT_PORTAL_TYPE:
+      return 'Portal';
+
+    case REACT_PROFILER_TYPE:
+      return "Profiler";
+
+    case REACT_STRICT_MODE_TYPE:
+      return 'StrictMode';
+
+    case REACT_SUSPENSE_TYPE:
+      return 'Suspense';
+
+    case REACT_SUSPENSE_LIST_TYPE:
+      return 'SuspenseList';
+  }
+
+  if (typeof type === 'object') {
+    switch (type.$$typeof) {
+      case REACT_CONTEXT_TYPE:
+        return 'Context.Consumer';
+
+      case REACT_PROVIDER_TYPE:
+        return 'Context.Provider';
+
+      case REACT_FORWARD_REF_TYPE:
+        return getWrappedName(type, type.render, 'ForwardRef');
+
+      case REACT_MEMO_TYPE:
+        return getComponentName(type.type);
+
+      case REACT_BLOCK_TYPE:
+        return getComponentName(type.render);
+
+      case REACT_LAZY_TYPE:
+        {
+          var thenable = type;
+          var resolvedThenable = refineResolvedLazyComponent(thenable);
+
+          if (resolvedThenable) {
+            return getComponentName(resolvedThenable);
+          }
+
+          break;
+        }
+    }
+  }
+
+  return null;
+}
+
+var ReactDebugCurrentFrame$1 = ReactSharedInternals.ReactDebugCurrentFrame;
+
+function describeFiber(fiber) {
+  switch (fiber.tag) {
+    case HostRoot:
+    case HostPortal:
+    case HostText:
+    case Fragment:
+    case ContextProvider:
+    case ContextConsumer:
+      return '';
+
+    default:
+      var owner = fiber._debugOwner;
+      var source = fiber._debugSource;
+      var name = getComponentName(fiber.type);
+      var ownerName = null;
+
+      if (owner) {
+        ownerName = getComponentName(owner.type);
+      }
+
+      return describeComponentFrame(name, source, ownerName);
+  }
+}
+
+function getStackByFiberInDevAndProd(workInProgress) {
+  var info = '';
+  var node = workInProgress;
+
+  do {
+    info += describeFiber(node);
+    node = node.return;
+  } while (node);
+
+  return info;
+}
+var current = null;
+var isRendering = false;
+function getCurrentFiberOwnerNameInDevOrNull() {
+  {
+    if (current === null) {
+      return null;
+    }
+
+    var owner = current._debugOwner;
+
+    if (owner !== null && typeof owner !== 'undefined') {
+      return getComponentName(owner.type);
+    }
+  }
+
+  return null;
+}
+function getCurrentFiberStackInDev() {
+  {
+    if (current === null) {
+      return '';
+    } // Safe because if current fiber exists, we are reconciling,
+    // and it is guaranteed to be the work-in-progress version.
+
+
+    return getStackByFiberInDevAndProd(current);
+  }
+}
+function resetCurrentFiber() {
+  {
+    ReactDebugCurrentFrame$1.getCurrentStack = null;
+    current = null;
+    isRendering = false;
+  }
+}
+function setCurrentFiber(fiber) {
+  {
+    ReactDebugCurrentFrame$1.getCurrentStack = getCurrentFiberStackInDev;
+    current = fiber;
+    isRendering = false;
+  }
+}
+function setIsRendering(rendering) {
+  {
+    isRendering = rendering;
   }
 }
 
@@ -25310,7 +25538,6 @@ function validateProperties$2(type, props, canUseEventSystem) {
 }
 
 var didWarnInvalidHydration = false;
-var didWarnShadyDOM = false;
 var DANGEROUSLY_SET_INNER_HTML = 'dangerouslySetInnerHTML';
 var SUPPRESS_CONTENT_EDITABLE_WARNING = 'suppressContentEditableWarning';
 var SUPPRESS_HYDRATION_WARNING = 'suppressHydrationWarning';
@@ -25630,12 +25857,6 @@ function setInitialProperties(domElement, tag, rawProps, rootContainerElement) {
 
   {
     validatePropertiesInDevelopment(tag, rawProps);
-
-    if (isCustomComponentTag && !didWarnShadyDOM && domElement.shadyRoot) {
-      error('%s is using shady DOM. Using shady DOM with React can ' + 'cause things to break subtly.', getCurrentFiberOwnerNameInDevOrNull() || 'A component');
-
-      didWarnShadyDOM = true;
-    }
   } // TODO: Make sure that we check isMounted before firing any of these events.
 
 
@@ -25989,12 +26210,6 @@ function diffHydratedProperties(domElement, tag, rawProps, parentNamespace, root
     suppressHydrationWarning = rawProps[SUPPRESS_HYDRATION_WARNING] === true;
     isCustomComponentTag = isCustomComponent(tag, rawProps);
     validatePropertiesInDevelopment(tag, rawProps);
-
-    if (isCustomComponentTag && !didWarnShadyDOM && domElement.shadyRoot) {
-      error('%s is using shady DOM. Using shady DOM with React can ' + 'cause things to break subtly.', getCurrentFiberOwnerNameInDevOrNull() || 'A component');
-
-      didWarnShadyDOM = true;
-    }
   } // TODO: Make sure that we check isMounted before firing any of these events.
 
 
@@ -30515,18 +30730,9 @@ function processChildContext(fiber, type, parentContext) {
     }
 
     var childContext;
-
-    {
-      setCurrentPhase('getChildContext');
-    }
-
     startPhaseTimer(fiber, 'getChildContext');
     childContext = instance.getChildContext();
     stopPhaseTimer();
-
-    {
-      setCurrentPhase(null);
-    }
 
     for (var contextKey in childContext) {
       if (!(contextKey in childContextTypes)) {
@@ -36451,7 +36657,6 @@ var didWarnAboutContextTypeOnFunctionComponent;
 var didWarnAboutGetDerivedStateOnFunctionComponent;
 var didWarnAboutFunctionRefs;
 var didWarnAboutReassigningProps;
-var didWarnAboutMaxDuration;
 var didWarnAboutRevealOrder;
 var didWarnAboutTailOptions;
 
@@ -36462,7 +36667,6 @@ var didWarnAboutTailOptions;
   didWarnAboutGetDerivedStateOnFunctionComponent = {};
   didWarnAboutFunctionRefs = {};
   didWarnAboutReassigningProps = false;
-  didWarnAboutMaxDuration = false;
   didWarnAboutRevealOrder = {};
   didWarnAboutTailOptions = {};
 }
@@ -36526,7 +36730,7 @@ function updateForwardRef(current, workInProgress, Component, nextProps, renderE
 
   {
     ReactCurrentOwner$1.current = workInProgress;
-    setCurrentPhase('render');
+    setIsRendering(true);
     nextChildren = renderWithHooks(current, workInProgress, render, nextProps, ref, renderExpirationTime);
 
     if ( workInProgress.mode & StrictMode) {
@@ -36536,7 +36740,7 @@ function updateForwardRef(current, workInProgress, Component, nextProps, renderE
       }
     }
 
-    setCurrentPhase(null);
+    setIsRendering(false);
   }
 
   if (current !== null && !didReceiveUpdate) {
@@ -36744,7 +36948,7 @@ function updateFunctionComponent(current, workInProgress, Component, nextProps, 
 
   {
     ReactCurrentOwner$1.current = workInProgress;
-    setCurrentPhase('render');
+    setIsRendering(true);
     nextChildren = renderWithHooks(current, workInProgress, Component, nextProps, context, renderExpirationTime);
 
     if ( workInProgress.mode & StrictMode) {
@@ -36754,7 +36958,7 @@ function updateFunctionComponent(current, workInProgress, Component, nextProps, 
       }
     }
 
-    setCurrentPhase(null);
+    setIsRendering(false);
   }
 
   if (current !== null && !didReceiveUpdate) {
@@ -36870,14 +37074,14 @@ function finishClassComponent(current, workInProgress, Component, shouldUpdate, 
     }
   } else {
     {
-      setCurrentPhase('render');
+      setIsRendering(true);
       nextChildren = instance.render();
 
       if ( workInProgress.mode & StrictMode) {
         instance.render();
       }
 
-      setCurrentPhase(null);
+      setIsRendering(false);
     }
   } // React DevTools reads this flag.
 
@@ -37191,8 +37395,10 @@ function mountIndeterminateComponent(_current, workInProgress, Component, render
       ReactStrictModeWarnings.recordLegacyContextWarning(workInProgress, null);
     }
 
+    setIsRendering(true);
     ReactCurrentOwner$1.current = workInProgress;
     value = renderWithHooks(null, workInProgress, Component, props, context, renderExpirationTime);
+    setIsRendering(false);
   } // React DevTools reads this flag.
 
 
@@ -37358,17 +37564,7 @@ function updateSuspenseComponent(current, workInProgress, renderExpirationTime) 
   }
 
   suspenseContext = setDefaultShallowSuspenseContext(suspenseContext);
-  pushSuspenseContext(workInProgress, suspenseContext);
-
-  {
-    if ('maxDuration' in nextProps) {
-      if (!didWarnAboutMaxDuration) {
-        didWarnAboutMaxDuration = true;
-
-        error('maxDuration has been removed from React. ' + 'Remove the maxDuration prop.');
-      }
-    }
-  } // This next part is a bit confusing. If the children timeout, we switch to
+  pushSuspenseContext(workInProgress, suspenseContext); // This next part is a bit confusing. If the children timeout, we switch to
   // showing the fallback children in place of the "primary" children.
   // However, we don't want to delete the primary children because then their
   // state will be lost (both the React state and the host state, e.g.
@@ -37389,7 +37585,6 @@ function updateSuspenseComponent(current, workInProgress, renderExpirationTime) 
   // Otherwise, we render the primary children directly. This requires some
   // custom reconciliation logic to preserve the state of the primary
   // children. It's essentially a very basic form of re-parenting.
-
 
   if (current === null) {
     // If we're currently hydrating, try to hydrate this boundary.
@@ -38023,9 +38218,9 @@ function updateContextConsumer(current, workInProgress, renderExpirationTime) {
 
   {
     ReactCurrentOwner$1.current = workInProgress;
-    setCurrentPhase('render');
+    setIsRendering(true);
     newChildren = render(newValue);
-    setCurrentPhase(null);
+    setIsRendering(false);
   } // React DevTools reads this flag.
 
 
@@ -40537,9 +40732,11 @@ function throwException(root, returnFiber, sourceFiber, value, renderExpirationT
       var currentSource = sourceFiber.alternate;
 
       if (currentSource) {
+        sourceFiber.updateQueue = currentSource.updateQueue;
         sourceFiber.memoizedState = currentSource.memoizedState;
         sourceFiber.expirationTime = currentSource.expirationTime;
       } else {
+        sourceFiber.updateQueue = null;
         sourceFiber.memoizedState = null;
       }
     }
@@ -42937,43 +43134,40 @@ var beginWork$1;
 }
 
 var didWarnAboutUpdateInRender = false;
-var didWarnAboutUpdateInGetChildContext = false;
+var didWarnAboutUpdateInRenderForAnotherComponent;
+
+{
+  didWarnAboutUpdateInRenderForAnotherComponent = new Set();
+}
 
 function warnAboutRenderPhaseUpdatesInDEV(fiber) {
   {
-    if ((executionContext & RenderContext) !== NoContext) {
+    if (isRendering && (executionContext & RenderContext) !== NoContext) {
       switch (fiber.tag) {
         case FunctionComponent:
         case ForwardRef:
         case SimpleMemoComponent:
           {
-            error('Cannot update a component from inside the function body of a ' + 'different component.');
+            var renderingComponentName = workInProgress && getComponentName(workInProgress.type) || 'Unknown'; // Dedupe by the rendering component because it's the one that needs to be fixed.
+
+            var dedupeKey = renderingComponentName;
+
+            if (!didWarnAboutUpdateInRenderForAnotherComponent.has(dedupeKey)) {
+              didWarnAboutUpdateInRenderForAnotherComponent.add(dedupeKey);
+              var setStateComponentName = getComponentName(fiber.type) || 'Unknown';
+
+              error('Cannot update a component (`%s`) while rendering a ' + 'different component (`%s`). To locate the bad setState() call inside `%s`, ' + 'follow the stack trace as described in https://fb.me/setstate-in-render', setStateComponentName, renderingComponentName, renderingComponentName);
+            }
 
             break;
           }
 
         case ClassComponent:
           {
-            switch (phase) {
-              case 'getChildContext':
-                if (didWarnAboutUpdateInGetChildContext) {
-                  return;
-                }
+            if (!didWarnAboutUpdateInRender) {
+              error('Cannot update during an existing state transition (such as ' + 'within `render`). Render methods should be a pure ' + 'function of props and state.');
 
-                error('setState(...): Cannot call setState() inside getChildContext()');
-
-                didWarnAboutUpdateInGetChildContext = true;
-                break;
-
-              case 'render':
-                if (didWarnAboutUpdateInRender) {
-                  return;
-                }
-
-                error('Cannot update during an existing state transition (such as ' + 'within `render`). Render methods should be a pure ' + 'function of props and state.');
-
-                didWarnAboutUpdateInRender = true;
-                break;
+              didWarnAboutUpdateInRender = true;
             }
 
             break;
@@ -44068,7 +44262,7 @@ function updateContainer(element, container, parentComponent, callback) {
   }
 
   {
-    if (phase === 'render' && current !== null && !didWarnAboutNestedUpdates) {
+    if (isRendering && current !== null && !didWarnAboutNestedUpdates) {
       didWarnAboutNestedUpdates = true;
 
       error('Render methods should be a pure function of props and state; ' + 'triggering nested component updates from render is not allowed. ' + 'If necessary, trigger nested updates in componentDidUpdate.\n\n' + 'Check the render method of %s.', getComponentName(current.type) || 'Unknown');
@@ -44644,7 +44838,7 @@ implementation) {
   };
 }
 
-var ReactVersion = '16.13.0';
+var ReactVersion = '16.13.1';
 
 setAttemptUserBlockingHydration(attemptUserBlockingHydration$1);
 setAttemptContinuousHydration(attemptContinuousHydration$1);
@@ -44755,7 +44949,7 @@ var reactDom = createCommonjsModule(function (module) {
 });
 var reactDom_1 = reactDom.findDOMNode;
 
-var config = {
+var config$1 = {
   disabled: false
 };
 
@@ -44876,9 +45070,7 @@ var EXITING = 'exiting';
  * `'exiting'` to `'exited'`.
  */
 
-var Transition =
-/*#__PURE__*/
-function (_React$Component) {
+var Transition = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Transition, _React$Component);
 
   function Transition(props, context) {
@@ -44923,7 +45115,7 @@ function (_React$Component) {
     }
 
     return null;
-  }; // getSnapshotBeforeUpdate(prevProps) {
+  } // getSnapshotBeforeUpdate(prevProps) {
   //   let nextStatus = null
   //   if (prevProps !== this.props) {
   //     const { status } = this.state
@@ -44939,7 +45131,7 @@ function (_React$Component) {
   //   }
   //   return { nextStatus }
   // }
-
+  ;
 
   var _proto = Transition.prototype;
 
@@ -44998,12 +45190,11 @@ function (_React$Component) {
     if (nextStatus !== null) {
       // nextStatus will always be ENTERING or EXITING.
       this.cancelNextCallback();
-      var node = reactDom.findDOMNode(this);
 
       if (nextStatus === ENTERING) {
-        this.performEnter(node, mounting);
+        this.performEnter(mounting);
       } else {
-        this.performExit(node);
+        this.performExit();
       }
     } else if (this.props.unmountOnExit && this.state.status === EXITED) {
       this.setState({
@@ -45012,66 +45203,72 @@ function (_React$Component) {
     }
   };
 
-  _proto.performEnter = function performEnter(node, mounting) {
+  _proto.performEnter = function performEnter(mounting) {
     var _this2 = this;
 
     var enter = this.props.enter;
     var appearing = this.context ? this.context.isMounting : mounting;
+
+    var _ref2 = this.props.nodeRef ? [appearing] : [reactDom.findDOMNode(this), appearing],
+        maybeNode = _ref2[0],
+        maybeAppearing = _ref2[1];
+
     var timeouts = this.getTimeouts();
     var enterTimeout = appearing ? timeouts.appear : timeouts.enter; // no enter animation skip right to ENTERED
     // if we are mounting and running this it means appear _must_ be set
 
-    if (!mounting && !enter || config.disabled) {
+    if (!mounting && !enter || config$1.disabled) {
       this.safeSetState({
         status: ENTERED
       }, function () {
-        _this2.props.onEntered(node);
+        _this2.props.onEntered(maybeNode);
       });
       return;
     }
 
-    this.props.onEnter(node, appearing);
+    this.props.onEnter(maybeNode, maybeAppearing);
     this.safeSetState({
       status: ENTERING
     }, function () {
-      _this2.props.onEntering(node, appearing);
+      _this2.props.onEntering(maybeNode, maybeAppearing);
 
-      _this2.onTransitionEnd(node, enterTimeout, function () {
+      _this2.onTransitionEnd(enterTimeout, function () {
         _this2.safeSetState({
           status: ENTERED
         }, function () {
-          _this2.props.onEntered(node, appearing);
+          _this2.props.onEntered(maybeNode, maybeAppearing);
         });
       });
     });
   };
 
-  _proto.performExit = function performExit(node) {
+  _proto.performExit = function performExit() {
     var _this3 = this;
 
     var exit = this.props.exit;
-    var timeouts = this.getTimeouts(); // no exit animation skip right to EXITED
+    var timeouts = this.getTimeouts();
+    var maybeNode = this.props.nodeRef ? undefined : reactDom.findDOMNode(this); // no exit animation skip right to EXITED
 
-    if (!exit || config.disabled) {
+    if (!exit || config$1.disabled) {
       this.safeSetState({
         status: EXITED
       }, function () {
-        _this3.props.onExited(node);
+        _this3.props.onExited(maybeNode);
       });
       return;
     }
 
-    this.props.onExit(node);
+    this.props.onExit(maybeNode);
     this.safeSetState({
       status: EXITING
     }, function () {
-      _this3.props.onExiting(node);
+      _this3.props.onExiting(maybeNode);
 
-      _this3.onTransitionEnd(node, timeouts.exit, function () {
+      _this3.onTransitionEnd(timeouts.exit, function () {
         _this3.safeSetState({
           status: EXITED
         }, function () {
-          _this3.props.onExited(node);
+          _this3.props.onExited(maybeNode);
         });
       });
     });
@@ -45112,8 +45309,9 @@ function (_React$Component) {
     return this.nextCallback;
   };
 
-  _proto.onTransitionEnd = function onTransitionEnd(node, timeout, handler) {
+  _proto.onTransitionEnd = function onTransitionEnd(timeout, handler) {
     this.setNextCallback(handler);
+    var node = this.props.nodeRef ? this.props.nodeRef.current : reactDom.findDOMNode(this);
     var doesNotHaveTimeoutOrListener = timeout == null && !this.props.addEndListener;
 
     if (!node || doesNotHaveTimeoutOrListener) {
@@ -45122,7 +45320,11 @@ function (_React$Component) {
     }
 
     if (this.props.addEndListener) {
-      this.props.addEndListener(node, this.nextCallback);
+      var _ref3 = this.props.nodeRef ? [this.nextCallback] : [node, this.nextCallback],
+          maybeNode = _ref3[0],
+          maybeNextCallback = _ref3[1];
+
+      this.props.addEndListener(maybeNode, maybeNextCallback);
     }
 
     if (timeout != null) {
@@ -45139,36 +45341,29 @@ function (_React$Component) {
 
     var _this$props = this.props,
         children = _this$props.children,
-        childProps = _objectWithoutPropertiesLoose(_this$props, ["children"]); // filter props for Transtition
+        _in = _this$props.in,
+        _mountOnEnter = _this$props.mountOnEnter,
+        _unmountOnExit = _this$props.unmountOnExit,
+        _appear = _this$props.appear,
+        _enter = _this$props.enter,
+        _exit = _this$props.exit,
+        _timeout = _this$props.timeout,
+        _addEndListener = _this$props.addEndListener,
+        _onEnter = _this$props.onEnter,
+        _onEntering = _this$props.onEntering,
+        _onEntered = _this$props.onEntered,
+        _onExit = _this$props.onExit,
+        _onExiting = _this$props.onExiting,
+        _onExited = _this$props.onExited,
+        _nodeRef = _this$props.nodeRef,
+        childProps = _objectWithoutPropertiesLoose(_this$props, ["children", "in", "mountOnEnter", "unmountOnExit", "appear", "enter", "exit", "timeout", "addEndListener", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "nodeRef"]);
 
-
-    delete childProps.in;
-    delete childProps.mountOnEnter;
-    delete childProps.unmountOnExit;
-    delete childProps.appear;
-    delete childProps.enter;
-    delete childProps.exit;
-    delete childProps.timeout;
-    delete childProps.addEndListener;
-    delete childProps.onEnter;
-    delete childProps.onEntering;
-    delete childProps.onEntered;
-    delete childProps.onExit;
-    delete childProps.onExiting;
-    delete childProps.onExited;
-
-    if (typeof children === 'function') {
+    return (
+      /*#__PURE__*/
       // allows for nested Transitions
-      return react.createElement(TransitionGroupContext.Provider, {
-        value: null
-      }, children(status, childProps));
-    }
-
-    var child = react.Children.only(children);
-    return (// allows for nested Transitions
       react.createElement(TransitionGroupContext.Provider, {
         value: null
-      }, react.cloneElement(child, childProps))
+      }, typeof children === 'function' ? children(status, childProps) : react.cloneElement(react.Children.only(children), childProps))
     );
   };
 
@@ -45177,6 +45372,21 @@ function (_React$Component) {
 
 Transition.contextType = TransitionGroupContext;
 Transition.propTypes =  {
+  /**
+   * A React reference to DOM element that need to transition:
+   * https://stackoverflow.com/a/51127130/4671932
+   *
+   *   - When `nodeRef` prop is used, `node` is not passed to callback functions
+   *      (e.g. `onEnter`) because user already has direct access to the node.
+   *   - When changing `key` prop of `Transition` in a `TransitionGroup` a new
+   *     `nodeRef` need to be provided to `Transition` with changed `key` prop
+   *     (see
+   *     [test/CSSTransition-test.js](https://github.com/reactjs/react-transition-group/blob/13435f897b3ab71f6e19d724f145596f5910581c/test/CSSTransition-test.js#L362-L437)).
+   */
+  nodeRef: propTypes.shape({
+    current: typeof Element === 'undefined' ? propTypes.any : propTypes.instanceOf(Element)
+  }),
+
   /**
    * A `function` child can be used instead of a React element. This function is
    * called with the current transition status (`'entering'`, `'entered'`,
@@ -45213,10 +45423,9 @@ Transition.propTypes =  {
   unmountOnExit: propTypes.bool,
 
   /**
-   * Normally a component is not transitioned if it is shown when the
-   * `<Transition>` component mounts. If you want to transition on the first
-   * mount set `appear` to `true`, and the component will transition in as soon
-   * as the `<Transition>` mounts.
+   * By default the child component does not perform the enter transition when
+   * it first mounts, regardless of the value of `in`. If you want this
+   * behavior, set both `appear` and `in` to `true`.
    *
    * > **Note**: there are no special appear states like `appearing`/`appeared`, this prop
    * > only adds an additional enter transition. However, in the
@@ -45276,7 +45485,9 @@ Transition.propTypes =  {
   /**
    * Add a custom transition end trigger. Called with the transitioning
    * DOM node and a `done` callback. Allows for more fine grained transition end
-   * logic. **Note:** Timeouts are still used as a fallback if provided.
+   * logic. Timeouts are still used as a fallback if provided.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
    *
    * ```jsx
    * addEndListener={(node, done) => {
@@ -45291,6 +45502,8 @@ Transition.propTypes =  {
    * Callback fired before the "entering" status is applied. An extra parameter
    * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
    *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
    * @type Function(node: HtmlElement, isAppearing: bool) -> void
    */
   onEnter: propTypes.func,
@@ -45298,6 +45511,8 @@ Transition.propTypes =  {
   /**
    * Callback fired after the "entering" status is applied. An extra parameter
    * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
    *
    * @type Function(node: HtmlElement, isAppearing: bool)
    */
@@ -45307,12 +45522,16 @@ Transition.propTypes =  {
    * Callback fired after the "entered" status is applied. An extra parameter
    * `isAppearing` is supplied to indicate if the enter stage is occurring on the initial mount
    *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
    * @type Function(node: HtmlElement, isAppearing: bool) -> void
    */
   onEntered: propTypes.func,
 
   /**
    * Callback fired before the "exiting" status is applied.
+   *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
    *
    * @type Function(node: HtmlElement) -> void
    */
@@ -45321,6 +45540,8 @@ Transition.propTypes =  {
   /**
    * Callback fired after the "exiting" status is applied.
    *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed.
+   *
    * @type Function(node: HtmlElement) -> void
    */
   onExiting: propTypes.func,
@@ -45328,13 +45549,14 @@ Transition.propTypes =  {
   /**
    * Callback fired after the "exited" status is applied.
    *
+   * **Note**: when `nodeRef` prop is passed, `node` is not passed
+   *
    * @type Function(node: HtmlElement) -> void
    */
-  onExited: propTypes.func // Name the function so it is clearer in the documentation
+  onExited: propTypes.func
+} ; // Name the function so it is clearer in the documentation
 
-} ;
-
-function noop$1() {}
+function noop$2() {}
 
 Transition.defaultProps = {
   in: false,
@@ -45343,18 +45565,18 @@ Transition.defaultProps = {
   appear: false,
   enter: true,
   exit: true,
-  onEnter: noop$1,
-  onEntering: noop$1,
-  onEntered: noop$1,
-  onExit: noop$1,
-  onExiting: noop$1,
-  onExited: noop$1
+  onEnter: noop$2,
+  onEntering: noop$2,
+  onEntered: noop$2,
+  onExit: noop$2,
+  onExiting: noop$2,
+  onExited: noop$2
 };
-Transition.UNMOUNTED = 0;
-Transition.EXITED = 1;
-Transition.ENTERING = 2;
-Transition.ENTERED = 3;
-Transition.EXITING = 4;
+Transition.UNMOUNTED = UNMOUNTED;
+Transition.EXITED = EXITED;
+Transition.ENTERING = ENTERING;
+Transition.ENTERED = ENTERED;
+Transition.EXITING = EXITING;
 
 // reading a dimension prop will cause the browser to recalculate,
 // which will let our animations work
@@ -45380,7 +45602,7 @@ var Fade = react.forwardRef(function (_ref, ref) {
     triggerBrowserReflow(node);
     if (props.onEnter) props.onEnter(node);
   }, [props]);
-  return react.createElement(Transition, _extends({
+  return /*#__PURE__*/react.createElement(Transition, _extends({
     ref: ref,
     addEndListener: transitionEnd
   }, props, {
@@ -45407,14 +45629,14 @@ var CloseButton = react.forwardRef(function (_ref, ref) {
       className = _ref.className,
       props = _objectWithoutPropertiesLoose(_ref, ["label", "onClick", "className"]);
 
-  return react.createElement("button", _extends({
+  return /*#__PURE__*/react.createElement("button", _extends({
     ref: ref,
     type: "button",
     className: classnames('close', className),
     onClick: onClick
-  }, props), react.createElement("span", {
+  }, props), /*#__PURE__*/react.createElement("span", {
     "aria-hidden": "true"
-  }, "\xD7"), react.createElement("span", {
+  }, "\xD7"), /*#__PURE__*/react.createElement("span", {
     className: "sr-only"
   }, label));
 });
@@ -45511,7 +45733,7 @@ var SafeAnchor = react.forwardRef(function (_ref, ref) {
     props['aria-disabled'] = true;
   }
 
-  return react.createElement(Component, _extends({
+  return /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, props, {
     onClick: handleClick,
@@ -45545,17 +45767,17 @@ var Alert = react.forwardRef(function (uncontrolledProps, ref) {
   var handleClose = useEventCallback(function (e) {
     onClose(false, e);
   });
-  var alert = react.createElement("div", _extends({
+  var alert = /*#__PURE__*/react.createElement("div", _extends({
     role: "alert"
   }, Transition ? props : undefined, {
     ref: ref,
     className: classnames(className, prefix, variant && prefix + "-" + variant, dismissible && prefix + "-dismissible")
-  }), dismissible && react.createElement(CloseButton, {
+  }), dismissible && /*#__PURE__*/react.createElement(CloseButton, {
     onClick: handleClose,
     label: closeLabel
   }), children);
   if (!Transition) return show ? alert : null;
-  return react.createElement(Transition, _extends({
+  return /*#__PURE__*/react.createElement(Transition, _extends({
     unmountOnExit: true
   }, props, {
     in: show
@@ -45593,7 +45815,7 @@ var Button = react.forwardRef(function (_ref, ref) {
   var classes = classnames(className, prefix, active && 'active', prefix + "-" + variant, block && prefix + "-block", size && prefix + "-" + size);
 
   if (props.href) {
-    return react.createElement(SafeAnchor, _extends({}, props, {
+    return /*#__PURE__*/react.createElement(SafeAnchor, _extends({}, props, {
       as: as,
       ref: ref,
       className: classnames(classes, props.disabled && 'disabled')
@@ -45609,7 +45831,7 @@ var Button = react.forwardRef(function (_ref, ref) {
   }
 
   var Component = as || 'button';
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     className: classes
   }));
 });
@@ -45634,7 +45856,7 @@ var ButtonGroup = react.forwardRef(function (props, ref) {
   var prefix = useBootstrapPrefix(bsPrefix, 'btn-group');
   var baseClass = prefix;
   if (vertical) baseClass = prefix + "-vertical";
-  return react.createElement(Component, _extends({}, rest, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, rest, {
     ref: ref,
     className: classnames(className, baseClass, size && prefix + "-" + size, toggle && prefix + "-toggle")
   }));
@@ -45678,7 +45900,7 @@ function (_ref, ref) {
     spans.push(prefix); // plain 'col'
   }
 
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames.apply(void 0, [className].concat(spans, classes))
   }));
@@ -45698,7 +45920,7 @@ var Container = react.forwardRef(function (_ref, ref) {
 
   var prefix = useBootstrapPrefix(bsPrefix, 'container');
   var suffix = typeof fluid === 'string' ? "-" + fluid : '-fluid';
-  return react.createElement(Component, _extends({
+  return /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, props, {
     className: classnames(className, fluid ? "" + prefix + suffix : prefix)
@@ -45706,6 +45928,99 @@ var Container = react.forwardRef(function (_ref, ref) {
 });
 Container.displayName = 'Container';
 Container.defaultProps = defaultProps$5;
+
+var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createChainableTypeChecker;
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+// Mostly taken from ReactPropTypes.
+
+function createChainableTypeChecker(validate) {
+  function checkType(isRequired, props, propName, componentName, location, propFullName) {
+    var componentNameSafe = componentName || '<<anonymous>>';
+    var propFullNameSafe = propFullName || propName;
+
+    if (props[propName] == null) {
+      if (isRequired) {
+        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
+      }
+
+      return null;
+    }
+
+    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
+      args[_key - 6] = arguments[_key];
+    }
+
+    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
+  }
+
+  var chainedCheckType = checkType.bind(null, false);
+  chainedCheckType.isRequired = checkType.bind(null, true);
+
+  return chainedCheckType;
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(createChainableTypeChecker_1);
+
+var all_1 = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = all;
+
+
+
+var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function all() {
+  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
+    validators[_key] = arguments[_key];
+  }
+
+  function allPropTypes() {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    var error = null;
+
+    validators.forEach(function (validator) {
+      if (error != null) {
+        return;
+      }
+
+      var result = validator.apply(undefined, args);
+      if (result != null) {
+        error = result;
+      }
+    });
+
+    return error;
+  }
+
+  return (0, _createChainableTypeChecker2.default)(allPropTypes);
+}
+module.exports = exports['default'];
+});
+
+unwrapExports(all_1);
 
 var warning$1 = function() {};
 
@@ -45772,7 +46087,7 @@ function (_ref, ref) {
       type = _ref.type,
       props = _objectWithoutPropertiesLoose(_ref, ["as", "className", "type"]);
 
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames(className, type && type + "-feedback")
   }));
@@ -45787,6 +46102,7 @@ var FormContext = react.createContext({
 
 var FormControl = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
       type = _ref.type,
       size = _ref.size,
       id = _ref.id,
@@ -45795,14 +46111,19 @@ var FormControl = react.forwardRef(function (_ref, ref) {
       isInvalid = _ref.isInvalid,
       plaintext = _ref.plaintext,
       readOnly = _ref.readOnly,
+      custom = _ref.custom,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'input' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "as"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "type", "size", "id", "className", "isValid", "isInvalid", "plaintext", "readOnly", "custom", "as"]);
 
   var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
 
-  bsPrefix = useBootstrapPrefix(bsPrefix, 'form-control');
+  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-control'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
   var classes;
 
   if (plaintext) {
@@ -45813,14 +46134,22 @@ var FormControl = react.forwardRef(function (_ref, ref) {
     var _classes2;
 
     classes = (_classes2 = {}, _classes2[bsPrefix + "-file"] = true, _classes2);
-  } else {
+  } else if (type === 'range') {
     var _classes3;
 
-    classes = (_classes3 = {}, _classes3[bsPrefix] = true, _classes3[bsPrefix + "-" + size] = size, _classes3);
+    classes = (_classes3 = {}, _classes3[bsPrefix + "-range"] = true, _classes3);
+  } else if (Component === 'select' && custom) {
+    var _classes4;
+
+    classes = (_classes4 = {}, _classes4[bsPrefix + "-select"] = true, _classes4[bsPrefix + "-select-" + size] = size, _classes4);
+  } else {
+    var _classes5;
+
+    classes = (_classes5 = {}, _classes5[bsPrefix] = true, _classes5[bsPrefix + "-" + size] = size, _classes5);
   }
 
    warning_1(controlId == null || !id, '`controlId` is ignored on `<FormControl>` when `id` is specified.') ;
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     type: type,
     ref: ref,
     readOnly: readOnly,
@@ -45848,7 +46177,7 @@ var InputGroup = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "size", "className", "as"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'input-group');
-  return react.createElement(Component, _extends({
+  return /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, props, {
     className: classnames(className, bsPrefix, size && bsPrefix + "-" + size)
@@ -45861,13 +46190,13 @@ var InputGroupText = createWithBsPrefix('input-group-text', {
 });
 
 var InputGroupCheckbox = function InputGroupCheckbox(props) {
-  return react.createElement(InputGroupText, null, react.createElement("input", _extends({
+  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
     type: "checkbox"
   }, props)));
 };
 
 var InputGroupRadio = function InputGroupRadio(props) {
-  return react.createElement(InputGroupText, null, react.createElement("input", _extends({
+  return /*#__PURE__*/react.createElement(InputGroupText, null, /*#__PURE__*/react.createElement("input", _extends({
     type: "radio"
   }, props)));
 };
@@ -45981,2629 +46310,1775 @@ function useForceUpdate() {
   return dispatch;
 }
 
-var DropdownContext = react.createContext({
-  menuRef: function menuRef() {},
-  toggleRef: function toggleRef() {},
-  onToggle: function onToggle() {},
-  toggleNode: undefined,
-  alignEnd: null,
-  show: null,
-  drop: null
-});
+var DropdownContext = react.createContext(null);
 
-/**!
- * @fileOverview Kickass library to create and place poppers near their reference elements.
- * @version 1.16.1
- * @license
- * Copyright (c) 2016 Federico Zivolo and contributors
+/**
+ * Track whether a component is current mounted. Generally less preferable than
+ * properlly canceling effects so they don't run after a component is unmounted,
+ * but helpful in cases where that isn't feasible, such as a `Promise` resolution.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * @returns a function that returns the current isMounted state of the component
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * ```ts
+ * const [data, setData] = useState(null)
+ * const isMounted = useMounted()
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * useEffect(() => {
+ *   fetchdata().then((newData) => {
+ *      if (isMounted()) {
+ *        setData(newData);
+ *      }
+ *   })
+ * })
+ * ```
  */
-var isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined' && typeof navigator !== 'undefined';
 
-var timeoutDuration = function () {
-  var longerTimeoutBrowsers = ['Edge', 'Trident', 'Firefox'];
-  for (var i = 0; i < longerTimeoutBrowsers.length; i += 1) {
-    if (isBrowser && navigator.userAgent.indexOf(longerTimeoutBrowsers[i]) >= 0) {
-      return 1;
-    }
-  }
-  return 0;
-}();
+function useMounted() {
+  var mounted = react_15(true);
+  var isMounted = react_15(function () {
+    return mounted.current;
+  });
+  react_10(function () {
+    return function () {
+      mounted.current = false;
+    };
+  }, []);
+  return isMounted.current;
+}
 
-function microtaskDebounce(fn) {
-  var called = false;
-  return function () {
-    if (called) {
-      return;
-    }
-    called = true;
-    window.Promise.resolve().then(function () {
-      called = false;
-      fn();
-    });
+function useSafeState(state) {
+  var isMounted = useMounted();
+  return [state[0], react_9(function (nextState) {
+    if (!isMounted()) return;
+    return state[1](nextState);
+  }, [isMounted, state[1]])];
+}
+
+var top = 'top';
+var bottom = 'bottom';
+var right = 'right';
+var left = 'left';
+var auto = 'auto';
+var basePlacements = [top, bottom, right, left];
+var start = 'start';
+var end = 'end';
+var clippingParents = 'clippingParents';
+var viewport = 'viewport';
+var popper = 'popper';
+var reference = 'reference';
+var variationPlacements = /*#__PURE__*/basePlacements.reduce(function (acc, placement) {
+  return acc.concat([placement + "-" + start, placement + "-" + end]);
+}, []);
+var placements = /*#__PURE__*/[].concat(basePlacements, [auto]).reduce(function (acc, placement) {
+  return acc.concat([placement, placement + "-" + start, placement + "-" + end]);
+}, []); // modifiers that need to read the DOM
+
+var beforeRead = 'beforeRead';
+var read = 'read';
+var afterRead = 'afterRead'; // pure-logic modifiers
+
+var beforeMain = 'beforeMain';
+var main = 'main';
+var afterMain = 'afterMain'; // modifier with the purpose to write to the DOM (or write into a framework state)
+
+var beforeWrite = 'beforeWrite';
+var write = 'write';
+var afterWrite = 'afterWrite';
+var modifierPhases = [beforeRead, read, afterRead, beforeMain, main, afterMain, beforeWrite, write, afterWrite];
+
+function getBasePlacement(placement) {
+  return placement.split('-')[0];
+}
+
+// Returns the layout rect of an element relative to its offsetParent. Layout
+// means it doesn't take into account transforms.
+function getLayoutRect(element) {
+  return {
+    x: element.offsetLeft,
+    y: element.offsetTop,
+    width: element.offsetWidth,
+    height: element.offsetHeight
   };
 }
 
-function taskDebounce(fn) {
-  var scheduled = false;
-  return function () {
-    if (!scheduled) {
-      scheduled = true;
-      setTimeout(function () {
-        scheduled = false;
-        fn();
-      }, timeoutDuration);
-    }
-  };
+function contains(parent, child) {
+  // $FlowFixMe: hasOwnProperty doesn't seem to work in tests
+  var isShadow = Boolean(child.getRootNode && child.getRootNode().host); // First, attempt with faster native method
+
+  if (parent.contains(child)) {
+    return true;
+  } // then fallback to custom implementation with Shadow DOM support
+  else if (isShadow) {
+      var next = child;
+
+      do {
+        if (next && parent.isSameNode(next)) {
+          return true;
+        } // $FlowFixMe: need a better way to handle this...
+
+
+        next = next.parentNode || next.host;
+      } while (next);
+    } // Give up, the result is false
+
+
+  return false;
 }
 
-var supportsMicroTasks = isBrowser && window.Promise;
+/*:: import type { Window } from '../types'; */
 
-/**
-* Create a debounced version of a method, that's asynchronously deferred
-* but called in the minimum time possible.
-*
-* @method
-* @memberof Popper.Utils
-* @argument {Function} fn
-* @returns {Function}
-*/
-var debounce$1 = supportsMicroTasks ? microtaskDebounce : taskDebounce;
-
-/**
- * Check if the given variable is a function
- * @method
- * @memberof Popper.Utils
- * @argument {Any} functionToCheck - variable to check
- * @returns {Boolean} answer to: is a function?
- */
-function isFunction$1(functionToCheck) {
-  var getType = {};
-  return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-}
-
-/**
- * Get CSS computed property of the given element
- * @method
- * @memberof Popper.Utils
- * @argument {Eement} element
- * @argument {String} property
- */
-function getStyleComputedProperty(element, property) {
-  if (element.nodeType !== 1) {
-    return [];
-  }
-  // NOTE: 1 DOM access here
-  var window = element.ownerDocument.defaultView;
-  var css = window.getComputedStyle(element, null);
-  return property ? css[property] : css;
-}
-
-/**
- * Returns the parentNode or the host of the element
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @returns {Element} parent
- */
-function getParentNode(element) {
-  if (element.nodeName === 'HTML') {
-    return element;
-  }
-  return element.parentNode || element.host;
-}
-
-/**
- * Returns the scrolling parent of the given element
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @returns {Element} scroll parent
- */
-function getScrollParent(element) {
-  // Return body, `getScroll` will take care to get the correct `scrollTop` from it
-  if (!element) {
-    return document.body;
-  }
-
-  switch (element.nodeName) {
-    case 'HTML':
-    case 'BODY':
-      return element.ownerDocument.body;
-    case '#document':
-      return element.body;
-  }
-
-  // Firefox want us to check `-x` and `-y` variations as well
-
-  var _getStyleComputedProp = getStyleComputedProperty(element),
-      overflow = _getStyleComputedProp.overflow,
-      overflowX = _getStyleComputedProp.overflowX,
-      overflowY = _getStyleComputedProp.overflowY;
-
-  if (/(auto|scroll|overlay)/.test(overflow + overflowY + overflowX)) {
-    return element;
-  }
-
-  return getScrollParent(getParentNode(element));
-}
-
-/**
- * Returns the reference node of the reference object, or the reference object itself.
- * @method
- * @memberof Popper.Utils
- * @param {Element|Object} reference - the reference element (the popper will be relative to this)
- * @returns {Element} parent
- */
-function getReferenceNode(reference) {
-  return reference && reference.referenceNode ? reference.referenceNode : reference;
-}
-
-var isIE11 = isBrowser && !!(window.MSInputMethodContext && document.documentMode);
-var isIE10 = isBrowser && /MSIE 10/.test(navigator.userAgent);
-
-/**
- * Determines if the browser is Internet Explorer
- * @method
- * @memberof Popper.Utils
- * @param {Number} version to check
- * @returns {Boolean} isIE
- */
-function isIE(version) {
-  if (version === 11) {
-    return isIE11;
-  }
-  if (version === 10) {
-    return isIE10;
-  }
-  return isIE11 || isIE10;
-}
-
-/**
- * Returns the offset parent of the given element
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @returns {Element} offset parent
- */
-function getOffsetParent(element) {
-  if (!element) {
-    return document.documentElement;
-  }
-
-  var noOffsetParent = isIE(10) ? document.body : null;
-
-  // NOTE: 1 DOM access here
-  var offsetParent = element.offsetParent || null;
-  // Skip hidden elements which don't have an offsetParent
-  while (offsetParent === noOffsetParent && element.nextElementSibling) {
-    offsetParent = (element = element.nextElementSibling).offsetParent;
-  }
-
-  var nodeName = offsetParent && offsetParent.nodeName;
-
-  if (!nodeName || nodeName === 'BODY' || nodeName === 'HTML') {
-    return element ? element.ownerDocument.documentElement : document.documentElement;
-  }
-
-  // .offsetParent will return the closest TH, TD or TABLE in case
-  // no offsetParent is present, I hate this job...
-  if (['TH', 'TD', 'TABLE'].indexOf(offsetParent.nodeName) !== -1 && getStyleComputedProperty(offsetParent, 'position') === 'static') {
-    return getOffsetParent(offsetParent);
-  }
-
-  return offsetParent;
-}
-
-function isOffsetContainer(element) {
-  var nodeName = element.nodeName;
-
-  if (nodeName === 'BODY') {
-    return false;
-  }
-  return nodeName === 'HTML' || getOffsetParent(element.firstElementChild) === element;
-}
-
-/**
- * Finds the root node (document, shadowDOM root) of the given element
- * @method
- * @memberof Popper.Utils
- * @argument {Element} node
- * @returns {Element} root node
- */
-function getRoot(node) {
-  if (node.parentNode !== null) {
-    return getRoot(node.parentNode);
+/*:: declare function getWindow(node: Node | Window): Window; */
+function getWindow(node) {
+  if (node.toString() !== '[object Window]') {
+    var ownerDocument = node.ownerDocument;
+    return ownerDocument ? ownerDocument.defaultView : window;
   }
 
   return node;
 }
 
-/**
- * Finds the offset parent common to the two provided nodes
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element1
- * @argument {Element} element2
- * @returns {Element} common offset parent
- */
-function findCommonOffsetParent(element1, element2) {
-  // This check is needed to avoid errors in case one of the elements isn't defined for any reason
-  if (!element1 || !element1.nodeType || !element2 || !element2.nodeType) {
-    return document.documentElement;
+function getNodeName(element) {
+  return element ? (element.nodeName || '').toLowerCase() : null;
+}
+
+function getComputedStyle$2(element) {
+  return getWindow(element).getComputedStyle(element);
+}
+
+/*:: declare function isElement(node: mixed): boolean %checks(node instanceof
+  Element); */
+
+function isElement(node) {
+  var OwnElement = getWindow(node).Element;
+  return node instanceof OwnElement || node instanceof Element;
+}
+/*:: declare function isHTMLElement(node: mixed): boolean %checks(node instanceof
+  HTMLElement); */
+
+
+function isHTMLElement(node) {
+  var OwnElement = getWindow(node).HTMLElement;
+  return node instanceof OwnElement || node instanceof HTMLElement;
+}
+
+function isTableElement(element) {
+  return ['table', 'td', 'th'].indexOf(getNodeName(element)) >= 0;
+}
+
+function getDocumentElement(element) {
+  // $FlowFixMe: assume body is always available
+  return (isElement(element) ? element.ownerDocument : element.document).documentElement;
+}
+
+function getParentNode(element) {
+  if (getNodeName(element) === 'html') {
+    return element;
   }
 
-  // Here we make sure to give as "start" the element that comes first in the DOM
-  var order = element1.compareDocumentPosition(element2) & Node.DOCUMENT_POSITION_FOLLOWING;
-  var start = order ? element1 : element2;
-  var end = order ? element2 : element1;
+  return (// $FlowFixMe: this is a quicker (but less type safe) way to save quite some bytes from the bundle
+    element.assignedSlot || // step into the shadow DOM of the parent of a slotted node
+    element.parentNode || // DOM Element detected
+    // $FlowFixMe: need a better way to handle this...
+    element.host || // ShadowRoot detected
+    // $FlowFixMe: HTMLElement is a Node
+    getDocumentElement(element) // fallback
 
-  // Get common ancestor container
-  var range = document.createRange();
-  range.setStart(start, 0);
-  range.setEnd(end, 0);
-  var commonAncestorContainer = range.commonAncestorContainer;
+  );
+}
 
-  // Both nodes are inside #document
+function getTrueOffsetParent(element) {
+  if (!isHTMLElement(element) || // https://github.com/popperjs/popper-core/issues/837
+  getComputedStyle$2(element).position === 'fixed') {
+    return null;
+  }
 
-  if (element1 !== commonAncestorContainer && element2 !== commonAncestorContainer || start.contains(end)) {
-    if (isOffsetContainer(commonAncestorContainer)) {
-      return commonAncestorContainer;
+  return element.offsetParent;
+} // `.offsetParent` reports `null` for fixed elements, while absolute elements
+// return the containing block
+
+
+function getContainingBlock(element) {
+  var currentNode = getParentNode(element);
+
+  while (isHTMLElement(currentNode) && ['html', 'body'].indexOf(getNodeName(currentNode)) < 0) {
+    var css = getComputedStyle$2(currentNode); // This is non-exhaustive but covers the most common CSS properties that
+    // create a containing block.
+
+    if (css.transform !== 'none' || css.perspective !== 'none' || css.willChange !== 'auto') {
+      return currentNode;
+    } else {
+      currentNode = currentNode.parentNode;
     }
-
-    return getOffsetParent(commonAncestorContainer);
   }
 
-  // one of the nodes is inside shadowDOM, find which one
-  var element1root = getRoot(element1);
-  if (element1root.host) {
-    return findCommonOffsetParent(element1root.host, element2);
-  } else {
-    return findCommonOffsetParent(element1, getRoot(element2).host);
-  }
-}
+  return null;
+} // Gets the closest ancestor positioned element. Handles some edge cases,
+// such as table ancestors and cross browser bugs.
 
-/**
- * Gets the scroll value of the given element in the given side (top and left)
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @argument {String} side `top` or `left`
- * @returns {number} amount of scrolled pixels
- */
-function getScroll(element) {
-  var side = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'top';
 
-  var upperSide = side === 'top' ? 'scrollTop' : 'scrollLeft';
-  var nodeName = element.nodeName;
+function getOffsetParent(element) {
+  var window = getWindow(element);
+  var offsetParent = getTrueOffsetParent(element);
 
-  if (nodeName === 'BODY' || nodeName === 'HTML') {
-    var html = element.ownerDocument.documentElement;
-    var scrollingElement = element.ownerDocument.scrollingElement || html;
-    return scrollingElement[upperSide];
+  while (offsetParent && isTableElement(offsetParent) && getComputedStyle$2(offsetParent).position === 'static') {
+    offsetParent = getTrueOffsetParent(offsetParent);
   }
 
-  return element[upperSide];
+  if (offsetParent && getNodeName(offsetParent) === 'body' && getComputedStyle$2(offsetParent).position === 'static') {
+    return window;
+  }
+
+  return offsetParent || getContainingBlock(element) || window;
 }
 
-/*
- * Sum or subtract the element scroll values (left and top) from a given rect object
- * @method
- * @memberof Popper.Utils
- * @param {Object} rect - Rect object you want to change
- * @param {HTMLElement} element - The element from the function reads the scroll values
- * @param {Boolean} subtract - set to true if you want to subtract the scroll values
- * @return {Object} rect - The modifier rect object
- */
-function includeScroll(rect, element) {
-  var subtract = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  var scrollTop = getScroll(element, 'top');
-  var scrollLeft = getScroll(element, 'left');
-  var modifier = subtract ? -1 : 1;
-  rect.top += scrollTop * modifier;
-  rect.bottom += scrollTop * modifier;
-  rect.left += scrollLeft * modifier;
-  rect.right += scrollLeft * modifier;
-  return rect;
+function getMainAxisFromPlacement(placement) {
+  return ['top', 'bottom'].indexOf(placement) >= 0 ? 'x' : 'y';
 }
 
-/*
- * Helper to detect borders of a given element
- * @method
- * @memberof Popper.Utils
- * @param {CSSStyleDeclaration} styles
- * Result of `getStyleComputedProperty` on the given element
- * @param {String} axis - `x` or `y`
- * @return {number} borders - The borders size of the given axis
- */
-
-function getBordersSize(styles, axis) {
-  var sideA = axis === 'x' ? 'Left' : 'Top';
-  var sideB = sideA === 'Left' ? 'Right' : 'Bottom';
-
-  return parseFloat(styles['border' + sideA + 'Width']) + parseFloat(styles['border' + sideB + 'Width']);
+function within(min, value, max) {
+  return Math.max(min, Math.min(value, max));
 }
 
-function getSize(axis, body, html, computedStyle) {
-  return Math.max(body['offset' + axis], body['scroll' + axis], html['client' + axis], html['offset' + axis], html['scroll' + axis], isIE(10) ? parseInt(html['offset' + axis]) + parseInt(computedStyle['margin' + (axis === 'Height' ? 'Top' : 'Left')]) + parseInt(computedStyle['margin' + (axis === 'Height' ? 'Bottom' : 'Right')]) : 0);
-}
-
-function getWindowSizes(document) {
-  var body = document.body;
-  var html = document.documentElement;
-  var computedStyle = isIE(10) && getComputedStyle(html);
-
+function getFreshSideObject() {
   return {
-    height: getSize('Height', body, html, computedStyle),
-    width: getSize('Width', body, html, computedStyle)
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0
   };
 }
 
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
+function mergePaddingObject(paddingObject) {
+  return Object.assign(Object.assign({}, getFreshSideObject()), paddingObject);
+}
 
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+function expandToHashMap(value, keys) {
+  return keys.reduce(function (hashMap, key) {
+    hashMap[key] = value;
+    return hashMap;
+  }, {});
+}
+
+function arrow(_ref) {
+  var _state$modifiersData$;
+
+  var state = _ref.state,
+      name = _ref.name;
+  var arrowElement = state.elements.arrow;
+  var popperOffsets = state.modifiersData.popperOffsets;
+  var basePlacement = getBasePlacement(state.placement);
+  var axis = getMainAxisFromPlacement(basePlacement);
+  var isVertical = [left, right].indexOf(basePlacement) >= 0;
+  var len = isVertical ? 'height' : 'width';
+
+  if (!arrowElement || !popperOffsets) {
+    return;
+  }
+
+  var paddingObject = state.modifiersData[name + "#persistent"].padding;
+  var arrowRect = getLayoutRect(arrowElement);
+  var minProp = axis === 'y' ? top : left;
+  var maxProp = axis === 'y' ? bottom : right;
+  var endDiff = state.rects.reference[len] + state.rects.reference[axis] - popperOffsets[axis] - state.rects.popper[len];
+  var startDiff = popperOffsets[axis] - state.rects.reference[axis];
+  var arrowOffsetParent = getOffsetParent(arrowElement);
+  var clientSize = arrowOffsetParent ? axis === 'y' ? arrowOffsetParent.clientHeight || 0 : arrowOffsetParent.clientWidth || 0 : 0;
+  var centerToReference = endDiff / 2 - startDiff / 2; // Make sure the arrow doesn't overflow the popper if the center point is
+  // outside of the popper bounds
+
+  var min = paddingObject[minProp];
+  var max = clientSize - arrowRect[len] - paddingObject[maxProp];
+  var center = clientSize / 2 - arrowRect[len] / 2 + centerToReference;
+  var offset = within(min, center, max); // Prevents breaking syntax highlighting...
+
+  var axisProp = axis;
+  state.modifiersData[name] = (_state$modifiersData$ = {}, _state$modifiersData$[axisProp] = offset, _state$modifiersData$.centerOffset = offset - center, _state$modifiersData$);
+}
+
+function effect(_ref2) {
+  var state = _ref2.state,
+      options = _ref2.options,
+      name = _ref2.name;
+  var _options$element = options.element,
+      arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element,
+      _options$padding = options.padding,
+      padding = _options$padding === void 0 ? 0 : _options$padding;
+
+  if (arrowElement == null) {
+    return;
+  } // CSS selector
+
+
+  if (typeof arrowElement === 'string') {
+    arrowElement = state.elements.popper.querySelector(arrowElement);
+
+    if (!arrowElement) {
+      return;
     }
   }
 
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
+  {
+    if (!isHTMLElement(arrowElement)) {
+      console.error(['Popper: "arrow" element must be an HTMLElement (not an SVGElement).', 'To use an SVG arrow, wrap it in an HTMLElement that will be used as', 'the arrow.'].join(' '));
+    }
+  }
+
+  if (!contains(state.elements.popper, arrowElement)) {
+    {
+      console.error(['Popper: "arrow" modifier\'s `element` must be a child of the popper', 'element.'].join(' '));
+    }
+
+    return;
+  }
+
+  state.elements.arrow = arrowElement;
+  state.modifiersData[name + "#persistent"] = {
+    padding: mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements))
   };
-}();
+} // eslint-disable-next-line import/no-unused-modules
 
 
+var arrow$1 = {
+  name: 'arrow',
+  enabled: true,
+  phase: 'main',
+  fn: arrow,
+  effect: effect,
+  requires: ['popperOffsets'],
+  requiresIfExists: ['preventOverflow']
+};
+
+var unsetSides = {
+  top: 'auto',
+  right: 'auto',
+  bottom: 'auto',
+  left: 'auto'
+}; // Round the offsets to the nearest suitable subpixel based on the DPR.
+// Zooming can change the DPR, but it seems to report a value that will
+// cleanly divide the values into the appropriate subpixels.
+
+function roundOffsets(_ref) {
+  var x = _ref.x,
+      y = _ref.y;
+  var win = window;
+  var dpr = win.devicePixelRatio || 1;
+  return {
+    x: Math.round(x * dpr) / dpr || 0,
+    y: Math.round(y * dpr) / dpr || 0
+  };
+}
+
+function mapToStyles(_ref2) {
+  var _Object$assign2;
+
+  var popper = _ref2.popper,
+      popperRect = _ref2.popperRect,
+      placement = _ref2.placement,
+      offsets = _ref2.offsets,
+      position = _ref2.position,
+      gpuAcceleration = _ref2.gpuAcceleration,
+      adaptive = _ref2.adaptive;
+
+  var _roundOffsets = roundOffsets(offsets),
+      x = _roundOffsets.x,
+      y = _roundOffsets.y;
+
+  var hasX = offsets.hasOwnProperty('x');
+  var hasY = offsets.hasOwnProperty('y');
+  var sideX = left;
+  var sideY = top;
+  var win = window;
+
+  if (adaptive) {
+    var offsetParent = getOffsetParent(popper);
+
+    if (offsetParent === getWindow(popper)) {
+      offsetParent = getDocumentElement(popper);
+    } // $FlowFixMe: force type refinement, we compare offsetParent with window above, but Flow doesn't detect it
+
+    /*:: offsetParent = (offsetParent: Element); */
 
 
+    if (placement === top) {
+      sideY = bottom;
+      y -= offsetParent.clientHeight - popperRect.height;
+      y *= gpuAcceleration ? 1 : -1;
+    }
 
-var defineProperty$2 = function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
+    if (placement === left) {
+      sideX = right;
+      x -= offsetParent.clientWidth - popperRect.width;
+      x *= gpuAcceleration ? 1 : -1;
+    }
+  }
+
+  var commonStyles = Object.assign({
+    position: position
+  }, adaptive && unsetSides);
+
+  if (gpuAcceleration) {
+    var _Object$assign;
+
+    return Object.assign(Object.assign({}, commonStyles), {}, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) < 2 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
+  }
+
+  return Object.assign(Object.assign({}, commonStyles), {}, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
+}
+
+function computeStyles(_ref3) {
+  var state = _ref3.state,
+      options = _ref3.options;
+  var _options$gpuAccelerat = options.gpuAcceleration,
+      gpuAcceleration = _options$gpuAccelerat === void 0 ? true : _options$gpuAccelerat,
+      _options$adaptive = options.adaptive,
+      adaptive = _options$adaptive === void 0 ? true : _options$adaptive;
+
+  {
+    var transitionProperty = getComputedStyle$2(state.elements.popper).transitionProperty || '';
+
+    if (adaptive && ['transform', 'top', 'right', 'bottom', 'left'].some(function (property) {
+      return transitionProperty.indexOf(property) >= 0;
+    })) {
+      console.warn(['Popper: Detected CSS transitions on at least one of the following', 'CSS properties: "transform", "top", "right", "bottom", "left".', '\n\n', 'Disable the "computeStyles" modifier\'s `adaptive` option to allow', 'for smooth transitions, or remove these properties from the CSS', 'transition declaration on the popper element if only transitioning', 'opacity or background-color for example.', '\n\n', 'We recommend using the popper element as a wrapper around an inner', 'element that can have any CSS property transitioned for animations.'].join(' '));
+    }
+  }
+
+  var commonStyles = {
+    placement: getBasePlacement(state.placement),
+    popper: state.elements.popper,
+    popperRect: state.rects.popper,
+    gpuAcceleration: gpuAcceleration
+  };
+
+  if (state.modifiersData.popperOffsets != null) {
+    state.styles.popper = Object.assign(Object.assign({}, state.styles.popper), mapToStyles(Object.assign(Object.assign({}, commonStyles), {}, {
+      offsets: state.modifiersData.popperOffsets,
+      position: state.options.strategy,
+      adaptive: adaptive
+    })));
+  }
+
+  if (state.modifiersData.arrow != null) {
+    state.styles.arrow = Object.assign(Object.assign({}, state.styles.arrow), mapToStyles(Object.assign(Object.assign({}, commonStyles), {}, {
+      offsets: state.modifiersData.arrow,
+      position: 'absolute',
+      adaptive: false
+    })));
+  }
+
+  state.attributes.popper = Object.assign(Object.assign({}, state.attributes.popper), {}, {
+    'data-popper-placement': state.placement
+  });
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var computeStyles$1 = {
+  name: 'computeStyles',
+  enabled: true,
+  phase: 'beforeWrite',
+  fn: computeStyles,
+  data: {}
+};
+
+var passive = {
+  passive: true
+};
+
+function effect$1(_ref) {
+  var state = _ref.state,
+      instance = _ref.instance,
+      options = _ref.options;
+  var _options$scroll = options.scroll,
+      scroll = _options$scroll === void 0 ? true : _options$scroll,
+      _options$resize = options.resize,
+      resize = _options$resize === void 0 ? true : _options$resize;
+  var window = getWindow(state.elements.popper);
+  var scrollParents = [].concat(state.scrollParents.reference, state.scrollParents.popper);
+
+  if (scroll) {
+    scrollParents.forEach(function (scrollParent) {
+      scrollParent.addEventListener('scroll', instance.update, passive);
     });
-  } else {
-    obj[key] = value;
   }
 
-  return obj;
+  if (resize) {
+    window.addEventListener('resize', instance.update, passive);
+  }
+
+  return function () {
+    if (scroll) {
+      scrollParents.forEach(function (scrollParent) {
+        scrollParent.removeEventListener('scroll', instance.update, passive);
+      });
+    }
+
+    if (resize) {
+      window.removeEventListener('resize', instance.update, passive);
+    }
+  };
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var eventListeners = {
+  name: 'eventListeners',
+  enabled: true,
+  phase: 'write',
+  fn: function fn() {},
+  effect: effect$1,
+  data: {}
 };
 
-var _extends$1 = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
+var hash = {
+  left: 'right',
+  right: 'left',
+  bottom: 'top',
+  top: 'bottom'
 };
-
-/**
- * Given element offsets, generate an output similar to getBoundingClientRect
- * @method
- * @memberof Popper.Utils
- * @argument {Object} offsets
- * @returns {Object} ClientRect like output
- */
-function getClientRect(offsets) {
-  return _extends$1({}, offsets, {
-    right: offsets.left + offsets.width,
-    bottom: offsets.top + offsets.height
-  });
-}
-
-/**
- * Get bounding client rect of given element
- * @method
- * @memberof Popper.Utils
- * @param {HTMLElement} element
- * @return {Object} client rect
- */
-function getBoundingClientRect(element) {
-  var rect = {};
-
-  // IE10 10 FIX: Please, don't ask, the element isn't
-  // considered in DOM in some circumstances...
-  // This isn't reproducible in IE10 compatibility mode of IE11
-  try {
-    if (isIE(10)) {
-      rect = element.getBoundingClientRect();
-      var scrollTop = getScroll(element, 'top');
-      var scrollLeft = getScroll(element, 'left');
-      rect.top += scrollTop;
-      rect.left += scrollLeft;
-      rect.bottom += scrollTop;
-      rect.right += scrollLeft;
-    } else {
-      rect = element.getBoundingClientRect();
-    }
-  } catch (e) {}
-
-  var result = {
-    left: rect.left,
-    top: rect.top,
-    width: rect.right - rect.left,
-    height: rect.bottom - rect.top
-  };
-
-  // subtract scrollbar size from sizes
-  var sizes = element.nodeName === 'HTML' ? getWindowSizes(element.ownerDocument) : {};
-  var width = sizes.width || element.clientWidth || result.width;
-  var height = sizes.height || element.clientHeight || result.height;
-
-  var horizScrollbar = element.offsetWidth - width;
-  var vertScrollbar = element.offsetHeight - height;
-
-  // if an hypothetical scrollbar is detected, we must be sure it's not a `border`
-  // we make this check conditional for performance reasons
-  if (horizScrollbar || vertScrollbar) {
-    var styles = getStyleComputedProperty(element);
-    horizScrollbar -= getBordersSize(styles, 'x');
-    vertScrollbar -= getBordersSize(styles, 'y');
-
-    result.width -= horizScrollbar;
-    result.height -= vertScrollbar;
-  }
-
-  return getClientRect(result);
-}
-
-function getOffsetRectRelativeToArbitraryNode(children, parent) {
-  var fixedPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  var isIE10 = isIE(10);
-  var isHTML = parent.nodeName === 'HTML';
-  var childrenRect = getBoundingClientRect(children);
-  var parentRect = getBoundingClientRect(parent);
-  var scrollParent = getScrollParent(children);
-
-  var styles = getStyleComputedProperty(parent);
-  var borderTopWidth = parseFloat(styles.borderTopWidth);
-  var borderLeftWidth = parseFloat(styles.borderLeftWidth);
-
-  // In cases where the parent is fixed, we must ignore negative scroll in offset calc
-  if (fixedPosition && isHTML) {
-    parentRect.top = Math.max(parentRect.top, 0);
-    parentRect.left = Math.max(parentRect.left, 0);
-  }
-  var offsets = getClientRect({
-    top: childrenRect.top - parentRect.top - borderTopWidth,
-    left: childrenRect.left - parentRect.left - borderLeftWidth,
-    width: childrenRect.width,
-    height: childrenRect.height
-  });
-  offsets.marginTop = 0;
-  offsets.marginLeft = 0;
-
-  // Subtract margins of documentElement in case it's being used as parent
-  // we do this only on HTML because it's the only element that behaves
-  // differently when margins are applied to it. The margins are included in
-  // the box of the documentElement, in the other cases not.
-  if (!isIE10 && isHTML) {
-    var marginTop = parseFloat(styles.marginTop);
-    var marginLeft = parseFloat(styles.marginLeft);
-
-    offsets.top -= borderTopWidth - marginTop;
-    offsets.bottom -= borderTopWidth - marginTop;
-    offsets.left -= borderLeftWidth - marginLeft;
-    offsets.right -= borderLeftWidth - marginLeft;
-
-    // Attach marginTop and marginLeft because in some circumstances we may need them
-    offsets.marginTop = marginTop;
-    offsets.marginLeft = marginLeft;
-  }
-
-  if (isIE10 && !fixedPosition ? parent.contains(scrollParent) : parent === scrollParent && scrollParent.nodeName !== 'BODY') {
-    offsets = includeScroll(offsets, parent);
-  }
-
-  return offsets;
-}
-
-function getViewportOffsetRectRelativeToArtbitraryNode(element) {
-  var excludeScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-  var html = element.ownerDocument.documentElement;
-  var relativeOffset = getOffsetRectRelativeToArbitraryNode(element, html);
-  var width = Math.max(html.clientWidth, window.innerWidth || 0);
-  var height = Math.max(html.clientHeight, window.innerHeight || 0);
-
-  var scrollTop = !excludeScroll ? getScroll(html) : 0;
-  var scrollLeft = !excludeScroll ? getScroll(html, 'left') : 0;
-
-  var offset = {
-    top: scrollTop - relativeOffset.top + relativeOffset.marginTop,
-    left: scrollLeft - relativeOffset.left + relativeOffset.marginLeft,
-    width: width,
-    height: height
-  };
-
-  return getClientRect(offset);
-}
-
-/**
- * Check if the given element is fixed or is inside a fixed parent
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @argument {Element} customContainer
- * @returns {Boolean} answer to "isFixed?"
- */
-function isFixed(element) {
-  var nodeName = element.nodeName;
-  if (nodeName === 'BODY' || nodeName === 'HTML') {
-    return false;
-  }
-  if (getStyleComputedProperty(element, 'position') === 'fixed') {
-    return true;
-  }
-  var parentNode = getParentNode(element);
-  if (!parentNode) {
-    return false;
-  }
-  return isFixed(parentNode);
-}
-
-/**
- * Finds the first parent of an element that has a transformed property defined
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @returns {Element} first transformed parent or documentElement
- */
-
-function getFixedPositionOffsetParent(element) {
-  // This check is needed to avoid errors in case one of the elements isn't defined for any reason
-  if (!element || !element.parentElement || isIE()) {
-    return document.documentElement;
-  }
-  var el = element.parentElement;
-  while (el && getStyleComputedProperty(el, 'transform') === 'none') {
-    el = el.parentElement;
-  }
-  return el || document.documentElement;
-}
-
-/**
- * Computed the boundaries limits and return them
- * @method
- * @memberof Popper.Utils
- * @param {HTMLElement} popper
- * @param {HTMLElement} reference
- * @param {number} padding
- * @param {HTMLElement} boundariesElement - Element used to define the boundaries
- * @param {Boolean} fixedPosition - Is in fixed position mode
- * @returns {Object} Coordinates of the boundaries
- */
-function getBoundaries(popper, reference, padding, boundariesElement) {
-  var fixedPosition = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-
-  // NOTE: 1 DOM access here
-
-  var boundaries = { top: 0, left: 0 };
-  var offsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
-
-  // Handle viewport case
-  if (boundariesElement === 'viewport') {
-    boundaries = getViewportOffsetRectRelativeToArtbitraryNode(offsetParent, fixedPosition);
-  } else {
-    // Handle other cases based on DOM element used as boundaries
-    var boundariesNode = void 0;
-    if (boundariesElement === 'scrollParent') {
-      boundariesNode = getScrollParent(getParentNode(reference));
-      if (boundariesNode.nodeName === 'BODY') {
-        boundariesNode = popper.ownerDocument.documentElement;
-      }
-    } else if (boundariesElement === 'window') {
-      boundariesNode = popper.ownerDocument.documentElement;
-    } else {
-      boundariesNode = boundariesElement;
-    }
-
-    var offsets = getOffsetRectRelativeToArbitraryNode(boundariesNode, offsetParent, fixedPosition);
-
-    // In case of HTML, we need a different computation
-    if (boundariesNode.nodeName === 'HTML' && !isFixed(offsetParent)) {
-      var _getWindowSizes = getWindowSizes(popper.ownerDocument),
-          height = _getWindowSizes.height,
-          width = _getWindowSizes.width;
-
-      boundaries.top += offsets.top - offsets.marginTop;
-      boundaries.bottom = height + offsets.top;
-      boundaries.left += offsets.left - offsets.marginLeft;
-      boundaries.right = width + offsets.left;
-    } else {
-      // for all the other DOM elements, this one is good
-      boundaries = offsets;
-    }
-  }
-
-  // Add paddings
-  padding = padding || 0;
-  var isPaddingNumber = typeof padding === 'number';
-  boundaries.left += isPaddingNumber ? padding : padding.left || 0;
-  boundaries.top += isPaddingNumber ? padding : padding.top || 0;
-  boundaries.right -= isPaddingNumber ? padding : padding.right || 0;
-  boundaries.bottom -= isPaddingNumber ? padding : padding.bottom || 0;
-
-  return boundaries;
-}
-
-function getArea(_ref) {
-  var width = _ref.width,
-      height = _ref.height;
-
-  return width * height;
-}
-
-/**
- * Utility used to transform the `auto` placement to the placement with more
- * available space.
- * @method
- * @memberof Popper.Utils
- * @argument {Object} data - The data object generated by update method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function computeAutoPlacement(placement, refRect, popper, reference, boundariesElement) {
-  var padding = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-
-  if (placement.indexOf('auto') === -1) {
-    return placement;
-  }
-
-  var boundaries = getBoundaries(popper, reference, padding, boundariesElement);
-
-  var rects = {
-    top: {
-      width: boundaries.width,
-      height: refRect.top - boundaries.top
-    },
-    right: {
-      width: boundaries.right - refRect.right,
-      height: boundaries.height
-    },
-    bottom: {
-      width: boundaries.width,
-      height: boundaries.bottom - refRect.bottom
-    },
-    left: {
-      width: refRect.left - boundaries.left,
-      height: boundaries.height
-    }
-  };
-
-  var sortedAreas = Object.keys(rects).map(function (key) {
-    return _extends$1({
-      key: key
-    }, rects[key], {
-      area: getArea(rects[key])
-    });
-  }).sort(function (a, b) {
-    return b.area - a.area;
-  });
-
-  var filteredAreas = sortedAreas.filter(function (_ref2) {
-    var width = _ref2.width,
-        height = _ref2.height;
-    return width >= popper.clientWidth && height >= popper.clientHeight;
-  });
-
-  var computedPlacement = filteredAreas.length > 0 ? filteredAreas[0].key : sortedAreas[0].key;
-
-  var variation = placement.split('-')[1];
-
-  return computedPlacement + (variation ? '-' + variation : '');
-}
-
-/**
- * Get offsets to the reference element
- * @method
- * @memberof Popper.Utils
- * @param {Object} state
- * @param {Element} popper - the popper element
- * @param {Element} reference - the reference element (the popper will be relative to this)
- * @param {Element} fixedPosition - is in fixed position mode
- * @returns {Object} An object containing the offsets which will be applied to the popper
- */
-function getReferenceOffsets(state, popper, reference) {
-  var fixedPosition = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-  var commonOffsetParent = fixedPosition ? getFixedPositionOffsetParent(popper) : findCommonOffsetParent(popper, getReferenceNode(reference));
-  return getOffsetRectRelativeToArbitraryNode(reference, commonOffsetParent, fixedPosition);
-}
-
-/**
- * Get the outer sizes of the given element (offset size + margins)
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element
- * @returns {Object} object containing width and height properties
- */
-function getOuterSizes(element) {
-  var window = element.ownerDocument.defaultView;
-  var styles = window.getComputedStyle(element);
-  var x = parseFloat(styles.marginTop || 0) + parseFloat(styles.marginBottom || 0);
-  var y = parseFloat(styles.marginLeft || 0) + parseFloat(styles.marginRight || 0);
-  var result = {
-    width: element.offsetWidth + y,
-    height: element.offsetHeight + x
-  };
-  return result;
-}
-
-/**
- * Get the opposite placement of the given one
- * @method
- * @memberof Popper.Utils
- * @argument {String} placement
- * @returns {String} flipped placement
- */
 function getOppositePlacement(placement) {
-  var hash = { left: 'right', right: 'left', bottom: 'top', top: 'bottom' };
   return placement.replace(/left|right|bottom|top/g, function (matched) {
     return hash[matched];
   });
 }
 
-/**
- * Get offsets to the popper
- * @method
- * @memberof Popper.Utils
- * @param {Object} position - CSS position the Popper will get applied
- * @param {HTMLElement} popper - the popper element
- * @param {Object} referenceOffsets - the reference offsets (the popper will be relative to this)
- * @param {String} placement - one of the valid placement options
- * @returns {Object} popperOffsets - An object containing the offsets which will be applied to the popper
- */
-function getPopperOffsets(popper, referenceOffsets, placement) {
-  placement = placement.split('-')[0];
+var hash$1 = {
+  start: 'end',
+  end: 'start'
+};
+function getOppositeVariationPlacement(placement) {
+  return placement.replace(/start|end/g, function (matched) {
+    return hash$1[matched];
+  });
+}
 
-  // Get popper node sizes
-  var popperRect = getOuterSizes(popper);
-
-  // Add position, width and height to our offsets object
-  var popperOffsets = {
-    width: popperRect.width,
-    height: popperRect.height
+function getBoundingClientRect(element) {
+  var rect = element.getBoundingClientRect();
+  return {
+    width: rect.width,
+    height: rect.height,
+    top: rect.top,
+    right: rect.right,
+    bottom: rect.bottom,
+    left: rect.left,
+    x: rect.left,
+    y: rect.top
   };
-
-  // depending by the popper placement we have to compute its offsets slightly differently
-  var isHoriz = ['right', 'left'].indexOf(placement) !== -1;
-  var mainSide = isHoriz ? 'top' : 'left';
-  var secondarySide = isHoriz ? 'left' : 'top';
-  var measurement = isHoriz ? 'height' : 'width';
-  var secondaryMeasurement = !isHoriz ? 'height' : 'width';
-
-  popperOffsets[mainSide] = referenceOffsets[mainSide] + referenceOffsets[measurement] / 2 - popperRect[measurement] / 2;
-  if (placement === secondarySide) {
-    popperOffsets[secondarySide] = referenceOffsets[secondarySide] - popperRect[secondaryMeasurement];
-  } else {
-    popperOffsets[secondarySide] = referenceOffsets[getOppositePlacement(secondarySide)];
-  }
-
-  return popperOffsets;
 }
 
-/**
- * Mimics the `find` method of Array
- * @method
- * @memberof Popper.Utils
- * @argument {Array} arr
- * @argument prop
- * @argument value
- * @returns index or -1
- */
-function find(arr, check) {
-  // use native find if supported
-  if (Array.prototype.find) {
-    return arr.find(check);
-  }
-
-  // use `filter` to obtain the same behavior of `find`
-  return arr.filter(check)[0];
-}
-
-/**
- * Return the index of the matching object
- * @method
- * @memberof Popper.Utils
- * @argument {Array} arr
- * @argument prop
- * @argument value
- * @returns index or -1
- */
-function findIndex(arr, prop, value) {
-  // use native findIndex if supported
-  if (Array.prototype.findIndex) {
-    return arr.findIndex(function (cur) {
-      return cur[prop] === value;
-    });
-  }
-
-  // use `find` + `indexOf` if `findIndex` isn't supported
-  var match = find(arr, function (obj) {
-    return obj[prop] === value;
-  });
-  return arr.indexOf(match);
-}
-
-/**
- * Loop trough the list of modifiers and run them in order,
- * each of them will then edit the data object.
- * @method
- * @memberof Popper.Utils
- * @param {dataObject} data
- * @param {Array} modifiers
- * @param {String} ends - Optional modifier name used as stopper
- * @returns {dataObject}
- */
-function runModifiers(modifiers, data, ends) {
-  var modifiersToRun = ends === undefined ? modifiers : modifiers.slice(0, findIndex(modifiers, 'name', ends));
-
-  modifiersToRun.forEach(function (modifier) {
-    if (modifier['function']) {
-      // eslint-disable-line dot-notation
-      console.warn('`modifier.function` is deprecated, use `modifier.fn`!');
-    }
-    var fn = modifier['function'] || modifier.fn; // eslint-disable-line dot-notation
-    if (modifier.enabled && isFunction$1(fn)) {
-      // Add properties to offsets to make them a complete clientRect object
-      // we do this before each modifier to make sure the previous one doesn't
-      // mess with these values
-      data.offsets.popper = getClientRect(data.offsets.popper);
-      data.offsets.reference = getClientRect(data.offsets.reference);
-
-      data = fn(data, modifier);
-    }
-  });
-
-  return data;
-}
-
-/**
- * Updates the position of the popper, computing the new offsets and applying
- * the new style.<br />
- * Prefer `scheduleUpdate` over `update` because of performance reasons.
- * @method
- * @memberof Popper
- */
-function update() {
-  // if popper is destroyed, don't perform any further update
-  if (this.state.isDestroyed) {
-    return;
-  }
-
-  var data = {
-    instance: this,
-    styles: {},
-    arrowStyles: {},
-    attributes: {},
-    flipped: false,
-    offsets: {}
+function getWindowScroll(node) {
+  var win = getWindow(node);
+  var scrollLeft = win.pageXOffset;
+  var scrollTop = win.pageYOffset;
+  return {
+    scrollLeft: scrollLeft,
+    scrollTop: scrollTop
   };
-
-  // compute reference element offsets
-  data.offsets.reference = getReferenceOffsets(this.state, this.popper, this.reference, this.options.positionFixed);
-
-  // compute auto placement, store placement inside the data object,
-  // modifiers will be able to edit `placement` if needed
-  // and refer to originalPlacement to know the original value
-  data.placement = computeAutoPlacement(this.options.placement, data.offsets.reference, this.popper, this.reference, this.options.modifiers.flip.boundariesElement, this.options.modifiers.flip.padding);
-
-  // store the computed placement inside `originalPlacement`
-  data.originalPlacement = data.placement;
-
-  data.positionFixed = this.options.positionFixed;
-
-  // compute the popper offsets
-  data.offsets.popper = getPopperOffsets(this.popper, data.offsets.reference, data.placement);
-
-  data.offsets.popper.position = this.options.positionFixed ? 'fixed' : 'absolute';
-
-  // run the modifiers
-  data = runModifiers(this.modifiers, data);
-
-  // the first `update` will call `onCreate` callback
-  // the other ones will call `onUpdate` callback
-  if (!this.state.isCreated) {
-    this.state.isCreated = true;
-    this.options.onCreate(data);
-  } else {
-    this.options.onUpdate(data);
-  }
 }
 
-/**
- * Helper used to know if the given modifier is enabled.
- * @method
- * @memberof Popper.Utils
- * @returns {Boolean}
- */
-function isModifierEnabled(modifiers, modifierName) {
-  return modifiers.some(function (_ref) {
-    var name = _ref.name,
-        enabled = _ref.enabled;
-    return enabled && name === modifierName;
-  });
+function getWindowScrollBarX(element) {
+  // If <html> has a CSS width greater than the viewport, then this will be
+  // incorrect for RTL.
+  // Popper 1 is broken in this case and never had a bug report so let's assume
+  // it's not an issue. I don't think anyone ever specifies width on <html>
+  // anyway.
+  // Browsers where the left scrollbar doesn't cause an issue report `0` for
+  // this (e.g. Edge 2019, IE11, Safari)
+  return getBoundingClientRect(getDocumentElement(element)).left + getWindowScroll(element).scrollLeft;
 }
 
-/**
- * Get the prefixed supported property name
- * @method
- * @memberof Popper.Utils
- * @argument {String} property (camelCase)
- * @returns {String} prefixed property (camelCase or PascalCase, depending on the vendor prefix)
- */
-function getSupportedPropertyName(property) {
-  var prefixes = [false, 'ms', 'Webkit', 'Moz', 'O'];
-  var upperProp = property.charAt(0).toUpperCase() + property.slice(1);
+function getViewportRect(element) {
+  var win = getWindow(element);
+  var html = getDocumentElement(element);
+  var visualViewport = win.visualViewport;
+  var width = html.clientWidth;
+  var height = html.clientHeight;
+  var x = 0;
+  var y = 0; // NB: This isn't supported on iOS <= 12. If the keyboard is open, the popper
+  // can be obscured underneath it.
+  // Also, `html.clientHeight` adds the bottom bar height in Safari iOS, even
+  // if it isn't open, so if this isn't available, the popper will be detected
+  // to overflow the bottom of the screen too early.
 
-  for (var i = 0; i < prefixes.length; i++) {
-    var prefix = prefixes[i];
-    var toCheck = prefix ? '' + prefix + upperProp : property;
-    if (typeof document.body.style[toCheck] !== 'undefined') {
-      return toCheck;
+  if (visualViewport) {
+    width = visualViewport.width;
+    height = visualViewport.height; // Uses Layout Viewport (like Chrome; Safari does not currently)
+    // In Chrome, it returns a value very close to 0 (+/-) but contains rounding
+    // errors due to floating point numbers, so we need to check precision.
+    // Safari returns a number <= 0, usually < -1 when pinch-zoomed
+    // Feature detection fails in mobile emulation mode in Chrome.
+    // Math.abs(win.innerWidth / visualViewport.scale - visualViewport.width) <
+    // 0.001
+    // Fallback here: "Not Safari" userAgent
+
+    if (!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+      x = visualViewport.offsetLeft;
+      y = visualViewport.offsetTop;
     }
   }
-  return null;
-}
-
-/**
- * Destroys the popper.
- * @method
- * @memberof Popper
- */
-function destroy() {
-  this.state.isDestroyed = true;
-
-  // touch DOM only if `applyStyle` modifier is enabled
-  if (isModifierEnabled(this.modifiers, 'applyStyle')) {
-    this.popper.removeAttribute('x-placement');
-    this.popper.style.position = '';
-    this.popper.style.top = '';
-    this.popper.style.left = '';
-    this.popper.style.right = '';
-    this.popper.style.bottom = '';
-    this.popper.style.willChange = '';
-    this.popper.style[getSupportedPropertyName('transform')] = '';
-  }
-
-  this.disableEventListeners();
-
-  // remove the popper if user explicitly asked for the deletion on destroy
-  // do not use `remove` because IE11 doesn't support it
-  if (this.options.removeOnDestroy) {
-    this.popper.parentNode.removeChild(this.popper);
-  }
-  return this;
-}
-
-/**
- * Get the window associated with the element
- * @argument {Element} element
- * @returns {Window}
- */
-function getWindow(element) {
-  var ownerDocument = element.ownerDocument;
-  return ownerDocument ? ownerDocument.defaultView : window;
-}
-
-function attachToScrollParents(scrollParent, event, callback, scrollParents) {
-  var isBody = scrollParent.nodeName === 'BODY';
-  var target = isBody ? scrollParent.ownerDocument.defaultView : scrollParent;
-  target.addEventListener(event, callback, { passive: true });
-
-  if (!isBody) {
-    attachToScrollParents(getScrollParent(target.parentNode), event, callback, scrollParents);
-  }
-  scrollParents.push(target);
-}
-
-/**
- * Setup needed event listeners used to update the popper position
- * @method
- * @memberof Popper.Utils
- * @private
- */
-function setupEventListeners(reference, options, state, updateBound) {
-  // Resize event listener on window
-  state.updateBound = updateBound;
-  getWindow(reference).addEventListener('resize', state.updateBound, { passive: true });
-
-  // Scroll event listener on scroll parents
-  var scrollElement = getScrollParent(reference);
-  attachToScrollParents(scrollElement, 'scroll', state.updateBound, state.scrollParents);
-  state.scrollElement = scrollElement;
-  state.eventsEnabled = true;
-
-  return state;
-}
-
-/**
- * It will add resize/scroll events and start recalculating
- * position of the popper element when they are triggered.
- * @method
- * @memberof Popper
- */
-function enableEventListeners() {
-  if (!this.state.eventsEnabled) {
-    this.state = setupEventListeners(this.reference, this.options, this.state, this.scheduleUpdate);
-  }
-}
-
-/**
- * Remove event listeners used to update the popper position
- * @method
- * @memberof Popper.Utils
- * @private
- */
-function removeEventListeners(reference, state) {
-  // Remove resize event listener on window
-  getWindow(reference).removeEventListener('resize', state.updateBound);
-
-  // Remove scroll event listener on scroll parents
-  state.scrollParents.forEach(function (target) {
-    target.removeEventListener('scroll', state.updateBound);
-  });
-
-  // Reset state
-  state.updateBound = null;
-  state.scrollParents = [];
-  state.scrollElement = null;
-  state.eventsEnabled = false;
-  return state;
-}
-
-/**
- * It will remove resize/scroll events and won't recalculate popper position
- * when they are triggered. It also won't trigger `onUpdate` callback anymore,
- * unless you call `update` method manually.
- * @method
- * @memberof Popper
- */
-function disableEventListeners() {
-  if (this.state.eventsEnabled) {
-    cancelAnimationFrame(this.scheduleUpdate);
-    this.state = removeEventListeners(this.reference, this.state);
-  }
-}
-
-/**
- * Tells if a given input is a number
- * @method
- * @memberof Popper.Utils
- * @param {*} input to check
- * @return {Boolean}
- */
-function isNumeric(n) {
-  return n !== '' && !isNaN(parseFloat(n)) && isFinite(n);
-}
-
-/**
- * Set the style to the given popper
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element - Element to apply the style to
- * @argument {Object} styles
- * Object with a list of properties and values which will be applied to the element
- */
-function setStyles(element, styles) {
-  Object.keys(styles).forEach(function (prop) {
-    var unit = '';
-    // add unit if the value is numeric and is one of the following
-    if (['width', 'height', 'top', 'right', 'bottom', 'left'].indexOf(prop) !== -1 && isNumeric(styles[prop])) {
-      unit = 'px';
-    }
-    element.style[prop] = styles[prop] + unit;
-  });
-}
-
-/**
- * Set the attributes to the given popper
- * @method
- * @memberof Popper.Utils
- * @argument {Element} element - Element to apply the attributes to
- * @argument {Object} styles
- * Object with a list of properties and values which will be applied to the element
- */
-function setAttributes(element, attributes) {
-  Object.keys(attributes).forEach(function (prop) {
-    var value = attributes[prop];
-    if (value !== false) {
-      element.setAttribute(prop, attributes[prop]);
-    } else {
-      element.removeAttribute(prop);
-    }
-  });
-}
-
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by `update` method
- * @argument {Object} data.styles - List of style properties - values to apply to popper element
- * @argument {Object} data.attributes - List of attribute properties - values to apply to popper element
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The same data object
- */
-function applyStyle(data) {
-  // any property present in `data.styles` will be applied to the popper,
-  // in this way we can make the 3rd party modifiers add custom styles to it
-  // Be aware, modifiers could override the properties defined in the previous
-  // lines of this modifier!
-  setStyles(data.instance.popper, data.styles);
-
-  // any property present in `data.attributes` will be applied to the popper,
-  // they will be set as HTML attributes of the element
-  setAttributes(data.instance.popper, data.attributes);
-
-  // if arrowElement is defined and arrowStyles has some properties
-  if (data.arrowElement && Object.keys(data.arrowStyles).length) {
-    setStyles(data.arrowElement, data.arrowStyles);
-  }
-
-  return data;
-}
-
-/**
- * Set the x-placement attribute before everything else because it could be used
- * to add margins to the popper margins needs to be calculated to get the
- * correct popper offsets.
- * @method
- * @memberof Popper.modifiers
- * @param {HTMLElement} reference - The reference element used to position the popper
- * @param {HTMLElement} popper - The HTML element used as popper
- * @param {Object} options - Popper.js options
- */
-function applyStyleOnLoad(reference, popper, options, modifierOptions, state) {
-  // compute reference element offsets
-  var referenceOffsets = getReferenceOffsets(state, popper, reference, options.positionFixed);
-
-  // compute auto placement, store placement inside the data object,
-  // modifiers will be able to edit `placement` if needed
-  // and refer to originalPlacement to know the original value
-  var placement = computeAutoPlacement(options.placement, referenceOffsets, popper, reference, options.modifiers.flip.boundariesElement, options.modifiers.flip.padding);
-
-  popper.setAttribute('x-placement', placement);
-
-  // Apply `position` to popper before anything else because
-  // without the position applied we can't guarantee correct computations
-  setStyles(popper, { position: options.positionFixed ? 'fixed' : 'absolute' });
-
-  return options;
-}
-
-/**
- * @function
- * @memberof Popper.Utils
- * @argument {Object} data - The data object generated by `update` method
- * @argument {Boolean} shouldRound - If the offsets should be rounded at all
- * @returns {Object} The popper's position offsets rounded
- *
- * The tale of pixel-perfect positioning. It's still not 100% perfect, but as
- * good as it can be within reason.
- * Discussion here: https://github.com/FezVrasta/popper.js/pull/715
- *
- * Low DPI screens cause a popper to be blurry if not using full pixels (Safari
- * as well on High DPI screens).
- *
- * Firefox prefers no rounding for positioning and does not have blurriness on
- * high DPI screens.
- *
- * Only horizontal placement and left/right values need to be considered.
- */
-function getRoundedOffsets(data, shouldRound) {
-  var _data$offsets = data.offsets,
-      popper = _data$offsets.popper,
-      reference = _data$offsets.reference;
-  var round = Math.round,
-      floor = Math.floor;
-
-  var noRound = function noRound(v) {
-    return v;
-  };
-
-  var referenceWidth = round(reference.width);
-  var popperWidth = round(popper.width);
-
-  var isVertical = ['left', 'right'].indexOf(data.placement) !== -1;
-  var isVariation = data.placement.indexOf('-') !== -1;
-  var sameWidthParity = referenceWidth % 2 === popperWidth % 2;
-  var bothOddWidth = referenceWidth % 2 === 1 && popperWidth % 2 === 1;
-
-  var horizontalToInteger = !shouldRound ? noRound : isVertical || isVariation || sameWidthParity ? round : floor;
-  var verticalToInteger = !shouldRound ? noRound : round;
 
   return {
-    left: horizontalToInteger(bothOddWidth && !isVariation && shouldRound ? popper.left - 1 : popper.left),
-    top: verticalToInteger(popper.top),
-    bottom: verticalToInteger(popper.bottom),
-    right: horizontalToInteger(popper.right)
+    width: width,
+    height: height,
+    x: x + getWindowScrollBarX(element),
+    y: y
   };
 }
 
-var isFirefox = isBrowser && /Firefox/i.test(navigator.userAgent);
+// of the `<html>` and `<body>` rect bounds if horizontally scrollable
 
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by `update` method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function computeStyle(data, options) {
-  var x = options.x,
-      y = options.y;
-  var popper = data.offsets.popper;
+function getDocumentRect(element) {
+  var html = getDocumentElement(element);
+  var winScroll = getWindowScroll(element);
+  var body = element.ownerDocument.body;
+  var width = Math.max(html.scrollWidth, html.clientWidth, body ? body.scrollWidth : 0, body ? body.clientWidth : 0);
+  var height = Math.max(html.scrollHeight, html.clientHeight, body ? body.scrollHeight : 0, body ? body.clientHeight : 0);
+  var x = -winScroll.scrollLeft + getWindowScrollBarX(element);
+  var y = -winScroll.scrollTop;
 
-  // Remove this legacy support in Popper.js v2
-
-  var legacyGpuAccelerationOption = find(data.instance.modifiers, function (modifier) {
-    return modifier.name === 'applyStyle';
-  }).gpuAcceleration;
-  if (legacyGpuAccelerationOption !== undefined) {
-    console.warn('WARNING: `gpuAcceleration` option moved to `computeStyle` modifier and will not be supported in future versions of Popper.js!');
+  if (getComputedStyle$2(body || html).direction === 'rtl') {
+    x += Math.max(html.clientWidth, body ? body.clientWidth : 0) - width;
   }
-  var gpuAcceleration = legacyGpuAccelerationOption !== undefined ? legacyGpuAccelerationOption : options.gpuAcceleration;
 
-  var offsetParent = getOffsetParent(data.instance.popper);
-  var offsetParentRect = getBoundingClientRect(offsetParent);
-
-  // Styles
-  var styles = {
-    position: popper.position
+  return {
+    width: width,
+    height: height,
+    x: x,
+    y: y
   };
-
-  var offsets = getRoundedOffsets(data, window.devicePixelRatio < 2 || !isFirefox);
-
-  var sideA = x === 'bottom' ? 'top' : 'bottom';
-  var sideB = y === 'right' ? 'left' : 'right';
-
-  // if gpuAcceleration is set to `true` and transform is supported,
-  //  we use `translate3d` to apply the position to the popper we
-  // automatically use the supported prefixed version if needed
-  var prefixedProperty = getSupportedPropertyName('transform');
-
-  // now, let's make a step back and look at this code closely (wtf?)
-  // If the content of the popper grows once it's been positioned, it
-  // may happen that the popper gets misplaced because of the new content
-  // overflowing its reference element
-  // To avoid this problem, we provide two options (x and y), which allow
-  // the consumer to define the offset origin.
-  // If we position a popper on top of a reference element, we can set
-  // `x` to `top` to make the popper grow towards its top instead of
-  // its bottom.
-  var left = void 0,
-      top = void 0;
-  if (sideA === 'bottom') {
-    // when offsetParent is <html> the positioning is relative to the bottom of the screen (excluding the scrollbar)
-    // and not the bottom of the html element
-    if (offsetParent.nodeName === 'HTML') {
-      top = -offsetParent.clientHeight + offsets.bottom;
-    } else {
-      top = -offsetParentRect.height + offsets.bottom;
-    }
-  } else {
-    top = offsets.top;
-  }
-  if (sideB === 'right') {
-    if (offsetParent.nodeName === 'HTML') {
-      left = -offsetParent.clientWidth + offsets.right;
-    } else {
-      left = -offsetParentRect.width + offsets.right;
-    }
-  } else {
-    left = offsets.left;
-  }
-  if (gpuAcceleration && prefixedProperty) {
-    styles[prefixedProperty] = 'translate3d(' + left + 'px, ' + top + 'px, 0)';
-    styles[sideA] = 0;
-    styles[sideB] = 0;
-    styles.willChange = 'transform';
-  } else {
-    // othwerise, we use the standard `top`, `left`, `bottom` and `right` properties
-    var invertTop = sideA === 'bottom' ? -1 : 1;
-    var invertLeft = sideB === 'right' ? -1 : 1;
-    styles[sideA] = top * invertTop;
-    styles[sideB] = left * invertLeft;
-    styles.willChange = sideA + ', ' + sideB;
-  }
-
-  // Attributes
-  var attributes = {
-    'x-placement': data.placement
-  };
-
-  // Update `data` attributes, styles and arrowStyles
-  data.attributes = _extends$1({}, attributes, data.attributes);
-  data.styles = _extends$1({}, styles, data.styles);
-  data.arrowStyles = _extends$1({}, data.offsets.arrow, data.arrowStyles);
-
-  return data;
 }
 
-/**
- * Helper used to know if the given modifier depends from another one.<br />
- * It checks if the needed modifier is listed and enabled.
- * @method
- * @memberof Popper.Utils
- * @param {Array} modifiers - list of modifiers
- * @param {String} requestingName - name of requesting modifier
- * @param {String} requestedName - name of requested modifier
- * @returns {Boolean}
- */
-function isModifierRequired(modifiers, requestingName, requestedName) {
-  var requesting = find(modifiers, function (_ref) {
-    var name = _ref.name;
-    return name === requestingName;
+function isScrollParent(element) {
+  // Firefox wants us to check `-x` and `-y` variations as well
+  var _getComputedStyle = getComputedStyle$2(element),
+      overflow = _getComputedStyle.overflow,
+      overflowX = _getComputedStyle.overflowX,
+      overflowY = _getComputedStyle.overflowY;
+
+  return /auto|scroll|overlay|hidden/.test(overflow + overflowY + overflowX);
+}
+
+function getScrollParent(node) {
+  if (['html', 'body', '#document'].indexOf(getNodeName(node)) >= 0) {
+    // $FlowFixMe: assume body is always available
+    return node.ownerDocument.body;
+  }
+
+  if (isHTMLElement(node) && isScrollParent(node)) {
+    return node;
+  }
+
+  return getScrollParent(getParentNode(node));
+}
+
+/*
+given a DOM element, return the list of all scroll parents, up the list of ancesors
+until we get to the top window object. This list is what we attach scroll listeners
+to, because if any of these parent elements scroll, we'll need to re-calculate the 
+reference element's position.
+*/
+
+function listScrollParents(element, list) {
+  if (list === void 0) {
+    list = [];
+  }
+
+  var scrollParent = getScrollParent(element);
+  var isBody = getNodeName(scrollParent) === 'body';
+  var win = getWindow(scrollParent);
+  var target = isBody ? [win].concat(win.visualViewport || [], isScrollParent(scrollParent) ? scrollParent : []) : scrollParent;
+  var updatedList = list.concat(target);
+  return isBody ? updatedList : // $FlowFixMe: isBody tells us target will be an HTMLElement here
+  updatedList.concat(listScrollParents(getParentNode(target)));
+}
+
+function rectToClientRect(rect) {
+  return Object.assign(Object.assign({}, rect), {}, {
+    left: rect.x,
+    top: rect.y,
+    right: rect.x + rect.width,
+    bottom: rect.y + rect.height
   });
+}
 
-  var isRequired = !!requesting && modifiers.some(function (modifier) {
-    return modifier.name === requestedName && modifier.enabled && modifier.order < requesting.order;
+function getInnerBoundingClientRect(element) {
+  var rect = getBoundingClientRect(element);
+  rect.top = rect.top + element.clientTop;
+  rect.left = rect.left + element.clientLeft;
+  rect.bottom = rect.top + element.clientHeight;
+  rect.right = rect.left + element.clientWidth;
+  rect.width = element.clientWidth;
+  rect.height = element.clientHeight;
+  rect.x = rect.left;
+  rect.y = rect.top;
+  return rect;
+}
+
+function getClientRectFromMixedType(element, clippingParent) {
+  return clippingParent === viewport ? rectToClientRect(getViewportRect(element)) : isHTMLElement(clippingParent) ? getInnerBoundingClientRect(clippingParent) : rectToClientRect(getDocumentRect(getDocumentElement(element)));
+} // A "clipping parent" is an overflowable container with the characteristic of
+// clipping (or hiding) overflowing elements with a position different from
+// `initial`
+
+
+function getClippingParents(element) {
+  var clippingParents = listScrollParents(element);
+  var canEscapeClipping = ['absolute', 'fixed'].indexOf(getComputedStyle$2(element).position) >= 0;
+  var clipperElement = canEscapeClipping && isHTMLElement(element) ? getOffsetParent(element) : element;
+
+  if (!isElement(clipperElement)) {
+    return [];
+  } // $FlowFixMe: https://github.com/facebook/flow/issues/1414
+
+
+  return clippingParents.filter(function (clippingParent) {
+    return isElement(clippingParent) && contains(clippingParent, clipperElement);
   });
+} // Gets the maximum area that the element is visible in due to any number of
+// clipping parents
 
-  if (!isRequired) {
-    var _requesting = '`' + requestingName + '`';
-    var requested = '`' + requestedName + '`';
-    console.warn(requested + ' modifier is required by ' + _requesting + ' modifier in order to work, be sure to include it before ' + _requesting + '!');
-  }
-  return isRequired;
+
+function getClippingRect(element, boundary, rootBoundary) {
+  var mainClippingParents = boundary === 'clippingParents' ? getClippingParents(element) : [].concat(boundary);
+  var clippingParents = [].concat(mainClippingParents, [rootBoundary]);
+  var firstClippingParent = clippingParents[0];
+  var clippingRect = clippingParents.reduce(function (accRect, clippingParent) {
+    var rect = getClientRectFromMixedType(element, clippingParent);
+    accRect.top = Math.max(rect.top, accRect.top);
+    accRect.right = Math.min(rect.right, accRect.right);
+    accRect.bottom = Math.min(rect.bottom, accRect.bottom);
+    accRect.left = Math.max(rect.left, accRect.left);
+    return accRect;
+  }, getClientRectFromMixedType(element, firstClippingParent));
+  clippingRect.width = clippingRect.right - clippingRect.left;
+  clippingRect.height = clippingRect.bottom - clippingRect.top;
+  clippingRect.x = clippingRect.left;
+  clippingRect.y = clippingRect.top;
+  return clippingRect;
 }
 
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by update method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function arrow(data, options) {
-  var _data$offsets$arrow;
-
-  // arrow depends on keepTogether in order to work
-  if (!isModifierRequired(data.instance.modifiers, 'arrow', 'keepTogether')) {
-    return data;
-  }
-
-  var arrowElement = options.element;
-
-  // if arrowElement is a string, suppose it's a CSS selector
-  if (typeof arrowElement === 'string') {
-    arrowElement = data.instance.popper.querySelector(arrowElement);
-
-    // if arrowElement is not found, don't run the modifier
-    if (!arrowElement) {
-      return data;
-    }
-  } else {
-    // if the arrowElement isn't a query selector we must check that the
-    // provided DOM node is child of its popper node
-    if (!data.instance.popper.contains(arrowElement)) {
-      console.warn('WARNING: `arrow.element` must be child of its popper element!');
-      return data;
-    }
-  }
-
-  var placement = data.placement.split('-')[0];
-  var _data$offsets = data.offsets,
-      popper = _data$offsets.popper,
-      reference = _data$offsets.reference;
-
-  var isVertical = ['left', 'right'].indexOf(placement) !== -1;
-
-  var len = isVertical ? 'height' : 'width';
-  var sideCapitalized = isVertical ? 'Top' : 'Left';
-  var side = sideCapitalized.toLowerCase();
-  var altSide = isVertical ? 'left' : 'top';
-  var opSide = isVertical ? 'bottom' : 'right';
-  var arrowElementSize = getOuterSizes(arrowElement)[len];
-
-  //
-  // extends keepTogether behavior making sure the popper and its
-  // reference have enough pixels in conjunction
-  //
-
-  // top/left side
-  if (reference[opSide] - arrowElementSize < popper[side]) {
-    data.offsets.popper[side] -= popper[side] - (reference[opSide] - arrowElementSize);
-  }
-  // bottom/right side
-  if (reference[side] + arrowElementSize > popper[opSide]) {
-    data.offsets.popper[side] += reference[side] + arrowElementSize - popper[opSide];
-  }
-  data.offsets.popper = getClientRect(data.offsets.popper);
-
-  // compute center of the popper
-  var center = reference[side] + reference[len] / 2 - arrowElementSize / 2;
-
-  // Compute the sideValue using the updated popper offsets
-  // take popper margin in account because we don't have this info available
-  var css = getStyleComputedProperty(data.instance.popper);
-  var popperMarginSide = parseFloat(css['margin' + sideCapitalized]);
-  var popperBorderSide = parseFloat(css['border' + sideCapitalized + 'Width']);
-  var sideValue = center - data.offsets.popper[side] - popperMarginSide - popperBorderSide;
-
-  // prevent arrowElement from being placed not contiguously to its popper
-  sideValue = Math.max(Math.min(popper[len] - arrowElementSize, sideValue), 0);
-
-  data.arrowElement = arrowElement;
-  data.offsets.arrow = (_data$offsets$arrow = {}, defineProperty$2(_data$offsets$arrow, side, Math.round(sideValue)), defineProperty$2(_data$offsets$arrow, altSide, ''), _data$offsets$arrow);
-
-  return data;
+function getVariation(placement) {
+  return placement.split('-')[1];
 }
 
-/**
- * Get the opposite placement variation of the given one
- * @method
- * @memberof Popper.Utils
- * @argument {String} placement variation
- * @returns {String} flipped placement variation
- */
-function getOppositeVariation(variation) {
-  if (variation === 'end') {
-    return 'start';
-  } else if (variation === 'start') {
-    return 'end';
-  }
-  return variation;
-}
+function computeOffsets(_ref) {
+  var reference = _ref.reference,
+      element = _ref.element,
+      placement = _ref.placement;
+  var basePlacement = placement ? getBasePlacement(placement) : null;
+  var variation = placement ? getVariation(placement) : null;
+  var commonX = reference.x + reference.width / 2 - element.width / 2;
+  var commonY = reference.y + reference.height / 2 - element.height / 2;
+  var offsets;
 
-/**
- * List of accepted placements to use as values of the `placement` option.<br />
- * Valid placements are:
- * - `auto`
- * - `top`
- * - `right`
- * - `bottom`
- * - `left`
- *
- * Each placement can have a variation from this list:
- * - `-start`
- * - `-end`
- *
- * Variations are interpreted easily if you think of them as the left to right
- * written languages. Horizontally (`top` and `bottom`), `start` is left and `end`
- * is right.<br />
- * Vertically (`left` and `right`), `start` is top and `end` is bottom.
- *
- * Some valid examples are:
- * - `top-end` (on top of reference, right aligned)
- * - `right-start` (on right of reference, top aligned)
- * - `bottom` (on bottom, centered)
- * - `auto-end` (on the side with more space available, alignment depends by placement)
- *
- * @static
- * @type {Array}
- * @enum {String}
- * @readonly
- * @method placements
- * @memberof Popper
- */
-var placements = ['auto-start', 'auto', 'auto-end', 'top-start', 'top', 'top-end', 'right-start', 'right', 'right-end', 'bottom-end', 'bottom', 'bottom-start', 'left-end', 'left', 'left-start'];
-
-// Get rid of `auto` `auto-start` and `auto-end`
-var validPlacements = placements.slice(3);
-
-/**
- * Given an initial placement, returns all the subsequent placements
- * clockwise (or counter-clockwise).
- *
- * @method
- * @memberof Popper.Utils
- * @argument {String} placement - A valid placement (it accepts variations)
- * @argument {Boolean} counter - Set to true to walk the placements counterclockwise
- * @returns {Array} placements including their variations
- */
-function clockwise(placement) {
-  var counter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-  var index = validPlacements.indexOf(placement);
-  var arr = validPlacements.slice(index + 1).concat(validPlacements.slice(0, index));
-  return counter ? arr.reverse() : arr;
-}
-
-var BEHAVIORS = {
-  FLIP: 'flip',
-  CLOCKWISE: 'clockwise',
-  COUNTERCLOCKWISE: 'counterclockwise'
-};
-
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by update method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function flip(data, options) {
-  // if `inner` modifier is enabled, we can't use the `flip` modifier
-  if (isModifierEnabled(data.instance.modifiers, 'inner')) {
-    return data;
-  }
-
-  if (data.flipped && data.placement === data.originalPlacement) {
-    // seems like flip is trying to loop, probably there's not enough space on any of the flippable sides
-    return data;
-  }
-
-  var boundaries = getBoundaries(data.instance.popper, data.instance.reference, options.padding, options.boundariesElement, data.positionFixed);
-
-  var placement = data.placement.split('-')[0];
-  var placementOpposite = getOppositePlacement(placement);
-  var variation = data.placement.split('-')[1] || '';
-
-  var flipOrder = [];
-
-  switch (options.behavior) {
-    case BEHAVIORS.FLIP:
-      flipOrder = [placement, placementOpposite];
+  switch (basePlacement) {
+    case top:
+      offsets = {
+        x: commonX,
+        y: reference.y - element.height
+      };
       break;
-    case BEHAVIORS.CLOCKWISE:
-      flipOrder = clockwise(placement);
+
+    case bottom:
+      offsets = {
+        x: commonX,
+        y: reference.y + reference.height
+      };
       break;
-    case BEHAVIORS.COUNTERCLOCKWISE:
-      flipOrder = clockwise(placement, true);
+
+    case right:
+      offsets = {
+        x: reference.x + reference.width,
+        y: commonY
+      };
       break;
+
+    case left:
+      offsets = {
+        x: reference.x - element.width,
+        y: commonY
+      };
+      break;
+
     default:
-      flipOrder = options.behavior;
+      offsets = {
+        x: reference.x,
+        y: reference.y
+      };
   }
 
-  flipOrder.forEach(function (step, index) {
-    if (placement !== step || flipOrder.length === index + 1) {
-      return data;
-    }
+  var mainAxis = basePlacement ? getMainAxisFromPlacement(basePlacement) : null;
 
-    placement = data.placement.split('-')[0];
-    placementOpposite = getOppositePlacement(placement);
+  if (mainAxis != null) {
+    var len = mainAxis === 'y' ? 'height' : 'width';
 
-    var popperOffsets = data.offsets.popper;
-    var refOffsets = data.offsets.reference;
-
-    // using floor because the reference offsets may contain decimals we are not going to consider here
-    var floor = Math.floor;
-    var overlapsRef = placement === 'left' && floor(popperOffsets.right) > floor(refOffsets.left) || placement === 'right' && floor(popperOffsets.left) < floor(refOffsets.right) || placement === 'top' && floor(popperOffsets.bottom) > floor(refOffsets.top) || placement === 'bottom' && floor(popperOffsets.top) < floor(refOffsets.bottom);
-
-    var overflowsLeft = floor(popperOffsets.left) < floor(boundaries.left);
-    var overflowsRight = floor(popperOffsets.right) > floor(boundaries.right);
-    var overflowsTop = floor(popperOffsets.top) < floor(boundaries.top);
-    var overflowsBottom = floor(popperOffsets.bottom) > floor(boundaries.bottom);
-
-    var overflowsBoundaries = placement === 'left' && overflowsLeft || placement === 'right' && overflowsRight || placement === 'top' && overflowsTop || placement === 'bottom' && overflowsBottom;
-
-    // flip the variation if required
-    var isVertical = ['top', 'bottom'].indexOf(placement) !== -1;
-
-    // flips variation if reference element overflows boundaries
-    var flippedVariationByRef = !!options.flipVariations && (isVertical && variation === 'start' && overflowsLeft || isVertical && variation === 'end' && overflowsRight || !isVertical && variation === 'start' && overflowsTop || !isVertical && variation === 'end' && overflowsBottom);
-
-    // flips variation if popper content overflows boundaries
-    var flippedVariationByContent = !!options.flipVariationsByContent && (isVertical && variation === 'start' && overflowsRight || isVertical && variation === 'end' && overflowsLeft || !isVertical && variation === 'start' && overflowsBottom || !isVertical && variation === 'end' && overflowsTop);
-
-    var flippedVariation = flippedVariationByRef || flippedVariationByContent;
-
-    if (overlapsRef || overflowsBoundaries || flippedVariation) {
-      // this boolean to detect any flip loop
-      data.flipped = true;
-
-      if (overlapsRef || overflowsBoundaries) {
-        placement = flipOrder[index + 1];
-      }
-
-      if (flippedVariation) {
-        variation = getOppositeVariation(variation);
-      }
-
-      data.placement = placement + (variation ? '-' + variation : '');
-
-      // this object contains `position`, we want to preserve it along with
-      // any additional property we may add in the future
-      data.offsets.popper = _extends$1({}, data.offsets.popper, getPopperOffsets(data.instance.popper, data.offsets.reference, data.placement));
-
-      data = runModifiers(data.instance.modifiers, data, 'flip');
-    }
-  });
-  return data;
-}
-
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by update method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function keepTogether(data) {
-  var _data$offsets = data.offsets,
-      popper = _data$offsets.popper,
-      reference = _data$offsets.reference;
-
-  var placement = data.placement.split('-')[0];
-  var floor = Math.floor;
-  var isVertical = ['top', 'bottom'].indexOf(placement) !== -1;
-  var side = isVertical ? 'right' : 'bottom';
-  var opSide = isVertical ? 'left' : 'top';
-  var measurement = isVertical ? 'width' : 'height';
-
-  if (popper[side] < floor(reference[opSide])) {
-    data.offsets.popper[opSide] = floor(reference[opSide]) - popper[measurement];
-  }
-  if (popper[opSide] > floor(reference[side])) {
-    data.offsets.popper[opSide] = floor(reference[side]);
-  }
-
-  return data;
-}
-
-/**
- * Converts a string containing value + unit into a px value number
- * @function
- * @memberof {modifiers~offset}
- * @private
- * @argument {String} str - Value + unit string
- * @argument {String} measurement - `height` or `width`
- * @argument {Object} popperOffsets
- * @argument {Object} referenceOffsets
- * @returns {Number|String}
- * Value in pixels, or original string if no values were extracted
- */
-function toValue(str, measurement, popperOffsets, referenceOffsets) {
-  // separate value from unit
-  var split = str.match(/((?:\-|\+)?\d*\.?\d*)(.*)/);
-  var value = +split[1];
-  var unit = split[2];
-
-  // If it's not a number it's an operator, I guess
-  if (!value) {
-    return str;
-  }
-
-  if (unit.indexOf('%') === 0) {
-    var element = void 0;
-    switch (unit) {
-      case '%p':
-        element = popperOffsets;
+    switch (variation) {
+      case start:
+        offsets[mainAxis] = Math.floor(offsets[mainAxis]) - Math.floor(reference[len] / 2 - element[len] / 2);
         break;
-      case '%':
-      case '%r':
-      default:
-        element = referenceOffsets;
+
+      case end:
+        offsets[mainAxis] = Math.floor(offsets[mainAxis]) + Math.ceil(reference[len] / 2 - element[len] / 2);
+        break;
     }
-
-    var rect = getClientRect(element);
-    return rect[measurement] / 100 * value;
-  } else if (unit === 'vh' || unit === 'vw') {
-    // if is a vh or vw, we calculate the size based on the viewport
-    var size = void 0;
-    if (unit === 'vh') {
-      size = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    } else {
-      size = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    }
-    return size / 100 * value;
-  } else {
-    // if is an explicit pixel unit, we get rid of the unit and keep the value
-    // if is an implicit unit, it's px, and we return just the value
-    return value;
-  }
-}
-
-/**
- * Parse an `offset` string to extrapolate `x` and `y` numeric offsets.
- * @function
- * @memberof {modifiers~offset}
- * @private
- * @argument {String} offset
- * @argument {Object} popperOffsets
- * @argument {Object} referenceOffsets
- * @argument {String} basePlacement
- * @returns {Array} a two cells array with x and y offsets in numbers
- */
-function parseOffset(offset, popperOffsets, referenceOffsets, basePlacement) {
-  var offsets = [0, 0];
-
-  // Use height if placement is left or right and index is 0 otherwise use width
-  // in this way the first offset will use an axis and the second one
-  // will use the other one
-  var useHeight = ['right', 'left'].indexOf(basePlacement) !== -1;
-
-  // Split the offset string to obtain a list of values and operands
-  // The regex addresses values with the plus or minus sign in front (+10, -20, etc)
-  var fragments = offset.split(/(\+|\-)/).map(function (frag) {
-    return frag.trim();
-  });
-
-  // Detect if the offset string contains a pair of values or a single one
-  // they could be separated by comma or space
-  var divider = fragments.indexOf(find(fragments, function (frag) {
-    return frag.search(/,|\s/) !== -1;
-  }));
-
-  if (fragments[divider] && fragments[divider].indexOf(',') === -1) {
-    console.warn('Offsets separated by white space(s) are deprecated, use a comma (,) instead.');
   }
 
-  // If divider is found, we divide the list of values and operands to divide
-  // them by ofset X and Y.
-  var splitRegex = /\s*,\s*|\s+/;
-  var ops = divider !== -1 ? [fragments.slice(0, divider).concat([fragments[divider].split(splitRegex)[0]]), [fragments[divider].split(splitRegex)[1]].concat(fragments.slice(divider + 1))] : [fragments];
-
-  // Convert the values with units to absolute pixels to allow our computations
-  ops = ops.map(function (op, index) {
-    // Most of the units rely on the orientation of the popper
-    var measurement = (index === 1 ? !useHeight : useHeight) ? 'height' : 'width';
-    var mergeWithPrevious = false;
-    return op
-    // This aggregates any `+` or `-` sign that aren't considered operators
-    // e.g.: 10 + +5 => [10, +, +5]
-    .reduce(function (a, b) {
-      if (a[a.length - 1] === '' && ['+', '-'].indexOf(b) !== -1) {
-        a[a.length - 1] = b;
-        mergeWithPrevious = true;
-        return a;
-      } else if (mergeWithPrevious) {
-        a[a.length - 1] += b;
-        mergeWithPrevious = false;
-        return a;
-      } else {
-        return a.concat(b);
-      }
-    }, [])
-    // Here we convert the string values into number values (in px)
-    .map(function (str) {
-      return toValue(str, measurement, popperOffsets, referenceOffsets);
-    });
-  });
-
-  // Loop trough the offsets arrays and execute the operations
-  ops.forEach(function (op, index) {
-    op.forEach(function (frag, index2) {
-      if (isNumeric(frag)) {
-        offsets[index] += frag * (op[index2 - 1] === '-' ? -1 : 1);
-      }
-    });
-  });
   return offsets;
 }
 
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by update method
- * @argument {Object} options - Modifiers configuration and options
- * @argument {Number|String} options.offset=0
- * The offset value as described in the modifier description
- * @returns {Object} The data object, properly modified
- */
-function offset(data, _ref) {
-  var offset = _ref.offset;
-  var placement = data.placement,
-      _data$offsets = data.offsets,
-      popper = _data$offsets.popper,
-      reference = _data$offsets.reference;
-
-  var basePlacement = placement.split('-')[0];
-
-  var offsets = void 0;
-  if (isNumeric(+offset)) {
-    offsets = [+offset, 0];
-  } else {
-    offsets = parseOffset(offset, popper, reference, basePlacement);
+function detectOverflow(state, options) {
+  if (options === void 0) {
+    options = {};
   }
 
-  if (basePlacement === 'left') {
-    popper.top += offsets[0];
-    popper.left -= offsets[1];
-  } else if (basePlacement === 'right') {
-    popper.top += offsets[0];
-    popper.left += offsets[1];
-  } else if (basePlacement === 'top') {
-    popper.left += offsets[0];
-    popper.top -= offsets[1];
-  } else if (basePlacement === 'bottom') {
-    popper.left += offsets[0];
-    popper.top += offsets[1];
+  var _options = options,
+      _options$placement = _options.placement,
+      placement = _options$placement === void 0 ? state.placement : _options$placement,
+      _options$boundary = _options.boundary,
+      boundary = _options$boundary === void 0 ? clippingParents : _options$boundary,
+      _options$rootBoundary = _options.rootBoundary,
+      rootBoundary = _options$rootBoundary === void 0 ? viewport : _options$rootBoundary,
+      _options$elementConte = _options.elementContext,
+      elementContext = _options$elementConte === void 0 ? popper : _options$elementConte,
+      _options$altBoundary = _options.altBoundary,
+      altBoundary = _options$altBoundary === void 0 ? false : _options$altBoundary,
+      _options$padding = _options.padding,
+      padding = _options$padding === void 0 ? 0 : _options$padding;
+  var paddingObject = mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
+  var altContext = elementContext === popper ? reference : popper;
+  var referenceElement = state.elements.reference;
+  var popperRect = state.rects.popper;
+  var element = state.elements[altBoundary ? altContext : elementContext];
+  var clippingClientRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
+  var referenceClientRect = getBoundingClientRect(referenceElement);
+  var popperOffsets = computeOffsets({
+    reference: referenceClientRect,
+    element: popperRect,
+    strategy: 'absolute',
+    placement: placement
+  });
+  var popperClientRect = rectToClientRect(Object.assign(Object.assign({}, popperRect), popperOffsets));
+  var elementClientRect = elementContext === popper ? popperClientRect : referenceClientRect; // positive = overflowing the clipping rect
+  // 0 or negative = within the clipping rect
+
+  var overflowOffsets = {
+    top: clippingClientRect.top - elementClientRect.top + paddingObject.top,
+    bottom: elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom,
+    left: clippingClientRect.left - elementClientRect.left + paddingObject.left,
+    right: elementClientRect.right - clippingClientRect.right + paddingObject.right
+  };
+  var offsetData = state.modifiersData.offset; // Offsets can be applied only to the popper element
+
+  if (elementContext === popper && offsetData) {
+    var offset = offsetData[placement];
+    Object.keys(overflowOffsets).forEach(function (key) {
+      var multiply = [right, bottom].indexOf(key) >= 0 ? 1 : -1;
+      var axis = [top, bottom].indexOf(key) >= 0 ? 'y' : 'x';
+      overflowOffsets[key] += offset[axis] * multiply;
+    });
   }
 
-  data.popper = popper;
-  return data;
+  return overflowOffsets;
 }
 
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by `update` method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function preventOverflow(data, options) {
-  var boundariesElement = options.boundariesElement || getOffsetParent(data.instance.popper);
+/*:: type OverflowsMap = { [ComputedPlacement]: number }; */
 
-  // If offsetParent is the reference element, we really want to
-  // go one step up and use the next offsetParent as reference to
-  // avoid to make this modifier completely useless and look like broken
-  if (data.instance.reference === boundariesElement) {
-    boundariesElement = getOffsetParent(boundariesElement);
+/*;; type OverflowsMap = { [key in ComputedPlacement]: number }; */
+function computeAutoPlacement(state, options) {
+  if (options === void 0) {
+    options = {};
   }
 
-  // NOTE: DOM access here
-  // resets the popper's position so that the document size can be calculated excluding
-  // the size of the popper element itself
-  var transformProp = getSupportedPropertyName('transform');
-  var popperStyles = data.instance.popper.style; // assignment to help minification
-  var top = popperStyles.top,
-      left = popperStyles.left,
-      transform = popperStyles[transformProp];
+  var _options = options,
+      placement = _options.placement,
+      boundary = _options.boundary,
+      rootBoundary = _options.rootBoundary,
+      padding = _options.padding,
+      flipVariations = _options.flipVariations,
+      _options$allowedAutoP = _options.allowedAutoPlacements,
+      allowedAutoPlacements = _options$allowedAutoP === void 0 ? placements : _options$allowedAutoP;
+  var variation = getVariation(placement);
+  var placements$1 = (variation ? flipVariations ? variationPlacements : variationPlacements.filter(function (placement) {
+    return getVariation(placement) === variation;
+  }) : basePlacements).filter(function (placement) {
+    return allowedAutoPlacements.indexOf(placement) >= 0;
+  }); // $FlowFixMe: Flow seems to have problems with two array unions...
 
-  popperStyles.top = '';
-  popperStyles.left = '';
-  popperStyles[transformProp] = '';
+  var overflows = placements$1.reduce(function (acc, placement) {
+    acc[placement] = detectOverflow(state, {
+      placement: placement,
+      boundary: boundary,
+      rootBoundary: rootBoundary,
+      padding: padding
+    })[getBasePlacement(placement)];
+    return acc;
+  }, {});
+  return Object.keys(overflows).sort(function (a, b) {
+    return overflows[a] - overflows[b];
+  });
+}
 
-  var boundaries = getBoundaries(data.instance.popper, data.instance.reference, options.padding, boundariesElement, data.positionFixed);
+function getExpandedFallbackPlacements(placement) {
+  if (getBasePlacement(placement) === auto) {
+    return [];
+  }
 
-  // NOTE: DOM access here
-  // restores the original style properties after the offsets have been computed
-  popperStyles.top = top;
-  popperStyles.left = left;
-  popperStyles[transformProp] = transform;
+  var oppositePlacement = getOppositePlacement(placement);
+  return [getOppositeVariationPlacement(placement), oppositePlacement, getOppositeVariationPlacement(oppositePlacement)];
+}
 
-  options.boundaries = boundaries;
+function flip(_ref) {
+  var state = _ref.state,
+      options = _ref.options,
+      name = _ref.name;
 
-  var order = options.priority;
-  var popper = data.offsets.popper;
+  if (state.modifiersData[name]._skip) {
+    return;
+  }
 
-  var check = {
-    primary: function primary(placement) {
-      var value = popper[placement];
-      if (popper[placement] < boundaries[placement] && !options.escapeWithReference) {
-        value = Math.max(popper[placement], boundaries[placement]);
-      }
-      return defineProperty$2({}, placement, value);
-    },
-    secondary: function secondary(placement) {
-      var mainSide = placement === 'right' ? 'left' : 'top';
-      var value = popper[mainSide];
-      if (popper[placement] > boundaries[placement] && !options.escapeWithReference) {
-        value = Math.min(popper[mainSide], boundaries[placement] - (placement === 'right' ? popper.width : popper.height));
-      }
-      return defineProperty$2({}, mainSide, value);
+  var _options$mainAxis = options.mainAxis,
+      checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
+      _options$altAxis = options.altAxis,
+      checkAltAxis = _options$altAxis === void 0 ? true : _options$altAxis,
+      specifiedFallbackPlacements = options.fallbackPlacements,
+      padding = options.padding,
+      boundary = options.boundary,
+      rootBoundary = options.rootBoundary,
+      altBoundary = options.altBoundary,
+      _options$flipVariatio = options.flipVariations,
+      flipVariations = _options$flipVariatio === void 0 ? true : _options$flipVariatio,
+      allowedAutoPlacements = options.allowedAutoPlacements;
+  var preferredPlacement = state.options.placement;
+  var basePlacement = getBasePlacement(preferredPlacement);
+  var isBasePlacement = basePlacement === preferredPlacement;
+  var fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipVariations ? [getOppositePlacement(preferredPlacement)] : getExpandedFallbackPlacements(preferredPlacement));
+  var placements = [preferredPlacement].concat(fallbackPlacements).reduce(function (acc, placement) {
+    return acc.concat(getBasePlacement(placement) === auto ? computeAutoPlacement(state, {
+      placement: placement,
+      boundary: boundary,
+      rootBoundary: rootBoundary,
+      padding: padding,
+      flipVariations: flipVariations,
+      allowedAutoPlacements: allowedAutoPlacements
+    }) : placement);
+  }, []);
+  var referenceRect = state.rects.reference;
+  var popperRect = state.rects.popper;
+  var checksMap = new Map();
+  var makeFallbackChecks = true;
+  var firstFittingPlacement = placements[0];
+
+  for (var i = 0; i < placements.length; i++) {
+    var placement = placements[i];
+
+    var _basePlacement = getBasePlacement(placement);
+
+    var isStartVariation = getVariation(placement) === start;
+    var isVertical = [top, bottom].indexOf(_basePlacement) >= 0;
+    var len = isVertical ? 'width' : 'height';
+    var overflow = detectOverflow(state, {
+      placement: placement,
+      boundary: boundary,
+      rootBoundary: rootBoundary,
+      altBoundary: altBoundary,
+      padding: padding
+    });
+    var mainVariationSide = isVertical ? isStartVariation ? right : left : isStartVariation ? bottom : top;
+
+    if (referenceRect[len] > popperRect[len]) {
+      mainVariationSide = getOppositePlacement(mainVariationSide);
     }
+
+    var altVariationSide = getOppositePlacement(mainVariationSide);
+    var checks = [];
+
+    if (checkMainAxis) {
+      checks.push(overflow[_basePlacement] <= 0);
+    }
+
+    if (checkAltAxis) {
+      checks.push(overflow[mainVariationSide] <= 0, overflow[altVariationSide] <= 0);
+    }
+
+    if (checks.every(function (check) {
+      return check;
+    })) {
+      firstFittingPlacement = placement;
+      makeFallbackChecks = false;
+      break;
+    }
+
+    checksMap.set(placement, checks);
+  }
+
+  if (makeFallbackChecks) {
+    // `2` may be desired in some cases – research later
+    var numberOfChecks = flipVariations ? 3 : 1;
+
+    var _loop = function _loop(_i) {
+      var fittingPlacement = placements.find(function (placement) {
+        var checks = checksMap.get(placement);
+
+        if (checks) {
+          return checks.slice(0, _i).every(function (check) {
+            return check;
+          });
+        }
+      });
+
+      if (fittingPlacement) {
+        firstFittingPlacement = fittingPlacement;
+        return "break";
+      }
+    };
+
+    for (var _i = numberOfChecks; _i > 0; _i--) {
+      var _ret = _loop(_i);
+
+      if (_ret === "break") break;
+    }
+  }
+
+  if (state.placement !== firstFittingPlacement) {
+    state.modifiersData[name]._skip = true;
+    state.placement = firstFittingPlacement;
+    state.reset = true;
+  }
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var flip$1 = {
+  name: 'flip',
+  enabled: true,
+  phase: 'main',
+  fn: flip,
+  requiresIfExists: ['offset'],
+  data: {
+    _skip: false
+  }
+};
+
+function getSideOffsets(overflow, rect, preventedOffsets) {
+  if (preventedOffsets === void 0) {
+    preventedOffsets = {
+      x: 0,
+      y: 0
+    };
+  }
+
+  return {
+    top: overflow.top - rect.height - preventedOffsets.y,
+    right: overflow.right - rect.width + preventedOffsets.x,
+    bottom: overflow.bottom - rect.height + preventedOffsets.y,
+    left: overflow.left - rect.width - preventedOffsets.x
+  };
+}
+
+function isAnySideFullyClipped(overflow) {
+  return [top, right, bottom, left].some(function (side) {
+    return overflow[side] >= 0;
+  });
+}
+
+function hide(_ref) {
+  var state = _ref.state,
+      name = _ref.name;
+  var referenceRect = state.rects.reference;
+  var popperRect = state.rects.popper;
+  var preventedOffsets = state.modifiersData.preventOverflow;
+  var referenceOverflow = detectOverflow(state, {
+    elementContext: 'reference'
+  });
+  var popperAltOverflow = detectOverflow(state, {
+    altBoundary: true
+  });
+  var referenceClippingOffsets = getSideOffsets(referenceOverflow, referenceRect);
+  var popperEscapeOffsets = getSideOffsets(popperAltOverflow, popperRect, preventedOffsets);
+  var isReferenceHidden = isAnySideFullyClipped(referenceClippingOffsets);
+  var hasPopperEscaped = isAnySideFullyClipped(popperEscapeOffsets);
+  state.modifiersData[name] = {
+    referenceClippingOffsets: referenceClippingOffsets,
+    popperEscapeOffsets: popperEscapeOffsets,
+    isReferenceHidden: isReferenceHidden,
+    hasPopperEscaped: hasPopperEscaped
+  };
+  state.attributes.popper = Object.assign(Object.assign({}, state.attributes.popper), {}, {
+    'data-popper-reference-hidden': isReferenceHidden,
+    'data-popper-escaped': hasPopperEscaped
+  });
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var hide$1 = {
+  name: 'hide',
+  enabled: true,
+  phase: 'main',
+  requiresIfExists: ['preventOverflow'],
+  fn: hide
+};
+
+function distanceAndSkiddingToXY(placement, rects, offset) {
+  var basePlacement = getBasePlacement(placement);
+  var invertDistance = [left, top].indexOf(basePlacement) >= 0 ? -1 : 1;
+
+  var _ref = typeof offset === 'function' ? offset(Object.assign(Object.assign({}, rects), {}, {
+    placement: placement
+  })) : offset,
+      skidding = _ref[0],
+      distance = _ref[1];
+
+  skidding = skidding || 0;
+  distance = (distance || 0) * invertDistance;
+  return [left, right].indexOf(basePlacement) >= 0 ? {
+    x: distance,
+    y: skidding
+  } : {
+    x: skidding,
+    y: distance
+  };
+}
+
+function offset(_ref2) {
+  var state = _ref2.state,
+      options = _ref2.options,
+      name = _ref2.name;
+  var _options$offset = options.offset,
+      offset = _options$offset === void 0 ? [0, 0] : _options$offset;
+  var data = placements.reduce(function (acc, placement) {
+    acc[placement] = distanceAndSkiddingToXY(placement, state.rects, offset);
+    return acc;
+  }, {});
+  var _data$state$placement = data[state.placement],
+      x = _data$state$placement.x,
+      y = _data$state$placement.y;
+
+  if (state.modifiersData.popperOffsets != null) {
+    state.modifiersData.popperOffsets.x += x;
+    state.modifiersData.popperOffsets.y += y;
+  }
+
+  state.modifiersData[name] = data;
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var offset$1 = {
+  name: 'offset',
+  enabled: true,
+  phase: 'main',
+  requires: ['popperOffsets'],
+  fn: offset
+};
+
+function popperOffsets(_ref) {
+  var state = _ref.state,
+      name = _ref.name;
+  // Offsets are the actual position the popper needs to have to be
+  // properly positioned near its reference element
+  // This is the most basic placement, and will be adjusted by
+  // the modifiers in the next step
+  state.modifiersData[name] = computeOffsets({
+    reference: state.rects.reference,
+    element: state.rects.popper,
+    strategy: 'absolute',
+    placement: state.placement
+  });
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var popperOffsets$1 = {
+  name: 'popperOffsets',
+  enabled: true,
+  phase: 'read',
+  fn: popperOffsets,
+  data: {}
+};
+
+function getAltAxis(axis) {
+  return axis === 'x' ? 'y' : 'x';
+}
+
+function preventOverflow(_ref) {
+  var state = _ref.state,
+      options = _ref.options,
+      name = _ref.name;
+  var _options$mainAxis = options.mainAxis,
+      checkMainAxis = _options$mainAxis === void 0 ? true : _options$mainAxis,
+      _options$altAxis = options.altAxis,
+      checkAltAxis = _options$altAxis === void 0 ? false : _options$altAxis,
+      boundary = options.boundary,
+      rootBoundary = options.rootBoundary,
+      altBoundary = options.altBoundary,
+      padding = options.padding,
+      _options$tether = options.tether,
+      tether = _options$tether === void 0 ? true : _options$tether,
+      _options$tetherOffset = options.tetherOffset,
+      tetherOffset = _options$tetherOffset === void 0 ? 0 : _options$tetherOffset;
+  var overflow = detectOverflow(state, {
+    boundary: boundary,
+    rootBoundary: rootBoundary,
+    padding: padding,
+    altBoundary: altBoundary
+  });
+  var basePlacement = getBasePlacement(state.placement);
+  var variation = getVariation(state.placement);
+  var isBasePlacement = !variation;
+  var mainAxis = getMainAxisFromPlacement(basePlacement);
+  var altAxis = getAltAxis(mainAxis);
+  var popperOffsets = state.modifiersData.popperOffsets;
+  var referenceRect = state.rects.reference;
+  var popperRect = state.rects.popper;
+  var tetherOffsetValue = typeof tetherOffset === 'function' ? tetherOffset(Object.assign(Object.assign({}, state.rects), {}, {
+    placement: state.placement
+  })) : tetherOffset;
+  var data = {
+    x: 0,
+    y: 0
   };
 
-  order.forEach(function (placement) {
-    var side = ['left', 'top'].indexOf(placement) !== -1 ? 'primary' : 'secondary';
-    popper = _extends$1({}, popper, check[side](placement));
-  });
+  if (!popperOffsets) {
+    return;
+  }
 
-  data.offsets.popper = popper;
+  if (checkMainAxis) {
+    var mainSide = mainAxis === 'y' ? top : left;
+    var altSide = mainAxis === 'y' ? bottom : right;
+    var len = mainAxis === 'y' ? 'height' : 'width';
+    var offset = popperOffsets[mainAxis];
+    var min = popperOffsets[mainAxis] + overflow[mainSide];
+    var max = popperOffsets[mainAxis] - overflow[altSide];
+    var additive = tether ? -popperRect[len] / 2 : 0;
+    var minLen = variation === start ? referenceRect[len] : popperRect[len];
+    var maxLen = variation === start ? -popperRect[len] : -referenceRect[len]; // We need to include the arrow in the calculation so the arrow doesn't go
+    // outside the reference bounds
 
-  return data;
-}
-
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by `update` method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function shift(data) {
-  var placement = data.placement;
-  var basePlacement = placement.split('-')[0];
-  var shiftvariation = placement.split('-')[1];
-
-  // if shift shiftvariation is specified, run the modifier
-  if (shiftvariation) {
-    var _data$offsets = data.offsets,
-        reference = _data$offsets.reference,
-        popper = _data$offsets.popper;
-
-    var isVertical = ['bottom', 'top'].indexOf(basePlacement) !== -1;
-    var side = isVertical ? 'left' : 'top';
-    var measurement = isVertical ? 'width' : 'height';
-
-    var shiftOffsets = {
-      start: defineProperty$2({}, side, reference[side]),
-      end: defineProperty$2({}, side, reference[side] + reference[measurement] - popper[measurement])
+    var arrowElement = state.elements.arrow;
+    var arrowRect = tether && arrowElement ? getLayoutRect(arrowElement) : {
+      width: 0,
+      height: 0
     };
+    var arrowPaddingObject = state.modifiersData['arrow#persistent'] ? state.modifiersData['arrow#persistent'].padding : getFreshSideObject();
+    var arrowPaddingMin = arrowPaddingObject[mainSide];
+    var arrowPaddingMax = arrowPaddingObject[altSide]; // If the reference length is smaller than the arrow length, we don't want
+    // to include its full size in the calculation. If the reference is small
+    // and near the edge of a boundary, the popper can overflow even if the
+    // reference is not overflowing as well (e.g. virtual elements with no
+    // width or height)
 
-    data.offsets.popper = _extends$1({}, popper, shiftOffsets[shiftvariation]);
+    var arrowLen = within(0, referenceRect[len], arrowRect[len]);
+    var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - tetherOffsetValue : minLen - arrowLen - arrowPaddingMin - tetherOffsetValue;
+    var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + tetherOffsetValue : maxLen + arrowLen + arrowPaddingMax + tetherOffsetValue;
+    var arrowOffsetParent = state.elements.arrow && getOffsetParent(state.elements.arrow);
+    var clientOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
+    var offsetModifierValue = state.modifiersData.offset ? state.modifiersData.offset[state.placement][mainAxis] : 0;
+    var tetherMin = popperOffsets[mainAxis] + minOffset - offsetModifierValue - clientOffset;
+    var tetherMax = popperOffsets[mainAxis] + maxOffset - offsetModifierValue;
+    var preventedOffset = within(tether ? Math.min(min, tetherMin) : min, offset, tether ? Math.max(max, tetherMax) : max);
+    popperOffsets[mainAxis] = preventedOffset;
+    data[mainAxis] = preventedOffset - offset;
   }
 
-  return data;
+  if (checkAltAxis) {
+    var _mainSide = mainAxis === 'x' ? top : left;
+
+    var _altSide = mainAxis === 'x' ? bottom : right;
+
+    var _offset = popperOffsets[altAxis];
+
+    var _min = _offset + overflow[_mainSide];
+
+    var _max = _offset - overflow[_altSide];
+
+    var _preventedOffset = within(_min, _offset, _max);
+
+    popperOffsets[altAxis] = _preventedOffset;
+    data[altAxis] = _preventedOffset - _offset;
+  }
+
+  state.modifiersData[name] = data;
+} // eslint-disable-next-line import/no-unused-modules
+
+
+var preventOverflow$1 = {
+  name: 'preventOverflow',
+  enabled: true,
+  phase: 'main',
+  fn: preventOverflow,
+  requiresIfExists: ['offset']
+};
+
+function getHTMLElementScroll(element) {
+  return {
+    scrollLeft: element.scrollLeft,
+    scrollTop: element.scrollTop
+  };
 }
 
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by update method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function hide(data) {
-  if (!isModifierRequired(data.instance.modifiers, 'hide', 'preventOverflow')) {
-    return data;
-  }
-
-  var refRect = data.offsets.reference;
-  var bound = find(data.instance.modifiers, function (modifier) {
-    return modifier.name === 'preventOverflow';
-  }).boundaries;
-
-  if (refRect.bottom < bound.top || refRect.left > bound.right || refRect.top > bound.bottom || refRect.right < bound.left) {
-    // Avoid unnecessary DOM access if visibility hasn't changed
-    if (data.hide === true) {
-      return data;
-    }
-
-    data.hide = true;
-    data.attributes['x-out-of-boundaries'] = '';
+function getNodeScroll(node) {
+  if (node === getWindow(node) || !isHTMLElement(node)) {
+    return getWindowScroll(node);
   } else {
-    // Avoid unnecessary DOM access if visibility hasn't changed
-    if (data.hide === false) {
-      return data;
+    return getHTMLElementScroll(node);
+  }
+}
+
+// Composite means it takes into account transforms as well as layout.
+
+function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
+  if (isFixed === void 0) {
+    isFixed = false;
+  }
+
+  var documentElement = getDocumentElement(offsetParent);
+  var rect = getBoundingClientRect(elementOrVirtualElement);
+  var isOffsetParentAnElement = isHTMLElement(offsetParent);
+  var scroll = {
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+  var offsets = {
+    x: 0,
+    y: 0
+  };
+
+  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (getNodeName(offsetParent) !== 'body' || // https://github.com/popperjs/popper-core/issues/1078
+    isScrollParent(documentElement)) {
+      scroll = getNodeScroll(offsetParent);
     }
 
-    data.hide = false;
-    data.attributes['x-out-of-boundaries'] = false;
+    if (isHTMLElement(offsetParent)) {
+      offsets = getBoundingClientRect(offsetParent);
+      offsets.x += offsetParent.clientLeft;
+      offsets.y += offsetParent.clientTop;
+    } else if (documentElement) {
+      offsets.x = getWindowScrollBarX(documentElement);
+    }
   }
 
-  return data;
+  return {
+    x: rect.left + scroll.scrollLeft - offsets.x,
+    y: rect.top + scroll.scrollTop - offsets.y,
+    width: rect.width,
+    height: rect.height
+  };
 }
 
-/**
- * @function
- * @memberof Modifiers
- * @argument {Object} data - The data object generated by `update` method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {Object} The data object, properly modified
- */
-function inner(data) {
-  var placement = data.placement;
-  var basePlacement = placement.split('-')[0];
-  var _data$offsets = data.offsets,
-      popper = _data$offsets.popper,
-      reference = _data$offsets.reference;
+function order(modifiers) {
+  var map = new Map();
+  var visited = new Set();
+  var result = [];
+  modifiers.forEach(function (modifier) {
+    map.set(modifier.name, modifier);
+  }); // On visiting object, check for its dependencies and visit them recursively
 
-  var isHoriz = ['left', 'right'].indexOf(basePlacement) !== -1;
+  function sort(modifier) {
+    visited.add(modifier.name);
+    var requires = [].concat(modifier.requires || [], modifier.requiresIfExists || []);
+    requires.forEach(function (dep) {
+      if (!visited.has(dep)) {
+        var depModifier = map.get(dep);
 
-  var subtractLength = ['top', 'left'].indexOf(basePlacement) === -1;
-
-  popper[isHoriz ? 'left' : 'top'] = reference[basePlacement] - (subtractLength ? popper[isHoriz ? 'width' : 'height'] : 0);
-
-  data.placement = getOppositePlacement(placement);
-  data.offsets.popper = getClientRect(popper);
-
-  return data;
-}
-
-/**
- * Modifier function, each modifier can have a function of this type assigned
- * to its `fn` property.<br />
- * These functions will be called on each update, this means that you must
- * make sure they are performant enough to avoid performance bottlenecks.
- *
- * @function ModifierFn
- * @argument {dataObject} data - The data object generated by `update` method
- * @argument {Object} options - Modifiers configuration and options
- * @returns {dataObject} The data object, properly modified
- */
-
-/**
- * Modifiers are plugins used to alter the behavior of your poppers.<br />
- * Popper.js uses a set of 9 modifiers to provide all the basic functionalities
- * needed by the library.
- *
- * Usually you don't want to override the `order`, `fn` and `onLoad` props.
- * All the other properties are configurations that could be tweaked.
- * @namespace modifiers
- */
-var modifiers = {
-  /**
-   * Modifier used to shift the popper on the start or end of its reference
-   * element.<br />
-   * It will read the variation of the `placement` property.<br />
-   * It can be one either `-end` or `-start`.
-   * @memberof modifiers
-   * @inner
-   */
-  shift: {
-    /** @prop {number} order=100 - Index used to define the order of execution */
-    order: 100,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: shift
-  },
-
-  /**
-   * The `offset` modifier can shift your popper on both its axis.
-   *
-   * It accepts the following units:
-   * - `px` or unit-less, interpreted as pixels
-   * - `%` or `%r`, percentage relative to the length of the reference element
-   * - `%p`, percentage relative to the length of the popper element
-   * - `vw`, CSS viewport width unit
-   * - `vh`, CSS viewport height unit
-   *
-   * For length is intended the main axis relative to the placement of the popper.<br />
-   * This means that if the placement is `top` or `bottom`, the length will be the
-   * `width`. In case of `left` or `right`, it will be the `height`.
-   *
-   * You can provide a single value (as `Number` or `String`), or a pair of values
-   * as `String` divided by a comma or one (or more) white spaces.<br />
-   * The latter is a deprecated method because it leads to confusion and will be
-   * removed in v2.<br />
-   * Additionally, it accepts additions and subtractions between different units.
-   * Note that multiplications and divisions aren't supported.
-   *
-   * Valid examples are:
-   * ```
-   * 10
-   * '10%'
-   * '10, 10'
-   * '10%, 10'
-   * '10 + 10%'
-   * '10 - 5vh + 3%'
-   * '-10px + 5vh, 5px - 6%'
-   * ```
-   * > **NB**: If you desire to apply offsets to your poppers in a way that may make them overlap
-   * > with their reference element, unfortunately, you will have to disable the `flip` modifier.
-   * > You can read more on this at this [issue](https://github.com/FezVrasta/popper.js/issues/373).
-   *
-   * @memberof modifiers
-   * @inner
-   */
-  offset: {
-    /** @prop {number} order=200 - Index used to define the order of execution */
-    order: 200,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: offset,
-    /** @prop {Number|String} offset=0
-     * The offset value as described in the modifier description
-     */
-    offset: 0
-  },
-
-  /**
-   * Modifier used to prevent the popper from being positioned outside the boundary.
-   *
-   * A scenario exists where the reference itself is not within the boundaries.<br />
-   * We can say it has "escaped the boundaries" — or just "escaped".<br />
-   * In this case we need to decide whether the popper should either:
-   *
-   * - detach from the reference and remain "trapped" in the boundaries, or
-   * - if it should ignore the boundary and "escape with its reference"
-   *
-   * When `escapeWithReference` is set to`true` and reference is completely
-   * outside its boundaries, the popper will overflow (or completely leave)
-   * the boundaries in order to remain attached to the edge of the reference.
-   *
-   * @memberof modifiers
-   * @inner
-   */
-  preventOverflow: {
-    /** @prop {number} order=300 - Index used to define the order of execution */
-    order: 300,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: preventOverflow,
-    /**
-     * @prop {Array} [priority=['left','right','top','bottom']]
-     * Popper will try to prevent overflow following these priorities by default,
-     * then, it could overflow on the left and on top of the `boundariesElement`
-     */
-    priority: ['left', 'right', 'top', 'bottom'],
-    /**
-     * @prop {number} padding=5
-     * Amount of pixel used to define a minimum distance between the boundaries
-     * and the popper. This makes sure the popper always has a little padding
-     * between the edges of its container
-     */
-    padding: 5,
-    /**
-     * @prop {String|HTMLElement} boundariesElement='scrollParent'
-     * Boundaries used by the modifier. Can be `scrollParent`, `window`,
-     * `viewport` or any DOM element.
-     */
-    boundariesElement: 'scrollParent'
-  },
-
-  /**
-   * Modifier used to make sure the reference and its popper stay near each other
-   * without leaving any gap between the two. Especially useful when the arrow is
-   * enabled and you want to ensure that it points to its reference element.
-   * It cares only about the first axis. You can still have poppers with margin
-   * between the popper and its reference element.
-   * @memberof modifiers
-   * @inner
-   */
-  keepTogether: {
-    /** @prop {number} order=400 - Index used to define the order of execution */
-    order: 400,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: keepTogether
-  },
-
-  /**
-   * This modifier is used to move the `arrowElement` of the popper to make
-   * sure it is positioned between the reference element and its popper element.
-   * It will read the outer size of the `arrowElement` node to detect how many
-   * pixels of conjunction are needed.
-   *
-   * It has no effect if no `arrowElement` is provided.
-   * @memberof modifiers
-   * @inner
-   */
-  arrow: {
-    /** @prop {number} order=500 - Index used to define the order of execution */
-    order: 500,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: arrow,
-    /** @prop {String|HTMLElement} element='[x-arrow]' - Selector or node used as arrow */
-    element: '[x-arrow]'
-  },
-
-  /**
-   * Modifier used to flip the popper's placement when it starts to overlap its
-   * reference element.
-   *
-   * Requires the `preventOverflow` modifier before it in order to work.
-   *
-   * **NOTE:** this modifier will interrupt the current update cycle and will
-   * restart it if it detects the need to flip the placement.
-   * @memberof modifiers
-   * @inner
-   */
-  flip: {
-    /** @prop {number} order=600 - Index used to define the order of execution */
-    order: 600,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: flip,
-    /**
-     * @prop {String|Array} behavior='flip'
-     * The behavior used to change the popper's placement. It can be one of
-     * `flip`, `clockwise`, `counterclockwise` or an array with a list of valid
-     * placements (with optional variations)
-     */
-    behavior: 'flip',
-    /**
-     * @prop {number} padding=5
-     * The popper will flip if it hits the edges of the `boundariesElement`
-     */
-    padding: 5,
-    /**
-     * @prop {String|HTMLElement} boundariesElement='viewport'
-     * The element which will define the boundaries of the popper position.
-     * The popper will never be placed outside of the defined boundaries
-     * (except if `keepTogether` is enabled)
-     */
-    boundariesElement: 'viewport',
-    /**
-     * @prop {Boolean} flipVariations=false
-     * The popper will switch placement variation between `-start` and `-end` when
-     * the reference element overlaps its boundaries.
-     *
-     * The original placement should have a set variation.
-     */
-    flipVariations: false,
-    /**
-     * @prop {Boolean} flipVariationsByContent=false
-     * The popper will switch placement variation between `-start` and `-end` when
-     * the popper element overlaps its reference boundaries.
-     *
-     * The original placement should have a set variation.
-     */
-    flipVariationsByContent: false
-  },
-
-  /**
-   * Modifier used to make the popper flow toward the inner of the reference element.
-   * By default, when this modifier is disabled, the popper will be placed outside
-   * the reference element.
-   * @memberof modifiers
-   * @inner
-   */
-  inner: {
-    /** @prop {number} order=700 - Index used to define the order of execution */
-    order: 700,
-    /** @prop {Boolean} enabled=false - Whether the modifier is enabled or not */
-    enabled: false,
-    /** @prop {ModifierFn} */
-    fn: inner
-  },
-
-  /**
-   * Modifier used to hide the popper when its reference element is outside of the
-   * popper boundaries. It will set a `x-out-of-boundaries` attribute which can
-   * be used to hide with a CSS selector the popper when its reference is
-   * out of boundaries.
-   *
-   * Requires the `preventOverflow` modifier before it in order to work.
-   * @memberof modifiers
-   * @inner
-   */
-  hide: {
-    /** @prop {number} order=800 - Index used to define the order of execution */
-    order: 800,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: hide
-  },
-
-  /**
-   * Computes the style that will be applied to the popper element to gets
-   * properly positioned.
-   *
-   * Note that this modifier will not touch the DOM, it just prepares the styles
-   * so that `applyStyle` modifier can apply it. This separation is useful
-   * in case you need to replace `applyStyle` with a custom implementation.
-   *
-   * This modifier has `850` as `order` value to maintain backward compatibility
-   * with previous versions of Popper.js. Expect the modifiers ordering method
-   * to change in future major versions of the library.
-   *
-   * @memberof modifiers
-   * @inner
-   */
-  computeStyle: {
-    /** @prop {number} order=850 - Index used to define the order of execution */
-    order: 850,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: computeStyle,
-    /**
-     * @prop {Boolean} gpuAcceleration=true
-     * If true, it uses the CSS 3D transformation to position the popper.
-     * Otherwise, it will use the `top` and `left` properties
-     */
-    gpuAcceleration: true,
-    /**
-     * @prop {string} [x='bottom']
-     * Where to anchor the X axis (`bottom` or `top`). AKA X offset origin.
-     * Change this if your popper should grow in a direction different from `bottom`
-     */
-    x: 'bottom',
-    /**
-     * @prop {string} [x='left']
-     * Where to anchor the Y axis (`left` or `right`). AKA Y offset origin.
-     * Change this if your popper should grow in a direction different from `right`
-     */
-    y: 'right'
-  },
-
-  /**
-   * Applies the computed styles to the popper element.
-   *
-   * All the DOM manipulations are limited to this modifier. This is useful in case
-   * you want to integrate Popper.js inside a framework or view library and you
-   * want to delegate all the DOM manipulations to it.
-   *
-   * Note that if you disable this modifier, you must make sure the popper element
-   * has its position set to `absolute` before Popper.js can do its work!
-   *
-   * Just disable this modifier and define your own to achieve the desired effect.
-   *
-   * @memberof modifiers
-   * @inner
-   */
-  applyStyle: {
-    /** @prop {number} order=900 - Index used to define the order of execution */
-    order: 900,
-    /** @prop {Boolean} enabled=true - Whether the modifier is enabled or not */
-    enabled: true,
-    /** @prop {ModifierFn} */
-    fn: applyStyle,
-    /** @prop {Function} */
-    onLoad: applyStyleOnLoad,
-    /**
-     * @deprecated since version 1.10.0, the property moved to `computeStyle` modifier
-     * @prop {Boolean} gpuAcceleration=true
-     * If true, it uses the CSS 3D transformation to position the popper.
-     * Otherwise, it will use the `top` and `left` properties
-     */
-    gpuAcceleration: undefined
-  }
-};
-
-/**
- * The `dataObject` is an object containing all the information used by Popper.js.
- * This object is passed to modifiers and to the `onCreate` and `onUpdate` callbacks.
- * @name dataObject
- * @property {Object} data.instance The Popper.js instance
- * @property {String} data.placement Placement applied to popper
- * @property {String} data.originalPlacement Placement originally defined on init
- * @property {Boolean} data.flipped True if popper has been flipped by flip modifier
- * @property {Boolean} data.hide True if the reference element is out of boundaries, useful to know when to hide the popper
- * @property {HTMLElement} data.arrowElement Node used as arrow by arrow modifier
- * @property {Object} data.styles Any CSS property defined here will be applied to the popper. It expects the JavaScript nomenclature (eg. `marginBottom`)
- * @property {Object} data.arrowStyles Any CSS property defined here will be applied to the popper arrow. It expects the JavaScript nomenclature (eg. `marginBottom`)
- * @property {Object} data.boundaries Offsets of the popper boundaries
- * @property {Object} data.offsets The measurements of popper, reference and arrow elements
- * @property {Object} data.offsets.popper `top`, `left`, `width`, `height` values
- * @property {Object} data.offsets.reference `top`, `left`, `width`, `height` values
- * @property {Object} data.offsets.arrow] `top` and `left` offsets, only one of them will be different from 0
- */
-
-/**
- * Default options provided to Popper.js constructor.<br />
- * These can be overridden using the `options` argument of Popper.js.<br />
- * To override an option, simply pass an object with the same
- * structure of the `options` object, as the 3rd argument. For example:
- * ```
- * new Popper(ref, pop, {
- *   modifiers: {
- *     preventOverflow: { enabled: false }
- *   }
- * })
- * ```
- * @type {Object}
- * @static
- * @memberof Popper
- */
-var Defaults = {
-  /**
-   * Popper's placement.
-   * @prop {Popper.placements} placement='bottom'
-   */
-  placement: 'bottom',
-
-  /**
-   * Set this to true if you want popper to position it self in 'fixed' mode
-   * @prop {Boolean} positionFixed=false
-   */
-  positionFixed: false,
-
-  /**
-   * Whether events (resize, scroll) are initially enabled.
-   * @prop {Boolean} eventsEnabled=true
-   */
-  eventsEnabled: true,
-
-  /**
-   * Set to true if you want to automatically remove the popper when
-   * you call the `destroy` method.
-   * @prop {Boolean} removeOnDestroy=false
-   */
-  removeOnDestroy: false,
-
-  /**
-   * Callback called when the popper is created.<br />
-   * By default, it is set to no-op.<br />
-   * Access Popper.js instance with `data.instance`.
-   * @prop {onCreate}
-   */
-  onCreate: function onCreate() {},
-
-  /**
-   * Callback called when the popper is updated. This callback is not called
-   * on the initialization/creation of the popper, but only on subsequent
-   * updates.<br />
-   * By default, it is set to no-op.<br />
-   * Access Popper.js instance with `data.instance`.
-   * @prop {onUpdate}
-   */
-  onUpdate: function onUpdate() {},
-
-  /**
-   * List of modifiers used to modify the offsets before they are applied to the popper.
-   * They provide most of the functionalities of Popper.js.
-   * @prop {modifiers}
-   */
-  modifiers: modifiers
-};
-
-/**
- * @callback onCreate
- * @param {dataObject} data
- */
-
-/**
- * @callback onUpdate
- * @param {dataObject} data
- */
-
-// Utils
-// Methods
-var Popper = function () {
-  /**
-   * Creates a new Popper.js instance.
-   * @class Popper
-   * @param {Element|referenceObject} reference - The reference element used to position the popper
-   * @param {Element} popper - The HTML / XML element used as the popper
-   * @param {Object} options - Your custom options to override the ones defined in [Defaults](#defaults)
-   * @return {Object} instance - The generated Popper.js instance
-   */
-  function Popper(reference, popper) {
-    var _this = this;
-
-    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    classCallCheck(this, Popper);
-
-    this.scheduleUpdate = function () {
-      return requestAnimationFrame(_this.update);
-    };
-
-    // make update() debounced, so that it only runs at most once-per-tick
-    this.update = debounce$1(this.update.bind(this));
-
-    // with {} we create a new object with the options inside it
-    this.options = _extends$1({}, Popper.Defaults, options);
-
-    // init state
-    this.state = {
-      isDestroyed: false,
-      isCreated: false,
-      scrollParents: []
-    };
-
-    // get reference and popper elements (allow jQuery wrappers)
-    this.reference = reference && reference.jquery ? reference[0] : reference;
-    this.popper = popper && popper.jquery ? popper[0] : popper;
-
-    // Deep merge modifiers options
-    this.options.modifiers = {};
-    Object.keys(_extends$1({}, Popper.Defaults.modifiers, options.modifiers)).forEach(function (name) {
-      _this.options.modifiers[name] = _extends$1({}, Popper.Defaults.modifiers[name] || {}, options.modifiers ? options.modifiers[name] : {});
-    });
-
-    // Refactoring modifiers' list (Object => Array)
-    this.modifiers = Object.keys(this.options.modifiers).map(function (name) {
-      return _extends$1({
-        name: name
-      }, _this.options.modifiers[name]);
-    })
-    // sort the modifiers by order
-    .sort(function (a, b) {
-      return a.order - b.order;
-    });
-
-    // modifiers have the ability to execute arbitrary code when Popper.js get inited
-    // such code is executed in the same order of its modifier
-    // they could add new properties to their options configuration
-    // BE AWARE: don't add options to `options.modifiers.name` but to `modifierOptions`!
-    this.modifiers.forEach(function (modifierOptions) {
-      if (modifierOptions.enabled && isFunction$1(modifierOptions.onLoad)) {
-        modifierOptions.onLoad(_this.reference, _this.popper, _this.options, modifierOptions, _this.state);
+        if (depModifier) {
+          sort(depModifier);
+        }
       }
     });
-
-    // fire the first update to position the popper in the right place
-    this.update();
-
-    var eventsEnabled = this.options.eventsEnabled;
-    if (eventsEnabled) {
-      // setup event listeners, they will take care of update the position in specific situations
-      this.enableEventListeners();
-    }
-
-    this.state.eventsEnabled = eventsEnabled;
+    result.push(modifier);
   }
 
-  // We can't use class properties because they don't get listed in the
-  // class prototype and break stuff like Sinon stubs
-
-
-  createClass(Popper, [{
-    key: 'update',
-    value: function update$$1() {
-      return update.call(this);
+  modifiers.forEach(function (modifier) {
+    if (!visited.has(modifier.name)) {
+      // check for visited object
+      sort(modifier);
     }
-  }, {
-    key: 'destroy',
-    value: function destroy$$1() {
-      return destroy.call(this);
+  });
+  return result;
+}
+
+function orderModifiers(modifiers) {
+  // order based on dependencies
+  var orderedModifiers = order(modifiers); // order based on phase
+
+  return modifierPhases.reduce(function (acc, phase) {
+    return acc.concat(orderedModifiers.filter(function (modifier) {
+      return modifier.phase === phase;
+    }));
+  }, []);
+}
+
+function debounce$1(fn) {
+  var pending;
+  return function () {
+    if (!pending) {
+      pending = new Promise(function (resolve) {
+        Promise.resolve().then(function () {
+          pending = undefined;
+          resolve(fn());
+        });
+      });
     }
-  }, {
-    key: 'enableEventListeners',
-    value: function enableEventListeners$$1() {
-      return enableEventListeners.call(this);
+
+    return pending;
+  };
+}
+
+function format(str) {
+  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    args[_key - 1] = arguments[_key];
+  }
+
+  return [].concat(args).reduce(function (p, c) {
+    return p.replace(/%s/, c);
+  }, str);
+}
+
+var INVALID_MODIFIER_ERROR = 'Popper: modifier "%s" provided an invalid %s property, expected %s but got %s';
+var MISSING_DEPENDENCY_ERROR = 'Popper: modifier "%s" requires "%s", but "%s" modifier is not available';
+var VALID_PROPERTIES = ['name', 'enabled', 'phase', 'fn', 'effect', 'requires', 'options'];
+function validateModifiers(modifiers) {
+  modifiers.forEach(function (modifier) {
+    Object.keys(modifier).forEach(function (key) {
+      switch (key) {
+        case 'name':
+          if (typeof modifier.name !== 'string') {
+            console.error(format(INVALID_MODIFIER_ERROR, String(modifier.name), '"name"', '"string"', "\"" + String(modifier.name) + "\""));
+          }
+
+          break;
+
+        case 'enabled':
+          if (typeof modifier.enabled !== 'boolean') {
+            console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"enabled"', '"boolean"', "\"" + String(modifier.enabled) + "\""));
+          }
+
+        case 'phase':
+          if (modifierPhases.indexOf(modifier.phase) < 0) {
+            console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"phase"', "either " + modifierPhases.join(', '), "\"" + String(modifier.phase) + "\""));
+          }
+
+          break;
+
+        case 'fn':
+          if (typeof modifier.fn !== 'function') {
+            console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"fn"', '"function"', "\"" + String(modifier.fn) + "\""));
+          }
+
+          break;
+
+        case 'effect':
+          if (typeof modifier.effect !== 'function') {
+            console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"effect"', '"function"', "\"" + String(modifier.fn) + "\""));
+          }
+
+          break;
+
+        case 'requires':
+          if (!Array.isArray(modifier.requires)) {
+            console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"requires"', '"array"', "\"" + String(modifier.requires) + "\""));
+          }
+
+          break;
+
+        case 'requiresIfExists':
+          if (!Array.isArray(modifier.requiresIfExists)) {
+            console.error(format(INVALID_MODIFIER_ERROR, modifier.name, '"requiresIfExists"', '"array"', "\"" + String(modifier.requiresIfExists) + "\""));
+          }
+
+          break;
+
+        case 'options':
+        case 'data':
+          break;
+
+        default:
+          console.error("PopperJS: an invalid property has been provided to the \"" + modifier.name + "\" modifier, valid properties are " + VALID_PROPERTIES.map(function (s) {
+            return "\"" + s + "\"";
+          }).join(', ') + "; but \"" + key + "\" was provided.");
+      }
+
+      modifier.requires && modifier.requires.forEach(function (requirement) {
+        if (modifiers.find(function (mod) {
+          return mod.name === requirement;
+        }) == null) {
+          console.error(format(MISSING_DEPENDENCY_ERROR, String(modifier.name), requirement, requirement));
+        }
+      });
+    });
+  });
+}
+
+function uniqueBy(arr, fn) {
+  var identifiers = new Set();
+  return arr.filter(function (item) {
+    var identifier = fn(item);
+
+    if (!identifiers.has(identifier)) {
+      identifiers.add(identifier);
+      return true;
     }
-  }, {
-    key: 'disableEventListeners',
-    value: function disableEventListeners$$1() {
-      return disableEventListeners.call(this);
+  });
+}
+
+function mergeByName(modifiers) {
+  var merged = modifiers.reduce(function (merged, current) {
+    var existing = merged[current.name];
+    merged[current.name] = existing ? Object.assign(Object.assign(Object.assign({}, existing), current), {}, {
+      options: Object.assign(Object.assign({}, existing.options), current.options),
+      data: Object.assign(Object.assign({}, existing.data), current.data)
+    }) : current;
+    return merged;
+  }, {}); // IE11 does not support Object.values
+
+  return Object.keys(merged).map(function (key) {
+    return merged[key];
+  });
+}
+
+var INVALID_ELEMENT_ERROR = 'Popper: Invalid reference or popper argument provided. They must be either a DOM element or virtual element.';
+var INFINITE_LOOP_ERROR = 'Popper: An infinite loop in the modifiers cycle has been detected! The cycle has been interrupted to prevent a browser crash.';
+var DEFAULT_OPTIONS = {
+  placement: 'bottom',
+  modifiers: [],
+  strategy: 'absolute'
+};
+
+function areValidElements() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  return !args.some(function (element) {
+    return !(element && typeof element.getBoundingClientRect === 'function');
+  });
+}
+
+function popperGenerator(generatorOptions) {
+  if (generatorOptions === void 0) {
+    generatorOptions = {};
+  }
+
+  var _generatorOptions = generatorOptions,
+      _generatorOptions$def = _generatorOptions.defaultModifiers,
+      defaultModifiers = _generatorOptions$def === void 0 ? [] : _generatorOptions$def,
+      _generatorOptions$def2 = _generatorOptions.defaultOptions,
+      defaultOptions = _generatorOptions$def2 === void 0 ? DEFAULT_OPTIONS : _generatorOptions$def2;
+  return function createPopper(reference, popper, options) {
+    if (options === void 0) {
+      options = defaultOptions;
     }
 
-    /**
-     * Schedules an update. It will run on the next UI update available.
-     * @method scheduleUpdate
-     * @memberof Popper
-     */
+    var state = {
+      placement: 'bottom',
+      orderedModifiers: [],
+      options: Object.assign(Object.assign({}, DEFAULT_OPTIONS), defaultOptions),
+      modifiersData: {},
+      elements: {
+        reference: reference,
+        popper: popper
+      },
+      attributes: {},
+      styles: {}
+    };
+    var effectCleanupFns = [];
+    var isDestroyed = false;
+    var instance = {
+      state: state,
+      setOptions: function setOptions(options) {
+        cleanupModifierEffects();
+        state.options = Object.assign(Object.assign(Object.assign({}, defaultOptions), state.options), options);
+        state.scrollParents = {
+          reference: isElement(reference) ? listScrollParents(reference) : reference.contextElement ? listScrollParents(reference.contextElement) : [],
+          popper: listScrollParents(popper)
+        }; // Orders the modifiers based on their dependencies and `phase`
+        // properties
+
+        var orderedModifiers = orderModifiers(mergeByName([].concat(defaultModifiers, state.options.modifiers))); // Strip out disabled modifiers
+
+        state.orderedModifiers = orderedModifiers.filter(function (m) {
+          return m.enabled;
+        }); // Validate the provided modifiers so that the consumer will get warned
+        // if one of the modifiers is invalid for any reason
+
+        {
+          var modifiers = uniqueBy([].concat(orderedModifiers, state.options.modifiers), function (_ref) {
+            var name = _ref.name;
+            return name;
+          });
+          validateModifiers(modifiers);
+
+          if (getBasePlacement(state.options.placement) === auto) {
+            var flipModifier = state.orderedModifiers.find(function (_ref2) {
+              var name = _ref2.name;
+              return name === 'flip';
+            });
+
+            if (!flipModifier) {
+              console.error(['Popper: "auto" placements require the "flip" modifier be', 'present and enabled to work.'].join(' '));
+            }
+          }
+
+          var _getComputedStyle = getComputedStyle$2(popper),
+              marginTop = _getComputedStyle.marginTop,
+              marginRight = _getComputedStyle.marginRight,
+              marginBottom = _getComputedStyle.marginBottom,
+              marginLeft = _getComputedStyle.marginLeft; // We no longer take into account `margins` on the popper, and it can
+          // cause bugs with positioning, so we'll warn the consumer
 
 
-    /**
-     * Collection of utilities useful when writing custom modifiers.
-     * Starting from version 1.7, this method is available only if you
-     * include `popper-utils.js` before `popper.js`.
-     *
-     * **DEPRECATION**: This way to access PopperUtils is deprecated
-     * and will be removed in v2! Use the PopperUtils module directly instead.
-     * Due to the high instability of the methods contained in Utils, we can't
-     * guarantee them to follow semver. Use them at your own risk!
-     * @static
-     * @private
-     * @type {Object}
-     * @deprecated since version 1.8
-     * @member Utils
-     * @memberof Popper
-     */
+          if ([marginTop, marginRight, marginBottom, marginLeft].some(function (margin) {
+            return parseFloat(margin);
+          })) {
+            console.warn(['Popper: CSS "margin" styles cannot be used to apply padding', 'between the popper and its reference element or boundary.', 'To replicate margin, use the `offset` modifier, as well as', 'the `padding` option in the `preventOverflow` and `flip`', 'modifiers.'].join(' '));
+          }
+        }
 
-  }]);
-  return Popper;
-}();
+        runModifierEffects();
+        return instance.update();
+      },
+      // Sync update – it will always be executed, even if not necessary. This
+      // is useful for low frequency updates where sync behavior simplifies the
+      // logic.
+      // For high frequency updates (e.g. `resize` and `scroll` events), always
+      // prefer the async Popper#update method
+      forceUpdate: function forceUpdate() {
+        if (isDestroyed) {
+          return;
+        }
 
-/**
- * The `referenceObject` is an object that provides an interface compatible with Popper.js
- * and lets you use it as replacement of a real DOM node.<br />
- * You can use this method to position a popper relatively to a set of coordinates
- * in case you don't have a DOM node to use as reference.
- *
- * ```
- * new Popper(referenceObject, popperNode);
- * ```
- *
- * NB: This feature isn't supported in Internet Explorer 10.
- * @name referenceObject
- * @property {Function} data.getBoundingClientRect
- * A function that returns a set of coordinates compatible with the native `getBoundingClientRect` method.
- * @property {number} data.clientWidth
- * An ES6 getter that will return the width of the virtual reference element.
- * @property {number} data.clientHeight
- * An ES6 getter that will return the height of the virtual reference element.
- */
+        var _state$elements = state.elements,
+            reference = _state$elements.reference,
+            popper = _state$elements.popper; // Don't proceed if `reference` or `popper` are not valid elements
+        // anymore
+
+        if (!areValidElements(reference, popper)) {
+          {
+            console.error(INVALID_ELEMENT_ERROR);
+          }
+
+          return;
+        } // Store the reference and popper rects to be read by modifiers
 
 
-Popper.Utils = (typeof window !== 'undefined' ? window : global$1).PopperUtils;
-Popper.placements = placements;
-Popper.Defaults = Defaults;
+        state.rects = {
+          reference: getCompositeRect(reference, getOffsetParent(popper), state.options.strategy === 'fixed'),
+          popper: getLayoutRect(popper)
+        }; // Modifiers have the ability to reset the current update cycle. The
+        // most common use case for this is the `flip` modifier changing the
+        // placement, which then needs to re-run all the modifiers, because the
+        // logic was previously ran for the previous placement and is therefore
+        // stale/incorrect
+
+        state.reset = false;
+        state.placement = state.options.placement; // On each update cycle, the `modifiersData` property for each modifier
+        // is filled with the initial data specified by the modifier. This means
+        // it doesn't persist and is fresh on each update.
+        // To ensure persistent data, use `${name}#persistent`
+
+        state.orderedModifiers.forEach(function (modifier) {
+          return state.modifiersData[modifier.name] = Object.assign({}, modifier.data);
+        });
+        var __debug_loops__ = 0;
+
+        for (var index = 0; index < state.orderedModifiers.length; index++) {
+          {
+            __debug_loops__ += 1;
+
+            if (__debug_loops__ > 100) {
+              console.error(INFINITE_LOOP_ERROR);
+              break;
+            }
+          }
+
+          if (state.reset === true) {
+            state.reset = false;
+            index = -1;
+            continue;
+          }
+
+          var _state$orderedModifie = state.orderedModifiers[index],
+              fn = _state$orderedModifie.fn,
+              _state$orderedModifie2 = _state$orderedModifie.options,
+              _options = _state$orderedModifie2 === void 0 ? {} : _state$orderedModifie2,
+              name = _state$orderedModifie.name;
+
+          if (typeof fn === 'function') {
+            state = fn({
+              state: state,
+              options: _options,
+              name: name,
+              instance: instance
+            }) || state;
+          }
+        }
+      },
+      // Async and optimistically optimized update – it will not be executed if
+      // not necessary (debounced to run at most once-per-tick)
+      update: debounce$1(function () {
+        return new Promise(function (resolve) {
+          instance.forceUpdate();
+          resolve(state);
+        });
+      }),
+      destroy: function destroy() {
+        cleanupModifierEffects();
+        isDestroyed = true;
+      }
+    };
+
+    if (!areValidElements(reference, popper)) {
+      {
+        console.error(INVALID_ELEMENT_ERROR);
+      }
+
+      return instance;
+    }
+
+    instance.setOptions(options).then(function (state) {
+      if (!isDestroyed && options.onFirstUpdate) {
+        options.onFirstUpdate(state);
+      }
+    }); // Modifiers have the ability to execute arbitrary code before the first
+    // update cycle runs. They will be executed in the same order as the update
+    // cycle. This is useful when a modifier adds some persistent data that
+    // other modifiers need to use, but the modifier is run after the dependent
+    // one.
+
+    function runModifierEffects() {
+      state.orderedModifiers.forEach(function (_ref3) {
+        var name = _ref3.name,
+            _ref3$options = _ref3.options,
+            options = _ref3$options === void 0 ? {} : _ref3$options,
+            effect = _ref3.effect;
+
+        if (typeof effect === 'function') {
+          var cleanupFn = effect({
+            state: state,
+            name: name,
+            instance: instance,
+            options: options
+          });
+
+          var noopFn = function noopFn() {};
+
+          effectCleanupFns.push(cleanupFn || noopFn);
+        }
+      });
+    }
+
+    function cleanupModifierEffects() {
+      effectCleanupFns.forEach(function (fn) {
+        return fn();
+      });
+      effectCleanupFns = [];
+    }
+
+    return instance;
+  };
+}
+
+// This is b/c the Popper lib is all esm files, and would break in a common js only environment
+
+var createPopper = popperGenerator({
+  defaultModifiers: [hide$1, popperOffsets$1, computeStyles$1, eventListeners, offset$1, flip$1, preventOverflow$1, arrow$1]
+});
 
 var initialPopperStyles = {
   position: 'absolute',
@@ -48612,50 +48087,111 @@ var initialPopperStyles = {
   opacity: '0',
   pointerEvents: 'none'
 };
-var initialArrowStyles = {};
+var initialArrowStyles = {}; // until docjs supports type exports...
+
+function toModifierMap(modifiers) {
+  var result = {};
+
+  if (!Array.isArray(modifiers)) {
+    return modifiers || result;
+  } // eslint-disable-next-line no-unused-expressions
+
+
+  modifiers == null ? void 0 : modifiers.forEach(function (m) {
+    result[m.name] = m;
+  });
+  return result;
+}
+function toModifierArray(map) {
+  if (map === void 0) {
+    map = {};
+  }
+
+  if (Array.isArray(map)) return map;
+  return Object.keys(map).map(function (k) {
+    map[k].name = k;
+    return map[k];
+  });
+}
+
 /**
  * Position an element relative some reference element using Popper.js
  *
- * @param {HTMLElement} referenceElement The element
- * @param {HTMLElement} popperElement
- * @param {Object}      options
- * @param {Object}      options.modifiers Popper.js modifiers
- * @param {Boolean}     options.enabled toggle the popper functionality on/off
- * @param {String}      options.placement The popper element placement relative to the reference element
- * @param {Boolean}     options.positionFixed use fixed positioning
- * @param {Boolean}     options.eventsEnabled have Popper listen on window resize events to reposition the element
+ * @param referenceElement
+ * @param popperElement
+ * @param {object}      options
+ * @param {object=}     options.modifiers Popper.js modifiers
+ * @param {boolean=}    options.enabled toggle the popper functionality on/off
+ * @param {string=}     options.placement The popper element placement relative to the reference element
+ * @param {string=}     options.strategy the positioning strategy
+ * @param {boolean=}    options.eventsEnabled have Popper listen on window resize events to reposition the element
+ * @param {function=}   options.onCreate called when the popper is created
+ * @param {function=}   options.onUpdate called when the popper is updated
+ *
+ * @returns {UsePopperState} The popper state
  */
-
 function usePopper(referenceElement, popperElement, _temp) {
   var _ref = _temp === void 0 ? {} : _temp,
       _ref$enabled = _ref.enabled,
       enabled = _ref$enabled === void 0 ? true : _ref$enabled,
       _ref$placement = _ref.placement,
       placement = _ref$placement === void 0 ? 'bottom' : _ref$placement,
-      _ref$positionFixed = _ref.positionFixed,
-      positionFixed = _ref$positionFixed === void 0 ? false : _ref$positionFixed,
+      _ref$strategy = _ref.strategy,
+      strategy = _ref$strategy === void 0 ? 'absolute' : _ref$strategy,
       _ref$eventsEnabled = _ref.eventsEnabled,
       eventsEnabled = _ref$eventsEnabled === void 0 ? true : _ref$eventsEnabled,
-      _ref$modifiers = _ref.modifiers,
-      modifiers = _ref$modifiers === void 0 ? {} : _ref$modifiers;
+      userModifiers = _ref.modifiers,
+      popperOptions = _objectWithoutPropertiesLoose(_ref, ["enabled", "placement", "strategy", "eventsEnabled", "modifiers"]);
 
   var popperInstanceRef = react_15();
-  var hasArrow = !!(modifiers.arrow && modifiers.arrow.element);
   var scheduleUpdate = react_9(function () {
     if (popperInstanceRef.current) {
-      popperInstanceRef.current.scheduleUpdate();
+      popperInstanceRef.current.update();
     }
   }, []);
 
-  var _useState = react_16({
+  var _useSafeState = useSafeState(react_16({
     placement: placement,
     scheduleUpdate: scheduleUpdate,
     outOfBoundaries: false,
     styles: initialPopperStyles,
     arrowStyles: initialArrowStyles
-  }),
-      state = _useState[0],
-      setState = _useState[1]; // A placement difference in state means popper determined a new placement
+  })),
+      state = _useSafeState[0],
+      setState = _useSafeState[1];
+
+  var updateModifier = react_12(function () {
+    return {
+      name: 'updateStateModifier',
+      enabled: true,
+      phase: 'afterWrite',
+      requires: ['computeStyles'],
+      fn: function fn(data) {
+        var _data$state$modifiers, _data$state$styles, _data$state$styles2;
+
+        setState({
+          scheduleUpdate: scheduleUpdate,
+          outOfBoundaries: !!((_data$state$modifiers = data.state.modifiersData.hide) == null ? void 0 : _data$state$modifiers.isReferenceHidden),
+          placement: data.state.placement,
+          styles: _extends({}, (_data$state$styles = data.state.styles) == null ? void 0 : _data$state$styles.popper),
+          arrowStyles: _extends({}, (_data$state$styles2 = data.state.styles) == null ? void 0 : _data$state$styles2.arrow),
+          state: data.state
+        });
+      }
+    };
+  }, [scheduleUpdate, setState]);
+  var modifiers = toModifierArray(userModifiers);
+  var eventsModifier = modifiers.find(function (m) {
+    return m.name === 'eventListeners';
+  });
+
+  if (!eventsModifier && eventsEnabled) {
+    eventsModifier = {
+      name: 'eventListeners',
+      enabled: true
+    };
+    modifiers = [].concat(modifiers, [eventsModifier]);
+  } // A placement difference in state means popper determined a new placement
   // apart from the props value. By the time the popper element is rendered with
   // the new position Popper has already measured it, if the place change triggers
   // a size change it will result in a misaligned popper. So we schedule an update to be sure.
@@ -48664,74 +48200,65 @@ function usePopper(referenceElement, popperElement, _temp) {
   react_10(function () {
     scheduleUpdate();
   }, [state.placement, scheduleUpdate]);
-  /** Toggle Events */
-
   react_10(function () {
-    if (popperInstanceRef.current) {
-      // eslint-disable-next-line no-unused-expressions
-      eventsEnabled ? popperInstanceRef.current.enableEventListeners() : popperInstanceRef.current.disableEventListeners();
-    }
-  }, [eventsEnabled]);
+    if (!popperInstanceRef.current || !enabled) return;
+    popperInstanceRef.current.setOptions({
+      placement: placement,
+      strategy: strategy,
+      modifiers: [].concat(modifiers, [updateModifier])
+    }); // intentionally NOT re-running on new modifiers
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strategy, placement, eventsModifier.enabled, updateModifier, enabled]);
   react_10(function () {
     if (!enabled || referenceElement == null || popperElement == null) {
       return undefined;
     }
 
-    var arrow = modifiers.arrow && _extends({}, modifiers.arrow, {
-      element: modifiers.arrow.element
-    });
-
-    popperInstanceRef.current = new Popper(referenceElement, popperElement, {
+    popperInstanceRef.current = createPopper(referenceElement, popperElement, _extends(_extends({}, popperOptions), {}, {
       placement: placement,
-      positionFixed: positionFixed,
-      modifiers: _extends({}, modifiers, {
-        arrow: arrow,
-        applyStyle: {
-          enabled: false
-        },
-        updateStateModifier: {
-          enabled: true,
-          order: 900,
-          fn: function fn(data) {
-            setState({
-              scheduleUpdate: scheduleUpdate,
-              styles: _extends({
-                position: data.offsets.popper.position
-              }, data.styles),
-              arrowStyles: data.arrowStyles,
-              outOfBoundaries: data.hide,
-              placement: data.placement
-            });
-          }
-        }
-      })
-    });
+      strategy: strategy,
+      modifiers: [].concat(modifiers, [updateModifier])
+    }));
     return function () {
-      if (popperInstanceRef.current !== null) {
+      if (popperInstanceRef.current != null) {
         popperInstanceRef.current.destroy();
-        popperInstanceRef.current = null;
+        popperInstanceRef.current = undefined;
+        setState(function (s) {
+          return _extends(_extends({}, s), {}, {
+            styles: initialPopperStyles,
+            arrowStyles: initialArrowStyles
+          });
+        });
       }
-    }; // intentionally NOT re-running on new modifiers
+    }; // This is only run once to _create_ the popper
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, placement, positionFixed, referenceElement, popperElement, hasArrow]);
+  }, [enabled, referenceElement, popperElement]);
   return state;
 }
 
 /* eslint-disable no-bitwise, no-cond-assign */
 // HTML DOM and SVG DOM may have different support levels,
 // so we need to check on context instead of a document root element.
-function contains(context, node) {
+function contains$1(context, node) {
   if (context.contains) return context.contains(node);
   if (context.compareDocumentPosition) return context === node || !!(context.compareDocumentPosition(node) & 16);
 }
 
-function ownerDocument$1 (componentOrElement) {
-  return ownerDocument(reactDom.findDOMNode(componentOrElement));
+function safeFindDOMNode(componentOrElement) {
+  if (componentOrElement && 'setState' in componentOrElement) {
+    return reactDom.findDOMNode(componentOrElement);
+  }
+
+  return componentOrElement != null ? componentOrElement : null;
 }
+
+var ownerDocument$1 = (function (componentOrElement) {
+  return ownerDocument(safeFindDOMNode(componentOrElement));
+});
 
 var escapeKeyCode = 27;
 
-var noop$2 = function noop() {};
+var noop$3 = function noop() {};
 
 function isLeftClickEvent(event) {
   return event.button === 0;
@@ -48740,20 +48267,23 @@ function isLeftClickEvent(event) {
 function isModifiedEvent(event) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
+
+var getRefTarget = function getRefTarget(ref) {
+  return ref && ('current' in ref ? ref.current : ref);
+};
+
 /**
  * The `useRootClose` hook registers your callback on the document
  * when rendered. Powers the `<Overlay/>` component. This is used achieve modal
  * style behavior where your callback is triggered when the user tries to
  * interact with the rest of the document or hits the `esc` key.
  *
- * @param {Ref<HTMLElement>|HTMLElement} ref  The element boundary
+ * @param {Ref<HTMLElement>| HTMLElement} ref  The element boundary
  * @param {function} onRootClose
- * @param {object}  options
- * @param {boolean} options.disabled
- * @param {string}  options.clickTrigger The DOM event name (click, mousedown, etc) to attach listeners on
+ * @param {object=}  options
+ * @param {boolean=} options.disabled
+ * @param {string=}  options.clickTrigger The DOM event name (click, mousedown, etc) to attach listeners on
  */
-
-
 function useRootClose(ref, onRootClose, _temp) {
   var _ref = _temp === void 0 ? {} : _temp,
       disabled = _ref.disabled,
@@ -48761,11 +48291,11 @@ function useRootClose(ref, onRootClose, _temp) {
       clickTrigger = _ref$clickTrigger === void 0 ? 'click' : _ref$clickTrigger;
 
   var preventMouseRootCloseRef = react_15(false);
-  var onClose = onRootClose || noop$2;
+  var onClose = onRootClose || noop$3;
   var handleMouseCapture = react_9(function (e) {
-    var currentTarget = ref && ('current' in ref ? ref.current : ref);
+    var currentTarget = getRefTarget(ref);
     warning_1(!!currentTarget, 'RootClose captured a close event but does not have a ref to compare it to. ' + 'useRootClose(), should be passed a ref that resolves to a DOM node');
-    preventMouseRootCloseRef.current = !currentTarget || isModifiedEvent(e) || !isLeftClickEvent(e) || contains(currentTarget, e.target);
+    preventMouseRootCloseRef.current = !currentTarget || isModifiedEvent(e) || !isLeftClickEvent(e) || !!contains$1(currentTarget, e.target);
   }, [ref]);
   var handleMouse = useEventCallback(function (e) {
     if (!preventMouseRootCloseRef.current) {
@@ -48779,7 +48309,7 @@ function useRootClose(ref, onRootClose, _temp) {
   });
   react_10(function () {
     if (disabled || ref == null) return undefined;
-    var doc = ownerDocument$1(ref.current); // Use capture for this listener so it fires before React's listener, to
+    var doc = ownerDocument$1(getRefTarget(ref)); // Use capture for this listener so it fires before React's listener, to
     // avoid false positives in the contains() check below if the target DOM
     // element is removed in the React mouse callback.
 
@@ -48790,7 +48320,7 @@ function useRootClose(ref, onRootClose, _temp) {
 
     if ('ontouchstart' in doc.documentElement) {
       mobileSafariHackListeners = [].slice.call(doc.body.children).map(function (el) {
-        return listen(el, 'mousemove', noop$2);
+        return listen(el, 'mousemove', noop$3);
       });
     }
 
@@ -48805,7 +48335,21 @@ function useRootClose(ref, onRootClose, _temp) {
   }, [ref, disabled, clickTrigger, handleMouseCapture, handleMouse, handleKeyUp]);
 }
 
+var noop$4 = function noop() {};
+/**
+ * @memberOf Dropdown
+ * @param {object}  options
+ * @param {boolean} options.flip Automatically adjust the menu `drop` position based on viewport edge detection
+ * @param {boolean} options.show Display the menu manually, ignored in the context of a `Dropdown`
+ * @param {boolean} options.usePopper opt in/out of using PopperJS to position menus. When disabled you must position it yourself.
+ * @param {string}  options.rootCloseEvent The pointer event to listen for when determining "clicks outside" the menu for triggering a close.
+ * @param {object}  options.popperConfig Options passed to the [`usePopper`](/api/usePopper) hook.
+ */
+
+
 function useDropdownMenu(options) {
+  var _modifiers$arrow;
+
   if (options === void 0) {
     options = {};
   }
@@ -48823,43 +48367,49 @@ function useDropdownMenu(options) {
       _options$popperConfig = _options.popperConfig,
       popperConfig = _options$popperConfig === void 0 ? {} : _options$popperConfig,
       _options$usePopper = _options.usePopper,
-      shouldUsePopper = _options$usePopper === void 0 ? true : _options$usePopper;
-  var show = context.show == null ? options.show : context.show;
-  var alignEnd = context.alignEnd == null ? options.alignEnd : context.alignEnd;
+      shouldUsePopper = _options$usePopper === void 0 ? !!context : _options$usePopper;
+  var show = (context == null ? void 0 : context.show) == null ? options.show : context.show;
+  var alignEnd = (context == null ? void 0 : context.alignEnd) == null ? options.alignEnd : context.alignEnd;
 
   if (show && !hasShownRef.current) {
     hasShownRef.current = true;
   }
 
   var handleClose = function handleClose(e) {
-    if (!context.toggle) return;
-    context.toggle(false, e);
+    context == null ? void 0 : context.toggle(false, e);
   };
 
-  var drop = context.drop,
-      setMenu = context.setMenu,
-      menuElement = context.menuElement,
-      toggleElement = context.toggleElement;
+  var _ref = context || {},
+      drop = _ref.drop,
+      setMenu = _ref.setMenu,
+      menuElement = _ref.menuElement,
+      toggleElement = _ref.toggleElement;
+
   var placement = alignEnd ? 'bottom-end' : 'bottom-start';
   if (drop === 'up') placement = alignEnd ? 'top-end' : 'top-start';else if (drop === 'right') placement = alignEnd ? 'right-end' : 'right-start';else if (drop === 'left') placement = alignEnd ? 'left-end' : 'left-start';
-  var popper = usePopper(toggleElement, menuElement, {
+  var modifiers = toModifierMap(popperConfig.modifiers);
+  var popper = usePopper(toggleElement, menuElement, _extends(_extends({}, popperConfig), {}, {
     placement: placement,
     enabled: !!(shouldUsePopper && show),
-    eventsEnabled: !!show,
-    modifiers: _extends({
-      flip: {
-        enabled: !!flip
+    modifiers: _extends(_extends({}, modifiers), {}, {
+      eventListeners: {
+        enabled: !!show
       },
-      arrow: _extends({}, popperConfig.modifiers && popperConfig.modifiers.arrow, {
+      arrow: _extends(_extends({}, modifiers.arrow), {}, {
         enabled: !!arrowElement,
-        element: arrowElement
-      })
-    }, popperConfig.modifiers)
-  });
-  var menu = null;
+        options: _extends(_extends({}, (_modifiers$arrow = modifiers.arrow) == null ? void 0 : _modifiers$arrow.options), {}, {
+          element: arrowElement
+        })
+      }),
+      flip: _extends({
+        enabled: !!flip
+      }, modifiers.flip)
+    })
+  }));
+  var menu;
   var menuProps = {
-    ref: setMenu,
-    'aria-labelledby': toggleElement && toggleElement.id
+    ref: setMenu || noop$4,
+    'aria-labelledby': toggleElement == null ? void 0 : toggleElement.id
   };
   var childArgs = {
     show: show,
@@ -48869,12 +48419,12 @@ function useDropdownMenu(options) {
   };
 
   if (!shouldUsePopper) {
-    menu = _extends({}, childArgs, {
+    menu = _extends(_extends({}, childArgs), {}, {
       props: menuProps
     });
   } else {
-    menu = _extends({}, popper, {}, childArgs, {
-      props: _extends({}, menuProps, {
+    menu = _extends(_extends(_extends({}, popper), childArgs), {}, {
+      props: _extends(_extends({}, menuProps), {}, {
         style: popper.styles
       }),
       arrowProps: {
@@ -48951,31 +48501,43 @@ var defaultProps$7 = {
   usePopper: true
 };
 
-function DropdownMenu(_ref) {
-  var children = _ref.children,
-      options = _objectWithoutPropertiesLoose(_ref, ["children"]);
+/**
+ * Also exported as `<Dropdown.Menu>` from `Dropdown`.
+ *
+ * @displayName DropdownMenu
+ * @memberOf Dropdown
+ */
+function DropdownMenu(_ref2) {
+  var children = _ref2.children,
+      options = _objectWithoutPropertiesLoose(_ref2, ["children"]);
 
   var args = useDropdownMenu(options);
-  return args.hasShown ? children(args) : null;
+  return /*#__PURE__*/react.createElement(react.Fragment, null, args.hasShown ? children(args) : null);
 }
 
 DropdownMenu.displayName = 'ReactOverlaysDropdownMenu';
 DropdownMenu.propTypes = propTypes$3;
 DropdownMenu.defaultProps = defaultProps$7;
 
+var noop$5 = function noop() {};
 /**
- * Wires up Dropdown toggle functinality, returning a set a props to attach
+ * Wires up Dropdown toggle functionality, returning a set a props to attach
  * to the element that functions as the dropdown toggle (generally a button).
+ *
+ * @memberOf Dropdown
  */
 
+
 function useDropdownToggle() {
-  var _useContext = react_13(DropdownContext),
-      show = _useContext.show,
-      toggle = _useContext.toggle,
-      setToggle = _useContext.setToggle;
+  var _ref = react_13(DropdownContext) || {},
+      _ref$show = _ref.show,
+      show = _ref$show === void 0 ? false : _ref$show,
+      _ref$toggle = _ref.toggle,
+      toggle = _ref$toggle === void 0 ? noop$5 : _ref$toggle,
+      setToggle = _ref.setToggle;
 
   return [{
-    ref: setToggle,
+    ref: setToggle || noop$5,
     'aria-haspopup': true,
     'aria-expanded': !!show
   }, {
@@ -49002,8 +48564,14 @@ var propTypes$4 = {
   children: propTypes.func.isRequired
 };
 
-function DropdownToggle(_ref) {
-  var children = _ref.children;
+/**
+ * Also exported as `<Dropdown.Toggle>` from `Dropdown`.
+ *
+ * @displayName DropdownToggle
+ * @memberOf Dropdown
+ */
+function DropdownToggle(_ref2) {
+  var children = _ref2.children;
 
   var _useDropdownToggle = useDropdownToggle(),
       props = _useDropdownToggle[0],
@@ -49011,11 +48579,11 @@ function DropdownToggle(_ref) {
       show = _useDropdownToggle$.show,
       toggle = _useDropdownToggle$.toggle;
 
-  return children({
+  return /*#__PURE__*/react.createElement(react.Fragment, null, children({
     show: show,
     toggle: toggle,
     props: props
-  });
+  }));
 }
 
 DropdownToggle.displayName = 'ReactOverlaysDropdownToggle';
@@ -49055,7 +48623,7 @@ var propTypes$5 = {
    * Selectors should be relative to the menu component:
    * e.g. ` > li:not('.disabled')`
    */
-  itemSelector: propTypes.string.isRequired,
+  itemSelector: propTypes.string,
 
   /**
    * Align the menu to the 'end' side of the placement side of the Dropdown toggle. The default placement is `top-start` or `bottom-start`.
@@ -49078,7 +48646,7 @@ var propTypes$5 = {
    * A callback fired when the Dropdown wishes to change visibility. Called with the requested
    * `show` value, the DOM event, and the source that fired it: `'click'`,`'keydown'`,`'rootClose'`, or `'select'`.
    *
-   * ```js
+   * ```ts static
    * function(
    *   isOpen: boolean,
    *   event: SyntheticEvent,
@@ -49089,40 +48657,25 @@ var propTypes$5 = {
    */
   onToggle: propTypes.func
 };
-var defaultProps$8 = {
-  itemSelector: '* > *'
-};
-/**
- * `Dropdown` is set of structural components for building, accessible dropdown menus with close-on-click,
- * keyboard navigation, and correct focus handling. As with all the react-overlay's
- * components its BYOS (bring your own styles). Dropdown is primarily
- * built from three base components, you should compose to build your Dropdowns.
- *
- * - `Dropdown`, which wraps the menu and toggle, and handles keyboard navigation
- * - `Dropdown.Toggle` generally a button that triggers the menu opening
- * - `Dropdown.Menu` The overlaid, menu, positioned to the toggle with PopperJs
- */
 
+/**
+ * @displayName Dropdown
+ */
 function Dropdown(_ref) {
   var drop = _ref.drop,
       alignEnd = _ref.alignEnd,
       defaultShow = _ref.defaultShow,
       rawShow = _ref.show,
       rawOnToggle = _ref.onToggle,
-      itemSelector = _ref.itemSelector,
+      _ref$itemSelector = _ref.itemSelector,
+      itemSelector = _ref$itemSelector === void 0 ? '* > *' : _ref$itemSelector,
       focusFirstItemOnShow = _ref.focusFirstItemOnShow,
       children = _ref.children;
   var forceUpdate = useForceUpdate();
 
-  var _useUncontrolled = useUncontrolled({
-    defaultShow: defaultShow,
-    show: rawShow,
-    onToggle: rawOnToggle
-  }, {
-    show: 'onToggle'
-  }),
-      show = _useUncontrolled.show,
-      onToggle = _useUncontrolled.onToggle;
+  var _useUncontrolledProp = useUncontrolledProp(rawShow, defaultShow, rawOnToggle),
+      show = _useUncontrolledProp[0],
+      onToggle = _useUncontrolledProp[1];
 
   var _useCallbackRef = useCallbackRef(),
       toggleElement = _useCallbackRef[0],
@@ -49131,7 +48684,7 @@ function Dropdown(_ref) {
   // may run before the state value is set
 
 
-  var menuRef = react_15();
+  var menuRef = react_15(null);
   var menuElement = menuRef.current;
   var setMenu = react_9(function (ref) {
     menuRef.current = ref; // ensure that a menu set triggers an update for consumers
@@ -49200,8 +48753,8 @@ function Dropdown(_ref) {
   };
 
   var handleKeyDown = function handleKeyDown(event) {
-    var key = event.key,
-        target = event.target; // Second only to https://github.com/twbs/bootstrap/blob/8cfbf6933b8a0146ac3fbc369f19e520bd1ebdac/js/src/dropdown.js#L400
+    var key = event.key;
+    var target = event.target; // Second only to https://github.com/twbs/bootstrap/blob/8cfbf6933b8a0146ac3fbc369f19e520bd1ebdac/js/src/dropdown.js#L400
     // in inscrutability
 
     var isInput = /input|textarea/i.test(target.tagName);
@@ -49241,7 +48794,7 @@ function Dropdown(_ref) {
     }
   };
 
-  return react.createElement(DropdownContext.Provider, {
+  return /*#__PURE__*/react.createElement(DropdownContext.Provider, {
     value: context
   }, children({
     props: {
@@ -49252,7 +48805,6 @@ function Dropdown(_ref) {
 
 Dropdown.displayName = 'ReactOverlaysDropdown';
 Dropdown.propTypes = propTypes$5;
-Dropdown.defaultProps = defaultProps$8;
 Dropdown.Menu = DropdownMenu;
 Dropdown.Toggle = DropdownToggle;
 
@@ -49264,7 +48816,7 @@ var makeEventKey = function makeEventKey(eventKey, href) {
 
 var NavContext = react.createContext(null);
 
-var defaultProps$9 = {
+var defaultProps$8 = {
   as: SafeAnchor,
   disabled: false
 };
@@ -49298,7 +48850,7 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
     if (onSelectCtx) onSelectCtx(key, event);
     if (onSelect) onSelect(key, event);
   });
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     href: href,
     disabled: disabled,
@@ -49307,7 +48859,7 @@ var DropdownItem = react.forwardRef(function (_ref, ref) {
   }), children);
 });
 DropdownItem.displayName = 'DropdownItem';
-DropdownItem.defaultProps = defaultProps$9;
+DropdownItem.defaultProps = defaultProps$8;
 
 var toFnRef = function toFnRef(ref) {
   return !ref || typeof ref === 'function' ? ref : function (value) {
@@ -49351,13 +48903,75 @@ var NavbarContext = react.createContext(null);
 function useWrappedRefWithWarning(ref, componentName) {
 
   var warningRef = react_9(function (refValue) {
-    !(refValue == null || !refValue.isReactComponent) ?  browser(false, componentName + " injected a ref to a provided `as` component that resolved to a component instance instead of a DOM element. " + 'Use `React.forwardRef` to provide the injected ref to the class component as a prop in order to pass it directly to a DOM element')  : void 0;
+    !(refValue == null || !refValue.isReactComponent) ?  browser$1(false, componentName + " injected a ref to a provided `as` component that resolved to a component instance instead of a DOM element. " + 'Use `React.forwardRef` to provide the injected ref to the class component as a prop in order to pass it directly to a DOM element')  : void 0;
   }, [componentName]); // eslint-disable-next-line react-hooks/rules-of-hooks
 
   return useMergedRefs(warningRef, ref);
 }
 
-var defaultProps$a = {
+function hasClass(element, className) {
+  if (element.classList) return !!className && element.classList.contains(className);
+  return (" " + (element.className.baseVal || element.className) + " ").indexOf(" " + className + " ") !== -1;
+}
+
+function getMargins(element) {
+  var styles = getComputedStyle(element);
+  var top = parseFloat(styles.marginTop) || 0;
+  var right = parseFloat(styles.marginRight) || 0;
+  var bottom = parseFloat(styles.marginBottom) || 0;
+  var left = parseFloat(styles.marginLeft) || 0;
+  return {
+    top: top,
+    right: right,
+    bottom: bottom,
+    left: left
+  };
+}
+
+function usePopperMarginModifiers() {
+  var overlayRef = react_15(null);
+  var margins = react_15(null);
+  return [react_9(function (overlay) {
+    if (!overlay || !(hasClass(overlay, 'popover') || hasClass(overlay, 'dropdown-menu'))) return;
+    margins.current = getMargins(overlay);
+    overlay.style.margin = 0;
+    overlayRef.current = overlay;
+  }, []), [react_12(function () {
+    return {
+      name: 'offset',
+      options: {
+        offset: function offset(_ref) {
+          var placement = _ref.placement;
+          if (!margins.current) return [0, 0];
+          var _margins$current = margins.current,
+              top = _margins$current.top,
+              left = _margins$current.left,
+              bottom = _margins$current.bottom,
+              right = _margins$current.right;
+
+          switch (placement.split('-')[0]) {
+            case 'top':
+              return [0, bottom];
+
+            case 'left':
+              return [0, right];
+
+            case 'bottom':
+              return [0, top];
+
+            case 'right':
+              return [0, left];
+
+            default:
+              return [0, 0];
+          }
+        }
+      }
+    };
+  }, [margins])]];
+}
+
+var defaultProps$9 = {
   alignRight: false,
   flip: true
 };
@@ -49367,22 +48981,30 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
       alignRight = _ref.alignRight,
       rootCloseEvent = _ref.rootCloseEvent,
       flip = _ref.flip,
-      popperConfig = _ref.popperConfig,
       showProps = _ref.show,
+      renderOnMount = _ref.renderOnMount,
       _ref$as = _ref.as,
       Component = _ref$as === void 0 ? 'div' : _ref$as,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "alignRight", "rootCloseEvent", "flip", "popperConfig", "show", "as"]);
+      _ref$popperConfig = _ref.popperConfig,
+      popperConfig = _ref$popperConfig === void 0 ? {} : _ref$popperConfig,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "alignRight", "rootCloseEvent", "flip", "show", "renderOnMount", "as", "popperConfig"]);
 
   var isNavbar = react_13(NavbarContext);
   var prefix = useBootstrapPrefix(bsPrefix, 'dropdown-menu');
 
+  var _usePopperMarginModif = usePopperMarginModifiers(),
+      popperRef = _usePopperMarginModif[0],
+      marginModifiers = _usePopperMarginModif[1];
+
   var _useDropdownMenu = useDropdownMenu({
     flip: flip,
-    popperConfig: popperConfig,
     rootCloseEvent: rootCloseEvent,
     show: showProps,
     alignEnd: alignRight,
-    usePopper: !isNavbar
+    usePopper: !isNavbar,
+    popperConfig: _extends({}, popperConfig, {
+      modifiers: marginModifiers.concat(popperConfig.modifiers || [])
+    })
   }),
       hasShown = _useDropdownMenu.hasShown,
       placement = _useDropdownMenu.placement,
@@ -49391,8 +49013,8 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
       close = _useDropdownMenu.close,
       menuProps = _useDropdownMenu.props;
 
-  menuProps.ref = useMergedRefs(menuProps.ref, useWrappedRefWithWarning(ref, 'DropdownMenu'));
-  if (!hasShown) return null; // For custom components provide additional, non-DOM, props;
+  menuProps.ref = useMergedRefs(popperRef, useMergedRefs(useWrappedRefWithWarning(ref, 'DropdownMenu'), menuProps.ref));
+  if (!hasShown && !renderOnMount) return null; // For custom components provide additional, non-DOM, props;
 
   if (typeof Component !== 'string') {
     menuProps.show = show;
@@ -49409,13 +49031,13 @@ var DropdownMenu$1 = react.forwardRef(function (_ref, ref) {
     props['x-placement'] = placement;
   }
 
-  return react.createElement(Component, _extends({}, props, menuProps, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, menuProps, {
     style: style,
     className: classnames(className, prefix, show && 'show', alignEnd && prefix + "-right")
   }));
 });
 DropdownMenu$1.displayName = 'DropdownMenu';
-DropdownMenu$1.defaultProps = defaultProps$a;
+DropdownMenu$1.defaultProps = defaultProps$9;
 
 var isRequiredForA11y_1 = createCommonjsModule(function (module, exports) {
 
@@ -49467,14 +49089,14 @@ var DropdownToggle$1 = react.forwardRef(function (_ref, ref) {
   toggleProps.ref = useMergedRefs(toggleProps.ref, useWrappedRefWithWarning(ref, 'DropdownToggle')); // This intentionally forwards size and variant (if set) to the
   // underlying component, to allow it to render size and style variants.
 
-  return react.createElement(Component, _extends({
+  return /*#__PURE__*/react.createElement(Component, _extends({
     onClick: toggle,
     className: classnames(className, prefix, split && prefix + "-split")
   }, toggleProps, props), children);
 });
 DropdownToggle$1.displayName = 'DropdownToggle';
 
-var defaultProps$b = {
+var defaultProps$a = {
   navbar: false
 };
 var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
@@ -49511,9 +49133,9 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
     if (onSelect) onSelect(key, event);
     handleToggle(false, event, 'select');
   });
-  return react.createElement(SelectableContext.Provider, {
+  return /*#__PURE__*/react.createElement(SelectableContext.Provider, {
     value: handleSelect
-  }, react.createElement(Dropdown, {
+  }, /*#__PURE__*/react.createElement(Dropdown, {
     drop: drop,
     show: show,
     alignEnd: alignRight,
@@ -49522,14 +49144,14 @@ var Dropdown$1 = react.forwardRef(function (uncontrolledProps, ref) {
     itemSelector: "." + prefix + "-item:not(.disabled):not(:disabled)"
   }, function (_ref) {
     var dropdownProps = _ref.props;
-    return react.createElement(Component, _extends({}, props, dropdownProps, {
+    return /*#__PURE__*/react.createElement(Component, _extends({}, props, dropdownProps, {
       ref: ref,
       className: classnames(className, show && 'show', (!drop || drop === 'down') && prefix, drop === 'up' && 'dropup', drop === 'right' && 'dropright', drop === 'left' && 'dropleft')
     }));
   }));
 });
 Dropdown$1.displayName = 'Dropdown';
-Dropdown$1.defaultProps = defaultProps$b;
+Dropdown$1.defaultProps = defaultProps$a;
 Dropdown$1.Toggle = DropdownToggle$1;
 Dropdown$1.Menu = DropdownMenu$1;
 Dropdown$1.Item = DropdownItem;
@@ -49544,100 +49166,7 @@ Dropdown$1.Divider = createWithBsPrefix('dropdown-divider', {
   }
 });
 
-var createChainableTypeChecker_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = createChainableTypeChecker;
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-// Mostly taken from ReactPropTypes.
-
-function createChainableTypeChecker(validate) {
-  function checkType(isRequired, props, propName, componentName, location, propFullName) {
-    var componentNameSafe = componentName || '<<anonymous>>';
-    var propFullNameSafe = propFullName || propName;
-
-    if (props[propName] == null) {
-      if (isRequired) {
-        return new Error('Required ' + location + ' `' + propFullNameSafe + '` was not specified ' + ('in `' + componentNameSafe + '`.'));
-      }
-
-      return null;
-    }
-
-    for (var _len = arguments.length, args = Array(_len > 6 ? _len - 6 : 0), _key = 6; _key < _len; _key++) {
-      args[_key - 6] = arguments[_key];
-    }
-
-    return validate.apply(undefined, [props, propName, componentNameSafe, location, propFullNameSafe].concat(args));
-  }
-
-  var chainedCheckType = checkType.bind(null, false);
-  chainedCheckType.isRequired = checkType.bind(null, true);
-
-  return chainedCheckType;
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(createChainableTypeChecker_1);
-
-var all_1 = createCommonjsModule(function (module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = all;
-
-
-
-var _createChainableTypeChecker2 = _interopRequireDefault(createChainableTypeChecker_1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function all() {
-  for (var _len = arguments.length, validators = Array(_len), _key = 0; _key < _len; _key++) {
-    validators[_key] = arguments[_key];
-  }
-
-  function allPropTypes() {
-    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    var error = null;
-
-    validators.forEach(function (validator) {
-      if (error != null) {
-        return;
-      }
-
-      var result = validator.apply(undefined, args);
-      if (result != null) {
-        error = result;
-      }
-    });
-
-    return error;
-  }
-
-  return (0, _createChainableTypeChecker2.default)(allPropTypes);
-}
-module.exports = exports['default'];
-});
-
-unwrapExports(all_1);
-
-var defaultProps$c = {
+var defaultProps$b = {
   type: 'checkbox'
 };
 var FormCheckInput = react.forwardRef(function (_ref, ref) {
@@ -49656,15 +49185,19 @@ var FormCheckInput = react.forwardRef(function (_ref, ref) {
       controlId = _useContext.controlId,
       custom = _useContext.custom;
 
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-input') : useBootstrapPrefix(bsPrefix, 'form-check-input');
-  return react.createElement(Component, _extends({}, props, {
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-input'] : [bsPrefix, 'form-check-input'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     id: id || controlId,
     className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid', isStatic && 'position-static')
   }));
 });
 FormCheckInput.displayName = 'FormCheckInput';
-FormCheckInput.defaultProps = defaultProps$c;
+FormCheckInput.defaultProps = defaultProps$b;
 
 var FormCheckLabel = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
@@ -49677,8 +49210,12 @@ var FormCheckLabel = react.forwardRef(function (_ref, ref) {
       controlId = _useContext.controlId,
       custom = _useContext.custom;
 
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control-label') : useBootstrapPrefix(bsPrefix, 'form-check-label');
-  return react.createElement("label", _extends({}, props, {
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-control-label'] : [bsPrefix, 'form-check-label'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement("label", _extends({}, props, {
     ref: ref,
     htmlFor: htmlFor || controlId,
     className: classnames(className, bsPrefix)
@@ -49686,7 +49223,7 @@ var FormCheckLabel = react.forwardRef(function (_ref, ref) {
 });
 FormCheckLabel.displayName = 'FormCheckLabel';
 
-var defaultProps$d = {
+var defaultProps$c = {
   type: 'checkbox',
   inline: false,
   disabled: false,
@@ -49715,7 +49252,12 @@ var FormCheck = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "inline", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "title", "type", "label", "children", "custom", "as"]);
 
   var custom = type === 'switch' ? true : propCustom;
-  bsPrefix = custom ? useBootstrapPrefix(bsCustomPrefix, 'custom-control') : useBootstrapPrefix(bsPrefix, 'form-check');
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-control'] : [bsPrefix, 'form-check'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
 
   var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
@@ -49727,7 +49269,7 @@ var FormCheck = react.forwardRef(function (_ref, ref) {
     };
   }, [controlId, custom, id]);
   var hasLabel = label != null && label !== false && !children;
-  var input = react.createElement(FormCheckInput, _extends({}, props, {
+  var input = /*#__PURE__*/react.createElement(FormCheckInput, _extends({}, props, {
     type: type === 'switch' ? 'checkbox' : type,
     ref: ref,
     isValid: isValid,
@@ -49736,21 +49278,146 @@ var FormCheck = react.forwardRef(function (_ref, ref) {
     disabled: disabled,
     as: as
   }));
-  return react.createElement(FormContext.Provider, {
+  return /*#__PURE__*/react.createElement(FormContext.Provider, {
     value: innerFormContext
-  }, react.createElement("div", {
+  }, /*#__PURE__*/react.createElement("div", {
     style: style,
     className: classnames(className, bsPrefix, custom && "custom-" + type, inline && bsPrefix + "-inline")
-  }, children || react.createElement(react.Fragment, null, input, hasLabel && react.createElement(FormCheckLabel, {
+  }, children || /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormCheckLabel, {
     title: title
-  }, label), (isValid || isInvalid) && react.createElement(Feedback, {
+  }, label), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
     type: isValid ? 'valid' : 'invalid'
   }, feedback))));
 });
 FormCheck.displayName = 'FormCheck';
-FormCheck.defaultProps = defaultProps$d;
+FormCheck.defaultProps = defaultProps$c;
 FormCheck.Input = FormCheckInput;
 FormCheck.Label = FormCheckLabel;
+
+var FormFileInput = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      lang = _ref.lang,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'input' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "className", "isValid", "isInvalid", "lang", "as"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  var type = 'file';
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-input'] : [bsPrefix, 'form-control-file'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
+    ref: ref,
+    id: id || controlId,
+    type: type,
+    lang: lang,
+    className: classnames(className, bsPrefix, isValid && 'is-valid', isInvalid && 'is-invalid')
+  }));
+});
+FormFileInput.displayName = 'FormFileInput';
+
+var FormFileLabel = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      className = _ref.className,
+      htmlFor = _ref.htmlFor,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "bsCustomPrefix", "className", "htmlFor"]);
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId,
+      custom = _useContext.custom;
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom-file-label'] : [bsPrefix, 'form-file-label'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  return /*#__PURE__*/react.createElement("label", _extends({}, props, {
+    ref: ref,
+    htmlFor: htmlFor || controlId,
+    className: classnames(className, bsPrefix),
+    "data-browse": props['data-browse']
+  }));
+});
+FormFileLabel.displayName = 'FormFileLabel';
+
+var defaultProps$d = {
+  disabled: false,
+  isValid: false,
+  isInvalid: false
+};
+var FormFile = react.forwardRef(function (_ref, ref) {
+  var id = _ref.id,
+      bsPrefix = _ref.bsPrefix,
+      bsCustomPrefix = _ref.bsCustomPrefix,
+      disabled = _ref.disabled,
+      isValid = _ref.isValid,
+      isInvalid = _ref.isInvalid,
+      feedback = _ref.feedback,
+      className = _ref.className,
+      style = _ref.style,
+      label = _ref.label,
+      children = _ref.children,
+      custom = _ref.custom,
+      lang = _ref.lang,
+      dataBrowse = _ref['data-browse'],
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      _ref$inputAs = _ref.inputAs,
+      inputAs = _ref$inputAs === void 0 ? 'input' : _ref$inputAs,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "bsPrefix", "bsCustomPrefix", "disabled", "isValid", "isInvalid", "feedback", "className", "style", "label", "children", "custom", "lang", "data-browse", "as", "inputAs"]);
+
+  var _ref2 = custom ? [bsCustomPrefix, 'custom'] : [bsPrefix, 'form-file'],
+      prefix = _ref2[0],
+      defaultPrefix = _ref2[1];
+
+  bsPrefix = useBootstrapPrefix(prefix, defaultPrefix);
+  var type = 'file';
+
+  var _useContext = react_13(FormContext),
+      controlId = _useContext.controlId;
+
+  var innerFormContext = react_12(function () {
+    return {
+      controlId: id || controlId,
+      custom: custom
+    };
+  }, [controlId, custom, id]);
+  var hasLabel = label != null && label !== false && !children;
+  var input = /*#__PURE__*/react.createElement(FormFileInput, _extends({}, props, {
+    ref: ref,
+    isValid: isValid,
+    isInvalid: isInvalid,
+    disabled: disabled,
+    as: inputAs,
+    lang: lang
+  }));
+  return /*#__PURE__*/react.createElement(FormContext.Provider, {
+    value: innerFormContext
+  }, /*#__PURE__*/react.createElement(Component, {
+    style: style,
+    className: classnames(className, bsPrefix, custom && "custom-" + type)
+  }, children || /*#__PURE__*/react.createElement(react.Fragment, null, custom ? /*#__PURE__*/react.createElement(react.Fragment, null, input, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, {
+    "data-browse": dataBrowse
+  }, label)) : /*#__PURE__*/react.createElement(react.Fragment, null, hasLabel && /*#__PURE__*/react.createElement(FormFileLabel, null, label), input), (isValid || isInvalid) && /*#__PURE__*/react.createElement(Feedback, {
+    type: isValid ? 'valid' : 'invalid'
+  }, feedback))));
+});
+FormFile.displayName = 'FormFile';
+FormFile.defaultProps = defaultProps$d;
+FormFile.Input = FormFileInput;
+FormFile.Label = FormFileLabel;
 
 var FormGroup = react.forwardRef(function (_ref, ref) {
   var bsPrefix = _ref.bsPrefix,
@@ -49767,9 +49434,9 @@ var FormGroup = react.forwardRef(function (_ref, ref) {
       controlId: controlId
     };
   }, [controlId]);
-  return react.createElement(FormContext.Provider, {
+  return /*#__PURE__*/react.createElement(FormContext.Provider, {
     value: context
-  }, react.createElement(Component, _extends({}, props, {
+  }, /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames(className, bsPrefix)
   }), children));
@@ -49781,12 +49448,14 @@ var defaultProps$e = {
   srOnly: false
 };
 var FormLabel = react.forwardRef(function (_ref, ref) {
-  var bsPrefix = _ref.bsPrefix,
+  var _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'label' : _ref$as,
+      bsPrefix = _ref.bsPrefix,
       column = _ref.column,
       srOnly = _ref.srOnly,
       className = _ref.className,
       htmlFor = _ref.htmlFor,
-      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "column", "srOnly", "className", "htmlFor"]);
+      props = _objectWithoutPropertiesLoose(_ref, ["as", "bsPrefix", "column", "srOnly", "className", "htmlFor"]);
 
   var _useContext = react_13(FormContext),
       controlId = _useContext.controlId;
@@ -49797,13 +49466,15 @@ var FormLabel = react.forwardRef(function (_ref, ref) {
   var classes = classnames(className, bsPrefix, srOnly && 'sr-only', column && columnClass);
    warning_1(controlId == null || !htmlFor, '`controlId` is ignored on `<FormLabel>` when `htmlFor` is specified.') ;
   htmlFor = htmlFor || controlId;
-  if (column) return react.createElement(Col, _extends({
+  if (column) return /*#__PURE__*/react.createElement(Col, _extends({
     as: "label",
     className: classes,
     htmlFor: htmlFor
   }, props));
-  return (// eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
-    react.createElement("label", _extends({
+  return (
+    /*#__PURE__*/
+    // eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control
+    react.createElement(Component, _extends({
       ref: ref,
       className: classes,
       htmlFor: htmlFor
@@ -49823,7 +49494,7 @@ function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "as", "muted"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form-text');
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames(className, bsPrefix, muted && 'text-muted')
   }));
@@ -49831,7 +49502,7 @@ function (_ref, ref) {
 FormText.displayName = 'FormText';
 
 var Switch = react.forwardRef(function (props, ref) {
-  return react.createElement(FormCheck, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(FormCheck, _extends({}, props, {
     ref: ref,
     type: "switch"
   }));
@@ -49853,7 +49524,7 @@ var Form = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "inline", "className", "validated", "as"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'form');
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames(className, validated && 'was-validated', inline && bsPrefix + "-inline")
   }));
@@ -49864,6 +49535,7 @@ Form.Row = createWithBsPrefix('form-row');
 Form.Group = FormGroup;
 Form.Control = FormControl;
 Form.Check = FormCheck;
+Form.File = FormFile;
 Form.Switch = Switch;
 Form.Label = FormLabel;
 Form.Text = FormText;
@@ -49872,7 +49544,7 @@ var CardContext = react.createContext(null);
 
 var TabContext = react.createContext(null);
 
-var noop$3 = function noop() {};
+var noop$6 = function noop() {};
 
 var AbstractNav = react.forwardRef(function (_ref, ref) {
   var _ref$as = _ref.as,
@@ -49953,17 +49625,17 @@ var AbstractNav = react.forwardRef(function (_ref, ref) {
     needsRefocusRef.current = false;
   });
   var mergedRef = useMergedRefs(ref, listNode);
-  return react.createElement(SelectableContext.Provider, {
+  return /*#__PURE__*/react.createElement(SelectableContext.Provider, {
     value: handleSelect
-  }, react.createElement(NavContext.Provider, {
+  }, /*#__PURE__*/react.createElement(NavContext.Provider, {
     value: {
       role: role,
       // used by NavLink to determine it's role
       activeKey: makeEventKey(activeKey),
-      getControlledId: getControlledId || noop$3,
-      getControllerId: getControllerId || noop$3
+      getControlledId: getControlledId || noop$6,
+      getControllerId: getControllerId || noop$6
     }
-  }, react.createElement(Component, _extends({}, props, {
+  }, /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     onKeyDown: handleKeyDown,
     ref: mergedRef,
     role: role
@@ -49980,7 +49652,7 @@ function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "children", "as"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'nav-item');
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames(className, bsPrefix)
   }), children);
@@ -50007,9 +49679,13 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
 
   if (navContext) {
     if (!props.role && navContext.role === 'tablist') props.role = 'tab';
+    var contextControllerId = navContext.getControllerId(navKey);
+    var contextControlledId = navContext.getControlledId(navKey);
+     warning_1(!contextControllerId || !props.id, "[react-bootstrap] The provided id '" + props.id + "' was overwritten by the current navContext with '" + contextControllerId + "'.") ;
+     warning_1(!contextControlledId || !props['aria-controls'], "[react-bootstrap] The provided aria-controls value '" + props['aria-controls'] + "' was overwritten by the current navContext with '" + contextControlledId + "'.") ;
     props['data-rb-event-key'] = navKey;
-    props.id = navContext.getControllerId(navKey);
-    props['aria-controls'] = navContext.getControlledId(navKey);
+    props.id = contextControllerId || props.id;
+    props['aria-controls'] = contextControlledId || props['aria-controls'];
     isActive = active == null && navKey != null ? navContext.activeKey === navKey : active;
   }
 
@@ -50024,7 +49700,7 @@ var AbstractNavItem = react.forwardRef(function (_ref, ref) {
     if (onSelect) onSelect(navKey, e);
     if (parentOnSelect) parentOnSelect(navKey, e);
   });
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     onClick: handleOnclick,
     className: classnames(className, isActive && 'active')
@@ -50047,7 +49723,7 @@ var NavLink = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "disabled", "className", "href", "eventKey", "onSelect", "as"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'nav-link');
-  return react.createElement(AbstractNavItem, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(AbstractNavItem, _extends({}, props, {
     href: href,
     ref: ref,
     eventKey: eventKey,
@@ -50094,7 +49770,7 @@ var Nav = react.forwardRef(function (uncontrolledProps, ref) {
     cardHeaderBsPrefix = cardContext.cardHeaderBsPrefix;
   }
 
-  return react.createElement(AbstractNav, _extends({
+  return /*#__PURE__*/react.createElement(AbstractNav, _extends({
     as: as,
     ref: ref,
     activeKey: activeKey,
@@ -50129,6 +49805,9 @@ var propTypes$6 = {
   /** An ARIA accessible role applied to the Menu component. When set to 'menu', The dropdown */
   menuRole: propTypes.string,
 
+  /** Whether to render the dropdown menu in the DOM before the first time it is shown */
+  renderMenuOnMount: propTypes.bool,
+
   /**
    *  Which event when fired outside the component will cause it to be closed.
    *
@@ -50148,21 +49827,23 @@ var NavDropdown = react.forwardRef(function (_ref, ref) {
       menuRole = _ref.menuRole,
       disabled = _ref.disabled,
       active = _ref.active,
-      props = _objectWithoutPropertiesLoose(_ref, ["id", "title", "children", "bsPrefix", "rootCloseEvent", "menuRole", "disabled", "active"]);
+      renderMenuOnMount = _ref.renderMenuOnMount,
+      props = _objectWithoutPropertiesLoose(_ref, ["id", "title", "children", "bsPrefix", "rootCloseEvent", "menuRole", "disabled", "active", "renderMenuOnMount"]);
 
-  return react.createElement(Dropdown$1, _extends({
+  return /*#__PURE__*/react.createElement(Dropdown$1, _extends({
     ref: ref
   }, props, {
     as: NavItem
-  }), react.createElement(Dropdown$1.Toggle, {
+  }), /*#__PURE__*/react.createElement(Dropdown$1.Toggle, {
     id: id,
     eventKey: null,
     active: active,
     disabled: disabled,
     childBsPrefix: bsPrefix,
     as: NavLink
-  }, title), react.createElement(Dropdown$1.Menu, {
+  }, title), /*#__PURE__*/react.createElement(Dropdown$1.Menu, {
     role: menuRole,
+    renderOnMount: renderMenuOnMount,
     rootCloseEvent: rootCloseEvent
   }, children));
 });
@@ -50180,7 +49861,7 @@ var NavbarBrand = react.forwardRef(function (_ref, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar-brand');
   var Component = as || (props.href ? 'a' : 'span');
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     className: classnames(className, bsPrefix)
   }));
@@ -50211,9 +49892,7 @@ var defaultProps$j = {
   getDimensionValue: getDimensionValue
 };
 
-var Collapse =
-/*#__PURE__*/
-function (_React$Component) {
+var Collapse = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Collapse, _React$Component);
 
   function Collapse() {
@@ -50287,7 +49966,7 @@ function (_React$Component) {
     var handleEntered = createChainedFunction(this.handleEntered, onEntered);
     var handleExit = createChainedFunction(this.handleExit, onExit);
     var handleExiting = createChainedFunction(this.handleExiting, onExiting);
-    return react.createElement(Transition, _extends({
+    return /*#__PURE__*/react.createElement(Transition, _extends({
       addEndListener: transitionEnd
     }, props, {
       "aria-expanded": props.role ? props.in : null,
@@ -50314,10 +49993,10 @@ var NavbarCollapse = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["children", "bsPrefix"]);
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'navbar-collapse');
-  return react.createElement(NavbarContext.Consumer, null, function (context) {
-    return react.createElement(Collapse, _extends({
+  return /*#__PURE__*/react.createElement(NavbarContext.Consumer, null, function (context) {
+    return /*#__PURE__*/react.createElement(Collapse, _extends({
       in: !!(context && context.expanded)
-    }, props), react.createElement("div", {
+    }, props), /*#__PURE__*/react.createElement("div", {
       ref: ref,
       className: bsPrefix
     }, children));
@@ -50353,12 +50032,12 @@ var NavbarToggle = react.forwardRef(function (_ref, ref) {
     props.type = 'button';
   }
 
-  return react.createElement(Component, _extends({}, props, {
+  return /*#__PURE__*/react.createElement(Component, _extends({}, props, {
     ref: ref,
     onClick: handleClick,
     "aria-label": label,
     className: classnames(className, bsPrefix, !expanded && 'collapsed')
-  }), children || react.createElement("span", {
+  }), children || /*#__PURE__*/react.createElement("span", {
     className: bsPrefix + "-icon"
   }));
 });
@@ -50416,11 +50095,11 @@ var Navbar = react.forwardRef(function (props, ref) {
       expanded: expanded
     };
   }, [bsPrefix, expanded, _onToggle]);
-  return react.createElement(NavbarContext.Provider, {
+  return /*#__PURE__*/react.createElement(NavbarContext.Provider, {
     value: navbarContext
-  }, react.createElement(SelectableContext.Provider, {
+  }, /*#__PURE__*/react.createElement(SelectableContext.Provider, {
     value: handleCollapse
-  }, react.createElement(Component, _extends({
+  }, /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, controlledProps, {
     className: classnames(className, bsPrefix, expand && expandClass, variant && bsPrefix + "-" + variant, bg && "bg-" + bg, sticky && "sticky-" + sticky, fixed && "fixed-" + fixed)
@@ -50479,70 +50158,113 @@ class Pane extends react.PureComponent {
       }
     };
 
-    return react.createElement("div", {
-      style: {
-        width: '100%'
-      }
-    }, react.createElement(Navbar, {
-      key: "navbar",
-      bg: "light",
-      expand: "sm",
-      style: {
-        flex: '0 0 auto',
-        height: '30px'
-      }
-    }, react.createElement(Nav, {
-      key: "select",
-      className: "mr-auto"
-    }, viewChoices.length > 0 ? react.createElement(NavDropdown, {
-      title: react.createElement("span", {
+    return (
+      /*#__PURE__*/
+      react.createElement("div", {
+        style: {
+          width: '100%'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Navbar, {
+        key: "navbar",
+        bg: "light",
+        expand: "sm",
+        style: {
+          flex: '0 0 auto',
+          height: '30px'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Nav, {
+        key: "select",
+        className: "mr-auto"
+      }, viewChoices.length > 0 ?
+      /*#__PURE__*/
+      react.createElement(NavDropdown, {
+        title:
+        /*#__PURE__*/
+        react.createElement("span", {
+          style: {
+            color: 'black'
+          }
+        }, view === undefined ? 'Select' : viewTitle)
+      }, viewChoices.map(({
+        view,
+        viewTitle
+      }, index) =>
+      /*#__PURE__*/
+      react.createElement(NavDropdown.Item, {
+        key: index,
+        onClick: () => onSelectView(id, view)
+      }, viewTitle))) : view === undefined ? viewTitle :
+      /*#__PURE__*/
+      react.createElement(Nav.Item, null,
+      /*#__PURE__*/
+      react.createElement(Nav.Link, {
         style: {
           color: 'black'
         }
-      }, view === undefined ? 'Select' : viewTitle)
-    }, viewChoices.map(({
-      view,
-      viewTitle
-    }, index) => react.createElement(NavDropdown.Item, {
-      key: index,
-      onClick: () => onSelectView(id, view)
-    }, viewTitle))) : view === undefined ? viewTitle : react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      style: {
-        color: 'black'
-      }
-    }, viewTitle)), react.createElement(Dropdown$1, {
-      as: ButtonGroup
-    }, react.createElement(Form.Control, {
-      value: fileTitle,
-      onKeyPress: openFileTitle,
-      onChange: e => this.setState({
-        fileTitle: e.target.value
-      })
-    }), react.createElement(Dropdown$1.Toggle, {
-      split: true,
-      variant: "outline-primary",
-      id: "file-selector"
-    }), react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
-      file,
-      fileTitle
-    }, index) => react.createElement(Dropdown$1.Item, {
-      key: index,
-      onClick: () => onSelectFile(id, file)
-    }, fileTitle)))), extra), react.createElement(Nav, {
-      key: "tools"
-    }, react.createElement(lib_5.Consumer, {
-      key: `${id}/toolbar`
-    }, ({
-      mosaicWindowActions
-    }) => react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      onClick: () => mosaicWindowActions.split()
-    }, "Split"))), react.createElement(lib_4.Consumer, null, ({
-      mosaicActions
-    }) => react.createElement(lib_5.Consumer, null, ({
-      mosaicWindowActions
-    }) => react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      onClick: () => mosaicActions.remove(mosaicWindowActions.getPath())
-    }, "Close")))))));
+      }, viewTitle)),
+      /*#__PURE__*/
+      react.createElement(Dropdown$1, {
+        as: ButtonGroup
+      },
+      /*#__PURE__*/
+      react.createElement(Form.Control, {
+        value: fileTitle,
+        onKeyPress: openFileTitle,
+        onChange: e => this.setState({
+          fileTitle: e.target.value
+        })
+      }),
+      /*#__PURE__*/
+      react.createElement(Dropdown$1.Toggle, {
+        split: true,
+        variant: "outline-primary",
+        id: "file-selector"
+      }),
+      /*#__PURE__*/
+      react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
+        file,
+        fileTitle
+      }, index) =>
+      /*#__PURE__*/
+      react.createElement(Dropdown$1.Item, {
+        key: index,
+        onClick: () => onSelectFile(id, file)
+      }, fileTitle)))), extra),
+      /*#__PURE__*/
+      react.createElement(Nav, {
+        key: "tools"
+      },
+      /*#__PURE__*/
+      react.createElement(lib_5.Consumer, {
+        key: `${id}/toolbar`
+      }, ({
+        mosaicWindowActions
+      }) =>
+      /*#__PURE__*/
+      react.createElement(Nav.Item, null,
+      /*#__PURE__*/
+      react.createElement(Nav.Link, {
+        onClick: () => mosaicWindowActions.split()
+      }, "Split"))),
+      /*#__PURE__*/
+      react.createElement(lib_4.Consumer, null, ({
+        mosaicActions
+      }) =>
+      /*#__PURE__*/
+      react.createElement(lib_5.Consumer, null, ({
+        mosaicWindowActions
+      }) =>
+      /*#__PURE__*/
+      react.createElement(Nav.Item, null,
+      /*#__PURE__*/
+      react.createElement(Nav.Link, {
+        onClick: () => mosaicActions.remove(mosaicWindowActions.getPath())
+      }, "Close")))))))
+    );
   }
 
   renderPane() {
@@ -50556,32 +50278,52 @@ class Pane extends react.PureComponent {
       id,
       path
     } = this.props;
-    return react.createElement(lib_21, {
-      key: `window/${workspace}/${id}`,
-      createNode: createNode,
-      renderToolbar: () => this.renderToolbar(),
-      path: path
-    }, this.renderPane());
+    return (
+      /*#__PURE__*/
+      react.createElement(lib_21, {
+        key: `window/${workspace}/${id}`,
+        createNode: createNode,
+        renderToolbar: () => this.renderToolbar(),
+        path: path
+      }, this.renderPane())
+    );
   }
 
 }
 
+var DEVICE_SIZES$1 = ['xl', 'lg', 'md', 'sm', 'xs'];
 var defaultProps$m = {
   noGutters: false
 };
-var Row = react.forwardRef(function (props, ref) {
-  var bsPrefix = props.bsPrefix,
-      noGutters = props.noGutters,
-      _props$as = props.as,
-      Component = _props$as === void 0 ? 'div' : _props$as,
-      className = props.className,
-      otherProps = _objectWithoutPropertiesLoose(props, ["bsPrefix", "noGutters", "as", "className"]);
+var Row = react.forwardRef(function (_ref, ref) {
+  var bsPrefix = _ref.bsPrefix,
+      className = _ref.className,
+      noGutters = _ref.noGutters,
+      _ref$as = _ref.as,
+      Component = _ref$as === void 0 ? 'div' : _ref$as,
+      props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "noGutters", "as"]);
 
   var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'row');
-  return react.createElement(Component, _extends({
+  var sizePrefix = decoratedBsPrefix + "-cols";
+  var classes = [];
+  DEVICE_SIZES$1.forEach(function (brkPoint) {
+    var propValue = props[brkPoint];
+    delete props[brkPoint];
+    var cols;
+
+    if (propValue != null && typeof propValue === 'object') {
+      cols = propValue.cols;
+    } else {
+      cols = propValue;
+    }
+
+    var infix = brkPoint !== 'xs' ? "-" + brkPoint : '';
+    if (cols != null) classes.push("" + sizePrefix + infix + "-" + cols);
+  });
+  return /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
-  }, otherProps, {
-    className: classnames(className, decoratedBsPrefix, noGutters && 'no-gutters')
+  }, props, {
+    className: classnames.apply(void 0, [className, decoratedBsPrefix, noGutters && 'no-gutters'].concat(classes))
   }));
 });
 Row.displayName = 'Row';
@@ -50632,7 +50374,7 @@ class FilesUi extends Pane {
 
     if (file.length > 0) {
       // FIX: Prevent this from overwriting existing files.
-      await write(`source/${file}`, '');
+      await write$1(`source/${file}`, '');
     }
   }
 
@@ -50646,7 +50388,7 @@ class FilesUi extends Pane {
 
     reader.onload = e => {
       const data = e.target.result;
-      write(`source/${name}`, new Uint8Array(data));
+      write$1(`source/${name}`, new Uint8Array(data));
     };
 
     reader.readAsArrayBuffer(file);
@@ -50663,12 +50405,20 @@ class FilesUi extends Pane {
     const {
       files = []
     } = this.state;
-    return files.map(file => react.createElement(InputGroup, {
+    return files.map(file =>
+    /*#__PURE__*/
+    react.createElement(InputGroup, {
       key: file
-    }, react.createElement(FormControl, {
+    },
+    /*#__PURE__*/
+    react.createElement(FormControl, {
       disabled: true,
       placeholder: file
-    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
+    }),
+    /*#__PURE__*/
+    react.createElement(InputGroup.Append, null,
+    /*#__PURE__*/
+    react.createElement(Button, {
       onClick: () => deleteFile({}, file),
       variant: "outline-primary"
     }, "Delete"))));
@@ -50678,43 +50428,68 @@ class FilesUi extends Pane {
     const {
       id
     } = this.props;
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column',
-        padding: '4px',
-        border: '1px solid rgba(0,0,0,.125)',
-        borderRadius: '.25rem'
-      }
-    }, react.createElement(Row, {
-      style: {
-        flex: '1 1 auto',
-        overflow: 'auto'
-      }
-    }, react.createElement(Col, null, react.createElement(InputGroup, null, react.createElement(FormControl, {
-      id: "source/add/name",
-      placeholder: "File Name"
-    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
-      onClick: this.addFile,
-      variant: "outline-primary"
-    }, "Add"))), react.createElement(InputGroup, null, react.createElement(FormControl, {
-      as: "input",
-      type: "file",
-      id: `source/${id}/import`,
-      multiple: false,
-      onChange: this.importFile,
-      style: {
-        display: 'none'
-      }
-    }), react.createElement(FormControl, {
-      id: `source/${id}/name`,
-      placeholder: ""
-    }), react.createElement(InputGroup.Append, null, react.createElement(Button, {
-      onClick: this.clickImportFile,
-      variant: "outline-primary"
-    }, "Import"))), this.buildFiles())));
+    return (
+      /*#__PURE__*/
+      react.createElement(Container, {
+        key: id,
+        style: {
+          height: '100%',
+          display: 'flex',
+          flexFlow: 'column',
+          padding: '4px',
+          border: '1px solid rgba(0,0,0,.125)',
+          borderRadius: '.25rem'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Row, {
+        style: {
+          flex: '1 1 auto',
+          overflow: 'auto'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Col, null,
+      /*#__PURE__*/
+      react.createElement(InputGroup, null,
+      /*#__PURE__*/
+      react.createElement(FormControl, {
+        id: "source/add/name",
+        placeholder: "File Name"
+      }),
+      /*#__PURE__*/
+      react.createElement(InputGroup.Append, null,
+      /*#__PURE__*/
+      react.createElement(Button, {
+        onClick: this.addFile,
+        variant: "outline-primary"
+      }, "Add"))),
+      /*#__PURE__*/
+      react.createElement(InputGroup, null,
+      /*#__PURE__*/
+      react.createElement(FormControl, {
+        as: "input",
+        type: "file",
+        id: `source/${id}/import`,
+        multiple: false,
+        onChange: this.importFile,
+        style: {
+          display: 'none'
+        }
+      }),
+      /*#__PURE__*/
+      react.createElement(FormControl, {
+        id: `source/${id}/name`,
+        placeholder: ""
+      }),
+      /*#__PURE__*/
+      react.createElement(InputGroup.Append, null,
+      /*#__PURE__*/
+      react.createElement(Button, {
+        onClick: this.clickImportFile,
+        variant: "outline-primary"
+      }, "Import"))), this.buildFiles())))
+    );
   }
 
 }
@@ -53556,8 +53331,11 @@ exports.buildDom = function buildDom(arr, parent, refs) {
         return txt;
     }
     
-    if (!Array.isArray(arr))
+    if (!Array.isArray(arr)) {
+        if (arr && arr.appendChild && parent)
+            parent.appendChild(arr);
         return arr;
+    }
     if (typeof arr[0] != "string" || !arr[0]) {
         var els = [];
         for (var i = 0; i < arr.length; i++) {
@@ -53579,7 +53357,7 @@ exports.buildDom = function buildDom(arr, parent, refs) {
             var val = options[n];
             if (n === "class") {
                 el.className = Array.isArray(val) ? val.join(" ") : val;
-            } else if (typeof val == "function" || n == "value") {
+            } else if (typeof val == "function" || n == "value" || n[0] == "$") {
                 el[n] = val;
             } else if (n === "ref") {
                 if (refs) refs[val] = el;
@@ -53822,7 +53600,8 @@ var Keys = (function() {
 
         KEY_MODS: {
             "ctrl": 1, "alt": 2, "option" : 2, "shift": 4,
-            "super": 8, "meta": 8, "command": 8, "cmd": 8
+            "super": 8, "meta": 8, "command": 8, "cmd": 8, 
+            "control": 1
         },
 
         FUNCTION_KEYS : {
@@ -53949,12 +53728,24 @@ function getListenerOptions() {
     return activeListenerOptions;
 }
 
-exports.addListener = function(elem, type, callback) {
-    return elem.addEventListener(type, callback, getListenerOptions());
+function EventListener(elem, type, callback) {
+    this.elem = elem;
+    this.type = type;
+    this.callback = callback;
+}
+EventListener.prototype.destroy = function() {
+    removeListener(this.elem, this.type, this.callback);
+    this.elem = this.type = this.callback = undefined;
 };
 
-exports.removeListener = function(elem, type, callback) {
-    return elem.removeEventListener(type, callback, getListenerOptions());
+var addListener = exports.addListener = function(elem, type, callback, destroyer) {
+    elem.addEventListener(type, callback, getListenerOptions());
+    if (destroyer)
+        destroyer.$toDestroy.push(new EventListener(elem, type, callback));
+};
+
+var removeListener = exports.removeListener = function(elem, type, callback) {
+    elem.removeEventListener(type, callback, getListenerOptions());
 };
 exports.stopEvent = function(e) {
     exports.stopPropagation(e);
@@ -53984,21 +53775,21 @@ exports.capture = function(el, eventHandler, releaseCaptureHandler) {
         eventHandler && eventHandler(e);
         releaseCaptureHandler && releaseCaptureHandler(e);
 
-        exports.removeListener(document, "mousemove", eventHandler, true);
-        exports.removeListener(document, "mouseup", onMouseUp, true);
-        exports.removeListener(document, "dragstart", onMouseUp, true);
+        removeListener(document, "mousemove", eventHandler);
+        removeListener(document, "mouseup", onMouseUp);
+        removeListener(document, "dragstart", onMouseUp);
     }
 
-    exports.addListener(document, "mousemove", eventHandler, true);
-    exports.addListener(document, "mouseup", onMouseUp, true);
-    exports.addListener(document, "dragstart", onMouseUp, true);
+    addListener(document, "mousemove", eventHandler);
+    addListener(document, "mouseup", onMouseUp);
+    addListener(document, "dragstart", onMouseUp);
     
     return onMouseUp;
 };
 
-exports.addMouseWheelListener = function(el, callback) {
+exports.addMouseWheelListener = function(el, callback, destroyer) {
     if ("onmousewheel" in el) {
-        exports.addListener(el, "mousewheel", function(e) {
+        addListener(el, "mousewheel", function(e) {
             var factor = 8;
             if (e.wheelDeltaX !== undefined) {
                 e.wheelX = -e.wheelDeltaX / factor;
@@ -54008,9 +53799,9 @@ exports.addMouseWheelListener = function(el, callback) {
                 e.wheelY = -e.wheelDelta / factor;
             }
             callback(e);
-        });
+        }, destroyer);
     } else if ("onwheel" in el) {
-        exports.addListener(el, "wheel",  function(e) {
+        addListener(el, "wheel",  function(e) {
             var factor = 0.35;
             switch (e.deltaMode) {
                 case e.DOM_DELTA_PIXEL:
@@ -54025,9 +53816,9 @@ exports.addMouseWheelListener = function(el, callback) {
             }
             
             callback(e);
-        });
+        }, destroyer);
     } else {
-        exports.addListener(el, "DOMMouseScroll", function(e) {
+        addListener(el, "DOMMouseScroll", function(e) {
             if (e.axis && e.axis == e.HORIZONTAL_AXIS) {
                 e.wheelX = (e.detail || 0) * 5;
                 e.wheelY = 0;
@@ -54036,11 +53827,11 @@ exports.addMouseWheelListener = function(el, callback) {
                 e.wheelY = (e.detail || 0) * 5;
             }
             callback(e);
-        });
+        }, destroyer);
     }
 };
 
-exports.addMultiMouseDownListener = function(elements, timeouts, eventHandler, callbackName) {
+exports.addMultiMouseDownListener = function(elements, timeouts, eventHandler, callbackName, destroyer) {
     var clicks = 0;
     var startX, startY, timer; 
     var eventNames = {
@@ -54085,7 +53876,7 @@ exports.addMultiMouseDownListener = function(elements, timeouts, eventHandler, c
     if (!Array.isArray(elements))
         elements = [elements];
     elements.forEach(function(el) {
-        exports.addListener(el, "mousedown", onMousedown);
+        addListener(el, "mousedown", onMousedown, destroyer);
     });
 };
 
@@ -54150,16 +53941,15 @@ function normalizeCommandKeys(callback, e, keyCode) {
 }
 
 
-exports.addCommandKeyListener = function(el, callback) {
-    var addListener = exports.addListener;
+exports.addCommandKeyListener = function(el, callback, destroyer) {
     if (useragent.isOldGecko || (useragent.isOpera && !("KeyboardEvent" in window))) {
         var lastKeyDownKeyCode = null;
         addListener(el, "keydown", function(e) {
             lastKeyDownKeyCode = e.keyCode;
-        });
+        }, destroyer);
         addListener(el, "keypress", function(e) {
             return normalizeCommandKeys(callback, e, lastKeyDownKeyCode);
-        });
+        }, destroyer);
     } else {
         var lastDefaultPrevented = null;
 
@@ -54168,18 +53958,18 @@ exports.addCommandKeyListener = function(el, callback) {
             var result = normalizeCommandKeys(callback, e, e.keyCode);
             lastDefaultPrevented = e.defaultPrevented;
             return result;
-        });
+        }, destroyer);
 
         addListener(el, "keypress", function(e) {
             if (lastDefaultPrevented && (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey)) {
                 exports.stopEvent(e);
                 lastDefaultPrevented = null;
             }
-        });
+        }, destroyer);
 
         addListener(el, "keyup", function(e) {
             pressedKeys[e.keyCode] = null;
-        });
+        }, destroyer);
 
         if (!pressedKeys) {
             resetPressedKeys();
@@ -54200,12 +53990,12 @@ if (typeof window == "object" && window.postMessage && !useragent.isOldIE) {
         var listener = function(e) {
             if (e.data == messageName) {
                 exports.stopPropagation(e);
-                exports.removeListener(win, "message", listener);
+                removeListener(win, "message", listener);
                 callback();
             }
         };
         
-        exports.addListener(win, "message", listener);
+        addListener(win, "message", listener);
         win.postMessage(messageName, "*");
     };
 }
@@ -54704,6 +54494,7 @@ var KEYS = require("../lib/keys");
 var MODS = KEYS.KEY_MODS;
 var isIOS = useragent.isIOS;
 var valueResetRegex = isIOS ? /\s/ : /\n/;
+var isMobile = useragent.isMobile;
 
 var TextInput = function(parentNode, host) {
     var text = dom.createElement("textarea");
@@ -54723,7 +54514,7 @@ var TextInput = function(parentNode, host) {
     var sendingText = false;
     var tempStyle = '';
     
-    if (!useragent.isMobile)
+    if (!isMobile)
         text.style.fontSize = "1px";
 
     var commandMode = false;
@@ -54739,7 +54530,7 @@ var TextInput = function(parentNode, host) {
         if (ignoreFocusEvents) return;
         host.onBlur(e);
         isFocused = false;
-    });
+    }, host);
     event.addListener(text, "focus", function(e) {
         if (ignoreFocusEvents) return;
         isFocused = true;
@@ -54754,7 +54545,7 @@ var TextInput = function(parentNode, host) {
             setTimeout(resetSelection);
         else
             resetSelection();
-    });
+    }, host);
     this.$focusScroll = false;
     this.focus = function() {
         if (tempStyle || HAS_FOCUS_ARGS || this.$focusScroll == "browser")
@@ -54800,9 +54591,12 @@ var TextInput = function(parentNode, host) {
     };
     
     host.on("beforeEndOperation", function() {
-        if (host.curOp && host.curOp.command.name == "insertstring")
+        var curOp = host.curOp;
+        var commandName = curOp && curOp.command && curOp.command.name;
+        if (commandName == "insertstring")
             return;
-        if (inComposition) {
+        var isUserAction = commandName && (curOp.docChanged || curOp.selectionChanged);
+        if (inComposition && isUserAction) {
             lastValue = text.value = "";
             onCompositionEnd();
         }
@@ -54834,33 +54628,44 @@ var TextInput = function(parentNode, host) {
             return;
         inComposition = true;
         
-        var selection = host.selection;
-        var range = selection.getRange();
-        var row = selection.cursor.row;
-        var selectionStart = range.start.column;
-        var selectionEnd = range.end.column;
-        var line = host.session.getLine(row);
+        var selectionStart = 0;
+        var selectionEnd = 0;
+        var line = "";
 
-        if (range.start.row != row) {
-            var prevLine = host.session.getLine(row - 1);
-            selectionStart = range.start.row < row - 1 ? 0 : selectionStart;
-            selectionEnd += prevLine.length + 1;
-            line = prevLine + "\n" + line;
-        }
-        else if (range.end.row != row) {
-            var nextLine = host.session.getLine(row + 1);
-            selectionEnd = range.end.row > row  + 1 ? nextLine.length : selectionEnd;
-            selectionEnd += line.length + 1;
-            line = line + "\n" + nextLine;
-        }
+        if (host.session) {
+            var selection = host.selection;
+            var range = selection.getRange();
+            var row = selection.cursor.row;
+            selectionStart = range.start.column;
+            selectionEnd = range.end.column;
+            line = host.session.getLine(row);
 
-        if (line.length > MAX_LINE_LENGTH) {
-            if (selectionStart < MAX_LINE_LENGTH && selectionEnd < MAX_LINE_LENGTH) {
-                line = line.slice(0, MAX_LINE_LENGTH);
-            } else {
-                line = "\n";
-                selectionStart = 0;
-                selectionEnd = 1;
+            if (range.start.row != row) {
+                var prevLine = host.session.getLine(row - 1);
+                selectionStart = range.start.row < row - 1 ? 0 : selectionStart;
+                selectionEnd += prevLine.length + 1;
+                line = prevLine + "\n" + line;
+            }
+            else if (range.end.row != row) {
+                var nextLine = host.session.getLine(row + 1);
+                selectionEnd = range.end.row > row  + 1 ? nextLine.length : selectionEnd;
+                selectionEnd += line.length + 1;
+                line = line + "\n" + nextLine;
+            }
+            else if (isMobile && row > 0) {
+                line = "\n" + line;
+                selectionEnd += 1;
+                selectionStart += 1;
+            }
+
+            if (line.length > MAX_LINE_LENGTH) {
+                if (selectionStart < MAX_LINE_LENGTH && selectionEnd < MAX_LINE_LENGTH) {
+                    line = line.slice(0, MAX_LINE_LENGTH);
+                } else {
+                    line = "\n";
+                    selectionStart = 0;
+                    selectionEnd = 1;
+                }
             }
         }
 
@@ -54886,6 +54691,7 @@ var TextInput = function(parentNode, host) {
         }
         inComposition = false;
     };
+    this.resetSelection = resetSelection;
 
     if (isFocused)
         host.onFocus();
@@ -54904,6 +54710,8 @@ var TextInput = function(parentNode, host) {
             copied = false;
         } else if (isAllSelected(text)) {
             host.selectAll();
+            resetSelection();
+        } else if (isMobile && text.selectionStart != lastSelectionStart) {
             resetSelection();
         }
     };
@@ -54983,8 +54791,13 @@ var TextInput = function(parentNode, host) {
         }
         var data = text.value;
         var inserted = sendText(data, true);
-        if (data.length > MAX_LINE_LENGTH + 100 || valueResetRegex.test(inserted))
+        if (
+            data.length > MAX_LINE_LENGTH + 100 
+            || valueResetRegex.test(inserted)
+            || isMobile && lastSelectionStart < 1 && lastSelectionStart == lastSelectionEnd
+        ) {
             resetSelection();
+        }
     };
     
     var handleClipboardData = function(e, data, forceIEMime) {
@@ -55056,14 +54869,14 @@ var TextInput = function(parentNode, host) {
         }
     };
 
-    event.addCommandKeyListener(text, host.onCommandKey.bind(host));
+    event.addCommandKeyListener(text, host.onCommandKey.bind(host), host);
 
-    event.addListener(text, "select", onSelect);
-    event.addListener(text, "input", onInput);
+    event.addListener(text, "select", onSelect, host);
+    event.addListener(text, "input", onInput, host);
 
-    event.addListener(text, "cut", onCut);
-    event.addListener(text, "copy", onCopy);
-    event.addListener(text, "paste", onPaste);
+    event.addListener(text, "cut", onCut, host);
+    event.addListener(text, "copy", onCopy, host);
+    event.addListener(text, "paste", onPaste, host);
     if (!('oncut' in text) || !('oncopy' in text) || !('onpaste' in text)) {
         event.addListener(parentNode, "keydown", function(e) {
             if ((useragent.isMac && !e.metaKey) || !e.ctrlKey)
@@ -55080,7 +54893,7 @@ var TextInput = function(parentNode, host) {
                     onCut(e);
                     break;
             }
-        });
+        }, host);
     }
     var onCompositionStart = function(e) {
         if (inComposition || !host.onCompositionStart || host.$readOnly) 
@@ -55091,7 +54904,11 @@ var TextInput = function(parentNode, host) {
         if (commandMode)
             return;
         
+        if (e.data)
+            inComposition.useTextareaForIME = false;
+        
         setTimeout(onCompositionUpdate, 0);
+        host._signal("compositionStart");
         host.on("mousedown", cancelComposition);
         
         var range = host.getSelectionRange();
@@ -55102,8 +54919,7 @@ var TextInput = function(parentNode, host) {
         host.onCompositionStart(inComposition);
         
         if (inComposition.useTextareaForIME) {
-            text.value = "";
-            lastValue = "";
+            lastValue = text.value = "";
             lastSelectionStart = 0;
             lastSelectionEnd = 0;
         }
@@ -55166,11 +54982,11 @@ var TextInput = function(parentNode, host) {
         syncComposition();
     }
 
-    event.addListener(text, "compositionstart", onCompositionStart);
-    event.addListener(text, "compositionupdate", onCompositionUpdate);
-    event.addListener(text, "keyup", onKeyup);
-    event.addListener(text, "keydown", syncComposition);
-    event.addListener(text, "compositionend", onCompositionEnd);
+    event.addListener(text, "compositionstart", onCompositionStart, host);
+    event.addListener(text, "compositionupdate", onCompositionUpdate, host);
+    event.addListener(text, "keyup", onKeyup, host);
+    event.addListener(text, "keydown", syncComposition, host);
+    event.addListener(text, "compositionend", onCompositionEnd, host);
 
     this.getElement = function() {
         return text;
@@ -55241,13 +55057,13 @@ var TextInput = function(parentNode, host) {
         host.textInput.onContextMenu(e);
         onContextMenuClose();
     };
-    event.addListener(text, "mouseup", onContextMenu);
+    event.addListener(text, "mouseup", onContextMenu, host);
     event.addListener(text, "mousedown", function(e) {
         e.preventDefault();
         onContextMenuClose();
-    });
-    event.addListener(host.renderer.scroller, "contextmenu", onContextMenu);
-    event.addListener(text, "contextmenu", onContextMenu);
+    }, host);
+    event.addListener(host.renderer.scroller, "contextmenu", onContextMenu, host);
+    event.addListener(text, "contextmenu", onContextMenu, host);
     
     if (isIOS)
         addIosSelectionHandler(parentNode, host, text);
@@ -55333,10 +55149,13 @@ var TextInput = function(parentNode, host) {
             document.removeEventListener("selectionchange", detectArrowKeys);
         });
     }
-
 };
 
 exports.TextInput = TextInput;
+exports.$setUserAgentForTests = function(_isMobile, _isIOS) {
+    isMobile = _isMobile;
+    isIOS = _isIOS;
+};
 });
 
 ace.define("ace/mouse/default_handlers",["require","exports","module","ace/lib/useragent"], function(require, exports, module) {
@@ -55763,7 +55582,7 @@ function GutterHandler(mouseHandler) {
             tooltip.hide();
             tooltipAnnotation = null;
             editor._signal("hideGutterTooltip", tooltip);
-            editor.removeEventListener("mousewheel", hideTooltip);
+            editor.off("mousewheel", hideTooltip);
         }
     }
 
@@ -55800,7 +55619,7 @@ function GutterHandler(mouseHandler) {
             tooltipTimeout = null;
             hideTooltip();
         }, 50);
-    });
+    }, editor);
     
     editor.on("changeSession", hideTooltip);
 }
@@ -55933,7 +55752,7 @@ function DragdropHandler(mouseHandler) {
      exports.forEach(function(x) {
          mouseHandler[x] = this[x];
     }, this);
-    editor.addEventListener("mousedown", this.onMouseDown.bind(mouseHandler));
+    editor.on("mousedown", this.onMouseDown.bind(mouseHandler));
 
 
     var mouseTarget = editor.container;
@@ -56058,12 +55877,12 @@ function DragdropHandler(mouseHandler) {
         return event.preventDefault(e);
     };
 
-    event.addListener(mouseTarget, "dragstart", this.onDragStart.bind(mouseHandler));
-    event.addListener(mouseTarget, "dragend", this.onDragEnd.bind(mouseHandler));
-    event.addListener(mouseTarget, "dragenter", this.onDragEnter.bind(mouseHandler));
-    event.addListener(mouseTarget, "dragover", this.onDragOver.bind(mouseHandler));
-    event.addListener(mouseTarget, "dragleave", this.onDragLeave.bind(mouseHandler));
-    event.addListener(mouseTarget, "drop", this.onDrop.bind(mouseHandler));
+    event.addListener(mouseTarget, "dragstart", this.onDragStart.bind(mouseHandler), editor);
+    event.addListener(mouseTarget, "dragend", this.onDragEnd.bind(mouseHandler), editor);
+    event.addListener(mouseTarget, "dragenter", this.onDragEnter.bind(mouseHandler), editor);
+    event.addListener(mouseTarget, "dragover", this.onDragOver.bind(mouseHandler), editor);
+    event.addListener(mouseTarget, "dragleave", this.onDragLeave.bind(mouseHandler), editor);
+    event.addListener(mouseTarget, "drop", this.onDrop.bind(mouseHandler), editor);
 
     function scrollCursorIntoView(cursor, prevCursor) {
         var now = Date.now();
@@ -56420,7 +56239,7 @@ exports.addTouchListeners = function(el, editor) {
         if (!pressed) return;
         var textarea = editor.textInput.getElement();
         textarea.focus();
-    });
+    }, editor);
     event.addListener(el, "touchstart", function (e) {
         var touches = e.touches;
         if (longTouchTimer || touches.length > 1) {
@@ -56493,7 +56312,7 @@ exports.addTouchListeners = function(el, editor) {
             longTouchTimer = setTimeout(handleLongTap, 450);
         }
         touchStartT = t;
-    });
+    }, editor);
 
     event.addListener(el, "touchend", function (e) {
         pressed = editor.$mouseHandler.isMousePressed = false;
@@ -56507,14 +56326,13 @@ exports.addTouchListeners = function(el, editor) {
             showContextMenu();
         } else if (mode == "scroll") {
             animate();
-            e.preventDefault();
             hideContextMenu();
         } else {
             showContextMenu();
         }
         clearTimeout(longTouchTimer);
         longTouchTimer = null;
-    });
+    }, editor);
     event.addListener(el, "touchmove", function (e) {
         if (longTouchTimer) {
             clearTimeout(longTouchTimer);
@@ -56570,7 +56388,7 @@ exports.addTouchListeners = function(el, editor) {
             editor.renderer.scrollCursorIntoView(pos);
             e.preventDefault();
         }
-    });
+    }, editor);
 
     function animate() {
         animationSteps += 60;
@@ -56679,8 +56497,8 @@ EventEmitter._signal = function(eventName, e) {
 
 EventEmitter.once = function(eventName, callback) {
     var _self = this;
-    this.addEventListener(eventName, function newCallback() {
-        _self.removeEventListener(eventName, newCallback);
+    this.on(eventName, function newCallback() {
+        _self.off(eventName, newCallback);
         callback.apply(null, arguments);
     });
     if (!callback) {
@@ -56752,7 +56570,9 @@ EventEmitter.removeEventListener = function(eventName, callback) {
 };
 
 EventEmitter.removeAllListeners = function(eventName) {
-    if (this._eventRegistry) this._eventRegistry[eventName] = [];
+    if (!eventName) this._eventRegistry = this._defaultHandlers = undefined;
+    if (this._eventRegistry) this._eventRegistry[eventName] = undefined;
+    if (this._defaultHandlers) this._defaultHandlers[eventName] = undefined;
 };
 
 exports.EventEmitter = EventEmitter;
@@ -57075,7 +56895,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.4.8";
+exports.version = "1.4.10";
 
 });
 
@@ -57107,28 +56927,28 @@ var MouseHandler = function(editor) {
     };
 
     var mouseTarget = editor.renderer.getMouseEventTarget();
-    event.addListener(mouseTarget, "click", this.onMouseEvent.bind(this, "click"));
-    event.addListener(mouseTarget, "mousemove", this.onMouseMove.bind(this, "mousemove"));
+    event.addListener(mouseTarget, "click", this.onMouseEvent.bind(this, "click"), editor);
+    event.addListener(mouseTarget, "mousemove", this.onMouseMove.bind(this, "mousemove"), editor);
     event.addMultiMouseDownListener([
         mouseTarget,
         editor.renderer.scrollBarV && editor.renderer.scrollBarV.inner,
         editor.renderer.scrollBarH && editor.renderer.scrollBarH.inner,
         editor.textInput && editor.textInput.getElement()
-    ].filter(Boolean), [400, 300, 250], this, "onMouseEvent");
-    event.addMouseWheelListener(editor.container, this.onMouseWheel.bind(this, "mousewheel"));
+    ].filter(Boolean), [400, 300, 250], this, "onMouseEvent", editor);
+    event.addMouseWheelListener(editor.container, this.onMouseWheel.bind(this, "mousewheel"), editor);
     addTouchListeners(editor.container, editor);
 
     var gutterEl = editor.renderer.$gutter;
-    event.addListener(gutterEl, "mousedown", this.onMouseEvent.bind(this, "guttermousedown"));
-    event.addListener(gutterEl, "click", this.onMouseEvent.bind(this, "gutterclick"));
-    event.addListener(gutterEl, "dblclick", this.onMouseEvent.bind(this, "gutterdblclick"));
-    event.addListener(gutterEl, "mousemove", this.onMouseEvent.bind(this, "guttermousemove"));
+    event.addListener(gutterEl, "mousedown", this.onMouseEvent.bind(this, "guttermousedown"), editor);
+    event.addListener(gutterEl, "click", this.onMouseEvent.bind(this, "gutterclick"), editor);
+    event.addListener(gutterEl, "dblclick", this.onMouseEvent.bind(this, "gutterdblclick"), editor);
+    event.addListener(gutterEl, "mousemove", this.onMouseEvent.bind(this, "guttermousemove"), editor);
 
-    event.addListener(mouseTarget, "mousedown", focusEditor);
-    event.addListener(gutterEl, "mousedown", focusEditor);
+    event.addListener(mouseTarget, "mousedown", focusEditor, editor);
+    event.addListener(gutterEl, "mousedown", focusEditor, editor);
     if (useragent.isIE && editor.renderer.scrollBarV) {
-        event.addListener(editor.renderer.scrollBarV.element, "mousedown", focusEditor);
-        event.addListener(editor.renderer.scrollBarH.element, "mousedown", focusEditor);
+        event.addListener(editor.renderer.scrollBarV.element, "mousedown", focusEditor, editor);
+        event.addListener(editor.renderer.scrollBarH.element, "mousedown", focusEditor, editor);
     }
 
     editor.on("mousemove", function(e){
@@ -57144,7 +56964,7 @@ var MouseHandler = function(editor) {
         } else {
             renderer.setCursorStyle("");
         }
-    });
+    }, editor);
 };
 
 (function() {
@@ -60211,7 +60031,7 @@ var Anchor = exports.Anchor = function(doc, row, column) {
         });
     };
     this.detach = function() {
-        this.document.removeEventListener("change", this.$onChange);
+        this.document.off("change", this.$onChange);
     };
     this.attach = function(doc) {
         this.document = doc || this.document;
@@ -60542,6 +60362,16 @@ var Document = function(textOrLines) {
         }
     };
     
+    this.$safeApplyDelta = function(delta) {
+        var docLength = this.$lines.length;
+        if (
+            delta.action == "remove" && delta.start.row < docLength && delta.end.row < docLength
+            || delta.action == "insert" && delta.start.row <= docLength
+        ) {
+            this.applyDelta(delta);
+        }
+    };
+    
     this.$splitAndapplyLargeDelta = function(delta, MAX) {
         var lines = delta.lines;
         var l = lines.length - MAX + 1;
@@ -60564,7 +60394,7 @@ var Document = function(textOrLines) {
         this.applyDelta(delta, true);
     };
     this.revertDelta = function(delta) {
-        this.applyDelta({
+        this.$safeApplyDelta({
             start: this.clonePos(delta.start),
             end: this.clonePos(delta.end),
             action: (delta.action == "insert" ? "remove" : "insert"),
@@ -62806,7 +62636,8 @@ EditSession.$uid = 0;
             this.$modeId = mode.$id;
         if (this.$mode === mode) 
             return;
-
+            
+        var oldMode = this.$mode;
         this.$mode = mode;
 
         this.$stopWorker();
@@ -62816,15 +62647,15 @@ EditSession.$uid = 0;
 
         var tokenizer = mode.getTokenizer();
 
-        if(tokenizer.addEventListener !== undefined) {
+        if(tokenizer.on !== undefined) {
             var onReloadTokenizer = this.onReloadTokenizer.bind(this);
-            tokenizer.addEventListener("update", onReloadTokenizer);
+            tokenizer.on("update", onReloadTokenizer);
         }
 
         if (!this.bgTokenizer) {
             this.bgTokenizer = new BackgroundTokenizer(tokenizer);
             var _self = this;
-            this.bgTokenizer.addEventListener("update", function(e) {
+            this.bgTokenizer.on("update", function(e) {
                 _self._signal("tokenizerUpdate", e);
             });
         } else {
@@ -62843,7 +62674,7 @@ EditSession.$uid = 0;
             this.$options.wrapMethod.set.call(this, this.$wrapMethod);
             this.$setFolding(mode.foldingRules);
             this.bgTokenizer.start(0);
-            this._emit("changeMode");
+            this._emit("changeMode", {oldMode: oldMode, mode: mode});
         }
     };
 
@@ -62989,7 +62820,7 @@ EditSession.$uid = 0;
         for (var i = 0; i < deltas.length; i++) {
             var delta = deltas[i];
             if (delta.action == "insert" || delta.action == "remove") {
-                this.doc.applyDelta(delta);
+                this.doc.$safeApplyDelta(delta);
             }
         }
 
@@ -63903,6 +63734,8 @@ EditSession.$uid = 0;
             this.bgTokenizer = null;
         }
         this.$stopWorker();
+        this.removeAllListeners();
+        this.selection.detach();
     };
 
     this.isFullWidth = isFullWidth;
@@ -64641,7 +64474,7 @@ oop.inherits(CommandManager, MultiHashHandler);
         editor && editor._emit("changeStatus");
         if (this.recording) {
             this.macro.pop();
-            this.removeEventListener("exec", this.$addCommandToMacro);
+            this.off("exec", this.$addCommandToMacro);
 
             if (!this.macro.length)
                 this.macro = this.oldMacro;
@@ -65401,6 +65234,13 @@ exports.commands = [{
     multiSelectAction: "forEach",
     scrollIntoView: "cursor"
 }, {
+    name: "autoindent",
+    description: "Auto Indent",
+    bindKey: bindKey(null, null),
+    exec: function(editor) { editor.autoIndent(); },
+    multiSelectAction: "forEachLine",
+    scrollIntoView: "animate"
+}, {
     name: "expandtoline",
     description: "Expand to line",
     bindKey: bindKey("Ctrl-Shift-L", "Command-Shift-L"),
@@ -65553,6 +65393,7 @@ var TokenIterator = require("./token_iterator").TokenIterator;
 
 var clipboard = require("./clipboard");
 var Editor = function(renderer, session, options) {
+    this.$toDestroy = [];
     var container = renderer.getContainerElement();
     this.container = container;
     this.renderer = renderer;
@@ -65645,8 +65486,8 @@ Editor.$uid = 0;
     };
 
     this.endOperation = function(e) {
-        if (this.curOp) {
-            if (e && e.returnValue === false)
+        if (this.curOp && this.session) {
+            if (e && e.returnValue === false || !this.session)
                 return (this.curOp = null);
             if (e == true && this.curOp.command && this.curOp.command.name == "mouse")
                 return;
@@ -66047,6 +65888,9 @@ Editor.$uid = 0;
 
     this.$cursorChange = function() {
         this.renderer.updateCursor();
+        this.$highlightBrackets();
+        this.$highlightTags();
+        this.$updateHighlightActiveLine();
     };
     this.onDocumentChange = function(delta) {
         var wrap = this.session.$useWrapMode;
@@ -66055,7 +65899,6 @@ Editor.$uid = 0;
 
         this._signal("change", delta);
         this.$cursorChange();
-        this.$updateHighlightActiveLine();
     };
 
     this.onTokenizerUpdate = function(e) {
@@ -66073,10 +65916,6 @@ Editor.$uid = 0;
     };
     this.onCursorChange = function() {
         this.$cursorChange();
-
-        this.$highlightBrackets();
-        this.$highlightTags();
-        this.$updateHighlightActiveLine();
         this._signal("changeSelection");
     };
 
@@ -66327,15 +66166,61 @@ Editor.$uid = 0;
                               transform.selection[3]));
             }
         }
+        if (this.$enableAutoIndent) {
+            if (session.getDocument().isNewLine(text)) {
+                var lineIndent = mode.getNextLineIndent(lineState, line.slice(0, cursor.column), session.getTabString());
 
-        if (session.getDocument().isNewLine(text)) {
-            var lineIndent = mode.getNextLineIndent(lineState, line.slice(0, cursor.column), session.getTabString());
-
-            session.insert({row: cursor.row+1, column: 0}, lineIndent);
+                session.insert({row: cursor.row+1, column: 0}, lineIndent);
+            }
+            if (shouldOutdent)
+                mode.autoOutdent(lineState, session, cursor.row);
         }
-        if (shouldOutdent)
-            mode.autoOutdent(lineState, session, cursor.row);
     };
+
+    this.autoIndent = function () {
+        var session = this.session;
+        var mode = session.getMode();
+
+        var startRow, endRow;
+        if (this.selection.isEmpty()) {
+            startRow = 0;
+            endRow = session.doc.getLength() - 1;
+        } else {
+            var selectedRange = this.getSelectionRange();
+
+            startRow = selectedRange.start.row;
+            endRow = selectedRange.end.row;
+        }
+
+        var prevLineState = "";
+        var prevLine = "";
+        var lineIndent = "";
+        var line, currIndent, range;
+        var tab = session.getTabString();
+
+        for (var row = startRow; row <= endRow; row++) {
+            if (row > 0) {
+                prevLineState = session.getState(row - 1);
+                prevLine = session.getLine(row - 1);
+                lineIndent = mode.getNextLineIndent(prevLineState, prevLine, tab);
+            }
+
+            line = session.getLine(row);
+            currIndent = mode.$getIndent(line);
+            if (lineIndent !== currIndent) {
+                if (currIndent.length > 0) {
+                    range = new Range(row, 0, row, currIndent.length);
+                    session.remove(range);
+                }
+                if (lineIndent.length > 0) {
+                    session.insert({row: row, column: 0}, lineIndent);
+                }
+            }
+
+            mode.autoOutdent(prevLineState, session, row);
+        }
+    };
+
 
     this.onTextInput = function(text, composition) {
         if (!composition)
@@ -66355,6 +66240,10 @@ Editor.$uid = 0;
             var r = this.selection.getRange();
             r.start.column -= composition.extendLeft;
             r.end.column += composition.extendRight;
+            if (r.start.column < 0) {
+                r.start.row--;
+                r.start.column += this.session.getLine(r.start.row).length + 1;
+            }
             this.selection.setRange(r);
             if (!text && !r.isEmpty())
                 this.remove();
@@ -67360,13 +67249,19 @@ Editor.$uid = 0;
         this.renderer.scrollCursorIntoView(null, 0.5);
     };
     this.destroy = function() {
+        if (this.$toDestroy) {
+            this.$toDestroy.forEach(function(el) {
+                el.destroy();
+            });
+            this.$toDestroy = null;
+        }
         this.renderer.destroy();
         this._signal("destroy", this);
         if (this.session)
             this.session.destroy();
         if (this._$emitInputEvent)
             this._$emitInputEvent.cancel();
-        this.session = null;
+        this.removeAllListeners();
     };
     this.setAutoScrollEditorIntoView = function(enable) {
         if (!enable)
@@ -67482,6 +67377,7 @@ config.defineOptions(Editor.prototype, "editor", {
     },
     behavioursEnabled: {initialValue: true},
     wrapBehavioursEnabled: {initialValue: true},
+    enableAutoIndent: {initialValue: true},
     autoScrollEditorIntoView: {
         set: function(val) {this.setAutoScrollEditorIntoView(val);}
     },
@@ -67526,7 +67422,7 @@ config.defineOptions(Editor.prototype, "editor", {
         set: function(message) {
             if (!this.$updatePlaceholder) {
                 this.$updatePlaceholder = function() {
-                    var value = this.renderer.$composition || this.getValue();
+                    var value = this.session && (this.renderer.$composition || this.getValue());
                     if (value && this.renderer.placeholderNode) {
                         this.renderer.off("afterRender", this.$updatePlaceholder);
                         dom.removeCssClass(this.container, "ace_hasPlaceholder");
@@ -67540,6 +67436,8 @@ config.defineOptions(Editor.prototype, "editor", {
                         el.textContent = this.$placeholder || "";
                         this.renderer.placeholderNode = el;
                         this.renderer.content.appendChild(this.renderer.placeholderNode);
+                    } else if (!value && this.renderer.placeholderNode) {
+                        this.renderer.placeholderNode.textContent = this.$placeholder || "";
                     }
                 }.bind(this);
                 this.on("input", this.$updatePlaceholder);
@@ -67713,25 +67611,6 @@ var UndoManager = function() {
         if (to == null) to = this.$rev + 1;
         
     };
-
-    this.validateDeltaBoundaries = function(deltaSet, docLength, invertAction) {
-        if (!deltaSet) {
-            return false;
-        }
-        return deltaSet.every(function(delta) {
-            var action = delta.action;
-            if (invertAction && delta.action === "insert") action = "remove";
-            if (invertAction && delta.action === "remove") action = "insert";
-            switch(action) {
-                case "insert":
-                    return delta.start.row <= docLength;
-                case "remove":
-                    return delta.start.row < docLength && delta.end.row < docLength;
-                default:
-                    return true;
-            }
-        });
-    };
     this.undo = function(session, dontSelect) {
         this.lastDeltas = null;
         var stack = this.$undoStack;
@@ -67749,7 +67628,7 @@ var UndoManager = function() {
         
         var deltaSet = stack.pop();
         var undoSelectionRange = null;
-        if (this.validateDeltaBoundaries(deltaSet, session.getLength(), true)) {
+        if (deltaSet) {
             undoSelectionRange = session.undoChanges(deltaSet, dontSelect);
             this.$redoStack.push(deltaSet);
             this.$syncRev();
@@ -67777,7 +67656,7 @@ var UndoManager = function() {
         var deltaSet = this.$redoStack.pop();
         var redoSelectionRange = null;
         
-        if (this.validateDeltaBoundaries(deltaSet, session.getLength(), false)) {
+        if (deltaSet) {
             redoSelectionRange = session.redoChanges(deltaSet, dontSelect);
             this.$undoStack.push(deltaSet);
             this.$syncRev();
@@ -68235,7 +68114,7 @@ var Gutter = function(parentEl) {
 
     this.setSession = function(session) {
         if (this.session)
-            this.session.removeEventListener("change", this.$updateAnnotations);
+            this.session.off("change", this.$updateAnnotations);
         this.session = session;
         if (session)
             session.on("change", this.$updateAnnotations);
@@ -68921,11 +68800,21 @@ var Text = function(parentEl) {
     };
 
     this.showInvisibles = false;
+    this.showSpaces = false;
+    this.showTabs = false;
+    this.showEOL = false;
     this.setShowInvisibles = function(showInvisibles) {
         if (this.showInvisibles == showInvisibles)
             return false;
 
         this.showInvisibles = showInvisibles;
+        if (typeof showInvisibles == "string") {
+            this.showSpaces = /tab/i.test(showInvisibles);
+            this.showTabs = /space/i.test(showInvisibles);
+            this.showEOL = /eol/i.test(showInvisibles);
+        } else {
+            this.showSpaces = this.showTabs = this.showEOL = showInvisibles;
+        }
         this.$computeTabString();
         return true;
     };
@@ -68947,7 +68836,7 @@ var Text = function(parentEl) {
         this.tabSize = tabSize;
         var tabStr = this.$tabStrings = [0];
         for (var i = 1; i < tabSize + 1; i++) {
-            if (this.showInvisibles) {
+            if (this.showTabs) {
                 var span = this.dom.createElement("span");
                 span.className = "ace_invisible ace_invisible_tab";
                 span.textContent = lang.stringRepeat(this.TAB_CHAR, i);
@@ -68959,18 +68848,15 @@ var Text = function(parentEl) {
         if (this.displayIndentGuides) {
             this.$indentGuideRe =  /\s\S| \t|\t |\s$/;
             var className = "ace_indent-guide";
-            var spaceClass = "";
-            var tabClass = "";
-            if (this.showInvisibles) {
-                className += " ace_invisible";
-                spaceClass = " ace_invisible_space";
-                tabClass = " ace_invisible_tab";
-                var spaceContent = lang.stringRepeat(this.SPACE_CHAR, this.tabSize);
-                var tabContent = lang.stringRepeat(this.TAB_CHAR, this.tabSize);
-            } else {
-                var spaceContent = lang.stringRepeat(" ", this.tabSize);
-                var tabContent = spaceContent;
-            }
+            var spaceClass = this.showSpaces ? " ace_invisible ace_invisible_space" : "";
+            var spaceContent = this.showSpaces
+                ? lang.stringRepeat(this.SPACE_CHAR, this.tabSize)
+                : lang.stringRepeat(" ", this.tabSize);
+
+            var tabClass = this.showTabs ? " ace_invisible ace_invisible_tab" : "";
+            var tabContent = this.showTabs 
+                ? lang.stringRepeat(this.TAB_CHAR, this.tabSize)
+                : spaceContent;
 
             var span = this.dom.createElement("span");
             span.className = className + spaceClass;
@@ -69163,7 +69049,7 @@ var Text = function(parentEl) {
             var cjkSpace = m[4];
             var cjk = m[5];
             
-            if (!self.showInvisibles && simpleSpace)
+            if (!self.showSpaces && simpleSpace)
                 continue;
 
             var before = i != m.index ? value.slice(i, m.index) : "";
@@ -69179,7 +69065,7 @@ var Text = function(parentEl) {
                 valueFragment.appendChild(self.$tabStrings[tabSize].cloneNode(true));
                 screenColumn += tabSize - 1;
             } else if (simpleSpace) {
-                if (self.showInvisibles) {
+                if (self.showSpaces) {
                     var span = this.dom.createElement("span");
                     span.className = "ace_invisible ace_invisible_space";
                     span.textContent = lang.stringRepeat(self.SPACE_CHAR, simpleSpace.length);
@@ -69197,8 +69083,8 @@ var Text = function(parentEl) {
                 
                 var span = this.dom.createElement("span");
                 span.style.width = (self.config.characterWidth * 2) + "px";
-                span.className = self.showInvisibles ? "ace_cjk ace_invisible ace_invisible_space" : "ace_cjk";
-                span.textContent = self.showInvisibles ? self.SPACE_CHAR : cjkSpace;
+                span.className = self.showSpaces ? "ace_cjk ace_invisible ace_invisible_space" : "ace_cjk";
+                span.textContent = self.showSpaces ? self.SPACE_CHAR : cjkSpace;
                 valueFragment.appendChild(span);
             } else if (cjk) {
                 screenColumn += 1;
@@ -69367,7 +69253,7 @@ var Text = function(parentEl) {
             parent.appendChild(lastLineEl);
         }
 
-        if (this.showInvisibles && lastLineEl) {
+        if (this.showEOL && lastLineEl) {
             if (foldLine)
                 row = foldLine.end.row;
 
@@ -69895,7 +69781,7 @@ var FontMetrics = exports.FontMetrics = function(parentEl) {
     this.el.appendChild(this.$measureNode);
     parentEl.appendChild(this.el);
     
-    this.$measureNode.innerHTML = lang.stringRepeat("X", CHAR_COUNT);
+    this.$measureNode.textContent = lang.stringRepeat("X", CHAR_COUNT);
     
     this.$characterSize = {width: 0, height: 0};
     
@@ -69944,11 +69830,7 @@ var FontMetrics = exports.FontMetrics = function(parentEl) {
     this.$addObserver = function() {
         var self = this;
         this.$observer = new window.ResizeObserver(function(e) {
-            var rect = e[0].contentRect;
-            self.checkForSizeChanges({
-                height: rect.height,
-                width: rect.width / CHAR_COUNT
-            });
+            self.checkForSizeChanges();
         });
         this.$observer.observe(this.$measureNode);
     };
@@ -69984,7 +69866,7 @@ var FontMetrics = exports.FontMetrics = function(parentEl) {
     };
 
     this.$measureCharWidth = function(ch) {
-        this.$main.innerHTML = lang.stringRepeat(ch, CHAR_COUNT);
+        this.$main.textContent = lang.stringRepeat(ch, CHAR_COUNT);
         var rect = this.$main.getBoundingClientRect();
         return rect.width / CHAR_COUNT;
     };
@@ -70100,6 +69982,7 @@ var editorCss = "\
 .ace_editor {\
 position: relative;\
 overflow: hidden;\
+padding: 0;\
 font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;\
 direction: ltr;\
 text-align: left;\
@@ -70615,11 +70498,11 @@ var VirtualRenderer = function(container, theme) {
     this.scrollBar = 
     this.scrollBarV = new VScrollBar(this.container, this);
     this.scrollBarH = new HScrollBar(this.container, this);
-    this.scrollBarV.addEventListener("scroll", function(e) {
+    this.scrollBarV.on("scroll", function(e) {
         if (!_self.$scrollAnimation)
             _self.session.setScrollTop(e.data - _self.scrollMargin.top);
     });
-    this.scrollBarH.addEventListener("scroll", function(e) {
+    this.scrollBarH.on("scroll", function(e) {
         if (!_self.$scrollAnimation)
             _self.session.setScrollLeft(e.data - _self.scrollMargin.left);
     });
@@ -70634,7 +70517,7 @@ var VirtualRenderer = function(container, theme) {
 
     this.$fontMetrics = new FontMetrics(this.container);
     this.$textLayer.$setFontMetrics(this.$fontMetrics);
-    this.$textLayer.addEventListener("changeCharacterSize", function(e) {
+    this.$textLayer.on("changeCharacterSize", function(e) {
         _self.updateCharacterSize();
         _self.onResize(true, _self.gutterWidth, _self.$size.width, _self.$size.height);
         _self._signal("changeCharacterSize", e);
@@ -71571,6 +71454,8 @@ var VirtualRenderer = function(container, theme) {
         _self.session.setScrollTop(steps.shift());
         _self.session.$scrollTop = toValue;
         this.$timer = setInterval(function() {
+            if (!_self.session) 
+                return clearInterval(_self.$timer);
             if (steps.length) {
                 _self.session.setScrollTop(steps.shift());
                 _self.session.$scrollTop = toValue;
@@ -71681,7 +71566,8 @@ var VirtualRenderer = function(container, theme) {
         if (!composition.cssText) {
             composition.cssText = this.textarea.style.cssText;
         }
-        composition.useTextareaForIME = this.$useTextareaForIME;
+        if (composition.useTextareaForIME == undefined)
+            composition.useTextareaForIME = this.$useTextareaForIME;
         
         if (this.$useTextareaForIME) {
             dom.addCssClass(this.textarea, "ace_composition");
@@ -71707,6 +71593,8 @@ var VirtualRenderer = function(container, theme) {
 
         dom.removeCssClass(this.textarea, "ace_composition");
         this.textarea.style.cssText = this.$composition.cssText;
+        var cursor = this.session.selection.cursor;
+        this.removeExtraToken(cursor.row, cursor.column);
         this.$composition = null;
         this.$cursorLayer.element.style.display = "";
     };
@@ -71733,6 +71621,10 @@ var VirtualRenderer = function(container, theme) {
                 }
             }
         }
+        this.updateLines(row, row);
+    };
+
+    this.removeExtraToken = function(row, column) {
         this.updateLines(row, row);
     };
     this.setTheme = function(theme, cb) {
@@ -71805,6 +71697,8 @@ var VirtualRenderer = function(container, theme) {
         this.freeze();
         this.$fontMetrics.destroy();
         this.$cursorLayer.destroy();
+        this.removeAllListeners();
+        this.container.textContent = "";
     };
 
 }).call(VirtualRenderer.prototype);
@@ -72329,8 +72223,8 @@ var PlaceHolder = function(session, length, pos, others, mainClass, othersClass)
     this.detach = function() {
         this.session.removeMarker(this.pos && this.pos.markerId);
         this.hideOtherMarkers();
-        this.doc.removeEventListener("change", this.$onUpdate);
-        this.session.selection.removeEventListener("changeCursor", this.$onCursorChange);
+        this.doc.off("change", this.$onUpdate);
+        this.session.selection.off("changeCursor", this.$onCursorChange);
         this.session.setUndoSelect(true);
         this.session = null;
     };
@@ -73384,10 +73278,10 @@ function addAltCursorListeners(editor){
         } else if (altCursor) {
             reset();
         }
-    });
+    }, editor);
 
-    event.addListener(el, "keyup", reset);
-    event.addListener(el, "blur", reset);
+    event.addListener(el, "keyup", reset, editor);
+    event.addListener(el, "blur", reset, editor);
     function reset(e) {
         if (altCursor) {
             editor.renderer.setMouseCursor("");
@@ -75453,7 +75347,7 @@ function baseIsNative$1(value) {
   if (!isObject$1(value) || isMasked$1(value)) {
     return false;
   }
-  var pattern = (isFunction$2(value) || isHostObject(value)) ? reIsNative$1 : reIsHostCtor$1;
+  var pattern = (isFunction$1(value) || isHostObject(value)) ? reIsNative$1 : reIsHostCtor$1;
   return pattern.test(toSource$1(value));
 }
 
@@ -75761,7 +75655,7 @@ var isArray$1 = Array.isArray;
  * _.isFunction(/abc/);
  * // => false
  */
-function isFunction$2(value) {
+function isFunction$1(value) {
   // The use of `Object#toString` avoids issues with the `typeof` operator
   // in Safari 8-9 which returns 'object' for typed array and other constructors.
   var tag = isObject$1(value) ? objectToString$1.call(value) : '';
@@ -75953,6 +75847,7 @@ var SplitComponent = /** @class */ (function (_super) {
         var _this = this;
         var _a = this.props, className = _a.className, onBeforeLoad = _a.onBeforeLoad, mode = _a.mode, focus = _a.focus, theme = _a.theme, fontSize = _a.fontSize, value = _a.value, defaultValue = _a.defaultValue, cursorStart = _a.cursorStart, showGutter = _a.showGutter, wrapEnabled = _a.wrapEnabled, showPrintMargin = _a.showPrintMargin, _b = _a.scrollMargin, scrollMargin = _b === void 0 ? [0, 0, 0, 0] : _b, keyboardHandler = _a.keyboardHandler, onLoad = _a.onLoad, commands = _a.commands, annotations = _a.annotations, markers = _a.markers, splits = _a.splits;
         this.editor = ace.edit(this.refEditor);
+        this.editor.setTheme("ace/theme/" + theme);
         if (onBeforeLoad) {
             onBeforeLoad(ace);
         }
@@ -76344,7 +76239,7 @@ var diffMatchPatch = createCommonjsModule(function (module) {
  * Class containing the diff, match and patch methods.
  * @constructor
  */
-function diff_match_patch() {
+var diff_match_patch = function() {
 
   // Defaults.
   // Redefine these in your program to override the defaults.
@@ -76369,7 +76264,7 @@ function diff_match_patch() {
 
   // The number of bits in an int.
   this.Match_MaxBits = 32;
-}
+};
 
 
 //  DIFF FUNCTIONS
@@ -76384,6 +76279,18 @@ var DIFF_DELETE = -1;
 var DIFF_INSERT = 1;
 var DIFF_EQUAL = 0;
 
+/**
+ * Class representing one diff tuple.
+ * ~Attempts to look like a two-element array (which is what this used to be).~
+ * Constructor returns an actual two-element array, to allow destructing @JackuB
+ * See https://github.com/JackuB/diff-match-patch/issues/14 for details
+ * @param {number} op Operation, one of: DIFF_DELETE, DIFF_INSERT, DIFF_EQUAL.
+ * @param {string} text Text to be deleted, inserted, or retained.
+ * @constructor
+ */
+diff_match_patch.Diff = function(op, text) {
+  return [op, text];
+};
 
 /**
  * Find the differences between two texts.  Simplifies the problem by stripping
@@ -76393,7 +76300,7 @@ var DIFF_EQUAL = 0;
  * @param {boolean=} opt_checklines Optional speedup flag. If present and false,
  *     then don't run a line-level diff first to identify the changed areas.
  *     Defaults to true, which does a faster, slightly less optimal diff.
- * @param {number} opt_deadline Optional time when the diff should be complete
+ * @param {number=} opt_deadline Optional time when the diff should be complete
  *     by.  Used internally for recursive calls.  Users should set DiffTimeout
  *     instead.
  * @return {!Array.<!diff_match_patch.Diff>} Array of diff tuples.
@@ -76418,7 +76325,7 @@ diff_match_patch.prototype.diff_main = function(text1, text2, opt_checklines,
   // Check for equality (speedup).
   if (text1 == text2) {
     if (text1) {
-      return [[DIFF_EQUAL, text1]];
+      return [new diff_match_patch.Diff(DIFF_EQUAL, text1)];
     }
     return [];
   }
@@ -76445,10 +76352,10 @@ diff_match_patch.prototype.diff_main = function(text1, text2, opt_checklines,
 
   // Restore the prefix and suffix.
   if (commonprefix) {
-    diffs.unshift([DIFF_EQUAL, commonprefix]);
+    diffs.unshift(new diff_match_patch.Diff(DIFF_EQUAL, commonprefix));
   }
   if (commonsuffix) {
-    diffs.push([DIFF_EQUAL, commonsuffix]);
+    diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, commonsuffix));
   }
   this.diff_cleanupMerge(diffs);
   return diffs;
@@ -76473,12 +76380,12 @@ diff_match_patch.prototype.diff_compute_ = function(text1, text2, checklines,
 
   if (!text1) {
     // Just add some text (speedup).
-    return [[DIFF_INSERT, text2]];
+    return [new diff_match_patch.Diff(DIFF_INSERT, text2)];
   }
 
   if (!text2) {
     // Just delete some text (speedup).
-    return [[DIFF_DELETE, text1]];
+    return [new diff_match_patch.Diff(DIFF_DELETE, text1)];
   }
 
   var longtext = text1.length > text2.length ? text1 : text2;
@@ -76486,9 +76393,10 @@ diff_match_patch.prototype.diff_compute_ = function(text1, text2, checklines,
   var i = longtext.indexOf(shorttext);
   if (i != -1) {
     // Shorter text is inside the longer text (speedup).
-    diffs = [[DIFF_INSERT, longtext.substring(0, i)],
-             [DIFF_EQUAL, shorttext],
-             [DIFF_INSERT, longtext.substring(i + shorttext.length)]];
+    diffs = [new diff_match_patch.Diff(DIFF_INSERT, longtext.substring(0, i)),
+             new diff_match_patch.Diff(DIFF_EQUAL, shorttext),
+             new diff_match_patch.Diff(DIFF_INSERT,
+                 longtext.substring(i + shorttext.length))];
     // Swap insertions for deletions if diff is reversed.
     if (text1.length > text2.length) {
       diffs[0][0] = diffs[2][0] = DIFF_DELETE;
@@ -76499,7 +76407,8 @@ diff_match_patch.prototype.diff_compute_ = function(text1, text2, checklines,
   if (shorttext.length == 1) {
     // Single character string.
     // After the previous speedup, the character can't be an equality.
-    return [[DIFF_DELETE, text1], [DIFF_INSERT, text2]];
+    return [new diff_match_patch.Diff(DIFF_DELETE, text1),
+            new diff_match_patch.Diff(DIFF_INSERT, text2)];
   }
 
   // Check to see if the problem can be split in two.
@@ -76515,7 +76424,8 @@ diff_match_patch.prototype.diff_compute_ = function(text1, text2, checklines,
     var diffs_a = this.diff_main(text1_a, text2_a, checklines, deadline);
     var diffs_b = this.diff_main(text1_b, text2_b, checklines, deadline);
     // Merge the results.
-    return diffs_a.concat([[DIFF_EQUAL, mid_common]], diffs_b);
+    return diffs_a.concat([new diff_match_patch.Diff(DIFF_EQUAL, mid_common)],
+                          diffs_b);
   }
 
   if (checklines && text1.length > 100 && text2.length > 100) {
@@ -76552,7 +76462,7 @@ diff_match_patch.prototype.diff_lineMode_ = function(text1, text2, deadline) {
 
   // Rediff any replacement blocks, this time character-by-character.
   // Add a dummy entry at the end.
-  diffs.push([DIFF_EQUAL, '']);
+  diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, ''));
   var pointer = 0;
   var count_delete = 0;
   var count_insert = 0;
@@ -76575,11 +76485,12 @@ diff_match_patch.prototype.diff_lineMode_ = function(text1, text2, deadline) {
           diffs.splice(pointer - count_delete - count_insert,
                        count_delete + count_insert);
           pointer = pointer - count_delete - count_insert;
-          var a = this.diff_main(text_delete, text_insert, false, deadline);
-          for (var j = a.length - 1; j >= 0; j--) {
-            diffs.splice(pointer, 0, a[j]);
+          var subDiff =
+              this.diff_main(text_delete, text_insert, false, deadline);
+          for (var j = subDiff.length - 1; j >= 0; j--) {
+            diffs.splice(pointer, 0, subDiff[j]);
           }
-          pointer = pointer + a.length;
+          pointer = pointer + subDiff.length;
         }
         count_insert = 0;
         count_delete = 0;
@@ -76713,7 +76624,8 @@ diff_match_patch.prototype.diff_bisect_ = function(text1, text2, deadline) {
   }
   // Diff took too long and hit the deadline or
   // number of diffs equals number of characters, no commonality at all.
-  return [[DIFF_DELETE, text1], [DIFF_INSERT, text2]];
+  return [new diff_match_patch.Diff(DIFF_DELETE, text1),
+          new diff_match_patch.Diff(DIFF_INSERT, text2)];
 };
 
 
@@ -76785,21 +76697,29 @@ diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
         lineEnd = text.length - 1;
       }
       var line = text.substring(lineStart, lineEnd + 1);
-      lineStart = lineEnd + 1;
 
       if (lineHash.hasOwnProperty ? lineHash.hasOwnProperty(line) :
           (lineHash[line] !== undefined)) {
         chars += String.fromCharCode(lineHash[line]);
       } else {
+        if (lineArrayLength == maxLines) {
+          // Bail out at 65535 because
+          // String.fromCharCode(65536) == String.fromCharCode(0)
+          line = text.substring(lineStart);
+          lineEnd = text.length;
+        }
         chars += String.fromCharCode(lineArrayLength);
         lineHash[line] = lineArrayLength;
         lineArray[lineArrayLength++] = line;
       }
+      lineStart = lineEnd + 1;
     }
     return chars;
   }
-
+  // Allocate 2/3rds of the space for text1, the rest for text2.
+  var maxLines = 40000;
   var chars1 = diff_linesToCharsMunge_(text1);
+  maxLines = 65535;
   var chars2 = diff_linesToCharsMunge_(text2);
   return {chars1: chars1, chars2: chars2, lineArray: lineArray};
 };
@@ -76813,13 +76733,13 @@ diff_match_patch.prototype.diff_linesToChars_ = function(text1, text2) {
  * @private
  */
 diff_match_patch.prototype.diff_charsToLines_ = function(diffs, lineArray) {
-  for (var x = 0; x < diffs.length; x++) {
-    var chars = diffs[x][1];
+  for (var i = 0; i < diffs.length; i++) {
+    var chars = diffs[i][1];
     var text = [];
-    for (var y = 0; y < chars.length; y++) {
-      text[y] = lineArray[chars.charCodeAt(y)];
+    for (var j = 0; j < chars.length; j++) {
+      text[j] = lineArray[chars.charCodeAt(j)];
     }
-    diffs[x][1] = text.join('');
+    diffs[i][1] = text.join('');
   }
 };
 
@@ -76837,7 +76757,7 @@ diff_match_patch.prototype.diff_commonPrefix = function(text1, text2) {
     return 0;
   }
   // Binary search.
-  // Performance analysis: http://neil.fraser.name/news/2007/10/09/
+  // Performance analysis: https://neil.fraser.name/news/2007/10/09/
   var pointermin = 0;
   var pointermax = Math.min(text1.length, text2.length);
   var pointermid = pointermax;
@@ -76869,7 +76789,7 @@ diff_match_patch.prototype.diff_commonSuffix = function(text1, text2) {
     return 0;
   }
   // Binary search.
-  // Performance analysis: http://neil.fraser.name/news/2007/10/09/
+  // Performance analysis: https://neil.fraser.name/news/2007/10/09/
   var pointermin = 0;
   var pointermax = Math.min(text1.length, text2.length);
   var pointermid = pointermax;
@@ -76918,7 +76838,7 @@ diff_match_patch.prototype.diff_commonOverlap_ = function(text1, text2) {
 
   // Start by looking for a single character match
   // and increase length until no match is found.
-  // Performance analysis: http://neil.fraser.name/news/2010/11/04/
+  // Performance analysis: https://neil.fraser.name/news/2010/11/04/
   var best = 0;
   var length = 1;
   while (true) {
@@ -77045,7 +76965,7 @@ diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
   var equalities = [];  // Stack of indices where equalities are found.
   var equalitiesLength = 0;  // Keeping our own length var is faster in JS.
   /** @type {?string} */
-  var lastequality = null;
+  var lastEquality = null;
   // Always equal to diffs[equalities[equalitiesLength - 1]][1]
   var pointer = 0;  // Index of current position.
   // Number of characters that changed prior to the equality.
@@ -77061,7 +76981,7 @@ diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
       length_deletions1 = length_deletions2;
       length_insertions2 = 0;
       length_deletions2 = 0;
-      lastequality = diffs[pointer][1];
+      lastEquality = diffs[pointer][1];
     } else {  // An insertion or deletion.
       if (diffs[pointer][0] == DIFF_INSERT) {
         length_insertions2 += diffs[pointer][1].length;
@@ -77070,13 +76990,13 @@ diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
       }
       // Eliminate an equality that is smaller or equal to the edits on both
       // sides of it.
-      if (lastequality && (lastequality.length <=
+      if (lastEquality && (lastEquality.length <=
           Math.max(length_insertions1, length_deletions1)) &&
-          (lastequality.length <= Math.max(length_insertions2,
+          (lastEquality.length <= Math.max(length_insertions2,
                                            length_deletions2))) {
         // Duplicate record.
         diffs.splice(equalities[equalitiesLength - 1], 0,
-                     [DIFF_DELETE, lastequality]);
+                     new diff_match_patch.Diff(DIFF_DELETE, lastEquality));
         // Change second copy to insert.
         diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT;
         // Throw away the equality we just deleted.
@@ -77088,7 +77008,7 @@ diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
         length_deletions1 = 0;
         length_insertions2 = 0;
         length_deletions2 = 0;
-        lastequality = null;
+        lastEquality = null;
         changes = true;
       }
     }
@@ -77119,8 +77039,8 @@ diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
         if (overlap_length1 >= deletion.length / 2 ||
             overlap_length1 >= insertion.length / 2) {
           // Overlap found.  Insert an equality and trim the surrounding edits.
-          diffs.splice(pointer, 0,
-              [DIFF_EQUAL, insertion.substring(0, overlap_length1)]);
+          diffs.splice(pointer, 0, new diff_match_patch.Diff(DIFF_EQUAL,
+              insertion.substring(0, overlap_length1)));
           diffs[pointer - 1][1] =
               deletion.substring(0, deletion.length - overlap_length1);
           diffs[pointer + 1][1] = insertion.substring(overlap_length1);
@@ -77131,8 +77051,8 @@ diff_match_patch.prototype.diff_cleanupSemantic = function(diffs) {
             overlap_length2 >= insertion.length / 2) {
           // Reverse overlap found.
           // Insert an equality and swap and trim the surrounding edits.
-          diffs.splice(pointer, 0,
-              [DIFF_EQUAL, deletion.substring(0, overlap_length2)]);
+          diffs.splice(pointer, 0, new diff_match_patch.Diff(DIFF_EQUAL,
+              deletion.substring(0, overlap_length2)));
           diffs[pointer - 1][0] = DIFF_INSERT;
           diffs[pointer - 1][1] =
               insertion.substring(0, insertion.length - overlap_length2);
@@ -77290,7 +77210,7 @@ diff_match_patch.prototype.diff_cleanupEfficiency = function(diffs) {
   var equalities = [];  // Stack of indices where equalities are found.
   var equalitiesLength = 0;  // Keeping our own length var is faster in JS.
   /** @type {?string} */
-  var lastequality = null;
+  var lastEquality = null;
   // Always equal to diffs[equalities[equalitiesLength - 1]][1]
   var pointer = 0;  // Index of current position.
   // Is there an insertion operation before the last equality.
@@ -77309,11 +77229,11 @@ diff_match_patch.prototype.diff_cleanupEfficiency = function(diffs) {
         equalities[equalitiesLength++] = pointer;
         pre_ins = post_ins;
         pre_del = post_del;
-        lastequality = diffs[pointer][1];
+        lastEquality = diffs[pointer][1];
       } else {
         // Not a candidate, and can never become one.
         equalitiesLength = 0;
-        lastequality = null;
+        lastEquality = null;
       }
       post_ins = post_del = false;
     } else {  // An insertion or deletion.
@@ -77330,16 +77250,16 @@ diff_match_patch.prototype.diff_cleanupEfficiency = function(diffs) {
        * <ins>A</del>X<ins>C</ins><del>D</del>
        * <ins>A</ins><del>B</del>X<del>C</del>
        */
-      if (lastequality && ((pre_ins && pre_del && post_ins && post_del) ||
-                           ((lastequality.length < this.Diff_EditCost / 2) &&
+      if (lastEquality && ((pre_ins && pre_del && post_ins && post_del) ||
+                           ((lastEquality.length < this.Diff_EditCost / 2) &&
                             (pre_ins + pre_del + post_ins + post_del) == 3))) {
         // Duplicate record.
         diffs.splice(equalities[equalitiesLength - 1], 0,
-                     [DIFF_DELETE, lastequality]);
+                     new diff_match_patch.Diff(DIFF_DELETE, lastEquality));
         // Change second copy to insert.
         diffs[equalities[equalitiesLength - 1] + 1][0] = DIFF_INSERT;
         equalitiesLength--;  // Throw away the equality we just deleted;
-        lastequality = null;
+        lastEquality = null;
         if (pre_ins && pre_del) {
           // No changes made which could affect previous entry, keep going.
           post_ins = post_del = true;
@@ -77368,7 +77288,8 @@ diff_match_patch.prototype.diff_cleanupEfficiency = function(diffs) {
  * @param {!Array.<!diff_match_patch.Diff>} diffs Array of diff tuples.
  */
 diff_match_patch.prototype.diff_cleanupMerge = function(diffs) {
-  diffs.push([DIFF_EQUAL, '']);  // Add a dummy entry at the end.
+  // Add a dummy entry at the end.
+  diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, ''));
   var pointer = 0;
   var count_delete = 0;
   var count_insert = 0;
@@ -77400,8 +77321,8 @@ diff_match_patch.prototype.diff_cleanupMerge = function(diffs) {
                 diffs[pointer - count_delete - count_insert - 1][1] +=
                     text_insert.substring(0, commonlength);
               } else {
-                diffs.splice(0, 0, [DIFF_EQUAL,
-                                    text_insert.substring(0, commonlength)]);
+                diffs.splice(0, 0, new diff_match_patch.Diff(DIFF_EQUAL,
+                    text_insert.substring(0, commonlength)));
                 pointer++;
               }
               text_insert = text_insert.substring(commonlength);
@@ -77419,19 +77340,19 @@ diff_match_patch.prototype.diff_cleanupMerge = function(diffs) {
             }
           }
           // Delete the offending records and add the merged ones.
-          if (count_delete === 0) {
-            diffs.splice(pointer - count_insert,
-                count_delete + count_insert, [DIFF_INSERT, text_insert]);
-          } else if (count_insert === 0) {
-            diffs.splice(pointer - count_delete,
-                count_delete + count_insert, [DIFF_DELETE, text_delete]);
-          } else {
-            diffs.splice(pointer - count_delete - count_insert,
-                count_delete + count_insert, [DIFF_DELETE, text_delete],
-                [DIFF_INSERT, text_insert]);
+          pointer -= count_delete + count_insert;
+          diffs.splice(pointer, count_delete + count_insert);
+          if (text_delete.length) {
+            diffs.splice(pointer, 0,
+                new diff_match_patch.Diff(DIFF_DELETE, text_delete));
+            pointer++;
           }
-          pointer = pointer - count_delete - count_insert +
-                    (count_delete ? 1 : 0) + (count_insert ? 1 : 0) + 1;
+          if (text_insert.length) {
+            diffs.splice(pointer, 0,
+                new diff_match_patch.Diff(DIFF_INSERT, text_insert));
+            pointer++;
+          }
+          pointer++;
         } else if (pointer !== 0 && diffs[pointer - 1][0] == DIFF_EQUAL) {
           // Merge this equality with the previous one.
           diffs[pointer - 1][1] += diffs[pointer][1];
@@ -77669,7 +77590,8 @@ diff_match_patch.prototype.diff_fromDelta = function(text1, delta) {
     switch (tokens[x].charAt(0)) {
       case '+':
         try {
-          diffs[diffsLength++] = [DIFF_INSERT, decodeURI(param)];
+          diffs[diffsLength++] =
+              new diff_match_patch.Diff(DIFF_INSERT, decodeURI(param));
         } catch (ex) {
           // Malformed URI sequence.
           throw new Error('Illegal escape in diff_fromDelta: ' + param);
@@ -77684,9 +77606,9 @@ diff_match_patch.prototype.diff_fromDelta = function(text1, delta) {
         }
         var text = text1.substring(pointer, pointer += n);
         if (tokens[x].charAt(0) == '=') {
-          diffs[diffsLength++] = [DIFF_EQUAL, text];
+          diffs[diffsLength++] = new diff_match_patch.Diff(DIFF_EQUAL, text);
         } else {
-          diffs[diffsLength++] = [DIFF_DELETE, text];
+          diffs[diffsLength++] = new diff_match_patch.Diff(DIFF_DELETE, text);
         }
         break;
       default:
@@ -77889,6 +77811,9 @@ diff_match_patch.prototype.patch_addContext_ = function(patch, text) {
   if (text.length == 0) {
     return;
   }
+  if (patch.start2 === null) {
+    throw Error('patch not initialized');
+  }
   var pattern = text.substring(patch.start2, patch.start2 + patch.length1);
   var padding = 0;
 
@@ -77907,13 +77832,13 @@ diff_match_patch.prototype.patch_addContext_ = function(patch, text) {
   // Add the prefix.
   var prefix = text.substring(patch.start2 - padding, patch.start2);
   if (prefix) {
-    patch.diffs.unshift([DIFF_EQUAL, prefix]);
+    patch.diffs.unshift(new diff_match_patch.Diff(DIFF_EQUAL, prefix));
   }
   // Add the suffix.
   var suffix = text.substring(patch.start2 + patch.length1,
                               patch.start2 + patch.length1 + padding);
   if (suffix) {
-    patch.diffs.push([DIFF_EQUAL, suffix]);
+    patch.diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, suffix));
   }
 
   // Roll back the start points.
@@ -77941,9 +77866,9 @@ diff_match_patch.prototype.patch_addContext_ = function(patch, text) {
  *
  * @param {string|!Array.<!diff_match_patch.Diff>} a text1 (methods 1,3,4) or
  * Array of diff tuples for text1 to text2 (method 2).
- * @param {string|!Array.<!diff_match_patch.Diff>} opt_b text2 (methods 1,4) or
+ * @param {string|!Array.<!diff_match_patch.Diff>=} opt_b text2 (methods 1,4) or
  * Array of diff tuples for text1 to text2 (method 3) or undefined (method 2).
- * @param {string|!Array.<!diff_match_patch.Diff>} opt_c Array of diff tuples
+ * @param {string|!Array.<!diff_match_patch.Diff>=} opt_c Array of diff tuples
  * for text1 to text2 (method 4) or undefined (methods 1,2,3).
  * @return {!Array.<!diff_match_patch.patch_obj>} Array of Patch objects.
  */
@@ -78032,7 +77957,7 @@ diff_match_patch.prototype.patch_make = function(a, opt_b, opt_c) {
             patch = new diff_match_patch.patch_obj();
             patchDiffLength = 0;
             // Unlike Unidiff, our patch lists have a rolling context.
-            // http://code.google.com/p/google-diff-match-patch/wiki/Unidiff
+            // https://github.com/google/diff-match-patch/wiki/Unidiff
             // Update prepatch text & pos to reflect the application of the
             // just completed patch.
             prepatch_text = postpatch_text;
@@ -78073,7 +77998,8 @@ diff_match_patch.prototype.patch_deepCopy = function(patches) {
     var patchCopy = new diff_match_patch.patch_obj();
     patchCopy.diffs = [];
     for (var y = 0; y < patch.diffs.length; y++) {
-      patchCopy.diffs[y] = patch.diffs[y].slice();
+      patchCopy.diffs[y] =
+          new diff_match_patch.Diff(patch.diffs[y][0], patch.diffs[y][1]);
     }
     patchCopy.start1 = patch.start1;
     patchCopy.start2 = patch.start2;
@@ -78217,7 +78143,7 @@ diff_match_patch.prototype.patch_addPadding = function(patches) {
   var diffs = patch.diffs;
   if (diffs.length == 0 || diffs[0][0] != DIFF_EQUAL) {
     // Add nullPadding equality.
-    diffs.unshift([DIFF_EQUAL, nullPadding]);
+    diffs.unshift(new diff_match_patch.Diff(DIFF_EQUAL, nullPadding));
     patch.start1 -= paddingLength;  // Should be 0.
     patch.start2 -= paddingLength;  // Should be 0.
     patch.length1 += paddingLength;
@@ -78237,7 +78163,7 @@ diff_match_patch.prototype.patch_addPadding = function(patches) {
   diffs = patch.diffs;
   if (diffs.length == 0 || diffs[diffs.length - 1][0] != DIFF_EQUAL) {
     // Add nullPadding equality.
-    diffs.push([DIFF_EQUAL, nullPadding]);
+    diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, nullPadding));
     patch.length1 += paddingLength;
     patch.length2 += paddingLength;
   } else if (paddingLength > diffs[diffs.length - 1][1].length) {
@@ -78278,7 +78204,7 @@ diff_match_patch.prototype.patch_splitMax = function(patches) {
       patch.start2 = start2 - precontext.length;
       if (precontext !== '') {
         patch.length1 = patch.length2 = precontext.length;
-        patch.diffs.push([DIFF_EQUAL, precontext]);
+        patch.diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, precontext));
       }
       while (bigpatch.diffs.length !== 0 &&
              patch.length1 < patch_size - this.Patch_Margin) {
@@ -78297,7 +78223,7 @@ diff_match_patch.prototype.patch_splitMax = function(patches) {
           patch.length1 += diff_text.length;
           start1 += diff_text.length;
           empty = false;
-          patch.diffs.push([diff_type, diff_text]);
+          patch.diffs.push(new diff_match_patch.Diff(diff_type, diff_text));
           bigpatch.diffs.shift();
         } else {
           // Deletion or equality.  Only take as much as we can stomach.
@@ -78311,7 +78237,7 @@ diff_match_patch.prototype.patch_splitMax = function(patches) {
           } else {
             empty = false;
           }
-          patch.diffs.push([diff_type, diff_text]);
+          patch.diffs.push(new diff_match_patch.Diff(diff_type, diff_text));
           if (diff_text == bigpatch.diffs[0][1]) {
             bigpatch.diffs.shift();
           } else {
@@ -78334,7 +78260,7 @@ diff_match_patch.prototype.patch_splitMax = function(patches) {
             patch.diffs[patch.diffs.length - 1][0] === DIFF_EQUAL) {
           patch.diffs[patch.diffs.length - 1][1] += postcontext;
         } else {
-          patch.diffs.push([DIFF_EQUAL, postcontext]);
+          patch.diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, postcontext));
         }
       }
       if (!empty) {
@@ -78413,13 +78339,13 @@ diff_match_patch.prototype.patch_fromText = function(textline) {
       }
       if (sign == '-') {
         // Deletion.
-        patch.diffs.push([DIFF_DELETE, line]);
+        patch.diffs.push(new diff_match_patch.Diff(DIFF_DELETE, line));
       } else if (sign == '+') {
         // Insertion.
-        patch.diffs.push([DIFF_INSERT, line]);
+        patch.diffs.push(new diff_match_patch.Diff(DIFF_INSERT, line));
       } else if (sign == ' ') {
         // Minor equality.
-        patch.diffs.push([DIFF_EQUAL, line]);
+        patch.diffs.push(new diff_match_patch.Diff(DIFF_EQUAL, line));
       } else if (sign == '@') {
         // Start of next patch.
         break;
@@ -78453,9 +78379,9 @@ diff_match_patch.patch_obj = function() {
 
 
 /**
- * Emmulate GNU diff's format.
+ * Emulate GNU diff's format.
  * Header: @@ -382,8 +481,9 @@
- * Indicies are printed as 1-based, not 0-based.
+ * Indices are printed as 1-based, not 0-based.
  * @return {string} The GNU diff string.
  */
 diff_match_patch.patch_obj.prototype.toString = function() {
@@ -78791,11 +78717,11 @@ var _ = {
 	manual: _self.Prism && _self.Prism.manual,
 	disableWorkerMessageHandler: _self.Prism && _self.Prism.disableWorkerMessageHandler,
 	util: {
-		encode: function (tokens) {
+		encode: function encode(tokens) {
 			if (tokens instanceof Token) {
-				return new Token(tokens.type, _.util.encode(tokens.content), tokens.alias);
+				return new Token(tokens.type, encode(tokens.content), tokens.alias);
 			} else if (Array.isArray(tokens)) {
-				return tokens.map(_.util.encode);
+				return tokens.map(encode);
 			} else {
 				return tokens.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
 			}
@@ -79099,137 +79025,8 @@ var _ = {
 		return Token.stringify(_.util.encode(env.tokens), env.language);
 	},
 
-	matchGrammar: function (text, strarr, grammar, index, startPos, oneshot, target) {
-		for (var token in grammar) {
-			if (!grammar.hasOwnProperty(token) || !grammar[token]) {
-				continue;
-			}
-
-			var patterns = grammar[token];
-			patterns = Array.isArray(patterns) ? patterns : [patterns];
-
-			for (var j = 0; j < patterns.length; ++j) {
-				if (target && target == token + ',' + j) {
-					return;
-				}
-
-				var pattern = patterns[j],
-					inside = pattern.inside,
-					lookbehind = !!pattern.lookbehind,
-					greedy = !!pattern.greedy,
-					lookbehindLength = 0,
-					alias = pattern.alias;
-
-				if (greedy && !pattern.pattern.global) {
-					// Without the global flag, lastIndex won't work
-					var flags = pattern.pattern.toString().match(/[imsuy]*$/)[0];
-					pattern.pattern = RegExp(pattern.pattern.source, flags + 'g');
-				}
-
-				pattern = pattern.pattern || pattern;
-
-				// Don’t cache length as it changes during the loop
-				for (var i = index, pos = startPos; i < strarr.length; pos += strarr[i].length, ++i) {
-
-					var str = strarr[i];
-
-					if (strarr.length > text.length) {
-						// Something went terribly wrong, ABORT, ABORT!
-						return;
-					}
-
-					if (str instanceof Token) {
-						continue;
-					}
-
-					if (greedy && i != strarr.length - 1) {
-						pattern.lastIndex = pos;
-						var match = pattern.exec(text);
-						if (!match) {
-							break;
-						}
-
-						var from = match.index + (lookbehind && match[1] ? match[1].length : 0),
-						    to = match.index + match[0].length,
-						    k = i,
-						    p = pos;
-
-						for (var len = strarr.length; k < len && (p < to || (!strarr[k].type && !strarr[k - 1].greedy)); ++k) {
-							p += strarr[k].length;
-							// Move the index i to the element in strarr that is closest to from
-							if (from >= p) {
-								++i;
-								pos = p;
-							}
-						}
-
-						// If strarr[i] is a Token, then the match starts inside another Token, which is invalid
-						if (strarr[i] instanceof Token) {
-							continue;
-						}
-
-						// Number of tokens to delete and replace with the new match
-						delNum = k - i;
-						str = text.slice(pos, p);
-						match.index -= pos;
-					} else {
-						pattern.lastIndex = 0;
-
-						var match = pattern.exec(str),
-							delNum = 1;
-					}
-
-					if (!match) {
-						if (oneshot) {
-							break;
-						}
-
-						continue;
-					}
-
-					if(lookbehind) {
-						lookbehindLength = match[1] ? match[1].length : 0;
-					}
-
-					var from = match.index + lookbehindLength,
-					    match = match[0].slice(lookbehindLength),
-					    to = from + match.length,
-					    before = str.slice(0, from),
-					    after = str.slice(to);
-
-					var args = [i, delNum];
-
-					if (before) {
-						++i;
-						pos += before.length;
-						args.push(before);
-					}
-
-					var wrapped = new Token(token, inside? _.tokenize(match, inside) : match, alias, match, greedy);
-
-					args.push(wrapped);
-
-					if (after) {
-						args.push(after);
-					}
-
-					Array.prototype.splice.apply(strarr, args);
-
-					if (delNum != 1)
-						_.matchGrammar(text, strarr, grammar, i, pos, true, token + ',' + j);
-
-					if (oneshot)
-						break;
-				}
-			}
-		}
-	},
-
 	tokenize: function(text, grammar) {
-		var strarr = [text];
-
 		var rest = grammar.rest;
-
 		if (rest) {
 			for (var token in rest) {
 				grammar[token] = rest[token];
@@ -79238,9 +79035,12 @@ var _ = {
 			delete grammar.rest;
 		}
 
-		_.matchGrammar(text, strarr, grammar, 0, 0, false);
+		var tokenList = new LinkedList();
+		addAfter(tokenList, tokenList.head, text);
 
-		return strarr;
+		matchGrammar(text, tokenList, grammar, tokenList.head, 0);
+
+		return toArray(tokenList);
 	},
 
 	hooks: {
@@ -79281,39 +79081,269 @@ function Token(type, content, alias, matchedStr, greedy) {
 	this.greedy = !!greedy;
 }
 
-Token.stringify = function(o, language) {
+Token.stringify = function stringify(o, language) {
 	if (typeof o == 'string') {
 		return o;
 	}
-
 	if (Array.isArray(o)) {
-		return o.map(function(element) {
-			return Token.stringify(element, language);
-		}).join('');
+		var s = '';
+		o.forEach(function (e) {
+			s += stringify(e, language);
+		});
+		return s;
 	}
 
 	var env = {
 		type: o.type,
-		content: Token.stringify(o.content, language),
+		content: stringify(o.content, language),
 		tag: 'span',
 		classes: ['token', o.type],
 		attributes: {},
 		language: language
 	};
 
-	if (o.alias) {
-		var aliases = Array.isArray(o.alias) ? o.alias : [o.alias];
-		Array.prototype.push.apply(env.classes, aliases);
+	var aliases = o.alias;
+	if (aliases) {
+		if (Array.isArray(aliases)) {
+			Array.prototype.push.apply(env.classes, aliases);
+		} else {
+			env.classes.push(aliases);
+		}
 	}
 
 	_.hooks.run('wrap', env);
 
-	var attributes = Object.keys(env.attributes).map(function(name) {
-		return name + '="' + (env.attributes[name] || '').replace(/"/g, '&quot;') + '"';
-	}).join(' ');
+	var attributes = '';
+	for (var name in env.attributes) {
+		attributes += ' ' + name + '="' + (env.attributes[name] || '').replace(/"/g, '&quot;') + '"';
+	}
 
-	return '<' + env.tag + ' class="' + env.classes.join(' ') + '"' + (attributes ? ' ' + attributes : '') + '>' + env.content + '</' + env.tag + '>';
+	return '<' + env.tag + ' class="' + env.classes.join(' ') + '"' + attributes + '>' + env.content + '</' + env.tag + '>';
 };
+
+/**
+ * @param {string} text
+ * @param {LinkedList<string | Token>} tokenList
+ * @param {any} grammar
+ * @param {LinkedListNode<string | Token>} startNode
+ * @param {number} startPos
+ * @param {boolean} [oneshot=false]
+ * @param {string} [target]
+ */
+function matchGrammar(text, tokenList, grammar, startNode, startPos, oneshot, target) {
+	for (var token in grammar) {
+		if (!grammar.hasOwnProperty(token) || !grammar[token]) {
+			continue;
+		}
+
+		var patterns = grammar[token];
+		patterns = Array.isArray(patterns) ? patterns : [patterns];
+
+		for (var j = 0; j < patterns.length; ++j) {
+			if (target && target == token + ',' + j) {
+				return;
+			}
+
+			var pattern = patterns[j],
+				inside = pattern.inside,
+				lookbehind = !!pattern.lookbehind,
+				greedy = !!pattern.greedy,
+				lookbehindLength = 0,
+				alias = pattern.alias;
+
+			if (greedy && !pattern.pattern.global) {
+				// Without the global flag, lastIndex won't work
+				var flags = pattern.pattern.toString().match(/[imsuy]*$/)[0];
+				pattern.pattern = RegExp(pattern.pattern.source, flags + 'g');
+			}
+
+			pattern = pattern.pattern || pattern;
+
+			for ( // iterate the token list and keep track of the current token/string position
+				var currentNode = startNode.next, pos = startPos;
+				currentNode !== tokenList.tail;
+				pos += currentNode.value.length, currentNode = currentNode.next
+			) {
+
+				var str = currentNode.value;
+
+				if (tokenList.length > text.length) {
+					// Something went terribly wrong, ABORT, ABORT!
+					return;
+				}
+
+				if (str instanceof Token) {
+					continue;
+				}
+
+				var removeCount = 1; // this is the to parameter of removeBetween
+
+				if (greedy && currentNode != tokenList.tail.prev) {
+					pattern.lastIndex = pos;
+					var match = pattern.exec(text);
+					if (!match) {
+						break;
+					}
+
+					var from = match.index + (lookbehind && match[1] ? match[1].length : 0);
+					var to = match.index + match[0].length;
+					var p = pos;
+
+					// find the node that contains the match
+					p += currentNode.value.length;
+					while (from >= p) {
+						currentNode = currentNode.next;
+						p += currentNode.value.length;
+					}
+					// adjust pos (and p)
+					p -= currentNode.value.length;
+					pos = p;
+
+					// the current node is a Token, then the match starts inside another Token, which is invalid
+					if (currentNode.value instanceof Token) {
+						continue;
+					}
+
+					// find the last node which is affected by this match
+					for (
+						var k = currentNode;
+						k !== tokenList.tail && (p < to || (typeof k.value === 'string' && !k.prev.value.greedy));
+						k = k.next
+					) {
+						removeCount++;
+						p += k.value.length;
+					}
+					removeCount--;
+
+					// replace with the new match
+					str = text.slice(pos, p);
+					match.index -= pos;
+				} else {
+					pattern.lastIndex = 0;
+
+					var match = pattern.exec(str);
+				}
+
+				if (!match) {
+					if (oneshot) {
+						break;
+					}
+
+					continue;
+				}
+
+				if (lookbehind) {
+					lookbehindLength = match[1] ? match[1].length : 0;
+				}
+
+				var from = match.index + lookbehindLength,
+					match = match[0].slice(lookbehindLength),
+					to = from + match.length,
+					before = str.slice(0, from),
+					after = str.slice(to);
+
+				var removeFrom = currentNode.prev;
+
+				if (before) {
+					removeFrom = addAfter(tokenList, removeFrom, before);
+					pos += before.length;
+				}
+
+				removeRange(tokenList, removeFrom, removeCount);
+
+				var wrapped = new Token(token, inside ? _.tokenize(match, inside) : match, alias, match, greedy);
+				currentNode = addAfter(tokenList, removeFrom, wrapped);
+
+				if (after) {
+					addAfter(tokenList, currentNode, after);
+				}
+
+
+				if (removeCount > 1)
+					matchGrammar(text, tokenList, grammar, currentNode.prev, pos, true, token + ',' + j);
+
+				if (oneshot)
+					break;
+			}
+		}
+	}
+}
+
+/**
+ * @typedef LinkedListNode
+ * @property {T} value
+ * @property {LinkedListNode<T> | null} prev The previous node.
+ * @property {LinkedListNode<T> | null} next The next node.
+ * @template T
+ */
+
+/**
+ * @template T
+ */
+function LinkedList() {
+	/** @type {LinkedListNode<T>} */
+	var head = { value: null, prev: null, next: null };
+	/** @type {LinkedListNode<T>} */
+	var tail = { value: null, prev: head, next: null };
+	head.next = tail;
+
+	/** @type {LinkedListNode<T>} */
+	this.head = head;
+	/** @type {LinkedListNode<T>} */
+	this.tail = tail;
+	this.length = 0;
+}
+
+/**
+ * Adds a new node with the given value to the list.
+ * @param {LinkedList<T>} list
+ * @param {LinkedListNode<T>} node
+ * @param {T} value
+ * @returns {LinkedListNode<T>} The added node.
+ * @template T
+ */
+function addAfter(list, node, value) {
+	// assumes that node != list.tail && values.length >= 0
+	var next = node.next;
+
+	var newNode = { value: value, prev: node, next: next };
+	node.next = newNode;
+	next.prev = newNode;
+	list.length++;
+
+	return newNode;
+}
+/**
+ * Removes `count` nodes after the given node. The given node will not be removed.
+ * @param {LinkedList<T>} list
+ * @param {LinkedListNode<T>} node
+ * @param {number} count
+ * @template T
+ */
+function removeRange(list, node, count) {
+	var next = node.next;
+	for (var i = 0; i < count && next !== list.tail; i++) {
+		next = next.next;
+	}
+	node.next = next;
+	next.prev = node;
+	list.length -= i;
+}
+/**
+ * @param {LinkedList<T>} list
+ * @returns {T[]}
+ * @template T
+ */
+function toArray(list) {
+	var array = [];
+	var node = list.head.next;
+	while (node !== list.tail) {
+		array.push(node.value);
+		node = node.next;
+	}
+	return array;
+}
+
 
 if (!_self.document) {
 	if (!_self.addEventListener) {
@@ -79350,13 +79380,13 @@ if (script) {
 	}
 }
 
-if (!_.manual) {
-	function highlightAutomaticallyCallback() {
-		if (!_.manual) {
-			_.highlightAll();
-		}
+function highlightAutomaticallyCallback() {
+	if (!_.manual) {
+		_.highlightAll();
 	}
+}
 
+if (!_.manual) {
 	// If the document state is "loading", then we'll use DOMContentLoaded.
 	// If the document state is "interactive" and the prism.js script is deferred, then we'll also use the
 	// DOMContentLoaded event because there might be some plugins or languages which have also been deferred and they
@@ -80171,6 +80201,7 @@ oop.inherits(Mode, TextMode);
     };
 
     this.$id = "ace/mode/javascript";
+    this.snippetFileId = "ace/snippets/javascript";
 }).call(Mode.prototype);
 
 exports.Mode = Mode;
@@ -80912,6 +80943,12 @@ var SnippetManager = function() {
             }
             snippetMap[scope].push(s);
 
+            if (s.prefix)
+                s.tabTrigger = s.prefix;
+
+            if (!s.content && s.body)
+                s.content = Array.isArray(s.body) ? s.body.join("\n") : s.body;
+
             if (s.tabTrigger && !s.trigger) {
                 if (!s.guard && /^\w/.test(s.tabTrigger))
                     s.guard = "\\b";
@@ -80928,10 +80965,13 @@ var SnippetManager = function() {
             s.endTriggerRe = new RegExp(s.endTrigger);
         }
 
-        if (snippets && snippets.content)
-            addSnippet(snippets);
-        else if (Array.isArray(snippets))
+        if (Array.isArray(snippets)) {
             snippets.forEach(addSnippet);
+        } else {
+            Object.keys(snippets).forEach(function(key) {
+                addSnippet(snippets[key]);
+            });
+        }
         
         this._signal("registerSnippets", {scope: scope});
     };
@@ -80981,7 +81021,7 @@ var SnippetManager = function() {
                     snippet.tabTrigger = val.match(/^\S*/)[0];
                     if (!snippet.name)
                         snippet.name = val;
-                } else {
+                } else if (key) {
                     snippet[key] = val;
                 }
             }
@@ -81832,6 +81872,7 @@ var Autocomplete = function() {
         if (!data)
             return false;
 
+        this.editor.startOperation({command: {name: "insertMatch"}});
         if (data.completer && data.completer.insertMatch) {
             data.completer.insertMatch(this.editor, data);
         } else {
@@ -81848,6 +81889,7 @@ var Autocomplete = function() {
                 this.editor.execCommand("insertstring", data.value || data);
         }
         this.detach();
+        this.editor.endOperation();
     };
 
 
@@ -82325,31 +82367,33 @@ var onChangeMode = function(e, editor) {
 };
 
 var loadSnippetsForMode = function(mode) {
-    var id = mode.$id;
+    if (typeof mode == "string")
+        mode = config.$modes[mode];
+    if (!mode)
+        return;
     if (!snippetManager.files)
         snippetManager.files = {};
-    loadSnippetFile(id);
+    
+    loadSnippetFile(mode.$id, mode.snippetFileId);
     if (mode.modes)
         mode.modes.forEach(loadSnippetsForMode);
 };
 
-var loadSnippetFile = function(id) {
-    if (!id || snippetManager.files[id])
+var loadSnippetFile = function(id, snippetFilePath) {
+    if (!snippetFilePath || !id || snippetManager.files[id])
         return;
-    var snippetFilePath = id.replace("mode", "snippets");
     snippetManager.files[id] = {};
     config.loadModule(snippetFilePath, function(m) {
-        if (m) {
-            snippetManager.files[id] = m;
-            if (!m.snippets && m.snippetText)
-                m.snippets = snippetManager.parseSnippetFile(m.snippetText);
-            snippetManager.register(m.snippets || [], m.scope);
-            if (m.includeScopes) {
-                snippetManager.snippetMap[m.scope].includeScopes = m.includeScopes;
-                m.includeScopes.forEach(function(x) {
-                    loadSnippetFile("ace/mode/" + x);
-                });
-            }
+        if (!m) return;
+        snippetManager.files[id] = m;
+        if (!m.snippets && m.snippetText)
+            m.snippets = snippetManager.parseSnippetFile(m.snippetText);
+        snippetManager.register(m.snippets || [], m.scope);
+        if (m.includeScopes) {
+            snippetManager.snippetMap[m.scope].includeScopes = m.includeScopes;
+            m.includeScopes.forEach(function(x) {
+                loadSnippetsForMode("ace/mode/" + x);
+            });
         }
     });
 };
@@ -82705,7 +82749,7 @@ class JsEditorUi extends Pane {
       text: 'Running',
       level: 'serious'
     });
-    let script = await read(file);
+    let script = await read$1(file);
 
     if (script.buffer) {
       script = new TextDecoder('utf8').decode(script);
@@ -82725,7 +82769,7 @@ class JsEditorUi extends Pane {
     const {
       code = ''
     } = this.state;
-    await write(file, code);
+    await write$1(file, code);
     await log({
       op: 'text',
       text: 'Saved',
@@ -82753,7 +82797,7 @@ class JsEditorUi extends Pane {
     } = this.props;
 
     if (file !== undefined) {
-      let code = await read(file);
+      let code = await read$1(file);
 
       if (code.buffer) {
         code = new TextDecoder('utf8').decode(code);
@@ -82840,16 +82884,24 @@ class JsEditorUi extends Pane {
   }
 
   renderToolbar() {
-    return super.renderToolbar([react.createElement(Nav.Item, {
+    return super.renderToolbar([
+    /*#__PURE__*/
+    react.createElement(Nav.Item, {
       key: "JsEditor/run"
-    }, react.createElement(Nav.Link, {
+    },
+    /*#__PURE__*/
+    react.createElement(Nav.Link, {
       onClick: this.run,
       style: {
         color: 'blue'
       }
-    }, "Run")), react.createElement(Nav.Item, {
+    }, "Run")),
+    /*#__PURE__*/
+    react.createElement(Nav.Item, {
       key: "JsEditor/save"
-    }, react.createElement(Nav.Link, {
+    },
+    /*#__PURE__*/
+    react.createElement(Nav.Link, {
       onClick: this.save,
       style: {
         color: 'blue'
@@ -82865,48 +82917,57 @@ class JsEditorUi extends Pane {
       modal,
       code = ''
     } = this.state;
-    return react.createElement(Container, {
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column'
-      }
-    }, react.createElement(Row, {
-      style: {
-        width: '100%',
-        height: '100%',
-        flex: '1 1 auto'
-      }
-    }, react.createElement(Col, {
-      style: {
-        width: '100%',
-        height: '100%',
-        overflow: 'auto'
+    return (
+      /*#__PURE__*/
+      react.createElement(Container, {
+        style: {
+          height: '100%',
+          display: 'flex',
+          flexFlow: 'column'
+        }
       },
-      onKeyDown: this.onKeyDown
-    }, modal, react.createElement(AceEditor, {
-      commands: [this.runShortcut(), this.saveShortcut()],
-      editorProps: {
-        $blockScrolling: true
+      /*#__PURE__*/
+      react.createElement(Row, {
+        style: {
+          width: '100%',
+          height: '100%',
+          flex: '1 1 auto'
+        }
       },
-      setOptions: {
-        // enableBasicAutocompletion: true,
-        enableLiveAutocompletion: true,
-        enableSnippets: true,
-        useWorker: false
-      },
-      height: "100%",
-      highlightActiveLine: true,
-      key: id,
-      mode: "javascript",
-      name: id,
-      onChange: this.onValueChange,
-      showGutter: true,
-      showPrintMargin: true,
-      theme: "github",
-      value: code,
-      width: "100%"
-    }))));
+      /*#__PURE__*/
+      react.createElement(Col, {
+        style: {
+          width: '100%',
+          height: '100%',
+          overflow: 'auto'
+        },
+        onKeyDown: this.onKeyDown
+      }, modal,
+      /*#__PURE__*/
+      react.createElement(AceEditor, {
+        commands: [this.runShortcut(), this.saveShortcut()],
+        editorProps: {
+          $blockScrolling: true
+        },
+        setOptions: {
+          // enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: true,
+          useWorker: false
+        },
+        height: "100%",
+        highlightActiveLine: true,
+        key: id,
+        mode: "javascript",
+        name: id,
+        onChange: this.onValueChange,
+        showGutter: true,
+        showPrintMargin: true,
+        theme: "github",
+        value: code,
+        width: "100%"
+      }))))
+    );
   }
 
 }
@@ -82923,30 +82984,39 @@ class LogUi extends Pane {
     const {
       id
     } = this.props;
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column',
-        padding: '4px',
-        border: '1px solid rgba(0,0,0,.125)',
-        borderRadius: '.25rem'
-      }
-    }, react.createElement(Row, {
-      style: {
-        flex: '1 1 auto',
-        height: '100%',
-        overflow: 'auto'
-      }
-    }, react.createElement(Col, null, this.props.log.filter(entry => entry.op === 'text').map((entry, index) => react.createElement("div", {
-      key: index,
-      style: {
-        padding: '4px',
-        border: '1px solid rgba(0,0,0,.125)',
-        borderRadius: '.25rem'
-      }
-    }, entry.text)))));
+    return (
+      /*#__PURE__*/
+      react.createElement(Container, {
+        key: id,
+        style: {
+          height: '100%',
+          display: 'flex',
+          flexFlow: 'column',
+          padding: '4px',
+          border: '1px solid rgba(0,0,0,.125)',
+          borderRadius: '.25rem'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Row, {
+        style: {
+          flex: '1 1 auto',
+          height: '100%',
+          overflow: 'auto'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Col, null, this.props.log.filter(entry => entry.op === 'text').map((entry, index) =>
+      /*#__PURE__*/
+      react.createElement("div", {
+        key: index,
+        style: {
+          padding: '4px',
+          border: '1px solid rgba(0,0,0,.125)',
+          borderRadius: '.25rem'
+        }
+      }, entry.text)))))
+    );
   }
 
 }
@@ -82968,14 +83038,6 @@ function scrollbarSize(recalc) {
   }
 
   return size;
-}
-
-function _assertThisInitialized(self) {
-  if (self === void 0) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return self;
 }
 
 /**
@@ -83003,9 +83065,33 @@ function activeElement(doc) {
   }
 }
 
-function hasClass(element, className) {
-  if (element.classList) return !!className && element.classList.contains(className);
-  return (" " + (element.className.baseVal || element.className) + " ").indexOf(" " + className + " ") !== -1;
+/**
+ * Returns a ref that is immediately updated with the new value
+ *
+ * @param value The Ref value
+ * @category refs
+ */
+
+function useUpdatedRef(value) {
+  var valueRef = react_15(value);
+  valueRef.current = value;
+  return valueRef;
+}
+
+/**
+ * Attach a callback that fires when a component unmounts
+ *
+ * @param fn Handler to run when the component unmounts
+ * @category effects
+ */
+
+function useWillUnmount(fn) {
+  var onUnmount = useUpdatedRef(fn);
+  react_10(function () {
+    return function () {
+      return onUnmount.current();
+    };
+  }, []);
 }
 
 function addClass(element, className) {
@@ -83041,8 +83127,8 @@ function isBody(node) {
 }
 
 function bodyIsOverflowing(node) {
-  var doc = ownerDocument(node);
-  var win = isWindow(doc);
+  var doc = isWindow(node) ? ownerDocument() : ownerDocument(node);
+  var win = isWindow(node) || doc.defaultView;
   return doc.body.clientWidth < win.innerWidth;
 }
 
@@ -83060,7 +83146,6 @@ var isHidable = function isHidable(_ref) {
 };
 
 var siblings = function siblings(container, exclude, cb) {
-  exclude = [].concat(exclude);
   [].forEach.call(container.children, function (node) {
     if (exclude.indexOf(node) === -1 && isHidable(node)) {
       cb(node);
@@ -83104,16 +83189,13 @@ function findIndexOf(arr, cb) {
   });
   return idx;
 }
+
 /**
  * Proper state management for containers and the modals in those containers.
  *
  * @internal Used by the Modal to ensure proper styling of containers.
  */
-
-
-var ModalManager =
-/*#__PURE__*/
-function () {
+var ModalManager = /*#__PURE__*/function () {
   function ModalManager(_temp) {
     var _ref = _temp === void 0 ? {} : _temp,
         _ref$hideSiblingNodes = _ref.hideSiblingNodes,
@@ -83121,6 +83203,12 @@ function () {
         _ref$handleContainerO = _ref.handleContainerOverflow,
         handleContainerOverflow = _ref$handleContainerO === void 0 ? true : _ref$handleContainerO;
 
+    this.hideSiblingNodes = void 0;
+    this.handleContainerOverflow = void 0;
+    this.modals = void 0;
+    this.containers = void 0;
+    this.data = void 0;
+    this.scrollbarSize = void 0;
     this.hideSiblingNodes = hideSiblingNodes;
     this.handleContainerOverflow = handleContainerOverflow;
     this.modals = [];
@@ -83156,7 +83244,7 @@ function () {
     if (containerState.overflowing) {
       // use computed style, here to get the real padding
       // to add our scrollbar width
-      style$1.paddingRight = parseInt(style(container, 'paddingRight') || 0, 10) + this.scrollbarSize + "px";
+      style$1.paddingRight = parseInt(style(container, 'paddingRight') || '0', 10) + this.scrollbarSize + "px";
     }
 
     style(container, style$1);
@@ -83250,24 +83338,25 @@ function () {
   return ModalManager;
 }();
 
-var resolveRef = function resolveRef(ref) {
-  if (typeof document === 'undefined') return undefined;
+var resolveContainerRef = function resolveContainerRef(ref) {
+  var _ref;
+
+  if (typeof document === 'undefined') return null;
   if (ref == null) return ownerDocument().body;
   if (typeof ref === 'function') ref = ref();
-  if (ref && ref.current) ref = ref.current;
-  if (ref && ref.nodeType) return ref;
+  if (ref && 'current' in ref) ref = ref.current;
+  if ((_ref = ref) == null ? void 0 : _ref.nodeType) return ref || null;
   return null;
 };
-
 function useWaitForDOMRef(ref, onResolved) {
   var _useState = react_16(function () {
-    return resolveRef(ref);
+    return resolveContainerRef(ref);
   }),
       resolvedRef = _useState[0],
       setRef = _useState[1];
 
   if (!resolvedRef) {
-    var earlyRef = resolveRef(ref);
+    var earlyRef = resolveContainerRef(ref);
     if (earlyRef) setRef(earlyRef);
   }
 
@@ -83277,7 +83366,7 @@ function useWaitForDOMRef(ref, onResolved) {
     }
   }, [onResolved, resolvedRef]);
   react_10(function () {
-    var nextRef = resolveRef(ref);
+    var nextRef = resolveContainerRef(ref);
 
     if (nextRef !== resolvedRef) {
       setRef(nextRef);
@@ -83286,323 +83375,260 @@ function useWaitForDOMRef(ref, onResolved) {
   return resolvedRef;
 }
 
-function omitProps(props, propTypes) {
-  var keys = Object.keys(props);
-  var newProps = {};
-  keys.forEach(function (prop) {
-    if (!Object.prototype.hasOwnProperty.call(propTypes, prop)) {
-      newProps[prop] = props[prop];
-    }
-  });
-  return newProps;
+var manager;
+
+function getManager() {
+  if (!manager) manager = new ModalManager();
+  return manager;
 }
 
-var manager;
-/**
- * Love them or hate them, `<Modal />` provides a solid foundation for creating dialogs, lightboxes, or whatever else.
- * The Modal component renders its `children` node in front of a backdrop component.
- *
- * The Modal offers a few helpful features over using just a `<Portal/>` component and some styles:
- *
- * - Manages dialog stacking when one-at-a-time just isn't enough.
- * - Creates a backdrop, for disabling interaction below the modal.
- * - It properly manages focus; moving to the modal content, and keeping it there until the modal is closed.
- * - It disables scrolling of the page content while open.
- * - Adds the appropriate ARIA roles are automatically.
- * - Easily pluggable animations via a `<Transition/>` component.
- *
- * Note that, in the same way the backdrop element prevents users from clicking or interacting
- * with the page content underneath the Modal, Screen readers also need to be signaled to not to
- * interact with page content while the Modal is open. To do this, we use a common technique of applying
- * the `aria-hidden='true'` attribute to the non-Modal elements in the Modal `container`. This means that for
- * a Modal to be truly modal, it should have a `container` that is _outside_ your app's
- * React hierarchy (such as the default: document.body).
- */
+function useModalManager(provided) {
+  var modalManager = provided || getManager();
+  var modal = react_15({
+    dialog: null,
+    backdrop: null
+  });
+  return Object.assign(modal.current, {
+    add: function add(container, className) {
+      return modalManager.add(modal.current, container, className);
+    },
+    remove: function remove() {
+      return modalManager.remove(modal.current);
+    },
+    isTopModal: function isTopModal() {
+      return modalManager.isTopModal(modal.current);
+    },
+    setDialogRef: react_9(function (ref) {
+      modal.current.dialog = ref;
+    }, []),
+    setBackdropRef: react_9(function (ref) {
+      modal.current.backdrop = ref;
+    }, [])
+  });
+}
 
-var Modal =
-/*#__PURE__*/
-function (_React$Component) {
-  _inheritsLoose(Modal, _React$Component);
+var Modal = react_7(function (_ref, ref) {
+  var _ref$show = _ref.show,
+      show = _ref$show === void 0 ? false : _ref$show,
+      _ref$role = _ref.role,
+      role = _ref$role === void 0 ? 'dialog' : _ref$role,
+      className = _ref.className,
+      style = _ref.style,
+      children = _ref.children,
+      _ref$backdrop = _ref.backdrop,
+      backdrop = _ref$backdrop === void 0 ? true : _ref$backdrop,
+      _ref$keyboard = _ref.keyboard,
+      keyboard = _ref$keyboard === void 0 ? true : _ref$keyboard,
+      onBackdropClick = _ref.onBackdropClick,
+      onEscapeKeyDown = _ref.onEscapeKeyDown,
+      transition = _ref.transition,
+      backdropTransition = _ref.backdropTransition,
+      _ref$autoFocus = _ref.autoFocus,
+      autoFocus = _ref$autoFocus === void 0 ? true : _ref$autoFocus,
+      _ref$enforceFocus = _ref.enforceFocus,
+      enforceFocus = _ref$enforceFocus === void 0 ? true : _ref$enforceFocus,
+      _ref$restoreFocus = _ref.restoreFocus,
+      restoreFocus = _ref$restoreFocus === void 0 ? true : _ref$restoreFocus,
+      restoreFocusOptions = _ref.restoreFocusOptions,
+      renderDialog = _ref.renderDialog,
+      _ref$renderBackdrop = _ref.renderBackdrop,
+      renderBackdrop = _ref$renderBackdrop === void 0 ? function (props) {
+    return /*#__PURE__*/react.createElement("div", props);
+  } : _ref$renderBackdrop,
+      providedManager = _ref.manager,
+      containerRef = _ref.container,
+      containerClassName = _ref.containerClassName,
+      onShow = _ref.onShow,
+      _ref$onHide = _ref.onHide,
+      onHide = _ref$onHide === void 0 ? function () {} : _ref$onHide,
+      onExit = _ref.onExit,
+      onExited = _ref.onExited,
+      onExiting = _ref.onExiting,
+      onEnter = _ref.onEnter,
+      onEntering = _ref.onEntering,
+      onEntered = _ref.onEntered,
+      rest = _objectWithoutPropertiesLoose(_ref, ["show", "role", "className", "style", "children", "backdrop", "keyboard", "onBackdropClick", "onEscapeKeyDown", "transition", "backdropTransition", "autoFocus", "enforceFocus", "restoreFocus", "restoreFocusOptions", "renderDialog", "renderBackdrop", "manager", "container", "containerClassName", "onShow", "onHide", "onExit", "onExited", "onExiting", "onEnter", "onEntering", "onEntered"]);
 
-  function Modal() {
-    var _this;
+  var container = useWaitForDOMRef(containerRef);
+  var modal = useModalManager(providedManager);
+  var isMounted = useMounted();
+  var prevShow = usePrevious(show);
 
-    for (var _len = arguments.length, _args = new Array(_len), _key = 0; _key < _len; _key++) {
-      _args[_key] = arguments[_key];
-    }
+  var _useState = react_16(!show),
+      exited = _useState[0],
+      setExited = _useState[1];
 
-    _this = _React$Component.call.apply(_React$Component, [this].concat(_args)) || this;
-    _this.state = {
-      exited: !_this.props.show
-    };
+  var lastFocusRef = react_15(null);
+  react_11(ref, function () {
+    return modal;
+  }, [modal]);
 
-    _this.onShow = function () {
-      var _this$props = _this.props,
-          container = _this$props.container,
-          containerClassName = _this$props.containerClassName,
-          onShow = _this$props.onShow;
-
-      _this.getModalManager().add(_assertThisInitialized(_this), container, containerClassName);
-
-      _this.removeKeydownListener = listen(document, 'keydown', _this.handleDocumentKeyDown);
-      _this.removeFocusListener = listen(document, 'focus', // the timeout is necessary b/c this will run before the new modal is mounted
-      // and so steals focus from it
-      function () {
-        return setTimeout(_this.enforceFocus);
-      }, true);
-
-      if (onShow) {
-        onShow();
-      } // autofocus after onShow, to not trigger a focus event for previous
-      // modals before this one is shown.
-
-
-      _this.autoFocus();
-    };
-
-    _this.onHide = function () {
-      _this.getModalManager().remove(_assertThisInitialized(_this));
-
-      _this.removeKeydownListener();
-
-      _this.removeFocusListener();
-
-      if (_this.props.restoreFocus) {
-        _this.restoreLastFocus();
-      }
-    };
-
-    _this.setDialogRef = function (ref) {
-      _this.dialog = ref;
-    };
-
-    _this.setBackdropRef = function (ref) {
-      _this.backdrop = ref && reactDom.findDOMNode(ref);
-    };
-
-    _this.handleHidden = function () {
-      _this.setState({
-        exited: true
-      });
-
-      _this.onHide();
-
-      if (_this.props.onExited) {
-        var _this$props2;
-
-        (_this$props2 = _this.props).onExited.apply(_this$props2, arguments);
-      }
-    };
-
-    _this.handleBackdropClick = function (e) {
-      if (e.target !== e.currentTarget) {
-        return;
-      }
-
-      if (_this.props.onBackdropClick) {
-        _this.props.onBackdropClick(e);
-      }
-
-      if (_this.props.backdrop === true) {
-        _this.props.onHide();
-      }
-    };
-
-    _this.handleDocumentKeyDown = function (e) {
-      if (_this.props.keyboard && e.keyCode === 27 && _this.isTopModal()) {
-        if (_this.props.onEscapeKeyDown) {
-          _this.props.onEscapeKeyDown(e);
-        }
-
-        _this.props.onHide();
-      }
-    };
-
-    _this.enforceFocus = function () {
-      if (!_this.props.enforceFocus || !_this._isMounted || !_this.isTopModal()) {
-        return;
-      }
-
-      var currentActiveElement = activeElement(ownerDocument$1(_assertThisInitialized(_this)));
-
-      if (_this.dialog && !contains(_this.dialog, currentActiveElement)) {
-        _this.dialog.focus();
-      }
-    };
-
-    _this.renderBackdrop = function () {
-      var _this$props3 = _this.props,
-          renderBackdrop = _this$props3.renderBackdrop,
-          Transition = _this$props3.backdropTransition;
-      var backdrop = renderBackdrop({
-        ref: _this.setBackdropRef,
-        onClick: _this.handleBackdropClick
-      });
-
-      if (Transition) {
-        backdrop = react.createElement(Transition, {
-          appear: true,
-          "in": _this.props.show
-        }, backdrop);
-      }
-
-      return backdrop;
-    };
-
-    return _this;
+  if (canUseDOM && !prevShow && show) {
+    lastFocusRef.current = activeElement();
   }
 
-  Modal.getDerivedStateFromProps = function getDerivedStateFromProps(nextProps) {
-    if (nextProps.show) {
-      return {
-        exited: false
-      };
+  if (!transition && !show && !exited) {
+    setExited(true);
+  } else if (show && exited) {
+    setExited(false);
+  }
+
+  var handleShow = useEventCallback(function () {
+    modal.add(container, containerClassName);
+    removeKeydownListenerRef.current = listen(document, 'keydown', handleDocumentKeyDown);
+    removeFocusListenerRef.current = listen(document, 'focus', // the timeout is necessary b/c this will run before the new modal is mounted
+    // and so steals focus from it
+    function () {
+      return setTimeout(handleEnforceFocus);
+    }, true);
+
+    if (onShow) {
+      onShow();
+    } // autofocus after onShow to not trigger a focus event for previous
+    // modals before this one is shown.
+
+
+    if (autoFocus) {
+      var currentActiveElement = activeElement(document);
+
+      if (modal.dialog && currentActiveElement && !contains$1(modal.dialog, currentActiveElement)) {
+        lastFocusRef.current = currentActiveElement;
+        modal.dialog.focus();
+      }
+    }
+  });
+  var handleHide = useEventCallback(function () {
+    modal.remove();
+    removeKeydownListenerRef.current == null ? void 0 : removeKeydownListenerRef.current();
+    removeFocusListenerRef.current == null ? void 0 : removeFocusListenerRef.current();
+
+    if (restoreFocus) {
+      var _lastFocusRef$current;
+
+      // Support: <=IE11 doesn't support `focus()` on svg elements (RB: #917)
+      (_lastFocusRef$current = lastFocusRef.current) == null ? void 0 : _lastFocusRef$current.focus == null ? void 0 : _lastFocusRef$current.focus(restoreFocusOptions);
+      lastFocusRef.current = null;
+    }
+  }); // TODO: try and combine these effects: https://github.com/react-bootstrap/react-overlays/pull/794#discussion_r409954120
+  // Show logic when:
+  //  - show is `true` _and_ `container` has resolved
+
+  react_10(function () {
+    if (!show || !container) return;
+    handleShow();
+  }, [show, container,
+  /* should never change: */
+  handleShow]); // Hide cleanup logic when:
+  //  - `exited` switches to true
+  //  - component unmounts;
+
+  react_10(function () {
+    if (!exited) return;
+    handleHide();
+  }, [exited, handleHide]);
+  useWillUnmount(function () {
+    handleHide();
+  }); // --------------------------------
+
+  var handleEnforceFocus = useEventCallback(function () {
+    if (!enforceFocus || !isMounted() || !modal.isTopModal()) {
+      return;
     }
 
-    if (!nextProps.transition) {
-      // Otherwise let handleHidden take care of marking exited.
-      return {
-        exited: true
-      };
+    var currentActiveElement = activeElement();
+
+    if (modal.dialog && currentActiveElement && !contains$1(modal.dialog, currentActiveElement)) {
+      modal.dialog.focus();
+    }
+  });
+  var handleBackdropClick = useEventCallback(function (e) {
+    if (e.target !== e.currentTarget) {
+      return;
     }
 
+    onBackdropClick == null ? void 0 : onBackdropClick(e);
+
+    if (backdrop === true) {
+      onHide();
+    }
+  });
+  var handleDocumentKeyDown = useEventCallback(function (e) {
+    if (keyboard && e.keyCode === 27 && modal.isTopModal()) {
+      onEscapeKeyDown == null ? void 0 : onEscapeKeyDown(e);
+
+      if (!e.defaultPrevented) {
+        onHide();
+      }
+    }
+  });
+  var removeFocusListenerRef = react_15();
+  var removeKeydownListenerRef = react_15();
+
+  var handleHidden = function handleHidden() {
+    setExited(true);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    onExited == null ? void 0 : onExited.apply(void 0, args);
+  };
+
+  var Transition = transition;
+
+  if (!container || !(show || Transition && !exited)) {
     return null;
-  };
+  }
 
-  var _proto = Modal.prototype;
+  var dialogProps = _extends(_extends({
+    role: role,
+    ref: modal.setDialogRef,
+    // apparently only works on the dialog role element
+    'aria-modal': role === 'dialog' ? true : undefined
+  }, rest), {}, {
+    style: style,
+    className: className,
+    tabIndex: -1
+  });
 
-  _proto.componentDidMount = function componentDidMount() {
-    this._isMounted = true;
+  var dialog = renderDialog ? renderDialog(dialogProps) : /*#__PURE__*/react.createElement("div", dialogProps, react.cloneElement(children, {
+    role: 'document'
+  }));
 
-    if (this.props.show) {
-      this.onShow();
-    }
-  };
+  if (Transition) {
+    dialog = /*#__PURE__*/react.createElement(Transition, {
+      appear: true,
+      unmountOnExit: true,
+      "in": !!show,
+      onExit: onExit,
+      onExiting: onExiting,
+      onExited: handleHidden,
+      onEnter: onEnter,
+      onEntering: onEntering,
+      onEntered: onEntered
+    }, dialog);
+  }
 
-  _proto.componentDidUpdate = function componentDidUpdate(prevProps) {
-    var transition = this.props.transition;
+  var backdropElement = null;
 
-    if (prevProps.show && !this.props.show && !transition) {
-      // Otherwise handleHidden will call this.
-      this.onHide();
-    } else if (!prevProps.show && this.props.show) {
-      this.onShow();
-    }
-  };
-
-  _proto.componentWillUnmount = function componentWillUnmount() {
-    var _this$props4 = this.props,
-        show = _this$props4.show,
-        transition = _this$props4.transition;
-    this._isMounted = false;
-
-    if (show || transition && !this.state.exited) {
-      this.onHide();
-    }
-  };
-
-  _proto.getSnapshotBeforeUpdate = function getSnapshotBeforeUpdate(prevProps) {
-    if (canUseDOM && !prevProps.show && this.props.show) {
-      this.lastFocus = activeElement();
-    }
-
-    return null;
-  };
-
-  _proto.getModalManager = function getModalManager() {
-    if (this.props.manager) {
-      return this.props.manager;
-    }
-
-    if (!manager) {
-      manager = new ModalManager();
-    }
-
-    return manager;
-  };
-
-  _proto.restoreLastFocus = function restoreLastFocus() {
-    // Support: <=IE11 doesn't support `focus()` on svg elements (RB: #917)
-    if (this.lastFocus && this.lastFocus.focus) {
-      this.lastFocus.focus(this.props.restoreFocusOptions);
-      this.lastFocus = null;
-    }
-  };
-
-  _proto.autoFocus = function autoFocus() {
-    if (!this.props.autoFocus) return;
-    var currentActiveElement = activeElement(ownerDocument$1(this));
-
-    if (this.dialog && !contains(this.dialog, currentActiveElement)) {
-      this.lastFocus = currentActiveElement;
-      this.dialog.focus();
-    }
-  };
-
-  _proto.isTopModal = function isTopModal() {
-    return this.getModalManager().isTopModal(this);
-  };
-
-  _proto.render = function render() {
-    var _this$props5 = this.props,
-        show = _this$props5.show,
-        container = _this$props5.container,
-        children = _this$props5.children,
-        renderDialog = _this$props5.renderDialog,
-        _this$props5$role = _this$props5.role,
-        role = _this$props5$role === void 0 ? 'dialog' : _this$props5$role,
-        Transition = _this$props5.transition,
-        backdrop = _this$props5.backdrop,
-        className = _this$props5.className,
-        style = _this$props5.style,
-        onExit = _this$props5.onExit,
-        onExiting = _this$props5.onExiting,
-        onEnter = _this$props5.onEnter,
-        onEntering = _this$props5.onEntering,
-        onEntered = _this$props5.onEntered,
-        props = _objectWithoutPropertiesLoose(_this$props5, ["show", "container", "children", "renderDialog", "role", "transition", "backdrop", "className", "style", "onExit", "onExiting", "onEnter", "onEntering", "onEntered"]);
-
-    if (!(show || Transition && !this.state.exited)) {
-      return null;
-    }
-
-    var dialogProps = _extends({
-      role: role,
-      ref: this.setDialogRef,
-      // apparently only works on the dialog role element
-      'aria-modal': role === 'dialog' ? true : undefined
-    }, omitProps(props, Modal.propTypes), {
-      style: style,
-      className: className,
-      tabIndex: '-1'
+  if (backdrop) {
+    var BackdropTransition = backdropTransition;
+    backdropElement = renderBackdrop({
+      ref: modal.setBackdropRef,
+      onClick: handleBackdropClick
     });
 
-    var dialog = renderDialog ? renderDialog(dialogProps) : react.createElement("div", dialogProps, react.cloneElement(children, {
-      role: 'document'
-    }));
-
-    if (Transition) {
-      dialog = react.createElement(Transition, {
+    if (BackdropTransition) {
+      backdropElement = /*#__PURE__*/react.createElement(BackdropTransition, {
         appear: true,
-        unmountOnExit: true,
-        "in": show,
-        onExit: onExit,
-        onExiting: onExiting,
-        onExited: this.handleHidden,
-        onEnter: onEnter,
-        onEntering: onEntering,
-        onEntered: onEntered
-      }, dialog);
+        "in": !!show
+      }, backdropElement);
     }
+  }
 
-    return reactDom.createPortal(react.createElement(react.Fragment, null, backdrop && this.renderBackdrop(), dialog), container);
-  };
-
-  return Modal;
-}(react.Component); // dumb HOC for the sake react-docgen
-
-
-Modal.propTypes = {
+  return /*#__PURE__*/react.createElement(react.Fragment, null, reactDom.createPortal( /*#__PURE__*/react.createElement(react.Fragment, null, backdropElement, dialog), container));
+});
+var propTypes$7 = {
   /**
    * Set the visibility of the Modal
    */
@@ -83638,8 +83664,8 @@ Modal.propTypes = {
    * A function that returns the dialog component. Useful for custom
    * rendering. **Note:** the component should make sure to apply the provided ref.
    *
-   * ```js
-   *  renderDialog={props => <MyDialog {...props} />}
+   * ```js static
+   * renderDialog={props => <MyDialog {...props} />}
    * ```
    */
   renderDialog: propTypes.func,
@@ -83656,6 +83682,8 @@ Modal.propTypes = {
 
   /**
    * A callback fired when the escape key, if specified in `keyboard`, is pressed.
+   *
+   * If preventDefault() is called on the keyboard event, closing the modal will be cancelled.
    */
   onEscapeKeyDown: propTypes.func,
 
@@ -83754,38 +83782,13 @@ Modal.propTypes = {
    * A ModalManager instance used to track and manage the state of open
    * Modals. Useful when customizing how modals interact within a container
    */
-  manager: propTypes.object
+  manager: propTypes.instanceOf(ModalManager)
 };
-Modal.defaultProps = {
-  show: false,
-  role: 'dialog',
-  backdrop: true,
-  keyboard: true,
-  autoFocus: true,
-  enforceFocus: true,
-  restoreFocus: true,
-  onHide: function onHide() {},
-  renderBackdrop: function renderBackdrop(props) {
-    return react.createElement("div", props);
-  }
-};
-
-function forwardRef$1(Component) {
-  // eslint-disable-next-line react/display-name
-  var ModalWithContainer = react.forwardRef(function (props, ref) {
-    var resolved = useWaitForDOMRef(props.container);
-    return resolved ? react.createElement(Component, _extends({}, props, {
-      ref: ref,
-      container: resolved
-    })) : null;
-  });
-  ModalWithContainer.Manager = ModalManager;
-  ModalWithContainer._Inner = Component;
-  return ModalWithContainer;
-}
-
-var ModalWithContainer = forwardRef$1(Modal);
-ModalWithContainer.Manager = ModalManager;
+Modal.displayName = 'Modal';
+Modal.propTypes = propTypes$7;
+var BaseModal = Object.assign(Modal, {
+  Manager: ModalManager
+});
 
 var Selector = {
   FIXED_CONTENT: '.fixed-top, .fixed-bottom, .is-fixed, .sticky-top',
@@ -83793,9 +83796,7 @@ var Selector = {
   NAVBAR_TOGGLER: '.navbar-toggler'
 };
 
-var BootstrapModalManager =
-/*#__PURE__*/
-function (_ModalManager) {
+var BootstrapModalManager = /*#__PURE__*/function (_ModalManager) {
   _inheritsLoose(BootstrapModalManager, _ModalManager);
 
   function BootstrapModalManager() {
@@ -83885,10 +83886,10 @@ var ModalDialog = react.forwardRef(function (_ref, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'modal');
   var dialogClass = bsPrefix + "-dialog";
-  return react.createElement("div", _extends({}, props, {
+  return /*#__PURE__*/react.createElement("div", _extends({}, props, {
     ref: ref,
     className: classnames(dialogClass, className, size && bsPrefix + "-" + size, centered && dialogClass + "-centered", scrollable && dialogClass + "-scrollable")
-  }), react.createElement("div", {
+  }), /*#__PURE__*/react.createElement("div", {
     className: bsPrefix + "-content"
   }, children));
 });
@@ -83915,11 +83916,11 @@ var ModalHeader = react.forwardRef(function (_ref, ref) {
     if (context) context.onHide();
     if (onHide) onHide();
   });
-  return react.createElement("div", _extends({
+  return /*#__PURE__*/react.createElement("div", _extends({
     ref: ref
   }, props, {
     className: classnames(className, bsPrefix)
-  }), children, closeButton && react.createElement(CloseButton, {
+  }), children, closeButton && /*#__PURE__*/react.createElement(CloseButton, {
     label: closeLabel,
     onClick: handleClick
   }));
@@ -83946,18 +83947,16 @@ var defaultProps$o = {
 /* eslint-disable no-use-before-define, react/no-multi-comp */
 
 function DialogTransition(props) {
-  return react.createElement(Fade, props);
+  return /*#__PURE__*/react.createElement(Fade, props);
 }
 
 function BackdropTransition(props) {
-  return react.createElement(Fade, props);
+  return /*#__PURE__*/react.createElement(Fade, props);
 }
 /* eslint-enable no-use-before-define */
 
 
-var Modal$1 =
-/*#__PURE__*/
-function (_React$Component) {
+var Modal$1 = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Modal, _React$Component);
 
   function Modal() {
@@ -84065,7 +84064,7 @@ function (_React$Component) {
           bsPrefix = _this$props4.bsPrefix,
           backdropClassName = _this$props4.backdropClassName,
           animation = _this$props4.animation;
-      return react.createElement("div", _extends({}, props, {
+      return /*#__PURE__*/react.createElement("div", _extends({}, props, {
         className: classnames(bsPrefix + "-backdrop", backdropClassName, !animation && 'show')
       }));
     };
@@ -84100,6 +84099,7 @@ function (_React$Component) {
         dialogClassName = _this$props5.dialogClassName,
         children = _this$props5.children,
         Dialog = _this$props5.dialogAs,
+        ariaLabelledby = _this$props5['aria-labelledby'],
         show = _this$props5.show,
         animation = _this$props5.animation,
         backdrop = _this$props5.backdrop,
@@ -84120,7 +84120,7 @@ function (_React$Component) {
         _6 = _this$props5.onEnter,
         _4 = _this$props5.onEntering,
         _2 = _this$props5.backdropClassName,
-        props = _objectWithoutPropertiesLoose(_this$props5, ["bsPrefix", "className", "style", "dialogClassName", "children", "dialogAs", "show", "animation", "backdrop", "keyboard", "onEscapeKeyDown", "onShow", "onHide", "container", "autoFocus", "enforceFocus", "restoreFocus", "restoreFocusOptions", "onEntered", "onExit", "onExiting", "onExited", "onEntering", "onEnter", "onEntering", "backdropClassName"]);
+        props = _objectWithoutPropertiesLoose(_this$props5, ["bsPrefix", "className", "style", "dialogClassName", "children", "dialogAs", "aria-labelledby", "show", "animation", "backdrop", "keyboard", "onEscapeKeyDown", "onShow", "onHide", "container", "autoFocus", "enforceFocus", "restoreFocus", "restoreFocusOptions", "onEntered", "onExit", "onExiting", "onExited", "onEntering", "onEnter", "onEntering", "backdropClassName"]);
 
     var clickHandler = backdrop === true ? this.handleClick : null;
 
@@ -84128,9 +84128,9 @@ function (_React$Component) {
 
 
     if (!animation) baseModalStyle.display = 'block';
-    return react.createElement(ModalContext.Provider, {
+    return /*#__PURE__*/react.createElement(ModalContext.Provider, {
       value: this.modalContext
-    }, react.createElement(ModalWithContainer, {
+    }, /*#__PURE__*/react.createElement(BaseModal, {
       show: show,
       backdrop: backdrop,
       container: container,
@@ -84157,8 +84157,9 @@ function (_React$Component) {
       onMouseUp: this.handleMouseUp,
       onEnter: this.handleEnter,
       onEntering: this.handleEntering,
-      onExited: this.handleExited
-    }, react.createElement(Dialog, _extends({}, props, {
+      onExited: this.handleExited,
+      'aria-labelledby': ariaLabelledby
+    }, /*#__PURE__*/react.createElement(Dialog, _extends({}, props, {
       onMouseDown: this.handleDialogMouseDown,
       className: dialogClassName
     }), children)));
@@ -84192,8 +84193,8 @@ function _defineProperty$2(obj, key, value) {
   return obj;
 }
 
-function _extends$2() {
-  _extends$2 = Object.assign || function (target) {
+function _extends$1() {
+  _extends$1 = Object.assign || function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
 
@@ -84207,7 +84208,7 @@ function _extends$2() {
     return target;
   };
 
-  return _extends$2.apply(this, arguments);
+  return _extends$1.apply(this, arguments);
 }
 
 var reactDraggable_min = createCommonjsModule(function (module, exports) {
@@ -84235,7 +84236,10 @@ const cloneElement = (element, props) => {
     props.className = `${element.props.className} ${props.className}`;
   }
 
-  return react.cloneElement(element, props);
+  return (
+    /*#__PURE__*/
+    react.cloneElement(element, props)
+  );
 };
 class Resizable extends react.Component {
   constructor(...args) {
@@ -84384,9 +84388,12 @@ class Resizable extends react.Component {
       return handle;
     }
 
-    return react.createElement("span", {
-      className: `react-resizable-handle react-resizable-handle-${resizeHandle}`
-    });
+    return (
+      /*#__PURE__*/
+      react.createElement("span", {
+        className: `react-resizable-handle react-resizable-handle-${resizeHandle}`
+      })
+    );
   }
 
   render() {
@@ -84415,7 +84422,9 @@ class Resizable extends react.Component {
 
     return cloneElement(children, { ...p,
       className,
-      children: [children.props.children, resizeHandles.map(h => react.createElement(reactDraggable_min_1, _extends$2({}, draggableOpts, {
+      children: [children.props.children, resizeHandles.map(h =>
+      /*#__PURE__*/
+      react.createElement(reactDraggable_min_1, _extends$1({}, draggableOpts, {
         key: `resizableHandle-${h}`,
         onStop: this.resizeHandler('onResizeStop', h),
         onStart: this.resizeHandler('onResizeStart', h),
@@ -84543,26 +84552,31 @@ class ResizableBox extends react.Component {
       resizeHandles,
       ...props
     } = this.props;
-    return react.createElement(Resizable, {
-      handle: handle,
-      handleSize: handleSize,
-      width: this.state.width,
-      height: this.state.height,
-      onResizeStart: onResizeStart,
-      onResize: this.onResize,
-      onResizeStop: onResizeStop,
-      draggableOpts: draggableOpts,
-      minConstraints: minConstraints,
-      maxConstraints: maxConstraints,
-      lockAspectRatio: lockAspectRatio,
-      axis: axis,
-      resizeHandles: resizeHandles
-    }, react.createElement("div", _extends$2({
-      style: { ...style,
-        width: this.state.width + 'px',
-        height: this.state.height + 'px'
-      }
-    }, props)));
+    return (
+      /*#__PURE__*/
+      react.createElement(Resizable, {
+        handle: handle,
+        handleSize: handleSize,
+        width: this.state.width,
+        height: this.state.height,
+        onResizeStart: onResizeStart,
+        onResize: this.onResize,
+        onResizeStop: onResizeStop,
+        draggableOpts: draggableOpts,
+        minConstraints: minConstraints,
+        maxConstraints: maxConstraints,
+        lockAspectRatio: lockAspectRatio,
+        axis: axis,
+        resizeHandles: resizeHandles
+      },
+      /*#__PURE__*/
+      react.createElement("div", _extends$1({
+        style: { ...style,
+          width: this.state.width + 'px',
+          height: this.state.height + 'px'
+        }
+      }, props)))
+    );
   }
 
 }
@@ -86514,33 +86528,40 @@ class OrbitView extends react.PureComponent {
     } = this.props; //    width={width}
     //    height={height}
 
-    return react.createElement(ResizableBox, {
-      className: "box",
-      width: width,
-      height: height,
-      style: {
-        borderStyle: 'solid',
-        borderWidth: 'thin',
-        borderColor: 'blue',
-        display: 'inline-block',
-        width: '90%',
-        height: '90%'
-      },
-      onClick: e => e.stopPropagation(),
-      resizeHandles: ['ne', 'nw', 'se', 'sw'],
-      handle: resizeHandle => react.createElement("span", {
-        className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
+    return (
+      /*#__PURE__*/
+      react.createElement(ResizableBox, {
+        className: "box",
+        width: width,
+        height: height,
         style: {
-          zIndex: 2
+          borderStyle: 'solid',
+          borderWidth: 'thin',
+          borderColor: 'blue',
+          display: 'inline-block',
+          width: '90%',
+          height: '90%'
+        },
+        onClick: e => e.stopPropagation(),
+        resizeHandles: ['ne', 'nw', 'se', 'sw'],
+        handle: resizeHandle =>
+        /*#__PURE__*/
+        react.createElement("span", {
+          className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
+          style: {
+            zIndex: 2
+          }
+        })
+      },
+      /*#__PURE__*/
+      react.createElement("div", {
+        id: containerId,
+        style: {
+          borderStyle: 'solid',
+          borderWidth: 'thin'
         }
-      })
-    }, react.createElement("div", {
-      id: containerId,
-      style: {
-        borderStyle: 'solid',
-        borderWidth: 'thin'
-      }
-    }));
+      }))
+    );
   }
 
 }
@@ -86592,19 +86613,24 @@ class StaticView extends react.PureComponent {
     const {
       url
     } = this.state;
-    return react.createElement("div", {
-      style: {
-        display: 'inline-block'
-      }
-    }, react.createElement("img", {
-      src: url,
-      onClick: onClick,
-      style: {
-        borderStyle: 'dotted',
-        borderWidth: 'thin',
-        verticalAlign: 'baseline'
-      }
-    }));
+    return (
+      /*#__PURE__*/
+      react.createElement("div", {
+        style: {
+          display: 'inline-block'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement("img", {
+        src: url,
+        onClick: onClick,
+        style: {
+          borderStyle: 'dotted',
+          borderWidth: 'thin',
+          verticalAlign: 'baseline'
+        }
+      }))
+    );
   }
 
 }
@@ -86642,24 +86668,30 @@ class GeometryView extends react.PureComponent {
 
     switch (mode) {
       case 'static':
-        return react.createElement(StaticView, {
-          path: path,
-          geometry: geometry,
-          width: width,
-          height: height,
-          position: position,
-          onClick: onClick
-        });
+        return (
+          /*#__PURE__*/
+          react.createElement(StaticView, {
+            path: path,
+            geometry: geometry,
+            width: width,
+            height: height,
+            position: position,
+            onClick: onClick
+          })
+        );
 
       case 'dynamic':
-        return react.createElement(OrbitView, {
-          id: id,
-          path: path,
-          geometry: geometry,
-          width: width,
-          height: height,
-          position: position
-        });
+        return (
+          /*#__PURE__*/
+          react.createElement(OrbitView, {
+            id: id,
+            path: path,
+            geometry: geometry,
+            width: width,
+            height: height,
+            position: position
+          })
+        );
     }
   }
 
@@ -86695,14 +86727,20 @@ class DownloadView extends react.PureComponent {
       data,
       type
     }, index) => {
-      return react.createElement(Button, {
-        key: index,
-        variant: "outline-primary",
-        onClick: () => downloadFile(filename, data, type)
-      }, filename);
+      return (
+        /*#__PURE__*/
+        react.createElement(Button, {
+          key: index,
+          variant: "outline-primary",
+          onClick: () => downloadFile(filename, data, type)
+        }, filename)
+      );
     };
 
-    return react.createElement(ButtonGroup, null, entries.map(makeDownloadButton));
+    return (
+      /*#__PURE__*/
+      react.createElement(ButtonGroup, null, entries.map(makeDownloadButton))
+    );
   }
 
 }
@@ -86792,7 +86830,9 @@ class NotebookUi extends Pane {
 
 
         const key = Math.random();
-        notes.push(react.createElement(GeometryView, {
+        notes.push(
+        /*#__PURE__*/
+        react.createElement(GeometryView, {
           key: key,
           width: width,
           height: height,
@@ -86806,7 +86846,9 @@ class NotebookUi extends Pane {
       } else if (note.md) {
         const data = note.md;
         const key = object_hash(data);
-        notes.push(react.createElement("div", {
+        notes.push(
+        /*#__PURE__*/
+        react.createElement("div", {
           key: key,
           dangerouslySetInnerHTML: {
             __html: marked_1(data)
@@ -86819,7 +86861,9 @@ class NotebookUi extends Pane {
 
         if (entries) {
           const key = object_hash(entries);
-          notes.push(react.createElement(DownloadView, {
+          notes.push(
+          /*#__PURE__*/
+          react.createElement(DownloadView, {
             key: key,
             entries: entries
           }));
@@ -86856,27 +86900,34 @@ class NotebookUi extends Pane {
       await this.update();
     };
 
-    return react.createElement(Container, {
-      key: id,
-      style: {
-        height: '100%',
-        display: 'flex',
-        flexFlow: 'column'
-      }
-    }, react.createElement(Row, {
-      style: {
-        width: '100%',
-        height: '100%',
-        flex: '1 1 auto'
-      }
-    }, react.createElement(Col, {
-      style: {
-        width: '100%',
-        height: '100%',
-        overflow: 'auto'
+    return (
+      /*#__PURE__*/
+      react.createElement(Container, {
+        key: id,
+        style: {
+          height: '100%',
+          display: 'flex',
+          flexFlow: 'column'
+        }
       },
-      onClick: unselect
-    }, notes)));
+      /*#__PURE__*/
+      react.createElement(Row, {
+        style: {
+          width: '100%',
+          height: '100%',
+          flex: '1 1 auto'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Col, {
+        style: {
+          width: '100%',
+          height: '100%',
+          overflow: 'auto'
+        },
+        onClick: unselect
+      }, notes)))
+    );
   }
 
 }
@@ -86896,7 +86947,7 @@ function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "className", "variant", "as"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'card-img');
-  return react.createElement(Component, _extends({
+  return /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref,
     className: classnames(variant ? prefix + "-" + variant : prefix, className)
   }, props));
@@ -86928,13 +86979,13 @@ var Card = react.forwardRef(function (_ref, ref) {
       cardHeaderBsPrefix: prefix + "-header"
     };
   }, [prefix]);
-  return react.createElement(CardContext.Provider, {
+  return /*#__PURE__*/react.createElement(CardContext.Provider, {
     value: cardContext
-  }, react.createElement(Component, _extends({
+  }, /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, props, {
     className: classnames(className, prefix, bg && "bg-" + bg, text && "text-" + text, border && "border-" + border)
-  }), body ? react.createElement(CardBody, null, children) : children));
+  }), body ? /*#__PURE__*/react.createElement(CardBody, null, children) : children));
 });
 Card.displayName = 'Card';
 Card.defaultProps = defaultProps$q;
@@ -86977,7 +87028,7 @@ class SettingsUi extends react.PureComponent {
     const {
       storage
     } = this.props;
-    const state = await read(`settings/${storage}`);
+    const state = await read$1(`settings/${storage}`);
 
     if (state !== undefined) {
       if (state.buffer) {
@@ -87027,7 +87078,7 @@ class SettingsUi extends react.PureComponent {
     } = this.props;
 
     if (storage) {
-      await write(`settings/${storage}`, this.state);
+      await write$1(`settings/${storage}`, this.state);
     }
   }
 
@@ -87068,9 +87119,9 @@ var TabContainer = function TabContainer(props) {
       }
     };
   }, [onSelect, activeKey, transition, mountOnEnter, unmountOnExit, generateChildId]);
-  return react.createElement(TabContext.Provider, {
+  return /*#__PURE__*/react.createElement(TabContext.Provider, {
     value: tabContext
-  }, react.createElement(SelectableContext.Provider, {
+  }, /*#__PURE__*/react.createElement(SelectableContext.Provider, {
     value: onSelect
   }, children));
 };
@@ -87083,7 +87134,7 @@ var TabContent = react.forwardRef(function (_ref, ref) {
       props = _objectWithoutPropertiesLoose(_ref, ["bsPrefix", "as", "className"]);
 
   var decoratedBsPrefix = useBootstrapPrefix(bsPrefix, 'tab-content');
-  return react.createElement(Component, _extends({
+  return /*#__PURE__*/react.createElement(Component, _extends({
     ref: ref
   }, props, {
     className: classnames(className, decoratedBsPrefix)
@@ -87131,8 +87182,8 @@ var TabPane = react.forwardRef(function (props, ref) {
       rest = _objectWithoutPropertiesLoose(_useTabContext, ["bsPrefix", "className", "active", "onEnter", "onEntering", "onEntered", "onExit", "onExiting", "onExited", "mountOnEnter", "unmountOnExit", "transition", "as", "eventKey"]);
 
   var prefix = useBootstrapPrefix(bsPrefix, 'tab-pane');
-  if (!active && unmountOnExit) return null;
-  var pane = react.createElement(Component, _extends({}, rest, {
+  if (!active && !Transition && unmountOnExit) return null;
+  var pane = /*#__PURE__*/react.createElement(Component, _extends({}, rest, {
     ref: ref,
     role: "tabpanel",
     "aria-hidden": !active,
@@ -87140,7 +87191,7 @@ var TabPane = react.forwardRef(function (props, ref) {
       active: active
     })
   }));
-  if (Transition) pane = react.createElement(Transition, {
+  if (Transition) pane = /*#__PURE__*/react.createElement(Transition, {
     in: active,
     onEnter: onEnter,
     onEntering: onEntering,
@@ -87153,9 +87204,9 @@ var TabPane = react.forwardRef(function (props, ref) {
   }, pane); // We provide an empty the TabContext so `<Nav>`s in `<TabPane>`s don't
   // conflict with the top level one.
 
-  return react.createElement(TabContext.Provider, {
+  return /*#__PURE__*/react.createElement(TabContext.Provider, {
     value: null
-  }, react.createElement(SelectableContext.Provider, {
+  }, /*#__PURE__*/react.createElement(SelectableContext.Provider, {
     value: null
   }, pane));
 });
@@ -87163,9 +87214,7 @@ TabPane.displayName = 'TabPane';
 
 /* eslint-disable react/require-render-return, react/no-unused-prop-types */
 
-var Tab =
-/*#__PURE__*/
-function (_React$Component) {
+var Tab = /*#__PURE__*/function (_React$Component) {
   _inheritsLoose(Tab, _React$Component);
 
   function Tab() {
@@ -87236,16 +87285,18 @@ function renderTab(child) {
       title = _child$props.title,
       eventKey = _child$props.eventKey,
       disabled = _child$props.disabled,
-      tabClassName = _child$props.tabClassName;
+      tabClassName = _child$props.tabClassName,
+      id = _child$props.id;
 
   if (title == null) {
     return null;
   }
 
-  return react.createElement(NavItem, {
+  return /*#__PURE__*/react.createElement(NavItem, {
     as: NavLink,
     eventKey: eventKey,
     disabled: disabled,
+    id: id,
     className: tabClassName
   }, title);
 }
@@ -87264,7 +87315,7 @@ var Tabs = react.forwardRef(function (props, ref) {
       activeKey = _useUncontrolled$acti === void 0 ? getDefaultActiveKey(children) : _useUncontrolled$acti,
       controlledProps = _objectWithoutPropertiesLoose(_useUncontrolled, ["id", "onSelect", "transition", "mountOnEnter", "unmountOnExit", "children", "activeKey"]);
 
-  return react.createElement(TabContainer, {
+  return /*#__PURE__*/react.createElement(TabContainer, {
     ref: ref,
     id: id,
     activeKey: activeKey,
@@ -87272,16 +87323,16 @@ var Tabs = react.forwardRef(function (props, ref) {
     transition: transition,
     mountOnEnter: mountOnEnter,
     unmountOnExit: unmountOnExit
-  }, react.createElement(Nav, _extends({}, controlledProps, {
+  }, /*#__PURE__*/react.createElement(Nav, _extends({}, controlledProps, {
     role: "tablist",
     as: "nav"
-  }), map(children, renderTab)), react.createElement(TabContent, null, map(children, function (child) {
+  }), map(children, renderTab)), /*#__PURE__*/react.createElement(TabContent, null, map(children, function (child) {
     var childProps = _extends({}, child.props);
 
     delete childProps.title;
     delete childProps.disabled;
     delete childProps.tabClassName;
-    return react.createElement(TabPane, childProps);
+    return /*#__PURE__*/react.createElement(TabPane, childProps);
   })));
 });
 Tabs.defaultProps = defaultProps$r;
@@ -87352,9 +87403,9 @@ class SelectWorkspaceUi extends SettingsUi {
       setupFilesystem({
         fileBase: workspace
       });
-      await write('source/script.jsxcad', defaultScript);
-      await write('ui/paneLayout', defaultPaneLayout);
-      await write('ui/paneViews', defaultPaneViews);
+      await write$1('source/script.jsxcad', defaultScript);
+      await write$1('ui/paneLayout', defaultPaneLayout);
+      await write$1('ui/paneViews', defaultPaneViews);
       await log({
         op: 'text',
         text: `Workspace ${workspace} created`,
@@ -87385,53 +87436,90 @@ class SelectWorkspaceUi extends SettingsUi {
       rows.push(workspaces.slice(i, i + 5));
     }
 
-    return react.createElement(DecoratedModal, {
-      show: this.props.show,
-      onHide: this.doHide,
-      size: "xl",
-      scrollable: true
-    }, react.createElement(DecoratedModal.Header, {
-      closeButton: true
-    }, react.createElement(DecoratedModal.Title, null, "Workspace")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
-      defaultActiveKey: "local",
-      style: {
-        display: 'flex'
-      }
-    }, react.createElement(Tab, {
-      eventKey: "local",
-      title: "Local"
-    }, react.createElement("div", {
-      style: {
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap'
-      }
-    }, workspaces.map((workspace, index) => react.createElement(Card, {
-      tag: "a",
-      key: index,
-      style: {
-        width: '196px',
-        height: '128'
+    return (
+      /*#__PURE__*/
+      react.createElement(DecoratedModal, {
+        show: this.props.show,
+        onHide: this.doHide,
+        size: "xl",
+        scrollable: true
       },
-      onClick: e => this.doSubmit(e, {
-        action: 'selectWorkspace',
-        workspace
-      })
-    }, react.createElement(Card.Body, null, react.createElement(Card.Title, null, workspace)))))), react.createElement(Tab, {
-      eventKey: "search",
-      title: "Search"
-    }), react.createElement(Tab, {
-      eventKey: "create",
-      title: "Create"
-    }, react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Workspace Name"), react.createElement(Form.Control, {
-      name: "workspace",
-      value: workspace,
-      onChange: this.doUpdate
-    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      name: "create",
-      variant: "outline-primary",
-      onClick: () => this.create()
-    }, "Create Workspace"))))), toast));
+      /*#__PURE__*/
+      react.createElement(DecoratedModal.Header, {
+        closeButton: true
+      },
+      /*#__PURE__*/
+      react.createElement(DecoratedModal.Title, null, "Workspace")),
+      /*#__PURE__*/
+      react.createElement(DecoratedModal.Body, null,
+      /*#__PURE__*/
+      react.createElement(Tabs, {
+        defaultActiveKey: "local",
+        style: {
+          display: 'flex'
+        }
+      },
+      /*#__PURE__*/
+      react.createElement(Tab, {
+        eventKey: "local",
+        title: "Local"
+      },
+      /*#__PURE__*/
+      react.createElement("div", {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap'
+        }
+      }, workspaces.map((workspace, index) =>
+      /*#__PURE__*/
+      react.createElement(Card, {
+        tag: "a",
+        key: index,
+        style: {
+          width: '196px',
+          height: '128'
+        },
+        onClick: e => this.doSubmit(e, {
+          action: 'selectWorkspace',
+          workspace
+        })
+      },
+      /*#__PURE__*/
+      react.createElement(Card.Body, null,
+      /*#__PURE__*/
+      react.createElement(Card.Title, null, workspace)))))),
+      /*#__PURE__*/
+      react.createElement(Tab, {
+        eventKey: "search",
+        title: "Search"
+      }),
+      /*#__PURE__*/
+      react.createElement(Tab, {
+        eventKey: "create",
+        title: "Create"
+      },
+      /*#__PURE__*/
+      react.createElement(Form, null,
+      /*#__PURE__*/
+      react.createElement(Form.Group, null,
+      /*#__PURE__*/
+      react.createElement(Form.Label, null, "Workspace Name"),
+      /*#__PURE__*/
+      react.createElement(Form.Control, {
+        name: "workspace",
+        value: workspace,
+        onChange: this.doUpdate
+      })),
+      /*#__PURE__*/
+      react.createElement(ButtonGroup, null,
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "create",
+        variant: "outline-primary",
+        onClick: () => this.create()
+      }, "Create Workspace"))))), toast))
+    );
   }
 
 }
@@ -87491,24 +87579,37 @@ class ShareFileUi extends SettingsUi {
   }
 
   render() {
-    return react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(FormControl, {
-      as: "input",
-      type: "file",
-      multiple: false,
-      id: this.getImportId(),
-      onChange: () => this.import(),
-      style: {
-        display: 'none'
-      }
-    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      name: "import",
-      variant: "outline-primary",
-      onClick: () => this.clickImport()
-    }, "Import"), react.createElement(Button, {
-      name: "export",
-      variant: "outline-primary",
-      onClick: () => this.export()
-    }, "Export")));
+    return (
+      /*#__PURE__*/
+      react.createElement(Form, null,
+      /*#__PURE__*/
+      react.createElement(Form.Group, null,
+      /*#__PURE__*/
+      react.createElement(FormControl, {
+        as: "input",
+        type: "file",
+        multiple: false,
+        id: this.getImportId(),
+        onChange: () => this.import(),
+        style: {
+          display: 'none'
+        }
+      })),
+      /*#__PURE__*/
+      react.createElement(ButtonGroup, null,
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "import",
+        variant: "outline-primary",
+        onClick: () => this.clickImport()
+      }, "Import"),
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "export",
+        variant: "outline-primary",
+        onClick: () => this.export()
+      }, "Export")))
+    );
   }
 
 }
@@ -87533,7 +87634,7 @@ const readWorkspace$1 = async (gistId, {
     const file = files[path]; // FIX: An oversize file will have file.content === '' and be silently ignored.
 
     if (file && file.content) {
-      await write(`source/${path}`, file.content, {
+      await write$1(`source/${path}`, file.content, {
         workspace
       });
     }
@@ -87554,7 +87655,7 @@ const writeWorkspace$1 = async ({
     if (path.startsWith(prefix)) {
       const name = path.substring(prefix.length);
       files[name] = {
-        content: await read(path, {
+        content: await read$1(path, {
           workspace
         })
       };
@@ -87640,24 +87741,43 @@ class ShareGistUi extends SettingsUi {
       isPublic = true,
       url
     } = this.state;
-    return react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Gist Url"), react.createElement(Form.Control, {
-      name: "url",
-      value: url,
-      onChange: this.doUpdate
-    }), react.createElement(Form.Label, null, "Gist is public?"), react.createElement(Form.Check, {
-      name: "isPublic",
-      checked: isPublic,
-      onChange: this.doUpdate
-    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      name: "import",
-      variant: "outline-primary",
-      disabled: url === '',
-      onClick: () => this.import()
-    }, "Import"), react.createElement(Button, {
-      name: "export",
-      variant: "outline-primary",
-      onClick: () => this.export()
-    }, "Export")));
+    return (
+      /*#__PURE__*/
+      react.createElement(Form, null,
+      /*#__PURE__*/
+      react.createElement(Form.Group, null,
+      /*#__PURE__*/
+      react.createElement(Form.Label, null, "Gist Url"),
+      /*#__PURE__*/
+      react.createElement(Form.Control, {
+        name: "url",
+        value: url,
+        onChange: this.doUpdate
+      }),
+      /*#__PURE__*/
+      react.createElement(Form.Label, null, "Gist is public?"),
+      /*#__PURE__*/
+      react.createElement(Form.Check, {
+        name: "isPublic",
+        checked: isPublic,
+        onChange: this.doUpdate
+      })),
+      /*#__PURE__*/
+      react.createElement(ButtonGroup, null,
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "import",
+        variant: "outline-primary",
+        disabled: url === '',
+        onClick: () => this.import()
+      }, "Import"),
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "export",
+        variant: "outline-primary",
+        onClick: () => this.export()
+      }, "Export")))
+    );
   }
 
 }
@@ -87684,7 +87804,7 @@ class ShareGithubUi extends SettingsUi {
 
     for (const file of await listFiles()) {
       if (file.startsWith('source/')) {
-        files.push([file, await read(file)]);
+        files.push([file, await read$1(file)]);
       }
     }
 
@@ -87739,31 +87859,58 @@ class ShareGithubUi extends SettingsUi {
       repository,
       prefix
     } = this.state;
-    return react.createElement(Form, null, react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Owner"), react.createElement(Form.Control, {
-      name: "owner",
-      value: owner,
-      onChange: this.doUpdate
-    })), react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Repository"), react.createElement(Form.Control, {
-      name: "repository",
-      value: repository,
-      onChange: this.doUpdate
-    })), react.createElement(Form.Group, null, react.createElement(Form.Label, null, "Path Prefix"), react.createElement(Form.Control, {
-      name: "prefix",
-      value: prefix,
-      onChange: this.doUpdate
-    })), react.createElement(ButtonGroup, null, react.createElement(Button, {
-      name: "import",
-      variant: "outline-primary",
-      onClick: e => this.doImport(e, {
-        action: 'repositoryImport'
-      })
-    }, "Import"), react.createElement(Button, {
-      name: "export",
-      variant: "outline-primary",
-      onClick: e => this.doExport(e, {
-        action: 'repositoryExport'
-      })
-    }, "Export")));
+    return (
+      /*#__PURE__*/
+      react.createElement(Form, null,
+      /*#__PURE__*/
+      react.createElement(Form.Group, null,
+      /*#__PURE__*/
+      react.createElement(Form.Label, null, "Owner"),
+      /*#__PURE__*/
+      react.createElement(Form.Control, {
+        name: "owner",
+        value: owner,
+        onChange: this.doUpdate
+      })),
+      /*#__PURE__*/
+      react.createElement(Form.Group, null,
+      /*#__PURE__*/
+      react.createElement(Form.Label, null, "Repository"),
+      /*#__PURE__*/
+      react.createElement(Form.Control, {
+        name: "repository",
+        value: repository,
+        onChange: this.doUpdate
+      })),
+      /*#__PURE__*/
+      react.createElement(Form.Group, null,
+      /*#__PURE__*/
+      react.createElement(Form.Label, null, "Path Prefix"),
+      /*#__PURE__*/
+      react.createElement(Form.Control, {
+        name: "prefix",
+        value: prefix,
+        onChange: this.doUpdate
+      })),
+      /*#__PURE__*/
+      react.createElement(ButtonGroup, null,
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "import",
+        variant: "outline-primary",
+        onClick: e => this.doImport(e, {
+          action: 'repositoryImport'
+        })
+      }, "Import"),
+      /*#__PURE__*/
+      react.createElement(Button, {
+        name: "export",
+        variant: "outline-primary",
+        onClick: e => this.doExport(e, {
+          action: 'repositoryExport'
+        })
+      }, "Export")))
+    );
   }
 
 }
@@ -87778,29 +87925,52 @@ class ShareUi extends SettingsUi {
     const {
       toast
     } = this.props;
-    return react.createElement(DecoratedModal, {
-      show: this.props.show,
-      onHide: this.doHide
-    }, react.createElement(DecoratedModal.Header, {
-      closeButton: true
-    }, react.createElement(DecoratedModal.Title, null, "Share")), react.createElement(DecoratedModal.Body, null, react.createElement(Tabs, {
-      defaultActiveKey: "repository"
-    }, react.createElement(Tab, {
-      eventKey: "repository",
-      title: "Github"
-    }, react.createElement(ShareGithubUi, {
-      storage: "share/github"
-    })), react.createElement(Tab, {
-      eventKey: "gist",
-      title: "Gist"
-    }, react.createElement(ShareGistUi, {
-      storage: "share/gist"
-    })), react.createElement(Tab, {
-      eventKey: "file",
-      title: "File"
-    }, react.createElement(ShareFileUi, {
-      storage: "share/file"
-    })))), toast);
+    return (
+      /*#__PURE__*/
+      react.createElement(DecoratedModal, {
+        show: this.props.show,
+        onHide: this.doHide
+      },
+      /*#__PURE__*/
+      react.createElement(DecoratedModal.Header, {
+        closeButton: true
+      },
+      /*#__PURE__*/
+      react.createElement(DecoratedModal.Title, null, "Share")),
+      /*#__PURE__*/
+      react.createElement(DecoratedModal.Body, null,
+      /*#__PURE__*/
+      react.createElement(Tabs, {
+        defaultActiveKey: "repository"
+      },
+      /*#__PURE__*/
+      react.createElement(Tab, {
+        eventKey: "repository",
+        title: "Github"
+      },
+      /*#__PURE__*/
+      react.createElement(ShareGithubUi, {
+        storage: "share/github"
+      })),
+      /*#__PURE__*/
+      react.createElement(Tab, {
+        eventKey: "gist",
+        title: "Gist"
+      },
+      /*#__PURE__*/
+      react.createElement(ShareGistUi, {
+        storage: "share/gist"
+      })),
+      /*#__PURE__*/
+      react.createElement(Tab, {
+        eventKey: "file",
+        title: "File"
+      },
+      /*#__PURE__*/
+      react.createElement(ShareFileUi, {
+        storage: "share/file"
+      })))), toast)
+    );
   }
 
 }
@@ -88067,7 +88237,7 @@ class SvgPathEditor extends Pane {
         file
       } = this.props;
       const path = this.generatePath();
-      await write(file, path);
+      await write$1(file, path);
       await log({
         op: 'text',
         text: 'Saved',
@@ -88381,7 +88551,7 @@ class SvgPathEditor extends Pane {
     const {
       file
     } = this.props;
-    const svgPath = await read(file);
+    const svgPath = await read$1(file);
     const {
       points,
       closePath
@@ -88433,40 +88603,53 @@ class SvgPathEditor extends Pane {
   }
 
   renderPane() {
-    return react.createElement("div", {
-      className: "ad-SvgPathEditor",
-      onMouseUp: this.cancelDragging
-    }, react.createElement("div", {
-      className: "ad-SvgPathEditor-main"
-    }, react.createElement("div", {
-      className: "ad-SvgPathEditor-svg"
-    }, react.createElement(SVG, _extends$2({
-      ref: "svg",
-      svgPath: this.generatePath()
-    }, this.state, {
-      addPoint: this.addPoint,
-      setDraggedPoint: this.setDraggedPoint,
-      setDraggedQuadratic: this.setDraggedQuadratic,
-      setDraggedCubic: this.setDraggedCubic,
-      handleMouseMove: this.handleMouseMove
-    })))), react.createElement("div", {
-      className: "ad-SvgPathEditor-controls"
-    }, react.createElement(Controls, _extends$2({}, this.state, {
-      reset: this.reset,
-      removeActivePoint: this.removeActivePoint,
-      setPointPosition: this.setPointPosition,
-      setQuadraticPosition: this.setQuadraticPosition,
-      setCubicPosition: this.setCubicPosition,
-      setArcParam: this.setArcParam,
-      setPointType: this.setPointType,
-      setWidth: this.setWidth,
-      setHeight: this.setHeight,
-      setGridSize: this.setGridSize,
-      setGridSnap: this.setGridSnap,
-      setGridShow: this.setGridShow,
-      setClosePath: this.setClosePath,
-      save: this.save
-    }))));
+    return (
+      /*#__PURE__*/
+      react.createElement("div", {
+        className: "ad-SvgPathEditor",
+        onMouseUp: this.cancelDragging
+      },
+      /*#__PURE__*/
+      react.createElement("div", {
+        className: "ad-SvgPathEditor-main"
+      },
+      /*#__PURE__*/
+      react.createElement("div", {
+        className: "ad-SvgPathEditor-svg"
+      },
+      /*#__PURE__*/
+      react.createElement(SVG, _extends$1({
+        ref: "svg",
+        svgPath: this.generatePath()
+      }, this.state, {
+        addPoint: this.addPoint,
+        setDraggedPoint: this.setDraggedPoint,
+        setDraggedQuadratic: this.setDraggedQuadratic,
+        setDraggedCubic: this.setDraggedCubic,
+        handleMouseMove: this.handleMouseMove
+      })))),
+      /*#__PURE__*/
+      react.createElement("div", {
+        className: "ad-SvgPathEditor-controls"
+      },
+      /*#__PURE__*/
+      react.createElement(Controls, _extends$1({}, this.state, {
+        reset: this.reset,
+        removeActivePoint: this.removeActivePoint,
+        setPointPosition: this.setPointPosition,
+        setQuadraticPosition: this.setQuadraticPosition,
+        setCubicPosition: this.setCubicPosition,
+        setArcParam: this.setArcParam,
+        setPointType: this.setPointType,
+        setWidth: this.setWidth,
+        setHeight: this.setHeight,
+        setGridSize: this.setGridSize,
+        setGridSnap: this.setGridSnap,
+        setGridShow: this.setGridShow,
+        setClosePath: this.setClosePath,
+        save: this.save
+      }))))
+    );
   }
 
 }
@@ -88494,7 +88677,9 @@ class SVG extends Component {
       let anchors = [];
 
       if (p.q) {
-        anchors.push(react.createElement(Quadratic, {
+        anchors.push(
+        /*#__PURE__*/
+        react.createElement(Quadratic, {
           key: anchors.length,
           index: i,
           p1x: a[i - 1].x,
@@ -88506,7 +88691,9 @@ class SVG extends Component {
           setDraggedQuadratic: setDraggedQuadratic
         }));
       } else if (p.c) {
-        anchors.push(react.createElement(Cubic, {
+        anchors.push(
+        /*#__PURE__*/
+        react.createElement(Cubic, {
           key: anchors.length,
           index: i,
           p1x: a[i - 1].x,
@@ -88521,102 +88708,139 @@ class SVG extends Component {
         }));
       }
 
-      return react.createElement("g", {
-        key: i,
-        className: 'ad-PointGroup' + (i === 0 ? '  ad-PointGroup--first' : '') + (activePoint === i ? '  is-active' : '')
-      }, react.createElement(Point, {
-        key: "p",
-        index: i,
-        x: p.x,
-        y: p.y,
-        setDraggedPoint: setDraggedPoint
-      }), anchors);
+      return (
+        /*#__PURE__*/
+        react.createElement("g", {
+          key: i,
+          className: 'ad-PointGroup' + (i === 0 ? '  ad-PointGroup--first' : '') + (activePoint === i ? '  is-active' : '')
+        },
+        /*#__PURE__*/
+        react.createElement(Point, {
+          key: "p",
+          index: i,
+          x: p.x,
+          y: p.y,
+          setDraggedPoint: setDraggedPoint
+        }), anchors)
+      );
     });
-    return react.createElement("svg", {
-      className: "ad-SVG",
-      width: w,
-      height: h,
-      onClickCapture: e => addPoint(e),
-      onMouseMoveCapture: e => handleMouseMove(e)
-    }, react.createElement(Grid, {
-      w: w,
-      h: h,
-      grid: grid
-    }), react.createElement("path", {
-      className: "ad-Path",
-      d: svgPath
-    }), react.createElement("g", {
-      className: "ad-Points"
-    }, circles));
+    return (
+      /*#__PURE__*/
+      react.createElement("svg", {
+        className: "ad-SVG",
+        width: w,
+        height: h,
+        onClickCapture: e => addPoint(e),
+        onMouseMoveCapture: e => handleMouseMove(e)
+      },
+      /*#__PURE__*/
+      react.createElement(Grid, {
+        w: w,
+        h: h,
+        grid: grid
+      }),
+      /*#__PURE__*/
+      react.createElement("path", {
+        className: "ad-Path",
+        d: svgPath
+      }),
+      /*#__PURE__*/
+      react.createElement("g", {
+        className: "ad-Points"
+      }, circles))
+    );
   }
 
 }
 
 function Cubic(props) {
-  return react.createElement("g", {
-    className: "ad-Anchor"
-  }, react.createElement("line", {
-    className: "ad-Anchor-line",
-    x1: props.p1x,
-    y1: props.p1y,
-    x2: props.x1,
-    y2: props.y1
-  }), react.createElement("line", {
-    className: "ad-Anchor-line",
-    x1: props.p2x,
-    y1: props.p2y,
-    x2: props.x2,
-    y2: props.y2
-  }), react.createElement("circle", {
-    className: "ad-Anchor-point",
-    onMouseDown: e => props.setDraggedCubic(props.index, 0),
-    cx: props.x1,
-    cy: props.y1,
-    r: 6
-  }), react.createElement("circle", {
-    className: "ad-Anchor-point",
-    onMouseDown: e => props.setDraggedCubic(props.index, 1),
-    cx: props.x2,
-    cy: props.y2,
-    r: 6
-  }));
+  return (
+    /*#__PURE__*/
+    react.createElement("g", {
+      className: "ad-Anchor"
+    },
+    /*#__PURE__*/
+    react.createElement("line", {
+      className: "ad-Anchor-line",
+      x1: props.p1x,
+      y1: props.p1y,
+      x2: props.x1,
+      y2: props.y1
+    }),
+    /*#__PURE__*/
+    react.createElement("line", {
+      className: "ad-Anchor-line",
+      x1: props.p2x,
+      y1: props.p2y,
+      x2: props.x2,
+      y2: props.y2
+    }),
+    /*#__PURE__*/
+    react.createElement("circle", {
+      className: "ad-Anchor-point",
+      onMouseDown: e => props.setDraggedCubic(props.index, 0),
+      cx: props.x1,
+      cy: props.y1,
+      r: 6
+    }),
+    /*#__PURE__*/
+    react.createElement("circle", {
+      className: "ad-Anchor-point",
+      onMouseDown: e => props.setDraggedCubic(props.index, 1),
+      cx: props.x2,
+      cy: props.y2,
+      r: 6
+    }))
+  );
 }
 
 function Quadratic(props) {
-  return react.createElement("g", {
-    className: "ad-Anchor"
-  }, react.createElement("line", {
-    key: "q1",
-    className: "ad-Anchor-line",
-    x1: props.p1x,
-    y1: props.p1y,
-    x2: props.x,
-    y2: props.y
-  }), react.createElement("line", {
-    key: "q2",
-    className: "ad-Anchor-line",
-    x1: props.x,
-    y1: props.y,
-    x2: props.p2x,
-    y2: props.p2y
-  }), react.createElement("circle", {
-    key: "q3",
-    className: "ad-Anchor-point",
-    onMouseDown: e => props.setDraggedQuadratic(props.index),
-    cx: props.x,
-    cy: props.y,
-    r: 6
-  }));
+  return (
+    /*#__PURE__*/
+    react.createElement("g", {
+      className: "ad-Anchor"
+    },
+    /*#__PURE__*/
+    react.createElement("line", {
+      key: "q1",
+      className: "ad-Anchor-line",
+      x1: props.p1x,
+      y1: props.p1y,
+      x2: props.x,
+      y2: props.y
+    }),
+    /*#__PURE__*/
+    react.createElement("line", {
+      key: "q2",
+      className: "ad-Anchor-line",
+      x1: props.x,
+      y1: props.y,
+      x2: props.p2x,
+      y2: props.p2y
+    }),
+    /*#__PURE__*/
+    react.createElement("circle", {
+      key: "q3",
+      className: "ad-Anchor-point",
+      onMouseDown: e => props.setDraggedQuadratic(props.index),
+      cx: props.x,
+      cy: props.y,
+      r: 6
+    }))
+  );
 }
 
 function Point(props) {
-  return react.createElement("circle", {
-    className: "ad-Point",
-    onMouseDown: e => props.setDraggedPoint(props.index),
-    cx: props.x,
-    cy: props.y,
-    r: 8
-  });
+  return (
+    /*#__PURE__*/
+    react.createElement("circle", {
+      className: "ad-Point",
+      onMouseDown: e => props.setDraggedPoint(props.index),
+      cx: props.x,
+      cy: props.y,
+      r: 8
+    })
+  );
 }
 
 function Grid(props) {
@@ -88628,7 +88852,9 @@ function Grid(props) {
   let grid = [];
 
   for (let i = 1; i < props.w / size; i++) {
-    grid.push(react.createElement("line", {
+    grid.push(
+    /*#__PURE__*/
+    react.createElement("line", {
       key: `Gx${i}`,
       x1: i * size,
       y1: 0,
@@ -88638,7 +88864,9 @@ function Grid(props) {
   }
 
   for (let i = 1; i < props.h / size; i++) {
-    grid.push(react.createElement("line", {
+    grid.push(
+    /*#__PURE__*/
+    react.createElement("line", {
       key: `Gy${i}`,
       x1: 0,
       y1: i * size,
@@ -88647,9 +88875,12 @@ function Grid(props) {
     }));
   }
 
-  return react.createElement("g", {
-    className: 'ad-Grid' + (!show ? '  is-hidden' : '')
-  }, grid);
+  return (
+    /*#__PURE__*/
+    react.createElement("g", {
+      className: 'ad-Grid' + (!show ? '  is-hidden' : '')
+    }, grid)
+  );
 }
 /**
  * Controls
@@ -88662,10 +88893,14 @@ function Controls(props) {
   let params = [];
 
   if (active.q) {
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Control point X position",
       type: "range",
       min: 0,
@@ -88674,10 +88909,14 @@ function Controls(props) {
       value: active.q.x,
       onChange: e => props.setQuadraticPosition('x', e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Control point Y position",
       type: "range",
       min: 0,
@@ -88687,10 +88926,14 @@ function Controls(props) {
       onChange: e => props.setQuadraticPosition('y', e)
     })));
   } else if (active.c) {
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "First control point X position",
       type: "range",
       min: 0,
@@ -88699,10 +88942,14 @@ function Controls(props) {
       value: active.c[0].x,
       onChange: e => props.setCubicPosition('x', 0, e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "First control point Y position",
       type: "range",
       min: 0,
@@ -88711,10 +88958,14 @@ function Controls(props) {
       value: active.c[0].y,
       onChange: e => props.setCubicPosition('y', 0, e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Second control point X position",
       type: "range",
       min: 0,
@@ -88723,10 +88974,14 @@ function Controls(props) {
       value: active.c[1].x,
       onChange: e => props.setCubicPosition('x', 1, e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Second control point Y position",
       type: "range",
       min: 0,
@@ -88736,10 +88991,14 @@ function Controls(props) {
       onChange: e => props.setCubicPosition('y', 1, e)
     })));
   } else if (active.a) {
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "X Radius",
       type: "range",
       min: 0,
@@ -88748,10 +89007,14 @@ function Controls(props) {
       value: active.a.rx,
       onChange: e => props.setArcParam('rx', e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Y Radius",
       type: "range",
       min: 0,
@@ -88760,10 +89023,14 @@ function Controls(props) {
       value: active.a.ry,
       onChange: e => props.setArcParam('ry', e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Rotation",
       type: "range",
       min: 0,
@@ -88772,19 +89039,27 @@ function Controls(props) {
       value: active.a.rot,
       onChange: e => props.setArcParam('rot', e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Large arc sweep flag",
       type: "checkbox",
       checked: active.a.laf,
       onChange: e => props.setArcParam('laf', e)
     })));
-    params.push(react.createElement("div", {
+    params.push(
+    /*#__PURE__*/
+    react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    }, react.createElement(Control, {
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
       name: "Sweep flag",
       type: "checkbox",
       checked: active.a.sf,
@@ -88792,120 +89067,167 @@ function Controls(props) {
     })));
   }
 
-  return react.createElement("div", {
-    className: "ad-Controls"
-  }, react.createElement("h3", {
-    className: "ad-Controls-title"
-  }, "Parameters"), react.createElement("div", {
-    key: "c1",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    name: "Width",
-    type: "text",
-    value: props.w,
-    onChange: e => props.setWidth(e)
-  }), react.createElement(Control, {
-    name: "Height",
-    type: "text",
-    value: props.h,
-    onChange: e => props.setHeight(e)
-  }), react.createElement(Control, {
-    name: "Close path",
-    type: "checkbox",
-    value: props.closePath,
-    onChange: e => props.setClosePath(e)
-  })), react.createElement("div", {
-    key: "c2",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    name: "Grid size",
-    type: "text",
-    value: props.grid.size,
-    onChange: e => props.setGridSize(e)
-  }), react.createElement(Control, {
-    name: "Snap grid",
-    type: "checkbox",
-    checked: props.grid.snap,
-    onChange: e => props.setGridSnap(e)
-  }), react.createElement(Control, {
-    name: "Show grid",
-    type: "checkbox",
-    checked: props.grid.show,
-    onChange: e => props.setGridShow(e)
-  })), react.createElement("div", {
-    key: "c3",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    type: "button",
-    action: "reset",
-    value: "Reset path",
-    onClick: e => props.reset(e)
-  })), react.createElement("h3", {
-    className: "ad-Controls-title"
-  }, "Selected point"), props.activePoint !== 0 && react.createElement("div", {
-    key: "c4",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    name: "Point type",
-    type: "choices",
-    id: "pointType",
-    choices: [{
-      name: 'L',
-      value: 'l',
-      checked: !active.q && !active.c && !active.a
-    }, {
-      name: 'Q',
-      value: 'q',
-      checked: !!active.q
-    }, {
-      name: 'C',
-      value: 'c',
-      checked: !!active.c
-    }, {
-      name: 'A',
-      value: 'a',
-      checked: !!active.a
-    }],
-    onChange: e => props.setPointType(e)
-  })), react.createElement("div", {
-    key: "c5",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    name: "Point X position",
-    type: "range",
-    min: 0,
-    max: props.w,
-    step: step,
-    value: active.x,
-    onChange: e => props.setPointPosition('x', e)
-  })), react.createElement("div", {
-    key: "c6",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    name: "Point Y position",
-    type: "range",
-    min: 0,
-    max: props.h,
-    step: step,
-    value: active.y,
-    onChange: e => props.setPointPosition('y', e)
-  })), params, props.activePoint !== 0 && react.createElement("div", {
-    key: "c7",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    type: "button",
-    action: "delete",
-    value: "Remove this point",
-    onClick: e => props.removeActivePoint(e)
-  })), react.createElement("div", {
-    key: "c8",
-    className: "ad-Controls-container"
-  }, react.createElement(Control, {
-    type: "button",
-    action: "save",
-    value: "Save",
-    onClick: e => props.save(e)
-  })));
+  return (
+    /*#__PURE__*/
+    react.createElement("div", {
+      className: "ad-Controls"
+    },
+    /*#__PURE__*/
+    react.createElement("h3", {
+      className: "ad-Controls-title"
+    }, "Parameters"),
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c1",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Width",
+      type: "text",
+      value: props.w,
+      onChange: e => props.setWidth(e)
+    }),
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Height",
+      type: "text",
+      value: props.h,
+      onChange: e => props.setHeight(e)
+    }),
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Close path",
+      type: "checkbox",
+      value: props.closePath,
+      onChange: e => props.setClosePath(e)
+    })),
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c2",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Grid size",
+      type: "text",
+      value: props.grid.size,
+      onChange: e => props.setGridSize(e)
+    }),
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Snap grid",
+      type: "checkbox",
+      checked: props.grid.snap,
+      onChange: e => props.setGridSnap(e)
+    }),
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Show grid",
+      type: "checkbox",
+      checked: props.grid.show,
+      onChange: e => props.setGridShow(e)
+    })),
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c3",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      type: "button",
+      action: "reset",
+      value: "Reset path",
+      onClick: e => props.reset(e)
+    })),
+    /*#__PURE__*/
+    react.createElement("h3", {
+      className: "ad-Controls-title"
+    }, "Selected point"), props.activePoint !== 0 &&
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c4",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Point type",
+      type: "choices",
+      id: "pointType",
+      choices: [{
+        name: 'L',
+        value: 'l',
+        checked: !active.q && !active.c && !active.a
+      }, {
+        name: 'Q',
+        value: 'q',
+        checked: !!active.q
+      }, {
+        name: 'C',
+        value: 'c',
+        checked: !!active.c
+      }, {
+        name: 'A',
+        value: 'a',
+        checked: !!active.a
+      }],
+      onChange: e => props.setPointType(e)
+    })),
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c5",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Point X position",
+      type: "range",
+      min: 0,
+      max: props.w,
+      step: step,
+      value: active.x,
+      onChange: e => props.setPointPosition('x', e)
+    })),
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c6",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      name: "Point Y position",
+      type: "range",
+      min: 0,
+      max: props.h,
+      step: step,
+      value: active.y,
+      onChange: e => props.setPointPosition('y', e)
+    })), params, props.activePoint !== 0 &&
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c7",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      type: "button",
+      action: "delete",
+      value: "Remove this point",
+      onClick: e => props.removeActivePoint(e)
+    })),
+    /*#__PURE__*/
+    react.createElement("div", {
+      key: "c8",
+      className: "ad-Controls-container"
+    },
+    /*#__PURE__*/
+    react.createElement(Control, {
+      type: "button",
+      action: "save",
+      value: "Save",
+      onClick: e => props.save(e)
+    })))
+  );
 }
 
 function Control(props) {
@@ -88919,168 +89241,150 @@ function Control(props) {
 
   switch (type) {
     case 'range':
-      control = react.createElement(Range, _props);
+      control =
+      /*#__PURE__*/
+      react.createElement(Range, _props);
       break;
 
     case 'text':
-      control = react.createElement(Text, _props);
+      control =
+      /*#__PURE__*/
+      react.createElement(Text, _props);
       break;
 
     case 'checkbox':
-      control = react.createElement(Checkbox, _props);
+      control =
+      /*#__PURE__*/
+      react.createElement(Checkbox, _props);
       break;
 
     case 'button':
-      control = react.createElement(Button$1, _props);
+      control =
+      /*#__PURE__*/
+      react.createElement(Button$1, _props);
       break;
 
     case 'choices':
-      control = react.createElement(Choices, _props);
+      control =
+      /*#__PURE__*/
+      react.createElement(Choices, _props);
       break;
   }
 
   if (name) {
-    label = react.createElement("label", {
+    label =
+    /*#__PURE__*/
+    react.createElement("label", {
       className: "ad-Control-label"
     }, name);
   }
 
-  return react.createElement("div", {
-    className: "ad-Control"
-  }, label, control);
+  return (
+    /*#__PURE__*/
+    react.createElement("div", {
+      className: "ad-Control"
+    }, label, control)
+  );
 }
 
 function Choices(props) {
   let choices = props.choices.map((c, i) => {
-    return react.createElement("label", {
-      key: i,
-      className: "ad-Choice"
-    }, react.createElement("input", {
-      className: "ad-Choice-input",
-      type: "radio",
-      value: c.value,
-      checked: c.checked,
-      name: props.id,
-      onChange: props.onChange
-    }), react.createElement("div", {
-      className: "ad-Choice-fake"
-    }, c.name));
+    return (
+      /*#__PURE__*/
+      react.createElement("label", {
+        key: i,
+        className: "ad-Choice"
+      },
+      /*#__PURE__*/
+      react.createElement("input", {
+        className: "ad-Choice-input",
+        type: "radio",
+        value: c.value,
+        checked: c.checked,
+        name: props.id,
+        onChange: props.onChange
+      }),
+      /*#__PURE__*/
+      react.createElement("div", {
+        className: "ad-Choice-fake"
+      }, c.name))
+    );
   });
-  return react.createElement("div", {
-    className: "ad-Choices"
-  }, choices);
+  return (
+    /*#__PURE__*/
+    react.createElement("div", {
+      className: "ad-Choices"
+    }, choices)
+  );
 }
 
 function Button$1(props) {
-  return react.createElement("button", {
-    className: 'ad-Button' + (props.action ? '  ad-Button--' + props.action : ''),
-    type: "button",
-    onClick: props.onClick
-  }, props.value);
+  return (
+    /*#__PURE__*/
+    react.createElement("button", {
+      className: 'ad-Button' + (props.action ? '  ad-Button--' + props.action : ''),
+      type: "button",
+      onClick: props.onClick
+    }, props.value)
+  );
 }
 
 function Checkbox(props) {
-  return react.createElement("label", {
-    className: "ad-Checkbox"
-  }, react.createElement("input", {
-    className: "ad-Checkbox-input",
-    type: "checkbox",
-    onChange: props.onChange,
-    checked: props.checked
-  }), react.createElement("div", {
-    className: "ad-Checkbox-fake"
-  }));
+  return (
+    /*#__PURE__*/
+    react.createElement("label", {
+      className: "ad-Checkbox"
+    },
+    /*#__PURE__*/
+    react.createElement("input", {
+      className: "ad-Checkbox-input",
+      type: "checkbox",
+      onChange: props.onChange,
+      checked: props.checked
+    }),
+    /*#__PURE__*/
+    react.createElement("div", {
+      className: "ad-Checkbox-fake"
+    }))
+  );
 }
 
 function Text(props) {
-  return react.createElement("input", {
-    className: "ad-Text",
-    type: "text",
-    value: props.value,
-    onChange: props.onChange
-  });
+  return (
+    /*#__PURE__*/
+    react.createElement("input", {
+      className: "ad-Text",
+      type: "text",
+      value: props.value,
+      onChange: props.onChange
+    })
+  );
 }
 
 function Range(props) {
-  return react.createElement("div", {
-    className: "ad-Range"
-  }, react.createElement("input", {
-    className: "ad-Range-input",
-    type: "range",
-    min: props.min,
-    max: props.max,
-    step: props.step,
-    value: props.value,
-    onChange: props.onChange
-  }), react.createElement("input", {
-    className: "ad-Range-text  ad-Text",
-    type: "text",
-    value: props.value,
-    onChange: props.onChange
-  }));
-}
-
-/**
- * Track whether a component is current mounted. Generally less preferable than
- * properlly canceling effects so they don't run after a component is unmounted,
- * but helpful in cases where that isn't feasible, such as a `Promise` resolution.
- *
- * @returns a function that returns the current isMounted state of the component
- *
- * ```ts
- * const [data, setData] = useState(null)
- * const isMounted = useMounted()
- *
- * useEffect(() => {
- *   fetchdata().then((newData) => {
- *      if (isMounted()) {
- *        setData(newData);
- *      }
- *   })
- * })
- * ```
- */
-
-function useMounted() {
-  var mounted = react_15(true);
-  var isMounted = react_15(function () {
-    return mounted.current;
-  });
-  react_10(function () {
-    return function () {
-      mounted.current = false;
-    };
-  }, []);
-  return isMounted.current;
-}
-
-/**
- * Returns a ref that is immediately updated with the new value
- *
- * @param value The Ref value
- * @category refs
- */
-
-function useUpdatedRef(value) {
-  var valueRef = react_15(value);
-  valueRef.current = value;
-  return valueRef;
-}
-
-/**
- * Attach a callback that fires when a component unmounts
- *
- * @param fn Handler to run when the component unmounts
- * @category effects
- */
-
-function useWillUnmount(fn) {
-  var onUnmount = useUpdatedRef(fn);
-  react_10(function () {
-    return function () {
-      return onUnmount.current();
-    };
-  }, []);
+  return (
+    /*#__PURE__*/
+    react.createElement("div", {
+      className: "ad-Range"
+    },
+    /*#__PURE__*/
+    react.createElement("input", {
+      className: "ad-Range-input",
+      type: "range",
+      min: props.min,
+      max: props.max,
+      step: props.step,
+      value: props.value,
+      onChange: props.onChange
+    }),
+    /*#__PURE__*/
+    react.createElement("input", {
+      className: "ad-Range-text  ad-Text",
+      type: "text",
+      value: props.value,
+      onChange: props.onChange
+    }))
+  );
 }
 
 /*
@@ -89159,16 +89463,16 @@ var ToastHeader = react.forwardRef(function (_ref, ref) {
 
   bsPrefix = useBootstrapPrefix(bsPrefix, 'toast-header');
   var context = react_13(ToastContext);
-  var handleClick = useEventCallback(function () {
-    if (context) {
-      context.onClose();
+  var handleClick = useEventCallback(function (e) {
+    if (context && context.onClose) {
+      context.onClose(e);
     }
   });
-  return react.createElement("div", _extends({
+  return /*#__PURE__*/react.createElement("div", _extends({
     ref: ref
   }, props, {
     className: classnames(bsPrefix, className)
-  }), children, closeButton && react.createElement(CloseButton, {
+  }), children, closeButton && /*#__PURE__*/react.createElement(CloseButton, {
     label: closeLabel,
     onClick: handleClick,
     className: "ml-2 mb-1",
@@ -89217,12 +89521,12 @@ var Toast = react.forwardRef(function (_ref, ref) {
     onCloseRef.current();
   }, [autohide, show]);
   autohideTimeout.set(autohideFunc, delayRef.current);
-  var useAnimation = react_12(function () {
+  var hasAnimation = react_12(function () {
     return Transition && animation;
   }, [Transition, animation]);
-  var toast = react.createElement("div", _extends({}, props, {
+  var toast = /*#__PURE__*/react.createElement("div", _extends({}, props, {
     ref: ref,
-    className: classnames(bsPrefix, className, !useAnimation && show && 'show'),
+    className: classnames(bsPrefix, className, !hasAnimation && (show ? 'show' : 'hide')),
     role: "alert",
     "aria-live": "assertive",
     "aria-atomic": "true"
@@ -89230,10 +89534,11 @@ var Toast = react.forwardRef(function (_ref, ref) {
   var toastContext = {
     onClose: onClose
   };
-  return react.createElement(ToastContext.Provider, {
+  return /*#__PURE__*/react.createElement(ToastContext.Provider, {
     value: toastContext
-  }, useAnimation ? react.createElement(Transition, {
-    in: show
+  }, hasAnimation ? /*#__PURE__*/react.createElement(Transition, {
+    in: show,
+    unmountOnExit: true
   }, toast) : toast);
 });
 Toast.defaultProps = defaultProps$t;
@@ -89695,14 +90000,14 @@ const ensureFile = async (file, url, {
   // TODO: Handle a transform from file to source so that things github can be used sensibly.
 
 
-  const content = await read(`${file}`, {
+  const content = await read$1(`${file}`, {
     workspace,
     sources
   });
 
   if (content === undefined) {
     // If we couldn't find it, create it as an empty file.
-    await write(`${file}`, '', {
+    await write$1(`${file}`, '', {
       workspace
     });
   }
@@ -89808,14 +90113,14 @@ class Ui extends react.PureComponent {
           options,
           path
         } = question.readFile;
-        return read(path, options);
+        return read$1(path, options);
       } else if (question.writeFile) {
         const {
           options,
           path,
           data
         } = question.writeFile;
-        return write(path, data, options);
+        return write$1(path, data, options);
       } else if (question.deleteFile) {
         const {
           options,
@@ -89914,9 +90219,9 @@ class Ui extends react.PureComponent {
       setupFilesystem({
         fileBase: workspace
       });
-      await write('source/script.jsxcad', defaultScript$1);
-      await write('ui/paneLayout', defaultPaneLayout$1);
-      await write('ui/paneViews', defaultPaneViews$1);
+      await write$1('source/script.jsxcad', defaultScript$1);
+      await write$1('ui/paneLayout', defaultPaneLayout$1);
+      await write$1('ui/paneViews', defaultPaneViews$1);
       await this.selectWorkspace(workspace);
     }
   }
@@ -89927,7 +90232,7 @@ class Ui extends react.PureComponent {
     });
     const encodedWorkspace = encodeURIComponent(workspace);
     history.pushState(null, null, `#${encodedWorkspace}`);
-    const paneLayoutData = await read('ui/paneLayout');
+    const paneLayoutData = await read$1('ui/paneLayout');
     let paneLayout;
 
     if (paneLayoutData !== undefined && paneLayoutData !== 'null') {
@@ -89940,7 +90245,7 @@ class Ui extends react.PureComponent {
       paneLayout = '0';
     }
 
-    const paneViewsData = await read('ui/paneViews');
+    const paneViewsData = await read$1('ui/paneViews');
     let paneViews;
 
     if (paneViewsData !== undefined) {
@@ -89999,7 +90304,7 @@ class Ui extends react.PureComponent {
 
           for (const file of await listFiles()) {
             if (file.startsWith('source/')) {
-              files.push([file, await read(file)]);
+              files.push([file, await read$1(file)]);
             }
           }
 
@@ -90067,7 +90372,7 @@ class Ui extends react.PureComponent {
     this.setState({
       paneLayout
     });
-    await write('ui/paneLayout', paneLayout);
+    await write$1('ui/paneLayout', paneLayout);
   }
 
   onRelease(paneLayout) {}
@@ -90150,7 +90455,7 @@ class Ui extends react.PureComponent {
       paneViews: newPaneViews,
       switchView: undefined
     });
-    await write('ui/paneViews', newPaneViews);
+    await write$1('ui/paneViews', newPaneViews);
   }
 
   renderPane(views, id, path, createNode, onSelectView, onSelectFile) {
@@ -90180,74 +90485,86 @@ class Ui extends react.PureComponent {
       case 'notebook':
         {
           const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return react.createElement(NotebookUi, {
-            key: `${id}/notebook/${file}`,
-            id: id,
-            path: path,
-            createNode: createNode,
-            view: view,
-            viewChoices: viewChoices,
-            viewTitle: 'Notebook',
-            onSelectView: onSelectView,
-            file: file,
-            fileChoices: fileChoices,
-            fileTitle: fileTitle,
-            onSelectFile: onSelectFile,
-            workspace: workspace
-          });
+          return (
+            /*#__PURE__*/
+            react.createElement(NotebookUi, {
+              key: `${id}/notebook/${file}`,
+              id: id,
+              path: path,
+              createNode: createNode,
+              view: view,
+              viewChoices: viewChoices,
+              viewTitle: 'Notebook',
+              onSelectView: onSelectView,
+              file: file,
+              fileChoices: fileChoices,
+              fileTitle: fileTitle,
+              onSelectFile: onSelectFile,
+              workspace: workspace
+            })
+          );
         }
 
       case 'editScript':
         {
           const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return react.createElement(JsEditorUi, {
-            key: `${id}/editScript/${file}`,
-            id: id,
-            path: path,
-            createNode: createNode,
-            view: view,
-            viewChoices: viewChoices,
-            viewTitle: 'Edit Script',
-            onSelectView: onSelectView,
-            file: file,
-            fileChoices: fileChoices,
-            fileTitle: fileTitle,
-            onSelectFile: onSelectFile,
-            ask: ask,
-            workspace: workspace
-          });
+          return (
+            /*#__PURE__*/
+            react.createElement(JsEditorUi, {
+              key: `${id}/editScript/${file}`,
+              id: id,
+              path: path,
+              createNode: createNode,
+              view: view,
+              viewChoices: viewChoices,
+              viewTitle: 'Edit Script',
+              onSelectView: onSelectView,
+              file: file,
+              fileChoices: fileChoices,
+              fileTitle: fileTitle,
+              onSelectFile: onSelectFile,
+              ask: ask,
+              workspace: workspace
+            })
+          );
         }
 
       case 'editSvgPath':
         {
           const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return react.createElement(SvgPathEditor, {
-            key: `${id}/editSvgPath/${file}`,
+          return (
+            /*#__PURE__*/
+            react.createElement(SvgPathEditor, {
+              key: `${id}/editSvgPath/${file}`,
+              id: id,
+              path: path,
+              createNode: createNode,
+              view: view,
+              viewChoices: viewChoices,
+              viewTitle: 'Edit SvgPath',
+              onSelectView: onSelectView,
+              file: file,
+              fileChoices: fileChoices,
+              fileTitle: fileTitle,
+              onSelectFile: onSelectFile
+            })
+          );
+        }
+
+      case 'files':
+        return (
+          /*#__PURE__*/
+          react.createElement(FilesUi, {
+            key: id,
             id: id,
             path: path,
             createNode: createNode,
             view: view,
             viewChoices: viewChoices,
-            viewTitle: 'Edit SvgPath',
-            onSelectView: onSelectView,
-            file: file,
-            fileChoices: fileChoices,
-            fileTitle: fileTitle,
-            onSelectFile: onSelectFile
-          });
-        }
-
-      case 'files':
-        return react.createElement(FilesUi, {
-          key: id,
-          id: id,
-          path: path,
-          createNode: createNode,
-          view: view,
-          viewChoices: viewChoices,
-          viewTitle: 'Files',
-          onSelectView: onSelectView
-        });
+            viewTitle: 'Files',
+            onSelectView: onSelectView
+          })
+        );
 
       case 'log':
         {
@@ -90256,30 +90573,36 @@ class Ui extends react.PureComponent {
           } = this.state;
 
           if (log !== undefined) {
-            return react.createElement(LogUi, {
-              key: id,
-              id: id,
-              path: path,
-              createNode: createNode,
-              view: view,
-              viewChoices: viewChoices,
-              viewTitle: 'Log',
-              onSelectView: onSelectView,
-              log: log
-            });
+            return (
+              /*#__PURE__*/
+              react.createElement(LogUi, {
+                key: id,
+                id: id,
+                path: path,
+                createNode: createNode,
+                view: view,
+                viewChoices: viewChoices,
+                viewTitle: 'Log',
+                onSelectView: onSelectView,
+                log: log
+              })
+            );
           }
         }
     }
 
-    return react.createElement(NothingUi, {
-      id: id,
-      path: path,
-      createNode: createNode,
-      view: 'nothing',
-      viewChoices: viewChoices,
-      viewTitle: 'Nothing',
-      onSelectView: onSelectView
-    });
+    return (
+      /*#__PURE__*/
+      react.createElement(NothingUi, {
+        id: id,
+        path: path,
+        createNode: createNode,
+        view: 'nothing',
+        viewChoices: viewChoices,
+        viewTitle: 'Nothing',
+        onSelectView: onSelectView
+      })
+    );
   }
 
   openLog() {
@@ -90326,18 +90649,23 @@ class Ui extends react.PureComponent {
         text,
         duration = 1000
       } = entry;
-      return react.createElement(Toast, {
-        key: `toast/${index}`,
-        variant: "info",
-        delay: duration,
-        show: true,
-        autohide: true,
-        onClose: () => this.setState({
-          toast: toast.filter(item => item !== entry)
-        })
-      }, text);
+      return (
+        /*#__PURE__*/
+        react.createElement(Toast, {
+          key: `toast/${index}`,
+          variant: "info",
+          delay: duration,
+          show: true,
+          autohide: true,
+          onClose: () => this.setState({
+            toast: toast.filter(item => item !== entry)
+          })
+        }, text)
+      );
     });
-    const toastDiv = toasts.length > 0 ? react.createElement(Alert, {
+    const toastDiv = toasts.length > 0 ?
+    /*#__PURE__*/
+    react.createElement(Alert, {
       key: "toasts",
       variant: "primary",
       style: {
@@ -90359,25 +90687,44 @@ class Ui extends react.PureComponent {
       }
 
       const paneView = this.getPaneView(switchView);
-      return react.createElement(Container, null, react.createElement(Row, null, react.createElement(Col, null, react.createElement(DecoratedModal, {
-        show: switchView !== undefined,
-        onHide: () => this.setState({
-          switchView: undefined
-        }),
-        keyboard: true
-      }, react.createElement(DecoratedModal.Header, {
-        closeButton: true
-      }, react.createElement(DecoratedModal.Title, null, "Select Content")), react.createElement(DecoratedModal.Body, null, react.createElement(ButtonGroup, {
-        vertical: true,
-        style: {
-          width: '100%'
-        }
-      }, views.map((viewOption, index) => react.createElement(Button, {
-        key: `switch/${index}`,
-        variant: "outline-primary",
-        active: fastEquals_1(paneView, viewOption),
-        onClick: () => this.setPaneView(switchView, viewOption)
-      }, viewOption.title))))))));
+      return (
+        /*#__PURE__*/
+        react.createElement(Container, null,
+        /*#__PURE__*/
+        react.createElement(Row, null,
+        /*#__PURE__*/
+        react.createElement(Col, null,
+        /*#__PURE__*/
+        react.createElement(DecoratedModal, {
+          show: switchView !== undefined,
+          onHide: () => this.setState({
+            switchView: undefined
+          }),
+          keyboard: true
+        },
+        /*#__PURE__*/
+        react.createElement(DecoratedModal.Header, {
+          closeButton: true
+        },
+        /*#__PURE__*/
+        react.createElement(DecoratedModal.Title, null, "Select Content")),
+        /*#__PURE__*/
+        react.createElement(DecoratedModal.Body, null,
+        /*#__PURE__*/
+        react.createElement(ButtonGroup, {
+          vertical: true,
+          style: {
+            width: '100%'
+          }
+        }, views.map((viewOption, index) =>
+        /*#__PURE__*/
+        react.createElement(Button, {
+          key: `switch/${index}`,
+          variant: "outline-primary",
+          active: fastEquals_1(paneView, viewOption),
+          onClick: () => this.setPaneView(switchView, viewOption)
+        }, viewOption.title))))))))
+      );
     };
 
     const {
@@ -90390,28 +90737,34 @@ class Ui extends react.PureComponent {
 
     const buildModal = () => {
       if (showShareUi) {
-        return react.createElement(ShareUi, {
-          key: "shareUi",
-          show: true,
-          storage: "share",
-          toast: toastDiv,
-          onSubmit: this.doGithub,
-          onHide: () => this.setState({
-            showShareUi: false
+        return (
+          /*#__PURE__*/
+          react.createElement(ShareUi, {
+            key: "shareUi",
+            show: true,
+            storage: "share",
+            toast: toastDiv,
+            onSubmit: this.doGithub,
+            onHide: () => this.setState({
+              showShareUi: false
+            })
           })
-        });
+        );
       } else if (showSelectWorkspaceUi || workspace === '') {
-        return react.createElement(SelectWorkspaceUi, {
-          key: "selectWorkspaceUi",
-          show: true,
-          workspaces: workspaces,
-          storage: "selectWorkspace",
-          toast: toastDiv,
-          onSubmit: this.doSelectWorkspace,
-          onHide: () => this.setState({
-            showSelectWorkspaceUi: false
+        return (
+          /*#__PURE__*/
+          react.createElement(SelectWorkspaceUi, {
+            key: "selectWorkspaceUi",
+            show: true,
+            workspaces: workspaces,
+            storage: "selectWorkspace",
+            toast: toastDiv,
+            onSubmit: this.doSelectWorkspace,
+            onHide: () => this.setState({
+              showSelectWorkspaceUi: false
+            })
           })
-        });
+        );
       } else {
         return switchViewModal();
       }
@@ -90433,50 +90786,79 @@ class Ui extends react.PureComponent {
       });
     };
 
-    return react.createElement("div", {
-      style: {
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexFlow: 'column'
-      }
-    }, modal, modal === undefined && toastDiv, react.createElement(Navbar, {
-      bg: "light",
-      expand: "lg",
-      style: {
-        flex: '0 0 auto'
-      }
-    }, react.createElement(Navbar.Brand, null, "JSxCAD"), react.createElement(Navbar.Toggle, {
-      "aria-controls": "basic-navbar-nav"
-    }), react.createElement(Navbar.Collapse, {
-      id: "basic-navbar-nav"
-    }, react.createElement(Nav, {
-      className: "mr-auto",
-      onSelect: this.doNav
-    }, react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      eventKey: "selectWorkspace"
-    }, "Workspace", workspace === '' ? '' : ` (${workspace})`)), workspace !== '' && react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      eventKey: "io"
-    }, "Share")), react.createElement(Nav.Item, null, react.createElement(Nav.Link, {
-      eventKey: "reference"
-    }, "Reference"))))), react.createElement(lib_1, {
-      style: {
-        flex: '1 1 auto',
-        background: '#e6ebf0'
+    return (
+      /*#__PURE__*/
+      react.createElement("div", {
+        style: {
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          flexFlow: 'column'
+        }
+      }, modal, modal === undefined && toastDiv,
+      /*#__PURE__*/
+      react.createElement(Navbar, {
+        bg: "light",
+        expand: "lg",
+        style: {
+          flex: '0 0 auto'
+        }
       },
-      key: `mosaic/${workspace}`,
-      renderTile: (id, path) => {
-        const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
-        return pane;
-      },
-      zeroStateView: react.createElement(lib_23, {
-        createNode: this.createNode
+      /*#__PURE__*/
+      react.createElement(Navbar.Brand, null, "JSxCAD"),
+      /*#__PURE__*/
+      react.createElement(Navbar.Toggle, {
+        "aria-controls": "basic-navbar-nav"
       }),
-      value: this.state.paneLayout,
-      onChange: this.onChange,
-      onRelease: this.onRelease,
-      className: ''
-    }));
+      /*#__PURE__*/
+      react.createElement(Navbar.Collapse, {
+        id: "basic-navbar-nav"
+      },
+      /*#__PURE__*/
+      react.createElement(Nav, {
+        className: "mr-auto",
+        onSelect: this.doNav
+      },
+      /*#__PURE__*/
+      react.createElement(Nav.Item, null,
+      /*#__PURE__*/
+      react.createElement(Nav.Link, {
+        eventKey: "selectWorkspace"
+      }, "Workspace", workspace === '' ? '' : ` (${workspace})`)), workspace !== '' &&
+      /*#__PURE__*/
+      react.createElement(Nav.Item, null,
+      /*#__PURE__*/
+      react.createElement(Nav.Link, {
+        eventKey: "io"
+      }, "Share")),
+      /*#__PURE__*/
+      react.createElement(Nav.Item, null,
+      /*#__PURE__*/
+      react.createElement(Nav.Link, {
+        eventKey: "reference"
+      }, "Reference"))))),
+      /*#__PURE__*/
+      react.createElement(lib_1, {
+        style: {
+          flex: '1 1 auto',
+          background: '#e6ebf0'
+        },
+        key: `mosaic/${workspace}`,
+        renderTile: (id, path) => {
+          const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
+          return pane;
+        },
+        zeroStateView:
+        /*#__PURE__*/
+        react.createElement(lib_23, {
+          createNode: this.createNode
+        }),
+        value: this.state.paneLayout,
+        onChange: this.onChange,
+        onRelease: this.onRelease,
+        className: ''
+      }))
+    );
   }
 
 }
@@ -90495,7 +90877,9 @@ const setupUi = async sha => {
     });
   }
 
-  reactDom.render(react.createElement(Ui, {
+  reactDom.render(
+  /*#__PURE__*/
+  react.createElement(Ui, {
     workspaces: [...filesystems],
     workspace: workspace,
     path: path,

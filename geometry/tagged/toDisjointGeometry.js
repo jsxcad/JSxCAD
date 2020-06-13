@@ -14,7 +14,7 @@ export const toDisjointGeometry = (geometry) => {
     } else if (geometry.matrix) {
       return rewrite(toTransformedGeometry(geometry), op);
     } else if (geometry.assembly) {
-      const assembly = geometry.assembly.map(entry => rewrite(entry, op));
+      const assembly = geometry.assembly.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
       for (let i = assembly.length - 1; i >= 0; i--) {
         disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));

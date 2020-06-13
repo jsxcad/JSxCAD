@@ -15,15 +15,20 @@ const arch = (shape, factor, { resolution = 1 } = {}) => {
     const maxZ = max[Z];
     const minZ = min[Z];
     const height = maxZ - minZ;
-    const liftAt = z => factor * Math.sin((z - minZ) / height * Math.PI);
+    const liftAt = (z) => factor * Math.sin(((z - minZ) / height) * Math.PI);
     const lift = ([x, y, z]) => [x + liftAt(z), y, z];
-    assembly.push({ solid: deform(makeWatertight(solid), lift, min, max, resolution), tags });
+    assembly.push({
+      solid: deform(makeWatertight(solid), lift, min, max, resolution),
+      tags,
+    });
   }
 
   return Shape.fromGeometry({ assembly });
 };
 
-const archMethod = function (...args) { return arch(this, ...args); };
+const archMethod = function (...args) {
+  return arch(this, ...args);
+};
 Shape.prototype.arch = archMethod;
 
 function unwrapExports (x) {
@@ -3661,27 +3666,38 @@ const X = 0;
 const Y = 1;
 const Z$1 = 2;
 
-const crumple = (shape, amount = 0.1, { resolution = 1, seed = 1 } = {}) => {
+const crumple = (
+  shape,
+  amount = 0.1,
+  { resolution = 1, seed = 1 } = {}
+) => {
   const scale = amount / 2;
 
   const noiseX = lib_2(seed + 0);
   const noiseY = lib_2(seed + 1);
   const noiseZ = lib_2(seed + 2);
 
-  const perturb = (point) => [point[X] + noiseX(...point) * scale,
-                              point[Y] + noiseY(...point) * scale,
-                              point[Z$1] + noiseZ(...point) * scale];
+  const perturb = (point) => [
+    point[X] + noiseX(...point) * scale,
+    point[Y] + noiseY(...point) * scale,
+    point[Z$1] + noiseZ(...point) * scale,
+  ];
 
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
-    assembly.push({ solid: deform(makeWatertight(solid), perturb, min, max, resolution), tags });
+    assembly.push({
+      solid: deform(makeWatertight(solid), perturb, min, max, resolution),
+      tags,
+    });
   }
 
   return Shape.fromGeometry({ assembly });
 };
 
-const crumpleMethod = function (...args) { return crumple(this, ...args); };
+const crumpleMethod = function (...args) {
+  return crumple(this, ...args);
+};
 Shape.prototype.crumple = crumpleMethod;
 
 const Z$2 = 0;
@@ -3693,15 +3709,20 @@ const skew = (shape, factor, { resolution = 1 } = {}) => {
     const maxZ = max[Z$2];
     const minZ = min[Z$2];
     const height = maxZ - minZ;
-    const shiftAt = z => 1 - (z - minZ) / height * (1 - factor);
+    const shiftAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const shift = ([x, y, z]) => [x + shiftAt(z), y + shiftAt(z), z];
-    assembly.push({ solid: deform(makeWatertight(solid), shift, min, max, resolution), tags });
+    assembly.push({
+      solid: deform(makeWatertight(solid), shift, min, max, resolution),
+      tags,
+    });
   }
 
   return Shape.fromGeometry({ assembly });
 };
 
-const skewMethod = function (...args) { return skew(this, ...args); };
+const skewMethod = function (...args) {
+  return skew(this, ...args);
+};
 Shape.prototype.skew = skewMethod;
 
 const Z$3 = 2;
@@ -3716,15 +3737,20 @@ const taper = (shape, factor, { resolution = 1 } = {}) => {
     const maxZ = max[Z$3];
     const minZ = min[Z$3];
     const height = maxZ - minZ;
-    const widthAt = z => 1 - (z - minZ) / height * (1 - factor);
+    const widthAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
-    assembly.push({ solid: deform(makeWatertight(solid), squeeze, min, max, resolution), tags });
+    assembly.push({
+      solid: deform(makeWatertight(solid), squeeze, min, max, resolution),
+      tags,
+    });
   }
 
   return Shape.fromGeometry({ assembly });
 };
 
-const taperMethod = function (...args) { return taper(this, ...args); };
+const taperMethod = function (...args) {
+  return taper(this, ...args);
+};
 Shape.prototype.taper = taperMethod;
 
 const Z$4 = 2;
@@ -3735,14 +3761,19 @@ const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const [min, max] = measureBoundingBox(solid);
     const height = max[Z$4] - min[Z$4];
     const radians = (angle / height) * (Math.PI / 180);
-    const rotate = point => rotateZ(point, radians * (point[Z$4] - min[Z$4]));
-    assembly.push({ solid: deform(makeWatertight(solid), rotate, min, max, resolution), tags });
+    const rotate = (point) => rotateZ(point, radians * (point[Z$4] - min[Z$4]));
+    assembly.push({
+      solid: deform(makeWatertight(solid), rotate, min, max, resolution),
+      tags,
+    });
   }
 
   return Shape.fromGeometry({ assembly });
 };
 
-const twistMethod = function (...args) { return twist(this, ...args); };
+const twistMethod = function (...args) {
+  return twist(this, ...args);
+};
 Shape.prototype.twist = twistMethod;
 
 const api = {
@@ -3750,7 +3781,7 @@ const api = {
   crumple,
   skew,
   taper,
-  twist
+  twist,
 };
 
 export default api;

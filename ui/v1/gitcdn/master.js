@@ -10,7 +10,7 @@ document.onreadystatechange = () => {
       await installUi({
         document,
         project,
-        source
+        source,
       });
     };
 

@@ -57,7 +57,7 @@ const api = {
   Triangle,
   Union,
   Void,
-  Wave
+  Wave,
 };
 
 export {
@@ -89,7 +89,7 @@ export {
   Triangle,
   Union,
   Void,
-  Wave
+  Wave,
 };
 
 export default api;

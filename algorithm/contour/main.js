@@ -1,5 +1,3 @@
 import { fromRaster } from './fromRaster';
 
-export {
-  fromRaster
-};
+export { fromRaster };

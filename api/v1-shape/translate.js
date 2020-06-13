@@ -37,9 +37,12 @@ import { fromTranslation } from '@jsxcad/math-mat4';
  *
  **/
 
-export const translate = (shape, x = 0, y = 0, z = 0) => shape.transform(fromTranslation([x, y, z]));
+export const translate = (shape, x = 0, y = 0, z = 0) =>
+  shape.transform(fromTranslation([x, y, z]));
 
-const method = function (...args) { return translate(this, ...args); };
+const method = function (...args) {
+  return translate(this, ...args);
+};
 Shape.prototype.translate = method;
 
 export default translate;

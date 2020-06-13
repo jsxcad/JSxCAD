@@ -81,7 +81,6 @@
       "browserify-shim"
     ]
   },
-  "browserify-shim": {
-  },
+  "browserify-shim": {},
   "gitHead": "bfa6fefb9b9d1416e45db35e9eeb438be9047e44"
 }

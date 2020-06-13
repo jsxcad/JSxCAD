@@ -6,7 +6,7 @@ import { isClockwise } from '@jsxcad/geometry-path';
 
 const { Clipper, ClipType, PolyTree, PolyType } = ClipperLib;
 
-export const makeConvex = (surface, normalize = p => p) => {
+export const makeConvex = (surface, normalize = (p) => p) => {
   const clipper = new Clipper();
   clipper.AddPaths(fromSurface(surface, normalize), PolyType.ptSubject, true);
   const result = new PolyTree();
@@ -30,9 +30,11 @@ export const makeConvex = (surface, normalize = p => p) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [[contour[a * 2 + 0] / RESOLUTION, contour[a * 2 + 1] / RESOLUTION, 0],
-                        [contour[b * 2 + 0] / RESOLUTION, contour[b * 2 + 1] / RESOLUTION, 0],
-                        [contour[c * 2 + 0] / RESOLUTION, contour[c * 2 + 1] / RESOLUTION, 0]];
+      const triangle = [
+        [contour[a * 2 + 0] / RESOLUTION, contour[a * 2 + 1] / RESOLUTION, 0],
+        [contour[b * 2 + 0] / RESOLUTION, contour[b * 2 + 1] / RESOLUTION, 0],
+        [contour[c * 2 + 0] / RESOLUTION, contour[c * 2 + 1] / RESOLUTION, 0],
+      ];
       if (isClockwise(triangle)) {
         triangle.reverse();
       }

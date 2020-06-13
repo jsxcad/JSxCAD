@@ -6,11 +6,14 @@ window.bootstrap = async () => {
     console.log(`Was asked: ${JSON.stringify(question)}`);
   };
 
-  const { ask } = await createService({ webWorker: './maslowWorker.js', agent });
+  const { ask } = await createService({
+    webWorker: './maslowWorker.js',
+    agent,
+  });
 
   const result = await ask({
     values: [10, 10],
-    key: 'rectangle'
+    key: 'rectangle',
   });
 
   console.log(JSON.stringify(result));

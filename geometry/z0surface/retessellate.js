@@ -20,7 +20,8 @@ const interpolateXForY = (point1, point2, y) => {
     t = 0.0;
   } else if (f1 >= f2) {
     t = 1.0;
-  } else if (f2 < 1e-10) { // FIXME Should this be EPS?
+  } else if (f2 < 1e-10) {
+    // FIXME Should this be EPS?
     t = 0.5;
   } else {
     t = f1 / f2;
@@ -78,7 +79,11 @@ export const binPolygons = (sourcePolygons) => {
 
   // Make a list of all encountered y coordinates
   // And build a map of all polygons that have a vertex at a certain y coordinate:
-  for (let polygonIndex = 0; polygonIndex < sourcePolygons.length; polygonIndex++) {
+  for (
+    let polygonIndex = 0;
+    polygonIndex < sourcePolygons.length;
+    polygonIndex++
+  ) {
     const polygon = sourcePolygons[polygonIndex];
     let points = [];
     let minIndex = -1;
@@ -141,12 +146,21 @@ export const binPolygons = (sourcePolygons) => {
     yCoordinateToPolygonIndexes,
     topYToPolygonIndexes,
     normalizedPolygons,
-    polygonTopVertexIndexes
+    polygonTopVertexIndexes,
   };
 };
 
-const recomputeActivePolygons = ({ activePolygons, polygonIndexesWithCorner, normalizedPolygons, yCoordinate }) => {
-  for (let activePolygonIndex = 0; activePolygonIndex < activePolygons.length; activePolygonIndex++) {
+const recomputeActivePolygons = ({
+  activePolygons,
+  polygonIndexesWithCorner,
+  normalizedPolygons,
+  yCoordinate,
+}) => {
+  for (
+    let activePolygonIndex = 0;
+    activePolygonIndex < activePolygons.length;
+    activePolygonIndex++
+  ) {
     const activePolygon = activePolygons[activePolygonIndex];
     const polygonIndex = activePolygon.polygonIndex;
     if (polygonIndexesWithCorner[polygonIndex]) {
@@ -167,7 +181,10 @@ const recomputeActivePolygons = ({ activePolygons, polygonIndexesWithCorner, nor
       if (polygon[nextRightVertexIndex][1] === yCoordinate) {
         newRightVertexIndex = nextRightVertexIndex;
       }
-      if ((newLeftVertexIndex !== activePolygon.leftVertexIndex) && (newLeftVertexIndex === newRightVertexIndex)) {
+      if (
+        newLeftVertexIndex !== activePolygon.leftVertexIndex &&
+        newLeftVertexIndex === newRightVertexIndex
+      ) {
         // We have increased leftVertexIndex or decreased rightVertexIndex, and now they point to the same vertex
         // This means that this is the bottom point of the polygon. We'll remove it:
         activePolygons.splice(activePolygonIndex, 1);
@@ -188,7 +205,15 @@ const recomputeActivePolygons = ({ activePolygons, polygonIndexesWithCorner, nor
   }
 };
 
-const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes, activePolygons }) => {
+const findNextYCoordinate = ({
+  yIndex,
+  yCoordinates,
+  yCoordinate,
+  topYToPolygonIndexes,
+  normalizedPolygons,
+  polygonTopVertexIndexes,
+  activePolygons,
+}) => {
   let nextYCoordinate;
   if (yIndex >= yCoordinates.length - 1) {
     // last row, all polygons must be finished here:
@@ -232,11 +257,19 @@ const findNextYCoordinate = ({ yIndex, yCoordinates, yCoordinate, topYToPolygonI
       topLeft: polygon[topLeftVertexIndex],
       topRight: polygon[topRightVertexIndex],
       bottomLeft: polygon[nextLeftVertexIndex],
-      bottomRight: polygon[nextRightVertexIndex]
+      bottomRight: polygon[nextRightVertexIndex],
     };
     insertSorted(activePolygons, newActivePolygon, (el1, el2) => {
-      const x1 = interpolateXForY(el1.topLeft, el1.bottomLeft, middleYCoordinate);
-      const x2 = interpolateXForY(el2.topLeft, el2.bottomLeft, middleYCoordinate);
+      const x1 = interpolateXForY(
+        el1.topLeft,
+        el1.bottomLeft,
+        middleYCoordinate
+      );
+      const x2 = interpolateXForY(
+        el2.topLeft,
+        el2.bottomLeft,
+        middleYCoordinate
+      );
       if (x1 > x2) return 1;
       if (x1 < x2) return -1;
       return 0;
@@ -255,22 +288,46 @@ const equalsPolygon = (a, b) => {
     }
   }
   return true;
-}
+};
 
-const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons }) => {
+const buildOutputPolygons = ({
+  activePolygons,
+  yCoordinate,
+  nextYCoordinate,
+  newPolygonRow,
+  yIndex,
+  previousPolygonRow,
+  destinationPolygons,
+}) => {
   // Now activePolygons is up to date
 
   // Build the output polygons for the next row in newPolygonRow:
   for (let activepolygonKey in activePolygons) {
     const activePolygon = activePolygons[activepolygonKey];
 
-    let x = interpolateXForY(activePolygon.topLeft, activePolygon.bottomLeft, yCoordinate);
+    let x = interpolateXForY(
+      activePolygon.topLeft,
+      activePolygon.bottomLeft,
+      yCoordinate
+    );
     const topLeft = [x, yCoordinate];
-    x = interpolateXForY(activePolygon.topRight, activePolygon.bottomRight, yCoordinate);
+    x = interpolateXForY(
+      activePolygon.topRight,
+      activePolygon.bottomRight,
+      yCoordinate
+    );
     const topRight = [x, yCoordinate];
-    x = interpolateXForY(activePolygon.topLeft, activePolygon.bottomLeft, nextYCoordinate);
+    x = interpolateXForY(
+      activePolygon.topLeft,
+      activePolygon.bottomLeft,
+      nextYCoordinate
+    );
     const bottomLeft = [x, nextYCoordinate];
-    x = interpolateXForY(activePolygon.topRight, activePolygon.bottomRight, nextYCoordinate);
+    x = interpolateXForY(
+      activePolygon.topRight,
+      activePolygon.bottomRight,
+      nextYCoordinate
+    );
     const bottomRight = [x, nextYCoordinate];
     const outPolygon = {
       topLeft,
@@ -278,7 +335,7 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
       bottomLeft,
       bottomRight,
       leftLine: toLineFromPoints(topLeft, bottomLeft),
-      rightLine: toLineFromPoints(bottomRight, topRight)
+      rightLine: toLineFromPoints(bottomRight, topRight),
     };
     if (newPolygonRow.length > 0) {
       // Stitch together congruent edges.
@@ -289,8 +346,11 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
       switch ('old') {
         case 'old': {
           const d1 = distance(outPolygon.topLeft, previousOutPolygon.topRight);
-          const d2 = distance(outPolygon.bottomLeft, previousOutPolygon.bottomRight);
-          if ((d1 < EPS) && (d2 < EPS)) {
+          const d2 = distance(
+            outPolygon.bottomLeft,
+            previousOutPolygon.bottomRight
+          );
+          if (d1 < EPS && d2 < EPS) {
             // we can join this polygon with the one to the left:
             outPolygon.topLeft = previousOutPolygon.topLeft;
             outPolygon.leftLine = previousOutPolygon.leftLine;
@@ -324,12 +384,15 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
     for (let i = 0; i < newPolygonRow.length; i++) {
       const thisPolygon = newPolygonRow[i];
       for (let ii = 0; ii < previousPolygonRow.length; ii++) {
-        if (!matchedIndexes[ii]) { // not already processed?
+        if (!matchedIndexes[ii]) {
+          // not already processed?
           // We have a match if the sidelines are equal or if the top coordinates
           // are on the sidelines of the previous polygon
           const previousPolygon = previousPolygonRow[ii];
           if (distance(previousPolygon.bottomLeft, thisPolygon.topLeft) < EPS) {
-            if (distance(previousPolygon.bottomRight, thisPolygon.topRight) < EPS) {
+            if (
+              distance(previousPolygon.bottomRight, thisPolygon.topRight) < EPS
+            ) {
               // Yes, the top of this polygon matches the bottom of the previous:
               matchedIndexes[ii] = true;
               // Now check if the joined polygon would remain convex:
@@ -343,8 +406,8 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
 
               const leftLineContinues = Math.abs(d1) < EPS;
               const rightLineContinues = Math.abs(d2) < EPS;
-              const leftLineIsConvex = leftLineContinues || (d1 >= 0);
-              const rightLineIsConvex = rightLineContinues || (d2 >= 0);
+              const leftLineIsConvex = leftLineContinues || d1 >= 0;
+              const rightLineIsConvex = rightLineContinues || d2 >= 0;
               if (leftLineIsConvex && rightLineIsConvex) {
                 // yes, both sides have convex corners:
                 // This polygon will continue the previous polygon
@@ -365,14 +428,23 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
         // polygon ends here
         // Finish the polygon with the last point(s):
         const previousPolygon = previousPolygonRow[ii];
-        previousPolygon.outPolygon.rightPoints.push(previousPolygon.bottomRight);
-        if (distance(previousPolygon.bottomRight, previousPolygon.bottomLeft) > EPS) {
+        previousPolygon.outPolygon.rightPoints.push(
+          previousPolygon.bottomRight
+        );
+        if (
+          distance(previousPolygon.bottomRight, previousPolygon.bottomLeft) >
+          EPS
+        ) {
           // polygon ends with a horizontal line:
-          previousPolygon.outPolygon.leftPoints.push(previousPolygon.bottomLeft);
+          previousPolygon.outPolygon.leftPoints.push(
+            previousPolygon.bottomLeft
+          );
         }
         // reverse the left half so we get a counterclockwise circle:
         previousPolygon.outPolygon.leftPoints.reverse();
-        const polygon = previousPolygon.outPolygon.rightPoints.concat(previousPolygon.outPolygon.leftPoints);
+        const polygon = previousPolygon.outPolygon.rightPoints.concat(
+          previousPolygon.outPolygon.leftPoints
+        );
         staging.push(polygon);
       }
     }
@@ -386,7 +458,7 @@ const buildOutputPolygons = ({ activePolygons, yCoordinate, nextYCoordinate, new
       // polygon starts here:
       thisPolygon.outPolygon = {
         leftPoints: [],
-        rightPoints: []
+        rightPoints: [],
       };
       thisPolygon.outPolygon.leftPoints.push(thisPolygon.topLeft);
       if (distance(thisPolygon.topLeft, thisPolygon.topRight) > EPS) {
@@ -412,7 +484,13 @@ export const retessellate = (sourcePolygons) => {
   if (sourcePolygons.length < 2) {
     return sourcePolygons;
   }
-  let { yCoordinates, yCoordinateToPolygonIndexes, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes } = binPolygons(sourcePolygons);
+  let {
+    yCoordinates,
+    yCoordinateToPolygonIndexes,
+    topYToPolygonIndexes,
+    normalizedPolygons,
+    polygonTopVertexIndexes,
+  } = binPolygons(sourcePolygons);
   const destinationPolygons = [];
   // Now we will iterate over all y coordinates, from lowest to highest y coordinate
   // activePolygons: source polygons that are 'active', i.e. intersect with our y coordinate
@@ -437,14 +515,35 @@ export const retessellate = (sourcePolygons) => {
     //   at the the left and right side of the polygon
     // Iterate over all polygons that have a corner at this y coordinate:
     const polygonIndexesWithCorner = yCoordinateToPolygonIndexes[yCoordinate];
-    recomputeActivePolygons({ activePolygons, polygonIndexesWithCorner, normalizedPolygons, yCoordinate });
-    const nextYCoordinate = findNextYCoordinate({ yIndex, yCoordinates, yCoordinate, topYToPolygonIndexes, normalizedPolygons, polygonTopVertexIndexes, activePolygons });
+    recomputeActivePolygons({
+      activePolygons,
+      polygonIndexesWithCorner,
+      normalizedPolygons,
+      yCoordinate,
+    });
+    const nextYCoordinate = findNextYCoordinate({
+      yIndex,
+      yCoordinates,
+      yCoordinate,
+      topYToPolygonIndexes,
+      normalizedPolygons,
+      polygonTopVertexIndexes,
+      activePolygons,
+    });
     if (nextYCoordinate === null) {
       activePolygons = [];
     }
-    previousPolygonRow = buildOutputPolygons({ activePolygons, yCoordinate, nextYCoordinate, newPolygonRow, yIndex, previousPolygonRow, destinationPolygons });
+    previousPolygonRow = buildOutputPolygons({
+      activePolygons,
+      yCoordinate,
+      nextYCoordinate,
+      newPolygonRow,
+      yIndex,
+      previousPolygonRow,
+      destinationPolygons,
+    });
   }
   return destinationPolygons
-           .filter(polygon => polygon.length >= 3)
-           .map(polygon => polygon.map(([x, y]) => [x, y, 0]));
+    .filter((polygon) => polygon.length >= 3)
+    .map((polygon) => polygon.map(([x, y]) => [x, y, 0]));
 };

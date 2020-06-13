@@ -21,7 +21,7 @@ import {
   Y_SUB_27,
   Y_SUB_3,
   Y_SUB_81,
-  Y_SUB_9
+  Y_SUB_9,
 } from './dst';
 
 import { scale } from '@jsxcad/geometry-paths';
@@ -39,14 +39,14 @@ export const createByteFetcher = (bytes) => {
 };
 
 export const fetchHeader = (options = {}, fetchBytes) => {
-  function readBytes (prefix, field, converter, start, length, flag) {
+  function readBytes(prefix, field, converter, start, length, flag) {
     let bytes = fetchBytes(length);
     if (field !== '') {
       options[field] = converter(prefix, bytes);
     }
   }
 
-  function asString (prefix, bytes) {
+  function asString(prefix, bytes) {
     return Buffer.from(bytes).toString().slice(prefix.length).trim();
   }
 
@@ -83,7 +83,7 @@ const fetchStitch = (fetchBytes) => {
   if (bytes.length === 3) {
     r = (bytes[0] << 16) | (bytes[1] << 8) | (bytes[2] << 0);
   } else {
-    r = (END | JUMP_STITCH | PAUSE);
+    r = END | JUMP_STITCH | PAUSE;
   }
 
   let x = 0;

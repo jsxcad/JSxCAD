@@ -20,5 +20,7 @@ import assemble from './assemble';
  *
  **/
 
-const withMethod = function (...shapes) { return assemble(this, ...shapes); };
+const withMethod = function (...shapes) {
+  return assemble(this, ...shapes);
+};
 Shape.prototype.with = withMethod;
