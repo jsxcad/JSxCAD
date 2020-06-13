@@ -16202,7 +16202,10 @@ const toOperator = async ({ api }, script) => {
   let ecmascript;
   try {
     ecmascript = toEcmascript({}, script);
-    const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+    const builder = new Function(
+      `{ ${Object.keys(api).join(', ')} }`,
+      ecmascript
+    );
     const constructor = await builder(api);
     const module = await constructor();
     return module.main;
@@ -16258,10 +16261,17 @@ const toUserGuide = async ({ api, paths, root }) => {
       case 'container_illustration_open': {
         const start = idx;
         let end = idx;
-        while (end < tokens.length && tokens[end].type !== 'container_illustration_close') {
+        while (
+          end < tokens.length &&
+          tokens[end].type !== 'container_illustration_close'
+        ) {
           end += 1;
         }
-        const defaults = { view: { position: [0, 0, 60] }, pageSize: [128, 128], grid: true };
+        const defaults = {
+          view: { position: [0, 0, 60] },
+          pageSize: [128, 128],
+          grid: true,
+        };
         let options = {};
         const prefix = ' illustration ';
         if (tokens[start].info.startsWith(prefix)) {
@@ -16299,9 +16309,14 @@ const toUserGuide = async ({ api, paths, root }) => {
     console.log(`QQ/toOperator: ${toOperator}`);
     const main = await toOperator({ api }, text);
     const geometry = await main();
-    const png = await toPng({ includeXmlHeader: false, ...options },
-                            geometry.toDisjointGeometry());
-    markdownHtml = markdownHtml.replace(patch, `<img src="data:image/png;base64,${fromByteArray_1(png)}">`);
+    const png = await toPng(
+      { includeXmlHeader: false, ...options },
+      geometry.toDisjointGeometry()
+    );
+    markdownHtml = markdownHtml.replace(
+      patch,
+      `<img src="data:image/png;base64,${fromByteArray_1(png)}">`
+    );
   }
   const html = `
 <html>

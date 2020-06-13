@@ -3,7 +3,7 @@ import { alignVertices } from '@jsxcad/geometry-solid';
 import { getEdges } from '@jsxcad/geometry-path';
 import { getSolids } from '@jsxcad/geometry-tagged';
 
-export const edges = (shape, op = (_ => _)) => {
+export const edges = (shape, op = (_) => _) => {
   const edgeId = (from, to) => `${JSON.stringify(from)}->${JSON.stringify(to)}`;
   const edges = new Map();
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
@@ -20,7 +20,9 @@ export const edges = (shape, op = (_ => _)) => {
   return [...edges.values()];
 };
 
-const edgesMethod = function (...args) { return edges(this, ...args); };
+const edgesMethod = function (...args) {
+  return edges(this, ...args);
+};
 Shape.prototype.edges = edgesMethod;
 
 export default edges;

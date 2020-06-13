@@ -25,13 +25,16 @@ import { numbers } from '@jsxcad/api-v1-math';
  * :::
  **/
 
-export const Spiral = (toPathFromAngle = (angle => [[angle]]), { from = 0, to = 360, by, resolution } = {}) => {
+export const Spiral = (
+  toPathFromAngle = (angle) => [[angle]],
+  { from = 0, to = 360, by, resolution } = {}
+) => {
   if (by === undefined && resolution === undefined) {
     by = 1;
   }
   let path = [null];
-  for (const angle of numbers(angle => angle, { from, to, by, resolution })) {
-    const radians = angle * Math.PI / 180;
+  for (const angle of numbers((angle) => angle, { from, to, by, resolution })) {
+    const radians = (angle * Math.PI) / 180;
     const subpath = toPathFromAngle(angle);
     path = concatenate(path, rotateZ(radians, subpath));
   }

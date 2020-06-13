@@ -17,7 +17,7 @@ const api = {
   items,
   leafs,
   registerDesignator,
-  toBillOfMaterial
+  toBillOfMaterial,
 };
 
 export {
@@ -29,7 +29,7 @@ export {
   items,
   leafs,
   registerDesignator,
-  toBillOfMaterial
+  toBillOfMaterial,
 };
 
 export default api;

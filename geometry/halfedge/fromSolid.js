@@ -110,14 +110,13 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
   if (closed) {
     for (const loop of loops) {
       if (loop.face === undefined) continue;
-      eachLink(loop,
-               edge => {
-                 edgeCount += 1;
-                 if (edge.twin === undefined) {
-                   // A hole in the 2-manifold.
-                   holeCount += 1;
-                 }
-               });
+      eachLink(loop, (edge) => {
+        edgeCount += 1;
+        if (edge.twin === undefined) {
+          // A hole in the 2-manifold.
+          holeCount += 1;
+        }
+      });
     }
   }
 

@@ -1,4 +1,7 @@
-import { unitRegularTrianglePolygon, unitSquarePolygon } from '@jsxcad/data-shape';
+import {
+  unitRegularTrianglePolygon,
+  unitSquarePolygon,
+} from '@jsxcad/data-shape';
 
 import { boot } from '@jsxcad/sys';
 import { canonicalize } from './canonicalize';
@@ -6,18 +9,70 @@ import { rotateZ } from '@jsxcad/geometry-surface';
 import test from 'ava';
 import { toDisjointGeometry } from './toDisjointGeometry';
 
-test.beforeEach(async t => { await boot(); });
-
-test('Simple', t => {
-  const disjoint = toDisjointGeometry({ assembly: [{ z0Surface: [unitSquarePolygon], tags: ['a'] },
-                                                   { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] },
-                                                   { z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]), tags: ['c'] }] });
-  t.deepEqual(canonicalize(disjoint),
-              { 'disjointAssembly': [{ 'surface': [[[0.36603, 0.36603, 0], [0.5, 0.28868, 0], [0.5, 0.5, 0], [0.28868, 0.5, 0], [0.5, 0.13398, 0]]], 'tags': ['a'] }, { 'surface': [[[-0.18301, 0.68302, 0], [-0.5, 0.86603, 0], [-0.5, 0.13398, 0]], [[1, 0, 0], [0.36603, 0.36603, 0], [0.68302, -0.18301, 0]], [[0.13398, -0.5, 0], [-0.5, -0.5, 0], [-0.5, -0.86603, 0]]], 'tags': ['b'] }, { 'surface': [[[0, 1, 0], [-0.86603, -0.5, 0], [0.86603, -0.5, 0]]], 'tags': ['c'] }] });
+test.beforeEach(async (t) => {
+  await boot();
 });
 
-test('Empty', t => {
+test('Simple', (t) => {
+  const disjoint = toDisjointGeometry({
+    assembly: [
+      { z0Surface: [unitSquarePolygon], tags: ['a'] },
+      { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] },
+      {
+        z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]),
+        tags: ['c'],
+      },
+    ],
+  });
+  t.deepEqual(canonicalize(disjoint), {
+    disjointAssembly: [
+      {
+        surface: [
+          [
+            [0.36603, 0.36603, 0],
+            [0.5, 0.28868, 0],
+            [0.5, 0.5, 0],
+            [0.28868, 0.5, 0],
+            [0.5, 0.13398, 0],
+          ],
+        ],
+        tags: ['a'],
+      },
+      {
+        surface: [
+          [
+            [-0.18301, 0.68302, 0],
+            [-0.5, 0.86603, 0],
+            [-0.5, 0.13398, 0],
+          ],
+          [
+            [1, 0, 0],
+            [0.36603, 0.36603, 0],
+            [0.68302, -0.18301, 0],
+          ],
+          [
+            [0.13398, -0.5, 0],
+            [-0.5, -0.5, 0],
+            [-0.5, -0.86603, 0],
+          ],
+        ],
+        tags: ['b'],
+      },
+      {
+        surface: [
+          [
+            [0, 1, 0],
+            [-0.86603, -0.5, 0],
+            [0.86603, -0.5, 0],
+          ],
+        ],
+        tags: ['c'],
+      },
+    ],
+  });
+});
+
+test('Empty', (t) => {
   const disjoint = toDisjointGeometry({ assembly: [] });
-  t.deepEqual(canonicalize(disjoint),
-              { disjointAssembly: [] });
+  t.deepEqual(canonicalize(disjoint), { disjointAssembly: [] });
 });

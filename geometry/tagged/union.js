@@ -95,26 +95,35 @@ const unionImpl = (geometry, ...geometries) => {
       return { solid: solidUnion(solid, ...solids), tags };
     } else if (geometry.surface) {
       const { surface, tags } = geometry;
-      return { surface: surfaceUnion(surface, ...surfaces, ...z0Surfaces), tags };
+      return {
+        surface: surfaceUnion(surface, ...surfaces, ...z0Surfaces),
+        tags,
+      };
     } else if (geometry.z0Surface) {
       const { z0Surface, tags } = geometry;
       if (surfaces.length === 0) {
         return { z0Surface: z0SurfaceUnion(z0Surface, ...z0Surfaces), tags };
       } else {
-        return { surface: surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces), tags };
+        return {
+          surface: surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces),
+          tags,
+        };
       }
     } else if (geometry.paths) {
       const { paths, tags } = geometry;
       return { paths: pathsUnion(paths, ...pathsets), tags };
     } else if (geometry.assembly) {
       const { assembly, tags } = geometry;
-      return { assembly: assembly.map(entry => rewrite(entry, op)), tags };
+      return { assembly: assembly.map((entry) => rewrite(entry, op)), tags };
     } else if (geometry.disjointAssembly) {
       const { disjointAssembly, tags } = geometry;
-      return { assembly: disjointAssembly.map(entry => rewrite(entry, op)), tags };
+      return {
+        assembly: disjointAssembly.map((entry) => rewrite(entry, op)),
+        tags,
+      };
     } else if (geometry.layers) {
       const { layers, tags } = geometry;
-      return { layers: layers.map(entry => rewrite(entry, op)), tags };
+      return { layers: layers.map((entry) => rewrite(entry, op)), tags };
     } else {
       return descend();
     }

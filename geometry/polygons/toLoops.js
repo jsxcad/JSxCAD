@@ -5,12 +5,24 @@ const START = 0;
 const END = 1;
 
 const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
-  if (aX < bX) { return -1; }
-  if (aX > bX) { return 1; }
-  if (aY < bY) { return -1; }
-  if (aY > bY) { return 1; }
-  if (aZ < bZ) { return -1; }
-  if (aZ > bZ) { return 1; }
+  if (aX < bX) {
+    return -1;
+  }
+  if (aX > bX) {
+    return 1;
+  }
+  if (aY < bY) {
+    return -1;
+  }
+  if (aY > bY) {
+    return 1;
+  }
+  if (aZ < bZ) {
+    return -1;
+  }
+  if (aZ > bZ) {
+    return 1;
+  }
   return 0;
 };
 

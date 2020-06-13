@@ -17,7 +17,9 @@ import difference from './difference';
  *
  **/
 
-const cutMethod = function (...shapes) { return difference(this, ...shapes); };
+const cutMethod = function (...shapes) {
+  return difference(this, ...shapes);
+};
 Shape.prototype.cut = cutMethod;
 
 cutMethod.signature = 'Shape -> cut(...shapes:Shape) -> Shape';

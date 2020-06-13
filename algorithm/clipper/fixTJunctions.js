@@ -25,7 +25,10 @@ export const fixTJunctions = (surface) => {
       const colinear = [];
       for (const vertex of vertices) {
         // FIX: Threshold
-        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+        if (
+          Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+          THRESHOLD
+        ) {
           // FIX: Clip an ear instead.
           // Vertex is on the open edge.
           colinear.push(vertex);

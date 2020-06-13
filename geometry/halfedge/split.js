@@ -17,10 +17,14 @@ import { toPlane } from './toPlane';
  */
 export const splitBridges = (uncleanedLoop, holes) => {
   const loop = clean(uncleanedLoop);
-  if (loop.face.holes) { throw Error('die'); }
+  if (loop.face.holes) {
+    throw Error('die');
+  }
   let link = loop;
   do {
-    if (link.holes) { throw Error('die'); }
+    if (link.holes) {
+      throw Error('die');
+    }
     const twin = link.twin;
     if (twin === undefined || twin.face !== link.face) {
       // Nothing to do.
@@ -44,26 +48,34 @@ export const splitBridges = (uncleanedLoop, holes) => {
       twin.twin = undefined;
       Object.assign(twin, linkNext);
 
-      if (link.twin) { link.twin.twin = link; }
-      if (twin.twin) { twin.twin.twin = twin; }
+      if (link.twin) {
+        link.twin.twin = link;
+      }
+      if (twin.twin) {
+        twin.twin.twin = twin;
+      }
 
       // One loop was merged with itself, producing a new hole.
       // But we're not sure which loop is the hole and which is the loop around the hole.
 
       // Elect new faces.
-      eachLink(link, edge => { edge.face = link; });
-      eachLink(twin, edge => { edge.face = twin; });
+      eachLink(link, (edge) => {
+        edge.face = link;
+      });
+      eachLink(twin, (edge) => {
+        edge.face = twin;
+      });
 
       // Check the orientations to see which is the hole.
-      const newLinkPlane = toPlane(link, /* recompute= */true);
-      const newTwinPlane = toPlane(twin, /* recompute= */true);
+      const newLinkPlane = toPlane(link, /* recompute= */ true);
+      const newTwinPlane = toPlane(twin, /* recompute= */ true);
 
       if (newLinkPlane === undefined) {
         throw Error('die');
       } else if (newTwinPlane === undefined) {
         throw Error('die');
       } else if (equalsPlane(linkPlane, newLinkPlane)) {
-      // The twin loop is the hole.
+        // The twin loop is the hole.
         if (!equalsPlane(linkPlane, newTwinPlane)) {
           // But they have the same orientation, which means that it isn't a bridge,
           throw Error('die');
@@ -71,7 +83,7 @@ export const splitBridges = (uncleanedLoop, holes) => {
         splitBridges(link, holes);
         splitBridges(twin, holes);
       } else {
-      // The link loop is the hole.
+        // The link loop is the hole.
         if (!equalsPlane(linkPlane, newLinkPlane)) {
           // But they have the same orientation, which means that it isn't a hole,
           // but a region connected by a degenerate bridge.
@@ -135,23 +147,31 @@ export const split = (loops) => {
         twin.twin = undefined;
         Object.assign(twin, linkNext);
 
-        if (link.twin) { link.twin.twin = link; }
-        if (twin.twin) { twin.twin.twin = twin; }
+        if (link.twin) {
+          link.twin.twin = link;
+        }
+        if (twin.twin) {
+          twin.twin.twin = twin;
+        }
 
         // One loop was merged with itself, producing a new hole.
         // But we're not sure which loop is the hole and which is the loop around the hole.
 
         // Elect new faces.
-        eachLink(link, edge => { edge.face = link; });
-        eachLink(twin, edge => { edge.face = twin; });
+        eachLink(link, (edge) => {
+          edge.face = link;
+        });
+        eachLink(twin, (edge) => {
+          edge.face = twin;
+        });
 
         // Now that the loops are separated, clean up any residual canals.
         link = clean(link);
         twin = clean(twin);
 
         // Check the orientations to see which is the hole.
-        const newLinkPlane = toPlane(link, /* recompute= */true);
-        const newTwinPlane = toPlane(twin, /* recompute= */true);
+        const newLinkPlane = toPlane(link, /* recompute= */ true);
+        const newTwinPlane = toPlane(twin, /* recompute= */ true);
 
         if (newLinkPlane === undefined) {
           // The link loop is a degenerate hole.
@@ -164,7 +184,7 @@ export const split = (loops) => {
           link.face.holes = holes;
           loop = link;
         } else if (equalsPlane(linkPlane, newLinkPlane)) {
-        // The twin loop is the hole.
+          // The twin loop is the hole.
           if (equalsPlane(linkPlane, newTwinPlane)) {
             // But they have the same orientation, which means that it isn't a hole,
             // but a region connected by a degenerate bridge.
@@ -174,7 +194,7 @@ export const split = (loops) => {
           link.face.holes = holes;
           loop = link;
         } else {
-        // The link loop is the hole.
+          // The link loop is the hole.
           if (equalsPlane(linkPlane, newLinkPlane)) {
             // But they have the same orientation, which means that it isn't a hole,
             // but a region connected by a degenerate bridge.

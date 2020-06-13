@@ -1,4 +1,7 @@
-import { buildRegularPolygon, regularPolygonEdgeLengthToRadius } from '@jsxcad/algorithm-shape';
+import {
+  buildRegularPolygon,
+  regularPolygonEdgeLengthToRadius,
+} from '@jsxcad/algorithm-shape';
 
 import Shape from '@jsxcad/api-v1-shape';
 
@@ -51,10 +54,13 @@ import Shape from '@jsxcad/api-v1-shape';
 const toRadiusFromApothem = (apothem) => apothem / Math.cos(Math.PI / 4);
 
 const edgeScale = regularPolygonEdgeLengthToRadius(1, 4);
-const unitSquare = () => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale);
+const unitSquare = () =>
+  Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(edgeScale);
 
-export const ofSize = (width = 1, length) => unitSquare().scale([width, length === undefined ? width : length, 1]);
-export const ofRadius = (radius) => Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
+export const ofSize = (width = 1, length) =>
+  unitSquare().scale([width, length === undefined ? width : length, 1]);
+export const ofRadius = (radius) =>
+  Shape.fromGeometry(buildRegularPolygon(4)).rotateZ(45).scale(radius);
 export const ofApothem = (apothem) => ofRadius(toRadiusFromApothem(apothem));
 export const ofDiameter = (diameter) => ofRadius(diameter / 2);
 
@@ -80,6 +86,7 @@ Square.ofApothem.signature = 'Square(apothem:number) -> Surface';
 Square.ofDiameter.signature = 'Square(diameter:number) -> Surface';
 Square.ofRadius.signature = 'Square(radius:number) -> Surface';
 Square.ofSize.signature = 'Square(edge:number) -> Surface';
-Square.fromCorners.signature = 'Square(corner1:Point, corner2:Point) -> Surface';
+Square.fromCorners.signature =
+  'Square(corner1:Point, corner2:Point) -> Surface';
 
 export default Square;

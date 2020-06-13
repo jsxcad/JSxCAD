@@ -1,6 +1,5 @@
-const example001 = await readJscad(
-  {
-    script: `
+const example001 = await readJscad({
+  script: `
              // title      : Example 001
              // author     : OpenSCAD.org, adapted by Rene K. Mueller
              // license    : MIT License
@@ -32,8 +31,8 @@ const example001 = await readJscad(
              function main () {
                return example001();
              }
-               `
-  });
+               `,
+});
 
 const output = example001();
 

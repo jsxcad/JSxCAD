@@ -65,5 +65,5 @@ export {
   turnX,
   turnY,
   turnZ,
-  unit
+  unit,
 };

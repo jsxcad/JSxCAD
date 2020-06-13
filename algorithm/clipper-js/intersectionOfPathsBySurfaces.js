@@ -1,4 +1,9 @@
-import { fromClosedPaths, fromOpenPaths, fromSurface, toPaths } from './convert';
+import {
+  fromClosedPaths,
+  fromOpenPaths,
+  fromSurface,
+  toPaths,
+} from './convert';
 
 import ClipperLib from 'clipper-lib';
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';

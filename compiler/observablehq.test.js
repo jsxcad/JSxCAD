@@ -4,9 +4,11 @@ import { toEcmascript } from './observablehq';
 
 Error.stackTraceLimit = Infinity;
 
-test('Simple case', t => {
-  const es = '\n' + toEcmascript(
-    `
+test('Simple case', (t) => {
+  const es =
+    '\n' +
+    toEcmascript(
+      `
       // https://observablehq.com/@pentacular/es6-module-generation-test@16
       export default function define(runtime, observer) {
         const main = runtime.module();
@@ -18,16 +20,22 @@ test('Simple case', t => {
       )});
         return main;
       }
-    `);
-  t.is(es, `
+    `
+    );
+  t.is(
+    es,
+    `
 export var times = (a, b) => a * b;
 export var square = x => times(x, x);
-`);
+`
+  );
 });
 
-test('Threads notebook', t => {
+test('Threads notebook', (t) => {
   const es = '\n' + toEcmascript(readFileSync('jsxcad-threads.observablehq'));
-  t.is(es, `
+  t.is(
+    es,
+    `
 export var toHeightFromPitch = pitch => pitch * 0.866;
 export var Tooth = (pitch = 1) => {
   const height = toHeightFromPitch(pitch);
@@ -49,5 +57,6 @@ export var Thread = (diameter, length, pitch) => Loop(Tooth(pitch).moveY(diamete
 }).moveX(length / -2).rotateY(-90);
 export var ThreadedRod = (diameter, height, pitch) => Thread(diameter, height, pitch).add(Cylinder.ofDiameter(diameter - toHeightFromPitch(pitch) * 5 / 8 * 2, height)).with(Connector('top').moveZ(height / 2), Connector('bottom').moveZ(height / -2).flip()).Item(\`\${diameter}x\${height} Threaded Rod\`);
 export var Example = Cylinder.ofDiameter(6, 3).on(ThreadedRod(6, 20, examplePitch)).on(Cylinder.ofDiameter(6, 3));
-`);
+`
+  );
 });

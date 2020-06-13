@@ -29,5 +29,5 @@ export {
   toEdges,
   toPlane,
   toPoints,
-  transform
+  transform,
 };

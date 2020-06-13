@@ -20,17 +20,33 @@ const toGeometry = (geometry, properties) => {
     case 'LineString':
       return { paths: [[null, ...geometry.coordinates.map(toVec3)]], tags };
     case 'Polygon':
-      return { z0Surface: geometry.coordinates.map(path => path.map(toVec3)), tags };
+      return {
+        z0Surface: geometry.coordinates.map((path) => path.map(toVec3)),
+        tags,
+      };
     case 'MultiPoint':
       return { points: geometry.coordinates.map(toVec3), tags };
     case 'MultiLineString':
-      return { paths: geometry.coordinates.map(line => [null, ...line.map(toVec3)]), tags };
+      return {
+        paths: geometry.coordinates.map((line) => [null, ...line.map(toVec3)]),
+        tags,
+      };
     case 'MultiPolygon':
-      return { assembly: geometry.coordinates.map(surface => ({ z0Surface: surface.map(polygon => polygon.map(toVec3)), tags })) };
+      return {
+        assembly: geometry.coordinates.map((surface) => ({
+          z0Surface: surface.map((polygon) => polygon.map(toVec3)),
+          tags,
+        })),
+      };
     case 'GeometryCollection':
       return { assembly: geometry.geometries.map(toGeometry), tags };
     case 'FeatureCollection':
-      return { assembly: geometry.features.map(feature => toGeometry(feature.geometry, feature.properties)), tags };
+      return {
+        assembly: geometry.features.map((feature) =>
+          toGeometry(feature.geometry, feature.properties)
+        ),
+        tags,
+      };
     default:
       throw Error('die');
   }

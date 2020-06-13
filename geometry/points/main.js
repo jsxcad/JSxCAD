@@ -16,5 +16,5 @@ export {
   measureBoundingBox,
   transform,
   translate,
-  union
+  union,
 };

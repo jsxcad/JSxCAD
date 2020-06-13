@@ -9,8 +9,8 @@ import { registerDesignator } from './jsxcad-api-v1-item.js';
 
 const Rod = (radius = 1, height = 1) =>
   Cylinder(radius, height)
-      .op(s => s.with(s.top(), s.bottom()))
-      .Item(`Rod ${radius}x${height}`);
+    .op((s) => s.with(s.top(), s.bottom()))
+    .Item(`Rod ${radius}x${height}`);
 
 // TODO: Support designation decoding.
 
@@ -18,10 +18,10 @@ const Rod = (radius = 1, height = 1) =>
 // 10-24 x 3 ft Threaded Rod, 316 Stainless Steel
 
 const FlatRod = (radius = 1, height = 1, flat = 0.25) =>
-  Rod(radius, height).cut(Cube(radius * 2, radius * 2, height)
-      .moveX(radius * 2 - flat))
-      .fuse()
-      .Item(`FlatRod ${flat} ${radius}x${height}`);
+  Rod(radius, height)
+    .cut(Cube(radius * 2, radius * 2, height).moveX(radius * 2 - flat))
+    .fuse()
+    .Item(`FlatRod ${flat} ${radius}x${height}`);
 
 /*
 DESIGNATION
@@ -3412,43 +3412,82 @@ const token = (parser) => parser.skip(whitespace$1);
 const skipWhitespace = (parser) => parser.skip(whitespace$1);
 const letter$1 = (text) => string$1(text).thru(skipWhitespace);
 const word = (text) => string$1(text).thru(skipWhitespace);
-const number = () => token(regexp$1(/-?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?/)).map(Number).desc('number');
+const number = () =>
+  token(regexp$1(/-?(0|[1-9][0-9]*)([.][0-9]+)?([eE][+-]?[0-9]+)?/))
+    .map(Number)
+    .desc('number');
 
-const nominalSize = seq$1(word('#'), number()).map(([, inchDiameter]) => ({ inchDiameter }));
+const nominalSize = seq$1(word('#'), number()).map(([, inchDiameter]) => ({
+  inchDiameter,
+}));
 const length = seq$1(number()).map(([feetLength]) => ({ feetLength }));
 
 // FIX: Should be 'M'
-const metricSize = seq$1(letter$1('m'), number()).map(([, mmDiameter]) => ({ mmDiameter }));
-const metricLength = alt$1(number().skip(word('mm')), number()).map(mmLength => ({ mmLength }));
+const metricSize = seq$1(letter$1('m'), number()).map(([, mmDiameter]) => ({
+  mmDiameter,
+}));
+const metricLength = alt$1(
+  number().skip(word('mm')),
+  number()
+).map((mmLength) => ({ mmLength }));
 
-const nominalSizeAndLength = seq$1(nominalSize.skip(word('x')), length).map(([nominalSize, length]) => ({ ...nominalSize, ...length }));
-const metricSizeAndLength = seq$1(metricSize.skip(word('x')), metricLength).map(([nominalSize, length]) => ({ ...nominalSize, ...length }));
+const nominalSizeAndLength = seq$1(
+  nominalSize.skip(word('x')),
+  length
+).map(([nominalSize, length]) => ({ ...nominalSize, ...length }));
+const metricSizeAndLength = seq$1(
+  metricSize.skip(word('x')),
+  metricLength
+).map(([nominalSize, length]) => ({ ...nominalSize, ...length }));
 
 const size = alt$1(nominalSizeAndLength, metricSizeAndLength);
 
-const driveStyle = alt$1(word('slotted'),
-                       word('phillips'), // Phillips
-                       word('square')
+const driveStyle = alt$1(
+  word('slotted'),
+  word('phillips'), // Phillips
+  word('square')
 ).map((driveStyle) => ({ driveStyle }));
 
-const headType = alt$1(word('flat head'),
-                     word('oval countersunk head'),
-                     word('round head')
-).map(headType => ({ headType }));
+const headType = alt$1(
+  word('flat head'),
+  word('oval countersunk head'),
+  word('round head')
+).map((headType) => ({ headType }));
 
-const fastenerName = alt$1(word('wood screw')).map(fastenerName => ({ fastenerName: fastenerName }));
+const fastenerName = alt$1(word('wood screw')).map((fastenerName) => ({
+  fastenerName: fastenerName,
+}));
 
-const material = alt$1(word('steel'),
-                     word('stainless steel'),
-                     word('brass'),
-                     word('silicon bronze')).map((material) => ({ material }));
+const material = alt$1(
+  word('steel'),
+  word('stainless steel'),
+  word('brass'),
+  word('silicon bronze')
+).map((material) => ({ material }));
 
-const protectiveFinish = alt$1(word('zinc plated')).map(protectiveFinish => ({ protectiveFinish }));
+const protectiveFinish = alt$1(word('zinc plated')).map((protectiveFinish) => ({
+  protectiveFinish,
+}));
 
-const WoodScrewDesignator = alt$1(seq$1(size, driveStyle, headType, fastenerName.skip(word(',')), material, protectiveFinish),
-                                seq$1(size, driveStyle, headType, fastenerName.skip(word(',')), material),
-                                seq$1(size, driveStyle, headType, fastenerName.skip(word(',')), protectiveFinish),
-                                seq$1(size, driveStyle, headType, fastenerName));
+const WoodScrewDesignator = alt$1(
+  seq$1(
+    size,
+    driveStyle,
+    headType,
+    fastenerName.skip(word(',')),
+    material,
+    protectiveFinish
+  ),
+  seq$1(size, driveStyle, headType, fastenerName.skip(word(',')), material),
+  seq$1(
+    size,
+    driveStyle,
+    headType,
+    fastenerName.skip(word(',')),
+    protectiveFinish
+  ),
+  seq$1(size, driveStyle, headType, fastenerName)
+);
 
 /*
 From: https://www.fastenermart.com/wood-screws.html
@@ -3470,9 +3509,10 @@ Examples:
 */
 
 const decode = (designator) => {
-  return WoodScrewDesignator
-      .tryParse(designator.toLowerCase())
-      .reduce((value, object) => ({ ...object, ...value, designator }), {});
+  return WoodScrewDesignator.tryParse(designator.toLowerCase()).reduce(
+    (value, object) => ({ ...object, ...value, designator }),
+    {}
+  );
 };
 
 const WoodScrew = ({
@@ -3485,10 +3525,14 @@ const WoodScrew = ({
   mmDiameter,
   mmLength,
   protectiveFinish,
-  designator
+  designator,
 }) => {
-  if (feetLength) { mmLength = feetLength * foot; }
-  if (inchDiameter) { mmDiameter = inchDiameter * inch; }
+  if (feetLength) {
+    mmLength = feetLength * foot;
+  }
+  if (inchDiameter) {
+    mmDiameter = inchDiameter * inch;
+  }
   return Cylinder(mmDiameter, mmLength).material('thread').Item(designator);
 };
 
@@ -3499,7 +3543,7 @@ const api = {
   HexBolt,
   Rod,
   Screw,
-  WoodScrew
+  WoodScrew,
 };
 
 export default api;

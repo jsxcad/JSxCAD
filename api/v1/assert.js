@@ -53,7 +53,10 @@ export const assertEquals = (value, match) => {
 };
 
 export const assertStrings = (value) => {
-  if (value instanceof Array && value.every(item => typeof item === 'string')) {
+  if (
+    value instanceof Array &&
+    value.every((item) => typeof item === 'string')
+  ) {
     return true;
   }
   throw Error(`Is not a list of strings: ${value}`);

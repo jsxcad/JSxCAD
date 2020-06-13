@@ -2,7 +2,7 @@ import { canonicalize as c } from './canonicalize';
 import test from 'ava';
 import { turnY } from './turnY';
 
-const radians = 90 * Math.PI / 180;
+const radians = (90 * Math.PI) / 180;
 
 test('vec3: turnY() called with two paramerters should return a vec3 with correct values', (t) => {
   t.deepEqual(c(turnY(0, [0, 0, 0], [0, 0, 0])), [0, 0, 0]);

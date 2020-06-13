@@ -14,5 +14,7 @@ const noVoid = (shape, tags, select) => {
   return Shape.fromGeometry(rewritten);
 };
 
-const noVoidMethod = function (...tags) { return noVoid(this, tags); };
+const noVoidMethod = function (...tags) {
+  return noVoid(this, tags);
+};
 Shape.prototype.noVoid = noVoidMethod;

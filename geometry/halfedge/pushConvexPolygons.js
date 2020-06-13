@@ -8,7 +8,7 @@
 
 import {
   flip as flipPolygon,
-  toPlane as toPlaneOfPolygon
+  toPlane as toPlaneOfPolygon,
 } from '@jsxcad/math-poly3';
 
 import { dot } from '@jsxcad/math-vec3';
@@ -127,7 +127,12 @@ const selectBuildContour = (plane) => {
  * @param {PointSelector} selectJunction
  * @returns {void}
  */
-export const pushConvexPolygons = (polygons, loop, selectJunction, concavePolygons) => {
+export const pushConvexPolygons = (
+  polygons,
+  loop,
+  selectJunction,
+  concavePolygons
+) => {
   const plane = toPlane(loop);
   const buildContour = selectBuildContour(plane);
   const points = [];

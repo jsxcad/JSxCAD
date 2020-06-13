@@ -12,32 +12,36 @@ import SettingsUi from './SettingsUi';
 import saveAs from 'file-saver';
 
 export class ShareFileUi extends SettingsUi {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {
       isPublic: true,
-      url: ''
+      url: '',
     };
   }
 
-  async export () {
+  async export() {
     const path = getFilesystem();
     const zip = await toZipFromFilesystem();
     const blob = new Blob([zip.buffer], { type: 'application/zip' });
     saveAs(blob, path);
-    await log({ op: 'text', text: `Exporting ${path} to file`, level: 'serious' });
+    await log({
+      op: 'text',
+      text: `Exporting ${path} to file`,
+      level: 'serious',
+    });
   }
 
-  getImportId () {
+  getImportId() {
     const { id } = this.props;
     return `ShareFileUi/${id}/import`;
   }
 
-  clickImport () {
+  clickImport() {
     document.getElementById(this.getImportId()).click();
   }
 
-  async import () {
+  async import() {
     const fileElement = document.getElementById(this.getImportId());
     const path = fileElement.value;
     const file = fileElement.files[0];
@@ -45,12 +49,16 @@ export class ShareFileUi extends SettingsUi {
     reader.onload = async (event) => {
       const zip = event.target.result;
       await fromZipToFilesystem({}, zip);
-      await log({ op: 'text', text: `Imported ${path} from file`, level: 'serious' });
+      await log({
+        op: 'text',
+        text: `Imported ${path} from file`,
+        level: 'serious',
+      });
     };
     reader.readAsArrayBuffer(file);
   }
 
-  render () {
+  render() {
     return (
       <Form>
         <Form.Group>
@@ -64,10 +72,18 @@ export class ShareFileUi extends SettingsUi {
           />
         </Form.Group>
         <ButtonGroup>
-          <Button name="import" variant="outline-primary" onClick={() => this.clickImport()}>
+          <Button
+            name="import"
+            variant="outline-primary"
+            onClick={() => this.clickImport()}
+          >
             Import
           </Button>
-          <Button name="export" variant="outline-primary" onClick={() => this.export()}>
+          <Button
+            name="export"
+            variant="outline-primary"
+            onClick={() => this.export()}
+          >
             Export
           </Button>
         </ButtonGroup>

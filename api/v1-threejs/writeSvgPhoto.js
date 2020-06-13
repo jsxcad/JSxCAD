@@ -26,11 +26,17 @@ export const writeSvgPhoto = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  await writeFile({ doSerialize: false }, `output/${path}`, toSvg(options, geometry));
+  await writeFile(
+    { doSerialize: false },
+    `output/${path}`,
+    toSvg(options, geometry)
+  );
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const method = function (options = {}) { return writeSvgPhoto(options, this); };
+const method = function (options = {}) {
+  return writeSvgPhoto(options, this);
+};
 
 Shape.prototype.writeSvgPhoto = method;
 

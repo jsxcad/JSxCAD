@@ -3,7 +3,7 @@ import { length, subtract, equals, dot, add, multiply, fromScalar, squaredDistan
 import { fromPoints } from './jsxcad-math-ray3.js';
 import { fromPoints as fromPoints$2 } from './jsxcad-math-plane.js';
 
-const ensureMapElement = (map, key, ensurer = (_ => [])) => {
+const ensureMapElement = (map, key, ensurer = (_) => []) => {
   if (!map.has(key)) {
     map.set(key, ensurer());
   }
@@ -36,7 +36,7 @@ const toIdentity = JSON.stringify;
  */
 const findVertexViolations = (start, ...ends) => {
   const lines = new Map();
-  ends.forEach(end => {
+  ends.forEach((end) => {
     // These are not actually lines, but they all start at the same position, so we can pretend.
     const ray = fromPoints(start, end);
     ensureMapElement(lines, toIdentity(ray)).push(end);
@@ -45,7 +45,7 @@ const findVertexViolations = (start, ...ends) => {
   const distance = (end) => length(subtract(end, start));
 
   let violations = [];
-  lines.forEach(ends => {
+  lines.forEach((ends) => {
     ends.sort((a, b) => distance(a) - distance(b));
     for (let nth = 1; nth < ends.length; nth++) {
       if (!equals(ends[nth], ends[nth - 1])) {
@@ -63,31 +63,43 @@ const findVertexViolations = (start, ...ends) => {
 
 const toIdentity$1 = JSON.stringify;
 
-const findPolygonsViolations = polygons => {
+const findPolygonsViolations = (polygons) => {
   // A map from vertex value to connected edges represented as an array in
   // the form [start, ...end].
   const edges = new Map();
-  const addEdge = (start, end) => ensureMapElement(edges, toIdentity$1(start), () => [start]).push(end);
-  const addEdges = (start, end) => { addEdge(start, end); addEdge(end, start); };
-  polygons.forEach(polygon => eachEdge({}, addEdges, polygon));
+  const addEdge = (start, end) =>
+    ensureMapElement(edges, toIdentity$1(start), () => [start]).push(end);
+  const addEdges = (start, end) => {
+    addEdge(start, end);
+    addEdge(end, start);
+  };
+  polygons.forEach((polygon) => eachEdge({}, addEdges, polygon));
 
   // Edges are assembled, check for matches
   let violations = [];
-  edges.forEach(vertex => {
+  edges.forEach((vertex) => {
     violations = [].concat(violations, findVertexViolations(...vertex));
   });
 
   return violations;
 };
 
-const isWatertightPolygons = polygons => findPolygonsViolations(polygons).length === 0;
+const isWatertightPolygons = (polygons) =>
+  findPolygonsViolations(polygons).length === 0;
 
 const EPS = 1e-5;
 const W = 3;
 
-const tag = vertex => JSON.stringify([...vertex]);
+const tag = (vertex) => JSON.stringify([...vertex]);
 
-function addSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vertex1, polygonindex) {
+function addSide(
+  sidemap,
+  vertextag2sidestart,
+  vertextag2sideend,
+  vertex0,
+  vertex1,
+  polygonindex
+) {
   let starttag = tag(vertex0);
   let endtag = tag(vertex1);
   if (starttag === endtag) throw new Error('Assertion failed');
@@ -97,14 +109,21 @@ function addSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vert
     // we have a matching reverse oriented side.
     // Instead of adding the new side, cancel out the reverse side:
     // console.log("addSide("+newsidetag+") has reverse side:");
-    deleteSide(sidemap, vertextag2sidestart, vertextag2sideend, vertex1, vertex0, null);
+    deleteSide(
+      sidemap,
+      vertextag2sidestart,
+      vertextag2sideend,
+      vertex1,
+      vertex0,
+      null
+    );
     return null;
   }
   //  console.log("addSide("+newsidetag+")");
   let newsideobj = {
     vertex0: vertex0,
     vertex1: vertex1,
-    polygonindex: polygonindex
+    polygonindex: polygonindex,
   };
   if (!(newsidetag in sidemap)) {
     sidemap[newsidetag] = [newsideobj];
@@ -124,7 +143,14 @@ function addSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vert
   return newsidetag;
 }
 
-function deleteSide (sidemap, vertextag2sidestart, vertextag2sideend, vertex0, vertex1, polygonindex) {
+function deleteSide(
+  sidemap,
+  vertextag2sidestart,
+  vertextag2sideend,
+  vertex0,
+  vertex1,
+  polygonindex
+) {
   let starttag = tag(vertex0);
   let endtag = tag(vertex1);
   let sidetag = starttag + '/' + endtag;
@@ -211,7 +237,7 @@ const fixTJunctions = function (polygons) {
           let sideobj = {
             vertex0: vertex,
             vertex1: nextvertex,
-            polygonindex: polygonindex
+            polygonindex: polygonindex,
           };
           if (!(sidetag in sidemap)) {
             sidemap[sidetag] = [sideobj];
@@ -275,8 +301,10 @@ const fixTJunctions = function (polygons) {
           if (sideobjs.length === 0) throw new Error('Assertion failed');
           let sideobj = sideobjs[0];
           for (let directionindex = 0; directionindex < 2; directionindex++) {
-            let startvertex = (directionindex === 0) ? sideobj.vertex0 : sideobj.vertex1;
-            let endvertex = (directionindex === 0) ? sideobj.vertex1 : sideobj.vertex0;
+            let startvertex =
+              directionindex === 0 ? sideobj.vertex0 : sideobj.vertex1;
+            let endvertex =
+              directionindex === 0 ? sideobj.vertex1 : sideobj.vertex0;
             let startvertextag = tag(startvertex);
             let endvertextag = tag(endvertex);
             let matchingsides = [];
@@ -289,18 +317,44 @@ const fixTJunctions = function (polygons) {
                 matchingsides = vertextag2sidestart[startvertextag];
               }
             }
-            for (let matchingsideindex = 0; matchingsideindex < matchingsides.length; matchingsideindex++) {
+            for (
+              let matchingsideindex = 0;
+              matchingsideindex < matchingsides.length;
+              matchingsideindex++
+            ) {
               let matchingsidetag = matchingsides[matchingsideindex];
               let matchingside = sidemap[matchingsidetag][0];
-              let matchingsidestartvertex = (directionindex === 0) ? matchingside.vertex0 : matchingside.vertex1;
-              let matchingsideendvertex = (directionindex === 0) ? matchingside.vertex1 : matchingside.vertex0;
+              let matchingsidestartvertex =
+                directionindex === 0
+                  ? matchingside.vertex0
+                  : matchingside.vertex1;
+              let matchingsideendvertex =
+                directionindex === 0
+                  ? matchingside.vertex1
+                  : matchingside.vertex0;
               let matchingsidestartvertextag = tag(matchingsidestartvertex);
               let matchingsideendvertextag = tag(matchingsideendvertex);
-              if (matchingsideendvertextag !== startvertextag) throw new Error('Assertion failed');
+              if (matchingsideendvertextag !== startvertextag) {
+                throw new Error('Assertion failed');
+              }
               if (matchingsidestartvertextag === endvertextag) {
                 // matchingside cancels sidetagtocheck
-                deleteSide(sidemap, vertextag2sidestart, vertextag2sideend, startvertex, endvertex, null);
-                deleteSide(sidemap, vertextag2sidestart, vertextag2sideend, endvertex, startvertex, null);
+                deleteSide(
+                  sidemap,
+                  vertextag2sidestart,
+                  vertextag2sideend,
+                  startvertex,
+                  endvertex,
+                  null
+                );
+                deleteSide(
+                  sidemap,
+                  vertextag2sidestart,
+                  vertextag2sideend,
+                  endvertex,
+                  startvertex,
+                  null
+                );
                 donewithside = false;
                 directionindex = 2; // skip reverse direction check
                 donesomething = true;
@@ -313,11 +367,16 @@ const fixTJunctions = function (polygons) {
                 let direction = subtract(checkpos, startpos);
                 // Now we need to check if endpos is on the line startpos-checkpos:
                 // let t = endpos.minus(startpos).dot(direction) / direction.dot(direction)
-                let t = dot(subtract(endpos, startpos), direction) / dot(direction, direction);
-                if ((t > 0) && (t < 1)) {
-                  let closestpoint = add(startpos, multiply(direction, fromScalar(t)));
+                let t =
+                  dot(subtract(endpos, startpos), direction) /
+                  dot(direction, direction);
+                if (t > 0 && t < 1) {
+                  let closestpoint = add(
+                    startpos,
+                    multiply(direction, fromScalar(t))
+                  );
                   let distancesquared = squaredDistance(closestpoint, endpos);
-                  if (distancesquared < (EPS * EPS)) {
+                  if (distancesquared < EPS * EPS) {
                     // Yes it's a t-junction! We need to split matchingside in two:
                     let polygonindex = matchingside.polygonindex;
                     let polygon = polygons[polygonindex];
@@ -330,7 +389,9 @@ const fixTJunctions = function (polygons) {
                         break;
                       }
                     }
-                    if (insertionvertextagindex < 0) throw new Error('Assertion failed');
+                    if (insertionvertextagindex < 0) {
+                      throw new Error('Assertion failed');
+                    }
                     // split the side by inserting the vertex:
                     let newvertices = polygon.slice(0);
                     newvertices.splice(insertionvertextagindex, 0, endvertex);
@@ -360,12 +421,30 @@ const fixTJunctions = function (polygons) {
                     polygons[polygonindex] = newpolygon;
                     // remove the original sides from our maps
                     // deleteSide(sideobj.vertex0, sideobj.vertex1, null)
-                    deleteSide(sidemap, vertextag2sidestart, vertextag2sideend,
-                               matchingside.vertex0, matchingside.vertex1, polygonindex);
-                    let newsidetag1 = addSide(sidemap, vertextag2sidestart, vertextag2sideend,
-                                              matchingside.vertex0, endvertex, polygonindex);
-                    let newsidetag2 = addSide(sidemap, vertextag2sidestart, vertextag2sideend, endvertex,
-                                              matchingside.vertex1, polygonindex);
+                    deleteSide(
+                      sidemap,
+                      vertextag2sidestart,
+                      vertextag2sideend,
+                      matchingside.vertex0,
+                      matchingside.vertex1,
+                      polygonindex
+                    );
+                    let newsidetag1 = addSide(
+                      sidemap,
+                      vertextag2sidestart,
+                      vertextag2sideend,
+                      matchingside.vertex0,
+                      endvertex,
+                      polygonindex
+                    );
+                    let newsidetag2 = addSide(
+                      sidemap,
+                      vertextag2sidestart,
+                      vertextag2sideend,
+                      endvertex,
+                      matchingside.vertex1,
+                      polygonindex
+                    );
                     if (newsidetag1 !== null) sidestocheck[newsidetag1] = true;
                     if (newsidetag2 !== null) sidestocheck[newsidetag2] = true;
                     donewithside = false;
@@ -389,6 +468,6 @@ const fixTJunctions = function (polygons) {
   return polygons;
 };
 
-const makeWatertight = polygons => fixTJunctions(polygons);
+const makeWatertight = (polygons) => fixTJunctions(polygons);
 
 export { isWatertightPolygons, makeWatertight };

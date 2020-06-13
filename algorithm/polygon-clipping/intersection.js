@@ -34,7 +34,9 @@ export const intersection = (...z0Surfaces) => {
     if (doesNotOverlap(a, b)) {
       return [];
     } else {
-      z0Surfaces.push(toSurface(polygonClipping.intersection(fromSurface(a), fromSurface(b))));
+      z0Surfaces.push(
+        toSurface(polygonClipping.intersection(fromSurface(a), fromSurface(b)))
+      );
     }
   }
   return z0Surfaces[0];

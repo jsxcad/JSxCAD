@@ -10,8 +10,8 @@ export const map = (original, transform) => {
     original = [];
   }
   if (transform === undefined) {
-    transform = _ => _;
+    transform = (_) => _;
   }
   // FIX: Consider optimizing this to return the original if all transforms are identity transforms.
-  return original.map(path => transform(path));
+  return original.map((path) => transform(path));
 };

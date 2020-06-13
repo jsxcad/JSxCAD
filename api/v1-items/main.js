@@ -9,15 +9,9 @@ const api = {
   HexBolt,
   Rod,
   Screw,
-  WoodScrew
+  WoodScrew,
 };
 
-export {
-  FlatRod,
-  HexBolt,
-  Rod,
-  Screw,
-  WoodScrew
-};
+export { FlatRod, HexBolt, Rod, Screw, WoodScrew };
 
 export default api;

@@ -1,7 +1,7 @@
 import {
   alignVertices,
   toPolygons as toPolygonsFromSolid,
-  fromPolygons as toSolidFromPolygons
+  fromPolygons as toSolidFromPolygons,
 } from '@jsxcad/geometry-solid';
 
 import {
@@ -11,13 +11,10 @@ import {
   outLeaf,
   removeExteriorPolygonsForIntersectionDroppingOverlap,
   removeExteriorPolygonsForIntersectionKeepingOverlap,
-  fromPolygons as toBspFromPolygons
+  fromPolygons as toBspFromPolygons,
 } from './bsp';
 
-import {
-  doesNotOverlap,
-  measureBoundingBox
-} from '@jsxcad/geometry-polygons';
+import { doesNotOverlap, measureBoundingBox } from '@jsxcad/geometry-polygons';
 
 import { containsPoint } from './containsPoint';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -35,7 +32,9 @@ export const intersection = (...solids) => {
     return solids[0];
   }
   const normalize = createNormalize3();
-  const s = solids.map(solid => toPolygonsFromSolid(alignVertices(solid, normalize)));
+  const s = solids.map((solid) =>
+    toPolygonsFromSolid(alignVertices(solid, normalize))
+  );
   while (s.length > 1) {
     const a = s.shift();
     const b = s.shift();
@@ -74,8 +73,16 @@ export const intersection = (...solids) => {
         return [];
       }
     } else {
-      const aTrimmed = removeExteriorPolygonsForIntersectionKeepingOverlap(bBsp, aIn, normalize);
-      const bTrimmed = removeExteriorPolygonsForIntersectionDroppingOverlap(aBsp, bIn, normalize);
+      const aTrimmed = removeExteriorPolygonsForIntersectionKeepingOverlap(
+        bBsp,
+        aIn,
+        normalize
+      );
+      const bTrimmed = removeExteriorPolygonsForIntersectionDroppingOverlap(
+        aBsp,
+        bIn,
+        normalize
+      );
 
       s.push(clean([...aTrimmed, ...bTrimmed]));
     }

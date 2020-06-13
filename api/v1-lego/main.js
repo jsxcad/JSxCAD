@@ -4,8 +4,6 @@ import readLDraw from './readLDraw';
 const api = { ...Lego, readLDraw };
 
 export * from './Lego';
-export {
-  readLDraw
-};
+export { readLDraw };
 
 export default api;

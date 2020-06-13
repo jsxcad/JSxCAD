@@ -10,7 +10,12 @@ export const Z = (z = 0) => {
   const min = -size;
   const max = size;
   // FIX: Why aren't we createing the connector directly?
-  const sheet = Shape.fromPathToZ0Surface([[max, min, z], [max, max, z], [min, max, z], [min, min, z]]);
+  const sheet = Shape.fromPathToZ0Surface([
+    [max, min, z],
+    [max, max, z],
+    [min, max, z],
+    [min, min, z],
+  ]);
   return toConnector(sheet, sheet.toGeometry().z0Surface, 'top');
 };
 

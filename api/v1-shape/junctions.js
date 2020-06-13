@@ -3,7 +3,7 @@ import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { junctionSelector } from '@jsxcad/geometry-halfedge';
 
-export const junctions = (shape, mode = (n => n)) => {
+export const junctions = (shape, mode = (n) => n) => {
   const junctions = [];
   const points = [];
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
@@ -25,12 +25,16 @@ export const junctions = (shape, mode = (n => n)) => {
   return Shape.fromGeometry({ points: junctions });
 };
 
-export const nonJunctions = (shape) => junctions(shape, n => !n);
+export const nonJunctions = (shape) => junctions(shape, (n) => !n);
 
-const junctionsMethod = function () { return junctions(this); };
+const junctionsMethod = function () {
+  return junctions(this);
+};
 Shape.prototype.junctions = junctionsMethod;
 
-const nonJunctionsMethod = function () { return nonJunctions(this); };
+const nonJunctionsMethod = function () {
+  return nonJunctions(this);
+};
 Shape.prototype.nonJunctions = nonJunctionsMethod;
 
 export default junctions;

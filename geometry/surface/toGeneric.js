@@ -1,1 +1,2 @@
-export const toGeneric = (surface) => surface.map(path => path.map(point => [...point]));
+export const toGeneric = (surface) =>
+  surface.map((path) => path.map((point) => [...point]));

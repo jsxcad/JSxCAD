@@ -9,10 +9,11 @@ const Y = 1;
  */
 export const measureArea = (path) => {
   let last = path.length - 1;
-  let current = (path[0] === null) ? 1 : 0;
+  let current = path[0] === null ? 1 : 0;
   let twiceArea = 0;
   for (; current < path.length; last = current++) {
-    twiceArea += path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
+    twiceArea +=
+      path[last][X] * path[current][Y] - path[last][Y] * path[current][X];
   }
   return twiceArea / 2;
 };

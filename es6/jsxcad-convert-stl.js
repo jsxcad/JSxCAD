@@ -60,9 +60,11 @@ var parseStlAscii = parse;
 
 const LITTLE_ENDIAN = true;
 
-const readVector = (view, off) => [view.getFloat32(off + 0, LITTLE_ENDIAN),
-                                   view.getFloat32(off + 4, LITTLE_ENDIAN),
-                                   view.getFloat32(off + 8, LITTLE_ENDIAN)];
+const readVector = (view, off) => [
+  view.getFloat32(off + 0, LITTLE_ENDIAN),
+  view.getFloat32(off + 4, LITTLE_ENDIAN),
+  view.getFloat32(off + 8, LITTLE_ENDIAN),
+];
 
 const parse$1 = (data) => {
   const view = new DataView(data.buffer);
@@ -96,15 +98,18 @@ const parse$1 = (data) => {
   return {
     positions: positions,
     cells: cells,
-    faceNormals: faceNormals
+    faceNormals: faceNormals,
   };
 };
 
 const toParser = (format) => {
   switch (format) {
-    case 'ascii': return parseStlAscii;
-    case 'binary': return parse$1;
-    default: throw Error('die');
+    case 'ascii':
+      return parseStlAscii;
+    case 'binary':
+      return parse$1;
+    default:
+      throw Error('die');
   }
 };
 
@@ -139,31 +144,39 @@ const fromSolidToTriangles = (solid) => {
 
 const toStl = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(geometry);
-  let solids = getSolids(keptGeometry).filter(solid => isNotVoid(solid)).map(({ solid }) => solid);
+  let solids = getSolids(keptGeometry)
+    .filter((solid) => isNotVoid(solid))
+    .map(({ solid }) => solid);
   const triangles = fromSolidToTriangles(union(...solids));
-  const output = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
+  const output = `solid JSxCAD\n${convertToFacets(
+    options,
+    canonicalize(triangles)
+  )}\nendsolid JSxCAD\n`;
   return new TextEncoder('utf8').encode(output);
 };
 
 const convertToFacets = (options, polygons) =>
-  polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
+  polygons
+    .map(convertToFacet)
+    .filter((facet) => facet !== undefined)
+    .join('\n');
 
-const toStlVector = vector =>
-  `${vector[0]} ${vector[1]} ${vector[2]}`;
+const toStlVector = (vector) => `${vector[0]} ${vector[1]} ${vector[2]}`;
 
-const toStlVertex = vertex =>
-  `vertex ${toStlVector(vertex)}`;
+const toStlVertex = (vertex) => `vertex ${toStlVector(vertex)}`;
 
 const convertToFacet = (polygon) => {
   const plane = toPlane(polygon);
   if (plane !== undefined) {
-    return `facet normal ${toStlVector(toPlane(polygon))}\n` +
-           `outer loop\n` +
-           `${toStlVertex(polygon[0])}\n` +
-           `${toStlVertex(polygon[1])}\n` +
-           `${toStlVertex(polygon[2])}\n` +
-           `endloop\n` +
-           `endfacet`;
+    return (
+      `facet normal ${toStlVector(toPlane(polygon))}\n` +
+      `outer loop\n` +
+      `${toStlVertex(polygon[0])}\n` +
+      `${toStlVertex(polygon[1])}\n` +
+      `${toStlVertex(polygon[2])}\n` +
+      `endloop\n` +
+      `endfacet`
+    );
   }
 };
 

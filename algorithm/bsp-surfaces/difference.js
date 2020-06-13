@@ -1,7 +1,7 @@
 import {
   alignVertices,
   toPolygons as toPolygonsFromSolid,
-  fromPolygons as toSolidFromPolygons
+  fromPolygons as toSolidFromPolygons,
 } from '@jsxcad/geometry-solid';
 
 import {
@@ -11,13 +11,13 @@ import {
   outLeaf,
   removeExteriorPolygonsForDifference,
   removeInteriorPolygonsForDifference,
-  fromPolygons as toBspFromPolygons
+  fromPolygons as toBspFromPolygons,
 } from './bsp';
 
 import {
   doesNotOverlap,
   flip,
-  measureBoundingBox
+  measureBoundingBox,
 } from '@jsxcad/geometry-polygons';
 
 import { containsPoint } from './containsPoint';
@@ -35,8 +35,8 @@ export const difference = (aSolid, ...bSolids) => {
   const normalize = createNormalize3();
   let a = toPolygonsFromSolid(alignVertices(aSolid, normalize));
   let bs = bSolids
-      .map(b => toPolygonsFromSolid(alignVertices(b, normalize)))
-      .filter(b => !doesNotOverlap(a, b));
+    .map((b) => toPolygonsFromSolid(alignVertices(b, normalize)))
+    .filter((b) => !doesNotOverlap(a, b));
 
   while (bs.length > 0) {
     const b = bs.shift();
@@ -72,9 +72,17 @@ export const difference = (aSolid, ...bSolids) => {
       }
     } else {
       // Remove the parts of a that are inside b.
-      const aTrimmed = removeInteriorPolygonsForDifference(bBsp, aIn, normalize);
+      const aTrimmed = removeInteriorPolygonsForDifference(
+        bBsp,
+        aIn,
+        normalize
+      );
       // Remove the parts of b that are outside a.
-      const bTrimmed = removeExteriorPolygonsForDifference(aBsp, bIn, normalize);
+      const bTrimmed = removeExteriorPolygonsForDifference(
+        aBsp,
+        bIn,
+        normalize
+      );
 
       a = clean([...aOut, ...aTrimmed, ...flip(bTrimmed)]);
     }

@@ -23,11 +23,15 @@ import { toTagFromName } from '@jsxcad/algorithm-color';
  **/
 
 export const fromName = (shape, name) =>
-  Shape.fromGeometry(rewriteTags([toTagFromName(name)], [], shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags([toTagFromName(name)], [], shape.toGeometry())
+  );
 
 export const color = (...args) => fromName(...args);
 
-const colorMethod = function (...args) { return color(this, ...args); };
+const colorMethod = function (...args) {
+  return color(this, ...args);
+};
 Shape.prototype.color = colorMethod;
 
 export default color;

@@ -7,39 +7,42 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 Error.stackTraceLimit = Infinity;
 
 export const watcher = {
-  transform (code, id) {
+  transform(code, id) {
     console.log(id);
     console.log(code);
-  }
+  },
 };
 
 export default {
   input: 'main.js',
   output: {
     dir: 'dist',
-    format: 'module'
+    format: 'module',
   },
-  external (id) {
+  external(id) {
     return id.startsWith('./jsxcad-');
   },
   plugins: [
     // watcher,
-    hypothetical(
-      {
-        allowFallthrough: true,
-        allowRealFiles: true,
-        files: {
-          'gl': 'const dummy = {}; export default dummy;'
-        }
-      }),
+    hypothetical({
+      allowFallthrough: true,
+      allowRealFiles: true,
+      files: {
+        gl: 'const dummy = {}; export default dummy;',
+      },
+    }),
     builtins(),
     commonjs({
       namedExports: {
-        './../node_modules/adaptive-bezier-curve/index.js': ['bezier']
-      }
+        './../node_modules/adaptive-bezier-curve/index.js': ['bezier'],
+      },
     }),
     globals(),
     nodeResolve({ preferBuiltins: true }),
-    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
-  ]
+    {
+      transform(code, id) {
+        return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
+      },
+    },
+  ],
 };

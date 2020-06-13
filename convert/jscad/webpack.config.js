@@ -8,6 +8,6 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     library: 'api',
     libraryTarget: 'umd',
-    filename: 'api.js'
-  }
+    filename: 'api.js',
+  },
 };

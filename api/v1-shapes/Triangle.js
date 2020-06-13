@@ -43,9 +43,11 @@ import { Polygon } from './Polygon';
  **/
 
 export const ofEdge = (edge = 1) => Polygon.ofEdge(edge, { sides: 3 });
-export const ofApothem = (apothem = 1) => Polygon.ofApothem(apothem, { sides: 3 });
+export const ofApothem = (apothem = 1) =>
+  Polygon.ofApothem(apothem, { sides: 3 });
 export const ofRadius = (radius = 1) => Polygon.ofRadius(radius, { sides: 3 });
-export const ofDiameter = (diameter = 1) => Polygon.ofDiameter(diameter, { sides: 3 });
+export const ofDiameter = (diameter = 1) =>
+  Polygon.ofDiameter(diameter, { sides: 3 });
 
 export const Triangle = (...args) => ofEdge(...args);
 

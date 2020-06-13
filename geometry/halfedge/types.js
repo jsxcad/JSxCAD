@@ -48,7 +48,8 @@
  * @property {boolean} dead
  * @property {boolean} spurLinkage
  */
-export const Edge = '{ Point: start, Edge: face, Edge: next, Edge: twin, Array<Edge>: holes, number: id }';
+export const Edge =
+  '{ Point: start, Edge: face, Edge: next, Edge: twin, Array<Edge>: holes, number: id }';
 
 /**
  * @typedef {Array<Edge>} Loops

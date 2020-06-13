@@ -2,7 +2,9 @@ export const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = {};
   const ask = (question) => {
-    const promise = new Promise((resolve, reject) => { openQuestions[id] = { resolve, reject }; });
+    const promise = new Promise((resolve, reject) => {
+      openQuestions[id] = { resolve, reject };
+    });
     say({ id, question });
     id += 1;
     return promise;

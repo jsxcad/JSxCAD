@@ -1,5 +1,10 @@
 import { flip, isCounterClockwise } from '@jsxcad/geometry-path';
-import { getPaths, getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
+import {
+  getPaths,
+  getSolids,
+  getSurfaces,
+  getZ0Surfaces,
+} from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { outline } from '@jsxcad/geometry-z0surface-boolean';
@@ -45,7 +50,9 @@ export const squash = (shape) => {
   return Shape.fromGeometry(result);
 };
 
-const squashMethod = function () { return squash(this); };
+const squashMethod = function () {
+  return squash(this);
+};
 Shape.prototype.squash = squashMethod;
 
 export default squash;

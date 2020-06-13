@@ -31,7 +31,9 @@ export const merge = (loops) => {
    */
   const walk = (loop) => {
     if (loop[merged] || loop.next === undefined) return;
-    eachLink(loop, link => { link[merged] = true; });
+    eachLink(loop, (link) => {
+      link[merged] = true;
+    });
     let link = loop;
     do {
       if (link.face !== link.next.face) {
@@ -69,8 +71,12 @@ export const merge = (loops) => {
         twin.from = linkNext;
         linkNext.to = twin;
 
-        if (link.twin) { link.twin.twin = link; }
-        if (twin.twin) { twin.twin.twin = twin; }
+        if (link.twin) {
+          link.twin.twin = link;
+        }
+        if (twin.twin) {
+          twin.twin.twin = twin;
+        }
 
         if (twin.next === twin) throw Error('die');
 
@@ -100,9 +106,13 @@ export const merge = (loops) => {
           link = link.next;
         } while (link !== loop);
       }
-      if (link.next === undefined) { throw Error('die'); }
+      if (link.next === undefined) {
+        throw Error('die');
+      }
       link = link.next;
-      if (link.to !== undefined) { throw Error('die'); }
+      if (link.to !== undefined) {
+        throw Error('die');
+      }
     } while (link !== loop);
     while (link !== link.face) link = link.face;
     return link.face;

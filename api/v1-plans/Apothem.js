@@ -9,12 +9,11 @@ export const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
   return Plan({
     plan: { apothem },
     marks: [center],
-    visualization:
-      Circle.ofRadius(radius)
-          .outline()
-          .add(Path([0, 0, 0], [0, radius, 0]))
-          .add(Hershey(radius / 10)(`A${dp2(apothem)}`).moveY(radius / 2))
-          .color('red')
+    visualization: Circle.ofRadius(radius)
+      .outline()
+      .add(Path([0, 0, 0], [0, radius, 0]))
+      .add(Hershey(radius / 10)(`A${dp2(apothem)}`).moveY(radius / 2))
+      .color('red'),
   });
 };
 

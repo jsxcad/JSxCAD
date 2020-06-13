@@ -285,17 +285,36 @@ var process = {
 
 // Inlined browser-or-node@1.2.1 due to es6 importing issue.
 
-const _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === 'function' && obj.constructor === Symbol && obj !== Symbol.prototype ? 'symbol' : typeof obj; };
+const _typeof =
+  typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
+    ? function (obj) {
+        return typeof obj;
+      }
+    : function (obj) {
+        return obj &&
+          typeof Symbol === 'function' &&
+          obj.constructor === Symbol &&
+          obj !== Symbol.prototype
+          ? 'symbol'
+          : typeof obj;
+      };
 
 /* global window self */
 
-const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+const isBrowser =
+  typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 /* eslint-disable no-restricted-globals */
-const isWebWorker = (typeof self === 'undefined' ? 'undefined' : _typeof(self)) === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope';
+const isWebWorker =
+  (typeof self === 'undefined' ? 'undefined' : _typeof(self)) === 'object' &&
+  self.constructor &&
+  self.constructor.name === 'DedicatedWorkerGlobalScope';
 /* eslint-enable no-restricted-globals */
 
-const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+const isNode =
+  typeof process !== 'undefined' &&
+  process.versions != null &&
+  process.versions.node != null;
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -310,7 +329,7 @@ function createCommonjsModule(fn, module) {
 var localforage = createCommonjsModule(function (module, exports) {
 /*!
     localForage -- Offline Storage, Improved
-    Version 1.7.3
+    Version 1.7.4
     https://localforage.github.io/localForage
     (c) 2013-2017 Mozilla, Apache License 2.0
 */
@@ -682,7 +701,7 @@ function isIndexedDBValid() {
     try {
         // Initialize IndexedDB; fall back to vendor-prefixed versions
         // if needed.
-        if (!idb) {
+        if (!idb || !idb.open) {
             return false;
         }
         // We mimic PouchDB here;
@@ -693,8 +712,12 @@ function isIndexedDBValid() {
 
         var hasFetch = typeof fetch === 'function' && fetch.toString().indexOf('[native code') !== -1;
 
-        // Safari <10.1 does not meet our requirements for IDB support (#5572)
-        // since Safari 10.1 shipped with fetch, we can use that to detect it
+        // Safari <10.1 does not meet our requirements for IDB support
+        // (see: https://github.com/pouchdb/pouchdb/issues/5572).
+        // Safari 10.1 shipped with fetch, we can use that to detect it.
+        // Note: this creates issues with `window.fetch` polyfills and
+        // overrides; see:
+        // https://github.com/localForage/localForage/issues/856
         return (!isSafari || hasFetch) && typeof indexedDB !== 'undefined' &&
         // some outdated implementations of IDB that appear on Samsung
         // and HTC Android devices <4.4 are missing IDBKeyRange
@@ -1280,7 +1303,7 @@ function iterate(iterator, callback) {
                             }
                             var result = iterator(value, cursor.key, iterationNumber++);
 
-                            // when the iterator callback retuns any
+                            // when the iterator callback returns any
                             // (non-`undefined`) value, then we stop
                             // the iteration immediately
                             if (result !== void 0) {
@@ -1502,7 +1525,7 @@ function key(n, callback) {
                 try {
                     var store = transaction.objectStore(self._dbInfo.storeName);
                     var advanced = false;
-                    var req = store.openCursor();
+                    var req = store.openKeyCursor();
 
                     req.onsuccess = function () {
                         var cursor = req.result;
@@ -1556,7 +1579,7 @@ function keys(callback) {
 
                 try {
                     var store = transaction.objectStore(self._dbInfo.storeName);
-                    var req = store.openCursor();
+                    var req = store.openKeyCursor();
                     var keys = [];
 
                     req.onsuccess = function () {
@@ -3111,7 +3134,7 @@ const db = () => {
       name: 'jsxcad',
       driver: localforage.INDEXEDDB,
       storeName: 'jsxcad',
-      description: 'jsxcad local filesystem'
+      description: 'jsxcad local filesystem',
     });
   }
   return dbInstance;
@@ -3250,7 +3273,11 @@ const writeFile = async (options, path, data) => {
   //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   // }
 
-  const { doSerialize = true, ephemeral, workspace = getFilesystem() } = options;
+  const {
+    doSerialize = true,
+    ephemeral,
+    workspace = getFilesystem(),
+  } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
     log({ op: 'text', text: `Write ${path} of ${workspace}` });
@@ -3272,15 +3299,13 @@ const writeFile = async (options, path, data) => {
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
-      } catch (error) {
-      }
+      } catch (error) {}
       try {
         if (doSerialize) {
           data = serialize(data);
         }
         await promises.writeFile(persistentPath, data);
-      } catch (error) {
-      }
+      } catch (error) {}
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {
@@ -3313,7 +3338,8 @@ const { deserialize } = v8$1;
 // Read decoders allow us to turn data back into objects based on structure.
 const readDecoders = [];
 
-const addReadDecoder = (guard, decoder) => readDecoders.push({ guard, decoder });
+const addReadDecoder = (guard, decoder) =>
+  readDecoders.push({ guard, decoder });
 
 // There should be a better way to do this.
 const decode = (data) => {
@@ -3396,7 +3422,7 @@ const fetchPersistent = async (path, doSerialize) => {
 // Fetch from external sources.
 const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher(path => path, false);
+  const fetchFile = await getFileFetcher((path) => path, false);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
@@ -3414,8 +3440,7 @@ const fetchSources = async (options = {}, sources) => {
             return data;
           }
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     } else {
       throw Error('die');
     }
@@ -3428,7 +3453,11 @@ const readFile = async (options, path) => {
   // if (false && isWebWorker) {
   //  return self.ask({ readFile: { options, path } });
   // }
-  const { sources = [], workspace = getFilesystem(), useCache = true } = options;
+  const {
+    sources = [],
+    workspace = getFilesystem(),
+    useCache = true,
+  } = options;
   let originalWorkspace = getFilesystem();
   if (workspace !== originalWorkspace) {
     log({ op: 'text', text: `Read ${path} of ${workspace}` });
@@ -3527,7 +3556,9 @@ const boot = async () => {
 
 const emitted = [];
 
-const clearEmitted = () => { emitted.length = 0; };
+const clearEmitted = () => {
+  emitted.length = 0;
+};
 
 const emit$1 = (value) => emitted.push(value);
 
@@ -3572,8 +3603,10 @@ const getFileLister = async () => {
 
 let cachedKeys;
 
-const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
-const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
+const updateCachedKeys = (options = {}, file) =>
+  cachedKeys.add(file.storageKey);
+const deleteCachedKeys = (options = {}, file) =>
+  cachedKeys.delete(file.storageKey);
 
 const getKeys = async () => {
   if (cachedKeys === undefined) {
@@ -3612,15 +3645,19 @@ const listFiles$1 = async ({ workspace } = {}) => {
   return files;
 };
 
-const watchFile = async (path, thunk) => (await getFile({}, path)).watchers.add(thunk);
+const watchFile = async (path, thunk) =>
+  (await getFile({}, path)).watchers.add(thunk);
 
-const unwatchFile = async (path, thunk) => (await getFile({}, path)).watchers.delete(thunk);
+const unwatchFile = async (path, thunk) =>
+  (await getFile({}, path)).watchers.delete(thunk);
 
 const conversation = ({ agent, say }) => {
   let id = 0;
   const openQuestions = {};
   const ask = (question) => {
-    const promise = new Promise((resolve, reject) => { openQuestions[id] = { resolve, reject }; });
+    const promise = new Promise((resolve, reject) => {
+      openQuestions[id] = { resolve, reject };
+    });
     say({ id, question });
     id += 1;
     return promise;
@@ -3649,7 +3686,12 @@ const conversation = ({ agent, say }) => {
 /* global Worker */
 
 // Sets up a worker with conversational interface.
-const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
+const createService = async ({
+  nodeWorker,
+  webWorker,
+  agent,
+  workerType,
+}) => {
   if (isNode) {
     // const { Worker } = await import('worker_threads');
     const { Worker } = require('worker_threads');

@@ -19,7 +19,9 @@ export const size = (shape) => {
   return { area, length, width, height, max, min, center, radius };
 };
 
-const sizeMethod = function () { return size(this); };
+const sizeMethod = function () {
+  return size(this);
+};
 Shape.prototype.size = sizeMethod;
 
 export default size;

@@ -1,11 +1,8 @@
-import {
-  identityMatrix,
-  multiply
-} from '@jsxcad/math-mat4';
+import { identityMatrix, multiply } from '@jsxcad/math-mat4';
 
 import {
   reconcile as reconcileSolid,
-  transform as transformSolid
+  transform as transformSolid,
 } from '@jsxcad/geometry-solid';
 
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
@@ -22,12 +19,11 @@ export const toTransformedGeometry = (geometry) => {
       if (geometry.matrix) {
         // Preserve any tags applied to the untransformed geometry.
         // FIX: Ensure tags are merged between transformed and untransformed upon resolution.
-        return walk(multiply(matrix, geometry.matrix),
-                    geometry.untransformed);
+        return walk(multiply(matrix, geometry.matrix), geometry.untransformed);
       } else if (geometry.assembly) {
         return {
-          assembly: geometry.assembly.map(geometry => walk(matrix, geometry)),
-          tags
+          assembly: geometry.assembly.map((geometry) => walk(matrix, geometry)),
+          tags,
         };
       } else if (geometry.disjointAssembly) {
         if (matrix === identityMatrix) {
@@ -36,62 +32,68 @@ export const toTransformedGeometry = (geometry) => {
           return geometry;
         }
         return {
-          disjointAssembly: geometry.disjointAssembly.map(geometry => walk(matrix, geometry)),
-          tags
+          disjointAssembly: geometry.disjointAssembly.map((geometry) =>
+            walk(matrix, geometry)
+          ),
+          tags,
         };
       } else if (geometry.layers) {
         return {
-          layers: geometry.layers.map(geometry => walk(matrix, geometry)),
-          tags
+          layers: geometry.layers.map((geometry) => walk(matrix, geometry)),
+          tags,
         };
       } else if (geometry.item) {
         return {
           item: walk(matrix, geometry.item),
-          tags
+          tags,
         };
       } else if (geometry.connection) {
         return {
           // A connection is a list of geometry with connections (connectors that have been connected)
           // The join can be released, to yield the geometry with the disconnected connections reconnected.
           connection: geometry.connection,
-          geometries: geometry.geometries.map(geometry => walk(matrix, geometry)),
-          connectors: geometry.connectors.map(connector => walk(matrix, connector)),
-          tags
+          geometries: geometry.geometries.map((geometry) =>
+            walk(matrix, geometry)
+          ),
+          connectors: geometry.connectors.map((connector) =>
+            walk(matrix, connector)
+          ),
+          tags,
         };
       } else if (geometry.paths) {
         return {
           paths: transformPaths(matrix, geometry.paths),
-          tags
+          tags,
         };
       } else if (geometry.plan) {
         return {
           plan: geometry.plan,
           marks: transformPoints(matrix, geometry.marks),
-          planes: geometry.planes.map(plane => transformPlane(matrix, plane)),
+          planes: geometry.planes.map((plane) => transformPlane(matrix, plane)),
           content: walk(matrix, geometry.content),
           visualization: walk(matrix, geometry.visualization),
-          tags
+          tags,
         };
       } else if (geometry.points) {
         return {
           points: transformPoints(matrix, geometry.points),
-          tags
+          tags,
         };
       } else if (geometry.solid) {
         return {
           solid: transformSolid(matrix, reconcileSolid(geometry.solid)),
-          tags
+          tags,
         };
       } else if (geometry.surface) {
         return {
           surface: transformSurface(matrix, geometry.surface),
-          tags
+          tags,
         };
       } else if (geometry.z0Surface) {
         // FIX: Consider transforms that preserve z0.
         return {
           surface: transformSurface(matrix, geometry.z0Surface),
-          tags
+          tags,
         };
       } else {
         throw Error(`die: ${JSON.stringify(geometry)}`);

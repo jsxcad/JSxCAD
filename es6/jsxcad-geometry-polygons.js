@@ -29,12 +29,24 @@ const START = 0;
 const END = 1;
 
 const lexicographcalPointOrder = ([aX, aY, aZ], [bX, bY, bZ]) => {
-  if (aX < bX) { return -1; }
-  if (aX > bX) { return 1; }
-  if (aY < bY) { return -1; }
-  if (aY > bY) { return 1; }
-  if (aZ < bZ) { return -1; }
-  if (aZ > bZ) { return 1; }
+  if (aX < bX) {
+    return -1;
+  }
+  if (aX > bX) {
+    return 1;
+  }
+  if (aY < bY) {
+    return -1;
+  }
+  if (aY > bY) {
+    return 1;
+  }
+  if (aZ < bZ) {
+    return -1;
+  }
+  if (aZ > bZ) {
+    return 1;
+  }
   return 0;
 };
 
@@ -101,7 +113,9 @@ const toType = (plane, point) => {
 };
 
 const spanPoint = (plane, startPoint, endPoint) => {
-  let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+  let t =
+    (plane[W] - dot(plane, startPoint)) /
+    dot(plane, subtract(endPoint, startPoint));
   return canonicalize$2(lerp(t, startPoint, endPoint));
 };
 
@@ -112,7 +126,11 @@ const spanPoint = (plane, startPoint, endPoint) => {
  * FIX: Make sure this works properly for solids with holes in them, etc.
  * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.
  */
-const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
+const cutTrianglesByPlane = (
+  { allowOpenPaths = false },
+  plane,
+  triangles
+) => {
   let edges = [];
   const addEdge = (start, end) => {
     edges.push([canonicalize$2(start), canonicalize$2(end)]);
@@ -122,7 +140,11 @@ const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
   for (let nth = 0; nth < triangles.length; nth++) {
     const triangle = triangles[nth];
     const [a, b, c] = triangle;
-    const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];
+    const [aType, bType, cType] = [
+      toType(plane, a),
+      toType(plane, b),
+      toType(plane, c),
+    ];
 
     switch (aType) {
       case FRONT:
@@ -282,12 +304,24 @@ const doesNotOverlap = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] <= minB[X] - iota * 10) { return true; }
-  if (maxA[Y] <= minB[Y] - iota * 10) { return true; }
-  if (maxA[Z] <= minB[Z] - iota * 10) { return true; }
-  if (maxB[X] <= minA[X] - iota * 10) { return true; }
-  if (maxB[Y] <= minA[Y] - iota * 10) { return true; }
-  if (maxB[Z] <= minA[Z] - iota * 10) { return true; }
+  if (maxA[X] <= minB[X] - iota * 10) {
+    return true;
+  }
+  if (maxA[Y] <= minB[Y] - iota * 10) {
+    return true;
+  }
+  if (maxA[Z] <= minB[Z] - iota * 10) {
+    return true;
+  }
+  if (maxB[X] <= minA[X] - iota * 10) {
+    return true;
+  }
+  if (maxB[Y] <= minA[Y] - iota * 10) {
+    return true;
+  }
+  if (maxB[Z] <= minA[Z] - iota * 10) {
+    return true;
+  }
   return false;
 };
 
@@ -311,9 +345,9 @@ const map = (original, transform) => {
     original = [];
   }
   if (transform === undefined) {
-    transform = _ => _;
+    transform = (_) => _;
   }
-  return original.map(polygon => transform(polygon));
+  return original.map((polygon) => transform(polygon));
 };
 
 const flip = (polygons) => map(polygons, flip$1);
@@ -321,7 +355,7 @@ const flip = (polygons) => map(polygons, flip$1);
 const fromPointsAndPaths = ({ points = [], paths = [] }) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(fromPoints(path.map(nth => points[nth])));
+    polygons.push(fromPoints(path.map((nth) => points[nth])));
   }
   return polygons;
 };
@@ -370,7 +404,7 @@ const toGeneric = (polygons) => map(polygons, map$1);
 
 const toPoints = (options = {}, polygons) => {
   const points = [];
-  eachPoint(options, point => points.push(point), polygons);
+  eachPoint(options, (point) => points.push(point), polygons);
   return points;
 };
 
@@ -384,12 +418,14 @@ const toTriangles = (options = {}, paths) => {
   return triangles;
 };
 
-const transform = (matrix, polygons) => polygons.map(polygon => transform$1(matrix, polygon));
+const transform = (matrix, polygons) =>
+  polygons.map((polygon) => transform$1(matrix, polygon));
 
 const rotateX = (angle, polygons) => transform(fromXRotation(angle), polygons);
 const rotateY = (angle, polygons) => transform(fromYRotation(angle), polygons);
 const rotateZ = (angle, polygons) => transform(fromZRotation(angle), polygons);
 const scale = (vector, polygons) => transform(fromScaling(vector), polygons);
-const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
+const translate = (vector, polygons) =>
+  transform(fromTranslation(vector), polygons);
 
 export { canonicalize, cutTrianglesByPlane, doesNotOverlap, eachPoint, flip, fromPointsAndPaths, isTriangle, map, measureBoundingBox, measureBoundingSphere, pushWhenValid, rotateX, rotateY, rotateZ, scale, toGeneric, toLoops, toPoints, toTriangles, transform, translate };

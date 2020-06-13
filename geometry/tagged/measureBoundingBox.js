@@ -10,11 +10,10 @@ import { toKeptGeometry } from './toKeptGeometry';
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  eachPoint(point => {
+  eachPoint((point) => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-  },
-            geometry);
+  }, geometry);
   return [minPoint, maxPoint];
 };
 

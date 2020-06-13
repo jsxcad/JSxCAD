@@ -11,9 +11,11 @@ import { subtract } from './subtract';
 export const turnY = (angle, origin, vector) => {
   const p = subtract(vector, origin);
   // turn
-  const r = [p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
-             p[1],
-             p[2] * Math.cos(angle) - p[0] * Math.sin(angle)];
+  const r = [
+    p[2] * Math.sin(angle) + p[0] * Math.cos(angle),
+    p[1],
+    p[2] * Math.cos(angle) - p[0] * Math.sin(angle),
+  ];
   // translate
   return add(r, origin);
 };

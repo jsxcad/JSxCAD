@@ -11,7 +11,9 @@ import move from './move';
 
 export const moveY = (shape, y = 0) => move(shape, 0, y);
 
-const moveYMethod = function (y) { return moveY(this, y); };
+const moveYMethod = function (y) {
+  return moveY(this, y);
+};
 Shape.prototype.moveY = moveYMethod;
 
 export default moveY;

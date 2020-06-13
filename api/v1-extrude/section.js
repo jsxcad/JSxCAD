@@ -50,7 +50,12 @@ const toSurface = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
-  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const path = [
+    [max, max, 0],
+    [min, max, 0],
+    [min, min, 0],
+    [max, min, 0],
+  ];
   const polygon = transform(from, path);
   return [polygon];
 };
@@ -65,7 +70,7 @@ export const section = (solidShape, ...connectors) => {
   const normalize = createNormalize3();
   for (const { solid, tags } of getSolids(solidShape.toKeptGeometry())) {
     const sections = bspSection(solid, planeSurfaces, normalize);
-    const surfaces = sections.map(section => makeConvex(section, normalize));
+    const surfaces = sections.map((section) => makeConvex(section, normalize));
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
       shapes.push(Shape.fromGeometry({ surface: surfaces[i], tags }));
@@ -74,7 +79,9 @@ export const section = (solidShape, ...connectors) => {
   return layer(...shapes);
 };
 
-const sectionMethod = function (...args) { return section(this, ...args); };
+const sectionMethod = function (...args) {
+  return section(this, ...args);
+};
 Shape.prototype.section = sectionMethod;
 
 export default section;

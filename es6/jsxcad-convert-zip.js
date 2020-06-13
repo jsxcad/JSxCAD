@@ -3541,7 +3541,10 @@ var toArray = files => {
 	return [...fileData, ...centralDirectory, 0x50, 0x4B, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, ...int(files.length, 2), ...int(files.length, 2), ...int(centralDirectory.length, 4), ...int(fileData.length, 4), 0x00, 0x00];
 };
 
-const toZipFromFilesystem = async ({ filterPath = (a => true), transformPath = (a => a) } = {}) => {
+const toZipFromFilesystem = async ({
+  filterPath = (a) => true,
+  transformPath = (a) => a,
+} = {}) => {
   const entries = [];
   for (const file of await listFiles()) {
     const data = await readFile({ doSerialize: true }, file);
@@ -3550,7 +3553,7 @@ const toZipFromFilesystem = async ({ filterPath = (a => true), transformPath = (
       const path = transformPath(qualifiedPath);
       entries.push({
         path,
-        data: new Uint8Array(data)
+        data: new Uint8Array(data),
       });
     }
   }

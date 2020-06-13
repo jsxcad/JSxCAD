@@ -1,4 +1,10 @@
-import { fromScaling, fromTranslation, fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
+import {
+  fromScaling,
+  fromTranslation,
+  fromXRotation,
+  fromYRotation,
+  fromZRotation,
+} from '@jsxcad/math-mat4';
 
 import { canonicalize } from './canonicalize';
 import { cutTrianglesByPlane } from './cutTrianglesByPlane';
@@ -21,7 +27,8 @@ const rotateX = (angle, polygons) => transform(fromXRotation(angle), polygons);
 const rotateY = (angle, polygons) => transform(fromYRotation(angle), polygons);
 const rotateZ = (angle, polygons) => transform(fromZRotation(angle), polygons);
 const scale = (vector, polygons) => transform(fromScaling(vector), polygons);
-const translate = (vector, polygons) => transform(fromTranslation(vector), polygons);
+const translate = (vector, polygons) =>
+  transform(fromTranslation(vector), polygons);
 
 export {
   canonicalize,
@@ -44,5 +51,5 @@ export {
   rotateZ,
   scale,
   transform,
-  translate
+  translate,
 };

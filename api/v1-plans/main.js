@@ -14,18 +14,9 @@ const api = {
   Length,
   Page,
   Radius,
-  Sketch
+  Sketch,
 };
 
-export {
-  Apothem,
-  Diameter,
-  Label,
-  Length,
-  Page,
-  Radius,
-  Sketch,
-  ensurePages
-};
+export { Apothem, Diameter, Label, Length, Page, Radius, Sketch, ensurePages };
 
 export default api;

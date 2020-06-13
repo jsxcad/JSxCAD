@@ -9,8 +9,10 @@ const relax = ({ a, b, distance, stiffness }, stepCoefficient) => {
   if (m === 0) {
     m = 1;
   }
-  const scaledNormal = scale(((distance * distance - m) / m) * stiffness * stepCoefficient,
-                             normal);
+  const scaledNormal = scale(
+    ((distance * distance - m) / m) * stiffness * stepCoefficient,
+    normal
+  );
   a.position = add(a.position, scaledNormal);
   b.position = subtract(b.position, scaledNormal);
 };
@@ -22,7 +24,7 @@ export const create = ({ constraints, ids, particles }) => {
       b: ensureParticle(ids, particles, b),
       distance,
       relax,
-      stiffness
+      stiffness,
     });
   };
   return constrain;

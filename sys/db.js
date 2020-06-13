@@ -8,7 +8,7 @@ export const db = () => {
       name: 'jsxcad',
       driver: localForage.INDEXEDDB,
       storeName: 'jsxcad',
-      description: 'jsxcad local filesystem'
+      description: 'jsxcad local filesystem',
     });
   }
   return dbInstance;

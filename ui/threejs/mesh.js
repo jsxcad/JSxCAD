@@ -12,7 +12,7 @@ import {
   PointsMaterial,
   Vector2,
   Vector3,
-  VertexColors
+  VertexColors,
 } from 'three';
 
 import { buildMeshMaterial } from './material';
@@ -31,7 +31,7 @@ const toName = (threejsGeometry) => {
 // FIX: Found it somewhere -- attribute.
 const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
   const coords = [];
-  coords.length = 2 * geom.attributes.position.array.length / 3;
+  coords.length = (2 * geom.attributes.position.array.length) / 3;
 
   if (geom.attributes.uv === undefined) {
     geom.addAttribute('uv', new Float32BufferAttribute(coords, 2));
@@ -66,8 +66,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
 
       uv2.x = (v2.x - bbox.min.x) / bboxMaxSize;
       uv2.y = (bbox.max.z - v2.z) / bboxMaxSize;
-    } else
-    if (n.x > n.y && n.x > n.z) {
+    } else if (n.x > n.y && n.x > n.z) {
       uv0.x = (v0.z - bbox.min.z) / bboxMaxSize;
       uv0.y = (v0.y - bbox.min.y) / bboxMaxSize;
 
@@ -76,8 +75,7 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
 
       uv2.x = (v2.z - bbox.min.z) / bboxMaxSize;
       uv2.y = (v2.y - bbox.min.y) / bboxMaxSize;
-    } else
-    if (n.z > n.y && n.z > n.x) {
+    } else if (n.z > n.y && n.z > n.x) {
       uv0.x = (v0.x - bbox.min.x) / bboxMaxSize;
       uv0.y = (v0.y - bbox.min.y) / bboxMaxSize;
 
@@ -91,7 +89,8 @@ const applyBoxUVImpl = (geom, transformMatrix, bbox, bboxMaxSize) => {
     return { uv0, uv1, uv2 };
   };
 
-  if (geom.index) { // is it indexed buffer geometry?
+  if (geom.index) {
+    // is it indexed buffer geometry?
     for (let vi = 0; vi < geom.index.array.length; vi += 3) {
       const idx0 = geom.index.array[vi];
       const idx1 = geom.index.array[vi + 1];
@@ -179,8 +178,10 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
     boxSize = Math.max(bboxSizeX, bboxSizeY, bboxSizeZ);
   }
 
-  const uvBbox = new Box3(new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
-                          new Vector3(boxSize / 2, boxSize / 2, boxSize / 2));
+  const uvBbox = new Box3(
+    new Vector3(-boxSize / 2, -boxSize / 2, -boxSize / 2),
+    new Vector3(boxSize / 2, boxSize / 2, boxSize / 2)
+  );
 
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
@@ -188,24 +189,44 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
 
-export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GEOMETRY_LAYER }) => {
+export const buildMeshes = async ({
+  datasets,
+  threejsGeometry,
+  scene,
+  layer = GEOMETRY_LAYER,
+}) => {
   if (threejsGeometry === undefined) {
     return;
   }
   const { tags } = threejsGeometry;
   if (threejsGeometry.assembly) {
     for (const subGeometry of threejsGeometry.assembly) {
-      await buildMeshes({ datasets, threejsGeometry: subGeometry, scene, layer });
+      await buildMeshes({
+        datasets,
+        threejsGeometry: subGeometry,
+        scene,
+        layer,
+      });
     }
   } else if (threejsGeometry.item) {
-    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.item, scene });
+    await buildMeshes({
+      datasets,
+      threejsGeometry: threejsGeometry.item,
+      scene,
+    });
   } else if (threejsGeometry.threejsSegments) {
     const segments = threejsGeometry.threejsSegments;
     const dataset = {};
     const geometry = new Geometry();
-    const material = new LineBasicMaterial({ color: 0xffffff, vertexColors: VertexColors });
+    const material = new LineBasicMaterial({
+      color: 0xffffff,
+      vertexColors: VertexColors,
+    });
     const color = new Color(setColor(tags, {}, [0, 0, 0]).color);
-    for (const [[aX = 0, aY = 0, aZ = 0], [bX = 0, bY = 0, bZ = 0]] of segments) {
+    for (const [
+      [aX = 0, aY = 0, aZ = 0],
+      [bX = 0, bY = 0, bZ = 0],
+    ] of segments) {
       geometry.colors.push(color, color);
       geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
     }
@@ -218,7 +239,10 @@ export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GE
     const points = threejsGeometry.threejsPoints;
     const dataset = {};
     const geometry = new Geometry();
-    const material = new PointsMaterial({ color: setColor(tags, {}, [0, 0, 0]).color, size: 0.5 });
+    const material = new PointsMaterial({
+      color: setColor(tags, {}, [0, 0, 0]).color,
+      size: 0.5,
+    });
     for (const [aX = 0, aY = 0, aZ = 0] of points) {
       // geometry.colors.push(color, color);
       geometry.vertices.push(new Vector3(aX, aY, aZ));
@@ -255,7 +279,17 @@ export const buildMeshes = async ({ datasets, threejsGeometry, scene, layer = GE
     scene.add(dataset.mesh);
     datasets.push(dataset);
   } else if (threejsGeometry.threejsPlan) {
-    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsVisualization, scene, layer: PLAN_LAYER });
-    await buildMeshes({ datasets, threejsGeometry: threejsGeometry.threejsContent, scene, layer: GEOMETRY_LAYER });
+    await buildMeshes({
+      datasets,
+      threejsGeometry: threejsGeometry.threejsVisualization,
+      scene,
+      layer: PLAN_LAYER,
+    });
+    await buildMeshes({
+      datasets,
+      threejsGeometry: threejsGeometry.threejsContent,
+      scene,
+      layer: GEOMETRY_LAYER,
+    });
   }
 };

@@ -63,16 +63,19 @@ const divide = ([ax, ay], [bx, by]) => [ax / bx, ay / by];
  * @param {vec2} b the second operand
  * @returns {Number} dot product of a and b
  */
-const dot = ([ax, ay], [bx, by]) => (ax * bx) + (ay * by);
+const dot = ([ax, ay], [bx, by]) => ax * bx + ay * by;
 
-const equals = ([ax, ay], [bx, by]) => (ax === bx) && (ay === by);
+const equals = ([ax, ay], [bx, by]) => ax === bx && ay === by;
 
 const fromAngleDegrees = (degrees) => {
-  const radians = Math.PI * degrees / 180;
+  const radians = (Math.PI * degrees) / 180;
   return [Math.cos(radians), Math.sin(radians)];
 };
 
-const fromAngleRadians = (radians) => [Math.cos(radians), Math.sin(radians)];
+const fromAngleRadians = (radians) => [
+  Math.cos(radians),
+  Math.sin(radians),
+];
 
 /**
  * Creates a new vec2 from the point given.
@@ -106,7 +109,7 @@ const fromValues = (x = 0, y = 0) => [x, y];
  * @param {vec2} a vector to calculate length of
  * @returns {Number} length of a
  */
-const length = ([x, y]) => Math.sqrt((x * x) + (y * y));
+const length = ([x, y]) => Math.sqrt(x * x + y * y);
 
 /**
  * Performs a linear interpolation between two vec2's
@@ -116,8 +119,10 @@ const length = ([x, y]) => Math.sqrt((x * x) + (y * y));
  * @param {vec2} b the second operand
  * @returns {vec2} out
  */
-const lerp = (t, [ax, ay], [bx, by]) => [ax + t * (bx - ax),
-                                                ay + t * (by - ay)];
+const lerp = (t, [ax, ay], [bx, by]) => [
+  ax + t * (bx - ax),
+  ay + t * (by - ay),
+];
 
 /**
  * Returns the maximum of two vec2's
@@ -164,8 +169,7 @@ const negate = ([x, y]) => [-x, -y];
 const rotate = (angle, [x, y]) => {
   const c = Math.cos(angle);
   const s = Math.sin(angle);
-  return [x * c - y * s,
-          x * s + y * c];
+  return [x * c - y * s, x * s + y * c];
 };
 
 /**
@@ -212,7 +216,7 @@ const scale = (amount, [x, y]) => [x * amount, y * amount];
 const squaredDistance = ([ax, ay], [bx, by]) => {
   const x = bx - ax;
   const y = by - ay;
-  return (x * x) + (y * y);
+  return x * x + y * y;
 };
 
 /**
@@ -221,7 +225,7 @@ const squaredDistance = ([ax, ay], [bx, by]) => {
  * @param {vec2} a vector to calculate squared length of
  * @returns {Number} squared length of a
  */
-const squaredLength = ([x, y]) => (x * x) + (y * y);
+const squaredLength = ([x, y]) => x * x + y * y;
 
 /**
  * Subtracts vector b from vector a
@@ -241,8 +245,10 @@ const subtract = ([ax, ay], [bx, by]) => [ax - bx, ay - by];
  * @param {vec2} vector the vector to transform
  * @returns {vec2} out
  */
-const transform = (matrix, [x, y]) => [matrix[0] * x + matrix[4] * y + matrix[12],
-                                              matrix[1] * x + matrix[5] * y + matrix[13]];
+const transform = (matrix, [x, y]) => [
+  matrix[0] * x + matrix[4] * y + matrix[12],
+  matrix[1] * x + matrix[5] * y + matrix[13],
+];
 
 const angle = angleRadians;
 const fromAngle = fromAngleRadians;

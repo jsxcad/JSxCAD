@@ -27,7 +27,9 @@ export const measureCenter = (shape) => {
   return scale(0.5, add(high, low));
 };
 
-const measureCenterMethod = function () { return measureCenter(this); };
+const measureCenterMethod = function () {
+  return measureCenter(this);
+};
 Shape.prototype.measureCenter = measureCenterMethod;
 
 measureCenter.signature = 'measureCenter(shape:Shape) -> vector';

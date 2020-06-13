@@ -4,9 +4,12 @@ import { parse as parseStlBinary } from './parseStlBinary';
 
 const toParser = (format) => {
   switch (format) {
-    case 'ascii': return parseStlAscii;
-    case 'binary': return parseStlBinary;
-    default: throw Error('die');
+    case 'ascii':
+      return parseStlAscii;
+    case 'binary':
+      return parseStlBinary;
+    default:
+      throw Error('die');
   }
 };
 

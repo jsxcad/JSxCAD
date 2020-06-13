@@ -14,5 +14,5 @@ export {
   intersectionOfPathsBySurfaces,
   makeConvex,
   reorient,
-  union
+  union,
 };

@@ -1,4 +1,4 @@
-const {isCAG} = require('../core/utils')
+const { isCAG } = require('../core/utils');
 // boolean operations
 
 // FIXME should this be lazy ? in which case, how do we deal with 2D/3D combined
@@ -12,35 +12,36 @@ const {isCAG} = require('../core/utils')
  * @example
  * let unionOfSpherAndCube = union(sphere(), cube())
  */
-function union () {
-  let options = {}
+function union() {
+  let options = {};
   const defaults = {
-    extrude2d: false
-  }
-  let o
-  let i = 0
-  let a = arguments
-  if (a[0].length) a = a[0]
-  if ('extrude2d' in a[0]) { // first parameter is options
-    options = Object.assign({}, defaults, a[0])
-    o = a[i++]
+    extrude2d: false,
+  };
+  let o;
+  let i = 0;
+  let a = arguments;
+  if (a[0].length) a = a[0];
+  if ('extrude2d' in a[0]) {
+    // first parameter is options
+    options = Object.assign({}, defaults, a[0]);
+    o = a[i++];
   }
 
-  o = a[i++]
+  o = a[i++];
 
   // TODO: add option to be able to set this?
-  if ((typeof (a[i]) === 'object') && isCAG(a[i]) && options.extrude2d) {
-    o = a[i].extrude({offset: [0, 0, 0.1]}) // -- convert a 2D shape to a thin solid, note: do not a[i] = a[i].extrude()
+  if (typeof a[i] === 'object' && isCAG(a[i]) && options.extrude2d) {
+    o = a[i].extrude({ offset: [0, 0, 0.1] }); // -- convert a 2D shape to a thin solid, note: do not a[i] = a[i].extrude()
   }
   for (; i < a.length; i++) {
-    let obj = a[i]
+    let obj = a[i];
 
-    if ((typeof (a[i]) === 'object') && isCAG(a[i]) && options.extrude2d) {
-      obj = a[i].extrude({offset: [0, 0, 0.1]}) // -- convert a 2D shape to a thin solid:
+    if (typeof a[i] === 'object' && isCAG(a[i]) && options.extrude2d) {
+      obj = a[i].extrude({ offset: [0, 0, 0.1] }); // -- convert a 2D shape to a thin solid:
     }
-    o = o.union(obj)
+    o = o.union(obj);
   }
-  return o
+  return o;
 }
 
 /** difference/ subtraction of the given shapes ie:
@@ -54,19 +55,19 @@ function union () {
  * @example
  * let differenceOfSpherAndCube = difference(sphere(), cube())
  */
-function difference () {
-  let object
-  let i = 0
-  let a = arguments
-  if (a[0].length) a = a[0]
+function difference() {
+  let object;
+  let i = 0;
+  let a = arguments;
+  if (a[0].length) a = a[0];
   for (object = a[i++]; i < a.length; i++) {
-    if ( isCAG(a[i])) {
-      object = object.subtract(a[i])
+    if (isCAG(a[i])) {
+      object = object.subtract(a[i]);
     } else {
-      object = object.subtract(a[i].setColor(1, 1, 0)) // -- color the cuts
+      object = object.subtract(a[i].setColor(1, 1, 0)); // -- color the cuts
     }
   }
-  return object
+  return object;
 }
 
 /** intersection of the given shapes: ie keep only the common parts between the given shapes
@@ -79,23 +80,23 @@ function difference () {
  * @example
  * let intersectionOfSpherAndCube = intersection(sphere(), cube())
  */
-function intersection () {
-  let object
-  let i = 0
-  let a = arguments
-  if (a[0].length) a = a[0]
+function intersection() {
+  let object;
+  let i = 0;
+  let a = arguments;
+  if (a[0].length) a = a[0];
   for (object = a[i++]; i < a.length; i++) {
     if (isCAG(a[i])) {
-      object = object.intersect(a[i])
+      object = object.intersect(a[i]);
     } else {
-      object = object.intersect(a[i].setColor(1, 1, 0)) // -- color the cuts
+      object = object.intersect(a[i].setColor(1, 1, 0)); // -- color the cuts
     }
   }
-  return object
+  return object;
 }
 
 module.exports = {
   union,
   difference,
-  intersection
-}
+  intersection,
+};

@@ -24,7 +24,7 @@ const api = {
   numbers,
   sin,
   sqrt,
-  vec
+  vec,
 };
 
 export {
@@ -39,7 +39,7 @@ export {
   numbers,
   sin,
   sqrt,
-  vec
+  vec,
 };
 
 export default api;

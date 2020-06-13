@@ -3,33 +3,32 @@ import {
   fromTranslation,
   fromXRotation,
   fromYRotation,
-  fromZRotation
+  fromZRotation,
 } from '@jsxcad/math-mat4';
 
 import { transform } from './transform';
 
-export const rotateX = (angle, assembly) => transform(fromXRotation(angle * Math.PI / 180), assembly);
-export const rotateY = (angle, assembly) => transform(fromYRotation(angle * Math.PI / 180), assembly);
-export const rotateZ = (angle, assembly) => transform(fromZRotation(angle * Math.PI / 180), assembly);
-export const translate = (vector, assembly) => transform(fromTranslation(vector), assembly);
-export const scale = (vector, assembly) => transform(fromScaling(vector), assembly);
+export const rotateX = (angle, assembly) =>
+  transform(fromXRotation((angle * Math.PI) / 180), assembly);
+export const rotateY = (angle, assembly) =>
+  transform(fromYRotation((angle * Math.PI) / 180), assembly);
+export const rotateZ = (angle, assembly) =>
+  transform(fromZRotation((angle * Math.PI) / 180), assembly);
+export const translate = (vector, assembly) =>
+  transform(fromTranslation(vector), assembly);
+export const scale = (vector, assembly) =>
+  transform(fromScaling(vector), assembly);
 
 export {
   findOpenEdges,
   isWatertight,
   makeWatertight,
-  reconcile
+  reconcile,
 } from './makeWatertight';
 
-export {
-  isNotVoid,
-  isVoid
-} from './isNotVoid';
+export { isNotVoid, isVoid } from './isNotVoid';
 
-export {
-  rewrite,
-  visit
-} from './visit';
+export { rewrite, visit } from './visit';
 
 export { allTags } from './allTags';
 export { assemble } from './assemble';

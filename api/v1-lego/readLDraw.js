@@ -13,6 +13,7 @@ import { fromLDraw } from '@jsxcad/convert-ldraw';
  *
  **/
 
-export const readLDraw = async (part) => Shape.fromGeometry(await fromLDraw(part));
+export const readLDraw = async (part) =>
+  Shape.fromGeometry(await fromLDraw(part));
 
 export default readLDraw;

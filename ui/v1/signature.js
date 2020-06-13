@@ -2,10 +2,12 @@
 export const toSignature = (string) => {
   // "Shape -> Circle.ofApothem(apothem:number = 1, { sides:number = 32 }) -> Shape"
 
-  const [, prefix, body, suffix] = string.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
+  const [, prefix, body, suffix] =
+    string.match(/([^(]*)[(]([^)]*)[)](.*)/) || [];
   const [, inputType, inputOp] = prefix.match(/([^ ]*) -> ([^ ]*)/) || [];
   const operation = inputOp || prefix;
-  const [, restArgs, options, rest] = body.match(/([^{]*)[{]([^}]*)[}][, ]*(.*)/) || [];
+  const [, restArgs, options, rest] =
+    body.match(/([^{]*)[{]([^}]*)[}][, ]*(.*)/) || [];
   const args = restArgs === undefined ? body : restArgs;
   const [, , outputType] = suffix.match(/([^ ]*) -> ([^ ]*)/) || [];
 
@@ -13,14 +15,16 @@ export const toSignature = (string) => {
 
   const argSpecs = [];
   for (const arg of args.split(',')) {
-    const [, initializedDeclaration, value] = arg.match(/ *([^=]*) *= *([^ ]*)/) || [];
+    const [, initializedDeclaration, value] =
+      arg.match(/ *([^=]*) *= *([^ ]*)/) || [];
     const declaration = initializedDeclaration || arg;
-    const [, typedDeclaration, type] = declaration.match(/ *([^:]*):([^ ]*)/) || [];
+    const [, typedDeclaration, type] =
+      declaration.match(/ *([^:]*):([^ ]*)/) || [];
     const name = typedDeclaration || declaration;
     if (name.match(/^ *$/) === null) {
       const argSpec = {};
       if (type) argSpec.type = type;
-      if (value) argSpec.value = value; ;
+      if (value) argSpec.value = value;
       if (name) {
         if (name.startsWith('...')) {
           argSpec.name = name.substring(3);
@@ -36,15 +40,17 @@ export const toSignature = (string) => {
   const optionSpecs = [];
   if (options !== undefined) {
     for (const option of options.split(',')) {
-      const [, initializedDeclaration, value] = option.match(/ *([^=]*) *= *([^ ]*)/) || [];
+      const [, initializedDeclaration, value] =
+        option.match(/ *([^=]*) *= *([^ ]*)/) || [];
       const declaration = initializedDeclaration || option;
-      const [, typedDeclaration, type] = declaration.match(/ *([^:]*):([^ ]*)/) || [];
+      const [, typedDeclaration, type] =
+        declaration.match(/ *([^:]*):([^ ]*)/) || [];
       const name = typedDeclaration || declaration;
       if (name.match(/^ *$/) === null) {
         const optionSpec = {};
         if (name) optionSpec.name = name;
         if (type) optionSpec.type = type;
-        if (value) optionSpec.value = value; ;
+        if (value) optionSpec.value = value;
         optionSpecs.push(optionSpec);
       }
     }
@@ -55,7 +61,7 @@ export const toSignature = (string) => {
     if (name.match(/^ *$/) === null && name.startsWith('...')) {
       restSpec = {
         name: name.substring(3),
-        type
+        type,
       };
     }
   }
@@ -100,7 +106,15 @@ const startsWithUpperCase = (string) => {
   return true;
 };
 
-export const toSnippet = ({ inputType, operation, args, options, rest, outputType, string }) => {
+export const toSnippet = ({
+  inputType,
+  operation,
+  args,
+  options,
+  rest,
+  outputType,
+  string,
+}) => {
   const { name, namespace } = operation;
   const snippet = {};
   if (inputType) {

@@ -6,7 +6,10 @@ import { solve2Linear } from './jsxcad-math-utils.js';
  * @param {ray3} the ray
  * @returns {ray3} the canonical ray3
  */
-const canonicalize = ([point, unitDirection]) => [canonicalize$1(point), canonicalize$1(unitDirection)];
+const canonicalize = ([point, unitDirection]) => [
+  canonicalize$1(point),
+  canonicalize$1(unitDirection),
+];
 
 /**
  * Determine the closest point on the given line to the given point.
@@ -73,7 +76,10 @@ const equals = (line1, [point2, unit2]) => {
  * @param {vec3} direction direction of the line segment
  * @returns {line3} a new unbounded 3D line
  */
-const fromPointAndDirection = (point, direction) => [point, unit(direction)];
+const fromPointAndDirection = (point, direction) => [
+  point,
+  unit(direction),
+];
 
 const EPS$1 = 1e-5;
 
@@ -83,7 +89,7 @@ const fromPlanes = (plane1, plane2) => {
   if (length$1 < EPS$1) {
     throw new Error('parallel planes do not intersect');
   }
-  length$1 = (1.0 / length$1);
+  length$1 = 1.0 / length$1;
   direction = scale(length$1, direction);
 
   const absx = Math.abs(direction[0]);
@@ -91,17 +97,38 @@ const fromPlanes = (plane1, plane2) => {
   const absz = Math.abs(direction[2]);
   let origin;
   let r;
-  if ((absx >= absy) && (absx >= absz)) {
+  if (absx >= absy && absx >= absz) {
     // find a point p for which x is zero
-    r = solve2Linear(plane1[1], plane1[2], plane2[1], plane2[2], plane1[3], plane2[3]);
+    r = solve2Linear(
+      plane1[1],
+      plane1[2],
+      plane2[1],
+      plane2[2],
+      plane1[3],
+      plane2[3]
+    );
     origin = fromValues(0, r[0], r[1]);
-  } else if ((absy >= absx) && (absy >= absz)) {
+  } else if (absy >= absx && absy >= absz) {
     // find a point p for which y is zero
-    r = solve2Linear(plane1[0], plane1[2], plane2[0], plane2[2], plane1[3], plane2[3]);
+    r = solve2Linear(
+      plane1[0],
+      plane1[2],
+      plane2[0],
+      plane2[2],
+      plane1[3],
+      plane2[3]
+    );
     origin = fromValues(r[0], 0, r[1]);
   } else {
     // find a point p for which z is zero
-    r = solve2Linear(plane1[0], plane1[1], plane2[0], plane2[1], plane1[3], plane2[3]);
+    r = solve2Linear(
+      plane1[0],
+      plane1[1],
+      plane2[0],
+      plane2[1],
+      plane1[3],
+      plane2[3]
+    );
     origin = fromValues(r[0], r[1], 0);
   }
   return fromPointAndDirection(origin, direction);
@@ -155,7 +182,8 @@ const origin = ([origin, unitDirection]) => origin;
  * @param {line3} line the 3D line to reverse
  * @returns {line3} a new unbounded 3D line
  */
-const reverse = ([point, unitDirection]) => fromPointAndDirection(point, negate(unitDirection));
+const reverse = ([point, unitDirection]) =>
+  fromPointAndDirection(point, negate(unitDirection));
 
 /**
  * Transforms the given 3D line using the given matrix.

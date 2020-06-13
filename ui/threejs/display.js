@@ -20,7 +20,13 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   const planLayers = new Layers();
   planLayers.set(PLAN_LAYER);
 
-  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({ width, height, view, geometryLayers, planLayers });
+  const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({
+    width,
+    height,
+    view,
+    geometryLayers,
+    planLayers,
+  });
 
   const { gui } = buildGui({ viewerElement });
   const render = () => {
@@ -40,8 +46,18 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   const container = document.body;
   container.appendChild(viewerElement);
 
-  const { trackball } = buildTrackballControls({ camera, render, view, viewerElement });
-  const { resize } = createResizer({ camera, trackball, renderer, viewerElement });
+  const { trackball } = buildTrackballControls({
+    camera,
+    render,
+    view,
+    viewerElement,
+  });
+  const { resize } = createResizer({
+    camera,
+    trackball,
+    renderer,
+    viewerElement,
+  });
 
   resize();
   new ResizeObserver(resize).observe(container);

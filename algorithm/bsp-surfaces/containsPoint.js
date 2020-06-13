@@ -10,7 +10,11 @@ export const containsPoint = (bsp, point, history = []) => {
     } else {
       const plane = bsp.plane;
       // const t = planeDistance(plane, point);
-      const t = plane[0] * point[0] + plane[1] * point[1] + plane[2] * point[2] - plane[3];
+      const t =
+        plane[0] * point[0] +
+        plane[1] * point[1] +
+        plane[2] * point[2] -
+        plane[3];
       if (t <= 0) {
         // Consider points on the surface to be contained.
         bsp = bsp.back;

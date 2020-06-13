@@ -1,6 +1,6 @@
 import {
   flip as flipPolygon,
-  toPlane as toPlaneOfPolygon
+  toPlane as toPlaneOfPolygon,
 } from '@jsxcad/math-poly3';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
@@ -59,7 +59,11 @@ const selectBuildContour = (plane) => {
   }
 };
 
-export const makeConvexNoHoles = (surface, normalize3 = createNormalize3(), plane) => {
+export const makeConvexNoHoles = (
+  surface,
+  normalize3 = createNormalize3(),
+  plane
+) => {
   if (surface.length === undefined) {
     throw Error('die');
   }

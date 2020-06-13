@@ -10,7 +10,9 @@ window.bootstrap = async () => {
   } else if (search.startsWith('?githubRepository=')) {
     const accessToken = search.substring(18);
     console.log(`QQ/accessToken: ${accessToken}`);
-    await write('auth/githubRepository/accessToken', accessToken, { workspace: '.system' });
+    await write('auth/githubRepository/accessToken', accessToken, {
+      workspace: '.system',
+    });
   }
   window.close();
 };

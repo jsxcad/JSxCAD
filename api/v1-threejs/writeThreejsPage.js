@@ -8,11 +8,17 @@ export const writeThreejsPage = async (options, shape) => {
   }
   const { path } = options;
   const geometry = shape.toKeptGeometry();
-  await writeFile({ doSerialize: false }, `output/${path}`, toThreejsPage(options, geometry));
+  await writeFile(
+    { doSerialize: false },
+    `output/${path}`,
+    toThreejsPage(options, geometry)
+  );
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const method = function (options = {}) { return writeThreejsPage(options, this); };
+const method = function (options = {}) {
+  return writeThreejsPage(options, this);
+};
 
 Shape.prototype.writeThreejsPage = method;
 

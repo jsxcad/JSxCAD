@@ -8,7 +8,7 @@ import { Shape, log } from '@jsxcad/api-v1-shape';
 
 // FIX: Does not handle convex solids.
 export const unfold = (shape) => {
-  const faces = shape.faces(f => f);
+  const faces = shape.faces((f) => f);
   log(`Face count is ${faces.length}`);
   const faceByEdge = new Map();
 
@@ -36,7 +36,7 @@ export const unfold = (shape) => {
       queue.push({
         face: neighbor,
         to: `face/edge:${edge}`,
-        from: `face/edge:${redge}`
+        from: `face/edge:${redge}`,
       });
     }
   };
@@ -65,7 +65,9 @@ export const unfold = (shape) => {
   return root;
 };
 
-const method = function (...args) { return unfold(this, ...args); };
+const method = function (...args) {
+  return unfold(this, ...args);
+};
 Shape.prototype.unfold = method;
 
 export default unfold;

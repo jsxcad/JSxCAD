@@ -8,7 +8,10 @@ export const readSvg = async (path, { src } = {}) => {
     data = await readFile({ decode: 'utf8', sources: [src] }, `cache/${path}`);
   }
   if (data === undefined) {
-    data = await readFile({ doSerialize: false, decode: 'utf8' }, `output/${path}`);
+    data = await readFile(
+      { doSerialize: false, decode: 'utf8' },
+      `output/${path}`
+    );
   }
   if (data === undefined) {
     throw Error(`Cannot find ${path}`);

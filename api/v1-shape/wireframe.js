@@ -1,4 +1,8 @@
-import { getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces } from '@jsxcad/geometry-tagged';
+import {
+  getNonVoidSolids,
+  getNonVoidSurfaces,
+  getNonVoidZ0Surfaces,
+} from '@jsxcad/geometry-tagged';
 
 import { Shape } from './Shape';
 import { assemble } from './assemble';
@@ -29,7 +33,11 @@ export const wireframe = (options = {}, shape) => {
   return assemble(...pieces);
 };
 
-const method = function (options) { return wireframe(options, this); };
+const method = function (options) {
+  return wireframe(options, this);
+};
 
 Shape.prototype.wireframe = method;
-Shape.prototype.withWireframe = function (options) { return assemble(this, wireframe(options, this)); };
+Shape.prototype.withWireframe = function (options) {
+  return assemble(this, wireframe(options, this));
+};

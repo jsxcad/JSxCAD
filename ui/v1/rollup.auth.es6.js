@@ -18,45 +18,53 @@ export default {
   input: 'auth.js',
   output: {
     dir: 'dist.es6',
-    format: 'module'
+    format: 'module',
   },
-  external (id) { return id.startsWith('./jsxcad-'); },
+  external(id) {
+    return id.startsWith('./jsxcad-');
+  },
   plugins: [
-    hypothetical(
-      {
-        allowFallthrough: true,
-        allowRealFiles: true,
-        files: {
-          'fast-png': 'export const encode = {}; export const decode = {};',
-          'fs': 'export const promises = {};',
-          'gl': 'const dummy = {}; export default dummy;',
-          'node-fetch': 'export default {};',
-          'os': '',
-          'tty': ''
-        }
-      }),
+    hypothetical({
+      allowFallthrough: true,
+      allowRealFiles: true,
+      files: {
+        'fast-png': 'export const encode = {}; export const decode = {};',
+        fs: 'export const promises = {};',
+        gl: 'const dummy = {}; export default dummy;',
+        'node-fetch': 'export default {};',
+        os: '',
+        tty: '',
+      },
+    }),
     builtins(),
     babel({
       babelrc: false,
       exclude: [/node_modules/, /polybooljs/],
-      presets: ['@babel/preset-react',
-                ['@babel/env', { 'targets': { 'browsers': 'last 1 chrome versions' } }]],
+      presets: [
+        '@babel/preset-react',
+        ['@babel/env', { targets: { browsers: 'last 1 chrome versions' } }],
+      ],
       plugins: [
         '@babel/transform-react-jsx',
-        '@babel/plugin-proposal-class-properties'
-      ]
+        '@babel/plugin-proposal-class-properties',
+      ],
     }),
     commonjs({
       namedExports: {
-        '../../node_modules/binpackingjs/dist/BinPacking.min.js': [
-          'BP2D'
-        ]
-      }
+        '../../node_modules/binpackingjs/dist/BinPacking.min.js': ['BP2D'],
+      },
     }),
     globals(),
     json(),
     nodeResolve({ jsnext: true, preferBuiltins: true }),
     sizes(),
-    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-$1.js'"); } }
-  ]
+    {
+      transform(code, id) {
+        return code.replace(
+          /'@jsxcad\/([^']*)'/g,
+          "'https://gitcdn.link/cdn/jsxcad/JSxCAD/master/es6/jsxcad-$1.js'"
+        );
+      },
+    },
+  ],
 };

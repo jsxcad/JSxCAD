@@ -1,4 +1,10 @@
-import { fromScaling, fromTranslation, fromZRotation, identity, multiply } from '@jsxcad/math-mat4';
+import {
+  fromScaling,
+  fromTranslation,
+  fromZRotation,
+  identity,
+  multiply,
+} from '@jsxcad/math-mat4';
 
 import { DOMParser } from 'xmldom/dom-parser';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
@@ -9,7 +15,10 @@ import { transform } from '@jsxcad/geometry-tagged';
 
 // Normally svgPathToPaths normalized the coordinate system, but this would interfere with our own normalization.
 const fromSvgPath = (svgPath, options = {}) =>
-  baseFromSvgPath(new TextEncoder('utf8').encode(svgPath), Object.assign({ normalizeCoordinateSystem: false }, options));
+  baseFromSvgPath(
+    new TextEncoder('utf8').encode(svgPath),
+    Object.assign({ normalizeCoordinateSystem: false }, options)
+  );
 
 const ELEMENT_NODE = 1;
 const ATTRIBUTE_NODE = 2;
@@ -28,15 +37,34 @@ const applyTransforms = ({ matrix }, transformText) => {
   const match = /([^(]+)[(]([^)]*)[)] *(.*)/.exec(transformText);
   if (match) {
     const [operator, operandText, rest] = match.slice(1);
-    const operands = operandText.split(/ +/).map(operand => parseFloat(operand));
-    if (operands.some(operand => isNaN(operand))) {
+    const operands = operandText
+      .split(/ +/)
+      .map((operand) => parseFloat(operand));
+    if (operands.some((operand) => isNaN(operand))) {
       throw Error(`die: Bad operand in ${transformText}.`);
     }
     switch (operator.trim()) {
       case 'matrix': {
         // a b c
         const [a, b, c, d, tx, ty] = operands;
-        matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+        matrix = multiply(matrix, [
+          a,
+          b,
+          0,
+          0,
+          c,
+          d,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          tx,
+          ty,
+          0,
+          1,
+        ]);
         break;
       }
       case 'translate': {
@@ -52,22 +80,70 @@ const applyTransforms = ({ matrix }, transformText) => {
       case 'rotate': {
         const [degrees = 0, x = 0, y = 0, z = 0] = operands;
         matrix = multiply(matrix, fromTranslation([x, y, z]));
-        matrix = multiply(matrix, fromZRotation(degrees * Math.PI / 180));
+        matrix = multiply(matrix, fromZRotation((degrees * Math.PI) / 180));
         matrix = multiply(matrix, fromTranslation([-x, -y, -z]));
         break;
       }
       case 'skewX': {
         // TODO: Move to math-mat4.
         const [degrees = 0] = operands;
-        const [a, b, c, d, tx, ty] = [1, 0, Math.tan(degrees * Math.PI / 180), 1, 0, 0];
-        matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+        const [a, b, c, d, tx, ty] = [
+          1,
+          0,
+          Math.tan((degrees * Math.PI) / 180),
+          1,
+          0,
+          0,
+        ];
+        matrix = multiply(matrix, [
+          a,
+          b,
+          0,
+          0,
+          c,
+          d,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          tx,
+          ty,
+          0,
+          1,
+        ]);
         break;
       }
       case 'skewY': {
         // TODO: Move to math-mat4.
         const [degrees = 0] = operands;
-        const [a, b, c, d, tx, ty] = [1, Math.tan(degrees * Math.PI / 180), 0, 1, 0, 0];
-        matrix = multiply(matrix, [a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1]);
+        const [a, b, c, d, tx, ty] = [
+          1,
+          Math.tan((degrees * Math.PI) / 180),
+          0,
+          1,
+          0,
+          0,
+        ];
+        matrix = multiply(matrix, [
+          a,
+          b,
+          0,
+          0,
+          c,
+          d,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          tx,
+          ty,
+          0,
+          1,
+        ]);
         break;
       }
       default: {
@@ -99,8 +175,13 @@ export const fromSvg = async (input, options = {}) => {
     // FIX: This is wrong and assumes width and height are in cm. Parse the units properly.
     const width = parseFloat(getAttribute(node, 'width', '1')) * 10;
     const height = parseFloat(getAttribute(node, 'height', '1')) * 10;
-    const [minX, minY, maxX, maxY] = getAttribute(node, 'viewBox', `0 0 ${width} ${height}`)
-        .split(/ +/).map(text => parseFloat(text));
+    const [minX, minY, maxX, maxY] = getAttribute(
+      node,
+      'viewBox',
+      `0 0 ${width} ${height}`
+    )
+      .split(/ +/)
+      .map((text) => parseFloat(text));
     const scaling = [width / (maxX - minX), -height / (maxY - minY), 1];
     return scaling;
   };
@@ -109,7 +190,7 @@ export const fromSvg = async (input, options = {}) => {
   const scale = (matrix) => multiply(fromScaling(scaling), matrix);
 
   const walk = ({ matrix }, node) => {
-    if (matrix.some(element => isNaN(element))) {
+    if (matrix.some((element) => isNaN(element))) {
       throw Error(`die: Bad element in matrix ${matrix}.`);
     }
     const buildShape = (...attrs) => {
@@ -134,9 +215,12 @@ export const fromSvg = async (input, options = {}) => {
     };
     switch (node.nodeType) {
       case ELEMENT_NODE: {
-        ({ matrix } = applyTransforms({ matrix }, node.getAttribute('transform')));
+        ({ matrix } = applyTransforms(
+          { matrix },
+          node.getAttribute('transform')
+        ));
 
-        if (matrix.some(element => isNaN(element))) {
+        if (matrix.some((element) => isNaN(element))) {
           throw Error(`die: Bad element in matrix ${matrix}.`);
         }
 
@@ -146,32 +230,51 @@ export const fromSvg = async (input, options = {}) => {
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
-            geometry.assembly.push(transform(scale(matrix), { z0Surface: close(paths), tags }));
+            geometry.assembly.push(
+              transform(scale(matrix), { z0Surface: close(paths), tags })
+            );
           }
           const stroke = node.getAttribute('stroke');
           if (stroke !== undefined && stroke !== 'none' && stroke !== '') {
-            if (matrix.some(element => isNaN(element))) {
+            if (matrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const scaledMatrix = scale(matrix);
-            if (scaledMatrix.some(element => isNaN(element))) {
+            if (scaledMatrix.some((element) => isNaN(element))) {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const tags = toTagsFromName(stroke);
-            geometry.assembly.push(transform(scaledMatrix, { paths: paths, tags }));
+            geometry.assembly.push(
+              transform(scaledMatrix, { paths: paths, tags })
+            );
           }
         };
 
         // FIX: Should output a path given a stroke, should output a surface given a fill.
         switch (node.tagName) {
-          case 'path': output(node.getAttribute('d')); break;
-          case 'circle': output(toPath(buildShape('cx', 'cy', 'r'))); break;
-          case 'ellipse': output(toPath(buildShape('cx', 'cy', 'rx', 'ry'))); break;
-          case 'line': output(toPath(buildShape('x1', 'x2', 'y1', 'y2'))); break;
-          case 'polygon': output(toPath(buildShape('points'))); break;
-          case 'polyline': output(toPath(buildShape('points'))); break;
-          case 'rect': output(toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry'))); break;
-          default: break;
+          case 'path':
+            output(node.getAttribute('d'));
+            break;
+          case 'circle':
+            output(toPath(buildShape('cx', 'cy', 'r')));
+            break;
+          case 'ellipse':
+            output(toPath(buildShape('cx', 'cy', 'rx', 'ry')));
+            break;
+          case 'line':
+            output(toPath(buildShape('x1', 'x2', 'y1', 'y2')));
+            break;
+          case 'polygon':
+            output(toPath(buildShape('points')));
+            break;
+          case 'polyline':
+            output(toPath(buildShape('points')));
+            break;
+          case 'rect':
+            output(toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry')));
+            break;
+          default:
+            break;
         }
         break;
       }
