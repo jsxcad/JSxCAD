@@ -53,12 +53,6 @@ const toDisjointAssembly = (geometry) => {
     return geometry[disjointAssembly];
   } else if (geometry.item) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
-  } else if (geometry.connection) {
-    return {
-      ...geometry,
-      connectors: geometry.connectors.map(toDisjointGeometry),
-      geometries: geometry.geometries.map(toDisjointGeometry)
-    };
   } else if (geometry.layers) {
     return {
       ...geometry,

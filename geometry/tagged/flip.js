@@ -4,10 +4,10 @@ import { flip as flipPoints } from '@jsxcad/geometry-points';
 import { flip as flipSolid } from '@jsxcad/geometry-solid';
 import { flip as flipSurface } from '@jsxcad/geometry-surface';
 
-import { rewriteUp } from './rewrite';
+import { rewrite } from './visit';
 
 export const flip = (geometry) => {
-  const op = (geometry) => {
+  const op = (geometry, descend) => {
     if (geometry.points) {
       return { ...geometry, points: flipPoints(geometry.points) };
     } else if (geometry.paths) {
@@ -19,11 +19,11 @@ export const flip = (geometry) => {
     } else if (geometry.solid) {
       return { ...geometry, solid: flipSolid(geometry.solid) };
     } else if (geometry.assembly) {
-      return geometry;
+      return descend();
     } else if (geometry.layers) {
-      return geometry;
+      return descend();
     } else if (geometry.disjointAssembly) {
-      return geometry;
+      return descend();
     } else if (geometry.plan) {
       if (geometry.plan.connector) {
         // FIX: Mirror visualization?
@@ -31,18 +31,12 @@ export const flip = (geometry) => {
       } else {
         return { ...geometry, content: flip(geometry.content) };
       }
-    } else if (geometry.connection) {
-      return {
-        ...geometry,
-        geometries: geometry.geometries.map(flip),
-        connectors: geometry.connectors.map(flip),
-      };
     } else if (geometry.item) {
       // FIX: How should items deal with flip?
-      return geometry;
+      return { ...geometry, item: flip(geometry.item) };
     } else {
       throw Error(`die: ${JSON.stringify(geometry)}`);
     }
   };
-  return rewriteUp(geometry, op);
+  return rewrite(geometry, op);
 };

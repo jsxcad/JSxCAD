@@ -1,4 +1,4 @@
-import { drop, splice, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { drop, toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { negate, subtract } from '@jsxcad/math-vec3';
 
 import Shape from '@jsxcad/api-v1-shape';
@@ -151,81 +151,3 @@ export const join = (a, aJoin, bJoin, b) => {
   });
   return result;
 };
-
-export const rejoin = (shape, connectionShape, aJoin, bJoin) => {
-  const connection = connectionShape.toKeptGeometry().disjointAssembly[0];
-  const { connectors, geometries } = connection;
-  const rejoined = join(
-    Shape.fromGeometry(geometries[0]).toConnector(
-      Shape.fromGeometry(connectors[0])
-    ),
-    aJoin,
-    bJoin,
-    Shape.fromGeometry(geometries[2]).toConnector(
-      Shape.fromGeometry(connectors[2])
-    )
-  );
-  return Shape.fromGeometry(
-    splice(
-      shape.toKeptGeometry().disjointAssembly[0],
-      connection,
-      rejoined.toGeometry()
-    )
-  );
-};
-
-// FIX: The toKeptGeometry is almost certainly wrong.
-export const joinLeft = (
-  leftArm,
-  joinId,
-  leftArmConnectorId,
-  rightJointConnectorId,
-  joint,
-  leftJointConnectorId,
-  rightArmConnectorId,
-  rightArm
-) => {
-  // leftArm will remain stationary.
-  const leftArmConnector = leftArm.connector(leftArmConnectorId);
-  const rightJointConnector = joint.connector(rightJointConnectorId);
-  const [
-    joinedJointShape,
-    joinedJointConnector,
-  ] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
-  const rightArmConnector = rightArm.connector(rightArmConnectorId, {
-    doConnect: false,
-  });
-  const [
-    joinedRightShape,
-    joinedRightConnector,
-  ] = rightArmConnector.connectTo(
-    joinedJointShape.connector(leftJointConnectorId),
-    { doConnect: false }
-  );
-  const result = Shape.fromGeometry({
-    connection: joinId,
-    connectors: [
-      leftArmConnector.toKeptGeometry().disjointAssembly[0],
-      joinedJointConnector.toKeptGeometry().disjointAssembly[0],
-      joinedRightConnector.toKeptGeometry().disjointAssembly[0],
-    ],
-    geometries: [
-      leftArm.dropConnector(leftArmConnectorId).toKeptGeometry()
-        .disjointAssembly[0],
-      joinedJointShape
-        .dropConnector(rightJointConnectorId, leftJointConnectorId)
-        .toKeptGeometry().disjointAssembly[0],
-      joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()
-        .disjointAssembly[0],
-    ],
-    tags: [`joinLeft/${joinId}`],
-  });
-  return result;
-};
-
-const joinLeftMethod = function (a, ...rest) {
-  return joinLeft(this, a, ...rest);
-};
-Shape.prototype.joinLeft = joinLeftMethod;
-
-export const rejoinLeft = (...joints) => undefined;

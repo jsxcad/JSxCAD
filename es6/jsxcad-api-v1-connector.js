@@ -741,60 +741,6 @@ atMethod.signature = 'Connector -> at(target:Connector) -> Shape';
 
 connect.signature = 'connect(to:Connector, from:Connector) -> Shape';
 
-// FIX: The toKeptGeometry is almost certainly wrong.
-const joinLeft = (
-  leftArm,
-  joinId,
-  leftArmConnectorId,
-  rightJointConnectorId,
-  joint,
-  leftJointConnectorId,
-  rightArmConnectorId,
-  rightArm
-) => {
-  // leftArm will remain stationary.
-  const leftArmConnector = leftArm.connector(leftArmConnectorId);
-  const rightJointConnector = joint.connector(rightJointConnectorId);
-  const [
-    joinedJointShape,
-    joinedJointConnector,
-  ] = rightJointConnector.connectTo(leftArmConnector, { doConnect: false });
-  const rightArmConnector = rightArm.connector(rightArmConnectorId, {
-    doConnect: false,
-  });
-  const [
-    joinedRightShape,
-    joinedRightConnector,
-  ] = rightArmConnector.connectTo(
-    joinedJointShape.connector(leftJointConnectorId),
-    { doConnect: false }
-  );
-  const result = Shape.fromGeometry({
-    connection: joinId,
-    connectors: [
-      leftArmConnector.toKeptGeometry().disjointAssembly[0],
-      joinedJointConnector.toKeptGeometry().disjointAssembly[0],
-      joinedRightConnector.toKeptGeometry().disjointAssembly[0],
-    ],
-    geometries: [
-      leftArm.dropConnector(leftArmConnectorId).toKeptGeometry()
-        .disjointAssembly[0],
-      joinedJointShape
-        .dropConnector(rightJointConnectorId, leftJointConnectorId)
-        .toKeptGeometry().disjointAssembly[0],
-      joinedRightShape.dropConnector(rightArmConnectorId).toKeptGeometry()
-        .disjointAssembly[0],
-    ],
-    tags: [`joinLeft/${joinId}`],
-  });
-  return result;
-};
-
-const joinLeftMethod = function (a, ...rest) {
-  return joinLeft(this, a, ...rest);
-};
-Shape.prototype.joinLeft = joinLeftMethod;
-
 const api = {
   Connector,
   X: X$2,

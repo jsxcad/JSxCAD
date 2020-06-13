@@ -36,8 +36,6 @@ export const measureBoundingBox = (rawGeometry) => {
       item.assembly.forEach(walk);
     } else if (item.layers) {
       item.layers.forEach(walk);
-    } else if (item.connection) {
-      item.geometries.map(walk);
     } else if (item.disjointAssembly) {
       item.disjointAssembly.forEach(walk);
     } else if (item.item) {

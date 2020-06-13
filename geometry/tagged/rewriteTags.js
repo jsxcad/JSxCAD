@@ -1,6 +1,6 @@
 import { cacheRewriteTags } from '@jsxcad/cache';
 import { hasMatchingTag } from './hasMatchingTag';
-import { rewriteUp } from './rewrite';
+import { rewrite } from './visit';
 
 const buildCondition = (conditionTags, conditionSpec) => {
   switch (conditionSpec) {
@@ -33,10 +33,10 @@ const rewriteTagsImpl = (
     }
   };
 
-  const op = (geometry) => {
+  const op = (geometry, descend) => {
     if (geometry.assembly || geometry.disjointAssembly) {
       // These structural geometries don't take tags.
-      return geometry;
+      return descend();
     }
     const composedTags = composeTags(geometry.tags);
     if (composedTags === undefined) {
@@ -47,11 +47,11 @@ const rewriteTagsImpl = (
     if (composedTags === geometry.tags) {
       return geometry;
     } else {
-      return { ...geometry, tags: composedTags };
+      return descend({ tags: composedTags });
     }
   };
 
-  return rewriteUp(geometry, op);
+  return rewrite(geometry, op);
 };
 
 export const rewriteTags = cacheRewriteTags(rewriteTagsImpl);

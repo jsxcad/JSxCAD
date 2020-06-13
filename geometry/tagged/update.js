@@ -1,4 +1,7 @@
-export const update = (geometry, updates) => {
+export const update = (geometry, updates, changes) => {
+  if (updates === undefined) {
+    return geometry;
+  }
   if (geometry === updates) {
     return geometry;
   }
@@ -13,6 +16,14 @@ export const update = (geometry, updates) => {
     if (updates[key] !== updated[key]) {
       updated[key] = updates[key];
       changed = true;
+    }
+  }
+  if (changes !== undefined) {
+    for (const key of Object.keys(changes)) {
+      if (changes[key] !== updated[key]) {
+        updated[key] = changes[key];
+        changed = true;
+      }
     }
   }
   if (changed) {
