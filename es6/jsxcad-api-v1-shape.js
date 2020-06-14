@@ -1,11 +1,12 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, getPaths, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
 import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
+import { segment as segment$1 } from './jsxcad-geometry-paths.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
@@ -720,6 +721,20 @@ const withOpenEdgesMethod = function (...args) {
   return assemble(this, openEdges(this, ...args));
 };
 Shape.prototype.withOpenEdges = withOpenEdgesMethod;
+
+const segment = (shape, start = 0, end = start) => {
+  const outputPaths = [];
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    const segments = segment$1(paths, start, end);
+    outputPaths.push(...segments);
+  }
+  return Shape.fromGeometry({ paths: outputPaths });
+};
+
+const segmentMethod = function (start, end) {
+  return segment(this, start, end);
+};
+Shape.prototype.segment = segmentMethod;
 
 const solids = (shape, xform = (_) => _) => {
   const solids = [];
