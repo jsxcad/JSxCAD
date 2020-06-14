@@ -1,7 +1,7 @@
 import Shape, { Shape as Shape$1, assemble, log } from './jsxcad-api-v1-shape.js';
 import { add, random, scale, dot, subtract, negate } from './jsxcad-math-vec3.js';
-import { visit, getConnections, getSolids, getAnySurfaces, getPlans, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import Plan from './jsxcad-api-v1-plan.js';
+import { visit, getSolids, getAnySurfaces, getPlans, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
 import { cut } from './jsxcad-algorithm-bsp-surfaces.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -28,7 +28,8 @@ import { transform } from './jsxcad-geometry-path.js';
 
 const shapeToConnect = Symbol('shapeToConnect');
 
-// A connector expresses a joint-of-connection extending from origin along axis to end.
+// A connector is an oriented reference point.
+//
 // The orientation expresses the direction of facing orthogonal to that axis.
 // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
 // Note: axis must be further than end from origin.
@@ -148,21 +149,6 @@ const connectorMethod = function (id) {
   return connector(this, id);
 };
 Shape.prototype.connector = connectorMethod;
-
-const connection = (shape, id) => {
-  const shapeGeometry = shape.toKeptGeometry();
-  const connections = getConnections(shapeGeometry);
-  for (const geometry of connections) {
-    if (geometry.connection === id) {
-      return Shape.fromGeometry(geometry);
-    }
-  }
-};
-
-const connectionMethod = function (id) {
-  return connection(this, id);
-};
-Shape.prototype.connection = connectionMethod;
 
 // FIX:
 // This will produce the average position, but that's probably not what we

@@ -1,7 +1,6 @@
-import { getConnections, visit } from '@jsxcad/geometry-tagged';
-
 import Plan from '@jsxcad/api-v1-plan';
 import Shape from '@jsxcad/api-v1-shape';
+import { visit } from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -24,7 +23,8 @@ import Shape from '@jsxcad/api-v1-shape';
 
 export const shapeToConnect = Symbol('shapeToConnect');
 
-// A connector expresses a joint-of-connection extending from origin along axis to end.
+// A connector is an oriented reference point.
+//
 // The orientation expresses the direction of facing orthogonal to that axis.
 // The joint may have a zero length (origin and end are equal), but axis must not equal origin.
 // Note: axis must be further than end from origin.
@@ -147,18 +147,3 @@ const connectorMethod = function (id) {
   return connector(this, id);
 };
 Shape.prototype.connector = connectorMethod;
-
-export const connection = (shape, id) => {
-  const shapeGeometry = shape.toKeptGeometry();
-  const connections = getConnections(shapeGeometry);
-  for (const geometry of connections) {
-    if (geometry.connection === id) {
-      return Shape.fromGeometry(geometry);
-    }
-  }
-};
-
-const connectionMethod = function (id) {
-  return connection(this, id);
-};
-Shape.prototype.connection = connectionMethod;
