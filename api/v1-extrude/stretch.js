@@ -3,7 +3,7 @@ import {
   alignVertices,
   transform as transformSolid,
 } from '@jsxcad/geometry-solid';
-import { cutOpen, section } from '@jsxcad/algorithm-bsp-surfaces';
+import { cutOpen, section } from '@jsxcad/geometry-bsp';
 import {
   flip,
   toPlane,

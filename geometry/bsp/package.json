@@ -1,7 +1,7 @@
 {
-  "name": "@jsxcad/algorithm-bsp-surfaces",
+  "name": "@jsxcad/geometry-bsp",
   "version": "0.0.79",
-  "description": "Surface soup BSP trees for JSxCAD",
+  "description": "BSP geometry for JSxCAD",
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",

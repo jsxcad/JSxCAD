@@ -2,7 +2,7 @@ import { Shape, layer } from '@jsxcad/api-v1-shape';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
-import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
+import { section as bspSection } from '@jsxcad/geometry-bsp';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
