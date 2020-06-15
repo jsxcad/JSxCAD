@@ -13,6 +13,7 @@ import './noPlan';
 import './noVoid';
 import './op';
 import './openEdges';
+import './segment';
 import './solids';
 import './tags';
 import './wireframe';

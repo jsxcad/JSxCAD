@@ -1,6 +1,9 @@
 import { fromScaling, fromTranslation } from './jsxcad-math-mat4.js';
-import { canonicalize as canonicalize$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon, transform as transform$1 } from './jsxcad-geometry-path.js';
-import { fromPoint, min, max } from './jsxcad-math-vec3.js';
+import { transform as transform$1, canonicalize as canonicalize$1, getEdges, flip as flip$1, toGeneric as toGeneric$1, toPolygon, toZ0Polygon } from './jsxcad-geometry-path.js';
+import { fromPoint, min, max, subtract, length, add, scale as scale$1, normalize } from './jsxcad-math-vec3.js';
+
+const transform = (matrix, paths) =>
+  paths.map((path) => transform$1(matrix, path));
 
 const butLast = (paths) => paths.slice(0, paths.length - 1);
 
@@ -77,6 +80,49 @@ const measureBoundingBox = (paths) => {
   return [minPoint, maxPoint];
 };
 
+const segment = (paths, start, end) => {
+  const segments = [];
+  let segment = [];
+  let position = 0;
+  let collecting = false;
+  for (const path of paths) {
+    for (const [first, second] of getEdges(path)) {
+      const vector = subtract(second, first);
+      const nextPosition = position + length(vector);
+      if (collecting === false) {
+        if (nextPosition >= start) {
+          const point = add(first, scale$1(start - position, normalize(vector)));
+          // The segments are always open paths.
+          segment.push(null, point);
+          if (start - position < 0) {
+            throw Error('die');
+          }
+          collecting = true;
+        }
+      }
+      if (collecting === true) {
+        if (position > start && segment.length === 0) {
+          segment.push(first);
+        }
+        if (nextPosition >= end) {
+          const point = add(first, scale$1(end - position, normalize(vector)));
+          segment.push(point);
+          segments.push(segment);
+          return segments;
+        } else {
+          segment.push(second);
+        }
+      }
+      position = nextPosition;
+    }
+    if (segment.length > 0) {
+      segments.push(segment);
+      segment = [];
+    }
+  }
+  return segments;
+};
+
 /**
  * Transforms each path of Paths.
  *
@@ -119,9 +165,6 @@ const toZ0Polygons = (paths) => {
   return paths;
 };
 
-const transform = (matrix, paths) =>
-  paths.map((path) => transform$1(matrix, path));
-
 // FIX: Deduplication.
 
 const union = (...pathsets) => [].concat(...pathsets);
@@ -131,4 +174,4 @@ const scale = ([x = 1, y = 1, z = 1], paths) =>
 const translate = ([x = 0, y = 0, z = 0], paths) =>
   transform(fromTranslation([x, y, z]), paths);
 
-export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
+export { butLast, canonicalize, difference, eachPoint, findOpenEdges, flip, intersection, last, measureBoundingBox, scale, segment, toGeneric, toPoints, toPolygons, toZ0Polygons, transform, translate, union };
