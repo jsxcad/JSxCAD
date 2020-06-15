@@ -1,6 +1,6 @@
 import { measureBoundingBox, makeWatertight } from './jsxcad-geometry-solid.js';
 import Shape from './jsxcad-api-v1-shape.js';
-import { deform } from './jsxcad-algorithm-bsp-surfaces.js';
+import { deform } from './jsxcad-geometry-bsp.js';
 import { getSolids } from './jsxcad-geometry-tagged.js';
 import { scale } from './jsxcad-math-vec2.js';
 import { rotateZ } from './jsxcad-math-vec3.js';

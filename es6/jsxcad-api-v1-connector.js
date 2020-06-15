@@ -3,7 +3,7 @@ import { add, random, scale, dot, subtract, negate } from './jsxcad-math-vec3.js
 import Plan from './jsxcad-api-v1-plan.js';
 import { visit, getSolids, getAnySurfaces, getPlans, getSurfaces, getZ0Surfaces, toKeptGeometry, drop } from './jsxcad-geometry-tagged.js';
 import { toPlane as toPlane$1, cut as cut$1 } from './jsxcad-geometry-surface.js';
-import { cut } from './jsxcad-algorithm-bsp-surfaces.js';
+import { cut } from './jsxcad-geometry-bsp.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { transform } from './jsxcad-geometry-path.js';
 

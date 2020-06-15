@@ -2,7 +2,7 @@ import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import {
   containsPoint as containsPointAlgorithm,
   fromSolid,
-} from '@jsxcad/algorithm-bsp-surfaces';
+} from '@jsxcad/geometry-bsp';
 import { getSolids, measureBoundingBox } from '@jsxcad/geometry-tagged';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';

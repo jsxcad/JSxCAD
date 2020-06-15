@@ -8,7 +8,7 @@ import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
-import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-algorithm-bsp-surfaces.js';
+import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';

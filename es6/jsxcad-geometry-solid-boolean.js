@@ -1,1 +1,1 @@
-export { difference, intersection, union } from './jsxcad-algorithm-bsp-surfaces.js';
+export { difference, intersection, union } from './jsxcad-geometry-bsp.js';
