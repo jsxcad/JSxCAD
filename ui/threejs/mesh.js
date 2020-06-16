@@ -194,6 +194,7 @@ export const buildMeshes = async ({
   threejsGeometry,
   scene,
   layer = GEOMETRY_LAYER,
+  render,
 }) => {
   if (threejsGeometry === undefined) {
     return;
@@ -206,6 +207,7 @@ export const buildMeshes = async ({
         threejsGeometry: subGeometry,
         scene,
         layer,
+        render,
       });
     }
   } else if (threejsGeometry.item) {
@@ -213,28 +215,65 @@ export const buildMeshes = async ({
       datasets,
       threejsGeometry: threejsGeometry.item,
       scene,
+      render,
     });
-  } else if (threejsGeometry.threejsSegments) {
-    const segments = threejsGeometry.threejsSegments;
+  } else if (threejsGeometry.threejsPaths) {
+    const paths = threejsGeometry.threejsPaths;
     const dataset = {};
-    const geometry = new Geometry();
+    const geometry = new BufferGeometry();
     const material = new LineBasicMaterial({
       color: 0xffffff,
       vertexColors: VertexColors,
     });
     const color = new Color(setColor(tags, {}, [0, 0, 0]).color);
-    for (const [
-      [aX = 0, aY = 0, aZ = 0],
-      [bX = 0, bY = 0, bZ = 0],
-    ] of segments) {
-      geometry.colors.push(color, color);
-      geometry.vertices.push(new Vector3(aX, aY, aZ), new Vector3(bX, bY, bZ));
+    const colors = [];
+    const positions = [];
+    const index = [];
+    for (const path of paths) {
+      const entry = { start: Math.floor(positions.length / 3), length: 0 };
+      let last = path.length - 1;
+      for (let nth = 0; nth < path.length; last = nth, nth += 1) {
+        const start = path[last];
+        const end = path[nth];
+        if (start === null || end === null) continue;
+        const [aX = 0, aY = 0, aZ = 0] = start;
+        const [bX = 0, bY = 0, bZ = 0] = end;
+        colors.push(color.r, color.g, color.b, color.r, color.g, color.b);
+        positions.push(aX, aY, aZ, bX, bY, bZ);
+        entry.length += 2;
+      }
+      if (entry.length > 0) {
+        index.push(entry);
+      }
     }
+    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+    // geometry.setDrawRange(index[0].start, index[0].length);
     dataset.mesh = new LineSegments(geometry, material);
     dataset.mesh.layers.set(layer);
     dataset.name = toName(threejsGeometry);
     scene.add(dataset.mesh);
     datasets.push(dataset);
+    if (render && tags.includes('display/trace')) {
+      let current = 0;
+      let extent = 0;
+      const animate = () => {
+        if (dataset.mesh) {
+          const geometry = dataset.mesh.geometry;
+          // geometry.setDrawRange(index[current].start, index[current].length);
+          geometry.setDrawRange(0, (extent += index[current].length));
+          geometry.attributes.position.needsUpdate = true;
+          render();
+          current += 1;
+          if (current >= index.length) {
+            current = 0;
+            extent = 0;
+          }
+          setTimeout(animate, 100);
+        }
+      };
+      animate();
+    }
   } else if (threejsGeometry.threejsPoints) {
     const points = threejsGeometry.threejsPoints;
     const dataset = {};
@@ -284,12 +323,14 @@ export const buildMeshes = async ({
       threejsGeometry: threejsGeometry.threejsVisualization,
       scene,
       layer: PLAN_LAYER,
+      render,
     });
     await buildMeshes({
       datasets,
       threejsGeometry: threejsGeometry.threejsContent,
       scene,
       layer: GEOMETRY_LAYER,
+      render,
     });
   }
 };

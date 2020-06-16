@@ -48,6 +48,7 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     view,
     viewerElement: canvas,
   });
+
   const { resize } = createResizer({
     camera,
     trackball,
@@ -71,7 +72,7 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     // Build new datasets from the written data, and display them.
     datasets = [];
 
-    await buildMeshes({ datasets, threejsGeometry, scene });
+    await buildMeshes({ datasets, threejsGeometry, scene, render });
 
     moveToFit({ view, camera, controls: trackball, scene });
 
