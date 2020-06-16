@@ -53947,7 +53947,7 @@ const buildMeshes = async ({
   threejsGeometry,
   scene,
   layer = GEOMETRY_LAYER,
-  render
+  render,
 }) => {
   if (threejsGeometry === undefined) {
     return;
@@ -53960,7 +53960,7 @@ const buildMeshes = async ({
         threejsGeometry: subGeometry,
         scene,
         layer,
-      render,
+        render,
       });
     }
   } else if (threejsGeometry.item) {
@@ -53999,8 +53999,8 @@ const buildMeshes = async ({
         index.push(entry);
       }
     }
-    geometry.setAttribute( 'position', new Float32BufferAttribute(positions, 3));
-    geometry.setAttribute( 'color', new Float32BufferAttribute(colors, 3));
+    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
     // geometry.setDrawRange(index[0].start, index[0].length);
     dataset.mesh = new LineSegments(geometry, material);
     dataset.mesh.layers.set(layer);
@@ -54014,7 +54014,7 @@ const buildMeshes = async ({
         if (dataset.mesh) {
           const geometry = dataset.mesh.geometry;
           // geometry.setDrawRange(index[current].start, index[current].length);
-          geometry.setDrawRange(0, extent += index[current].length);
+          geometry.setDrawRange(0, (extent += index[current].length));
           geometry.attributes.position.needsUpdate = true;
           render();
           current += 1;

@@ -5,7 +5,7 @@ import { segment } from '@jsxcad/geometry-paths';
 export const trace = (shape, length = 1) => {
   const tracePaths = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    for (let start = 0;; start += length) {
+    for (let start = 0; ; start += length) {
       const segments = segment(paths, start, start + length);
       if (segments.length === 0) {
         break;
