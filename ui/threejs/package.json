@@ -27,7 +27,7 @@
     "@jsxcad/geometry-surface": "^0.0.79",
     "@jsxcad/math-poly3": "^0.0.79",
     "dat.gui": "0.7.6",
-    "three": "^0.104.0"
+    "three": "^0.117.1"
   },
   "devDependencies": {
     "depcheck": "^0.9.1",
