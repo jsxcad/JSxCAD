@@ -6,7 +6,7 @@ import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { junctionSelector } from './jsxcad-geometry-halfedge.js';
 import { scale as scale$1, add, negate, normalize, subtract, dot, cross, distance } from './jsxcad-math-vec3.js';
-import { segment as segment$1 } from './jsxcad-geometry-paths.js';
+import { segment } from './jsxcad-geometry-paths.js';
 import { toTagFromName } from './jsxcad-algorithm-color.js';
 import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
 
@@ -722,20 +722,6 @@ const withOpenEdgesMethod = function (...args) {
 };
 Shape.prototype.withOpenEdges = withOpenEdgesMethod;
 
-const segment = (shape, start = 0, end = start) => {
-  const outputPaths = [];
-  for (const { paths } of getPaths(shape.toKeptGeometry())) {
-    const segments = segment$1(paths, start, end);
-    outputPaths.push(...segments);
-  }
-  return Shape.fromGeometry({ paths: outputPaths });
-};
-
-const segmentMethod = function (start, end) {
-  return segment(this, start, end);
-};
-Shape.prototype.segment = segmentMethod;
-
 const solids = (shape, xform = (_) => _) => {
   const solids = [];
   for (const solid of getSolids(shape.toKeptGeometry())) {
@@ -748,6 +734,25 @@ const solidsMethod = function (...args) {
   return solids(this, ...args);
 };
 Shape.prototype.solids = solidsMethod;
+
+const trace = (shape, length = 1) => {
+  const tracePaths = [];
+  for (const { paths } of getPaths(shape.toKeptGeometry())) {
+    for (let start = 0; ; start += length) {
+      const segments = segment(paths, start, start + length);
+      if (segments.length === 0) {
+        break;
+      }
+      tracePaths.push(...segments);
+    }
+  }
+  return Shape.fromGeometry({ paths: tracePaths, tags: ['display/trace'] });
+};
+
+const traceMethod = function (length = 1) {
+  return trace(this, length);
+};
+Shape.prototype.trace = traceMethod;
 
 const tags = (shape) =>
   [...allTags(shape.toGeometry())]

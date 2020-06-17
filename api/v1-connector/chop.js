@@ -2,7 +2,7 @@ import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import { getAnySurfaces, getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import Z from './Z';
-import { cut as bspCut } from '@jsxcad/algorithm-bsp-surfaces';
+import { cut as bspCut } from '@jsxcad/geometry-bsp';
 import { cut as surfaceCut } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from '@jsxcad/geometry-path';

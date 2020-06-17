@@ -22,7 +22,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@jsxcad/algorithm-bsp-surfaces": "^0.0.79",
+    "@jsxcad/geometry-bsp": "^0.0.79",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",
