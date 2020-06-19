@@ -8,7 +8,7 @@
  *
  * @function
  * @param {Loop} loop
- * @returns {Loop | void}
+ * @returns {Loop|undefined}
  */
 export const clean = (loop) => {
   let link = loop;
