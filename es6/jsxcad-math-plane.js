@@ -138,10 +138,24 @@ const splitLineSegmentByPlane = (plane, p1, p2) => {
   return add(p1, scale(lambda, direction));
 };
 
+const W$2 = 3;
+
+const toPolygon = (plane, size = 1e10) => {
+  const v = unit(cross(plane, random(plane)));
+  const u = cross(v, plane);
+  const origin = scale(plane[W$2], plane);
+  return [
+    add(origin, scale(-size, u)),
+    add(origin, scale(-size, v)),
+    add(origin, scale(size, u)),
+    add(origin, scale(size, v)),
+  ];
+};
+
 const X$1 = 0;
 const Y$1 = 1;
 const Z$1 = 2;
-const W$2 = 3;
+const W$3 = 3;
 
 const toXYPlaneTransforms = (plane, rightVector) => {
   if (plane === undefined) {
@@ -153,7 +167,7 @@ const toXYPlaneTransforms = (plane, rightVector) => {
 
   const v = unit(cross(plane, rightVector));
   const u = cross(v, plane);
-  const p = multiply(plane, fromScalar(plane[W$2]));
+  const p = multiply(plane, fromScalar(plane[W$3]));
 
   const to = fromValues(
     u[X$1],
@@ -170,7 +184,7 @@ const toXYPlaneTransforms = (plane, rightVector) => {
     0,
     0,
     0,
-    -plane[W$2],
+    -plane[W$3],
     1
   );
 
@@ -223,4 +237,4 @@ const transform = (matrix, plane) => {
   return newplane;
 };
 
-export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsRandom, fromPolygon, signedDistanceToPoint, splitLineSegmentByPlane, toXYPlaneTransforms, transform };
+export { canonicalize, equals, flip, fromNormalAndPoint, fromPoints, fromPointsRandom, fromPolygon, signedDistanceToPoint, splitLineSegmentByPlane, toPolygon, toXYPlaneTransforms, transform };
