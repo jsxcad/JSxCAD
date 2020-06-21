@@ -1,25 +1,12 @@
-import { canonicalize } from './canonicalize';
-import { equals } from './equals';
-import { flip } from './flip';
-import { fromNormalAndPoint } from './fromNormalAndPoint';
-import { fromPoints } from './fromPoints';
-import { fromPointsRandom } from './fromPointsRandom';
-import { fromPolygon } from './fromPolygon';
-import { signedDistanceToPoint } from './signedDistanceToPoint';
-import { splitLineSegmentByPlane } from './splitLineSegmentByPlane';
-import { toXYPlaneTransforms } from './toXYPlaneTransforms';
-import { transform } from './transform';
-
-export {
-  canonicalize,
-  equals,
-  flip,
-  fromNormalAndPoint,
-  fromPoints,
-  fromPointsRandom,
-  fromPolygon,
-  signedDistanceToPoint,
-  splitLineSegmentByPlane,
-  toXYPlaneTransforms,
-  transform,
-};
+export { canonicalize } from './canonicalize';
+export { equals } from './equals';
+export { flip } from './flip';
+export { fromNormalAndPoint } from './fromNormalAndPoint';
+export { fromPoints } from './fromPoints';
+export { fromPointsRandom } from './fromPointsRandom';
+export { fromPolygon } from './fromPolygon';
+export { signedDistanceToPoint } from './signedDistanceToPoint';
+export { splitLineSegmentByPlane } from './splitLineSegmentByPlane';
+export { toPolygon } from './toPolygon';
+export { toXYPlaneTransforms } from './toXYPlaneTransforms';
+export { transform } from './transform';
