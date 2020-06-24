@@ -283,13 +283,13 @@ export const buildMeshes = async ({
       datasets,
       threejsGeometry: threejsGeometry.threejsVisualization,
       scene,
-      layer: PLAN_LAYER,
+      // layer: PLAN_LAYER,
     });
     await buildMeshes({
       datasets,
       threejsGeometry: threejsGeometry.threejsContent,
       scene,
-      layer: GEOMETRY_LAYER,
+      layer,
     });
   }
 };

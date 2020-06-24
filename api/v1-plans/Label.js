@@ -4,6 +4,7 @@ import Plan from '@jsxcad/api-v1-plan';
 
 export const Label = (label, mark = [0, 0, 0]) =>
   Plan({ plan: { label }, marks: [mark] });
+
 Plan.Label = Label;
 
 const withLabelMethod = function (...args) {

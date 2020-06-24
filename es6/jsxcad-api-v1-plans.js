@@ -170,6 +170,7 @@ Plan$1.Diameter = Diameter;
 
 const Label = (label, mark = [0, 0, 0]) =>
   Plan$1({ plan: { label }, marks: [mark] });
+
 Plan$1.Label = Label;
 
 const withLabelMethod = function (...args) {

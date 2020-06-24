@@ -1164,6 +1164,9 @@ const outlineImpl = (geometry) => {
   for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
     outlines.push(outlineSurface(surface || z0Surface, normalize));
   }
+  for (const { paths } of getNonVoidPaths(keptGeometry)) {
+    outlines.push(paths);
+  }
   return outlines.map((outline) => ({ paths: outline }));
 };
 
