@@ -14,16 +14,21 @@ import grow from './grow';
  * :::
  **/
 
-export const byRadius = (shape, amount = 1, { resolution = 16 } = {}) => grow(shape, -amount, resolution);
+export const byRadius = (shape, amount = 1, { resolution = 16 } = {}) =>
+  grow(shape, -amount, resolution);
 
 export const shrink = (...args) => byRadius(...args);
 
 shrink.byRadius = byRadius;
 
-const shrinkMethod = function (radius, resolution) { return shrink(this, radius, resolution); };
+const shrinkMethod = function (radius, resolution) {
+  return shrink(this, radius, resolution);
+};
 Shape.prototype.shrink = shrinkMethod;
 
 export default shrink;
 
-shrink.signature = 'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
-shrinkMethod.signature = 'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';
+shrink.signature =
+  'shrink(shape:Shape, amount:number = 1, { resolution:number = 16 }) -> Shape';
+shrinkMethod.signature =
+  'Shape -> shrink(amount:number = 1, { resolution:number = 16 }) -> Shape';

@@ -9,20 +9,24 @@ export default {
   input: 'main.js',
   output: {
     dir: 'dist',
-    format: 'module'
+    format: 'module',
   },
-  external (id) {
+  external(id) {
     return id.startsWith('./jsxcad-');
   },
   plugins: [
     builtins(),
     commonjs({
       namedExports: {
-        '../../node_modules/simplify-path/index.js': ['default']
-      }
+        '../../node_modules/simplify-path/index.js': ['default'],
+      },
     }),
     globals(),
     nodeResolve({ preferBuiltins: true }),
-    { transform (code, id) { return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'"); } }
-  ]
+    {
+      transform(code, id) {
+        return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");
+      },
+    },
+  ],
 };

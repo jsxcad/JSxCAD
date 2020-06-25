@@ -12,9 +12,9 @@ export { vec };
  *
  **/
 
-const ease = (start = 0.00, end = 1.00, op = t => 1) => {
-  const compose = (next = t => 1) => {
-    const fn = t => {
+const ease = (start = 0.0, end = 1.0, op = (t) => 1) => {
+  const compose = (next = (t) => 1) => {
+    const fn = (t) => {
       if (t >= start && t <= end) {
         return op((t - start) / (end - start));
       } else {
@@ -26,10 +26,11 @@ const ease = (start = 0.00, end = 1.00, op = t => 1) => {
   return compose;
 };
 
-const linear = (start, end) => t => start + t * (end - start);
+const linear = (start, end) => (t) => start + t * (end - start);
 ease.linear = linear;
 
-ease.signature = 'ease(start:number = 0, end:number = 1, op:function) -> function';
+ease.signature =
+  'ease(start:number = 0, end:number = 1, op:function) -> function';
 linear.signature = 'linear(start:number = 0, end:number = 1) -> function';
 
 function unwrapExports (x) {
@@ -3873,7 +3874,7 @@ const Random = (seed = 0) => {
  *
  **/
 
-const acos = (a) => Math.acos(a) / (Math.PI * 2) * 360;
+const acos = (a) => (Math.acos(a) / (Math.PI * 2)) * 360;
 acos.signature = 'acos(angle:number) -> number';
 
 /**
@@ -3891,7 +3892,7 @@ acos.signature = 'acos(angle:number) -> number';
  *
  **/
 
-const cos = (a) => Math.cos(a / 360 * Math.PI * 2);
+const cos = (a) => Math.cos((a / 360) * Math.PI * 2);
 
 cos.signature = 'cos(angle:number) -> number';
 
@@ -3942,7 +3943,10 @@ min.signature = 'min(...values:number) -> number';
 
 const EPSILON = 1e-5;
 
-const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) => {
+const numbers = (
+  thunk = (n) => n,
+  { from = 0, to, upto, by, resolution } = {}
+) => {
   const numbers = [];
   if (by === undefined) {
     if (resolution !== undefined) {
@@ -3958,12 +3962,20 @@ const numbers = (thunk = (n => n), { from = 0, to, upto, by, resolution } = {}) 
 
   if (upto !== undefined) {
     // Exclusive
-    for (let number = from, nth = 0; number < to - EPSILON; number += by, nth++) {
+    for (
+      let number = from, nth = 0;
+      number < to - EPSILON;
+      number += by, nth++
+    ) {
       numbers.push(thunk(number, nth));
     }
   } else if (to !== undefined) {
     // Inclusive
-    for (let number = from, nth = 0; number <= to + EPSILON; number += by, nth++) {
+    for (
+      let number = from, nth = 0;
+      number <= to + EPSILON;
+      number += by, nth++
+    ) {
       numbers.push(thunk(number, nth));
     }
   }
@@ -3987,7 +3999,7 @@ numbers.signature = 'numbers(spec) -> numbers';
  *
  **/
 
-const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
 
 /**
  *
@@ -4018,7 +4030,7 @@ const api = {
   numbers,
   sin,
   sqrt,
-  vec
+  vec,
 };
 
 export default api;

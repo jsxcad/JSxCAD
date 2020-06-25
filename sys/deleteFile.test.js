@@ -5,7 +5,7 @@ import test from 'ava';
 import { watchFileDeletion } from './files';
 import { writeFile } from './writeFile';
 
-test('Utf8 read', async t => {
+test('Utf8 read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });
 
   const deleted = new Set();

@@ -212,7 +212,10 @@ var _function = function createBezierBuilder(opt) {
 var adaptiveBezierCurve = _function();
 var adaptiveBezierCurve_1 = adaptiveBezierCurve.bezier;
 
-const buildAdaptiveCubicBezierCurve = ({ scale = 2 }, [start, c1, c2, end]) => adaptiveBezierCurve(start, c1, c2, end, scale);
+const buildAdaptiveCubicBezierCurve = (
+  { scale = 2 },
+  [start, c1, c2, end]
+) => adaptiveBezierCurve(start, c1, c2, end, scale);
 
 function unwrapExports (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -5714,7 +5717,9 @@ var QuickHull = unwrapExports(QuickHull_1);
 const buildConvexHullImpl = (points) => {
   const hull = new QuickHull(points, { skipTriangulation: true });
   hull.build();
-  const polygons = hull.collectFaces().map(polygon => polygon.map(nthPoint => points[nthPoint]));
+  const polygons = hull
+    .collectFaces()
+    .map((polygon) => polygon.map((nthPoint) => points[nthPoint]));
   polygons.isConvex = true;
   return { solid: fromPolygons({}, polygons) };
 };
@@ -6422,7 +6427,11 @@ const buildConvexSurfaceHull = cache$1(buildConvexSurfaceHullImpl);
 const EPSILON = 1e-5;
 
 const buildWalls = (polygons, floor, roof) => {
-  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
     // Remember that we are walking CCW.
     const a = deduplicate([floor[start], floor[end], roof[start]]);
     const b = deduplicate([floor[end], roof[end], roof[start]]);
@@ -6483,7 +6492,11 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
 const buildFromFunction = cache$1(buildFromFunctionImpl);
 
 const buildWalls$1 = (polygons, floor, roof) => {
-  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
     // Remember that we are walking CCW.
     const a = deduplicate([floor[start], floor[end], roof[start]]);
     const b = deduplicate([floor[end], roof[end], roof[start]]);
@@ -6535,31 +6548,50 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
 const fromPointsAndPaths = ({ points = [], paths = [] }) => {
   const polygons = [];
   for (const path of paths) {
-    polygons.push(fromPoints(path.map(nth => points[nth])));
+    polygons.push(fromPoints(path.map((nth) => points[nth])));
   }
   return polygons;
 };
 
 // Unit icosahedron vertices.
-const points = [[0.850651, 0.000000, -0.525731],
-                [0.850651, -0.000000, 0.525731],
-                [-0.850651, -0.000000, 0.525731],
-                [-0.850651, 0.000000, -0.525731],
-                [0.000000, -0.525731, 0.850651],
-                [0.000000, 0.525731, 0.850651],
-                [0.000000, 0.525731, -0.850651],
-                [0.000000, -0.525731, -0.850651],
-                [-0.525731, -0.850651, -0.000000],
-                [0.525731, -0.850651, -0.000000],
-                [0.525731, 0.850651, 0.000000],
-                [-0.525731, 0.850651, 0.000000]];
+const points = [
+  [0.850651, 0.0, -0.525731],
+  [0.850651, -0.0, 0.525731],
+  [-0.850651, -0.0, 0.525731],
+  [-0.850651, 0.0, -0.525731],
+  [0.0, -0.525731, 0.850651],
+  [0.0, 0.525731, 0.850651],
+  [0.0, 0.525731, -0.850651],
+  [0.0, -0.525731, -0.850651],
+  [-0.525731, -0.850651, -0.0],
+  [0.525731, -0.850651, -0.0],
+  [0.525731, 0.850651, 0.0],
+  [-0.525731, 0.850651, 0.0],
+];
 
 // Triangular decomposition structure.
-const paths = [[1, 9, 0], [0, 10, 1], [0, 7, 6], [0, 6, 10],
-               [0, 9, 7], [4, 1, 5], [9, 1, 4], [1, 10, 5],
-               [3, 8, 2], [2, 11, 3], [4, 5, 2], [2, 8, 4],
-               [5, 11, 2], [6, 7, 3], [3, 11, 6], [3, 7, 8],
-               [4, 8, 9], [5, 10, 11], [6, 11, 10], [7, 9, 8]];
+const paths = [
+  [1, 9, 0],
+  [0, 10, 1],
+  [0, 7, 6],
+  [0, 6, 10],
+  [0, 9, 7],
+  [4, 1, 5],
+  [9, 1, 4],
+  [1, 10, 5],
+  [3, 8, 2],
+  [2, 11, 3],
+  [4, 5, 2],
+  [2, 8, 4],
+  [5, 11, 2],
+  [6, 7, 3],
+  [3, 11, 6],
+  [3, 7, 8],
+  [4, 8, 9],
+  [5, 10, 11],
+  [6, 11, 10],
+  [7, 9, 8],
+];
 
 // FIX: Why aren't we computing the convex hull?
 const buildRegularIcosahedron = (options = {}) => {
@@ -6580,10 +6612,12 @@ const subdivideTriangle = (triangle) => {
   const t20 = scale$1(1 / 2, add$1(t2, t0));
   const t21 = scale$1(1 / 2, add$1(t2, t1));
   // Turning CCW.
-  return [[t0, t10, t20],
-          [t10, t1, t21],
-          [t20, t21, t2],
-          [t10, t21, t20]];
+  return [
+    [t0, t10, t20],
+    [t10, t1, t21],
+    [t20, t21, t2],
+    [t10, t21, t20],
+  ];
 };
 
 const subdivideTriangularMesh = (mesh) => {
@@ -6606,10 +6640,12 @@ const buildGeodesicSphere = ({ faces = 20 }) => {
   while (mesh.length < faces) {
     mesh = subdivideTriangularMesh(mesh);
   }
-  return mesh.map(triangle => triangle.map(unit));
+  return mesh.map((triangle) => triangle.map(unit));
 };
 
-const buildPolygonFromPointsImpl = (points) => ({ surface: [points.map(([x = 0, y = 0, z = 0]) => [x, y, z])] });
+const buildPolygonFromPointsImpl = (points) => ({
+  surface: [points.map(([x = 0, y = 0, z = 0]) => [x, y, z])],
+});
 
 const buildPolygonFromPoints = cachePoints(buildPolygonFromPointsImpl);
 
@@ -6631,7 +6667,7 @@ const buildPolygonFromPoints = cachePoints(buildPolygonFromPointsImpl);
 const buildRegularPolygonImpl = (sides = 32) => {
   let points = [];
   for (let i = 0; i < sides; i++) {
-    let radians = 2 * Math.PI * i / sides;
+    let radians = (2 * Math.PI * i) / sides;
     let [x, y] = fromAngleRadians(radians);
     points.push([x, y, 0]);
   }
@@ -6705,17 +6741,34 @@ const buildRegularPrismImpl = (edges = 32) => {
 const buildRegularPrism = cache$1(buildRegularPrismImpl);
 
 // Unit tetrahedron vertices.
-const points$1 = [[1, 1, 1], [-1, 1, -1], [1, -1, -1],
-                [-1, 1, -1], [-1, -1, 1], [1, -1, -1],
-                [1, 1, 1], [1, -1, -1], [-1, -1, 1],
-                [1, 1, 1], [-1, -1, 1], [-1, 1, -1]];
+const points$1 = [
+  [1, 1, 1],
+  [-1, 1, -1],
+  [1, -1, -1],
+  [-1, 1, -1],
+  [-1, -1, 1],
+  [1, -1, -1],
+  [1, 1, 1],
+  [1, -1, -1],
+  [-1, -1, 1],
+  [1, 1, 1],
+  [-1, -1, 1],
+  [-1, 1, -1],
+];
 
-const buildRegularTetrahedron = (options = {}) => buildConvexHull(points$1);
+const buildRegularTetrahedron = (options = {}) =>
+  buildConvexHull(points$1);
 
 const buildWalls$2 = (polygons, floor, roof) => {
-  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
     // Remember that we are walking CCW.
-    polygons.push(deduplicate([floor[start], floor[end], roof[end], roof[start]]));
+    polygons.push(
+      deduplicate([floor[start], floor[end], roof[end], roof[start]])
+    );
   }
 };
 
@@ -6730,7 +6783,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   // Trace out latitudinal rings.
   const ring = buildRegularPolygon(longitudinalResolution);
   for (let slice = 0; slice <= latitudinalResolution; slice++) {
-    let angle = Math.PI * 1.0 * slice / latitudinalResolution;
+    let angle = (Math.PI * 1.0 * slice) / latitudinalResolution;
     let height = Math.cos(angle);
     let radius = Math.sin(angle);
     const points = ring.z0Surface[0]; // FIX: Make this less fragile.
@@ -6830,18 +6883,24 @@ const interpolateCubicBezier = bezier.prepare(4);
 // Approximate a cubic bezier by dividing the curve into a uniform number of segments.
 
 const buildUniformCubicBezierCurve = ({ segments = 8 }, points) => {
-  const xPoints = points.map(point => point[0]);
-  const yPoints = points.map(point => point[1]);
+  const xPoints = points.map((point) => point[0]);
+  const yPoints = points.map((point) => point[1]);
   const path = [];
   for (let t = 0; t <= 1; t += 1 / segments) {
-    path.push([interpolateCubicBezier(xPoints, t),
-               interpolateCubicBezier(yPoints, t)]);
+    path.push([
+      interpolateCubicBezier(xPoints, t),
+      interpolateCubicBezier(yPoints, t),
+    ]);
   }
   return path;
 };
 
 const buildWalls$3 = (polygons, floor, roof) => {
-  for (let start = floor.length - 1, end = 0; end < floor.length; start = end++) {
+  for (
+    let start = floor.length - 1, end = 0;
+    end < floor.length;
+    start = end++
+  ) {
     if (floor[start] === null || floor[end] === null) {
       continue;
     }
@@ -6852,33 +6911,49 @@ const buildWalls$3 = (polygons, floor, roof) => {
 };
 
 // Rotate a path around the X axis to produce the polygons of a solid.
-const loopImpl = (path, endRadians = Math.PI * 2, resolution = 16, pitch = 0) => {
+const loopImpl = (
+  path,
+  endRadians = Math.PI * 2,
+  resolution = 16,
+  pitch = 0
+) => {
   const stepRadians = (Math.PI * 2) / resolution;
   const pitchPerRadian = pitch / (Math.PI * 2);
   let lastPath;
   const polygons = [];
   if (endRadians !== Math.PI * 2 || pitch !== 0) {
     // Cap the loop.
-    polygons.push(flip(path), translate$1([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path)));
+    polygons.push(
+      flip(path),
+      translate$1([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path))
+    );
   }
   for (let radians = 0; radians < endRadians; radians += stepRadians) {
-    const rotatedPath = translate$1([pitchPerRadian * radians, 0, 0], rotateX(radians, path));
+    const rotatedPath = translate$1(
+      [pitchPerRadian * radians, 0, 0],
+      rotateX(radians, path)
+    );
     if (lastPath !== undefined) {
       buildWalls$3(polygons, rotatedPath, lastPath);
     }
     lastPath = rotatedPath;
   }
   if (lastPath !== undefined) {
-    buildWalls$3(polygons, translate$1([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path)), lastPath);
+    buildWalls$3(
+      polygons,
+      translate$1([pitchPerRadian * endRadians, 0, 0], rotateX(endRadians, path)),
+      lastPath
+    );
   }
   return { solid: fromPolygons({}, polygons) };
 };
 
 const loop = cache$1(loopImpl);
 
-const sin = (a) => Math.sin(a / 360 * Math.PI * 2);
+const sin = (a) => Math.sin((a / 360) * Math.PI * 2);
 
-const regularPolygonEdgeLengthToRadius = (length, edges) => length / (2 * sin(180 / edges));
+const regularPolygonEdgeLengthToRadius = (length, edges) =>
+  length / (2 * sin(180 / edges));
 
 function getSqDist(p1, p2) {
     var dx = p1[0] - p2[0],
@@ -6995,7 +7070,9 @@ const simplifyPath$1 = (path, tolerance = 0.01) => {
   }
 };
 
-const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+const toRadiusFromApothem = (apothem, sides) =>
+  apothem / Math.cos(Math.PI / sides);
+const toRadiusFromEdge = (edge, sides) =>
+  edge * regularPolygonEdgeLengthToRadius(1, sides);
 
 export { buildAdaptiveCubicBezierCurve, buildConvexHull, buildConvexMinkowskiSum, buildConvexSurfaceHull, buildFromFunction, buildFromSlices, buildGeodesicSphere, buildPolygonFromPoints, buildRegularIcosahedron, buildRegularPolygon, buildRegularPrism, buildRegularTetrahedron, buildRingSphere, buildUniformCubicBezierCurve, extrude, loop, regularPolygonEdgeLengthToRadius, simplifyPath$1 as simplifyPath, subdivideTriangle, subdivideTriangularMesh, toRadiusFromApothem, toRadiusFromEdge };

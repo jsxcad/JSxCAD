@@ -16,13 +16,29 @@ import { rewriteTags } from '@jsxcad/geometry-tagged';
  **/
 
 export const as = (shape, tags) =>
-  Shape.fromGeometry(rewriteTags(tags.map(tag => `user/${tag}`), [], shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags(
+      tags.map((tag) => `user/${tag}`),
+      [],
+      shape.toGeometry()
+    )
+  );
 
 export const notAs = (shape, tags) =>
-  Shape.fromGeometry(rewriteTags([], tags.map(tag => `user/${tag}`), shape.toGeometry()));
+  Shape.fromGeometry(
+    rewriteTags(
+      [],
+      tags.map((tag) => `user/${tag}`),
+      shape.toGeometry()
+    )
+  );
 
-const asMethod = function (...tags) { return as(this, tags); };
-const notAsMethod = function (...tags) { return notAs(this, tags); };
+const asMethod = function (...tags) {
+  return as(this, tags);
+};
+const notAsMethod = function (...tags) {
+  return notAs(this, tags);
+};
 
 Shape.prototype.as = asMethod;
 Shape.prototype.notAs = notAsMethod;

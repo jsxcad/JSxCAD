@@ -17,102 +17,105 @@ var epsilon = Epsilon();
 var PolyBool;
 PolyBool = {
 	// getter/setter for buildLog
-	buildLog: function(bl){
-		if (bl === true)
-			buildLog = BuildLog();
-		else if (bl === false)
-			buildLog = false;
+	buildLog: function (bl) {
+		if (bl === true) buildLog = BuildLog();
+		else if (bl === false) buildLog = false;
 		return buildLog === false ? false : buildLog.list;
 	},
 	// getter/setter for epsilon
-	epsilon: function(v){
+	epsilon: function (v) {
 		return epsilon.epsilon(v);
 	},
 
 	// core API
-	segments: function(poly){
+	segments: function (poly) {
 		var i = Intersecter(true, epsilon, buildLog);
 		poly.regions.forEach(i.addRegion);
 		return {
 			segments: i.calculate(poly.inverted),
-			inverted: poly.inverted
+			inverted: poly.inverted,
 		};
 	},
-	combine: function(segments1, segments2){
+	combine: function (segments1, segments2) {
 		var i3 = Intersecter(false, epsilon, buildLog);
 		return {
 			combined: i3.calculate(
-				segments1.segments, segments1.inverted,
-				segments2.segments, segments2.inverted
+				segments1.segments,
+				segments1.inverted,
+				segments2.segments,
+				segments2.inverted
 			),
 			inverted1: segments1.inverted,
-			inverted2: segments2.inverted
+			inverted2: segments2.inverted,
 		};
 	},
-	selectUnion: function(combined){
+	selectUnion: function (combined) {
 		return {
 			segments: SegmentSelector.union(combined.combined, buildLog),
-			inverted: combined.inverted1 || combined.inverted2
-		}
+			inverted: combined.inverted1 || combined.inverted2,
+		};
 	},
-	selectIntersect: function(combined){
+	selectIntersect: function (combined) {
 		return {
 			segments: SegmentSelector.intersect(combined.combined, buildLog),
-			inverted: combined.inverted1 && combined.inverted2
-		}
+			inverted: combined.inverted1 && combined.inverted2,
+		};
 	},
-	selectDifference: function(combined){
+	selectDifference: function (combined) {
 		return {
 			segments: SegmentSelector.difference(combined.combined, buildLog),
-			inverted: combined.inverted1 && !combined.inverted2
-		}
+			inverted: combined.inverted1 && !combined.inverted2,
+		};
 	},
-	selectDifferenceRev: function(combined){
+	selectDifferenceRev: function (combined) {
 		return {
-			segments: SegmentSelector.differenceRev(combined.combined, buildLog),
-			inverted: !combined.inverted1 && combined.inverted2
-		}
+			segments: SegmentSelector.differenceRev(
+				combined.combined,
+				buildLog
+			),
+			inverted: !combined.inverted1 && combined.inverted2,
+		};
 	},
-	selectXor: function(combined){
+	selectXor: function (combined) {
 		return {
 			segments: SegmentSelector.xor(combined.combined, buildLog),
-			inverted: combined.inverted1 !== combined.inverted2
-		}
+			inverted: combined.inverted1 !== combined.inverted2,
+		};
 	},
-	polygon: function(segments){
+	polygon: function (segments) {
 		return {
 			regions: SegmentChainer(segments.segments, epsilon, buildLog),
-			inverted: segments.inverted
+			inverted: segments.inverted,
 		};
 	},
 
 	// GeoJSON converters
-	polygonFromGeoJSON: function(geojson){
+	polygonFromGeoJSON: function (geojson) {
 		return GeoJSON.toPolygon(PolyBool, geojson);
 	},
-	polygonToGeoJSON: function(poly){
+	polygonToGeoJSON: function (poly) {
 		return GeoJSON.fromPolygon(PolyBool, epsilon, poly);
 	},
 
 	// helper functions for common operations
-	union: function(poly1, poly2){
+	union: function (poly1, poly2) {
 		return operate(poly1, poly2, PolyBool.selectUnion);
 	},
-	intersect: function(poly1, poly2){
+	intersect: function (poly1, poly2) {
 		return operate(poly1, poly2, PolyBool.selectIntersect);
 	},
-	difference: function(poly1, poly2){
+	difference: function (poly1, poly2) {
 		return operate(poly1, poly2, PolyBool.selectDifference);
 	},
-	differenceRev: function(poly1, poly2){
+	differenceRev: function (poly1, poly2) {
 		return operate(poly1, poly2, PolyBool.selectDifferenceRev);
 	},
-	xor: function(poly1, poly2){
+	xor: function (poly1, poly2) {
 		return operate(poly1, poly2, PolyBool.selectXor);
-	}
+	},
 };
 
-function operate(poly1, poly2, selector){
+function operate(poly1, poly2, selector) {
 	var seg1 = PolyBool.segments(poly1);
 	var seg2 = PolyBool.segments(poly2);
 	var comb = PolyBool.combine(seg1, seg2);
@@ -120,7 +123,6 @@ function operate(poly1, poly2, selector){
 	return PolyBool.polygon(seg3);
 }
 
-if (typeof window === 'object')
-	window.PolyBool = PolyBool;
+if (typeof window === 'object') window.PolyBool = PolyBool;
 
 module.exports = PolyBool;

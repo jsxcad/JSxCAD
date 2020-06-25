@@ -1,7 +1,14 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
-import { alignVertices, transform as transformSolid } from '@jsxcad/geometry-solid';
-import { cutOpen, section } from '@jsxcad/algorithm-bsp-surfaces';
-import { flip, toPlane, transform as transformSurface } from '@jsxcad/geometry-surface';
+import {
+  alignVertices,
+  transform as transformSolid,
+} from '@jsxcad/geometry-solid';
+import { cutOpen, section } from '@jsxcad/geometry-bsp';
+import {
+  flip,
+  toPlane,
+  transform as transformSurface,
+} from '@jsxcad/geometry-surface';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
@@ -30,7 +37,12 @@ const toSurface = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
-  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const path = [
+    [max, max, 0],
+    [min, max, 0],
+    [min, min, 0],
+    [max, min, 0],
+  ];
   const polygon = transformPath(from, path);
   return [polygon];
 };
@@ -47,16 +59,31 @@ export const stretch = (shape, length, connector = Z()) => {
     const [profile] = section(solid, [planeSurface], normalize);
     const top = cutOpen(solid, flip(planeSurface), normalize);
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane(profile));
-    const z0SolidGeometry = extrude(transformSurface(toZ0, profile), length, 0, false);
+    const z0SolidGeometry = extrude(
+      transformSurface(toZ0, profile),
+      length,
+      0,
+      false
+    );
     const middle = transformSolid(fromZ0, z0SolidGeometry);
-    const topMoved = transformSolid(fromTranslation(scale(length, toPlane(profile))), top);
-    stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
+    const topMoved = transformSolid(
+      fromTranslation(scale(length, toPlane(profile))),
+      top
+    );
+    stretches.push(
+      Shape.fromGeometry({
+        solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
+        tags,
+      })
+    );
   }
 
   return assemble(...stretches);
 };
 
-const method = function (...args) { return stretch(this, ...args); };
+const method = function (...args) {
+  return stretch(this, ...args);
+};
 Shape.prototype.stretch = method;
 
 export default stretch;

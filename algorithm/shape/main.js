@@ -19,8 +19,10 @@ import { simplifyPath } from './simplifyPath';
 import { subdivideTriangle } from './subdivideTriangle';
 import { subdivideTriangularMesh } from './subdivideTriangularMesh';
 
-export const toRadiusFromApothem = (apothem, sides) => apothem / Math.cos(Math.PI / sides);
-export const toRadiusFromEdge = (edge, sides) => edge * regularPolygonEdgeLengthToRadius(1, sides);
+export const toRadiusFromApothem = (apothem, sides) =>
+  apothem / Math.cos(Math.PI / sides);
+export const toRadiusFromEdge = (edge, sides) =>
+  edge * regularPolygonEdgeLengthToRadius(1, sides);
 
 export {
   buildAdaptiveCubicBezierCurve,
@@ -42,5 +44,5 @@ export {
   regularPolygonEdgeLengthToRadius,
   simplifyPath,
   subdivideTriangle,
-  subdivideTriangularMesh
+  subdivideTriangularMesh,
 };

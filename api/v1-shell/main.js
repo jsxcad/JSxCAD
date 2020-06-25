@@ -7,14 +7,9 @@ const api = {
   grow,
   offset,
   shell,
-  shrink
+  shrink,
 };
 
-export {
-  grow,
-  offset,
-  shell,
-  shrink
-};
+export { grow, offset, shell, shrink };
 
 export default api;

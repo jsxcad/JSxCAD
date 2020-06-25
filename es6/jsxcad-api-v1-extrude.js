@@ -8,7 +8,7 @@ import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
 import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
-import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-algorithm-bsp-surfaces.js';
+import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
@@ -42,11 +42,11 @@ import { overcut } from './jsxcad-algorithm-toolpath.js';
 const Z = 2;
 
 const ChainedHull = (...shapes) => {
-  const pointsets = shapes.map(shape => shape.toPoints());
+  const pointsets = shapes.map((shape) => shape.toPoints());
   const chain = [];
   for (let nth = 1; nth < pointsets.length; nth++) {
     const points = [...pointsets[nth - 1], ...pointsets[nth]];
-    if (points.every(point => point[Z] === 0)) {
+    if (points.every((point) => point[Z] === 0)) {
       chain.push(Shape.fromGeometry(buildConvexSurfaceHull(points)));
     } else {
       chain.push(Shape.fromGeometry(buildConvexHull(points)));
@@ -55,7 +55,9 @@ const ChainedHull = (...shapes) => {
   return union(...chain);
 };
 
-const ChainedHullMethod = function (...args) { return ChainedHull(this, ...args); };
+const ChainedHullMethod = function (...args) {
+  return ChainedHull(this, ...args);
+};
 Shape.prototype.ChainedHull = ChainedHullMethod;
 
 ChainedHull.signature = 'ChainedHull(...shapes:Shape) -> Shape';
@@ -97,16 +99,18 @@ const Z$1 = 2;
 
 const Hull = (...shapes) => {
   const points = [];
-  shapes.forEach(shape => shape.eachPoint(point => points.push(point)));
+  shapes.forEach((shape) => shape.eachPoint((point) => points.push(point)));
   // FIX: Detect planar hulls properly.
-  if (points.every(point => point[Z$1] === 0)) {
+  if (points.every((point) => point[Z$1] === 0)) {
     return Shape.fromGeometry(buildConvexSurfaceHull(points));
   } else {
     return Shape.fromGeometry(buildConvexHull(points));
   }
 };
 
-const HullMethod = function (...shapes) { return Hull(this, ...shapes); };
+const HullMethod = function (...shapes) {
+  return Hull(this, ...shapes);
+};
 Shape.prototype.Hull = HullMethod;
 
 Hull.signature = 'Hull(shape:Shape, ...shapes:Shape) -> Shape';
@@ -123,21 +127,40 @@ HullMethod.signature = 'Shape -> Hull(...shapes:Shape) -> Shape';
  *
  **/
 
-const Loop = (shape, endDegrees = 360, { sides = 32, pitch = 0 } = {}) => {
+const Loop = (
+  shape,
+  endDegrees = 360,
+  { sides = 32, pitch = 0 } = {}
+) => {
   const profile = shape.chop(Y$1(0));
   const outline = profile.outline();
   const solids = [];
   for (const geometry of getPaths(outline.toKeptGeometry())) {
     for (const path of geometry.paths) {
-      for (let startDegrees = 0; startDegrees < endDegrees; startDegrees += 360) {
-        solids.push(Shape.fromGeometry(loop(path, Math.min(360, endDegrees - startDegrees) * Math.PI / 180, sides, pitch)).moveX(pitch * startDegrees / 360));
+      for (
+        let startDegrees = 0;
+        startDegrees < endDegrees;
+        startDegrees += 360
+      ) {
+        solids.push(
+          Shape.fromGeometry(
+            loop(
+              path,
+              (Math.min(360, endDegrees - startDegrees) * Math.PI) / 180,
+              sides,
+              pitch
+            )
+          ).moveX((pitch * startDegrees) / 360)
+        );
       }
     }
   }
   return assemble(...solids);
 };
 
-const LoopMethod = function (...args) { return Loop(this, ...args); };
+const LoopMethod = function (...args) {
+  return Loop(this, ...args);
+};
 Shape.prototype.Loop = LoopMethod;
 
 /**
@@ -190,14 +213,23 @@ const extrude = (shape, height = 1, depth = 0) => {
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
       const plane = toPlane$1(surface);
-      if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
+      if (
+        plane[0] === 0 &&
+        plane[1] === 0 &&
+        plane[2] === 1 &&
+        plane[3] === 0
+      ) {
         // Detect Z0.
         // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
         const solid = extrude$1(surface, height, depth);
         solids.push(Shape.fromGeometry({ solid, tags }));
       } else {
         const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
-        const z0SolidGeometry = extrude$1(transform(toZ0, surface), height, depth);
+        const z0SolidGeometry = extrude$1(
+          transform(toZ0, surface),
+          height,
+          depth
+        );
         const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
         solids.push(Shape.fromGeometry({ solid, tags }));
       }
@@ -210,11 +242,15 @@ const extrude = (shape, height = 1, depth = 0) => {
   return assemble(...solids);
 };
 
-const extrudeMethod = function (...args) { return extrude(this, ...args); };
+const extrudeMethod = function (...args) {
+  return extrude(this, ...args);
+};
 Shape.prototype.extrude = extrudeMethod;
 
-extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
-extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
+extrude.signature =
+  'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
+extrudeMethod.signature =
+  'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
 
 const fill = (shape, pathsShape) => {
   const fills = [];
@@ -233,10 +269,14 @@ const fill = (shape, pathsShape) => {
   return Shape.fromGeometry({ paths: fills });
 };
 
-const fillMethod = function (...args) { return fill(this, ...args); };
+const fillMethod = function (...args) {
+  return fill(this, ...args);
+};
 Shape.prototype.fill = fillMethod;
 
-const withFillMethod = function (...args) { return assemble(this, fill(this, ...args)); };
+const withFillMethod = function (...args) {
+  return assemble(this, fill(this, ...args));
+};
 Shape.prototype.withFill = withFillMethod;
 
 fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
@@ -274,12 +314,18 @@ const interior = (shape) => {
   const surfaces = [];
   for (const { paths } of getPaths(shape.toKeptGeometry())) {
     // FIX: Check paths for coplanarity.
-    surfaces.push(Shape.fromPathsToSurface(paths.filter(isClosed).filter(path => path.length >= 3)));
+    surfaces.push(
+      Shape.fromPathsToSurface(
+        paths.filter(isClosed).filter((path) => path.length >= 3)
+      )
+    );
   }
   return assemble(...surfaces);
 };
 
-const interiorMethod = function (...args) { return interior(this); };
+const interiorMethod = function (...args) {
+  return interior(this);
+};
 Shape.prototype.interior = interiorMethod;
 
 interior.signature = 'interior(shape:Shape) -> Shape';
@@ -304,12 +350,14 @@ interiorMethod.signature = 'Shape -> interior() -> Shape';
 const minkowski = (a, b) => {
   const aPoints = [];
   const bPoints = [];
-  a.eachPoint(point => aPoints.push(point));
-  b.eachPoint(point => bPoints.push(point));
+  a.eachPoint((point) => aPoints.push(point));
+  b.eachPoint((point) => bPoints.push(point));
   return Shape.fromGeometry(buildConvexMinkowskiSum(aPoints, bPoints));
 };
 
-const minkowskiMethod = function (shape) { return minkowski(this, shape); };
+const minkowskiMethod = function (shape) {
+  return minkowski(this, shape);
+};
 Shape.prototype.minkowski = minkowskiMethod;
 
 minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
@@ -339,10 +387,18 @@ minkowski.signature = 'minkowski(a:Shape, b:Shape) -> Shape';
  **/
 
 const outline = (shape) =>
-  assemble(...outline$1(shape.toGeometry()).map(outline => Shape.fromGeometry(outline)));
+  assemble(
+    ...outline$1(shape.toGeometry()).map((outline) =>
+      Shape.fromGeometry(outline)
+    )
+  );
 
-const outlineMethod = function (options) { return outline(this); };
-const withOutlineMethod = function (options) { return assemble(this, outline(this)); };
+const outlineMethod = function (options) {
+  return outline(this);
+};
+const withOutlineMethod = function (options) {
+  return assemble(this, outline(this));
+};
 
 Shape.prototype.outline = outlineMethod;
 Shape.prototype.withOutline = withOutlineMethod;
@@ -393,7 +449,12 @@ const toSurface = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
-  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const path = [
+    [max, max, 0],
+    [min, max, 0],
+    [min, min, 0],
+    [max, min, 0],
+  ];
   const polygon = transform$3(from, path);
   return [polygon];
 };
@@ -406,21 +467,20 @@ const section = (solidShape, ...connectors) => {
   const planeSurfaces = planes.map(toSurface);
   const shapes = [];
   const normalize = createNormalize3();
-  for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+  for (const { solid, tags } of getSolids(solidShape.toKeptGeometry())) {
     const sections = section$1(solid, planeSurfaces, normalize);
-    const surfaces = sections.map(section => makeConvex(section, normalize));
-    // const surfaces = sections.map(section => outlineSurface(section, normalize));
-    // const surfaces = sections.map(section => section);
-    // const surfaces = sections;
+    const surfaces = sections.map((section) => makeConvex(section, normalize));
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
-      shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+      shapes.push(Shape.fromGeometry({ surface: surfaces[i], tags }));
     }
   }
   return layer(...shapes);
 };
 
-const sectionMethod = function (...args) { return section(this, ...args); };
+const sectionMethod = function (...args) {
+  return section(this, ...args);
+};
 Shape.prototype.section = sectionMethod;
 
 const squash = (shape) => {
@@ -463,7 +523,9 @@ const squash = (shape) => {
   return Shape$1.fromGeometry(result);
 };
 
-const squashMethod = function () { return squash(this); };
+const squashMethod = function () {
+  return squash(this);
+};
 Shape$1.prototype.squash = squashMethod;
 
 /**
@@ -484,7 +546,12 @@ const toSurface$1 = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
-  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const path = [
+    [max, max, 0],
+    [min, max, 0],
+    [min, min, 0],
+    [max, min, 0],
+  ];
   const polygon = transform$3(from, path);
   return [polygon];
 };
@@ -501,16 +568,31 @@ const stretch = (shape, length, connector = Z$3()) => {
     const [profile] = section$1(solid, [planeSurface], normalize);
     const top = cutOpen(solid, flip$1(planeSurface), normalize);
     const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(profile));
-    const z0SolidGeometry = extrude$1(transform(toZ0, profile), length, 0, false);
+    const z0SolidGeometry = extrude$1(
+      transform(toZ0, profile),
+      length,
+      0,
+      false
+    );
     const middle = transform$1(fromZ0, z0SolidGeometry);
-    const topMoved = transform$1(fromTranslation(scale(length, toPlane$1(profile))), top);
-    stretches.push(Shape.fromGeometry({ solid: alignVertices([...bottom, ...middle, ...topMoved], normalize), tags }));
+    const topMoved = transform$1(
+      fromTranslation(scale(length, toPlane$1(profile))),
+      top
+    );
+    stretches.push(
+      Shape.fromGeometry({
+        solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
+        tags,
+      })
+    );
   }
 
   return assemble(...stretches);
 };
 
-const method = function (...args) { return stretch(this, ...args); };
+const method = function (...args) {
+  return stretch(this, ...args);
+};
 Shape.prototype.stretch = method;
 
 /**
@@ -526,35 +608,63 @@ const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      chains.push(ChainedHull(...path.map(point => tool.move(...point))));
+      chains.push(ChainedHull(...path.map((point) => tool.move(...point))));
     }
   }
   return union(...chains);
 };
 
-const sweepMethod = function (tool) { return sweep(this, tool); };
+const sweepMethod = function (tool) {
+  return sweep(this, tool);
+};
 
 Shape.prototype.sweep = sweepMethod;
-Shape.prototype.withSweep = function (tool) { return assemble(this, sweep(this, tool)); };
+Shape.prototype.withSweep = function (tool) {
+  return assemble(this, sweep(this, tool));
+};
 
 // Return an assembly of paths so that each toolpath can have its own tag.
-const toolpath = (shape, radius = 1, { overcut: overcut$1 = 0, joinPaths = false } = {}) =>
-  Shape.fromGeometry({ paths: overcut(shape.outline().toKeptGeometry(), radius, overcut$1, joinPaths) });
+const toolpath = (
+  shape,
+  radius = 1,
+  { overcut: overcut$1 = 0, joinPaths = false } = {}
+) =>
+  Shape.fromGeometry({
+    paths: overcut(
+      shape.outline().toKeptGeometry(),
+      radius,
+      overcut$1,
+      joinPaths
+    ),
+  });
 
-const method$1 = function (...options) { return toolpath(this, ...options); };
+const method$1 = function (...options) {
+  return toolpath(this, ...options);
+};
 
 Shape.prototype.toolpath = method$1;
-Shape.prototype.withToolpath = function (...args) { return assemble(this, toolpath(this, ...args)); };
+Shape.prototype.withToolpath = function (...args) {
+  return assemble(this, toolpath(this, ...args));
+};
 
 const X = 0;
 const Y = 1;
 const Z$2 = 2;
 
-const floor = (value, resolution) => Math.floor(value / resolution) * resolution;
+const floor = (value, resolution) =>
+  Math.floor(value / resolution) * resolution;
 const ceil = (value, resolution) => Math.ceil(value / resolution) * resolution;
 
-const floorPoint = ([x, y, z], resolution) => [floor(x, resolution), floor(y, resolution), floor(z, resolution)];
-const ceilPoint = ([x, y, z], resolution) => [ceil(x, resolution), ceil(y, resolution), ceil(z, resolution)];
+const floorPoint = ([x, y, z], resolution) => [
+  floor(x, resolution),
+  floor(y, resolution),
+  floor(z, resolution),
+];
+const ceilPoint = ([x, y, z], resolution) => [
+  ceil(x, resolution),
+  ceil(y, resolution),
+  ceil(z, resolution),
+];
 
 const voxels = (shape, resolution = 1) => {
   const offset = resolution / 2;
@@ -581,24 +691,30 @@ const voxels = (shape, resolution = 1) => {
       for (let z = min[Z$2] - offset; z <= max[Z$2] + offset; z += resolution) {
         const state = test([x, y, z]);
         if (state !== test([x + resolution, y, z])) {
-          const face = [[x + offset, y - offset, z - offset],
-                        [x + offset, y + offset, z - offset],
-                        [x + offset, y + offset, z + offset],
-                        [x + offset, y - offset, z + offset]];
+          const face = [
+            [x + offset, y - offset, z - offset],
+            [x + offset, y + offset, z - offset],
+            [x + offset, y + offset, z + offset],
+            [x + offset, y - offset, z + offset],
+          ];
           polygons.push(state ? face : face.reverse());
         }
         if (state !== test([x, y + resolution, z])) {
-          const face = [[x - offset, y + offset, z - offset],
-                        [x + offset, y + offset, z - offset],
-                        [x + offset, y + offset, z + offset],
-                        [x - offset, y + offset, z + offset]];
+          const face = [
+            [x - offset, y + offset, z - offset],
+            [x + offset, y + offset, z - offset],
+            [x + offset, y + offset, z + offset],
+            [x - offset, y + offset, z + offset],
+          ];
           polygons.push(state ? face.reverse() : face);
         }
         if (state !== test([x, y, z + resolution])) {
-          const face = [[x - offset, y - offset, z + offset],
-                        [x + offset, y - offset, z + offset],
-                        [x + offset, y + offset, z + offset],
-                        [x - offset, y + offset, z + offset]];
+          const face = [
+            [x - offset, y - offset, z + offset],
+            [x + offset, y - offset, z + offset],
+            [x + offset, y + offset, z + offset],
+            [x - offset, y + offset, z + offset],
+          ];
           polygons.push(state ? face : face.reverse());
         }
       }
@@ -607,7 +723,9 @@ const voxels = (shape, resolution = 1) => {
   return Shape.fromGeometry({ solid: fromPolygons({}, polygons) });
 };
 
-const voxelsMethod = function (...args) { return voxels(this, ...args); };
+const voxelsMethod = function (...args) {
+  return voxels(this, ...args);
+};
 Shape.prototype.voxels = voxelsMethod;
 
 const surfaceCloud = (shape, resolution = 1) => {
@@ -649,10 +767,14 @@ const surfaceCloud = (shape, resolution = 1) => {
   return Shape.fromGeometry({ paths });
 };
 
-const surfaceCloudMethod = function (...args) { return surfaceCloud(this, ...args); };
+const surfaceCloudMethod = function (...args) {
+  return surfaceCloud(this, ...args);
+};
 Shape.prototype.surfaceCloud = surfaceCloudMethod;
 
-const withSurfaceCloudMethod = function (...args) { return assemble(this, surfaceCloud(this, ...args)); };
+const withSurfaceCloudMethod = function (...args) {
+  return assemble(this, surfaceCloud(this, ...args));
+};
 Shape.prototype.withSurfaceCloud = withSurfaceCloudMethod;
 
 const orderPoints = ([aX, aY, aZ], [bX, bY, bZ]) => {
@@ -701,7 +823,9 @@ const cloud = (shape, resolution = 1) => {
   return Shape.fromGeometry({ points });
 };
 
-const cloudMethod = function (...args) { return cloud(this, ...args); };
+const cloudMethod = function (...args) {
+  return cloud(this, ...args);
+};
 Shape.prototype.cloud = cloudMethod;
 
 // FIX: move this
@@ -715,7 +839,9 @@ const containsPoint = (shape, point) => {
   return false;
 };
 
-const containsPointMethod = function (point) { return containsPoint(this, point); };
+const containsPointMethod = function (point) {
+  return containsPoint(this, point);
+};
 Shape.prototype.containsPoint = containsPointMethod;
 
 const api = {
@@ -732,7 +858,7 @@ const api = {
   stretch,
   sweep,
   toolpath,
-  voxels
+  voxels,
 };
 
 export default api;

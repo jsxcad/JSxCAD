@@ -1,23 +1,51 @@
 const signatures = {
-  '.bom': { input: { type: 'shape' }, argument: [{ name: 'bomItem', type: 'bomItem' }], output: { type: 'shape' } },
-  'assemble': { rest: { name: 'shape', type: 'shape' } },
-  'Circle': { argument: [{ name: 'radius', type: 'number', value: 1 }], parameter: [{ name: 'sides', type: 'number', value: 32 }] },
-  'Circle.ofDiameter': { argument: [{ name: 'diameter', type: 'number', value: 1 }], parameter: [{ name: 'sides', type: 'number', value: 32 }] },
-  '.color': { input: { type: 'shape' }, argument: [{ name: 'name', type: 'string' }], output: { type: 'shape' } },
-  '.extrude': { input: { type: 'shape' },
-                argument: [{ name: 'height', type: 'number', value: 1 },
-                           { name: 'depth', type: 'number', value: 0 }],
-                parameter: [{ name: 'twist', type: 'number', value: 0 },
-                            { name: 'steps', type: 'number', value: 1 }],
-                output: { type: 'shape' } },
-  'Square': { argument: [{ name: 'length', type: 'number', value: 1 },
-                         { name: 'width', type: 'number', value: 1 }],
-              output: { type: 'shape' } },
-  '.move': { input: { type: 'shape' },
-             argument: [{ name: 'x', type: 'number' },
-                        { name: 'y', type: 'number' },
-                        { name: 'z', type: 'number' }],
-             output: { type: 'shape' } }
+  '.bom': {
+    input: { type: 'shape' },
+    argument: [{ name: 'bomItem', type: 'bomItem' }],
+    output: { type: 'shape' },
+  },
+  assemble: { rest: { name: 'shape', type: 'shape' } },
+  Circle: {
+    argument: [{ name: 'radius', type: 'number', value: 1 }],
+    parameter: [{ name: 'sides', type: 'number', value: 32 }],
+  },
+  'Circle.ofDiameter': {
+    argument: [{ name: 'diameter', type: 'number', value: 1 }],
+    parameter: [{ name: 'sides', type: 'number', value: 32 }],
+  },
+  '.color': {
+    input: { type: 'shape' },
+    argument: [{ name: 'name', type: 'string' }],
+    output: { type: 'shape' },
+  },
+  '.extrude': {
+    input: { type: 'shape' },
+    argument: [
+      { name: 'height', type: 'number', value: 1 },
+      { name: 'depth', type: 'number', value: 0 },
+    ],
+    parameter: [
+      { name: 'twist', type: 'number', value: 0 },
+      { name: 'steps', type: 'number', value: 1 },
+    ],
+    output: { type: 'shape' },
+  },
+  Square: {
+    argument: [
+      { name: 'length', type: 'number', value: 1 },
+      { name: 'width', type: 'number', value: 1 },
+    ],
+    output: { type: 'shape' },
+  },
+  '.move': {
+    input: { type: 'shape' },
+    argument: [
+      { name: 'x', type: 'number' },
+      { name: 'y', type: 'number' },
+      { name: 'z', type: 'number' },
+    ],
+    output: { type: 'shape' },
+  },
 };
 
 const toCall = (op, node, toInRef) => {
@@ -36,10 +64,16 @@ const toCall = (op, node, toInRef) => {
   }
   const pieces = [];
   if (argument) {
-    pieces.push(argument.map(({ name, value }) => toInRef(node, name, value)).join(', '));
+    pieces.push(
+      argument.map(({ name, value }) => toInRef(node, name, value)).join(', ')
+    );
   }
   if (parameter) {
-    pieces.push(`{ ${parameter.map(({ name, value }) => `${name}: ${toInRef(node, name, value)}`).join(', ')} }`);
+    pieces.push(
+      `{ ${parameter
+        .map(({ name, value }) => `${name}: ${toInRef(node, name, value)}`)
+        .join(', ')} }`
+    );
   }
   if (rest) {
     const { name } = rest;
@@ -122,7 +156,10 @@ export const toEcmascript = (flow) => {
           return toStatement(nodeId, toCall('assemble', node, toInRef));
         }
         case 'Circle': {
-          return toStatement(nodeId, toCall('Circle.ofDiameter', node, toInRef));
+          return toStatement(
+            nodeId,
+            toCall('Circle.ofDiameter', node, toInRef)
+          );
           // const diameter = toInRef(node, 'diameter', 1);
           // return `Circle.ofDiameter(${diameter})`;
         }
@@ -135,8 +172,9 @@ export const toEcmascript = (flow) => {
         case 'Equation': {
           // FIX: Equation is not regular under the current schema.
           const equation = toInRef(node, 'equation', 1);
-          const inRefs = input.sockets.filter(({ socketName }) => socketName !== 'equation')
-              .map(({ socketId }) => toConnectionRef(nodeId, socketId));
+          const inRefs = input.sockets
+            .filter(({ socketName }) => socketName !== 'equation')
+            .map(({ socketId }) => toConnectionRef(nodeId, socketId));
           return `Equation(${equation}, ${inRefs.join(', ')})`;
         }
         case 'Extrude': {
@@ -144,18 +182,25 @@ export const toEcmascript = (flow) => {
         }
         case 'GitHubMolecule': {
           // const project = toInRef(node, 'project');
-          const inRefs = input.sockets.filter(({ socketName }) => socketName !== 'project')
-              .map(({ socketId }) => toConnectionRef(nodeId, socketId));
+          const inRefs = input.sockets
+            .filter(({ socketName }) => socketName !== 'project')
+            .map(({ socketId }) => toConnectionRef(nodeId, socketId));
           const newRef = nextRef('$');
           // FIX: Import 'project'.
-          statements.push(`const ${newRef} = ${toFunctionName(name)}(${inRefs.join(', ')});`);
+          statements.push(
+            `const ${newRef} = ${toFunctionName(name)}(${inRefs.join(', ')});`
+          );
           definitions.set(nodeId, newRef);
           return newRef;
         }
         case 'Molecule': {
-          const inRefs = input.sockets.map(({ socketId }) => toConnectionRef(nodeId, socketId));
+          const inRefs = input.sockets.map(({ socketId }) =>
+            toConnectionRef(nodeId, socketId)
+          );
           const newRef = nextRef('$');
-          statements.push(`const ${newRef} = ${toFunctionName(name)}(${inRefs.join(', ')});`);
+          statements.push(
+            `const ${newRef} = ${toFunctionName(name)}(${inRefs.join(', ')});`
+          );
           definitions.set(nodeId, newRef);
           return newRef;
         }
@@ -169,7 +214,9 @@ export const toEcmascript = (flow) => {
           const z = toInRef(node, 'z', 0);
           const newRef = nextRef('$');
           // CHECK: semantics.
-          statements.push(`const ${newRef} = ${shape}.rotate(${x}, ${y}, ${z});`);
+          statements.push(
+            `const ${newRef} = ${shape}.rotate(${x}, ${y}, ${z});`
+          );
           definitions.set(nodeId, newRef);
           return newRef;
         }
@@ -177,7 +224,9 @@ export const toEcmascript = (flow) => {
           return toStatement(nodeId, toCall('.move', node, toInRef));
         }
         case 'Output': {
-          const inRefs = input.sockets.map(({ socketId }) => toConnectionRef(nodeId, socketId));
+          const inRefs = input.sockets.map(({ socketId }) =>
+            toConnectionRef(nodeId, socketId)
+          );
           // So, how do we return multiple values?
           statements.push(`return ${inRefs[0]};`);
           return;
@@ -198,5 +247,7 @@ export const toEcmascript = (flow) => {
     }
   }
 
-  return `const ${toFunctionName(flowName)} = () => {\n  ${statements.join('\n  ')}\n};\n`;
+  return `const ${toFunctionName(flowName)} = () => {\n  ${statements.join(
+    '\n  '
+  )}\n};\n`;
 };

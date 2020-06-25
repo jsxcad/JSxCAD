@@ -2,9 +2,11 @@
 
 const LITTLE_ENDIAN = true;
 
-const readVector = (view, off) => [view.getFloat32(off + 0, LITTLE_ENDIAN),
-                                   view.getFloat32(off + 4, LITTLE_ENDIAN),
-                                   view.getFloat32(off + 8, LITTLE_ENDIAN)];
+const readVector = (view, off) => [
+  view.getFloat32(off + 0, LITTLE_ENDIAN),
+  view.getFloat32(off + 4, LITTLE_ENDIAN),
+  view.getFloat32(off + 8, LITTLE_ENDIAN),
+];
 
 export const parse = (data) => {
   const view = new DataView(data.buffer);
@@ -38,6 +40,6 @@ export const parse = (data) => {
   return {
     positions: positions,
     cells: cells,
-    faceNormals: faceNormals
+    faceNormals: faceNormals,
   };
 };

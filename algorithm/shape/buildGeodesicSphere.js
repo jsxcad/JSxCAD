@@ -12,5 +12,5 @@ export const buildGeodesicSphere = ({ faces = 20 }) => {
   while (mesh.length < faces) {
     mesh = subdivideTriangularMesh(mesh);
   }
-  return mesh.map(triangle => triangle.map(unit));
+  return mesh.map((triangle) => triangle.map(unit));
 };

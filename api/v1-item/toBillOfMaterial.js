@@ -14,7 +14,9 @@ export const toBillOfMaterial = (shape) => {
   return specifications;
 };
 
-const toBillOfMaterialMethod = function (options = {}) { return toBillOfMaterial(this); };
+const toBillOfMaterialMethod = function (options = {}) {
+  return toBillOfMaterial(this);
+};
 
 Shape.prototype.toBillOfMaterial = toBillOfMaterialMethod;
 

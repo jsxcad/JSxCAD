@@ -1,19 +1,13 @@
 import * as fs from 'fs';
 
-import {
-  getFilesystem,
-  qualifyPath
-} from './filesystem';
+import { getFilesystem, qualifyPath } from './filesystem';
 
-import {
-  isBrowser,
-  isNode
-} from './browserOrNode';
+import { isBrowser, isNode } from './browserOrNode';
 
 import {
   listFiles as listEphemeralFiles,
   watchFileCreation,
-  watchFileDeletion
+  watchFileDeletion,
 } from './files';
 
 import { db } from './db';
@@ -57,8 +51,10 @@ const getFileLister = async () => {
 
 let cachedKeys;
 
-const updateCachedKeys = (options = {}, file) => cachedKeys.add(file.storageKey);
-const deleteCachedKeys = (options = {}, file) => cachedKeys.delete(file.storageKey);
+const updateCachedKeys = (options = {}, file) =>
+  cachedKeys.add(file.storageKey);
+const deleteCachedKeys = (options = {}, file) =>
+  cachedKeys.delete(file.storageKey);
 
 const getKeys = async () => {
   if (cachedKeys === undefined) {
@@ -82,11 +78,11 @@ export const listFilesystems = async () => {
   return [...filesystems];
 };
 
-export const listFiles = async ({ project } = {}) => {
-  if (project === undefined) {
-    project = getFilesystem();
+export const listFiles = async ({ workspace } = {}) => {
+  if (workspace === undefined) {
+    workspace = getFilesystem();
   }
-  const prefix = qualifyPath('', project);
+  const prefix = qualifyPath('', workspace);
   const keys = await getKeys();
   const files = [];
   for (const key of keys) {

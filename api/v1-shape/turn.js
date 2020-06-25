@@ -26,12 +26,15 @@ import { negate } from '@jsxcad/math-vec3';
 
 export const turn = (shape, axis, angle) => {
   const center = shape.measureCenter();
-  return shape.move(...negate(center))
-      .rotate(axis, angle)
-      .move(...center);
+  return shape
+    .move(...negate(center))
+    .rotate(axis, angle)
+    .move(...center);
 };
 
-const turnMethod = function (angle, axis) { return turn(this, axis, angle); };
+const turnMethod = function (angle, axis) {
+  return turn(this, axis, angle);
+};
 Shape.prototype.turn = turnMethod;
 
 export default turn;

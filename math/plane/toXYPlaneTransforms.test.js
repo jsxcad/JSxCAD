@@ -2,7 +2,7 @@ import test from 'ava';
 // const toXYPlaneTransforms = require('./toXYPlaneTransforms');
 
 // FIX: Circular dependency.
-test('Basic test.', t => {
+test('Basic test.', (t) => {
   t.true(true);
 });
 

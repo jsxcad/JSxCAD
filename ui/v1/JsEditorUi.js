@@ -1,7 +1,7 @@
-import * as api from '@jsxcad/api-v1';
+// import * as api from '@jsxcad/api-v1';
 
-import { log, readFile, writeFile } from '@jsxcad/sys';
-import { toSignature, toSnippet } from './signature';
+import { log, read, unwatchFiles, watchFile, write } from '@jsxcad/sys';
+// import { toSignature, toSnippet } from './signature';
 
 import AceEditor from 'react-ace';
 import Col from 'react-bootstrap/Col';
@@ -39,7 +39,7 @@ const snippetCompleter = {
     }
     scopes.forEach(function (scope) {
       var snippets = snippetMap[scope] || [];
-      for (var i = snippets.length; i--;) {
+      for (var i = snippets.length; i--; ) {
         var s = snippets[i];
         if (s.isMethod) {
           if (!isMethod) {
@@ -47,20 +47,23 @@ const snippetCompleter = {
           }
         }
         var caption = s.name;
-        if (!caption) { continue; }
+        if (!caption) {
+          continue;
+        }
         completions.push({
           caption: caption,
           snippet: s.content,
           meta: s.meta,
           docHTML: s.docHTML,
-          type: s.type
+          type: s.type,
         });
       }
     }, this);
     callback(null, completions);
-  }
+  },
 };
 
+/*
 const getSignatures = (api) => {
   const signatures = [];
   for (const name of Object.keys(api)) {
@@ -88,70 +91,81 @@ const getSignatures = (api) => {
   }
   return signatures;
 };
+*/
 
-const snippets = getSignatures(api).map(toSnippet);
+// const snippets = getSignatures(api).map(toSnippet);
 
 aceEditorCompleter.setCompleters([snippetCompleter]);
-aceEditorSnippetManager.register(snippets, 'JSxCAD');
+// aceEditorSnippetManager.register(snippets, 'JSxCAD');
 
 export class JsEditorUi extends Pane {
-  static get propTypes () {
+  static get propTypes() {
     return {
       ask: PropTypes.func,
       file: PropTypes.string,
       id: PropTypes.string,
-      workspace: PropTypes.string
+      workspace: PropTypes.string,
     };
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
     this.run = this.run.bind(this);
     this.save = this.save.bind(this);
+    this.update = this.update.bind(this);
   }
 
-  saveShortcut () {
+  saveShortcut() {
     return {
       name: 'save',
       bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
-      exec: () => this.save()
+      exec: () => this.save(),
     };
   }
 
-  runShortcut () {
+  runShortcut() {
     return {
       name: 'run',
       bindKey: { win: 'Shift-Enter', mac: 'Shift-Enter' },
-      exec: () => this.run()
+      exec: () => this.run(),
     };
   }
 
-  async run () {
+  async run() {
     const { ask, file, workspace } = this.props;
     await this.save();
     await log({ op: 'open' });
     await log({ op: 'text', text: 'Running', level: 'serious' });
-    let script = await readFile({}, file);
+    let script = await read(file);
     if (script.buffer) {
       script = new TextDecoder('utf8').decode(script);
     }
-    await ask({ evaluate: script, workspace });
+    await ask({ evaluate: script, workspace, path: file });
   }
 
-  async save () {
+  async save() {
     const { file } = this.props;
     const { code = '' } = this.state;
-    await writeFile({}, file, code);
+    await write(file, code);
     await log({ op: 'text', text: 'Saved', level: 'serious' });
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     const { file } = this.props;
     if (file !== undefined) {
-      let code = await readFile({}, file);
+      const watcher = await watchFile(`source/${file}`, this.update);
+      this.setState({ watcher });
+      await this.update();
+    }
+  }
+
+  async update() {
+    const { file } = this.props;
+    if (file !== undefined) {
+      let code = await read(file);
       if (code.buffer) {
         code = new TextDecoder('utf8').decode(code);
       }
@@ -159,24 +173,32 @@ export class JsEditorUi extends Pane {
     }
   }
 
-  onValueChange (code) {
+  async componentWillUnmount() {
+    const { watcher } = this.state;
+
+    if (watcher) {
+      await unwatchFiles(watcher);
+    }
+  }
+
+  onValueChange(code) {
     this.setState({ code });
   }
 
-  highlight (code) {
+  highlight(code) {
     return PrismJS.highlight(code, PrismJS.languages.js);
   }
 
-  stop (e) {
+  stop(e) {
     e.stopPropagation();
   }
 
-  preventDefault (e) {
+  preventDefault(e) {
     e.preventDefault();
     return false;
   }
 
-  onKeyDown (e) {
+  onKeyDown(e) {
     const ENTER = 13;
     const S = 83;
     const SHIFT = 16;
@@ -213,7 +235,7 @@ export class JsEditorUi extends Pane {
     }
   }
 
-  renderToolbar () {
+  renderToolbar() {
     return super.renderToolbar([
       <Nav.Item key="JsEditor/run">
         <Nav.Link onClick={this.run} style={{ color: 'blue' }}>
@@ -224,18 +246,24 @@ export class JsEditorUi extends Pane {
         <Nav.Link onClick={this.save} style={{ color: 'blue' }}>
           Save
         </Nav.Link>
-      </Nav.Item>
+      </Nav.Item>,
     ]);
   }
 
-  renderPane () {
+  renderPane() {
     const { id } = this.props;
-    const { code = '' } = this.state;
+    const { modal, code = '' } = this.state;
 
     return (
-      <Container style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
+      <Container
+        style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
+      >
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onKeyDown={this.onKeyDown}>
+          <Col
+            style={{ width: '100%', height: '100%', overflow: 'auto' }}
+            onKeyDown={this.onKeyDown}
+          >
+            {modal}
             <AceEditor
               commands={[this.runShortcut(), this.saveShortcut()]}
               editorProps={{ $blockScrolling: true }}
@@ -243,9 +271,9 @@ export class JsEditorUi extends Pane {
                 // enableBasicAutocompletion: true,
                 enableLiveAutocompletion: true,
                 enableSnippets: true,
-                useWorker: false
+                useWorker: false,
               }}
-              height='100%'
+              height="100%"
               highlightActiveLine={true}
               key={id}
               mode="javascript"
@@ -255,14 +283,13 @@ export class JsEditorUi extends Pane {
               showPrintMargin={true}
               theme="github"
               value={code}
-              width='100%'
-            >
-            </AceEditor>
+              width="100%"
+            ></AceEditor>
           </Col>
         </Row>
       </Container>
     );
   }
-};
+}
 
 export default JsEditorUi;

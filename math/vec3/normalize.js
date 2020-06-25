@@ -8,7 +8,7 @@ import { scale } from './scale';
  */
 export const normalize = (a) => {
   const [x, y, z] = a;
-  const len = (x * x) + (y * y) + (z * z);
+  const len = x * x + y * y + z * z;
   if (len > 0) {
     // TODO: evaluate use of glm_invsqrt here?
     return scale(1 / Math.sqrt(len), a);

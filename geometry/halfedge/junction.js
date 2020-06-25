@@ -32,30 +32,22 @@ export const equalsPlane = (a, b) => {
 };
 
 /**
- * junctionSelector
+ * getPlanesOfPoint
  *
- * @function
- * @param {Solid} solid
- * @param {Normalizer} normalize
- * @returns {PointSelector}
+ * @param {Point} point
+ * @returns {Array<Plane>}
  */
-export const junctionSelector = (solid, normalize) => {
-  const planesOfPoint = new Map();
+const getPlanesOfPoint = (planesOfPoint, point) => {
+  let planes = planesOfPoint.get(point);
+  if (planes === undefined) {
+    planes = [];
+    planesOfPoint.set(point, planes);
+  }
+  return planes;
+};
 
-  /**
-   * getPlanesOfPoint
-   *
-   * @param {Point} point
-   * @returns {Array<Plane>}
-   */
-  const getPlanesOfPoint = (point) => {
-    let planes = planesOfPoint.get(point);
-    if (planes === undefined) {
-      planes = [];
-      planesOfPoint.set(point, planes);
-    }
-    return planes;
-  };
+export const computeJunctions = (solid, normalize) => {
+  const planesOfPoint = new Map();
 
   /**
    * considerJunction
@@ -65,13 +57,16 @@ export const junctionSelector = (solid, normalize) => {
    * @returns {undefined}
    */
   const considerJunction = (point, planeOfPath) => {
-    let planes = getPlanesOfPoint(point);
+    let planes = getPlanesOfPoint(planesOfPoint, point);
     for (const plane of planes) {
       if (equalsPlane(plane, planeOfPath)) {
         return;
       }
     }
     planes.push(planeOfPath);
+    if (planes.length > 3) {
+      throw Error('die: non-manifold');
+    }
   };
 
   for (const surface of solid) {
@@ -82,9 +77,21 @@ export const junctionSelector = (solid, normalize) => {
     }
   }
 
-  // A corner is defined as a point of intersection of three distinct planes.
-  /** @type {PointSelector} */
-  const select = (point) => getPlanesOfPoint(point).length >= 3;
+  return planesOfPoint;
+};
+
+/**
+ * junctionSelector
+ *
+ * @function
+ * @param {Solid} solid
+ * @param {Normalizer} normalize
+ * @returns {PointSelector}
+ */
+export const junctionSelector = (solid, normalize) => {
+  const planesOfPoint = computeJunctions(solid, normalize);
+
+  const select = (point) => getPlanesOfPoint(planesOfPoint, point).length === 3;
 
   return select;
 };

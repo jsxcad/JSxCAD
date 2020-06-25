@@ -50,4 +50,3 @@ registerDynamicModule(module('units'), '@jsxcad/api-v1-units');
 
 export * from './api';
 export { importModule };
-export { md } from './md';

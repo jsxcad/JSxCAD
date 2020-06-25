@@ -20,14 +20,8 @@ import toPolygons from './toPolygons';
 export const outlineSurface = (surface, normalize) => {
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);
-  // console.log(`mergedLoops`);
-  // console.log(toDot(mergedLoops));
-  const cleanedLoops = clean(mergedLoops);
-  // console.log(`cleanedLoops`);
-  // console.log(toDot(cleanedLoops));
+  const cleanedLoops = mergedLoops.map(clean);
   const splitLoops = split(cleanedLoops);
-  // console.log(`splitLoops`);
-  // console.log(toDot(splitLoops));
   return toPolygons(splitLoops);
 };
 

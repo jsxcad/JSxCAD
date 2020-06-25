@@ -19,6 +19,10 @@ const merged = Symbol('merged');
  * @returns {Loops}
  */
 export const merge = (loops) => {
+  const faces = new Set();
+  for (const loop of loops) {
+    faces.add(loop.face);
+  }
   /**
    * walk
    *
@@ -27,14 +31,15 @@ export const merge = (loops) => {
    */
   const walk = (loop) => {
     if (loop[merged] || loop.next === undefined) return;
-    eachLink(loop, link => { link[merged] = true; });
+    eachLink(loop, (link) => {
+      link[merged] = true;
+    });
     let link = loop;
     do {
       if (link.face !== link.next.face) {
         throw Error('die');
       }
       const twin = link.twin;
-      // Ensure face cohesion.
       if (twin === undefined) {
         // Do nothing.
       } else if (twin.face === link.face) {
@@ -42,6 +47,8 @@ export const merge = (loops) => {
       } else if (link.next === twin) {
         // Do nothing.
       } else if (equalsPlane(toPlane(link), toPlane(twin))) {
+        faces.delete(link.face);
+        faces.delete(twin.face);
         // Merge the loops.
         const linkNext = link.next;
         const twinNext = twin.next;
@@ -64,8 +71,12 @@ export const merge = (loops) => {
         twin.from = linkNext;
         linkNext.to = twin;
 
-        if (link.twin) { link.twin.twin = link; }
-        if (twin.twin) { twin.twin.twin = twin; }
+        if (link.twin) {
+          link.twin.twin = link;
+        }
+        if (twin.twin) {
+          twin.twin.twin = twin;
+        }
 
         if (twin.next === twin) throw Error('die');
 
@@ -84,22 +95,34 @@ export const merge = (loops) => {
         // Ensure we do a complete pass over the merged loop.
         loop = link;
 
+        if (faces.has(loop)) {
+          throw Error('die');
+        }
+        faces.add(loop);
+
         // Update face affinity to detect self-merging.
         do {
           link.face = loop;
           link = link.next;
         } while (link !== loop);
       }
-      if (link.next === undefined) { throw Error('die'); }
+      if (link.next === undefined) {
+        throw Error('die');
+      }
       link = link.next;
-      if (link.to !== undefined) { throw Error('die'); }
+      if (link.to !== undefined) {
+        throw Error('die');
+      }
     } while (link !== loop);
     while (link !== link.face) link = link.face;
     return link.face;
   };
 
+  // Test preconditions.
   for (const loop of loops) {
     let link = loop;
+    let face = link.face;
+    let containsFace = false;
     do {
       if (link.twin) {
         if (link.twin.start !== link.next.start) throw Error('die');
@@ -108,8 +131,14 @@ export const merge = (loops) => {
       if (link.dead) {
         throw Error('die');
       }
+      if (link === face) {
+        containsFace = true;
+      }
       link = link.next;
     } while (link !== loop);
+    if (containsFace === false) {
+      throw Error('die: Does not contain face');
+    }
   }
 
   const seen = new Set();
@@ -119,6 +148,7 @@ export const merge = (loops) => {
     if (loop.next === undefined) continue;
     if (loop.face === undefined) continue;
     if (loop.dead !== undefined) continue;
+    // Test postconditions.
     let link = loop;
     do {
       if (link.face.id !== loop.face.id) throw Error('die');
@@ -126,7 +156,7 @@ export const merge = (loops) => {
     } while (link !== loop);
     if (seen.has(loop.face)) {
       // faces aren't loop-unique.
-      // throw Error('die');
+      // throw Error(`die: ${loop.face.id}`);
     } else {
       seen.add(loop.face);
       // We're getting the wrong ones in here, sometimes.

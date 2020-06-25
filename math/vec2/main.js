@@ -62,5 +62,5 @@ export {
   squaredDistance,
   squaredLength,
   subtract,
-  transform
+  transform,
 };

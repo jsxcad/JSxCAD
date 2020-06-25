@@ -14,5 +14,5 @@ export {
   createPinnedConstraint,
   positions,
   solve,
-  verlet
+  verlet,
 };

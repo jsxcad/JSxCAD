@@ -14,7 +14,7 @@ export const toDisjointGeometry = (geometry) => {
     } else if (geometry.matrix) {
       return rewrite(toTransformedGeometry(geometry), op);
     } else if (geometry.assembly) {
-      const assembly = geometry.assembly.map(entry => rewrite(entry, op));
+      const assembly = geometry.assembly.map((entry) => rewrite(entry, op));
       const disjointAssembly = [];
       for (let i = assembly.length - 1; i >= 0; i--) {
         disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
@@ -53,12 +53,6 @@ const toDisjointAssembly = (geometry) => {
     return geometry[disjointAssembly];
   } else if (geometry.item) {
     return { ...geometry, item: toDisjointAssembly(geometry.item) };
-  } else if (geometry.connection) {
-    return {
-      ...geometry,
-      connectors: geometry.connectors.map(toDisjointGeometry),
-      geometries: geometry.geometries.map(toDisjointGeometry)
-    };
   } else if (geometry.layers) {
     return {
       ...geometry,

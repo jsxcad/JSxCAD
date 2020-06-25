@@ -11,12 +11,21 @@ test('poly3: measureSignedVolume() should return correct values', (t) => {
   t.is(ret1, 0.0);
 
   // simple triangle
-  let ply2 = fromPoints([[5, 5, 5], [5, 15, 5], [5, 15, 15]]);
+  let ply2 = fromPoints([
+    [5, 5, 5],
+    [5, 15, 5],
+    [5, 15, 15],
+  ]);
   let ret2 = measureSignedVolume(ply2);
   t.is(ret2, 83.33333333333333);
 
   // simple square
-  let ply3 = fromPoints([[5, 5, 5], [5, 15, 5], [5, 15, 15], [5, 5, 15]]);
+  let ply3 = fromPoints([
+    [5, 5, 5],
+    [5, 15, 5],
+    [5, 15, 15],
+    [5, 5, 15],
+  ]);
   let ret3 = measureSignedVolume(ply3);
   t.is(ret3, 166.66666666666666);
 
@@ -31,14 +40,14 @@ test('poly3: measureSignedVolume() should return correct values', (t) => {
     [-50, 5, 2],
     [-50, 2, 5],
     [-50, 1, 3],
-    [-50, 3, 3]
+    [-50, 3, 3],
   ];
   let ply4 = fromPoints(points);
   let ret4 = measureSignedVolume(ply4);
-  t.is(ret4, -325.00000);
+  t.is(ret4, -325.0);
 
   // rotated to various angles
-  const rotation = fromZRotation((45 * 0.017453292519943295));
+  const rotation = fromZRotation(45 * 0.017453292519943295);
   ply1 = transform(rotation, ply1);
   ply2 = transform(rotation, ply2);
   ply3 = transform(rotation, ply3);

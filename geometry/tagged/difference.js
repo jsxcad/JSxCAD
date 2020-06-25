@@ -18,8 +18,12 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(solid);
         }
       }
-      return { solid: solidDifference(geometry.solid, ...todo), tags: geometry.tags };
+      return {
+        solid: solidDifference(geometry.solid, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.surface) {
+      // FIX: Solids should cut surfaces
       const todo = [];
       for (const geometry of geometries) {
         for (const { surface } of getSurfaces(geometry)) {
@@ -29,8 +33,12 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(z0Surface);
         }
       }
-      return { surface: surfaceDifference(geometry.surface, ...todo), tags: geometry.tags };
+      return {
+        surface: surfaceDifference(geometry.surface, ...todo),
+        tags: geometry.tags,
+      };
     } else if (geometry.z0Surface) {
+      // FIX: Solids should cut surfaces
       const todoSurfaces = [];
       const todoZ0Surfaces = [];
       for (const geometry of geometries) {
@@ -42,9 +50,19 @@ const differenceImpl = (geometry, ...geometries) => {
         }
       }
       if (todoSurfaces.length > 0) {
-        return { surface: surfaceDifference(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: surfaceDifference(
+            geometry.z0Surface,
+            ...todoSurfaces,
+            ...todoZ0Surfaces
+          ),
+          tags: geometry.tags,
+        };
       } else {
-        return { surface: z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces), tags: geometry.tags };
+        return {
+          surface: z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces),
+          tags: geometry.tags,
+        };
       }
     } else if (geometry.paths) {
       const todo = [];
@@ -53,7 +71,10 @@ const differenceImpl = (geometry, ...geometries) => {
           todo.push(paths);
         }
       }
-      return { paths: pathsDifference(geometry.paths, ...todo), tags: geometry.tags };
+      return {
+        paths: pathsDifference(geometry.paths, ...todo),
+        tags: geometry.tags,
+      };
     } else {
       return descend();
     }

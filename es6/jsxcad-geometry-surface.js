@@ -13,10 +13,14 @@ import { union, outline as outline$1 } from './jsxcad-geometry-z0surface-boolean
 const canonicalize = (surface) => surface.map(canonicalize$1);
 
 // Transforms
-const transform = (matrix, surface) => surface.map(polygon => transform$2(matrix, polygon));
-const translate = (vector, surface) => transform(fromTranslation(vector), surface);
-const rotateZ = (angle, surface) => transform(fromZRotation(angle), surface);
-const scale = (vector, surface) => transform(fromScaling(vector), surface);
+const transform = (matrix, surface) =>
+  surface.map((polygon) => transform$2(matrix, polygon));
+const translate = (vector, surface) =>
+  transform(fromTranslation(vector), surface);
+const rotateZ = (angle, surface) =>
+  transform(fromZRotation(angle), surface);
+const scale = (vector, surface) =>
+  transform(fromScaling(vector), surface);
 
 // FIX: This is incorrect, since it assumes the first non-degenerate polygon is representative.
 
@@ -54,7 +58,16 @@ const toType = (plane, point) => {
 
 const pointType = [];
 
-const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, frontEdges, backEdges, surface) => {
+const cutSurface = (
+  plane,
+  coplanarFrontSurfaces,
+  coplanarBackSurfaces,
+  frontSurfaces,
+  backSurfaces,
+  frontEdges,
+  backEdges,
+  surface
+) => {
   const surfacePlane = toPlane(surface);
   if (surfacePlane === undefined) {
     // Degenerate.
@@ -140,8 +153,15 @@ const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSur
             const lastPoint = polygon[last];
             if ((lastType | pointType[current]) === SPANNING) {
               // Break spanning segments at the point of intersection.
-              const rawSpanPoint = splitLineSegmentByPlane(plane, lastPoint, polygon[current]);
-              const spanPoint = subtract(rawSpanPoint, scale$1(signedDistanceToPoint(surfacePlane, rawSpanPoint), plane));
+              const rawSpanPoint = splitLineSegmentByPlane(
+                plane,
+                lastPoint,
+                polygon[current]
+              );
+              const spanPoint = subtract(
+                rawSpanPoint,
+                scale$1(signedDistanceToPoint(surfacePlane, rawSpanPoint), plane)
+              );
               // Note: Destructive modification of polygon here.
               polygon.splice(current, 0, spanPoint);
               pointType.splice(current, 0, COPLANAR);
@@ -177,14 +197,14 @@ const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSur
           }
         }
         if (frontPoints.length >= 3) {
-        // Add the polygon that sticks out the front of the plane.
+          // Add the polygon that sticks out the front of the plane.
           if (frontPolygons === undefined) {
             frontPolygons = [];
           }
           frontPolygons.push(frontPoints);
         }
         if (backPoints.length >= 3) {
-        // Add the polygon that sticks out the back of the plane.
+          // Add the polygon that sticks out the back of the plane.
           if (backPolygons === undefined) {
             backPolygons = [];
           }
@@ -214,8 +234,17 @@ const cutImpl = (planeSurface, surface) => {
   const frontEdges = [];
   const backEdges = [];
 
-  cutSurface(toPlane(planeSurface), front, back, front, back, frontEdges, backEdges, surface);
-  if (frontEdges.some(edge => edge[1] === undefined)) {
+  cutSurface(
+    toPlane(planeSurface),
+    front,
+    back,
+    front,
+    back,
+    frontEdges,
+    backEdges,
+    surface
+  );
+  if (frontEdges.some((edge) => edge[1] === undefined)) {
     throw Error(`die/end/missing: ${JSON.stringify(frontEdges)}`);
   }
 
@@ -272,9 +301,9 @@ const map = (original, transform) => {
     original = [];
   }
   if (transform === undefined) {
-    transform = _ => _;
+    transform = (_) => _;
   }
-  return original.map(polygon => transform(polygon));
+  return original.map((polygon) => transform(polygon));
 };
 
 const flip = (surface) => map(surface, flip$1);
@@ -332,11 +361,15 @@ const makeWatertight = (surface, normalize, threshold = THRESHOLD) => {
         watertightPath.push(start);
         const span = distance(start, end);
         const colinear = [];
-        let limit = Math.max(start.index, end.index);
-        for (let i = Math.min(start.index, end.index); i < limit; i++) {
+        // let limit = Math.max(start.index, end.index);
+        // for (let i = Math.min(start.index, end.index); i < limit; i++) {
+        for (let i = 0; i < orderedVertices.length; i++) {
           const vertex = orderedVertices[i];
           // FIX: Threshold
-          if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < threshold) {
+          if (
+            Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+            threshold
+          ) {
             colinear.push(vertex);
           }
         }
@@ -347,6 +380,7 @@ const makeWatertight = (surface, normalize, threshold = THRESHOLD) => {
       }
       pushWhenValid(watertightPaths, watertightPath);
     }
+
     surface[watertight] = watertightPaths;
   }
 
@@ -404,9 +438,14 @@ const makeConvex = (surface, normalize3 = createNormalize3(), plane) => {
     }
   }
   const [to, from] = toXYPlaneTransforms(plane);
-  const z0Surface = transform(to, surface.map(path => path.map(normalize3)));
+  const z0Surface = transform(
+    to,
+    surface.map((path) => path.map(normalize3))
+  );
   const convexZ0Surface = makeConvex$1(z0Surface);
-  const convexSurface = transform(from, convexZ0Surface).map(path => path.map(normalize3));
+  const convexSurface = transform(from, convexZ0Surface).map((path) =>
+    path.map(normalize3)
+  );
   return makeWatertight(convexSurface);
 };
 
@@ -1142,7 +1181,11 @@ const selectBuildContour = (plane) => {
   }
 };
 
-const makeConvexNoHoles = (surface, normalize3 = createNormalize3(), plane) => {
+const makeConvexNoHoles = (
+  surface,
+  normalize3 = createNormalize3(),
+  plane
+) => {
   if (surface.length === undefined) {
     throw Error('die');
   }
@@ -1192,7 +1235,9 @@ const makeConvexNoHoles = (surface, normalize3 = createNormalize3(), plane) => {
 
 const makeSimple = (options = {}, surface) => {
   const [to, from] = toXYPlaneTransforms(toPlane(surface));
-  let simpleSurface = union(...transform(to, surface).map(polygon => [polygon]));
+  let simpleSurface = union(
+    ...transform(to, surface).map((polygon) => [polygon])
+  );
   return transform(from, simpleSurface);
 };
 
@@ -1235,32 +1280,47 @@ const measureBoundingSphere = (surface) => {
   return surface.measureBoundingSphere;
 };
 
-const transformImpl = (matrix, polygons) => polygons.map(polygon => transform$2(matrix, polygon));
+const transformImpl = (matrix, polygons) =>
+  polygons.map((polygon) => transform$2(matrix, polygon));
 
 const transform$1 = cacheTransform(transformImpl);
 
-const outline = (surface, normalize = createNormalize3(), plane = toPlane(surface)) => {
+const outline = (
+  surface,
+  normalize = createNormalize3(),
+  plane = toPlane(surface)
+) => {
   if (plane === undefined) {
     return [];
   }
   // FIX: Detect when the surfaces aren't in the same plane.
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize)));
+  const z0Surface = transform$1(
+    toZ0,
+    surface.map((path) => path.map(normalize))
+  );
   const outlinedZ0Surface = outline$1(z0Surface, normalize);
-  return transform$1(fromZ0, outlinedZ0Surface).map(path => path.map(normalize));
+  return transform$1(fromZ0, outlinedZ0Surface).map((path) =>
+    path.map(normalize)
+  );
 };
 
-const toGeneric = (surface) => surface.map(path => path.map(point => [...point]));
+const toGeneric = (surface) =>
+  surface.map((path) => path.map((point) => [...point]));
 
 const toPoints = (surface) => {
   const points = [];
-  eachPoint(point => points.push(point), surface);
+  eachPoint((point) => points.push(point), surface);
   return points;
 };
 
 const toPolygons = (options = {}, surface) => surface;
 
-const retessellate = (surface, normalize3 = createNormalize3(), plane) => {
+const retessellate = (
+  surface,
+  normalize3 = createNormalize3(),
+  plane
+) => {
   if (surface.length < 2) {
     return surface;
   }
@@ -1271,9 +1331,12 @@ const retessellate = (surface, normalize3 = createNormalize3(), plane) => {
     }
   }
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Surface = transform$1(toZ0, surface.map(path => path.map(normalize3)));
+  const z0Surface = transform$1(
+    toZ0,
+    surface.map((path) => path.map(normalize3))
+  );
   const retessellated = retessellate$1(z0Surface);
-  return transform$1(fromZ0, retessellated).map(path => path.map(normalize3));
+  return transform$1(fromZ0, retessellated).map((path) => path.map(normalize3));
 };
 
 export { assertCoplanar, assertGood, canonicalize, cut, cutSurface, eachPoint, flip, fromPolygons, makeConvex, makeConvexNoHoles, makeSimple, makeWatertight, measureArea, measureBoundingBox, measureBoundingSphere, outline, retessellate, rotateZ, scale, toGeneric, toPlane, toPoints, toPolygons, transform, translate };

@@ -10,11 +10,10 @@ import { toKeptGeometry } from './toKeptGeometry';
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
-  eachPoint(point => {
+  eachPoint((point) => {
     minPoint = min(minPoint, point);
     maxPoint = max(maxPoint, point);
-  },
-            geometry);
+  }, geometry);
   return [minPoint, maxPoint];
 };
 
@@ -37,8 +36,6 @@ export const measureBoundingBox = (rawGeometry) => {
       item.assembly.forEach(walk);
     } else if (item.layers) {
       item.layers.forEach(walk);
-    } else if (item.connection) {
-      item.geometries.map(walk);
     } else if (item.disjointAssembly) {
       item.disjointAssembly.forEach(walk);
     } else if (item.item) {

@@ -4,7 +4,11 @@ import { toPlane } from './toPlane';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 import { transform } from './transform';
 
-export const retessellate = (surface, normalize3 = createNormalize3(), plane) => {
+export const retessellate = (
+  surface,
+  normalize3 = createNormalize3(),
+  plane
+) => {
   if (surface.length < 2) {
     return surface;
   }
@@ -15,7 +19,10 @@ export const retessellate = (surface, normalize3 = createNormalize3(), plane) =>
     }
   }
   const [toZ0, fromZ0] = toXYPlaneTransforms(plane);
-  const z0Surface = transform(toZ0, surface.map(path => path.map(normalize3)));
+  const z0Surface = transform(
+    toZ0,
+    surface.map((path) => path.map(normalize3))
+  );
   const retessellated = retessellateZ0Surface(z0Surface);
-  return transform(fromZ0, retessellated).map(path => path.map(normalize3));
+  return transform(fromZ0, retessellated).map((path) => path.map(normalize3));
 };

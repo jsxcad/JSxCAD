@@ -48,7 +48,8 @@ export const readFont = async (path, { src } = {}) => {
     data = await readFile({ sources: [src] }, `cache/${path}`);
   }
   const font = toFont({ path }, data);
-  const fontFactory = (size = 1) => (text) => Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
+  const fontFactory = (size = 1) => (text) =>
+    Shape.fromGeometry(font({ emSize: toEmSizeFromMm(size) }, text));
   return fontFactory;
 };
 

@@ -14,6 +14,7 @@ import './noVoid';
 import './op';
 import './openEdges';
 import './solids';
+import './trace';
 import './tags';
 import './wireframe';
 import './wireframeFaces';
@@ -90,7 +91,7 @@ export {
   turnY,
   turnZ,
   union,
-  writeShape
+  writeShape,
 };
 
 export default Shape;

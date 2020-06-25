@@ -1,10 +1,15 @@
-/* global Window, self */
+/* global self, window */
 // FIX: Refactor this once we figure it out.
 
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
-import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
+import {
+  getBase,
+  getFilesystem,
+  qualifyPath,
+  setupFilesystem,
+} from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { db } from './db';
@@ -19,7 +24,8 @@ const { deserialize } = v8;
 // Read decoders allow us to turn data back into objects based on structure.
 const readDecoders = [];
 
-export const addReadDecoder = (guard, decoder) => readDecoders.push({ guard, decoder });
+export const addReadDecoder = (guard, decoder) =>
+  readDecoders.push({ guard, decoder });
 
 // There should be a better way to do this.
 const decode = (data) => {
@@ -49,7 +55,7 @@ const decode = (data) => {
 
 const getUrlFetcher = async () => {
   if (isBrowser) {
-    return Window.fetch;
+    return window.fetch;
   }
   if (isWebWorker) {
     return self.fetch;
@@ -102,7 +108,7 @@ const fetchPersistent = async (path, doSerialize) => {
 // Fetch from external sources.
 const fetchSources = async (options = {}, sources) => {
   const fetchUrl = await getUrlFetcher();
-  const fetchFile = await getFileFetcher(path => path, false);
+  const fetchFile = await getFileFetcher((path) => path, false);
   // Try to load the data from a source.
   for (const source of sources) {
     if (typeof source === 'string') {
@@ -120,8 +126,7 @@ const fetchSources = async (options = {}, sources) => {
             return data;
           }
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     } else {
       throw Error('die');
     }
@@ -134,12 +139,16 @@ export const readFile = async (options, path) => {
   // if (false && isWebWorker) {
   //  return self.ask({ readFile: { options, path } });
   // }
-  const { sources = [], project = getFilesystem(), useCache = true } = options;
-  let originalProject = getFilesystem();
-  if (project !== originalProject) {
-    log({ op: 'text', text: `Read ${path} of ${project}` });
+  const {
+    sources = [],
+    workspace = getFilesystem(),
+    useCache = true,
+  } = options;
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    log({ op: 'text', text: `Read ${path} of ${workspace}` });
     // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: project });
+    setupFilesystem({ fileBase: workspace });
   } else {
     log({ op: 'text', text: `Read ${path}` });
   }
@@ -147,9 +156,9 @@ export const readFile = async (options, path) => {
   if (file.data === undefined || useCache === false) {
     file.data = await fetchPersistent(path, true);
   }
-  if (project !== originalProject) {
+  if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalProject });
+    setupFilesystem({ fileBase: originalWorkspace });
   }
   if (file.data === undefined && allowFetch && sources.length > 0) {
     file.data = await fetchSources({}, sources);

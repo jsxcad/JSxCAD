@@ -35,11 +35,6 @@ export const toKeptGeometry = (geometry) => {
             ...geometry,
             content: toKeptGeometry(geometry.content)
           };
-        } else if (geometry.connection) {
-          return {
-            ...geometry,
-            geometries: geometry.geometries.map(toKeptGeometry)
-          };
         } else {
           return geometry;
         }

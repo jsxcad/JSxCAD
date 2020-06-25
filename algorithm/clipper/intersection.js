@@ -29,13 +29,12 @@ export const intersection = (a, ...z0Surfaces) => {
       if (bPolygons.length === 0) {
         return [];
       }
-      const result = clipper.clipToPaths(
-        {
-          clipType: ClipType.Intersection,
-          subjectInputs: [{ data: aPolygons, closed: true }],
-          clipInputs: [{ data: bPolygons, closed: true }],
-          subjectFillType: PolyFillType.Positive
-        });
+      const result = clipper.clipToPaths({
+        clipType: ClipType.Intersection,
+        subjectInputs: [{ data: aPolygons, closed: true }],
+        clipInputs: [{ data: bPolygons, closed: true }],
+        subjectFillType: PolyFillType.Positive,
+      });
       a = toSurface(result, normalize);
     }
   }

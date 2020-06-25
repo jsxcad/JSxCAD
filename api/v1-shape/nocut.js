@@ -8,9 +8,17 @@ import { nonNegative } from '@jsxcad/geometry-tagged';
  *
  **/
 
-export const nocut = (shape, ...tags) => fromGeometry(nonNegative(tags.map(tag => `user/${tag}`), toGeometry(shape)));
+export const nocut = (shape, ...tags) =>
+  fromGeometry(
+    nonNegative(
+      tags.map((tag) => `user/${tag}`),
+      toGeometry(shape)
+    )
+  );
 
-const nocutMethod = function (...tags) { return nocut(this, tags); };
+const nocutMethod = function (...tags) {
+  return nocut(this, tags);
+};
 Shape.prototype.nocut = nocutMethod;
 
 export default nocut;

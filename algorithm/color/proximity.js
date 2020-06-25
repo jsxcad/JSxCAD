@@ -3,7 +3,11 @@
 export const proximity = (s1, s2) => {
   const c1 = rgb2lab(...s1);
   const c2 = rgb2lab(...s2);
-  return Math.sqrt(Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2));
+  return Math.sqrt(
+    Math.pow(c1[0] - c2[0], 2) +
+      Math.pow(c1[1] - c2[1], 2) +
+      Math.pow(c1[2] - c2[2], 2)
+  );
 };
 
 const labConstants = {
@@ -11,14 +15,14 @@ const labConstants = {
   Kn: 18,
 
   // D65 standard referent
-  Xn: 0.950470,
+  Xn: 0.95047,
   Yn: 1,
-  Zn: 1.088830,
+  Zn: 1.08883,
 
   t0: 0.137931034, // 4 / 29
   t1: 0.206896552, // 6 / 29
   t2: 0.12841855, // 3 * t1 * t1
-  t3: 0.008856452 // t1 * t1 * t1
+  t3: 0.008856452, // t1 * t1 * t1
 };
 
 const rgbXyz = (r) => {
@@ -39,9 +43,15 @@ const rgb2xyz = (r, g, b) => {
   r = rgbXyz(r);
   g = rgbXyz(g);
   b = rgbXyz(b);
-  var x = xyzLab((0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / labConstants.Xn);
-  var y = xyzLab((0.2126729 * r + 0.7151522 * g + 0.0721750 * b) / labConstants.Yn);
-  var z = xyzLab((0.0193339 * r + 0.1191920 * g + 0.9503041 * b) / labConstants.Zn);
+  var x = xyzLab(
+    (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / labConstants.Xn
+  );
+  var y = xyzLab(
+    (0.2126729 * r + 0.7151522 * g + 0.072175 * b) / labConstants.Yn
+  );
+  var z = xyzLab(
+    (0.0193339 * r + 0.119192 * g + 0.9503041 * b) / labConstants.Zn
+  );
   return [x, y, z];
 };
 

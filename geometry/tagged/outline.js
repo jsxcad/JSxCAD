@@ -1,12 +1,9 @@
+import { outlineSolid, outlineSurface } from '@jsxcad/geometry-halfedge';
+
 import { cache } from '@jsxcad/cache';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { getSolids } from './getSolids';
-import { getSurfaces } from './getSurfaces';
-import { getZ0Surfaces } from './getZ0Surfaces';
-import { outline as outlineSolid } from '@jsxcad/geometry-solid';
-// import { outline as outlineSurface } from '@jsxcad/geometry-surface';
-import { outlineSurface } from '@jsxcad/geometry-halfedge';
-import { outline as outlineZ0Surface } from '@jsxcad/geometry-z0surface-boolean';
+import { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces';
+import { getNonVoidSolids } from './getNonVoidSolids';
 import { toKeptGeometry } from './toKeptGeometry';
 
 const outlineImpl = (geometry) => {
@@ -15,16 +12,13 @@ const outlineImpl = (geometry) => {
   // FIX: This assumes general coplanarity.
   const keptGeometry = toKeptGeometry(geometry);
   const outlines = [];
-  for (const { solid } of getSolids(keptGeometry)) {
+  for (const { solid } of getNonVoidSolids(keptGeometry)) {
     outlines.push(outlineSolid(solid, normalize));
   }
-  for (const { surface } of getSurfaces(keptGeometry)) {
-    outlines.push(outlineSurface(surface, normalize));
+  for (const { surface, z0Surface } of getAnyNonVoidSurfaces(keptGeometry)) {
+    outlines.push(outlineSurface(surface || z0Surface, normalize));
   }
-  for (const { z0Surface } of getZ0Surfaces(keptGeometry)) {
-    outlines.push(outlineZ0Surface(z0Surface, normalize));
-  }
-  return outlines.map(outline => ({ paths: outline }));
+  return outlines.map((outline) => ({ paths: outline }));
 };
 
 export const outline = cache(outlineImpl);

@@ -21,7 +21,10 @@ const askForString = async (identifier, value, options = {}) => {
 };
 
 const askForBool = async (identifier, value = false, options = {}) => {
-  return askForString(identifier, value, { ...options, choices: [true, false] });
+  return askForString(identifier, value, {
+    ...options,
+    choices: [true, false],
+  });
 };
 
 export const askForNumber = async (identifier, value = 0, options = {}) => {
@@ -48,4 +51,5 @@ export default ask;
 ask.signature = 'ask(parameter:string) -> number';
 ask.forNumber.signature = 'ask(parameter:string, value:number = 0) -> number';
 ask.forString.signature = 'ask(parameter:string, value) -> string';
-ask.forBool.signature = 'ask(parameter:string, value:boolean = false) -> boolean';
+ask.forBool.signature =
+  'ask(parameter:string, value:boolean = false) -> boolean';

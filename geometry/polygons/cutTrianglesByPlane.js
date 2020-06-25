@@ -24,7 +24,9 @@ const toType = (plane, point) => {
 };
 
 const spanPoint = (plane, startPoint, endPoint) => {
-  let t = (plane[W] - dot(plane, startPoint)) / dot(plane, subtract(endPoint, startPoint));
+  let t =
+    (plane[W] - dot(plane, startPoint)) /
+    dot(plane, subtract(endPoint, startPoint));
   return canonicalize(lerp(t, startPoint, endPoint));
 };
 
@@ -35,7 +37,11 @@ const spanPoint = (plane, startPoint, endPoint) => {
  * FIX: Make sure this works properly for solids with holes in them, etc.
  * FIX: Figure out where the duplicate paths are coming from and see if we can avoid deduplication.
  */
-export const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles) => {
+export const cutTrianglesByPlane = (
+  { allowOpenPaths = false },
+  plane,
+  triangles
+) => {
   let edges = [];
   const addEdge = (start, end) => {
     edges.push([canonicalize(start), canonicalize(end)]);
@@ -45,7 +51,11 @@ export const cutTrianglesByPlane = ({ allowOpenPaths = false }, plane, triangles
   for (let nth = 0; nth < triangles.length; nth++) {
     const triangle = triangles[nth];
     const [a, b, c] = triangle;
-    const [aType, bType, cType] = [toType(plane, a), toType(plane, b), toType(plane, c)];
+    const [aType, bType, cType] = [
+      toType(plane, a),
+      toType(plane, b),
+      toType(plane, c),
+    ];
 
     switch (aType) {
       case FRONT:

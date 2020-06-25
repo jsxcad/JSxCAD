@@ -3,7 +3,12 @@
 import * as fs from 'fs';
 import * as v8 from 'v8';
 
-import { getBase, getFilesystem, qualifyPath, setupFilesystem } from './filesystem';
+import {
+  getBase,
+  getFilesystem,
+  qualifyPath,
+  setupFilesystem,
+} from './filesystem';
 import { isBrowser, isNode, isWebWorker } from './browserOrNode';
 
 import { db } from './db';
@@ -23,12 +28,16 @@ export const writeFile = async (options, path, data) => {
   //  return self.ask({ writeFile: { options: { ...options, as: 'bytes' }, path, data: await data } });
   // }
 
-  const { doSerialize = true, ephemeral, project = getFilesystem() } = options;
-  let originalProject = getFilesystem();
-  if (project !== originalProject) {
-    log({ op: 'text', text: `Write ${path} of ${project}` });
+  const {
+    doSerialize = true,
+    ephemeral,
+    workspace = getFilesystem(),
+  } = options;
+  let originalWorkspace = getFilesystem();
+  if (workspace !== originalWorkspace) {
+    log({ op: 'text', text: `Write ${path} of ${workspace}` });
     // Switch to the source filesystem, if necessary.
-    setupFilesystem({ fileBase: project });
+    setupFilesystem({ fileBase: workspace });
   }
 
   await log({ op: 'text', text: `Write ${path}` });
@@ -45,26 +54,24 @@ export const writeFile = async (options, path, data) => {
     if (isNode) {
       try {
         await promises.mkdir(dirname(persistentPath), { recursive: true });
-      } catch (error) {
-      }
+      } catch (error) {}
       try {
         if (doSerialize) {
           data = serialize(data);
         }
         await promises.writeFile(persistentPath, data);
-      } catch (error) {
-      }
+      } catch (error) {}
     } else if (isBrowser || isWebWorker) {
       await db().setItem(persistentPath, data);
       if (isWebWorker) {
-        await self.ask({ touchFile: { path, workspace: project } });
+        await self.ask({ touchFile: { path, workspace: workspace } });
       }
     }
   }
 
-  if (project !== originalProject) {
+  if (workspace !== originalWorkspace) {
     // Switch back to the original filesystem, if necessary.
-    setupFilesystem({ fileBase: originalProject });
+    setupFilesystem({ fileBase: originalWorkspace });
   }
 
   return true;

@@ -24,17 +24,9 @@ const api = {
   Z,
   connect,
   faceConnector,
-  toConnector
+  toConnector,
 };
 
-export {
-  Connector,
-  X,
-  Y,
-  Z,
-  connect,
-  faceConnector,
-  toConnector
-};
+export { Connector, X, Y, Z, connect, faceConnector, toConnector };
 
 export default api;

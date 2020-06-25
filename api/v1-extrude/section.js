@@ -2,7 +2,7 @@ import { Shape, layer } from '@jsxcad/api-v1-shape';
 import { getPlans, getSolids } from '@jsxcad/geometry-tagged';
 
 import { Z } from '@jsxcad/api-v1-connector';
-import { section as bspSection } from '@jsxcad/algorithm-bsp-surfaces';
+import { section as bspSection } from '@jsxcad/geometry-bsp';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { makeConvex } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -50,7 +50,12 @@ const toSurface = (plane) => {
   const max = +1e5;
   const min = -1e5;
   const [, from] = toXYPlaneTransforms(plane);
-  const path = [[max, max, 0], [min, max, 0], [min, min, 0], [max, min, 0]];
+  const path = [
+    [max, max, 0],
+    [min, max, 0],
+    [min, min, 0],
+    [max, min, 0],
+  ];
   const polygon = transform(from, path);
   return [polygon];
 };
@@ -63,21 +68,20 @@ export const section = (solidShape, ...connectors) => {
   const planeSurfaces = planes.map(toSurface);
   const shapes = [];
   const normalize = createNormalize3();
-  for (const { solid } of getSolids(solidShape.toKeptGeometry())) {
+  for (const { solid, tags } of getSolids(solidShape.toKeptGeometry())) {
     const sections = bspSection(solid, planeSurfaces, normalize);
-    const surfaces = sections.map(section => makeConvex(section, normalize));
-    // const surfaces = sections.map(section => outlineSurface(section, normalize));
-    // const surfaces = sections.map(section => section);
-    // const surfaces = sections;
+    const surfaces = sections.map((section) => makeConvex(section, normalize));
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
-      shapes.push(Shape.fromGeometry({ surface: surfaces[i] }));
+      shapes.push(Shape.fromGeometry({ surface: surfaces[i], tags }));
     }
   }
   return layer(...shapes);
 };
 
-const sectionMethod = function (...args) { return section(this, ...args); };
+const sectionMethod = function (...args) {
+  return section(this, ...args);
+};
 Shape.prototype.section = sectionMethod;
 
 export default section;

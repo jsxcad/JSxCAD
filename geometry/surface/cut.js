@@ -1,5 +1,9 @@
 import { dot, scale, subtract } from '@jsxcad/math-vec3';
-import { signedDistanceToPoint as planeDistance, equals as planeEquals, splitLineSegmentByPlane } from '@jsxcad/math-plane';
+import {
+  signedDistanceToPoint as planeDistance,
+  equals as planeEquals,
+  splitLineSegmentByPlane,
+} from '@jsxcad/math-plane';
 
 import { cacheCut } from '@jsxcad/cache';
 import { toPlane } from './toPlane';
@@ -24,7 +28,16 @@ const toType = (plane, point) => {
 
 const pointType = [];
 
-export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, frontSurfaces, backSurfaces, frontEdges, backEdges, surface) => {
+export const cutSurface = (
+  plane,
+  coplanarFrontSurfaces,
+  coplanarBackSurfaces,
+  frontSurfaces,
+  backSurfaces,
+  frontEdges,
+  backEdges,
+  surface
+) => {
   const surfacePlane = toPlane(surface);
   if (surfacePlane === undefined) {
     // Degenerate.
@@ -110,8 +123,15 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
             const lastPoint = polygon[last];
             if ((lastType | pointType[current]) === SPANNING) {
               // Break spanning segments at the point of intersection.
-              const rawSpanPoint = splitLineSegmentByPlane(plane, lastPoint, polygon[current]);
-              const spanPoint = subtract(rawSpanPoint, scale(planeDistance(surfacePlane, rawSpanPoint), plane));
+              const rawSpanPoint = splitLineSegmentByPlane(
+                plane,
+                lastPoint,
+                polygon[current]
+              );
+              const spanPoint = subtract(
+                rawSpanPoint,
+                scale(planeDistance(surfacePlane, rawSpanPoint), plane)
+              );
               // Note: Destructive modification of polygon here.
               polygon.splice(current, 0, spanPoint);
               pointType.splice(current, 0, COPLANAR);
@@ -147,14 +167,14 @@ export const cutSurface = (plane, coplanarFrontSurfaces, coplanarBackSurfaces, f
           }
         }
         if (frontPoints.length >= 3) {
-        // Add the polygon that sticks out the front of the plane.
+          // Add the polygon that sticks out the front of the plane.
           if (frontPolygons === undefined) {
             frontPolygons = [];
           }
           frontPolygons.push(frontPoints);
         }
         if (backPoints.length >= 3) {
-        // Add the polygon that sticks out the back of the plane.
+          // Add the polygon that sticks out the back of the plane.
           if (backPolygons === undefined) {
             backPolygons = [];
           }
@@ -184,8 +204,17 @@ const cutImpl = (planeSurface, surface) => {
   const frontEdges = [];
   const backEdges = [];
 
-  cutSurface(toPlane(planeSurface), front, back, front, back, frontEdges, backEdges, surface);
-  if (frontEdges.some(edge => edge[1] === undefined)) {
+  cutSurface(
+    toPlane(planeSurface),
+    front,
+    back,
+    front,
+    back,
+    frontEdges,
+    backEdges,
+    surface
+  );
+  if (frontEdges.some((edge) => edge[1] === undefined)) {
     throw Error(`die/end/missing: ${JSON.stringify(frontEdges)}`);
   }
 

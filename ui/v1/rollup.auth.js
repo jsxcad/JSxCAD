@@ -14,44 +14,43 @@ export default {
   input: 'auth.js',
   output: {
     dir: 'dist',
-    format: 'amd'
+    format: 'amd',
   },
   external: [],
   plugins: [
-    hypothetical(
-      {
-        allowFallthrough: true,
-        allowRealFiles: true,
-        files: {
-          'fast-png': 'export const encode = {}; export const decode = {};',
-          'fs': 'export const promises = {};',
-          'gl': 'const dummy = {}; export default dummy;',
-          'node-fetch': 'export default {};',
-          'os': '',
-          'tty': ''
-        }
-      }),
+    hypothetical({
+      allowFallthrough: true,
+      allowRealFiles: true,
+      files: {
+        'fast-png': 'export const encode = {}; export const decode = {};',
+        fs: 'export const promises = {};',
+        gl: 'const dummy = {}; export default dummy;',
+        'node-fetch': 'export default {};',
+        os: '',
+        tty: '',
+      },
+    }),
     loadz0r(),
     builtins(),
     babel({
       babelrc: false,
       exclude: [/node_modules/, /polybooljs/],
-      presets: ['@babel/preset-react',
-                ['@babel/env', { 'targets': { 'browsers': 'last 1 chrome versions' } }]],
+      presets: [
+        '@babel/preset-react',
+        ['@babel/env', { targets: { browsers: 'last 1 chrome versions' } }],
+      ],
       plugins: [
         '@babel/transform-react-jsx',
-        '@babel/plugin-proposal-class-properties'
-      ]
+        '@babel/plugin-proposal-class-properties',
+      ],
     }),
     commonjs({
       namedExports: {
-        '../../node_modules/binpackingjs/dist/BinPacking.min.js': [
-          'BP2D'
-        ]
-      }
+        '../../node_modules/binpackingjs/dist/BinPacking.min.js': ['BP2D'],
+      },
     }),
     globals(),
     json(),
-    nodeResolve({ jsnext: true, preferBuiltins: true })
-  ]
+    nodeResolve({ jsnext: true, preferBuiltins: true }),
+  ],
 };

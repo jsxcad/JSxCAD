@@ -1,6 +1,7 @@
 import { fromDesignator, registerDesignator } from './designator';
 import { rewriteTags, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
+import { Connector } from '@jsxcad/api-v1-connector';
 import Shape from '@jsxcad/api-v1-shape';
 
 /**
@@ -22,9 +23,14 @@ export const Item = (designator) => {
 
 // Turns the current shape into an item.
 const itemMethod = function (id) {
-  const shape = Shape.fromGeometry(toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() })));
+  const shape = Shape.fromGeometry(
+    toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }))
+  ).with(Connector('center'));
   // Register the designator for re-use.
-  registerDesignator(d => (d === id), () => shape);
+  registerDesignator(
+    (d) => d === id,
+    () => shape
+  );
   return shape;
 };
 

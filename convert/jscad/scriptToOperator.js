@@ -16,9 +16,16 @@ const unpackApi = (api) => {
 };
 
 const csgToSolid = (csg) =>
-  fromPolygons({}, csg.polygons.map(polygon =>
-    polygon.vertices.map(vertex =>
-      [vertex.pos.x, vertex.pos.y, vertex.pos.z])));
+  fromPolygons(
+    {},
+    csg.polygons.map((polygon) =>
+      polygon.vertices.map((vertex) => [
+        vertex.pos.x,
+        vertex.pos.y,
+        vertex.pos.z,
+      ])
+    )
+  );
 
 const createJscadFunction = (script, api) => {
   const parameter = `{ ${Object.keys(api).join(', ')} }`;
@@ -54,7 +61,7 @@ const replaceIncludes = async (ast) => {
         }
       }
       this.traverse(path);
-    }
+    },
   });
   for (const include of includes) {
     const path = include.node.arguments[0].value;
@@ -69,7 +76,10 @@ export const scriptToOperator = async (options = {}, script) => {
   try {
     const src = new TextDecoder('utf8').decode(script);
     const ast = await replaceIncludes(recast.parse(src));
-    const operator = createJscadFunction(recast.print(ast).code, unpackApi(api));
+    const operator = createJscadFunction(
+      recast.print(ast).code,
+      unpackApi(api)
+    );
     return operator;
   } catch (e) {
     console.log(e);

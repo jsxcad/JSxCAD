@@ -39,8 +39,11 @@ const toRgbIntFromName = (name, defaultRgbInt = 0) => {
   return rgbInt;
 };
 
-export const toArrayFromRgbInt = (rgbInt) =>
-  [(rgbInt >> 16) & 0xFF, (rgbInt >> 8) & 0xFF, (rgbInt >> 0) & 0xFF];
+export const toArrayFromRgbInt = (rgbInt) => [
+  (rgbInt >> 16) & 0xff,
+  (rgbInt >> 8) & 0xff,
+  (rgbInt >> 0) & 0xff,
+];
 
 export const toRgbIntFromTags = (tags = [], defaultRgb = [0, 0, 0]) => {
   let rgb = defaultRgb;
@@ -68,7 +71,8 @@ export const toTagFromRgbInt = (rgbInt, defaultTag = 'color/black') =>
 
 export const toTagsFromName = (name) => [toTagFromName(name)];
 
-export const toRgbFromName = (name) => toArrayFromRgbInt(toRgbIntFromName(name));
+export const toRgbFromName = (name) =>
+  toArrayFromRgbInt(toRgbIntFromName(name));
 
 export const toRgbFromTags = (tags, defaultRgb) => {
   const rgbInt = toRgbIntFromTags(tags, null);

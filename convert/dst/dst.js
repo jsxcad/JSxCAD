@@ -22,5 +22,5 @@ export const X_SUB_81 = 1 << 3;
 export const X_ADD_81 = 1 << 2;
 export const SYNC_1 = 1 << 1;
 export const SYNC_2 = 1 << 0;
-export const END = (Y_ADD_81 | Y_SUB_81);
+export const END = Y_ADD_81 | Y_SUB_81;
 export const JUMP_LIMIT = 121;

@@ -29,7 +29,7 @@ const toIdentity = JSON.stringify;
  */
 export const findVertexViolations = (start, ...ends) => {
   const lines = new Map();
-  ends.forEach(end => {
+  ends.forEach((end) => {
     // These are not actually lines, but they all start at the same position, so we can pretend.
     const ray = fromPoints(start, end);
     ensureMapElement(lines, toIdentity(ray)).push(end);
@@ -38,7 +38,7 @@ export const findVertexViolations = (start, ...ends) => {
   const distance = (end) => length(subtract(end, start));
 
   let violations = [];
-  lines.forEach(ends => {
+  lines.forEach((ends) => {
     ends.sort((a, b) => distance(a) - distance(b));
     for (let nth = 1; nth < ends.length; nth++) {
       if (!equals(ends[nth], ends[nth - 1])) {

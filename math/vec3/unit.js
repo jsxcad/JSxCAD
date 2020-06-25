@@ -9,7 +9,5 @@ import { length } from './length';
 export const unit = (vector) => {
   const [x, y, z] = vector;
   const magnitude = length(vector);
-  return [x / magnitude,
-          y / magnitude,
-          z / magnitude];
+  return [x / magnitude, y / magnitude, z / magnitude];
 };

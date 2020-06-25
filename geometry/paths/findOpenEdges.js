@@ -3,7 +3,7 @@ import { getEdges } from '@jsxcad/geometry-path';
 // Expects aligned vertices.
 
 export const findOpenEdges = (paths, isOpen) => {
-  const test = (closed) => isOpen ? !closed : closed;
+  const test = (closed) => (isOpen ? !closed : closed);
 
   const edges = new Set();
 

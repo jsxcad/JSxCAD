@@ -14,15 +14,26 @@ const agent = async ({ ask, question }) => {
       const ecmascript = toEcmascript({}, question.evaluate);
       console.log({ op: 'text', text: `QQ/script: ${question.evaluate}` });
       console.log({ op: 'text', text: `QQ/ecmascript: ${ecmascript}` });
-      const builder = new Function(`{ ${Object.keys(api).join(', ')} }`, ecmascript);
+      const builder = new Function(
+        `{ ${Object.keys(api).join(', ')} }`,
+        ecmascript
+      );
       const constructor = await builder(api);
       const module = await constructor();
       const shape = await module.main();
-      await sys.log({ op: 'text', text: 'Evaluation Succeeded', level: 'serious' });
+      await sys.log({
+        op: 'text',
+        text: 'Evaluation Succeeded',
+        level: 'serious',
+      });
       await sys.log({ op: 'evaluate', status: 'success' });
       if (shape !== undefined && shape.toKeptGeometry) {
         const keptGeometry = shape.toKeptGeometry();
-        await sys.log({ op: 'text', text: 'Preview Rendered', level: 'serious' });
+        await sys.log({
+          op: 'text',
+          text: 'Preview Rendered',
+          level: 'serious',
+        });
         return keptGeometry;
       }
     }

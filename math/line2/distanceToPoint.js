@@ -7,4 +7,5 @@ import { dot } from '@jsxcad/math-vec2';
  * @param {line2} line the 2D line of reference
  * @return {Number} distance between line and point
  */
-export const distanceToPoint = (point, line) => Math.abs(dot(point, line) - line[2]);
+export const distanceToPoint = (point, line) =>
+  Math.abs(dot(point, line) - line[2]);

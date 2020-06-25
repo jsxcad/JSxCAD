@@ -8,12 +8,12 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
 export class ShareUi extends SettingsUi {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {};
   }
 
-  render () {
+  render() {
     const { toast } = this.props;
     return (
       <Modal show={this.props.show} onHide={this.doHide}>

@@ -1,16 +1,8 @@
 /* global Blob */
 
-import {
-  dataUrl,
-  orbitDisplay
-} from '@jsxcad/ui-threejs';
+import { dataUrl, orbitDisplay } from '@jsxcad/ui-threejs';
 
-import {
-  read,
-  readFile,
-  unwatchFiles,
-  watchFile
-} from '@jsxcad/sys';
+import { readFile, unwatchFiles, watchFile } from '@jsxcad/sys';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -27,25 +19,25 @@ import marked from 'marked';
 import saveAs from 'file-saver';
 
 export class OrbitView extends React.PureComponent {
-  static get propTypes () {
+  static get propTypes() {
     return {
       id: PropTypes.string,
       geometry: PropTypes.object,
       path: PropTypes.string,
       width: PropTypes.number,
       height: PropTypes.number,
-      position: PropTypes.array
+      position: PropTypes.array,
     };
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {
-      containerId: `${props.id}/container`
+      containerId: `${props.id}/container`,
     };
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     const { containerId } = this.state;
     let { geometry, path, position } = this.props;
     const container = document.getElementById(containerId);
@@ -57,7 +49,7 @@ export class OrbitView extends React.PureComponent {
     page.style.height = '100%';
 
     if (path) {
-      geometry = await read(path);
+      geometry = await readFile({}, path);
     }
 
     await orbitDisplay({ view, geometry }, page);
@@ -65,7 +57,7 @@ export class OrbitView extends React.PureComponent {
     container.appendChild(page);
   }
 
-  async componentWillUnmount () {
+  async componentWillUnmount() {
     const { containerId, watcher } = this.state;
     const container = document.getElementById(containerId);
 
@@ -83,27 +75,44 @@ export class OrbitView extends React.PureComponent {
     }
   }
 
-  render () {
+  render() {
     const { containerId } = this.state;
     const { width, height } = this.props;
     //    width={width}
     //    height={height}
     return (
-      <ResizableBox className="box"
+      <ResizableBox
+        className="box"
         width={width}
         height={height}
-        style={{ borderStyle: 'solid', borderWidth: 'thin', borderColor: 'blue', display: 'inline-block', width: '90%', height: '90%' }}
+        style={{
+          borderStyle: 'solid',
+          borderWidth: 'thin',
+          borderColor: 'blue',
+          display: 'inline-block',
+          width: '90%',
+          height: '90%',
+        }}
         onClick={(e) => e.stopPropagation()}
         resizeHandles={['ne', 'nw', 'se', 'sw']}
-        handle={(resizeHandle) => <span className={`react-resizable-handle react-resizable-handle-${resizeHandle}`} style={{ zIndex: 2 }} />}>
-        <div id={containerId} style={{ borderStyle: 'solid', borderWidth: 'thin' }}></div>
+        handle={(resizeHandle) => (
+          <span
+            className={`react-resizable-handle react-resizable-handle-${resizeHandle}`}
+            style={{ zIndex: 2 }}
+          />
+        )}
+      >
+        <div
+          id={containerId}
+          style={{ borderStyle: 'solid', borderWidth: 'thin' }}
+        ></div>
       </ResizableBox>
     );
   }
 }
 
 export class StaticView extends React.PureComponent {
-  static get propTypes () {
+  static get propTypes() {
     return {
       id: PropTypes.string,
       geometry: PropTypes.object,
@@ -111,36 +120,52 @@ export class StaticView extends React.PureComponent {
       width: PropTypes.number,
       height: PropTypes.number,
       position: PropTypes.array,
-      onClick: PropTypes.func
+      onClick: PropTypes.func,
     };
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {};
   }
 
-  async componentDidMount () {
+  async componentDidMount() {
     let { path, geometry, width, height, position } = this.props;
 
     if (path) {
-      geometry = await read(path);
+      geometry = await readFile({}, path);
     }
 
-    const url = await dataUrl(Shape.fromGeometry(geometry), { width, height, position });
+    const url = await dataUrl(Shape.fromGeometry(geometry), {
+      width,
+      height,
+      position,
+    });
 
     this.setState({ url });
   }
 
-  render () {
+  render() {
     const { onClick } = this.props;
     const { url } = this.state;
-    return <div style= {{ display: 'inline-block' }}><img src={url} onClick={onClick} style={{ borderStyle: 'dotted', borderWidth: 'thin', verticalAlign: 'baseline' }}/></div>;
+    return (
+      <div style={{ display: 'inline-block' }}>
+        <img
+          src={url}
+          onClick={onClick}
+          style={{
+            borderStyle: 'dotted',
+            borderWidth: 'thin',
+            verticalAlign: 'baseline',
+          }}
+        />
+      </div>
+    );
   }
 }
 
 export class GeometryView extends React.PureComponent {
-  static get propTypes () {
+  static get propTypes() {
     return {
       id: PropTypes.string,
       width: PropTypes.number,
@@ -150,22 +175,49 @@ export class GeometryView extends React.PureComponent {
       mode: PropTypes.string,
       isSelected: PropTypes.bool,
       geometry: PropTypes.object,
-      path: PropTypes.string
+      path: PropTypes.string,
     };
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {};
   }
 
-  render () {
-    const { id, path, geometry, width, height, position, mode, onClick } = this.props;
+  render() {
+    const {
+      id,
+      path,
+      geometry,
+      width,
+      height,
+      position,
+      mode,
+      onClick,
+    } = this.props;
     switch (mode) {
       case 'static':
-        return <StaticView path={path} geometry={geometry} width={width} height={height} position={position} onClick={onClick}/>;
+        return (
+          <StaticView
+            path={path}
+            geometry={geometry}
+            width={width}
+            height={height}
+            position={position}
+            onClick={onClick}
+          />
+        );
       case 'dynamic':
-        return <OrbitView id={id} path={path} geometry={geometry} width={width} height={height} position={position}/>;
+        return (
+          <OrbitView
+            id={id}
+            path={path}
+            geometry={geometry}
+            width={width}
+            height={height}
+            position={position}
+          />
+        );
     }
   }
 }
@@ -176,25 +228,31 @@ const downloadFile = async (filename, data, type) => {
 };
 
 export class DownloadView extends React.PureComponent {
-  static get propTypes () {
+  static get propTypes() {
     return {
       id: PropTypes.string,
-      entries: PropTypes.array
+      entries: PropTypes.array,
     };
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {};
   }
 
-  render () {
+  render() {
     const { entries } = this.props;
 
     const makeDownloadButton = ({ filename, data, type }, index) => {
-      return <Button key={index} variant='outline-primary' onClick={() => downloadFile(filename, data, type)}>
-        {filename}
-      </Button>;
+      return (
+        <Button
+          key={index}
+          variant="outline-primary"
+          onClick={() => downloadFile(filename, data, type)}
+        >
+          {filename}
+        </Button>
+      );
     };
 
     return <ButtonGroup>{entries.map(makeDownloadButton)}</ButtonGroup>;
@@ -202,25 +260,25 @@ export class DownloadView extends React.PureComponent {
 }
 
 export class NotebookUi extends Pane {
-  static get propTypes () {
+  static get propTypes() {
     return {
-      id: PropTypes.string
+      id: PropTypes.string,
     };
   }
 
-  constructor (props) {
+  constructor(props) {
     super(props);
-    this.state = {};
     this.update = this.update.bind(this);
   }
 
-  async componentDidMount () {
-    const watcher = await watchFile('notebook', this.update);
+  async componentDidMount() {
+    const { file } = this.props;
+    const watcher = await watchFile(`notebook/${file}`, this.update);
     this.setState({ watcher });
     await this.update();
   }
 
-  async componentWillUnmount () {
+  async componentWillUnmount() {
     const { watcher } = this.state;
 
     if (watcher) {
@@ -228,25 +286,26 @@ export class NotebookUi extends Pane {
     }
   }
 
-  async update () {
+  async update() {
+    const { file } = this.props;
     const { selected = -1 } = this.state;
 
-    const notebook = await readFile({}, 'notebook');
+    const notebook = await readFile({}, `notebook/${file}`);
     const notes = this.buildNotes({ notebook, selected });
 
     this.setState({ notebook, notes });
   }
 
-  buildNotes ({ notebook = [], selected = -1 }) {
+  buildNotes({ notebook = [], selected = -1 }) {
     const notes = [];
     let nth = 0;
     for (const note of notebook) {
       nth += 1;
-      const isSelected = (nth === selected);
+      const isSelected = nth === selected;
       if (note.geometry) {
         const index = nth;
         const { width, height, position, path, geometry } = note.geometry;
-        const mode = (index === selected) ? 'dynamic' : 'static';
+        const mode = index === selected ? 'dynamic' : 'static';
         const select = (e) => {
           e.stopPropagation();
           const notes = this.buildNotes({ ...this.state, selected: index });
@@ -254,23 +313,41 @@ export class NotebookUi extends Pane {
         };
         // const key = hash(note.geometry);
         const key = Math.random();
-        notes.push(<GeometryView key={key} width={width} height={height} position={position} path={path} geometry={geometry} onClick={select} mode={mode} isSelected={isSelected}/>);
+        notes.push(
+          <GeometryView
+            key={key}
+            width={width}
+            height={height}
+            position={position}
+            path={path}
+            geometry={geometry}
+            onClick={select}
+            mode={mode}
+            isSelected={isSelected}
+          />
+        );
       } else if (note.md) {
         const data = note.md;
         const key = hash(data);
-        notes.push(<div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }}/>);
+        notes.push(
+          <div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }} />
+        );
       } else if (note.download) {
         const { entries } = note.download;
         if (entries) {
           const key = hash(entries);
-          notes.push(<DownloadView key={key} entries={entries}/>);
+          notes.push(<DownloadView key={key} entries={entries} />);
         }
       }
     }
     return notes;
   }
 
-  renderPane () {
+  renderToolbar() {
+    return super.renderToolbar();
+  }
+
+  renderPane() {
     const { id } = this.props;
     const { notes = [] } = this.state;
 
@@ -282,9 +359,15 @@ export class NotebookUi extends Pane {
     };
 
     return (
-      <Container key={id} style={{ height: '100%', display: 'flex', flexFlow: 'column' }}>
+      <Container
+        key={id}
+        style={{ height: '100%', display: 'flex', flexFlow: 'column' }}
+      >
         <Row style={{ width: '100%', height: '100%', flex: '1 1 auto' }}>
-          <Col style={{ width: '100%', height: '100%', overflow: 'auto' }} onClick={unselect}>
+          <Col
+            style={{ width: '100%', height: '100%', overflow: 'auto' }}
+            onClick={unselect}
+          >
             {notes}
           </Col>
         </Row>

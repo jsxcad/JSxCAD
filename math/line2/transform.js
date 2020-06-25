@@ -10,5 +10,8 @@ import { transform as transformVec2 } from '@jsxcad/math-vec2';
  * @param {line2} line the 2D line to transform
  * @returns {line2} a new unbounded 2D line
  */
-export const transform = (matrix, line) => fromPoints(transformVec2(matrix, origin(line)),
-                                                      transformVec2(matrix, direction(line)));
+export const transform = (matrix, line) =>
+  fromPoints(
+    transformVec2(matrix, origin(line)),
+    transformVec2(matrix, direction(line))
+  );

@@ -5,7 +5,20 @@
  * @returns {mat4} out
  */
 export const mirrorByPlane = ([nx, ny, nz, w]) => [
-  (1.0 - 2.0 * nx * nx), (-2.0 * ny * nx), (-2.0 * nz * nx), 0,
-  (-2.0 * nx * ny), (1.0 - 2.0 * ny * ny), (-2.0 * nz * ny), 0,
-  (-2.0 * nx * nz), (-2.0 * ny * nz), (1.0 - 2.0 * nz * nz), 0,
-  (2.0 * nx * w), (2.0 * ny * w), (2.0 * nz * w), 1];
+  1.0 - 2.0 * nx * nx,
+  -2.0 * ny * nx,
+  -2.0 * nz * nx,
+  0,
+  -2.0 * nx * ny,
+  1.0 - 2.0 * ny * ny,
+  -2.0 * nz * ny,
+  0,
+  -2.0 * nx * nz,
+  -2.0 * ny * nz,
+  1.0 - 2.0 * nz * nz,
+  0,
+  2.0 * nx * w,
+  2.0 * ny * w,
+  2.0 * nz * w,
+  1,
+];

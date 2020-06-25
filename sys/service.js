@@ -5,7 +5,12 @@ import { conversation } from './conversation';
 import { log } from './log';
 
 // Sets up a worker with conversational interface.
-export const createService = async ({ nodeWorker, webWorker, agent, workerType }) => {
+export const createService = async ({
+  nodeWorker,
+  webWorker,
+  agent,
+  workerType,
+}) => {
   if (isNode) {
     // const { Worker } = await import('worker_threads');
     const { Worker } = require('worker_threads');

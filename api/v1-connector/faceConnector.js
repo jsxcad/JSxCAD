@@ -51,7 +51,13 @@ export const faceConnector = (shape, id, scoreOrientation, scorePosition) => {
 
   // FIX: We should have a consistent rule for deciding the rotational position of the connector.
   const plane = toPlane(bestSurface);
-  return shape.toConnector(Connector(id, { plane, center: bestPosition, right: add(bestPosition, random(plane)) }));
+  return shape.toConnector(
+    Connector(id, {
+      plane,
+      center: bestPosition,
+      right: add(bestPosition, random(plane)),
+    })
+  );
 };
 
 export const toConnector = (shape, surface, id) => {

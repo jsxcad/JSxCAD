@@ -3,12 +3,9 @@ import writeThreejsPage from './writeThreejsPage';
 
 const api = {
   writeSvgPhoto,
-  writeThreejsPage
+  writeThreejsPage,
 };
 
-export {
-  writeSvgPhoto,
-  writeThreejsPage
-};
+export { writeSvgPhoto, writeThreejsPage };
 
 export default api;

@@ -26,30 +26,38 @@ const fromSolidToTriangles = (solid) => {
 
 export const toStl = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(geometry);
-  let solids = getSolids(keptGeometry).filter(solid => isNotVoid(solid)).map(({ solid }) => solid);
+  let solids = getSolids(keptGeometry)
+    .filter((solid) => isNotVoid(solid))
+    .map(({ solid }) => solid);
   const triangles = fromSolidToTriangles(union(...solids));
-  const output = `solid JSxCAD\n${convertToFacets(options, canonicalize(triangles))}\nendsolid JSxCAD\n`;
+  const output = `solid JSxCAD\n${convertToFacets(
+    options,
+    canonicalize(triangles)
+  )}\nendsolid JSxCAD\n`;
   return new TextEncoder('utf8').encode(output);
 };
 
 const convertToFacets = (options, polygons) =>
-  polygons.map(convertToFacet).filter(facet => facet !== undefined).join('\n');
+  polygons
+    .map(convertToFacet)
+    .filter((facet) => facet !== undefined)
+    .join('\n');
 
-const toStlVector = vector =>
-  `${vector[0]} ${vector[1]} ${vector[2]}`;
+const toStlVector = (vector) => `${vector[0]} ${vector[1]} ${vector[2]}`;
 
-const toStlVertex = vertex =>
-  `vertex ${toStlVector(vertex)}`;
+const toStlVertex = (vertex) => `vertex ${toStlVector(vertex)}`;
 
 const convertToFacet = (polygon) => {
   const plane = toPlane(polygon);
   if (plane !== undefined) {
-    return `facet normal ${toStlVector(toPlane(polygon))}\n` +
-           `outer loop\n` +
-           `${toStlVertex(polygon[0])}\n` +
-           `${toStlVertex(polygon[1])}\n` +
-           `${toStlVertex(polygon[2])}\n` +
-           `endloop\n` +
-           `endfacet`;
+    return (
+      `facet normal ${toStlVector(toPlane(polygon))}\n` +
+      `outer loop\n` +
+      `${toStlVertex(polygon[0])}\n` +
+      `${toStlVertex(polygon[1])}\n` +
+      `${toStlVertex(polygon[2])}\n` +
+      `endloop\n` +
+      `endfacet`
+    );
   }
 };

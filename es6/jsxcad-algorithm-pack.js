@@ -240,7 +240,10 @@ const measureOffsets = (size, pageMargin) => {
   }
 };
 
-const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
+const pack = (
+  { size, itemMargin = 1, pageMargin = 5 },
+  ...geometries
+) => {
   const [xOffset, yOffset, packer] = measureOffsets(size, pageMargin);
 
   const packedGeometries = [];
@@ -271,7 +274,10 @@ const pack = ({ size, itemMargin = 1, pageMargin = 5 }, ...geometries) => {
       const xo = 0 + xOffset + (fit.x - x + itemMargin + pageMargin);
       const yo = 0 + yOffset + (fit.y - y + itemMargin + pageMargin);
       minPoint = min([fit.x + xOffset, fit.y + yOffset, 0], minPoint);
-      maxPoint = max([fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0], maxPoint);
+      maxPoint = max(
+        [fit.x + xOffset + fit.w, fit.y + yOffset + fit.h, 0],
+        maxPoint
+      );
       const transformed = toKeptGeometry(translate([xo, yo, 0], geometry));
       packedGeometries.push(transformed);
     } else {

@@ -1,6 +1,9 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
 import { getAnySurfaces, getPaths } from '@jsxcad/geometry-tagged';
-import { toPlane, transform as transformSurface } from '@jsxcad/geometry-surface';
+import {
+  toPlane,
+  transform as transformSurface,
+} from '@jsxcad/geometry-surface';
 
 import { intersectionOfPathsBySurfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -23,10 +26,14 @@ export const fill = (shape, pathsShape) => {
   return Shape.fromGeometry({ paths: fills });
 };
 
-const fillMethod = function (...args) { return fill(this, ...args); };
+const fillMethod = function (...args) {
+  return fill(this, ...args);
+};
 Shape.prototype.fill = fillMethod;
 
-const withFillMethod = function (...args) { return assemble(this, fill(this, ...args)); };
+const withFillMethod = function (...args) {
+  return assemble(this, fill(this, ...args));
+};
 Shape.prototype.withFill = withFillMethod;
 
 fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';

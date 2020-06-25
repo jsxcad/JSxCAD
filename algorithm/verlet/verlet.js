@@ -2,10 +2,15 @@ import { squaredDistance } from '@jsxcad/math-vec3';
 
 const EPSILON2 = 1e-10;
 
-const relax = (constraint, stepCoefficient) => constraint.relax(constraint, stepCoefficient);
+const relax = (constraint, stepCoefficient) =>
+  constraint.relax(constraint, stepCoefficient);
 
-export const verlet = ({ forces = [], ids = {}, particles = [], constraints = [] } = {}) =>
-  ({ forces, ids, particles: Object.values(particles), constraints });
+export const verlet = ({
+  forces = [],
+  ids = {},
+  particles = [],
+  constraints = [],
+} = {}) => ({ forces, ids, particles: Object.values(particles), constraints });
 
 export const positions = ({ particles }) => {
   const positions = {};
@@ -37,7 +42,10 @@ export const update = ({ constraints, forces, particles }, step = 16) => {
 };
 
 export const isStopped = ({ particles }) => {
-  return particles.every(({ position, lastPosition }) => squaredDistance(position, lastPosition) < EPSILON2);
+  return particles.every(
+    ({ position, lastPosition }) =>
+      squaredDistance(position, lastPosition) < EPSILON2
+  );
 };
 
 export const solve = (verlet, stepLimit = 0) => {

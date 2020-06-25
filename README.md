@@ -1,6 +1,7 @@
 ## JSxCAD
 
 ## Unstable - DO NOT USE
+
 (... unless you read the following carefully ...)
 
 This code is in early development - many things are broken.
@@ -78,19 +79,19 @@ For questions about the API, please contact the [User Group](https://groups.goog
 
 This library is maintained by a group of volunteers. We welcome and encourage anyone to pitch in but please take a moment to read the following guidelines.
 
-* Design discussion on [Design](https://docs.google.com/document/d/1SLwZldZ-3Xxda4b2HtJlQhFxdZDizvTz3ciKIZAyLoY/edit?usp=sharing).
+- Design discussion on [Design](https://docs.google.com/document/d/1SLwZldZ-3Xxda4b2HtJlQhFxdZDizvTz3ciKIZAyLoY/edit?usp=sharing).
 
-* API discussion on [API](https://docs.google.com/document/d/197XMxmHM7dL0wbdeFG33BX3efA6_f5peiO5rUsdQkJc/edit?usp=sharing).
+- API discussion on [API](https://docs.google.com/document/d/197XMxmHM7dL0wbdeFG33BX3efA6_f5peiO5rUsdQkJc/edit?usp=sharing).
 
-* Bug reports are accepted as [Issues](https://github.com/JSxCAD/jsxcad/issues/) via GitHub.
+- Bug reports are accepted as [Issues](https://github.com/JSxCAD/jsxcad/issues/) via GitHub.
 
-* New contributions are accepted as [Pull Requests](https://github.com/JSxCAD/jsxcad/pulls/) via GithHub.
+- New contributions are accepted as [Pull Requests](https://github.com/JSxCAD/jsxcad/pulls/) via GithHub.
 
-* We only accept bug reports and pull requests on **GitHub**.
+- We only accept bug reports and pull requests on **GitHub**.
 
-* If you have a question about how to use JSxCAD, then please start a conversation at the [User Group](https://groups.google.com/forum/#!forum/jsxcad).
+- If you have a question about how to use JSxCAD, then please start a conversation at the [User Group](https://groups.google.com/forum/#!forum/jsxcad).
 
-* If you have a change or new feature in mind, please start a conversation at the [User Group](https://groups.google.com/forum/#!forum/jsxcad).
+- If you have a change or new feature in mind, please start a conversation at the [User Group](https://groups.google.com/forum/#!forum/jsxcad).
 
 Small Note: If editing this README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 

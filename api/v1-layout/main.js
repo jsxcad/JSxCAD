@@ -1,11 +1,9 @@
 import pack from './pack';
 
 const api = {
-  pack
+  pack,
 };
 
-export {
-  pack
-};
+export { pack };
 
 export default api;

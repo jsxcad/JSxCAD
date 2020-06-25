@@ -14,6 +14,7 @@ import fromSolid from './fromSolid';
  * @param {Normalizer} normalize
  * @returns {Loops}
  */
-export const fromSurface = (surface, normalize) => fromSolid([surface], normalize, /* closed= */false);
+export const fromSurface = (surface, normalize) =>
+  fromSolid([surface], normalize, /* closed= */ false);
 
 export default fromSurface;

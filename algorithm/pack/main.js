@@ -1,5 +1,3 @@
 import pack from './pack';
 
-export {
-  pack
-};
+export { pack };

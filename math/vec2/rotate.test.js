@@ -2,7 +2,7 @@ import { canonicalize } from './canonicalize';
 import { rotate } from './rotate';
 import test from 'ava';
 
-const radians = 90 * Math.PI / 180;
+const radians = (90 * Math.PI) / 180;
 
 test('vec2: rotate() called with two paramerters should return a vec2 with correct values', (t) => {
   t.deepEqual(canonicalize(rotate(0, [0, 0])), [0, 0]);

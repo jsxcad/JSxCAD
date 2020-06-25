@@ -9,4 +9,21 @@
  * @param {vec3} v Translation vector
  * @returns {mat4} out
  */
-export const fromTranslation = ([x = 0, y = 0, z = 0]) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
+export const fromTranslation = ([x = 0, y = 0, z = 0]) => [
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  x,
+  y,
+  z,
+  1,
+];

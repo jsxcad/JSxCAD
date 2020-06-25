@@ -85,21 +85,23 @@ let CSG = require('./src/core/CSG');
 let CAG = require('./src/core/CAG');
 
 // FIXME: how many are actual usefull to be exposed as API ?? looks like a code smell
-const { _CSGDEBUG,
-        defaultResolution2D,
-        defaultResolution3D,
-        EPS,
-        angleEPS,
-        areaEPS,
-        all,
-        top,
-        bottom,
-        left,
-        right,
-        front,
-        back,
-        staticTag,
-        getTag } = require('./src/core/constants');
+const {
+  _CSGDEBUG,
+  defaultResolution2D,
+  defaultResolution3D,
+  EPS,
+  angleEPS,
+  areaEPS,
+  all,
+  top,
+  bottom,
+  left,
+  right,
+  front,
+  back,
+  staticTag,
+  getTag,
+} = require('./src/core/constants');
 
 CSG._CSGDEBUG = _CSGDEBUG;
 CSG.defaultResolution2D = defaultResolution2D;
@@ -137,9 +139,21 @@ CSG.Connector = require('./src/core/connectors').Connector;
 CSG.ConnectorList = require('./src/core/connectors').ConnectorList;
 CSG.Properties = require('./src/core/Properties');
 
-const { circle, ellipse, rectangle, roundedRectangle } = require('./src/api/primitives2d');
-const { sphere, cube, roundedCube, cylinder, roundedCylinder,
-        cylinderElliptic, polyhedron } = require('./src/api/primitives3d');
+const {
+  circle,
+  ellipse,
+  rectangle,
+  roundedRectangle,
+} = require('./src/api/primitives2d');
+const {
+  sphere,
+  cube,
+  roundedCube,
+  cylinder,
+  roundedCylinder,
+  cylinderElliptic,
+  polyhedron,
+} = require('./src/api/primitives3d');
 
 CSG.sphere = sphere;
 CSG.cube = cube;
@@ -155,7 +169,12 @@ CAG.rectangle = rectangle;
 CAG.roundedRectangle = roundedRectangle;
 
 // injecting factories
-const { fromPolygons, fromCompactBinary, fromObject, fromSlices } = require('./src/core/CSGFactories');
+const {
+  fromPolygons,
+  fromCompactBinary,
+  fromObject,
+  fromSlices,
+} = require('./src/core/CSGFactories');
 CSG.fromCompactBinary = fromCompactBinary;
 CSG.fromObject = fromObject;
 CSG.fromSlices = fromSlices;
@@ -205,6 +224,9 @@ CSG.Polygon2D.prototype = CAG.prototype;
 // utilities
 const { isCAG, isCSG } = require('./src/core/utils');
 
-const globalApi = Object.assign({}, { CSG, CAG }, optionsParsers, { isCAG, isCSG });
+const globalApi = Object.assign({}, { CSG, CAG }, optionsParsers, {
+  isCAG,
+  isCSG,
+});
 
 module.exports = globalApi;

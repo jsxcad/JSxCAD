@@ -17,7 +17,11 @@ const fromTessellation = (tessellation) => {
 
   const toPoint = (offset) => {
     const vertex = tessPolygons[offset];
-    return [vertices[vertex * 3 + 0], vertices[vertex * 3 + 1], vertices[vertex * 3 + 2]];
+    return [
+      vertices[vertex * 3 + 0],
+      vertices[vertex * 3 + 1],
+      vertices[vertex * 3 + 2],
+    ];
   };
 
   for (let nth = 0; nth < tessPolygons.length; nth += 3) {
@@ -46,11 +50,13 @@ export const makeConvex = (options = {}, polygons) => {
   const contours = polygons.map(toContour);
   // CONISDER: Migrating from tess2 to earclip, given we flatten in solid tessellation anyhow.
   const convex = fromTessellation(
-    Tess2.tesselate({ contours: contours,
-                      windingRule: Tess2.WINDING_ODD,
-                      elementType: Tess2.POLYGONS,
-                      polySize: 3,
-                      vertexSize: 3
-    }));
+    Tess2.tesselate({
+      contours: contours,
+      windingRule: Tess2.WINDING_ODD,
+      elementType: Tess2.POLYGONS,
+      polySize: 3,
+      vertexSize: 3,
+    })
+  );
   return blessAsConvex(convex);
 };

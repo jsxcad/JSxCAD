@@ -29,13 +29,12 @@ export const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
       if (clipInputs.length === 0) {
         return [];
       }
-      const result = clipper.clipToPolyTree(
-        {
-          clipType: ClipType.Intersection,
-          subjectInputs,
-          clipInputs,
-          subjectFillType: PolyFillType.Positive
-        });
+      const result = clipper.clipToPolyTree({
+        clipType: ClipType.Intersection,
+        subjectInputs,
+        clipInputs,
+        subjectFillType: PolyFillType.Positive,
+      });
       a = toPaths(clipper, result, normalize);
     }
   }

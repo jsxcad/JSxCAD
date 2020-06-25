@@ -1,7 +1,13 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
-import { alignVertices, transform as transformSolid } from '@jsxcad/geometry-solid';
+import {
+  alignVertices,
+  transform as transformSolid,
+} from '@jsxcad/geometry-solid';
 import { getPlans, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
-import { toPlane as toPlaneOfSurface, transform as transformSurface } from '@jsxcad/geometry-surface';
+import {
+  toPlane as toPlaneOfSurface,
+  transform as transformSurface,
+} from '@jsxcad/geometry-surface';
 
 import { extrude as extrudeAlgorithm } from '@jsxcad/algorithm-shape';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
@@ -56,14 +62,23 @@ export const extrude = (shape, height = 1, depth = 0) => {
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
     if (surface.length > 0) {
       const plane = toPlaneOfSurface(surface);
-      if (plane[0] === 0 && plane[1] === 0 && plane[2] === 1 && plane[3] === 0) {
+      if (
+        plane[0] === 0 &&
+        plane[1] === 0 &&
+        plane[2] === 1 &&
+        plane[3] === 0
+      ) {
         // Detect Z0.
         // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
         const solid = extrudeAlgorithm(surface, height, depth);
         solids.push(Shape.fromGeometry({ solid, tags }));
       } else {
         const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
-        const z0SolidGeometry = extrudeAlgorithm(transformSurface(toZ0, surface), height, depth);
+        const z0SolidGeometry = extrudeAlgorithm(
+          transformSurface(toZ0, surface),
+          height,
+          depth
+        );
         const solid = alignVertices(transformSolid(fromZ0, z0SolidGeometry));
         solids.push(Shape.fromGeometry({ solid, tags }));
       }
@@ -76,10 +91,14 @@ export const extrude = (shape, height = 1, depth = 0) => {
   return assemble(...solids);
 };
 
-const extrudeMethod = function (...args) { return extrude(this, ...args); };
+const extrudeMethod = function (...args) {
+  return extrude(this, ...args);
+};
 Shape.prototype.extrude = extrudeMethod;
 
 export default extrude;
 
-extrude.signature = 'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
-extrudeMethod.signature = 'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';
+extrude.signature =
+  'extrude(shape:Shape, height:number = 1, depth:number = 1) -> Shape';
+extrudeMethod.signature =
+  'Shape -> extrude(height:number = 1, depth:number = 1) -> Shape';

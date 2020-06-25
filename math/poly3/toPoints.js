@@ -4,4 +4,4 @@
  * @returns {Points}
  */
 
-export const toPoints = polygon => polygon;
+export const toPoints = (polygon) => polygon;

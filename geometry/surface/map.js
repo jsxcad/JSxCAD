@@ -10,7 +10,7 @@ export const map = (original, transform) => {
     original = [];
   }
   if (transform === undefined) {
-    transform = _ => _;
+    transform = (_) => _;
   }
-  return original.map(polygon => transform(polygon));
+  return original.map((polygon) => transform(polygon));
 };

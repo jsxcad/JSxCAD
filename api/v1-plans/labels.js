@@ -11,5 +11,7 @@ const labels = (geometry) => {
   return labels;
 };
 
-const labelsMethod = function () { return labels(this.toKeptGeometry()); };
+const labelsMethod = function () {
+  return labels(this.toKeptGeometry());
+};
 Shape.prototype.labels = labelsMethod;

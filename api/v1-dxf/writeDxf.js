@@ -24,7 +24,9 @@ export const writeDxf = async (options, shape) => {
   await writeFile({}, `geometry/${path}`, geometry);
 };
 
-const method = function (options = {}) { return writeDxf(options, this); };
+const method = function (options = {}) {
+  return writeDxf(options, this);
+};
 Shape.prototype.writeDxf = method;
 
 export default writeDxf;

@@ -24,12 +24,11 @@ export const toPolygons = (loops) => {
   }
   for (const face of faces) {
     const polygon = [];
-    eachLink(face,
-             edge => {
-               if (edge.face !== undefined) {
-                 polygon.push(edge.start);
-               }
-             });
+    eachLink(face, (edge) => {
+      if (edge.face !== undefined) {
+        polygon.push(edge.start);
+      }
+    });
     pushWhenValid(polygons, polygon);
   }
   return polygons;

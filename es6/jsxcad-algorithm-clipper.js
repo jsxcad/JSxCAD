@@ -2507,10 +2507,11 @@ const setup = async () => {
   }
 };
 
-function IntPoint (x, y) {
+function IntPoint(x, y) {
   this.x = x;
   this.y = y;
 }
+
 onBoot(setup);
 
 // CHECK: Should this be sqrt(2)?
@@ -2518,7 +2519,7 @@ const CLEAN_DISTANCE = 1;
 
 const RESOLUTION = 1e6;
 
-const clockOrder = (a) => isClockwise(a) ? 1 : 0;
+const clockOrder = (a) => (isClockwise(a) ? 1 : 0);
 
 // Reorder in-place such that counterclockwise paths preceed clockwise paths.
 const clockSort = (surface) => {
@@ -2530,27 +2531,39 @@ const toInt = (integer) => Math.round(integer * RESOLUTION);
 const toFloat = (integer) => integer / RESOLUTION;
 
 const fromSurface = (surface, normalize) => {
-  const normalized = surface.map(path => path.map(normalize));
-  const scaled = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-  const filtered = scaled.filter(path => toPlane(path) !== undefined);
-  return filtered.map(path => path.map(([X, Y]) => new IntPoint(X, Y)));
+  const normalized = surface.map((path) => path.map(normalize));
+  const scaled = normalized.map((path) =>
+    path.map(([X, Y]) => [toInt(X), toInt(Y), 0])
+  );
+  const filtered = scaled.filter((path) => toPlane(path) !== undefined);
+  return filtered.map((path) => path.map(([X, Y]) => new IntPoint(X, Y)));
 };
 
 const fromSurfaceAsClosedPaths = (surface, normalize) => {
-  const normalized = surface.map(path => path.map(normalize));
-  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
-  const filtered = integers.filter(path => toPlane(path) !== undefined);
-  return filtered.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+  const normalized = surface.map((path) => path.map(normalize));
+  const integers = normalized.map((path) =>
+    path.map(([X, Y]) => [toInt(X), toInt(Y), 0])
+  );
+  const filtered = integers.filter((path) => toPlane(path) !== undefined);
+  return filtered.map((path) => ({
+    data: path.map(([X, Y]) => new IntPoint(X, Y)),
+    closed: true,
+  }));
 };
 
 const fromSurfaceToIntegers = (surface, normalize) => {
-  const normalized = surface.map(path => path.map(normalize));
-  const integers = normalized.map(path => path.map(([X, Y]) => [toInt(X), toInt(Y), 0]));
+  const normalized = surface.map((path) => path.map(normalize));
+  const integers = normalized.map((path) =>
+    path.map(([X, Y]) => [toInt(X), toInt(Y), 0])
+  );
   return integers;
 };
 
 const fromIntegersToClosedPaths = (integers) => {
-  return integers.map(path => ({ data: path.map(([X, Y]) => new IntPoint(X, Y)), closed: true }));
+  return integers.map((path) => ({
+    data: path.map(([X, Y]) => new IntPoint(X, Y)),
+    closed: true,
+  }));
 };
 
 const fromOpenPaths = (paths, normalize) => {
@@ -2597,12 +2610,21 @@ const fromClosedPaths = (paths, normalize) => {
 };
 
 const toSurface = (clipperPaths, normalize) =>
-  clockSort(clipperPaths.map(clipperPath => deduplicate(clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])))));
+  clockSort(
+    clipperPaths.map((clipperPath) =>
+      deduplicate(
+        clipperPath.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))
+      )
+    )
+  );
 
 const toPaths = (clipper, polytree, normalize) => {
   const paths = [];
   for (const path of clipper.openPathsFromPolyTree(polytree)) {
-    paths.push([null, ...path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0]))]);
+    paths.push([
+      null,
+      ...path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])),
+    ]);
   }
   for (const path of clipper.closedPathsFromPolyTree(polytree)) {
     paths.push(path.map(({ x, y }) => normalize([toFloat(x), toFloat(y), 0])));
@@ -2643,10 +2665,18 @@ const doesNotOverlapOrAbut = (a, b) => {
   }
   const [minA, maxA] = measureBoundingBox(a);
   const [minB, maxB] = measureBoundingBox(b);
-  if (maxA[X] < minB[X] - iota) { return true; }
-  if (maxA[Y] < minB[Y] - iota) { return true; }
-  if (maxB[X] < minA[X] - iota) { return true; }
-  if (maxB[Y] < minA[Y] - iota) { return true; }
+  if (maxA[X] < minB[X] - iota) {
+    return true;
+  }
+  if (maxA[Y] < minB[Y] - iota) {
+    return true;
+  }
+  if (maxB[X] < minA[X] - iota) {
+    return true;
+  }
+  if (maxB[Y] < minA[Y] - iota) {
+    return true;
+  }
   return false;
 };
 
@@ -2670,13 +2700,12 @@ const difference = (a, ...z0Surfaces) => {
       if (bPolygons.length === 0) {
         continue;
       }
-      const result = clipper$1.clipToPaths(
-        {
-          clipType: jsAngusjClipperjsWeb_2.Difference,
-          subjectInputs: [{ data: aPolygons, closed: true }],
-          clipInputs: [{ data: bPolygons, closed: true }],
-          subjectFillType: jsAngusjClipperjsWeb_8.Positive
-        });
+      const result = clipper$1.clipToPaths({
+        clipType: jsAngusjClipperjsWeb_2.Difference,
+        subjectInputs: [{ data: aPolygons, closed: true }],
+        clipInputs: [{ data: bPolygons, closed: true }],
+        subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+      });
       a = toSurface(result, normalize);
     }
   }
@@ -2708,13 +2737,12 @@ const intersection = (a, ...z0Surfaces) => {
       if (bPolygons.length === 0) {
         return [];
       }
-      const result = clipper$1.clipToPaths(
-        {
-          clipType: jsAngusjClipperjsWeb_2.Intersection,
-          subjectInputs: [{ data: aPolygons, closed: true }],
-          clipInputs: [{ data: bPolygons, closed: true }],
-          subjectFillType: jsAngusjClipperjsWeb_8.Positive
-        });
+      const result = clipper$1.clipToPaths({
+        clipType: jsAngusjClipperjsWeb_2.Intersection,
+        subjectInputs: [{ data: aPolygons, closed: true }],
+        clipInputs: [{ data: bPolygons, closed: true }],
+        subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+      });
       a = toSurface(result, normalize);
     }
   }
@@ -2746,13 +2774,12 @@ const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
       if (clipInputs.length === 0) {
         return [];
       }
-      const result = clipper$1.clipToPolyTree(
-        {
-          clipType: jsAngusjClipperjsWeb_2.Intersection,
-          subjectInputs,
-          clipInputs,
-          subjectFillType: jsAngusjClipperjsWeb_8.Positive
-        });
+      const result = clipper$1.clipToPolyTree({
+        clipType: jsAngusjClipperjsWeb_2.Intersection,
+        subjectInputs,
+        clipInputs,
+        subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+      });
       a = toPaths(clipper$1, result, normalize);
     }
   }
@@ -3446,12 +3473,11 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   if (subjectInputs.length === 0) {
     return [];
   }
-  const request =
-    {
-      clipType: jsAngusjClipperjsWeb_2.Union,
-      subjectInputs,
-      subjectFillType: jsAngusjClipperjsWeb_8.Positive
-    };
+  const request = {
+    clipType: jsAngusjClipperjsWeb_2.Union,
+    subjectInputs,
+    subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+  };
   const result = clipper$1.clipToPolyTree(request);
   const convexSurface = [];
 
@@ -3471,9 +3497,23 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
       const a = triangles[i + 0];
       const b = triangles[i + 1];
       const c = triangles[i + 2];
-      const triangle = [normalize([earContour[a * 2 + 0] / RESOLUTION, earContour[a * 2 + 1] / RESOLUTION, 0]),
-                        normalize([earContour[b * 2 + 0] / RESOLUTION, earContour[b * 2 + 1] / RESOLUTION, 0]),
-                        normalize([earContour[c * 2 + 0] / RESOLUTION, earContour[c * 2 + 1] / RESOLUTION, 0])];
+      const triangle = [
+        normalize([
+          earContour[a * 2 + 0] / RESOLUTION,
+          earContour[a * 2 + 1] / RESOLUTION,
+          0,
+        ]),
+        normalize([
+          earContour[b * 2 + 0] / RESOLUTION,
+          earContour[b * 2 + 1] / RESOLUTION,
+          0,
+        ]),
+        normalize([
+          earContour[c * 2 + 0] / RESOLUTION,
+          earContour[c * 2 + 1] / RESOLUTION,
+          0,
+        ]),
+      ];
       convexSurface.push(triangle);
     }
   };
@@ -3497,7 +3537,9 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
     walkContour(child);
   }
 
-  const normalized = convexSurface.map(path => path.map(normalize)).filter(path => toPlane(path) !== undefined);
+  const normalized = convexSurface
+    .map((path) => path.map(normalize))
+    .filter((path) => toPlane(path) !== undefined);
   const rectified = [];
   for (const polygon of normalized) {
     if (isClockwise(polygon)) {
@@ -3533,7 +3575,10 @@ const fixTJunctions = (surface) => {
       const colinear = [];
       for (const vertex of vertices) {
         // FIX: Threshold
-        if (Math.abs(distance(start, vertex) + distance(vertex, end) - span) < THRESHOLD) {
+        if (
+          Math.abs(distance(start, vertex) + distance(vertex, end) - span) <
+          THRESHOLD
+        ) {
           // FIX: Clip an ear instead.
           // Vertex is on the open edge.
           colinear.push(vertex);
@@ -3553,7 +3598,7 @@ const fixTJunctions = (surface) => {
 // Here we have a surface with a confused orientation.
 // This reorients the most exterior paths to be ccw.
 
-const reorient = (surface, normalize = p => p) => {
+const reorient = (surface, normalize = (p) => p) => {
   const integers = fromSurfaceToIntegers(surface, normalize);
   const fixed = fixTJunctions(integers);
   const subjectInputs = fromIntegersToClosedPaths(fixed);
@@ -3563,7 +3608,7 @@ const reorient = (surface, normalize = p => p) => {
   const result = clipper$1.clipToPaths({
     clipType: jsAngusjClipperjsWeb_2.Union,
     subjectInputs,
-    subjectFillType: jsAngusjClipperjsWeb_8.NonZero
+    subjectFillType: jsAngusjClipperjsWeb_8.NonZero,
   });
   return toSurface(result, normalize);
 };
@@ -3593,13 +3638,12 @@ const union = (...z0Surfaces) => {
       } else if (bPolygons.length === 0) {
         z0Surfaces.push(a);
       } else {
-        const result = clipper$1.clipToPaths(
-          {
-            clipType: jsAngusjClipperjsWeb_2.Union,
-            subjectInputs: [{ data: aPolygons, closed: true }],
-            clipInputs: [{ data: bPolygons, closed: true }],
-            subjectFillType: jsAngusjClipperjsWeb_8.Positive
-          });
+        const result = clipper$1.clipToPaths({
+          clipType: jsAngusjClipperjsWeb_2.Union,
+          subjectInputs: [{ data: aPolygons, closed: true }],
+          clipInputs: [{ data: bPolygons, closed: true }],
+          subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+        });
         z0Surfaces.push(toSurface(result, normalize));
       }
     }

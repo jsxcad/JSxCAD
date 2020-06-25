@@ -1,7 +1,7 @@
-import { Shape, log } from '@jsxcad/api-v1-shape';
 import { addPending, emit, writeFile } from '@jsxcad/sys';
-import { getLeafs, getPlans, toKeptGeometry } from '@jsxcad/geometry-tagged';
+import { getLeafs, getPlans } from '@jsxcad/geometry-tagged';
 
+import { Shape } from '@jsxcad/api-v1-shape';
 import { toStl as convertToStl } from '@jsxcad/convert-stl';
 import { ensurePages } from '@jsxcad/api-v1-plans';
 
@@ -26,14 +26,20 @@ export const downloadStl = (shape, name, options = {}) => {
     for (let leaf of getLeafs(entry.content)) {
       const op = convertToStl(leaf, options);
       addPending(op);
-      entries.push({ data: op, filename: `${name}_${++index}.stl`, type: 'application/sla' });
+      entries.push({
+        data: op,
+        filename: `${name}_${++index}.stl`,
+        type: 'application/sla',
+      });
     }
   }
   emit({ download: { entries } });
   return shape;
 };
 
-const downloadStlMethod = function (...args) { return downloadStl(this, ...args); };
+const downloadStlMethod = function (...args) {
+  return downloadStl(this, ...args);
+};
 Shape.prototype.downloadStl = downloadStlMethod;
 
 export const toStl = async (shape, options = {}) => {
@@ -44,7 +50,11 @@ export const toStl = async (shape, options = {}) => {
     if (entry.plan.page) {
       for (let leaf of getLeafs(entry.content)) {
         const stl = await convertToStl(leaf, {});
-        pages.push({ stl, leaf: { ...entry, content: leaf }, index: pages.length });
+        pages.push({
+          stl,
+          leaf: { ...entry, content: leaf },
+          index: pages.length,
+        });
       }
     }
   }
@@ -52,17 +62,22 @@ export const toStl = async (shape, options = {}) => {
 };
 
 export const writeStl = async (shape, name, options = {}) => {
-  const start = new Date();
-  log(`writeStl start: ${start}`, 'serious');
-  for (const { stl, leaf, index } of await toStl(shape, {})) {
-    await writeFile({ doSerialize: false }, `output/${name}_${index}.stl`, stl);
-    await writeFile({}, `geometry/${name}_${index}.stl`, toKeptGeometry(leaf));
+  let index = 0;
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    for (let leaf of getLeafs(entry.content)) {
+      const stl = await convertToStl(leaf, options);
+      await writeFile(
+        { doSerialize: false },
+        `output/${name}_${index}.stl`,
+        stl
+      );
+    }
   }
-  const end = new Date();
-  log(`writeStl end: ${end - start}`, 'serious');
 };
 
-const method = function (...args) { return writeStl(this, ...args); };
+const method = function (...args) {
+  return writeStl(this, ...args);
+};
 Shape.prototype.writeStl = method;
 
 export default writeStl;

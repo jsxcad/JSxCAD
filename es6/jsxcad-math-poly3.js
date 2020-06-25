@@ -23,12 +23,12 @@ const map = (original, transform) => {
     original = [];
   }
   if (transform === undefined) {
-    transform = _ => _;
+    transform = (_) => _;
   }
-  return original.map(vertex => transform(vertex));
+  return original.map((vertex) => transform(vertex));
 };
 
-const canonicalize = polygon => map(polygon, canonicalize$1);
+const canonicalize = (polygon) => map(polygon, canonicalize$1);
 
 /**
  * Emits the edges of a polygon in order.
@@ -105,15 +105,18 @@ const areVerticesConvex = (vertices, plane) => {
 //  prevpoint, point, nextpoint: the 3 coordinates (Vector3D instances)
 //  normal: the normal vector of the plane
 const isConvexPoint = (prevpoint, point, nextpoint, plane) => {
-  const crossproduct = cross(subtract(point, prevpoint),
-                             subtract(nextpoint, point));
+  const crossproduct = cross(
+    subtract(point, prevpoint),
+    subtract(nextpoint, point)
+  );
   // The plane of a polygon is structurally equivalent to its normal.
   const crossdotnormal = dot(crossproduct, plane);
   // CHECK: 0 or EPS?
   return crossdotnormal >= 0;
 };
 
-const isConvex = (polygon) => areVerticesConvex(polygon, toPlane(polygon));
+const isConvex = (polygon) =>
+  areVerticesConvex(polygon, toPlane(polygon));
 
 const isCoplanar = (polygon) => {
   const plane = toPlane(polygon);
@@ -165,13 +168,12 @@ const measureArea = (poly3) => {
   const ax = Math.abs(normal[0]);
   const ay = Math.abs(normal[1]);
   const az = Math.abs(normal[2]);
-  const an = Math.sqrt((ax * ax) + (ay * ay) + (az * az)); // length of normal
+  const an = Math.sqrt(ax * ax + ay * ay + az * az); // length of normal
 
   let coord = 3; // ignore Z coordinates
-  if ((ax > ay) && (ax > az)) {
+  if (ax > ay && ax > az) {
     coord = 1; // ignore X coordinates
-  } else
-  if (ay > az) {
+  } else if (ay > az) {
     coord = 2; // ignore Y coordinates
   }
 
@@ -180,40 +182,40 @@ const measureArea = (poly3) => {
   let j = 2;
   switch (coord) {
     case 1: // ignore X coordinates
-    // compute area of 2D projection
+      // compute area of 2D projection
       for (i = 1; i < n; i++) {
         h = i - 1;
         j = (i + 1) % n;
-        area += (vertices[i][1] * (vertices[j][2] - vertices[h][2]));
+        area += vertices[i][1] * (vertices[j][2] - vertices[h][2]);
       }
-      area += (vertices[0][1] * (vertices[1][2] - vertices[n - 1][2]));
+      area += vertices[0][1] * (vertices[1][2] - vertices[n - 1][2]);
       // scale to get area
-      area *= (an / (2 * normal[0]));
+      area *= an / (2 * normal[0]);
       break;
 
     case 2: // ignore Y coordinates
-    // compute area of 2D projection
+      // compute area of 2D projection
       for (i = 1; i < n; i++) {
         h = i - 1;
         j = (i + 1) % n;
-        area += (vertices[i][2] * (vertices[j][0] - vertices[h][0]));
+        area += vertices[i][2] * (vertices[j][0] - vertices[h][0]);
       }
-      area += (vertices[0][2] * (vertices[1][0] - vertices[n - 1][0]));
+      area += vertices[0][2] * (vertices[1][0] - vertices[n - 1][0]);
       // scale to get area
-      area *= (an / (2 * normal[1]));
+      area *= an / (2 * normal[1]);
       break;
 
     case 3: // ignore Z coordinates
     default:
-    // compute area of 2D projection
+      // compute area of 2D projection
       for (i = 1; i < n; i++) {
         h = i - 1;
         j = (i + 1) % n;
-        area += (vertices[i][0] * (vertices[j][1] - vertices[h][1]));
+        area += vertices[i][0] * (vertices[j][1] - vertices[h][1]);
       }
-      area += (vertices[0][0] * (vertices[1][1] - vertices[n - 1][1]));
+      area += vertices[0][0] * (vertices[1][1] - vertices[n - 1][1]);
       // scale to get area
-      area *= (an / (2 * normal[2]));
+      area *= an / (2 * normal[2]);
       break;
   }
 
@@ -269,11 +271,11 @@ const toEdges = (options = {}, polygon) => {
  * @returns {Points}
  */
 
-const toPoints = polygon => polygon;
+const toPoints = (polygon) => polygon;
 
 // Affine transformation of polygon. Returns a new polygon.
 const transform = (matrix, polygon) => {
-  const transformed = map(polygon, vertex => transform$1(matrix, vertex));
+  const transformed = map(polygon, (vertex) => transform$1(matrix, vertex));
   if (isMirroring(matrix)) {
     // Reverse the order to preserve the orientation.
     transformed.reverse();
