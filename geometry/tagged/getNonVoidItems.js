@@ -1,7 +1,7 @@
 import { isNotVoid } from './isNotVoid';
 import { visit } from './visit';
 
-export const getNonVoidItemsItems = (geometry) => {
+export const getNonVoidItems = (geometry) => {
   const items = [];
   const op = (geometry, descend) => {
     if (geometry.item && isNotVoid(geometry)) {
