@@ -714,12 +714,13 @@ const getLayers = (geometry) => {
 const getLeafs = (geometry) => {
   const leafs = [];
   const op = (geometry, descend) => {
-    if (
-      geometry.assembly ||
-      geometry.disjointAssembly ||
-      geometry.layers ||
-      geometry.content
-    ) {
+    if (geometry.assembly ||
+        geometry.disjointAssembly ||
+        geometry.layers) {
+      descend();
+    } else if (geometry.plan) {
+      // This is a bit confused -- the plan is a leaf, but has content.
+      leafs.push(geometry);
       descend();
     } else {
       leafs.push(geometry);
