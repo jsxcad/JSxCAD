@@ -49,6 +49,7 @@ export { getAnySurfaces } from './getAnySurfaces';
 export { getItems } from './getItems';
 export { getLayers } from './getLayers';
 export { getLeafs } from './getLeafs';
+export { getNonVoidItems } from './getNonVoidItems';
 export { getNonVoidPaths } from './getNonVoidPaths';
 export { getNonVoidPlans } from './getNonVoidPlans';
 export { getNonVoidPoints } from './getNonVoidPoints';

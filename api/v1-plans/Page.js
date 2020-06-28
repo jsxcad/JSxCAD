@@ -1,7 +1,7 @@
 import '@jsxcad/api-v1-item';
 
 import { Empty, Layers, Square } from '@jsxcad/api-v1-shapes';
-import { getLeafs, getPlans } from '@jsxcad/geometry-tagged';
+import { getLeafs, getPlans, isNotVoid, visit } from '@jsxcad/geometry-tagged';
 
 import { Hershey } from '@jsxcad/api-v1-font';
 import { Plan } from '@jsxcad/api-v1-plan';
@@ -13,6 +13,26 @@ const MIN = 0;
 const MAX = 1;
 const X = 0;
 const Y = 1;
+
+const getItemNames = (geometry) => {
+  const names = new Set();
+  const op = (geometry, descend) => {
+    if (
+      geometry.item &&
+      isNotVoid(geometry) &&
+      geometry.tags &&
+      geometry.tags.some((tag) => tag.startsWith('item/'))
+    ) {
+      geometry.tags
+        .filter((tag) => tag.startsWith('item/'))
+        .forEach((tag) => names.add(tag.substring(5)));
+    } else {
+      descend();
+    }
+  };
+  visit(geometry, op);
+  return [...names].sort();
+};
 
 export const Page = (
   { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
@@ -40,6 +60,7 @@ export const Page = (
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     const plans = [];
     for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
+      const itemNames = getItemNames(layer);
       plans.push(
         Plan({
           plan: { page: { size, margin: pageMargin } },
@@ -49,7 +70,7 @@ export const Page = (
             .outline()
             .with(
               Hershey(max(pageWidth, pageLength) * labelScale)(
-                `${r(pageWidth)} x ${r(pageLength)}`
+                `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`
               ).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
             )
             .color('red'),
@@ -73,6 +94,7 @@ export const Page = (
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
+        const itemNames = getItemNames(layer);
         plans.push(
           Plan({
             plan: {
@@ -84,7 +106,7 @@ export const Page = (
               .outline()
               .with(
                 Hershey(max(pageWidth, pageLength) * labelScale)(
-                  `${r(pageWidth)} x ${r(pageLength)}`
+                  `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`
                 ).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
               )
               .color('red'),
