@@ -33,6 +33,8 @@
     "@jsxcad/convert-svg": "^0.0.79",
     "@jsxcad/convert-threejs": "^0.0.79",
     "@jsxcad/convert-zip": "^0.0.79",
+    "@jsxcad/geometry-path": "^0.0.79",
+    "@jsxcad/math-vec3": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",
     "abs-svg-path": "^0.1.1",
