@@ -15,8 +15,12 @@ test.beforeEach(async (t) => {
 
 test('Simple', (t) => {
   const surface = intersection(
-    { assembly: [{ z0Surface: [unitSquarePolygon] }] },
     {
+      type: 'assembly',
+      content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
+    },
+    {
+      type: 'z0Surface',
       z0Surface: scale(
         [0.8, 0.8, 0.8],
         rotateZ(Math.PI / 2, [unitRegularTrianglePolygon])
@@ -24,8 +28,11 @@ test('Simple', (t) => {
     }
   );
   t.deepEqual(canonicalize(surface), {
-    assembly: [
+    type: 'assembly',
+    content: [
       {
+        type: 'surface',
+        tags: undefined,
         surface: [
           [
             [0.5, -0.06602, 0],

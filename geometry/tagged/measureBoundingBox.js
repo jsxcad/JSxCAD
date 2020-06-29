@@ -6,6 +6,7 @@ import { measureBoundingBox as measureBoundingBoxOfSolid } from '@jsxcad/geometr
 import { measureBoundingBox as measureBoundingBoxOfSurface } from '@jsxcad/geometry-surface';
 import { measureBoundingBox as measureBoundingBoxOfZ0Surface } from '@jsxcad/geometry-z0surface';
 import { toKeptGeometry } from './toKeptGeometry';
+import { visit } from './visit';
 
 const measureBoundingBoxGeneric = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
@@ -17,9 +18,7 @@ const measureBoundingBoxGeneric = (geometry) => {
   return [minPoint, maxPoint];
 };
 
-export const measureBoundingBox = (rawGeometry) => {
-  const geometry = toKeptGeometry(rawGeometry);
-
+export const measureBoundingBox = (geometry) => {
   let minPoint = [Infinity, Infinity, Infinity];
   let maxPoint = [-Infinity, -Infinity, -Infinity];
 
@@ -28,35 +27,31 @@ export const measureBoundingBox = (rawGeometry) => {
     maxPoint = max(maxPoint, itemMaxPoint);
   };
 
-  const walk = (item) => {
-    if (isVoid(item)) {
+  const op = (geometry, descend) => {
+    if (isVoid(geometry)) {
       return;
     }
-    if (item.assembly) {
-      item.assembly.forEach(walk);
-    } else if (item.layers) {
-      item.layers.forEach(walk);
-    } else if (item.disjointAssembly) {
-      item.disjointAssembly.forEach(walk);
-    } else if (item.item) {
-      walk(item.item);
-    } else if (item.solid) {
-      update(measureBoundingBoxOfSolid(item.solid));
-    } else if (item.surface) {
-      update(measureBoundingBoxOfSurface(item.surface));
-    } else if (item.z0Surface) {
-      update(measureBoundingBoxOfZ0Surface(item.z0Surface));
-    } else if (item.plan) {
-      if (item.plan.page) {
-        update(item.marks);
-      }
-      walk(item.content);
-    } else {
-      update(measureBoundingBoxGeneric(item));
+    switch (geometry.type) {
+      case 'assembly':
+      case 'layers':
+      case 'disjointAssembly':
+      case 'item':
+      case 'plan':
+        return descend();
+      case 'layout':
+        return update(geometry.marks);
+      case 'solid':
+        return update(measureBoundingBoxOfSolid(geometry.solid));
+      case 'surface':
+        return update(measureBoundingBoxOfSurface(geometry.surface));
+      case 'z0Surface':
+        return update(measureBoundingBoxOfZ0Surface(geometry.z0Surface));
+      default:
+        return update(measureBoundingBoxGeneric(geometry));
     }
   };
 
-  walk(geometry);
+  visit(toKeptGeometry(geometry), op);
 
   return [minPoint, maxPoint];
 };

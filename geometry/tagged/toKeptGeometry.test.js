@@ -6,32 +6,37 @@ import { toKeptGeometry } from './toKeptGeometry';
 // Note: toKeptGeometry no-longer removes unkept geometry.
 
 test('Empty', (t) => {
-  const kept = toKeptGeometry({ assembly: [] });
-  t.deepEqual(kept, { disjointAssembly: [] });
+  const kept = toKeptGeometry({ type: 'assembly', content: [] });
+  t.deepEqual(kept, { type: 'disjointAssembly', content: [] });
 });
 
 test('Emptied', (t) => {
   const keptGeometry = toKeptGeometry({
-    assembly: [{ solid: [], tags: ['compose/non-positive'] }],
+    type: 'assembly',
+    content: [{ type: 'solid', solid: [], tags: ['compose/non-positive'] }],
   });
   t.deepEqual(keptGeometry, {
-    disjointAssembly: [{ solid: [], tags: ['compose/non-positive'] }],
+    type: 'disjointAssembly',
+    content: [{ type: 'solid', solid: [], tags: ['compose/non-positive'] }],
   });
 });
 
 test('With Keep', (t) => {
   const geometry = {
-    assembly: [
-      { solid: [], tags: ['user/cube'] },
-      { solid: [], tags: ['user/cylinder'] },
+    type: 'assembly',
+    content: [
+      { type: 'solid', solid: [], tags: ['user/cube'] },
+      { type: 'solid', solid: [], tags: ['user/cylinder'] },
     ],
   };
   const selectedGeometry = keep(['user/cylinder'], geometry);
   const keptGeometry = toKeptGeometry(selectedGeometry);
+  console.log(`QQ/canon: ${JSON.stringify(canonicalize(keptGeometry))}`);
   t.deepEqual(canonicalize(keptGeometry), {
-    disjointAssembly: [
-      { solid: [], tags: ['compose/non-positive', 'user/cube'] },
-      { solid: [], tags: ['user/cylinder'] },
+    type: 'disjointAssembly',
+    content: [
+      { type: 'solid', solid: [], tags: ['compose/non-positive', 'user/cube'] },
+      { type: 'solid', solid: [], tags: ['user/cylinder'] },
     ],
   });
 });

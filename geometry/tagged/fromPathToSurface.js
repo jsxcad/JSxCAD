@@ -1,7 +1,7 @@
 import { cache } from '@jsxcad/cache';
 
 const fromPathToSurfaceImpl = (path) => {
-  return { surface: [path] };
+  return { type: 'surface', surface: [path] };
 };
 
 export const fromPathToSurface = cache(fromPathToSurfaceImpl);

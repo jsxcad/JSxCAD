@@ -15,8 +15,12 @@ test.beforeEach(async (t) => {
 
 test('Simple', (t) => {
   const geometry = difference(
-    { assembly: [{ z0Surface: [unitSquarePolygon] }] },
     {
+      type: 'assembly',
+      content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
+    },
+    {
+      type: 'z0Surface',
       z0Surface: scale(
         [0.6, 0.6, 0.6],
         rotateZ(Math.PI / 2, [unitRegularTrianglePolygon])
@@ -24,9 +28,12 @@ test('Simple', (t) => {
     }
   );
   t.deepEqual(canonicalize(geometry), {
-    assembly: [
+    type: 'assembly',
+    content: [
       {
-        surface: [
+        tags: undefined,
+        type: 'z0Surface',
+        z0Surface: [
           [
             [-0.05773, 0.5, 0],
             [-0.5, 0.5, 0],

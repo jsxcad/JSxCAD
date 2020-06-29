@@ -11,72 +11,93 @@ import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface-bo
 
 const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
-    if (geometry.solid) {
-      const todo = [];
-      for (const geometry of geometries) {
-        for (const { solid } of getSolids(geometry)) {
-          todo.push(solid);
+    switch (geometry.type) {
+      case 'solid': {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { solid } of getSolids(geometry)) {
+            todo.push(solid);
+          }
         }
-      }
-      return {
-        solid: solidDifference(geometry.solid, ...todo),
-        tags: geometry.tags,
-      };
-    } else if (geometry.surface) {
-      // FIX: Solids should cut surfaces
-      const todo = [];
-      for (const geometry of geometries) {
-        for (const { surface } of getSurfaces(geometry)) {
-          todo.push(surface);
-        }
-        for (const { z0Surface } of getZ0Surfaces(geometry)) {
-          todo.push(z0Surface);
-        }
-      }
-      return {
-        surface: surfaceDifference(geometry.surface, ...todo),
-        tags: geometry.tags,
-      };
-    } else if (geometry.z0Surface) {
-      // FIX: Solids should cut surfaces
-      const todoSurfaces = [];
-      const todoZ0Surfaces = [];
-      for (const geometry of geometries) {
-        for (const { surface } of getSurfaces(geometry)) {
-          todoSurfaces.push(surface);
-        }
-        for (const { z0Surface } of getZ0Surfaces(geometry)) {
-          todoZ0Surfaces.push(z0Surface);
-        }
-      }
-      if (todoSurfaces.length > 0) {
         return {
-          surface: surfaceDifference(
-            geometry.z0Surface,
-            ...todoSurfaces,
-            ...todoZ0Surfaces
-          ),
-          tags: geometry.tags,
-        };
-      } else {
-        return {
-          surface: z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces),
+          type: 'solid',
+          solid: solidDifference(geometry.solid, ...todo),
           tags: geometry.tags,
         };
       }
-    } else if (geometry.paths) {
-      const todo = [];
-      for (const geometry of geometries) {
-        for (const { paths } of getPaths(geometry)) {
-          todo.push(paths);
+      case 'surface': {
+        // FIX: Solids should cut surfaces
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todo.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todo.push(z0Surface);
+          }
+        }
+        return {
+          type: 'surface',
+          surface: surfaceDifference(geometry.surface, ...todo),
+          tags: geometry.tags,
+        };
+      }
+      case 'z0Surface': {
+        // FIX: Solids should cut surfaces
+        const todoSurfaces = [];
+        const todoZ0Surfaces = [];
+        for (const geometry of geometries) {
+          for (const { surface } of getSurfaces(geometry)) {
+            todoSurfaces.push(surface);
+          }
+          for (const { z0Surface } of getZ0Surfaces(geometry)) {
+            todoZ0Surfaces.push(z0Surface);
+          }
+        }
+        if (todoSurfaces.length > 0) {
+          return {
+            type: 'surface',
+            surface: surfaceDifference(
+              geometry.z0Surface,
+              ...todoSurfaces,
+              ...todoZ0Surfaces
+            ),
+            tags: geometry.tags,
+          };
+        } else {
+          return {
+            type: 'z0Surface',
+            z0Surface: z0SurfaceDifference(
+              geometry.z0Surface,
+              ...todoZ0Surfaces
+            ),
+            tags: geometry.tags,
+          };
         }
       }
-      return {
-        paths: pathsDifference(geometry.paths, ...todo),
-        tags: geometry.tags,
-      };
-    } else {
-      return descend();
+      case 'paths': {
+        const todo = [];
+        for (const geometry of geometries) {
+          for (const { paths } of getPaths(geometry)) {
+            todo.push(paths);
+          }
+        }
+        return {
+          type: 'paths',
+          paths: pathsDifference(geometry.paths, ...todo),
+          tags: geometry.tags,
+        };
+      }
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'plan':
+      case 'item':
+      case 'layout':
+      case 'points':
+        return descend();
+      default:
+        throw Error(`Unknown geometry type ${JSON.stringify(geometry)}`);
     }
   };
 

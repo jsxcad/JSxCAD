@@ -9,6 +9,7 @@
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
+    "prettier": "prettier --write .",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js"
@@ -49,7 +50,8 @@
     "ava": "^2.4.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "esm": "^3.2.10"
+    "esm": "^3.2.10",
+    "prettier": "^2.0.5"
   },
   "ava": {
     "require": "esm"

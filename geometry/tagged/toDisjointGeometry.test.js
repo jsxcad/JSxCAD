@@ -15,19 +15,27 @@ test.beforeEach(async (t) => {
 
 test('Simple', (t) => {
   const disjoint = toDisjointGeometry({
-    assembly: [
-      { z0Surface: [unitSquarePolygon], tags: ['a'] },
-      { z0Surface: [unitRegularTrianglePolygon], tags: ['b'] },
+    type: 'assembly',
+    content: [
+      { type: 'z0Surface', z0Surface: [unitSquarePolygon], tags: ['a'] },
       {
+        type: 'z0Surface',
+        z0Surface: [unitRegularTrianglePolygon],
+        tags: ['b'],
+      },
+      {
+        type: 'z0Surface',
         z0Surface: rotateZ(Math.PI / 2, [unitRegularTrianglePolygon]),
         tags: ['c'],
       },
     ],
   });
   t.deepEqual(canonicalize(disjoint), {
-    disjointAssembly: [
+    type: 'disjointAssembly',
+    content: [
       {
-        surface: [
+        type: 'z0Surface',
+        z0Surface: [
           [
             [0.36603, 0.36603, 0],
             [0.5, 0.28868, 0],
@@ -39,7 +47,8 @@ test('Simple', (t) => {
         tags: ['a'],
       },
       {
-        surface: [
+        type: 'z0Surface',
+        z0Surface: [
           [
             [-0.18301, 0.68302, 0],
             [-0.5, 0.86603, 0],
@@ -59,7 +68,8 @@ test('Simple', (t) => {
         tags: ['b'],
       },
       {
-        surface: [
+        type: 'z0Surface',
+        z0Surface: [
           [
             [0, 1, 0],
             [-0.86603, -0.5, 0],
@@ -73,6 +83,9 @@ test('Simple', (t) => {
 });
 
 test('Empty', (t) => {
-  const disjoint = toDisjointGeometry({ assembly: [] });
-  t.deepEqual(canonicalize(disjoint), { disjointAssembly: [] });
+  const disjoint = toDisjointGeometry({ type: 'assembly', content: [] });
+  t.deepEqual(canonicalize(disjoint), {
+    type: 'disjointAssembly',
+    content: [],
+  });
 });

@@ -3,7 +3,7 @@ import { eachItem } from './eachItem';
 export const getSolids = (geometry) => {
   const solids = [];
   eachItem(geometry, (item) => {
-    if (item.solid) {
+    if (item.type === 'solid') {
       solids.push(item);
     }
   });

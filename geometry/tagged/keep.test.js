@@ -3,16 +3,19 @@ import test from 'ava';
 
 test('Deep keep', (t) => {
   const assembly = {
-    assembly: [
-      { solid: [], tags: ['plate'] },
+    type: 'assembly',
+    content: [
+      { type: 'solid', solid: [], tags: ['plate'] },
       {
-        assembly: [
-          { solid: [] },
+        type: 'assembly',
+        content: [
+          { type: 'solid', solid: [] },
           {
-            assembly: [
-              { solid: [], tags: ['void'] },
-              { solid: [], tags: ['void'] },
-              { solid: [], tags: ['void'] },
+            type: 'assembly',
+            content: [
+              { type: 'solid', solid: [], tags: ['void'] },
+              { type: 'solid', solid: [], tags: ['void'] },
+              { type: 'solid', solid: [], tags: ['void'] },
             ],
           },
         ],
@@ -21,16 +24,19 @@ test('Deep keep', (t) => {
   };
   const kept = keep(['void'], assembly);
   t.deepEqual(kept, {
-    assembly: [
-      { solid: [], tags: ['compose/non-positive', 'plate'] },
+    type: 'assembly',
+    content: [
+      { type: 'solid', solid: [], tags: ['compose/non-positive', 'plate'] },
       {
-        assembly: [
-          { solid: [], tags: ['compose/non-positive'] },
+        type: 'assembly',
+        content: [
+          { type: 'solid', solid: [], tags: ['compose/non-positive'] },
           {
-            assembly: [
-              { solid: [], tags: ['void'] },
-              { solid: [], tags: ['void'] },
-              { solid: [], tags: ['void'] },
+            type: 'assembly',
+            content: [
+              { type: 'solid', solid: [], tags: ['void'] },
+              { type: 'solid', solid: [], tags: ['void'] },
+              { type: 'solid', solid: [], tags: ['void'] },
             ],
           },
         ],
