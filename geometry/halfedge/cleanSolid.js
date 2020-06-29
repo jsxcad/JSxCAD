@@ -1,8 +1,4 @@
-/**
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Solid} Solid
- */
-
+import './types';
 import clean from './clean';
 import fromSolid from './fromSolid';
 import { junctionSelector } from './junction';

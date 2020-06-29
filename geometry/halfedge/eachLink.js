@@ -1,13 +1,11 @@
-/**
- * @typedef {import("./types").Edge} Edge
- */
+import './types';
 
 /**
- * @typedef {function(Edge): void} Thunk
- * @returns {void}
+ * @typedef {function(Edge):undefined} Thunk
+ * @returns {undefined}
  */
 
-/* @type {function(Edge, Thunk): void} */
+/* @type {function(Edge, Thunk):undefined} */
 
 /**
  * eachLink
@@ -15,7 +13,7 @@
  * @function
  * @param {Edge} loop
  * @param {Thunk} thunk
- * @returns {void}
+ * @returns {undefined}
  */
 export const eachLink = (loop, thunk) => {
   let link = loop;

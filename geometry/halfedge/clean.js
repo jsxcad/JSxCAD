@@ -1,16 +1,12 @@
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Loops} Loops
- */
+import './types';
 
 /**
  * clean
- *
- * @function
- * @param {Loop} loop
- * @returns {Loop|undefined}
+ * @param {Edge} loop
+ * @returns {Edge|undefined}
  */
 export const clean = (loop) => {
+  /** @type {Edge} */
   let link = loop;
   do {
     if (link.next === undefined) {

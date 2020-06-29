@@ -34,7 +34,6 @@ module.exports = {
     'comma-dangle': [0, 'ignore'],
     'space-in-parens': [0, 'ignore'],
     "@orzechowskid/typelint/assignment-types-must-match": [ 'error' ],
-    '@orzechowskid/typelint/function-args-length-must-match': ['error'],
     '@orzechowskid/typelint/function-args-types-must-match': ['error'],
     '@orzechowskid/typelint/function-return-type-must-match': ['error'],
   },
