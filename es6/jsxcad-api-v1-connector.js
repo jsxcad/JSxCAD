@@ -319,14 +319,16 @@ const chop = (shape, connector = Z$1()) => {
   const planeSurface = toSurface(toPlane(connector));
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const cutResult = cut(solid, planeSurface);
-    cuts.push(Shape$1.fromGeometry({ solid: cutResult, tags }));
+    cuts.push(Shape$1.fromGeometry({ type: 'solid', solid: cutResult, tags }));
   }
   for (const { surface, z0Surface, tags } of getAnySurfaces(
     shape.toKeptGeometry()
   )) {
     const cutSurface = surface || z0Surface;
     const cutResult = cut$1(planeSurface, cutSurface);
-    cuts.push(Shape$1.fromGeometry({ surface: cutResult, tags }));
+    cuts.push(
+      Shape$1.fromGeometry({ type: 'surface', surface: cutResult, tags })
+    );
   }
 
   return assemble(...cuts);
@@ -336,9 +338,6 @@ const chopMethod = function (surface) {
   return chop(this, surface);
 };
 Shape$1.prototype.chop = chopMethod;
-
-chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
-chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
 
 const Z$2 = 2;
 

@@ -6,7 +6,7 @@ const buildConvexSurfaceHullImpl = (points) => {
   for (const nth of ConvexHull2d(points)) {
     hull.push(points[nth]);
   }
-  return { z0Surface: [hull.reverse()] };
+  return { type: 'z0Surface', z0Surface: [hull.reverse()] };
 };
 
 export const buildConvexSurfaceHull = cache(buildConvexSurfaceHullImpl);

@@ -3,16 +3,19 @@ import test from 'ava';
 
 test('Deep drop', (t) => {
   const assembly = {
-    assembly: [
-      { solid: [], tags: ['plate'] },
+    type: 'assembly',
+    content: [
+      { type: 'solid', solid: [], tags: ['plate'] },
       {
-        assembly: [
-          { solid: [] },
+        type: 'assembly',
+        content: [
+          { type: 'solid', solid: [] },
           {
-            assembly: [
-              { solid: [], tags: ['void'] },
-              { solid: [], tags: ['void'] },
-              { solid: [], tags: ['void'] },
+            type: 'assembly',
+            content: [
+              { type: 'solid', solid: [], tags: ['void'] },
+              { type: 'solid', solid: [], tags: ['void'] },
+              { type: 'solid', solid: [], tags: ['void'] },
             ],
           },
         ],
@@ -21,16 +24,31 @@ test('Deep drop', (t) => {
   };
   const dropped = drop(['void'], assembly);
   t.deepEqual(dropped, {
-    assembly: [
-      { solid: [], tags: ['plate'] },
+    type: 'assembly',
+    content: [
+      { type: 'solid', solid: [], tags: ['plate'] },
       {
-        assembly: [
-          { solid: [] },
+        type: 'assembly',
+        content: [
+          { type: 'solid', solid: [] },
           {
-            assembly: [
-              { solid: [], tags: ['compose/non-positive', 'void'] },
-              { solid: [], tags: ['compose/non-positive', 'void'] },
-              { solid: [], tags: ['compose/non-positive', 'void'] },
+            type: 'assembly',
+            content: [
+              {
+                type: 'solid',
+                solid: [],
+                tags: ['compose/non-positive', 'void'],
+              },
+              {
+                type: 'solid',
+                solid: [],
+                tags: ['compose/non-positive', 'void'],
+              },
+              {
+                type: 'solid',
+                solid: [],
+                tags: ['compose/non-positive', 'void'],
+              },
             ],
           },
         ],

@@ -56,5 +56,8 @@ export const buildFromSlices = (buildPath, resolution, cap = true) => {
     }
   }
 
-  return { solid: toSolidFromPolygons({}, flipSurface(polygons)) };
+  return {
+    type: 'solid',
+    solid: toSolidFromPolygons({}, flipSurface(polygons)),
+  };
 };

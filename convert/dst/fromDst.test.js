@@ -26,6 +26,7 @@ test('Fetch header', (t) => {
 test('Read dst to z0paths', async (t) => {
   const paths = await fromDst({}, readFileSync('test.dst'));
   t.deepEqual(canonicalize(paths), {
+    type: 'paths',
     paths: [
       [
         null,

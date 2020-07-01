@@ -45,14 +45,16 @@ const downloadStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      const op = toStl(leaf, options);
-      addPending(op);
-      entries.push({
-        data: op,
-        filename: `${name}_${++index}.stl`,
-        type: 'application/sla',
-      });
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const op = toStl(leaf, options);
+        addPending(op);
+        entries.push({
+          data: op,
+          filename: `${name}_${++index}.stl`,
+          type: 'application/sla',
+        });
+      }
     }
   }
   emit({ download: { entries } });
@@ -67,13 +69,15 @@ Shape$1.prototype.downloadStl = downloadStlMethod;
 const writeStl = async (shape, name, options = {}) => {
   let index = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      const stl = await toStl(leaf, options);
-      await writeFile(
-        { doSerialize: false },
-        `output/${name}_${index}.stl`,
-        stl
-      );
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const stl = await toStl(leaf, options);
+        await writeFile(
+          { doSerialize: false },
+          `output/${name}_${index}.stl`,
+          stl
+        );
+      }
     }
   }
 };

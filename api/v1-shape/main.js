@@ -39,7 +39,6 @@ import move from './move';
 import moveX from './moveX';
 import moveY from './moveY';
 import moveZ from './moveZ';
-import nocut from './nocut';
 import orient from './orient';
 import readShape from './readShape';
 import rotate from './rotate';
@@ -76,7 +75,6 @@ export {
   moveX,
   moveY,
   moveZ,
-  nocut,
   orient,
   readShape,
   rotate,

@@ -168,5 +168,8 @@ export const fetchStitches = ({ previousX = 0, previousY = 0 }, fetchBytes) => {
 export const fromDst = async (options = {}, data) => {
   const fetcher = createByteFetcher(data);
   const header = fetchHeader({}, fetcher);
-  return { paths: scale([0.1, 0.1, 0.1], fetchStitches(header, fetcher)) };
+  return {
+    type: 'paths',
+    paths: scale([0.1, 0.1, 0.1], fetchStitches(header, fetcher)),
+  };
 };

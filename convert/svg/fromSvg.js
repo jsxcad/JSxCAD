@@ -159,7 +159,7 @@ const applyTransforms = ({ matrix }, transformText) => {
 
 export const fromSvg = async (input, options = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
-  const geometry = { assembly: [] };
+  const geometry = { type: 'assembly', content: [] };
   const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
 
   const getAttribute = (node, attribute, otherwise) => {
@@ -230,8 +230,12 @@ export const fromSvg = async (input, options = {}) => {
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
-            geometry.assembly.push(
-              transform(scale(matrix), { z0Surface: close(paths), tags })
+            geometry.content.push(
+              transform(scale(matrix), {
+                type: 'z0Surface',
+                z0Surface: close(paths),
+                tags,
+              })
             );
           }
           const stroke = node.getAttribute('stroke');
@@ -244,8 +248,8 @@ export const fromSvg = async (input, options = {}) => {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const tags = toTagsFromName(stroke);
-            geometry.assembly.push(
-              transform(scaledMatrix, { paths: paths, tags })
+            geometry.content.push(
+              transform(scaledMatrix, { type: 'paths', paths: paths, tags })
             );
           }
         };

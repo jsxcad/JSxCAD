@@ -26,31 +26,29 @@ import { fromPolygons as fromPolygonsToSolid } from '@jsxcad/geometry-solid';
 export class Shape {
   close() {
     const geometry = this.toKeptGeometry();
-    if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+    if (!isSingleOpenPath(geometry.content[0])) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(
-      closePath(geometry.disjointAssembly[0].paths[0])
-    );
+    return Shape.fromClosedPath(closePath(geometry.content[0].paths[0]));
   }
 
   concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
       const geometry = shape.toKeptGeometry();
-      if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+      if (!isSingleOpenPath(geometry.content[0])) {
         throw Error(
           `Concatenation requires single open paths: ${JSON.stringify(
             geometry
           )}`
         );
       }
-      paths.push(geometry.disjointAssembly[0].paths[0]);
+      paths.push(geometry.content[0].paths[0]);
     }
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor(geometry = { assembly: [] }, context) {
+  constructor(geometry = { type: 'assembly', content: [] }, context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }
@@ -119,12 +117,14 @@ const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 Shape.fromClosedPath = (path, context) =>
-  fromGeometry({ paths: [closePath(path)] }, context);
+  fromGeometry({ type: 'paths', paths: [closePath(path)] }, context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromOpenPath = (path, context) =>
-  fromGeometry({ paths: [openPath(path)] }, context);
-Shape.fromPath = (path, context) => fromGeometry({ paths: [path] }, context);
-Shape.fromPaths = (paths, context) => fromGeometry({ paths: paths }, context);
+  fromGeometry({ type: 'paths', paths: [openPath(path)] }, context);
+Shape.fromPath = (path, context) =>
+  fromGeometry({ type: 'paths', paths: [path] }, context);
+Shape.fromPaths = (paths, context) =>
+  fromGeometry({ type: 'paths', paths: paths }, context);
 Shape.fromPathToSurface = (path, context) =>
   fromGeometry(fromPathToSurface(path), context);
 Shape.fromPathToZ0Surface = (path, context) =>
@@ -134,16 +134,20 @@ Shape.fromPathsToSurface = (paths, context) =>
 Shape.fromPathsToZ0Surface = (paths, context) =>
   fromGeometry(fromPathsToZ0Surface(paths), context);
 Shape.fromPoint = (point, context) =>
-  fromGeometry({ points: [point] }, context);
+  fromGeometry({ type: 'points', points: [point] }, context);
 Shape.fromPoints = (points, context) =>
-  fromGeometry({ points: points }, context);
+  fromGeometry({ type: 'points', points: points }, context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
-  fromGeometry({ solid: fromPolygonsToSolid({}, polygons) }, context);
+  fromGeometry(
+    { type: 'solid', solid: fromPolygonsToSolid({}, polygons) },
+    context
+  );
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
-  fromGeometry({ z0Surface: polygons }, context);
+  fromGeometry({ type: 'z0Surface', z0Surface: polygons }, context);
 Shape.fromSurfaces = (surfaces, context) =>
-  fromGeometry({ solid: surfaces }, context);
-Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
+  fromGeometry({ type: 'solid', solid: surfaces }, context);
+Shape.fromSolid = (solid, context) =>
+  fromGeometry({ type: 'solid', solid }, context);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

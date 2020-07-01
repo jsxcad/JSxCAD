@@ -20,5 +20,5 @@ export const fromStl = async (stl, { format = 'ascii' } = {}) => {
   for (const [a, b, c] of cells) {
     polygons.push([positions[a], positions[b], positions[c]]);
   }
-  return { solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons({}, polygons) };
 };

@@ -10,14 +10,18 @@ export const measureArea = (rawGeometry) => {
     if (isVoid(geometry)) {
       return;
     }
-    if (geometry.surface) {
-      area += measureAreaOfSurface(geometry.surface);
-    } else if (geometry.z0Surface) {
-      area += measureAreaOfSurface(geometry.z0Surface);
-    } else if (geometry.solid) {
-      for (const surface of geometry.solid) {
-        area += measureAreaOfSurface(surface);
-      }
+    switch (geometry.type) {
+      case 'surface':
+        area += measureAreaOfSurface(geometry.surface);
+        break;
+      case 'z0Surface':
+        area += measureAreaOfSurface(geometry.z0Surface);
+        break;
+      case 'solid':
+        for (const surface of geometry.solid) {
+          area += measureAreaOfSurface(surface);
+        }
+        break;
     }
     descend();
   };

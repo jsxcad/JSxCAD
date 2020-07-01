@@ -12,6 +12,7 @@ test.beforeEach(async (t) => {
 test('Hulling a cube produces a solid cube.', (t) => {
   const solid = buildConvexHull(toPoints(unitCubePolygons));
   t.deepEqual(canonicalize(solid), {
+    type: 'solid',
     solid: [
       [
         [

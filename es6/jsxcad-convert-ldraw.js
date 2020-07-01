@@ -185,6 +185,7 @@ const fromPartToPolygons = async (
 };
 
 const fromLDraw = async (part, { allowFetch = true } = {}) => ({
+  type: 'solid',
   solid: rotateX(
     (-90 * Math.PI) / 180,
     scale(

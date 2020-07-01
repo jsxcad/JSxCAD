@@ -12,8 +12,9 @@ import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 
 export const reconcile = (geometry, normalize = createNormalize3()) =>
   rewrite(geometry, (geometry, descend) => {
-    if (geometry.solid) {
+    if (geometry.type === 'solid') {
       return {
+        type: 'solid',
         solid: reconcileSolid(geometry.solid, normalize),
         tags: geometry.tags,
       };
@@ -28,8 +29,9 @@ export const makeWatertight = (
   onFixed
 ) =>
   rewrite(geometry, (geometry, descend) => {
-    if (geometry.solid) {
+    if (geometry.type === 'solid') {
       return {
+        type: 'solid',
         solid: makeWatertightSolid(geometry.solid, normalize, onFixed),
         tags: geometry.tags,
       };
@@ -41,7 +43,7 @@ export const makeWatertight = (
 export const isWatertight = (geometry) => {
   let watertight = true;
   visit(geometry, (geometry, descend) => {
-    if (geometry.solid && !isWatertightSolid(geometry.solid)) {
+    if (geometry.type === 'solid' && !isWatertightSolid(geometry.solid)) {
       watertight = false;
     }
     return descend();
@@ -52,10 +54,10 @@ export const isWatertight = (geometry) => {
 export const findOpenEdges = (geometry) => {
   const openEdges = [];
   visit(geometry, (geometry, descend) => {
-    if (geometry.solid) {
+    if (geometry.type === 'solid') {
       openEdges.push(...findOpenEdgesOfSolid(geometry.solid).map(close));
     }
     return descend();
   });
-  return { paths: openEdges };
+  return { type: 'paths', paths: openEdges };
 };

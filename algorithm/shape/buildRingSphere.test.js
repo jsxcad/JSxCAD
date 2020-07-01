@@ -3,6 +3,7 @@ import { canonicalize } from '@jsxcad/geometry-tagged';
 import test from 'ava';
 
 const fixZeroes = ({ solid }) => ({
+  type: 'solid',
   solid: solid.map((surface) =>
     surface.map((path) =>
       path.map((point) => point.map((value) => (value === 0 ? 0 : value)))
@@ -13,6 +14,7 @@ const fixZeroes = ({ solid }) => ({
 test('Build a ring sphere', (t) => {
   const polygons = buildRingSphere(8);
   t.deepEqual(fixZeroes(canonicalize(polygons)), {
+    type: 'solid',
     solid: [
       [
         [

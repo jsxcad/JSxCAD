@@ -24,8 +24,12 @@ test.beforeEach(async (t) => {
 
 test('Surface', (t) => {
   const surface = union(
-    { assembly: [{ z0Surface: [unitSquarePolygon] }] },
     {
+      type: 'assembly',
+      content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
+    },
+    {
+      type: 'z0Surface',
       z0Surface: scaleSurface(
         [0.8, 0.8, 0.8],
         rotateSurface(Math.PI / 2, [unitRegularTrianglePolygon])
@@ -33,9 +37,13 @@ test('Surface', (t) => {
     }
   );
   t.deepEqual(canonicalize(surface), {
-    assembly: [
+    type: 'assembly',
+    tags: undefined,
+    content: [
       {
-        surface: [
+        type: 'z0Surface',
+        tags: undefined,
+        z0Surface: [
           [
             [0.5, -0.4, 0],
             [0.69282, -0.4, 0],
@@ -60,18 +68,21 @@ test('Surface', (t) => {
 test('Solid', (t) => {
   const solid = union(
     {
+      type: 'solid',
       solid: translateSolid(
         [0, 0, 0],
         scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
       ),
     },
     {
+      type: 'solid',
       solid: translateSolid(
         [2, 2, 0],
         scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
       ),
     },
     {
+      type: 'solid',
       solid: translateSolid(
         [4, 4, 0],
         scaleSolid([10, 10, 10], solidFromPolygons({}, unitCubePolygons))
@@ -79,6 +90,8 @@ test('Solid', (t) => {
     }
   );
   t.deepEqual(canonicalize(solid), {
+    type: 'solid',
+    tags: undefined,
     solid: [
       [
         [
