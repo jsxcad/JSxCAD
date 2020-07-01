@@ -1,4 +1,4 @@
-import { visit } from './visit';
+import { visit } from './visit.js';
 
 export const getItems = (geometry) => {
   const items = [];

@@ -2,7 +2,7 @@ import { eachPoint as eachPointOfPaths } from '@jsxcad/geometry-paths';
 import { eachPoint as eachPointOfPoints } from '@jsxcad/geometry-points';
 import { eachPoint as eachPointOfSolid } from '@jsxcad/geometry-solid';
 import { eachPoint as eachPointOfSurface } from '@jsxcad/geometry-surface';
-import { visit } from './visit';
+import { visit } from './visit.js';
 
 export const eachPoint = (emit, geometry) => {
   const op = (geometry, descend) => {

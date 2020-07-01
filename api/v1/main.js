@@ -1,8 +1,8 @@
-import './view';
+import './view.js';
 
-import * as api from './api';
+import * as api from './api.js';
 
-import { buildImportModule, registerDynamicModule } from './importModule';
+import { buildImportModule, registerDynamicModule } from './importModule.js';
 
 // Bootstrap importModule.
 
@@ -48,5 +48,5 @@ registerDynamicModule(module('thread'), '@jsxcad/api-v1-thread');
 registerDynamicModule(module('threejs'), '@jsxcad/api-v1-threejs');
 registerDynamicModule(module('units'), '@jsxcad/api-v1-units');
 
-export * from './api';
+export * from './api.js';
 export { importModule };

@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import union from './union';
+import Shape from './Shape.js';
+import union from './union.js';
 
 /**
  *

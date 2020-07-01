@@ -15,9 +15,9 @@ import '@jsxcad/api-v1-svg';
 import '@jsxcad/api-v1-stl';
 // import '@jsxcad/api-v1-view';
 
-export { md } from './md';
+export { md } from './md.js';
 
-export { source } from './source';
+export { source } from './source.js';
 
 export { emit, read, write } from '@jsxcad/sys';
 

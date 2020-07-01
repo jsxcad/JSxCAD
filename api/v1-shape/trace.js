@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { getPaths } from '@jsxcad/geometry-tagged';
 import { segment } from '@jsxcad/geometry-paths';
 

@@ -1,8 +1,8 @@
-import { readFile } from './readFile';
+import { readFile } from './readFile.js';
 import { test } from 'ava';
-import { watchFile } from './watchFile';
-import { watchFileCreation } from './files';
-import { writeFile } from './writeFile';
+import { watchFile } from './watchFile.js';
+import { watchFileCreation } from './files.js';
+import { writeFile } from './writeFile.js';
 
 test('Test writing a new file', async (t) => {
   await writeFile('tmp/1', 'hello');

@@ -1,4 +1,4 @@
-import { Shape, toKeptGeometry } from './Shape';
+import { Shape, toKeptGeometry } from './Shape.js';
 
 /**
  *

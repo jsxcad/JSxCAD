@@ -1,6 +1,6 @@
 import { cacheRewriteTags } from '@jsxcad/cache';
-import { hasMatchingTag } from './hasMatchingTag';
-import { rewrite } from './visit';
+import { hasMatchingTag } from './hasMatchingTag.js';
+import { rewrite } from './visit.js';
 
 const buildCondition = (conditionTags, conditionSpec) => {
   switch (conditionSpec) {

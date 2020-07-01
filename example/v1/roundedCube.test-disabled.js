@@ -1,4 +1,4 @@
-import { main } from './roundedCube';
+import { main } from './roundedCube.js';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
 

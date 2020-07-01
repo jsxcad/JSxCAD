@@ -5,6 +5,7 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "index.js",
   "module": "index.js",
+  "type": "module",
   "scripts": {
     "depcheck": "depcheck --ignores=esm",
     "lint": "eslint *.js",
@@ -32,13 +33,9 @@
   },
   "devDependencies": {
     "argv": "^0.0.2",
-    "ava": "^2.4.0",
+    "ava": "^3.9.0",
     "depcheck": "^0.9.1",
-    "eslint": "^5.15.0",
-    "esm": "^3.2.10"
-  },
-  "ava": {
-    "require": "esm"
+    "eslint": "^5.15.0"
   },
   "private": true,
   "publishConfig": {

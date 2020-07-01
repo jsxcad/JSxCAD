@@ -1,6 +1,6 @@
 import { cross, dot, negate, normalize, subtract } from '@jsxcad/math-vec3';
 
-import { Shape } from './Shape';
+import { Shape } from './Shape.js';
 
 /**
  *

@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { fromRotation } from '@jsxcad/math-mat4';
 
 /**

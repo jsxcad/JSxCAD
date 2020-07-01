@@ -3,7 +3,7 @@ import { getSolids, getSurfaces, getZ0Surfaces } from '@jsxcad/geometry-tagged';
 import Shape from '@jsxcad/api-v1-shape';
 import { toPlane } from '@jsxcad/geometry-surface';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { withConnector } from './faceConnector';
+import { withConnector } from './faceConnector.js';
 
 const Z = 2;
 

@@ -4,8 +4,8 @@ import {
   getNonVoidZ0Surfaces,
 } from '@jsxcad/geometry-tagged';
 
-import { Shape } from './Shape';
-import { assemble } from './assemble';
+import { Shape } from './Shape.js';
+import { assemble } from './assemble.js';
 
 const toWireframeFromSolid = (solid) => {
   const paths = [];

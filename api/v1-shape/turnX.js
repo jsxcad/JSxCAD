@@ -1,4 +1,4 @@
-import { Shape } from './Shape';
+import { Shape } from './Shape.js';
 import { negate } from '@jsxcad/math-vec3';
 
 export const turnX = (shape, angle) => {

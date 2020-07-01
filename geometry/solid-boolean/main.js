@@ -1,3 +1,1 @@
-import { difference, intersection, union } from '@jsxcad/geometry-bsp';
-
-export { difference, intersection, union };
+export { difference, intersection, union } from '@jsxcad/geometry-bsp';

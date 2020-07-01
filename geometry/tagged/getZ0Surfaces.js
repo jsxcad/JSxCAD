@@ -1,4 +1,4 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getZ0Surfaces = (geometry) => {
   const z0Surfaces = [];

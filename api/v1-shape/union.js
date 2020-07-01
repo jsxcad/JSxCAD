@@ -1,4 +1,4 @@
-import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { Shape, fromGeometry, toKeptGeometry } from './Shape.js';
 
 import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 

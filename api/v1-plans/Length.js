@@ -1,7 +1,7 @@
 import { Hershey } from '@jsxcad/api-v1-font';
 import { Path } from '@jsxcad/api-v1-shapes';
 import Plan from '@jsxcad/api-v1-plan';
-import { dp2 } from './dp';
+import { dp2 } from './dp.js';
 
 export const Length = (length) => {
   return Plan({

@@ -1,6 +1,6 @@
 /* global postMessage, onmessage:writable */
 
-import { conversation } from './conversation';
+import { conversation } from './conversation.js';
 
 const say = (message) => postMessage(message);
 const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;

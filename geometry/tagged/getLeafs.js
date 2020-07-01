@@ -1,4 +1,4 @@
-import { visit } from './visit';
+import { visit } from './visit.js';
 
 // Retrieve leaf geometry.
 

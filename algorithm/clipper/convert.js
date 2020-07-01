@@ -5,7 +5,7 @@ import {
   isOpen,
 } from '@jsxcad/geometry-path';
 
-import { IntPoint } from './clipper-lib';
+import { IntPoint } from './clipper-lib.js';
 import { toPlane } from '@jsxcad/math-poly3';
 
 // CHECK: Should this be sqrt(2)?

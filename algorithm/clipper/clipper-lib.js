@@ -1,7 +1,12 @@
-import {
+import clipperjs from './js-angusj-clipperjs-web/index.cjs';
+
+const {
+  ClipType,
   NativeClipperLibRequestedFormat,
-  loadNativeClipperLibInstanceAsync,
-} from './js-angusj-clipperjs-web/index.js';
+  PolyFillType,
+  PolyTree,
+  loadNativeClipperLibInstanceAsync
+} = clipperjs;
 
 import { onBoot } from '@jsxcad/sys';
 
@@ -28,6 +33,6 @@ export {
   ClipType,
   PolyFillType,
   PolyTree,
-} from './js-angusj-clipperjs-web/index.js';
+}
 
 onBoot(setup);

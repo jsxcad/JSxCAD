@@ -6,7 +6,7 @@ import {
   fromZRotation,
 } from '@jsxcad/math-mat4';
 
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 export const rotateX = (angle, assembly) =>
   transform(fromXRotation((angle * Math.PI) / 180), assembly);
@@ -24,53 +24,53 @@ export {
   isWatertight,
   makeWatertight,
   reconcile,
-} from './makeWatertight';
+} from './makeWatertight.js';
 
-export { isNotVoid, isVoid } from './isNotVoid';
+export { isNotVoid, isVoid } from './isNotVoid.js';
 
-export { rewrite, visit } from './visit';
+export { rewrite, visit } from './visit.js';
 
-export { allTags } from './allTags';
-export { assemble } from './assemble';
-export { canonicalize } from './canonicalize';
-export { difference } from './difference';
-export { drop } from './drop';
-export { eachItem } from './eachItem';
-export { eachPoint } from './eachPoint';
-export { flip } from './flip';
-export { fresh } from './fresh';
-export { fromPathToSurface } from './fromPathToSurface';
-export { fromPathToZ0Surface } from './fromPathToZ0Surface';
-export { fromPathsToSurface } from './fromPathsToSurface';
-export { fromPathsToZ0Surface } from './fromPathsToZ0Surface';
-export { fromSurfaceToPaths } from './fromSurfaceToPaths';
-export { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces';
-export { getAnySurfaces } from './getAnySurfaces';
-export { getItems } from './getItems';
-export { getLayers } from './getLayers';
-export { getLeafs } from './getLeafs';
-export { getNonVoidItems } from './getNonVoidItems';
-export { getNonVoidPaths } from './getNonVoidPaths';
-export { getNonVoidPlans } from './getNonVoidPlans';
-export { getNonVoidPoints } from './getNonVoidPoints';
-export { getNonVoidSolids } from './getNonVoidSolids';
-export { getNonVoidSurfaces } from './getNonVoidSurfaces';
-export { getNonVoidZ0Surfaces } from './getNonVoidZ0Surfaces';
-export { getPaths } from './getPaths';
-export { getPlans } from './getPlans';
-export { getPoints } from './getPoints';
-export { getSolids } from './getSolids';
-export { getSurfaces } from './getSurfaces';
-export { getTags } from './getTags';
-export { getZ0Surfaces } from './getZ0Surfaces';
-export { intersection } from './intersection';
-export { keep } from './keep';
-export { measureArea } from './measureArea';
-export { measureBoundingBox } from './measureBoundingBox';
-export { outline } from './outline';
-export { rewriteTags } from './rewriteTags';
-export { toKeptGeometry } from './toKeptGeometry';
-export { toPoints } from './toPoints';
-export { transform } from './transform';
-export { union } from './union';
-export { update } from './update';
+export { allTags } from './allTags.js';
+export { assemble } from './assemble.js';
+export { canonicalize } from './canonicalize.js';
+export { difference } from './difference.js';
+export { drop } from './drop.js';
+export { eachItem } from './eachItem.js';
+export { eachPoint } from './eachPoint.js';
+export { flip } from './flip.js';
+export { fresh } from './fresh.js';
+export { fromPathToSurface } from './fromPathToSurface.js';
+export { fromPathToZ0Surface } from './fromPathToZ0Surface.js';
+export { fromPathsToSurface } from './fromPathsToSurface.js';
+export { fromPathsToZ0Surface } from './fromPathsToZ0Surface.js';
+export { fromSurfaceToPaths } from './fromSurfaceToPaths.js';
+export { getAnyNonVoidSurfaces } from './getAnyNonVoidSurfaces.js';
+export { getAnySurfaces } from './getAnySurfaces.js';
+export { getItems } from './getItems.js';
+export { getLayers } from './getLayers.js';
+export { getLeafs } from './getLeafs.js';
+export { getNonVoidItems } from './getNonVoidItems.js';
+export { getNonVoidPaths } from './getNonVoidPaths.js';
+export { getNonVoidPlans } from './getNonVoidPlans.js';
+export { getNonVoidPoints } from './getNonVoidPoints.js';
+export { getNonVoidSolids } from './getNonVoidSolids.js';
+export { getNonVoidSurfaces } from './getNonVoidSurfaces.js';
+export { getNonVoidZ0Surfaces } from './getNonVoidZ0Surfaces.js';
+export { getPaths } from './getPaths.js';
+export { getPlans } from './getPlans.js';
+export { getPoints } from './getPoints.js';
+export { getSolids } from './getSolids.js';
+export { getSurfaces } from './getSurfaces.js';
+export { getTags } from './getTags.js';
+export { getZ0Surfaces } from './getZ0Surfaces.js';
+export { intersection } from './intersection.js';
+export { keep } from './keep.js';
+export { measureArea } from './measureArea.js';
+export { measureBoundingBox } from './measureBoundingBox.js';
+export { outline } from './outline.js';
+export { rewriteTags } from './rewriteTags.js';
+export { toKeptGeometry } from './toKeptGeometry.js';
+export { toPoints } from './toPoints.js';
+export { transform } from './transform.js';
+export { union } from './union.js';
+export { update } from './update.js';

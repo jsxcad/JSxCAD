@@ -1,11 +1,11 @@
-import { Page, ensurePages } from './Page';
+import { Page, ensurePages } from './Page.js';
 
-import Apothem from './Apothem';
-import Diameter from './Diameter';
-import Label from './Label';
-import Length from './Length';
-import Radius from './Radius';
-import Sketch from './Sketch';
+import Apothem from './Apothem.js';
+import Diameter from './Diameter.js';
+import Label from './Label.js';
+import Length from './Length.js';
+import Radius from './Radius.js';
+import Sketch from './Sketch.js';
 
 const api = {
   Apothem,

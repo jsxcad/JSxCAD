@@ -1,4 +1,4 @@
-// import { RESOLUTION } from './convert';
+// import { RESOLUTION } from './convert.js';
 import { distance } from '@jsxcad/math-vec3';
 import { getEdges } from '@jsxcad/geometry-path';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';

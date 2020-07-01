@@ -5,7 +5,7 @@ import {
   reconcile as reconcileSolid,
 } from '@jsxcad/geometry-solid';
 
-import { rewrite, visit } from './visit';
+import { rewrite, visit } from './visit.js';
 
 import { close } from '@jsxcad/geometry-path';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';

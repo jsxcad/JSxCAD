@@ -1,8 +1,6 @@
-import {
+export {
   toRgbFromTags,
   toTagFromName,
   toTagFromRgbInt,
   toTagsFromName,
-} from './color';
-
-export { toRgbFromTags, toTagFromName, toTagFromRgbInt, toTagsFromName };
+} from './color.js';

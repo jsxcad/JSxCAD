@@ -1,21 +1,21 @@
-import './back';
-import './bottom';
-import './chop';
-import './flat';
-import './front';
-import './left';
-import './on';
-import './right';
-import './top';
-import './unfold';
+import './back.js';
+import './bottom.js';
+import './chop.js';
+import './flat.js';
+import './front.js';
+import './left.js';
+import './on.js';
+import './right.js';
+import './top.js';
+import './unfold.js';
 
-import { faceConnector, toConnector } from './faceConnector';
+import { faceConnector, toConnector } from './faceConnector.js';
 
-import Connector from './Connector';
-import X from './X';
-import Y from './Y';
-import Z from './Z';
-import connect from './connect';
+import Connector from './Connector.js';
+import X from './X.js';
+import Y from './Y.js';
+import Z from './Z.js';
+import connect from './connect.js';
 
 const api = {
   Connector,

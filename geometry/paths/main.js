@@ -1,22 +1,22 @@
 import { fromScaling, fromTranslation } from '@jsxcad/math-mat4';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
-export { butLast } from './butLast';
-export { canonicalize } from './canonicalize';
-export { difference } from './difference';
-export { eachPoint } from './eachPoint';
-export { findOpenEdges } from './findOpenEdges';
-export { flip } from './flip';
-export { intersection } from './intersection';
-export { last } from './last';
-export { measureBoundingBox } from './measureBoundingBox';
-export { segment } from './segment';
-export { toGeneric } from './toGeneric';
-export { toPoints } from './toPoints';
-export { toPolygons } from './toPolygons';
-export { toZ0Polygons } from './toZ0Polygons';
-export { transform } from './transform';
-export { union } from './union';
+export { butLast } from './butLast.js';
+export { canonicalize } from './canonicalize.js';
+export { difference } from './difference.js';
+export { eachPoint } from './eachPoint.js';
+export { findOpenEdges } from './findOpenEdges.js';
+export { flip } from './flip.js';
+export { intersection } from './intersection.js';
+export { last } from './last.js';
+export { measureBoundingBox } from './measureBoundingBox.js';
+export { segment } from './segment.js';
+export { toGeneric } from './toGeneric.js';
+export { toPoints } from './toPoints.js';
+export { toPolygons } from './toPolygons.js';
+export { toZ0Polygons } from './toZ0Polygons.js';
+export { transform } from './transform.js';
+export { union } from './union.js';
 
 export const scale = ([x = 1, y = 1, z = 1], paths) =>
   transform(fromScaling([x, y, z]), paths);

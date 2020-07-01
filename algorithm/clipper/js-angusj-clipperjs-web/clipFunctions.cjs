@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Clipper_1 = require("./Clipper");
-var ClipperError_1 = require("./ClipperError");
-var enums_1 = require("./enums");
+var Clipper_1 = require("./Clipper.cjs");
+var ClipperError_1 = require("./ClipperError.cjs");
+var enums_1 = require("./enums.cjs");
 var devMode = typeof "process" !== "undefined" && process.env && process.env.NODE_ENV !== "production";
 var addPathOrPaths = function (clipper, inputDatas, polyType) {
     if (inputDatas === undefined) {

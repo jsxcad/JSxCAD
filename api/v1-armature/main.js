@@ -1,4 +1,4 @@
-import Armature from './Armature';
+import Armature from './Armature.js';
 
 const api = { Armature };
 export { Armature };

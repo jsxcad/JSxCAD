@@ -10,7 +10,7 @@ import {
   fromPolygons as toBspFromPolygons,
 } from './bsp.js';
 
-import { createNormalize3 } from '@jsxcad/algorithm-quantize.js';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 
 export const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.

@@ -1,5 +1,5 @@
 import { Shape } from '@jsxcad/api-v1-shape';
-import { toConnector } from './faceConnector';
+import { toConnector } from './faceConnector.js';
 
 // Ideally this would be a plane of infinite extent.
 // Unfortunately this makes things like interpolation tricky,

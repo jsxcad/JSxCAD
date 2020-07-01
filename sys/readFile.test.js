@@ -1,7 +1,7 @@
-import { readFile } from './readFile';
-import { setupFilesystem } from './filesystem';
+import { readFile } from './readFile.js';
+import { setupFilesystem } from './filesystem.js';
 import test from 'ava';
-import { writeFile } from './writeFile';
+import { writeFile } from './writeFile.js';
 
 test('Unserialized utf8 read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });

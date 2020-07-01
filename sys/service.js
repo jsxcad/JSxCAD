@@ -1,8 +1,8 @@
 /* global Worker */
 
-import { isBrowser, isNode } from './browserOrNode';
-import { conversation } from './conversation';
-import { log } from './log';
+import { isBrowser, isNode } from './browserOrNode.js';
+import { conversation } from './conversation.js';
+import { log } from './log.js';
 
 // Sets up a worker with conversational interface.
 export const createService = async ({
@@ -12,8 +12,7 @@ export const createService = async ({
   workerType,
 }) => {
   if (isNode) {
-    // const { Worker } = await import('worker_threads');
-    const { Worker } = require('worker_threads');
+    const { Worker } = await import('worker_threads');
     const worker = new Worker(nodeWorker);
     const say = (message) => worker.postMessage(message);
     const { ask, hear } = conversation({ agent, say });

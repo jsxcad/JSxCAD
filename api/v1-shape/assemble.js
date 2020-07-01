@@ -1,4 +1,4 @@
-import { Shape, fromGeometry, toGeometry } from './Shape';
+import { Shape, fromGeometry, toGeometry } from './Shape.js';
 
 import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
 

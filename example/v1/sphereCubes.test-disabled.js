@@ -1,6 +1,6 @@
 Error.stackTraceLimit = Infinity;
 
-import { isExpected, run } from './run';
+import { isExpected, run } from './run.js';
 
 import test from 'ava';
 

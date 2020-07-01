@@ -1,5 +1,5 @@
-import { isNotVoid } from './isNotVoid';
-import { visit } from './visit';
+import { isNotVoid } from './isNotVoid.js';
+import { visit } from './visit.js';
 
 export const getNonVoidItems = (geometry) => {
   const items = [];

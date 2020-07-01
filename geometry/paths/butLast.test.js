@@ -1,4 +1,4 @@
-import { butLast } from './butLast';
+import { butLast } from './butLast.js';
 import test from 'ava';
 
 test('butLast gets all but the last.', (t) => {

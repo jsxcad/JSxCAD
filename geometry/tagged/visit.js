@@ -1,4 +1,4 @@
-import { update } from './update';
+import { update } from './update.js';
 
 export const rewrite = (geometry, op, state) => {
   const walk = (geometry, state) => {

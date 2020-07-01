@@ -4,10 +4,10 @@ import {
 } from '@jsxcad/data-shape';
 
 import { boot } from '@jsxcad/sys';
-import { canonicalize } from './canonicalize';
+import { canonicalize } from './canonicalize.js';
 import { rotateZ } from '@jsxcad/geometry-surface';
 import test from 'ava';
-import { toDisjointGeometry } from './toDisjointGeometry';
+import { toDisjointGeometry } from './toDisjointGeometry.js';
 
 test.beforeEach(async (t) => {
   await boot();

@@ -1,5 +1,5 @@
 import { isVoid, rewrite } from '@jsxcad/geometry-tagged';
-import { Shape } from './Shape';
+import { Shape } from './Shape.js';
 
 const noVoid = (shape, tags, select) => {
   const op = (geometry, descend) => {

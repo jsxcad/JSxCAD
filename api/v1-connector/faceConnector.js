@@ -1,6 +1,6 @@
 import { add, random, scale } from '@jsxcad/math-vec3';
 
-import Connector from './Connector';
+import Connector from './Connector.js';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { toPlane } from '@jsxcad/geometry-surface';
 

@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { intersection } from './intersection';
+import { Shape } from './Shape.js';
+import { intersection } from './intersection.js';
 
 const clipMethod = function (...shapes) {
   return intersection(this, ...shapes);

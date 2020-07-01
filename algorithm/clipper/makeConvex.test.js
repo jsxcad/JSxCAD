@@ -1,7 +1,7 @@
 import { boot } from '@jsxcad/sys';
 import { canonicalize } from '@jsxcad/geometry-paths';
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
-import { makeConvex } from './makeConvex';
+import { makeConvex } from './makeConvex.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {

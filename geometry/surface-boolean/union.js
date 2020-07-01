@@ -1,7 +1,7 @@
-import { equals } from './equals';
-import { toPlane } from './toPlane';
+import { equals } from './equals.js';
+import { toPlane } from './toPlane.js';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from './transform';
+import { transform } from './transform.js';
 import { union as unionZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 
 export const union = (...surfaces) => {

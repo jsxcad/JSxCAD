@@ -2,7 +2,7 @@ import { Circle, Path, Polygon } from '@jsxcad/api-v1-shapes';
 
 import { Hershey } from '@jsxcad/api-v1-font';
 import Plan from '@jsxcad/api-v1-plan';
-import { dp2 } from './dp';
+import { dp2 } from './dp.js';
 
 export const Apothem = (apothem = 1, sides = 32, center = [0, 0, 0]) => {
   const radius = Polygon.toRadiusFromApothem(apothem, sides);

@@ -1,4 +1,4 @@
-import { drop } from './drop';
+import { drop } from './drop.js';
 import test from 'ava';
 
 test('Deep drop', (t) => {

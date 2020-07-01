@@ -1,4 +1,4 @@
-import { measureBoundingBox } from './measureBoundingBox';
+import { measureBoundingBox } from './measureBoundingBox.js';
 import test from 'ava';
 
 test('Check points in assembly are measured.', (t) => {

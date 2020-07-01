@@ -1,4 +1,4 @@
-import { main } from './example001';
+import { main } from './example001.js';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
 

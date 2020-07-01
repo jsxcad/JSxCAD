@@ -1,6 +1,6 @@
-import { difference } from './difference';
-import { rewrite } from './visit';
-import { toTransformedGeometry } from './toTransformedGeometry';
+import { difference } from './difference.js';
+import { rewrite } from './visit.js';
+import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 const linkDisjointAssembly = Symbol('linkDisjointAssembly');
 

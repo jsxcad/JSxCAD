@@ -1,4 +1,4 @@
-import { isExpected, run } from './run';
+.jsimport { isExpected, run } from './run.js';
 
 import test from 'ava';
 
