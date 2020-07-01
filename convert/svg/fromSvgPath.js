@@ -112,6 +112,6 @@ export const fromSvgPath = (svgPath, options = {}) => {
   for (const path of paths) {
     assertGood(path);
   }
-  const geometry = { paths };
+  const geometry = { type: 'paths', paths };
   return geometry;
 };

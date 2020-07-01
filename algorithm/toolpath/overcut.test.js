@@ -6,7 +6,7 @@ import test from 'ava';
 import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
 test('paths', (t) => {
-  const cuts = overcut({ paths: [unitRegularTrianglePolygon] }, 0, 0);
+  const cuts = overcut({ type: 'paths', paths: [unitRegularTrianglePolygon] }, 0, 0);
   t.deepEqual(canonicalize(cuts), [
     [
       [1, 0, 0],

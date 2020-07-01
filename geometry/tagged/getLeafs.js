@@ -9,7 +9,7 @@ export const getLeafs = (geometry) => {
       case 'assembly':
       case 'disjointAssembly':
       case 'layers':
-      case 'content':
+      case 'layout':
         return descend();
       default:
         return leafs.push(geometry);

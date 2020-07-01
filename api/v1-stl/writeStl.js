@@ -23,14 +23,16 @@ export const downloadStl = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      const op = convertToStl(leaf, options);
-      addPending(op);
-      entries.push({
-        data: op,
-        filename: `${name}_${++index}.stl`,
-        type: 'application/sla',
-      });
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const op = convertToStl(leaf, options);
+        addPending(op);
+        entries.push({
+          data: op,
+          filename: `${name}_${++index}.stl`,
+          type: 'application/sla',
+        });
+      }
     }
   }
   emit({ download: { entries } });
@@ -48,13 +50,15 @@ export const toStl = async (shape, options = {}) => {
   const geometry = shape.toKeptGeometry();
   for (const entry of getPlans(geometry)) {
     if (entry.plan.page) {
-      for (let leaf of getLeafs(entry.content)) {
-        const stl = await convertToStl(leaf, {});
-        pages.push({
-          stl,
-          leaf: { ...entry, content: leaf },
-          index: pages.length,
-        });
+      for (const content of entry.content) {
+        for (let leaf of getLeafs(entry.content)) {
+          const stl = await convertToStl(leaf, {});
+          pages.push({
+            stl,
+            leaf: { ...entry, content: leaf },
+            index: pages.length,
+          });
+        }
       }
     }
   }
@@ -64,13 +68,15 @@ export const toStl = async (shape, options = {}) => {
 export const writeStl = async (shape, name, options = {}) => {
   let index = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      const stl = await convertToStl(leaf, options);
-      await writeFile(
-        { doSerialize: false },
-        `output/${name}_${index}.stl`,
-        stl
-      );
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const stl = await convertToStl(leaf, options);
+        await writeFile(
+          { doSerialize: false },
+          `output/${name}_${index}.stl`,
+          stl
+        );
+      }
     }
   }
 };

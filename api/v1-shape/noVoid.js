@@ -4,7 +4,7 @@ import { Shape } from './Shape';
 const noVoid = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
-      return { layers: [] };
+      return { type: 'layers', content: [] };
     } else {
       return descend();
     }

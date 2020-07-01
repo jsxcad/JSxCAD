@@ -18,7 +18,7 @@ const getItemNames = (geometry) => {
   const names = new Set();
   const op = (geometry, descend) => {
     if (
-      geometry.item &&
+      geometry.type === 'item' &&
       isNotVoid(geometry) &&
       geometry.tags &&
       geometry.tags.some((tag) => tag.startsWith('item/'))
@@ -49,7 +49,7 @@ export const Page = (
   if (size) {
     // Content fits to page size.
     const packSize = [];
-    const content = pack(Shape.fromGeometry({ layers }), {
+    const content = pack(Shape.fromGeometry({ type: 'layers', content: layers }), {
       size,
       pageMargin,
       itemMargin,
@@ -59,13 +59,13 @@ export const Page = (
     const pageWidth = packSize[MAX][X] - packSize[MIN][X];
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     const plans = [];
-    for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
+    for (const layer of content.toKeptGeometry().content[0].content) {
       const itemNames = getItemNames(layer);
       plans.push(
         Plan({
           plan: { page: { size, margin: pageMargin } },
           marks: packSize,
-          content: Shape.fromGeometry(layer),
+          content: [Shape.fromGeometry(layer)],
           visualization: Square(pageWidth, pageLength)
             .outline()
             .with(
@@ -81,7 +81,7 @@ export const Page = (
   } else {
     const packSize = [];
     // Page fits to content size.
-    const content = pack(Shape.fromGeometry({ layers }), {
+    const content = pack(Shape.fromGeometry({ type: 'layers', content: layers }), {
       pageMargin,
       itemMargin,
       perLayout: itemsPerPage,
@@ -93,14 +93,14 @@ export const Page = (
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
-      for (const layer of content.toKeptGeometry().disjointAssembly[0].layers) {
+      for (const layer of content.toKeptGeometry().content[0].content) {
         const itemNames = getItemNames(layer);
         plans.push(
           Plan({
             plan: {
               page: { size: [pageWidth, pageLength], margin: pageMargin },
             },
-            content: Shape.fromGeometry(layer).center(),
+            content: [Shape.fromGeometry(layer).center()],
             marks: packSize,
             visualization: Square(pageWidth, pageLength)
               .outline()

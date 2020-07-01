@@ -96,9 +96,8 @@ const differenceImpl = (geometry, ...geometries) => {
       case 'layout':
       case 'points':
         return descend();
-      default:
-        throw Error(`Unknown geometry type ${JSON.stringify(geometry)}`);
     }
+    throw Error(`Unknown geometry type ${JSON.stringify(geometry)}`);
   };
 
   return rewrite(geometry, op);

@@ -8,7 +8,7 @@ export const rewrite = (geometry, op, state) => {
         (changes, state) =>
           update(
             geometry,
-            { content: geometry.content.map((entry) => walk(entry, state)) },
+            { content: geometry.content && geometry.content.map((entry) => walk(entry, state)) },
             changes
           ),
         walk,
@@ -24,7 +24,7 @@ export const rewrite = (geometry, op, state) => {
 export const visit = (geometry, op, state) => {
   const walk = (geometry, state) => {
     if (geometry.content) {
-      return op(geometry, (_) => geometry.content.forEach(walk), state);
+      return op(geometry, (_) => geometry.content && geometry.content.forEach(walk), state);
     } else {
       return op(geometry, (_) => undefined, state);
     }

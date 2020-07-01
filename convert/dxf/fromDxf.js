@@ -34,7 +34,7 @@ export const fromDxf = async (options = {}, data) => {
           // Shape false means closed.
           path.unshift(null);
         }
-        assembly.push({ paths: [path], tags });
+        assembly.push({ type: 'paths', paths: [path], tags });
         break;
       }
       case 'INSERT': {
@@ -60,7 +60,7 @@ export const fromDxf = async (options = {}, data) => {
         throw Error(`die due to entity: ${JSON.stringify(entity)}`);
     }
   }
-  return { assembly };
+  return { type: 'assembly', content: assembly };
 };
 
 export default fromDxf;

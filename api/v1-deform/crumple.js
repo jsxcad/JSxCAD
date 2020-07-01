@@ -30,12 +30,12 @@ export const crumple = (
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
     assembly.push({
-      solid: deform(makeWatertight(solid), perturb, min, max, resolution),
+      type: 'solid', solid: deform(makeWatertight(solid), perturb, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const crumpleMethod = function (...args) {

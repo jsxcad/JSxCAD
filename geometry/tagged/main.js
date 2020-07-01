@@ -67,7 +67,6 @@ export { intersection } from './intersection';
 export { keep } from './keep';
 export { measureArea } from './measureArea';
 export { measureBoundingBox } from './measureBoundingBox';
-export { nonNegative } from './nonNegative';
 export { outline } from './outline';
 export { rewriteTags } from './rewriteTags';
 export { toKeptGeometry } from './toKeptGeometry';

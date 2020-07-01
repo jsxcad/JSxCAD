@@ -9,14 +9,16 @@ export const downloadSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      const op = convertToSvg(leaf, options);
-      addPending(op);
-      entries.push({
-        data: op,
-        filename: `${name}_${++index}.svg`,
-        type: 'image/svg+xml',
-      });
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const op = convertToSvg(leaf, options);
+        addPending(op);
+        entries.push({
+          data: op,
+          filename: `${name}_${++index}.svg`,
+          type: 'image/svg+xml',
+        });
+      }
     }
   }
   emit({ download: { entries } });
@@ -34,13 +36,15 @@ export const toSvg = async (shape, options = {}) => {
   const geometry = shape.toKeptGeometry();
   for (const entry of getPlans(geometry)) {
     if (entry.plan.page) {
-      for (let leaf of getLeafs(entry.content)) {
-        const svg = await convertToSvg(leaf);
-        pages.push({
-          svg,
-          leaf: { ...entry, content: leaf },
-          index: pages.length,
-        });
+      for (const content of entry.content) {
+        for (let leaf of getLeafs(content)) {
+          const svg = await convertToSvg(leaf);
+          pages.push({
+            svg,
+            leaf: { ...entry, content: leaf },
+            index: pages.length,
+          });
+        }
       }
     }
   }
@@ -59,13 +63,15 @@ export const writeSvg = async (shape, name, options = {}) => {
 export const writeSvg = async (shape, name, options = {}) => {
   let index = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (let leaf of getLeafs(entry.content)) {
-      const svg = await convertToSvg(leaf, options);
-      await writeFile(
-        { doSerialize: false },
-        `output/${name}_${index}.svg`,
-        svg
-      );
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const svg = await convertToSvg(leaf, options);
+        await writeFile(
+          { doSerialize: false },
+          `output/${name}_${index}.svg`,
+          svg
+        );
+      }
     }
   }
 };

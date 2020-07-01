@@ -6,12 +6,13 @@ export const Plan = (
 ) => {
   let visualizationGeometry =
     visualization === undefined
-      ? { assembly: [] }
+      ? { type: 'assembly', content: [] }
       : visualization.toKeptGeometry();
   let contentGeometry =
-    content === undefined ? { assembly: [] } : content.toKeptGeometry();
+    content === undefined ? [] : content.map(shape => shape.toKeptGeometry());
   const shape = Shape.fromGeometry(
     {
+      type: 'plan',
       plan,
       marks,
       planes,

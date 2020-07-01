@@ -4,7 +4,7 @@ import { rewrite } from '@jsxcad/geometry-tagged';
 const noPlan = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (geometry.plan) {
-      return { layers: [] };
+      return { type: 'layers', content: [] };
     } else {
       return descend();
     }

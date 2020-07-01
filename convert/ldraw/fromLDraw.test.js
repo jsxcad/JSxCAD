@@ -5,6 +5,7 @@ import { fromLDraw } from './fromLDraw';
 import test from 'ava';
 
 const fixZeroes = ({ solid }) => ({
+  type: 'solid',
   solid: solid.map((surface) =>
     surface.map((path) =>
       path.map((point) => point.map((value) => (value === 0 ? 0 : value)))
@@ -50,6 +51,7 @@ test('Load a file', async (t) => {
   );
   const solid = await fromLDraw('3024', { allowFetch: false });
   t.deepEqual(fixZeroes(canonicalize(solid)), {
+    type: 'solid',
     solid: [
       [
         [

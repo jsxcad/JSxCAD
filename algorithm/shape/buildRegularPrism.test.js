@@ -11,8 +11,10 @@ test.beforeEach(async (t) => {
 test('A simple triangular prism', (t) => {
   const geometry = toKeptGeometry(buildRegularPrism(3));
   t.deepEqual(canonicalize(geometry), {
-    disjointAssembly: [
+    type: 'disjointAssembly',
+    content: [
       {
+        type: 'solid',
         solid: [
           [
             [

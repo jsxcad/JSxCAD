@@ -10,9 +10,9 @@ test.beforeEach(async (t) => {
 test('Triangle', async (t) => {
   const svg = await toSvg(
     {
-      disjointAssembly: [
-        { z0Surface: buildRegularPolygon(3).z0Surface, tags: ['color/blue'] },
-        { paths: buildRegularPolygon(3).z0Surface, tags: ['color/red'] },
+      type: 'disjointAssembly', content: [
+        { type: 'z0Surface', z0Surface: buildRegularPolygon(3).z0Surface, tags: ['color/blue'] },
+        { type: 'paths', paths: buildRegularPolygon(3).z0Surface, tags: ['color/red'] },
       ],
     },
     { padding: 2 }
@@ -30,7 +30,7 @@ test('Triangle', async (t) => {
 });
 
 test('Octagon', async (t) => {
-  const svg = await toSvg({ surface: buildRegularPolygon(8).z0Surface });
+  const svg = await toSvg({ type: 'surface', surface: buildRegularPolygon(8).z0Surface });
   t.is(
     new TextDecoder('utf8').decode(svg),
     `<?xml version="1.0" encoding="UTF-8"?>

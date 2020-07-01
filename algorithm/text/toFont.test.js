@@ -13,7 +13,8 @@ test('Render a letter', async (t) => {
   const font = toFont({}, bytes);
   const letterA = font({}, 'ab');
   t.deepEqual(canonicalize(letterA), {
-    surface: [
+    type: 'z0Surface',
+    z0Surface: [
       [
         [0.2025, 0.00021, 0],
         [0.21862, 0.00853, 0],

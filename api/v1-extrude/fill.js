@@ -23,7 +23,7 @@ export const fill = (shape, pathsShape) => {
       fills.push(...fill);
     }
   }
-  return Shape.fromGeometry({ paths: fills });
+  return Shape.fromGeometry({ type: 'paths', paths: fills });
 };
 
 const fillMethod = function (...args) {
@@ -35,9 +35,5 @@ const withFillMethod = function (...args) {
   return assemble(this, fill(this, ...args));
 };
 Shape.prototype.withFill = withFillMethod;
-
-fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
-fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
-withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
 
 export default fill;

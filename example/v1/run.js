@@ -6,6 +6,7 @@ import { importModule } from '@jsxcad/api-v1';
 import { toEcmascript } from '@jsxcad/compiler';
 
 export const run = async (target = process.argv[2], base = 'observed') => {
+  Error.stackTraceLimit = Infinity;
   await boot();
   const start = new Date();
   setupFilesystem({ fileBase: `${base}/${target}` });

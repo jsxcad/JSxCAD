@@ -15,12 +15,12 @@ export const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const radians = (angle / height) * (Math.PI / 180);
     const rotate = (point) => rotateZ(point, radians * (point[Z] - min[Z]));
     assembly.push({
-      solid: deform(makeWatertight(solid), rotate, min, max, resolution),
+      type: 'solid', solid: deform(makeWatertight(solid), rotate, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const twistMethod = function (...args) {

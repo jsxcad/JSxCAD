@@ -81,7 +81,7 @@ export const voxels = (shape, resolution = 1) => {
       }
     }
   }
-  return Shape.fromGeometry({ solid: fromPolygons({}, polygons) });
+  return Shape.fromGeometry({ type: 'solid', solid: fromPolygons({}, polygons) });
 };
 
 const voxelsMethod = function (...args) {

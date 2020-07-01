@@ -56,7 +56,7 @@ export const extrude = (shape, height = 1, depth = 0) => {
   for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
       const solid = alignVertices(extrudeAlgorithm(z0Surface, height, depth));
-      solids.push(Shape.fromGeometry({ solid, tags }));
+      solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
     }
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
@@ -71,7 +71,7 @@ export const extrude = (shape, height = 1, depth = 0) => {
         // Detect Z0.
         // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
         const solid = extrudeAlgorithm(surface, height, depth);
-        solids.push(Shape.fromGeometry({ solid, tags }));
+        solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       } else {
         const [toZ0, fromZ0] = toXYPlaneTransforms(toPlaneOfSurface(surface));
         const z0SolidGeometry = extrudeAlgorithm(
@@ -80,7 +80,7 @@ export const extrude = (shape, height = 1, depth = 0) => {
           depth
         );
         const solid = alignVertices(transformSolid(fromZ0, z0SolidGeometry));
-        solids.push(Shape.fromGeometry({ solid, tags }));
+        solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       }
     }
   }

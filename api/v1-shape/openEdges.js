@@ -10,6 +10,7 @@ export const openEdges = (shape, { isOpen = true } = {}) => {
     paths.push(...findOpenEdges(solid, isOpen));
   }
   return Shape.fromGeometry({
+    type: 'paths',
     paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
   });
 };

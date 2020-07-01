@@ -12,7 +12,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 
 export const squash = (shape) => {
   const geometry = shape.toKeptGeometry();
-  const result = { layers: [] };
+  const result = { type: 'layers', content: [] };
   for (const { solid, tags } of getSolids(geometry)) {
     const polygons = [];
     for (const surface of solid) {
@@ -22,7 +22,7 @@ export const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.layers.push({ z0Surface: outline(polygons), tags });
+    result.content.push({ type: 'z0Surface', z0Surface: outline(polygons), tags });
   }
   for (const { surface, tags } of getSurfaces(geometry)) {
     const polygons = [];
@@ -31,21 +31,21 @@ export const squash = (shape) => {
       if (toPlane(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
-    result.layers.push({ z0Surface: polygons, tags });
+    result.content.push({ type: 'z0Surface', z0Surface: polygons, tags });
   }
   for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
     const polygons = [];
     for (const path of z0Surface) {
       polygons.push(path);
     }
-    result.layers.push({ z0Surface: polygons, tags });
+    result.content.push({ type: 'z0Surface', z0Surface: polygons, tags });
   }
   for (const { paths, tags } of getPaths(geometry)) {
     const flatPaths = [];
     for (const path of paths) {
       flatPaths.push(path.map(([x, y]) => [x, y, 0]));
     }
-    result.layers.push({ paths: flatPaths, tags });
+    result.content.push({ type: 'paths', paths: flatPaths, tags });
   }
   return Shape.fromGeometry(result);
 };

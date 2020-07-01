@@ -31,7 +31,6 @@ test('With Keep', (t) => {
   };
   const selectedGeometry = keep(['user/cylinder'], geometry);
   const keptGeometry = toKeptGeometry(selectedGeometry);
-  console.log(`QQ/canon: ${JSON.stringify(canonicalize(keptGeometry))}`);
   t.deepEqual(canonicalize(keptGeometry), {
     type: 'disjointAssembly',
     content: [

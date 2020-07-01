@@ -53,7 +53,7 @@ const loopImpl = (
       lastPath
     );
   }
-  return { solid: toSolidFromPolygons({}, polygons) };
+  return { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
 };
 
 export const loop = cache(loopImpl);

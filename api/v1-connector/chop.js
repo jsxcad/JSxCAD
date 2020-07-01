@@ -53,14 +53,14 @@ export const chop = (shape, connector = Z()) => {
   const planeSurface = toSurface(toPlane(connector));
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const cutResult = bspCut(solid, planeSurface);
-    cuts.push(Shape.fromGeometry({ solid: cutResult, tags }));
+    cuts.push(Shape.fromGeometry({ type: 'solid', solid: cutResult, tags }));
   }
   for (const { surface, z0Surface, tags } of getAnySurfaces(
     shape.toKeptGeometry()
   )) {
     const cutSurface = surface || z0Surface;
     const cutResult = surfaceCut(planeSurface, cutSurface);
-    cuts.push(Shape.fromGeometry({ surface: cutResult, tags }));
+    cuts.push(Shape.fromGeometry({ type: 'surface', surface: cutResult, tags }));
   }
 
   return assemble(...cuts);
@@ -70,8 +70,5 @@ const chopMethod = function (surface) {
   return chop(this, surface);
 };
 Shape.prototype.chop = chopMethod;
-
-chop.signature = 'chop(shape:Shape, surface:Shape) -> Shape';
-chopMethod.signature = 'Shape -> chop(surface:Shape) -> Shape';
 
 export default chop;

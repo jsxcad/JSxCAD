@@ -9,7 +9,7 @@ const buildConvexHullImpl = (points) => {
     .collectFaces()
     .map((polygon) => polygon.map((nthPoint) => points[nthPoint]));
   polygons.isConvex = true;
-  return { solid: toSolidFromPolygons({}, polygons) };
+  return { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
 };
 
 export const buildConvexHull = cache(buildConvexHullImpl);

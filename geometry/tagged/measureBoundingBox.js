@@ -46,8 +46,11 @@ export const measureBoundingBox = (geometry) => {
         return update(measureBoundingBoxOfSurface(geometry.surface));
       case 'z0Surface':
         return update(measureBoundingBoxOfZ0Surface(geometry.z0Surface));
-      default:
+      case 'points':
+      case 'paths':
         return update(measureBoundingBoxGeneric(geometry));
+      default:
+        throw Error(`Unknown geometry: ${geometry.type}`);
     }
   };
 

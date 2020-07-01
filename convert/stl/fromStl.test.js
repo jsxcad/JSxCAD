@@ -9,6 +9,7 @@ test('Read example', async (t) => {
   const stl = readFileSync('fromStl.test.box.stl');
   const geometry = await fromStl(stl);
   t.deepEqual(canonicalize(geometry), {
+    type: 'solid',
     solid: [
       [
         [

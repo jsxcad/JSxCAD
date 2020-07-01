@@ -9,6 +9,7 @@ export const toolpath = (
   { overcut = 0, joinPaths = false } = {}
 ) =>
   Shape.fromGeometry({
+    type: 'paths',
     paths: overcutAlgorithm(
       shape.outline().toKeptGeometry(),
       radius,

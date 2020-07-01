@@ -70,7 +70,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       polygons.push(...makeConvex([deduplicatedPath]));
     }
   }
-  const solid = { solid: toSolidFromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
   return solid;
 };
 

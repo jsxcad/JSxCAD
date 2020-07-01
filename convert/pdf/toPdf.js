@@ -1,9 +1,8 @@
 import { fromScaling, fromTranslation, multiply } from '@jsxcad/math-mat4';
 import {
-  getPaths,
-  getSurfaces,
-  getZ0Surfaces,
-  isNotVoid,
+  getNonVoidPaths,
+  getNonVoidSurfaces,
+  getNonVoidZ0Surfaces,
   toKeptGeometry,
   transform,
 } from '@jsxcad/geometry-tagged';
@@ -86,7 +85,7 @@ export const toPdf = async (
     fromScaling([scale, scale, scale])
   );
   const keptGeometry = toKeptGeometry(transform(matrix, geometry));
-  for (const { tags, surface } of getSurfaces(keptGeometry).filter(isNotVoid)) {
+  for (const { tags, surface } of getNonVoidSurfaces(keptGeometry)) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of outline(surface)) {
@@ -101,9 +100,7 @@ export const toPdf = async (
     }
     lines.push(`f`); // Surface paths are always filled.
   }
-  for (const { tags, z0Surface } of getZ0Surfaces(keptGeometry).filter(
-    isNotVoid
-  )) {
+  for (const { tags, z0Surface } of getNonVoidZ0Surfaces(keptGeometry)) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     // FIX: Avoid making the surface convex.
@@ -119,7 +116,7 @@ export const toPdf = async (
     }
     lines.push(`f`); // Surface paths are always filled.
   }
-  for (const { tags, paths } of getPaths(keptGeometry).filter(isNotVoid)) {
+  for (const { tags, paths } of getNonVoidPaths(keptGeometry)) {
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of paths) {
       let nth = path[0] === null ? 1 : 0;

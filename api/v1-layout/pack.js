@@ -30,11 +30,11 @@ export const pack = (
     if (packed.length === 0) {
       break;
     } else {
-      packedLayers.push({ item: { disjointAssembly: packed } });
+      packedLayers.push({ type: 'item', content: [{ type: 'disjointAssembly', content: packed }] });
     }
     todo.unshift(...unpacked);
   }
-  let packedShape = Shape.fromGeometry({ layers: packedLayers });
+  let packedShape = Shape.fromGeometry({ type: 'layers', content: packedLayers });
   if (size === undefined) {
     packedShape = packedShape.center();
   }
@@ -45,8 +45,5 @@ const packMethod = function (...args) {
   return pack(this, ...args);
 };
 Shape.prototype.pack = packMethod;
-
-pack.signature =
-  'pack({ size, margin = 5 }, ...shapes:Shape) -> [packed:Shapes, unpacked:Shapes]';
 
 export default pack;

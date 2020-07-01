@@ -19,6 +19,7 @@ test('Minkowski sum of a cube and a sphere.', (t) => {
     toPoints(unitGeodesicSphere20Polygons)
   );
   t.deepEqual(canonicalize(solid), {
+    type: 'solid',
     solid: [
       [
         [

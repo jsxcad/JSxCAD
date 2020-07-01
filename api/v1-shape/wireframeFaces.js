@@ -7,7 +7,7 @@ export const wireframeFaces = (shape, op = (x) => x) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     for (const surface of solid) {
       for (const path of surface) {
-        faces.push(op(Shape.fromGeometry({ paths: [path] }), faces.length));
+        faces.push(op(Shape.fromGeometry({ type: 'paths', paths: [path] }), faces.length));
       }
     }
   }

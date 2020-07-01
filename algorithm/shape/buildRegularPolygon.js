@@ -25,7 +25,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
   }
   points.isConvex = true;
   // FIX: Clean up the consumers of this result.
-  const z0Surface = { z0Surface: [points] };
+  const z0Surface = { type: 'z0Surface', z0Surface: [points] };
   return z0Surface;
 };
 

@@ -17,12 +17,12 @@ export const arch = (shape, factor, { resolution = 1 } = {}) => {
     const liftAt = (z) => factor * Math.sin(((z - minZ) / height) * Math.PI);
     const lift = ([x, y, z]) => [x + liftAt(z), y, z];
     assembly.push({
-      solid: deform(makeWatertight(solid), lift, min, max, resolution),
+      type: 'solid', solid: deform(makeWatertight(solid), lift, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'solid', content: assembly });
 };
 
 const archMethod = function (...args) {

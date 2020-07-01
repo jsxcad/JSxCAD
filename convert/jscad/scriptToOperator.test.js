@@ -8,8 +8,10 @@ test('Trivial', async (t) => {
     new TextEncoder('utf8').encode('const main = () => cube();')
   );
   t.deepEqual(canonicalize(getGeometry()), {
-    assembly: [
+    type: 'assembly',
+    content: [
       {
+        type: 'solid',
         solid: [
           [
             [
@@ -97,8 +99,10 @@ test('Include', async (t) => {
     )
   );
   t.deepEqual(canonicalize(getGeometry()), {
-    assembly: [
+    type: 'assembly',
+    content: [
       {
+        type: 'solid',
         solid: [
           [
             [
@@ -191,8 +195,9 @@ test('Parameters', async (t) => {
     )
   );
   t.deepEqual(canonicalize(getGeometry({ size: 2 })), {
-    assembly: [
+    type: 'assembly', content: [
       {
+        type: 'solid',
         solid: [
           [
             [
