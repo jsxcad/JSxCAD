@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/math-vec2';
-import { closestPoint } from './closestPoint';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
+import { closestPoint } from './closestPoint.js';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
 
 test('line2: closestPoint() should return proper values', (t) => {

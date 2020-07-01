@@ -1,4 +1,4 @@
-import { origin } from './origin';
+import { origin } from './origin.js';
 
 /**
  * Determine the X coordinate of the given line at the Y coordinate.

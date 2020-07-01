@@ -1,4 +1,4 @@
-import { deepEqual } from 'fast-equals';
+import { deepEqual } from 'fast-equals/dist/fast-equals.mjs';
 import memoizeImpl from 'micro-memoize';
 
 const memoizedOps = new Set();

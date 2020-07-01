@@ -1,6 +1,6 @@
-import { equals } from './equals';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
+import { equals } from './equals.js';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
 
 test('equals() should return correct booleans', (t) => {

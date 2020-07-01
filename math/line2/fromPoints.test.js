@@ -1,5 +1,5 @@
-import { canonicalize as c } from './canonicalize';
-import { fromPoints } from './fromPoints';
+import { canonicalize as c } from './canonicalize.js';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
 
 test('line2: fromPoints() should return a new line2 with correct values', (t) => {
