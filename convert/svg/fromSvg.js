@@ -231,7 +231,11 @@ export const fromSvg = async (input, options = {}) => {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
             geometry.content.push(
-              transform(scale(matrix), { type: 'z0Surface', z0Surface: close(paths), tags })
+              transform(scale(matrix), {
+                type: 'z0Surface',
+                z0Surface: close(paths),
+                tags,
+              })
             );
           }
           const stroke = node.getAttribute('stroke');

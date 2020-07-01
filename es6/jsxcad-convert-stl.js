@@ -1,6 +1,6 @@
 import { fromPolygons, makeWatertight } from './jsxcad-geometry-solid.js';
 import { canonicalize, toTriangles } from './jsxcad-geometry-polygons.js';
-import { toKeptGeometry, getSolids, isNotVoid } from './jsxcad-geometry-tagged.js';
+import { toKeptGeometry, getNonVoidSolids } from './jsxcad-geometry-tagged.js';
 import { toPlane } from './jsxcad-math-poly3.js';
 import { union } from './jsxcad-geometry-solid-boolean.js';
 
@@ -120,7 +120,7 @@ const fromStl = async (stl, { format = 'ascii' } = {}) => {
   for (const [a, b, c] of cells) {
     polygons.push([positions[a], positions[b], positions[c]]);
   }
-  return { solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons({}, polygons) };
 };
 
 /**
@@ -140,19 +140,6 @@ const fromSolidToTriangles = (solid) => {
     }
   }
   return triangles;
-};
-
-const toStl = async (geometry, options = {}) => {
-  const keptGeometry = toKeptGeometry(geometry);
-  let solids = getSolids(keptGeometry)
-    .filter((solid) => isNotVoid(solid))
-    .map(({ solid }) => solid);
-  const triangles = fromSolidToTriangles(union(...solids));
-  const output = `solid JSxCAD\n${convertToFacets(
-    options,
-    canonicalize(triangles)
-  )}\nendsolid JSxCAD\n`;
-  return new TextEncoder('utf8').encode(output);
 };
 
 const convertToFacets = (options, polygons) =>
@@ -178,6 +165,19 @@ const convertToFacet = (polygon) => {
       `endfacet`
     );
   }
+};
+
+const toStl = async (geometry, options = {}) => {
+  const keptGeometry = toKeptGeometry(geometry);
+  const solids = getNonVoidSolids(keptGeometry);
+  const triangles = fromSolidToTriangles(
+    union(...solids.map(({ solid }) => solid))
+  );
+  const output = `solid JSxCAD\n${convertToFacets(
+    options,
+    canonicalize(triangles)
+  )}\nendsolid JSxCAD\n`;
+  return new TextEncoder('utf8').encode(output);
 };
 
 export { fromStl, toStl };

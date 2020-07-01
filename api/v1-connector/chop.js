@@ -60,7 +60,9 @@ export const chop = (shape, connector = Z()) => {
   )) {
     const cutSurface = surface || z0Surface;
     const cutResult = surfaceCut(planeSurface, cutSurface);
-    cuts.push(Shape.fromGeometry({ type: 'surface', surface: cutResult, tags }));
+    cuts.push(
+      Shape.fromGeometry({ type: 'surface', surface: cutResult, tags })
+    );
   }
 
   return assemble(...cuts);

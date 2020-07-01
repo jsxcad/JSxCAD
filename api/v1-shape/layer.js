@@ -1,7 +1,10 @@
 import Shape from './Shape';
 
 export const layer = (...shapes) =>
-  Shape.fromGeometry({ type: 'layers', content: shapes.map((shape) => shape.toGeometry()) });
+  Shape.fromGeometry({
+    type: 'layers',
+    content: shapes.map((shape) => shape.toGeometry()),
+  });
 
 const layerMethod = function (...shapes) {
   return layer(this, ...shapes);

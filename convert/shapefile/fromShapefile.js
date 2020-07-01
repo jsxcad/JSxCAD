@@ -18,10 +18,14 @@ const toGeometry = (geometry, properties) => {
     case 'Point':
       return { type: 'points', points: [toVec3(geometry.coordinates)], tags };
     case 'LineString':
-      return { type: 'paths', paths: [[null, ...geometry.coordinates.map(toVec3)]], tags };
+      return {
+        type: 'paths',
+        paths: [[null, ...geometry.coordinates.map(toVec3)]],
+        tags,
+      };
     case 'Polygon':
       return {
-type: 'z0Surface',
+        type: 'z0Surface',
         z0Surface: geometry.coordinates.map((path) => path.map(toVec3)),
         tags,
       };
@@ -29,22 +33,29 @@ type: 'z0Surface',
       return { type: 'points', points: geometry.coordinates.map(toVec3), tags };
     case 'MultiLineString':
       return {
-type: 'paths',
+        type: 'paths',
         paths: geometry.coordinates.map((line) => [null, ...line.map(toVec3)]),
         tags,
       };
     case 'MultiPolygon':
       return {
-        type: 'assembly', content: geometry.coordinates.map((surface) => ({
-          type: 'z0Surface', z0Surface: surface.map((polygon) => polygon.map(toVec3)),
+        type: 'assembly',
+        content: geometry.coordinates.map((surface) => ({
+          type: 'z0Surface',
+          z0Surface: surface.map((polygon) => polygon.map(toVec3)),
           tags,
         })),
       };
     case 'GeometryCollection':
-      return { type: 'assembly', content: geometry.geometries.map(toGeometry), tags };
+      return {
+        type: 'assembly',
+        content: geometry.geometries.map(toGeometry),
+        tags,
+      };
     case 'FeatureCollection':
       return {
-        type: 'assembly', content: geometry.features.map((feature) =>
+        type: 'assembly',
+        content: geometry.features.map((feature) =>
           toGeometry(feature.geometry, feature.properties)
         ),
         tags,

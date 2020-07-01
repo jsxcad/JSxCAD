@@ -18,7 +18,10 @@ import { translate } from '@jsxcad/geometry-tagged';
 const buildRegularPrismImpl = (edges = 32) => {
   const surface = buildRegularPolygon(edges);
   surface.isConvex = true;
-  return translate([0, 0, -0.5], { type: 'solid', solid: extrude(surface.z0Surface, 1) });
+  return translate([0, 0, -0.5], {
+    type: 'solid',
+    solid: extrude(surface.z0Surface, 1),
+  });
 };
 
 export const buildRegularPrism = cache(buildRegularPrismImpl);

@@ -53,7 +53,10 @@ const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
 const Assembly = (...shapes) =>
-  Shape.fromGeometry({ assembly: shapes.map((shape) => shape.toGeometry()) });
+  Shape.fromGeometry({
+    type: 'assembly',
+    content: shapes.map((shape) => shape.toGeometry()),
+  });
 
 const unitPolygon = (sides = 16) =>
   Shape.fromGeometry(buildRegularPolygon(sides));
@@ -460,7 +463,12 @@ const Difference = (...args) => difference(...args);
 
 const Empty = (...shapes) =>
   Shape.fromGeometry({
-    disjointAssembly: [{ solid: [] }, { surface: [] }, { paths: [] }],
+    type: 'disjointAssembly',
+    content: [
+      { type: 'solid', solid: [] },
+      { type: 'surface', surface: [] },
+      { type: 'paths', paths: [] },
+    ],
   });
 
 /**
@@ -550,7 +558,10 @@ Icosahedron.ofDiameter.signature =
 const Intersection = (...args) => intersection(...args);
 
 const Layers = (...shapes) =>
-  Shape.fromGeometry({ layers: shapes.map((shape) => shape.toGeometry()) });
+  Shape.fromGeometry({
+    type: 'layers',
+    content: shapes.map((shape) => shape.toGeometry()),
+  });
 
 const fromPoints = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));

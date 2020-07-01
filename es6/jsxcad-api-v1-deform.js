@@ -18,12 +18,13 @@ const arch = (shape, factor, { resolution = 1 } = {}) => {
     const liftAt = (z) => factor * Math.sin(((z - minZ) / height) * Math.PI);
     const lift = ([x, y, z]) => [x + liftAt(z), y, z];
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), lift, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'solid', content: assembly });
 };
 
 const archMethod = function (...args) {
@@ -3687,12 +3688,13 @@ const crumple = (
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), perturb, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const crumpleMethod = function (...args) {
@@ -3712,12 +3714,13 @@ const skew = (shape, factor, { resolution = 1 } = {}) => {
     const shiftAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const shift = ([x, y, z]) => [x + shiftAt(z), y + shiftAt(z), z];
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), shift, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const skewMethod = function (...args) {
@@ -3740,12 +3743,13 @@ const taper = (shape, factor, { resolution = 1 } = {}) => {
     const widthAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), squeeze, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const taperMethod = function (...args) {
@@ -3763,12 +3767,13 @@ const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const radians = (angle / height) * (Math.PI / 180);
     const rotate = (point) => rotateZ(point, radians * (point[Z$4] - min[Z$4]));
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), rotate, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const twistMethod = function (...args) {

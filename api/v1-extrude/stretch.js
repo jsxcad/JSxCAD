@@ -72,7 +72,8 @@ export const stretch = (shape, length, connector = Z()) => {
     );
     stretches.push(
       Shape.fromGeometry({
-        type: 'solid', solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
+        type: 'solid',
+        solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
         tags,
       })
     );

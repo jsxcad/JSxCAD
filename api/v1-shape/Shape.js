@@ -29,9 +29,7 @@ export class Shape {
     if (!isSingleOpenPath(geometry.content[0])) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(
-      closePath(geometry.content[0].paths[0])
-    );
+    return Shape.fromClosedPath(closePath(geometry.content[0].paths[0]));
   }
 
   concat(...shapes) {
@@ -123,8 +121,10 @@ Shape.fromClosedPath = (path, context) =>
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromOpenPath = (path, context) =>
   fromGeometry({ type: 'paths', paths: [openPath(path)] }, context);
-Shape.fromPath = (path, context) => fromGeometry({ type: 'paths', paths: [path] }, context);
-Shape.fromPaths = (paths, context) => fromGeometry({ type: 'paths', paths: paths }, context);
+Shape.fromPath = (path, context) =>
+  fromGeometry({ type: 'paths', paths: [path] }, context);
+Shape.fromPaths = (paths, context) =>
+  fromGeometry({ type: 'paths', paths: paths }, context);
 Shape.fromPathToSurface = (path, context) =>
   fromGeometry(fromPathToSurface(path), context);
 Shape.fromPathToZ0Surface = (path, context) =>
@@ -138,12 +138,16 @@ Shape.fromPoint = (point, context) =>
 Shape.fromPoints = (points, context) =>
   fromGeometry({ type: 'points', points: points }, context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
-  fromGeometry({ type: 'solid', solid: fromPolygonsToSolid({}, polygons) }, context);
+  fromGeometry(
+    { type: 'solid', solid: fromPolygonsToSolid({}, polygons) },
+    context
+  );
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
   fromGeometry({ type: 'z0Surface', z0Surface: polygons }, context);
 Shape.fromSurfaces = (surfaces, context) =>
   fromGeometry({ type: 'solid', solid: surfaces }, context);
-Shape.fromSolid = (solid, context) => fromGeometry({ type: 'solid', solid }, context);
+Shape.fromSolid = (solid, context) =>
+  fromGeometry({ type: 'solid', solid }, context);
 
 export const fromGeometry = Shape.fromGeometry;
 export const toGeometry = (shape) => shape.toGeometry();

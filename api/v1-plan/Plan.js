@@ -9,7 +9,7 @@ export const Plan = (
       ? { type: 'assembly', content: [] }
       : visualization.toKeptGeometry();
   let contentGeometry =
-    content === undefined ? [] : content.map(shape => shape.toKeptGeometry());
+    content === undefined ? [] : content.map((shape) => shape.toKeptGeometry());
   const shape = Shape.fromGeometry(
     {
       type: 'plan',

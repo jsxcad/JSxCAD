@@ -30,11 +30,17 @@ export const pack = (
     if (packed.length === 0) {
       break;
     } else {
-      packedLayers.push({ type: 'item', content: [{ type: 'disjointAssembly', content: packed }] });
+      packedLayers.push({
+        type: 'item',
+        content: [{ type: 'disjointAssembly', content: packed }],
+      });
     }
     todo.unshift(...unpacked);
   }
-  let packedShape = Shape.fromGeometry({ type: 'layers', content: packedLayers });
+  let packedShape = Shape.fromGeometry({
+    type: 'layers',
+    content: packedLayers,
+  });
   if (size === undefined) {
     packedShape = packedShape.center();
   }

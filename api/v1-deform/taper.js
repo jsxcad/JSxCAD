@@ -20,7 +20,8 @@ export const taper = (shape, factor, { resolution = 1 } = {}) => {
     const widthAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
     assembly.push({
-      type: 'solid', solid: deform(makeWatertight(solid), squeeze, min, max, resolution),
+      type: 'solid',
+      solid: deform(makeWatertight(solid), squeeze, min, max, resolution),
       tags,
     });
   }

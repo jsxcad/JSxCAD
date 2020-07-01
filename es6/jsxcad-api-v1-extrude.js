@@ -207,7 +207,7 @@ const extrude = (shape, height = 1, depth = 0) => {
   for (const { z0Surface, tags } of getZ0Surfaces(keptGeometry)) {
     if (z0Surface.length > 0) {
       const solid = alignVertices(extrude$1(z0Surface, height, depth));
-      solids.push(Shape.fromGeometry({ solid, tags }));
+      solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
     }
   }
   for (const { surface, tags } of getSurfaces(keptGeometry)) {
@@ -222,7 +222,7 @@ const extrude = (shape, height = 1, depth = 0) => {
         // Detect Z0.
         // const solid = alignVertices(extrudeAlgorithm(surface, height, depth));
         const solid = extrude$1(surface, height, depth);
-        solids.push(Shape.fromGeometry({ solid, tags }));
+        solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       } else {
         const [toZ0, fromZ0] = toXYPlaneTransforms(toPlane$1(surface));
         const z0SolidGeometry = extrude$1(
@@ -231,7 +231,7 @@ const extrude = (shape, height = 1, depth = 0) => {
           depth
         );
         const solid = alignVertices(transform$1(fromZ0, z0SolidGeometry));
-        solids.push(Shape.fromGeometry({ solid, tags }));
+        solids.push(Shape.fromGeometry({ type: 'solid', solid, tags }));
       }
     }
   }
@@ -266,7 +266,7 @@ const fill = (shape, pathsShape) => {
       fills.push(...fill);
     }
   }
-  return Shape.fromGeometry({ paths: fills });
+  return Shape.fromGeometry({ type: 'paths', paths: fills });
 };
 
 const fillMethod = function (...args) {
@@ -278,10 +278,6 @@ const withFillMethod = function (...args) {
   return assemble(this, fill(this, ...args));
 };
 Shape.prototype.withFill = withFillMethod;
-
-fill.signature = 'interior(shape:Surface, paths:Paths) -> Paths';
-fillMethod.signature = 'Surface -> interior(paths:Paths) -> Paths';
-withFillMethod.signature = 'Surface -> interior(paths:Paths) -> Shape';
 
 /**
  *
@@ -472,7 +468,9 @@ const section = (solidShape, ...connectors) => {
     const surfaces = sections.map((section) => makeConvex(section, normalize));
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
-      shapes.push(Shape.fromGeometry({ surface: surfaces[i], tags }));
+      shapes.push(
+        Shape.fromGeometry({ type: 'surface', surface: surfaces[i], tags })
+      );
     }
   }
   return layer(...shapes);
@@ -485,7 +483,7 @@ Shape.prototype.section = sectionMethod;
 
 const squash = (shape) => {
   const geometry = shape.toKeptGeometry();
-  const result = { layers: [] };
+  const result = { type: 'layers', content: [] };
   for (const { solid, tags } of getSolids(geometry)) {
     const polygons = [];
     for (const surface of solid) {
@@ -495,7 +493,11 @@ const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.layers.push({ z0Surface: outline$2(polygons), tags });
+    result.content.push({
+      type: 'z0Surface',
+      z0Surface: outline$2(polygons),
+      tags,
+    });
   }
   for (const { surface, tags } of getSurfaces(geometry)) {
     const polygons = [];
@@ -504,21 +506,21 @@ const squash = (shape) => {
       if (toPlane$2(flat) === undefined) continue;
       polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
     }
-    result.layers.push({ z0Surface: polygons, tags });
+    result.content.push({ type: 'z0Surface', z0Surface: polygons, tags });
   }
   for (const { z0Surface, tags } of getZ0Surfaces(geometry)) {
     const polygons = [];
     for (const path of z0Surface) {
       polygons.push(path);
     }
-    result.layers.push({ z0Surface: polygons, tags });
+    result.content.push({ type: 'z0Surface', z0Surface: polygons, tags });
   }
   for (const { paths, tags } of getPaths(geometry)) {
     const flatPaths = [];
     for (const path of paths) {
       flatPaths.push(path.map(([x, y]) => [x, y, 0]));
     }
-    result.layers.push({ paths: flatPaths, tags });
+    result.content.push({ type: 'paths', paths: flatPaths, tags });
   }
   return Shape$1.fromGeometry(result);
 };
@@ -581,6 +583,7 @@ const stretch = (shape, length, connector = Z$3()) => {
     );
     stretches.push(
       Shape.fromGeometry({
+        type: 'solid',
         solid: alignVertices([...bottom, ...middle, ...topMoved], normalize),
         tags,
       })
@@ -630,6 +633,7 @@ const toolpath = (
   { overcut: overcut$1 = 0, joinPaths = false } = {}
 ) =>
   Shape.fromGeometry({
+    type: 'paths',
     paths: overcut(
       shape.outline().toKeptGeometry(),
       radius,
@@ -720,7 +724,10 @@ const voxels = (shape, resolution = 1) => {
       }
     }
   }
-  return Shape.fromGeometry({ solid: fromPolygons({}, polygons) });
+  return Shape.fromGeometry({
+    type: 'solid',
+    solid: fromPolygons({}, polygons),
+  });
 };
 
 const voxelsMethod = function (...args) {

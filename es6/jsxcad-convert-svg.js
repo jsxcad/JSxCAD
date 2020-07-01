@@ -5,7 +5,7 @@ import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnySurfaces, isNotVoid, getPaths } from './jsxcad-geometry-tagged.js';
+import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, isNotVoid, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { outline } from './jsxcad-geometry-surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -2735,7 +2735,7 @@ const fromSvgPath = (svgPath, options = {}) => {
   for (const path of paths) {
     assertGood(path);
   }
-  const geometry = { paths };
+  const geometry = { type: 'paths', paths };
   return geometry;
 };
 
@@ -3373,7 +3373,7 @@ const applyTransforms = ({ matrix }, transformText) => {
 
 const fromSvg = async (input, options = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
-  const geometry = { assembly: [] };
+  const geometry = { type: 'assembly', content: [] };
   const svg = new domParser_3().parseFromString(await svgString, 'image/svg+xml');
 
   const getAttribute = (node, attribute, otherwise) => {
@@ -3444,8 +3444,12 @@ const fromSvg = async (input, options = {}) => {
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
-            geometry.assembly.push(
-              transform$1(scale(matrix), { z0Surface: close(paths), tags })
+            geometry.content.push(
+              transform$1(scale(matrix), {
+                type: 'z0Surface',
+                z0Surface: close(paths),
+                tags,
+              })
             );
           }
           const stroke = node.getAttribute('stroke');
@@ -3458,8 +3462,8 @@ const fromSvg = async (input, options = {}) => {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const tags = toTagsFromName(stroke);
-            geometry.assembly.push(
-              transform$1(scaledMatrix, { paths: paths, tags })
+            geometry.content.push(
+              transform$1(scaledMatrix, { type: 'paths', paths: paths, tags })
             );
           }
         };
@@ -3535,9 +3539,9 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry).filter(
-    isNotVoid
-  )) {
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
+    geometry
+  ).filter(isNotVoid)) {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
@@ -3554,7 +3558,7 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }
     svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
-  for (const { paths, tags } of getPaths(geometry).filter(isNotVoid)) {
+  for (const { paths, tags } of getNonVoidPaths(geometry).filter(isNotVoid)) {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {

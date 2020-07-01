@@ -22,7 +22,11 @@ export const squash = (shape) => {
         polygons.push(isCounterClockwise(flat) ? flat : flip(flat));
       }
     }
-    result.content.push({ type: 'z0Surface', z0Surface: outline(polygons), tags });
+    result.content.push({
+      type: 'z0Surface',
+      z0Surface: outline(polygons),
+      tags,
+    });
   }
   for (const { surface, tags } of getSurfaces(geometry)) {
     const polygons = [];

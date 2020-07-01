@@ -73,7 +73,9 @@ export const section = (solidShape, ...connectors) => {
     const surfaces = sections.map((section) => makeConvex(section, normalize));
     for (let i = 0; i < surfaces.length; i++) {
       surfaces[i].plane = planes[i];
-      shapes.push(Shape.fromGeometry({ type: 'surface', surface: surfaces[i], tags }));
+      shapes.push(
+        Shape.fromGeometry({ type: 'surface', surface: surfaces[i], tags })
+      );
     }
   }
   return layer(...shapes);

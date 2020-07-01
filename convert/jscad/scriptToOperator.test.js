@@ -195,7 +195,8 @@ test('Parameters', async (t) => {
     )
   );
   t.deepEqual(canonicalize(getGeometry({ size: 2 })), {
-    type: 'assembly', content: [
+    type: 'assembly',
+    content: [
       {
         type: 'solid',
         solid: [

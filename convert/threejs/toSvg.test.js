@@ -17,17 +17,21 @@ test('Example', async (t) => {
   const svg = await toSvg(
     { view: { position: [0, 0, 16] } },
     {
-      type: 'assembly', content: [
+      type: 'assembly',
+      content: [
         {
-          type: 'paths', paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]),
+          type: 'paths',
+          paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]),
           tags: ['paths'],
         },
         {
-          type: 'solid', solid: fromPolygons({}, unitGeodesicSphere20Polygons),
+          type: 'solid',
+          solid: fromPolygons({}, unitGeodesicSphere20Polygons),
           tags: ['solid'],
         },
         {
-          type: 'z0Surface', z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]),
+          type: 'z0Surface',
+          z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]),
           tags: ['surface'],
         },
       ],

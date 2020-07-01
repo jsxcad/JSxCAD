@@ -86,7 +86,7 @@ test('Partial fit', (t) => {
 test('Partial rotated fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [60, 110], itemMargin: 1, pageMargin: 0 },
-    {    
+    {
       type: 'paths',
       paths: [
         [

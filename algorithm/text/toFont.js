@@ -40,7 +40,10 @@ export const toFont = (options = {}, data) => {
       // Outlining forces re-orientation.
       pathsets.push(reorient(paths));
     }
-    return scale([factor, factor, factor], { type: 'z0Surface', z0Surface: union(...pathsets) });
+    return scale([factor, factor, factor], {
+      type: 'z0Surface',
+      z0Surface: union(...pathsets),
+    });
   };
 
   return font;

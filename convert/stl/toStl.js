@@ -52,7 +52,9 @@ const convertToFacet = (polygon) => {
 export const toStl = async (geometry, options = {}) => {
   const keptGeometry = toKeptGeometry(geometry);
   const solids = getNonVoidSolids(keptGeometry);
-  const triangles = fromSolidToTriangles(union(...solids.map(({ solid }) => solid)));
+  const triangles = fromSolidToTriangles(
+    union(...solids.map(({ solid }) => solid))
+  );
   const output = `solid JSxCAD\n${convertToFacets(
     options,
     canonicalize(triangles)

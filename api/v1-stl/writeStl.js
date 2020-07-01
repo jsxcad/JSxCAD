@@ -51,7 +51,7 @@ export const toStl = async (shape, options = {}) => {
   for (const entry of getPlans(geometry)) {
     if (entry.plan.page) {
       for (const content of entry.content) {
-        for (let leaf of getLeafs(entry.content)) {
+        for (let leaf of getLeafs(content)) {
           const stl = await convertToStl(leaf, {});
           pages.push({
             stl,

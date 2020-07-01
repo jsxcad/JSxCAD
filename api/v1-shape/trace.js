@@ -13,7 +13,11 @@ export const trace = (shape, length = 1) => {
       tracePaths.push(...segments);
     }
   }
-  return Shape.fromGeometry({ type: 'paths', paths: tracePaths, tags: ['display/trace'] });
+  return Shape.fromGeometry({
+    type: 'paths',
+    paths: tracePaths,
+    tags: ['display/trace'],
+  });
 };
 
 const traceMethod = function (length = 1) {

@@ -120,6 +120,8 @@ export const toThreejsGeometry = (geometry, supertags) => {
         isThreejsGeometry: true,
       };
     default:
-      throw Error(`Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`);
+      throw Error(
+        `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
+      );
   }
 };

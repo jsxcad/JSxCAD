@@ -1,5 +1,5 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, getPaths, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, nonNegative, measureArea } from './jsxcad-geometry-tagged.js';
+import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, getPaths, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
 import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
@@ -13,31 +13,29 @@ import { fromTranslation, fromRotation, fromXRotation, fromYRotation, fromZRotat
 class Shape {
   close() {
     const geometry = this.toKeptGeometry();
-    if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+    if (!isSingleOpenPath(geometry.content[0])) {
       throw Error('Close requires a single open path.');
     }
-    return Shape.fromClosedPath(
-      close(geometry.disjointAssembly[0].paths[0])
-    );
+    return Shape.fromClosedPath(close(geometry.content[0].paths[0]));
   }
 
   concat(...shapes) {
     const paths = [];
     for (const shape of [this, ...shapes]) {
       const geometry = shape.toKeptGeometry();
-      if (!isSingleOpenPath(geometry.disjointAssembly[0])) {
+      if (!isSingleOpenPath(geometry.content[0])) {
         throw Error(
           `Concatenation requires single open paths: ${JSON.stringify(
             geometry
           )}`
         );
       }
-      paths.push(geometry.disjointAssembly[0].paths[0]);
+      paths.push(geometry.content[0].paths[0]);
     }
     return Shape.fromOpenPath(concatenate(...paths));
   }
 
-  constructor(geometry = { assembly: [] }, context) {
+  constructor(geometry = { type: 'assembly', content: [] }, context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }
@@ -106,12 +104,14 @@ const isSingleOpenPath = ({ paths }) =>
   paths !== undefined && paths.length === 1 && paths[0][0] === null;
 
 Shape.fromClosedPath = (path, context) =>
-  fromGeometry({ paths: [close(path)] }, context);
+  fromGeometry({ type: 'paths', paths: [close(path)] }, context);
 Shape.fromGeometry = (geometry, context) => new Shape(geometry, context);
 Shape.fromOpenPath = (path, context) =>
-  fromGeometry({ paths: [open(path)] }, context);
-Shape.fromPath = (path, context) => fromGeometry({ paths: [path] }, context);
-Shape.fromPaths = (paths, context) => fromGeometry({ paths: paths }, context);
+  fromGeometry({ type: 'paths', paths: [open(path)] }, context);
+Shape.fromPath = (path, context) =>
+  fromGeometry({ type: 'paths', paths: [path] }, context);
+Shape.fromPaths = (paths, context) =>
+  fromGeometry({ type: 'paths', paths: paths }, context);
 Shape.fromPathToSurface = (path, context) =>
   fromGeometry(fromPathToSurface(path), context);
 Shape.fromPathToZ0Surface = (path, context) =>
@@ -121,16 +121,20 @@ Shape.fromPathsToSurface = (paths, context) =>
 Shape.fromPathsToZ0Surface = (paths, context) =>
   fromGeometry(fromPathsToZ0Surface(paths), context);
 Shape.fromPoint = (point, context) =>
-  fromGeometry({ points: [point] }, context);
+  fromGeometry({ type: 'points', points: [point] }, context);
 Shape.fromPoints = (points, context) =>
-  fromGeometry({ points: points }, context);
+  fromGeometry({ type: 'points', points: points }, context);
 Shape.fromPolygonsToSolid = (polygons, context) =>
-  fromGeometry({ solid: fromPolygons({}, polygons) }, context);
+  fromGeometry(
+    { type: 'solid', solid: fromPolygons({}, polygons) },
+    context
+  );
 Shape.fromPolygonsToZ0Surface = (polygons, context) =>
-  fromGeometry({ z0Surface: polygons }, context);
+  fromGeometry({ type: 'z0Surface', z0Surface: polygons }, context);
 Shape.fromSurfaces = (surfaces, context) =>
-  fromGeometry({ solid: surfaces }, context);
-Shape.fromSolid = (solid, context) => fromGeometry({ solid: solid }, context);
+  fromGeometry({ type: 'solid', solid: surfaces }, context);
+Shape.fromSolid = (solid, context) =>
+  fromGeometry({ type: 'solid', solid }, context);
 
 const fromGeometry = Shape.fromGeometry;
 const toGeometry = (shape) => shape.toGeometry();
@@ -240,7 +244,7 @@ notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 const union = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ assembly: [] });
+      return fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       return shapes[0];
@@ -343,7 +347,7 @@ addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
 const intersection = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ assembly: [] });
+      return fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       // We still want to produce a simple shape.
@@ -403,7 +407,7 @@ clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
 const difference = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ assembly: [] });
+      return fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       // We still want to produce a simple shape.
@@ -505,7 +509,7 @@ const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
   switch (shapes.length) {
     case 0: {
-      return Shape.fromGeometry({ assembly: [] });
+      return Shape.fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       return shapes[0];
@@ -658,7 +662,7 @@ measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 const noPlan = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (geometry.plan) {
-      return { layers: [] };
+      return { type: 'layers', content: [] };
     } else {
       return descend();
     }
@@ -676,7 +680,7 @@ Shape.prototype.noPlan = noPlanMethod;
 const noVoid = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
-      return { layers: [] };
+      return { type: 'layers', content: [] };
     } else {
       return descend();
     }
@@ -708,6 +712,7 @@ const openEdges = (shape, { isOpen = true } = {}) => {
     paths.push(...findOpenEdges(solid, isOpen));
   }
   return Shape.fromGeometry({
+    type: 'paths',
     paths: paths.map((path) => path.map(([x, y, z]) => [r(x), r(y), r(z)])),
   });
 };
@@ -746,7 +751,11 @@ const trace = (shape, length = 1) => {
       tracePaths.push(...segments);
     }
   }
-  return Shape.fromGeometry({ paths: tracePaths, tags: ['display/trace'] });
+  return Shape.fromGeometry({
+    type: 'paths',
+    paths: tracePaths,
+    tags: ['display/trace'],
+  });
 };
 
 const traceMethod = function (length = 1) {
@@ -805,7 +814,9 @@ const wireframeFaces = (shape, op = (x) => x) => {
   for (const { solid } of getSolids(shape.toKeptGeometry())) {
     for (const surface of solid) {
       for (const path of surface) {
-        faces.push(op(Shape.fromGeometry({ paths: [path] }), faces.length));
+        faces.push(
+          op(Shape.fromGeometry({ type: 'paths', paths: [path] }), faces.length)
+        );
       }
     }
   }
@@ -1062,7 +1073,10 @@ kept.signature = 'kept(shape:Shape) -> Shape';
 keptMethod.signature = 'Shape -> kept() -> Shape';
 
 const layer = (...shapes) =>
-  Shape.fromGeometry({ layers: shapes.map((shape) => shape.toGeometry()) });
+  Shape.fromGeometry({
+    type: 'layers',
+    content: shapes.map((shape) => shape.toGeometry()),
+  });
 
 const layerMethod = function (...shapes) {
   return layer(this, ...shapes);
@@ -1308,28 +1322,6 @@ Shape.prototype.moveZ = moveZMethod;
 
 moveZ.signature = 'moveZ(shape:Shape, z:number = 0) -> Shape';
 moveZMethod.signature = 'Shape -> moveZ(z:number = 0) -> Shape';
-
-/**
- *
- * # Mark an object as not to cut holes.
- *
- **/
-
-const nocut = (shape, ...tags) =>
-  fromGeometry(
-    nonNegative(
-      tags.map((tag) => `user/${tag}`),
-      toGeometry(shape)
-    )
-  );
-
-const nocutMethod = function (...tags) {
-  return nocut(this, tags);
-};
-Shape.prototype.nocut = nocutMethod;
-
-nocut.signature = 'nocut(shape:Shape, ...tag:string) -> Shape';
-nocutMethod.signature = 'Shape -> nocut(...tag:string) -> Shape';
 
 /**
  *
@@ -1619,4 +1611,4 @@ const turnZMethod = function (angle) {
 Shape.prototype.turnZ = turnZMethod;
 
 export default Shape;
-export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, make, material, move, moveX, moveY, moveZ, nocut, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };
+export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, make, material, move, moveX, moveY, moveZ, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };

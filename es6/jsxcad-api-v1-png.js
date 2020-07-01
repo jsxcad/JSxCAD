@@ -36,12 +36,12 @@ const readPngAsContours = async (
   }
   const bands = numbers((a) => a, { to: 256, by });
   const contours = await fromRaster(data, bands);
-  const geometry = { assembly: [] };
+  const geometry = { type: 'assembly', content: [] };
   for (const contour of contours) {
     const simplifiedContour = contour.map((path) =>
       simplifyPath(path, tolerance)
     );
-    geometry.assembly.push({ paths: simplifiedContour });
+    geometry.assembly.push({ type: 'paths', paths: simplifiedContour });
   }
   return Shape.fromGeometry(geometry);
 };
