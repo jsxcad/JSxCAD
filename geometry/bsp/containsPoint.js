@@ -1,4 +1,4 @@
-import { inLeaf, outLeaf } from './bsp';
+import { inLeaf, outLeaf } from './bsp.js';
 
 export const containsPoint = (bsp, point, history = []) => {
   while (true) {

@@ -6,7 +6,7 @@ import {
 } from '@jsxcad/math-plane';
 
 import { cacheCut } from '@jsxcad/cache';
-import { toPlane } from './toPlane';
+import { toPlane } from './toPlane.js'.;
 
 const EPSILON = 1e-5;
 

@@ -8,9 +8,9 @@ import {
   removeExteriorPolygonsForCutDroppingOverlap,
   removeExteriorPolygonsForCutKeepingOverlap,
   fromPolygons as toBspFromPolygons,
-} from './bsp';
+} from './bsp.js';
 
-import { createNormalize3 } from '@jsxcad/algorithm-quantize';
+import { createNormalize3 } from '@jsxcad/algorithm-quantize.js';
 
 export const cut = (solid, surface, normalize = createNormalize3()) => {
   // Build a classifier from the planar polygon.

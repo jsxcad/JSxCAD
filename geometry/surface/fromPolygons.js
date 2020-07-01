@@ -1,3 +1,3 @@
-import { makeConvex } from './makeConvex';
+import { makeConvex } from './makeConvex.js';
 
 export const fromPolygons = ({ plane }, polygons) => makeConvex(polygons);

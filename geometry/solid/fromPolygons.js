@@ -1,7 +1,7 @@
 import { cleanSolid } from '@jsxcad/geometry-halfedge';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { createNormalize4 } from './createNormalize4';
-import { makeWatertight } from './makeWatertight';
+import { createNormalize4 } from './createNormalize4.js';
+import { makeWatertight } from './makeWatertight.js';
 import { toPlane } from '@jsxcad/math-poly3';
 
 export let doCheckOverlap = false;

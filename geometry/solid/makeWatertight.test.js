@@ -1,5 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { makeWatertight } from './makeWatertight';
+import { makeWatertight } from './makeWatertight.js';
 import test from 'ava';
 
 const canonicalize = (solid) =>

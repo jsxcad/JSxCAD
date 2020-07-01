@@ -12,14 +12,14 @@ import {
   removeExteriorPolygonsForIntersectionDroppingOverlap,
   removeExteriorPolygonsForIntersectionKeepingOverlap,
   fromPolygons as toBspFromPolygons,
-} from './bsp';
+} from './bsp.js';
 
 import { doesNotOverlap, measureBoundingBox } from '@jsxcad/geometry-polygons';
 
-import { containsPoint } from './containsPoint';
+import { containsPoint } from './containsPoint.js';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { max } from '@jsxcad/math-vec3';
-import partition from './partition';
+import partition from './partition.js';
 
 const MIN = 0;
 

@@ -1,6 +1,6 @@
 import { add, distance, scale } from '@jsxcad/math-vec3';
 
-import { measureBoundingBox } from './measureBoundingBox';
+import { measureBoundingBox } from './measureBoundingBox.js';
 
 export const measureBoundingSphere = (surface) => {
   if (surface.measureBoundingSphere === undefined) {

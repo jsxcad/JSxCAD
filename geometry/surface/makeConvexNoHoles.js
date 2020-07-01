@@ -6,7 +6,7 @@ import {
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { dot } from '@jsxcad/math-vec3';
 import earcut from 'earcut';
-import { toPlane } from './toPlane';
+import { toPlane } from './toPlane.js';
 
 const X = 0;
 const Y = 1;

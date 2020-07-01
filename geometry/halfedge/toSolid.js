@@ -5,7 +5,7 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import eachLink from './eachLink';
+import eachLink from './eachLink.js';
 import pushConvexPolygons from './pushConvexPolygons.js';
 
 const walked = Symbol('walked');
