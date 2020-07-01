@@ -4,7 +4,7 @@
  * @typedef {import("./types").Surface} Surface
  */
 
-import fromSolid from './fromSolid';
+import fromSolid from './fromSolid.js';
 
 /**
  * fromSurface

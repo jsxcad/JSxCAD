@@ -1,4 +1,4 @@
-import { fromPoint } from './fromPoint';
+import { fromPoint } from './fromPoint.js';
 import test from 'ava';
 
 test('With no ranks, produces the origin', (t) => {

@@ -3,7 +3,7 @@
  * @typedef {import("./types").Polygons} Polygons
  */
 
-import eachLink from './eachLink';
+import eachLink from './eachLink.js';
 import { pushWhenValid } from '@jsxcad/geometry-polygons';
 
 /**

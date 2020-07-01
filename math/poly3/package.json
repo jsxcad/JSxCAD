@@ -5,6 +5,7 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
+  "type": "module",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",

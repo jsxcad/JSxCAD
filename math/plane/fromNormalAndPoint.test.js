@@ -1,4 +1,4 @@
-import { fromNormalAndPoint } from './fromNormalAndPoint';
+import { fromNormalAndPoint } from './fromNormalAndPoint.js';
 import test from 'ava';
 
 test('plane: fromNormalAndPoint() should return a new plant with correct values', (t) => {

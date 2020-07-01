@@ -6,22 +6,22 @@ import {
   fromZRotation,
 } from '@jsxcad/math-mat4';
 
-import { canonicalize } from './canonicalize';
-import { cutTrianglesByPlane } from './cutTrianglesByPlane';
-import { doesNotOverlap } from './doesNotOverlap';
-import { eachPoint } from './eachPoint';
-import { flip } from './flip';
-import { fromPointsAndPaths } from './fromPointsAndPaths';
-import { isTriangle } from './isTriangle';
-import { map } from './map';
-import { measureBoundingBox } from './measureBoundingBox';
-import { measureBoundingSphere } from './measureBoundingSphere';
-import { pushWhenValid } from './pushWhenValid';
-import { toGeneric } from './toGeneric';
-import { toLoops } from './toLoops';
-import { toPoints } from './toPoints';
-import { toTriangles } from './toTriangles';
-import { transform } from './transform';
+import { canonicalize } from './canonicalize.js';
+import { cutTrianglesByPlane } from './cutTrianglesByPlane.js';
+import { doesNotOverlap } from './doesNotOverlap.js';
+import { eachPoint } from './eachPoint.js';
+import { flip } from './flip.js';
+import { fromPointsAndPaths } from './fromPointsAndPaths.js';
+import { isTriangle } from './isTriangle.js';
+import { map } from './map.js';
+import { measureBoundingBox } from './measureBoundingBox.js';
+import { measureBoundingSphere } from './measureBoundingSphere.js';
+import { pushWhenValid } from './pushWhenValid.js';
+import { toGeneric } from './toGeneric.js';
+import { toLoops } from './toLoops.js';
+import { toPoints } from './toPoints.js';
+import { toTriangles } from './toTriangles.js';
+import { transform } from './transform.js';
 
 const rotateX = (angle, polygons) => transform(fromXRotation(angle), polygons);
 const rotateY = (angle, polygons) => transform(fromYRotation(angle), polygons);

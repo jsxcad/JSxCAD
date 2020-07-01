@@ -1,5 +1,5 @@
-import { canonicalize as c } from './canonicalize';
-import { normalize } from './normalize';
+import { canonicalize as c } from './canonicalize.js';
+import { normalize } from './normalize.js';
 import test from 'ava';
 
 test('vec3: normalize() called with one paramerters should return a vec3 with correct values', (t) => {

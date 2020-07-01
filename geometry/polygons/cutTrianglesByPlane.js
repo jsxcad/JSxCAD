@@ -1,6 +1,6 @@
 import { canonicalize, dot, lerp, subtract } from '@jsxcad/math-vec3';
 
-import { toLoops } from './toLoops';
+import { toLoops } from './toLoops.js';
 
 const EPSILON = 1e-5;
 

@@ -1,4 +1,4 @@
-import { concatenate } from './concatenate';
+import { concatenate } from './concatenate.js';
 import test from 'ava';
 
 test('Concatenation of closed paths succeeds', (t) => {

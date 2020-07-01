@@ -1,6 +1,6 @@
-import { canonicalize } from './canonicalize';
+import { canonicalize } from './canonicalize.js';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('vec2: transform() called with two paramerters should return a vec2 with correct values', (t) => {
   const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];

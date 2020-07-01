@@ -1,4 +1,4 @@
-import { squaredLength } from './squaredLength';
+import { squaredLength } from './squaredLength.js';
 import test from 'ava';
 
 test('vec3: length() should return correct values', (t) => {

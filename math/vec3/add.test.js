@@ -1,4 +1,4 @@
-import { add } from './add';
+import { add } from './add.js';
 import test from 'ava';
 
 test('vec3: add() called with two parameters should return a vec3 with correct values', (t) => {

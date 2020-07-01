@@ -5,9 +5,9 @@
 
 // Note that merging produces duplicate points.
 
-import { eachLink } from './eachLink';
-import { equalsPlane } from './junction';
-import { toPlane } from './toPlane';
+import { eachLink } from './eachLink.js';
+import { equalsPlane } from './junction.js';
+import { toPlane } from './toPlane.js';
 
 const merged = Symbol('merged');
 

@@ -1,4 +1,4 @@
-import { multiply } from './multiply';
+import { multiply } from './multiply.js';
 import test from 'ava';
 
 test('mat4: multiply() should return a new mat4 with correct values', (t) => {

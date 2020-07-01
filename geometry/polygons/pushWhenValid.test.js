@@ -1,4 +1,4 @@
-import { pushWhenValid } from './pushWhenValid';
+import { pushWhenValid } from './pushWhenValid.js';
 import test from 'ava';
 
 test('bad', (t) => {

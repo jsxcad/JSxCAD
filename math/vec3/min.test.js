@@ -1,4 +1,4 @@
-import { min } from './min';
+import { min } from './min.js';
 import test from 'ava';
 
 test('vec3: min() called with two parameters should return a vec3 with correct values', (t) => {

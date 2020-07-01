@@ -1,7 +1,7 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import fromSolid from './fromSolid';
+import fromSolid from './fromSolid.js';
 import test from 'ava';
-import toPolygons from './toPolygons';
+import toPolygons from './toPolygons.js';
 
 const unitCube = [
   [

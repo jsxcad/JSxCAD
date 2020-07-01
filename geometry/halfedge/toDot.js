@@ -2,7 +2,7 @@
  * @typedef {import("./types").Loops} Loops
  */
 
-import eachLink from './eachLink';
+import eachLink from './eachLink.js';
 
 /**
  * toDot

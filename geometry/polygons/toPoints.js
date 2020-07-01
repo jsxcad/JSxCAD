@@ -1,4 +1,4 @@
-import { eachPoint } from './eachPoint';
+import { eachPoint } from './eachPoint.js';
 
 export const toPoints = (options = {}, polygons) => {
   const points = [];

@@ -1,8 +1,8 @@
-import { canonicalize } from './canonicalize';
-import { equals } from './equals';
-import { fromPoints } from './fromPoints';
+import { canonicalize } from './canonicalize.js';
+import { equals } from './equals.js';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('poly3: identity transform should return a new poly3 with correct values', (t) => {
   const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];

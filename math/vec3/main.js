@@ -1,69 +1,33 @@
-import { abs } from './abs';
-import { add } from './add';
-import { angle } from './angle';
-import { canonicalize } from './canonicalize';
-import { cross } from './cross';
-import { distance } from './distance';
-import { divide } from './divide';
-import { dot } from './dot';
-import { equals } from './equals';
-import { fromPoint } from './fromPoint';
-import { fromScalar } from './fromScalar';
-import { fromValues } from './fromValues';
-import { fromVec2 } from './fromVec2';
-import { length } from './length';
-import { lerp } from './lerp';
-import { max } from './max';
-import { min } from './min';
-import { multiply } from './multiply';
-import { negate } from './negate';
-import { normalize } from './normalize';
-import { random } from './random';
-import { rotateX } from './rotateX';
-import { rotateY } from './rotateY';
-import { rotateZ } from './rotateZ';
-import { scale } from './scale';
-import { squaredDistance } from './squaredDistance';
-import { squaredLength } from './squaredLength';
-import { subtract } from './subtract';
-import { transform } from './transform';
-import { turnX } from './turnX';
-import { turnY } from './turnY';
-import { turnZ } from './turnZ';
-import { unit } from './unit';
-
-export {
-  abs,
-  add,
-  angle,
-  canonicalize,
-  cross,
-  distance,
-  divide,
-  dot,
-  equals,
-  fromPoint,
-  fromScalar,
-  fromValues,
-  fromVec2,
-  length,
-  lerp,
-  max,
-  min,
-  multiply,
-  negate,
-  normalize,
-  random,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  squaredDistance,
-  squaredLength,
-  subtract,
-  transform,
-  turnX,
-  turnY,
-  turnZ,
-  unit,
-};
+export { abs } from './abs.js';
+export { add } from './add.js';
+export { angle } from './angle.js';
+export { canonicalize } from './canonicalize.js';
+export { cross } from './cross.js';
+export { distance } from './distance.js';
+export { divide } from './divide.js';
+export { dot } from './dot.js';
+export { equals } from './equals.js';
+export { fromPoint } from './fromPoint.js';
+export { fromScalar } from './fromScalar.js';
+export { fromValues } from './fromValues.js';
+export { fromVec2 } from './fromVec2.js';
+export { length } from './length.js';
+export { lerp } from './lerp.js';
+export { max } from './max.js';
+export { min } from './min.js';
+export { multiply } from './multiply.js';
+export { negate } from './negate.js';
+export { normalize } from './normalize.js';
+export { random } from './random.js';
+export { rotateX } from './rotateX.js';
+export { rotateY } from './rotateY.js';
+export { rotateZ } from './rotateZ.js';
+export { scale } from './scale.js';
+export { squaredDistance } from './squaredDistance.js';
+export { squaredLength } from './squaredLength.js';
+export { subtract } from './subtract.js';
+export { transform } from './transform.js';
+export { turnX } from './turnX.js';
+export { turnY } from './turnY.js';
+export { turnZ } from './turnZ.js';
+export { unit } from './unit.js';

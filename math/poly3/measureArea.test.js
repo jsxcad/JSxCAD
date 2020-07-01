@@ -1,11 +1,11 @@
 import { fromXRotation, fromYRotation, fromZRotation } from '@jsxcad/math-mat4';
 
-import { flip } from './flip';
-import { fromPoints } from './fromPoints';
-import { measureArea } from './measureArea';
+import { flip } from './flip.js';
+import { fromPoints } from './fromPoints.js';
+import { measureArea } from './measureArea.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 const empty = [];
 

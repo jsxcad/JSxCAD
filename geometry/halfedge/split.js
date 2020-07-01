@@ -3,10 +3,10 @@
  * @typedef {import("./types").Loops} Loops
  */
 
-import { clean } from './clean';
-import { eachLink } from './eachLink';
-import { equalsPlane } from './junction';
-import { toPlane } from './toPlane';
+import { clean } from './clean.js';
+import { eachLink } from './eachLink.js';
+import { equalsPlane } from './junction.js';
+import { toPlane } from './toPlane.js';
 
 /**
  * walk

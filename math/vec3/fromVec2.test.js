@@ -1,4 +1,4 @@
-import { fromVec2 } from './fromVec2';
+import { fromVec2 } from './fromVec2.js';
 import test from 'ava';
 
 test('vec3: fromVec2() should return a new vec3 with correct values', (t) => {

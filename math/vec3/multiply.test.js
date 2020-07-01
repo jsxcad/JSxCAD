@@ -1,4 +1,4 @@
-import { multiply } from './multiply';
+import { multiply } from './multiply.js';
 import test from 'ava';
 
 test('vec3: multiply() called with two paramerters should return a vec3 with correct values', (t) => {

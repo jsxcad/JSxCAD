@@ -1,4 +1,4 @@
-import { subtract } from './subtract';
+import { subtract } from './subtract.js';
 import test from 'ava';
 
 test('vec2: subtract() called with two paramerters should return a vec2 with correct values', (t) => {

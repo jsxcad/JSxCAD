@@ -1,4 +1,4 @@
-import { equals } from './equals';
+import { equals } from './equals.js';
 import test from 'ava';
 
 test('plane: equals() should return correct booleans', (t) => {

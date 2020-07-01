@@ -6,7 +6,7 @@
  */
 
 import eachLink from './eachLink';
-import pushConvexPolygons from './pushConvexPolygons';
+import pushConvexPolygons from './pushConvexPolygons.js';
 
 const walked = Symbol('walked');
 

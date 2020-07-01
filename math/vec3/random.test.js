@@ -1,4 +1,4 @@
-import { random } from './random';
+import { random } from './random.js';
 import test from 'ava';
 
 test('vec3: random() should return a vec3 with correct values', (t) => {

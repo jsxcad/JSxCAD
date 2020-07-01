@@ -1,4 +1,4 @@
-import { fromValues } from './fromValues';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
 
 test('mat4: fromValues() should return a new mat4 with correct values', (t) => {

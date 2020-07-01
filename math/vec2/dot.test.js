@@ -1,4 +1,4 @@
-import { dot } from './dot';
+import { dot } from './dot.js';
 import test from 'ava';
 
 test('vec2: dot() should return correct values', (t) => {

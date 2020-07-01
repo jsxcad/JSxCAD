@@ -1,4 +1,4 @@
-import { add } from './add';
+import { add } from './add.js';
 import test from 'ava';
 
 test('mat4: add() should return a new mat4 with correct values', (t) => {

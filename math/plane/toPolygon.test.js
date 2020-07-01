@@ -1,5 +1,5 @@
 import test from 'ava';
-import { toPolygon } from './toPolygon';
+import { toPolygon } from './toPolygon.js';
 
 test('Polygon representing z0', (t) => {
   const polygon = toPolygon([0, 0, 1, 0], 10);

@@ -1,6 +1,6 @@
 import { cross, dot, subtract } from '@jsxcad/math-vec3';
 
-import { toPlane } from './toPlane';
+import { toPlane } from './toPlane.js';
 
 /**
  * Check whether the polygon is convex.

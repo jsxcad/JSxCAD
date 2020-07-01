@@ -5,6 +5,7 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
+  "type": "module",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
@@ -29,7 +30,7 @@
     "earcut": "^2.2.2"
   },
   "devDependencies": {
-    "ava": "^2.4.0",
+    "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
     "esm": "^3.2.10",
@@ -40,7 +41,6 @@
     "rollup-plugin-node-resolve": "^4.2.3"
   },
   "ava": {
-    "require": "esm"
   },
   "publishConfig": {
     "access": "public"

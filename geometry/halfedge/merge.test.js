@@ -1,8 +1,8 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import fromSurface from './fromSurface';
-import merge from './merge';
+import fromSurface from './fromSurface.js';
+import merge from './merge.js';
 import test from 'ava';
-import toPolygons from './toPolygons';
+import toPolygons from './toPolygons.js';
 
 test('Original', (t) => {
   const normalize = createNormalize3();
