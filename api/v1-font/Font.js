@@ -1,5 +1,5 @@
-import Hershey from './Hershey';
-import readFont from './readFont';
+import Hershey from './Hershey.js';
+import readFont from './readFont.js';
 
 const ofSize = (size) => Hershey.ofSize(size);
 

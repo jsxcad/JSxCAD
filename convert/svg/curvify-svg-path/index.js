@@ -1,8 +1,6 @@
-var arc = require('./arc-to-curves');
+import { curves as arc } from './arc-to-curves.js';
 
-module.exports = curvify;
-
-function curvify(path) {
+export function curvify(path) {
   var result = [];
   var cmd, prev, curves;
   var x = 0,

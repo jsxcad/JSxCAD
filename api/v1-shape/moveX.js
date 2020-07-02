@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import move from './move';
+import Shape from './Shape.js';
+import move from './move.js';
 
 /**
  *

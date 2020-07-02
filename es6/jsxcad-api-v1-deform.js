@@ -3658,7 +3658,7 @@ function shuffleSeed(seed) {
 }
 });
 
-unwrapExports(lib);
+var OpenSimplexNoise = unwrapExports(lib);
 var lib_1 = lib.makeNoise2D;
 var lib_2 = lib.makeNoise3D;
 var lib_3 = lib.makeNoise4D;
@@ -3674,9 +3674,9 @@ const crumple = (
 ) => {
   const scale = amount / 2;
 
-  const noiseX = lib_2(seed + 0);
-  const noiseY = lib_2(seed + 1);
-  const noiseZ = lib_2(seed + 2);
+  const noiseX = OpenSimplexNoise.makeNoise3D(seed + 0);
+  const noiseY = OpenSimplexNoise.makeNoise3D(seed + 1);
+  const noiseZ = OpenSimplexNoise.makeNoise3D(seed + 2);
 
   const perturb = (point) => [
     point[X] + noiseX(...point) * scale,

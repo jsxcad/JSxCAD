@@ -1,4 +1,4 @@
-import { equals } from './equals';
+import { equals } from './equals.js';
 import test from 'ava';
 
 test('vec2: equals() should return correct booleans', (t) => {

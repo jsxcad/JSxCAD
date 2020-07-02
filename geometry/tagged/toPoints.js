@@ -1,5 +1,5 @@
-import { createPointNormalizer } from './pointNormalizer';
-import { eachPoint } from './eachPoint';
+import { createPointNormalizer } from './pointNormalizer.js';
+import { eachPoint } from './eachPoint.js';
 
 export const toPoints = (geometry) => {
   const normalize = createPointNormalizer();

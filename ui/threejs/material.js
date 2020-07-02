@@ -6,7 +6,7 @@ import {
   TextureLoader,
 } from 'three';
 
-import { setColor } from './color';
+import { setColor } from './color.js';
 
 const loader = new TextureLoader();
 

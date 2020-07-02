@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { getSolids } from '@jsxcad/geometry-tagged';
 import { junctionSelector } from '@jsxcad/geometry-halfedge';

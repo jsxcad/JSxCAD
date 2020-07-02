@@ -1,4 +1,4 @@
-import { toDot, toGraph } from './toGraph';
+import { toDot, toGraph } from './toGraph.js';
 
 import test from 'ava';
 

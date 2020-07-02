@@ -1,4 +1,4 @@
-import { cross } from './cross';
+import { cross } from './cross.js';
 import test from 'ava';
 
 test('vec2: cross() called with two paramerters should return a vec2 with correct values', (t) => {

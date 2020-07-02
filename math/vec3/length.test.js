@@ -1,4 +1,4 @@
-import { length } from './length';
+import { length } from './length.js';
 import test from 'ava';
 
 test('vec3: length() should return correct values', (t) => {

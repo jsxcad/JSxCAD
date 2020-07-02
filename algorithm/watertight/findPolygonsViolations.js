@@ -1,6 +1,6 @@
 import { eachEdge } from '@jsxcad/math-poly3';
-import { ensureMapElement } from './ensureMapElement';
-import { findVertexViolations } from './findVertexViolations';
+import { ensureMapElement } from './ensureMapElement.js';
+import { findVertexViolations } from './findVertexViolations.js';
 
 const toIdentity = JSON.stringify;
 

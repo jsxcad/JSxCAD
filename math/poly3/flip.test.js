@@ -1,6 +1,6 @@
-import { equals } from './equals';
-import { flip } from './flip';
-import { fromPoints } from './fromPoints';
+import { equals } from './equals.js';
+import { flip } from './flip.js';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
 
 test('poly3: flip() should return a new poly3 with correct values', (t) => {

@@ -1,4 +1,4 @@
-import { eachNonVoidItem } from './eachNonVoidItem';
+import { eachNonVoidItem } from './eachNonVoidItem.js';
 
 export const getAnyNonVoidSurfaces = (geometry) => {
   const surfaces = [];

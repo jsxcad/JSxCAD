@@ -1,33 +1,15 @@
-import { canonicalize } from './canonicalize';
-import { eachEdge } from './eachEdge';
-import { flip } from './flip';
-import { fromPoints } from './fromPoints';
-import { isConvex } from './isConvex';
-import { isCoplanar } from './isCoplanar';
-import { isStrictlyCoplanar } from './isStrictlyCoplanar';
-import { map } from './map';
-import { measureArea } from './measureArea';
-import { measureBoundingBox } from './measureBoundingBox';
-import { measureBoundingSphere } from './measureBoundingSphere';
-import { toEdges } from './toEdges';
-import { toPlane } from './toPlane';
-import { toPoints } from './toPoints';
-import { transform } from './transform';
-
-export {
-  canonicalize,
-  eachEdge,
-  flip,
-  fromPoints,
-  isConvex,
-  isCoplanar,
-  isStrictlyCoplanar,
-  map,
-  measureArea,
-  measureBoundingBox,
-  measureBoundingSphere,
-  toEdges,
-  toPlane,
-  toPoints,
-  transform,
-};
+export { canonicalize } from './canonicalize.js';
+export { eachEdge } from './eachEdge.js';
+export { flip } from './flip.js';
+export { fromPoints } from './fromPoints.js';
+export { isConvex } from './isConvex.js';
+export { isCoplanar } from './isCoplanar.js';
+export { isStrictlyCoplanar } from './isStrictlyCoplanar.js';
+export { map } from './map.js';
+export { measureArea } from './measureArea.js';
+export { measureBoundingBox } from './measureBoundingBox.js';
+export { measureBoundingSphere } from './measureBoundingSphere.js';
+export { toEdges } from './toEdges.js';
+export { toPlane } from './toPlane.js';
+export { toPoints } from './toPoints.js';
+export { transform } from './transform.js';

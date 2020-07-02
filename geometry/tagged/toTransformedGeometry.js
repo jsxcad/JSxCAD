@@ -1,6 +1,6 @@
 import { identityMatrix, multiply } from '@jsxcad/math-mat4';
 
-import { rewrite } from './visit';
+import { rewrite } from './visit.js';
 import { transform as transformPaths } from '@jsxcad/geometry-paths';
 import { transform as transformPlane } from '@jsxcad/math-plane';
 import { transform as transformPoints } from '@jsxcad/geometry-points';

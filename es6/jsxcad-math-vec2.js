@@ -250,7 +250,4 @@ const transform = (matrix, [x, y]) => [
   matrix[1] * x + matrix[5] * y + matrix[13],
 ];
 
-const angle = angleRadians;
-const fromAngle = fromAngleRadians;
-
-export { abs, add, angle, angleDegrees, angleRadians, canonicalize, cross, distance, divide, dot, equals, fromAngle, fromAngleDegrees, fromAngleRadians, fromPoint, fromScalar, fromValues, length, lerp, max, min, multiply, negate, normal, normalize, rotate, scale, squaredDistance, squaredLength, subtract, transform };
+export { abs, add, angleRadians as angle, angleDegrees, angleRadians, canonicalize, cross, distance, divide, dot, equals, fromAngleRadians as fromAngle, fromAngleDegrees, fromAngleRadians, fromPoint, fromScalar, fromValues, length, lerp, max, min, multiply, negate, normal, normalize, rotate, scale, squaredDistance, squaredLength, subtract, transform };

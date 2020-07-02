@@ -1,4 +1,4 @@
-import { distanceToPoint } from './distanceToPoint';
+import { distanceToPoint } from './distanceToPoint.js';
 import { equals as equalsVec3 } from '@jsxcad/math-vec3';
 
 const EPS = 1e-5;

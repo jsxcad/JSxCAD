@@ -1,4 +1,4 @@
-import { subdivideTriangle } from './subdivideTriangle';
+import { subdivideTriangle } from './subdivideTriangle.js';
 
 export const subdivideTriangularMesh = (mesh) => {
   const subdividedMesh = [];

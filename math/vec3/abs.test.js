@@ -1,4 +1,4 @@
-import { abs } from './abs';
+import { abs } from './abs.js';
 import test from 'ava';
 
 test('vec3: abs() should return a vec3 with positive values', (t) => {

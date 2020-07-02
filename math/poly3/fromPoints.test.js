@@ -1,4 +1,4 @@
-import { fromPoints } from './fromPoints';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
 
 test('poly3: fromPoints() should return a new poly3 with correct values', (t) => {

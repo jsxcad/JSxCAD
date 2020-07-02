@@ -1,4 +1,4 @@
-import { allTags } from './allTags';
+import { allTags } from './allTags.js';
 import test from 'ava';
 
 test('Extract tags', (t) => {

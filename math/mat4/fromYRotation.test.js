@@ -1,4 +1,4 @@
-import { fromYRotation } from './fromYRotation';
+import { fromYRotation } from './fromYRotation.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 

@@ -1,5 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import outlineSurface from './outlineSurface';
+import outlineSurface from './outlineSurface.js';
 import test from 'ava';
 
 test('square-with-square-hole', (t) => {

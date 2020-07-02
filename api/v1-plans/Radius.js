@@ -2,7 +2,7 @@ import { Circle, Path } from '@jsxcad/api-v1-shapes';
 
 import { Hershey } from '@jsxcad/api-v1-font';
 import Plan from '@jsxcad/api-v1-plan';
-import { dp2 } from './dp';
+import { dp2 } from './dp.js';
 
 // Radius
 

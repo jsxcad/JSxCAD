@@ -1,5 +1,5 @@
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('vec4: transform() called with two paramerters should return a vec4 with correct values', (t) => {
   const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];

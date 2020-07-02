@@ -124,11 +124,6 @@ const offsetMethod = function (radius, resolution) {
 };
 Shape.prototype.offset = offsetMethod;
 
-offset.signature =
-  'offset(shape:Shape, radius:number = 1, resolution:number = 16) -> Shape';
-offsetMethod.signature =
-  'Shape -> offset(radius:number = 1, resolution:number = 16) -> Shape';
-
 /**
  *
  * # shrink

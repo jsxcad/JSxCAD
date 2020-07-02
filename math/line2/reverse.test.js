@@ -1,7 +1,7 @@
-import { canonicalize } from './canonicalize';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import { reverse } from './reverse';
+import { canonicalize } from './canonicalize.js';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
+import { reverse } from './reverse.js';
 import test from 'ava';
 
 test('line2: reverse() should return proper lines', (t) => {

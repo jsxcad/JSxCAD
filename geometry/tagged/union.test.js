@@ -14,9 +14,9 @@ import {
 } from '@jsxcad/data-shape';
 
 import { boot } from '@jsxcad/sys';
-import { canonicalize } from './canonicalize';
+import { canonicalize } from './canonicalize.js';
 import test from 'ava';
-import { union } from './union';
+import { union } from './union.js';
 
 test.beforeEach(async (t) => {
   await boot();

@@ -5,8 +5,8 @@ import {
 } from '@jsxcad/data-shape';
 
 import { boot } from '@jsxcad/sys';
-import { canonicalize } from './canonicalize';
-import { intersection } from './intersection';
+import { canonicalize } from './canonicalize.js';
+import { intersection } from './intersection.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {

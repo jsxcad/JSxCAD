@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { toDotFromFlows, toFlows } from './molecules';
+import { toDotFromFlows, toFlows } from './molecules.js';
 
 import test from 'ava';
 

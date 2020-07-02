@@ -1,5 +1,5 @@
-import Line2 from './Line2';
+import Line2 from './Line2.js';
 
-export * from './Line2';
+export * from './Line2.js';
 
 export default Line2;

@@ -1,6 +1,6 @@
 /* global self */
 
-import { isWebWorker } from './browserOrNode';
+import { isWebWorker } from './browserOrNode.js';
 
 const watchers = new Set();
 

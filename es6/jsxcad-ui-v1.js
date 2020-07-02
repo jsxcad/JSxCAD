@@ -1,7 +1,6 @@
 import { read as read$1, log, write as write$1, getFilesystem, listFiles, watchFileCreation, watchFileDeletion, unwatchFileCreation, unwatchFileDeletion, deleteFile, watchFile, unwatchFiles, readFile, listFilesystems, setupFilesystem, watchLog, createService, setHandleAskUser, unwatchLog, boot, ask, touch } from './jsxcad-sys.js';
 import { orbitDisplay, dataUrl } from './jsxcad-ui-threejs.js';
 import Shape from './jsxcad-api-v1-shape.js';
-import { toZipFromFilesystem, fromZipToFilesystem } from './jsxcad-convert-zip.js';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -46492,7 +46491,17 @@ function getTrueOffsetParent(element) {
     return null;
   }
 
-  return element.offsetParent;
+  var offsetParent = element.offsetParent;
+
+  if (offsetParent) {
+    var html = getDocumentElement(offsetParent);
+
+    if (getNodeName(offsetParent) === 'body' && getComputedStyle$2(offsetParent).position === 'static' && getComputedStyle$2(html).position !== 'static') {
+      return html;
+    }
+  }
+
+  return offsetParent;
 } // `.offsetParent` reports `null` for fixed elements, while absolute elements
 // return the containing block
 
@@ -46504,7 +46513,7 @@ function getContainingBlock(element) {
     var css = getComputedStyle$2(currentNode); // This is non-exhaustive but covers the most common CSS properties that
     // create a containing block.
 
-    if (css.transform !== 'none' || css.perspective !== 'none' || css.willChange !== 'auto') {
+    if (css.transform !== 'none' || css.perspective !== 'none' || css.willChange && css.willChange !== 'auto') {
       return currentNode;
     } else {
       currentNode = currentNode.parentNode;
@@ -47030,7 +47039,7 @@ function getClippingParents(element) {
 
 
   return clippingParents.filter(function (clippingParent) {
-    return isElement(clippingParent) && contains(clippingParent, clipperElement);
+    return isElement(clippingParent) && contains(clippingParent, clipperElement) && getNodeName(clippingParent) !== 'body';
   });
 } // Gets the maximum area that the element is visible in due to any number of
 // clipping parents
@@ -47196,13 +47205,24 @@ function computeAutoPlacement(state, options) {
       _options$allowedAutoP = _options.allowedAutoPlacements,
       allowedAutoPlacements = _options$allowedAutoP === void 0 ? placements : _options$allowedAutoP;
   var variation = getVariation(placement);
-  var placements$1 = (variation ? flipVariations ? variationPlacements : variationPlacements.filter(function (placement) {
+  var placements$1 = variation ? flipVariations ? variationPlacements : variationPlacements.filter(function (placement) {
     return getVariation(placement) === variation;
-  }) : basePlacements).filter(function (placement) {
-    return allowedAutoPlacements.indexOf(placement) >= 0;
-  }); // $FlowFixMe: Flow seems to have problems with two array unions...
+  }) : basePlacements; // $FlowFixMe
 
-  var overflows = placements$1.reduce(function (acc, placement) {
+  var allowedPlacements = placements$1.filter(function (placement) {
+    return allowedAutoPlacements.indexOf(placement) >= 0;
+  });
+
+  if (allowedPlacements.length === 0) {
+    allowedPlacements = placements$1;
+
+    {
+      console.error(['Popper: The `allowedAutoPlacements` option did not allow any', 'placements. Ensure the `placement` option matches the variation', 'of the allowed placements.', 'For example, "auto" cannot be used to allow "bottom-start".', 'Use "auto-start" instead.'].join(' '));
+    }
+  } // $FlowFixMe: Flow seems to have problems with two array unions...
+
+
+  var overflows = allowedPlacements.reduce(function (acc, placement) {
     acc[placement] = detectOverflow(state, {
       placement: placement,
       boundary: boundary,
@@ -50158,113 +50178,70 @@ class Pane extends react.PureComponent {
       }
     };
 
-    return (
-      /*#__PURE__*/
-      react.createElement("div", {
-        style: {
-          width: '100%'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Navbar, {
-        key: "navbar",
-        bg: "light",
-        expand: "sm",
-        style: {
-          flex: '0 0 auto',
-          height: '30px'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Nav, {
-        key: "select",
-        className: "mr-auto"
-      }, viewChoices.length > 0 ?
-      /*#__PURE__*/
-      react.createElement(NavDropdown, {
-        title:
-        /*#__PURE__*/
-        react.createElement("span", {
-          style: {
-            color: 'black'
-          }
-        }, view === undefined ? 'Select' : viewTitle)
-      }, viewChoices.map(({
-        view,
-        viewTitle
-      }, index) =>
-      /*#__PURE__*/
-      react.createElement(NavDropdown.Item, {
-        key: index,
-        onClick: () => onSelectView(id, view)
-      }, viewTitle))) : view === undefined ? viewTitle :
-      /*#__PURE__*/
-      react.createElement(Nav.Item, null,
-      /*#__PURE__*/
-      react.createElement(Nav.Link, {
+    return /*#__PURE__*/react.createElement("div", {
+      style: {
+        width: '100%'
+      }
+    }, /*#__PURE__*/react.createElement(Navbar, {
+      key: "navbar",
+      bg: "light",
+      expand: "sm",
+      style: {
+        flex: '0 0 auto',
+        height: '30px'
+      }
+    }, /*#__PURE__*/react.createElement(Nav, {
+      key: "select",
+      className: "mr-auto"
+    }, viewChoices.length > 0 ? /*#__PURE__*/react.createElement(NavDropdown, {
+      title: /*#__PURE__*/react.createElement("span", {
         style: {
           color: 'black'
         }
-      }, viewTitle)),
-      /*#__PURE__*/
-      react.createElement(Dropdown$1, {
-        as: ButtonGroup
-      },
-      /*#__PURE__*/
-      react.createElement(Form.Control, {
-        value: fileTitle,
-        onKeyPress: openFileTitle,
-        onChange: e => this.setState({
-          fileTitle: e.target.value
-        })
-      }),
-      /*#__PURE__*/
-      react.createElement(Dropdown$1.Toggle, {
-        split: true,
-        variant: "outline-primary",
-        id: "file-selector"
-      }),
-      /*#__PURE__*/
-      react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
-        file,
-        fileTitle
-      }, index) =>
-      /*#__PURE__*/
-      react.createElement(Dropdown$1.Item, {
-        key: index,
-        onClick: () => onSelectFile(id, file)
-      }, fileTitle)))), extra),
-      /*#__PURE__*/
-      react.createElement(Nav, {
-        key: "tools"
-      },
-      /*#__PURE__*/
-      react.createElement(lib_5.Consumer, {
-        key: `${id}/toolbar`
-      }, ({
-        mosaicWindowActions
-      }) =>
-      /*#__PURE__*/
-      react.createElement(Nav.Item, null,
-      /*#__PURE__*/
-      react.createElement(Nav.Link, {
-        onClick: () => mosaicWindowActions.split()
-      }, "Split"))),
-      /*#__PURE__*/
-      react.createElement(lib_4.Consumer, null, ({
-        mosaicActions
-      }) =>
-      /*#__PURE__*/
-      react.createElement(lib_5.Consumer, null, ({
-        mosaicWindowActions
-      }) =>
-      /*#__PURE__*/
-      react.createElement(Nav.Item, null,
-      /*#__PURE__*/
-      react.createElement(Nav.Link, {
-        onClick: () => mosaicActions.remove(mosaicWindowActions.getPath())
-      }, "Close")))))))
-    );
+      }, view === undefined ? 'Select' : viewTitle)
+    }, viewChoices.map(({
+      view,
+      viewTitle
+    }, index) => /*#__PURE__*/react.createElement(NavDropdown.Item, {
+      key: index,
+      onClick: () => onSelectView(id, view)
+    }, viewTitle))) : view === undefined ? viewTitle : /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
+      style: {
+        color: 'black'
+      }
+    }, viewTitle)), /*#__PURE__*/react.createElement(Dropdown$1, {
+      as: ButtonGroup
+    }, /*#__PURE__*/react.createElement(Form.Control, {
+      value: fileTitle,
+      onKeyPress: openFileTitle,
+      onChange: e => this.setState({
+        fileTitle: e.target.value
+      })
+    }), /*#__PURE__*/react.createElement(Dropdown$1.Toggle, {
+      split: true,
+      variant: "outline-primary",
+      id: "file-selector"
+    }), /*#__PURE__*/react.createElement(Dropdown$1.Menu, null, fileChoices.map(({
+      file,
+      fileTitle
+    }, index) => /*#__PURE__*/react.createElement(Dropdown$1.Item, {
+      key: index,
+      onClick: () => onSelectFile(id, file)
+    }, fileTitle)))), extra), /*#__PURE__*/react.createElement(Nav, {
+      key: "tools"
+    }, /*#__PURE__*/react.createElement(lib_5.Consumer, {
+      key: `${id}/toolbar`
+    }, ({
+      mosaicWindowActions
+    }) => /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
+      onClick: () => mosaicWindowActions.split()
+    }, "Split"))), /*#__PURE__*/react.createElement(lib_4.Consumer, null, ({
+      mosaicActions
+    }) => /*#__PURE__*/react.createElement(lib_5.Consumer, null, ({
+      mosaicWindowActions
+    }) => /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
+      onClick: () => mosaicActions.remove(mosaicWindowActions.getPath())
+    }, "Close")))))));
   }
 
   renderPane() {
@@ -50278,15 +50255,12 @@ class Pane extends react.PureComponent {
       id,
       path
     } = this.props;
-    return (
-      /*#__PURE__*/
-      react.createElement(lib_21, {
-        key: `window/${workspace}/${id}`,
-        createNode: createNode,
-        renderToolbar: () => this.renderToolbar(),
-        path: path
-      }, this.renderPane())
-    );
+    return /*#__PURE__*/react.createElement(lib_21, {
+      key: `window/${workspace}/${id}`,
+      createNode: createNode,
+      renderToolbar: () => this.renderToolbar(),
+      path: path
+    }, this.renderPane());
   }
 
 }
@@ -50405,20 +50379,12 @@ class FilesUi extends Pane {
     const {
       files = []
     } = this.state;
-    return files.map(file =>
-    /*#__PURE__*/
-    react.createElement(InputGroup, {
+    return files.map(file => /*#__PURE__*/react.createElement(InputGroup, {
       key: file
-    },
-    /*#__PURE__*/
-    react.createElement(FormControl, {
+    }, /*#__PURE__*/react.createElement(FormControl, {
       disabled: true,
       placeholder: file
-    }),
-    /*#__PURE__*/
-    react.createElement(InputGroup.Append, null,
-    /*#__PURE__*/
-    react.createElement(Button, {
+    }), /*#__PURE__*/react.createElement(InputGroup.Append, null, /*#__PURE__*/react.createElement(Button, {
       onClick: () => deleteFile({}, file),
       variant: "outline-primary"
     }, "Delete"))));
@@ -50428,68 +50394,43 @@ class FilesUi extends Pane {
     const {
       id
     } = this.props;
-    return (
-      /*#__PURE__*/
-      react.createElement(Container, {
-        key: id,
-        style: {
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column',
-          padding: '4px',
-          border: '1px solid rgba(0,0,0,.125)',
-          borderRadius: '.25rem'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Row, {
-        style: {
-          flex: '1 1 auto',
-          overflow: 'auto'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Col, null,
-      /*#__PURE__*/
-      react.createElement(InputGroup, null,
-      /*#__PURE__*/
-      react.createElement(FormControl, {
-        id: "source/add/name",
-        placeholder: "File Name"
-      }),
-      /*#__PURE__*/
-      react.createElement(InputGroup.Append, null,
-      /*#__PURE__*/
-      react.createElement(Button, {
-        onClick: this.addFile,
-        variant: "outline-primary"
-      }, "Add"))),
-      /*#__PURE__*/
-      react.createElement(InputGroup, null,
-      /*#__PURE__*/
-      react.createElement(FormControl, {
-        as: "input",
-        type: "file",
-        id: `source/${id}/import`,
-        multiple: false,
-        onChange: this.importFile,
-        style: {
-          display: 'none'
-        }
-      }),
-      /*#__PURE__*/
-      react.createElement(FormControl, {
-        id: `source/${id}/name`,
-        placeholder: ""
-      }),
-      /*#__PURE__*/
-      react.createElement(InputGroup.Append, null,
-      /*#__PURE__*/
-      react.createElement(Button, {
-        onClick: this.clickImportFile,
-        variant: "outline-primary"
-      }, "Import"))), this.buildFiles())))
-    );
+    return /*#__PURE__*/react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column',
+        padding: '4px',
+        border: '1px solid rgba(0,0,0,.125)',
+        borderRadius: '.25rem'
+      }
+    }, /*#__PURE__*/react.createElement(Row, {
+      style: {
+        flex: '1 1 auto',
+        overflow: 'auto'
+      }
+    }, /*#__PURE__*/react.createElement(Col, null, /*#__PURE__*/react.createElement(InputGroup, null, /*#__PURE__*/react.createElement(FormControl, {
+      id: "source/add/name",
+      placeholder: "File Name"
+    }), /*#__PURE__*/react.createElement(InputGroup.Append, null, /*#__PURE__*/react.createElement(Button, {
+      onClick: this.addFile,
+      variant: "outline-primary"
+    }, "Add"))), /*#__PURE__*/react.createElement(InputGroup, null, /*#__PURE__*/react.createElement(FormControl, {
+      as: "input",
+      type: "file",
+      id: `source/${id}/import`,
+      multiple: false,
+      onChange: this.importFile,
+      style: {
+        display: 'none'
+      }
+    }), /*#__PURE__*/react.createElement(FormControl, {
+      id: `source/${id}/name`,
+      placeholder: ""
+    }), /*#__PURE__*/react.createElement(InputGroup.Append, null, /*#__PURE__*/react.createElement(Button, {
+      onClick: this.clickImportFile,
+      variant: "outline-primary"
+    }, "Import"))), this.buildFiles())));
   }
 
 }
@@ -82884,24 +82825,16 @@ class JsEditorUi extends Pane {
   }
 
   renderToolbar() {
-    return super.renderToolbar([
-    /*#__PURE__*/
-    react.createElement(Nav.Item, {
+    return super.renderToolbar([/*#__PURE__*/react.createElement(Nav.Item, {
       key: "JsEditor/run"
-    },
-    /*#__PURE__*/
-    react.createElement(Nav.Link, {
+    }, /*#__PURE__*/react.createElement(Nav.Link, {
       onClick: this.run,
       style: {
         color: 'blue'
       }
-    }, "Run")),
-    /*#__PURE__*/
-    react.createElement(Nav.Item, {
+    }, "Run")), /*#__PURE__*/react.createElement(Nav.Item, {
       key: "JsEditor/save"
-    },
-    /*#__PURE__*/
-    react.createElement(Nav.Link, {
+    }, /*#__PURE__*/react.createElement(Nav.Link, {
       onClick: this.save,
       style: {
         color: 'blue'
@@ -82917,57 +82850,48 @@ class JsEditorUi extends Pane {
       modal,
       code = ''
     } = this.state;
-    return (
-      /*#__PURE__*/
-      react.createElement(Container, {
-        style: {
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column'
-        }
+    return /*#__PURE__*/react.createElement(Container, {
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column'
+      }
+    }, /*#__PURE__*/react.createElement(Row, {
+      style: {
+        width: '100%',
+        height: '100%',
+        flex: '1 1 auto'
+      }
+    }, /*#__PURE__*/react.createElement(Col, {
+      style: {
+        width: '100%',
+        height: '100%',
+        overflow: 'auto'
       },
-      /*#__PURE__*/
-      react.createElement(Row, {
-        style: {
-          width: '100%',
-          height: '100%',
-          flex: '1 1 auto'
-        }
+      onKeyDown: this.onKeyDown
+    }, modal, /*#__PURE__*/react.createElement(AceEditor, {
+      commands: [this.runShortcut(), this.saveShortcut()],
+      editorProps: {
+        $blockScrolling: true
       },
-      /*#__PURE__*/
-      react.createElement(Col, {
-        style: {
-          width: '100%',
-          height: '100%',
-          overflow: 'auto'
-        },
-        onKeyDown: this.onKeyDown
-      }, modal,
-      /*#__PURE__*/
-      react.createElement(AceEditor, {
-        commands: [this.runShortcut(), this.saveShortcut()],
-        editorProps: {
-          $blockScrolling: true
-        },
-        setOptions: {
-          // enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: true,
-          useWorker: false
-        },
-        height: "100%",
-        highlightActiveLine: true,
-        key: id,
-        mode: "javascript",
-        name: id,
-        onChange: this.onValueChange,
-        showGutter: true,
-        showPrintMargin: true,
-        theme: "github",
-        value: code,
-        width: "100%"
-      }))))
-    );
+      setOptions: {
+        // enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
+        useWorker: false
+      },
+      height: "100%",
+      highlightActiveLine: true,
+      key: id,
+      mode: "javascript",
+      name: id,
+      onChange: this.onValueChange,
+      showGutter: true,
+      showPrintMargin: true,
+      theme: "github",
+      value: code,
+      width: "100%"
+    }))));
   }
 
 }
@@ -82984,39 +82908,30 @@ class LogUi extends Pane {
     const {
       id
     } = this.props;
-    return (
-      /*#__PURE__*/
-      react.createElement(Container, {
-        key: id,
-        style: {
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column',
-          padding: '4px',
-          border: '1px solid rgba(0,0,0,.125)',
-          borderRadius: '.25rem'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Row, {
-        style: {
-          flex: '1 1 auto',
-          height: '100%',
-          overflow: 'auto'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Col, null, this.props.log.filter(entry => entry.op === 'text').map((entry, index) =>
-      /*#__PURE__*/
-      react.createElement("div", {
-        key: index,
-        style: {
-          padding: '4px',
-          border: '1px solid rgba(0,0,0,.125)',
-          borderRadius: '.25rem'
-        }
-      }, entry.text)))))
-    );
+    return /*#__PURE__*/react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column',
+        padding: '4px',
+        border: '1px solid rgba(0,0,0,.125)',
+        borderRadius: '.25rem'
+      }
+    }, /*#__PURE__*/react.createElement(Row, {
+      style: {
+        flex: '1 1 auto',
+        height: '100%',
+        overflow: 'auto'
+      }
+    }, /*#__PURE__*/react.createElement(Col, null, this.props.log.filter(entry => entry.op === 'text').map((entry, index) => /*#__PURE__*/react.createElement("div", {
+      key: index,
+      style: {
+        padding: '4px',
+        border: '1px solid rgba(0,0,0,.125)',
+        borderRadius: '.25rem'
+      }
+    }, entry.text)))));
   }
 
 }
@@ -84236,10 +84151,7 @@ const cloneElement = (element, props) => {
     props.className = `${element.props.className} ${props.className}`;
   }
 
-  return (
-    /*#__PURE__*/
-    react.cloneElement(element, props)
-  );
+  return /*#__PURE__*/react.cloneElement(element, props);
 };
 class Resizable extends react.Component {
   constructor(...args) {
@@ -84388,12 +84300,9 @@ class Resizable extends react.Component {
       return handle;
     }
 
-    return (
-      /*#__PURE__*/
-      react.createElement("span", {
-        className: `react-resizable-handle react-resizable-handle-${resizeHandle}`
-      })
-    );
+    return /*#__PURE__*/react.createElement("span", {
+      className: `react-resizable-handle react-resizable-handle-${resizeHandle}`
+    });
   }
 
   render() {
@@ -84422,9 +84331,7 @@ class Resizable extends react.Component {
 
     return cloneElement(children, { ...p,
       className,
-      children: [children.props.children, resizeHandles.map(h =>
-      /*#__PURE__*/
-      react.createElement(reactDraggable_min_1, _extends$1({}, draggableOpts, {
+      children: [children.props.children, resizeHandles.map(h => /*#__PURE__*/react.createElement(reactDraggable_min_1, _extends$1({}, draggableOpts, {
         key: `resizableHandle-${h}`,
         onStop: this.resizeHandler('onResizeStop', h),
         onStart: this.resizeHandler('onResizeStart', h),
@@ -84552,31 +84459,26 @@ class ResizableBox extends react.Component {
       resizeHandles,
       ...props
     } = this.props;
-    return (
-      /*#__PURE__*/
-      react.createElement(Resizable, {
-        handle: handle,
-        handleSize: handleSize,
-        width: this.state.width,
-        height: this.state.height,
-        onResizeStart: onResizeStart,
-        onResize: this.onResize,
-        onResizeStop: onResizeStop,
-        draggableOpts: draggableOpts,
-        minConstraints: minConstraints,
-        maxConstraints: maxConstraints,
-        lockAspectRatio: lockAspectRatio,
-        axis: axis,
-        resizeHandles: resizeHandles
-      },
-      /*#__PURE__*/
-      react.createElement("div", _extends$1({
-        style: { ...style,
-          width: this.state.width + 'px',
-          height: this.state.height + 'px'
-        }
-      }, props)))
-    );
+    return /*#__PURE__*/react.createElement(Resizable, {
+      handle: handle,
+      handleSize: handleSize,
+      width: this.state.width,
+      height: this.state.height,
+      onResizeStart: onResizeStart,
+      onResize: this.onResize,
+      onResizeStop: onResizeStop,
+      draggableOpts: draggableOpts,
+      minConstraints: minConstraints,
+      maxConstraints: maxConstraints,
+      lockAspectRatio: lockAspectRatio,
+      axis: axis,
+      resizeHandles: resizeHandles
+    }, /*#__PURE__*/react.createElement("div", _extends$1({
+      style: { ...style,
+        width: this.state.width + 'px',
+        height: this.state.height + 'px'
+      }
+    }, props)));
   }
 
 }
@@ -86528,40 +86430,33 @@ class OrbitView extends react.PureComponent {
     } = this.props; //    width={width}
     //    height={height}
 
-    return (
-      /*#__PURE__*/
-      react.createElement(ResizableBox, {
-        className: "box",
-        width: width,
-        height: height,
-        style: {
-          borderStyle: 'solid',
-          borderWidth: 'thin',
-          borderColor: 'blue',
-          display: 'inline-block',
-          width: '90%',
-          height: '90%'
-        },
-        onClick: e => e.stopPropagation(),
-        resizeHandles: ['ne', 'nw', 'se', 'sw'],
-        handle: resizeHandle =>
-        /*#__PURE__*/
-        react.createElement("span", {
-          className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
-          style: {
-            zIndex: 2
-          }
-        })
+    return /*#__PURE__*/react.createElement(ResizableBox, {
+      className: "box",
+      width: width,
+      height: height,
+      style: {
+        borderStyle: 'solid',
+        borderWidth: 'thin',
+        borderColor: 'blue',
+        display: 'inline-block',
+        width: '90%',
+        height: '90%'
       },
-      /*#__PURE__*/
-      react.createElement("div", {
-        id: containerId,
+      onClick: e => e.stopPropagation(),
+      resizeHandles: ['ne', 'nw', 'se', 'sw'],
+      handle: resizeHandle => /*#__PURE__*/react.createElement("span", {
+        className: `react-resizable-handle react-resizable-handle-${resizeHandle}`,
         style: {
-          borderStyle: 'solid',
-          borderWidth: 'thin'
+          zIndex: 2
         }
-      }))
-    );
+      })
+    }, /*#__PURE__*/react.createElement("div", {
+      id: containerId,
+      style: {
+        borderStyle: 'solid',
+        borderWidth: 'thin'
+      }
+    }));
   }
 
 }
@@ -86613,24 +86508,19 @@ class StaticView extends react.PureComponent {
     const {
       url
     } = this.state;
-    return (
-      /*#__PURE__*/
-      react.createElement("div", {
-        style: {
-          display: 'inline-block'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement("img", {
-        src: url,
-        onClick: onClick,
-        style: {
-          borderStyle: 'dotted',
-          borderWidth: 'thin',
-          verticalAlign: 'baseline'
-        }
-      }))
-    );
+    return /*#__PURE__*/react.createElement("div", {
+      style: {
+        display: 'inline-block'
+      }
+    }, /*#__PURE__*/react.createElement("img", {
+      src: url,
+      onClick: onClick,
+      style: {
+        borderStyle: 'dotted',
+        borderWidth: 'thin',
+        verticalAlign: 'baseline'
+      }
+    }));
   }
 
 }
@@ -86668,30 +86558,24 @@ class GeometryView extends react.PureComponent {
 
     switch (mode) {
       case 'static':
-        return (
-          /*#__PURE__*/
-          react.createElement(StaticView, {
-            path: path,
-            geometry: geometry,
-            width: width,
-            height: height,
-            position: position,
-            onClick: onClick
-          })
-        );
+        return /*#__PURE__*/react.createElement(StaticView, {
+          path: path,
+          geometry: geometry,
+          width: width,
+          height: height,
+          position: position,
+          onClick: onClick
+        });
 
       case 'dynamic':
-        return (
-          /*#__PURE__*/
-          react.createElement(OrbitView, {
-            id: id,
-            path: path,
-            geometry: geometry,
-            width: width,
-            height: height,
-            position: position
-          })
-        );
+        return /*#__PURE__*/react.createElement(OrbitView, {
+          id: id,
+          path: path,
+          geometry: geometry,
+          width: width,
+          height: height,
+          position: position
+        });
     }
   }
 
@@ -86727,20 +86611,14 @@ class DownloadView extends react.PureComponent {
       data,
       type
     }, index) => {
-      return (
-        /*#__PURE__*/
-        react.createElement(Button, {
-          key: index,
-          variant: "outline-primary",
-          onClick: () => downloadFile(filename, data, type)
-        }, filename)
-      );
+      return /*#__PURE__*/react.createElement(Button, {
+        key: index,
+        variant: "outline-primary",
+        onClick: () => downloadFile(filename, data, type)
+      }, filename);
     };
 
-    return (
-      /*#__PURE__*/
-      react.createElement(ButtonGroup, null, entries.map(makeDownloadButton))
-    );
+    return /*#__PURE__*/react.createElement(ButtonGroup, null, entries.map(makeDownloadButton));
   }
 
 }
@@ -86830,9 +86708,7 @@ class NotebookUi extends Pane {
 
 
         const key = Math.random();
-        notes.push(
-        /*#__PURE__*/
-        react.createElement(GeometryView, {
+        notes.push( /*#__PURE__*/react.createElement(GeometryView, {
           key: key,
           width: width,
           height: height,
@@ -86846,9 +86722,7 @@ class NotebookUi extends Pane {
       } else if (note.md) {
         const data = note.md;
         const key = object_hash(data);
-        notes.push(
-        /*#__PURE__*/
-        react.createElement("div", {
+        notes.push( /*#__PURE__*/react.createElement("div", {
           key: key,
           dangerouslySetInnerHTML: {
             __html: marked_1(data)
@@ -86861,9 +86735,7 @@ class NotebookUi extends Pane {
 
         if (entries) {
           const key = object_hash(entries);
-          notes.push(
-          /*#__PURE__*/
-          react.createElement(DownloadView, {
+          notes.push( /*#__PURE__*/react.createElement(DownloadView, {
             key: key,
             entries: entries
           }));
@@ -86900,34 +86772,27 @@ class NotebookUi extends Pane {
       await this.update();
     };
 
-    return (
-      /*#__PURE__*/
-      react.createElement(Container, {
-        key: id,
-        style: {
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column'
-        }
+    return /*#__PURE__*/react.createElement(Container, {
+      key: id,
+      style: {
+        height: '100%',
+        display: 'flex',
+        flexFlow: 'column'
+      }
+    }, /*#__PURE__*/react.createElement(Row, {
+      style: {
+        width: '100%',
+        height: '100%',
+        flex: '1 1 auto'
+      }
+    }, /*#__PURE__*/react.createElement(Col, {
+      style: {
+        width: '100%',
+        height: '100%',
+        overflow: 'auto'
       },
-      /*#__PURE__*/
-      react.createElement(Row, {
-        style: {
-          width: '100%',
-          height: '100%',
-          flex: '1 1 auto'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Col, {
-        style: {
-          width: '100%',
-          height: '100%',
-          overflow: 'auto'
-        },
-        onClick: unselect
-      }, notes)))
-    );
+      onClick: unselect
+    }, notes)));
   }
 
 }
@@ -87436,180 +87301,53 @@ class SelectWorkspaceUi extends SettingsUi {
       rows.push(workspaces.slice(i, i + 5));
     }
 
-    return (
-      /*#__PURE__*/
-      react.createElement(DecoratedModal, {
-        show: this.props.show,
-        onHide: this.doHide,
-        size: "xl",
-        scrollable: true
+    return /*#__PURE__*/react.createElement(DecoratedModal, {
+      show: this.props.show,
+      onHide: this.doHide,
+      size: "xl",
+      scrollable: true
+    }, /*#__PURE__*/react.createElement(DecoratedModal.Header, {
+      closeButton: true
+    }, /*#__PURE__*/react.createElement(DecoratedModal.Title, null, "Workspace")), /*#__PURE__*/react.createElement(DecoratedModal.Body, null, /*#__PURE__*/react.createElement(Tabs, {
+      defaultActiveKey: "local",
+      style: {
+        display: 'flex'
+      }
+    }, /*#__PURE__*/react.createElement(Tab, {
+      eventKey: "local",
+      title: "Local"
+    }, /*#__PURE__*/react.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap'
+      }
+    }, workspaces.map((workspace, index) => /*#__PURE__*/react.createElement(Card, {
+      tag: "a",
+      key: index,
+      style: {
+        width: '196px',
+        height: '128'
       },
-      /*#__PURE__*/
-      react.createElement(DecoratedModal.Header, {
-        closeButton: true
-      },
-      /*#__PURE__*/
-      react.createElement(DecoratedModal.Title, null, "Workspace")),
-      /*#__PURE__*/
-      react.createElement(DecoratedModal.Body, null,
-      /*#__PURE__*/
-      react.createElement(Tabs, {
-        defaultActiveKey: "local",
-        style: {
-          display: 'flex'
-        }
-      },
-      /*#__PURE__*/
-      react.createElement(Tab, {
-        eventKey: "local",
-        title: "Local"
-      },
-      /*#__PURE__*/
-      react.createElement("div", {
-        style: {
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap'
-        }
-      }, workspaces.map((workspace, index) =>
-      /*#__PURE__*/
-      react.createElement(Card, {
-        tag: "a",
-        key: index,
-        style: {
-          width: '196px',
-          height: '128'
-        },
-        onClick: e => this.doSubmit(e, {
-          action: 'selectWorkspace',
-          workspace
-        })
-      },
-      /*#__PURE__*/
-      react.createElement(Card.Body, null,
-      /*#__PURE__*/
-      react.createElement(Card.Title, null, workspace)))))),
-      /*#__PURE__*/
-      react.createElement(Tab, {
-        eventKey: "search",
-        title: "Search"
-      }),
-      /*#__PURE__*/
-      react.createElement(Tab, {
-        eventKey: "create",
-        title: "Create"
-      },
-      /*#__PURE__*/
-      react.createElement(Form, null,
-      /*#__PURE__*/
-      react.createElement(Form.Group, null,
-      /*#__PURE__*/
-      react.createElement(Form.Label, null, "Workspace Name"),
-      /*#__PURE__*/
-      react.createElement(Form.Control, {
-        name: "workspace",
-        value: workspace,
-        onChange: this.doUpdate
-      })),
-      /*#__PURE__*/
-      react.createElement(ButtonGroup, null,
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "create",
-        variant: "outline-primary",
-        onClick: () => this.create()
-      }, "Create Workspace"))))), toast))
-    );
-  }
-
-}
-
-/* global Blob, FileReader, document */
-class ShareFileUi extends SettingsUi {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isPublic: true,
-      url: ''
-    };
-  }
-
-  async export() {
-    const path = getFilesystem();
-    const zip = await toZipFromFilesystem();
-    const blob = new Blob([zip.buffer], {
-      type: 'application/zip'
-    });
-    FileSaver_min(blob, path);
-    await log({
-      op: 'text',
-      text: `Exporting ${path} to file`,
-      level: 'serious'
-    });
-  }
-
-  getImportId() {
-    const {
-      id
-    } = this.props;
-    return `ShareFileUi/${id}/import`;
-  }
-
-  clickImport() {
-    document.getElementById(this.getImportId()).click();
-  }
-
-  async import() {
-    const fileElement = document.getElementById(this.getImportId());
-    const path = fileElement.value;
-    const file = fileElement.files[0];
-    const reader = new FileReader();
-
-    reader.onload = async event => {
-      const zip = event.target.result;
-      await fromZipToFilesystem({}, zip);
-      await log({
-        op: 'text',
-        text: `Imported ${path} from file`,
-        level: 'serious'
-      });
-    };
-
-    reader.readAsArrayBuffer(file);
-  }
-
-  render() {
-    return (
-      /*#__PURE__*/
-      react.createElement(Form, null,
-      /*#__PURE__*/
-      react.createElement(Form.Group, null,
-      /*#__PURE__*/
-      react.createElement(FormControl, {
-        as: "input",
-        type: "file",
-        multiple: false,
-        id: this.getImportId(),
-        onChange: () => this.import(),
-        style: {
-          display: 'none'
-        }
-      })),
-      /*#__PURE__*/
-      react.createElement(ButtonGroup, null,
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "import",
-        variant: "outline-primary",
-        onClick: () => this.clickImport()
-      }, "Import"),
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "export",
-        variant: "outline-primary",
-        onClick: () => this.export()
-      }, "Export")))
-    );
+      onClick: e => this.doSubmit(e, {
+        action: 'selectWorkspace',
+        workspace
+      })
+    }, /*#__PURE__*/react.createElement(Card.Body, null, /*#__PURE__*/react.createElement(Card.Title, null, workspace)))))), /*#__PURE__*/react.createElement(Tab, {
+      eventKey: "search",
+      title: "Search"
+    }), /*#__PURE__*/react.createElement(Tab, {
+      eventKey: "create",
+      title: "Create"
+    }, /*#__PURE__*/react.createElement(Form, null, /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Workspace Name"), /*#__PURE__*/react.createElement(Form.Control, {
+      name: "workspace",
+      value: workspace,
+      onChange: this.doUpdate
+    })), /*#__PURE__*/react.createElement(ButtonGroup, null, /*#__PURE__*/react.createElement(Button, {
+      name: "create",
+      variant: "outline-primary",
+      onClick: () => this.create()
+    }, "Create Workspace"))))), toast));
   }
 
 }
@@ -87741,43 +87479,24 @@ class ShareGistUi extends SettingsUi {
       isPublic = true,
       url
     } = this.state;
-    return (
-      /*#__PURE__*/
-      react.createElement(Form, null,
-      /*#__PURE__*/
-      react.createElement(Form.Group, null,
-      /*#__PURE__*/
-      react.createElement(Form.Label, null, "Gist Url"),
-      /*#__PURE__*/
-      react.createElement(Form.Control, {
-        name: "url",
-        value: url,
-        onChange: this.doUpdate
-      }),
-      /*#__PURE__*/
-      react.createElement(Form.Label, null, "Gist is public?"),
-      /*#__PURE__*/
-      react.createElement(Form.Check, {
-        name: "isPublic",
-        checked: isPublic,
-        onChange: this.doUpdate
-      })),
-      /*#__PURE__*/
-      react.createElement(ButtonGroup, null,
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "import",
-        variant: "outline-primary",
-        disabled: url === '',
-        onClick: () => this.import()
-      }, "Import"),
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "export",
-        variant: "outline-primary",
-        onClick: () => this.export()
-      }, "Export")))
-    );
+    return /*#__PURE__*/react.createElement(Form, null, /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Gist Url"), /*#__PURE__*/react.createElement(Form.Control, {
+      name: "url",
+      value: url,
+      onChange: this.doUpdate
+    }), /*#__PURE__*/react.createElement(Form.Label, null, "Gist is public?"), /*#__PURE__*/react.createElement(Form.Check, {
+      name: "isPublic",
+      checked: isPublic,
+      onChange: this.doUpdate
+    })), /*#__PURE__*/react.createElement(ButtonGroup, null, /*#__PURE__*/react.createElement(Button, {
+      name: "import",
+      variant: "outline-primary",
+      disabled: url === '',
+      onClick: () => this.import()
+    }, "Import"), /*#__PURE__*/react.createElement(Button, {
+      name: "export",
+      variant: "outline-primary",
+      onClick: () => this.export()
+    }, "Export")));
   }
 
 }
@@ -87859,58 +87578,31 @@ class ShareGithubUi extends SettingsUi {
       repository,
       prefix
     } = this.state;
-    return (
-      /*#__PURE__*/
-      react.createElement(Form, null,
-      /*#__PURE__*/
-      react.createElement(Form.Group, null,
-      /*#__PURE__*/
-      react.createElement(Form.Label, null, "Owner"),
-      /*#__PURE__*/
-      react.createElement(Form.Control, {
-        name: "owner",
-        value: owner,
-        onChange: this.doUpdate
-      })),
-      /*#__PURE__*/
-      react.createElement(Form.Group, null,
-      /*#__PURE__*/
-      react.createElement(Form.Label, null, "Repository"),
-      /*#__PURE__*/
-      react.createElement(Form.Control, {
-        name: "repository",
-        value: repository,
-        onChange: this.doUpdate
-      })),
-      /*#__PURE__*/
-      react.createElement(Form.Group, null,
-      /*#__PURE__*/
-      react.createElement(Form.Label, null, "Path Prefix"),
-      /*#__PURE__*/
-      react.createElement(Form.Control, {
-        name: "prefix",
-        value: prefix,
-        onChange: this.doUpdate
-      })),
-      /*#__PURE__*/
-      react.createElement(ButtonGroup, null,
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "import",
-        variant: "outline-primary",
-        onClick: e => this.doImport(e, {
-          action: 'repositoryImport'
-        })
-      }, "Import"),
-      /*#__PURE__*/
-      react.createElement(Button, {
-        name: "export",
-        variant: "outline-primary",
-        onClick: e => this.doExport(e, {
-          action: 'repositoryExport'
-        })
-      }, "Export")))
-    );
+    return /*#__PURE__*/react.createElement(Form, null, /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Owner"), /*#__PURE__*/react.createElement(Form.Control, {
+      name: "owner",
+      value: owner,
+      onChange: this.doUpdate
+    })), /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Repository"), /*#__PURE__*/react.createElement(Form.Control, {
+      name: "repository",
+      value: repository,
+      onChange: this.doUpdate
+    })), /*#__PURE__*/react.createElement(Form.Group, null, /*#__PURE__*/react.createElement(Form.Label, null, "Path Prefix"), /*#__PURE__*/react.createElement(Form.Control, {
+      name: "prefix",
+      value: prefix,
+      onChange: this.doUpdate
+    })), /*#__PURE__*/react.createElement(ButtonGroup, null, /*#__PURE__*/react.createElement(Button, {
+      name: "import",
+      variant: "outline-primary",
+      onClick: e => this.doImport(e, {
+        action: 'repositoryImport'
+      })
+    }, "Import"), /*#__PURE__*/react.createElement(Button, {
+      name: "export",
+      variant: "outline-primary",
+      onClick: e => this.doExport(e, {
+        action: 'repositoryExport'
+      })
+    }, "Export")));
   }
 
 }
@@ -87925,52 +87617,24 @@ class ShareUi extends SettingsUi {
     const {
       toast
     } = this.props;
-    return (
-      /*#__PURE__*/
-      react.createElement(DecoratedModal, {
-        show: this.props.show,
-        onHide: this.doHide
-      },
-      /*#__PURE__*/
-      react.createElement(DecoratedModal.Header, {
-        closeButton: true
-      },
-      /*#__PURE__*/
-      react.createElement(DecoratedModal.Title, null, "Share")),
-      /*#__PURE__*/
-      react.createElement(DecoratedModal.Body, null,
-      /*#__PURE__*/
-      react.createElement(Tabs, {
-        defaultActiveKey: "repository"
-      },
-      /*#__PURE__*/
-      react.createElement(Tab, {
-        eventKey: "repository",
-        title: "Github"
-      },
-      /*#__PURE__*/
-      react.createElement(ShareGithubUi, {
-        storage: "share/github"
-      })),
-      /*#__PURE__*/
-      react.createElement(Tab, {
-        eventKey: "gist",
-        title: "Gist"
-      },
-      /*#__PURE__*/
-      react.createElement(ShareGistUi, {
-        storage: "share/gist"
-      })),
-      /*#__PURE__*/
-      react.createElement(Tab, {
-        eventKey: "file",
-        title: "File"
-      },
-      /*#__PURE__*/
-      react.createElement(ShareFileUi, {
-        storage: "share/file"
-      })))), toast)
-    );
+    return /*#__PURE__*/react.createElement(DecoratedModal, {
+      show: this.props.show,
+      onHide: this.doHide
+    }, /*#__PURE__*/react.createElement(DecoratedModal.Header, {
+      closeButton: true
+    }, /*#__PURE__*/react.createElement(DecoratedModal.Title, null, "Share")), /*#__PURE__*/react.createElement(DecoratedModal.Body, null, /*#__PURE__*/react.createElement(Tabs, {
+      defaultActiveKey: "repository"
+    }, /*#__PURE__*/react.createElement(Tab, {
+      eventKey: "repository",
+      title: "Github"
+    }, /*#__PURE__*/react.createElement(ShareGithubUi, {
+      storage: "share/github"
+    })), /*#__PURE__*/react.createElement(Tab, {
+      eventKey: "gist",
+      title: "Gist"
+    }, /*#__PURE__*/react.createElement(ShareGistUi, {
+      storage: "share/gist"
+    })))), toast);
   }
 
 }
@@ -88603,53 +88267,40 @@ class SvgPathEditor extends Pane {
   }
 
   renderPane() {
-    return (
-      /*#__PURE__*/
-      react.createElement("div", {
-        className: "ad-SvgPathEditor",
-        onMouseUp: this.cancelDragging
-      },
-      /*#__PURE__*/
-      react.createElement("div", {
-        className: "ad-SvgPathEditor-main"
-      },
-      /*#__PURE__*/
-      react.createElement("div", {
-        className: "ad-SvgPathEditor-svg"
-      },
-      /*#__PURE__*/
-      react.createElement(SVG, _extends$1({
-        ref: "svg",
-        svgPath: this.generatePath()
-      }, this.state, {
-        addPoint: this.addPoint,
-        setDraggedPoint: this.setDraggedPoint,
-        setDraggedQuadratic: this.setDraggedQuadratic,
-        setDraggedCubic: this.setDraggedCubic,
-        handleMouseMove: this.handleMouseMove
-      })))),
-      /*#__PURE__*/
-      react.createElement("div", {
-        className: "ad-SvgPathEditor-controls"
-      },
-      /*#__PURE__*/
-      react.createElement(Controls, _extends$1({}, this.state, {
-        reset: this.reset,
-        removeActivePoint: this.removeActivePoint,
-        setPointPosition: this.setPointPosition,
-        setQuadraticPosition: this.setQuadraticPosition,
-        setCubicPosition: this.setCubicPosition,
-        setArcParam: this.setArcParam,
-        setPointType: this.setPointType,
-        setWidth: this.setWidth,
-        setHeight: this.setHeight,
-        setGridSize: this.setGridSize,
-        setGridSnap: this.setGridSnap,
-        setGridShow: this.setGridShow,
-        setClosePath: this.setClosePath,
-        save: this.save
-      }))))
-    );
+    return /*#__PURE__*/react.createElement("div", {
+      className: "ad-SvgPathEditor",
+      onMouseUp: this.cancelDragging
+    }, /*#__PURE__*/react.createElement("div", {
+      className: "ad-SvgPathEditor-main"
+    }, /*#__PURE__*/react.createElement("div", {
+      className: "ad-SvgPathEditor-svg"
+    }, /*#__PURE__*/react.createElement(SVG, _extends$1({
+      ref: "svg",
+      svgPath: this.generatePath()
+    }, this.state, {
+      addPoint: this.addPoint,
+      setDraggedPoint: this.setDraggedPoint,
+      setDraggedQuadratic: this.setDraggedQuadratic,
+      setDraggedCubic: this.setDraggedCubic,
+      handleMouseMove: this.handleMouseMove
+    })))), /*#__PURE__*/react.createElement("div", {
+      className: "ad-SvgPathEditor-controls"
+    }, /*#__PURE__*/react.createElement(Controls, _extends$1({}, this.state, {
+      reset: this.reset,
+      removeActivePoint: this.removeActivePoint,
+      setPointPosition: this.setPointPosition,
+      setQuadraticPosition: this.setQuadraticPosition,
+      setCubicPosition: this.setCubicPosition,
+      setArcParam: this.setArcParam,
+      setPointType: this.setPointType,
+      setWidth: this.setWidth,
+      setHeight: this.setHeight,
+      setGridSize: this.setGridSize,
+      setGridSnap: this.setGridSnap,
+      setGridShow: this.setGridShow,
+      setClosePath: this.setClosePath,
+      save: this.save
+    }))));
   }
 
 }
@@ -88677,9 +88328,7 @@ class SVG extends Component {
       let anchors = [];
 
       if (p.q) {
-        anchors.push(
-        /*#__PURE__*/
-        react.createElement(Quadratic, {
+        anchors.push( /*#__PURE__*/react.createElement(Quadratic, {
           key: anchors.length,
           index: i,
           p1x: a[i - 1].x,
@@ -88691,9 +88340,7 @@ class SVG extends Component {
           setDraggedQuadratic: setDraggedQuadratic
         }));
       } else if (p.c) {
-        anchors.push(
-        /*#__PURE__*/
-        react.createElement(Cubic, {
+        anchors.push( /*#__PURE__*/react.createElement(Cubic, {
           key: anchors.length,
           index: i,
           p1x: a[i - 1].x,
@@ -88708,139 +88355,102 @@ class SVG extends Component {
         }));
       }
 
-      return (
-        /*#__PURE__*/
-        react.createElement("g", {
-          key: i,
-          className: 'ad-PointGroup' + (i === 0 ? '  ad-PointGroup--first' : '') + (activePoint === i ? '  is-active' : '')
-        },
-        /*#__PURE__*/
-        react.createElement(Point, {
-          key: "p",
-          index: i,
-          x: p.x,
-          y: p.y,
-          setDraggedPoint: setDraggedPoint
-        }), anchors)
-      );
+      return /*#__PURE__*/react.createElement("g", {
+        key: i,
+        className: 'ad-PointGroup' + (i === 0 ? '  ad-PointGroup--first' : '') + (activePoint === i ? '  is-active' : '')
+      }, /*#__PURE__*/react.createElement(Point, {
+        key: "p",
+        index: i,
+        x: p.x,
+        y: p.y,
+        setDraggedPoint: setDraggedPoint
+      }), anchors);
     });
-    return (
-      /*#__PURE__*/
-      react.createElement("svg", {
-        className: "ad-SVG",
-        width: w,
-        height: h,
-        onClickCapture: e => addPoint(e),
-        onMouseMoveCapture: e => handleMouseMove(e)
-      },
-      /*#__PURE__*/
-      react.createElement(Grid, {
-        w: w,
-        h: h,
-        grid: grid
-      }),
-      /*#__PURE__*/
-      react.createElement("path", {
-        className: "ad-Path",
-        d: svgPath
-      }),
-      /*#__PURE__*/
-      react.createElement("g", {
-        className: "ad-Points"
-      }, circles))
-    );
+    return /*#__PURE__*/react.createElement("svg", {
+      className: "ad-SVG",
+      width: w,
+      height: h,
+      onClickCapture: e => addPoint(e),
+      onMouseMoveCapture: e => handleMouseMove(e)
+    }, /*#__PURE__*/react.createElement(Grid, {
+      w: w,
+      h: h,
+      grid: grid
+    }), /*#__PURE__*/react.createElement("path", {
+      className: "ad-Path",
+      d: svgPath
+    }), /*#__PURE__*/react.createElement("g", {
+      className: "ad-Points"
+    }, circles));
   }
 
 }
 
 function Cubic(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("g", {
-      className: "ad-Anchor"
-    },
-    /*#__PURE__*/
-    react.createElement("line", {
-      className: "ad-Anchor-line",
-      x1: props.p1x,
-      y1: props.p1y,
-      x2: props.x1,
-      y2: props.y1
-    }),
-    /*#__PURE__*/
-    react.createElement("line", {
-      className: "ad-Anchor-line",
-      x1: props.p2x,
-      y1: props.p2y,
-      x2: props.x2,
-      y2: props.y2
-    }),
-    /*#__PURE__*/
-    react.createElement("circle", {
-      className: "ad-Anchor-point",
-      onMouseDown: e => props.setDraggedCubic(props.index, 0),
-      cx: props.x1,
-      cy: props.y1,
-      r: 6
-    }),
-    /*#__PURE__*/
-    react.createElement("circle", {
-      className: "ad-Anchor-point",
-      onMouseDown: e => props.setDraggedCubic(props.index, 1),
-      cx: props.x2,
-      cy: props.y2,
-      r: 6
-    }))
-  );
+  return /*#__PURE__*/react.createElement("g", {
+    className: "ad-Anchor"
+  }, /*#__PURE__*/react.createElement("line", {
+    className: "ad-Anchor-line",
+    x1: props.p1x,
+    y1: props.p1y,
+    x2: props.x1,
+    y2: props.y1
+  }), /*#__PURE__*/react.createElement("line", {
+    className: "ad-Anchor-line",
+    x1: props.p2x,
+    y1: props.p2y,
+    x2: props.x2,
+    y2: props.y2
+  }), /*#__PURE__*/react.createElement("circle", {
+    className: "ad-Anchor-point",
+    onMouseDown: e => props.setDraggedCubic(props.index, 0),
+    cx: props.x1,
+    cy: props.y1,
+    r: 6
+  }), /*#__PURE__*/react.createElement("circle", {
+    className: "ad-Anchor-point",
+    onMouseDown: e => props.setDraggedCubic(props.index, 1),
+    cx: props.x2,
+    cy: props.y2,
+    r: 6
+  }));
 }
 
 function Quadratic(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("g", {
-      className: "ad-Anchor"
-    },
-    /*#__PURE__*/
-    react.createElement("line", {
-      key: "q1",
-      className: "ad-Anchor-line",
-      x1: props.p1x,
-      y1: props.p1y,
-      x2: props.x,
-      y2: props.y
-    }),
-    /*#__PURE__*/
-    react.createElement("line", {
-      key: "q2",
-      className: "ad-Anchor-line",
-      x1: props.x,
-      y1: props.y,
-      x2: props.p2x,
-      y2: props.p2y
-    }),
-    /*#__PURE__*/
-    react.createElement("circle", {
-      key: "q3",
-      className: "ad-Anchor-point",
-      onMouseDown: e => props.setDraggedQuadratic(props.index),
-      cx: props.x,
-      cy: props.y,
-      r: 6
-    }))
-  );
+  return /*#__PURE__*/react.createElement("g", {
+    className: "ad-Anchor"
+  }, /*#__PURE__*/react.createElement("line", {
+    key: "q1",
+    className: "ad-Anchor-line",
+    x1: props.p1x,
+    y1: props.p1y,
+    x2: props.x,
+    y2: props.y
+  }), /*#__PURE__*/react.createElement("line", {
+    key: "q2",
+    className: "ad-Anchor-line",
+    x1: props.x,
+    y1: props.y,
+    x2: props.p2x,
+    y2: props.p2y
+  }), /*#__PURE__*/react.createElement("circle", {
+    key: "q3",
+    className: "ad-Anchor-point",
+    onMouseDown: e => props.setDraggedQuadratic(props.index),
+    cx: props.x,
+    cy: props.y,
+    r: 6
+  }));
 }
 
 function Point(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("circle", {
-      className: "ad-Point",
-      onMouseDown: e => props.setDraggedPoint(props.index),
-      cx: props.x,
-      cy: props.y,
-      r: 8
-    })
-  );
+  return /*#__PURE__*/react.createElement("circle", {
+    className: "ad-Point",
+    onMouseDown: e => props.setDraggedPoint(props.index),
+    cx: props.x,
+    cy: props.y,
+    r: 8
+  });
 }
 
 function Grid(props) {
@@ -88852,9 +88462,7 @@ function Grid(props) {
   let grid = [];
 
   for (let i = 1; i < props.w / size; i++) {
-    grid.push(
-    /*#__PURE__*/
-    react.createElement("line", {
+    grid.push( /*#__PURE__*/react.createElement("line", {
       key: `Gx${i}`,
       x1: i * size,
       y1: 0,
@@ -88864,9 +88472,7 @@ function Grid(props) {
   }
 
   for (let i = 1; i < props.h / size; i++) {
-    grid.push(
-    /*#__PURE__*/
-    react.createElement("line", {
+    grid.push( /*#__PURE__*/react.createElement("line", {
       key: `Gy${i}`,
       x1: 0,
       y1: i * size,
@@ -88875,12 +88481,9 @@ function Grid(props) {
     }));
   }
 
-  return (
-    /*#__PURE__*/
-    react.createElement("g", {
-      className: 'ad-Grid' + (!show ? '  is-hidden' : '')
-    }, grid)
-  );
+  return /*#__PURE__*/react.createElement("g", {
+    className: 'ad-Grid' + (!show ? '  is-hidden' : '')
+  }, grid);
 }
 /**
  * Controls
@@ -88893,14 +88496,10 @@ function Controls(props) {
   let params = [];
 
   if (active.q) {
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Control point X position",
       type: "range",
       min: 0,
@@ -88909,14 +88508,10 @@ function Controls(props) {
       value: active.q.x,
       onChange: e => props.setQuadraticPosition('x', e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Control point Y position",
       type: "range",
       min: 0,
@@ -88926,14 +88521,10 @@ function Controls(props) {
       onChange: e => props.setQuadraticPosition('y', e)
     })));
   } else if (active.c) {
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "First control point X position",
       type: "range",
       min: 0,
@@ -88942,14 +88533,10 @@ function Controls(props) {
       value: active.c[0].x,
       onChange: e => props.setCubicPosition('x', 0, e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "First control point Y position",
       type: "range",
       min: 0,
@@ -88958,14 +88545,10 @@ function Controls(props) {
       value: active.c[0].y,
       onChange: e => props.setCubicPosition('y', 0, e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Second control point X position",
       type: "range",
       min: 0,
@@ -88974,14 +88557,10 @@ function Controls(props) {
       value: active.c[1].x,
       onChange: e => props.setCubicPosition('x', 1, e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Second control point Y position",
       type: "range",
       min: 0,
@@ -88991,14 +88570,10 @@ function Controls(props) {
       onChange: e => props.setCubicPosition('y', 1, e)
     })));
   } else if (active.a) {
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "X Radius",
       type: "range",
       min: 0,
@@ -89007,14 +88582,10 @@ function Controls(props) {
       value: active.a.rx,
       onChange: e => props.setArcParam('rx', e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Y Radius",
       type: "range",
       min: 0,
@@ -89023,14 +88594,10 @@ function Controls(props) {
       value: active.a.ry,
       onChange: e => props.setArcParam('ry', e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Rotation",
       type: "range",
       min: 0,
@@ -89039,27 +88606,19 @@ function Controls(props) {
       value: active.a.rot,
       onChange: e => props.setArcParam('rot', e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Large arc sweep flag",
       type: "checkbox",
       checked: active.a.laf,
       onChange: e => props.setArcParam('laf', e)
     })));
-    params.push(
-    /*#__PURE__*/
-    react.createElement("div", {
+    params.push( /*#__PURE__*/react.createElement("div", {
       key: params.length,
       className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
+    }, /*#__PURE__*/react.createElement(Control, {
       name: "Sweep flag",
       type: "checkbox",
       checked: active.a.sf,
@@ -89067,167 +88626,120 @@ function Controls(props) {
     })));
   }
 
-  return (
-    /*#__PURE__*/
-    react.createElement("div", {
-      className: "ad-Controls"
-    },
-    /*#__PURE__*/
-    react.createElement("h3", {
-      className: "ad-Controls-title"
-    }, "Parameters"),
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c1",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Width",
-      type: "text",
-      value: props.w,
-      onChange: e => props.setWidth(e)
-    }),
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Height",
-      type: "text",
-      value: props.h,
-      onChange: e => props.setHeight(e)
-    }),
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Close path",
-      type: "checkbox",
-      value: props.closePath,
-      onChange: e => props.setClosePath(e)
-    })),
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c2",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Grid size",
-      type: "text",
-      value: props.grid.size,
-      onChange: e => props.setGridSize(e)
-    }),
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Snap grid",
-      type: "checkbox",
-      checked: props.grid.snap,
-      onChange: e => props.setGridSnap(e)
-    }),
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Show grid",
-      type: "checkbox",
-      checked: props.grid.show,
-      onChange: e => props.setGridShow(e)
-    })),
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c3",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      type: "button",
-      action: "reset",
-      value: "Reset path",
-      onClick: e => props.reset(e)
-    })),
-    /*#__PURE__*/
-    react.createElement("h3", {
-      className: "ad-Controls-title"
-    }, "Selected point"), props.activePoint !== 0 &&
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c4",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Point type",
-      type: "choices",
-      id: "pointType",
-      choices: [{
-        name: 'L',
-        value: 'l',
-        checked: !active.q && !active.c && !active.a
-      }, {
-        name: 'Q',
-        value: 'q',
-        checked: !!active.q
-      }, {
-        name: 'C',
-        value: 'c',
-        checked: !!active.c
-      }, {
-        name: 'A',
-        value: 'a',
-        checked: !!active.a
-      }],
-      onChange: e => props.setPointType(e)
-    })),
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c5",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Point X position",
-      type: "range",
-      min: 0,
-      max: props.w,
-      step: step,
-      value: active.x,
-      onChange: e => props.setPointPosition('x', e)
-    })),
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c6",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      name: "Point Y position",
-      type: "range",
-      min: 0,
-      max: props.h,
-      step: step,
-      value: active.y,
-      onChange: e => props.setPointPosition('y', e)
-    })), params, props.activePoint !== 0 &&
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c7",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      type: "button",
-      action: "delete",
-      value: "Remove this point",
-      onClick: e => props.removeActivePoint(e)
-    })),
-    /*#__PURE__*/
-    react.createElement("div", {
-      key: "c8",
-      className: "ad-Controls-container"
-    },
-    /*#__PURE__*/
-    react.createElement(Control, {
-      type: "button",
-      action: "save",
-      value: "Save",
-      onClick: e => props.save(e)
-    })))
-  );
+  return /*#__PURE__*/react.createElement("div", {
+    className: "ad-Controls"
+  }, /*#__PURE__*/react.createElement("h3", {
+    className: "ad-Controls-title"
+  }, "Parameters"), /*#__PURE__*/react.createElement("div", {
+    key: "c1",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    name: "Width",
+    type: "text",
+    value: props.w,
+    onChange: e => props.setWidth(e)
+  }), /*#__PURE__*/react.createElement(Control, {
+    name: "Height",
+    type: "text",
+    value: props.h,
+    onChange: e => props.setHeight(e)
+  }), /*#__PURE__*/react.createElement(Control, {
+    name: "Close path",
+    type: "checkbox",
+    value: props.closePath,
+    onChange: e => props.setClosePath(e)
+  })), /*#__PURE__*/react.createElement("div", {
+    key: "c2",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    name: "Grid size",
+    type: "text",
+    value: props.grid.size,
+    onChange: e => props.setGridSize(e)
+  }), /*#__PURE__*/react.createElement(Control, {
+    name: "Snap grid",
+    type: "checkbox",
+    checked: props.grid.snap,
+    onChange: e => props.setGridSnap(e)
+  }), /*#__PURE__*/react.createElement(Control, {
+    name: "Show grid",
+    type: "checkbox",
+    checked: props.grid.show,
+    onChange: e => props.setGridShow(e)
+  })), /*#__PURE__*/react.createElement("div", {
+    key: "c3",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    type: "button",
+    action: "reset",
+    value: "Reset path",
+    onClick: e => props.reset(e)
+  })), /*#__PURE__*/react.createElement("h3", {
+    className: "ad-Controls-title"
+  }, "Selected point"), props.activePoint !== 0 && /*#__PURE__*/react.createElement("div", {
+    key: "c4",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    name: "Point type",
+    type: "choices",
+    id: "pointType",
+    choices: [{
+      name: 'L',
+      value: 'l',
+      checked: !active.q && !active.c && !active.a
+    }, {
+      name: 'Q',
+      value: 'q',
+      checked: !!active.q
+    }, {
+      name: 'C',
+      value: 'c',
+      checked: !!active.c
+    }, {
+      name: 'A',
+      value: 'a',
+      checked: !!active.a
+    }],
+    onChange: e => props.setPointType(e)
+  })), /*#__PURE__*/react.createElement("div", {
+    key: "c5",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    name: "Point X position",
+    type: "range",
+    min: 0,
+    max: props.w,
+    step: step,
+    value: active.x,
+    onChange: e => props.setPointPosition('x', e)
+  })), /*#__PURE__*/react.createElement("div", {
+    key: "c6",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    name: "Point Y position",
+    type: "range",
+    min: 0,
+    max: props.h,
+    step: step,
+    value: active.y,
+    onChange: e => props.setPointPosition('y', e)
+  })), params, props.activePoint !== 0 && /*#__PURE__*/react.createElement("div", {
+    key: "c7",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    type: "button",
+    action: "delete",
+    value: "Remove this point",
+    onClick: e => props.removeActivePoint(e)
+  })), /*#__PURE__*/react.createElement("div", {
+    key: "c8",
+    className: "ad-Controls-container"
+  }, /*#__PURE__*/react.createElement(Control, {
+    type: "button",
+    action: "save",
+    value: "Save",
+    onClick: e => props.save(e)
+  })));
 }
 
 function Control(props) {
@@ -89241,150 +88753,105 @@ function Control(props) {
 
   switch (type) {
     case 'range':
-      control =
-      /*#__PURE__*/
-      react.createElement(Range, _props);
+      control = /*#__PURE__*/react.createElement(Range, _props);
       break;
 
     case 'text':
-      control =
-      /*#__PURE__*/
-      react.createElement(Text, _props);
+      control = /*#__PURE__*/react.createElement(Text, _props);
       break;
 
     case 'checkbox':
-      control =
-      /*#__PURE__*/
-      react.createElement(Checkbox, _props);
+      control = /*#__PURE__*/react.createElement(Checkbox, _props);
       break;
 
     case 'button':
-      control =
-      /*#__PURE__*/
-      react.createElement(Button$1, _props);
+      control = /*#__PURE__*/react.createElement(Button$1, _props);
       break;
 
     case 'choices':
-      control =
-      /*#__PURE__*/
-      react.createElement(Choices, _props);
+      control = /*#__PURE__*/react.createElement(Choices, _props);
       break;
   }
 
   if (name) {
-    label =
-    /*#__PURE__*/
-    react.createElement("label", {
+    label = /*#__PURE__*/react.createElement("label", {
       className: "ad-Control-label"
     }, name);
   }
 
-  return (
-    /*#__PURE__*/
-    react.createElement("div", {
-      className: "ad-Control"
-    }, label, control)
-  );
+  return /*#__PURE__*/react.createElement("div", {
+    className: "ad-Control"
+  }, label, control);
 }
 
 function Choices(props) {
   let choices = props.choices.map((c, i) => {
-    return (
-      /*#__PURE__*/
-      react.createElement("label", {
-        key: i,
-        className: "ad-Choice"
-      },
-      /*#__PURE__*/
-      react.createElement("input", {
-        className: "ad-Choice-input",
-        type: "radio",
-        value: c.value,
-        checked: c.checked,
-        name: props.id,
-        onChange: props.onChange
-      }),
-      /*#__PURE__*/
-      react.createElement("div", {
-        className: "ad-Choice-fake"
-      }, c.name))
-    );
+    return /*#__PURE__*/react.createElement("label", {
+      key: i,
+      className: "ad-Choice"
+    }, /*#__PURE__*/react.createElement("input", {
+      className: "ad-Choice-input",
+      type: "radio",
+      value: c.value,
+      checked: c.checked,
+      name: props.id,
+      onChange: props.onChange
+    }), /*#__PURE__*/react.createElement("div", {
+      className: "ad-Choice-fake"
+    }, c.name));
   });
-  return (
-    /*#__PURE__*/
-    react.createElement("div", {
-      className: "ad-Choices"
-    }, choices)
-  );
+  return /*#__PURE__*/react.createElement("div", {
+    className: "ad-Choices"
+  }, choices);
 }
 
 function Button$1(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("button", {
-      className: 'ad-Button' + (props.action ? '  ad-Button--' + props.action : ''),
-      type: "button",
-      onClick: props.onClick
-    }, props.value)
-  );
+  return /*#__PURE__*/react.createElement("button", {
+    className: 'ad-Button' + (props.action ? '  ad-Button--' + props.action : ''),
+    type: "button",
+    onClick: props.onClick
+  }, props.value);
 }
 
 function Checkbox(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("label", {
-      className: "ad-Checkbox"
-    },
-    /*#__PURE__*/
-    react.createElement("input", {
-      className: "ad-Checkbox-input",
-      type: "checkbox",
-      onChange: props.onChange,
-      checked: props.checked
-    }),
-    /*#__PURE__*/
-    react.createElement("div", {
-      className: "ad-Checkbox-fake"
-    }))
-  );
+  return /*#__PURE__*/react.createElement("label", {
+    className: "ad-Checkbox"
+  }, /*#__PURE__*/react.createElement("input", {
+    className: "ad-Checkbox-input",
+    type: "checkbox",
+    onChange: props.onChange,
+    checked: props.checked
+  }), /*#__PURE__*/react.createElement("div", {
+    className: "ad-Checkbox-fake"
+  }));
 }
 
 function Text(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("input", {
-      className: "ad-Text",
-      type: "text",
-      value: props.value,
-      onChange: props.onChange
-    })
-  );
+  return /*#__PURE__*/react.createElement("input", {
+    className: "ad-Text",
+    type: "text",
+    value: props.value,
+    onChange: props.onChange
+  });
 }
 
 function Range(props) {
-  return (
-    /*#__PURE__*/
-    react.createElement("div", {
-      className: "ad-Range"
-    },
-    /*#__PURE__*/
-    react.createElement("input", {
-      className: "ad-Range-input",
-      type: "range",
-      min: props.min,
-      max: props.max,
-      step: props.step,
-      value: props.value,
-      onChange: props.onChange
-    }),
-    /*#__PURE__*/
-    react.createElement("input", {
-      className: "ad-Range-text  ad-Text",
-      type: "text",
-      value: props.value,
-      onChange: props.onChange
-    }))
-  );
+  return /*#__PURE__*/react.createElement("div", {
+    className: "ad-Range"
+  }, /*#__PURE__*/react.createElement("input", {
+    className: "ad-Range-input",
+    type: "range",
+    min: props.min,
+    max: props.max,
+    step: props.step,
+    value: props.value,
+    onChange: props.onChange
+  }), /*#__PURE__*/react.createElement("input", {
+    className: "ad-Range-text  ad-Text",
+    type: "text",
+    value: props.value,
+    onChange: props.onChange
+  }));
 }
 
 /*
@@ -90485,86 +89952,74 @@ class Ui extends react.PureComponent {
       case 'notebook':
         {
           const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return (
-            /*#__PURE__*/
-            react.createElement(NotebookUi, {
-              key: `${id}/notebook/${file}`,
-              id: id,
-              path: path,
-              createNode: createNode,
-              view: view,
-              viewChoices: viewChoices,
-              viewTitle: 'Notebook',
-              onSelectView: onSelectView,
-              file: file,
-              fileChoices: fileChoices,
-              fileTitle: fileTitle,
-              onSelectFile: onSelectFile,
-              workspace: workspace
-            })
-          );
-        }
-
-      case 'editScript':
-        {
-          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return (
-            /*#__PURE__*/
-            react.createElement(JsEditorUi, {
-              key: `${id}/editScript/${file}`,
-              id: id,
-              path: path,
-              createNode: createNode,
-              view: view,
-              viewChoices: viewChoices,
-              viewTitle: 'Edit Script',
-              onSelectView: onSelectView,
-              file: file,
-              fileChoices: fileChoices,
-              fileTitle: fileTitle,
-              onSelectFile: onSelectFile,
-              ask: ask,
-              workspace: workspace
-            })
-          );
-        }
-
-      case 'editSvgPath':
-        {
-          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
-          return (
-            /*#__PURE__*/
-            react.createElement(SvgPathEditor, {
-              key: `${id}/editSvgPath/${file}`,
-              id: id,
-              path: path,
-              createNode: createNode,
-              view: view,
-              viewChoices: viewChoices,
-              viewTitle: 'Edit SvgPath',
-              onSelectView: onSelectView,
-              file: file,
-              fileChoices: fileChoices,
-              fileTitle: fileTitle,
-              onSelectFile: onSelectFile
-            })
-          );
-        }
-
-      case 'files':
-        return (
-          /*#__PURE__*/
-          react.createElement(FilesUi, {
-            key: id,
+          return /*#__PURE__*/react.createElement(NotebookUi, {
+            key: `${id}/notebook/${file}`,
             id: id,
             path: path,
             createNode: createNode,
             view: view,
             viewChoices: viewChoices,
-            viewTitle: 'Files',
-            onSelectView: onSelectView
-          })
-        );
+            viewTitle: 'Notebook',
+            onSelectView: onSelectView,
+            file: file,
+            fileChoices: fileChoices,
+            fileTitle: fileTitle,
+            onSelectFile: onSelectFile,
+            workspace: workspace
+          });
+        }
+
+      case 'editScript':
+        {
+          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
+          return /*#__PURE__*/react.createElement(JsEditorUi, {
+            key: `${id}/editScript/${file}`,
+            id: id,
+            path: path,
+            createNode: createNode,
+            view: view,
+            viewChoices: viewChoices,
+            viewTitle: 'Edit Script',
+            onSelectView: onSelectView,
+            file: file,
+            fileChoices: fileChoices,
+            fileTitle: fileTitle,
+            onSelectFile: onSelectFile,
+            ask: ask,
+            workspace: workspace
+          });
+        }
+
+      case 'editSvgPath':
+        {
+          const fileTitle = file === undefined ? '' : file.substring('source/'.length);
+          return /*#__PURE__*/react.createElement(SvgPathEditor, {
+            key: `${id}/editSvgPath/${file}`,
+            id: id,
+            path: path,
+            createNode: createNode,
+            view: view,
+            viewChoices: viewChoices,
+            viewTitle: 'Edit SvgPath',
+            onSelectView: onSelectView,
+            file: file,
+            fileChoices: fileChoices,
+            fileTitle: fileTitle,
+            onSelectFile: onSelectFile
+          });
+        }
+
+      case 'files':
+        return /*#__PURE__*/react.createElement(FilesUi, {
+          key: id,
+          id: id,
+          path: path,
+          createNode: createNode,
+          view: view,
+          viewChoices: viewChoices,
+          viewTitle: 'Files',
+          onSelectView: onSelectView
+        });
 
       case 'log':
         {
@@ -90573,36 +90028,30 @@ class Ui extends react.PureComponent {
           } = this.state;
 
           if (log !== undefined) {
-            return (
-              /*#__PURE__*/
-              react.createElement(LogUi, {
-                key: id,
-                id: id,
-                path: path,
-                createNode: createNode,
-                view: view,
-                viewChoices: viewChoices,
-                viewTitle: 'Log',
-                onSelectView: onSelectView,
-                log: log
-              })
-            );
+            return /*#__PURE__*/react.createElement(LogUi, {
+              key: id,
+              id: id,
+              path: path,
+              createNode: createNode,
+              view: view,
+              viewChoices: viewChoices,
+              viewTitle: 'Log',
+              onSelectView: onSelectView,
+              log: log
+            });
           }
         }
     }
 
-    return (
-      /*#__PURE__*/
-      react.createElement(NothingUi, {
-        id: id,
-        path: path,
-        createNode: createNode,
-        view: 'nothing',
-        viewChoices: viewChoices,
-        viewTitle: 'Nothing',
-        onSelectView: onSelectView
-      })
-    );
+    return /*#__PURE__*/react.createElement(NothingUi, {
+      id: id,
+      path: path,
+      createNode: createNode,
+      view: 'nothing',
+      viewChoices: viewChoices,
+      viewTitle: 'Nothing',
+      onSelectView: onSelectView
+    });
   }
 
   openLog() {
@@ -90649,23 +90098,18 @@ class Ui extends react.PureComponent {
         text,
         duration = 1000
       } = entry;
-      return (
-        /*#__PURE__*/
-        react.createElement(Toast, {
-          key: `toast/${index}`,
-          variant: "info",
-          delay: duration,
-          show: true,
-          autohide: true,
-          onClose: () => this.setState({
-            toast: toast.filter(item => item !== entry)
-          })
-        }, text)
-      );
+      return /*#__PURE__*/react.createElement(Toast, {
+        key: `toast/${index}`,
+        variant: "info",
+        delay: duration,
+        show: true,
+        autohide: true,
+        onClose: () => this.setState({
+          toast: toast.filter(item => item !== entry)
+        })
+      }, text);
     });
-    const toastDiv = toasts.length > 0 ?
-    /*#__PURE__*/
-    react.createElement(Alert, {
+    const toastDiv = toasts.length > 0 ? /*#__PURE__*/react.createElement(Alert, {
       key: "toasts",
       variant: "primary",
       style: {
@@ -90687,44 +90131,25 @@ class Ui extends react.PureComponent {
       }
 
       const paneView = this.getPaneView(switchView);
-      return (
-        /*#__PURE__*/
-        react.createElement(Container, null,
-        /*#__PURE__*/
-        react.createElement(Row, null,
-        /*#__PURE__*/
-        react.createElement(Col, null,
-        /*#__PURE__*/
-        react.createElement(DecoratedModal, {
-          show: switchView !== undefined,
-          onHide: () => this.setState({
-            switchView: undefined
-          }),
-          keyboard: true
-        },
-        /*#__PURE__*/
-        react.createElement(DecoratedModal.Header, {
-          closeButton: true
-        },
-        /*#__PURE__*/
-        react.createElement(DecoratedModal.Title, null, "Select Content")),
-        /*#__PURE__*/
-        react.createElement(DecoratedModal.Body, null,
-        /*#__PURE__*/
-        react.createElement(ButtonGroup, {
-          vertical: true,
-          style: {
-            width: '100%'
-          }
-        }, views.map((viewOption, index) =>
-        /*#__PURE__*/
-        react.createElement(Button, {
-          key: `switch/${index}`,
-          variant: "outline-primary",
-          active: fastEquals_1(paneView, viewOption),
-          onClick: () => this.setPaneView(switchView, viewOption)
-        }, viewOption.title))))))))
-      );
+      return /*#__PURE__*/react.createElement(Container, null, /*#__PURE__*/react.createElement(Row, null, /*#__PURE__*/react.createElement(Col, null, /*#__PURE__*/react.createElement(DecoratedModal, {
+        show: switchView !== undefined,
+        onHide: () => this.setState({
+          switchView: undefined
+        }),
+        keyboard: true
+      }, /*#__PURE__*/react.createElement(DecoratedModal.Header, {
+        closeButton: true
+      }, /*#__PURE__*/react.createElement(DecoratedModal.Title, null, "Select Content")), /*#__PURE__*/react.createElement(DecoratedModal.Body, null, /*#__PURE__*/react.createElement(ButtonGroup, {
+        vertical: true,
+        style: {
+          width: '100%'
+        }
+      }, views.map((viewOption, index) => /*#__PURE__*/react.createElement(Button, {
+        key: `switch/${index}`,
+        variant: "outline-primary",
+        active: fastEquals_1(paneView, viewOption),
+        onClick: () => this.setPaneView(switchView, viewOption)
+      }, viewOption.title))))))));
     };
 
     const {
@@ -90737,34 +90162,28 @@ class Ui extends react.PureComponent {
 
     const buildModal = () => {
       if (showShareUi) {
-        return (
-          /*#__PURE__*/
-          react.createElement(ShareUi, {
-            key: "shareUi",
-            show: true,
-            storage: "share",
-            toast: toastDiv,
-            onSubmit: this.doGithub,
-            onHide: () => this.setState({
-              showShareUi: false
-            })
+        return /*#__PURE__*/react.createElement(ShareUi, {
+          key: "shareUi",
+          show: true,
+          storage: "share",
+          toast: toastDiv,
+          onSubmit: this.doGithub,
+          onHide: () => this.setState({
+            showShareUi: false
           })
-        );
+        });
       } else if (showSelectWorkspaceUi || workspace === '') {
-        return (
-          /*#__PURE__*/
-          react.createElement(SelectWorkspaceUi, {
-            key: "selectWorkspaceUi",
-            show: true,
-            workspaces: workspaces,
-            storage: "selectWorkspace",
-            toast: toastDiv,
-            onSubmit: this.doSelectWorkspace,
-            onHide: () => this.setState({
-              showSelectWorkspaceUi: false
-            })
+        return /*#__PURE__*/react.createElement(SelectWorkspaceUi, {
+          key: "selectWorkspaceUi",
+          show: true,
+          workspaces: workspaces,
+          storage: "selectWorkspace",
+          toast: toastDiv,
+          onSubmit: this.doSelectWorkspace,
+          onHide: () => this.setState({
+            showSelectWorkspaceUi: false
           })
-        );
+        });
       } else {
         return switchViewModal();
       }
@@ -90786,79 +90205,50 @@ class Ui extends react.PureComponent {
       });
     };
 
-    return (
-      /*#__PURE__*/
-      react.createElement("div", {
-        style: {
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexFlow: 'column'
-        }
-      }, modal, modal === undefined && toastDiv,
-      /*#__PURE__*/
-      react.createElement(Navbar, {
-        bg: "light",
-        expand: "lg",
-        style: {
-          flex: '0 0 auto'
-        }
+    return /*#__PURE__*/react.createElement("div", {
+      style: {
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexFlow: 'column'
+      }
+    }, modal, modal === undefined && toastDiv, /*#__PURE__*/react.createElement(Navbar, {
+      bg: "light",
+      expand: "lg",
+      style: {
+        flex: '0 0 auto'
+      }
+    }, /*#__PURE__*/react.createElement(Navbar.Brand, null, "JSxCAD"), /*#__PURE__*/react.createElement(Navbar.Toggle, {
+      "aria-controls": "basic-navbar-nav"
+    }), /*#__PURE__*/react.createElement(Navbar.Collapse, {
+      id: "basic-navbar-nav"
+    }, /*#__PURE__*/react.createElement(Nav, {
+      className: "mr-auto",
+      onSelect: this.doNav
+    }, /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
+      eventKey: "selectWorkspace"
+    }, "Workspace", workspace === '' ? '' : ` (${workspace})`)), workspace !== '' && /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
+      eventKey: "io"
+    }, "Share")), /*#__PURE__*/react.createElement(Nav.Item, null, /*#__PURE__*/react.createElement(Nav.Link, {
+      eventKey: "reference"
+    }, "Reference"))))), /*#__PURE__*/react.createElement(lib_1, {
+      style: {
+        flex: '1 1 auto',
+        background: '#e6ebf0'
       },
-      /*#__PURE__*/
-      react.createElement(Navbar.Brand, null, "JSxCAD"),
-      /*#__PURE__*/
-      react.createElement(Navbar.Toggle, {
-        "aria-controls": "basic-navbar-nav"
+      key: `mosaic/${workspace}`,
+      renderTile: (id, path) => {
+        const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
+        return pane;
+      },
+      zeroStateView: /*#__PURE__*/react.createElement(lib_23, {
+        createNode: this.createNode
       }),
-      /*#__PURE__*/
-      react.createElement(Navbar.Collapse, {
-        id: "basic-navbar-nav"
-      },
-      /*#__PURE__*/
-      react.createElement(Nav, {
-        className: "mr-auto",
-        onSelect: this.doNav
-      },
-      /*#__PURE__*/
-      react.createElement(Nav.Item, null,
-      /*#__PURE__*/
-      react.createElement(Nav.Link, {
-        eventKey: "selectWorkspace"
-      }, "Workspace", workspace === '' ? '' : ` (${workspace})`)), workspace !== '' &&
-      /*#__PURE__*/
-      react.createElement(Nav.Item, null,
-      /*#__PURE__*/
-      react.createElement(Nav.Link, {
-        eventKey: "io"
-      }, "Share")),
-      /*#__PURE__*/
-      react.createElement(Nav.Item, null,
-      /*#__PURE__*/
-      react.createElement(Nav.Link, {
-        eventKey: "reference"
-      }, "Reference"))))),
-      /*#__PURE__*/
-      react.createElement(lib_1, {
-        style: {
-          flex: '1 1 auto',
-          background: '#e6ebf0'
-        },
-        key: `mosaic/${workspace}`,
-        renderTile: (id, path) => {
-          const pane = this.renderPane(views, `${id}`, path, this.createNode, selectView, selectFile);
-          return pane;
-        },
-        zeroStateView:
-        /*#__PURE__*/
-        react.createElement(lib_23, {
-          createNode: this.createNode
-        }),
-        value: this.state.paneLayout,
-        onChange: this.onChange,
-        onRelease: this.onRelease,
-        className: ''
-      }))
-    );
+      value: this.state.paneLayout,
+      onChange: this.onChange,
+      onRelease: this.onRelease,
+      className: ''
+    }));
   }
 
 }
@@ -90877,9 +90267,7 @@ const setupUi = async sha => {
     });
   }
 
-  reactDom.render(
-  /*#__PURE__*/
-  react.createElement(Ui, {
+  reactDom.render( /*#__PURE__*/react.createElement(Ui, {
     workspaces: [...filesystems],
     workspace: workspace,
     path: path,

@@ -1,10 +1,10 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { isConvex } from '@jsxcad/math-poly3';
 import { makeConvex as makeConvexZ0Surface } from '@jsxcad/geometry-z0surface';
-import { makeWatertight } from './makeWatertight';
-import { toPlane } from './toPlane';
+import { makeWatertight } from './makeWatertight.js';
+import { toPlane } from './toPlane.js';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from './ops';
+import { transform } from './ops.js';
 
 // Cut the corners to produce triangles.
 const triangulateConvexPolygon = (polygon) => {

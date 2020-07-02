@@ -1,4 +1,4 @@
-import { eachEdge } from './eachEdge';
+import { eachEdge } from './eachEdge.js';
 import test from 'ava';
 
 test('Empty polygon emits no edges.', (t) => {

@@ -1,4 +1,4 @@
-import { subtract } from './subtract';
+import { subtract } from './subtract.js';
 import test from 'ava';
 
 test('mat4: subtract() should return a new mat4 with correct values', (t) => {

@@ -1,7 +1,7 @@
 import { equals, length, subtract } from '@jsxcad/math-vec3';
 
-import { ensureMapElement } from './ensureMapElement';
-import { fromPoints } from '@jsxcad/math-ray3';
+import { ensureMapElement } from './ensureMapElement.js';
+import { fromPoints } from '@jsxcad/math-line3';
 
 const toIdentity = JSON.stringify;
 

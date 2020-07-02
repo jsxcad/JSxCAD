@@ -5712,14 +5712,38 @@ exports.default = QuickHull;
 module.exports = exports['default'];
 });
 
-var QuickHull = unwrapExports(QuickHull_1);
+unwrapExports(QuickHull_1);
+
+var dist = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = runner;
+
+
+
+var _QuickHull2 = _interopRequireDefault(QuickHull_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function runner(points) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  var instance = new _QuickHull2.default(points);
+  instance.build();
+  return instance.collectFaces(options.skipTriangulation);
+}
+module.exports = exports['default'];
+});
+
+var QuickHull = unwrapExports(dist);
 
 const buildConvexHullImpl = (points) => {
-  const hull = new QuickHull(points, { skipTriangulation: true });
-  hull.build();
-  const polygons = hull
-    .collectFaces()
-    .map((polygon) => polygon.map((nthPoint) => points[nthPoint]));
+  const faces = QuickHull(points, { skipTriangulation: true });
+  const polygons = faces.map((polygon) =>
+    polygon.map((nthPoint) => points[nthPoint])
+  );
   polygons.isConvex = true;
   return { type: 'solid', solid: fromPolygons({}, polygons) };
 };

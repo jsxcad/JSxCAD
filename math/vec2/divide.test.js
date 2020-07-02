@@ -1,4 +1,4 @@
-import { divide } from './divide';
+import { divide } from './divide.js';
 import test from 'ava';
 
 test('vec2: divide() called with two paramerters should return a vec2 with correct values', (t) => {

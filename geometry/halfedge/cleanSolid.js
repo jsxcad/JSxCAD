@@ -3,12 +3,12 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import clean from './clean';
-import fromSolid from './fromSolid';
-import { junctionSelector } from './junction';
-import merge from './merge';
-import split from './split';
-import toSolid from './toSolid';
+import clean from './clean.js';
+import fromSolid from './fromSolid.js';
+import { junctionSelector } from './junction.js';
+import merge from './merge.js';
+import split from './split.js';
+import toSolid from './toSolid.js';
 
 /**
  * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.

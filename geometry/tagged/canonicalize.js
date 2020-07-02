@@ -3,8 +3,8 @@ import { canonicalize as canonicalizePlane } from '@jsxcad/math-plane';
 import { canonicalize as canonicalizePoints } from '@jsxcad/geometry-points';
 import { canonicalize as canonicalizeSolid } from '@jsxcad/geometry-solid';
 import { canonicalize as canonicalizeSurface } from '@jsxcad/geometry-surface';
-import { rewrite } from './visit';
-import { toTransformedGeometry } from './toTransformedGeometry';
+import { rewrite } from './visit.js';
+import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 export const canonicalize = (geometry) => {
   const op = (geometry, descend) => {

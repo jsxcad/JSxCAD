@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import assemble from './assemble';
+import Shape from './Shape.js';
+import assemble from './assemble.js';
 
 const opMethod = function (op, ...args) {
   return op(this, ...args);

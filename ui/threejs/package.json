@@ -5,6 +5,7 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
+  "type": "module",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
@@ -31,7 +32,6 @@
   "devDependencies": {
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-hypothetical-windows-fix": "^2.1.1",

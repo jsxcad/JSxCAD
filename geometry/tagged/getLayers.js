@@ -1,4 +1,4 @@
-import { rewrite } from './visit';
+import { rewrite } from './visit.js';
 
 // This gets each layer independently.
 

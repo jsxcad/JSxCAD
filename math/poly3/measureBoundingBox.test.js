@@ -1,8 +1,8 @@
-import { fromPoints } from './fromPoints';
+import { fromPoints } from './fromPoints.js';
 import { fromZRotation } from '@jsxcad/math-mat4';
-import { measureBoundingBox } from './measureBoundingBox';
+import { measureBoundingBox } from './measureBoundingBox.js';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('poly3: measureBoundingBox() should return correct values', (t) => {
   let ply1;

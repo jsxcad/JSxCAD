@@ -1,1 +1,1 @@
-export const create = () => ({ surfaces: [] });
+export const create = () => ({ type: 'surfaces', surfaces: [] });

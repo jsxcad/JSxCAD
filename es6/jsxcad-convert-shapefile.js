@@ -1,13 +1,28 @@
-function array_cancel() {
-  this._array = null;
-  return Promise.resolve();
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
-function array_read() {
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var shapefile = createCommonjsModule(function (module, exports) {
+// https://github.com/mbostock/shapefile Version 0.6.6. Copyright 2017 Mike Bostock.
+(function (global, factory) {
+	 factory(exports) ;
+}(commonjsGlobal, (function (exports) {
+var array_cancel = function() {
+  this._array = null;
+  return Promise.resolve();
+};
+
+var array_read = function() {
   var array = this._array;
   this._array = null;
   return Promise.resolve(array ? {done: false, value: array} : {done: true, value: undefined});
-}
+};
 
 function array(array) {
   return new ArraySource(array instanceof Uint8Array ? array : new Uint8Array(array));
@@ -20,15 +35,15 @@ function ArraySource(array) {
 ArraySource.prototype.read = array_read;
 ArraySource.prototype.cancel = array_cancel;
 
-function fetchPath(url) {
+var fetchPath = function(url) {
   return fetch(url).then(function(response) {
     return response.body && response.body.getReader
         ? response.body.getReader()
         : response.arrayBuffer().then(array);
   });
-}
+};
 
-function requestPath(url) {
+var requestPath = function(url) {
   return new Promise(function(resolve, reject) {
     var request = new XMLHttpRequest;
     request.responseType = "arraybuffer";
@@ -38,7 +53,7 @@ function requestPath(url) {
     request.open("GET", url, true);
     request.send();
   });
-}
+};
 
 function path(path) {
   return (typeof fetch === "function" ? fetchPath : requestPath)(path);
@@ -50,9 +65,9 @@ function stream(source) {
 
 var empty = new Uint8Array(0);
 
-function slice_cancel() {
+var slice_cancel = function() {
   return this._source.cancel();
-}
+};
 
 function concat(a, b) {
   if (!a.length) return b;
@@ -63,7 +78,7 @@ function concat(a, b) {
   return c;
 }
 
-function slice_read() {
+var slice_read = function() {
   var that = this, array = that._array.subarray(that._index);
   return that._source.read().then(function(result) {
     that._array = empty;
@@ -73,9 +88,9 @@ function slice_read() {
         : {done: true, value: undefined})
         : {done: false, value: concat(array, result.value)};
   });
-}
+};
 
-function slice_slice(length) {
+var slice_slice = function(length) {
   if ((length |= 0) < 0) throw new Error("invalid length");
   var that = this, index = this._array.length - this._index;
 
@@ -112,7 +127,7 @@ function slice_slice(length) {
       return read();
     });
   })();
-}
+};
 
 function slice(source) {
   return typeof source.slice === "function" ? source :
@@ -130,27 +145,27 @@ SliceSource.prototype.read = slice_read;
 SliceSource.prototype.slice = slice_slice;
 SliceSource.prototype.cancel = slice_cancel;
 
-function dbf_cancel() {
+var dbf_cancel = function() {
   return this._source.cancel();
-}
+};
 
-function readBoolean(value) {
+var readBoolean = function(value) {
   return /^[nf]$/i.test(value) ? false
       : /^[yt]$/i.test(value) ? true
       : null;
-}
+};
 
-function readDate(value) {
+var readDate = function(value) {
   return new Date(+value.substring(0, 4), value.substring(4, 6) - 1, +value.substring(6, 8));
-}
+};
 
-function readNumber(value) {
+var readNumber = function(value) {
   return !(value = value.trim()) || isNaN(value = +value) ? null : value;
-}
+};
 
-function readString(value) {
+var readString = function(value) {
   return value.trim() || null;
-}
+};
 
 var types = {
   B: readNumber,
@@ -162,7 +177,7 @@ var types = {
   N: readNumber
 };
 
-function dbf_read() {
+var dbf_read = function() {
   var that = this, i = 1;
   return that._source.slice(that._recordLength).then(function(value) {
     return value && (value[0] !== 0x1a) ? {done: false, value: that._fields.reduce(function(p, f) {
@@ -170,13 +185,13 @@ function dbf_read() {
       return p;
     }, {})} : {done: true, value: undefined};
   });
-}
+};
 
-function view(array) {
+var view = function(array) {
   return new DataView(array.buffer, array.byteOffset, array.byteLength);
-}
+};
 
-function dbf(source, decoder) {
+var dbf = function(source, decoder) {
   source = slice(source);
   return source.slice(32).then(function(array) {
     var head = view(array);
@@ -184,7 +199,7 @@ function dbf(source, decoder) {
       return new Dbf(source, decoder, head, view(array));
     });
   });
-}
+};
 
 function Dbf(source, decoder, head, body) {
   this._source = source;
@@ -209,21 +224,21 @@ function cancel() {
   return this._source.cancel();
 }
 
-function parseMultiPoint(record) {
+var parseMultiPoint = function(record) {
   var i = 40, j, n = record.getInt32(36, true), coordinates = new Array(n);
   for (j = 0; j < n; ++j, i += 16) coordinates[j] = [record.getFloat64(i, true), record.getFloat64(i + 8, true)];
   return {type: "MultiPoint", coordinates: coordinates};
-}
+};
 
-function parseNull() {
+var parseNull = function() {
   return null;
-}
+};
 
-function parsePoint(record) {
+var parsePoint = function(record) {
   return {type: "Point", coordinates: [record.getFloat64(4, true), record.getFloat64(12, true)]};
-}
+};
 
-function parsePolygon(record) {
+var parsePolygon = function(record) {
   var i = 44, j, n = record.getInt32(36, true), m = record.getInt32(40, true), parts = new Array(n), points = new Array(m), polygons = [], holes = [];
   for (j = 0; j < n; ++j, i += 4) parts[j] = record.getInt32(i, true);
   for (j = 0; j < m; ++j, i += 16) points[j] = [record.getFloat64(i, true), record.getFloat64(i + 8, true)];
@@ -246,7 +261,8 @@ function parsePolygon(record) {
   return polygons.length === 1
       ? {type: "Polygon", coordinates: polygons[0]}
       : {type: "MultiPolygon", coordinates: polygons};
-}
+};
+
 function ringClockwise(ring) {
   if ((n = ring.length) < 4) return false;
   var i = 0, n, area = ring[n - 1][1] * ring[0][0] - ring[n - 1][0] * ring[0][1];
@@ -288,23 +304,23 @@ function segmentContains(p0, p1, p2) {
   return t < 0 || t > 1 ? false : t === 0 || t === 1 ? true : t * x10 === x20 && t * y10 === y20;
 }
 
-function parsePolyLine(record) {
+var parsePolyLine = function(record) {
   var i = 44, j, n = record.getInt32(36, true), m = record.getInt32(40, true), parts = new Array(n), points = new Array(m);
   for (j = 0; j < n; ++j, i += 4) parts[j] = record.getInt32(i, true);
   for (j = 0; j < m; ++j, i += 16) points[j] = [record.getFloat64(i, true), record.getFloat64(i + 8, true)];
   return n === 1
       ? {type: "LineString", coordinates: points}
       : {type: "MultiLineString", coordinates: parts.map(function(i, j) { return points.slice(i, parts[j + 1]); })};
-}
+};
 
-function concat$1(a, b) {
+var concat$1 = function(a, b) {
   var ab = new Uint8Array(a.length + b.length);
   ab.set(a, 0);
   ab.set(b, a.length);
   return ab;
-}
+};
 
-function shp_read() {
+var shp_read = function() {
   var that = this;
   ++that._index;
   return that._source.slice(12).then(function(array) {
@@ -333,7 +349,7 @@ function shp_read() {
 
     return read();
   });
-}
+};
 
 var parsers = {
   0: parseNull,
@@ -351,12 +367,13 @@ var parsers = {
   28: parseMultiPoint // MultiPointM
 };
 
-function shp(source) {
+var shp = function(source) {
   source = slice(source);
   return source.slice(100).then(function(array) {
     return new Shp(source, view(array));
   });
-}
+};
+
 function Shp(source, header) {
   var type = header.getInt32(32, true);
   if (!(type in parsers)) throw new Error("unsupported shape type: " + type);
@@ -367,20 +384,20 @@ function Shp(source, header) {
   this.bbox = [header.getFloat64(36, true), header.getFloat64(44, true), header.getFloat64(52, true), header.getFloat64(60, true)];
 }
 
-var prototype$1 = Shp.prototype;
-prototype$1.read = shp_read;
-prototype$1.cancel = cancel;
+var prototype$2 = Shp.prototype;
+prototype$2.read = shp_read;
+prototype$2.cancel = cancel;
 
 function noop() {}
 
-function shapefile_cancel() {
+var shapefile_cancel = function() {
   return Promise.all([
     this._dbf && this._dbf.cancel(),
     this._shp.cancel()
   ]).then(noop);
-}
+};
 
-function shapefile_read() {
+var shapefile_read = function() {
   var that = this;
   return Promise.all([
     that._dbf ? that._dbf.read() : {value: {}},
@@ -396,54 +413,83 @@ function shapefile_read() {
       }
     };
   });
-}
+};
 
-function shapefile(shpSource, dbfSource, decoder) {
+var shapefile = function(shpSource, dbfSource, decoder) {
   return Promise.all([
     shp(shpSource),
     dbfSource && dbf(dbfSource, decoder)
   ]).then(function(sources) {
     return new Shapefile(sources[0], sources[1]);
   });
+};
+
+function Shapefile(shp$$1, dbf$$1) {
+  this._shp = shp$$1;
+  this._dbf = dbf$$1;
+  this.bbox = shp$$1.bbox;
 }
 
-function Shapefile(shp, dbf) {
-  this._shp = shp;
-  this._dbf = dbf;
-  this.bbox = shp.bbox;
-}
+var prototype$1 = Shapefile.prototype;
+prototype$1.read = shapefile_read;
+prototype$1.cancel = shapefile_cancel;
 
-var prototype$2 = Shapefile.prototype;
-prototype$2.read = shapefile_read;
-prototype$2.cancel = shapefile_cancel;
-
-function open(shp, dbf, options) {
-  if (typeof dbf === "string") {
-    if (!/\.dbf$/.test(dbf)) dbf += ".dbf";
-    dbf = path(dbf);
-  } else if (dbf instanceof ArrayBuffer || dbf instanceof Uint8Array) {
-    dbf = array(dbf);
-  } else if (dbf != null) {
-    dbf = stream(dbf);
+function open(shp$$1, dbf$$1, options) {
+  if (typeof dbf$$1 === "string") {
+    if (!/\.dbf$/.test(dbf$$1)) dbf$$1 += ".dbf";
+    dbf$$1 = path(dbf$$1);
+  } else if (dbf$$1 instanceof ArrayBuffer || dbf$$1 instanceof Uint8Array) {
+    dbf$$1 = array(dbf$$1);
+  } else if (dbf$$1 != null) {
+    dbf$$1 = stream(dbf$$1);
   }
-  if (typeof shp === "string") {
-    if (!/\.shp$/.test(shp)) shp += ".shp";
-    if (dbf === undefined) dbf = path(shp.substring(0, shp.length - 4) + ".dbf").catch(function() {});
-    shp = path(shp);
-  } else if (shp instanceof ArrayBuffer || shp instanceof Uint8Array) {
-    shp = array(shp);
+  if (typeof shp$$1 === "string") {
+    if (!/\.shp$/.test(shp$$1)) shp$$1 += ".shp";
+    if (dbf$$1 === undefined) dbf$$1 = path(shp$$1.substring(0, shp$$1.length - 4) + ".dbf").catch(function() {});
+    shp$$1 = path(shp$$1);
+  } else if (shp$$1 instanceof ArrayBuffer || shp$$1 instanceof Uint8Array) {
+    shp$$1 = array(shp$$1);
   } else {
-    shp = stream(shp);
+    shp$$1 = stream(shp$$1);
   }
-  return Promise.all([shp, dbf]).then(function(sources) {
-    var shp = sources[0], dbf = sources[1], encoding = "windows-1252";
+  return Promise.all([shp$$1, dbf$$1]).then(function(sources) {
+    var shp$$1 = sources[0], dbf$$1 = sources[1], encoding = "windows-1252";
     if (options && options.encoding != null) encoding = options.encoding;
-    return shapefile(shp, dbf, dbf && new TextDecoder(encoding));
+    return shapefile(shp$$1, dbf$$1, dbf$$1 && new TextDecoder(encoding));
   });
 }
 
-function read(shp, dbf, options) {
-  return open(shp, dbf, options).then(function(source) {
+function openShp(source, options) {
+  if (typeof source === "string") {
+    if (!/\.shp$/.test(source)) source += ".shp";
+    source = path(source);
+  } else if (source instanceof ArrayBuffer || source instanceof Uint8Array) {
+    source = array(source);
+  } else {
+    source = stream(source);
+  }
+  return Promise.resolve(source).then(shp);
+}
+
+function openDbf(source, options) {
+  var encoding = "windows-1252";
+  if (options && options.encoding != null) encoding = options.encoding;
+  encoding = new TextDecoder(encoding);
+  if (typeof source === "string") {
+    if (!/\.dbf$/.test(source)) source += ".dbf";
+    source = path(source);
+  } else if (source instanceof ArrayBuffer || source instanceof Uint8Array) {
+    source = array(source);
+  } else {
+    source = stream(source);
+  }
+  return Promise.resolve(source).then(function(source) {
+    return dbf(source, encoding);
+  });
+}
+
+function read(shp$$1, dbf$$1, options) {
+  return open(shp$$1, dbf$$1, options).then(function(source) {
     var features = [], collection = {type: "FeatureCollection", features: features, bbox: source.bbox};
     return source.read().then(function read(result) {
       if (result.done) return collection;
@@ -452,6 +498,18 @@ function read(shp, dbf, options) {
     });
   });
 }
+
+exports.open = open;
+exports.openShp = openShp;
+exports.openDbf = openDbf;
+exports.read = read;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+});
+
+var Shapefile = unwrapExports(shapefile);
 
 const toVec3 = ([x = 0, y = 0, z = 0]) => [x, y, z];
 
@@ -519,7 +577,7 @@ const toGeometry = (geometry, properties) => {
 };
 
 const fromShapefile = async (options, shp, dbf) => {
-  const geoJson = await read(shp, dbf);
+  const geoJson = await Shapefile.read(shp, dbf);
   const geometry = toGeometry(geoJson);
   return geometry;
 };

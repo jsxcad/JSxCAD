@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import grow from './grow';
+import grow from './grow.js';
 
 /**
  *

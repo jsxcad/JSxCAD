@@ -5,7 +5,7 @@ import {
   scale,
 } from '@jsxcad/math-vec3';
 
-import { fromPointAndDirection } from './fromPointAndDirection';
+import { fromPointAndDirection } from './fromPointAndDirection.js';
 import { solve2Linear } from '@jsxcad/math-utils';
 
 const EPS = 1e-5;

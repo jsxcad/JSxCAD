@@ -1,5 +1,5 @@
 import { boot } from '@jsxcad/sys';
-import { intersectionOfPathsBySurfaces } from './intersectionOfPathsBySurfaces';
+import { intersectionOfPathsBySurfaces } from './intersectionOfPathsBySurfaces.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {

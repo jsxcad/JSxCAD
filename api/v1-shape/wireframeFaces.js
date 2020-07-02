@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import assemble from './assemble';
+import Shape from './Shape.js';
+import assemble from './assemble.js';
 import { getSolids } from '@jsxcad/geometry-tagged';
 
 export const wireframeFaces = (shape, op = (x) => x) => {

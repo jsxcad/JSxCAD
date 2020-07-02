@@ -268,15 +268,6 @@ Cone.ofRadius = ofRadius$4;
 Cone.ofDiameter = ofDiameter$3;
 Cone.ofApothem = ofApothem$2;
 
-Cone.signature =
-  'Cone(radius:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofRadius.signature =
-  'Cone.ofRadius(radius:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofDiameter.signature =
-  'Cone.ofDiameter(diameter:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofApothem.signature =
-  'Cone.ofApothem(apothem:number, height:number, { sides:number = 32 }) -> Shape';
-
 /**
  *
  * # Cube (cuboid)
@@ -367,15 +358,6 @@ Cube.ofRadius = ofRadius$5;
 Cube.ofApothem = ofApothem$3;
 Cube.ofDiameter = ofDiameter$4;
 Cube.fromCorners = fromCorners;
-
-Cube.signature = 'Cube(size:number = 1) -> Shape';
-Cube.ofSize.signature =
-  'Cube.ofSize(width:number = 1, length:number = 1, height:number = 1) -> Shape';
-Cube.ofRadius.signature = 'Cube.ofRadius(radius:number = 1) -> Shape';
-Cube.ofApothem.signature = 'Cube.ofApothem(apothem:number = 1) -> Shape';
-Cube.ofDiameter.signature = 'Cube.ofDiameter(diameter:number = 1) -> Shape';
-Cube.fromCorners.signature =
-  'Cube.fromCorners(corner1:point, corner2:point) -> Shape';
 
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);

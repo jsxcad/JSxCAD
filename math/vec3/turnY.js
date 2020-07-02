@@ -1,5 +1,5 @@
-import { add } from './add';
-import { subtract } from './subtract';
+import { add } from './add.js';
+import { subtract } from './subtract.js';
 
 /**
  * Rotate vector 3D vector around the y-axis

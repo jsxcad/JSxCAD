@@ -2,11 +2,11 @@
 
 import * as fs from 'fs';
 
-import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
-import { db } from './db';
-import { deleteFile as deleteCachedFile } from './files';
-import { qualifyPath } from './filesystem';
+import { db } from './db.js';
+import { deleteFile as deleteCachedFile } from './files.js';
+import { qualifyPath } from './filesystem.js';
 
 const { promises } = fs;
 

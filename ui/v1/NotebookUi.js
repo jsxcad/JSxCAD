@@ -8,7 +8,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
-import Pane from './Pane';
+import Pane from './Pane.js';
 import PropTypes from 'prop-types';
 import React from 'react';
 import ResizableBox from './ResizableBox';

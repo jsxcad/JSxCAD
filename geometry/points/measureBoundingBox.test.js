@@ -1,5 +1,5 @@
-import { fromPolygons } from './fromPolygons';
-import { measureBoundingBox } from './measureBoundingBox';
+import { fromPolygons } from './fromPolygons.js';
+import { measureBoundingBox } from './measureBoundingBox.js';
 import test from 'ava';
 import { unitCubePolygons } from '@jsxcad/data-shape';
 

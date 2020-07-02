@@ -1,7 +1,7 @@
 import { fromTranslation } from '@jsxcad/math-mat4';
 import test from 'ava';
-import { toTransformedGeometry } from './toTransformedGeometry';
-import { transform } from './transform';
+import { toTransformedGeometry } from './toTransformedGeometry.js';
+import { transform } from './transform.js';
 
 test('Deferred translation.', (t) => {
   const geometry = transform(fromTranslation([1, 1, 1]), {

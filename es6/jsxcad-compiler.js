@@ -1,5 +1,7 @@
 import { read } from './jsxcad-sys.js';
 
+// From npm astring 1.4.3 to work around node native module issue.
+
 // Astring is a tiny and fast JavaScript code generator from an ESTree-compliant AST.
 //
 // Astring was written by David Bonnet and released under an MIT license.
@@ -16,16 +18,16 @@ const { stringify } = JSON;
 if (!String.prototype.repeat) {
   /* istanbul ignore next */
   throw new Error(
-    'String.prototype.repeat is undefined, see https://github.com/davidbonnet/astring#installation',
-  )
+    'String.prototype.repeat is undefined, see https://github.com/davidbonnet/astring#installation'
+  );
 }
 
 /* istanbul ignore if */
 if (!String.prototype.endsWith) {
   /* istanbul ignore next */
   throw new Error(
-    'String.prototype.endsWith is undefined, see https://github.com/davidbonnet/astring#installation',
-  )
+    'String.prototype.endsWith is undefined, see https://github.com/davidbonnet/astring#installation'
+  );
 }
 
 const OPERATOR_PRECEDENCE = {
@@ -110,7 +112,7 @@ function formatSequence(state, nodes) {
 function expressionNeedsParenthesis(node, parentNode, isRightHand) {
   const nodePrecedence = EXPRESSIONS_PRECEDENCE[node.type];
   if (nodePrecedence === NEEDS_PARENTHESES) {
-    return true
+    return true;
   }
   const parentNodePrecedence = EXPRESSIONS_PRECEDENCE[parentNode.type];
   if (nodePrecedence !== parentNodePrecedence) {
@@ -121,27 +123,27 @@ function expressionNeedsParenthesis(node, parentNode, isRightHand) {
         parentNodePrecedence === 14 &&
         parentNode.operator === '**') ||
       nodePrecedence < parentNodePrecedence
-    )
+    );
   }
   if (nodePrecedence !== 13 && nodePrecedence !== 14) {
     // Not a `LogicalExpression` or `BinaryExpression`
-    return false
+    return false;
   }
   if (node.operator === '**' && parentNode.operator === '**') {
     // Exponentiation operator has right-to-left associativity
-    return !isRightHand
+    return !isRightHand;
   }
   if (isRightHand) {
     // Parenthesis are used if both operators have the same precedence
     return (
       OPERATOR_PRECEDENCE[node.operator] <=
       OPERATOR_PRECEDENCE[parentNode.operator]
-    )
+    );
   }
   return (
     OPERATOR_PRECEDENCE[node.operator] <
     OPERATOR_PRECEDENCE[parentNode.operator]
-  )
+  );
 }
 
 function formatBinaryExpressionPart(state, node, parentNode, isRightHand) {
@@ -207,12 +209,12 @@ function hasCallExpression(node) {
     const { type } = currentNode;
     if (type[0] === 'C' && type[1] === 'a') {
       // Is CallExpression
-      return true
+      return true;
     } else if (type[0] === 'M' && type[1] === 'e' && type[2] === 'm') {
       // Is MemberExpression
       currentNode = currentNode.object;
     } else {
-      return false
+      return false;
     }
   }
 }
@@ -263,7 +265,7 @@ const baseGenerator = {
       formatComments(state, node.trailingComments, indent, lineEnd);
     }
   },
-  BlockStatement: (BlockStatement = function(node, state) {
+  BlockStatement: (BlockStatement = function (node, state) {
     const indent = state.indent.repeat(state.indentLevel++);
     const { lineEnd, writeComments } = state;
     const statementIndent = indent + state.indent;
@@ -458,7 +460,7 @@ const baseGenerator = {
     state.write(') ');
     this[node.body.type](node.body, state);
   },
-  ForInStatement: (ForInStatement = function(node, state) {
+  ForInStatement: (ForInStatement = function (node, state) {
     state.write(`for ${node.await ? 'await ' : ''}(`);
     const { left } = node;
     if (left.type[0] === 'V') {
@@ -476,12 +478,12 @@ const baseGenerator = {
   DebuggerStatement(node, state) {
     state.write('debugger;' + state.lineEnd);
   },
-  FunctionDeclaration: (FunctionDeclaration = function(node, state) {
+  FunctionDeclaration: (FunctionDeclaration = function (node, state) {
     state.write(
       (node.async ? 'async ' : '') +
         (node.generator ? 'function* ' : 'function ') +
         (node.id ? node.id.name : ''),
-      node,
+      node
     );
     formatSequence(state, node.params);
     state.write(' ');
@@ -532,7 +534,7 @@ const baseGenerator = {
           i++;
         } else {
           // ImportSpecifier
-          break
+          break;
         }
       }
       if (i < length) {
@@ -547,7 +549,7 @@ const baseGenerator = {
           if (++i < length) {
             state.write(', ');
           } else {
-            break
+            break;
           }
         }
         state.write('}');
@@ -574,8 +576,8 @@ const baseGenerator = {
       this[node.declaration.type](node.declaration, state);
     } else {
       state.write('{');
-      const { specifiers } = node,
-        { length } = specifiers;
+      const { specifiers } = node;
+      const { length } = specifiers;
       if (length > 0) {
         for (let i = 0; ; ) {
           const specifier = specifiers[i];
@@ -587,7 +589,7 @@ const baseGenerator = {
           if (++i < length) {
             state.write(', ');
           } else {
-            break
+            break;
           }
         }
       }
@@ -661,7 +663,7 @@ const baseGenerator = {
   Super(node, state) {
     state.write('super', node);
   },
-  RestElement: (RestElement = function(node, state) {
+  RestElement: (RestElement = function (node, state) {
     state.write('...');
     this[node.argument.type](node.argument, state);
   }),
@@ -700,11 +702,11 @@ const baseGenerator = {
     this[node.tag.type](node.tag, state);
     this[node.quasi.type](node.quasi, state);
   },
-  ArrayExpression: (ArrayExpression = function(node, state) {
+  ArrayExpression: (ArrayExpression = function (node, state) {
     state.write('[');
     if (node.elements.length > 0) {
-      const { elements } = node,
-        { length } = elements;
+      const { elements } = node;
+      const { length } = elements;
       for (let i = 0; ; ) {
         const element = elements[i];
         if (element != null) {
@@ -716,7 +718,7 @@ const baseGenerator = {
           if (element == null) {
             state.write(', ');
           }
-          break
+          break;
         }
       }
     }
@@ -734,8 +736,8 @@ const baseGenerator = {
         formatComments(state, node.comments, propertyIndent, lineEnd);
       }
       const comma = ',' + lineEnd;
-      const { properties } = node,
-        { length } = properties;
+      const { properties } = node;
+      const { length } = properties;
       for (let i = 0; ; ) {
         const property = properties[i];
         if (writeComments && property.comments != null) {
@@ -746,7 +748,7 @@ const baseGenerator = {
         if (++i < length) {
           state.write(comma);
         } else {
-          break
+          break;
         }
       }
       state.write(lineEnd);
@@ -795,14 +797,14 @@ const baseGenerator = {
   ObjectPattern(node, state) {
     state.write('{');
     if (node.properties.length > 0) {
-      const { properties } = node,
-        { length } = properties;
+      const { properties } = node;
+      const { length } = properties;
       for (let i = 0; ; ) {
         this[properties[i].type](properties[i], state);
         if (++i < length) {
           state.write(', ');
         } else {
-          break
+          break;
         }
       }
     }
@@ -853,7 +855,7 @@ const baseGenerator = {
     state.write(' = ');
     this[node.right.type](node.right, state);
   },
-  BinaryExpression: (BinaryExpression = function(node, state) {
+  BinaryExpression: (BinaryExpression = function (node, state) {
     const isIn = node.operator === 'in';
     if (isIn) {
       // Avoids confusion in `for` loops initializers
@@ -1039,7 +1041,7 @@ class State {
   }
 
   toString() {
-    return this.output
+    return this.output;
   }
 }
 
@@ -1058,7 +1060,7 @@ function generate(node, options) {
   const state = new State(options);
   // Travel through the AST node and generate the code
   state.generator[node.type](node, state);
-  return state.output
+  return state.output;
 }
 
 function commonjsRequire () {

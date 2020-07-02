@@ -1,5 +1,5 @@
 import { canonicalize } from '@jsxcad/math-vec3';
-import { fromPoints } from './fromPoints';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
 
 test('line3: fromPoints() should return a new line3 with correct values', (t) => {

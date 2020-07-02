@@ -1,5 +1,5 @@
-import { fromRotation } from './fromRotation';
-import { identity } from './identity';
+import { fromRotation } from './fromRotation.js';
+import { identity } from './identity.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 

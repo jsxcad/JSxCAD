@@ -1,12 +1,12 @@
 // FIX: Is this specific to the v1 api? If so, move it there.
 
-import { generate } from 'astring';
-import { parse } from 'acorn';
-import { recursive } from 'acorn-walk';
+import AString from 'astring';
+import Acorn from 'acorn';
+import AcornWalk from 'acorn-walk';
 
 export const toEcmascript = (script) => {
   const parseOptions = { sourceType: 'module' };
-  const ast = parse(script, parseOptions);
+  const ast = Acorn.parse(script, parseOptions);
   const definitions = [];
 
   // TODO: Handle imports in the notebook.
@@ -22,7 +22,7 @@ export const toEcmascript = (script) => {
         const op = node.arguments[node.arguments.length - 1].body;
         const fun = op.body[0].argument;
         if (!name.startsWith('viewof ')) {
-          definitions.push(`export var ${name} = ${generate(fun)};`);
+          definitions.push(`export var ${name} = ${AString.generate(fun)};`);
         }
         return;
       }
@@ -33,7 +33,7 @@ export const toEcmascript = (script) => {
     node.arguments.forEach((argument) => c(argument, state));
   };
 
-  recursive(ast, undefined, { CallExpression });
+  AcornWalk.recursive(ast, undefined, { CallExpression });
 
-  return generate(parse(definitions.join('\n'), parseOptions));
+  return AString.generate(Acorn.parse(definitions.join('\n'), parseOptions));
 };

@@ -1,4 +1,4 @@
-import { scale } from './scale';
+import { scale } from './scale.js';
 import test from 'ava';
 
 test('vec2: scale() should return a vec2 with positive values', (t) => {

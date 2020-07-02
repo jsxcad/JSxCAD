@@ -1,4 +1,4 @@
-import { measureBoundingBox } from './measureBoundingBox';
+import { measureBoundingBox } from './measureBoundingBox.js';
 
 const iota = 1e-5;
 const X = 0;

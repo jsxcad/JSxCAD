@@ -1,4 +1,2 @@
-import { createNormalize2 } from './createNormalize2';
-import { createNormalize3 } from './createNormalize3';
-
-export { createNormalize2, createNormalize3 };
+export { createNormalize2 } from './createNormalize2.js';
+export { createNormalize3 } from './createNormalize3.js';

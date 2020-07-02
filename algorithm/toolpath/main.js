@@ -1,3 +1,1 @@
-import { overcut } from './overcut';
-
-export { overcut };
+export { overcut } from './overcut.js';

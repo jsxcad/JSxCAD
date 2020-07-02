@@ -1,3 +1,1 @@
-import { toGcode } from './toGcode';
-
-export { toGcode };
+export { toGcode } from './toGcode.js';

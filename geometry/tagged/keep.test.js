@@ -1,4 +1,4 @@
-import { keep } from './keep';
+import { keep } from './keep.js';
 import test from 'ava';
 
 test('Deep keep', (t) => {

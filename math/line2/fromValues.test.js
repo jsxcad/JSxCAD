@@ -1,4 +1,4 @@
-import { fromValues } from './fromValues';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
 
 test('line2: fromValues() should return a new line2 with correct values', (t) => {

@@ -1,4 +1,4 @@
-import { fromScaling } from './fromScaling';
+import { fromScaling } from './fromScaling.js';
 import test from 'ava';
 
 test('mat4: fromScaling() should return a new mat4 with correct values', (t) => {

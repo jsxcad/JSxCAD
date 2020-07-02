@@ -1,7 +1,7 @@
 import { canonicalize, fromPolygons } from '@jsxcad/geometry-solid';
 
 import { boot } from '@jsxcad/sys';
-import { cut } from './cut';
+import { cut } from './cut.js';
 import test from 'ava';
 
 // Producing duplicate paths within surfaces.

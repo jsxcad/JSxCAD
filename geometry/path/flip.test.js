@@ -1,4 +1,4 @@
-import { flip } from './flip';
+import { flip } from './flip.js';
 import test from 'ava';
 
 test('Flipped path is reversed.', (t) => {

@@ -3,7 +3,7 @@ import { flip as flipPoints } from '@jsxcad/geometry-points';
 import { flip as flipSolid } from '@jsxcad/geometry-solid';
 import { flip as flipSurface } from '@jsxcad/geometry-surface';
 
-import { rewrite } from './visit';
+import { rewrite } from './visit.js';
 
 export const flip = (geometry) => {
   const op = (geometry, descend) => {

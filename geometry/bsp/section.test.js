@@ -2,7 +2,7 @@ import { boot } from '@jsxcad/sys';
 import { canonicalize } from '@jsxcad/geometry-surface';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { fromPolygons } from '@jsxcad/geometry-solid';
-import { section } from './section';
+import { section } from './section.js';
 import test from 'ava';
 
 // Producing duplicate paths within surfaces.

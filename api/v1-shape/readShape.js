@@ -1,5 +1,5 @@
-import { Shape } from './Shape';
-import { cacheShape } from './writeShape';
+import { Shape } from './Shape.js';
+import { cacheShape } from './writeShape.js';
 import { readFile } from '@jsxcad/sys';
 
 export const readShape = async (

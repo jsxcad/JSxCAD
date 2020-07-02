@@ -1,4 +1,4 @@
-import { negate } from './negate';
+import { negate } from './negate.js';
 import test from 'ava';
 
 test('vec3: negate() called with one paramerters should return a vec3 with correct values', (t) => {

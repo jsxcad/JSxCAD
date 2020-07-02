@@ -1,10 +1,10 @@
 import { cache } from '@jsxcad/cache';
-import { getPaths } from './getPaths';
-import { getSolids } from './getSolids';
-import { getSurfaces } from './getSurfaces';
-import { getZ0Surfaces } from './getZ0Surfaces';
+import { getPaths } from './getPaths.js';
+import { getSolids } from './getSolids.js';
+import { getSurfaces } from './getSurfaces.js';
+import { getZ0Surfaces } from './getZ0Surfaces.js';
 import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
-import { rewrite } from './visit';
+import { rewrite } from './visit.js';
 import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolean';
 import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface-boolean';
 import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface-boolean';

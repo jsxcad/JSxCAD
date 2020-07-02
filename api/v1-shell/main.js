@@ -1,7 +1,7 @@
-import grow from './grow';
-import offset from './offset';
-import shell from './shell';
-import shrink from './shrink';
+import grow from './grow.js';
+import offset from './offset.js';
+import shell from './shell.js';
+import shrink from './shrink.js';
 
 const api = {
   grow,

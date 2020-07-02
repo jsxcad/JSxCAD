@@ -1,4 +1,4 @@
-import { fromDesignator, registerDesignator } from './designator';
+import { fromDesignator, registerDesignator } from './designator.js';
 import { rewriteTags, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
 import { Connector } from '@jsxcad/api-v1-connector';

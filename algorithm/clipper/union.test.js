@@ -4,7 +4,7 @@ import { boot } from '@jsxcad/sys';
 import { degToRad } from '@jsxcad/math-utils';
 import { fromZRotation } from '@jsxcad/math-mat4';
 import test from 'ava';
-import { union } from './union';
+import { union } from './union.js';
 
 const rectangle = [
   [

@@ -1,4 +1,4 @@
-import { toRgbFromTags, toTagFromRgbInt } from './color';
+import { toRgbFromTags, toTagFromRgbInt } from './color.js';
 
 import test from 'ava';
 

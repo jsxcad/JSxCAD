@@ -1,4 +1,4 @@
-import { createService } from './service';
+import { createService } from './service.js';
 import test from 'ava';
 
 test('Echo service', async (t) => {

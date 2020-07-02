@@ -1,6 +1,6 @@
 import Shape from '@jsxcad/api-v1-shape';
 import { dot } from '@jsxcad/math-vec3';
-import faceConnector from './faceConnector';
+import faceConnector from './faceConnector.js';
 import { toPlane } from '@jsxcad/geometry-surface';
 
 const Y = 1;

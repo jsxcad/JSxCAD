@@ -2,7 +2,7 @@ import { boot, readFile } from '@jsxcad/sys';
 
 import { canonicalize } from '@jsxcad/geometry-tagged';
 import test from 'ava';
-import { toFont } from './main';
+import { toFont } from './toFont.js';
 
 test('Render a letter', async (t) => {
   await boot();

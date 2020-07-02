@@ -1,7 +1,7 @@
-import { canonicalize } from './canonicalize';
-import { keep } from './keep';
+import { canonicalize } from './canonicalize.js';
+import { keep } from './keep.js';
 import test from 'ava';
-import { toKeptGeometry } from './toKeptGeometry';
+import { toKeptGeometry } from './toKeptGeometry.js';
 
 // Note: toKeptGeometry no-longer removes unkept geometry.
 

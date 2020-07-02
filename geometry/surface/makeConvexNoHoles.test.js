@@ -1,5 +1,5 @@
-import { canonicalize } from './ops';
-import makeConvex from './makeConvexNoHoles';
+import { canonicalize } from './ops.js';
+import makeConvex from './makeConvexNoHoles.js';
 import test from 'ava';
 
 test('Bridge', (t) => {

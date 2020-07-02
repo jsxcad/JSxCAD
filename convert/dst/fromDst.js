@@ -22,7 +22,7 @@ import {
   Y_SUB_3,
   Y_SUB_81,
   Y_SUB_9,
-} from './dst';
+} from './dst.js';
 
 import { scale } from '@jsxcad/geometry-paths';
 

@@ -1,5 +1,5 @@
-import { dot } from './dot';
-import { normalize } from './normalize';
+import { dot } from './dot.js';
+import { normalize } from './normalize.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 
 /**

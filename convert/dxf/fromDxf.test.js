@@ -1,4 +1,4 @@
-import fromDxf from './fromDxf';
+import fromDxf from './fromDxf.js';
 import fs from 'fs';
 import test from 'ava';
 

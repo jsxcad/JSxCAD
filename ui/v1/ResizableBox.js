@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Resizable from './Resizable';
+import Resizable from './Resizable.js';
 
 // An example use of Resizable.
 export default class ResizableBox extends React.Component {

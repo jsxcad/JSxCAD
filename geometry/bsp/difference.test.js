@@ -1,7 +1,7 @@
 import { canonicalize, fromPolygons, transform } from '@jsxcad/geometry-solid';
 
 import { boot } from '@jsxcad/sys';
-import { difference } from './difference';
+import { difference } from './difference.js';
 import { fromTranslation } from '@jsxcad/math-mat4';
 import test from 'ava';
 

@@ -1,15 +1,6 @@
-import { clamp } from './clamp';
-import { degToRad } from './degToRad';
-import { quantizeForSpace } from './quantizeForSpace';
-import { radToDeg } from './radToDeg';
-import { reallyQuantizeForSpace } from './reallyQuantizeForSpace';
-import { solve2Linear } from './solve2Linear';
-
-export {
-  clamp,
-  degToRad,
-  quantizeForSpace,
-  radToDeg,
-  reallyQuantizeForSpace,
-  solve2Linear,
-};
+export { clamp } from './clamp.js';
+export { degToRad } from './degToRad.js';
+export { quantizeForSpace } from './quantizeForSpace.js';
+export { radToDeg } from './radToDeg.js';
+export { reallyQuantizeForSpace } from './reallyQuantizeForSpace.js';
+export { solve2Linear } from './solve2Linear.js';

@@ -6,24 +6,24 @@ import {
   fromZRotation,
 } from '@jsxcad/math-mat4';
 
-import { assertGood } from './assertGood';
-import { assertUnique } from './assertUnique';
-import { canonicalize } from './canonicalize';
-import { close } from './close';
-import { concatenate } from './concatenate';
-import { deduplicate } from './deduplicate';
-import { flip } from './flip';
-import { getEdges } from './getEdges';
-import { isClockwise } from './isClockwise';
-import { isClosed } from './isClosed';
-import { isCounterClockwise } from './isCounterClockwise';
-import { measureArea } from './measureArea';
-import { open } from './open';
-import { toGeneric } from './toGeneric';
-import { toPolygon } from './toPolygon';
-import { toSegments } from './toSegments';
-import { toZ0Polygon } from './toZ0Polygon';
-import { transform } from './transform';
+import { assertGood } from './assertGood.js';
+import { assertUnique } from './assertUnique.js';
+import { canonicalize } from './canonicalize.js';
+import { close } from './close.js';
+import { concatenate } from './concatenate.js';
+import { deduplicate } from './deduplicate.js';
+import { flip } from './flip.js';
+import { getEdges } from './getEdges.js';
+import { isClockwise } from './isClockwise.js';
+import { isClosed } from './isClosed.js';
+import { isCounterClockwise } from './isCounterClockwise.js';
+import { measureArea } from './measureArea.js';
+import { open } from './open.js';
+import { toGeneric } from './toGeneric.js';
+import { toPolygon } from './toPolygon.js';
+import { toSegments } from './toSegments.js';
+import { toZ0Polygon } from './toZ0Polygon.js';
+import { transform } from './transform.js';
 
 const isOpen = (path) => !isClosed(path);
 

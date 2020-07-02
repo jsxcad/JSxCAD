@@ -1,7 +1,7 @@
 import { boot, writeFile } from '@jsxcad/sys';
 
 import { canonicalize } from '@jsxcad/geometry-tagged';
-import { fromLDraw } from './fromLDraw';
+import { fromLDraw } from './fromLDraw.js';
 import test from 'ava';
 
 const fixZeroes = ({ solid }) => ({

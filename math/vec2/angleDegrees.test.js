@@ -1,4 +1,4 @@
-import { angleDegrees } from './angleDegrees';
+import { angleDegrees } from './angleDegrees.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 

@@ -1,29 +1,13 @@
-import { canonicalize } from './canonicalize';
-import { closestPoint } from './closestPoint';
-import { direction } from './direction';
-import { distanceToPoint } from './distanceToPoint';
-import { doLinesIntersect } from './doLinesIntersect';
-import { equals } from './equals';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import { intersectPointOfLines } from './intersectPointOfLines';
-import { origin } from './origin';
-import { reverse } from './reverse';
-import { transform } from './transform';
-import { xAtY } from './xAtY';
-
-export {
-  canonicalize,
-  closestPoint,
-  direction,
-  distanceToPoint,
-  doLinesIntersect,
-  equals,
-  fromPoints,
-  fromValues,
-  intersectPointOfLines,
-  origin,
-  reverse,
-  transform,
-  xAtY,
-};
+export { canonicalize } from './canonicalize.js';
+export { closestPoint } from './closestPoint.js';
+export { direction } from './direction.js';
+export { distanceToPoint } from './distanceToPoint.js';
+export { doLinesIntersect } from './doLinesIntersect.js';
+export { equals } from './equals.js';
+export { fromPoints } from './fromPoints.js';
+export { fromValues } from './fromValues.js';
+export { intersectPointOfLines } from './intersectPointOfLines.js';
+export { origin } from './origin.js';
+export { reverse } from './reverse.js';
+export { transform } from './transform.js';
+export { xAtY } from './xAtY.js';

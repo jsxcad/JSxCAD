@@ -1,4 +1,4 @@
-import { fromTranslation } from './fromTranslation';
+import { fromTranslation } from './fromTranslation.js';
 import test from 'ava';
 
 test('mat4: fromTranslation() should return a new mat4 with correct values', (t) => {

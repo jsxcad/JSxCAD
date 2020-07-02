@@ -1,4 +1,4 @@
-import { toPdf, writePdf } from './writePdf';
+import { toPdf, writePdf } from './writePdf.js';
 
 const api = { toPdf, writePdf };
 export { toPdf, writePdf };

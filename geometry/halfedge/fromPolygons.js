@@ -1,4 +1,4 @@
-import fromSurface from './fromSurface';
+import fromSurface from './fromSurface.js';
 
 /**
  * fromPolygons

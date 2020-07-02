@@ -1,5 +1,5 @@
 import { signedDistanceToPoint as planeDistance } from '@jsxcad/math-plane';
-import { toPlane } from './toPlane';
+import { toPlane } from './toPlane.js';
 
 export const isCoplanar = (polygon) => {
   const plane = toPlane(polygon);

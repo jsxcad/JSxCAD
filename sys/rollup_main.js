@@ -21,6 +21,7 @@ export default {
       allowRealFiles: true,
       files: {
         'node-fetch': 'export default _ => _;',
+        './nodeService.js': 'export const nodeService = () => {};',
         v8: 'export default {};',
       },
     }),

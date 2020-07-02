@@ -1,5 +1,5 @@
-import { fromPoints } from './fromPoints';
-import { isConvex } from './isConvex';
+import { fromPoints } from './fromPoints.js';
+import { isConvex } from './isConvex.js';
 import test from 'ava';
 
 test('poly3: convex poly3 is convex', (t) => {

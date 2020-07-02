@@ -1,6 +1,6 @@
 import { boot } from '@jsxcad/sys';
 import { canonicalize } from '@jsxcad/geometry-tagged';
-import { fromStl } from './fromStl';
+import { fromStl } from './fromStl.js';
 import { readFileSync } from 'fs';
 import test from 'ava';
 

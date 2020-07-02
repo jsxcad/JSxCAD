@@ -1,4 +1,4 @@
-import { main } from './jscad';
+import { main } from './jscad.js';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
 

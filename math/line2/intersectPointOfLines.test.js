@@ -1,8 +1,8 @@
-import { canonicalize } from './canonicalize';
+import { canonicalize } from './canonicalize.js';
 import { canonicalize as canonicalizeVec2 } from '@jsxcad/math-vec2';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import { intersectPointOfLines } from './intersectPointOfLines';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
+import { intersectPointOfLines } from './intersectPointOfLines.js';
 import test from 'ava';
 
 test('line2: intersectPointOfLines() should return proper points', (t) => {

@@ -1,5 +1,5 @@
 import test from 'ava';
-import { turnX } from './turnX';
+import { turnX } from './turnX.js';
 
 const radians = (90 * Math.PI) / 180;
 

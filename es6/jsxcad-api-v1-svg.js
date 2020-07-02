@@ -88,15 +88,6 @@ const downloadSvgMethod = function (...args) {
 };
 Shape$1.prototype.downloadSvg = downloadSvgMethod;
 
-/*
-export const writeSvg = async (shape, name, options = {}) => {
-  for (const { svg, leaf, index } of await toSvg(shape, options)) {
-    await writeFile({ doSerialize: false }, `output/${name}_${index}.svg`, svg);
-    await writeFile({}, `geometry/${name}_${index}.svg`, toKeptGeometry(leaf));
-  }
-};
-*/
-
 const writeSvg = async (shape, name, options = {}) => {
   let index = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {

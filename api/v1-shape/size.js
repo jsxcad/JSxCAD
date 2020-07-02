@@ -1,7 +1,7 @@
 import { add, distance, scale } from '@jsxcad/math-vec3';
 import { measureArea, measureBoundingBox } from '@jsxcad/geometry-tagged';
 
-import Shape from './Shape';
+import Shape from './Shape.js';
 
 const X = 0;
 const Y = 1;

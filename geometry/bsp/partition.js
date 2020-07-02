@@ -1,4 +1,4 @@
-import { boundPolygons, fromBoundingBoxes, fromPolygons } from './bsp';
+import { boundPolygons, fromBoundingBoxes, fromPolygons } from './bsp.js';
 
 export const boxPartition = (
   bbBsp,

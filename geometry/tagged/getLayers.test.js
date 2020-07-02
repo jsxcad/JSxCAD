@@ -1,4 +1,4 @@
-import { getLayers } from './getLayers';
+import { getLayers } from './getLayers.js';
 import test from 'ava';
 
 test('Simple', (t) => {

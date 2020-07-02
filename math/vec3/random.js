@@ -1,4 +1,4 @@
-import { abs } from './abs';
+import { abs } from './abs.js';
 
 // find a vector that is somewhat perpendicular to this one
 export const random = (vec) => {

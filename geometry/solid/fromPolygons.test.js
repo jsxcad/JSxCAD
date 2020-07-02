@@ -1,5 +1,5 @@
-import { canonicalize } from './canonicalize';
-import { fromPolygons } from './fromPolygons';
+import { canonicalize } from './canonicalize.js';
+import { fromPolygons } from './fromPolygons.js';
 import test from 'ava';
 import { unitCubePolygons } from '@jsxcad/data-shape';
 

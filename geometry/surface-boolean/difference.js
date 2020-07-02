@@ -1,10 +1,10 @@
 import { difference as differenceZ0Surfaces } from '@jsxcad/geometry-z0surface-boolean';
 import { distance } from '@jsxcad/math-vec3';
-import { equals } from './equals';
+import { equals } from './equals.js';
 import { measureBoundingSphere } from '@jsxcad/geometry-surface';
-import { toPlane } from './toPlane';
+import { toPlane } from './toPlane.js';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 const mayOverlap = ([centerA, radiusA], [centerB, radiusB]) =>
   distance(centerA, centerB) < radiusA + radiusB;

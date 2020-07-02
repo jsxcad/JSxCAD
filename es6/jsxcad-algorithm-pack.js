@@ -1,6 +1,20 @@
 import { min, max } from './jsxcad-math-vec3.js';
 import { toKeptGeometry, translate, measureBoundingBox } from './jsxcad-geometry-tagged.js';
 
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var binPacking = createCommonjsModule(function (module, exports) {
+(function (global, factory) {
+   factory(exports) ;
+}(commonjsGlobal, (function (exports) {
 /******************************************************************************
 
 This is a binary tree based bin packing algorithm that is more complex than
@@ -207,6 +221,19 @@ Packer.prototype = {
   }
 
 };
+
+exports.GrowingPacker = GrowingPacker;
+exports.Packer = Packer;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+
+});
+
+var BinPackingEs = unwrapExports(binPacking);
+
+const { GrowingPacker, Packer } = BinPackingEs;
 
 const X = 0;
 const Y = 1;

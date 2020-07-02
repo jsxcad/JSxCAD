@@ -1,5 +1,5 @@
-import { equals } from './equals';
-import { fromPointAndDirection } from './fromPointAndDirection';
+import { equals } from './equals.js';
+import { fromPointAndDirection } from './fromPointAndDirection.js';
 import test from 'ava';
 
 test('line3: equals() should return correct booleans', (t) => {

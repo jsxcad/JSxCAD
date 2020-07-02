@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { log as sysLog } from '@jsxcad/sys';
 
 /**

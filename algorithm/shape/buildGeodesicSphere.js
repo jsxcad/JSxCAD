@@ -1,5 +1,5 @@
-import { buildRegularIcosahedron } from './buildRegularIcosahedron';
-import { subdivideTriangularMesh } from './subdivideTriangularMesh';
+import { buildRegularIcosahedron } from './buildRegularIcosahedron.js';
+import { subdivideTriangularMesh } from './subdivideTriangularMesh.js';
 import { unit } from '@jsxcad/math-vec3';
 
 /**

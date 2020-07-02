@@ -1,5 +1,5 @@
 import { isMirroring } from '@jsxcad/math-mat4';
-import { map } from './map';
+import { map } from './map.js';
 import { transform as transformVec3 } from '@jsxcad/math-vec3';
 
 // Affine transformation of polygon. Returns a new polygon.

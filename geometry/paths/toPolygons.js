@@ -1,4 +1,4 @@
-import { map } from './map';
+import { map } from './map.js';
 import { toPolygon } from '@jsxcad/geometry-path';
 
 export const toPolygons = (paths) => {

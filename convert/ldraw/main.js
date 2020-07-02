@@ -1,3 +1,1 @@
-import { fromLDraw } from './fromLDraw';
-
-export { fromLDraw };
+export { fromLDraw } from './fromLDraw.js';

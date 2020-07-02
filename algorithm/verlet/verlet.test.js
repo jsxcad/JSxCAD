@@ -1,8 +1,8 @@
-import { positions, solve, verlet } from './verlet';
+import { positions, solve, verlet } from './verlet.js';
 
 import { canonicalize } from '@jsxcad/math-vec3';
-import { create as createDistanceConstraint } from './constrainDistance';
-import { create as createPinnedConstraint } from './constrainPinned';
+import { create as createDistanceConstraint } from './constrainDistance.js';
+import { create as createPinnedConstraint } from './constrainPinned.js';
 import test from 'ava';
 
 test('Simple case', (t) => {

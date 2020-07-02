@@ -1,8 +1,8 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import { retessellate as retessellateZ0Surface } from '@jsxcad/geometry-z0surface';
-import { toPlane } from './toPlane';
+import { toPlane } from './toPlane.js';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 export const retessellate = (
   surface,

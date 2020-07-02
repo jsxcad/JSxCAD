@@ -1,6 +1,6 @@
 import { canonicalize } from '@jsxcad/geometry-tagged';
 
-import pack from './pack';
+import pack from './pack.js';
 import test from 'ava';
 
 test('Partial fit', (t) => {

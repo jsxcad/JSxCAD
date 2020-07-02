@@ -3,11 +3,11 @@
  * @typedef {import("./types").Solid} Solid
  */
 
-import clean from './clean';
-import fromSurface from './fromSurface';
-import merge from './merge';
-import split from './split';
-import toPolygons from './toPolygons';
+import clean from './clean.js';
+import fromSurface from './fromSurface.js';
+import merge from './merge.js';
+import split from './split.js';
+import toPolygons from './toPolygons.js';
 
 /**
  * Produces the outline of a surface.

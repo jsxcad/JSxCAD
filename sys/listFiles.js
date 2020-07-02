@@ -1,16 +1,16 @@
 import * as fs from 'fs';
 
-import { getFilesystem, qualifyPath } from './filesystem';
+import { getFilesystem, qualifyPath } from './filesystem.js';
 
-import { isBrowser, isNode } from './browserOrNode';
+import { isBrowser, isNode } from './browserOrNode.js';
 
 import {
   listFiles as listEphemeralFiles,
   watchFileCreation,
   watchFileDeletion,
-} from './files';
+} from './files.js';
 
-import { db } from './db';
+import { db } from './db.js';
 
 const { promises } = fs;
 

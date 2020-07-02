@@ -1,8 +1,8 @@
-import arch from './arch';
-import crumple from './crumple';
-import skew from './skew';
-import taper from './taper';
-import twist from './twist';
+import arch from './arch.js';
+import crumple from './crumple.js';
+import skew from './skew.js';
+import taper from './taper.js';
+import twist from './twist.js';
 
 const api = {
   arch,

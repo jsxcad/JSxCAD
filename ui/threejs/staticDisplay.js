@@ -1,7 +1,7 @@
 import { Layers } from 'three';
-import { buildMeshes } from './mesh';
-import { buildScene } from './scene';
-import { moveToFit } from './moveToFit';
+import { buildMeshes } from './mesh.js';
+import { buildScene } from './scene.js';
+import { moveToFit } from './moveToFit.js';
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;
