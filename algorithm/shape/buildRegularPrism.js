@@ -1,6 +1,6 @@
-import { buildRegularPolygon } from './buildRegularPolygon';
+import { buildRegularPolygon } from './buildRegularPolygon.js';
 import { cache } from '@jsxcad/cache';
-import { extrude } from './extrude';
+import { extrude } from './extrude.js';
 import { translate } from '@jsxcad/geometry-tagged';
 
 /**

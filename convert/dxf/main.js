@@ -1,4 +1,2 @@
-import fromDxf from './fromDxf';
-import toDxf from './toDxf';
-
-export { fromDxf, toDxf };
+export fromDxf from './fromDxf.js';
+export toDxf from './toDxf.js';

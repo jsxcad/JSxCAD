@@ -1,27 +1,12 @@
-import { canonicalize } from './canonicalize';
-import { closestPoint } from './closestPoint';
-import { direction } from './direction';
-import { distanceToPoint } from './distanceToPoint';
-import { equals } from './equals';
-import { fromPlanes } from './fromPlanes';
-import { fromPointAndDirection } from './fromPointAndDirection';
-import { fromPoints } from './fromPoints';
-import { intersectPointOfLineAndPlane } from './intersectPointOfLineAndPlane';
-import { origin } from './origin';
-import { reverse } from './reverse';
-import { transform } from './transform';
-
-export {
-  canonicalize,
-  closestPoint,
-  direction,
-  distanceToPoint,
-  equals,
-  fromPointAndDirection,
-  fromPlanes,
-  fromPoints,
-  intersectPointOfLineAndPlane,
-  origin,
-  reverse,
-  transform,
-};
+export { canonicalize } from './canonicalize.js';
+export { closestPoint } from './closestPoint.js';
+export { direction } from './direction.js';
+export { distanceToPoint } from './distanceToPoint.js';
+export { equals } from './equals.js';
+export { fromPlanes } from './fromPlanes.js';
+export { fromPointAndDirection } from './fromPointAndDirection.js';
+export { fromPoints } from './fromPoints.js';
+export { intersectPointOfLineAndPlane } from './intersectPointOfLineAndPlane.js';
+export { origin } from './origin.js';
+export { reverse } from './reverse.js';
+export { transform } from './transform.js';

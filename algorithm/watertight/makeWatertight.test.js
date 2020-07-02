@@ -1,5 +1,5 @@
-import { isWatertightPolygons } from './isWatertightPolygons';
-import { makeWatertight } from './makeWatertight';
+import { isWatertightPolygons } from './isWatertightPolygons.js';
+import { makeWatertight } from './makeWatertight.js';
 import test from 'ava';
 
 test('Makes box1-union-box4 test case watertight.', (t) => {

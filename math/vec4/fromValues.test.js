@@ -1,4 +1,4 @@
-import { fromValues } from './fromValues';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
 
 test('vec4: fromValues() should return a new vec4 with correct values', (t) => {

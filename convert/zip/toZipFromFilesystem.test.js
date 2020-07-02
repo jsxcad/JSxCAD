@@ -2,7 +2,7 @@ import { setupFilesystem, writeFile as writeFsFile } from '@jsxcad/sys';
 
 import fs from 'fs';
 import test from 'ava';
-import { toZipFromFilesystem } from './toZipFromFilesystem';
+import { toZipFromFilesystem } from './toZipFromFilesystem.js';
 
 const { readFile, writeFile } = fs.promises;
 

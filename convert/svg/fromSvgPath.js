@@ -2,7 +2,7 @@ import { assertGood, canonicalize, isClosed } from '@jsxcad/geometry-path';
 
 import absolutifySvgPath from 'abs-svg-path';
 import { buildAdaptiveCubicBezierCurve } from '@jsxcad/algorithm-shape';
-import curvifySvgPath from './curvify-svg-path/index.js';
+import { curvify as curvifySvgPath } from './curvify-svg-path/index.js';
 import { equals } from '@jsxcad/math-vec2';
 import { fromScaling } from '@jsxcad/math-mat4';
 import parseSvgPath from 'parse-svg-path';

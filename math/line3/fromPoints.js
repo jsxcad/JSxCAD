@@ -1,4 +1,4 @@
-import { fromPointAndDirection } from './fromPointAndDirection';
+import { fromPointAndDirection } from './fromPointAndDirection.js';
 import { subtract } from '@jsxcad/math-vec3';
 
 /**

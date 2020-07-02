@@ -1,3 +1,1 @@
-import { fromPng } from './fromPng';
-
-export { fromPng };
+export { fromPng } from './fromPng.js';

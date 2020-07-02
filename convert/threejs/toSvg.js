@@ -35,10 +35,10 @@ import {
 } from 'three';
 
 import { DOMParser, XMLSerializer } from 'xmldom';
-import { installProjector } from './Projector';
-import { installSVGRenderer } from './SVGRenderer';
+import { installProjector } from './Projector.js';
+import { installSVGRenderer } from './SVGRenderer.js';
 import { toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { toThreejsGeometry } from './toThreejsGeometry';
+import { toThreejsGeometry } from './toThreejsGeometry.js';
 
 // Bootstrap start.
 const {

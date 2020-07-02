@@ -1,4 +1,4 @@
-import { create } from './create';
+import { create } from './create.js';
 import test from 'ava';
 
 test('line3: create() should return a line3 with initial values', (t) => {

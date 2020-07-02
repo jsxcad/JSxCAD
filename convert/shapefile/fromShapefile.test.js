@@ -1,4 +1,4 @@
-import { fromShapefile } from './fromShapefile';
+import { fromShapefile } from './fromShapefile.js';
 import fs from 'fs';
 import test from 'ava';
 

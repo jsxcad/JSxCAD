@@ -9,7 +9,7 @@ import fs from 'fs';
 import { scale as scalePaths } from '@jsxcad/geometry-paths';
 import { scale as scaleSurface } from '@jsxcad/geometry-surface';
 import test from 'ava';
-import { toSvg } from './toSvg';
+import { toSvg } from './toSvg.js';
 
 const { readFile } = fs.promises;
 

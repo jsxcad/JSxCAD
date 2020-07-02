@@ -1,4 +1,4 @@
-import { overcut, overcutPathEdges } from './overcut';
+import { overcut, overcutPathEdges } from './overcut.js';
 
 import { canonicalize } from '@jsxcad/geometry-paths';
 

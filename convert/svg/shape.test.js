@@ -1,13 +1,13 @@
-import { getPoints, toPath } from 'svg-shapes';
+import SvgShapes from 'svg-shapes';
 
 import absolutifySvgPath from 'abs-svg-path';
-import { canonicalize } from './canonicalize';
+import { canonicalize } from './canonicalize.js';
 import curvifySvgPath from 'curvify-svg-path';
 import parseSvgPath from 'parse-svg-path';
 import test from 'ava';
 
 test('Circle as cubic bezier.', (t) => {
-  const circlePath = toPath(getPoints('circle', { cx: 0, cy: 0, r: 1 }));
+  const circlePath = SvgShapes.toPath(SvgShapes.getPoints('circle', { cx: 0, cy: 0, r: 1 }));
   const parsedCirclePath = parseSvgPath(circlePath);
   const absoluteCirclePath = absolutifySvgPath(parsedCirclePath);
   const curvifiedCirclePath = canonicalize(curvifySvgPath(absoluteCirclePath));

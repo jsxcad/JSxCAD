@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import test from 'ava';
-import { toEcmascript } from './observablehq';
+import { toEcmascript } from './observablehq.js';
 
 Error.stackTraceLimit = Infinity;
 

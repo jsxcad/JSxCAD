@@ -1,6 +1,6 @@
 import { listFiles, qualifyPath, readFile } from '@jsxcad/sys';
 
-import { toArray } from 'do-not-zip';
+import DoNotZip from 'do-not-zip';
 
 export const toZipFromFilesystem = async ({
   filterPath = (a) => true,
@@ -18,5 +18,5 @@ export const toZipFromFilesystem = async ({
       });
     }
   }
-  return new Uint8Array(toArray(entries));
+  return new Uint8Array(DoNotZip.toArray(entries));
 };

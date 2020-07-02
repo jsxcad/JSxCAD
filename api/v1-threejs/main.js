@@ -1,5 +1,5 @@
-import writeSvgPhoto from './writeSvgPhoto';
-import writeThreejsPage from './writeThreejsPage';
+import writeSvgPhoto from './writeSvgPhoto.js';
+import writeThreejsPage from './writeThreejsPage.js';
 
 const api = {
   writeSvgPhoto,

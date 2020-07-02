@@ -1,3 +1,1 @@
-import { toEcmascript } from './toEcmascript';
-
-export { toEcmascript };
+export { toEcmascript } from './toEcmascript.js';

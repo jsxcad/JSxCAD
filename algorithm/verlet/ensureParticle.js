@@ -1,4 +1,4 @@
-import { particle } from './particle';
+import { particle } from './particle.js';
 
 export const ensureParticle = (ids, particles, id) => {
   let p = ids[id];

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import test from 'ava';
-import { toGcode } from './toGcode';
+import { toGcode } from './toGcode.js';
 import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 
 const { readFile } = fs.promises;

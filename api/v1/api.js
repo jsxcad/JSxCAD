@@ -68,8 +68,6 @@ export {
 
 export { Item } from '@jsxcad/api-v1-item';
 
-export { WoodScrew } from '@jsxcad/api-v1-items';
-
 export {
   Noise,
   Random,

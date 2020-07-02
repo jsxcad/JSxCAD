@@ -1,6 +1,6 @@
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import test from 'ava';
-import { toPdf } from './toPdf';
+import { toPdf } from './toPdf.js';
 
 test('Triangle', async (t) => {
   // A surface is a set of paths.

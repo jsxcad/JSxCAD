@@ -3,7 +3,7 @@ import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 import Shape from '@jsxcad/api-v1-shape';
 import { deform } from '@jsxcad/geometry-bsp';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import { makeNoise3D } from 'open-simplex-noise';
+import OpenSimplexNoise from 'open-simplex-noise';
 
 const X = 0;
 const Y = 1;
@@ -16,9 +16,9 @@ export const crumple = (
 ) => {
   const scale = amount / 2;
 
-  const noiseX = makeNoise3D(seed + 0);
-  const noiseY = makeNoise3D(seed + 1);
-  const noiseZ = makeNoise3D(seed + 2);
+  const noiseX = OpenSimplexNoise.makeNoise3D(seed + 0);
+  const noiseY = OpenSimplexNoise.makeNoise3D(seed + 1);
+  const noiseZ = OpenSimplexNoise.makeNoise3D(seed + 2);
 
   const perturb = (point) => [
     point[X] + noiseX(...point) * scale,

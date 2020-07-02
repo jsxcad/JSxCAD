@@ -1,4 +1,4 @@
-import { isWatertightPolygons } from './isWatertightPolygons';
+import { isWatertightPolygons } from './isWatertightPolygons.js';
 import test from 'ava';
 
 test('Leaky polygon array is not watertight', (t) => {

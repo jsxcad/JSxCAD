@@ -1,4 +1,4 @@
-import { findVertexViolations } from './findVertexViolations';
+import { findVertexViolations } from './findVertexViolations.js';
 import test from 'ava';
 
 test('Watertight vertex is has no violations', (t) => {

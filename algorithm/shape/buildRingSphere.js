@@ -5,7 +5,7 @@ import {
   translate,
 } from '@jsxcad/geometry-path';
 
-import { buildRegularPolygon } from './buildRegularPolygon';
+import { buildRegularPolygon } from './buildRegularPolygon.js';
 import { cache } from '@jsxcad/cache';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 

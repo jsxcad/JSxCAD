@@ -1,5 +1,5 @@
 import { boot } from '@jsxcad/sys';
-import { fromSvg } from './fromSvg';
+import { fromSvg } from './fromSvg.js';
 import fs from 'fs';
 import test from 'ava';
 import { toPdf } from '@jsxcad/convert-pdf';

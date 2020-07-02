@@ -1,4 +1,4 @@
-import { fromPointAndDirection } from './fromPointAndDirection';
+import { fromPointAndDirection } from './fromPointAndDirection.js';
 import test from 'ava';
 
 test('line3: fromPointAndDirection() should return a new line3 with correct values', (t) => {

@@ -1,18 +1,7 @@
-import { positions, solve, verlet } from './verlet';
+export { positions, solve, verlet } from './verlet.js';
 
-import { force as addGravity } from './forceGravity';
-import { force as addInertia } from './forceInertia';
-import { create as createAngleConstraint } from './constrainAngle';
-import { create as createDistanceConstraint } from './constrainDistance';
-import { create as createPinnedConstraint } from './constrainPinned';
-
-export {
-  addGravity,
-  addInertia,
-  createAngleConstraint,
-  createDistanceConstraint,
-  createPinnedConstraint,
-  positions,
-  solve,
-  verlet,
-};
+export { force as addGravity } from './forceGravity.js';
+export { force as addInertia } from './forceInertia.js';
+export { create as createAngleConstraint } from './constrainAngle.js';
+export { create as createDistanceConstraint } from './constrainDistance.js';
+export { create as createPinnedConstraint } from './constrainPinned.js';

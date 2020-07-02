@@ -1,7 +1,7 @@
-import Font from './Font';
+import Font from './Font.js';
 
-export * from './Font';
+export * from './Font.js';
 
-export { readFont } from './readFont';
+export { readFont } from './readFont.js';
 
 export default Font;

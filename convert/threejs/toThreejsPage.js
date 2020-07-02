@@ -1,5 +1,5 @@
 import { toKeptGeometry } from '@jsxcad/geometry-tagged';
-import { toThreejsGeometry } from './toThreejsGeometry';
+import { toThreejsGeometry } from './toThreejsGeometry.js';
 
 export const toThreejsPage = async (
   { view, title = 'JSxCAD Viewer' },

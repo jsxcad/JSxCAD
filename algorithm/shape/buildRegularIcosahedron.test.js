@@ -1,5 +1,5 @@
-import { buildRegularIcosahedron } from './buildRegularIcosahedron';
-import { canonicalize } from './canonicalize';
+import { buildRegularIcosahedron } from './buildRegularIcosahedron.js';
+import { canonicalize } from './canonicalize.js';
 import test from 'ava';
 import { unitRegularIcosahedronPolygons } from '@jsxcad/data-shape';
 

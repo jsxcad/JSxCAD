@@ -1,6 +1,6 @@
-import { create } from './create';
-import { distanceToPoint } from './distanceToPoint';
-import { fromPoints } from './fromPoints';
+import { create } from './create.js';
+import { distanceToPoint } from './distanceToPoint.js';
+import { fromPoints } from './fromPoints.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 

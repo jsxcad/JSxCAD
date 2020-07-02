@@ -1,6 +1,6 @@
 import { length, subtract } from '@jsxcad/math-vec3';
 
-import { closestPoint } from './closestPoint';
+import { closestPoint } from './closestPoint.js';
 
 /**
  * Calculate the distance (positive) between the given point and line

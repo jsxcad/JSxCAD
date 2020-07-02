@@ -1,8 +1,8 @@
-import { unzip } from 'unzipit';
+import UnzipIt from 'unzipit';
 import { writeFile } from '@jsxcad/sys';
 
 export const fromZipToFilesystem = async (options = {}, zip) => {
-  const { entries } = await unzip(new Uint8Array(zip));
+  const { entries } = await UnzipIt.unzip(new Uint8Array(zip));
   for (const [name, entry] of Object.entries(entries)) {
     const [jsxcad, , ...path] = name.split('/');
     if (jsxcad !== 'jsxcad') {

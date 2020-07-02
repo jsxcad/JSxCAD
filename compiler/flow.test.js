@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import test from 'ava';
-import { toEcmascript } from './flow';
-import { toFlows } from './molecules';
+import { toEcmascript } from './flow.js';
+import { toFlows } from './molecules.js';
 
 test('Basic', (t) => {
   const molecules = JSON.parse(

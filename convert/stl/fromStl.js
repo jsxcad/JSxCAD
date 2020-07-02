@@ -1,6 +1,6 @@
 import { fromPolygons } from '@jsxcad/geometry-solid';
 import parseStlAscii from 'parse-stl-ascii';
-import { parse as parseStlBinary } from './parseStlBinary';
+import { parse as parseStlBinary } from './parseStlBinary.js';
 
 const toParser = (format) => {
   switch (format) {

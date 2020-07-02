@@ -1,4 +1,4 @@
-import { buildRingSphere } from './buildRingSphere';
+import { buildRingSphere } from './buildRingSphere.js';
 import { canonicalize } from '@jsxcad/geometry-tagged';
 import test from 'ava';
 

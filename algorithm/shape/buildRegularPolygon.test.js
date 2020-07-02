@@ -1,5 +1,5 @@
-import { buildRegularPolygon } from './buildRegularPolygon';
-import { canonicalize } from './canonicalize';
+import { buildRegularPolygon } from './buildRegularPolygon.js';
+import { canonicalize } from './canonicalize.js';
 import test from 'ava';
 import { unitRegularTrianglePolygon } from '@jsxcad/data-shape';
 

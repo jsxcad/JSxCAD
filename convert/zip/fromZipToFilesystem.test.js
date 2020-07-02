@@ -1,6 +1,6 @@
 import { readFile as readFsFile, setupFilesystem } from '@jsxcad/sys';
 
-import { fromZipToFilesystem } from './fromZipToFilesystem';
+import { fromZipToFilesystem } from './fromZipToFilesystem.js';
 import fs from 'fs';
 import test from 'ava';
 

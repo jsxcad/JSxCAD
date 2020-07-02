@@ -1,4 +1,4 @@
-import { fromPointsAndPaths } from './fromPointsAndPaths';
+import { fromPointsAndPaths } from './fromPointsAndPaths.js';
 
 // Unit icosahedron vertices.
 const points = [

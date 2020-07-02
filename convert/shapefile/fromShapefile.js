@@ -1,4 +1,4 @@
-import { read } from 'shapefile';
+import Shapefile from 'shapefile';
 
 const toVec3 = ([x = 0, y = 0, z = 0]) => [x, y, z];
 
@@ -66,7 +66,7 @@ const toGeometry = (geometry, properties) => {
 };
 
 export const fromShapefile = async (options, shp, dbf) => {
-  const geoJson = await read(shp, dbf);
+  const geoJson = await Shapefile.read(shp, dbf);
   const geometry = toGeometry(geoJson);
   return geometry;
 };

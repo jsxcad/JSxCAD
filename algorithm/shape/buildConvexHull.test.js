@@ -1,5 +1,5 @@
 import { boot } from '@jsxcad/sys';
-import { buildConvexHull } from './buildConvexHull';
+import { buildConvexHull } from './buildConvexHull.js';
 import { canonicalize } from '@jsxcad/geometry-tagged';
 import test from 'ava';
 import { toPoints } from '@jsxcad/geometry-surface';

@@ -1,4 +1,4 @@
-import { fromZipToFilesystem } from './fromZipToFilesystem';
-import { toZipFromFilesystem } from './toZipFromFilesystem';
+import { fromZipToFilesystem } from './fromZipToFilesystem.js';
+import { toZipFromFilesystem } from './toZipFromFilesystem.js';
 
 export { fromZipToFilesystem, toZipFromFilesystem };

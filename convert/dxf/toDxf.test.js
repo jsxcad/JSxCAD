@@ -1,7 +1,7 @@
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import fs from 'fs';
 import test from 'ava';
-import { toDxf } from './toDxf';
+import { toDxf } from './toDxf.js';
 
 const { readFile } = fs.promises;
 

@@ -1,12 +1,12 @@
-import { fromDesignator, registerDesignator } from './designator';
+import { fromDesignator, registerDesignator } from './designator.js';
 
-import Item from './Item';
-import bom from './bom';
-import fuse from './fuse';
-import inItems from './inItems';
-import items from './items';
-import leafs from './leafs';
-import toBillOfMaterial from './toBillOfMaterial';
+import Item from './Item.js';
+import bom from './bom.js';
+import fuse from './fuse.js';
+import inItems from './inItems.js';
+import items from './items.js';
+import leafs from './leafs.js';
+import toBillOfMaterial from './toBillOfMaterial.js';
 
 const api = {
   Item,
