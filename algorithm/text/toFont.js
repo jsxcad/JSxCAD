@@ -1,6 +1,6 @@
 import { reorient, union } from '@jsxcad/geometry-z0surface-boolean';
 
-import OpenTypeJs from 'opentype.js';
+import OpenTypeJs from 'opentype.js/dist/opentype.js';
 import { fromSvgPath } from '@jsxcad/convert-svg';
 import { scale } from '@jsxcad/geometry-tagged';
 

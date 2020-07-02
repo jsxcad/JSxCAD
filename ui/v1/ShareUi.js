@@ -1,7 +1,6 @@
 import Modal from 'react-bootstrap/Modal';
 import React from 'react';
 import SettingsUi from './SettingsUi';
-import ShareFileUi from './ShareFileUi';
 import ShareGistUi from './ShareGistUi';
 import ShareGithubUi from './ShareGithubUi';
 import Tab from 'react-bootstrap/Tab';
@@ -27,9 +26,6 @@ export class ShareUi extends SettingsUi {
             </Tab>
             <Tab eventKey="gist" title="Gist">
               <ShareGistUi storage="share/gist" />
-            </Tab>
-            <Tab eventKey="file" title="File">
-              <ShareFileUi storage="share/file" />
             </Tab>
           </Tabs>
         </Modal.Body>

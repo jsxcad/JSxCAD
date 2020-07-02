@@ -6,8 +6,6 @@
   "main": "main.js",
   "module": "dist/main.js",
   "scripts": {
-    "build:UserGuide": "node -r esm buildUserGuide",
-    "build:UserGuide2": "node -r esm buildUserGuide2",
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
@@ -26,7 +24,6 @@
   "dependencies": {
     "@jsxcad/api-v1": "^0.0.79",
     "@jsxcad/api-v1-shape": "^0.0.79",
-    "@jsxcad/convert-zip": "^0.0.79",
     "@jsxcad/sys": "^0.0.79",
     "@jsxcad/ui-threejs": "^0.0.79",
     "file-saver": "^2.0.2"
@@ -34,7 +31,6 @@
   "devDependencies": {
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "esm": "^3.2.10",
     "rollup": "^1.11.0",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-builtins": "^2.1.2",

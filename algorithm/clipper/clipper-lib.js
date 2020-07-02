@@ -1,4 +1,4 @@
-import clipperjs from './js-angusj-clipperjs-web/index.cjs';
+import mediator from './mediator.js';
 
 import { onBoot } from '@jsxcad/sys';
 
@@ -8,7 +8,7 @@ const {
   PolyFillType,
   PolyTree,
   loadNativeClipperLibInstanceAsync,
-} = clipperjs;
+} = mediator;
 
 export let clipper;
 

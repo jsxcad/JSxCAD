@@ -1,6 +1,6 @@
-import AString from 'astring';
-import Acorn from 'acorn';
-import AcornWalk from 'acorn-walk';
+import { generate } from './astring.js';
+import { parse } from 'acorn/dist/acorn.mjs';
+import { recursive } from 'acorn-walk/dist/walk.mjs';
 import hash from 'object-hash';
 import { read } from '@jsxcad/sys';
 
@@ -27,7 +27,7 @@ export const toEcmascript = async (script, options = {}) => {
     allowReturnOutsideFunction: true,
     sourceType: 'module',
   };
-  let ast = Acorn.parse(script, parseOptions);
+  let ast = parse(script, parseOptions);
 
   const exportNames = [];
 
@@ -57,7 +57,7 @@ export const toEcmascript = async (script, options = {}) => {
     };
 
     // walk(declarator, undefined, { CallExpression, Identifier });
-    AcornWalk.recursive(declarator, undefined, { Identifier });
+    recursive(declarator, undefined, { Identifier });
 
     const dependencyShas = dependencies.map(fromIdToSha);
 
@@ -84,7 +84,7 @@ export const toEcmascript = async (script, options = {}) => {
     const meta = await read(`meta/def/${id}`);
     if (meta && meta.sha === sha) {
       const readCode = strip(
-        Acorn.parse(`await read('data/def/${id}')`, parseOptions)
+        parse(`await read('data/def/${id}')`, parseOptions)
       );
       const readExpression = readCode.body[0].expression;
       const init = readExpression;
@@ -92,7 +92,7 @@ export const toEcmascript = async (script, options = {}) => {
     } else {
       out.push({ ...declaration, declarations: [declarator] });
       out.push(
-        Acorn.parse(
+        parse(
           `await write('data/def/${id}', ${id}) && await write('meta/def/${id}', { sha: '${sha}' });`,
           parseOptions
         )
@@ -132,15 +132,13 @@ export const toEcmascript = async (script, options = {}) => {
       const { specifiers, source } = entry;
 
       if (specifiers.length === 0) {
-        out.push(
-          Acorn.parse(`await importModule('${source.value}');`, parseOptions)
-        );
+        out.push(parse(`await importModule('${source.value}');`, parseOptions));
       } else {
         for (const { imported, local, type } of specifiers) {
           switch (type) {
             case 'ImportDefaultSpecifier':
               out.push(
-                Acorn.parse(
+                parse(
                   `const ${local.name} = (await importModule('${source.value}')).default;`,
                   parseOptions
                 )
@@ -148,7 +146,7 @@ export const toEcmascript = async (script, options = {}) => {
               break;
             case 'ImportSpecifier':
               out.push(
-                Acorn.parse(
+                parse(
                   `const { ${imported.name} } = await importModule('${source.value}');`,
                   parseOptions
                 )
@@ -168,12 +166,9 @@ export const toEcmascript = async (script, options = {}) => {
   }
 
   // Return the exports as an object.
-  out.push(Acorn.parse(`return { ${exportNames.join(', ')} };`, parseOptions));
+  out.push(parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
   const result =
-    '\n' +
-    AString.generate(
-      Acorn.parse(out.map(AString.generate).join('\n'), parseOptions)
-    );
+    '\n' + generate(parse(out.map(generate).join('\n'), parseOptions));
   return result;
 };

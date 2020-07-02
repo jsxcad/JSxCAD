@@ -5,7 +5,7 @@ import {
   translate,
 } from '@jsxcad/geometry-tagged';
 
-import BinPackingEs from 'bin-packing-es';
+import BinPackingEs from 'bin-packing-es/build/bin-packing.js';
 
 const { GrowingPacker, Packer } = BinPackingEs;
 

@@ -6,7 +6,7 @@ import {
   multiply,
 } from '@jsxcad/math-mat4';
 
-import SvgPoints from 'svg-points';
+import SvgPoints from 'svg-points/cjs/index.js';
 import XmlDom from 'xmldom';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath.js';
 import { close } from '@jsxcad/geometry-path';
