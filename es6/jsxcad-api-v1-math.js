@@ -3659,13 +3659,13 @@ function shuffleSeed(seed) {
 }
 });
 
-unwrapExports(lib);
+var OpenSimplexNoise = unwrapExports(lib);
 var lib_1 = lib.makeNoise2D;
 var lib_2 = lib.makeNoise3D;
 var lib_3 = lib.makeNoise4D;
 
 const Noise = (seed = 0) => {
-  const generator = lib_2(seed);
+  const generator = OpenSimplexNoise.makeNoise3D(seed);
   const generate = (x = 0, y = 0, z = 0) => generator(x, y, z);
   return generate;
 };

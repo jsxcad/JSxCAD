@@ -1,5 +1,3 @@
-/* global Worker */
-
 import { conversation } from './conversation.js';
 
 // Sets up a worker with conversational interface.

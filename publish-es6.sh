@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cp algorithm/clipper/dist/main.js es6/jsxcad-algorithm-clipper.js
-cp algorithm/clipper-js/dist/main.js es6/jsxcad-algorithm-clipper-js.js
 cp algorithm/color/dist/main.js es6/jsxcad-algorithm-color.js
 cp algorithm/contour/dist/main.js es6/jsxcad-algorithm-contour.js
 cp algorithm/pack/dist/main.js es6/jsxcad-algorithm-pack.js
@@ -22,15 +21,10 @@ cp api/v1-dxf/dist/main.js es6/jsxcad-api-v1-dxf.js
 cp api/v1-extrude/dist/main.js es6/jsxcad-api-v1-extrude.js
 cp api/v1-font/dist/main.js es6/jsxcad-api-v1-font.js
 cp api/v1-gcode/dist/main.js es6/jsxcad-api-v1-gcode.js
-cp api/v1-gear/dist/main.js es6/jsxcad-api-v1-gear.js
 cp api/v1-item/dist/main.js es6/jsxcad-api-v1-item.js
-cp api/v1-items/dist/main.js es6/jsxcad-api-v1-items.js
-cp api/v1-jscad/dist/main.js es6/jsxcad-api-v1-jscad.js
 cp api/v1-layout/dist/main.js es6/jsxcad-api-v1-layout.js
-cp api/v1-lego/dist/main.js es6/jsxcad-api-v1-lego.js
 cp api/v1-line2/dist/main.js es6/jsxcad-api-v1-line2.js
 cp api/v1-math/dist/main.js es6/jsxcad-api-v1-math.js
-cp api/v1-motor/dist/main.js es6/jsxcad-api-v1-motor.js
 cp api/v1-pdf/dist/main.js es6/jsxcad-api-v1-pdf.js
 cp api/v1-plan/dist/main.js es6/jsxcad-api-v1-plan.js
 cp api/v1-plans/dist/main.js es6/jsxcad-api-v1-plans.js
@@ -41,7 +35,6 @@ cp api/v1-shapes/dist/main.js es6/jsxcad-api-v1-shapes.js
 cp api/v1-shell/dist/main.js es6/jsxcad-api-v1-shell.js
 cp api/v1-stl/dist/main.js es6/jsxcad-api-v1-stl.js
 cp api/v1-svg/dist/main.js es6/jsxcad-api-v1-svg.js
-cp api/v1-thread/dist/main.js es6/jsxcad-api-v1-thread.js
 cp api/v1-threejs/dist/main.js es6/jsxcad-api-v1-threejs.js
 cp api/v1-units/dist/main.js es6/jsxcad-api-v1-units.js
 cp api/v1-view/dist/main.js es6/jsxcad-api-v1-view.js
@@ -50,7 +43,6 @@ cp compiler/dist/main.js es6/jsxcad-compiler.js
 cp convert/dst/dist/main.js es6/jsxcad-convert-dst.js
 cp convert/dxf/dist/main.js es6/jsxcad-convert-dxf.js
 cp convert/gcode/dist/main.js es6/jsxcad-convert-gcode.js
-cp convert/jscad/dist/main.js es6/jsxcad-convert-jscad.js
 cp convert/ldraw/dist/main.js es6/jsxcad-convert-ldraw.js
 cp convert/pdf/dist/main.js es6/jsxcad-convert-pdf.js
 cp convert/png/dist/main.js es6/jsxcad-convert-png.js
@@ -58,7 +50,6 @@ cp convert/shapefile/dist/main.js es6/jsxcad-convert-shapefile.js
 cp convert/stl/dist/main.js es6/jsxcad-convert-stl.js
 cp convert/svg/dist/main.js es6/jsxcad-convert-svg.js
 cp convert/threejs/dist/main.js es6/jsxcad-convert-threejs.js
-cp convert/zip/dist/main.js es6/jsxcad-convert-zip.js
 cp data/shape/dist/main.js es6/jsxcad-data-shape.js
 cp geometry/bsp/dist/main.js es6/jsxcad-geometry-bsp.js
 cp geometry/halfedge/dist/main.js es6/jsxcad-geometry-halfedge.js

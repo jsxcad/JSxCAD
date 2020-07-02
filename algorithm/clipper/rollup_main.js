@@ -25,9 +25,10 @@ export default {
       },
     }),
     builtins(),
+    nodeResolve({ preferBuiltins: true, extensions: ['.js', '.cjs'] }),
     commonjs({
       namedExports: {
-        './js-angusj-clipperjs-web/index.cjs': [
+        './js-angusj-clipperjs-web/index.xjs': [
           'ClipType',
           'NativeClipperLibRequestedFormat',
           'PolyFillType',
@@ -37,7 +38,6 @@ export default {
       },
     }),
     globals(),
-    nodeResolve({ preferBuiltins: true }),
     {
       transform(code, id) {
         return code.replace(/'@jsxcad\/([^']*)'/g, "'./jsxcad-$1.js'");

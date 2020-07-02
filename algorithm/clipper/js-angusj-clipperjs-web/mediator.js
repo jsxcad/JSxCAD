@@ -4,7 +4,7 @@ const {
   PolyFillType,
   PolyTree,
   loadNativeClipperLibInstanceAsync,
-} = require('./index.cjs');
+} = require('./index.js');
 
 module.exports = {
   ClipType,

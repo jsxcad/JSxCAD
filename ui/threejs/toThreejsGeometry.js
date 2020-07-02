@@ -48,69 +48,91 @@ export const toThreejsGeometry = (geometry, supertags) => {
   }
   if (geometry.isThreejsGeometry) {
     return geometry;
-  } else if (geometry.assembly) {
-    return {
-      assembly: geometry.assembly.map((item) => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.disjointAssembly) {
-    const items = geometry.disjointAssembly;
-    return {
-      assembly: items.map((item) => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.layers) {
-    return {
-      assembly: geometry.layers.map((item) => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.item) {
-    return {
-      item: toThreejsGeometry(geometry.item, tags),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.paths) {
-    return {
-      threejsPaths: geometry.paths,
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.plan) {
-    return {
-      threejsPlan: geometry.plan,
-      threejsMarks: geometry.marks,
-      threejsVisualization: toThreejsGeometry(geometry.visualization),
-      threejsContent: toThreejsGeometry(geometry.content),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.points) {
-    return {
-      threejsPoints: pointsToThreejsPoints(geometry.points),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.solid) {
-    return {
-      threejsSolid: solidToThreejsSolid(geometry.solid),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.surface) {
-    return {
-      threejsSurface: surfaceToThreejsSurface(geometry.surface),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.z0Surface) {
-    return {
-      threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
-      tags,
-      isThreejsGeometry: true,
-    };
+  }
+  switch (geometry.type) {
+    case 'assembly':
+      return {
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'disjointAssembly':
+      return {
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'layers':
+      return {
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'item':
+      return {
+        type: 'item',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'paths':
+      return {
+        type: 'paths',
+        threejsPaths: geometry.paths,
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'plan':
+      return {
+        type: 'plan',
+        threejsPlan: geometry.plan,
+        threejsMarks: geometry.marks,
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'points':
+      return {
+        type: 'points',
+        threejsPoints: pointsToThreejsPoints(geometry.points),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'solid':
+      return {
+        type: 'solid',
+        threejsSolid: solidToThreejsSolid(geometry.solid),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'surface':
+      return {
+        type: 'surface',
+        threejsSurface: surfaceToThreejsSurface(geometry.surface),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'z0Surface':
+      return {
+        type: 'surface',
+        threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
+        tags,
+        isThreejsGeometry: true,
+      };
+    default:
+      throw Error(`Unexpected geometry: ${geometry.type}`);
   }
 };

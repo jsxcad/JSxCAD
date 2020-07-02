@@ -3683,7 +3683,29 @@ const conversation = ({ agent, say }) => {
   return { ask, hear };
 };
 
+const nodeService = () => {};
+
 /* global Worker */
+
+// Sets up a worker with conversational interface.
+const webService = async ({
+  nodeWorker,
+  webWorker,
+  agent,
+  workerType,
+}) => {
+  let worker;
+  try {
+    worker = new Worker(webWorker, { type: workerType });
+  } catch (e) {
+    log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
+    throw Error('die');
+  }
+  const say = (message) => worker.postMessage(message);
+  const { ask, hear } = conversation({ agent, say });
+  worker.onmessage = ({ data }) => hear(data);
+  return { ask };
+};
 
 // Sets up a worker with conversational interface.
 const createService = async ({
@@ -3693,36 +3715,9 @@ const createService = async ({
   workerType,
 }) => {
   if (isNode) {
-    // const { Worker } = await import('worker_threads');
-    const { Worker } = require('worker_threads');
-    const worker = new Worker(nodeWorker);
-    const say = (message) => worker.postMessage(message);
-    const { ask, hear } = conversation({ agent, say });
-    const stop = async () => {
-      return new Promise((resolve, reject) => {
-        worker.terminate((err, exitCode) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(exitCode);
-          }
-        });
-      });
-    };
-    worker.on('message', hear);
-    return { ask, stop };
+    return nodeService();
   } else if (isBrowser) {
-    let worker;
-    try {
-      worker = new Worker(webWorker, { type: workerType });
-    } catch (e) {
-      log({ op: 'text', text: '' + e, level: 'serious', duration: 6000000 });
-      throw Error('die');
-    }
-    const say = (message) => worker.postMessage(message);
-    const { ask, hear } = conversation({ agent, say });
-    worker.onmessage = ({ data }) => hear(data);
-    return { ask };
+    return webService({ nodeWorker, webWorker, agent, workerType });
   } else {
     throw Error('die');
   }

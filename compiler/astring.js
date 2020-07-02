@@ -574,8 +574,8 @@ export const baseGenerator = {
       this[node.declaration.type](node.declaration, state);
     } else {
       state.write('{');
-      const { specifiers } = node,
-        { length } = specifiers;
+      const { specifiers } = node;
+      const { length } = specifiers;
       if (length > 0) {
         for (let i = 0; ; ) {
           const specifier = specifiers[i];
@@ -703,8 +703,8 @@ export const baseGenerator = {
   ArrayExpression: (ArrayExpression = function (node, state) {
     state.write('[');
     if (node.elements.length > 0) {
-      const { elements } = node,
-        { length } = elements;
+      const { elements } = node;
+      const { length } = elements;
       for (let i = 0; ; ) {
         const element = elements[i];
         if (element != null) {
@@ -734,8 +734,8 @@ export const baseGenerator = {
         formatComments(state, node.comments, propertyIndent, lineEnd);
       }
       const comma = ',' + lineEnd;
-      const { properties } = node,
-        { length } = properties;
+      const { properties } = node;
+      const { length } = properties;
       for (let i = 0; ; ) {
         const property = properties[i];
         if (writeComments && property.comments != null) {
@@ -795,8 +795,8 @@ export const baseGenerator = {
   ObjectPattern(node, state) {
     state.write('{');
     if (node.properties.length > 0) {
-      const { properties } = node,
-        { length } = properties;
+      const { properties } = node;
+      const { length } = properties;
       for (let i = 0; ; ) {
         this[properties[i].type](properties[i], state);
         if (++i < length) {

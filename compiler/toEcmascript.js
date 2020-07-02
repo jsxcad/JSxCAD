@@ -1,8 +1,8 @@
 import { generate } from './astring.js';
-import { parse } from 'acorn/dist/acorn.mjs';
-import { recursive } from 'acorn-walk/dist/walk.mjs';
 import hash from 'object-hash';
+import { parse } from 'acorn/dist/acorn.mjs';
 import { read } from '@jsxcad/sys';
+import { recursive } from 'acorn-walk/dist/walk.mjs';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {

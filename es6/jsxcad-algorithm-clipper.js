@@ -2493,14 +2493,51 @@ var jsAngusjClipperjsWeb_10 = jsAngusjClipperjsWeb.PolyTree;
 var jsAngusjClipperjsWeb_11 = jsAngusjClipperjsWeb.ClipperLibWrapper;
 var jsAngusjClipperjsWeb_12 = jsAngusjClipperjsWeb.loadNativeClipperLibInstanceAsync;
 
+const {
+  ClipType,
+  NativeClipperLibRequestedFormat,
+  PolyFillType,
+  PolyTree,
+  loadNativeClipperLibInstanceAsync,
+} = jsAngusjClipperjsWeb;
+
+var mediator = {
+  ClipType,
+  NativeClipperLibRequestedFormat,
+  PolyFillType,
+  PolyTree,
+  loadNativeClipperLibInstanceAsync,
+};
+var mediator_1 = mediator.ClipType;
+var mediator_2 = mediator.NativeClipperLibRequestedFormat;
+var mediator_3 = mediator.PolyFillType;
+var mediator_4 = mediator.PolyTree;
+var mediator_5 = mediator.loadNativeClipperLibInstanceAsync;
+
+var lib = {
+  ClipType: mediator_1,
+  NativeClipperLibRequestedFormat: mediator_2,
+  PolyFillType: mediator_3,
+  PolyTree: mediator_4,
+  loadNativeClipperLibInstanceAsync: mediator_5,
+};
+
+const {
+  ClipType: ClipType$1,
+  NativeClipperLibRequestedFormat: NativeClipperLibRequestedFormat$1,
+  PolyFillType: PolyFillType$1,
+  PolyTree: PolyTree$1,
+  loadNativeClipperLibInstanceAsync: loadNativeClipperLibInstanceAsync$1,
+} = lib;
+
 let clipper$1;
 
 const setup = async () => {
   if (clipper$1 === undefined) {
-    clipper$1 = await jsAngusjClipperjsWeb_12(
+    clipper$1 = await loadNativeClipperLibInstanceAsync$1(
       // let it autodetect which one to use, but also available WasmOnly and AsmJsOnly
       // NativeClipperLibRequestedFormat.WasmWithAsmJsFallback
-      jsAngusjClipperjsWeb_6.WasmOnly
+      NativeClipperLibRequestedFormat$1.WasmOnly
     );
     clipper$1.strictlySimple = true;
     clipper$1.preserveCollinear = true;
@@ -2701,10 +2738,10 @@ const difference = (a, ...z0Surfaces) => {
         continue;
       }
       const result = clipper$1.clipToPaths({
-        clipType: jsAngusjClipperjsWeb_2.Difference,
+        clipType: ClipType$1.Difference,
         subjectInputs: [{ data: aPolygons, closed: true }],
         clipInputs: [{ data: bPolygons, closed: true }],
-        subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+        subjectFillType: PolyFillType$1.Positive,
       });
       a = toSurface(result, normalize);
     }
@@ -2738,10 +2775,10 @@ const intersection = (a, ...z0Surfaces) => {
         return [];
       }
       const result = clipper$1.clipToPaths({
-        clipType: jsAngusjClipperjsWeb_2.Intersection,
+        clipType: ClipType$1.Intersection,
         subjectInputs: [{ data: aPolygons, closed: true }],
         clipInputs: [{ data: bPolygons, closed: true }],
-        subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+        subjectFillType: PolyFillType$1.Positive,
       });
       a = toSurface(result, normalize);
     }
@@ -2775,10 +2812,10 @@ const intersectionOfPathsBySurfaces = (a, ...z0Surfaces) => {
         return [];
       }
       const result = clipper$1.clipToPolyTree({
-        clipType: jsAngusjClipperjsWeb_2.Intersection,
+        clipType: ClipType$1.Intersection,
         subjectInputs,
         clipInputs,
-        subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+        subjectFillType: PolyFillType$1.Positive,
       });
       a = toPaths(clipper$1, result, normalize);
     }
@@ -3474,9 +3511,9 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
     return [];
   }
   const request = {
-    clipType: jsAngusjClipperjsWeb_2.Union,
+    clipType: ClipType$1.Union,
     subjectInputs,
-    subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+    subjectFillType: PolyFillType$1.Positive,
   };
   const result = clipper$1.clipToPolyTree(request);
   const convexSurface = [];
@@ -3551,7 +3588,7 @@ const makeConvex = (surface, normalize = createNormalize2()) => {
   return normalized;
 };
 
-// import { RESOLUTION } from './convert';
+// import { RESOLUTION } from './convert.js';
 
 const THRESHOLD = 1e-5; // * RESOLUTION;
 
@@ -3606,9 +3643,9 @@ const reorient = (surface, normalize = (p) => p) => {
     return [];
   }
   const result = clipper$1.clipToPaths({
-    clipType: jsAngusjClipperjsWeb_2.Union,
+    clipType: ClipType$1.Union,
     subjectInputs,
-    subjectFillType: jsAngusjClipperjsWeb_8.NonZero,
+    subjectFillType: PolyFillType$1.NonZero,
   });
   return toSurface(result, normalize);
 };
@@ -3639,10 +3676,10 @@ const union = (...z0Surfaces) => {
         z0Surfaces.push(a);
       } else {
         const result = clipper$1.clipToPaths({
-          clipType: jsAngusjClipperjsWeb_2.Union,
+          clipType: ClipType$1.Union,
           subjectInputs: [{ data: aPolygons, closed: true }],
           clipInputs: [{ data: bPolygons, closed: true }],
-          subjectFillType: jsAngusjClipperjsWeb_8.Positive,
+          subjectFillType: PolyFillType$1.Positive,
         });
         z0Surfaces.push(toSurface(result, normalize));
       }
