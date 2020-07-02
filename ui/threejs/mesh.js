@@ -15,8 +15,8 @@ import {
   VertexColors,
 } from 'three';
 
-import { buildMeshMaterial } from './material';
-import { setColor } from './color';
+import { buildMeshMaterial } from './material.js';
+import { setColor } from './color.js';
 
 const toName = (threejsGeometry) => {
   if (threejsGeometry.tags !== undefined && threejsGeometry.tags.length >= 1) {

@@ -10,7 +10,7 @@
     "depcheck": "depcheck --ignores=esm",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
-    "example": "node -r esm run",
+    "example": "node ./run.js",
     "profile": "node -r esm --prof --logfile=prof.log --no-logfile-per-isolate run",
     "trace": "node -r esm --trace-ic run",
     "test": "ava --timeout 10m",

@@ -1,12 +1,12 @@
 /* global ResizeObserver */
 
-import { buildScene, createResizer } from './scene';
+import { buildScene, createResizer } from './scene.js';
 
 import { Layers } from 'three';
-import { buildMeshes } from './mesh';
-import { buildTrackballControls } from './controls';
-import { moveToFit } from './moveToFit';
-import { toThreejsGeometry } from './toThreejsGeometry';
+import { buildMeshes } from './mesh.js';
+import { buildTrackballControls } from './controls.js';
+import { moveToFit } from './moveToFit.js';
+import { toThreejsGeometry } from './toThreejsGeometry.js';
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;

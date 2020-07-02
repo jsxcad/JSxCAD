@@ -1,8 +1,8 @@
 /* global document */
 
-import { orbitDisplay } from './orbitDisplay';
-import { staticDisplay } from './staticDisplay';
-import { toThreejsGeometry } from './toThreejsGeometry';
+import { orbitDisplay } from './orbitDisplay.js';
+import { staticDisplay } from './staticDisplay.js';
+import { toThreejsGeometry } from './toThreejsGeometry.js';
 
 const toCanvasFromWebglContext = (webgl) => {
   const { width, height } = webgl.canvas;

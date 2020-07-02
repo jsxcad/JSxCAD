@@ -1,6 +1,5 @@
 import * as dat from 'dat.gui';
 
-// import OrbitControlsBuilder from 'three-orbit-controls';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export const buildTrackballControls = ({

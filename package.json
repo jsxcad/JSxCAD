@@ -56,25 +56,10 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.0",
-    "esm": "^3.2.10",
     "lerna": "^3.20.2",
     "prettier": "^2.0.5"
   },
-  "ava": {
-    "require": [
-      "esm"
-    ]
-  },
   "publishConfig": {
     "access": "restricted"
-  },
-  "esm": {
-    "cjs": true,
-    "mainFields": [
-      "main"
-    ],
-    "mode": "auto",
-    "await": true,
-    "force": false
   }
 }

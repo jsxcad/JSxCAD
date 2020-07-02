@@ -1,4 +1,4 @@
-import Path from './Path';
+import Path from './Path.js';
 
 export const Line = (length) => Path([0, 0, length / -2], [0, 0, length / 2]);
 export default Line;
