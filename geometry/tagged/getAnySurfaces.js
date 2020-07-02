@@ -1,13 +1,12 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getAnySurfaces = (geometry) => {
   const surfaces = [];
   eachItem(geometry, (item) => {
-    if (item.surface) {
-      surfaces.push(item);
-    }
-    if (item.z0Surface) {
-      surfaces.push(item);
+    switch (item.type) {
+      case 'surface':
+      case 'z0Surface':
+        surfaces.push(item);
     }
   });
   return surfaces;

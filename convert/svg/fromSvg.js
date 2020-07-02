@@ -6,10 +6,10 @@ import {
   multiply,
 } from '@jsxcad/math-mat4';
 
-import { DOMParser } from 'xmldom/dom-parser';
-import { fromSvgPath as baseFromSvgPath } from './fromSvgPath';
+import SvgPoints from 'svg-points/cjs/index.js';
+import XmlDom from 'xmldom';
+import { fromSvgPath as baseFromSvgPath } from './fromSvgPath.js';
 import { close } from '@jsxcad/geometry-path';
-import { toPath } from 'svg-points';
 import { toTagsFromName } from '@jsxcad/algorithm-color';
 import { transform } from '@jsxcad/geometry-tagged';
 
@@ -159,8 +159,11 @@ const applyTransforms = ({ matrix }, transformText) => {
 
 export const fromSvg = async (input, options = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
-  const geometry = { assembly: [] };
-  const svg = new DOMParser().parseFromString(await svgString, 'image/svg+xml');
+  const geometry = { type: 'assembly', content: [] };
+  const svg = new XmlDom.DOMParser().parseFromString(
+    await svgString,
+    'image/svg+xml'
+  );
 
   const getAttribute = (node, attribute, otherwise) => {
     const value = node.getAttribute(attribute);
@@ -230,8 +233,12 @@ export const fromSvg = async (input, options = {}) => {
           if (fill !== undefined && fill !== 'none' && fill !== '') {
             // Does fill, etc, inherit?
             const tags = toTagsFromName(fill);
-            geometry.assembly.push(
-              transform(scale(matrix), { z0Surface: close(paths), tags })
+            geometry.content.push(
+              transform(scale(matrix), {
+                type: 'z0Surface',
+                z0Surface: close(paths),
+                tags,
+              })
             );
           }
           const stroke = node.getAttribute('stroke');
@@ -244,8 +251,8 @@ export const fromSvg = async (input, options = {}) => {
               throw Error(`die: Bad element in matrix ${matrix}.`);
             }
             const tags = toTagsFromName(stroke);
-            geometry.assembly.push(
-              transform(scaledMatrix, { paths: paths, tags })
+            geometry.content.push(
+              transform(scaledMatrix, { type: 'paths', paths: paths, tags })
             );
           }
         };
@@ -256,22 +263,26 @@ export const fromSvg = async (input, options = {}) => {
             output(node.getAttribute('d'));
             break;
           case 'circle':
-            output(toPath(buildShape('cx', 'cy', 'r')));
+            output(SvgPoints.toPath(buildShape('cx', 'cy', 'r')));
             break;
           case 'ellipse':
-            output(toPath(buildShape('cx', 'cy', 'rx', 'ry')));
+            output(SvgPoints.toPath(buildShape('cx', 'cy', 'rx', 'ry')));
             break;
           case 'line':
-            output(toPath(buildShape('x1', 'x2', 'y1', 'y2')));
+            output(SvgPoints.toPath(buildShape('x1', 'x2', 'y1', 'y2')));
             break;
           case 'polygon':
-            output(toPath(buildShape('points')));
+            output(SvgPoints.toPath(buildShape('points')));
             break;
           case 'polyline':
-            output(toPath(buildShape('points')));
+            output(SvgPoints.toPath(buildShape('points')));
             break;
           case 'rect':
-            output(toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry')));
+            output(
+              SvgPoints.toPath(
+                buildShape('height', 'width', 'x', 'y', 'rx', 'ry')
+              )
+            );
             break;
           default:
             break;

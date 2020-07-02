@@ -5,6 +5,7 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "dist/bundle.js",
   "module": "dist/bundle.js",
+  "type": "module",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
@@ -28,12 +29,9 @@
     "passport-github2": "^0.1.11"
   },
   "devDependencies": {
-    "ava": "^2.4.0",
+    "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0"
-  },
-  "ava": {
-    "require": "esm"
   },
   "publishConfig": {
     "access": "public"

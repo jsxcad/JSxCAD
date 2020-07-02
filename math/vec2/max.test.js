@@ -1,4 +1,4 @@
-import { max } from './max';
+import { max } from './max.js';
 import test from 'ava';
 
 test('vec2: max() called with two parameters should return a vec2 with correct values', (t) => {

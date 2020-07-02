@@ -1,5 +1,5 @@
 import test from 'ava';
-import { toEcmascript } from './toEcmascript';
+import { toEcmascript } from './toEcmascript.js';
 import { write } from '@jsxcad/sys';
 
 Error.stackTraceLimit = Infinity;

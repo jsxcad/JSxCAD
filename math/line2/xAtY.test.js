@@ -1,7 +1,7 @@
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
-import { xAtY } from './xAtY';
+import { xAtY } from './xAtY.js';
 
 test('line2: xAtY() should return proper values', (t) => {
   const line1 = fromValues();

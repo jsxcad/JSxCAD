@@ -1,4 +1,4 @@
-import { flip } from './flip';
+import { flip } from './flip.js';
 import test from 'ava';
 
 test('plane: flip() called with one paramerters should return a plane with correct values', (t) => {

@@ -1,3 +1,1 @@
-import { fromShapefile } from './fromShapefile';
-
-export { fromShapefile };
+export { fromShapefile } from './fromShapefile.js';

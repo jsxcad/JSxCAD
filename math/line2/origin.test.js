@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/math-vec2';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
-import { origin } from './origin';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
+import { origin } from './origin.js';
 import test from 'ava';
 
 test('line2: origin() should return proper origins', (t) => {

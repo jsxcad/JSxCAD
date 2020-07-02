@@ -1,5 +1,5 @@
-import readStl from './readStl';
-import writeStl from './writeStl';
+import readStl from './readStl.js';
+import writeStl from './writeStl.js';
 
 const api = {
   readStl,

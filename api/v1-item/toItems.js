@@ -1,4 +1,4 @@
-import { Shape, fromGeometry } from './Shape';
+import { Shape, fromGeometry } from './Shape.js';
 
 import { getItems } from '@jsxcad/geometry-tagged';
 

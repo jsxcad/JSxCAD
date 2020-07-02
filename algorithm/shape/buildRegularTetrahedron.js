@@ -1,4 +1,4 @@
-import { buildConvexHull } from './buildConvexHull';
+import { buildConvexHull } from './buildConvexHull.js';
 
 // Unit tetrahedron vertices.
 const points = [

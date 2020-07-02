@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { rewrite } from '@jsxcad/geometry-tagged';
 
 export const inSolids = (shape, op = (_) => _) => {

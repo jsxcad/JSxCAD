@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import translate from './translate';
+import Shape from './Shape.js';
+import translate from './translate.js';
 
 /**
  *

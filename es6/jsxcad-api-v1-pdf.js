@@ -10,14 +10,16 @@ const downloadPdf = (shape, name, { lineWidth = 0.096 } = {}) => {
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
     const { size } = entry.plan.page;
-    for (let leaf of getLeafs(entry.content)) {
-      const op = toPdf$1(leaf, { lineWidth, size });
-      addPending(op);
-      entries.push({
-        data: op,
-        filename: `${name}_${++index}.pdf`,
-        type: 'application/pdf',
-      });
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const op = toPdf$1(leaf, { lineWidth, size });
+        addPending(op);
+        entries.push({
+          data: op,
+          filename: `${name}_${++index}.pdf`,
+          type: 'application/pdf',
+        });
+      }
     }
   }
   emit({ download: { entries } });
@@ -39,13 +41,15 @@ const toPdf = async (shape, { lineWidth = 0.096 } = {}) => {
   for (const entry of getPlans(geometry)) {
     if (entry.plan.page) {
       const { size } = entry.plan.page;
-      for (let leaf of getLeafs(entry.content)) {
-        const pdf = await toPdf$1(leaf, { lineWidth, size });
-        pages.push({
-          pdf,
-          leaf: { ...entry, content: leaf },
-          index: pages.length,
-        });
+      for (const content of entry.content) {
+        for (let leaf of getLeafs(content)) {
+          const pdf = await toPdf$1(leaf, { lineWidth, size });
+          pages.push({
+            pdf,
+            leaf: { ...entry, content: leaf },
+            index: pages.length,
+          });
+        }
       }
     }
   }
@@ -65,13 +69,15 @@ const writePdf = async (shape, name, { lineWidth = 0.096 } = {}) => {
   let index = 0;
   for (const entry of ensurePages(shape.toKeptGeometry())) {
     const { size } = entry.plan.page;
-    for (let leaf of getLeafs(entry.content)) {
-      const pdf = await toPdf$1(leaf, { lineWidth, size });
-      await writeFile(
-        { doSerialize: false },
-        `output/${name}_${index}.pdf`,
-        pdf
-      );
+    for (const content of entry.content) {
+      for (let leaf of getLeafs(content)) {
+        const pdf = await toPdf$1(leaf, { lineWidth, size });
+        await writeFile(
+          { doSerialize: false },
+          `output/${name}_${index}.pdf`,
+          pdf
+        );
+      }
     }
   }
 };

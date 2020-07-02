@@ -1,9 +1,9 @@
-import { deleteFile } from './deleteFile';
-import { readFile } from './readFile';
-import { setupFilesystem } from './filesystem';
+import { deleteFile } from './deleteFile.js';
+import { readFile } from './readFile.js';
+import { setupFilesystem } from './filesystem.js';
 import test from 'ava';
-import { watchFileDeletion } from './files';
-import { writeFile } from './writeFile';
+import { watchFileDeletion } from './files.js';
+import { writeFile } from './writeFile.js';
 
 test('Utf8 read', async (t) => {
   setupFilesystem({ fileBase: 'tmp' });

@@ -1,9 +1,9 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getPaths = (geometry) => {
   const pathsets = [];
   eachItem(geometry, (item) => {
-    if (item.paths) {
+    if (item.type === 'paths') {
       pathsets.push(item);
     }
   });

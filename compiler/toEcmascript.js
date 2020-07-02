@@ -1,8 +1,8 @@
-import { generate } from 'astring';
+import { generate } from './astring.js';
 import hash from 'object-hash';
-import { parse } from 'acorn';
+import { parse } from 'acorn/dist/acorn.mjs';
 import { read } from '@jsxcad/sys';
-import { recursive as walk } from 'acorn-walk';
+import { recursive } from 'acorn-walk/dist/walk.mjs';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -57,7 +57,7 @@ export const toEcmascript = async (script, options = {}) => {
     };
 
     // walk(declarator, undefined, { CallExpression, Identifier });
-    walk(declarator, undefined, { Identifier });
+    recursive(declarator, undefined, { Identifier });
 
     const dependencyShas = dependencies.map(fromIdToSha);
 

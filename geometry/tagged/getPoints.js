@@ -1,9 +1,9 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getPoints = (geometry) => {
   const pointsets = [];
   eachItem(geometry, (item) => {
-    if (item.points) {
+    if (item.type === 'points') {
       pointsets.push(item);
     }
   });

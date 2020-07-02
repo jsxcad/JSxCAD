@@ -1,5 +1,5 @@
-import { canonicalize } from './canonicalize';
-import { fromAngleDegrees } from './fromAngleDegrees';
+import { canonicalize } from './canonicalize.js';
+import { fromAngleDegrees } from './fromAngleDegrees.js';
 import test from 'ava';
 
 test('vec2: fromAngleDegrees() should return a new vec2 with correct values', (t) => {

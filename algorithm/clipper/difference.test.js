@@ -2,7 +2,7 @@ import { canonicalize, transform } from '@jsxcad/geometry-paths';
 
 import { boot } from '@jsxcad/sys';
 import { degToRad } from '@jsxcad/math-utils';
-import { difference } from './difference';
+import { difference } from './difference.js';
 import { fromZRotation } from '@jsxcad/math-mat4';
 import test from 'ava';
 

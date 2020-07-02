@@ -16,12 +16,13 @@ export const skew = (shape, factor, { resolution = 1 } = {}) => {
     const shiftAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const shift = ([x, y, z]) => [x + shiftAt(z), y + shiftAt(z), z];
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), shift, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const skewMethod = function (...args) {

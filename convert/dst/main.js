@@ -1,3 +1,1 @@
-import { fromDst } from './fromDst';
-
-export { fromDst };
+export { fromDst } from './fromDst.js';

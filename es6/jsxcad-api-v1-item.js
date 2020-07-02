@@ -40,7 +40,12 @@ const Item = (designator) => {
 // Turns the current shape into an item.
 const itemMethod = function (id) {
   const shape = Shape.fromGeometry(
-    toKeptGeometry(rewriteTags([`item/${id}`], [], { item: this.toGeometry() }))
+    toKeptGeometry(
+      rewriteTags([`item/${id}`], [], {
+        type: 'item',
+        content: [this.toGeometry()],
+      })
+    )
   ).with(Connector('center'));
   // Register the designator for re-use.
   registerDesignator(
@@ -52,9 +57,6 @@ const itemMethod = function (id) {
 
 Shape.prototype.Item = itemMethod;
 Shape.prototype.toItem = itemMethod;
-
-Item.signature = 'Item(shape:Shape, id:string) -> Shape';
-itemMethod.signature = 'Shape -> toItem(id:string) -> Shape';
 
 /**
  *

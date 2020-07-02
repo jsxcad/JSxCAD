@@ -1,5 +1,5 @@
 import test from 'ava';
-import { toPoints } from './toPoints';
+import { toPoints } from './toPoints.js';
 
 test('Exercise toPoints', (t) => {
   t.deepEqual(

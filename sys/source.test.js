@@ -1,4 +1,4 @@
-import { addSource, getSources } from './source';
+import { addSource, getSources } from './source.js';
 
 import test from 'ava';
 

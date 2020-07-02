@@ -1,9 +1,9 @@
-import { fromPoints } from './fromPoints';
+import { fromPoints } from './fromPoints.js';
 import { fromValues as fromValuesAVec3 } from '@jsxcad/math-vec3';
 import { fromZRotation } from '@jsxcad/math-mat4';
-import { measureBoundingSphere } from './measureBoundingSphere';
+import { measureBoundingSphere } from './measureBoundingSphere.js';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 const empty = [];
 const triangle = fromPoints([

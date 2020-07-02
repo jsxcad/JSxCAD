@@ -1,4 +1,2 @@
-import { fromStl } from './fromStl';
-import { toStl } from './toStl';
-
-export { fromStl, toStl };
+export { fromStl } from './fromStl.js';
+export { toStl } from './toStl.js';

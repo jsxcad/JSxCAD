@@ -1,4 +1,4 @@
-import readDst from './readDst';
+import readDst from './readDst.js';
 
 const api = { readDst };
 export { readDst };

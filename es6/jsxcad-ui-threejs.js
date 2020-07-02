@@ -53940,7 +53940,7 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
 };
 
 const GEOMETRY_LAYER = 0;
-const PLAN_LAYER = 1;
+// const PLAN_LAYER = 1;
 
 const buildMeshes = async ({
   datasets,
@@ -53953,138 +53953,142 @@ const buildMeshes = async ({
     return;
   }
   const { tags } = threejsGeometry;
-  if (threejsGeometry.assembly) {
-    for (const subGeometry of threejsGeometry.assembly) {
+  switch (threejsGeometry.type) {
+    case 'assembly':
+    case 'item':
+    case 'plan':
+      break;
+    case 'paths': {
+      const paths = threejsGeometry.threejsPaths;
+      const dataset = {};
+      const geometry = new BufferGeometry();
+      const material = new LineBasicMaterial({
+        color: 0xffffff,
+        vertexColors: VertexColors,
+      });
+      const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
+      const colors = [];
+      const positions = [];
+      const index = [];
+      for (const path of paths) {
+        const entry = { start: Math.floor(positions.length / 3), length: 0 };
+        let last = path.length - 1;
+        for (let nth = 0; nth < path.length; last = nth, nth += 1) {
+          const start = path[last];
+          const end = path[nth];
+          if (start === null || end === null) continue;
+          const [aX = 0, aY = 0, aZ = 0] = start;
+          const [bX = 0, bY = 0, bZ = 0] = end;
+          colors.push(color.r, color.g, color.b, color.r, color.g, color.b);
+          positions.push(aX, aY, aZ, bX, bY, bZ);
+          entry.length += 2;
+        }
+        if (entry.length > 0) {
+          index.push(entry);
+        }
+      }
+      geometry.setAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+      dataset.mesh = new LineSegments(geometry, material);
+      dataset.mesh.layers.set(layer);
+      dataset.name = toName(threejsGeometry);
+      scene.add(dataset.mesh);
+      datasets.push(dataset);
+      if (render && tags.includes('display/trace')) {
+        let current = 0;
+        let extent = 0;
+        const animate = () => {
+          if (dataset.mesh) {
+            const geometry = dataset.mesh.geometry;
+            // geometry.setDrawRange(index[current].start, index[current].length);
+            geometry.setDrawRange(0, (extent += index[current].length));
+            geometry.attributes.position.needsUpdate = true;
+            render();
+            current += 1;
+            if (current >= index.length) {
+              current = 0;
+              extent = 0;
+            }
+            setTimeout(animate, 100);
+          }
+        };
+        animate();
+      }
+      break;
+    }
+    case 'points': {
+      const points = threejsGeometry.threejsPoints;
+      const dataset = {};
+      const geometry = new Geometry();
+      const material = new PointsMaterial({
+        color: setColor(tags, {}, [0, 0, 0]).color,
+        size: 0.5,
+      });
+      for (const [aX = 0, aY = 0, aZ = 0] of points) {
+        // geometry.colors.push(color, color);
+        geometry.vertices.push(new Vector3(aX, aY, aZ));
+      }
+      dataset.mesh = new Points(geometry, material);
+      dataset.mesh.layers.set(layer);
+      dataset.name = toName(threejsGeometry);
+      scene.add(dataset.mesh);
+      datasets.push(dataset);
+      break;
+    }
+    case 'solid': {
+      const { positions, normals } = threejsGeometry.threejsSolid;
+      const dataset = {};
+      const geometry = new BufferGeometry();
+      geometry.addAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      applyBoxUV(geometry);
+      const material = await buildMeshMaterial(tags);
+      dataset.mesh = new Mesh(geometry, material);
+      dataset.mesh.layers.set(layer);
+      dataset.name = toName(threejsGeometry);
+      scene.add(dataset.mesh);
+      datasets.push(dataset);
+      break;
+    }
+    case 'z0Surface':
+    case 'surface': {
+      const { positions, normals } = threejsGeometry.threejsSurface;
+      const dataset = {};
+      const geometry = new BufferGeometry();
+      geometry.addAttribute(
+        'position',
+        new Float32BufferAttribute(positions, 3)
+      );
+      geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
+      applyBoxUV(geometry);
+      const material = await buildMeshMaterial(tags);
+      dataset.mesh = new Mesh(geometry, material);
+      dataset.mesh.layers.set(layer);
+      dataset.name = toName(threejsGeometry);
+      scene.add(dataset.mesh);
+      datasets.push(dataset);
+      break;
+    }
+    default:
+      throw Error(`Unexpected geometry: ${threejsGeometry.type}`);
+  }
+
+  if (threejsGeometry.content) {
+    for (const content of threejsGeometry.content) {
       await buildMeshes({
         datasets,
-        threejsGeometry: subGeometry,
+        threejsGeometry: content,
         scene,
         layer,
         render,
       });
     }
-  } else if (threejsGeometry.item) {
-    await buildMeshes({
-      datasets,
-      threejsGeometry: threejsGeometry.item,
-      scene,
-      render,
-    });
-  } else if (threejsGeometry.threejsPaths) {
-    const paths = threejsGeometry.threejsPaths;
-    const dataset = {};
-    const geometry = new BufferGeometry();
-    const material = new LineBasicMaterial({
-      color: 0xffffff,
-      vertexColors: VertexColors,
-    });
-    const color = new Color$1(setColor(tags, {}, [0, 0, 0]).color);
-    const colors = [];
-    const positions = [];
-    const index = [];
-    for (const path of paths) {
-      const entry = { start: Math.floor(positions.length / 3), length: 0 };
-      let last = path.length - 1;
-      for (let nth = 0; nth < path.length; last = nth, nth += 1) {
-        const start = path[last];
-        const end = path[nth];
-        if (start === null || end === null) continue;
-        const [aX = 0, aY = 0, aZ = 0] = start;
-        const [bX = 0, bY = 0, bZ = 0] = end;
-        colors.push(color.r, color.g, color.b, color.r, color.g, color.b);
-        positions.push(aX, aY, aZ, bX, bY, bZ);
-        entry.length += 2;
-      }
-      if (entry.length > 0) {
-        index.push(entry);
-      }
-    }
-    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
-    // geometry.setDrawRange(index[0].start, index[0].length);
-    dataset.mesh = new LineSegments(geometry, material);
-    dataset.mesh.layers.set(layer);
-    dataset.name = toName(threejsGeometry);
-    scene.add(dataset.mesh);
-    datasets.push(dataset);
-    if (render && tags.includes('display/trace')) {
-      let current = 0;
-      let extent = 0;
-      const animate = () => {
-        if (dataset.mesh) {
-          const geometry = dataset.mesh.geometry;
-          // geometry.setDrawRange(index[current].start, index[current].length);
-          geometry.setDrawRange(0, (extent += index[current].length));
-          geometry.attributes.position.needsUpdate = true;
-          render();
-          current += 1;
-          if (current >= index.length) {
-            current = 0;
-            extent = 0;
-          }
-          setTimeout(animate, 100);
-        }
-      };
-      animate();
-    }
-  } else if (threejsGeometry.threejsPoints) {
-    const points = threejsGeometry.threejsPoints;
-    const dataset = {};
-    const geometry = new Geometry();
-    const material = new PointsMaterial({
-      color: setColor(tags, {}, [0, 0, 0]).color,
-      size: 0.5,
-    });
-    for (const [aX = 0, aY = 0, aZ = 0] of points) {
-      // geometry.colors.push(color, color);
-      geometry.vertices.push(new Vector3(aX, aY, aZ));
-    }
-    dataset.mesh = new Points(geometry, material);
-    dataset.mesh.layers.set(layer);
-    dataset.name = toName(threejsGeometry);
-    scene.add(dataset.mesh);
-    datasets.push(dataset);
-  } else if (threejsGeometry.threejsSolid) {
-    const { positions, normals } = threejsGeometry.threejsSolid;
-    const dataset = {};
-    const geometry = new BufferGeometry();
-    geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
-    geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
-    applyBoxUV(geometry);
-    const material = await buildMeshMaterial(tags);
-    dataset.mesh = new Mesh(geometry, material);
-    dataset.mesh.layers.set(layer);
-    dataset.name = toName(threejsGeometry);
-    scene.add(dataset.mesh);
-    datasets.push(dataset);
-  } else if (threejsGeometry.threejsSurface) {
-    const { positions, normals } = threejsGeometry.threejsSurface;
-    const dataset = {};
-    const geometry = new BufferGeometry();
-    geometry.addAttribute('position', new Float32BufferAttribute(positions, 3));
-    geometry.addAttribute('normal', new Float32BufferAttribute(normals, 3));
-    applyBoxUV(geometry);
-    const material = await buildMeshMaterial(tags);
-    dataset.mesh = new Mesh(geometry, material);
-    dataset.mesh.layers.set(layer);
-    dataset.name = toName(threejsGeometry);
-    scene.add(dataset.mesh);
-    datasets.push(dataset);
-  } else if (threejsGeometry.threejsPlan) {
-    await buildMeshes({
-      datasets,
-      threejsGeometry: threejsGeometry.threejsVisualization,
-      scene,
-      layer: PLAN_LAYER,
-      render,
-    });
-    await buildMeshes({
-      datasets,
-      threejsGeometry: threejsGeometry.threejsContent,
-      scene,
-      layer: GEOMETRY_LAYER,
-      render,
-    });
   }
 };
 
@@ -54182,77 +54186,99 @@ const toThreejsGeometry = (geometry, supertags) => {
   }
   if (geometry.isThreejsGeometry) {
     return geometry;
-  } else if (geometry.assembly) {
-    return {
-      assembly: geometry.assembly.map((item) => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.disjointAssembly) {
-    const items = geometry.disjointAssembly;
-    return {
-      assembly: items.map((item) => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.layers) {
-    return {
-      assembly: geometry.layers.map((item) => toThreejsGeometry(item, tags)),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.item) {
-    return {
-      item: toThreejsGeometry(geometry.item, tags),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.paths) {
-    return {
-      threejsPaths: geometry.paths,
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.plan) {
-    return {
-      threejsPlan: geometry.plan,
-      threejsMarks: geometry.marks,
-      threejsVisualization: toThreejsGeometry(geometry.visualization),
-      threejsContent: toThreejsGeometry(geometry.content),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.points) {
-    return {
-      threejsPoints: pointsToThreejsPoints(geometry.points),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.solid) {
-    return {
-      threejsSolid: solidToThreejsSolid(geometry.solid),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.surface) {
-    return {
-      threejsSurface: surfaceToThreejsSurface(geometry.surface),
-      tags,
-      isThreejsGeometry: true,
-    };
-  } else if (geometry.z0Surface) {
-    return {
-      threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
-      tags,
-      isThreejsGeometry: true,
-    };
+  }
+  switch (geometry.type) {
+    case 'assembly':
+      return {
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'disjointAssembly':
+      return {
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'layers':
+      return {
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'item':
+      return {
+        type: 'item',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'paths':
+      return {
+        type: 'paths',
+        threejsPaths: geometry.paths,
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'plan':
+      return {
+        type: 'plan',
+        threejsPlan: geometry.plan,
+        threejsMarks: geometry.marks,
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'points':
+      return {
+        type: 'points',
+        threejsPoints: pointsToThreejsPoints(geometry.points),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'solid':
+      return {
+        type: 'solid',
+        threejsSolid: solidToThreejsSolid(geometry.solid),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'surface':
+      return {
+        type: 'surface',
+        threejsSurface: surfaceToThreejsSurface(geometry.surface),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'z0Surface':
+      return {
+        type: 'surface',
+        threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
+        tags,
+        isThreejsGeometry: true,
+      };
+    default:
+      throw Error(`Unexpected geometry: ${geometry.type}`);
   }
 };
 
 /* global ResizeObserver */
 
 const GEOMETRY_LAYER$1 = 0;
-const PLAN_LAYER$1 = 1;
+const PLAN_LAYER = 1;
 
 const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   let datasets = [];
@@ -54263,7 +54289,7 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   geometryLayers.set(GEOMETRY_LAYER$1);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER$1);
+  planLayers.set(PLAN_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -54279,7 +54305,7 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     camera.layers.set(GEOMETRY_LAYER$1);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER$1);
+    camera.layers.set(PLAN_LAYER);
     renderer.render(scene, camera);
   };
 
@@ -54331,7 +54357,7 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
 };
 
 const GEOMETRY_LAYER$2 = 0;
-const PLAN_LAYER$2 = 1;
+const PLAN_LAYER$1 = 1;
 
 let locked = false;
 const pending = [];
@@ -54368,7 +54394,7 @@ const staticDisplay = async (
   geometryLayers.set(GEOMETRY_LAYER$2);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER$2);
+  planLayers.set(PLAN_LAYER$1);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -54384,7 +54410,7 @@ const staticDisplay = async (
     camera.layers.set(GEOMETRY_LAYER$2);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER$2);
+    camera.layers.set(PLAN_LAYER$1);
     renderer.render(scene, camera);
   };
 

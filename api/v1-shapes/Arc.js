@@ -1,4 +1,4 @@
-import Spiral from './Spiral';
+import Spiral from './Spiral.js';
 
 export const ofRadius = (radius, angle = 360, { start = 0, sides = 32 } = {}) =>
   Spiral((a) => [[radius]], {

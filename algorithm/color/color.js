@@ -1,5 +1,5 @@
-import colors from './colors';
-import { proximity } from './proximity';
+import colors from './colors.js';
+import { proximity } from './proximity.js';
 
 const toEntryFromRgbInt = (rgbInt) => {
   const rgb = toArrayFromRgbInt(rgbInt);

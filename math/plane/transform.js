@@ -6,8 +6,8 @@ import {
   transform as transformVec3,
 } from '@jsxcad/math-vec3';
 
-import { flip } from './flip';
-import { fromPoints } from './fromPoints';
+import { flip } from './flip.js';
+import { fromPoints } from './fromPoints.js';
 import { isMirroring } from '@jsxcad/math-mat4';
 
 /**

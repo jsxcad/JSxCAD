@@ -18,12 +18,13 @@ const arch = (shape, factor, { resolution = 1 } = {}) => {
     const liftAt = (z) => factor * Math.sin(((z - minZ) / height) * Math.PI);
     const lift = ([x, y, z]) => [x + liftAt(z), y, z];
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), lift, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'solid', content: assembly });
 };
 
 const archMethod = function (...args) {
@@ -3657,7 +3658,7 @@ function shuffleSeed(seed) {
 }
 });
 
-unwrapExports(lib);
+var OpenSimplexNoise = unwrapExports(lib);
 var lib_1 = lib.makeNoise2D;
 var lib_2 = lib.makeNoise3D;
 var lib_3 = lib.makeNoise4D;
@@ -3673,9 +3674,9 @@ const crumple = (
 ) => {
   const scale = amount / 2;
 
-  const noiseX = lib_2(seed + 0);
-  const noiseY = lib_2(seed + 1);
-  const noiseZ = lib_2(seed + 2);
+  const noiseX = OpenSimplexNoise.makeNoise3D(seed + 0);
+  const noiseY = OpenSimplexNoise.makeNoise3D(seed + 1);
+  const noiseZ = OpenSimplexNoise.makeNoise3D(seed + 2);
 
   const perturb = (point) => [
     point[X] + noiseX(...point) * scale,
@@ -3687,12 +3688,13 @@ const crumple = (
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), perturb, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const crumpleMethod = function (...args) {
@@ -3712,12 +3714,13 @@ const skew = (shape, factor, { resolution = 1 } = {}) => {
     const shiftAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const shift = ([x, y, z]) => [x + shiftAt(z), y + shiftAt(z), z];
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), shift, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const skewMethod = function (...args) {
@@ -3740,12 +3743,13 @@ const taper = (shape, factor, { resolution = 1 } = {}) => {
     const widthAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), squeeze, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const taperMethod = function (...args) {
@@ -3763,12 +3767,13 @@ const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const radians = (angle / height) * (Math.PI / 180);
     const rotate = (point) => rotateZ(point, radians * (point[Z$4] - min[Z$4]));
     assembly.push({
+      type: 'solid',
       solid: deform(makeWatertight(solid), rotate, min, max, resolution),
       tags,
     });
   }
 
-  return Shape.fromGeometry({ assembly });
+  return Shape.fromGeometry({ type: 'assembly', content: assembly });
 };
 
 const twistMethod = function (...args) {

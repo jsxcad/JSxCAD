@@ -1,8 +1,8 @@
-import { ClipType, PolyFillType, clipper } from './clipper-lib';
-import { fromPaths, fromSurfaceAsClosedPaths, toPaths } from './convert';
+import { ClipType, PolyFillType, clipper } from './clipper-lib.js';
+import { fromPaths, fromSurfaceAsClosedPaths, toPaths } from './convert.js';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
-import { doesNotOverlapOrAbut } from './doesNotOverlap';
+import { doesNotOverlapOrAbut } from './doesNotOverlap.js';
 
 /**
  * Produces a surface that is the intersection of all provided surfaces.

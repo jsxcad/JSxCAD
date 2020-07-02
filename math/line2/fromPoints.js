@@ -1,6 +1,6 @@
 import { dot, normal, normalize, subtract } from '@jsxcad/math-vec2';
 
-import { fromValues } from './fromValues';
+import { fromValues } from './fromValues.js';
 
 /**
  * Create a new 2D line that passes through the given points

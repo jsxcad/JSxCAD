@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { getSolids } from '@jsxcad/geometry-tagged';
 
 export const solids = (shape, xform = (_) => _) => {

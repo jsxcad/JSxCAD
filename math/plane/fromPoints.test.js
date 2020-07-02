@@ -1,4 +1,4 @@
-import { fromPoints } from './fromPoints';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
 
 test('plane: fromPoints() should return a new plane with correct values', (t) => {

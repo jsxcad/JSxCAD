@@ -9,14 +9,14 @@ import {
   getFilesystem,
   qualifyPath,
   setupFilesystem,
-} from './filesystem';
-import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+} from './filesystem.js';
+import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
-import { db } from './db';
-import { getFile } from './files';
-import { log } from './log';
+import { db } from './db.js';
+import { getFile } from './files.js';
+import { log } from './log.js';
 import nodeFetch from 'node-fetch';
-import { writeFile } from './writeFile';
+import { writeFile } from './writeFile.js';
 
 const { promises } = fs;
 const { deserialize } = v8;

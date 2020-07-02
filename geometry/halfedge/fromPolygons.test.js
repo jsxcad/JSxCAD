@@ -1,7 +1,7 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import fromPolygons from './fromPolygons';
+import fromPolygons from './fromPolygons.js';
 import test from 'ava';
-import toPolygons from './toPolygons';
+import toPolygons from './toPolygons.js';
 
 test('Cube mesh', (t) => {
   const normalize = createNormalize3();

@@ -5,6 +5,7 @@ const X = 0;
 const Y = 1;
 const Z = 2;
 
+// FIX: Use createNormalize3
 export const createPointNormalizer = () => {
   const map = new Map();
   const normalize = (coordinate) => {

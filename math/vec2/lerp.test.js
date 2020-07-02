@@ -1,4 +1,4 @@
-import { lerp } from './lerp';
+import { lerp } from './lerp.js';
 import test from 'ava';
 
 test('vec2: lerp() called with two paramerters should return a vec2 with correct values', (t) => {

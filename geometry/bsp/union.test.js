@@ -3,7 +3,7 @@ import { canonicalize, fromPolygons, transform } from '@jsxcad/geometry-solid';
 import { boot } from '@jsxcad/sys';
 import { fromTranslation } from '@jsxcad/math-mat4';
 import test from 'ava';
-import { union } from './union';
+import { union } from './union.js';
 
 // Producing duplicate paths within surfaces.
 

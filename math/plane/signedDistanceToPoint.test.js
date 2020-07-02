@@ -1,4 +1,4 @@
-import { signedDistanceToPoint } from './signedDistanceToPoint';
+import { signedDistanceToPoint } from './signedDistanceToPoint.js';
 import test from 'ava';
 
 test('plane: signedDistanceToPoint() should return correct values', (t) => {

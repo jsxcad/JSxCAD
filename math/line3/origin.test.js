@@ -1,6 +1,6 @@
-import { create } from './create';
-import { fromPoints } from './fromPoints';
-import { origin } from './origin';
+import { create } from './create.js';
+import { fromPoints } from './fromPoints.js';
+import { origin } from './origin.js';
 import test from 'ava';
 
 test('line3: origin() should return proper origins', (t) => {

@@ -4,7 +4,7 @@ import {
   OK,
   eq,
   request as githubRequest,
-} from './githubRequest';
+} from './githubRequest.js';
 
 import { toByteArray as toByteArrayFromBase64 } from 'base64-js';
 import { write } from '@jsxcad/sys';

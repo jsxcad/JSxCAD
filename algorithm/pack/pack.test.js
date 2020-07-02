@@ -1,12 +1,13 @@
 import { canonicalize } from '@jsxcad/geometry-tagged';
 
-import pack from './pack';
+import pack from './pack.js';
 import test from 'ava';
 
 test('Partial fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [110, 110], itemMargin: 1, pageMargin: 0 },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -16,6 +17,7 @@ test('Partial fit', (t) => {
       tags: ['one'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -25,6 +27,7 @@ test('Partial fit', (t) => {
       tags: ['two'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -36,8 +39,10 @@ test('Partial fit', (t) => {
   );
   t.deepEqual(packed.map(canonicalize), [
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [-54, -54, 0],
@@ -49,8 +54,10 @@ test('Partial fit', (t) => {
       ],
     },
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [-2, -54, 0],
@@ -64,6 +71,7 @@ test('Partial fit', (t) => {
   ]);
   t.deepEqual(unpacked.map(canonicalize), [
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -79,6 +87,7 @@ test('Partial rotated fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [60, 110], itemMargin: 1, pageMargin: 0 },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -88,6 +97,7 @@ test('Partial rotated fit', (t) => {
       tags: ['one'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -97,6 +107,7 @@ test('Partial rotated fit', (t) => {
       tags: ['two'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -108,8 +119,10 @@ test('Partial rotated fit', (t) => {
   );
   t.deepEqual(packed.map(canonicalize), [
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [-29, -54, 0],
@@ -123,6 +136,7 @@ test('Partial rotated fit', (t) => {
   ]);
   t.deepEqual(unpacked.map(canonicalize), [
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -132,6 +146,7 @@ test('Partial rotated fit', (t) => {
       tags: ['three'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -147,6 +162,7 @@ test('Complete fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [200, 200], itemMargin: 1, pageMargin: 0 },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -156,6 +172,7 @@ test('Complete fit', (t) => {
       tags: ['one'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -165,6 +182,7 @@ test('Complete fit', (t) => {
       tags: ['two'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -176,8 +194,10 @@ test('Complete fit', (t) => {
   );
   t.deepEqual(packed.map(canonicalize), [
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [-99, -99, 0],
@@ -189,8 +209,10 @@ test('Complete fit', (t) => {
       ],
     },
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [-47, -99, 0],
@@ -202,8 +224,10 @@ test('Complete fit', (t) => {
       ],
     },
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [-99, 3, 0],
@@ -222,6 +246,7 @@ test('Growing fit', (t) => {
   const [packed, unpacked] = pack(
     {},
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -231,6 +256,7 @@ test('Growing fit', (t) => {
       tags: ['one'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -240,6 +266,7 @@ test('Growing fit', (t) => {
       tags: ['two'],
     },
     {
+      type: 'paths',
       paths: [
         [
           [50, 50, 0],
@@ -251,8 +278,10 @@ test('Growing fit', (t) => {
   );
   t.deepEqual(packed.map(canonicalize), [
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [6, 6, 0],
@@ -264,8 +293,10 @@ test('Growing fit', (t) => {
       ],
     },
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [58, 6, 0],
@@ -277,8 +308,10 @@ test('Growing fit', (t) => {
       ],
     },
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'paths',
           paths: [
             [
               [6, 108, 0],
@@ -300,6 +333,7 @@ test('Bad fit', (t) => {
   const [packed, unpacked] = pack(
     { size: [30, 120] },
     {
+      type: 'surface',
       surface: [
         [
           [5.000000000000001, 20, 0],
@@ -310,6 +344,7 @@ test('Bad fit', (t) => {
       ],
     },
     {
+      type: 'surface',
       surface: [
         [
           [5.000000000000001, 20, 0],
@@ -322,8 +357,10 @@ test('Bad fit', (t) => {
   );
   t.deepEqual(packed.map(canonicalize), [
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'surface',
           surface: [
             [
               [1, -14, 0],
@@ -336,8 +373,10 @@ test('Bad fit', (t) => {
       ],
     },
     {
-      disjointAssembly: [
+      type: 'disjointAssembly',
+      content: [
         {
+          type: 'surface',
           surface: [
             [
               [1, 28, 0],

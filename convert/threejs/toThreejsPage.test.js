@@ -9,7 +9,7 @@ import fs from 'fs';
 import { scale as scalePaths } from '@jsxcad/geometry-paths';
 import { scale as scaleSurface } from '@jsxcad/geometry-surface';
 import test from 'ava';
-import { toThreejsPage } from './toThreejsPage';
+import { toThreejsPage } from './toThreejsPage.js';
 
 const { readFile, writeFile } = fs.promises;
 
@@ -17,16 +17,20 @@ test('No-eval geodesic sphere', async (t) => {
   const html = await toThreejsPage(
     { includeEvaluator: false },
     {
-      assembly: [
+      type: 'assembly',
+      content: [
         {
+          type: 'paths',
           paths: scalePaths([3, 3, 3], [unitRegularTrianglePolygon]),
           tags: ['paths'],
         },
         {
+          type: 'solid',
           solid: fromPolygons({}, unitGeodesicSphere20Polygons),
           tags: ['solid'],
         },
         {
+          type: 'z0Surface',
           z0Surface: scaleSurface([2, 2, 2], [unitSquarePolygon]),
           tags: ['surface'],
         },
@@ -52,7 +56,7 @@ const main = async () => {
  }
 `,
     },
-    { assembly: [] }
+    { type: 'assembly', content: [] }
   );
   await writeFile('toThreejsPage.test.eval.html', html, { encoding: 'utf8' });
   t.is(

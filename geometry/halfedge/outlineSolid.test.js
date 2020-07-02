@@ -1,5 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import outlineSolid from './outlineSolid';
+import outlineSolid from './outlineSolid.js';
 import test from 'ava';
 
 false &&

@@ -1,7 +1,7 @@
 import { canonicalize, toKeptGeometry } from '@jsxcad/geometry-tagged';
 
 import { boot } from '@jsxcad/sys';
-import { buildRegularPrism } from './buildRegularPrism';
+import { buildRegularPrism } from './buildRegularPrism.js';
 import test from 'ava';
 
 test.beforeEach(async (t) => {
@@ -11,8 +11,10 @@ test.beforeEach(async (t) => {
 test('A simple triangular prism', (t) => {
   const geometry = toKeptGeometry(buildRegularPrism(3));
   t.deepEqual(canonicalize(geometry), {
-    disjointAssembly: [
+    type: 'disjointAssembly',
+    content: [
       {
+        type: 'solid',
         solid: [
           [
             [

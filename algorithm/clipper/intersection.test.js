@@ -2,7 +2,7 @@ import { canonicalize, transform } from '@jsxcad/geometry-paths';
 
 import { boot } from '@jsxcad/sys';
 import { fromTranslation } from '@jsxcad/math-mat4';
-import { intersection } from './intersection';
+import { intersection } from './intersection.js';
 import test from 'ava';
 
 const rectangle = [

@@ -1,11 +1,11 @@
-import clean from './clean';
+import clean from './clean.js';
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import fromSurface from './fromSurface';
-import { junctionSelector } from './junction';
-import merge from './merge';
-import split from './split';
+import fromSurface from './fromSurface.js';
+import { junctionSelector } from './junction.js';
+import merge from './merge.js';
+import split from './split.js';
 import test from 'ava';
-import toPolygons from './toPolygons';
+import toPolygons from './toPolygons.js';
 
 const solid = [
   [

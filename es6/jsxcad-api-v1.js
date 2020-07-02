@@ -23,8 +23,6 @@ import { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon
 export { Arc, Assembly, Circle, Cone, Cube, Cylinder, Difference, Empty, Hexagon, Icosahedron, Intersection, Layers, Line, Path, Point, Points, Polygon, Polyhedron, Prism, Sphere, Spiral, Square, Tetrahedron, Torus, Triangle, Union, Void, Wave } from './jsxcad-api-v1-shapes.js';
 import { Item } from './jsxcad-api-v1-item.js';
 export { Item } from './jsxcad-api-v1-item.js';
-import { WoodScrew } from './jsxcad-api-v1-items.js';
-export { WoodScrew } from './jsxcad-api-v1-items.js';
 import { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 export { Noise, Random, acos, cos, ease, max, min, numbers, sin, sqrt, vec } from './jsxcad-api-v1-math.js';
 import { foot, inch, mm, mil, cm, m, thou, yard } from './jsxcad-api-v1-units.js';
@@ -227,7 +225,6 @@ var api = /*#__PURE__*/Object.freeze({
   Void: Void,
   Wave: Wave,
   Item: Item,
-  WoodScrew: WoodScrew,
   Noise: Noise,
   Random: Random,
   acos: acos,
@@ -302,13 +299,9 @@ registerDynamicModule(module('dxf'), './jsxcad-api-v1-dxf.js');
 registerDynamicModule(module('extrude'), './jsxcad-api-v1-extrude.js');
 registerDynamicModule(module('font'), './jsxcad-api-v1-font.js');
 registerDynamicModule(module('gcode'), './jsxcad-api-v1-gcode.js');
-registerDynamicModule(module('gear'), './jsxcad-api-v1-gear.js');
 registerDynamicModule(module('item'), './jsxcad-api-v1-item.js');
-registerDynamicModule(module('jscad'), './jsxcad-api-v1-jscad.js');
 registerDynamicModule(module('layout'), './jsxcad-api-v1-layout.js');
-registerDynamicModule(module('lego'), './jsxcad-api-v1-lego.js');
 registerDynamicModule(module('math'), './jsxcad-api-v1-math.js');
-registerDynamicModule(module('motor'), './jsxcad-api-v1-motor.js');
 registerDynamicModule(module('pdf'), './jsxcad-api-v1-pdf.js');
 registerDynamicModule(module('plan'), './jsxcad-api-v1-plan.js');
 registerDynamicModule(module('plans'), './jsxcad-api-v1-plans.js');
@@ -319,7 +312,6 @@ registerDynamicModule(module('shapes'), './jsxcad-api-v1-shapes.js');
 registerDynamicModule(module('shell'), './jsxcad-api-v1-shell.js');
 registerDynamicModule(module('stl'), './jsxcad-api-v1-stl.js');
 registerDynamicModule(module('svg'), './jsxcad-api-v1-svg.js');
-registerDynamicModule(module('thread'), './jsxcad-api-v1-thread.js');
 registerDynamicModule(module('threejs'), './jsxcad-api-v1-threejs.js');
 registerDynamicModule(module('units'), './jsxcad-api-v1-units.js');
 

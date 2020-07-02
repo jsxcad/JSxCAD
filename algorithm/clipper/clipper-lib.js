@@ -1,9 +1,14 @@
-import {
-  NativeClipperLibRequestedFormat,
-  loadNativeClipperLibInstanceAsync,
-} from './js-angusj-clipperjs-web/index.js';
+import mediator from './mediator.js';
 
 import { onBoot } from '@jsxcad/sys';
+
+const {
+  ClipType,
+  NativeClipperLibRequestedFormat,
+  PolyFillType,
+  PolyTree,
+  loadNativeClipperLibInstanceAsync,
+} = mediator;
 
 export let clipper;
 
@@ -24,10 +29,6 @@ export function IntPoint(x, y) {
   this.y = y;
 }
 
-export {
-  ClipType,
-  PolyFillType,
-  PolyTree,
-} from './js-angusj-clipperjs-web/index.js';
+export { ClipType, PolyFillType, PolyTree };
 
 onBoot(setup);

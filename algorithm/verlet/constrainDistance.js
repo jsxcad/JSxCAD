@@ -1,5 +1,5 @@
 import { add, scale, squaredDistance, subtract } from '@jsxcad/math-vec3';
-import { ensureParticle } from './ensureParticle';
+import { ensureParticle } from './ensureParticle.js';
 
 // Distance
 

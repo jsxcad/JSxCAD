@@ -1,5 +1,5 @@
 import test from 'ava';
-// const toXYPlaneTransforms = require('./toXYPlaneTransforms');
+// const toXYPlaneTransforms = require('./toXYPlaneTransforms.js');
 
 // FIX: Circular dependency.
 test('Basic test.', (t) => {

@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/math-vec3';
-import { create } from './create';
-import { fromPoints } from './fromPoints';
-import { reverse } from './reverse';
+import { create } from './create.js';
+import { fromPoints } from './fromPoints.js';
+import { reverse } from './reverse.js';
 import test from 'ava';
 
 test('line3: reverse() should return proper lines', (t) => {

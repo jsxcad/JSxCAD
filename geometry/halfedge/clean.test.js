@@ -1,8 +1,8 @@
-// import clean from './clean';
+// import clean from './clean.js';
 // import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-// import fromSurface from './fromSurface';
+// import fromSurface from './fromSurface.js';
 import test from 'ava';
-// import toPolygons from './toPolygons';
+// import toPolygons from './toPolygons.js';
 
 test('Null', (t) => t.true(true));
 

@@ -1,4 +1,4 @@
-import { Shape, fromGeometry, toKeptGeometry } from './Shape';
+import { Shape, fromGeometry, toKeptGeometry } from './Shape.js';
 
 import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 
@@ -56,7 +56,7 @@ import { union as unionGeometry } from '@jsxcad/geometry-tagged';
 export const union = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ assembly: [] });
+      return fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       return shapes[0];

@@ -1,4 +1,4 @@
-import { scale } from './scale';
+import { scale } from './scale.js';
 
 /**
  * Normalize a vec3

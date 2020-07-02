@@ -1,4 +1,4 @@
-import { angleRadians } from './angleRadians';
+import { angleRadians } from './angleRadians.js';
 import test from 'ava';
 
 test('vec2: angleRadians() should return correct values', (t) => {

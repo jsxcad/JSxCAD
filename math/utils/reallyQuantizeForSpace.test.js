@@ -1,4 +1,4 @@
-import { reallyQuantizeForSpace } from './reallyQuantizeForSpace';
+import { reallyQuantizeForSpace } from './reallyQuantizeForSpace.js';
 import test from 'ava';
 
 test('Quantization happens.', (t) => {

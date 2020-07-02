@@ -1,6 +1,6 @@
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
-import Pane from './Pane';
+import Pane from './Pane.js';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Row from 'react-bootstrap/Row';

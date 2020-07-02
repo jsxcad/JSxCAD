@@ -53,7 +53,10 @@ const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
 const Assembly = (...shapes) =>
-  Shape.fromGeometry({ assembly: shapes.map((shape) => shape.toGeometry()) });
+  Shape.fromGeometry({
+    type: 'assembly',
+    content: shapes.map((shape) => shape.toGeometry()),
+  });
 
 const unitPolygon = (sides = 16) =>
   Shape.fromGeometry(buildRegularPolygon(sides));
@@ -265,15 +268,6 @@ Cone.ofRadius = ofRadius$4;
 Cone.ofDiameter = ofDiameter$3;
 Cone.ofApothem = ofApothem$2;
 
-Cone.signature =
-  'Cone(radius:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofRadius.signature =
-  'Cone.ofRadius(radius:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofDiameter.signature =
-  'Cone.ofDiameter(diameter:number, height:number, { sides:number = 32 }) -> Shape';
-Cone.ofApothem.signature =
-  'Cone.ofApothem(apothem:number, height:number, { sides:number = 32 }) -> Shape';
-
 /**
  *
  * # Cube (cuboid)
@@ -365,15 +359,6 @@ Cube.ofApothem = ofApothem$3;
 Cube.ofDiameter = ofDiameter$4;
 Cube.fromCorners = fromCorners;
 
-Cube.signature = 'Cube(size:number = 1) -> Shape';
-Cube.ofSize.signature =
-  'Cube.ofSize(width:number = 1, length:number = 1, height:number = 1) -> Shape';
-Cube.ofRadius.signature = 'Cube.ofRadius(radius:number = 1) -> Shape';
-Cube.ofApothem.signature = 'Cube.ofApothem(apothem:number = 1) -> Shape';
-Cube.ofDiameter.signature = 'Cube.ofDiameter(diameter:number = 1) -> Shape';
-Cube.fromCorners.signature =
-  'Cube.fromCorners(corner1:point, corner2:point) -> Shape';
-
 const buildPrism$1 = (radius = 1, height = 1, sides = 32) =>
   Shape.fromGeometry(buildRegularPrism(sides)).scale([radius, radius, height]);
 
@@ -460,7 +445,12 @@ const Difference = (...args) => difference(...args);
 
 const Empty = (...shapes) =>
   Shape.fromGeometry({
-    disjointAssembly: [{ solid: [] }, { surface: [] }, { paths: [] }],
+    type: 'disjointAssembly',
+    content: [
+      { type: 'solid', solid: [] },
+      { type: 'surface', surface: [] },
+      { type: 'paths', paths: [] },
+    ],
   });
 
 /**
@@ -550,7 +540,10 @@ Icosahedron.ofDiameter.signature =
 const Intersection = (...args) => intersection(...args);
 
 const Layers = (...shapes) =>
-  Shape.fromGeometry({ layers: shapes.map((shape) => shape.toGeometry()) });
+  Shape.fromGeometry({
+    type: 'layers',
+    content: shapes.map((shape) => shape.toGeometry()),
+  });
 
 const fromPoints = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));

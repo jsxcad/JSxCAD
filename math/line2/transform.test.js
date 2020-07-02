@@ -1,8 +1,8 @@
-import { canonicalize } from './canonicalize';
-import { fromPoints } from './fromPoints';
-import { fromValues } from './fromValues';
+import { canonicalize } from './canonicalize.js';
+import { fromPoints } from './fromPoints.js';
+import { fromValues } from './fromValues.js';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('line2: transform() called with two paramerters should return a line2 with correct values', (t) => {
   const line1 = fromValues();

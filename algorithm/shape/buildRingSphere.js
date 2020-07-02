@@ -5,7 +5,7 @@ import {
   translate,
 } from '@jsxcad/geometry-path';
 
-import { buildRegularPolygon } from './buildRegularPolygon';
+import { buildRegularPolygon } from './buildRegularPolygon.js';
 import { cache } from '@jsxcad/cache';
 import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
@@ -49,7 +49,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  const solid = { solid: toSolidFromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
   return solid;
 };
 

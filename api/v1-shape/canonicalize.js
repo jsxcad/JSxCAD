@@ -1,4 +1,4 @@
-import Shape from './Shape';
+import Shape from './Shape.js';
 import { canonicalize as canonicalizeGeometry } from '@jsxcad/geometry-tagged';
 
 export const canonicalize = (shape) =>

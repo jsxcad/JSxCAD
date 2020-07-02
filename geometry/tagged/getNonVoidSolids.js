@@ -1,9 +1,9 @@
-import { eachNonVoidItem } from './eachNonVoidItem';
+import { eachNonVoidItem } from './eachNonVoidItem.js';
 
 export const getNonVoidSolids = (geometry) => {
   const solids = [];
   eachNonVoidItem(geometry, (item) => {
-    if (item.solid) {
+    if (item.type === 'solid') {
       solids.push(item);
     }
   });

@@ -1,5 +1,5 @@
 import Shape from '@jsxcad/api-v1-shape';
-import shell from './shell';
+import shell from './shell.js';
 
 /**
  *

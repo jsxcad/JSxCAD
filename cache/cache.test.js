@@ -1,4 +1,4 @@
-import { cache, cacheTransform, clearCache } from './cache';
+import { cache, cacheTransform, clearCache } from './cache.js';
 
 import test from 'ava';
 

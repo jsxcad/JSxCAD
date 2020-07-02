@@ -1,4 +1,4 @@
-import { identity } from './identity';
+import { identity } from './identity.js';
 import test from 'ava';
 
 test('mat4: identity() should return a mat4 with correct values', (t) => {

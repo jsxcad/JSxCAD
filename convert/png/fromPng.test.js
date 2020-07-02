@@ -1,4 +1,4 @@
-import { fromPng } from './fromPng';
+import { fromPng } from './fromPng.js';
 import fs from 'fs';
 import test from 'ava';
 

@@ -1,4 +1,4 @@
-import { distance } from './distance';
+import { distance } from './distance.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 

@@ -1,4 +1,4 @@
-import fromDxf from './fromDxf';
+import fromDxf from './fromDxf.js';
 import fs from 'fs';
 import test from 'ava';
 
@@ -10,14 +10,17 @@ test('Basic', async (t) => {
     await readFile('toDxf.test.triangle.dxf', { encoding: 'utf8' })
   );
   t.deepEqual(geometry, {
-    assembly: [
+    type: 'assembly',
+    content: [
       {
+        type: 'paths',
         paths: [
           [null, [1, 0, 0], [-0.4999999999999998, 0.8660254037844387, 0]],
         ],
         tags: ['user/dxf/handle:0', 'user/dxf/layer:0', 'color/white'],
       },
       {
+        type: 'paths',
         paths: [
           [
             null,
@@ -28,6 +31,7 @@ test('Basic', async (t) => {
         tags: ['user/dxf/handle:1', 'user/dxf/layer:0', 'color/white'],
       },
       {
+        type: 'paths',
         paths: [
           [null, [-0.5000000000000004, -0.8660254037844385, 0], [1, 0, 0]],
         ],

@@ -1,4 +1,4 @@
-import { ensureParticle } from './ensureParticle';
+import { ensureParticle } from './ensureParticle.js';
 
 // Pinning Constraint
 

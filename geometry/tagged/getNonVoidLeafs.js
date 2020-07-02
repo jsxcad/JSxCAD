@@ -1,20 +1,21 @@
-import { isNotVoid } from './isNotVoid';
-import { visit } from './visit';
+import { isNotVoid } from './isNotVoid.js';
+import { visit } from './visit.js';
 
 // Retrieve leaf geometry.
 
 export const getNonVoidLeafs = (geometry) => {
   const leafs = [];
   const op = (geometry, descend) => {
-    if (
-      geometry.assembly ||
-      geometry.disjointAssembly ||
-      geometry.layers ||
-      geometry.content
-    ) {
-      descend();
-    } else if (isNotVoid(geometry)) {
-      leafs.push(geometry);
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+      case 'layout':
+        return descend();
+      default:
+        if (isNotVoid(geometry)) {
+          leafs.push(geometry);
+        }
     }
   };
   visit(geometry, op);

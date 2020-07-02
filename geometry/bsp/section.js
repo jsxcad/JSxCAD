@@ -1,7 +1,7 @@
 import {
   removeExteriorPolygonsForSection,
   fromSolid as toBspFromSolid,
-} from './bsp';
+} from './bsp.js';
 
 import { alignVertices } from '@jsxcad/geometry-solid';
 

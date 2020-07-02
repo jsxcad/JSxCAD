@@ -1,4 +1,4 @@
-import { fromXRotation } from './fromXRotation';
+import { fromXRotation } from './fromXRotation.js';
 import { reallyQuantizeForSpace as q } from '@jsxcad/math-utils';
 import test from 'ava';
 

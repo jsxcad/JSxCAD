@@ -1,21 +1,9 @@
-import { cut, cutOpen } from './cut';
+export { cut, cutOpen } from './cut.js';
 
-import { containsPoint } from './containsPoint';
-import { deform } from './deform';
-import { difference } from './difference';
-import { fromSolid } from './bsp';
-import { intersection } from './intersection';
-import { section } from './section';
-import { union } from './union';
-
-export {
-  containsPoint,
-  cut,
-  cutOpen,
-  deform,
-  difference,
-  fromSolid,
-  intersection,
-  section,
-  union,
-};
+export { containsPoint } from './containsPoint.js';
+export { deform } from './deform.js';
+export { difference } from './difference.js';
+export { fromSolid } from './bsp.js';
+export { intersection } from './intersection.js';
+export { section } from './section.js';
+export { union } from './union.js';

@@ -5,10 +5,12 @@
   "repository": "https://github.com/jsxcad/JSxCAD",
   "main": "main.js",
   "module": "dist/main.js",
+  "type": "module",
   "scripts": {
     "depcheck": "depcheck",
     "lint": "eslint *.js",
     "lintfix": "eslint --fix *.js",
+    "prettier": "prettier --write .",
     "rollup": "rollup -c rollup_main.js",
     "test": "ava",
     "tests": "ava *.test.js"
@@ -46,13 +48,10 @@
   },
   "devDependencies": {
     "@jsxcad/data-shape": "^0.0.79",
-    "ava": "^2.4.0",
+    "ava": "^3.9.0",
     "depcheck": "^0.9.1",
     "eslint": "^5.15.0",
-    "esm": "^3.2.10"
-  },
-  "ava": {
-    "require": "esm"
+    "prettier": "^2.0.5"
   },
   "publishConfig": {
     "access": "public"

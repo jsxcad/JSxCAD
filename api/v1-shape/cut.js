@@ -1,5 +1,5 @@
-import Shape from './Shape';
-import difference from './difference';
+import Shape from './Shape.js';
+import difference from './difference.js';
 
 /**
  *

@@ -1455,7 +1455,9 @@ const toPaths = (letters) => {
     mergedPaths.push(...translate([xOffset, 0, 0], paths));
     xOffset += hersheyWidth[code] || 0;
   }
-  return Shape.fromGeometry({ paths: mergedPaths }).scale(1 / 28);
+  return Shape.fromGeometry({ type: 'paths', paths: mergedPaths }).scale(
+    1 / 28
+  );
 };
 
 const ofSize = (size) => (text) => toPaths(text).scale(size);

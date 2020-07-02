@@ -1,1 +1,1 @@
-export { toFont } from './toFont';
+export { toFont } from './toFont.js';

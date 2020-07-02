@@ -1,12 +1,12 @@
-import { ClipType, PolyFillType, clipper } from './clipper-lib';
+import { ClipType, PolyFillType, clipper } from './clipper-lib.js';
 
 import {
   fromIntegersToClosedPaths,
   fromSurfaceToIntegers,
   toSurface,
-} from './convert';
+} from './convert.js';
 
-import { fixTJunctions } from './fixTJunctions';
+import { fixTJunctions } from './fixTJunctions.js';
 
 // Here we have a surface with a confused orientation.
 // This reorients the most exterior paths to be ccw.

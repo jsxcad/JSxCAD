@@ -1,6 +1,6 @@
 import { Shape, assemble, union } from '@jsxcad/api-v1-shape';
 
-import ChainedHull from './ChainedHull';
+import ChainedHull from './ChainedHull.js';
 import { getPaths } from '@jsxcad/geometry-tagged';
 
 /**

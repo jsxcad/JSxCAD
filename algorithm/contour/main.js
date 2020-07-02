@@ -1,3 +1,1 @@
-import { fromRaster } from './fromRaster';
-
-export { fromRaster };
+export { fromRaster } from './fromRaster.js';

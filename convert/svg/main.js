@@ -1,6 +1,4 @@
-import { canonicalize } from './canonicalize';
-import { fromSvg } from './fromSvg';
-import { fromSvgPath } from './fromSvgPath';
-import { toSvg } from './toSvg';
-
-export { canonicalize, fromSvg, fromSvgPath, toSvg };
+export { canonicalize } from './canonicalize.js';
+export { fromSvg } from './fromSvg.js';
+export { fromSvgPath } from './fromSvgPath.js';
+export { toSvg } from './toSvg.js';

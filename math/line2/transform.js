@@ -1,6 +1,6 @@
-import { direction } from './direction';
-import { fromPoints } from './fromPoints';
-import { origin } from './origin';
+import { direction } from './direction.js';
+import { fromPoints } from './fromPoints.js';
+import { origin } from './origin.js';
 import { transform as transformVec2 } from '@jsxcad/math-vec2';
 
 /**

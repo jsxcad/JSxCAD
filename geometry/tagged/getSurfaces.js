@@ -1,9 +1,9 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getSurfaces = (geometry) => {
   const surfaces = [];
   eachItem(geometry, (item) => {
-    if (item.surface) {
+    if (item.type === 'surface') {
       surfaces.push(item);
     }
   });

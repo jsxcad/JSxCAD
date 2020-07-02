@@ -1,7 +1,7 @@
 import { canonicalize, fromPolygons } from '@jsxcad/geometry-solid';
 
 import { boot } from '@jsxcad/sys';
-import { deform } from './deform';
+import { deform } from './deform.js';
 import test from 'ava';
 
 const cubePolygons = [

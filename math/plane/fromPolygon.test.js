@@ -1,4 +1,4 @@
-import { fromPolygon } from './fromPolygon';
+import { fromPolygon } from './fromPolygon.js';
 import test from 'ava';
 
 test('Colinear points.', (t) => {

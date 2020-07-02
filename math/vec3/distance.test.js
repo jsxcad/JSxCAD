@@ -1,4 +1,4 @@
-import { distance } from './distance';
+import { distance } from './distance.js';
 import test from 'ava';
 
 test('vec3: distance() should return correct values', (t) => {

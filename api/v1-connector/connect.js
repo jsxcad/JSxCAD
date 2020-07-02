@@ -2,7 +2,7 @@ import { drop, toKeptGeometry } from '@jsxcad/geometry-tagged';
 import { negate, subtract } from '@jsxcad/math-vec3';
 
 import Shape from '@jsxcad/api-v1-shape';
-import { shapeToConnect } from './Connector';
+import { shapeToConnect } from './Connector.js';
 import { toXYPlaneTransforms } from '@jsxcad/math-plane';
 
 /**

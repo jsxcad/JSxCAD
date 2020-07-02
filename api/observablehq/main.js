@@ -12,9 +12,8 @@ import './view';
 import * as v1 from '@jsxcad/api-v1';
 
 import { boot } from '@jsxcad/sys';
-import downloadAsZip from './download';
 
 export const api = async () => {
   await boot();
-  return { ...v1, downloadAsZip };
+  return { ...v1 };
 };

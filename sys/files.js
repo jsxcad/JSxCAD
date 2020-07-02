@@ -1,4 +1,4 @@
-import { qualifyPath } from './filesystem';
+import { qualifyPath } from './filesystem.js';
 
 const files = new Map();
 const fileCreationWatchers = new Set();

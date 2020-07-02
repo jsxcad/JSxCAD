@@ -8,13 +8,13 @@ import {
   getFilesystem,
   qualifyPath,
   setupFilesystem,
-} from './filesystem';
-import { isBrowser, isNode, isWebWorker } from './browserOrNode';
+} from './filesystem.js';
+import { isBrowser, isNode, isWebWorker } from './browserOrNode.js';
 
-import { db } from './db';
+import { db } from './db.js';
 import { dirname } from 'path';
-import { getFile } from './files';
-import { log } from './log';
+import { getFile } from './files.js';
+import { log } from './log.js';
 
 const { promises } = fs;
 const { serialize } = v8;

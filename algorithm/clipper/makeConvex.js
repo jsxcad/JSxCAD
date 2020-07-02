@@ -2,8 +2,8 @@ import {
   CLEAN_DISTANCE,
   RESOLUTION,
   fromSurfaceAsClosedPaths,
-} from './convert';
-import { ClipType, PolyFillType, clipper } from './clipper-lib';
+} from './convert.js';
+import { ClipType, PolyFillType, clipper } from './clipper-lib.js';
 import { flip, isClockwise } from '@jsxcad/geometry-path';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';

@@ -1,4 +1,4 @@
-import { last } from './last';
+import { last } from './last.js';
 import test from 'ava';
 
 test('last gets the last.', (t) => {

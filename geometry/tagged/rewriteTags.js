@@ -1,6 +1,6 @@
 import { cacheRewriteTags } from '@jsxcad/cache';
-import { hasMatchingTag } from './hasMatchingTag';
-import { rewrite } from './visit';
+import { hasMatchingTag } from './hasMatchingTag.js';
+import { rewrite } from './visit.js';
 
 const buildCondition = (conditionTags, conditionSpec) => {
   switch (conditionSpec) {
@@ -32,25 +32,26 @@ const rewriteTagsImpl = (
       return geometryTags;
     }
   };
-
   const op = (geometry, descend) => {
-    if (geometry.assembly || geometry.disjointAssembly) {
-      // These structural geometries don't take tags.
-      return descend();
-    }
-    const composedTags = composeTags(geometry.tags);
-    if (composedTags === undefined) {
-      const copy = { ...geometry };
-      delete copy.tags;
-      return copy;
-    }
-    if (composedTags === geometry.tags) {
-      return geometry;
-    } else {
-      return descend({ tags: composedTags });
+    switch (geometry.type) {
+      case 'assembly':
+      case 'disjointAssembly':
+      case 'layers':
+        return descend();
+      default:
+        const composedTags = composeTags(geometry.tags);
+        if (composedTags === undefined) {
+          const copy = { ...geometry };
+          delete copy.tags;
+          return copy;
+        }
+        if (composedTags === geometry.tags) {
+          return geometry;
+        } else {
+          return descend({ tags: composedTags });
+        }
     }
   };
-
   return rewrite(geometry, op);
 };
 

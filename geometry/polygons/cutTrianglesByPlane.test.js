@@ -4,10 +4,10 @@ import {
   unitRegularTetrahedronPolygons,
 } from '@jsxcad/data-shape';
 
-import { cutTrianglesByPlane } from './cutTrianglesByPlane';
+import { cutTrianglesByPlane } from './cutTrianglesByPlane.js';
 import { fromPoints } from '@jsxcad/math-plane';
 import test from 'ava';
-import { toTriangles } from './toTriangles';
+import { toTriangles } from './toTriangles.js';
 
 test('Slice a cube to form a square.', (t) => {
   const input = toTriangles({}, unitCubePolygons);

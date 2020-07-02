@@ -9,9 +9,7 @@ var sqrt = Math.sqrt;
 var ceil = Math.ceil;
 var τ = Math.PI * 2;
 
-module.exports = curves;
-
-function curves(px, py, cx, cy, rx, ry, xrot, large, sweep) {
+export function curves(px, py, cx, cy, rx, ry, xrot, large, sweep) {
   if (rx === 0 || ry === 0) return [];
 
   xrot = xrot || 0;

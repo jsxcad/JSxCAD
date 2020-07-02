@@ -1,7 +1,7 @@
 import { canonicalize } from '@jsxcad/math-vec3';
-import { create } from './create';
-import { direction } from './direction';
-import { fromPoints } from './fromPoints';
+import { create } from './create.js';
+import { direction } from './direction.js';
+import { fromPoints } from './fromPoints.js';
 import test from 'ava';
 
 test('line3: direction() should return proper direction', (t) => {

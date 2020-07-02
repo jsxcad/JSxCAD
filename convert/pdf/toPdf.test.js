@@ -1,11 +1,12 @@
 import { buildRegularPolygon } from '@jsxcad/algorithm-shape';
 import test from 'ava';
-import { toPdf } from './toPdf';
+import { toPdf } from './toPdf.js';
 
 test('Triangle', async (t) => {
   // A surface is a set of paths.
   const pdf = await toPdf({
     tags: ['color/blue'],
+    type: 'paths',
     paths: buildRegularPolygon(3).z0Surface,
   });
   t.is(
@@ -42,7 +43,7 @@ test('Triangle', async (t) => {
 test('Triangle with a custom page size', async (t) => {
   // A surface is a set of paths.
   const pdf = await toPdf(
-    { paths: buildRegularPolygon(3).z0Surface },
+    { type: 'paths', paths: buildRegularPolygon(3).z0Surface },
     { size: [100, 200] }
   );
   t.is(

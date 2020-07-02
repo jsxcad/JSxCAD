@@ -1,4 +1,4 @@
-import { fromScalar } from './fromScalar';
+import { fromScalar } from './fromScalar.js';
 import test from 'ava';
 
 test('vec4: fromScalar() should return a new vec4 with correct values', (t) => {

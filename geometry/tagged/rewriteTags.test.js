@@ -1,4 +1,4 @@
-import { rewriteTags } from './rewriteTags';
+import { rewriteTags } from './rewriteTags.js';
 import test from 'ava';
 
 test('Simple add', (t) => {

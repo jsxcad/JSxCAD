@@ -1,4 +1,4 @@
-import { fromPlanes } from './fromPlanes';
+import { fromPlanes } from './fromPlanes.js';
 import { fromPoints } from '@jsxcad/math-plane';
 import test from 'ava';
 

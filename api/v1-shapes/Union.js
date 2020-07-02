@@ -1,4 +1,4 @@
-import { Empty } from './Empty';
+import { Empty } from './Empty.js';
 import Shape from '@jsxcad/api-v1-shape';
 
 export const Union = (...args) => Empty().add(...args);

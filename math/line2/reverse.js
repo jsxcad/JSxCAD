@@ -1,4 +1,4 @@
-import { fromValues } from './fromValues';
+import { fromValues } from './fromValues.js';
 import { negate } from '@jsxcad/math-vec2';
 
 // TODO: Call this flip?

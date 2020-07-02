@@ -1,4 +1,4 @@
-import { buildConvexHull } from './buildConvexHull';
+import { buildConvexHull } from './buildConvexHull.js';
 import { cache } from '@jsxcad/cache';
 import { translate } from '@jsxcad/geometry-points';
 

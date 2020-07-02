@@ -1,5 +1,5 @@
-import { findPolygonsViolations } from './findPolygonsViolations';
-import { isWatertightPolygons } from './isWatertightPolygons';
+import { findPolygonsViolations } from './findPolygonsViolations.js';
+import { isWatertightPolygons } from './isWatertightPolygons.js';
 import test from 'ava';
 
 test('Leaky polygon array is not watertight', (t) => {

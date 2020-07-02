@@ -1,4 +1,4 @@
-import Random from './Random';
+import Random from './Random.js';
 import test from 'ava';
 
 test('Produce base sequence', (t) => {

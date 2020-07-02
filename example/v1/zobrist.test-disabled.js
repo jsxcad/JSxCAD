@@ -1,4 +1,4 @@
-import { main } from './zobrist';
+import { main } from './zobrist.js';
 import { readFileSync } from 'fs';
 import { test } from 'ava';
 

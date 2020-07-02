@@ -5712,16 +5712,40 @@ exports.default = QuickHull;
 module.exports = exports['default'];
 });
 
-var QuickHull = unwrapExports(QuickHull_1);
+unwrapExports(QuickHull_1);
+
+var dist = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = runner;
+
+
+
+var _QuickHull2 = _interopRequireDefault(QuickHull_1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function runner(points) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  var instance = new _QuickHull2.default(points);
+  instance.build();
+  return instance.collectFaces(options.skipTriangulation);
+}
+module.exports = exports['default'];
+});
+
+var QuickHull = unwrapExports(dist);
 
 const buildConvexHullImpl = (points) => {
-  const hull = new QuickHull(points, { skipTriangulation: true });
-  hull.build();
-  const polygons = hull
-    .collectFaces()
-    .map((polygon) => polygon.map((nthPoint) => points[nthPoint]));
+  const faces = QuickHull(points, { skipTriangulation: true });
+  const polygons = faces.map((polygon) =>
+    polygon.map((nthPoint) => points[nthPoint])
+  );
   polygons.isConvex = true;
-  return { solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons({}, polygons) };
 };
 
 const buildConvexHull = cache$1(buildConvexHullImpl);
@@ -6419,7 +6443,7 @@ const buildConvexSurfaceHullImpl = (points) => {
   for (const nth of monotoneConvexHull2d(points)) {
     hull.push(points[nth]);
   }
-  return { z0Surface: [hull.reverse()] };
+  return { type: 'z0Surface', z0Surface: [hull.reverse()] };
 };
 
 const buildConvexSurfaceHull = cache$1(buildConvexSurfaceHullImpl);
@@ -6485,7 +6509,7 @@ const buildFromFunctionImpl = (op, resolution, cap = true, context) => {
       polygons.push(...makeConvex([deduplicatedPath]));
     }
   }
-  const solid = { solid: fromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: fromPolygons({}, polygons) };
   return solid;
 };
 
@@ -6542,7 +6566,10 @@ const buildFromSlices = (buildPath, resolution, cap = true) => {
     }
   }
 
-  return { solid: fromPolygons({}, flip$1(polygons)) };
+  return {
+    type: 'solid',
+    solid: fromPolygons({}, flip$1(polygons)),
+  };
 };
 
 const fromPointsAndPaths = ({ points = [], paths = [] }) => {
@@ -6644,6 +6671,7 @@ const buildGeodesicSphere = ({ faces = 20 }) => {
 };
 
 const buildPolygonFromPointsImpl = (points) => ({
+  type: 'surface',
   surface: [points.map(([x = 0, y = 0, z = 0]) => [x, y, z])],
 });
 
@@ -6673,7 +6701,7 @@ const buildRegularPolygonImpl = (sides = 32) => {
   }
   points.isConvex = true;
   // FIX: Clean up the consumers of this result.
-  const z0Surface = { z0Surface: [points] };
+  const z0Surface = { type: 'z0Surface', z0Surface: [points] };
   return z0Surface;
 };
 
@@ -6735,7 +6763,10 @@ const extrude = cache$1(extrudeImpl);
 const buildRegularPrismImpl = (edges = 32) => {
   const surface = buildRegularPolygon(edges);
   surface.isConvex = true;
-  return translate$3([0, 0, -0.5], { solid: extrude(surface.z0Surface, 1) });
+  return translate$3([0, 0, -0.5], {
+    type: 'solid',
+    solid: extrude(surface.z0Surface, 1),
+  });
 };
 
 const buildRegularPrism = cache$1(buildRegularPrismImpl);
@@ -6799,7 +6830,7 @@ const buildRingSphereImpl = (resolution = 20) => {
   for (const polygon of polygons) {
     assertGood(polygon);
   }
-  const solid = { solid: fromPolygons({}, polygons) };
+  const solid = { type: 'solid', solid: fromPolygons({}, polygons) };
   return solid;
 };
 
@@ -6945,7 +6976,7 @@ const loopImpl = (
       lastPath
     );
   }
-  return { solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons({}, polygons) };
 };
 
 const loop = cache$1(loopImpl);

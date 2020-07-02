@@ -1,5 +1,5 @@
-const { parentPort } = require('worker_threads');
-const { conversation } = require('./conversationRequireable');
+import { conversation } from './conversation.js';
+import { parentPort } from 'worker_threads';
 
 const say = (message) => parentPort.postMessage(message);
 const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;

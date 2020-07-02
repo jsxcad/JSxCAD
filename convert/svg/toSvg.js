@@ -1,7 +1,7 @@
 import {
   canonicalize,
-  getAnySurfaces,
-  getPaths,
+  getAnyNonVoidSurfaces,
+  getNonVoidPaths,
   isNotVoid,
   measureBoundingBox,
   toKeptGeometry,
@@ -42,9 +42,9 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { surface, z0Surface, tags } of getAnySurfaces(geometry).filter(
-    isNotVoid
-  )) {
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
+    geometry
+  ).filter(isNotVoid)) {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
@@ -61,7 +61,7 @@ export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }
     svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
-  for (const { paths, tags } of getPaths(geometry).filter(isNotVoid)) {
+  for (const { paths, tags } of getNonVoidPaths(geometry).filter(isNotVoid)) {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {

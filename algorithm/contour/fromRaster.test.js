@@ -1,5 +1,5 @@
 import { canonicalize } from '@jsxcad/geometry-paths';
-import { fromRaster } from './fromRaster';
+import { fromRaster } from './fromRaster.js';
 import test from 'ava';
 
 test('Simple', async (t) => {

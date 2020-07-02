@@ -1,4 +1,4 @@
-import { toSignature, toSnippet } from './signature';
+import { toSignature, toSnippet } from './signature.js';
 
 import test from 'ava';
 

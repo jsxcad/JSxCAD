@@ -1,13 +1,13 @@
 import { reorient, union } from '@jsxcad/geometry-z0surface-boolean';
 
+import OpenTypeJs from 'opentype.js/dist/opentype.js';
 import { fromSvgPath } from '@jsxcad/convert-svg';
-import { parse } from 'opentype.js';
 import { scale } from '@jsxcad/geometry-tagged';
 
 export const toFont = (options = {}, data) => {
   // Unfortunately opentype.js wants a buffer but doesn't take an offset.
   // Trim the buffer back so that we get one where offset 0 is the start of data.
-  const fontData = parse(data.buffer.slice(data.byteOffset));
+  const fontData = OpenTypeJs.parse(data.buffer.slice(data.byteOffset));
 
   const font = (options, text) => {
     const {
@@ -40,7 +40,10 @@ export const toFont = (options = {}, data) => {
       // Outlining forces re-orientation.
       pathsets.push(reorient(paths));
     }
-    return scale([factor, factor, factor], { z0Surface: union(...pathsets) });
+    return scale([factor, factor, factor], {
+      type: 'z0Surface',
+      z0Surface: union(...pathsets),
+    });
   };
 
   return font;

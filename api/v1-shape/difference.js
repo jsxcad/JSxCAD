@@ -1,4 +1,4 @@
-import { fromGeometry, toKeptGeometry } from './Shape';
+import { fromGeometry, toKeptGeometry } from './Shape.js';
 
 import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
 
@@ -34,7 +34,7 @@ import { difference as differenceGeometry } from '@jsxcad/geometry-tagged';
 export const difference = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ assembly: [] });
+      return fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       // We still want to produce a simple shape.

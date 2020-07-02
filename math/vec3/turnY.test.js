@@ -1,6 +1,6 @@
-import { canonicalize as c } from './canonicalize';
+import { canonicalize as c } from './canonicalize.js';
 import test from 'ava';
-import { turnY } from './turnY';
+import { turnY } from './turnY.js';
 
 const radians = (90 * Math.PI) / 180;
 

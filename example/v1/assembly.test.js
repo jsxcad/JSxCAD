@@ -1,4 +1,6 @@
-import { isExpected, run } from './run';
+Error.stackTraceLimit = Infinity;
+
+import { isExpected, run } from './runner.js';
 
 import test from 'ava';
 

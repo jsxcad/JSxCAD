@@ -8,7 +8,7 @@ import {
   removeExteriorPolygonsForCutDroppingOverlap,
   removeExteriorPolygonsForCutKeepingOverlap,
   fromPolygons as toBspFromPolygons,
-} from './bsp';
+} from './bsp.js';
 
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 

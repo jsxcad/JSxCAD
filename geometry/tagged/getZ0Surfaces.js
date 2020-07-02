@@ -1,9 +1,9 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getZ0Surfaces = (geometry) => {
   const z0Surfaces = [];
   eachItem(geometry, (item) => {
-    if (item.z0Surface) {
+    if (item.type === 'z0Surface') {
       z0Surfaces.push(item);
     }
   });

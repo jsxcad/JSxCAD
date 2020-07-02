@@ -1,5 +1,5 @@
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('Transform identity informed by matrix structure and geometry identity', (t) => {
   const geometry = { foo: 'bar' };

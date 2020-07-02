@@ -3,8 +3,8 @@ import {
   unitGeodesicSphere80Polygons,
 } from '@jsxcad/data-shape';
 
-import { buildGeodesicSphere } from './buildGeodesicSphere';
-import { canonicalize } from './canonicalize';
+import { buildGeodesicSphere } from './buildGeodesicSphere.js';
+import { canonicalize } from './canonicalize.js';
 import test from 'ava';
 
 test('Build minimal sphere.', (t) => {

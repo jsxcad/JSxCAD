@@ -1,4 +1,4 @@
-import { createNormalize2 } from './createNormalize2';
+import { createNormalize2 } from './createNormalize2.js';
 import test from 'ava';
 
 test('Produces 3d points', (t) => {

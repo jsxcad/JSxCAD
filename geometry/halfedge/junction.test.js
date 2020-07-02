@@ -1,5 +1,5 @@
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
-import { junctionSelector } from './junction';
+import { junctionSelector } from './junction.js';
 import test from 'ava';
 
 const solid = [

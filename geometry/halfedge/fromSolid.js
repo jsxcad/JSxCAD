@@ -1,7 +1,7 @@
 import './types';
 
-import createEdge from './createEdge';
-import eachLink from './eachLink';
+import createEdge from './createEdge.js';
+import eachLink from './eachLink.js';
 
 let id = 0;
 

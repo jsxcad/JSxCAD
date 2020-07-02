@@ -1,4 +1,4 @@
-import { BRANCH, dividePolygons, inLeaf } from './bsp';
+import { BRANCH, dividePolygons, inLeaf } from './bsp.js';
 
 import {
   alignVertices,

@@ -1,4 +1,4 @@
-import { ensureParticle } from './ensureParticle';
+import { ensureParticle } from './ensureParticle.js';
 import { subtract } from '@jsxcad/math-vec3';
 
 const angle = ([ax, ay], [bx, by]) =>

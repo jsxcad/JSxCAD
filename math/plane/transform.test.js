@@ -1,6 +1,6 @@
-import { canonicalize as c } from './canonicalize';
+import { canonicalize as c } from './canonicalize.js';
 import test from 'ava';
-import { transform } from './transform';
+import { transform } from './transform.js';
 
 test('Identity', (t) => {
   const identityMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];

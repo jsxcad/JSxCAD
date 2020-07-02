@@ -1,9 +1,9 @@
-import { eachItem } from './eachItem';
+import { eachItem } from './eachItem.js';
 
 export const getSolids = (geometry) => {
   const solids = [];
   eachItem(geometry, (item) => {
-    if (item.solid) {
+    if (item.type === 'solid') {
       solids.push(item);
     }
   });

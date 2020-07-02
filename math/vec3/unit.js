@@ -1,4 +1,4 @@
-import { length } from './length';
+import { length } from './length.js';
 
 /**
  * Calculates the unit vector of the given vector

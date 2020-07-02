@@ -1,3 +1,1 @@
-import { toPdf } from './toPdf';
-
-export { toPdf };
+export { toPdf } from './toPdf.js';

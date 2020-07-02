@@ -1,4 +1,4 @@
-import { fromGeometry, toKeptGeometry } from './Shape';
+import { fromGeometry, toKeptGeometry } from './Shape.js';
 
 import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
 
@@ -54,7 +54,7 @@ import { intersection as intersectionGeometry } from '@jsxcad/geometry-tagged';
 export const intersection = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ assembly: [] });
+      return fromGeometry({ type: 'assembly', content: [] });
     }
     case 1: {
       // We still want to produce a simple shape.

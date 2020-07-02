@@ -1,3 +1,3 @@
-import pack from './pack';
+import pack from './pack.js';
 
 export { pack };

@@ -1,6 +1,6 @@
 import { fromPolygons } from '@jsxcad/geometry-solid';
 import parseStlAscii from 'parse-stl-ascii';
-import { parse as parseStlBinary } from './parseStlBinary';
+import { parse as parseStlBinary } from './parseStlBinary.js';
 
 const toParser = (format) => {
   switch (format) {
@@ -20,5 +20,5 @@ export const fromStl = async (stl, { format = 'ascii' } = {}) => {
   for (const [a, b, c] of cells) {
     polygons.push([positions[a], positions[b], positions[c]]);
   }
-  return { solid: fromPolygons({}, polygons) };
+  return { type: 'solid', solid: fromPolygons({}, polygons) };
 };
