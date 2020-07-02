@@ -1,8 +1,8 @@
 import AString from 'astring';
-import hash from 'object-hash';
 import Acorn from 'acorn';
-import { read } from '@jsxcad/sys';
 import AcornWalk from 'acorn-walk';
+import hash from 'object-hash';
+import { read } from '@jsxcad/sys';
 
 export const strip = (ast) => {
   if (ast instanceof Array) {
@@ -132,7 +132,9 @@ export const toEcmascript = async (script, options = {}) => {
       const { specifiers, source } = entry;
 
       if (specifiers.length === 0) {
-        out.push(Acorn.parse(`await importModule('${source.value}');`, parseOptions));
+        out.push(
+          Acorn.parse(`await importModule('${source.value}');`, parseOptions)
+        );
       } else {
         for (const { imported, local, type } of specifiers) {
           switch (type) {
@@ -169,6 +171,9 @@ export const toEcmascript = async (script, options = {}) => {
   out.push(Acorn.parse(`return { ${exportNames.join(', ')} };`, parseOptions));
 
   const result =
-    '\n' + AString.generate(Acorn.parse(out.map(AString.generate).join('\n'), parseOptions));
+    '\n' +
+    AString.generate(
+      Acorn.parse(out.map(AString.generate).join('\n'), parseOptions)
+    );
   return result;
 };

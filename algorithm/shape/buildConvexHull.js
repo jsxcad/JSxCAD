@@ -4,7 +4,9 @@ import { fromPolygons as toSolidFromPolygons } from '@jsxcad/geometry-solid';
 
 const buildConvexHullImpl = (points) => {
   const faces = QuickHull(points, { skipTriangulation: true });
-  const polygons = faces.map((polygon) => polygon.map((nthPoint) => points[nthPoint]));
+  const polygons = faces.map((polygon) =>
+    polygon.map((nthPoint) => points[nthPoint])
+  );
   polygons.isConvex = true;
   return { type: 'solid', solid: toSolidFromPolygons({}, polygons) };
 };

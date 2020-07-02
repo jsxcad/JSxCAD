@@ -1,10 +1,11 @@
-import BinPackingEs from 'bin-packing-es';
 import { max, min } from '@jsxcad/math-vec3';
 import {
   measureBoundingBox,
   toKeptGeometry,
   translate,
 } from '@jsxcad/geometry-tagged';
+
+import BinPackingEs from 'bin-packing-es';
 
 const { GrowingPacker, Packer } = BinPackingEs;
 

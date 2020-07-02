@@ -1,6 +1,10 @@
 /* global ResizeObserver */
 
-import { buildGui, buildGuiControls, buildTrackballControls } from './controls.js';
+import {
+  buildGui,
+  buildGuiControls,
+  buildTrackballControls,
+} from './controls.js';
 import { buildScene, createResizer } from './scene.js';
 
 import { Layers } from 'three';

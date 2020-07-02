@@ -1,7 +1,7 @@
 import { reorient, union } from '@jsxcad/geometry-z0surface-boolean';
 
-import { fromSvgPath } from '@jsxcad/convert-svg';
 import OpenTypeJs from 'opentype.js';
+import { fromSvgPath } from '@jsxcad/convert-svg';
 import { scale } from '@jsxcad/geometry-tagged';
 
 export const toFont = (options = {}, data) => {

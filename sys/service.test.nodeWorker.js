@@ -1,5 +1,5 @@
-import { parentPort } from 'worker_threads';
 import { conversation } from './conversation.js';
+import { parentPort } from 'worker_threads';
 
 const say = (message) => parentPort.postMessage(message);
 const agent = async ({ ask, question }) => `Worker ${await ask(question)}`;

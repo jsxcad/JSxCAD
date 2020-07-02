@@ -9,7 +9,10 @@ export { divide } from './divide.js';
 export { dot } from './dot.js';
 export { equals } from './equals.js';
 export { fromAngleDegrees } from './fromAngleDegrees.js';
-export { fromAngleRadians, fromAngleRadians as fromAngle } from './fromAngleRadians.js';
+export {
+  fromAngleRadians,
+  fromAngleRadians as fromAngle,
+} from './fromAngleRadians.js';
 export { fromPoint } from './fromPoint.js';
 export { fromScalar } from './fromScalar.js';
 export { fromValues } from './fromValues.js';

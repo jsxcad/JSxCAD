@@ -7,7 +7,9 @@ import parseSvgPath from 'parse-svg-path';
 import test from 'ava';
 
 test('Circle as cubic bezier.', (t) => {
-  const circlePath = SvgShapes.toPath(SvgShapes.getPoints('circle', { cx: 0, cy: 0, r: 1 }));
+  const circlePath = SvgShapes.toPath(
+    SvgShapes.getPoints('circle', { cx: 0, cy: 0, r: 1 })
+  );
   const parsedCirclePath = parseSvgPath(circlePath);
   const absoluteCirclePath = absolutifySvgPath(parsedCirclePath);
   const curvifiedCirclePath = canonicalize(curvifySvgPath(absoluteCirclePath));

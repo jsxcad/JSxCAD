@@ -1,14 +1,14 @@
 import clipperjs from './js-angusj-clipperjs-web/index.cjs';
 
+import { onBoot } from '@jsxcad/sys';
+
 const {
   ClipType,
   NativeClipperLibRequestedFormat,
   PolyFillType,
   PolyTree,
-  loadNativeClipperLibInstanceAsync
+  loadNativeClipperLibInstanceAsync,
 } = clipperjs;
-
-import { onBoot } from '@jsxcad/sys';
 
 export let clipper;
 
@@ -29,10 +29,6 @@ export function IntPoint(x, y) {
   this.y = y;
 }
 
-export {
-  ClipType,
-  PolyFillType,
-  PolyTree,
-}
+export { ClipType, PolyFillType, PolyTree };
 
 onBoot(setup);

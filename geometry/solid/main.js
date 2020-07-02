@@ -1,5 +1,12 @@
 export { isWatertight, makeWatertight } from './makeWatertight.js';
-export { rotateX, rotateY, rotateZ, scale, transform, translate } from './ops.js';
+export {
+  rotateX,
+  rotateY,
+  rotateZ,
+  scale,
+  transform,
+  translate,
+} from './ops.js';
 
 export { alignVertices } from './alignVertices.js';
 export { assertGood } from './assertGood.js';

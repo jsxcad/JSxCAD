@@ -1,9 +1,9 @@
 import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 
+import OpenSimplexNoise from 'open-simplex-noise';
 import Shape from '@jsxcad/api-v1-shape';
 import { deform } from '@jsxcad/geometry-bsp';
 import { getSolids } from '@jsxcad/geometry-tagged';
-import OpenSimplexNoise from 'open-simplex-noise';
 
 const X = 0;
 const Y = 1;

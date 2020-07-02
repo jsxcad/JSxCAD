@@ -6,10 +6,10 @@ import {
   multiply,
 } from '@jsxcad/math-mat4';
 
+import SvgPoints from 'svg-points';
 import XmlDom from 'xmldom';
 import { fromSvgPath as baseFromSvgPath } from './fromSvgPath.js';
 import { close } from '@jsxcad/geometry-path';
-import SvgPoints from 'svg-points';
 import { toTagsFromName } from '@jsxcad/algorithm-color';
 import { transform } from '@jsxcad/geometry-tagged';
 
@@ -160,7 +160,10 @@ const applyTransforms = ({ matrix }, transformText) => {
 export const fromSvg = async (input, options = {}) => {
   const svgString = new TextDecoder('utf8').decode(input);
   const geometry = { type: 'assembly', content: [] };
-  const svg = new XmlDom.DOMParser().parseFromString(await svgString, 'image/svg+xml');
+  const svg = new XmlDom.DOMParser().parseFromString(
+    await svgString,
+    'image/svg+xml'
+  );
 
   const getAttribute = (node, attribute, otherwise) => {
     const value = node.getAttribute(attribute);
@@ -275,7 +278,11 @@ export const fromSvg = async (input, options = {}) => {
             output(SvgPoints.toPath(buildShape('points')));
             break;
           case 'rect':
-            output(SvgPoints.toPath(buildShape('height', 'width', 'x', 'y', 'rx', 'ry')));
+            output(
+              SvgPoints.toPath(
+                buildShape('height', 'width', 'x', 'y', 'rx', 'ry')
+              )
+            );
             break;
           default:
             break;
