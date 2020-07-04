@@ -1,4 +1,4 @@
-import './types';
+import './types.js';
 
 import createEdge from './createEdge.js';
 import eachLink from './eachLink.js';

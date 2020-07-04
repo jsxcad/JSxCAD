@@ -1,16 +1,4 @@
-<<<<<<< HEAD
-import './types';
-import clean from './clean';
-import fromSolid from './fromSolid';
-import { junctionSelector } from './junction';
-import merge from './merge';
-import split from './split';
-import toSolid from './toSolid';
-=======
-/**
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Solid} Solid
- */
+import './types.js';
 
 import clean from './clean.js';
 import fromSolid from './fromSolid.js';
@@ -18,7 +6,6 @@ import { junctionSelector } from './junction.js';
 import merge from './merge.js';
 import split from './split.js';
 import toSolid from './toSolid.js';
->>>>>>> master
 
 /**
  * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.
@@ -35,6 +22,7 @@ export const cleanSolid = (solid, normalize) => {
     const loops = fromSolid(solid, normalize, /* closed= */ true);
     const selectJunction = junctionSelector(solid, normalize);
     const mergedLoops = merge(loops);
+    /** @type {Edge[]} */
     const cleanedLoops = mergedLoops.map(clean);
     const splitLoops = split(cleanedLoops);
     const cleanedSolid = toSolid(splitLoops, selectJunction);

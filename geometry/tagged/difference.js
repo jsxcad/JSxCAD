@@ -7,10 +7,15 @@ import { difference as pathsDifference } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
 import { difference as solidDifference } from '@jsxcad/geometry-solid-boolean';
 import { difference as surfaceDifference } from '@jsxcad/geometry-surface-boolean';
+import { taggedPaths } from './taggedPaths.js';
+import { taggedSolid } from './taggedSolid.js';
+import { taggedSurface } from './taggedSurface.js';
+import { taggedZ0Surface } from './taggedZ0Surface.js';
 import { difference as z0SurfaceDifference } from '@jsxcad/geometry-z0surface-boolean';
 
 const differenceImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
+    const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
         const todo = [];
@@ -19,11 +24,7 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(solid);
           }
         }
-        return {
-          type: 'solid',
-          solid: solidDifference(geometry.solid, ...todo),
-          tags: geometry.tags,
-        };
+        return taggedSolid({ tags }, solidDifference(geometry.solid, ...todo));
       }
       case 'surface': {
         // FIX: Solids should cut surfaces
@@ -36,11 +37,7 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(z0Surface);
           }
         }
-        return {
-          type: 'surface',
-          surface: surfaceDifference(geometry.surface, ...todo),
-          tags: geometry.tags,
-        };
+        return taggedSurface({ tags }, surfaceDifference(geometry.surface, ...todo));
       }
       case 'z0Surface': {
         // FIX: Solids should cut surfaces
@@ -55,24 +52,9 @@ const differenceImpl = (geometry, ...geometries) => {
           }
         }
         if (todoSurfaces.length > 0) {
-          return {
-            type: 'surface',
-            surface: surfaceDifference(
-              geometry.z0Surface,
-              ...todoSurfaces,
-              ...todoZ0Surfaces
-            ),
-            tags: geometry.tags,
-          };
+          return taggedSurface({ tags }, surfaceDifference(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces));
         } else {
-          return {
-            type: 'z0Surface',
-            z0Surface: z0SurfaceDifference(
-              geometry.z0Surface,
-              ...todoZ0Surfaces
-            ),
-            tags: geometry.tags,
-          };
+          return taggedZ0Surface({ tags }, z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces));
         }
       }
       case 'paths': {
@@ -82,11 +64,7 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(paths);
           }
         }
-        return {
-          type: 'paths',
-          paths: pathsDifference(geometry.paths, ...todo),
-          tags: geometry.tags,
-        };
+        return taggedPaths({ tags }, pathsDifference(geometry.paths, ...todo));
       }
       case 'assembly':
       case 'disjointAssembly':
@@ -94,10 +72,17 @@ const differenceImpl = (geometry, ...geometries) => {
       case 'plan':
       case 'item':
       case 'layout':
-      case 'points':
+      case 'points': {
         return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for difference.
+        return geometry;
+      }
+      default: {
+        throw Error(`Unknown geometry type ${JSON.stringify(geometry)}`);
+      }
     }
-    throw Error(`Unknown geometry type ${JSON.stringify(geometry)}`);
   };
 
   return rewrite(geometry, op);

@@ -1,5 +1,6 @@
 import { difference } from './difference.js';
 import { rewrite } from './visit.js';
+import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
 import { toTransformedGeometry } from './toTransformedGeometry.js';
 
 const linkDisjointAssembly = Symbol('linkDisjointAssembly');
@@ -19,10 +20,7 @@ export const toDisjointGeometry = (geometry) => {
       for (let i = assembly.length - 1; i >= 0; i--) {
         disjointAssembly.unshift(difference(assembly[i], ...disjointAssembly));
       }
-      const disjointed = {
-        type: 'disjointAssembly',
-        content: disjointAssembly,
-      };
+      const disjointed = taggedDisjointAssembly({}, ...disjointAssembly);
       geometry[linkDisjointAssembly] = disjointed;
       return disjointed;
     } else {
@@ -38,7 +36,7 @@ export const toDisjointGeometry = (geometry) => {
       geometry[linkDisjointAssembly] = disjointed;
       return disjointed;
     } else {
-      const wrapper = { type: 'disjointAssembly', content: [disjointed] };
+      const wrapper = taggedDisjointAssembly({}, disjointed);
       geometry[linkDisjointAssembly] = wrapper;
       return wrapper;
     }

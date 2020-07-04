@@ -1,34 +1,29 @@
-import { Shape } from './Shape.js';
-import { writeFile } from '@jsxcad/sys';
+import { emit, writeFile } from '@jsxcad/sys';
 
-/**
- *
- * # Write Shape Geometry
- *
- * This writes a shape as a tagged geometry in json format.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeShape('cube.shape');
- * await readShape({ path: 'cube.shape' })
- * ```
- * :::
- *
- **/
+import Shape from '@jsxcad/api-v1-shape';
 
-export const cacheShape = async (shape, path) => {
-  const geometry = shape.toGeometry();
-  await writeFile({}, `cache/${path}`, geometry);
+export const prepareShape = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  entries.push({
+    data: new TextEncoder('utf8').encode(JSON.stringify(shape)),
+    filename: `${name}_${index++}.jsxcad`,
+    type: 'application/x-jsxcad',
+  });
+  return entries;
 };
 
-export const writeShape = async (shape, path) => {
-  const geometry = shape.toGeometry();
-  await writeFile(
-    { doSerialize: false },
-    `output/${path}`,
-    JSON.stringify(geometry)
-  );
-  await writeFile({}, `geometry/${path}`, geometry);
+const downloadShapeMethod = function (...args) {
+  const entries = prepareShape(this, ...args);
+  emit({ download: { entries } });
+  return this;
+};
+Shape.prototype.downloadShape = downloadShapeMethod;
+
+export const writeShape = async (shape, name, options = {}) => {
+  for (const { data, filename } of prepareShape(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+  }
 };
 
 const writeShapeMethod = function (...args) {

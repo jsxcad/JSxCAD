@@ -1,13 +1,10 @@
-import '@jsxcad/api-v1-item';
-
-import { Empty, Layers, Square } from '@jsxcad/api-v1-shapes';
-import { getLeafs, getPlans, isNotVoid, visit } from '@jsxcad/geometry-tagged';
+import { Empty, Square } from '@jsxcad/api-v1-shapes';
+import { getLayouts, getLeafs, isNotVoid, taggedLayers, taggedLayout, visit } from '@jsxcad/geometry-tagged';
 
 import { Hershey } from '@jsxcad/api-v1-font';
-import { Plan } from '@jsxcad/api-v1-plan';
 import Shape from '@jsxcad/api-v1-shape';
 import { max } from '@jsxcad/api-v1-math';
-import { pack } from '@jsxcad/api-v1-layout';
+import { pack } from './pack.js';
 
 const MIN = 0;
 const MAX = 1;
@@ -34,23 +31,37 @@ const getItemNames = (geometry) => {
   return [...names].sort();
 };
 
+const buildLayoutGeometry = ({ layer, packSize, pageWidth, pageLength, margin }) => {
+  const itemNames = getItemNames(layer);
+  const labelScale = 0.0125 * 5;
+  const size = [pageWidth, pageLength];
+  const r = (v) => Math.floor(v * 100) / 100;
+  const title = `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`;
+  const visualization = Square(pageWidth, pageLength)
+                            .outline()
+                            .with(Hershey(max(pageWidth, pageLength) * labelScale)(title).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2))
+                            .color('red')
+                            .Sketch()
+                            .toGeometry();
+  return taggedLayout({ size, margin, title, marks: packSize }, layer, visualization);
+};
+
 export const Page = (
   { size, pageMargin = 5, itemMargin = 1, itemsPerPage = Infinity },
   ...shapes
 ) => {
+  const margin = itemMargin;
   const layers = [];
   for (const shape of shapes) {
     for (const leaf of getLeafs(shape.toKeptGeometry())) {
       layers.push(leaf);
     }
   }
-  const r = (v) => Math.floor(v * 100) / 100;
-  const labelScale = 0.0125 * 5;
   if (size) {
     // Content fits to page size.
     const packSize = [];
     const content = pack(
-      Shape.fromGeometry({ type: 'layers', content: layers }),
+      Shape.fromGeometry(taggedLayers({}, ...layers)),
       {
         size,
         pageMargin,
@@ -63,29 +74,14 @@ export const Page = (
     const pageLength = packSize[MAX][Y] - packSize[MIN][Y];
     const plans = [];
     for (const layer of content.toKeptGeometry().content[0].content) {
-      const itemNames = getItemNames(layer);
-      plans.push(
-        Plan({
-          plan: { page: { size, margin: pageMargin } },
-          marks: packSize,
-          content: [Shape.fromGeometry(layer)],
-          visualization: Square(pageWidth, pageLength)
-            .outline()
-            .with(
-              Hershey(max(pageWidth, pageLength) * labelScale)(
-                `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`
-              ).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
-            )
-            .color('red'),
-        }).Item()
-      );
+      plans.push(buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin }));
     }
-    return Layers(...plans);
+    return Shape.fromGeometry(taggedLayers({}, ...plans)).canonicalize();
   } else {
     const packSize = [];
     // Page fits to content size.
     const content = pack(
-      Shape.fromGeometry({ type: 'layers', content: layers }),
+      Shape.fromGeometry(taggedLayers({}, ...layers)),
       {
         pageMargin,
         itemMargin,
@@ -100,33 +96,16 @@ export const Page = (
     if (isFinite(pageWidth) && isFinite(pageLength)) {
       const plans = [];
       for (const layer of content.toKeptGeometry().content[0].content) {
-        const itemNames = getItemNames(layer);
-        plans.push(
-          Plan({
-            plan: {
-              page: { size: [pageWidth, pageLength], margin: pageMargin },
-            },
-            content: [Shape.fromGeometry(layer).center()],
-            marks: packSize,
-            visualization: Square(pageWidth, pageLength)
-              .outline()
-              .with(
-                Hershey(max(pageWidth, pageLength) * labelScale)(
-                  `${r(pageWidth)} x ${r(pageLength)} : ${itemNames.join(', ')}`
-                ).move(pageWidth / -2, (pageLength * (1 + labelScale)) / 2)
-              )
-              .color('red'),
-          }).Item()
-        );
+        const layoutGeometry = buildLayoutGeometry({ layer, packSize, pageWidth, pageLength, margin });
+        Shape.fromGeometry(layoutGeometry).canonicalize();
+        plans.push(layoutGeometry);
       }
-      return Layers(...plans);
+      return Shape.fromGeometry(taggedLayers({}, ...plans));
     } else {
-      return Empty();
+      return Empty().canonicalize();
     }
   }
 };
-
-Plan.Page = Page;
 
 const PageMethod = function (options = {}) {
   return Page(options, this);
@@ -136,7 +115,7 @@ Shape.prototype.Page = PageMethod;
 export default Page;
 
 export const ensurePages = (geometry, depth = 0) => {
-  const pages = getPlans(geometry).filter((entry) => entry.plan.page);
+  const pages = getLayouts(geometry);
   if (pages.length === 0 && depth === 0) {
     return ensurePages(
       Page({}, Shape.fromGeometry(geometry)).toGeometry(),

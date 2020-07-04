@@ -1,8 +1,4 @@
-/**
- * @typedef {import("./types").Loops} Loops
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Surface} Surface
- */
+import './types.js';
 
 import fromSolid from './fromSolid.js';
 

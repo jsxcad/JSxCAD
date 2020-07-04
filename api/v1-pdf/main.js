@@ -1,6 +1,6 @@
-import { toPdf, writePdf } from './writePdf.js';
+import { writePdf } from './writePdf.js';
 
-const api = { toPdf, writePdf };
-export { toPdf, writePdf };
+const api = { writePdf };
+export { writePdf };
 
 export default api;

@@ -1,3 +1,5 @@
+import { taggedAssembly, taggedPaths } from '@jsxcad/geometry-tagged';
+
 import Shape from '@jsxcad/api-v1-shape';
 import { fromPng } from '@jsxcad/convert-png';
 import { fromRaster } from '@jsxcad/algorithm-contour';
@@ -36,14 +38,14 @@ export const readPngAsContours = async (
   }
   const bands = numbers((a) => a, { to: 256, by });
   const contours = await fromRaster(data, bands);
-  const geometry = { type: 'assembly', content: [] };
+  const pathsets = [];
   for (const contour of contours) {
     const simplifiedContour = contour.map((path) =>
       simplifyPath(path, tolerance)
     );
-    geometry.assembly.push({ type: 'paths', paths: simplifiedContour });
+    pathsets.push(taggedPaths({}, simplifiedContour));
   }
-  return Shape.fromGeometry(geometry);
+  return Shape.fromGeometry(taggedAssembly({}, ...pathsets));
 };
 
 export default readPng;

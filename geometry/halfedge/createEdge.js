@@ -1,4 +1,4 @@
-import './types';
+import './types.js';
 
 // This produces a half-edge link.
 

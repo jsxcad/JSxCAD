@@ -1,4 +1,4 @@
-import './types';
+import './types.js';
 
 /**
  * @typedef {function(Edge):undefined} Thunk

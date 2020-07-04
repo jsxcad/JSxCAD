@@ -1,8 +1,4 @@
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Loops} Loops
- */
-
+import './types.js';
 import { clean } from './clean.js';
 import { eachLink } from './eachLink.js';
 import { equalsPlane } from './junction.js';

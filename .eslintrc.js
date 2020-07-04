@@ -1,5 +1,4 @@
 module.exports = {
-  plugins: [ "jsdoc", "@orzechowskid/typelint" ],
   extends: ['standard', 'plugin:react/recommended'],
   parser: 'babel-eslint',
   rules: {
@@ -33,8 +32,5 @@ module.exports = {
     'space-before-function-paren': [0, 'ignore'],
     'comma-dangle': [0, 'ignore'],
     'space-in-parens': [0, 'ignore'],
-    "@orzechowskid/typelint/assignment-types-must-match": [ 'error' ],
-    '@orzechowskid/typelint/function-args-types-must-match': ['error'],
-    '@orzechowskid/typelint/function-return-type-must-match': ['error'],
   },
 };

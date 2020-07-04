@@ -14,6 +14,7 @@ import {
   isWatertight,
   makeWatertight,
   reconcile,
+  taggedAssembly,
   toKeptGeometry as toKeptTaggedGeometry,
   toPoints,
   transform,
@@ -48,7 +49,7 @@ export class Shape {
     return Shape.fromOpenPath(concatenatePath(...paths));
   }
 
-  constructor(geometry = { type: 'assembly', content: [] }, context) {
+  constructor(geometry = taggedAssembly({}), context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }

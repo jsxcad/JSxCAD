@@ -13,7 +13,8 @@ import '@jsxcad/api-v1-pdf';
 import '@jsxcad/api-v1-shell';
 import '@jsxcad/api-v1-svg';
 import '@jsxcad/api-v1-stl';
-// import '@jsxcad/api-v1-view';
+
+export { Page, pack } from '@jsxcad/api-v1-layout';
 
 export { md } from './md.js';
 
@@ -27,13 +28,9 @@ export { ChainedHull, Hull, Loop } from '@jsxcad/api-v1-extrude';
 
 export { Shape, log, make } from '@jsxcad/api-v1-shape';
 
-export { pack } from '@jsxcad/api-v1-layout';
-
 export { Line2 } from '@jsxcad/api-v1-line2';
 
 export { Plan } from '@jsxcad/api-v1-plan';
-
-export { Page } from '@jsxcad/api-v1-plans';
 
 export {
   Arc,

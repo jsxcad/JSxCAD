@@ -4,6 +4,7 @@ import {
   getSolids,
   getSurfaces,
   getZ0Surfaces,
+  taggedLayers,
 } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
@@ -12,7 +13,7 @@ import { toPlane } from '@jsxcad/math-poly3';
 
 export const squash = (shape) => {
   const geometry = shape.toKeptGeometry();
-  const result = { type: 'layers', content: [] };
+  const result = taggedLayers({});
   for (const { solid, tags } of getSolids(geometry)) {
     const polygons = [];
     for (const surface of solid) {

@@ -1,10 +1,11 @@
+import { rewrite, taggedLayers } from '@jsxcad/geometry-tagged';
+
 import { Shape } from './Shape.js';
-import { rewrite } from '@jsxcad/geometry-tagged';
 
 const noPlan = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (geometry.plan) {
-      return { type: 'layers', content: [] };
+      return taggedLayers({});
     } else {
       return descend();
     }

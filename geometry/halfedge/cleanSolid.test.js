@@ -1,4 +1,5 @@
 import clean from './clean.js';
+/** @type {function():Normalizer} createNormalize3 */
 import { createNormalize3 } from '@jsxcad/algorithm-quantize';
 import fromSurface from './fromSurface.js';
 import { junctionSelector } from './junction.js';
@@ -275,7 +276,9 @@ const solid = [
 ];
 
 test('merge/clean/split - left wall', (t) => {
+  /** @type {Normalizer} */
   const normalize = createNormalize3();
+  /** @type {Surface} */
   const surface = solid[2];
   const loops = fromSurface(surface, normalize);
   const mergedLoops = merge(loops);

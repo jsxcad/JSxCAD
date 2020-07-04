@@ -1,32 +1,40 @@
+import { addPending, emit, writeFile } from '@jsxcad/sys';
+
 import Shape from '@jsxcad/api-v1-shape';
-import { toDxf } from '@jsxcad/convert-dxf';
-import { writeFile } from '@jsxcad/sys';
+import { ensurePages } from '@jsxcad/api-v1-layout';
+import { toDxf } from '@jsxcad/convert-svg';
 
-/**
- *
- * # Write DXF
- *
- * ```
- * Cube().section().writeDxf('cube.dxf');
- * ```
- *
- **/
-
-export const writeDxf = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writeDxf('foo', bar);
-    options = { path: options };
+export const prepareDxf = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    const op = toDxf(entry, options);
+    addPending(op);
+    entries.push({
+      data: op,
+      filename: `${name}_${index++}.dxf`,
+      type: 'application/dxf',
+    });
   }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const dxf = await toDxf({ preview: true, ...options }, geometry);
-  await writeFile({ doSerialize: false }, `output/${path}`, dxf);
-  await writeFile({}, `geometry/${path}`, geometry);
+  return entries;
 };
 
-const method = function (options = {}) {
-  return writeDxf(options, this);
+const downloadDxfMethod = function (...args) {
+  const entries = prepareDxf(this, ...args);
+  emit({ download: { entries } });
+  return this;
 };
-Shape.prototype.writeDxf = method;
+Shape.prototype.downloadDxf = downloadDxfMethod;
+
+export const writeDxf = async (shape, name, options = {}) => {
+  for (const { data, filename } of prepareDxf(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+  }
+};
+
+const writeDxfMethod = function (...args) {
+  return writeDxf(this, ...args);
+};
+Shape.prototype.writeDxf = writeDxfMethod;
 
 export default writeDxf;

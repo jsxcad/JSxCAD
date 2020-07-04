@@ -1,25 +1,40 @@
+import { addPending, emit, writeFile } from '@jsxcad/sys';
+
 import Shape from '@jsxcad/api-v1-shape';
+import { ensurePages } from '@jsxcad/api-v1-layout';
 import { toThreejsPage } from '@jsxcad/convert-threejs';
-import { writeFile } from '@jsxcad/sys';
 
-export const writeThreejsPage = async (options, shape) => {
-  if (typeof options === 'string') {
-    options = { path: options };
+export const prepareThreejsPage = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    const op = toThreejsPage(entry, options);
+    addPending(op);
+    entries.push({
+      data: op,
+      filename: `${name}_${index++}.html`,
+      type: 'text/html',
+    });
   }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  await writeFile(
-    { doSerialize: false },
-    `output/${path}`,
-    toThreejsPage(options, geometry)
-  );
-  await writeFile({}, `geometry/${path}`, geometry);
+  return entries;
 };
 
-const method = function (options = {}) {
-  return writeThreejsPage(options, this);
+const downloadThreejsPageMethod = function (...args) {
+  const entries = prepareThreejsPage(this, ...args);
+  emit({ download: { entries } });
+  return this;
+};
+Shape.prototype.downloadThreejsPage = downloadThreejsPageMethod;
+
+export const writeThreejsPage = async (shape, name, options = {}) => {
+  for (const { data, filename } of prepareThreejsPage(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+  }
 };
 
-Shape.prototype.writeThreejsPage = method;
+const writeThreejsPageMethod = function (...args) {
+  return writeThreejsPage(this, ...args);
+};
+Shape.prototype.writeThreejsPage = writeThreejsPageMethod;
 
 export default writeThreejsPage;

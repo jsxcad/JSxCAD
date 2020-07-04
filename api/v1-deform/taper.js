@@ -1,8 +1,8 @@
+import { getSolids, taggedAssembly, taggedSolid } from '@jsxcad/geometry-tagged';
 import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { deform } from '@jsxcad/geometry-bsp';
-import { getSolids } from '@jsxcad/geometry-tagged';
 import { scale } from '@jsxcad/math-vec2';
 
 const Z = 2;
@@ -19,14 +19,10 @@ export const taper = (shape, factor, { resolution = 1 } = {}) => {
     const height = maxZ - minZ;
     const widthAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const squeeze = ([x, y, z]) => scaleXY(widthAt(z), [x, y, z]);
-    assembly.push({
-      type: 'solid',
-      solid: deform(makeWatertight(solid), squeeze, min, max, resolution),
-      tags,
-    });
+    assembly.push(taggedSolid({ tags }, deform(makeWatertight(solid), squeeze, min, max, resolution)));
   }
 
-  return Shape.fromGeometry({ type: 'assembly', content: assembly });
+  return Shape.fromGeometry(taggedAssembly({}, ...assembly));
 };
 
 const taperMethod = function (...args) {

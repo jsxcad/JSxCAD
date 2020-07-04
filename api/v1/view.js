@@ -1,7 +1,7 @@
 import { addPending, emit, write } from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
-import { ensurePages } from '@jsxcad/api-v1-plans';
+import { ensurePages } from '@jsxcad/api-v1-layout';
 
 // FIX: Avoid the extra read-write cycle.
 const view = (
