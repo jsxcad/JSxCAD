@@ -1,11 +1,11 @@
 export const taggedDisjointAssembly = ({ tags }, ...content) => {
-  if (content.some(value => !value)) {
+  if (content.some((value) => !value)) {
     throw Error(`Undefined DisjointAssembly content`);
   }
-  if (content.some(value => value.length)) {
+  if (content.some((value) => value.length)) {
     throw Error(`DisjointAssembly content is an array`);
   }
-  if (content.some(value => value.geometry)) {
+  if (content.some((value) => value.geometry)) {
     throw Error(`Likely Shape instance in DisjointAssembly content`);
   }
   if (tags !== undefined && tags.length === undefined) {

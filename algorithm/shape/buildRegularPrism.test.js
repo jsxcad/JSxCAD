@@ -12,6 +12,7 @@ test('A simple triangular prism', (t) => {
   const geometry = toKeptGeometry(buildRegularPrism(3));
   t.deepEqual(canonicalize(geometry), {
     type: 'disjointAssembly',
+    tags: undefined,
     content: [
       {
         type: 'solid',

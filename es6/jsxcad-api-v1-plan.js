@@ -1,4 +1,5 @@
 import Shape from './jsxcad-api-v1-shape.js';
+import { taggedAssembly } from './jsxcad-geometry-tagged.js';
 
 const Plan = (
   { plan, marks = [], planes = [], tags = [], visualization, content },
@@ -6,7 +7,7 @@ const Plan = (
 ) => {
   let visualizationGeometry =
     visualization === undefined
-      ? { type: 'assembly', content: [] }
+      ? taggedAssembly({})
       : visualization.toKeptGeometry();
   let contentGeometry =
     content === undefined ? [] : content.map((shape) => shape.toKeptGeometry());

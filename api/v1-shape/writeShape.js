@@ -1,6 +1,6 @@
 import { emit, writeFile } from '@jsxcad/sys';
 
-import Shape from '@jsxcad/api-v1-shape';
+import Shape from './Shape.js';
 
 export const prepareShape = (shape, name, options = {}) => {
   let index = 0;

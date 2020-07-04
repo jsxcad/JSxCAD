@@ -1,5 +1,8 @@
 import { fromGeometry, toKeptGeometry } from './Shape.js';
-import { intersection as intersectionGeometry, taggedAssembly } from '@jsxcad/geometry-tagged';
+import {
+  intersection as intersectionGeometry,
+  taggedAssembly,
+} from '@jsxcad/geometry-tagged';
 
 /**
  *

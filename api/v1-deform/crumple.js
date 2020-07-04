@@ -1,4 +1,8 @@
-import { getSolids, taggedAssembly, taggedSolid } from '@jsxcad/geometry-tagged';
+import {
+  getSolids,
+  taggedAssembly,
+  taggedSolid,
+} from '@jsxcad/geometry-tagged';
 import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 
 import OpenSimplexNoise from 'open-simplex-noise';
@@ -29,7 +33,12 @@ export const crumple = (
   const assembly = [];
   for (const { solid, tags } of getSolids(shape.toKeptGeometry())) {
     const [min, max] = measureBoundingBox(solid);
-    assembly.push(taggedSolid({ tags }, deform(makeWatertight(solid), perturb, min, max, resolution)));
+    assembly.push(
+      taggedSolid(
+        { tags },
+        deform(makeWatertight(solid), perturb, min, max, resolution)
+      )
+    );
   }
 
   return Shape.fromGeometry(taggedAssembly({}, ...assembly));

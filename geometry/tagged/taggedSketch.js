@@ -1,5 +1,5 @@
 export const taggedSketch = ({ tags }, ...content) => {
-  if (content.some(value => value === undefined)) {
+  if (content.some((value) => value === undefined)) {
     throw Error(`Undefined Sketch content`);
   }
   if (content.length !== 1) {

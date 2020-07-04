@@ -16,6 +16,7 @@ test.beforeEach(async (t) => {
 test('Simple', (t) => {
   const disjoint = toDisjointGeometry({
     type: 'assembly',
+    tags: undefined,
     content: [
       { type: 'z0Surface', z0Surface: [unitSquarePolygon], tags: ['a'] },
       {
@@ -32,6 +33,7 @@ test('Simple', (t) => {
   });
   t.deepEqual(canonicalize(disjoint), {
     type: 'disjointAssembly',
+    tags: undefined,
     content: [
       {
         type: 'z0Surface',
@@ -86,6 +88,7 @@ test('Empty', (t) => {
   const disjoint = toDisjointGeometry({ type: 'assembly', content: [] });
   t.deepEqual(canonicalize(disjoint), {
     type: 'disjointAssembly',
+    tags: undefined,
     content: [],
   });
 });

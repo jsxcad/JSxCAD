@@ -1,5 +1,8 @@
 import { Shape, fromGeometry, toKeptGeometry } from './Shape.js';
-import { taggedAssembly, union as unionGeometry } from '@jsxcad/geometry-tagged';
+import {
+  taggedAssembly,
+  union as unionGeometry,
+} from '@jsxcad/geometry-tagged';
 
 /**
  *

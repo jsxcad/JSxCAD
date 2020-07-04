@@ -40,6 +40,7 @@ test('Partial fit', (t) => {
   t.deepEqual(packed.map(canonicalize), [
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -55,6 +56,7 @@ test('Partial fit', (t) => {
     },
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -120,6 +122,7 @@ test('Partial rotated fit', (t) => {
   t.deepEqual(packed.map(canonicalize), [
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -195,6 +198,7 @@ test('Complete fit', (t) => {
   t.deepEqual(packed.map(canonicalize), [
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -210,6 +214,7 @@ test('Complete fit', (t) => {
     },
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -225,6 +230,7 @@ test('Complete fit', (t) => {
     },
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -279,6 +285,7 @@ test('Growing fit', (t) => {
   t.deepEqual(packed.map(canonicalize), [
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -294,6 +301,7 @@ test('Growing fit', (t) => {
     },
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -309,6 +317,7 @@ test('Growing fit', (t) => {
     },
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'paths',
@@ -334,6 +343,7 @@ test('Bad fit', (t) => {
     { size: [30, 120] },
     {
       type: 'surface',
+      tags: undefined,
       surface: [
         [
           [5.000000000000001, 20, 0],
@@ -345,6 +355,7 @@ test('Bad fit', (t) => {
     },
     {
       type: 'surface',
+      tags: undefined,
       surface: [
         [
           [5.000000000000001, 20, 0],
@@ -358,9 +369,11 @@ test('Bad fit', (t) => {
   t.deepEqual(packed.map(canonicalize), [
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'surface',
+          tags: undefined,
           surface: [
             [
               [1, -14, 0],
@@ -374,9 +387,11 @@ test('Bad fit', (t) => {
     },
     {
       type: 'disjointAssembly',
+      tags: undefined,
       content: [
         {
           type: 'surface',
+          tags: undefined,
           surface: [
             [
               [1, 28, 0],

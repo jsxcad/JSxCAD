@@ -24,7 +24,10 @@ const intersectionImpl = (geometry, ...geometries) => {
             todo.push(solid);
           }
         }
-        return taggedSolid({ tags }, solidIntersection(geometry.solid, ...todo));
+        return taggedSolid(
+          { tags },
+          solidIntersection(geometry.solid, ...todo)
+        );
       }
       case 'surface': {
         const todo = [];
@@ -36,7 +39,10 @@ const intersectionImpl = (geometry, ...geometries) => {
             todo.push(z0Surface);
           }
         }
-        return taggedSurface({ tags }, surfaceIntersection(geometry.surface, ...todo));
+        return taggedSurface(
+          { tags },
+          surfaceIntersection(geometry.surface, ...todo)
+        );
       }
       case 'z0Surface': {
         const todoSurfaces = [];
@@ -50,9 +56,19 @@ const intersectionImpl = (geometry, ...geometries) => {
           }
         }
         if (todoSurfaces.length > 0) {
-          return taggedSurface({ tags }, surfaceIntersection(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces));
+          return taggedSurface(
+            { tags },
+            surfaceIntersection(
+              geometry.z0Surface,
+              ...todoSurfaces,
+              ...todoZ0Surfaces
+            )
+          );
         } else {
-          return taggedZ0Surface({ tags }, z0SurfaceIntersection(geometry.z0Surface, ...todoZ0Surfaces));
+          return taggedZ0Surface(
+            { tags },
+            z0SurfaceIntersection(geometry.z0Surface, ...todoZ0Surfaces)
+          );
         }
       }
       case 'paths': {
@@ -62,7 +78,10 @@ const intersectionImpl = (geometry, ...geometries) => {
             todo.push(paths);
           }
         }
-        return taggedPaths({ tags }, pathsIntersection(geometry.paths, ...todo));
+        return taggedPaths(
+          { tags },
+          pathsIntersection(geometry.paths, ...todo)
+        );
       }
       case 'points': {
         // Not implemented yet.

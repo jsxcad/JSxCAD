@@ -1,4 +1,9 @@
-import { getLeafs, taggedDisjointAssembly, taggedItem, taggedLayers } from '@jsxcad/geometry-tagged';
+import {
+  getLeafs,
+  taggedDisjointAssembly,
+  taggedItem,
+  taggedLayers,
+} from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';

@@ -7,7 +7,7 @@ import { toKeptGeometry } from './toKeptGeometry.js';
 
 test('Empty', (t) => {
   const kept = toKeptGeometry({ type: 'assembly', content: [] });
-  t.deepEqual(kept, { type: 'disjointAssembly', content: [] });
+  t.deepEqual(kept, { type: 'disjointAssembly', content: [], tags: undefined });
 });
 
 test('Emptied', (t) => {
@@ -17,6 +17,7 @@ test('Emptied', (t) => {
   });
   t.deepEqual(keptGeometry, {
     type: 'disjointAssembly',
+    tags: undefined,
     content: [{ type: 'solid', solid: [], tags: ['compose/non-positive'] }],
   });
 });
@@ -24,6 +25,7 @@ test('Emptied', (t) => {
 test('With Keep', (t) => {
   const geometry = {
     type: 'assembly',
+    tags: undefined,
     content: [
       { type: 'solid', solid: [], tags: ['user/cube'] },
       { type: 'solid', solid: [], tags: ['user/cylinder'] },
@@ -33,6 +35,7 @@ test('With Keep', (t) => {
   const keptGeometry = toKeptGeometry(selectedGeometry);
   t.deepEqual(canonicalize(keptGeometry), {
     type: 'disjointAssembly',
+    tags: undefined,
     content: [
       { type: 'solid', solid: [], tags: ['compose/non-positive', 'user/cube'] },
       { type: 'solid', solid: [], tags: ['user/cylinder'] },

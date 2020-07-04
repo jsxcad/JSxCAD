@@ -1,8 +1,7 @@
 import Shape, { Shape as Shape$1 } from './jsxcad-api-v1-shape.js';
 import { fromStl, toStl } from './jsxcad-convert-stl.js';
 import { readFile, writeFile, addPending, emit } from './jsxcad-sys.js';
-import { getLeafs } from './jsxcad-geometry-tagged.js';
-import { ensurePages } from './jsxcad-api-v1-plans.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
  *
@@ -40,45 +39,32 @@ const readStl = async (path, { src, format = 'ascii' } = {}) => {
  *
  **/
 
-const downloadStl = (shape, name, options = {}) => {
+const prepareStl = (shape, name, options = {}) => {
   // CHECK: Should this be limited to Page plans?
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (const content of entry.content) {
-      for (let leaf of getLeafs(content)) {
-        const op = toStl(leaf, options);
-        addPending(op);
-        entries.push({
-          data: op,
-          filename: `${name}_${++index}.stl`,
-          type: 'application/sla',
-        });
-      }
-    }
+    const op = toStl(entry, options);
+    addPending(op);
+    entries.push({
+      data: op,
+      filename: `${name}_${index++}.stl`,
+      type: 'application/sla',
+    });
   }
-  emit({ download: { entries } });
-  return shape;
+  return entries;
 };
 
 const downloadStlMethod = function (...args) {
-  return downloadStl(this, ...args);
+  const entries = prepareStl(this, ...args);
+  emit({ download: { entries } });
+  return this;
 };
 Shape$1.prototype.downloadStl = downloadStlMethod;
 
 const writeStl = async (shape, name, options = {}) => {
-  let index = 0;
-  for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (const content of entry.content) {
-      for (let leaf of getLeafs(content)) {
-        const stl = await toStl(leaf, options);
-        await writeFile(
-          { doSerialize: false },
-          `output/${name}_${index}.stl`,
-          stl
-        );
-      }
-    }
+  for (const { data, filename } of prepareStl(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
   }
 };
 

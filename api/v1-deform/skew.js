@@ -1,4 +1,8 @@
-import { getSolids, taggedAssembly, taggedSolid } from '@jsxcad/geometry-tagged';
+import {
+  getSolids,
+  taggedAssembly,
+  taggedSolid,
+} from '@jsxcad/geometry-tagged';
 import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 
 import Shape from '@jsxcad/api-v1-shape';
@@ -15,7 +19,12 @@ export const skew = (shape, factor, { resolution = 1 } = {}) => {
     const height = maxZ - minZ;
     const shiftAt = (z) => 1 - ((z - minZ) / height) * (1 - factor);
     const shift = ([x, y, z]) => [x + shiftAt(z), y + shiftAt(z), z];
-    assembly.push(taggedSolid({ tags }, deform(makeWatertight(solid), shift, min, max, resolution)));
+    assembly.push(
+      taggedSolid(
+        { tags },
+        deform(makeWatertight(solid), shift, min, max, resolution)
+      )
+    );
   }
 
   return Shape.fromGeometry(taggedAssembly({}, ...assembly));

@@ -6,7 +6,7 @@ import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
 import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';
-import { toThreejsGeometry } from './toThreejsGeometry.js';
+import { toThreejsGeometry } from '@jsxcad/convert-threejs';
 
 const GEOMETRY_LAYER = 0;
 const PLAN_LAYER = 1;

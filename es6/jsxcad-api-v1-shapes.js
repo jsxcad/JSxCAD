@@ -1,8 +1,8 @@
 import { concatenate, rotateZ, translate } from './jsxcad-geometry-path.js';
 import Shape, { difference, intersection } from './jsxcad-api-v1-shape.js';
 import { numbers, linear } from './jsxcad-api-v1-math.js';
+import { taggedAssembly, getAnySurfaces, getPaths, taggedDisjointAssembly, taggedLayers, rewriteTags } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon, toRadiusFromApothem as toRadiusFromApothem$1, regularPolygonEdgeLengthToRadius, buildPolygonFromPoints, buildRegularPrism, buildFromFunction, buildFromSlices, buildRegularIcosahedron, buildRingSphere, buildRegularTetrahedron } from './jsxcad-algorithm-shape.js';
-import { getAnySurfaces, getPaths, rewriteTags } from './jsxcad-geometry-tagged.js';
 
 /**
  *
@@ -53,10 +53,9 @@ const Arc = (...args) => ofRadius(...args);
 Arc.ofRadius = ofRadius;
 
 const Assembly = (...shapes) =>
-  Shape.fromGeometry({
-    type: 'assembly',
-    content: shapes.map((shape) => shape.toGeometry()),
-  });
+  Shape.fromGeometry(
+    taggedAssembly({}, ...shapes.map((shape) => shape.toGeometry()))
+  );
 
 const unitPolygon = (sides = 16) =>
   Shape.fromGeometry(buildRegularPolygon(sides));
@@ -444,14 +443,14 @@ Cylinder.ofFunction.signature =
 const Difference = (...args) => difference(...args);
 
 const Empty = (...shapes) =>
-  Shape.fromGeometry({
-    type: 'disjointAssembly',
-    content: [
+  Shape.fromGeometry(
+    taggedDisjointAssembly(
+      {},
       { type: 'solid', solid: [] },
       { type: 'surface', surface: [] },
-      { type: 'paths', paths: [] },
-    ],
-  });
+      { type: 'paths', paths: [] }
+    )
+  );
 
 /**
  *
@@ -539,11 +538,15 @@ Icosahedron.ofDiameter.signature =
 
 const Intersection = (...args) => intersection(...args);
 
+const isDefined = (value) => value;
+
 const Layers = (...shapes) =>
-  Shape.fromGeometry({
-    type: 'layers',
-    content: shapes.map((shape) => shape.toGeometry()),
-  });
+  Shape.fromGeometry(
+    taggedLayers(
+      {},
+      ...shapes.filter(isDefined).map((shape) => shape.toGeometry())
+    )
+  );
 
 const fromPoints = (...points) =>
   Shape.fromOpenPath(points.map(([x = 0, y = 0, z = 0]) => [x, y, z]));

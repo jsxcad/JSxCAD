@@ -1,6 +1,7 @@
-import { readFile, getSources, writeFile } from './jsxcad-sys.js';
+import { readFile, getSources, writeFile, addPending, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { fromDxf, toDxf } from './jsxcad-convert-dxf.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 const readDxf = async (options) => {
   if (typeof options === 'string') {
@@ -20,32 +21,38 @@ const readDxf = async (options) => {
   return Shape.fromGeometry(await fromDxf(options, data));
 };
 
-/**
- *
- * # Write DXF
- *
- * ```
- * Cube().section().writeDxf('cube.dxf');
- * ```
- *
- **/
-
-const writeDxf = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writeDxf('foo', bar);
-    options = { path: options };
+const prepareDxf = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    const op = toDxf(entry, options);
+    addPending(op);
+    entries.push({
+      data: op,
+      filename: `${name}_${index++}.dxf`,
+      type: 'application/dxf',
+    });
   }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const dxf = await toDxf({ preview: true, ...options }, geometry);
-  await writeFile({ doSerialize: false }, `output/${path}`, dxf);
-  await writeFile({}, `geometry/${path}`, geometry);
+  return entries;
 };
 
-const method = function (options = {}) {
-  return writeDxf(options, this);
+const downloadDxfMethod = function (...args) {
+  const entries = prepareDxf(this, ...args);
+  emit({ download: { entries } });
+  return this;
 };
-Shape.prototype.writeDxf = method;
+Shape.prototype.downloadDxf = downloadDxfMethod;
+
+const writeDxf = async (shape, name, options = {}) => {
+  for (const { data, filename } of prepareDxf(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+  }
+};
+
+const writeDxfMethod = function (...args) {
+  return writeDxf(this, ...args);
+};
+Shape.prototype.writeDxf = writeDxfMethod;
 
 const api = { readDxf, writeDxf };
 

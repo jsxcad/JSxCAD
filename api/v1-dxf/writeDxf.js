@@ -2,7 +2,7 @@ import { addPending, emit, writeFile } from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { ensurePages } from '@jsxcad/api-v1-layout';
-import { toDxf } from '@jsxcad/convert-svg';
+import { toDxf } from '@jsxcad/convert-dxf';
 
 export const prepareDxf = (shape, name, options = {}) => {
   let index = 0;

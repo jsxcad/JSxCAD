@@ -37,7 +37,10 @@ const differenceImpl = (geometry, ...geometries) => {
             todo.push(z0Surface);
           }
         }
-        return taggedSurface({ tags }, surfaceDifference(geometry.surface, ...todo));
+        return taggedSurface(
+          { tags },
+          surfaceDifference(geometry.surface, ...todo)
+        );
       }
       case 'z0Surface': {
         // FIX: Solids should cut surfaces
@@ -52,9 +55,19 @@ const differenceImpl = (geometry, ...geometries) => {
           }
         }
         if (todoSurfaces.length > 0) {
-          return taggedSurface({ tags }, surfaceDifference(geometry.z0Surface, ...todoSurfaces, ...todoZ0Surfaces));
+          return taggedSurface(
+            { tags },
+            surfaceDifference(
+              geometry.z0Surface,
+              ...todoSurfaces,
+              ...todoZ0Surfaces
+            )
+          );
         } else {
-          return taggedZ0Surface({ tags }, z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces));
+          return taggedZ0Surface(
+            { tags },
+            z0SurfaceDifference(geometry.z0Surface, ...todoZ0Surfaces)
+          );
         }
       }
       case 'paths': {

@@ -1,7 +1,7 @@
 import Shape$1, { Shape, union, assemble, layer } from './jsxcad-api-v1-shape.js';
 import { buildConvexSurfaceHull, buildConvexHull, loop, extrude as extrude$1, buildConvexMinkowskiSum } from './jsxcad-algorithm-shape.js';
 import { Y as Y$1, Z as Z$3 } from './jsxcad-api-v1-connector.js';
-import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, measureBoundingBox } from './jsxcad-geometry-tagged.js';
+import { getPaths, getZ0Surfaces, getSurfaces, getPlans, getAnySurfaces, outline as outline$1, getSolids, taggedLayers, measureBoundingBox } from './jsxcad-geometry-tagged.js';
 import { alignVertices, transform as transform$1, fromPolygons } from './jsxcad-geometry-solid.js';
 import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './jsxcad-geometry-surface.js';
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
@@ -483,7 +483,7 @@ Shape.prototype.section = sectionMethod;
 
 const squash = (shape) => {
   const geometry = shape.toKeptGeometry();
-  const result = { type: 'layers', content: [] };
+  const result = taggedLayers({});
   for (const { solid, tags } of getSolids(geometry)) {
     const polygons = [];
     for (const surface of solid) {

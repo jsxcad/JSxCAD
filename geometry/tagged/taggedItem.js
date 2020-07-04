@@ -2,7 +2,7 @@ export const taggedItem = ({ tags }, ...content) => {
   if (tags !== undefined && tags.length === undefined) {
     throw Error(`Bad tags: ${tags}`);
   }
-  if (content.some(value => value === undefined)) {
+  if (content.some((value) => value === undefined)) {
     throw Error(`Undefined Item content`);
   }
   if (content.length !== 1) {

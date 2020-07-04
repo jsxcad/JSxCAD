@@ -55,14 +55,23 @@ const unionImpl = (geometry, ...geometries) => {
       }
       case 'surface': {
         const { surface, tags } = geometry;
-        return taggedSurface({ tags }, surfaceUnion(surface, ...surfaces, ...z0Surfaces));
+        return taggedSurface(
+          { tags },
+          surfaceUnion(surface, ...surfaces, ...z0Surfaces)
+        );
       }
       case 'z0Surface': {
         const { z0Surface, tags } = geometry;
         if (surfaces.length === 0) {
-          return taggedZ0Surface({ tags }, z0SurfaceUnion(z0Surface, ...z0Surfaces));
+          return taggedZ0Surface(
+            { tags },
+            z0SurfaceUnion(z0Surface, ...z0Surfaces)
+          );
         } else {
-          return taggedSurface({ tags }, surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces));
+          return taggedSurface(
+            { tags },
+            surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces)
+          );
         }
       }
       case 'paths': {

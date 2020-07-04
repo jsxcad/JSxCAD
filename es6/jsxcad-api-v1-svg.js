@@ -1,8 +1,7 @@
 import Shape$1, { Shape } from './jsxcad-api-v1-shape.js';
 import { fromSvgPath, fromSvg, toSvg } from './jsxcad-convert-svg.js';
 import { readFile, getSources, writeFile, addPending, emit } from './jsxcad-sys.js';
-import { getLeafs } from './jsxcad-geometry-tagged.js';
-import { ensurePages } from './jsxcad-api-v1-plans.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 
 /**
  *
@@ -63,51 +62,38 @@ const readSvgPath = async (options) => {
   return Shape$1.fromGeometry(await fromSvgPath(options, data));
 };
 
-const downloadSvg = (shape, name, options = {}) => {
+const prepareSvg = (shape, name, options = {}) => {
   let index = 0;
   const entries = [];
   for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (const content of entry.content) {
-      for (let leaf of getLeafs(content)) {
-        const op = toSvg(leaf, options);
-        addPending(op);
-        entries.push({
-          data: op,
-          filename: `${name}_${++index}.svg`,
-          type: 'image/svg+xml',
-        });
-      }
-    }
+    const op = toSvg(entry, options);
+    addPending(op);
+    entries.push({
+      data: op,
+      filename: `${name}_${index++}.svg`,
+      type: 'image/svg+xml',
+    });
   }
-  emit({ download: { entries } });
-  return shape;
+  return entries;
 };
 
 const downloadSvgMethod = function (...args) {
-  return downloadSvg(this, ...args);
+  const entries = prepareSvg(this, ...args);
+  emit({ download: { entries } });
+  return this;
 };
 Shape$1.prototype.downloadSvg = downloadSvgMethod;
 
 const writeSvg = async (shape, name, options = {}) => {
-  let index = 0;
-  for (const entry of ensurePages(shape.toKeptGeometry())) {
-    for (const content of entry.content) {
-      for (let leaf of getLeafs(content)) {
-        const svg = await toSvg(leaf, options);
-        await writeFile(
-          { doSerialize: false },
-          `output/${name}_${index}.svg`,
-          svg
-        );
-      }
-    }
+  for (const { data, filename } of prepareSvg(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
   }
 };
 
-const method = function (...args) {
+const writeSvgMethod = function (...args) {
   return writeSvg(this, ...args);
 };
-Shape$1.prototype.writeSvg = method;
+Shape$1.prototype.writeSvg = writeSvgMethod;
 
 const api = { SvgPath, readSvg, readSvgPath, writeSvg };
 

@@ -5,7 +5,7 @@ import { buildAdaptiveCubicBezierCurve } from './jsxcad-algorithm-shape.js';
 import { equals } from './jsxcad-math-vec2.js';
 import { transform } from './jsxcad-geometry-paths.js';
 import { toTagsFromName } from './jsxcad-algorithm-color.js';
-import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, isNotVoid, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { transform as transform$1, measureBoundingBox, translate, canonicalize as canonicalize$2, toKeptGeometry, getAnyNonVoidSurfaces, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { outline } from './jsxcad-geometry-surface.js';
 
 const canonicalizeSegment = ([directive, ...args]) => [
@@ -3726,9 +3726,7 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }" version="1.1" stroke="black" stroke-width=".1" fill="none" xmlns="http://www.w3.org/2000/svg">`,
   ];
 
-  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(
-    geometry
-  ).filter(isNotVoid)) {
+  for (const { surface, z0Surface, tags } of getAnyNonVoidSurfaces(geometry)) {
     const anySurface = surface || z0Surface;
     if (anySurface === undefined) throw Error('die');
     const color = toColorFromTags(tags);
@@ -3745,7 +3743,7 @@ const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
     }
     svg.push(`<path fill="${color}" stroke="none" d="${paths.join(' ')}"/>`);
   }
-  for (const { paths, tags } of getNonVoidPaths(geometry).filter(isNotVoid)) {
+  for (const { paths, tags } of getNonVoidPaths(geometry)) {
     const color = toColorFromTags(tags);
     for (const path of paths) {
       if (path[0] === null) {

@@ -15,7 +15,6 @@ const { readFile, writeFile } = fs.promises;
 
 test('No-eval geodesic sphere', async (t) => {
   const html = await toThreejsPage(
-    { includeEvaluator: false },
     {
       type: 'assembly',
       content: [
@@ -35,7 +34,8 @@ test('No-eval geodesic sphere', async (t) => {
           tags: ['surface'],
         },
       ],
-    }
+    },
+    { includeEvaluator: false }
   );
   await writeFile('toThreejsPage.test.noeval.html', html, { encoding: 'utf8' });
   t.is(
@@ -46,6 +46,7 @@ test('No-eval geodesic sphere', async (t) => {
 
 test('Eval lego skeleton sphere', async (t) => {
   const html = await toThreejsPage(
+    { type: 'assembly', content: [] },
     {
       includeEvaluator: true,
       includeEditor: true,
@@ -55,8 +56,7 @@ const main = async () => {
    await writeStl({ path: 'window/skeleton' }, difference(skeleton.scale([0.1, 0.1, 0.1]), Cube(5)));
  }
 `,
-    },
-    { type: 'assembly', content: [] }
+    }
   );
   await writeFile('toThreejsPage.test.eval.html', html, { encoding: 'utf8' });
   t.is(
