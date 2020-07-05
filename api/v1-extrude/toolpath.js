@@ -1,16 +1,11 @@
 import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
-import { overcut as overcutAlgorithm } from '@jsxcad/algorithm-toolpath';
+import { toolpath as toolpathAlgorithm } from '@jsxcad/algorithm-toolpath';
 
-// Return an assembly of paths so that each toolpath can have its own tag.
-export const toolpath = (
-  shape,
-  radius = 1,
-  { overcut = 0, joinPaths = false } = {}
-) =>
+export const toolpath = (shape, radius = 1, { overcut, solid = false } = {}) =>
   Shape.fromGeometry({
     type: 'paths',
-    paths: overcutAlgorithm(shape.toKeptGeometry(), radius, overcut, joinPaths),
+    paths: toolpathAlgorithm(shape.toKeptGeometry(), radius, overcut, solid),
   });
 
 const method = function (...options) {

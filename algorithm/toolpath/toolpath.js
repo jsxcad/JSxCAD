@@ -1,8 +1,9 @@
-import { normalize, subtract, rotateZ, add, scale } from './jsxcad-math-vec3.js';
-import { getEdges } from './jsxcad-geometry-path.js';
-import { getNonVoidPaths } from './jsxcad-geometry-tagged.js';
+import { add, normalize, rotateZ, scale, subtract } from '@jsxcad/math-vec3';
 
-const toolpathEdges = (path, radius = 1, overcut = 0, solid = false) => {
+import { getEdges } from '@jsxcad/geometry-path';
+import { getNonVoidPaths } from '@jsxcad/geometry-tagged';
+
+export const toolpathEdges = (path, radius = 1, overcut = 0, solid = false) => {
   var toolpaths = [];
   for (const [start, end] of getEdges(path)) {
     const direction = normalize(subtract(end, start));
@@ -32,7 +33,7 @@ const toolpathEdges = (path, radius = 1, overcut = 0, solid = false) => {
   return toolpaths;
 };
 
-const toolpath = (geometry, radius = 1, overcut, solid = false) => {
+export const toolpath = (geometry, radius = 1, overcut, solid = false) => {
   const toolpaths = [];
   for (const { paths } of getNonVoidPaths(geometry)) {
     for (const path of paths) {
@@ -41,5 +42,3 @@ const toolpath = (geometry, radius = 1, overcut, solid = false) => {
   }
   return toolpaths;
 };
-
-export { toolpath };
