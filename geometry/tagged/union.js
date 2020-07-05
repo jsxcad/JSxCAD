@@ -1,12 +1,19 @@
 import { cache } from '@jsxcad/cache';
 import { getPaths } from './getPaths.js';
+import { getPoints } from './getPoints.js';
 import { getSolids } from './getSolids.js';
 import { getSurfaces } from './getSurfaces.js';
 import { getZ0Surfaces } from './getZ0Surfaces.js';
 import { union as pathsUnion } from '@jsxcad/geometry-paths';
+import { union as pointsUnion } from '@jsxcad/geometry-points';
 import { rewrite } from './visit.js';
 import { union as solidUnion } from '@jsxcad/geometry-solid-boolean';
 import { union as surfaceUnion } from '@jsxcad/geometry-surface-boolean';
+import { taggedPaths } from './taggedPaths.js';
+import { taggedPoints } from './taggedPoints.js';
+import { taggedSolid } from './taggedSolid.js';
+import { taggedSurface } from './taggedSurface.js';
+import { taggedZ0Surface } from './taggedZ0Surface.js';
 import { union as z0SurfaceUnion } from '@jsxcad/geometry-z0surface-boolean';
 
 // Union is a little more complex, since it can make violate disjointAssembly invariants.
@@ -17,6 +24,7 @@ const unionImpl = (geometry, ...geometries) => {
   const solids = [];
   const surfaces = [];
   const z0Surfaces = [];
+  const pointsets = [];
   for (const geometry of geometries) {
     for (const { surface } of getSurfaces(geometry)) {
       surfaces.push(surface);
@@ -30,6 +38,9 @@ const unionImpl = (geometry, ...geometries) => {
     for (const { paths } of getPaths(geometry)) {
       pathsets.push(paths);
     }
+    for (const { points } of getPoints(geometry)) {
+      pointsets.push(points);
+    }
   }
 
   // For assemblies and layers we effectively compose with each element.
@@ -40,62 +51,49 @@ const unionImpl = (geometry, ...geometries) => {
     switch (geometry.type) {
       case 'solid': {
         const { solid, tags } = geometry;
-        return { type: 'solid', solid: solidUnion(solid, ...solids), tags };
+        return taggedSolid({ tags }, solidUnion(solid, ...solids));
       }
       case 'surface': {
         const { surface, tags } = geometry;
-        return {
-          type: 'surface',
-          surface: surfaceUnion(surface, ...surfaces, ...z0Surfaces),
-          tags,
-        };
+        return taggedSurface(
+          { tags },
+          surfaceUnion(surface, ...surfaces, ...z0Surfaces)
+        );
       }
       case 'z0Surface': {
         const { z0Surface, tags } = geometry;
         if (surfaces.length === 0) {
-          return {
-            type: 'z0Surface',
-            z0Surface: z0SurfaceUnion(z0Surface, ...z0Surfaces),
-            tags,
-          };
+          return taggedZ0Surface(
+            { tags },
+            z0SurfaceUnion(z0Surface, ...z0Surfaces)
+          );
         } else {
-          return {
-            type: 'surface',
-            surface: surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces),
-            tags,
-          };
+          return taggedSurface(
+            { tags },
+            surfaceUnion(z0Surface, ...surfaces, ...z0Surfaces)
+          );
         }
       }
       case 'paths': {
         const { paths, tags } = geometry;
-        return { type: 'paths', paths: pathsUnion(paths, ...pathsets), tags };
+        return taggedPaths({ tags }, pathsUnion(paths, ...pathsets));
       }
-      case 'assembly': {
-        const { content, tags } = geometry;
-        return {
-          type: 'assembly',
-          content: content.map((entry) => rewrite(entry, op)),
-          tags,
-        };
+      case 'points': {
+        const { points, tags } = geometry;
+        return taggedPoints({ tags }, pointsUnion(points, ...pointsets));
       }
-      case 'disjointAssembly': {
-        const { content, tags } = geometry;
-        return {
-          type: 'disjointAssembly',
-          content: content.map((entry) => rewrite(entry, op)),
-          tags,
-        };
+      case 'sketch': {
+        // Sketches aren't real for union.
+        return geometry;
       }
+      case 'assembly':
+      case 'disjointAssembly':
       case 'layers': {
-        const { layers, tags } = geometry;
-        return {
-          type: 'layers',
-          layers: layers.map((entry) => rewrite(entry, op)),
-          tags,
-        };
-      }
-      default:
         return descend();
+      }
+      default: {
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
+      }
     }
   };
 

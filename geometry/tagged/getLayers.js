@@ -1,4 +1,5 @@
 import { rewrite } from './visit.js';
+import { taggedDisjointAssembly } from './taggedDisjointAssembly.js';
 
 // This gets each layer independently.
 
@@ -8,7 +9,7 @@ export const getLayers = (geometry) => {
     switch (geometry.type) {
       case 'layers':
         geometry.content.forEach((layer) => layers.unshift(walk(layer)));
-        return { type: 'disjointAssembly', content: [] };
+        return taggedDisjointAssembly({});
       default:
         return descend();
     }

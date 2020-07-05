@@ -14,6 +14,7 @@ import './noVoid.js';
 import './op.js';
 import './openEdges.js';
 import './solids.js';
+import './sketch.js';
 import './trace.js';
 import './tags.js';
 import './wireframe.js';

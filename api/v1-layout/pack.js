@@ -1,5 +1,12 @@
+import {
+  getLeafs,
+  taggedDisjointAssembly,
+  taggedItem,
+  taggedLayers,
+  toDisjointGeometry,
+} from '@jsxcad/geometry-tagged';
+
 import Shape from '@jsxcad/api-v1-shape';
-import { getLeafs } from '@jsxcad/geometry-tagged';
 import { pack as packAlgorithm } from '@jsxcad/algorithm-pack';
 
 export const pack = (
@@ -30,17 +37,16 @@ export const pack = (
     if (packed.length === 0) {
       break;
     } else {
-      packedLayers.push({
-        type: 'item',
-        content: [{ type: 'disjointAssembly', content: packed }],
-      });
+      packedLayers.push(
+        taggedItem(
+          {},
+          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
+        )
+      );
     }
     todo.unshift(...unpacked);
   }
-  let packedShape = Shape.fromGeometry({
-    type: 'layers',
-    content: packedLayers,
-  });
+  let packedShape = Shape.fromGeometry(taggedLayers({}, ...packedLayers));
   if (size === undefined) {
     packedShape = packedShape.center();
   }

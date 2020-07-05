@@ -24,7 +24,7 @@ const Z = 2;
  *
  * @function
  * @param {Path} points
- * @param {Array<number>} contour
+ * @param {number[]} contour
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
  * @returns {number}
@@ -47,7 +47,7 @@ const buildContourXy = (points, contour, loop, selectJunction) => {
  *
  * @function
  * @param {Path} points
- * @param {Array<number>} contour
+ * @param {number[]} contour
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
  * @returns {number}
@@ -70,7 +70,7 @@ const buildContourXz = (points, contour, loop, selectJunction) => {
  *
  * @function
  * @param {Path} points
- * @param {Array<number>} contour
+ * @param {number[]} contour
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
  * @returns {number}
@@ -93,7 +93,7 @@ const buildContourYz = (points, contour, loop, selectJunction) => {
  *
  * @function
  * @param {Plane} plane
- * @returns {Function}
+ * @returns {function}
  */
 const selectBuildContour = (plane) => {
   const tZ = dot(plane, [0, 0, 1, 0]);
@@ -125,7 +125,7 @@ const selectBuildContour = (plane) => {
  * @param {Polygons} polygons
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
- * @returns {void}
+ * @returns {undefined}
  */
 export const pushConvexPolygons = (
   polygons,

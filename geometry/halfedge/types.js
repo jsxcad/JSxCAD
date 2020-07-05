@@ -1,31 +1,14 @@
-/**
- * @typedef {Array<number>} Plane
- */
+/** @typedef {number[]} Plane */
+/** @typedef {number[]} Point */
+/** @typedef {Point[]} Path */
+/** @typedef {Path[]} Surface */
+/** @typedef {Surface[]} Solid */
+/** @typedef {Path[]} Polygons */
 
 /**
- * @typedef {Array<number>} Point
- */
-
-/**
- * @typedef {Array<Point>} Path
- */
-
-/**
- * @typedef {Array<Path>} Surface
- */
-
-/**
- * @typedef {Array<Surface>} Solid
- */
-
-/**
- * @typedef {Array<Path>} Polygons
- */
-
-/*
  * @callback Normalizer
  * @param {Point} point
- * @returns {void}
+ * @returns {undefined}
  */
 
 /** @typedef {function(Point): Point} Normalizer */
@@ -42,15 +25,12 @@
  * @property {Edge} face
  * @property {Edge} next
  * @property {Edge} twin
- * @property {Array<Edge>} holes
+ * @property {Edge[]} holes
  * @property {number} id
  * @property {Plane} plane
  * @property {boolean} dead
  * @property {boolean} spurLinkage
  */
-export const Edge =
-  '{ Point: start, Edge: face, Edge: next, Edge: twin, Array<Edge>: holes, number: id }';
 
-/**
- * @typedef {Array<Edge>} Loops
- */
+/** @typedef {Edge} Loop */
+/** @typedef {Loop[]} Loops */

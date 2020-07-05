@@ -6,6 +6,9 @@ export const getItems = (geometry) => {
     switch (geometry.type) {
       case 'item':
         return items.push(geometry);
+      case 'sketch':
+        // We don't look inside sketches.
+        return;
       default:
         return descend();
     }

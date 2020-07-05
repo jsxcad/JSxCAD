@@ -1,10 +1,10 @@
 import Shape from './Shape.js';
+import { taggedLayers } from '@jsxcad/geometry-tagged';
 
 export const layer = (...shapes) =>
-  Shape.fromGeometry({
-    type: 'layers',
-    content: shapes.map((shape) => shape.toGeometry()),
-  });
+  Shape.fromGeometry(
+    taggedLayers({}, ...shapes.map((shape) => shape.toGeometry()))
+  );
 
 const layerMethod = function (...shapes) {
   return layer(this, ...shapes);

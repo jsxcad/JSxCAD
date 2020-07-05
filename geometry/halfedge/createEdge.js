@@ -1,8 +1,4 @@
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Plane} Plane
- * @typedef {import("./types").Point} Point
- */
+import './types.js';
 
 // This produces a half-edge link.
 
@@ -14,7 +10,7 @@
  * @param {Edge=} face
  * @param {Edge=} next
  * @param {Edge=} twin
- * @param {Array<Edge>=} holes
+ * @param {Edge[]=} holes
  * @param {Plane=} plane
  * @param {number=} id
  * @param {boolean=} dead

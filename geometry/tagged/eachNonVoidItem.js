@@ -3,7 +3,8 @@ import { visit } from './visit.js';
 
 export const eachNonVoidItem = (geometry, op) => {
   const walk = (geometry, descend) => {
-    if (isNotVoid(geometry)) {
+    // FIX: Sketches aren't real either -- but this is a bit unclear.
+    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
       op(geometry);
       descend();
     }

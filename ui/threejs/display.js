@@ -1,5 +1,6 @@
 /* global ResizeObserver */
 
+import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import {
   buildGui,
   buildGuiControls,
@@ -10,9 +11,6 @@ import { buildScene, createResizer } from './scene.js';
 import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
 
-const GEOMETRY_LAYER = 0;
-const PLAN_LAYER = 1;
-
 export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   const datasets = [];
   const width = page.offsetWidth;
@@ -22,7 +20,7 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
   geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, hudCanvas, renderer, scene, viewerElement } = buildScene({
     width,
@@ -37,7 +35,7 @@ export const display = async ({ view = {}, threejsGeometry } = {}, page) => {
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER);
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
   const updateHud = () => {

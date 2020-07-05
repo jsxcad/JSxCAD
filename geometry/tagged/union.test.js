@@ -26,6 +26,7 @@ test('Surface', (t) => {
   const surface = union(
     {
       type: 'assembly',
+      tags: undefined,
       content: [{ type: 'z0Surface', z0Surface: [unitSquarePolygon] }],
     },
     {

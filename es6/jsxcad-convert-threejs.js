@@ -1,34 +1,24 @@
 import { makeConvex } from './jsxcad-geometry-surface.js';
 import { toPlane } from './jsxcad-math-poly3.js';
-import { toSegments } from './jsxcad-geometry-path.js';
 import { toTriangles } from './jsxcad-geometry-polygons.js';
 import { toKeptGeometry } from './jsxcad-geometry-tagged.js';
 
-const pointsToThreejsPoints = (geometry) => {
-  return geometry.points;
-};
-
-const pathsToThreejsSegments = (geometry) => {
-  const segments = [];
-  for (const path of geometry) {
-    for (const [start, end] of toSegments({}, path)) {
-      segments.push([start, end]);
-    }
-  }
-  return segments;
-};
+const pointsToThreejsPoints = (points) => points;
 
 const solidToThreejsSolid = (solid) => {
   const normals = [];
   const positions = [];
   for (const surface of solid) {
+    // for (const convex of makeConvex(surface)) {
     for (const triangle of toTriangles({}, surface)) {
-      for (const point of triangle) {
-        const plane = toPlane(triangle);
-        if (plane === undefined) continue;
-        const [x, y, z] = plane;
-        normals.push(x, y, z);
-        positions.push(...point);
+      const plane = toPlane(triangle);
+      if (plane === undefined) {
+        continue;
+      }
+      const [px, py, pz] = toPlane(triangle);
+      for (const [x = 0, y = 0, z = 0] of triangle) {
+        normals.push(px, py, pz);
+        positions.push(x, y, z);
       }
     }
   }
@@ -38,11 +28,13 @@ const solidToThreejsSolid = (solid) => {
 const surfaceToThreejsSurface = (surface) => {
   const normals = [];
   const positions = [];
-  for (const triangle of toTriangles({}, makeConvex(surface))) {
-    for (const point of triangle) {
-      const plane = toPlane(triangle);
-      if (plane === undefined) continue;
-      const [x, y, z] = plane;
+  for (const convex of makeConvex(surface)) {
+    const plane = toPlane(convex);
+    if (plane === undefined) {
+      continue;
+    }
+    const [x, y, z] = toPlane(convex);
+    for (const point of convex) {
       normals.push(x, y, z);
       positions.push(...point);
     }
@@ -52,84 +44,97 @@ const surfaceToThreejsSurface = (surface) => {
 
 const toThreejsGeometry = (geometry, supertags) => {
   const tags = [...(supertags || []), ...(geometry.tags || [])];
+  if (tags.includes('compose/non-positive')) {
+    return;
+  }
   if (geometry.isThreejsGeometry) {
     return geometry;
   }
   switch (geometry.type) {
+    case 'layout':
     case 'assembly':
-      return {
-        assembly: geometry.content.map((item) => toThreejsGeometry(item, tags)),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'disjointAssembly': {
-      return {
-        assembly: geometry.content.map((item) => toThreejsGeometry(item, tags)),
-        tags,
-        isThreejsGeometry: true,
-      };
-    }
+    case 'disjointAssembly':
     case 'layers':
       return {
-        assembly: geometry.content.map((item) => toThreejsGeometry(item, tags)),
+        type: 'assembly',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
+        tags,
+        isThreejsGeometry: true,
+      };
+    case 'sketch':
+      return {
+        type: 'sketch',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
         tags,
         isThreejsGeometry: true,
       };
     case 'item':
       return {
-        item: toThreejsGeometry(geometry.content[0], tags),
+        type: 'item',
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
         tags,
         isThreejsGeometry: true,
       };
     case 'paths':
       return {
-        threejsSegments: pathsToThreejsSegments(geometry.paths),
+        type: 'paths',
+        threejsPaths: geometry.paths,
         tags,
         isThreejsGeometry: true,
       };
     case 'plan':
       return {
+        type: 'plan',
         threejsPlan: geometry.plan,
         threejsMarks: geometry.marks,
-        threejsVisualization: toThreejsGeometry(geometry.visualization),
-        threejsContent: toThreejsGeometry(geometry.content[0]),
+        content: geometry.content.map((content) =>
+          toThreejsGeometry(content, tags)
+        ),
         tags,
         isThreejsGeometry: true,
       };
     case 'points':
       return {
-        threejsSegments: pointsToThreejsPoints(geometry.points),
+        type: 'points',
+        threejsPoints: pointsToThreejsPoints(geometry.points),
         tags,
         isThreejsGeometry: true,
       };
     case 'solid':
       return {
+        type: 'solid',
         threejsSolid: solidToThreejsSolid(geometry.solid),
         tags,
         isThreejsGeometry: true,
       };
     case 'surface':
       return {
+        type: 'surface',
         threejsSurface: surfaceToThreejsSurface(geometry.surface),
         tags,
         isThreejsGeometry: true,
       };
     case 'z0Surface':
       return {
+        type: 'surface',
         threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
         tags,
         isThreejsGeometry: true,
       };
     default:
-      throw Error(
-        `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
-      );
+      throw Error(`Unexpected geometry: ${geometry.type}`);
   }
 };
 
 const toThreejsPage = async (
-  { view, title = 'JSxCAD Viewer' },
-  geometry
+  geometry,
+  { view, title = 'JSxCAD Viewer' } = {}
 ) => {
   const keptGeometry = toKeptGeometry(geometry);
   const threejsGeometry = toThreejsGeometry(keptGeometry);

@@ -37,7 +37,6 @@ cp api/v1-stl/dist/main.js es6/jsxcad-api-v1-stl.js
 cp api/v1-svg/dist/main.js es6/jsxcad-api-v1-svg.js
 cp api/v1-threejs/dist/main.js es6/jsxcad-api-v1-threejs.js
 cp api/v1-units/dist/main.js es6/jsxcad-api-v1-units.js
-cp api/v1-view/dist/main.js es6/jsxcad-api-v1-view.js
 cp cache/dist/main.js es6/jsxcad-cache.js
 cp compiler/dist/main.js es6/jsxcad-compiler.js
 cp convert/dst/dist/main.js es6/jsxcad-convert-dst.js

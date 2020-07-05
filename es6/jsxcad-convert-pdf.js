@@ -83,6 +83,9 @@ const toPdf = async (
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of outline(surface)) {
       let nth = path[0] === null ? 1 : 0;
+      if (nth >= path.length) {
+        continue;
+      }
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
       for (nth++; nth < path.length; nth++) {
@@ -99,6 +102,9 @@ const toPdf = async (
     // FIX: Avoid making the surface convex.
     for (const path of outline(z0Surface)) {
       let nth = path[0] === null ? 1 : 0;
+      if (nth >= path.length) {
+        continue;
+      }
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
       for (nth++; nth < path.length; nth++) {
@@ -113,6 +119,9 @@ const toPdf = async (
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));
     for (const path of paths) {
       let nth = path[0] === null ? 1 : 0;
+      if (nth >= path.length) {
+        continue;
+      }
       const [x1, y1] = path[nth];
       lines.push(`${x1.toFixed(9)} ${y1.toFixed(9)} m`); // move-to.
       for (nth++; nth < path.length; nth++) {

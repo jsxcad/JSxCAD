@@ -1,6 +1,6 @@
 import { close, concatenate, open } from './jsxcad-geometry-path.js';
-import { eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, isVoid, getPaths, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
-import { addReadDecoder, log as log$1, writeFile, readFile } from './jsxcad-sys.js';
+import { taggedAssembly, eachPoint, flip, toKeptGeometry as toKeptGeometry$1, toPoints, transform, reconcile, isWatertight, makeWatertight, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, rewriteTags, union as union$1, intersection as intersection$1, difference as difference$1, assemble as assemble$1, getSolids, rewrite, measureBoundingBox as measureBoundingBox$1, taggedLayers, isVoid, taggedSketch, getPaths, allTags, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, canonicalize as canonicalize$1, measureArea } from './jsxcad-geometry-tagged.js';
+import { addReadDecoder, log as log$1, readFile, writeFile, emit } from './jsxcad-sys.js';
 import { fromPolygons, findOpenEdges } from './jsxcad-geometry-solid.js';
 import { outline } from './jsxcad-geometry-surface.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
@@ -35,7 +35,7 @@ class Shape {
     return Shape.fromOpenPath(concatenate(...paths));
   }
 
-  constructor(geometry = { type: 'assembly', content: [] }, context) {
+  constructor(geometry = taggedAssembly({}), context) {
     if (geometry.geometry) {
       throw Error('die: { geometry: ... } is not valid geometry.');
     }
@@ -244,7 +244,7 @@ notAsMethod.signature = 'Shape -> as(...tags:string) -> Shape';
 const union = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ type: 'assembly', content: [] });
+      return fromGeometry(taggedAssembly({}));
     }
     case 1: {
       return shapes[0];
@@ -347,7 +347,7 @@ addToMethod.signature = 'Shape -> (...Shapes) -> Shape';
 const intersection = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ type: 'assembly', content: [] });
+      return fromGeometry(taggedAssembly({}));
     }
     case 1: {
       // We still want to produce a simple shape.
@@ -358,8 +358,6 @@ const intersection = (...shapes) => {
     }
   }
 };
-
-intersection.signature = 'intersection(shape:Shape, ...to:Shape) -> Shape';
 
 const clipMethod = function (...shapes) {
   return intersection(this, ...shapes);
@@ -407,7 +405,7 @@ clipFromMethod.signature = 'Shape -> clipFrom(...to:Shape) -> Shape';
 const difference = (...shapes) => {
   switch (shapes.length) {
     case 0: {
-      return fromGeometry({ type: 'assembly', content: [] });
+      return fromGeometry(taggedAssembly({}));
     }
     case 1: {
       // We still want to produce a simple shape.
@@ -418,8 +416,6 @@ const difference = (...shapes) => {
     }
   }
 };
-
-difference.signature = 'difference(shape:Shape, ...shapes:Shape) -> Shape';
 
 /**
  *
@@ -509,7 +505,7 @@ const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
   switch (shapes.length) {
     case 0: {
-      return Shape.fromGeometry({ type: 'assembly', content: [] });
+      return Shape.fromGeometry(taggedAssembly({}));
     }
     case 1: {
       return shapes[0];
@@ -519,8 +515,6 @@ const assemble = (...shapes) => {
     }
   }
 };
-
-assemble.signature = 'assemble(...shapes:Shape) -> Shape';
 
 const faces = (shape, op = (x) => x) => {
   const faces = [];
@@ -662,7 +656,7 @@ measureCenterMethod.signature = 'Shape -> measureCenter() -> vector';
 const noPlan = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (geometry.plan) {
-      return { type: 'layers', content: [] };
+      return taggedLayers({});
     } else {
       return descend();
     }
@@ -680,7 +674,7 @@ Shape.prototype.noPlan = noPlanMethod;
 const noVoid = (shape, tags, select) => {
   const op = (geometry, descend) => {
     if (isVoid(geometry)) {
-      return { type: 'layers', content: [] };
+      return taggedLayers({});
     } else {
       return descend();
     }
@@ -739,6 +733,17 @@ const solidsMethod = function (...args) {
   return solids(this, ...args);
 };
 Shape.prototype.solids = solidsMethod;
+
+const sketch = (shape) =>
+  Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));
+
+Shape.prototype.sketch = function () {
+  return sketch(this);
+};
+
+Shape.prototype.withSketch = function () {
+  return assemble(this, sketch(this));
+};
 
 const trace = (shape, length = 1) => {
   const tracePaths = [];
@@ -1073,10 +1078,9 @@ kept.signature = 'kept(shape:Shape) -> Shape';
 keptMethod.signature = 'Shape -> kept() -> Shape';
 
 const layer = (...shapes) =>
-  Shape.fromGeometry({
-    type: 'layers',
-    content: shapes.map((shape) => shape.toGeometry()),
-  });
+  Shape.fromGeometry(
+    taggedLayers({}, ...shapes.map((shape) => shape.toGeometry()))
+  );
 
 const layerMethod = function (...shapes) {
   return layer(this, ...shapes);
@@ -1112,62 +1116,12 @@ Shape.prototype.log = logMethod;
 
 log.signature = 'log(op:function)';
 
-/**
- *
- * # Write Shape Geometry
- *
- * This writes a shape as a tagged geometry in json format.
- *
- * ::: illustration { "view": { "position": [5, 5, 5] } }
- * ```
- * await Cube().writeShape('cube.shape');
- * await readShape({ path: 'cube.shape' })
- * ```
- * :::
- *
- **/
-
-const cacheShape = async (shape, path) => {
-  const geometry = shape.toGeometry();
-  await writeFile({}, `cache/${path}`, geometry);
-};
-
-const writeShape = async (shape, path) => {
-  const geometry = shape.toGeometry();
-  await writeFile(
-    { doSerialize: false },
-    `output/${path}`,
-    JSON.stringify(geometry)
-  );
-  await writeFile({}, `geometry/${path}`, geometry);
-};
-
-const writeShapeMethod = function (...args) {
-  return writeShape(this, ...args);
-};
-Shape.prototype.writeShape = writeShapeMethod;
-
-const readShape = async (
-  path,
-  build,
-  { ephemeral = false, src } = {}
-) => {
-  let data = await readFile({ ephemeral }, `source/${path}`);
+const readShape = async (path, { src } = {}) => {
+  let data = await readFile({ doSerialize: false }, `source/${path}`);
   if (data === undefined && src) {
-    data = await readFile({ sources: [src], ephemeral }, `cache/${path}`);
+    data = await readFile({ sources: [src] }, `cache/${path}`);
   }
-  if (data === undefined && build !== undefined) {
-    data = await readFile({ ephemeral }, `cache/${path}`);
-    if (data !== undefined) {
-      return Shape.fromGeometry(data);
-    }
-    const shape = await build();
-    if (!ephemeral) {
-      await cacheShape(shape, path);
-    }
-    return shape;
-  }
-  return Shape.fromGeometry(data);
+  return Shape.fromGeometry(await JSON.parse(data));
 };
 
 const make = (path, builder) => readShape(path, builder);
@@ -1609,6 +1563,35 @@ const turnZMethod = function (angle) {
   return turnZ(this, angle);
 };
 Shape.prototype.turnZ = turnZMethod;
+
+const prepareShape = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  entries.push({
+    data: new TextEncoder('utf8').encode(JSON.stringify(shape)),
+    filename: `${name}_${index++}.jsxcad`,
+    type: 'application/x-jsxcad',
+  });
+  return entries;
+};
+
+const downloadShapeMethod = function (...args) {
+  const entries = prepareShape(this, ...args);
+  emit({ download: { entries } });
+  return this;
+};
+Shape.prototype.downloadShape = downloadShapeMethod;
+
+const writeShape = async (shape, name, options = {}) => {
+  for (const { data, filename } of prepareShape(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+  }
+};
+
+const writeShapeMethod = function (...args) {
+  return writeShape(this, ...args);
+};
+Shape.prototype.writeShape = writeShapeMethod;
 
 export default Shape;
 export { Shape, assemble, canonicalize, center, color, colors, difference, drop, intersection, keep, kept, layer, log, make, material, move, moveX, moveY, moveZ, orient, readShape, rotate, rotateX, rotateY, rotateZ, scale, size, translate, turn, turnX, turnY, turnZ, union, writeShape };

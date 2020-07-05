@@ -1,7 +1,5 @@
 import { toRgbFromTags } from './jsxcad-algorithm-color.js';
-import { makeConvex } from './jsxcad-geometry-surface.js';
-import { toPlane } from './jsxcad-math-poly3.js';
-import { toTriangles } from './jsxcad-geometry-polygons.js';
+import { toThreejsGeometry } from './jsxcad-convert-threejs.js';
 
 /**
  * dat-gui JavaScript Controller Library
@@ -53614,6 +53612,9 @@ const buildScene = ({
   return { camera, canvas, renderer, scene };
 };
 
+const GEOMETRY_LAYER = 0;
+const SKETCH_LAYER = 1;
+
 const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
   let rgb = toRgbFromTags(tags, null);
   if (rgb === null) {
@@ -53939,9 +53940,6 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
-const GEOMETRY_LAYER = 0;
-// const PLAN_LAYER = 1;
-
 const buildMeshes = async ({
   datasets,
   threejsGeometry,
@@ -53957,6 +53955,9 @@ const buildMeshes = async ({
     case 'assembly':
     case 'item':
     case 'plan':
+      break;
+    case 'sketch':
+      layer = SKETCH_LAYER;
       break;
     case 'paths': {
       const paths = threejsGeometry.threejsPaths;
@@ -54140,145 +54141,7 @@ const moveToFit = ({
   }
 };
 
-const pointsToThreejsPoints = (points) => points;
-
-const solidToThreejsSolid = (solid) => {
-  const normals = [];
-  const positions = [];
-  for (const surface of solid) {
-    // for (const convex of makeConvex(surface)) {
-    for (const triangle of toTriangles({}, surface)) {
-      const plane = toPlane(triangle);
-      if (plane === undefined) {
-        continue;
-      }
-      const [px, py, pz] = toPlane(triangle);
-      for (const [x = 0, y = 0, z = 0] of triangle) {
-        normals.push(px, py, pz);
-        positions.push(x, y, z);
-      }
-    }
-  }
-  return { normals, positions };
-};
-
-const surfaceToThreejsSurface = (surface) => {
-  const normals = [];
-  const positions = [];
-  for (const convex of makeConvex(surface)) {
-    const plane = toPlane(convex);
-    if (plane === undefined) {
-      continue;
-    }
-    const [x, y, z] = toPlane(convex);
-    for (const point of convex) {
-      normals.push(x, y, z);
-      positions.push(...point);
-    }
-  }
-  return { normals, positions };
-};
-
-const toThreejsGeometry = (geometry, supertags) => {
-  const tags = [...(supertags || []), ...(geometry.tags || [])];
-  if (tags.includes('compose/non-positive')) {
-    return;
-  }
-  if (geometry.isThreejsGeometry) {
-    return geometry;
-  }
-  switch (geometry.type) {
-    case 'assembly':
-      return {
-        type: 'assembly',
-        content: geometry.content.map((content) =>
-          toThreejsGeometry(content, tags)
-        ),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'disjointAssembly':
-      return {
-        type: 'assembly',
-        content: geometry.content.map((content) =>
-          toThreejsGeometry(content, tags)
-        ),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'layers':
-      return {
-        type: 'assembly',
-        content: geometry.content.map((content) =>
-          toThreejsGeometry(content, tags)
-        ),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'item':
-      return {
-        type: 'item',
-        content: geometry.content.map((content) =>
-          toThreejsGeometry(content, tags)
-        ),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'paths':
-      return {
-        type: 'paths',
-        threejsPaths: geometry.paths,
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'plan':
-      return {
-        type: 'plan',
-        threejsPlan: geometry.plan,
-        threejsMarks: geometry.marks,
-        content: geometry.content.map((content) =>
-          toThreejsGeometry(content, tags)
-        ),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'points':
-      return {
-        type: 'points',
-        threejsPoints: pointsToThreejsPoints(geometry.points),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'solid':
-      return {
-        type: 'solid',
-        threejsSolid: solidToThreejsSolid(geometry.solid),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'surface':
-      return {
-        type: 'surface',
-        threejsSurface: surfaceToThreejsSurface(geometry.surface),
-        tags,
-        isThreejsGeometry: true,
-      };
-    case 'z0Surface':
-      return {
-        type: 'surface',
-        threejsSurface: surfaceToThreejsSurface(geometry.z0Surface),
-        tags,
-        isThreejsGeometry: true,
-      };
-    default:
-      throw Error(`Unexpected geometry: ${geometry.type}`);
-  }
-};
-
 /* global ResizeObserver */
-
-const GEOMETRY_LAYER$1 = 0;
-const PLAN_LAYER = 1;
 
 const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   let datasets = [];
@@ -54286,10 +54149,10 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   const height = page.offsetHeight;
 
   const geometryLayers = new Layers();
-  geometryLayers.set(GEOMETRY_LAYER$1);
+  geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -54302,10 +54165,12 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
 
   const render = () => {
     renderer.clear();
-    camera.layers.set(GEOMETRY_LAYER$1);
+    camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER);
+    renderer.clearDepth();
+
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
 
@@ -54356,9 +54221,6 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   return { canvas, render, updateGeometry };
 };
 
-const GEOMETRY_LAYER$2 = 0;
-const PLAN_LAYER$1 = 1;
-
 let locked = false;
 const pending = [];
 
@@ -54391,10 +54253,10 @@ const staticDisplay = async (
   const height = page.offsetHeight;
 
   const geometryLayers = new Layers();
-  geometryLayers.set(GEOMETRY_LAYER$2);
+  geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER$1);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -54407,10 +54269,10 @@ const staticDisplay = async (
 
   const render = () => {
     renderer.clear();
-    camera.layers.set(GEOMETRY_LAYER$2);
+    camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER$1);
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
 

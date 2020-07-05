@@ -21,6 +21,7 @@ export const toTransformedGeometry = (geometry) => {
         case 'layout':
         case 'layers':
         case 'item':
+        case 'sketch':
           return descend(undefined, matrix);
         case 'disjointAssembly':
           if (matrix === identityMatrix) {

@@ -35,7 +35,7 @@ export const equalsPlane = (a, b) => {
  * getPlanesOfPoint
  *
  * @param {Point} point
- * @returns {Array<Plane>}
+ * @returns {Plane[]}
  */
 const getPlanesOfPoint = (planesOfPoint, point) => {
   let planes = planesOfPoint.get(point);

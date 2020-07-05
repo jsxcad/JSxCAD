@@ -47,7 +47,7 @@ export const toSolid = (loops, selectJunction) => {
    * walk
    *
    * @param {Edge} loop
-   * @returns {void}
+   * @returns {undefined}
    */
   const walk = (loop) => {
     if (

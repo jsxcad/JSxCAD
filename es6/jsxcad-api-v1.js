@@ -2,11 +2,9 @@ import { addPending, write, emit, addSource, read, readFile, getSources } from '
 export { emit, read, write } from './jsxcad-sys.js';
 import Shape, { Shape as Shape$1, log, make } from './jsxcad-api-v1-shape.js';
 export { Shape, log, make } from './jsxcad-api-v1-shape.js';
-import { ensurePages, Page } from './jsxcad-api-v1-plans.js';
-export { Page } from './jsxcad-api-v1-plans.js';
+import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
+export { Page, pack } from './jsxcad-api-v1-layout.js';
 import './jsxcad-api-v1-deform.js';
-import { pack } from './jsxcad-api-v1-layout.js';
-export { pack } from './jsxcad-api-v1-layout.js';
 import './jsxcad-api-v1-pdf.js';
 import './jsxcad-api-v1-shell.js';
 import './jsxcad-api-v1-svg.js';
@@ -177,6 +175,8 @@ const source = (path, source) => addSource(`cache/${path}`, source);
 
 var api = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  Page: Page,
+  pack: pack,
   md: md,
   source: source,
   emit: emit,
@@ -192,10 +192,8 @@ var api = /*#__PURE__*/Object.freeze({
   Shape: Shape$1,
   log: log,
   make: make,
-  pack: pack,
   Line2: Line2,
   Plan: Plan,
-  Page: Page,
   Arc: Arc,
   Assembly: Assembly,
   Circle: Circle,

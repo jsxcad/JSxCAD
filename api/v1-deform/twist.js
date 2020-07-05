@@ -1,8 +1,12 @@
+import {
+  getSolids,
+  taggedAssembly,
+  taggedSolid,
+} from '@jsxcad/geometry-tagged';
 import { makeWatertight, measureBoundingBox } from '@jsxcad/geometry-solid';
 
 import Shape from '@jsxcad/api-v1-shape';
 import { deform } from '@jsxcad/geometry-bsp';
-import { getSolids } from '@jsxcad/geometry-tagged';
 import { rotateZ } from '@jsxcad/math-vec3';
 
 const Z = 2;
@@ -14,14 +18,15 @@ export const twist = (shape, angle = 0, { resolution = 1 } = {}) => {
     const height = max[Z] - min[Z];
     const radians = (angle / height) * (Math.PI / 180);
     const rotate = (point) => rotateZ(point, radians * (point[Z] - min[Z]));
-    assembly.push({
-      type: 'solid',
-      solid: deform(makeWatertight(solid), rotate, min, max, resolution),
-      tags,
-    });
+    assembly.push(
+      taggedSolid(
+        { tags },
+        deform(makeWatertight(solid), rotate, min, max, resolution)
+      )
+    );
   }
 
-  return Shape.fromGeometry({ type: 'assembly', content: assembly });
+  return Shape.fromGeometry(taggedAssembly({}, ...assembly));
 };
 
 const twistMethod = function (...args) {

@@ -3,18 +3,12 @@ import { toPlane as toPlane$1, flip } from './jsxcad-math-poly3.js';
 import { pushWhenValid } from './jsxcad-geometry-polygons.js';
 
 /**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Loops} Loops
- */
-
-/**
  * clean
- *
- * @function
- * @param {Loop} loop
- * @returns {Loop | void}
+ * @param {Edge} loop
+ * @returns {Edge|undefined}
  */
 const clean = (loop) => {
+  /** @type {Edge} */
   let link = loop;
   do {
     if (link.next === undefined) {
@@ -59,12 +53,6 @@ const clean = (loop) => {
   return link.face;
 };
 
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Plane} Plane
- * @typedef {import("./types").Point} Point
- */
-
 // This produces a half-edge link.
 
 /**
@@ -75,7 +63,7 @@ const clean = (loop) => {
  * @param {Edge=} face
  * @param {Edge=} next
  * @param {Edge=} twin
- * @param {Array<Edge>=} holes
+ * @param {Edge[]=} holes
  * @param {Plane=} plane
  * @param {number=} id
  * @param {boolean=} dead
@@ -95,15 +83,11 @@ const createEdge = (
 ) => ({ start, face, next, twin, holes, plane, id, dead, spurLinkage });
 
 /**
- * @typedef {import("./types").Edge} Edge
+ * @typedef {function(Edge):undefined} Thunk
+ * @returns {undefined}
  */
 
-/**
- * @typedef {function(Edge): void} Thunk
- * @returns {void}
- */
-
-/* @type {function(Edge, Thunk): void} */
+/* @type {function(Edge, Thunk):undefined} */
 
 /**
  * eachLink
@@ -111,7 +95,7 @@ const createEdge = (
  * @function
  * @param {Edge} loop
  * @param {Thunk} thunk
- * @returns {void}
+ * @returns {undefined}
  */
 const eachLink = (loop, thunk) => {
   let link = loop;
@@ -126,14 +110,6 @@ const eachLink = (loop, thunk) => {
     link = link.next;
   } while (link !== loop);
 };
-
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Loops} Loops
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Point} Point
- * @typedef {import("./types").Solid} Solid
- */
 
 let id = 0;
 
@@ -152,7 +128,7 @@ const fromSolid = (solid, normalize, closed = true, verbose = false) => {
    * getTwins
    *
    * @param {Point} point
-   * @returns {Array<Edge>}
+   * @returns {Edge[]}
    */
   const getTwins = (point) => {
     let twins = twinMap.get(point);
@@ -277,7 +253,7 @@ const equalsPlane = (a, b) => {
  * getPlanesOfPoint
  *
  * @param {Point} point
- * @returns {Array<Plane>}
+ * @returns {Plane[]}
  */
 const getPlanesOfPoint = (planesOfPoint, point) => {
   let planes = planesOfPoint.get(point);
@@ -555,11 +531,6 @@ const merge = (loops) => {
   }
   return filtered;
 };
-
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Loops} Loops
- */
 
 /**
  * walk
@@ -1461,7 +1432,7 @@ const Z$1 = 2;
  *
  * @function
  * @param {Path} points
- * @param {Array<number>} contour
+ * @param {number[]} contour
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
  * @returns {number}
@@ -1484,7 +1455,7 @@ const buildContourXy = (points, contour, loop, selectJunction) => {
  *
  * @function
  * @param {Path} points
- * @param {Array<number>} contour
+ * @param {number[]} contour
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
  * @returns {number}
@@ -1507,7 +1478,7 @@ const buildContourXz = (points, contour, loop, selectJunction) => {
  *
  * @function
  * @param {Path} points
- * @param {Array<number>} contour
+ * @param {number[]} contour
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
  * @returns {number}
@@ -1530,7 +1501,7 @@ const buildContourYz = (points, contour, loop, selectJunction) => {
  *
  * @function
  * @param {Plane} plane
- * @returns {Function}
+ * @returns {function}
  */
 const selectBuildContour = (plane) => {
   const tZ = dot(plane, [0, 0, 1, 0]);
@@ -1562,7 +1533,7 @@ const selectBuildContour = (plane) => {
  * @param {Polygons} polygons
  * @param {Edge} loop
  * @param {PointSelector} selectJunction
- * @returns {void}
+ * @returns {undefined}
  */
 const pushConvexPolygons = (
   polygons,
@@ -1649,7 +1620,7 @@ const toSolid = (loops, selectJunction) => {
    * walk
    *
    * @param {Edge} loop
-   * @returns {void}
+   * @returns {undefined}
    */
   const walk = (loop) => {
     if (
@@ -1679,11 +1650,6 @@ const toSolid = (loops, selectJunction) => {
 };
 
 /**
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Solid} Solid
- */
-
-/**
  * CleanSolid produces a defragmented version of a solid, while maintaining watertightness.
  *
  * @function
@@ -1698,6 +1664,7 @@ const cleanSolid = (solid, normalize) => {
     const loops = fromSolid(solid, normalize, /* closed= */ true);
     const selectJunction = junctionSelector(solid, normalize);
     const mergedLoops = merge(loops);
+    /** @type {Edge[]} */
     const cleanedLoops = mergedLoops.map(clean);
     const splitLoops = split(cleanedLoops);
     const cleanedSolid = toSolid(splitLoops, selectJunction);
@@ -1706,12 +1673,6 @@ const cleanSolid = (solid, normalize) => {
     return solid;
   }
 };
-
-/**
- * @typedef {import("./types").Loops} Loops
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Surface} Surface
- */
 
 /**
  * fromSurface

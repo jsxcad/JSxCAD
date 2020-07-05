@@ -14,6 +14,7 @@ import {
   Vector3,
   VertexColors,
 } from 'three';
+import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 
 import { buildMeshMaterial } from './material.js';
 import { setColor } from './color.js';
@@ -186,9 +187,6 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
-const GEOMETRY_LAYER = 0;
-// const PLAN_LAYER = 1;
-
 export const buildMeshes = async ({
   datasets,
   threejsGeometry,
@@ -204,6 +202,9 @@ export const buildMeshes = async ({
     case 'assembly':
     case 'item':
     case 'plan':
+      break;
+    case 'sketch':
+      layer = SKETCH_LAYER;
       break;
     case 'paths': {
       const paths = threejsGeometry.threejsPaths;

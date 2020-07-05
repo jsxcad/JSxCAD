@@ -1,10 +1,4 @@
-/**
- * @typedef {import("./types").Edge} Edge
- * @typedef {import("./types").Loops} Loops
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Point} Point
- * @typedef {import("./types").Solid} Solid
- */
+import './types.js';
 
 import createEdge from './createEdge.js';
 import eachLink from './eachLink.js';
@@ -26,7 +20,7 @@ export const fromSolid = (solid, normalize, closed = true, verbose = false) => {
    * getTwins
    *
    * @param {Point} point
-   * @returns {Array<Edge>}
+   * @returns {Edge[]}
    */
   const getTwins = (point) => {
     let twins = twinMap.get(point);

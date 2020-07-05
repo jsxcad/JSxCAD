@@ -1,10 +1,9 @@
+import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
+
 import { Layers } from 'three';
 import { buildMeshes } from './mesh.js';
 import { buildScene } from './scene.js';
 import { moveToFit } from './moveToFit.js';
-
-const GEOMETRY_LAYER = 0;
-const PLAN_LAYER = 1;
 
 let locked = false;
 const pending = [];
@@ -41,7 +40,7 @@ export const staticDisplay = async (
   geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -57,7 +56,7 @@ export const staticDisplay = async (
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER);
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
 

@@ -29,9 +29,10 @@ export const canonicalize = (geometry) => {
       case 'disjointAssembly':
       case 'layers':
       case 'layout':
+      case 'sketch':
         return descend();
       default:
-        Error(`Unexpected geometry type ${geometry.type}`);
+        throw Error(`Unexpected geometry type ${geometry.type}`);
     }
   };
   return rewrite(toTransformedGeometry(geometry), op);

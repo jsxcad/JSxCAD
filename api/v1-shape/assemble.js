@@ -1,6 +1,9 @@
 import { Shape, fromGeometry, toGeometry } from './Shape.js';
 
-import { assemble as assembleGeometry } from '@jsxcad/geometry-tagged';
+import {
+  assemble as assembleGeometry,
+  taggedAssembly,
+} from '@jsxcad/geometry-tagged';
 
 /**
  *
@@ -58,7 +61,7 @@ export const assemble = (...shapes) => {
   shapes = shapes.filter((shape) => shape !== undefined);
   switch (shapes.length) {
     case 0: {
-      return Shape.fromGeometry({ type: 'assembly', content: [] });
+      return Shape.fromGeometry(taggedAssembly({}));
     }
     case 1: {
       return shapes[0];
@@ -70,5 +73,3 @@ export const assemble = (...shapes) => {
 };
 
 export default assemble;
-
-assemble.signature = 'assemble(...shapes:Shape) -> Shape';

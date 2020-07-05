@@ -1,7 +1,4 @@
-/**
- * @typedef {import("./types").Normalizer} Normalizer
- * @typedef {import("./types").Solid} Solid
- */
+import './types.js';
 
 import clean from './clean.js';
 import fromSolid from './fromSolid.js';
@@ -25,6 +22,7 @@ export const cleanSolid = (solid, normalize) => {
     const loops = fromSolid(solid, normalize, /* closed= */ true);
     const selectJunction = junctionSelector(solid, normalize);
     const mergedLoops = merge(loops);
+    /** @type {Edge[]} */
     const cleanedLoops = mergedLoops.map(clean);
     const splitLoops = split(cleanedLoops);
     const cleanedSolid = toSolid(splitLoops, selectJunction);

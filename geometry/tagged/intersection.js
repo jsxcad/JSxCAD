@@ -7,10 +7,15 @@ import { intersection as pathsIntersection } from '@jsxcad/geometry-paths';
 import { rewrite } from './visit.js';
 import { intersection as solidIntersection } from '@jsxcad/geometry-solid-boolean';
 import { intersection as surfaceIntersection } from '@jsxcad/geometry-surface-boolean';
+import { taggedPaths } from './taggedPaths.js';
+import { taggedSolid } from './taggedSolid.js';
+import { taggedSurface } from './taggedSurface.js';
+import { taggedZ0Surface } from './taggedZ0Surface.js';
 import { intersection as z0SurfaceIntersection } from '@jsxcad/geometry-z0surface-boolean';
 
 const intersectionImpl = (geometry, ...geometries) => {
   const op = (geometry, descend) => {
+    const { tags } = geometry;
     switch (geometry.type) {
       case 'solid': {
         const todo = [];
@@ -19,11 +24,10 @@ const intersectionImpl = (geometry, ...geometries) => {
             todo.push(solid);
           }
         }
-        return {
-          type: 'solid',
-          solid: solidIntersection(geometry.solid, ...todo),
-          tags: geometry.tags,
-        };
+        return taggedSolid(
+          { tags },
+          solidIntersection(geometry.solid, ...todo)
+        );
       }
       case 'surface': {
         const todo = [];
@@ -35,11 +39,10 @@ const intersectionImpl = (geometry, ...geometries) => {
             todo.push(z0Surface);
           }
         }
-        return {
-          type: 'surface',
-          surface: surfaceIntersection(geometry.surface, ...todo),
-          tags: geometry.tags,
-        };
+        return taggedSurface(
+          { tags },
+          surfaceIntersection(geometry.surface, ...todo)
+        );
       }
       case 'z0Surface': {
         const todoSurfaces = [];
@@ -53,24 +56,19 @@ const intersectionImpl = (geometry, ...geometries) => {
           }
         }
         if (todoSurfaces.length > 0) {
-          return {
-            type: 'surface',
-            surface: surfaceIntersection(
+          return taggedSurface(
+            { tags },
+            surfaceIntersection(
               geometry.z0Surface,
               ...todoSurfaces,
               ...todoZ0Surfaces
-            ),
-            tags: geometry.tags,
-          };
+            )
+          );
         } else {
-          return {
-            type: 'surface',
-            surface: z0SurfaceIntersection(
-              geometry.z0Surface,
-              ...todoZ0Surfaces
-            ),
-            tags: geometry.tags,
-          };
+          return taggedZ0Surface(
+            { tags },
+            z0SurfaceIntersection(geometry.z0Surface, ...todoZ0Surfaces)
+          );
         }
       }
       case 'paths': {
@@ -80,14 +78,27 @@ const intersectionImpl = (geometry, ...geometries) => {
             todo.push(paths);
           }
         }
-        return {
-          type: 'paths',
-          paths: pathsIntersection(geometry.paths, ...todo),
-          tags: geometry.tags,
-        };
+        return taggedPaths(
+          { tags },
+          pathsIntersection(geometry.paths, ...todo)
+        );
+      }
+      case 'points': {
+        // Not implemented yet.
+        return geometry;
+      }
+      case 'assembly':
+      case 'item':
+      case 'disjointAssembly':
+      case 'layers': {
+        return descend();
+      }
+      case 'sketch': {
+        // Sketches aren't real for intersection.
+        return geometry;
       }
       default:
-        return descend();
+        throw Error(`Unexpected geometry: ${JSON.stringify(geometry)}`);
     }
   };
 
