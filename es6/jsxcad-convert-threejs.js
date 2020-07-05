@@ -136,7 +136,7 @@ const toThreejsPage = async (
   geometry,
   { view, title = 'JSxCAD Viewer' } = {}
 ) => {
-  const keptGeometry = toKeptGeometry(geometry);
+  const keptGeometry = toKeptGeometry(await geometry);
   const threejsGeometry = toThreejsGeometry(keptGeometry);
   const html = `
 <html>

@@ -8,16 +8,16 @@ import {
 
 import { transform } from './transform.js';
 
-export const rotateX = (angle, assembly) =>
-  transform(fromXRotation((angle * Math.PI) / 180), assembly);
-export const rotateY = (angle, assembly) =>
-  transform(fromYRotation((angle * Math.PI) / 180), assembly);
-export const rotateZ = (angle, assembly) =>
-  transform(fromZRotation((angle * Math.PI) / 180), assembly);
-export const translate = (vector, assembly) =>
-  transform(fromTranslation(vector), assembly);
-export const scale = (vector, assembly) =>
-  transform(fromScaling(vector), assembly);
+export const rotateX = (angle, geometry) =>
+  transform(fromXRotation((angle * Math.PI) / 180), geometry);
+export const rotateY = (angle, geometry) =>
+  transform(fromYRotation((angle * Math.PI) / 180), geometry);
+export const rotateZ = (angle, geometry) =>
+  transform(fromZRotation((angle * Math.PI) / 180), geometry);
+export const translate = (vector, geometry) =>
+  transform(fromTranslation(vector), geometry);
+export const scale = (vector, geometry) =>
+  transform(fromScaling(vector), geometry);
 
 export {
   findOpenEdges,

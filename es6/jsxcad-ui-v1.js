@@ -86722,7 +86722,7 @@ class NotebookUi extends Pane {
       } else if (note.md) {
         // Use ''' and '' instead of ``` and `` to avoid escaping.
         // FIX: Do this in a more principled fashion.
-        const data = note.md.replace(/'''/g, "```").replace(/''/g, "``");
+        const data = note.md.replace(/'''/g, '```').replace(/''/g, '``');
         const key = object_hash(data);
         notes.push( /*#__PURE__*/react.createElement("div", {
           key: key,

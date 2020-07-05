@@ -73,8 +73,6 @@ export const toPdf = async (
   geometry,
   { lineWidth = 0.096, size = [210, 297] } = {}
 ) => {
-  geometry = await geometry;
-
   // This is the size of a post-script point in mm.
   const pointSize = 0.352777778;
   const scale = 1 / pointSize;
@@ -84,7 +82,7 @@ export const toPdf = async (
     fromTranslation([(width * scale) / 2, (height * scale) / 2, 0]),
     fromScaling([scale, scale, scale])
   );
-  const keptGeometry = toKeptGeometry(transform(matrix, geometry));
+  const keptGeometry = toKeptGeometry(transform(matrix, await geometry));
   for (const { tags, surface } of getNonVoidSurfaces(keptGeometry)) {
     lines.push(toFillColor(toRgbFromTags(tags, black)));
     lines.push(toStrokeColor(toRgbFromTags(tags, black)));

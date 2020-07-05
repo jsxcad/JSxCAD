@@ -10,12 +10,7 @@ export const toolpath = (
 ) =>
   Shape.fromGeometry({
     type: 'paths',
-    paths: overcutAlgorithm(
-      shape.outline().toKeptGeometry(),
-      radius,
-      overcut,
-      joinPaths
-    ),
+    paths: overcutAlgorithm(shape.toKeptGeometry(), radius, overcut, joinPaths),
   });
 
 const method = function (...options) {

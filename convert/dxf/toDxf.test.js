@@ -7,6 +7,6 @@ const { readFile } = fs.promises;
 
 test('Triangle', async (t) => {
   const path = buildRegularPolygon(3).z0Surface[0];
-  const dxf = await toDxf({}, { type: 'paths', paths: [path] });
+  const dxf = await toDxf({ type: 'paths', paths: [path] });
   t.is(dxf, await readFile('toDxf.test.triangle.dxf', { encoding: 'utf8' }));
 });

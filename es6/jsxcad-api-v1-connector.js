@@ -646,8 +646,7 @@ const connect = (
   bConnectorShape,
   { doConnect = false, doAssemble = true } = {}
 ) => {
-  const aConnector = toKeptGeometry(aConnectorShape.toGeometry())
-    .content[0];
+  const aConnector = toKeptGeometry(aConnectorShape.toGeometry()).content[0];
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(
     aConnector.planes[0],

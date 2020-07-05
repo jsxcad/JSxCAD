@@ -634,12 +634,7 @@ const toolpath = (
 ) =>
   Shape.fromGeometry({
     type: 'paths',
-    paths: overcut(
-      shape.outline().toKeptGeometry(),
-      radius,
-      overcut$1,
-      joinPaths
-    ),
+    paths: overcut(shape.toKeptGeometry(), radius, overcut$1, joinPaths),
   });
 
 const method$1 = function (...options) {

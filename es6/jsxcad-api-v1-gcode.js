@@ -1,33 +1,41 @@
+import { writeFile, addPending, emit } from './jsxcad-sys.js';
 import Shape from './jsxcad-api-v1-shape.js';
+import { ensurePages } from './jsxcad-api-v1-layout.js';
 import { toGcode } from './jsxcad-convert-gcode.js';
-import { writeFile } from './jsxcad-sys.js';
 
-/**
- *
- * # Write G-Code
- *
- * ```
- * Square().toolpath(0.5).writeGcode('cube.pdf');
- * ```
- *
- **/
-
-const writeGcode = async (options, shape) => {
-  if (typeof options === 'string') {
-    // Support writeGcode('foo', bar);
-    options = { path: options };
+const prepareGcode = (shape, name, options = {}) => {
+  let index = 0;
+  const entries = [];
+  for (const entry of ensurePages(shape.toKeptGeometry())) {
+    const op = toGcode(entry, options);
+    addPending(op);
+    entries.push({
+      data: op,
+      filename: `${name}_${index++}.gcode`,
+      // CHECK: Is this a reasonable mime type?
+      type: 'application/x-gcode',
+    });
   }
-  const { path } = options;
-  const geometry = shape.toKeptGeometry();
-  const gcode = await toGcode({ preview: true, ...options }, geometry);
-  await writeFile({ doSerialize: false }, `output/${path}`, gcode);
-  await writeFile({}, `geometry/${path}`, geometry);
+  return entries;
 };
 
-const method = function (options = {}) {
-  return writeGcode(options, this);
+const downloadGcodeMethod = function (...args) {
+  const entries = prepareGcode(this, ...args);
+  emit({ download: { entries } });
+  return this;
 };
-Shape.prototype.writeGcode = method;
+Shape.prototype.downloadGcode = downloadGcodeMethod;
+
+const writeGcode = async (shape, name, options = {}) => {
+  for (const { data, filename } of prepareGcode(shape, name, {})) {
+    await writeFile({ doSerialize: false }, `output/${filename}`, data);
+  }
+};
+
+const writeGcodeMethod = function (...args) {
+  return writeGcode(this, ...args);
+};
+Shape.prototype.writeGcode = writeGcodeMethod;
 
 const api = { writeGcode };
 
