@@ -647,7 +647,7 @@ const connect = (
   { doConnect = false, doAssemble = true } = {}
 ) => {
   const aConnector = toKeptGeometry(aConnectorShape.toGeometry())
-    .disjointAssembly[0];
+    .content[0];
   const aShape = toShape(aConnectorShape);
   const [aTo] = toXYPlaneTransforms(
     aConnector.planes[0],
@@ -655,7 +655,7 @@ const connect = (
   );
 
   const bConnector = toKeptGeometry(bConnectorShape.flip().toGeometry())
-    .disjointAssembly[0];
+    .content[0];
   const bShape = toShape(bConnectorShape);
   const [bTo, bFrom] = toXYPlaneTransforms(
     bConnector.planes[0],
@@ -665,14 +665,14 @@ const connect = (
   // Flatten a.
   const aFlatShape = aShape.transform(aTo);
   const aFlatConnector = aConnectorShape.transform(aTo);
-  const aMarks = aFlatConnector.toKeptGeometry().disjointAssembly[0].marks;
+  const aMarks = aFlatConnector.toKeptGeometry().content[0].marks;
   const aFlatOriginShape = aFlatShape.move(...negate(aMarks[CENTER]));
   // const aFlatOriginConnector = aFlatConnector.move(...negate(aMarks[CENTER]));
 
   // Flatten b's connector.
   const bFlatConnector = toKeptGeometry(
     bConnectorShape.transform(bTo).toGeometry()
-  ).disjointAssembly[0];
+  ).content[0];
   const bMarks = bFlatConnector.marks;
 
   // Rotate into alignment.

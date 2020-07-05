@@ -582,7 +582,7 @@ Point.fromPoint = fromPoint;
 
 Point.signature = 'Point(point:Point) -> Shape';
 
-const fromPoints$1 = (points) => Shape.fromPoints(points);
+const fromPoints$1 = (...args) => Shape.fromPoints(args);
 
 /**
  *

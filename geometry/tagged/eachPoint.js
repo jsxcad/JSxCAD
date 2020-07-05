@@ -20,8 +20,9 @@ export const eachPoint = (emit, geometry) => {
       case 'solid':
         return eachPointOfSolid(emit, geometry.solid);
       case 'surface':
-      case 'z0Surface':
         return eachPointOfSurface(emit, geometry.surface);
+      case 'z0Surface':
+        return eachPointOfSurface(emit, geometry.z0Surface);
       default:
         throw Error(
           `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`

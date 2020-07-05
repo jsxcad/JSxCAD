@@ -555,8 +555,9 @@ const eachPoint = (emit, geometry) => {
       case 'solid':
         return eachPoint$2(emit, geometry.solid);
       case 'surface':
-      case 'z0Surface':
         return eachPoint$1(emit, geometry.surface);
+      case 'z0Surface':
+        return eachPoint$1(emit, geometry.z0Surface);
       default:
         throw Error(
           `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`

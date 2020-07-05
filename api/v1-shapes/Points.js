@@ -1,6 +1,6 @@
 import Shape from '@jsxcad/api-v1-shape';
 
-export const fromPoints = (points) => Shape.fromPoints(points);
+export const fromPoints = (...args) => Shape.fromPoints(args);
 
 /**
  *

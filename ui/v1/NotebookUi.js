@@ -327,7 +327,9 @@ export class NotebookUi extends Pane {
           />
         );
       } else if (note.md) {
-        const data = note.md;
+        // Use ''' and '' instead of ``` and `` to avoid escaping.
+        // FIX: Do this in a more principled fashion.
+        const data = note.md.replace(/'''/g, "```").replace(/''/g, "``");
         const key = hash(data);
         notes.push(
           <div key={key} dangerouslySetInnerHTML={{ __html: marked(data) }} />
