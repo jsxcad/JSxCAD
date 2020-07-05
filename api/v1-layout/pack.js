@@ -3,6 +3,7 @@ import {
   taggedDisjointAssembly,
   taggedItem,
   taggedLayers,
+  toDisjointGeometry,
 } from '@jsxcad/geometry-tagged';
 
 import Shape from '@jsxcad/api-v1-shape';
@@ -36,7 +37,12 @@ export const pack = (
     if (packed.length === 0) {
       break;
     } else {
-      packedLayers.push(taggedItem({}, taggedDisjointAssembly({}, ...packed)));
+      packedLayers.push(
+        taggedItem(
+          {},
+          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
+        )
+      );
     }
     todo.unshift(...unpacked);
   }

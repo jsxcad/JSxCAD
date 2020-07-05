@@ -735,7 +735,7 @@ const solidsMethod = function (...args) {
 Shape.prototype.solids = solidsMethod;
 
 const sketch = (shape) =>
-  Shape.fromGeometry(taggedSketch({}, shape.outline().toGeometry()));
+  Shape.fromGeometry(taggedSketch({}, shape.toGeometry()));
 
 Shape.prototype.sketch = function () {
   return sketch(this);

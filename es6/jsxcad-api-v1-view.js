@@ -32,7 +32,7 @@ const view = async (
         await writeFile(
           {},
           `geometry/${name}_${index++}`,
-          JSON.stringify(leaf)
+          JSON.stringify(leaf.toKeptGeometry())
         );
       }
     }

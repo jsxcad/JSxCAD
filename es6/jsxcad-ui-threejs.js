@@ -53612,6 +53612,9 @@ const buildScene = ({
   return { camera, canvas, renderer, scene };
 };
 
+const GEOMETRY_LAYER = 0;
+const SKETCH_LAYER = 1;
+
 const setColor = (tags = [], parameters = {}, otherwise = [0, 0, 0]) => {
   let rgb = toRgbFromTags(tags, null);
   if (rgb === null) {
@@ -53937,9 +53940,6 @@ const applyBoxUV = (bufferGeometry, transformMatrix, boxSize) => {
   applyBoxUVImpl(bufferGeometry, transformMatrix, uvBbox, boxSize);
 };
 
-const GEOMETRY_LAYER = 0;
-// const PLAN_LAYER = 1;
-
 const buildMeshes = async ({
   datasets,
   threejsGeometry,
@@ -53955,6 +53955,9 @@ const buildMeshes = async ({
     case 'assembly':
     case 'item':
     case 'plan':
+      break;
+    case 'sketch':
+      layer = SKETCH_LAYER;
       break;
     case 'paths': {
       const paths = threejsGeometry.threejsPaths;
@@ -54140,19 +54143,16 @@ const moveToFit = ({
 
 /* global ResizeObserver */
 
-const GEOMETRY_LAYER$1 = 0;
-const PLAN_LAYER = 1;
-
 const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   let datasets = [];
   const width = page.offsetWidth;
   const height = page.offsetHeight;
 
   const geometryLayers = new Layers();
-  geometryLayers.set(GEOMETRY_LAYER$1);
+  geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -54165,10 +54165,12 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
 
   const render = () => {
     renderer.clear();
-    camera.layers.set(GEOMETRY_LAYER$1);
+    camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER);
+    renderer.clearDepth();
+
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
 
@@ -54219,9 +54221,6 @@ const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   return { canvas, render, updateGeometry };
 };
 
-const GEOMETRY_LAYER$2 = 0;
-const PLAN_LAYER$1 = 1;
-
 let locked = false;
 const pending = [];
 
@@ -54254,10 +54253,10 @@ const staticDisplay = async (
   const height = page.offsetHeight;
 
   const geometryLayers = new Layers();
-  geometryLayers.set(GEOMETRY_LAYER$2);
+  geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER$1);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -54270,10 +54269,10 @@ const staticDisplay = async (
 
   const render = () => {
     renderer.clear();
-    camera.layers.set(GEOMETRY_LAYER$2);
+    camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER$1);
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
 

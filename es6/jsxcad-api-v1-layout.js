@@ -1,5 +1,5 @@
 import { Empty, Square } from './jsxcad-api-v1-shapes.js';
-import { getLeafs, taggedItem, taggedDisjointAssembly, taggedLayers, taggedLayout, getLayouts, visit, isNotVoid } from './jsxcad-geometry-tagged.js';
+import { getLeafs, taggedItem, taggedDisjointAssembly, toDisjointGeometry, taggedLayers, taggedLayout, getLayouts, visit, isNotVoid } from './jsxcad-geometry-tagged.js';
 import { Hershey } from './jsxcad-api-v1-font.js';
 import Shape from './jsxcad-api-v1-shape.js';
 import { max } from './jsxcad-api-v1-math.js';
@@ -33,7 +33,12 @@ const pack = (
     if (packed.length === 0) {
       break;
     } else {
-      packedLayers.push(taggedItem({}, taggedDisjointAssembly({}, ...packed)));
+      packedLayers.push(
+        taggedItem(
+          {},
+          taggedDisjointAssembly({}, ...packed.map(toDisjointGeometry))
+        )
+      );
     }
     todo.unshift(...unpacked);
   }
@@ -176,7 +181,7 @@ const ensurePages = (geometry, depth = 0) => {
   const pages = getLayouts(geometry);
   if (pages.length === 0 && depth === 0) {
     return ensurePages(
-      Page({}, Shape.fromGeometry(geometry)).toGeometry(),
+      Page({}, Shape.fromGeometry(geometry)).toKeptGeometry(),
       depth + 1
     );
   } else {

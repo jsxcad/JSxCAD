@@ -1,3 +1,5 @@
+import { visit } from './visit.js';
+
 export const taggedDisjointAssembly = ({ tags }, ...content) => {
   if (content.some((value) => !value)) {
     throw Error(`Undefined DisjointAssembly content`);
@@ -14,5 +16,12 @@ export const taggedDisjointAssembly = ({ tags }, ...content) => {
   if (typeof tags === 'function') {
     throw Error(`Tags is a function`);
   }
-  return { type: 'disjointAssembly', tags, content };
+  const disjointAssembly = { type: 'disjointAssembly', tags, content };
+  visit(disjointAssembly, (geometry, descend) => {
+    if (geometry.type === 'transform') {
+      throw Error('DisjointAssembly contains transform.');
+    }
+    return descend();
+  });
+  return disjointAssembly;
 };

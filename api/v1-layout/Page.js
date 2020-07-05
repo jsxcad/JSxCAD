@@ -142,7 +142,7 @@ export const ensurePages = (geometry, depth = 0) => {
   const pages = getLayouts(geometry);
   if (pages.length === 0 && depth === 0) {
     return ensurePages(
-      Page({}, Shape.fromGeometry(geometry)).toGeometry(),
+      Page({}, Shape.fromGeometry(geometry)).toKeptGeometry(),
       depth + 1
     );
   } else {

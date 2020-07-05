@@ -636,7 +636,8 @@ const fromSurfaceToPaths = cache(fromSurfaceToPathsImpl);
 
 const eachNonVoidItem = (geometry, op) => {
   const walk = (geometry, descend) => {
-    if (isNotVoid(geometry)) {
+    // FIX: Sketches aren't real either -- but this is a bit unclear.
+    if (geometry.type !== 'sketch' && isNotVoid(geometry)) {
       op(geometry);
       descend();
     }
@@ -674,6 +675,9 @@ const getItems = (geometry) => {
     switch (geometry.type) {
       case 'item':
         return items.push(geometry);
+      case 'sketch':
+        // We don't look inside sketches.
+        return;
       default:
         return descend();
     }
@@ -698,7 +702,14 @@ const taggedDisjointAssembly = ({ tags }, ...content) => {
   if (typeof tags === 'function') {
     throw Error(`Tags is a function`);
   }
-  return { type: 'disjointAssembly', tags, content };
+  const disjointAssembly = { type: 'disjointAssembly', tags, content };
+  visit(disjointAssembly, (geometry, descend) => {
+    if (geometry.type === 'transform') {
+      throw Error('DisjointAssembly contains transform.');
+    }
+    return descend();
+  });
+  return disjointAssembly;
 };
 
 // This gets each layer independently.
@@ -1291,4 +1302,4 @@ const translate = (vector, assembly) =>
 const scale = (vector, assembly) =>
   transform(fromScaling(vector), assembly);
 
-export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toKeptGeometry, toPoints, transform, translate, union, update, visit };
+export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, transform, translate, union, update, visit };

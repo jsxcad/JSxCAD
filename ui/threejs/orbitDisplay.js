@@ -1,5 +1,6 @@
 /* global ResizeObserver */
 
+import { GEOMETRY_LAYER, SKETCH_LAYER } from './layers.js';
 import { buildScene, createResizer } from './scene.js';
 
 import { Layers } from 'three';
@@ -7,9 +8,6 @@ import { buildMeshes } from './mesh.js';
 import { buildTrackballControls } from './controls.js';
 import { moveToFit } from './moveToFit.js';
 import { toThreejsGeometry } from '@jsxcad/convert-threejs';
-
-const GEOMETRY_LAYER = 0;
-const PLAN_LAYER = 1;
 
 export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   let datasets = [];
@@ -20,7 +18,7 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
   geometryLayers.set(GEOMETRY_LAYER);
 
   const planLayers = new Layers();
-  planLayers.set(PLAN_LAYER);
+  planLayers.set(SKETCH_LAYER);
 
   const { camera, canvas, renderer, scene } = buildScene({
     width,
@@ -36,7 +34,9 @@ export const orbitDisplay = async ({ view = {}, geometry } = {}, page) => {
     camera.layers.set(GEOMETRY_LAYER);
     renderer.render(scene, camera);
 
-    camera.layers.set(PLAN_LAYER);
+    renderer.clearDepth();
+
+    camera.layers.set(SKETCH_LAYER);
     renderer.render(scene, camera);
   };
 
