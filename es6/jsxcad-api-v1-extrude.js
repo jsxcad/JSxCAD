@@ -13,7 +13,7 @@ import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
 import { fromTranslation } from './jsxcad-math-mat4.js';
 import { scale } from './jsxcad-math-vec3.js';
-import { overcut } from './jsxcad-algorithm-toolpath.js';
+import { toolpath as toolpath$1 } from './jsxcad-algorithm-toolpath.js';
 
 /**
  *
@@ -626,15 +626,10 @@ Shape.prototype.withSweep = function (tool) {
   return assemble(this, sweep(this, tool));
 };
 
-// Return an assembly of paths so that each toolpath can have its own tag.
-const toolpath = (
-  shape,
-  radius = 1,
-  { overcut: overcut$1 = 0, joinPaths = false } = {}
-) =>
+const toolpath = (shape, radius = 1, { overcut, solid = false } = {}) =>
   Shape.fromGeometry({
     type: 'paths',
-    paths: overcut(shape.toKeptGeometry(), radius, overcut$1, joinPaths),
+    paths: toolpath$1(shape.toKeptGeometry(), radius, overcut, solid),
   });
 
 const method$1 = function (...options) {
