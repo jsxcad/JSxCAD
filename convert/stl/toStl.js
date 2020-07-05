@@ -50,7 +50,7 @@ const convertToFacet = (polygon) => {
 };
 
 export const toStl = async (geometry, options = {}) => {
-  const keptGeometry = toKeptGeometry(geometry);
+  const keptGeometry = toKeptGeometry(await geometry);
   const solids = getNonVoidSolids(keptGeometry);
   const triangles = fromSolidToTriangles(
     union(...solids.map(({ solid }) => solid))

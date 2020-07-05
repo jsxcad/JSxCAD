@@ -6,6 +6,7 @@ import { ensurePages, Page, pack } from './jsxcad-api-v1-layout.js';
 export { Page, pack } from './jsxcad-api-v1-layout.js';
 import './jsxcad-api-v1-deform.js';
 import './jsxcad-api-v1-pdf.js';
+import './jsxcad-api-v1-plans.js';
 import './jsxcad-api-v1-shell.js';
 import './jsxcad-api-v1-svg.js';
 import './jsxcad-api-v1-stl.js';

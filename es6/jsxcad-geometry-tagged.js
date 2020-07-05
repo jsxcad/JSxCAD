@@ -555,8 +555,9 @@ const eachPoint = (emit, geometry) => {
       case 'solid':
         return eachPoint$2(emit, geometry.solid);
       case 'surface':
-      case 'z0Surface':
         return eachPoint$1(emit, geometry.surface);
+      case 'z0Surface':
+        return eachPoint$1(emit, geometry.z0Surface);
       default:
         throw Error(
           `Unexpected geometry ${geometry.type} ${JSON.stringify(geometry)}`
@@ -1291,15 +1292,15 @@ const unionImpl = (geometry, ...geometries) => {
 
 const union = cache(unionImpl);
 
-const rotateX = (angle, assembly) =>
-  transform(fromXRotation((angle * Math.PI) / 180), assembly);
-const rotateY = (angle, assembly) =>
-  transform(fromYRotation((angle * Math.PI) / 180), assembly);
-const rotateZ = (angle, assembly) =>
-  transform(fromZRotation((angle * Math.PI) / 180), assembly);
-const translate = (vector, assembly) =>
-  transform(fromTranslation(vector), assembly);
-const scale = (vector, assembly) =>
-  transform(fromScaling(vector), assembly);
+const rotateX = (angle, geometry) =>
+  transform(fromXRotation((angle * Math.PI) / 180), geometry);
+const rotateY = (angle, geometry) =>
+  transform(fromYRotation((angle * Math.PI) / 180), geometry);
+const rotateZ = (angle, geometry) =>
+  transform(fromZRotation((angle * Math.PI) / 180), geometry);
+const translate = (vector, geometry) =>
+  transform(fromTranslation(vector), geometry);
+const scale = (vector, geometry) =>
+  transform(fromScaling(vector), geometry);
 
 export { allTags, assemble, canonicalize, difference, drop, eachItem, eachPoint, findOpenEdges, flip, fresh, fromPathToSurface, fromPathToZ0Surface, fromPathsToSurface, fromPathsToZ0Surface, fromSurfaceToPaths, getAnyNonVoidSurfaces, getAnySurfaces, getItems, getLayers, getLayouts, getLeafs, getNonVoidItems, getNonVoidPaths, getNonVoidPlans, getNonVoidPoints, getNonVoidSolids, getNonVoidSurfaces, getNonVoidZ0Surfaces, getPaths, getPlans, getPoints, getSolids, getSurfaces, getTags, getZ0Surfaces, intersection, isNotVoid, isVoid, isWatertight, keep, makeWatertight, measureArea, measureBoundingBox, outline, reconcile, rewrite, rewriteTags, rotateX, rotateY, rotateZ, scale, taggedAssembly, taggedDisjointAssembly, taggedItem, taggedLayers, taggedLayout, taggedPaths, taggedPoints, taggedSketch, taggedSolid, taggedSurface, taggedZ0Surface, toDisjointGeometry, toKeptGeometry, toPoints, transform, translate, union, update, visit };

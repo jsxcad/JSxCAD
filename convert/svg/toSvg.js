@@ -24,10 +24,10 @@ const toColorFromTags = (tags, otherwise = 'black') => {
 };
 
 export const toSvg = async (baseGeometry, { padding = 0 } = {}) => {
-  const [min, max] = measureBoundingBox(baseGeometry);
+  const [min, max] = measureBoundingBox(await baseGeometry);
   const width = max[X] - min[X];
   const height = max[Y] - min[Y];
-  const translated = translate([width / 2, height / 2, 0], baseGeometry);
+  const translated = translate([width / 2, height / 2, 0], await baseGeometry);
   const geometry = canonicalize(toKeptGeometry(translated));
 
   const svg = [

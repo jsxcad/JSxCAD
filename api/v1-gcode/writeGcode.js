@@ -1,8 +1,8 @@
 import { addPending, emit, writeFile } from '@jsxcad/sys';
 
 import Shape from '@jsxcad/api-v1-shape';
-import { toGcode } from '@jsxcad/convert-gcode';
 import { ensurePages } from '@jsxcad/api-v1-layout';
+import { toGcode } from '@jsxcad/convert-gcode';
 
 export const prepareGcode = (shape, name, options = {}) => {
   let index = 0;

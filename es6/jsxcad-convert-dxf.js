@@ -1,4 +1,4 @@
-import { translate, scale, toKeptGeometry, getPaths } from './jsxcad-geometry-tagged.js';
+import { translate, scale, toKeptGeometry, getNonVoidPaths } from './jsxcad-geometry-tagged.js';
 import { buildRegularPolygon } from './jsxcad-algorithm-shape.js';
 import { toTagFromRgbInt } from './jsxcad-algorithm-color.js';
 import { getEdges } from './jsxcad-geometry-path.js';
@@ -3191,10 +3191,10 @@ var Drawing_1 = Drawing;
 
 var dxfWriter = Drawing_1;
 
-const toDxf = async (options = {}, geometry) => {
+const toDxf = async (geometry, options = {}) => {
   const drawing = new dxfWriter();
-  const keptGeometry = toKeptGeometry(geometry);
-  for (const { paths } of getPaths(keptGeometry)) {
+  const keptGeometry = toKeptGeometry(await geometry);
+  for (const { paths } of getNonVoidPaths(keptGeometry)) {
     for (const path of paths) {
       for (const [[x1, y1], [x2, y2]] of getEdges(path)) {
         drawing.drawLine(x1, y1, x2, y2);
