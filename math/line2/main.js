@@ -6,7 +6,7 @@ export { doLinesIntersect } from './doLinesIntersect.js';
 export { equals } from './equals.js';
 export { fromPoints } from './fromPoints.js';
 export { fromValues } from './fromValues.js';
-export { intersectPointOfLines } from './intersectPointOfLines.js';
+export { intersect } from './intersect.js';
 export { origin } from './origin.js';
 export { reverse } from './reverse.js';
 export { transform } from './transform.js';

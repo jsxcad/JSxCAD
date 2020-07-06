@@ -1,5 +1,27 @@
 import { fromTranslation, fromXRotation, fromYRotation, fromZRotation, fromScaling } from './jsxcad-math-mat4.js';
-import { equals, canonicalize as canonicalize$1, transform as transform$1 } from './jsxcad-math-vec3.js';
+import { transform as transform$1, equals, canonicalize as canonicalize$1 } from './jsxcad-math-vec3.js';
+
+const isClosed = (path) => path.length === 0 || path[0] !== null;
+const isOpen = (path) => !isClosed(path);
+
+const transform = (matrix, path) =>
+  path.map((point, index) =>
+    point === null ? null : transform$1(matrix, point)
+  );
+
+const translate = (vector, path) =>
+  transform(fromTranslation(vector), path);
+const rotateX = (radians, path) =>
+  transform(fromXRotation(radians), path);
+const rotateY = (radians, path) =>
+  transform(fromYRotation(radians), path);
+const rotateZ = (radians, path) =>
+  transform(fromZRotation(radians), path);
+const scale = (vector, path) => transform(fromScaling(vector), path);
+
+const createClosedPath = (...points) => [...points];
+
+const createOpenPath = (...points) => [null, ...points];
 
 const assertUnique = (path) => {
   let last = null;
@@ -28,8 +50,6 @@ const canonicalizePoint = (point, index) => {
 };
 
 const canonicalize = (path) => path.map(canonicalizePoint);
-
-const isClosed = (path) => path.length === 0 || path[0] !== null;
 
 const close = (path) => (isClosed(path) ? path : path.slice(1));
 
@@ -150,21 +170,4 @@ const toZ0Polygon = (path) => {
   return path;
 };
 
-const transform = (matrix, path) =>
-  path.map((point, index) =>
-    point === null ? null : transform$1(matrix, point)
-  );
-
-const isOpen = (path) => !isClosed(path);
-
-const translate = (vector, path) =>
-  transform(fromTranslation(vector), path);
-const rotateX = (radians, path) =>
-  transform(fromXRotation(radians), path);
-const rotateY = (radians, path) =>
-  transform(fromYRotation(radians), path);
-const rotateZ = (radians, path) =>
-  transform(fromZRotation(radians), path);
-const scale = (vector, path) => transform(fromScaling(vector), path);
-
-export { assertGood, assertUnique, canonicalize, close, concatenate, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, isOpen, measureArea, open, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };
+export { assertGood, assertUnique, canonicalize, close, concatenate, createClosedPath, createOpenPath, deduplicate, flip, getEdges, isClockwise, isClosed, isCounterClockwise, isOpen, measureArea, open, rotateX, rotateY, rotateZ, scale, toGeneric, toPolygon, toSegments, toZ0Polygon, transform, translate };
