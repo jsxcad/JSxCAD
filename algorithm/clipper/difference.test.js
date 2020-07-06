@@ -37,7 +37,19 @@ test.beforeEach(async (t) => {
 });
 
 test('difference: Difference of one geometry produces that geometry', (t) => {
-  t.deepEqual(difference(rectangle), rectangle);
+  const surface = difference(rectangle);
+  t.deepEqual(canonicalize(surface), [
+    [
+      [0, 0, 0],
+      [2, 0, 0],
+      [2, 1, 0],
+    ],
+    [
+      [2, 1, 0],
+      [0, 1, 0],
+      [0, 0, 0],
+    ],
+  ]);
 });
 
 test('difference: Difference of rectangle with itself produces an empty geometry', (t) => {
@@ -52,10 +64,14 @@ test('difference: Difference of rectangle with itself rotated 90 degrees produce
   );
   t.deepEqual(canonicalize(surface), [
     [
+      [0, 0, 0],
+      [2, 0, 0],
+      [2, 1, 0],
+    ],
+    [
       [2, 1, 0],
       [0, 1, 0],
       [0, 0, 0],
-      [2, 0, 0],
     ],
   ]);
 });
@@ -67,12 +83,24 @@ test('difference: Difference of rectangle with itself rotated -45 degrees produc
   );
   t.deepEqual(canonicalize(surface), [
     [
+      [1.41421, 0, 0],
+      [2, 0, 0],
       [2, 1, 0],
+    ],
+    [
       [0, 1, 0],
       [0, 0, 0],
       [0.70711, 0.70711, 0],
+    ],
+    [
+      [0.70711, 0.70711, 0],
       [1.41421, 0, 0],
-      [2, 0, 0],
+      [2, 1, 0],
+    ],
+    [
+      [2, 1, 0],
+      [0, 1, 0],
+      [0.70711, 0.70711, 0],
     ],
   ]);
 });
@@ -81,24 +109,51 @@ test('difference: Difference of two non-overlapping squares and a rectangle', (t
   const surface = difference(squares, rectangle);
   t.deepEqual(canonicalize(surface), [
     [
+      [-0.5, -0.5, 0],
+      [0.5, -0.5, 0],
       [0.5, 0, 0],
+    ],
+    [
       [0, 0, 0],
       [0, 0.5, 0],
       [-0.5, 0.5, 0],
-      [-0.5, -0.5, 0],
-      [0.5, -0.5, 0],
     ],
     [
-      [1.5, 0, 0],
+      [-0.5, -0.5, 0],
+      [0.5, 0, 0],
+      [0, 0, 0],
+    ],
+    [
+      [0, 0, 0],
+      [-0.5, 0.5, 0],
+      [-0.5, -0.5, 0],
+    ],
+    [
       [1.5, -0.5, 0],
       [2, -0.5, 0],
       [2, 0, 0],
+    ],
+    [
+      [2, 0, 0],
+      [1.5, 0, 0],
+      [1.5, -0.5, 0],
     ],
   ]);
 });
 
 test('difference: Handle empty geometries', (t) => {
   t.deepEqual(canonicalize(difference([], rectangle)), []);
-  t.deepEqual(canonicalize(difference(rectangle, [])), canonicalize(rectangle));
+  t.deepEqual(canonicalize(difference(rectangle, [])), [
+    [
+      [0, 0, 0],
+      [2, 0, 0],
+      [2, 1, 0],
+    ],
+    [
+      [2, 1, 0],
+      [0, 1, 0],
+      [0, 0, 0],
+    ],
+  ]);
   t.deepEqual(canonicalize(difference([], [])), []);
 });

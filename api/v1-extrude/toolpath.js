@@ -2,7 +2,11 @@ import { Shape, assemble } from '@jsxcad/api-v1-shape';
 
 import { toolpath as toolpathAlgorithm } from '@jsxcad/algorithm-toolpath';
 
-export const toolpath = (shape, radius = 1, { overcut, solid = false } = {}) =>
+export const toolpath = (
+  shape,
+  radius = 1,
+  { overcut = true, solid = false } = {}
+) =>
   Shape.fromGeometry({
     type: 'paths',
     paths: toolpathAlgorithm(shape.toKeptGeometry(), radius, overcut, solid),

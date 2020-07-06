@@ -3,6 +3,7 @@ import { fromSurface, toSurface } from './convert.js';
 
 import { createNormalize2 } from '@jsxcad/algorithm-quantize';
 import { doesNotOverlapOrAbut } from './doesNotOverlap.js';
+import { makeConvex } from './makeConvex.js';
 
 /**
  * Produces a surface that is the intersection of all provided surfaces.
@@ -38,5 +39,5 @@ export const intersection = (a, ...z0Surfaces) => {
       a = toSurface(result, normalize);
     }
   }
-  return a;
+  return makeConvex(a, normalize);
 };

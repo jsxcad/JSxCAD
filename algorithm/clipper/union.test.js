@@ -24,34 +24,62 @@ test('union: Union of no geometries produces an empty geometry', (t) => {
 });
 
 test('union: Union of one geometry produces that geometry', (t) => {
-  t.deepEqual(canonicalize(union(rectangle)), canonicalize(rectangle));
-});
-
-test('union: Union of rectangle with itself produces itself', (t) => {
-  const result = union(rectangle, rectangle);
-  t.deepEqual(canonicalize(result), [
+  const surface = union(rectangle);
+  t.deepEqual(canonicalize(surface), [
+    [
+      [0, 0, 0],
+      [2, 0, 0],
+      [2, 1, 0],
+    ],
     [
       [2, 1, 0],
       [0, 1, 0],
       [0, 0, 0],
+    ],
+  ]);
+});
+
+test('union: Union of rectangle with itself produces itself', (t) => {
+  const surface = union(rectangle, rectangle);
+  t.deepEqual(canonicalize(surface), [
+    [
+      [0, 0, 0],
       [2, 0, 0],
+      [2, 1, 0],
+    ],
+    [
+      [2, 1, 0],
+      [0, 1, 0],
+      [0, 0, 0],
     ],
   ]);
 });
 
 test('union: Union of rectangle with itself rotated 90 degrees produces L', (t) => {
-  const result = union(
+  const surface = union(
     rectangle,
     transform(fromZRotation(degToRad(90)), rectangle)
   );
-  t.deepEqual(canonicalize(result), [
+  t.deepEqual(canonicalize(surface), [
     [
-      [-1, 2, 0],
       [-1, 0, 0],
       [2, 0, 0],
       [2, 1, 0],
+    ],
+    [
       [0, 1, 0],
       [0, 2, 0],
+      [-1, 2, 0],
+    ],
+    [
+      [-1, 0, 0],
+      [2, 1, 0],
+      [0, 1, 0],
+    ],
+    [
+      [0, 1, 0],
+      [-1, 2, 0],
+      [-1, 0, 0],
     ],
   ]);
 });

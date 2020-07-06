@@ -7,7 +7,7 @@ import { toPlane as toPlane$1, transform, makeConvex, flip as flip$1 } from './j
 import { toXYPlaneTransforms } from './jsxcad-math-plane.js';
 import { intersectionOfPathsBySurfaces, outline as outline$2 } from './jsxcad-geometry-z0surface-boolean.js';
 import { transform as transform$2 } from './jsxcad-geometry-paths.js';
-import { isClosed, transform as transform$3, isCounterClockwise, flip } from './jsxcad-geometry-path.js';
+import { isClosed, transform as transform$3, isCounterClockwise, flip, isOpen } from './jsxcad-geometry-path.js';
 import { section as section$1, cutOpen, fromSolid, containsPoint as containsPoint$1 } from './jsxcad-geometry-bsp.js';
 import { createNormalize3 } from './jsxcad-algorithm-quantize.js';
 import { toPlane as toPlane$2 } from './jsxcad-math-poly3.js';
@@ -611,7 +611,13 @@ const sweep = (toolpath, tool) => {
   const chains = [];
   for (const { paths } of getPaths(toolpath.toKeptGeometry())) {
     for (const path of paths) {
-      chains.push(ChainedHull(...path.map((point) => tool.move(...point))));
+      if (isOpen(path)) {
+        chains.push(
+          ChainedHull(...path.slice(1).map((point) => tool.move(...point)))
+        );
+      } else {
+        chains.push(ChainedHull(...path.map((point) => tool.move(...point))));
+      }
     }
   }
   return union(...chains);
@@ -626,7 +632,11 @@ Shape.prototype.withSweep = function (tool) {
   return assemble(this, sweep(this, tool));
 };
 
-const toolpath = (shape, radius = 1, { overcut, solid = false } = {}) =>
+const toolpath = (
+  shape,
+  radius = 1,
+  { overcut = true, solid = false } = {}
+) =>
   Shape.fromGeometry({
     type: 'paths',
     paths: toolpath$1(shape.toKeptGeometry(), radius, overcut, solid),
